@@ -65,7 +65,7 @@ abstract class AbstractClusterJobMonitor {
         LogUsedTimeUtils.logUsedTime("${name}: fetch cluster jobs from database") {
             clusterJobsToCheck = findAllClusterJobsToCheck()
         }
-        clusterJobsToCheck*.realm.unique()*.name //init realm, since it is needed later outside the transaction
+        clusterJobsToCheck*.realm.unique()*.name // init realm, since it is needed later outside the transaction
         log.debug("${name}: Check for finished cluster jobs: ${clusterJobsToCheck.size()}")
         return clusterJobsToCheck
     }

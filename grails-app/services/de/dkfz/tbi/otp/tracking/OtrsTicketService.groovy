@@ -223,7 +223,7 @@ class OtrsTicketService {
     }
 
     List<FastqImportInstance> getFastqImportInstances(OtrsTicket otrsTicket) {
-        //Doesn't work as a single Query, probably a Unit test problem
+        // Doesn't work as a single Query, probably a Unit test problem
         return FastqImportInstance.withCriteria {
             eq('otrsTicket', otrsTicket)
         } as List<FastqImportInstance>

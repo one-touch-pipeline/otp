@@ -42,7 +42,7 @@ class FastqcFragmentJob extends AbstractFragmentJob implements FastqcShared {
                         workflowStep.workflowRun.workflowVersion,
                         seqTrack.project,
                         seqTrack.seqType,
-                        null, //referenceGenome, not used for FastQC
+                        null, // referenceGenome, not used for FastQC
                         seqTrack.libraryPreparationKit,
                 ),
         ]

@@ -33,19 +33,19 @@ abstract class AbstractHipo2SampleIdentifierParser implements SampleIdentifierPa
 
     private final static String TISSUE = "(?<tissueType>[${HipoTissueType.values()*.key.join('')}])(?<tissueNumber>[0-9]{1,3})"
 
-    //single cell
+    // single cell
     private final static String ANALYTE_CHARS_SINGLE_CELL = 'GHJS'
 
-    //chip seq
+    // chip seq
     private final static String ANALYTE_CHAR_CHIP_SEQ = 'C'
 
-    //use only the digits, formatting to two letters
+    // use only the digits, formatting to two letters
     private final static String ANALYTE_CHARS_OTHER = 'ABDELMPRTWY'
 
     private final static String ANALYTE_CHARS_NO_DIGIT_BEFORE = ANALYTE_CHARS_OTHER + ANALYTE_CHARS_SINGLE_CELL
 
-    //no chip seq or single cell demultiplex
-    //adapt HIPO2 Parser to parse char 'P' in SampleID and append '-p' suffix to the SampleType
+    // no chip seq or single cell demultiplex
+    // adapt HIPO2 Parser to parse char 'P' in SampleID and append '-p' suffix to the SampleType
     private final static String ANALYTE_PATTERN_NO_DIGIT_BEFORE =
             "(?<analyteChar>P?)(?<analyteCharOnlyNumber>[${ANALYTE_CHARS_NO_DIGIT_BEFORE}])(?<analyteDigit>[0-9]{1,2})"
 

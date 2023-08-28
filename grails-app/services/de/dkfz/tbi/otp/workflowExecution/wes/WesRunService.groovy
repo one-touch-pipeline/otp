@@ -54,7 +54,7 @@ class WesRunService {
         WesRun wesRun = new WesRun(
                 workflowStep: workflowStep,
                 wesIdentifier: wesIdentifier,
-                subPath: subPath,// only the last level of the path
+                subPath: subPath, // only the last level of the path
                 state: WesRun.MonitorState.CHECKING)
         wesRun.save(flush: true)
     }

@@ -49,7 +49,7 @@ class RunController {
         if (!run || run.project?.archived) {
             return response.sendError(404)
         }
-        //This page requires using SAMPLE_NAME, since the RawSequenceFile has no connection to a SeqTrack. Its only used for legacy objects
+        // This page requires using SAMPLE_NAME, since the RawSequenceFile has no connection to a SeqTrack. Its only used for legacy objects
         List<MetaDataKey> keys = []
         keys[0] = CollectionUtils.atMostOneElement(MetaDataKey.findAllByName(MetaDataColumn.SAMPLE_NAME.name()))
         keys[1] = CollectionUtils.atMostOneElement(MetaDataKey.findAllByName(MetaDataColumn.WITHDRAWN.name()))

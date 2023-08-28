@@ -95,7 +95,7 @@ class FastqcExecuteWesPipelineJobSpec extends Specification implements DataTest,
         ])
         artefact = createWorkflowArtefact([
                 producedBy  : run,
-                outputRole  : INPUT_ROLE, //"FASTQ"
+                outputRole  : INPUT_ROLE, // "FASTQ"
                 artefactType: ArtefactType.FASTQ,
         ])
         seqTrack = createSeqTrack([

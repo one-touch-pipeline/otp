@@ -466,7 +466,7 @@ class ProcessServiceIntegrationTests implements UserAndRoles {
         }
     }
 
-    //false positives, since rule can not recognize calling class
+    // false positives, since rule can not recognize calling class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
     @Test
     void testGetProcessingErrorStackTracePermissionIsRoleOperator() {

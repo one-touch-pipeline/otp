@@ -112,9 +112,9 @@ class PanCancerNoBedFileQaOverviewService extends AbstractRoddyQaOverviewService
     protected Map<String, ?> extractSpecificValues(Project project, Map<String, ?> qaMap) {
         Map<String, ?> result = [
                 createdWithVersion: "${(qaMap.programVersion2 ?: qaMap.workflowVersion) ?: 'NA'}",
-                coverageWithoutN  : FormatHelper.formatNumber((Number) qaMap.coverageWithoutN), //Coverage w/o N
-                coverageX         : FormatHelper.formatNumber((Number) qaMap.coverageX), //ChrX Coverage w/o N
-                coverageY         : FormatHelper.formatNumber((Number) qaMap.coverageY), //ChrY Coverage w/o N
+                coverageWithoutN  : FormatHelper.formatNumber((Number) qaMap.coverageWithoutN), // Coverage w/o N
+                coverageX         : FormatHelper.formatNumber((Number) qaMap.coverageX), // ChrX Coverage w/o N
+                coverageY         : FormatHelper.formatNumber((Number) qaMap.coverageY), // ChrY Coverage w/o N
         ]
         result.putAll(getRoddyConfig(qaMap.bamId as long, qaMap.state as WorkflowRun.State))
         return result

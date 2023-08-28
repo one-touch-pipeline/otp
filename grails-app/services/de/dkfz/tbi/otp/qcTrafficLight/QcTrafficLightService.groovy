@@ -86,8 +86,8 @@ class QcTrafficLightService {
 
         commentService.saveComment(bamFile, comment)
         setQcTrafficLightStatus(bamFile, qcTrafficLightStatus)
-        //No workflow will be triggered by changing from WARNING to ACCEPTED, since all workflows will be processed.
-        //The following block can be removed after migration
+        // No workflow will be triggered by changing from WARNING to ACCEPTED, since all workflows will be processed.
+        // The following block can be removed after migration
         if ((bamFile.qcTrafficLightStatus == AbstractBamFile.QcTrafficLightStatus.ACCEPTED ||
              bamFile.qcTrafficLightStatus == AbstractBamFile.QcTrafficLightStatus.WARNING) &&
                 prevQcTrafficLightStatus != AbstractBamFile.QcTrafficLightStatus.WARNING) {
@@ -116,7 +116,7 @@ class QcTrafficLightService {
         }
 
         AbstractBamFile.QcTrafficLightStatus qcStatus
-        //if QC error occurs, just set status to WARNING and continue with processing
+        // if QC error occurs, just set status to WARNING and continue with processing
         if (qcValuesExceedErrorThreshold(bamFile, qc)) {
             qcStatus = AbstractBamFile.QcTrafficLightStatus.WARNING
             commentService.saveCommentAsOtp(bamFile, "Bam file exceeded threshold")

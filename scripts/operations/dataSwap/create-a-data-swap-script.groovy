@@ -77,7 +77,7 @@ def swapMap = """
     }
 }
 
-//Only need, if the project should be changed. If the new Individual already exist, it have to belong to this project.
+// Only need, if the project should be changed. If the new Individual already exist, it have to belong to this project.
 String newProjectName = ''
 
 /**

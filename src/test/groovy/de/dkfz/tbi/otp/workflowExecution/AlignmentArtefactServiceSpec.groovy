@@ -84,7 +84,7 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
     }
 
     void setupData() {
-        //artefact in input and seqType in input
+        // artefact in input and seqType in input
         workflowArtefactSeqTrack1 = createWorkflowArtefact([artefactType: ArtefactType.FASTQ])
         seqTrack1 = createSeqTrackWithTwoFastqFileAndSpecies([workflowArtefact: workflowArtefactSeqTrack1])
         workflowArtefactFastqc1 = createWorkflowArtefact([artefactType: ArtefactType.FASTQC])
@@ -92,7 +92,7 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
         workflowArtefactBam1 = createWorkflowArtefact([artefactType: ArtefactType.BAM])
         bamFile1 = createBamFileWithSpecies([workflowArtefact: workflowArtefactBam1])
 
-        //artefact in input, but seqType not in input
+        // artefact in input, but seqType not in input
         workflowArtefactSeqTrack2 = createWorkflowArtefact([artefactType: ArtefactType.FASTQ])
         seqTrack2 = createSeqTrackWithTwoFastqFileAndSpecies([workflowArtefact: workflowArtefactSeqTrack2])
         workflowArtefactFastqc2 = createWorkflowArtefact([artefactType: ArtefactType.FASTQC])
@@ -100,7 +100,7 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
         workflowArtefactBam2 = createWorkflowArtefact([artefactType: ArtefactType.BAM])
         bamFile2 = createBamFileWithSpecies([workflowArtefact: workflowArtefactBam2])
 
-        //input list
+        // input list
         workflowArtefacts = [
                 workflowArtefactSeqTrack1,
                 workflowArtefactFastqc1,
@@ -124,7 +124,7 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
     void setupDataWithRelated() {
         setupData()
 
-        //artefact related to input, but not part of the artefact input
+        // artefact related to input, but not part of the artefact input
         workflowArtefactSeqTrackRelated = createWorkflowArtefact([artefactType: ArtefactType.FASTQ])
         seqTrackRelated = createSeqTrackWithTwoFastqFile([
                 workflowArtefact: workflowArtefactSeqTrackRelated,

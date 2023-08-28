@@ -32,10 +32,10 @@ This script export the project members table for a given project.
 The column "Project Access" is not exported since there is no information provided in this column.
  */
 
-//input
+// input
 String projectName = '???'
 
-//work
+// work
 IdentityProvider identityProvider = ctx.getBean('identityProvider')
 
 def project = CollectionUtils.exactlyOneElement(Project.findAllByName(projectName))

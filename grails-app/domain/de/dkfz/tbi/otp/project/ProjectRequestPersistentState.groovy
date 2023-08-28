@@ -41,10 +41,10 @@ class ProjectRequestPersistentState implements Entity {
     static Closure mapping = {
         usersThatNeedToApprove column: "project_request_persistent_state_id",
                 joinTable: "project_request_persistent_state_users_that_need_to_approve",
-                fetch: 'join' //this might be changed to lazy: false in a later grails version
+                fetch: 'join' // this might be changed to lazy: false in a later grails version
         usersThatAlreadyApproved column: "project_request_persistent_state_id",
                 joinTable: "project_request_persistent_state_users_that_already_approved",
-                fetch: 'join' //this might be changed to lazy: false in a later grails version
+                fetch: 'join' // this might be changed to lazy: false in a later grails version
         currentOwner index: "project_request_persistent_state_current_owner_idx"
     }
 

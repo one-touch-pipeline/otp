@@ -46,7 +46,7 @@ class WorkflowBeanNameService {
             isNotNull('beanName')
         }
 
-        //check if the bean name in db is the same as the bean name of implemented workflows
+        // check if the bean name in db is the same as the bean name of implemented workflows
         return implementedWorkflowBeanNames - beanNamesInDatabase
     }
 

@@ -34,7 +34,7 @@ String sampleTypeName = ""
 String seqTypeName = ""
 String libraryLayout = SequencingReadType.PAIRED
 
-//-----------------
+// -----------------
 
 def bamFile = CollectionUtils.exactlyOneElement(AbstractBamFile.createCriteria().list {
     workPackage {

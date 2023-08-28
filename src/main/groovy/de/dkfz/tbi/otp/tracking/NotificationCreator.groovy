@@ -227,7 +227,7 @@ class NotificationCreator {
         }
         content.append('\n')
 
-        //include the links to import detail pages
+        // include the links to import detail pages
         content.append(createNotificationTextService.messageSourceService.createMessage("notification.import.detail.link"))
         content.append(createLinksToImportDetailPage(ticket))
 

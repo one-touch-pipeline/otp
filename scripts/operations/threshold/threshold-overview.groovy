@@ -31,13 +31,13 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  * Additionally, it shows missing categories and thresholds for the project.
  */
 
-//-----------------------------------------------
-//input
+// -----------------------------------------------
+// input
 
 String projectName = ""
 
-//------------------------------------------------
-//working
+// ------------------------------------------------
+// working
 
 Project project = CollectionUtils.exactlyOneElement(Project.findAllByName(projectName), "Could not find project $projectName")
 

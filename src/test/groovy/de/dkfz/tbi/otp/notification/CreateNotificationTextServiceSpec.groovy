@@ -1058,7 +1058,7 @@ ${expectedAlign}"""
                 samplePairWithoutAnalysis.add(data2.samplePair)
                 break
             default:
-                //ignore samplepair
+                // ignore samplepair
                 break
         }
 

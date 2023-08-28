@@ -300,7 +300,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         Sample sample1 = createSample(individual: createIndividual(project: submission.project))
         Sample sample2 = createSample(individual: createIndividual(project: submission.project))
         Sample sample3 = createSample(individual: createIndividual(project: submission.project))
-        //set name and dirname explicit, since it use the method of IsPipeline and not DomainFactoryCore
+        // set name and dirname explicit, since it use the method of IsPipeline and not DomainFactoryCore
         SeqType seqType1 = createSeqType(name: 'a', dirName: 'a')
         SeqType seqType2 = createSeqType(name: 'b', dirName: 'b')
         SeqType seqType3 = createSeqType(name: 'c', dirName: 'c')

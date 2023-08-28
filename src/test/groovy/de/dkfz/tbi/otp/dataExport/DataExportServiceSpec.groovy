@@ -97,7 +97,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
     }
 
     private DataExportInput createDataFileInput(boolean checkFileStatus, boolean getFileList) {
-        //two seqTracks
+        // two seqTracks
         List<SeqTrack> seqTrackList = TEST_PID_LIST.collect {
             createSeqTrackWithOneFastqFile(sample: createSample(
                     individual: createIndividual(
@@ -166,7 +166,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
                 assert output.listScript.empty
 
                 assert output.consoleLog.contains('** FASTQ **')
-                TEST_PID_LIST.every {
+                TEST_PID_LIST.each {
                     assert output.consoleLog.contains(it)
                 }
                 break
@@ -175,7 +175,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
                 assert output.listScript.empty
 
                 assert output.consoleLog.contains('** FASTQ **')
-                TEST_PID_LIST.every {
+                TEST_PID_LIST.each {
                     assert output.consoleLog.contains(it)
                 }
                 break
@@ -191,14 +191,14 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
 
     private DataExportInput createBamFileInput(boolean checkFileStatus, boolean getFileList, boolean external = false, boolean copyExternal = false) {
         List<AbstractBamFile> bamFileList = [
-                //RoddyBamFile:
+                // RoddyBamFile:
                 DomainFactory.createRoddyBamFile([
                         workPackage: DomainFactory.createMergingWorkPackage([
                                 pipeline: DomainFactory.createPanCanPipeline(),
                                 seqType : DomainFactory.createWholeGenomeSeqType(),
                         ])
                 ]),
-                //ExternallyProcessedBamFile:
+                // ExternallyProcessedBamFile:
                 DomainFactory.createExternallyProcessedBamFile([
                         workPackage: DomainFactory.createExternalMergingWorkPackage([
                                 pipeline: DomainFactory.createExternallyProcessedPipelineLazy(),
@@ -378,7 +378,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
                 getFileList    : getFileList,
                 unixGroup      : TEST_UNIX_GROUP,
                 external       : false,
-                copyExternal   : false, //not relevant
+                copyExternal   : false, // not relevant
                 copyAnalyses   : [
                         (PipelineType.INDEL)    : true,
                         (PipelineType.SNV)      : true,

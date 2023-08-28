@@ -55,7 +55,7 @@ enum MetaDataColumn {
     BASE_MATERIAL,
     ALIGN_TOOL,
     COMMENT,
-    FILE_EXISTS, //For export, indicates, if a physically file is available or if it is a dead link
+    FILE_EXISTS, // For export, indicates, if a physically file is available or if it is a dead link
     FRAGMENT_SIZE(["INSERT_SIZE"]),
     SAMPLE_SUBMISSION_TYPE,
     SINGLE_CELL_WELL_LABEL,

@@ -26,18 +26,18 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import static org.springframework.util.Assert.*
 
-//-----------------------------------
-//input area
+// -----------------------------------
+// input area
 
 /**
  * Name of the bed file. It has to be exist for all given reference genomes in the target region directory
  */
 String bedFileName = 'Agilent_S0447132_Covered.bed'
 
-//Name of the lib prep kit the bedfile is to load for
+// Name of the lib prep kit the bedfile is to load for
 String libPrepKitName = '10XGenomics'
 
-//The name of the reference genomes the bedfile should be load for
+// The name of the reference genomes the bedfile should be load for
 List<String> refGenomeNames = [
         'hs37d5',
         '1KGRef_PhiX',
@@ -45,8 +45,8 @@ List<String> refGenomeNames = [
         'hs37d5_GRCm38mm_PhiX',
 ]
 
-//-----------------------------------
-//checks
+// -----------------------------------
+// checks
 
 assert bedFileName: 'Please provide a bed file name.'
 assert libPrepKitName: 'Please provide a libPrepKit.'
@@ -61,8 +61,8 @@ List<ReferenceGenome> referenceGenomes = refGenomeNames.collect {
     return referenceGenome
 }
 
-//-----------------------------------
-//work
+// -----------------------------------
+// work
 
 BedFileService bedFileService = ctx.bedFileService
 

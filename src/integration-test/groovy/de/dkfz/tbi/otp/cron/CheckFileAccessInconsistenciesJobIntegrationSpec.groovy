@@ -116,7 +116,7 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
         'access in ldap and not in otp, but change request'     | false        | true           | false                     | true       | true           | false        || 1         | 0
         'no file access in otp nor in ldap, no change request'  | false        | false          | true                      | true       | true           | false        || 0         | 0
         'no file access in otp nor in ldap, but change request' | false        | false          | false                     | true       | true           | false        || 0         | 0
-        //some special cases
+        // some special cases
         'send mail also if disabled in otp'                     | false        | true           | true                      | false      | true           | false        || 1         | 0
         'send mail also if disabled in project'                 | false        | true           | true                      | true       | false          | false        || 1         | 0
         'send mail also if disabled in ldap'                    | false        | true           | true                      | true       | true           | true         || 1         | 0

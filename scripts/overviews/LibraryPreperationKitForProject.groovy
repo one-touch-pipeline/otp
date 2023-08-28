@@ -25,15 +25,15 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 String projectName = ''
 
-//SeqType seqType = SeqTypeService.exomePairedSeqType
-//SeqType seqType = SeqTypeService.wholeGenomePairedSeqType
-//SeqType seqType = SeqTypeService.wholeGenomeBisulfitePairedSeqType
-//SeqType seqType = SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType
-//SeqType seqType = SeqTypeService.rnaPairedSeqType
-//SeqType seqType = SeqTypeService.rnaSingleSeqType
-//SeqType seqType = SeqTypeService.chipSeqPairedSeqType
+// SeqType seqType = SeqTypeService.exomePairedSeqType
+// SeqType seqType = SeqTypeService.wholeGenomePairedSeqType
+// SeqType seqType = SeqTypeService.wholeGenomeBisulfitePairedSeqType
+// SeqType seqType = SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType
+// SeqType seqType = SeqTypeService.rnaPairedSeqType
+// SeqType seqType = SeqTypeService.rnaSingleSeqType
+// SeqType seqType = SeqTypeService.chipSeqPairedSeqType
 
-//---------------------------
+// ---------------------------
 
 List<SeqTrack> seqTracks = SeqTrack.createCriteria().list {
     sample {

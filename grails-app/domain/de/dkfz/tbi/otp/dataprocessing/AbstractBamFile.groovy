@@ -322,7 +322,7 @@ abstract class AbstractBamFile implements CommentableWithProject, Entity {
         if (this.qcTrafficLightStatus in [QcTrafficLightStatus.REJECTED, QcTrafficLightStatus.BLOCKED]) {
             return null
         }
-        mergingWorkPackage.refresh() //Sometimes the mergingWorkPackage.processableBamFileInProjectFolder is empty but should have a value
+        mergingWorkPackage.refresh() // Sometimes the mergingWorkPackage.processableBamFileInProjectFolder is empty but should have a value
         AbstractBamFile processableBamFileInProjectFolder = mergingWorkPackage.processableBamFileInProjectFolder
         if (this.id == processableBamFileInProjectFolder?.id) {
             return pathForFurtherProcessingNoCheck

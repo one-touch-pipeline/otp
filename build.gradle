@@ -402,7 +402,7 @@ dependencies {
     }
     implementation 'org.liquibase:liquibase-core:4.19.0'
 
-    implementation 'org.codenarc:CodeNarc:3.2.0'
+    implementation 'org.codenarc:CodeNarc:3.3.0'
 
     // JS and CSS libraries
     implementation 'org.webjars:jquery:3.7.0'
@@ -485,7 +485,7 @@ assets {
 }
 
 codenarc {
-    toolVersion = '3.2.0'
+    toolVersion = '3.3.0'
     configFile file('grails-app/conf/CodeNarcRuleSet.groovy')
     maxPriority1Violations = 0
     maxPriority2Violations = 119

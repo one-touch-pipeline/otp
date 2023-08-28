@@ -47,7 +47,7 @@ class RawSequenceFileConsistencyCheckerIntegrationSpec extends AbstractIntegrati
         }
     }
 
-    //false positives, since rule can not recognize calling class
+    // false positives, since rule can not recognize calling class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
     void "test setFileExistsForAllRawSequenceFiles"() {
         given:

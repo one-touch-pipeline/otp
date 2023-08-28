@@ -75,13 +75,13 @@ class ScriptInputHelperServiceIntegrationSpec extends Specification implements D
         false         | 'project'             | 'unknownProject'             || 'Could not find any project'
         false         | 'run'                 | 'unknownRunName'             || 'Could not find any run'
         false         | 'laneId'              | 'unknownLane'                || 'Could not find any seqTracks'
-        false         | 'comment'             | ''                           || 'A multi input for lane is defined by 5 columns' //empty columns at the end are skipped, so column count is incorrect
+        false         | 'comment'             | ''                           || 'A multi input for lane is defined by 5 columns' // empty columns at the end are skipped, so column count is incorrect
         false         | 'comment'             | "''"                         || 'Comment may not be empty'
         true          | 'project'             | 'unknownProject'             || 'Could not find any project'
         true          | 'run'                 | 'unknownRunName'             || 'Could not find any run'
         true          | 'laneId'              | 'unknownLane'                || 'Could not find any seqTracks'
         true          | 'singleCellWellLabel' | 'unknownSingleCellWellLabel' || 'Could not find any seqTracks'
-        true          | 'comment'             | ''                           || 'A multi input for lane is defined by 5 columns' //empty columns at the end are skipped, so column count is incorrect
+        true          | 'comment'             | ''                           || 'A multi input for lane is defined by 5 columns' // empty columns at the end are skipped, so column count is incorrect
         true          | 'comment'             | "''"                         || 'Comment may not be empty'
     }
 

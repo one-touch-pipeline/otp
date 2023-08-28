@@ -215,7 +215,7 @@ class MetadataImportService {
 
         try {
             if (!Files.exists(targetFile)) {
-                //create the directory and set the permission with owner and group access (setgid bit) explicitly
+                // create the directory and set the permission with owner and group access (setgid bit) explicitly
                 fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(targetFile.parent, configService.defaultRealm,
                         "", FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
                 fileService.createFileWithContentOnDefaultRealm(targetFile, context.content)
@@ -560,7 +560,7 @@ class MetadataImportService {
             log.debug("      dataFiles of seqtrack ${seqTrack.laneId} started ${index}/${amountOfRows}")
             importDataFiles(context, fastqImportInstance, seqTrack, rows)
             log.debug("      dataFiles of seqtrack ${seqTrack.laneId} stopped took: ${System.currentTimeMillis() - timeStarted}")
-            seqTrack.save(flush: true) //needs to flush the session, so seqTrackService.decideAndPrepareForAlignment can work
+            seqTrack.save(flush: true) // needs to flush the session, so seqTrackService.decideAndPrepareForAlignment can work
 
             mergingCriteriaService.createDefaultMergingCriteria(sampleIdentifier.project, seqType)
             Collection<MergingWorkPackage> mergingWorkPackages = seqTrackService.decideAndPrepareForAlignment(seqTrack)

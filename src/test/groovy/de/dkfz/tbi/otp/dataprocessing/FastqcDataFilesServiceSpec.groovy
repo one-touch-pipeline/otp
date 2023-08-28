@@ -106,10 +106,10 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
 
         where:
         input                 || output
-        //no extension
+        // no extension
         "123"                 || "123"
 
-        //one extension
+        // one extension
         "123.gz"              || "123"
         "123.bz2"             || "123"
         "123.txt"             || "123"
@@ -118,7 +118,7 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         "123.bam"             || "123"
         "123.other"           || "123.other"
 
-        //two extension, second is gz
+        // two extension, second is gz
         "123.gz.gz"           || "123.gz"
         "123.bz2.gz"          || "123"
         "123.txt.gz"          || "123"
@@ -126,7 +126,7 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         "123.sam.gz"          || "123"
         "123.bam.gz"          || "123"
 
-        //two extension, second is bz2
+        // two extension, second is bz2
         "123.gz.bz2"          || "123"
         "123.bz2.bz2"         || "123"
         "123.txt.bz2"         || "123"
@@ -134,7 +134,7 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         "123.sam.bz2"         || "123"
         "123.bam.bz2"         || "123"
 
-        //two extension, second is other
+        // two extension, second is other
         "123.gz.other"        || "123.gz.other"
         "123.bz2.other"       || "123.bz2.other"
         "123.txt.other"       || "123.txt.other"
@@ -142,7 +142,7 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         "123.sam.other"       || "123.sam.other"
         "123.bam.other"       || "123.bam.other"
 
-        //two extension, first is other
+        // two extension, first is other
         "123.other.gz"        || "123.other"
         "123.other.bz2"       || "123.other"
         "123.other.txt"       || "123.other"
@@ -150,10 +150,10 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         "123.other.sam"       || "123.other"
         "123.other.bam"       || "123.other"
 
-        //dot in name, no extension
+        // dot in name, no extension
         "123.456"             || "123.456"
 
-        //dot in name, one extension
+        // dot in name, one extension
         "123.456.gz"          || "123.456"
         "123.456.bz2"         || "123.456"
         "123.456.txt"         || "123.456"
@@ -161,7 +161,7 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         "123.456.sam"         || "123.456"
         "123.456.bam"         || "123.456"
 
-        //dot in name, two extension, second is gz
+        // dot in name, two extension, second is gz
         "123.456.gz.gz"       || "123.456.gz"
         "123.456.bz2.gz"      || "123.456"
         "123.456.txt.gz"      || "123.456"
@@ -169,7 +169,7 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         "123.456.sam.gz"      || "123.456"
         "123.456.bam.gz"      || "123.456"
 
-        //dot in name, two extension, second is bz2
+        // dot in name, two extension, second is bz2
         "123.456.gz.bz2"      || "123.456"
         "123.456.bz2.bz2"     || "123.456"
         "123.456.txt.bz2"     || "123.456"
@@ -177,7 +177,7 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         "123.456.sam.bz2"     || "123.456"
         "123.456.bam.bz2"     || "123.456"
 
-        //dot in name, two extension, second is other
+        // dot in name, two extension, second is other
         "123.456.gz.other"    || "123.456.gz.other"
         "123.456.bz2.other"   || "123.456.bz2.other"
         "123.456.txt.other"   || "123.456.txt.other"
@@ -185,7 +185,7 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         "123.456.sam.other"   || "123.456.sam.other"
         "123.456.bam.other"   || "123.456.bam.other"
 
-        //dot in name, two extension, first is other
+        // dot in name, two extension, first is other
         "123.456.other.gz"    || "123.456.other"
         "123.456.other.bz2"   || "123.456.other"
         "123.456.other.txt"   || "123.456.other"
@@ -193,7 +193,7 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         "123.456.other.sam"   || "123.456.other"
         "123.456.other.bam"   || "123.456.other"
 
-        //handle tar.bz2 (own adaption before)
+        // handle tar.bz2 (own adaption before)
         "123.tar.bz2"         || "123"
         "123.tar.gz"          || "123"
     }

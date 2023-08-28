@@ -35,16 +35,16 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  * Empty lines and comments (starting with '#') are skipped.
  */
 
-//-------------------------------
-//work area
+// -------------------------------
+// work area
 String input = """
 #sample id 1
 #sample id 2
 
 """
 
-//-------------------------------
-//work area
+// -------------------------------
+// work area
 
 input.split('\n')*.trim().findAll {
     it && !it.startsWith('#')

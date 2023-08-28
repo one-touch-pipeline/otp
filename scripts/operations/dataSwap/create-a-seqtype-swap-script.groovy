@@ -38,8 +38,8 @@ FileSystemService fileSystemService = ctx.fileSystemService
  * Generation script for LaneSwaps
  */
 
-//Input area
-//------------------------------
+// Input area
+// ------------------------------
 
 swapLabel = 'OTRS-________________-something-descriptive'
 
@@ -91,8 +91,8 @@ def adaptValues = { SeqTrack oldSeqTrack ->
     ]
 }
 
-//script area
-//------------------------------
+// script area
+// ------------------------------
 
 int counter = 1
 ScriptBuilder builder = new ScriptBuilder(configService, fileService, fileSystemService, Paths.get('sample_swap', swapLabel))

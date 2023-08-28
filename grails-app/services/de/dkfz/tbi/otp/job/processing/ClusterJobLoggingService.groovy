@@ -51,7 +51,7 @@ class ClusterJobLoggingService {
         assert realm: 'No realm specified.'
         File logDirectory = getLogDirectory(processingStep)
         if (!logDirectory.exists()) {
-            //race condition between threads and within NFS can be ignored, since createDirectoryRecursivelyAndSetPermissionsViaBash handle them
+            // race condition between threads and within NFS can be ignored, since createDirectoryRecursivelyAndSetPermissionsViaBash handle them
             FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
             fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(fileSystem.getPath(logDirectory.toString()), realm)
         }

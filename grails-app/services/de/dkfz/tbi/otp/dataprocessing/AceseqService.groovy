@@ -122,7 +122,7 @@ class AceseqService extends AbstractBamFileAnalysisService<AceseqInstance> imple
                         .replace('.', '\\.') + '.+\\.png'
                 break
             case PlotType.ACESEQ_ALL:
-                //If variables contain dots replace them if not they will be used by Regex
+                // If variables contain dots replace them if not they will be used by Regex
                 pattern = "${instance.individual.pid}_plot_".replace('.', '\\.') + '.+_ALL\\.png'
                 break
             default: throw new IllegalArgumentException("Unknown AceSeq PlotType \"${plot}\"")

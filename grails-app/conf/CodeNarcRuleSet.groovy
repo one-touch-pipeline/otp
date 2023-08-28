@@ -29,13 +29,13 @@ final String SERVICE = "*Service.groovy"
 final String VALIDATOR = "*Validator*"
 final String WORKFLOW_TEST = "*/*workflow-test*/*"
 final String SPOCK_TEST_EXPRESSION = "(.*/workflow-test/.*)|(.*Spec.groovy)"
-final int DEFAULT = 1 //Value for rules that we have no explicitly discussed yet
+final int DEFAULT = 1 // Value for rules that we have no explicitly discussed yet
 final int CRITICAL = 1
 final int HIGH = 2
 final int MIDDLE = 3
 final int LOW = 3
 
-// rules sorted according this list: //https://codenarc.org/StarterRuleSet-AllRulesByCategory.groovy.txt
+// rules sorted according this list: // https://codenarc.org/StarterRuleSet-AllRulesByCategory.groovy.txt
 
 ruleset {
     description '''
@@ -256,6 +256,12 @@ All the Rules that will be used for OTP
     JavadocMissingThrowsDescription {
         priority = DEFAULT
     }
+    SpaceAfterCommentDelimiter {
+        priority = DEFAULT
+    }
+    SpaceBeforeCommentDelimiter {
+        priority = DEFAULT
+    }
 
     // rulesets/concurrency.xml
     BusyWait {
@@ -271,6 +277,9 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     NestedSynchronization {
+        priority = DEFAULT
+    }
+    NoScriptBindings {
         priority = DEFAULT
     }
     StaticCalendarField {
@@ -338,7 +347,7 @@ All the Rules that will be used for OTP
     }
 
     // rulesets/convention.xml
-    // CompileStatic //we add @CompileStatic via groovygc.groovy to '/services/', '/src/main/', '/src/init/', '/codenarcRules/'
+    // CompileStatic // we add @CompileStatic via groovygc.groovy to '/services/', '/src/main/', '/src/init/', '/codenarcRules/'
     ConfusingTernary {
         priority = CRITICAL
     }
@@ -349,6 +358,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     FieldTypeRequired {
+        priority = LOW
         ignoreFieldNames = 'mapping, constraints, hasMany, belongsTo, mappedBy, allowedMethods'
     }
     HashtableIsObsolete {
@@ -357,7 +367,7 @@ All the Rules that will be used for OTP
     IfStatementCouldBeTernary {
         priority = CRITICAL
     }
-    //ImplicitClosureParameter //There are more cases where this would deteriorate code quality instead of improving it
+    // ImplicitClosureParameter // There are more cases where this would deteriorate code quality instead of improving it
     ImplicitReturnStatement {
         priority = LOW
     }
@@ -376,24 +386,25 @@ All the Rules that will be used for OTP
     MethodReturnTypeRequired {
         priority = MIDDLE
         doNotApplyToFileNames = CONTROLLER
+
     }
     NoDef {
         priority = MIDDLE
         doNotApplyToFileNames = CONTROLLER
         excludeRegex = /hasMany|belongsTo|mappedBy/
     }
-    //NoDouble //Double is fine since we don't use the numbers for calculations
-    //NoFloat //Float is fine since we don't use the numbers for calculations
-    //NoJavaUtilDate //Since our code use the Date class a lot, it is not possible to avoid it in new code.
+    // NoDouble // Double is fine since we don't use the numbers for calculations
+    // NoFloat // Float is fine since we don't use the numbers for calculations
+    // NoJavaUtilDate // Since our code use the Date class a lot, it is not possible to avoid it in new code.
     NoTabCharacter {
         priority = CRITICAL
     }
     ParameterReassignment {
         priority = CRITICAL
     }
-    //PublicMethodsBeforeNonPublicMethods //does not fit with OTP-Convention of grouping related methods by topic
-    //StaticFieldsBeforeInstanceFields //does not fit with OTP-Convention of Services before class fields including statics
-    //StaticMethodsBeforeInstanceMethods //does not fit with OTP-Convention of grouping related methods by topic
+    // PublicMethodsBeforeNonPublicMethods // does not fit with OTP-Convention of grouping related methods by topic
+    // StaticFieldsBeforeInstanceFields // does not fit with OTP-Convention of Services before class fields including statics
+    // StaticMethodsBeforeInstanceMethods // does not fit with OTP-Convention of grouping related methods by topic
     TernaryCouldBeElvis {
         priority = CRITICAL
     }
@@ -421,7 +432,7 @@ All the Rules that will be used for OTP
     BooleanMethodReturnsNull {
         priority = DEFAULT
     }
-    //BuilderMethodWithSideEffects //also finds non builder methods start with create
+    // BuilderMethodWithSideEffects // also finds non builder methods start with create
     CloneableWithoutClone {
         priority = DEFAULT
     }
@@ -487,11 +498,11 @@ All the Rules that will be used for OTP
     DuplicateListLiteral {
         priority = DEFAULT
     }
-    //DuplicateMapLiteral //has problems with stuff like .save(flush: true)
+    // DuplicateMapLiteral // has problems with stuff like .save(flush: true)
     DuplicateNumberLiteral {
         priority = MIDDLE
     }
-    //DuplicateStringLiteral //has problems with stuff like .split(",")
+    // DuplicateStringLiteral // has problems with stuff like .split(",")
 
     // rulesets/enhanced.xml
     CloneWithoutCloneable {
@@ -613,14 +624,14 @@ All the Rules that will be used for OTP
         priority = DEFAULT
         length = 160
         doNotApplyToFilesMatching = "(.*/.*test.*/.*)|(.*Validator.*)"
-        ignoreLineRegex = /\s*\@((Pre)|(Post))Authorize\(.*\)/ //filter out Pre and PostAuthorize annotations
+        ignoreLineRegex = /\s*\@((Pre)|(Post))Authorize\(.*\)/ // filter out Pre and PostAuthorize annotations
     }
     LineLength {
         priority = DEFAULT
         length = 242
         applyToFileNames = TEST
         doNotApplyToFileNames = VALIDATOR
-        ignoreLineRegex = /((.*\s+\|{1,2}\s+.*)+)|(\s*void\s+\".*\"\(\)\s+\{)/ //filters out where block and test method names
+        ignoreLineRegex = /((.*\s+\|{1,2}\s+.*)+)|(\s*void\s+\".*\"\(\)\s+\{)/ // filters out where block and test method names
     }
     MissingBlankLineAfterImports {
         priority = CRITICAL
@@ -721,13 +732,13 @@ All the Rules that will be used for OTP
     }
 
     // rulesets/grails.xml
-    //GrailsDomainGormMethods //GORM domain method are necessary (see issue otp-1005 to replace them with data services)
-    //GrailsDomainHasEquals //Entity provides equals()
-    //GrailsDomainHasToString //we don't do this in OTP
+    // GrailsDomainGormMethods // GORM domain method are necessary (see issue otp-1005 to replace them with data services)
+    // GrailsDomainHasEquals // Entity provides equals()
+    // GrailsDomainHasToString // we don't do this in OTP
     GrailsDomainReservedSqlKeywordName {
         priority = DEFAULT
     }
-    //GrailsDomainStringPropertyMaxSize //done by hibernate
+    // GrailsDomainStringPropertyMaxSize // done by hibernate
     GrailsDomainWithServiceReference {
         priority = DEFAULT
     }
@@ -746,7 +757,7 @@ All the Rules that will be used for OTP
     GrailsServletContextReference {
         priority = DEFAULT
     }
-    //GrailsStatelessService //seems to have problems with Spring
+    // GrailsStatelessService // seems to have problems with Spring
 
     // rulesets/groovyism.xml
     AssignCollectionSort {
@@ -861,13 +872,13 @@ All the Rules that will be used for OTP
     }
     MisorderedStaticImports {
         priority = CRITICAL
-        comesBefore = false //to change to: Normal imports should appear before static imports
+        comesBefore = false // to change to: Normal imports should appear before static imports
     }
-    //NoWildcardImports //does not fit with OTP-Convention of using WildcardImports for 3+ imports
+    // NoWildcardImports // does not fit with OTP-Convention of using WildcardImports for 3+ imports
     UnnecessaryGroovyImport {
         priority = CRITICAL
     }
-    //UnusedImport //replaced by UnusedImportWithoutAutowiredRule
+    // UnusedImport // replaced by UnusedImportWithoutAutowiredRule
 
     // rulesets/jdbc.xml
     DirectConnectionManagement {
@@ -906,19 +917,19 @@ All the Rules that will be used for OTP
         priority = CRITICAL
         doNotApplyToFilesMatching = SPOCK_TEST_EXPRESSION
     }
-    //JUnitPublicField
-    //JUnitPublicNonTestMethod
+    // JUnitPublicField
+    // JUnitPublicNonTestMethod
     /* Disabled, since following cases require public properties:
      * - The @Rule annotation of test, used for TemporaryFolder
      * - Autowireing of services in integration tests
      * Since that are many cases, twe decided to disable JUnitPublicProperty
      */
-    //JUnitPublicProperty
+    // JUnitPublicProperty
     JUnitSetUpCallsSuper {
         priority = CRITICAL
         doNotApplyToFilesMatching = SPOCK_TEST_EXPRESSION
     }
-    //JUnitStyleAssertions //will be fixed by converting to spock
+    // JUnitStyleAssertions // will be fixed by converting to spock
     JUnitTearDownCallsSuper {
         priority = DEFAULT
         doNotApplyToFilesMatching = SPOCK_TEST_EXPRESSION
@@ -942,15 +953,18 @@ All the Rules that will be used for OTP
     SpockIgnoreRestUsed {
         priority = DEFAULT
     }
+    SpockMissingAssert {
+        priority = DEFAULT
+    }
     UnnecessaryFail {
         priority = DEFAULT
     }
-    //UseAssertEqualsInsteadOfAssertTrue
-    //UseAssertFalseInsteadOfNegation
-    //UseAssertNullInsteadOfAssertEquals
-    //UseAssertSameInsteadOfAssertTrue
-    //UseAssertTrueInsteadOfAssertEquals
-    //UseAssertTrueInsteadOfNegation
+    // UseAssertEqualsInsteadOfAssertTrue
+    // UseAssertFalseInsteadOfNegation
+    // UseAssertNullInsteadOfAssertEquals
+    // UseAssertSameInsteadOfAssertTrue
+    // UseAssertTrueInsteadOfAssertEquals
+    // UseAssertTrueInsteadOfNegation
 
     // rulesets/logging.xml
     LoggerForDifferentClass {
@@ -995,7 +1009,7 @@ All the Rules that will be used for OTP
     ConfusingMethodName {
         priority = DEFAULT
     }
-    //FactoryMethodName //we don't do this
+    // FactoryMethodName // we don't do this
     FieldName {
         priority = CRITICAL
     }
@@ -1012,7 +1026,7 @@ All the Rules that will be used for OTP
     ObjectOverrideMisspelledMethodName {
         priority = DEFAULT
     }
-    //PackageName //we use camelCase
+    // PackageName // we use camelCase
     PackageNameMatchesFilePath {
         priority = DEFAULT
     }
@@ -1078,7 +1092,7 @@ All the Rules that will be used for OTP
     AbcMetric {
         priority = HIGH
         doNotApplyToFileNames = TEST
-    }
+    } // Requires the GMetrics jar
     ClassSize {
         priority = MIDDLE
         doNotApplyToFileNames = TEST
@@ -1123,6 +1137,7 @@ All the Rules that will be used for OTP
     }
     UnnecessaryBooleanExpression {
         doNotApplyToFileNames = TEST
+        priority = DEFAULT
     }
     UnnecessaryBooleanInstantiation {
         priority = DEFAULT
@@ -1148,9 +1163,9 @@ All the Rules that will be used for OTP
     UnnecessaryConstructor {
         priority = CRITICAL
     }
-    //UnnecessaryDefInFieldDeclaration
-    //UnnecessaryDefInMethodDeclaration
-    //UnnecessaryDefInVariableDeclaration
+    // UnnecessaryDefInFieldDeclaration
+    // UnnecessaryDefInMethodDeclaration
+    // UnnecessaryDefInVariableDeclaration
     UnnecessaryDotClass {
         priority = CRITICAL
     }
@@ -1166,7 +1181,7 @@ All the Rules that will be used for OTP
     UnnecessaryFloatInstantiation {
         priority = DEFAULT
     }
-    //UnnecessaryGString //We would prefer a rule to only use GStrings
+    // UnnecessaryGString // We would prefer a rule to only use GStrings
     UnnecessaryGetter {
         priority = CRITICAL
         checkIsMethods = false
@@ -1203,7 +1218,7 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     UnnecessaryPackageReference {
-        //Produces false positives for the following two annotations. Additionally '@SuppressWarnings' can't be used for annotations
+        // Produces false positives for the following two annotations. Additionally '@SuppressWarnings' can't be used for annotations
         doNotApplyToFilesMatching = ".*/(ResumableJob|QcThresholdEvaluated).groovy"
         priority = CRITICAL
     }
@@ -1213,7 +1228,7 @@ All the Rules that will be used for OTP
     UnnecessaryPublicModifier {
         priority = CRITICAL
     }
-    //UnnecessaryReturnKeyword //no
+    // UnnecessaryReturnKeyword // no
     UnnecessarySafeNavigationOperator {
         priority = DEFAULT
     }

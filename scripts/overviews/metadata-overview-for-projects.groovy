@@ -28,8 +28,8 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  * Create overview of SampleIdentifier with the corresponding Project, Individual, SeqType, SampleType and ilse number.
  */
 
-//-----------------------------
-//input
+// -----------------------------
+// input
 
 /**
  * input of project names. Empty lines and lines starting with # are ignored.
@@ -40,8 +40,8 @@ String projectInputArea = """
 
 """
 
-//-----------------------------
-//work
+// -----------------------------
+// work
 
 List<Project> projects = projectInputArea.split('\n')*.trim().findAll { String line ->
     line && !line.startsWith('#')

@@ -38,19 +38,19 @@ class WorkflowRun implements Commentable, Entity {
 
     @TupleConstructor
     enum State {
-        //unfinished
+        // unfinished
         PENDING("The run was created and is waiting to be executed."),
         WAITING_FOR_USER("The run is waiting for user input."),
         RUNNING_WES("The run is running on an external system."),
         RUNNING_OTP("The run is running within OTP."),
         FAILED("The run failed and is waiting for an operator decision how to continue."),
-        //finished
+        // finished
         OMITTED_MISSING_PRECONDITION("The run was omitted because preconditions are missing."),
         SUCCESS("The run succeeded."),
         FAILED_FINAL("The run failed, and an operator decided not to restart it."),
         RESTARTED("The run was restarted after it failed."),
         KILLED("The run was killed by an operator."),
-        //other
+        // other
         LEGACY("The run is part of the old workflow system."),
 
         final String description

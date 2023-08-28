@@ -254,7 +254,7 @@ class LsdfFilesService {
         assert realm: 'realm may not be null'
         assert filesOrDirectories != null: 'filesOrDirectories may not be null'
         if (filesOrDirectories.empty) {
-            return //nothing to do
+            return // nothing to do
         }
         String cmd = createClusterScriptService.removeDirs(filesOrDirectories, CreateClusterScriptService.RemoveOption.RECURSIVE_FORCE)
         assert remoteShellHelper.executeCommand(realm, cmd) ==~ /^0\s*$/

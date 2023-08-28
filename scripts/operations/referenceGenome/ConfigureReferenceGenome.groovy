@@ -30,18 +30,18 @@ String projectName = ''
 assert projectName: "no project given"
 
 Collection<SeqType> seqTypes = [
-        //SeqTypeService.wholeGenomePairedSeqType,
-        //SeqTypeService.exomePairedSeqType,
-        //SeqTypeService.wholeGenomeBisulfitePairedSeqType,
-        //SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
+        // SeqTypeService.wholeGenomePairedSeqType,
+        // SeqTypeService.exomePairedSeqType,
+        // SeqTypeService.wholeGenomeBisulfitePairedSeqType,
+        // SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
 ]
 
 Collection<SampleType> sampleTypes = [
-        //null,
-        //exactlyOneElement(SampleType.findAllByName('')),
-        //exactlyOneElement(SampleType.findAllByName('XENOGRAFT')),
+        // null,
+        // exactlyOneElement(SampleType.findAllByName('')),
+        // exactlyOneElement(SampleType.findAllByName('XENOGRAFT')),
 ]
-//sampleTypes.addAll(SampleType.createCriteria().list { like 'name', 'XENOGRAFT%' })
+// sampleTypes.addAll(SampleType.createCriteria().list { like 'name', 'XENOGRAFT%' })
 
 /**
  * name of reference genome. Currently the following values are possible:
@@ -118,7 +118,7 @@ String refGenName = ''
  */
 String statSizeFileName = ''
 
-//RNA should not be configured over this script. Use the GUI instead!
+// RNA should not be configured over this script. Use the GUI instead!
 List<SeqType> blackListedSeqTypes = [
         SeqTypeService.rnaPairedSeqType,
         SeqTypeService.rnaSingleSeqType,

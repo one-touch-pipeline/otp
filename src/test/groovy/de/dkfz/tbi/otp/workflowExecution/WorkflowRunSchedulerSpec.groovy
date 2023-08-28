@@ -37,7 +37,7 @@ class WorkflowRunSchedulerSpec extends Specification implements ServiceUnitTest<
         ]
     }
 
-    //isEnabled is the mocked method name and can therefore not written as property
+    // isEnabled is the mocked method name and can therefore not written as property
     @SuppressWarnings('UnnecessaryGetter')
     void "scheduleWorkflowRun, if system runs and nextWaitingWorkflow return a workflowRun, then call createJob with it"() {
         given:
@@ -56,7 +56,7 @@ class WorkflowRunSchedulerSpec extends Specification implements ServiceUnitTest<
         1 * scheduler.jobService.createNextJob(workflowRun)
     }
 
-    //isEnabled is the mocked method name and can therefore not written as property
+    // isEnabled is the mocked method name and can therefore not written as property
     @SuppressWarnings('UnnecessaryGetter')
     void "scheduleWorkflowRun, if system runs and nextWaitingWorkflow return null, then do not call createJob "() {
         given:
@@ -71,7 +71,7 @@ class WorkflowRunSchedulerSpec extends Specification implements ServiceUnitTest<
         1 * scheduler.workflowRunService.nextWaitingWorkflow(_) >> null
     }
 
-    //isEnabled is the mocked method name and can therefore not written as property
+    // isEnabled is the mocked method name and can therefore not written as property
     @SuppressWarnings('UnnecessaryGetter')
     void "scheduleWorkflowRun, if system does not run, then do not call createJob "() {
         given:

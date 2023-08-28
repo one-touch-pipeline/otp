@@ -89,7 +89,7 @@ class ScriptInputHelperService {
      */
     String removeSurroundingSingleQuote(String s) {
         if (s == "''") {
-            //for "''" returning s[1..-2] return again "''"
+            // for "''" returning s[1..-2] return again "''"
             return ""
         } else if (s && s.size() >= 2 && s[0] == "'" && s[-1] == "'") {
             return s[1..-2]

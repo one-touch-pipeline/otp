@@ -53,7 +53,7 @@ class PanCancerLinkJob extends AbstractLinkJob implements PanCancerShared {
         links.add(new LinkEntry(link: roddyBamFileService.getFinalMergedQADirectory(roddyBamFile),
                 target: roddyBamFileService.getWorkMergedQADirectory(roddyBamFile)))
 
-        //collect links for every execution store
+        // collect links for every execution store
         ([
                 roddyBamFileService.getFinalExecutionDirectories(roddyBamFile),
                 roddyBamFileService.getWorkExecutionDirectories(roddyBamFile),
@@ -61,7 +61,7 @@ class PanCancerLinkJob extends AbstractLinkJob implements PanCancerShared {
             links.add(new LinkEntry(link: it[0], target: it[1]))
         }
 
-        //collect links for the single lane qa
+        // collect links for the single lane qa
         Map<SeqTrack, Path> finalSingleLaneQADirectories = roddyBamFileService.getFinalSingleLaneQADirectories(roddyBamFile)
         Map<SeqTrack, Path> workSingleLaneQADirectories = roddyBamFileService.getWorkSingleLaneQADirectories(roddyBamFile)
         workSingleLaneQADirectories.each { seqTrack, singleLaneQaWorkDir ->

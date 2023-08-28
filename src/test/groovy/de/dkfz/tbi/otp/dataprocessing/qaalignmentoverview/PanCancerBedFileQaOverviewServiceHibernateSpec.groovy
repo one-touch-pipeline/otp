@@ -235,7 +235,7 @@ class PanCancerBedFileQaOverviewServiceHibernateSpec extends HibernateSpec imple
 
         Map<String, ?> expected = qaMap + [
                 onTargetRatio        : onTargetRatio,
-                //from baseclass
+                // from baseclass
                 percentMappedReads   : null,
                 percentDuplicates    : null,
                 percentDiffChr       : null,

@@ -93,7 +93,7 @@ class ExecuteRoddyCommandService {
 
         RoddyWorkflowConfig config = roddyResult.config
 
-        //base view by pid directory
+        // base view by pid directory
         String viewByPid = individualService.getViewByPidPathBase(roddyResult.individual, roddyResult.seqType)
 
         String roddyCommand = [
@@ -133,7 +133,7 @@ class ExecuteRoddyCommandService {
         File roddyBaseConfigsPath = processingOptionService.findOptionAsString(OptionName.RODDY_BASE_CONFIGS_PATH) as File
         File applicationIniPath = processingOptionService.findOptionAsString(OptionName.RODDY_APPLICATION_INI) as File
 
-        //ensure that needed input files are available on the file system
+        // ensure that needed input files are available on the file system
         LsdfFilesService.ensureDirIsReadableAndNotEmpty(roddyBaseConfigsPath)
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(applicationIniPath)
 

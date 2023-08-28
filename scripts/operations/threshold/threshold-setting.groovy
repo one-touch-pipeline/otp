@@ -33,8 +33,8 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  * The sampleTypes need to exist already in OTP, but must not be connected to the project yet.```
  */
 
-//-----------------------------------------------
-//input
+// -----------------------------------------------
+// input
 
 String projectName = ""
 
@@ -53,8 +53,8 @@ String sampleTypesControlInput = """
 int laneCountWes = 1
 int laneCountWgs = 1
 
-//------------------------------------------------
-//working
+// ------------------------------------------------
+// working
 
 Project project = CollectionUtils.exactlyOneElement(Project.findAllByName(projectName), "Could not find project $projectName")
 

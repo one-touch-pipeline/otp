@@ -42,12 +42,12 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  * - ... further seq platform groups
  */
 
-//---------------------------
-//input area
+// ---------------------------
+// input area
 String projectName = ''
 
-//---------------------------
-//work area
+// ---------------------------
+// work area
 assert projectName : 'Please select a project'
 Project project = CollectionUtils.exactlyOneElement(Project.findAllByName(projectName),
         "Could not find project with name: '${projectName}'")

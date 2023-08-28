@@ -80,7 +80,7 @@ class SingleCellMappingFileServiceSpec extends Specification implements DataTest
         return data
     }
 
-    //false positives, since rule can not recognize calling class
+    // false positives, since rule can not recognize calling class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
     void "addMappingFileEntryIfMissing, when file not exist, then create it with entry"() {
         given:

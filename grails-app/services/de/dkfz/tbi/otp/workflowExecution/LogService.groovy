@@ -93,7 +93,7 @@ class LogService {
      */
     void addCommandLogEntry(WorkflowStep workflowStepParam, String commandParam, ProcessOutput processOutput) {
         SessionUtils.withNewTransaction {
-            //map constructor won't work, if a string is empty, since that is mapped to null and then the validation fail
+            // map constructor won't work, if a string is empty, since that is mapped to null and then the validation fail
             WorkflowCommandLog log = new WorkflowCommandLog()
             log.with {
                 workflowStep = workflowStepParam

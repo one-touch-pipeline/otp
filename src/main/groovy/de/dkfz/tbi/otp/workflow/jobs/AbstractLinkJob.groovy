@@ -45,7 +45,7 @@ abstract class AbstractLinkJob extends AbstractJob {
             logService.addSimpleLogEntry(workflowStep, "Creating link ${entry.link} to ${entry.target}")
             Project project = workflowStep.workflowRun.project
 
-            //create directory before linking to set it with correct group
+            // create directory before linking to set it with correct group
             fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(entry.link.parent, project.realm, project.unixGroup)
 
             fileService.createLink(

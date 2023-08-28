@@ -47,7 +47,7 @@ Path path = fileSystem.getPath(fileName)
 
 Spreadsheet s = new Spreadsheet(path.text)
 ProjectRequest.withTransaction {
-    s.dataRows.each { Row row -> //get the values from the spreadsheet for example: project id, speciesWithStrainId
+    s.dataRows.each { Row row -> // get the values from the spreadsheet for example: project id, speciesWithStrainId
         String projectRequestId = row.getCellByColumnTitle('projectRequestId').text
         String speciesWithStrainValue = row.getCellByColumnTitle('speciesWithStrainId').text
 

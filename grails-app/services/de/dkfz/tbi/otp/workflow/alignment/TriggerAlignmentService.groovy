@@ -114,7 +114,7 @@ class TriggerAlignmentService {
     List<Map<String, String>> createWarningsForMissingAlignmentConfig(Collection<SeqTrack> seqTracks) {
         Collection<SeqTrack> seqTracksNew = allDecider.findAllSeqTracksInNewWorkflowSystem(seqTracks)
 
-        //new system
+        // new system
         List<Map<String, String>> entries = seqTracksNew.countBy {
             [
                     it.project,
@@ -132,7 +132,7 @@ class TriggerAlignmentService {
             ]
         }
 
-        //old system
+        // old system
         entries.addAll((seqTracks - seqTracksNew).countBy {
             [
                     it.project,

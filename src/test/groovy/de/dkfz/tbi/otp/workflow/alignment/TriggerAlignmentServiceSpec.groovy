@@ -366,7 +366,7 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTe
         TestCase.assertContainSame(seqTracksMissingRefGenomes, expected)
     }
 
-    //nestedCollect not usable, since objects collected in different levels
+    // nestedCollect not usable, since objects collected in different levels
     @SuppressWarnings("UseCollectNested")
     void "createWarningsForSamplesHavingMultipleSeqPlatformGroups, when run, then return the expected warnings"() {
         given:
@@ -429,7 +429,7 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTe
         TestCase.assertContainSame(countedSeqPlatformGroup, expected)
     }
 
-    //nestedCollect not usable, since objects collected in different levels
+    // nestedCollect not usable, since objects collected in different levels
     @SuppressWarnings("UseCollectNested")
     void "createWarningsForSamplesHavingMultipleLibPrepKits, when run, then return the expected warnings"() {
         given:

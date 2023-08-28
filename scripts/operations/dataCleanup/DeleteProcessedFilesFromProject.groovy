@@ -31,7 +31,7 @@ import java.nio.file.FileSystem
 import java.nio.file.Path
 
 // input area
-//----------------------
+// ----------------------
 
 String projectName = ""
 
@@ -60,8 +60,8 @@ List<SeqTrack> seqTracks = SeqTrack.withCriteria {
     ])
 }
 
-//script area
-//-----------------------------
+// script area
+// -----------------------------
 
 assert projectName
 

@@ -138,7 +138,7 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
         workDirectoryName nullable: true, validator: { val, obj ->
             (val == null || (OtpPathValidator.isValidPathComponent(val) &&
                     !RoddyBamFile.findAllByWorkPackageAndWorkDirectoryNameAndIdNotEqual(obj.workPackage, val, obj.id)))
-        } //needs to be nullable for objects created before link structure was used
+        } // needs to be nullable for objects created before link structure was used
         md5sum validator: { val, obj ->
             return (!val || (val && obj.fileOperationStatus == FileOperationStatus.PROCESSED && obj.fileSize > 0))
         }
@@ -610,7 +610,7 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
     @Override
     void withdraw() {
         withTransaction {
-            //get later bam files
+            // get later bam files
             RoddyBamFile.findAllByBaseBamFile(this).each {
                 it.withdraw()
             }

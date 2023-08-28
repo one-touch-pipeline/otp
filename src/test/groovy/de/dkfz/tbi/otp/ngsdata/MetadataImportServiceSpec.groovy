@@ -1814,8 +1814,8 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
             }
         }
 
-        //remove the folder where the metadata should be copied (part of the setup)
-        //if the directory exists, nothing should be done. Permission won't be changed
+        // remove the folder where the metadata should be copied (part of the setup)
+        // if the directory exists, nothing should be done. Permission won't be changed
         Path targetDirectory = data.targetDirectory
         if (Files.exists(targetDirectory)) {
             targetDirectory.deleteDir()

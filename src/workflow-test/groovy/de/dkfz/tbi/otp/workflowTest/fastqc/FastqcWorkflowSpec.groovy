@@ -47,7 +47,7 @@ import java.util.zip.ZipFile
 
 class FastqcWorkflowSpec extends AbstractWorkflowSpec {
 
-    //@Slf4j does not work with Spock containing tests and produces problems in closures
+    // @Slf4j does not work with Spock containing tests and produces problems in closures
     @SuppressWarnings('PropertyName')
     final static Logger log = LoggerFactory.getLogger(FastqcWorkflowSpec)
 
@@ -204,7 +204,7 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
             rawSequenceFile.refresh()
             assert rawSequenceFile.sequenceLength
             assert rawSequenceFile.nReads
-            seqTrack = SeqTrack.get(seqTrack.id) //.refresh() does not work
+            seqTrack = SeqTrack.get(seqTrack.id) // .refresh() does not work
             assert seqTrack.nBasePairs
         }
     }

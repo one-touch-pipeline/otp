@@ -43,7 +43,7 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
     @Deprecated
     String statSizeFileName
 
-    //reference genome depending options
+    // reference genome depending options
     Set<MergingWorkPackageAlignmentProperty> alignmentProperties
 
     boolean needsProcessing

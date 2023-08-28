@@ -69,7 +69,7 @@ class AlignmentQualityOverviewControllerSpec extends Specification implements Co
         controller.changeQcStatus()
 
         then: 'HTTP OK code is returned'
-        response.status == HttpStatus.OK.value() //200
+        response.status == HttpStatus.OK.value() // 200
 
         and: 'BAM file status is updated'
     }
@@ -78,7 +78,7 @@ class AlignmentQualityOverviewControllerSpec extends Specification implements Co
         given:
         setupData()
 
-        //someone has changed the content: db version incremented by 1
+        // someone has changed the content: db version incremented by 1
         bamFile.version = 1
 
         controller.qcTrafficLightService = Mock(QcTrafficLightService)
@@ -101,6 +101,6 @@ class AlignmentQualityOverviewControllerSpec extends Specification implements Co
         controller.changeQcStatus()
 
         then:
-        response.status == HttpStatus.CONFLICT.value() //409
+        response.status == HttpStatus.CONFLICT.value() // 409
     }
 }

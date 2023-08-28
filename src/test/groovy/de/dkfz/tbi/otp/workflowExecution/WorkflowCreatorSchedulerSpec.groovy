@@ -139,7 +139,7 @@ class WorkflowCreatorSchedulerSpec extends HibernateSpec implements ServiceUnitT
             }
         }
 
-        applicationContext //initialize the applicationContext
+        applicationContext // initialize the applicationContext
 
         when:
         scheduler.createWorkflowsTask(metaDataFile)

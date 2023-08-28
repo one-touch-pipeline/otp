@@ -55,11 +55,11 @@ import java.time.Duration
 abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkflowSpec implements UsingReferenceGenome, RoddyReferences, RoddyPancanFactory,
         FastqcDomainFactory {
 
-    //@Slf4j does not work with Spock containing tests and produces problems in closures
+    // @Slf4j does not work with Spock containing tests and produces problems in closures
     @SuppressWarnings('PropertyName')
     final static Logger log = LoggerFactory.getLogger(AbstractRoddyAlignmentWorkflowSpec)
 
-    //The number of reads of the example fastqc files
+    // The number of reads of the example fastqc files
     protected static final int NUMBER_OF_READS = 1000
 
     /**
@@ -539,14 +539,14 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
         fileAssertHelper.assertDirectoryContent(roddyBamFileService.getWorkExecutionStoreDirectory(bamFile),
                 roddyBamFileService.getWorkExecutionDirectories(bamFile))
 
-        //check that given files exist in the execution store:
+        // check that given files exist in the execution store:
         roddyBamFileService.getWorkExecutionDirectories(bamFile).each { executionStore ->
             filesInRoddyExecutionDir.each { String fileName ->
                 fileAssertHelper.assertFileIsReadableAndNotEmpty(executionStore.resolve(fileName))
             }
         }
 
-        //check default json, additional needs to be checked in the subclass
+        // check default json, additional needs to be checked in the subclass
         Path qaJson = roddyBamFileService.getWorkMergedQAJsonFile(bamFile)
         fileAssertHelper.assertFileIsReadableAndNotEmpty(qaJson)
         JSON.parse(qaJson.text) // throws ConverterException when the JSON content is not valid
@@ -563,7 +563,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
     }
 
     private void assertBamFileFileOnFileSystem(RoddyBamFile bamFile) {
-        //check md5sum content
+        // check md5sum content
         assert bamFile.md5sum == roddyBamFileService.getFinalMd5sumFile(bamFile).text.replaceAll("\n", "")
 
         // content of the bam file

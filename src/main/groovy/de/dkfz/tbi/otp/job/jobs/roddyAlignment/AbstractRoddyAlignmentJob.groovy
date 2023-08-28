@@ -45,8 +45,8 @@ abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyB
         File referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome)
         assert referenceGenomeFastaFile: "Path to the reference genome file is null"
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(referenceGenomeFastaFile)
-        cValues.add("INDEX_PREFIX:${referenceGenomeFastaFile}") //used for pancan pipeline
-        cValues.add("GENOME_FA:${referenceGenomeFastaFile}")    //used for rna pipeline
+        cValues.add("INDEX_PREFIX:${referenceGenomeFastaFile}") // used for pancan pipeline
+        cValues.add("GENOME_FA:${referenceGenomeFastaFile}")    // used for rna pipeline
 
         if (!roddyBamFile.seqType.isRna()) {
             File chromosomeStatSizeFile = referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage)

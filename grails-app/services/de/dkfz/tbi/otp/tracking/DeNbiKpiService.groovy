@@ -212,7 +212,7 @@ class DeNbiKpiService {
      */
     DeNbiKpi getClusterJobKpi(Date from, Date to) {
         List<String> clusterJobProjects = [
-                //old system
+                // old system
                 ClusterJob.createCriteria().list {
                     lt("dateCreated", to)
                     gt("dateCreated", from)
@@ -224,7 +224,7 @@ class DeNbiKpiService {
                         }
                     }
                 },
-                //new system
+                // new system
                 ClusterJob.createCriteria().list {
                     lt("dateCreated", to)
                     gt("dateCreated", from)

@@ -37,7 +37,7 @@ abstract class AbstractAbstractBamFileService<T extends AbstractBamFile> {
         if (bamFile.qcTrafficLightStatus in [QcTrafficLightStatus.REJECTED, QcTrafficLightStatus.BLOCKED]) {
             return null
         }
-        bamFile.mergingWorkPackage.refresh() //Sometimes the mergingWorkPackage.processableBamFileInProjectFolder is empty but should have a value
+        bamFile.mergingWorkPackage.refresh() // Sometimes the mergingWorkPackage.processableBamFileInProjectFolder is empty but should have a value
         AbstractBamFile processableBamFileInProjectFolder = bamFile.mergingWorkPackage.processableBamFileInProjectFolder
         if (bamFile.id == processableBamFileInProjectFolder?.id) {
             return getPathForFurtherProcessingNoCheck(bamFile)

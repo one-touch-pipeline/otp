@@ -43,7 +43,7 @@ class QcTrafficLightCheckService {
                 callbackIfAllFine()
                 break
             case AbstractBamFile.QcTrafficLightStatus.JobLinkCase.CREATE_NO_LINK:
-                //no links creating, so nothing to do
+                // no links creating, so nothing to do
                 break
             case AbstractBamFile.QcTrafficLightStatus.JobLinkCase.SHOULD_NOT_OCCUR:
                 throw new OtpRuntimeException("${bamFile.qcTrafficLightStatus} is not a valid qcTrafficLightStatus " +
@@ -55,7 +55,7 @@ class QcTrafficLightCheckService {
         switch (bamFile.qcTrafficLightStatus.jobNotifyCase) {
             case null:
             case AbstractBamFile.QcTrafficLightStatus.JobNotifyCase.NO_NOTIFY:
-                //no email sending, so nothing to do
+                // no email sending, so nothing to do
                 break
             case AbstractBamFile.QcTrafficLightStatus.JobNotifyCase.NOTIFY:
                 qcTrafficLightNotificationService.informResultsAreWarned(bamFile)

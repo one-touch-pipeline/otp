@@ -237,7 +237,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
 
     void 'sendProcessingStatusOperatorNotification, when finalNotification is true, sending message contains a link to the import detail page'() {
         given:
-        //one ticket with three imports
+        // one ticket with three imports
         OtrsTicket ticket = createOtrsTicket()
         List<FastqImportInstance> fastqImportInstances = [
                 createFastqImportInstance([otrsTicket: ticket]),
@@ -250,7 +250,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
                 (LinkGenerator.ATTRIBUTE_ACTION)    : "details",
         ]
 
-        //url path to the details page of metadata import
+        // url path to the details page of metadata import
         final String pathMetadataImportDetail = linkProperties.values().join('/')
 
         notificationCreator.createNotificationTextService = new CreateNotificationTextService(

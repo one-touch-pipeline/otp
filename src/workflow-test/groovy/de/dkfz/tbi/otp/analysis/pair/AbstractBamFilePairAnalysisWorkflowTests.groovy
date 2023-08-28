@@ -37,7 +37,7 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
 
     static final Double COVERAGE = 30.0
 
-    static final String PID = 'stds' //name have to be the same as in the reference data for OTP snv
+    static final String PID = 'stds' // name have to be the same as in the reference data for OTP snv
 
     AbstractBamFile bamFileControl
     AbstractBamFile bamFileTumor
@@ -56,7 +56,7 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
     @Override
     abstract ReferenceGenome createReferenceGenome()
 
-    //The qa values are taken from the wgs alignment workflow with one lane
+    // The qa values are taken from the wgs alignment workflow with one lane
     final static Map QC_VALUES = [
             insertSizeMedian  : 406,
             insertSizeCV      : 23,

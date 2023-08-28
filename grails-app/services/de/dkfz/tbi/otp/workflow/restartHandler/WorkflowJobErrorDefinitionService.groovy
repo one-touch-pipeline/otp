@@ -88,7 +88,7 @@ class WorkflowJobErrorDefinitionService {
      *
      * Should only used by {@link AutoRestartHandlerService}.
      */
-    //UnnecessaryGetter is needed for mocking
+    // UnnecessaryGetter is needed for mocking
     @SuppressWarnings('UnnecessaryGetter')
     List<JobErrorDefinitionWithLogWithIdentifier> findMatchingJobErrorDefinition(WorkflowStep workflowStep) {
         List<JobErrorDefinitionWithLogWithIdentifier> definitions = []
@@ -100,21 +100,21 @@ class WorkflowJobErrorDefinitionService {
         }
 
         restartHandlerLogServices.each { RestartHandlerLogService restartHandlerLogService ->
-            //for mocking, getSourceType() needs to be used instead of sourceType
+            // for mocking, getSourceType() needs to be used instead of sourceType
             WorkflowJobErrorDefinition.SourceType sourceType = restartHandlerLogService.getSourceType()
 
             List<WorkflowJobErrorDefinition> errorDefinitionsOfType = errorDefinitions.findAll { WorkflowJobErrorDefinition errorDefinition ->
                 errorDefinition.sourceType == sourceType
             }
             if (!errorDefinitionsOfType) {
-                //for mocking of AbstractRestartHandlerLogService, getClass() needs to be used instead of class
+                // for mocking of AbstractRestartHandlerLogService, getClass() needs to be used instead of class
                 logService.addSimpleLogEntry(workflowStep, "skip logService ${restartHandlerLogService.getClass().name}, " +
                         "since no JobErrorDefinition found of type ${sourceType} for bean ${workflowStep.beanName}")
                 return
             }
             Collection<LogWithIdentifier> logs = restartHandlerLogService.createLogsWithIdentifier(workflowStep)
             if (!logs) {
-                //for mocking of AbstractRestartHandlerLogService, getClass() needs to be used instead of class
+                // for mocking of AbstractRestartHandlerLogService, getClass() needs to be used instead of class
                 logService.addSimpleLogEntry(workflowStep, "skip logService ${restartHandlerLogService.getClass().name}, " +
                         "since no logs found for type ${sourceType} and bean ${workflowStep.beanName}")
                 return

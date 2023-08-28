@@ -66,7 +66,7 @@ class ClusterAccessService {
 
         List<BEJob> beJobs = clusterJobHandlingService.createBeJobsToSend(jobManager, realm, workflowStep, scripts, jobSubmissionOptions)
 
-        //begin of not restartable area
+        // begin of not restartable area
         workflowRunService.markJobAsNotRestartableInSeparateTransaction(workflowStep.workflowRun)
 
         clusterJobHandlingService.sendJobs(jobManager, workflowStep, beJobs)
@@ -79,7 +79,7 @@ class ClusterAccessService {
 
         clusterJobHandlingService.startMonitorClusterJob(workflowStep, clusterJobs)
 
-        //end of not restartable area
+        // end of not restartable area
         workflowRunService.markJobAsRestartable(workflowStep.workflowRun)
 
         List<String> ids = beJobs*.jobID*.shortID

@@ -62,7 +62,7 @@ abstract class AbstractIntegrationSpecWithoutRollbackAnnotation extends Specific
             }
             String truncate = "TRUNCATE TABLE ${tables.join(', ')} CASCADE;"
             sql.execute(truncate)
-        } else { //h2 database
+        } else { // h2 database
             File schemaDump = CreateFileHelper.createFile(tempDir.resolve("test-database-dump.sql")).toFile()
             sql.execute("SCRIPT NODATA DROP TO ?", [schemaDump.absolutePath])
             sql.execute("DROP ALL OBJECTS")

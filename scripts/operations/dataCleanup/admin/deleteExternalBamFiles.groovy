@@ -44,8 +44,8 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  * The script
  */
 
-//--------------------------------
-//input
+// --------------------------------
+// input
 
 /**
  * list of Pid and sampleType.
@@ -60,8 +60,8 @@ List<String> multiColumnInput = """
  */
 boolean tryRun = true
 
-//--------------------------------
-//work
+// --------------------------------
+// work
 
 List<ExternallyProcessedBamFile> bamFiles = multiColumnInput.split('\n')*.trim().findAll { String line ->
     line && !line.startsWith('#')

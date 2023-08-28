@@ -56,7 +56,7 @@ static def transferDataAndCorrectDB(Path finalPath, Path originalPathResolved, R
     script << "rsync -uvL --group=${df.project.unixGroup} --perms=440 ${originalPathResolved} ${finalPath}"
 
     if (validateMd5) {
-        md5Check << "cd ${md5sumPath.parent} && md5sum -c ${md5sumPath}" //check md5sum from otp
+        md5Check << "cd ${md5sumPath.parent} && md5sum -c ${md5sumPath}" // check md5sum from otp
     }
 
     Long size = originalPathResolved.size().toLong()

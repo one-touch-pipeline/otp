@@ -37,16 +37,16 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  * - bed file path
  */
 
-//-----------------------------------
-//input area
+// -----------------------------------
+// input area
 
-//The names of reference genomes for which the bedfiles and library preparation kit should be shown
+// The names of reference genomes for which the bedfiles and library preparation kit should be shown
 List<String> refGenomeNames = [
         '1KGRef_PhiX'
 ]
 
-//-----------------------------------
-//checks
+// -----------------------------------
+// checks
 
 assert refGenomeNames: 'At least one reference genome must be specified'
 
@@ -56,8 +56,8 @@ List<ReferenceGenome> referenceGenomes = refGenomeNames.collect {
     return referenceGenome
 }
 
-//-----------------------------------
-//work
+// -----------------------------------
+// work
 
 BedFileService bedFileService = ctx.bedFileService
 

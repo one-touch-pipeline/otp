@@ -84,13 +84,13 @@ class ImportProcess implements Entity, ProcessParameterObject {
         state index: "import_process_state_idx"
     }
 
-    @SuppressWarnings("GetterMethodCouldBeProperty") //is no property
+    @SuppressWarnings("GetterMethodCouldBeProperty") // is no property
     @Override
     SeqType getSeqType() {
         return null
     }
 
-    @SuppressWarnings("GetterMethodCouldBeProperty") //is no property
+    @SuppressWarnings("GetterMethodCouldBeProperty") // is no property
     @Override
     Individual getIndividual() {
         return null

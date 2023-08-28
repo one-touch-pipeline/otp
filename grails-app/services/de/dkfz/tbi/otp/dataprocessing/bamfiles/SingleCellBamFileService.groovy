@@ -46,7 +46,7 @@ class SingleCellBamFileService<T extends AbstractBamFile> extends AbstractAbstra
 
     static final String ORIGINAL_BAI_FILE_NAME = 'possorted_genome_bam.bam.bai'
 
-    //is created manually
+    // is created manually
     static final String ORIGINAL_BAM_MD5SUM_FILE_NAME = 'possorted_genome_bam.md5sum'
 
     static final String METRICS_SUMMARY_CSV_FILE_NAME = "metrics_summary.csv"

@@ -38,7 +38,7 @@ class OE0290_EORTC_SampleIdentifierParserSpec extends AbstractHipo2SampleIdentif
 
         where:
         identifier << [
-                //invalid project
+                // invalid project
                 'K12K-123ABC-N0-D1',
                 'M02-123ABC-N0-D1',
                 'M002B-123ABC-N0-D1',

@@ -46,7 +46,7 @@ import static de.dkfz.tbi.otp.utils.LocalShellHelper.executeAndWait
 
 abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest implements RoddyReferences {
 
-    //The number of reads of the example fastqc files
+    // The number of reads of the example fastqc files
     protected static final int NUMBER_OF_READS = 1000
 
     protected String getRefGenFileNamePrefix() {
@@ -128,7 +128,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
 
             setPermissionsRecursive(baseDirectory, TEST_DATA_MODE_DIR, TEST_DATA_MODE_FILE)
 
-            //logging files are also created by the tomcat user, so the group needs write access
+            // logging files are also created by the tomcat user, so the group needs write access
             setPermissionsRecursive(configService.loggingRootPath, '2770', TEST_DATA_MODE_FILE)
         }
     }
@@ -494,7 +494,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     }
 
     void checkFileSystemState(RoddyBamFile bamFile) {
-        //content of the final dir: root
+        // content of the final dir: root
         if (!bamFile.seqType.rna) {
             List<File> rootDirs = [
                     bamFile.finalQADirectory,
@@ -527,13 +527,13 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
             fileAssertHelper.assertDirectoryContent(bamFile.baseDirectory.toPath(), rootDirs*.toPath(), [], rootLinks*.toPath())
         }
 
-        //check work directories
+        // check work directories
         checkWorkDirFileSystemState(bamFile)
         if (bamFile.baseBamFile && !bamFile.baseBamFile.oldStructureUsed) {
             checkWorkDirFileSystemState(bamFile.baseBamFile, true)
         }
 
-        //check md5sum content
+        // check md5sum content
         assert bamFile.md5sum == bamFile.finalMd5sumFile.text.replaceAll("\n", "")
 
         // content of the final dir: qa
@@ -634,7 +634,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         //  content of the work dir: executionStoreDirectory
         fileAssertHelper.assertDirectoryContent(bamFile.workExecutionStoreDirectory.toPath(), bamFile.workExecutionDirectories*.toPath())
 
-        //check that given files exist in the execution store:
+        // check that given files exist in the execution store:
         bamFile.workExecutionDirectories.each { executionStore ->
             filesInRoddyExecutionDir.each { String fileName ->
                 fileService.ensureFileIsReadableAndNotEmpty(new File(executionStore.absolutePath, fileName).toPath(), realm)

@@ -186,7 +186,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
         then:
         checkThatFileCopyingWasSuccessful(importProcess, furtherFiles)
 
-        Thread.sleep(1000) //needs a sleep, otherwise the file system cache has not yet the new value
+        Thread.sleep(1000) // needs a sleep, otherwise the file system cache has not yet the new value
         SessionUtils.withTransaction {
             FileSystem fs = fileSystemService.filesystemForBamImport
             importProcess.externallyProcessedBamFiles.each {
@@ -229,7 +229,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
         then:
         checkThatFileCopyingWasSuccessful(importProcess, furtherFiles)
 
-        Thread.sleep(1000) //needs a sleep, otherwise the file system cache has not yet the new value
+        Thread.sleep(1000) // needs a sleep, otherwise the file system cache has not yet the new value
 
         SessionUtils.withTransaction {
             importProcess.externallyProcessedBamFiles.each {
@@ -277,7 +277,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
         execute()
 
         then:
-        Thread.sleep(1000) //needs a sleep, otherwise the file system cache has not yet the new value
+        Thread.sleep(1000) // needs a sleep, otherwise the file system cache has not yet the new value
 
         SessionUtils.withTransaction {
             FileSystem fs = fileSystemService.filesystemForBamImport

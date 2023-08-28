@@ -348,19 +348,19 @@ class DeletionService {
             dirsToDelete.addAll(analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(samplePairs))
         }
 
-        //Disconnect bam files from base bam files before starting with deleting of the list
+        // Disconnect bam files from base bam files before starting with deleting of the list
         bamFiles.each { RoddyBamFile bamFile ->
             if (bamFile.baseBamFile) {
                 bamFile.baseBamFile = null
-                bamFile.save(flush: true, validate: false) //since object is deleted in next loop, no validation is necessary here
+                bamFile.save(flush: true, validate: false) // since object is deleted in next loop, no validation is necessary here
             }
         }
 
-        //delete bam files
+        // delete bam files
         bamFiles.each { RoddyBamFile bamFile ->
             mergingWorkPackage = bamFile.mergingWorkPackage
             mergingWorkPackage.bamFileInProjectFolder = null
-            mergingWorkPackage.save(flush: true, validate: false) //since object is deleted later, no validation is necessary
+            mergingWorkPackage.save(flush: true, validate: false) // since object is deleted later, no validation is necessary
             deleteQualityAssessmentInfoForAbstractBamFile(bamFile)
             deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(bamFile.id.toString(), bamFile.class.name))
             dirsToDelete << new File(abstractBamFileService.getBaseDirectory(bamFile).toString())
@@ -534,7 +534,7 @@ class DeletionService {
             seqTrackService.throwExceptionInCaseOfSeqTracksAreOnlyLinked([seqTrack])
         }
 
-        //keep ilse reference for later deletion
+        // keep ilse reference for later deletion
         IlseSubmission ilseSubmission = seqTrack.ilseSubmission
 
         List<File> dirsToDelete = []
@@ -612,7 +612,7 @@ class DeletionService {
             }
         }
 
-        //delete ilseSubmission if it is not used by other seqTracks and is not blacklisted
+        // delete ilseSubmission if it is not used by other seqTracks and is not blacklisted
         if (ilseSubmission && !ilseSubmission.warning && SeqTrack.countByIlseSubmission(ilseSubmission) == 0) {
             ilseSubmission.delete(flush: true)
         }

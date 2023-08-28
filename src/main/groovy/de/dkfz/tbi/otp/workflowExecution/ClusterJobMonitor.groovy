@@ -58,7 +58,7 @@ class ClusterJobMonitor extends AbstractClusterJobMonitor {
     @Scheduled(fixedDelay = 30000L)
     void check() {
         if (!workflowSystemService.enabled) {
-            return //job system is inactive
+            return // job system is inactive
         }
 
         doCheck()

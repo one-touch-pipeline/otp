@@ -325,7 +325,7 @@ class MergingPreventionServiceSpec extends Specification implements DataTest, Do
 
         switch (seqTrackLibPrep) {
             case LibPrepKitCase.SAME:
-                //no update needed
+                // no update needed
                 break
             case LibPrepKitCase.OTHER:
                 libraryPreparationKit = createLibraryPreparationKit()
@@ -607,7 +607,7 @@ class MergingPreventionServiceSpec extends Specification implements DataTest, Do
 
         switch (seqTrackLibPrep) {
             case LibPrepKitCase.SAME:
-                //no update needed
+                // no update needed
                 break
             case LibPrepKitCase.OTHER:
                 libraryPreparationKit = createLibraryPreparationKit()

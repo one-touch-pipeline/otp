@@ -83,7 +83,7 @@ class Hipo2SampleIdentifierParserSpec extends AbstractHipo2SampleIdentifierParse
         identifier          || sampleTypeDbName
         'H021-123ABC-N0-D1' || 'control0-01'
 
-        //different project prefixes
+        // different project prefixes
         'H022-123ABC-T0-D1' || 'tumor0-01'
     }
 

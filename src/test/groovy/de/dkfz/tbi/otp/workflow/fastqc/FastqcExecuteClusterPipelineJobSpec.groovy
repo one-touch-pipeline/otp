@@ -103,7 +103,7 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         ])
         artefact = createWorkflowArtefact([
                 producedBy  : run,
-                outputRole  : INPUT_ROLE, //"FASTQ"
+                outputRole  : INPUT_ROLE, // "FASTQ"
                 artefactType: ArtefactType.FASTQ,
         ])
         seqTrack = createSeqTrack([

@@ -39,7 +39,7 @@ import static groovyx.gpars.GParsPool.withPool
  */
 
 //////////////////////////////////////////////////////////////
-//User input parameters
+// User input parameters
 
 /**
  * Specifies how many seqTracks to be processed together in one batch
@@ -83,7 +83,7 @@ void migrateToNewWorkflow(List<SeqTrack> seqTracks, Workflow workflow, Processin
                 return
             }
 
-            //prepare attributes needed for the WF runs
+            // prepare attributes needed for the WF runs
             String directory = lsdfFilesService.getFileViewByPidPathAsPath(seqTrack.sequenceFiles.first()).parent
             String shortName = "DI: ${seqTrack.individual.pid} ${seqTrack.sampleType.displayName} ${seqTrack.seqType.displayNameWithLibraryLayout}"
             List<String> runDisplayName = []
@@ -98,7 +98,7 @@ void migrateToNewWorkflow(List<SeqTrack> seqTracks, Workflow workflow, Processin
             List<String> artefactDisplayName = runDisplayName
             artefactDisplayName.remove(0)
 
-            //create the WF run
+            // create the WF run
             Map runParam = [
                     workDirectory   : directory,
                     state           : WorkflowRun.State.LEGACY,
@@ -112,7 +112,7 @@ void migrateToNewWorkflow(List<SeqTrack> seqTracks, Workflow workflow, Processin
             ]
             WorkflowRun run = new WorkflowRun(runParam).save()
 
-            //create the WF artefact
+            // create the WF artefact
             Map artefactParam = [
                     producedBy  : run,
                     state       : WorkflowArtefact.State.SUCCESS,
@@ -124,14 +124,14 @@ void migrateToNewWorkflow(List<SeqTrack> seqTracks, Workflow workflow, Processin
             ]
             WorkflowArtefact artefact = new WorkflowArtefact(artefactParam).save()
 
-            //assign the foreign key to artefact
+            // assign the foreign key to artefact
             seqTrack.workflowArtefact = artefact
             seqTrack.save()
         }
     }
 }
 
-//=================================================
+// =================================================
 
 List<Long> seqTrackIds = SeqTrack.withCriteria {
     isNull("workflowArtefact")
@@ -147,16 +147,16 @@ println "There are ${numSeqTracks} Seq. Tracks to be migrated into new workflow 
 
 if (numSeqTracks != 0) {
 
-    //process the SeqTracks in chunks
+    // process the SeqTracks in chunks
     long numBatches = Math.ceil(numSeqTracks / batchSize) as long
     println "${numBatches} batches will be processed"
 
-    //fetch the FastQ Installation Workflow
+    // fetch the FastQ Installation Workflow
     Workflow workflow = workflowService.getExactlyOneWorkflow(WORKFLOW_NAME)
     assert workflow
     println "Migrate seqTracks to new workflow systems for Workflow \"${WORKFLOW_NAME}\""
 
-    //prepare batch for GPars pool
+    // prepare batch for GPars pool
     List<Integer> loop = []
     0.upto(numBatches - 1) {
         loop += it
@@ -165,14 +165,14 @@ if (numSeqTracks != 0) {
     int numCores = Runtime.runtime.availableProcessors()
     println "${numCores} logical CPU core(s) are available"
 
-    //fetch the priority from database
+    // fetch the priority from database
     ProcessingPriority priority = CollectionUtils.exactlyOneElement(ProcessingPriority.findAllByName(processPriority),
             "Processing priority ${processPriority} doesnt exist.")
 
     dryRun && println("dry run, nothing is saved")
     print "Processing: "
     withPool(numCores, {
-        //loop thru each batch and process it
+        // loop thru each batch and process it
         loop.makeConcurrent().each {
             TransactionUtils.withNewTransaction { session ->
                 int start = batchSize * it
@@ -180,7 +180,7 @@ if (numSeqTracks != 0) {
                 List<SeqTrack> seqTracks = SeqTrack.findAllByIdInList(seqTrackIds[start..start + adjustedSize])
                 migrateToNewWorkflow(seqTracks, workflow, priority, OUTPUT_ROLE, lsdfFilesService)
 
-                //flush changes to the database
+                // flush changes to the database
                 if (!dryRun) {
                     session.flush()
                 }

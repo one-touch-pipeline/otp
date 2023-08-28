@@ -42,7 +42,7 @@ class ProjectFieldsService {
         return AbstractFieldDefinition.list().sort { a, b ->
             a.sortNumber <=> b.sortNumber ?: a.name.compareToIgnoreCase(b.name)
         }.each {
-            it.valueList.iterator() //initialize the lazy lists
+            it.valueList.iterator() // initialize the lazy lists
         }
     }
 

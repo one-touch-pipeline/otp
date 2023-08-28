@@ -48,12 +48,12 @@ class MultiImportValidator extends AbstractValueTuplesValidator<AbstractMetadata
 
     @Override
     void checkMissingRequiredColumn(AbstractMetadataValidationContext context, String columnTitle) {
-        //should not create the missing required column, that are part of another validators
+        // should not create the missing required column, that are part of another validators
     }
 
     @Override
     void checkMissingOptionalColumn(AbstractMetadataValidationContext context, String columnTitle) {
-        //should not create the missing optional column, that are part of another validators
+        // should not create the missing optional column, that are part of another validators
     }
 
     @Override

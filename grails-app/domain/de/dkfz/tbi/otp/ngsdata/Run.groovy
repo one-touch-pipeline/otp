@@ -66,7 +66,7 @@ class Run implements ProcessParameterObject, Entity {
      * because this case is unusable for creating Cluster Jobs
      */
 
-    //the method is needed for compatibility of very old data of the old workflow system and shouldn't be used in new code
+    // the method is needed for compatibility of very old data of the old workflow system and shouldn't be used in new code
     @Deprecated
     @Override
     SeqType getSeqType() {
@@ -77,7 +77,7 @@ class Run implements ProcessParameterObject, Entity {
         return null
     }
 
-    //the method is needed for compatibility of very old data of the old workflow system and shouldn't be used in new code
+    // the method is needed for compatibility of very old data of the old workflow system and shouldn't be used in new code
     @Deprecated
     @Override
     Project getProject() {
@@ -88,7 +88,7 @@ class Run implements ProcessParameterObject, Entity {
      * returns the individual being sequenced in this run
      * returns null if a run has more than one individual
      */
-    //the method is needed for compatibility of very old data of the old workflow system  and shouldn't be used in new code
+    // the method is needed for compatibility of very old data of the old workflow system  and shouldn't be used in new code
     @Deprecated
     @Override
     Individual getIndividual() {

@@ -49,33 +49,33 @@ import java.util.regex.Matcher
  * In case more config files are needed, add content of file to new variable and adapt creation at place of creation of config files.
  */
 
-//----------------------------------
-//input
+// ----------------------------------
+// input
 
-//the seqtypes to check for workflow
+// the seqtypes to check for workflow
 @Field
 List<SeqType> seqTypes = [
         SeqTypeService.wholeGenomeBisulfitePairedSeqType,
         SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
 ]
 
-//the pipeline to check
+// the pipeline to check
 @Field
 Pipeline pipeline = Pipeline.findByName(Pipeline.Name.PANCAN_ALIGNMENT)
 
-//the name of the new workflow in the new system
+// the name of the new workflow in the new system
 @Field
 String nameNewWorkflow = WgbsWorkflow.WORKFLOW
 
-//name of the roddy plugin
+// name of the roddy plugin
 @Field
 String roddyWorkflowPlugin = "AlignmentAndQCWorkflows"
 
-//name of the roddy analysis
+// name of the roddy analysis
 @Field
 String roddyAnalysisConfiguration = 'bisulfiteCoreAnalysis'
 
-//additinal config file need for wgbs alignment, if not needed, remove it again
+// additinal config file need for wgbs alignment, if not needed, remove it again
 @Field
 String coAppAndRef = """
             |<configuration name='coAppAndRef'
@@ -83,8 +83,8 @@ String coAppAndRef = """
             |</configuration>
             |""".stripMargin()
 
-//----------------------------------
-//script
+// ----------------------------------
+// script
 
 @Field
 ConfigService configService = ctx.configService
@@ -226,15 +226,15 @@ GParsPool.withPool(parallel) {
                         roddyWorkflowConfig.programVersion,
                 ])
 
-                //base directory
+                // base directory
                 String projectName = "${roddyWorkflowConfig.project.name} ${roddyWorkflowConfig.seqType.displayNameWithLibraryLayout}".replaceAll(
                         '[^a-zA-Z0-9_]', '-')
                 String plugin = roddyWorkflowConfig.programVersion.split(':')[1]
                 work = base.resolve(plugin).resolve(projectName)
                 fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(work, realm)
 
-                //-------------
-                //old system
+                // -------------
+                // old system
                 String cmdOld = executeRoddyCommandService.roddyGetRuntimeConfigCommand(roddyWorkflowConfig, roddyWorkflowConfig.nameUsedInConfig, roddyWorkflowConfig.seqType.roddyName)
 
                 List<String> resultOld = handleRoddyCall(cmdOld,
@@ -242,8 +242,8 @@ GParsPool.withPool(parallel) {
                         "${roddyWorkflowConfig.nameUsedInConfig}",
                         work.resolve('12-resultOldExtracted'))
 
-                //-------------
-                //new system
+                // -------------
+                // new system
                 WorkflowVersion workflowVersion = CollectionUtils.exactlyOneElement(
                         WorkflowVersionSelector.findAllByProjectAndSeqTypeAndDeprecationDateIsNull(roddyWorkflowConfig.project, roddyWorkflowConfig.seqType).findAll {
                             it.workflowVersion.workflow.name == nameNewWorkflow
@@ -265,11 +265,11 @@ GParsPool.withPool(parallel) {
                 String fragmentJson = configFragmentService.mergeSortedFragments(fragments)
                 fileService.createFileWithContent(work.resolve('22-json'), JsonOutput.prettyPrint(fragmentJson) + '\n', realm)
 
-                //parameter
+                // parameter
                 String combinedConfig = fragmentJson
                 Map<String, String> specificConfig = [:]
-                Path inputDir = fileSystem.getPath('$USERHOME/temp/testproject/vbp')//value taken from roddy base config to have no difference
-                Path outputDir = fileSystem.getPath('$USERHOME/temp/testproject/rpp')//value taken from roddy base config to have no difference
+                Path inputDir = fileSystem.getPath('$USERHOME/temp/testproject/vbp')// value taken from roddy base config to have no difference
+                Path outputDir = fileSystem.getPath('$USERHOME/temp/testproject/rpp')// value taken from roddy base config to have no difference
                 String queue = 'devel'
                 boolean filenameSectionKillSwitch = true
 
@@ -309,8 +309,8 @@ GParsPool.withPool(parallel) {
                         "${roddyWorkflowConfig.nameUsedInConfig}",
                         work.resolve('25-resultNewExtracted'))
 
-                //------------------
-                //checkForEquals
+                // ------------------
+                // checkForEquals
                 Set c1Set = resultOld.toSet()
                 Set c2Set = resultNew.toSet()
                 Set c3Set = resultOld.toSet()

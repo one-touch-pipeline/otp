@@ -48,7 +48,7 @@ class WeskitAuthService {
     /**
      * returns the token to access WESKit.
      */
-    //library use directly RuntimeException
+    // library use directly RuntimeException
     @SuppressWarnings('CatchRuntimeException')
     String requestWeskitAccessToken() {
         try {

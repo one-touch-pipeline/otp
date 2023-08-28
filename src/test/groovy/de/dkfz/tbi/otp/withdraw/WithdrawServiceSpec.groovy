@@ -41,7 +41,7 @@ class WithdrawServiceSpec extends Specification implements DataTest, DomainFacto
         ]
     }
 
-    //disable UnnecessaryGetter, since for mock the method the method call is required
+    // disable UnnecessaryGetter, since for mock the method the method call is required
     @SuppressWarnings('UnnecessaryGetter')
     void "withdraw, when called then call helper methods in correct order"() {
         SeqTrack seqTrack1 = Mock(SeqTrack)

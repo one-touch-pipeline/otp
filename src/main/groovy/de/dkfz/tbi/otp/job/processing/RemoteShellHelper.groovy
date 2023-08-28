@@ -134,7 +134,7 @@ class RemoteShellHelper {
      * @param command The command to be executed on the remote server
      * @return process output of the command executed
      */
-    //maxSshCalls is initialized here, since during loading the class the database can not be accessed (not ready)
+    // maxSshCalls is initialized here, since during loading the class the database can not be accessed (not ready)
     @SuppressWarnings(['AssignmentToStaticFieldFromInstanceMethod', 'CatchException'])
     protected ProcessOutput querySsh(Realm realm, String username, String password, File keyFile, SshAuthMethod sshAuthMethod, String command) {
         assert command: "No command specified."
@@ -235,7 +235,7 @@ class RemoteShellHelper {
      * @param channel The channel to read from
      * @return The output of the finished process
      */
-    //the method needs to wait for the channel to end and a wait method is not provided.
+    // the method needs to wait for the channel to end and a wait method is not provided.
     @SuppressWarnings('BusyWait')
     private static ProcessOutput getOutput(ChannelExec channel) {
         OutputStream outputErrorStream = new ByteArrayOutputStream()

@@ -39,10 +39,10 @@ class DataInstallationFragmentJob extends AbstractFragmentJob implements DataIns
         return [
                 new SingleSelectSelectorExtendedCriteria(
                         workflowStep.workflowRun.workflow,
-                        null, //workflowVersion, not used for data installation
+                        null, // workflowVersion, not used for data installation
                         seqTrack.project,
                         seqTrack.seqType,
-                        null, //referenceGenome, not used for data installation
+                        null, // referenceGenome, not used for data installation
                         seqTrack.libraryPreparationKit,
                 ),
         ]

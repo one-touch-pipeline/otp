@@ -106,7 +106,7 @@ class RoddyExecutionService {
         Collection<ClusterJob> submittedClusterJobs = []
         roddyOutput.stdout.eachLine {
             if (it.trim().isEmpty()) {
-                return //skip empty lines
+                return // skip empty lines
             }
             Matcher m = it =~ RODDY_OUTPUT_PATTERN
             if (m.matches()) {

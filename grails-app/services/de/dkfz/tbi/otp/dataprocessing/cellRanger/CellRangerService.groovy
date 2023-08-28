@@ -98,7 +98,7 @@ class CellRangerService {
 
         Path sampleDirectory = fileSystem.getPath(singleCellBamFile.sampleDirectory.path)
 
-        fileService.deleteDirectoryRecursively(sampleDirectory) //delete dir if exist from previous run
+        fileService.deleteDirectoryRecursively(sampleDirectory) // delete dir if exist from previous run
         fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(sampleDirectory, realm, unixGroup)
 
         singleCellBamFile.containedSeqTracks.groupBy { it.sampleIdentifier }.each { String sampleIdentifier, List<SeqTrack> seqTracks ->

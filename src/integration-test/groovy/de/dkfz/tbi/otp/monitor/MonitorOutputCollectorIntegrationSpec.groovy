@@ -107,9 +107,7 @@ class MonitorOutputCollectorIntegrationSpec extends Specification implements Dom
 
         then:
         !output.empty
-        if (hasComment) {
-            !output.contains('comment')
-        }
+        hasComment ? output.contains('comment') : !output.contains('comment')
 
         where:
         errorCase                            | procesCount | noProcessUpdate | hasFailure | hasComment
@@ -204,9 +202,7 @@ class MonitorOutputCollectorIntegrationSpec extends Specification implements Dom
         and:
         !output.empty
         output.contains("shortName")
-        if (hasComment) {
-            output.contains('this is a commentary')
-        }
+        hasComment ? output.contains('this is a commentary') : !output.contains('this is a commentary')
 
         where:
         errorCase                                      | hasComment

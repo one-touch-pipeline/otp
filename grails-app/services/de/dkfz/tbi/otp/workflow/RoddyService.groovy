@@ -42,7 +42,7 @@ class RoddyService implements WorkflowShared {
     List<String> getReadGroupsInBam(WorkflowStep workflowStep) {
         final RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
         Path path = roddyBamFileService.getWorkBamFile(roddyBamFile)
-        //convert to local path, since SamReaderFactory use SeekableByteChannel, which is not supported by the ftp remote file system
+        // convert to local path, since SamReaderFactory use SeekableByteChannel, which is not supported by the ftp remote file system
         Path pathLocal = Paths.get(path.toString())
         final SamReaderFactory factory = SamReaderFactory.makeDefault().enable(SamReaderFactory.Option.VALIDATE_CRC_CHECKSUMS)
         return factory.getFileHeader(pathLocal).readGroups*.id.sort()

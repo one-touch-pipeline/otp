@@ -257,7 +257,7 @@ class MergingWorkPackageSpec extends Specification implements DataTest, DomainFa
                 statSizeFileName: null,
                 pipeline        : DomainFactory.createPanCanPipeline(),
         ], false)
-        mergingWorkPackage.statSizeFileName = '' //setting empty string does not work via map
+        mergingWorkPackage.statSizeFileName = '' // setting empty string does not work via map
 
         expect:
         TestCase.assertValidateError(mergingWorkPackage, 'statSizeFileName', 'blank', '')

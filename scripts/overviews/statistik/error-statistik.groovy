@@ -50,14 +50,14 @@ import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.util.TimeFormats
 import java.text.SimpleDateFormat
 
-//---------------------------
-//input
+// ---------------------------
+// input
 
-//the input is in the format yyyy-MM-dd
+// the input is in the format yyyy-MM-dd
 String startDateString = '2019-01-01'
 String endDateString = '2019-02-01'
 
-//the format to use for grouping (if date is selected)
+// the format to use for grouping (if date is selected)
 String groupFormat = TimeFormats.DATE.format
 
 /*
@@ -66,15 +66,15 @@ String groupFormat = TimeFormats.DATE.format
     change order to change hierarchy level
  */
 List<Closure> grouping = [
-        { it[0].format(groupFormat) }, //Date, using provided format
+        { it[0].format(groupFormat) }, // Date, using provided format
         { it[3] },// project name
         { it[1] },// Workflow name
-        //{ it[2] },// OTP job name
-        //{ it[4] },// seq type
+        // { it[2] },// OTP job name
+        // { it[4] },// seq type
 ]
 
-//---------------------
-//work
+// ---------------------
+// work
 
 SimpleDateFormat simpleDateFormat = new SimpleDateFormat(TimeFormats.DATE.format, Locale.ENGLISH)
 
@@ -102,8 +102,8 @@ List<List> result = [
 Map groupData = result.groupBy(grouping)
 println printGrouping(groupData)
 
-//---------------------
-//functions
+// ---------------------
+// functions
 
 static String createErrorQuery(String className, String propertyName) {
     return """

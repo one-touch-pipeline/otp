@@ -41,16 +41,16 @@ String ticketNumber = ""
 String projectName = ""
 boolean all = false
 
-//OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.INSTALLATION
-//OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.FASTQC
-//OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.ALIGNMENT
-//OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.SNV
-//OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.INDEL
-//OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.SOPHIA
-//OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.ACESEQ
-//OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.RUN_YAPSA
+// OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.INSTALLATION
+// OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.FASTQC
+// OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.ALIGNMENT
+// OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.SNV
+// OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.INDEL
+// OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.SOPHIA
+// OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.ACESEQ
+// OtrsTicket.ProcessingStep processingStep = OtrsTicket.ProcessingStep.RUN_YAPSA
 
-//---------------------------------
+// ---------------------------------
 
 // work area
 NotificationCreator notificationCreator = ctx.notificationCreator

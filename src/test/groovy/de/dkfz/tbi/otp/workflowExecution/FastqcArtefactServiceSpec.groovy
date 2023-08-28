@@ -68,13 +68,13 @@ class FastqcArtefactServiceSpec extends HibernateSpec implements WorkflowSystemD
     }
 
     void setupData() {
-        //artefact in input and seqType in input
+        // artefact in input and seqType in input
         workflowArtefactSeqTrack1 = createWorkflowArtefact([artefactType: ArtefactType.FASTQ])
         seqTrack1 = createSeqTrackWithTwoFastqFileAndSpecies([workflowArtefact: workflowArtefactSeqTrack1])
         workflowArtefactFastqc1 = createWorkflowArtefact([artefactType: ArtefactType.FASTQC])
         fastqc1 = createFastqcProcessedFileWithSpecies([workflowArtefact: workflowArtefactFastqc1])
 
-        //input list
+        // input list
         workflowArtefacts = [
                 workflowArtefactSeqTrack1,
                 workflowArtefactFastqc1,

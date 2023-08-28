@@ -267,13 +267,13 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
         SessionUtils.withTransaction {
             List<RawSequenceFile> rawSequenceFiles = RawSequenceFile.list()
 
-            //check mapping file exists
+            // check mapping file exists
             Path mappingFile = CollectionUtils.exactlyOneElement(rawSequenceFiles.collect {
                 singleCellService.singleCellMappingFile(it)
             }.unique())
             assert Files.exists(mappingFile)
 
-            //check mappingFileContext
+            // check mappingFileContext
             String mappingFileContent = mappingFile.text
             assert mappingFileContent.split('\n').size() == rawSequenceFiles.size()
             rawSequenceFiles.each {

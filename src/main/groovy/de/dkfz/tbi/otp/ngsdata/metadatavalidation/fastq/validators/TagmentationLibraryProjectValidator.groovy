@@ -101,7 +101,7 @@ class TagmentationLibraryProjectValidator extends AbstractValueTuplesValidator<M
                     }
                 } as List<String>
                 if (result) {
-                    //This is done, to remove correct rows from cells. Correct rows are rows where result.size is 1 and equal to the library name.
+                    // This is done, to remove correct rows from cells. Correct rows are rows where result.size is 1 and equal to the library name.
                     if (result.size() == 1) {
                         cells = rows.findAll { it.libraryName != result[0] }*.cells.sum() as Set<Cell>
                     }

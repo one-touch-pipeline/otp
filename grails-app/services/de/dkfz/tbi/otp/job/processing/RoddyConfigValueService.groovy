@@ -59,8 +59,8 @@ class RoddyConfigValueService {
         Map<String, String> cValues = [:]
 
         String referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome).absolutePath
-        cValues.put("INDEX_PREFIX", referenceGenomeFastaFile) //used for PanCancer pipeline
-        cValues.put("GENOME_FA", referenceGenomeFastaFile) //used for RNA pipeline
+        cValues.put("INDEX_PREFIX", referenceGenomeFastaFile) // used for PanCancer pipeline
+        cValues.put("GENOME_FA", referenceGenomeFastaFile) // used for RNA pipeline
 
         cValues.put("possibleControlSampleNamePrefixes", "${roddyBamFile.sampleType.dirName}")
         cValues.put("possibleTumorSampleNamePrefixes", "")

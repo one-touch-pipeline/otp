@@ -118,12 +118,12 @@ class SpeciesMigrationByProject {
         info()
         check()
         withPool(numCores, {
-            //loop through each batch and process it
+            // loop through each batch and process it
             listOfIndividualIdLists.makeConcurrent().each { List<Long> individualIdsBatch ->
                 TransactionUtils.withNewTransaction { session ->
                     List<Individual> individuals = Individual.findAllByIdInList(individualIdsBatch)
                     updateSpecies(individuals)
-                    //flush changes to the database
+                    // flush changes to the database
                     if (!dryRun) {
                         session.flush()
                     }

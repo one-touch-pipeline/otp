@@ -96,7 +96,7 @@ class SamplePairDeciderService {
         }.unique() as List<SamplePair>
     }
 
-    @SuppressWarnings(['Instanceof', 'ConstantAssertExpression']) //Instanceof: The method needs to do a check depending on MergingWorkPackage
+    @SuppressWarnings(['Instanceof', 'ConstantAssertExpression']) // Instanceof: The method needs to do a check depending on MergingWorkPackage
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<SamplePair> findOrCreateSamplePairs(AbstractMergingWorkPackage mergingWorkPackage) {
         assert mergingWorkPackage

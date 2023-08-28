@@ -46,7 +46,7 @@ class CommentService {
         return createOrUpdateComment(commentable, message, "otp")
     }
 
-    //only for otp internal use, not for gui
+    // only for otp internal use, not for gui
     Comment createOrUpdateComment(Commentable commentable, String message, String userName) {
         Comment comment = commentable.comment ?: new Comment()
         comment.comment = message

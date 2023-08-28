@@ -39,20 +39,20 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.*
 import de.dkfz.tbi.otp.utils.*
 
-//----------------------------------------------------
-//input area
+// ----------------------------------------------------
+// input area
 
 String projectName = ""
 
-//----------------------------------------------------
-//processing
+// ----------------------------------------------------
+// processing
 
 assert projectName: 'No Project name given'
 
 Project project = CollectionUtils.atMostOneElement(Project.findAllByName(projectName))
 assert project: "Project ${projectName} not found"
 
-//K20K-JRJ7D2 und K20K-ZFA224
+// K20K-JRJ7D2 und K20K-ZFA224
 
 List<AbstractBamFile> bamFiles = AbstractBamFile.createCriteria().list {
     workPackage {

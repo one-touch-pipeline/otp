@@ -61,8 +61,8 @@ import de.dkfz.tbi.otp.withdraw.WithdrawService
  * Input: See description of the input variables.
  */
 
-//--------------------------------------------------------
-//input
+// --------------------------------------------------------
+// input
 
 /**
  * indicate, if the bam files should be deleted (true) or set to withdrawn (false).
@@ -157,18 +157,18 @@ boolean stopOnAlreadyWithdrawnData = true
  */
 boolean tryRun = true
 
-//--------------------------------------------------------
+// --------------------------------------------------------
 // WORK
 assert fileName?.trim(): "no file name were given"
 
-//services
+// services
 ScriptInputHelperService scriptInputHelperService = ctx.scriptInputHelperService
 WithdrawService withdrawService = ctx.withdrawService
 
 assert (scriptInputHelperService.checkIfExactlyOneMultiLineStringContainsContent(
         [multiColumnInputSample, multiColumnInputSeqTrack, seqTracksIds])): "Please use exactly one multiColumnInput option for input"
 
-//load data
+// load data
 List<SeqTrackWithComment> seqTracksWithComments = [
         scriptInputHelperService.seqTracksBySampleDefinition(multiColumnInputSample),
         scriptInputHelperService.seqTracksByLaneDefinition(multiColumnInputSeqTrack),

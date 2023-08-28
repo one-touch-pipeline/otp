@@ -54,38 +54,38 @@ class InformSampleIdentifierParserSpec extends Specification {
         where:
         input              || pid        | sampleTypeDbName   | useSpecificReferenceGenome
         'I123_456_1T2_D3'  || 'I123_456' | 'tumor012-03'      | USE_PROJECT_DEFAULT
-        //different numbers in first group
+        // different numbers in first group
         'I456_456_1T2_D3'  || 'I456_456' | 'tumor012-03'      | USE_PROJECT_DEFAULT
         'I789_456_1T2_D3'  || 'I789_456' | 'tumor012-03'      | USE_PROJECT_DEFAULT
-        //different numbers in second group
+        // different numbers in second group
         'I123_789_1T2_D3'  || 'I123_789' | 'tumor012-03'      | USE_PROJECT_DEFAULT
         'I123_123_1T2_D3'  || 'I123_123' | 'tumor012-03'      | USE_PROJECT_DEFAULT
-        //different tissue types
+        // different tissue types
         'I123_456_1M2_D3'  || 'I123_456' | 'metastasis012-03' | USE_PROJECT_DEFAULT
         'I123_456_1C2_D3'  || 'I123_456' | 'control012-03'    | USE_PROJECT_DEFAULT
         'I123_456_1F2_D3'  || 'I123_456' | 'ffpe012-03'       | USE_PROJECT_DEFAULT
         'I123_456_1P2_D3'  || 'I123_456' | 'pdx012-03'        | USE_SAMPLE_TYPE_SPECIFIC
         'I123_456_1L2_D3'  || 'I123_456' | 'plasma012-03'     | USE_PROJECT_DEFAULT
         'I123_456_1X2_D3'  || 'I123_456' | 'other012-03'      | USE_PROJECT_DEFAULT
-        //different numbers for tissue type
+        // different numbers for tissue type
         'I123_456_2T2_D3'  || 'I123_456' | 'tumor022-03'      | USE_PROJECT_DEFAULT
         'I123_456_3T2_D3'  || 'I123_456' | 'tumor032-03'      | USE_PROJECT_DEFAULT
         'I123_456_4T2_D3'  || 'I123_456' | 'tumor042-03'      | USE_PROJECT_DEFAULT
         'I123_456_10T2_D3' || 'I123_456' | 'tumor102-03'      | USE_PROJECT_DEFAULT
         'I123_456_23T2_D3' || 'I123_456' | 'tumor232-03'      | USE_PROJECT_DEFAULT
         'I123_456_78T2_D3' || 'I123_456' | 'tumor782-03'      | USE_PROJECT_DEFAULT
-        //different order numbers
+        // different order numbers
         'I123_456_1T1_D3'  || 'I123_456' | 'tumor011-03'      | USE_PROJECT_DEFAULT
         'I123_456_1T3_D3'  || 'I123_456' | 'tumor013-03'      | USE_PROJECT_DEFAULT
         'I123_456_1T4_D3'  || 'I123_456' | 'tumor014-03'      | USE_PROJECT_DEFAULT
-        //different second order numbers
+        // different second order numbers
         'I123_456_1T2_D1'  || 'I123_456' | 'tumor012-01'      | USE_PROJECT_DEFAULT
         'I123_456_1T2_D2'  || 'I123_456' | 'tumor012-02'      | USE_PROJECT_DEFAULT
         'I123_456_1T2_D4'  || 'I123_456' | 'tumor012-04'      | USE_PROJECT_DEFAULT
         'I123_456_1T2_D10' || 'I123_456' | 'tumor012-10'      | USE_PROJECT_DEFAULT
         'I123_456_1T2_D23' || 'I123_456' | 'tumor012-23'      | USE_PROJECT_DEFAULT
         'I123_456_1T2_D56' || 'I123_456' | 'tumor012-56'      | USE_PROJECT_DEFAULT
-        //tissue number X
+        // tissue number X
         'I123_456_XT1_D3'  || 'I123_456' | 'tumor0X1-03'      | USE_PROJECT_DEFAULT
         'I123_456_XT2_D3'  || 'I123_456' | 'tumor0X2-03'      | USE_PROJECT_DEFAULT
         'I123_456_XT1_D4'  || 'I123_456' | 'tumor0X1-04'      | USE_PROJECT_DEFAULT

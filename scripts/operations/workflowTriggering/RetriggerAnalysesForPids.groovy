@@ -29,32 +29,32 @@ import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import de.dkfz.tbi.otp.utils.logging.*
 
 // INPUT
-//************ List of PIDs ************//
+// ************ List of PIDs ************//
 String pids = """
 #PID1
 #PID2
 
 """
 
-//************ Select witch analyses type should be triggered ************//
+// ************ Select witch analyses type should be triggered ************//
 List<String> analyses = [
-        //"snv",
-        //"indel",
-        //"sophia",
-        //"aceseq",
-        //"runYapsa",
+        // "snv",
+        // "indel",
+        // "sophia",
+        // "aceseq",
+        // "runYapsa",
 ]
 
-//************ Select witch seqTypes should be triggered ************//
+// ************ Select witch seqTypes should be triggered ************//
 List<SeqType> seqTypes = [
         SeqTypeService.exomePairedSeqType,
         SeqTypeService.wholeGenomePairedSeqType,
 ]
 
-//************ Trigger analyses for disabled sample pairs. otherwise they will be ignored. ************//
+// ************ Trigger analyses for disabled sample pairs. otherwise they will be ignored. ************//
 boolean runDisabledPairs = false
 
-//WORK
+// WORK
 def samplePairs = SamplePair.withCriteria {
     mergingWorkPackage1 {
         sample {

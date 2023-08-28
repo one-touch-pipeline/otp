@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.utils.DeletionService
 import java.nio.file.*
 
 // input area
-//----------------------
+// ----------------------
 
 /**
  * Multi selector using:
@@ -83,8 +83,8 @@ boolean checkForExternalBamFilesOrLinkedFastqFiles = true
  */
 boolean tryRun = true
 
-//script area
-//-----------------------------
+// script area
+// -----------------------------
 
 ConfigService configService = ctx.configService
 DeletionService deletionService = ctx.deletionService

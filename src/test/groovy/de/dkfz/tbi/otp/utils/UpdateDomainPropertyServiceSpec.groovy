@@ -72,7 +72,7 @@ class UpdateDomainPropertyServiceSpec extends Specification implements ServiceUn
         List<LocalDate> localDateValueList
         List<TestEnum> testEnumValueList
 
-        //grails DSL
+        // grails DSL
         @SuppressWarnings('NoDef')
         static constraints = {
             stringValue nullable: true

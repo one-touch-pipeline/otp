@@ -25,7 +25,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
-@SuppressWarnings('JavaIoPackageAccess') //helper class for FileAccess, so its fine
+@SuppressWarnings('JavaIoPackageAccess') // helper class for FileAccess, so its fine
 class CreateFileHelper {
 
     /**

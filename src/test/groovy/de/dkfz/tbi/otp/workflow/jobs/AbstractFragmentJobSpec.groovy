@@ -142,7 +142,7 @@ class AbstractFragmentJobSpec extends HibernateSpec implements GrailsUnitTest, W
     }
 
     private void setupDataInit() {
-        applicationContext //need call for initialisation
+        applicationContext // need call for initialisation
 
         workflowStep = createWorkflowStep()
         combinedJsonObject = [

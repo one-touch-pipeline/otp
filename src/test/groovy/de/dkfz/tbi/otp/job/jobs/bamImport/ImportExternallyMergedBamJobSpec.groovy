@@ -607,7 +607,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         ])
     }
 
-    @SuppressWarnings('ConsecutiveBlankLines') //is part of an script
+    @SuppressWarnings('ConsecutiveBlankLines') // is part of an script
     private static String getScript(String hasOrNotMd5SumCmd) {
         return """
 set -o pipefail

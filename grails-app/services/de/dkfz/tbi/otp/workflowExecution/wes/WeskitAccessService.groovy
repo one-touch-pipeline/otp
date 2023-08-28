@@ -116,7 +116,7 @@ class WeskitAccessService {
         }
     }
 
-    //library use directly RuntimeException
+    // library use directly RuntimeException
     @SuppressWarnings('CatchRuntimeException')
     private <T> T doApiCall(Closure<Mono<T>> closure) {
         WorkflowExecutionServiceApi api = weskitApiService.createApiInstance()

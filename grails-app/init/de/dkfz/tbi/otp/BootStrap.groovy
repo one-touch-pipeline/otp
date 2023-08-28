@@ -78,7 +78,7 @@ class BootStrap {
 
     def destroy = {
         if (Environment.current == Environment.DEVELOPMENT) {
-            //destroy file system to avoid problems on spring dev-tools restart
+            // destroy file system to avoid problems on spring dev-tools restart
             fileSystemService.closeFileSystem()
             remoteShellHelper.closeFileSystem()
         }

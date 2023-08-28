@@ -70,8 +70,8 @@ class SampleType implements Entity, Legacy {
                 return 'validator.path.component'
             }
             if (!obj.id && val.contains('_')) {
-                //Since roddy has problems with underscores in name of SampleTypes, it should not be allowed for new objects.
-                //But for legacy reasons the underscore should be allowed for already existing objects
+                // Since roddy has problems with underscores in name of SampleTypes, it should not be allowed for new objects.
+                // But for legacy reasons the underscore should be allowed for already existing objects
                 return 'underscore'
             }
         })

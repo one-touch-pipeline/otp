@@ -90,7 +90,7 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTes
                 [:],
                 false,
         )
-        rpst.statSizeFileName = '' //setting empty string does not work via map
+        rpst.statSizeFileName = '' // setting empty string does not work via map
 
         expect:
         TestCase.assertValidateError(rpst, 'statSizeFileName', 'blank', '')

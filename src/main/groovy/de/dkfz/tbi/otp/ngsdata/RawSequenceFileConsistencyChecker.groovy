@@ -55,7 +55,7 @@ class RawSequenceFileConsistencyChecker {
     @Autowired
     ProcessingOptionService processingOptionService
 
-    //12h
+    // 12h
     @Scheduled(fixedDelay = 43200000L, initialDelay = 60000L)
     void setFileExistsForAllRawSequenceFiles() {
         if (schedulerService.isActive()) {

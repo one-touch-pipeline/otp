@@ -53,9 +53,9 @@ ToolName genomeStarIndex_200 = CollectionUtils.atMostOneElement(ToolName.findAll
 ToolName genomeStarIndex_50  = CollectionUtils.atMostOneElement(ToolName.findAllByName("${ProjectService.GENOME_STAR_INDEX}_50"))
 
 ReferenceGenome.withTransaction {
-    //#################################################################################
-    //###############  human reference genome hs37d5 + PhiX            ################
-    //#################################################################################
+    // #################################################################################
+    // ###############  human reference genome hs37d5 + PhiX            ################
+    // #################################################################################
     ReferenceGenome referenceGenome_1KGRef_PhiX = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName("1KGRef_PhiX"))
 
     saveAndCheckGeneModel(new GeneModel(
@@ -116,9 +116,9 @@ ReferenceGenome.withTransaction {
             path: "STAR_2.5.2b_1KGRef_PhiX_Gencode19_50bp"
     ))
 
-    //#################################################################################
-    //###############  xenograft reference genome  mm10 + PhiX         ################
-    //#################################################################################
+    // #################################################################################
+    // ###############  xenograft reference genome  mm10 + PhiX         ################
+    // #################################################################################
     ReferenceGenome referenceGenome_GRCm38mm10_PhiX = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName("GRCm38mm10_PhiX"))
 
     saveAndCheckGeneModel(new GeneModel(
@@ -151,9 +151,9 @@ ReferenceGenome.withTransaction {
             path: "STAR_2.5.2b_GRCm38mm10_gencodevM12_PhiX_200bp"
     ))
 
-    //#################################################################################
-    //###############  xenograft reference genome hs37d5 + PhiX + mm10 ################
-    //#################################################################################
+    // #################################################################################
+    // ###############  xenograft reference genome hs37d5 + PhiX + mm10 ################
+    // #################################################################################
     ReferenceGenome referenceGenome_hs37d5_GRCm38mm_PhiX = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName("hs37d5_GRCm38mm_PhiX"))
 
     saveAndCheckGeneModel(new GeneModel(

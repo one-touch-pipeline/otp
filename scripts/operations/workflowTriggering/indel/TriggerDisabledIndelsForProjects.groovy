@@ -40,7 +40,7 @@ def samplePairs = SamplePair.withCriteria {
     eq('indelProcessingStatus', SamplePair.ProcessingStatus.DISABLED)
 }
 
-//show all
+// show all
 samplePairs.each { println "${it}" }
 println samplePairs.size()
 

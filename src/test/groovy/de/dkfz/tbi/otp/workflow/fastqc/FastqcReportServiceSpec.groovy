@@ -101,7 +101,7 @@ class FastqcReportServiceSpec extends Specification implements DataTest, FastqcD
         ])
         artefact = createWorkflowArtefact([
                 producedBy  : run,
-                outputRole  : INPUT_ROLE, //"FASTQ"
+                outputRole  : INPUT_ROLE, // "FASTQ"
                 artefactType: ArtefactType.FASTQ,
         ])
         seqTrack = createSeqTrack([

@@ -237,8 +237,8 @@ class AlignmentQualityOverviewController implements CheckAndCall {
      */
     def changeQcStatus(QcStatusCommand cmd) {
         checkDefaultErrorsAndCallMethod(cmd) {
-            //if db version has changed after loading the page -> someone else has made changes
-            //simplified way to resolve concurrent access, cheaper than explicit locking
+            // if db version has changed after loading the page -> someone else has made changes
+            // simplified way to resolve concurrent access, cheaper than explicit locking
             if (cmd.abstractBamFile.version > cmd.dbVersion) {
                 String errorMessage = g.message(code: "alignment.quality.concurrentWrite.message")
                 return response.sendError(HttpStatus.CONFLICT.value(), errorMessage)

@@ -36,7 +36,7 @@ class EntityIntegrationSpec extends Specification {
     GrailsApplication grailsApplication
 
     private SeqType createProxy(SeqType seqType) {
-        seqType.discard() //detach object from session to get proxy
+        seqType.discard() // detach object from session to get proxy
         SeqType proxy = SeqType.proxy(seqType.id)
         assert !proxy.is(seqType)
         return proxy
@@ -182,9 +182,9 @@ class EntityIntegrationSpec extends Specification {
 
         when:
         List<String> domainsWithoutEntity = grailsApplication.domainClasses.findAll {
-            !nonOtpDomains.contains(it.clazz) &&            //ignore non otp domains
-                    !dbViews.contains(it.clazz) &&          //ignore the dbviews
-                    !(Entity.isAssignableFrom(it.clazz))    //find class not implementing Entity
+            !nonOtpDomains.contains(it.clazz) &&            // ignore non otp domains
+                    !dbViews.contains(it.clazz) &&          // ignore the dbviews
+                    !(Entity.isAssignableFrom(it.clazz))    // find class not implementing Entity
         }*.clazz*.name
 
         then:

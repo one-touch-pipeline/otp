@@ -25,7 +25,7 @@ trait BamFileAnalysisServiceTrait {
 
     abstract String getConfigName()
 
-    //Methods with default values
+    // Methods with default values
     String checkReferenceGenome() {
         return ''
     }

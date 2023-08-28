@@ -38,8 +38,8 @@ import de.dkfz.tbi.otp.project.Project
  * 3. All effected pids. That can be used as input for RetriggerAnalysisForPids
  */
 
-//--------------------------
-//input
+// --------------------------
+// input
 
 String projectName = ''
 
@@ -52,8 +52,8 @@ String projectName = ''
  */
 String plugInAndVersion = ''
 
-//-------------------------
-//work
+// -------------------------
+// work
 
 assert projectName: "No project name given"
 assert plugInAndVersion: "No plugin version given"

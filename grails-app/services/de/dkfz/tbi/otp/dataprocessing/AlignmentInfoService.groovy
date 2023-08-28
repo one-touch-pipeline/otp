@@ -291,7 +291,7 @@ class AlignmentInfoService {
                         RoddyWorkflowConfig workflowConfig = RoddyWorkflowConfig.getLatestForProject(project, seqType,
                                 CollectionUtils.atMostOneElement(Pipeline.findAllByNameAndType(Pipeline.Name.forSeqType(seqType), Pipeline.Type.ALIGNMENT)))
                         if (!workflowConfig) {
-                            return //pancan not configured for this seq type, skipped
+                            return // pancan not configured for this seq type, skipped
                         }
                         result.put(seqType.displayNameWithLibraryLayout, getRoddyAlignmentInformation(workflowConfig))
                     }

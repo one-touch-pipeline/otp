@@ -22,15 +22,15 @@
 
 import de.dkfz.tbi.otp.dataprocessing.*
 
-//-----------
-//input
+// -----------
+// input
 
 int year = 2018
 int month =12
 int day = 17
 
-//---------------------------
-//work area
+// ---------------------------
+// work area
 
 Date dateStart = new Date(year - 1900, month - 1, day)
 Date dateEnd = dateStart.plus(1)

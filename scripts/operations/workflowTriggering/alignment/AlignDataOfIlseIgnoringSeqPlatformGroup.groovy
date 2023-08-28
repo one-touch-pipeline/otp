@@ -37,15 +37,15 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  * will add this lanes to the other and trigger the alignment.
  */
 
-//-------------------------------
-//input area
+// -------------------------------
+// input area
 /**
  * The ilse number
  */
 Integer ilseNumber = 0
 
-//-------------------------------
-//work area
+// -------------------------------
+// work area
 
 OtrsTicketService otrsTicketService = ctx.otrsTicketService
 

@@ -35,12 +35,12 @@ import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
  *  - Source Path of BAM File
  */
 
-//----------------------------------------------------
-//input area
+// ----------------------------------------------------
+// input area
 String projectName = ""
 
-//----------------------------------------
-//work area
+// ----------------------------------------
+// work area
 assert projectName: 'Please input project name'
 
 List<String> table = []

@@ -264,7 +264,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         e.message.contains("The input realm is not allowed to be null")
     }
 
-    //false positives, since rule can not recognize calling class
+    // false positives, since rule can not recognize calling class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
     void "test defaultRoddyExecutionCommand_ProcessingOptionRoddyApplicationIniDoesNotExistInFilesystem_ShouldFail"() {
         given:
@@ -446,7 +446,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         thrown(AssertionError)
     }
 
-    //false positives, since rule can not recognize calling class
+    // false positives, since rule can not recognize calling class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
     void "test createWorkOutputDirectory_DirectoryCreationFailed_ShouldFail"() {
         given:
@@ -465,7 +465,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         thrown(AssertionError)
     }
 
-    //false positives, since rule can not recognize calling class
+    // false positives, since rule can not recognize calling class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
     void "test createWorkOutputDirectory_AllFine"() {
         given:
@@ -489,7 +489,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
             stat -c %a ${tmpOutputDir}
             stat -c %G ${tmpOutputDir}
             """.stripIndent())
-        //make the 2 optional, since it does not work for all developers.
+        // make the 2 optional, since it does not work for all developers.
         String expected = """\
             2?750
             ${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)}
@@ -518,7 +518,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
             stat -c %a ${tmpOutputDir}
             stat -c %G ${tmpOutputDir}
             """.stripIndent())
-        //make the 2 optional, since it does not work for all developers.
+        // make the 2 optional, since it does not work for all developers.
         String expected = """\
             2?750
             ${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)}
@@ -685,8 +685,8 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
             """.stripIndent()
         )
 
-        //On some computers the group id are not set for unknown reasons.
-        //Therefore allow for the test also the other case
+        // On some computers the group id are not set for unknown reasons.
+        // Therefore allow for the test also the other case
         String expected = """\
             2?750
             2?750

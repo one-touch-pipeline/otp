@@ -39,7 +39,7 @@ import java.nio.file.Path
  */
 abstract class AbstractPanCancerWorkflowWithoutAntibodySpec extends AbstractPanCancerWorkflowSpec implements ReferenceGenomeHg37 {
 
-    //@Slf4j does not work with Spock containing tests and produces problems in closures
+    // @Slf4j does not work with Spock containing tests and produces problems in closures
     @SuppressWarnings('PropertyName')
     final static Logger log = LoggerFactory.getLogger(AbstractPanCancerWorkflowWithoutAntibodySpec)
 

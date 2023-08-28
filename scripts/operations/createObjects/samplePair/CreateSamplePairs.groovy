@@ -40,17 +40,17 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 
-//----------------------------------------
-//input area
+// ----------------------------------------
+// input area
 
-//Create manual SamplePairs defined by pid, sampleType1, sampleType2 and seqType:
-//PID SAMPLETYPE1 SAMPLETYPE2 SEQTYPE_NAME
+// Create manual SamplePairs defined by pid, sampleType1, sampleType2 and seqType:
+// PID SAMPLETYPE1 SAMPLETYPE2 SEQTYPE_NAME
 String input = """
 
 """
 
-//----------------------------------------
-//work area
+// ----------------------------------------
+// work area
 SamplePairDeciderService samplePairDeciderService = ctx.samplePairDeciderService
 SeqTypeService seqTypeService = ctx.seqTypeService
 

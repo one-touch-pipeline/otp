@@ -85,8 +85,8 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
  * - otp-1650-create-new-workflows-from-wgbs-alignments.groovy
  */
 class ExampleData {
-//------------------------------
-//input
+// ------------------------------
+// input
 
     /**
      * Name of the project for the example data. If it not exist, it is created.
@@ -187,8 +187,8 @@ class ExampleData {
     List<String> singleCellWellLabelSampleTypeNames = [
             "tumor03",
     ]
-//------------------------------
-//work
+// ------------------------------
+// work
 
     AbstractBamFileService abstractBamFileService
 
@@ -610,11 +610,11 @@ class ExampleData {
                     aceseqService.getPlot(aceseqInstance, PlotType.ACESEQ_QC_GC_CORRECTED),
                     aceseqService.getPlot(aceseqInstance, PlotType.ACESEQ_TCN_DISTANCE_COMBINED_STAR),
                     aceseqService.getPlot(aceseqInstance, PlotType.ACESEQ_WG_COVERAGE),
-                    //files for pattern for PlotType.ACESEQ_ALL
+                    // files for pattern for PlotType.ACESEQ_ALL
                     base.resolve("${aceseqInstance.individual.pid}_plot_1_ALL.png"),
                     base.resolve("${aceseqInstance.individual.pid}_plot_3_ALL.png"),
                     base.resolve("${aceseqInstance.individual.pid}_plot_4_ALL.png"),
-                    //files for pattern for PlotType.ACESEQ_EXTRA
+                    // files for pattern for PlotType.ACESEQ_EXTRA
                     base.resolve("${plotPrefixAceseqExtra}_1.png"),
                     base.resolve("${plotPrefixAceseqExtra}_3.png"),
                     base.resolve("${plotPrefixAceseqExtra}_5.png"),

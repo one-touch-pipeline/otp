@@ -45,7 +45,7 @@ import static groovyx.gpars.GParsPool.withPool
  */
 
 //////////////////////////////////////////////////////////////
-//User input parameters
+// User input parameters
 
 /**
  * Specifies how many individuals with wes/wgs/chipseq bam files to be processed together in one batch
@@ -154,7 +154,7 @@ void migrateToNewWorkflow(
             it.id
         }
 
-        //checking, that workflowArtefact is available
+        // checking, that workflowArtefact is available
         seqTracks.every {
             assert it.workflowArtefact: "input artefact of ${it} can't be null. Was migration script otp-592 called before to create missing input artifacts?"
         }
@@ -164,7 +164,7 @@ void migrateToNewWorkflow(
         }
         assert fastqcProcessedFiles.size() == seqTracks.size() * 2
 
-        //prepare names
+        // prepare names
         String shortName = [
                 PanCancerWorkflow.WORKFLOW,
                 roddyBamFile.individual.pid,
@@ -236,7 +236,7 @@ void migrateToNewWorkflow(
         workflowArtefactMap[roddyBamFile] = workflowArtefact
     }
 }
-//=================================================
+// =================================================
 
 fileSystemService.getRemoteFileSystemOnDefaultRealm()
 
@@ -251,11 +251,11 @@ println "There are ${numRoddyFiles} PanCancer Roddy Files of ${numIndividuals} I
 
 if (individualsIdsWithRoddyBamFileCount) {
 
-    //process the SeqTracks in chunks
+    // process the SeqTracks in chunks
     long numBatches = listOfListOfIndividuals.size()
     println "${numBatches} batches will be processed"
 
-    //fetch the FastQC Workflow
+    // fetch the FastQC Workflow
     Workflow workflow = workflowService.getExactlyOneWorkflow(WORKFLOW_NAME)
     assert workflow: "configured workflow ${WORKFLOW_NAME} does not exists"
     println "Migrate PanCancer bam files to new workflow systems for Workflow \"${WORKFLOW_NAME}\""
@@ -263,7 +263,7 @@ if (individualsIdsWithRoddyBamFileCount) {
     int numCores = Runtime.runtime.availableProcessors()
     println "${numCores} logical CPU core(s) are available"
 
-    //fetch the priority from database
+    // fetch the priority from database
     ProcessingPriority priority = CollectionUtils.exactlyOneElement(ProcessingPriority.findAllByName(processPriority),
             "Processing priority ${processPriority} doesnt exist.")
 
@@ -271,13 +271,13 @@ if (individualsIdsWithRoddyBamFileCount) {
     print "Processing: "
     try {
         withPool(numCores, {
-            //loop through each batch and process it
+            // loop through each batch and process it
             listOfListOfIndividuals.makeConcurrent().each { List<Long> partIndividualIds ->
                 try {
                     TransactionUtils.withNewTransaction { session ->
-                        //start the migration
+                        // start the migration
                         migrateToNewWorkflow(partIndividualIds, workflow, priority)
-                        //flush changes to the database
+                        // flush changes to the database
                         if (!dryRun) {
                             session.flush()
                         }

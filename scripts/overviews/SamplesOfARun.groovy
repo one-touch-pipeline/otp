@@ -20,9 +20,9 @@
  * SOFTWARE.
  */
 
-//Overview of samples of a run
+// Overview of samples of a run
 
-//Show for a run all samples with SeqType and creation date grouped by FastqImportInstance
+// Show for a run all samples with SeqType and creation date grouped by FastqImportInstance
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils

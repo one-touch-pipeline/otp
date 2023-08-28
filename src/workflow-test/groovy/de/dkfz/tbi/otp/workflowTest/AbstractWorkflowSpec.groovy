@@ -83,7 +83,7 @@ import java.util.concurrent.*
 abstract class AbstractWorkflowSpec extends Specification implements UserAndRoles, GroovyScriptAwareTestCase,
         DomainFactoryCore, WorkflowSystemDomainFactory, UserDomainFactory {
 
-    //@Slf4j does not work with Spock containing tests and produces problems in closures
+    // @Slf4j does not work with Spock containing tests and produces problems in closures
     @SuppressWarnings('PropertyName')
     final static Logger log = LoggerFactory.getLogger(AbstractWorkflowSpec)
 
@@ -275,7 +275,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
 
             log.info "Finish test '${getClass().simpleName}.${methodName}' using base directory: ${workingDirectory}"
         } catch (Throwable t) {
-            //exception in cleanup was not reported with stacktrace, therefore add own logging
+            // exception in cleanup was not reported with stacktrace, therefore add own logging
             log.error("cleanup error", t)
             throw t
         }
@@ -562,19 +562,19 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      */
     private void initProcessingOption() {
         log.debug("creating processingOptions")
-        //emails addresses
+        // emails addresses
         findOrCreateProcessingOption(name: OptionName.EMAIL_TICKET_SYSTEM, value: HelperUtils.randomEmail)
         findOrCreateProcessingOption(name: OptionName.EMAIL_REPLY_TO, value: HelperUtils.randomEmail)
         findOrCreateProcessingOption(name: OptionName.EMAIL_SENDER, value: HelperUtils.randomEmail)
         findOrCreateProcessingOption(name: OptionName.GUI_CONTACT_DATA_SUPPORT_EMAIL, value: HelperUtils.randomEmail)
         findOrCreateProcessingOption(name: OptionName.EMAIL_CLUSTER_ADMINISTRATION, value: HelperUtils.randomEmail)
 
-        //roddy and other paths
+        // roddy and other paths
         findOrCreateProcessingOption(name: OptionName.RODDY_APPLICATION_INI, value: roddyApplicationPropertyFile.toString())
         findOrCreateProcessingOption(name: OptionName.RODDY_SHARED_FILES_BASE_DIRECTORY, value: configService.workflowTestRoddySharedFilesBaseDir)
         findOrCreateProcessingOption(name: OptionName.BASE_PATH_REFERENCE_GENOME, value: referenceGenomeDirectory.toString())
 
-        //cluster and file system
+        // cluster and file system
         findOrCreateProcessingOption(name: OptionName.CLUSTER_NAME, value: 'CLUSTER NAME')
         findOrCreateProcessingOption(name: OptionName.FILESYSTEM_BAM_IMPORT, value: realm.name)
         findOrCreateProcessingOption(name: OptionName.FILESYSTEM_FASTQ_IMPORT, value: realm.name)
@@ -587,7 +587,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         findOrCreateProcessingOption(name: OptionName.PROCESSING_PRIORITY_DEFAULT_NAME, value: processingPriority.name)
         findOrCreateProcessingOption(name: OptionName.FILESYSTEM_TIMEOUT, value: '1')
 
-        //other values
+        // other values
         findOrCreateProcessingOption(name: OptionName.LDAP_ACCOUNT_DEACTIVATION_GRACE_PERIOD, value: "90")
         findOrCreateProcessingOption(name: OptionName.TICKET_SYSTEM_URL, value: "url ${nextId}")
         findOrCreateProcessingOption(name: OptionName.TICKET_SYSTEM_NUMBER_PREFIX, value: "prefix${nextId}")
@@ -814,7 +814,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     /**
      * enum for defining needed cron jobs
      */
-    //the nested enum is not abstracts itself, its only inside an abstract class
+    // the nested enum is not abstracts itself, its only inside an abstract class
     @SuppressWarnings("AbstractClassName")
     @TupleConstructor
     enum TestCronJob {

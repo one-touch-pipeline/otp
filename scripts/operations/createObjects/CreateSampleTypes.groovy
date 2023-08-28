@@ -22,7 +22,7 @@
 
 import de.dkfz.tbi.otp.ngsdata.*
 
-//************ List of Sample Types (one Type per line) ************//
+// ************ List of Sample Types (one Type per line) ************//
 List sampleTypeNames = """
 #SampleType1
 #SampleType2
@@ -31,10 +31,10 @@ List sampleTypeNames = """
     it && !it.startsWith('#')
 }
 
-//************ Choose specific reference genome (per project or sample type) ************//
+// ************ Choose specific reference genome (per project or sample type) ************//
 SampleType.SpecificReferenceGenome specificReferenceGenome =
-        //SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        //SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
+        // SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        // SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
 
 SampleType.withTransaction {
     sampleTypeNames.each {

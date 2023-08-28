@@ -61,11 +61,11 @@ class QaOverviewServiceHibernateSpec extends HibernateSpec implements DomainFact
             1 * addDerivedData(_ as List<Map<String, ?>>)
             1 * createList(project, seqType, _ as List<Map<String, ?>>) >> [[:]]
 
-            //groovy magic replace call 'createQuery' by call of '$tt__createQuery'
+            // groovy magic replace call 'createQuery' by call of '$tt__createQuery'
             0 * createQuery(_)
-            //method added and used by groovy magic, is used instead of 'createQuery'
+            // method added and used by groovy magic, is used instead of 'createQuery'
             1 * $tt__createQuery(_, _) >> 'select new map(p.id, p.version) from Project p'
-            //method added and used by groovy magic
+            // method added and used by groovy magic
             _ * getTransactionManager() >> super.transactionManager
         }
 

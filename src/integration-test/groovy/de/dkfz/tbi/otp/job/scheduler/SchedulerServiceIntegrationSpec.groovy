@@ -151,7 +151,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         when:
         schedulerService.schedule()
         process.refresh()
-        //process = Process.get(process.id)
+        // process = Process.get(process.id)
 
         then:
         process.finished

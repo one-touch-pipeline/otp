@@ -40,7 +40,7 @@ class SamplePairProcessingStatusSpec extends Specification {
         result == status.variantCallingProcessingStatus
 
         where:
-        //generates a Permutation List for indel, snv, aceseq and runYapsa.
+        // generates a Permutation List for indel, snv, aceseq and runYapsa.
         values << {
             List ret = []
             List list = [NOTHING_DONE_WONT_DO, NOTHING_DONE_MIGHT_DO, PARTLY_DONE_WONT_DO_MORE, PARTLY_DONE_MIGHT_DO_MORE, ALL_DONE]

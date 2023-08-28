@@ -43,9 +43,9 @@ class TypeValidatorsIntegrationSpec extends Specification {
         'empty'                    | { '' }                                             || false
         'null'                     | { null }                                           || false
         'OtherName'                | { 'OtherJobName' }                                 || false
-        //example for roddy job
+        // example for roddy job
         'ExecutePanCanJob'         | { ExecutePanCanJob.simpleName }                    || false
-        //example for no cluster job
+        // example for no cluster job
         'ReplaceSourceWithLinkJob' | { ReplaceSourceWithLinkJob.simpleName }            || false
     }
 }

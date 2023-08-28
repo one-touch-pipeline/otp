@@ -26,10 +26,10 @@ import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
  * Script to adapt the processing priorities. It is not to create new one.
  */
 
-//---------------------------
-//input
+// ---------------------------
+// input
 
-//processingPriorityName, queue,emailPrefix
+// processingPriorityName, queue,emailPrefix
 String input = """
 MINIMAL,prio5-ERROR,prod-prio5
 REPROCESSING,prio4-ERROR,prod-prio4
@@ -38,8 +38,8 @@ FASTTRACK,prio2-ERROR,prod-prio2
 EXTREME FASTTRACK,prio1-ERROR,prod-prio1
 """
 
-//--------------------------------------------
-//processing
+// --------------------------------------------
+// processing
 
 ProcessingPriority.withTransaction {
     input.split('\n')*.trim().findAll {

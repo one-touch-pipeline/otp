@@ -64,7 +64,7 @@ class LogbackConfigIntegrationSpec extends Specification {
     Appender<ILoggingEvent> startjobsAppender = Spy(jobsLogger.getAppender("STARTJOBS"))
 
     void setupSpec() {
-        //Redirect System.out to buffer
+        // Redirect System.out to buffer
         mockedStdoutStream = new ByteArrayOutputStream()
         System.out = new PrintStream(mockedStdoutStream)
     }

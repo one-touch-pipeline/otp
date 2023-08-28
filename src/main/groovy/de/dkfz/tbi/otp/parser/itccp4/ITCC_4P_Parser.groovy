@@ -80,7 +80,7 @@ class ITCC_4P_Parser implements SampleIdentifierParser {
      */
     static final String PID = /^${PROJECT}_${DISEASE}$/
 
-    //The full identifier
+    // The full identifier
     static final String REGEX = /^${PROJECT}_${SOURCE}_${DISEASE}_${SAMPLE_TYPE}_${MATERIAL_TYPE}_${ISOLATE_TYPE}(?:_${ANALYSE_TYPE})?$/
 
     @Override

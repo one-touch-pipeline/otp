@@ -50,7 +50,7 @@ Path path = fileSystem.getPath(fileName)
 
 Spreadsheet s = new Spreadsheet(path.text)
 Project.withTransaction {
-    s.dataRows.each { Row row -> //get the values from the spreadsheet for example: project id, organizationalUnit & costCenter
+    s.dataRows.each { Row row -> // get the values from the spreadsheet for example: project id, organizationalUnit & costCenter
         String projectId = row.getCellByColumnTitle('projectId').text
         String organizationalUnitValue = row.getCellByColumnTitle('organizationalUnit').text
         String costCenterValue = row.getCellByColumnTitle('costCenter').text
@@ -61,14 +61,14 @@ Project.withTransaction {
             AbstractFieldDefinition afdOrganizationalUnit = CollectionUtils.atMostOneElement(AbstractFieldDefinition.findAllByName('Organizational Unit'))
             AbstractFieldDefinition afdCostCenter = CollectionUtils.atMostOneElement(AbstractFieldDefinition.findAllByName('Cost Center'))
 
-            //import values for Organizational Unit
+            // import values for Organizational Unit
             TextFieldValue tfvOrganizationUnit = new TextFieldValue()
             tfvOrganizationUnit.definition = afdOrganizationalUnit
             tfvOrganizationUnit.textValue = organizationalUnitValue
             tfvOrganizationUnit.save(flush: true)
             project.projectFields.add(tfvOrganizationUnit)
 
-            //import values for Cost Center
+            // import values for Cost Center
             TextFieldValue tfvCostCenter = new TextFieldValue()
             tfvCostCenter.definition = afdCostCenter
             tfvCostCenter.textValue = costCenterValue

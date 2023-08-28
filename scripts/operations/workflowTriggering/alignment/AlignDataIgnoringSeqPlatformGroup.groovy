@@ -36,8 +36,8 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  * will add this lanes to the other and trigger the alignment.
  */
 
-//-------------------------------
-//input area
+// -------------------------------
+// input area
 
 /**
  * Input, defined by:
@@ -57,8 +57,8 @@ String multiColumnInput = """
 
 """
 
-//-------------------------------
-//work area
+// -------------------------------
+// work area
 
 OtrsTicketService otrsTicketService = ctx.otrsTicketService
 

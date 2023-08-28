@@ -32,7 +32,7 @@ trait WithReferenceGenomeRestriction implements BamFileAnalysisServiceTrait {
     @Override
     String checkReferenceGenome() {
         return referenceGenomes ? 'AND sp.mergingWorkPackage1.referenceGenome in (:referenceGenomes)' :
-                "AND 1=0" //to avoid SQL grammar exception for `x IN ()`
+                "AND 1=0" // to avoid SQL grammar exception for `x IN ()`
     }
 
     @Override

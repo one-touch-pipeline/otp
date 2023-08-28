@@ -91,7 +91,7 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
 
     void "test ensureFileIsReadableAndNotEmpty, when does not exist, should fail"() {
         given:
-        //file must be absolute to make sure that the test fails the 'exists?' assertion
+        // file must be absolute to make sure that the test fails the 'exists?' assertion
         File file = tempDir.resolve("testFile.txt").toFile()
 
         when:

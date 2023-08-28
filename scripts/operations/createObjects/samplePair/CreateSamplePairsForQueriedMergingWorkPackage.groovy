@@ -31,8 +31,8 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
-//----------------------------------------
-//input area
+// ----------------------------------------
+// input area
 
 Collection<AbstractMergingWorkPackage> mergingWorkPackages = AbstractMergingWorkPackage.withCriteria {
     sample {
@@ -55,14 +55,14 @@ Collection<AbstractMergingWorkPackage> mergingWorkPackages = AbstractMergingWork
     ])
 }
 
-//----------------------------------------
-//selection display
+// ----------------------------------------
+// selection display
 
 println "        Found Merging workPackage"
 println mergingWorkPackages*.toString().sort().join('\n')
 
-//----------------------------------------
-//work area
+// ----------------------------------------
+// work area
 SamplePairDeciderService samplePairDeciderService = ctx.samplePairDeciderService
 
 SeqTrack.withTransaction {

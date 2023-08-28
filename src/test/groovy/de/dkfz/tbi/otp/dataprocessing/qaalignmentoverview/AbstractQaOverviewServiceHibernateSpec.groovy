@@ -317,13 +317,13 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
         service = new TestAbstractQaOverviewServiceWithoutExtension()
 
         Map<String, ?> qaMap = [
-                //numerator
+                // numerator
                 totalMappedReadCounter      : totalMappedReadCounter,
                 duplicates                  : duplicates,
                 withMateMappedToDifferentChr: withMateMappedToDifferentChr,
                 properlyPaired              : properlyPaired,
                 singletons                  : singletons,
-                //denominator
+                // denominator
                 pairedInSequencing          : pairedInSequencing,
                 totalReadCounter            : totalReadCounter,
         ]
@@ -396,7 +396,7 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
         String pidLink = "pidLink"
 
         Map<String, ?> qaMap = [
-                //general
+                // general
                 pid                           : 'pid',
                 individualId                  : individualId,
                 libraryPreparationKitName     : 'libraryPreparationKitName',
@@ -407,20 +407,20 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
                 qcAuthor                      : 'qcAuthor',
                 bamId                         : bamId,
 
-                //QC_KEY_BASE
+                // QC_KEY_BASE
                 percentMappedReads            : 101,
                 percentDuplicates             : 102,
                 percentDiffChr                : 103,
                 percentProperlyPaired         : 104,
                 percentSingletons             : 105,
 
-                //qcKeys: none
+                // qcKeys: none
 
-                //keyMapBase
+                // keyMapBase
                 insertSizeMedian              : 301,
                 readLength                    : readLength,
 
-                //qcKeysMap(qaMap):none
+                // qcKeysMap(qaMap):none
         ]
 
         TableCellValue qcStatusCell = Mock(TableCellValue)
@@ -513,7 +513,7 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
         String pidLink = "pidLink"
 
         Map<String, ?> qaMap = [
-                //general
+                // general
                 pid                           : 'pid',
                 individualId                  : individualId,
                 libraryPreparationKitName     : 'libraryPreparationKitName',
@@ -524,22 +524,22 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
                 qcAuthor                      : 'qcAuthor',
                 bamId                         : bamId,
 
-                //QC_KEY_BASE
+                // QC_KEY_BASE
                 percentMappedReads            : 101,
                 percentDuplicates             : 102,
                 percentDiffChr                : 103,
                 percentProperlyPaired         : 104,
                 percentSingletons             : 105,
 
-                //qcKeys
+                // qcKeys
                 key1                          : 201,
                 key2                          : 202,
 
-                //keyMapBase
+                // keyMapBase
                 insertSizeMedian              : 301,
                 readLength                    : readLength,
 
-                //qcKeysMap(qaMap)
+                // qcKeysMap(qaMap)
                 keyMap1                       : 401,
                 keyMap2                       : 402,
         ]

@@ -70,7 +70,7 @@ class ProjectRequestStateProvider {
         return stateClass.simpleName.uncapitalize()
     }
 
-    /**To obtain the right simpleName we need AopProxyUtils, because the secure spring annotations are shown in the beans class name**/
+    /** To obtain the right simpleName we need AopProxyUtils, because the secure spring annotations are shown in the beans class name **/
     static String getStateBeanName(ProjectRequestState state) {
         Class<ProjectRequestState> stateClass = AopProxyUtils.ultimateTargetClass(state) as Class<ProjectRequestState>
         return stateClass.simpleName.uncapitalize()

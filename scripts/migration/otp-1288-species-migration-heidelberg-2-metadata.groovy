@@ -170,7 +170,7 @@ class SpeciesMigrationByMetaData {
     void check() {
         assert batchSize > 1
 
-        //check, will be done per batch
+        // check, will be done per batch
         createMetadataSpeciesMap()
     }
 
@@ -251,7 +251,7 @@ class SpeciesMigrationByMetaData {
                 List<SpeciesWithStrain> speciesForSample = metaDataEntryListPerSample.collect {
                     Map<String, SpeciesWithStrain> speciesEntry = metadataSpeciesMap[it.value]
                     if (!speciesEntry) {
-                        //was already reported for individual
+                        // was already reported for individual
                         return null
                     }
                     speciesEntry.mixedin
@@ -278,7 +278,7 @@ class SpeciesMigrationByMetaData {
         info()
         check()
         withPool(numCores, {
-            //loop through each batch and process it
+            // loop through each batch and process it
             listOfIndividualIdLists.makeConcurrent().each { List<Long> individualIdsBatch ->
                 try {
                     TransactionUtils.withNewTransaction { session ->
@@ -297,14 +297,14 @@ class SpeciesMigrationByMetaData {
                             }
                         }
                         updateSpecies(metaDataEntries)
-                        //flush changes to the database
+                        // flush changes to the database
                         if (!dryRun) {
                             session.flush()
                         }
                         print('.')
                     }
                 } catch (Throwable t) {
-                    //the pool do not provide the stacktrace
+                    // the pool do not provide the stacktrace
                     System.out.println StackTraceUtils.getStackTrace(t)
                     throw t
                 }

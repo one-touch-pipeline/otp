@@ -111,7 +111,7 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
         Map<ClusterJobIdentifier, JobState> result = service.retrieveKnownJobsWithState(realm)
 
         then:
-        result.isEmpty() //can not written as .empty
+        result.isEmpty() // can not written as .empty
     }
 
     void "test executeJob, succeeds"() {

@@ -76,15 +76,15 @@ class SampleOverviewController {
         Project project = projectSelectionService.requestedProject
 
         List<SeqType> seqTypes = sampleOverviewService.seqTypeByProject(project)
-        /*Map<pid, Map<sampleTypeName, InformationOfSample>>*/
+        /* Map<pid, Map<sampleTypeName, InformationOfSample>> */
         Map<String, Map<String, InfoAboutOneSample>> dataLastMap = [:].withDefault { [:].withDefault { new InfoAboutOneSample() } }
 
-        //Only counts lanes, which are not withdrawn
+        // Only counts lanes, which are not withdrawn
         sampleOverviewService.laneCountForSeqtypesPerPatientAndSampleType(project).each {
             dataLastMap[it.pid as String][it.sampleTypeName as String].laneCountRegistered[it.seqType.id as Long] = it.laneCount as String
         }
 
-        //adds all withdrawn lanes to the total amount of registered Lanes and shows the number of withdrawn lanes in brackets
+        // adds all withdrawn lanes to the total amount of registered Lanes and shows the number of withdrawn lanes in brackets
         sampleOverviewService.withdrawnLaneCountForSeqTypesPerPatientAndSampleType(project).each {
             Integer notWithdrawnLanesCount = (dataLastMap[it.pid as String][it.sampleTypeName as String]
                     .laneCountRegistered[it.seqType.id as Long] ?: 0) as Integer

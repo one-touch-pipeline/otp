@@ -51,7 +51,7 @@ import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.REALM_D
  */
 
 // input area
-//----------------------
+// ----------------------
 
 /**
  * The name of the project for deletion.
@@ -67,8 +67,8 @@ String pathName = ''
  * The deletion mode: complete project or only the data inside the project
  */
 ProjectDeletionMode mode =
-        ProjectDeletionMode.DELETE_ALL //delete the complete project
-        //ProjectDeletionMode.DELETE_SEQUENCING_ONLY //delete only the data of the project, but not the project itself
+        ProjectDeletionMode.DELETE_ALL // delete the complete project
+        // ProjectDeletionMode.DELETE_SEQUENCING_ONLY // delete only the data of the project, but not the project itself
 
 /**
  * checks that the project is empty. That means that it do not contain any fastq or bam files.
@@ -81,8 +81,8 @@ boolean assertProjectEmpty = true
  */
 boolean deleteAnalysisDirectory = true
 
-//script area
-//-----------------------------
+// script area
+// -----------------------------
 
 enum ProjectDeletionMode {
     DELETE_ALL, DELETE_SEQUENCING_ONLY

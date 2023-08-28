@@ -76,7 +76,7 @@ abstract class ConfigPerProjectAndSeqType implements Entity {
     ConfigPerProjectAndSeqType previousConfig
 
     static constraints = {
-        seqType nullable: true, //needs to be nullable because of old data, should never be null for new data
+        seqType nullable: true, // needs to be nullable because of old data, should never be null for new data
                 validator: { val, obj ->
                     obj.obsoleteDate ? true : val != null
                 }

@@ -2103,7 +2103,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     @SuppressWarnings('UnusedPrivateMethod')
-    //method name is constructed at runtime
+    // method name is constructed at runtime
     private RoddyConfiguration createRoddyIndelConfiguration(Map properties = [:]) {
         RoddyConfiguration configuration = new RoddyConfiguration([
                 project          : CollectionUtils.atMostOneElement(Project.findAllByName("testProjectAlignment")),
@@ -2118,7 +2118,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     @SuppressWarnings('UnusedPrivateMethod')
-    //method name is constructed at runtime
+    // method name is constructed at runtime
     private RoddyConfiguration createRoddySophiaConfiguration(Map properties = [:]) {
         RoddyConfiguration configuration = new RoddyConfiguration([
                 project          : CollectionUtils.atMostOneElement(Project.findAllByName("testProjectAlignment")),
@@ -2133,7 +2133,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     @SuppressWarnings('UnusedPrivateMethod')
-    //method name is constructed at runtime
+    // method name is constructed at runtime
     private RoddyConfiguration createRoddyAceseqConfiguration(Map properties = [:]) {
         RoddyConfiguration configuration = new RoddyConfiguration([
                 project          : CollectionUtils.atMostOneElement(Project.findAllByName("testProjectAlignment")),

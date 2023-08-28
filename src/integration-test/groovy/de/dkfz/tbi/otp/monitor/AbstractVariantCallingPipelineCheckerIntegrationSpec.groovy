@@ -220,7 +220,7 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         BamFilePairAnalysis secondAnalysisSamplePairWithTwoAnalysis = createAnalysis([samplePair: firstAnalysisSamplePairWithTwoAnalysis.samplePair])
         BamFilePairAnalysis crossCheckingAnalysis = createAnalysisForCrosschecking()
         BamFilePairAnalysis withdrawnAnalysis = createAnalysis()
-        withdrawnAnalysis.withdrawn = true //because of constraint in SnvCallingInstance it can not be given in the parameter map
+        withdrawnAnalysis.withdrawn = true // because of constraint in SnvCallingInstance it can not be given in the parameter map
         withdrawnAnalysis.save(flush: true)
 
         List<SamplePair> samplePairs = [
@@ -304,7 +304,7 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
                 value: '30.0',
         )
 
-        //sample pair with needs processing but no config
+        // sample pair with needs processing but no config
         SamplePair samplePairWithUnsupportedSeqType = createSamplePair(
                 mergingWorkPackage1: DomainFactory.createMergingWorkPackage([
                         seqType: DomainFactory.createSeqType(),
@@ -312,16 +312,16 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
                 ])
         )
 
-        //sample pair with needs processing but no config
+        // sample pair with needs processing but no config
         SamplePair samplePairWithoutConfig = createSamplePair()
 
-        //disabled sample pair
+        // disabled sample pair
         SamplePair samplePairDisabled = createSamplePair([
                 (processingStateMember): SamplePair.ProcessingStatus.DISABLED,
         ])
         createConfig(samplePairDisabled)
 
-        //sample pair with needs processing and no config and running instance
+        // sample pair with needs processing and no config and running instance
         SamplePair samplePairWithOldRunningInstance = createSamplePair([
                 (processingStateMember): SamplePair.ProcessingStatus.NEEDS_PROCESSING,
         ])
@@ -329,7 +329,7 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
                 samplePair: samplePairWithOldRunningInstance,
         ])
 
-        //sample pair with to less coverage
+        // sample pair with to less coverage
         SamplePair samplePairToLittleCoverage = createSamplePair([
                 (processingStateMember): SamplePair.ProcessingStatus.NEEDS_PROCESSING,
         ])
@@ -344,19 +344,19 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         ])
         AbstractVariantCallingPipelineChecker.ToLittleCoverageSamplePair toLittleCoverageSamplePair = new AbstractVariantCallingPipelineChecker.ToLittleCoverageSamplePair(samplePairToLittleCoverage, 10, 10, 30)
 
-        //sample pair waiting for start
+        // sample pair waiting for start
         SamplePair samplePairWaitingForStart = createSamplePair([
                 (processingStateMember): SamplePair.ProcessingStatus.NEEDS_PROCESSING,
         ])
         createConfig(samplePairWaitingForStart)
 
-        //sample pair with no processing needed and no instance
+        // sample pair with no processing needed and no instance
         SamplePair samplePairNotTriggered = createSamplePair([
                 (processingStateMember): SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
         ])
         createConfig(samplePairNotTriggered)
 
-        //sample pair with no processing needed and withdrawn analysis
+        // sample pair with no processing needed and withdrawn analysis
         SamplePair samplePairWithWithdrawnRunningAnalysis = createSamplePair([
                 (processingStateMember): SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
         ])
@@ -366,7 +366,7 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         runningWithdrawnAnalysis.withdrawn = true
         runningWithdrawnAnalysis.save(flush: true)
 
-        //sample pair with no processing needed and analysis running
+        // sample pair with no processing needed and analysis running
         SamplePair samplePairWithRunningAnalysis = createSamplePair([
                 (processingStateMember): SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
         ])
@@ -374,7 +374,7 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
                 samplePair: samplePairWithRunningAnalysis,
         ])
 
-        //sample pair with no processing needed and withrawn analysis finished
+        // sample pair with no processing needed and withrawn analysis finished
         SamplePair samplePairWithFinishedWithdrawnAnalysis = createSamplePair([
                 (processingStateMember): SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
         ])
@@ -385,7 +385,7 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         finishedWithdrawnAnalysis.withdrawn = true
         finishedWithdrawnAnalysis.save(flush: true)
 
-        //sample pair with no processing needed and analysis finished
+        // sample pair with no processing needed and analysis finished
         SamplePair samplePairWithFinishedAnalysis = createSamplePair([
                 (processingStateMember): SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED,
         ])
@@ -479,10 +479,10 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         ] + properties)
     }
 
-    //for checking with data of other PipeLine
+    // for checking with data of other PipeLine
     abstract Pipeline createPipeLineForCrosschecking()
 
-    //for checking with analysis of other PipeLine
+    // for checking with analysis of other PipeLine
     abstract BamFilePairAnalysis createAnalysisForCrosschecking(Map properties)
 
     BamFilePairAnalysis createAnalysisForCrosschecking() {

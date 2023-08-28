@@ -57,14 +57,14 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-//name of runs
+// name of runs
 String runString = """
 #run 1
 #run 2
 
 """
 
-//pid of patients
+// pid of patients
 String individualString ="""
 #patient 1
 #patient 2
@@ -77,24 +77,24 @@ String ilseIdString ="""
 
 """
 
-//name of projects, can take some time depending of project(s)
+// name of projects, can take some time depending of project(s)
 String projectString ="""
 #project 1
 #project 2
 
 """
 
-//if enabled, shows all lanes in progressing.
-//see file header comment for details
+// if enabled, shows all lanes in progressing.
+// see file header comment for details
 boolean allProcessed = true
 
-//flag if for all workflows the finished entries should be shown
+// flag if for all workflows the finished entries should be shown
 boolean showFinishedEntries = false
 
-//flag if all seqTypes that are not supported by the workflow should be listed in the output
+// flag if all seqTypes that are not supported by the workflow should be listed in the output
 boolean showUnsupportedSeqTypes = false
 
-//==================================================
+// ==================================================
 
 ProcessingOptionService processingOptionService = ctx.processingOptionService
 MonitorOutputCollector output = new MonitorOutputCollector(showFinishedEntries, showUnsupportedSeqTypes)
@@ -184,14 +184,14 @@ Closure handleStateMap = { Map map, String workflow, Closure objectToCheck = {it
 Closure showSeqTracks = { Collection<SeqTrack> seqTracks ->
     boolean allFinished = true
 
-    //remove withdrawn
+    // remove withdrawn
     List<SeqTrack> seqTracksNotWithdrawn = findNotWithdrawn(seqTracks)
     if (!seqTracksNotWithdrawn) {
         output << "No not withdrawn seq tracks left, stop"
         return
     }
 
-    //data installation workflow
+    // data installation workflow
     Map<SeqTrack.DataProcessingState, Collection<SeqTrack>> dataInstallationState =
             seqTracksNotWithdrawn.groupBy {it.dataInstallationState}
 
@@ -203,7 +203,7 @@ Closure showSeqTracks = { Collection<SeqTrack> seqTracks ->
         return
     }
 
-    //fastqc
+    // fastqc
     Map<SeqTrack.DataProcessingState, Collection<SeqTrack>> seqTracksNotWithdrawnByFastqcState =
             seqTracksFinishedDataInstallationWorkflow.groupBy {it.fastqcState}
 
@@ -224,7 +224,7 @@ Closure showSeqTracks = { Collection<SeqTrack> seqTracks ->
         return
     }
 
-    //finished aligned
+    // finished aligned
     output << "\nFinished aligned samples (${bamFilesFinishedAlignment.size()}): "
     bamFilesFinishedAlignment.collect {
         "${INDENT}${INDENT}${it} ${it.project}"
@@ -234,10 +234,10 @@ Closure showSeqTracks = { Collection<SeqTrack> seqTracks ->
         output << "\nnot all workflows are finished till alignment"
     }
 
-    //variant calling
+    // variant calling
     List<SamplePair> finishedSamplePair = new VariantCallingPipelinesChecker().handle(bamFilesFinishedAlignment, output)
 
-    //end
+    // end
     output << "\nFinished variant calling sample pairs (${finishedSamplePair.size()}): "
 
     finishedSamplePair.collect {
@@ -245,7 +245,7 @@ Closure showSeqTracks = { Collection<SeqTrack> seqTracks ->
     }.sort { it }.each { output << it }
 }
 
-//======================================================
+// ======================================================
 
 nameStringToList(runString).each { String runName ->
     output << "\n\n\n==============================\nrunNames = ${runName}\n==============================\n"
@@ -360,7 +360,7 @@ if (allProcessed) {
         )
     """.toString())
 
-    //collect waiting SamplePairs
+    // collect waiting SamplePairs
     Closure<GString> needsProcessing = { String property, Pipeline.Type type ->
         double minCoverage = processingOptionService.findOptionAsDouble(ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE, type.toString())
         return """
@@ -456,7 +456,7 @@ if (allProcessed) {
         }
     }
 
-    //collect running VariantCallingInstances
+    // collect running VariantCallingInstances
     BamFilePairAnalysis.createCriteria().list {
         eq('processingState', AnalysisProcessingStates.IN_PROGRESS)
         eq('withdrawn', false)
@@ -493,6 +493,6 @@ if (allProcessed) {
 
 output << '\n\n'
 println output.output.replace("<br>", " ")
-//println outputSeqTrack.join("\n")
+// println outputSeqTrack.join("\n")
 
 println ""

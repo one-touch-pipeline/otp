@@ -69,7 +69,7 @@ class SingleCellWellLabelSingleCellValidator extends AbstractValueTuplesValidato
     @Override
     void validateValueTuples(AbstractMetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         if (!context.spreadsheet.getColumn(BASE_MATERIAL.name())) {
-            return //no single cell seq types
+            return // no single cell seq types
         }
 
         Collection<ValueTuple> singleCellWithoutWellLabel = valueTuples.findAll {

@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.workflowTest.referenceGenome.ReferenceGenomeHg38
 
 class PanCancerChipSeqAlignmentWorkflowSpec extends AbstractPanCancerWorkflowSpec implements ReferenceGenomeHg38 {
 
-    //@Slf4j does not work with Spock containing tests and produces problems in closures
+    // @Slf4j does not work with Spock containing tests and produces problems in closures
     @SuppressWarnings('PropertyName')
     final static Logger log = LoggerFactory.getLogger(PanCancerChipSeqAlignmentWorkflowSpec)
 

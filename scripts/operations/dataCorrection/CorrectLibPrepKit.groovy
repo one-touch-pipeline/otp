@@ -34,16 +34,16 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  * The seqtracks can be selected about ilse, project or pid and filtered by seqType
  */
 
-//---------------------------
-//input
+// ---------------------------
+// input
 
-String libPrepKit = '' //new lib prep kit
+String libPrepKit = '' // new lib prep kit
 
-String commentInfo = '' //some additional Information about the change, perhaps link to OTRS ticket
+String commentInfo = '' // some additional Information about the change, perhaps link to OTRS ticket
 
-boolean overrideLibPrepKit = false //if a lib prep kit already exist, override it
+boolean overrideLibPrepKit = false // if a lib prep kit already exist, override it
 
-boolean dryRun = true //run first without saving the changes
+boolean dryRun = true // run first without saving the changes
 
 Collection<SeqTrack> seqTrackList = SeqTrack.withCriteria {
     or {
@@ -68,22 +68,22 @@ Collection<SeqTrack> seqTrackList = SeqTrack.withCriteria {
         }
     }
     'in'('seqType', [
-            //SeqTypeService.wholeGenomePairedSeqType,
-            //SeqTypeService.exomePairedSeqType,
-            //SeqTypeService.wholeGenomeBisulfitePairedSeqType,
-            //SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
-            //SeqTypeService.rnaPairedSeqType,
-            //SeqTypeService.rnaSingleSeqType,
-            //SeqTypeService.chipSeqPairedSeqType,
+            // SeqTypeService.wholeGenomePairedSeqType,
+            // SeqTypeService.exomePairedSeqType,
+            // SeqTypeService.wholeGenomeBisulfitePairedSeqType,
+            // SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
+            // SeqTypeService.rnaPairedSeqType,
+            // SeqTypeService.rnaSingleSeqType,
+            // SeqTypeService.chipSeqPairedSeqType,
     ])
 }
 
-//---------------------------
-//ensure keeping of import of disabled code
+// ---------------------------
+// ensure keeping of import of disabled code
 
 SeqTypeService seqTypeService
 
-//-----------------------------
+// -----------------------------
 assert libPrepKit : 'No lib prep kit is provided'
 assert commentInfo: 'No comment is provided'
 assert seqTrackList :' No seq tracks found'

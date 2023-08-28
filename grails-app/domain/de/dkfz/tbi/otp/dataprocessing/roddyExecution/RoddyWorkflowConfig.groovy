@@ -45,7 +45,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 @ManagedEntity
 class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements AlignmentConfig {
 
-    //dot makes problems in roddy config identifiers, therefore an underscore is used
+    // dot makes problems in roddy config identifiers, therefore an underscore is used
     @Deprecated
     final static String CONFIG_VERSION_PATTERN = /^v\d+_\d+$/
 
@@ -98,7 +98,7 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
                 !id || id == obj.id
             }
         }
-        configVersion nullable: true, //needs to be nullable because of old data
+        configVersion nullable: true, // needs to be nullable because of old data
                 blank: false, matches: CONFIG_VERSION_PATTERN, validator: { version, config ->
             if (version) {
                 // This validator asserts that the config is unique for the given properties.

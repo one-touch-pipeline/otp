@@ -51,7 +51,7 @@ ReferenceGenome.withTransaction {
     referenceGenome.mappabilityFile = "${basePath}/databases/UCSC/wgEncodeCrgMapabilityAlign100mer_chr.bedGraph.gz"
     referenceGenome.replicationTimeFile = "${basePath}/databases/ENCODE/ReplicationTime_10cellines_mean_10KB.Rda"
 
-//for ACEseq and SNV
+// for ACEseq and SNV
     referenceGenome.chromosomeLengthFilePath = "hg19_chrTotalLength.tsv"
 
     referenceGenome.save(flush: true)

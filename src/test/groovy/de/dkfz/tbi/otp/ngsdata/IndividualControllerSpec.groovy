@@ -41,7 +41,7 @@ class IndividualControllerSpec extends Specification implements ControllerUnitTe
         ]
     }
 
-    //save is controller method, no domain
+    // save is controller method, no domain
     @SuppressWarnings(['ExplicitFlushForSaveRule'])
     void "save, when save is called with valid input, then create the expected objects"() {
         given:
@@ -54,7 +54,7 @@ class IndividualControllerSpec extends Specification implements ControllerUnitTe
                 sampleIdentifierService: new SampleIdentifierService(),
         ])
 
-        //work around to get the service in the command object
+        // work around to get the service in the command object
         controller.params.individualService = controller.individualService
 
         when:
@@ -113,7 +113,7 @@ class IndividualControllerSpec extends Specification implements ControllerUnitTe
         Sample.count() == 3
     }
 
-    //save is controller method, no domain
+    // save is controller method, no domain
     @SuppressWarnings(['ExplicitFlushForSaveRule'])
     void "save, when input for individual is invalid, then do not create any objects"() {
         given:
@@ -123,7 +123,7 @@ class IndividualControllerSpec extends Specification implements ControllerUnitTe
                 sampleIdentifierService: new SampleIdentifierService(),
         ])
 
-        //work around to get the service in the command object
+        // work around to get the service in the command object
         controller.params.individualService = controller.individualService
 
         when:
@@ -144,7 +144,7 @@ class IndividualControllerSpec extends Specification implements ControllerUnitTe
         Individual.list().size() == 0
     }
 
-    //save is controller method, no domain
+    // save is controller method, no domain
     @SuppressWarnings(['ExplicitFlushForSaveRule'])
     void "save, when input for sample name is invalid, then show error message"() {
         given:
@@ -156,7 +156,7 @@ class IndividualControllerSpec extends Specification implements ControllerUnitTe
                 sampleIdentifierService: new SampleIdentifierService(),
         ])
 
-        //work around to get the service in the command object
+        // work around to get the service in the command object
         controller.params.individualService = controller.individualService
 
         when:

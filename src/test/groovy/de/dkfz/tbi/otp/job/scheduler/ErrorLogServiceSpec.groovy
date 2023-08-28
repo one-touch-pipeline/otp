@@ -49,7 +49,7 @@ class ErrorLogServiceSpec extends Specification implements DataTest {
         stacktraceFile.parentFile.mkdirs()
     }
 
-    //delete() is used to delete a file, not a domain object
+    // delete() is used to delete a file, not a domain object
     @SuppressWarnings("ExplicitFlushForDeleteRule")
     void cleanup() {
         exceptionStoringFile?.delete()

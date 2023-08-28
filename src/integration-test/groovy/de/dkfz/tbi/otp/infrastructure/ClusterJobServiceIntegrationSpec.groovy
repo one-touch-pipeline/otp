@@ -77,7 +77,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
                 processingStep: job.processingStep,
         ])
 
-        //case of same cluster id, but other job
+        // case of same cluster id, but other job
         createClusterJob([
                 seqType     : seqType,
                 clusterJobId: c2.clusterJobId,

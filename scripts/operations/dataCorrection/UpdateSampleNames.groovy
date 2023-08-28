@@ -36,21 +36,21 @@
 
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
-//=============================================
+// =============================================
 // input area
 
-//The map of old sample name to the new one.
-//Two columns, separated by space, tab, comma or semicolon
+// The map of old sample name to the new one.
+// Two columns, separated by space, tab, comma or semicolon
 String mapping = """
 #oldSampleName1, newSampleName1
 #oldSampleName2, newSampleName2
 
 """
 
-//flag to indicate whether to show the changes without executing them (true), or show and apply the changes (false).
+// flag to indicate whether to show the changes without executing them (true), or show and apply the changes (false).
 boolean preView = true
 
-//=============================================
+// =============================================
 // work area
 
 List<String> oldSampleNameNotFound = []

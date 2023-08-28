@@ -43,7 +43,7 @@ import java.nio.file.Path
  */
 
 // input area
-//----------------------
+// ----------------------
 
 /**
  * input area for pids, one pid per line.
@@ -61,8 +61,8 @@ String pids = """
  */
 boolean check = true
 
-//script area
-//-----------------------------
+// script area
+// -----------------------------
 
 List<Individual> individuals = pids.split('\n')*.trim().findAll { String line ->
     line && !line.startsWith('#')

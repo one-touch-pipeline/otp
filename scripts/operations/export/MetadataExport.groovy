@@ -76,7 +76,7 @@ import java.nio.file.attribute.PosixFilePermission
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.REALM_DEFAULT_VALUE
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
-//=============================================
+// =============================================
 // input area
 
 /**
@@ -187,7 +187,7 @@ boolean exportOnlyWhiteListedColumns = false
  */
 boolean exportWithdrawn = false
 
-//=============================================
+// =============================================
 // check input area
 
 SeqTypeService seqTypeService = ctx.seqTypeService
@@ -306,7 +306,7 @@ if (seqTrackPerMultiImport && seqTypes && !seqTypes.containsAll(seqTrackPerMulti
             "Therefore some of the seqTracks there will removed"
 }
 
-//=============================================
+// =============================================
 // work area
 
 Collection<RawSequenceFile> rawSequenceFiles = RawSequenceFile.createCriteria().list {
@@ -433,7 +433,7 @@ class MetaDataExport {
         put(WITHDRAWN_DATE, TimeFormats.DATE.getFormattedDate(rawSequenceFile.withdrawnDate))
         put(WITHDRAWN_COMMENT, rawSequenceFile.withdrawnComment?.trim()?.replace("\t", ", ")?.replace("\n", "; "))
 
-        //export, if the fastq file is available or is a dead link. It use the cached flag in the database.
+        // export, if the fastq file is available or is a dead link. It use the cached flag in the database.
         put(FILE_EXISTS, rawSequenceFile.fileExists.toString())
 
         Run run = rawSequenceFile.run

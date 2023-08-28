@@ -57,7 +57,7 @@ import java.time.format.DateTimeFormatter
  */
 @GrailsCompileStatic
 @Transactional
-@Deprecated//replace by a new system ClusterStatisticService
+@Deprecated // replace by a new system ClusterStatisticService
 class ClusterJobSchedulerService {
 
     static final int WAITING_TIME_FOR_SECOND_TRY_IN_MILLISECONDS = (Environment.current == Environment.TEST) ? 0 : 10000

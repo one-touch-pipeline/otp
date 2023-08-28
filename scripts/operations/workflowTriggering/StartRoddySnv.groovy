@@ -27,9 +27,9 @@ import de.dkfz.tbi.otp.job.jobs.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 
-//sample pair defined by:
-//PID SAMPLETYPE1 SAMPLETYPE2 SEQTYPE_NAME
-//the sample pair has to be created already by OTP, the SAMPLETYPE1 has to be a disease sample type, the SAMPLETYPE2 is usually control
+// sample pair defined by:
+// PID SAMPLETYPE1 SAMPLETYPE2 SEQTYPE_NAME
+// the sample pair has to be created already by OTP, the SAMPLETYPE1 has to be a disease sample type, the SAMPLETYPE2 is usually control
 List<SamplePair> samplePairs = """
 
 """.split('\n').findAll().collect {

@@ -56,7 +56,7 @@ class FastqcExecuteWesPipelineJob extends AbstractExecuteWesPipelineJob implemen
         return "nf-seq-qc-${workflowRun.workflowVersion.workflowVersion}/main.nf"
     }
 
-    //false positives for UnsafeImplementationAsMap & UnnecessaryCast
+    // false positives for UnsafeImplementationAsMap & UnnecessaryCast
     @SuppressWarnings(["UnsafeImplementationAsMap", "UnnecessaryCast"])
     @Override
     Map<Path, Map<String, String>> getRunSpecificParameters(WorkflowStep workflowStep, Path basePath) {

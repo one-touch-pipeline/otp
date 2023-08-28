@@ -46,7 +46,7 @@ def deleteSample(Sample sample) {
     }
 }
 
-//script
+// script
 SampleIdentifier.withTransaction {
     assert (sampleIdentifierToDelete || sampleToDelete) : "Please provide sample name or sample to delete"
 

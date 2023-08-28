@@ -37,26 +37,26 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  * Also the author for new comments needs to be provided by the ldap name.
  */
 
-//------------------------------
-//input
+// ------------------------------
+// input
 
-//the new comment
+// the new comment
 String newComment = """"""
 
-//the ldap name of the author for new comments. The author of existing comments are not changed.
+// the ldap name of the author for new comments. The author of existing comments are not changed.
 String author = ""
 
-//The bam file, defined by:
-//PID SAMPLE_TYPE SEQ_TYPE LIBRARY_LAYOUT,
-//separated by space, comma, semicolon or tab
+// The bam file, defined by:
+// PID SAMPLE_TYPE SEQ_TYPE LIBRARY_LAYOUT,
+// separated by space, comma, semicolon or tab
 String bamFileDefinition = """
 #PID SAMPLE_TYPE SEQ_TYPE LIBRARY_LAYOUT
 #PID2 TUMOR WHOLE_GENOME PAIRED
 
 """
 
-//------------------------------
-//work
+// ------------------------------
+// work
 
 CommentService commentService = ctx.commentService
 SeqTypeService seqTypeService = ctx.seqTypeService

@@ -197,7 +197,7 @@ class SeqTrack implements ProcessParameterObject, Entity, Artefact {
 
         nBasePairs nullable: true
 
-        //libraryPreparationKit and inferred state
+        // libraryPreparationKit and inferred state
         kitInfoReliability nullable: false
 
         libraryPreparationKit nullable: true, validator: { LibraryPreparationKit val, SeqTrack obj ->

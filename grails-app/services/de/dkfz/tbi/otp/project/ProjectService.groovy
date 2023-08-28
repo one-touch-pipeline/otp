@@ -71,7 +71,7 @@ class ProjectService {
 
     static final String PHIX_INFIX = 'PhiX'
 
-    //constants for rna configurations
+    // constants for rna configurations
     static final String ARRIBA_KNOWN_FUSIONS = "ARRIBA_KNOWN_FUSIONS"
     static final String ARRIBA_BLACKLIST = "ARRIBA_BLACKLIST"
     static final String GENOME_GATK_INDEX = "GENOME_GATK_INDEX"
@@ -294,7 +294,7 @@ class ProjectService {
             return atMostOneElement(Project.findAllByName(relatedProjectName))
         }
 
-        //update all the related projects' relatedProjects field with the newly created project name
+        // update all the related projects' relatedProjects field with the newly created project name
         relatedProjectList.findAll().each { Project baseProject ->
             addProjectToRelatedProjects(baseProject, project)
         }
@@ -357,7 +357,7 @@ class ProjectService {
         Path projectDirectory = getProjectDirectory(project)
 
         if (Files.exists(projectDirectory)) {
-            //ensure correct permission and group
+            // ensure correct permission and group
             fileService.setGroupViaBash(projectDirectory, realm, project.unixGroup)
             fileService.setPermissionViaBash(projectDirectory, realm, FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
             return
@@ -375,7 +375,7 @@ class ProjectService {
         FileSystem fs = fileSystemService.getRemoteFileSystem(realm)
         Path analysisDirectory = fs.getPath(project.dirAnalysis)
         if (Files.exists(analysisDirectory)) {
-            //ensure correct permission and group
+            // ensure correct permission and group
             fileService.setGroupViaBash(analysisDirectory, realm, project.unixGroup)
             fileService.setPermissionViaBash(analysisDirectory, realm, FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
             return
@@ -520,7 +520,7 @@ class ProjectService {
                     "Invalid sambamba version: '${panCanAlignmentConfiguration.sambambaVersion}', possible values: ${allSambambaVersions}"
         }
 
-        //Reference genomes with PHIX_INFIX only works with sambamba
+        // Reference genomes with PHIX_INFIX only works with sambamba
         if (referenceGenome.name.contains(PHIX_INFIX)) {
             assert panCanAlignmentConfiguration.mergeTool == MergeTool.SAMBAMBA.name: "Only sambamba supported for reference genome with Phix"
         }

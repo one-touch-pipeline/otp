@@ -30,15 +30,15 @@ import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
  */
 
 // input area
-//----------------------
+// ----------------------
 
 /**
  * flag to allow a try and rollback the changes at the end (true) or do the changes(false)
  */
 boolean tryRun = true
 
-//------------------------------------
-//work
+// ------------------------------------
+// work
 
 IdentityProvider identityProvider = ctx.getBean('identityProvider')
 UserProjectRoleService uprs = ctx.getBean('userProjectRoleService')

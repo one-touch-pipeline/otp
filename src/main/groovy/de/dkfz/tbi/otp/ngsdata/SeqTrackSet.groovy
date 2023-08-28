@@ -52,7 +52,7 @@ class SeqTrackSet {
         this.numberOfBases = totalNumberOfBasesOrNull
     }
 
-    @SuppressWarnings('ReturnNullFromCatchBlock') //if the number can not be calculated, null should be return
+    @SuppressWarnings('ReturnNullFromCatchBlock') // if the number can not be calculated, null should be return
     private Long getTotalNumberOfBasesOrNull() {
         try {
             return rawSequenceFiles.findAll { !it.indexFile }.sum { RawSequenceFile rawSequenceFile ->

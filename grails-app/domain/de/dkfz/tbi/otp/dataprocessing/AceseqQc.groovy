@@ -32,7 +32,7 @@ class AceseqQc implements Entity {
 
     int number
 
-    //tumor cell content
+    // tumor cell content
     double tcc
 
     String ploidyFactor

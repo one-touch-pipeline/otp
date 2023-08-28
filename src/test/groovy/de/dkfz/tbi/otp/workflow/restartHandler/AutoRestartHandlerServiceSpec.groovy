@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-//for the spock matching, using closure as parameter is better readable
+// for the spock matching, using closure as parameter is better readable
 class AutoRestartHandlerServiceSpec extends Specification implements ServiceUnitTest<AutoRestartHandlerService>, DataTest, WorkflowSystemDomainFactory {
 
     @Override

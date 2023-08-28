@@ -63,7 +63,7 @@ class WesMonitor {
     @Scheduled(fixedDelay = 30000L)
     void check() {
         if (!workflowSystemService.enabled) {
-            return //job system is inactive
+            return // job system is inactive
         }
 
         List<WesRun> wesRuns = LogUsedTimeUtils.logUsedTime(log, "fetch wesRuns to monitor from database") {

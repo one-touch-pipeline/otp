@@ -92,7 +92,7 @@ try {
                                 lanes                 : [
                                         'lane1',
                                         'lane2',
-                                        //...
+                                        // ...
                                 ],
                                 sampleNeedsToBeCreated: 'sampleNeedsToBeCreated',
                                 rawSequenceFileSwaps: [

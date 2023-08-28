@@ -41,7 +41,7 @@ class RoddyFileAssertHelper {
     FileAssertHelper fileAssertHelper
 
     void assertFileSystemState(RoddyBamFile bamFile, RoddyBamFileService roddyBamFileService) {
-        //content of the final dir: root
+        // content of the final dir: root
         List<Path> rootDirs = [
                 roddyBamFileService.getFinalQADirectory(bamFile),
                 roddyBamFileService.getFinalExecutionStoreDirectory(bamFile),
@@ -129,7 +129,7 @@ class RoddyFileAssertHelper {
     }
 
     private void assertQaWorkDirectoryFileSystemState(RoddyBamFile bamFile, RoddyBamFileService roddyBamFileService) {
-        //the default json is checked in the base class, here only additional json are checked
+        // the default json is checked in the base class, here only additional json are checked
         List<Path> qaJson = []
         List<Path> qaDirs = [roddyBamFileService.getWorkMergedQADirectory(bamFile)]
 

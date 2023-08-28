@@ -118,6 +118,8 @@ class ScriptBuilderSpec extends Specification implements DataTest, RoddyPancanFa
         bashCommands << [["some bash command"], ["bash command 1", "bash command 2", "bash command 3"]]
     }
 
+    // Comment Delimiter is part of string
+    @SuppressWarnings("SpaceBeforeCommentDelimiter")
     void "build, should create meta and groovy output and create bash script on filesystem"() {
         given:
         final String filename = "some_file_name"

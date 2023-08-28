@@ -68,8 +68,8 @@ LogThreadLocal.withThreadLog(System.out, {
                 }
             }
             'in'('seqType', [
-                    //SeqTypeService.rnaPairedSeqType,
-                    //SeqTypeService.rnaSingleSeqType,
+                    // SeqTypeService.rnaPairedSeqType,
+                    // SeqTypeService.rnaSingleSeqType,
             ])
         }
 
@@ -84,7 +84,7 @@ LogThreadLocal.withThreadLog(System.out, {
         seqTracks.each {
             assert !unsupportedSeqTypes.contains(it.seqType) : "${it.seqType} is not supported by this script, since it is part of the new workflow system. Please use gui: https://otp.dkfz.de/otp/triggerAlignment/index"        }
 
-        //show seqtracks
+        // show seqtracks
         // Header
         println([
                 "seqtrack_id",
@@ -119,7 +119,7 @@ LogThreadLocal.withThreadLog(System.out, {
 
         assert false: "DEBUG: transaction intentionally failed to rollback changes"
 
-        //trigger alignment
+        // trigger alignment
         List<MergingWorkPackage> mergingWorkPackages = seqTracks.collectMany {
             seqTrackService.decideAndPrepareForAlignment(it)
         }.unique()
@@ -130,7 +130,7 @@ LogThreadLocal.withThreadLog(System.out, {
         println samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages).join('\n')
         println "\n----------------------\n"
 
-        //reset ticket only for seqTracks which gets aligned.
+        // reset ticket only for seqTracks which gets aligned.
         List<OtrsTicket> otrsTickets = (mergingWorkPackages ? otrsTicketService.findAllOtrsTickets(mergingWorkPackages*.seqTracks.flatten()) : []) as List<OtrsTicket>
         println "found ${otrsTickets.size()} coresponding tickets: ${otrsTickets*.ticketNumber.sort().join(',')}"
         otrsTickets.each {

@@ -42,7 +42,7 @@ class Global {
     // SeqTypes to use for finding DISEASE/CONTROL SamplePairs
     static String baseSeqType =
             "WHOLE_GENOME"
-            //"EXOME"
+            // "EXOME"
 
     // SeqTypes to use for finding additional data
     static List<List<String>> seqTypesToQuery = [

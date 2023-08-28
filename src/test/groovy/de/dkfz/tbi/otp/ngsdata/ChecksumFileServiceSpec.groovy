@@ -83,7 +83,7 @@ class ChecksumFileServiceSpec extends Specification implements DataTest {
         expectedMd5 == checksumFileService.firstMD5ChecksumFromFile(file)
     }
 
-    //false positives, since rule can not recognize calling class
+    // false positives, since rule can not recognize calling class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
     void "test firstMD5ChecksumFromFile with non existing file"() {
         given:

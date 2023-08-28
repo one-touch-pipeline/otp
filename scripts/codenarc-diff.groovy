@@ -44,7 +44,7 @@ for (int i = 0; i < lines.size(); i++) {
         Map<String, List<String>> fileViolations = [:]
 
         for (i++; !lines[i].empty; i++) {
-            if (lines[i].startsWith(VIOLATION)) {//some messages contain newlines
+            if (lines[i].startsWith(VIOLATION)) {// some messages contain newlines
                 String violation = lines[i].substring(VIOLATION.length())
 
                 String[] violationFields = violation.split(" ")
@@ -69,7 +69,7 @@ for (int i = 0; i < lines.size(); i++) {
         Map<String, List<String>> fileViolations = [:]
 
         for (i++; !lines[i].empty; i++) {
-            if (lines[i].startsWith(VIOLATION)) {//some messages contain newlines
+            if (lines[i].startsWith(VIOLATION)) {// some messages contain newlines
                 String violation = lines[i].substring(VIOLATION.length())
 
                 String[] violationFields = violation.split(" ")

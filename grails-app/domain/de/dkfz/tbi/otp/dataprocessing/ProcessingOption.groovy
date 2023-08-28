@@ -42,7 +42,7 @@ class ProcessingOption implements Entity {
                 "Threshold for lcWGS",
                 Necessity.OPTIONAL, "20", TypeValidators.FLOAT,
         ),
-        //pipeline
+        // pipeline
         PIPELINE_MIN_COVERAGE(
                 "Minimum coverage to start a pipeline",
                 Necessity.OPTIONAL, "0.0", TypeValidators.FLOAT,
@@ -285,13 +285,13 @@ class ProcessingOption implements Entity {
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL, null, true
         ),
 
-        //basePath
+        // basePath
         BASE_PATH_REFERENCE_GENOME(
                 "Base path for reference genomes",
                 Necessity.REQUIRED, null, TypeValidators.ABSOLUTE_PATH
         ),
 
-        //roddy
+        // roddy
         RODDY_PATH(
                 "Path to the roddy.sh on the current cluster",
                 Necessity.REQUIRED, null, TypeValidators.ABSOLUTE_PATH
@@ -321,7 +321,7 @@ class ProcessingOption implements Entity {
                 Necessity.REQUIRED, null, TypeValidators.ABSOLUTE_PATH
         ),
 
-        //executionRestrictions
+        // executionRestrictions
         MAXIMUM_NUMBER_OF_JOBS(
                 "Maximum number of parallel jobs",
                 Necessity.OPTIONAL, "1", TypeValidators.POSITIVE_NUMBER,
@@ -345,13 +345,13 @@ class ProcessingOption implements Entity {
                 Necessity.OPTIONAL, "10", TypeValidators.POSITIVE_NUMBER,
         ),
 
-        //statistics
+        // statistics
         STATISTICS_BASES_PER_BYTES_FASTQ(
                 "Bases Per Byte for FastQ file used to calculate count of bases before FastQC-WG is finished",
                 Necessity.OPTIONAL, "2.339", TypeValidators.FLOAT
         ),
 
-        //ticketSystem
+        // ticketSystem
         TICKET_SYSTEM_URL(
                 "Ticket system URL",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
@@ -387,19 +387,19 @@ class ProcessingOption implements Entity {
                 Necessity.OPTIONAL, "0", TypeValidators.POSITIVE_NUMBER
         ),
 
-        //defaults
+        // defaults
         PROCESSING_PRIORITY_DEFAULT_NAME(
                 "The default processing priority, used as preselection in project creation. If not given, the oldest object is used as default.",
                 Necessity.REQUIRED, null, TypeValidators.PROCESSING_PRIORITY_NAME
         ),
 
-        //realm
+        // realm
         REALM_DEFAULT_VALUE(
                 "The default realm by name",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_WORD_TEXT
         ),
 
-        //email
+        // email
         EMAIL_CLUSTER_ADMINISTRATION(
                 "Email address of the entity managing the cluster",
                 Necessity.REQUIRED, null, TypeValidators.MAIL
@@ -501,13 +501,13 @@ class ProcessingOption implements Entity {
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_WORD_TEXT, null, true
         ),
 
-        //validator
+        // validator
         VALIDATOR_SAMPLE_IDENTIFIER_REGEX(
                 "regular expression for the sample id",
                 Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
 
-        //systemConfiguration
+        // systemConfiguration
         TIME_ZONE(
                 "Local time zone",
                 Necessity.OPTIONAL, "Europe/Berlin", TypeValidators.TIME_ZONE
@@ -525,7 +525,7 @@ class ProcessingOption implements Entity {
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
 
-        //ldap
+        // ldap
         LDAP_ACCOUNT_DEACTIVATION_GRACE_PERIOD(
                 "The grace period in days before OTP removes a user from all projects, when they are deactivated in the LDAP",
                 Necessity.OPTIONAL, "30", TypeValidators.POSITIVE_NUMBER
@@ -607,7 +607,7 @@ class ProcessingOption implements Entity {
                 TypeValidators.CRONJOB_CLASS
         ),
 
-        //naming
+        // naming
         CLUSTER_NAME(
                 "The common name to refer to the cluster OTP uses",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL

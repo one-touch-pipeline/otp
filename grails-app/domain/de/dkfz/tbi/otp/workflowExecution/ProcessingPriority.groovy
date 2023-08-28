@@ -30,19 +30,19 @@ import de.dkfz.tbi.otp.utils.Entity
 @ManagedEntity
 class ProcessingPriority implements Entity {
 
-    //Constant needed for start jobs/tests of old workflow system
+    // Constant needed for start jobs/tests of old workflow system
     @Deprecated
     static final int SUPREMUM = Integer.MAX_VALUE
 
-    //Constant needed for start jobs/tests of old workflow system
+    // Constant needed for start jobs/tests of old workflow system
     @Deprecated
     static final int MINIMUM = Integer.MIN_VALUE
 
-    //Constant needed for start jobs/tests of old workflow system
+    // Constant needed for start jobs/tests of old workflow system
     @Deprecated
     static final int FAST_TRACK = 1000
 
-    //Constant needed for start jobs/tests of old workflow system
+    // Constant needed for start jobs/tests of old workflow system
     @Deprecated
     static final int NORMAL = 0
 

@@ -272,7 +272,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
         aceseqInstance.processingState != AnalysisProcessingStates.FINISHED
     }
 
-    //false positives, since rule can not recognize calling class
+    // false positives, since rule can not recognize calling class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
     @Unroll
     void "validate, when file not exist, throw assert"() {

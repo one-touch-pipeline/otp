@@ -266,7 +266,7 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
 
         where:
         name                         | linkOperation                             | updateMap
-        //copy and keep
+        // copy and keep
         'all given'                  | ImportProcess.LinkOperation.COPY_AND_KEEP | [:]
         'no md5sum'                  | ImportProcess.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.MD5): null]
         'no coverage'                | ImportProcess.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.COVERAGE): null]
@@ -274,7 +274,7 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
         'no insert size file'        | ImportProcess.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.INSERT_SIZE_FILE): null]
         'no quality control file'    | ImportProcess.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.QUALITY_CONTROL_FILE): null]
         'no library preperation kit' | ImportProcess.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.LIBRARY_PREPARATION_KIT): null]
-        //copy and link
+        // copy and link
         'all given'                  | ImportProcess.LinkOperation.COPY_AND_LINK | [:]
         'no md5sum'                  | ImportProcess.LinkOperation.COPY_AND_LINK | [(BamMetadataColumn.MD5): null]
         'no coverage'                | ImportProcess.LinkOperation.COPY_AND_LINK | [(BamMetadataColumn.COVERAGE): null]
@@ -282,7 +282,7 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
         'no insert size file'        | ImportProcess.LinkOperation.COPY_AND_LINK | [(BamMetadataColumn.INSERT_SIZE_FILE): null]
         'no quality control file'    | ImportProcess.LinkOperation.COPY_AND_LINK | [(BamMetadataColumn.QUALITY_CONTROL_FILE): null]
         'no library preperation kit' | ImportProcess.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.LIBRARY_PREPARATION_KIT): null]
-        //link source
+        // link source
         'all given'                  | ImportProcess.LinkOperation.LINK_SOURCE   | [:]
         'no coverage'                | ImportProcess.LinkOperation.LINK_SOURCE   | [(BamMetadataColumn.COVERAGE): null]
         'no insert size file'        | ImportProcess.LinkOperation.LINK_SOURCE   | [(BamMetadataColumn.INSERT_SIZE_FILE): null]

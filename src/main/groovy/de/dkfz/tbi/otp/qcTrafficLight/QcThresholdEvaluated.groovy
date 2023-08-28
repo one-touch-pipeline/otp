@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.qcTrafficLight
 
 import java.lang.annotation.*
 
-//Produce false of UnnecessaryPackageReference and suppress warning is not allowed for annotation
+// Produce false of UnnecessaryPackageReference and suppress warning is not allowed for annotation
 @Target([ElementType.METHOD, ElementType.FIELD])
 @Retention(RetentionPolicy.RUNTIME)
 @interface QcThresholdEvaluated {

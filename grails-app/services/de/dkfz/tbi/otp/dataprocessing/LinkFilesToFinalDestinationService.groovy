@@ -123,7 +123,7 @@ class LinkFilesToFinalDestinationService {
 
         Map<File, File> linkMapSourceLink = [:]
 
-        //collect links for files and qa merge directory
+        // collect links for files and qa merge directory
         ['Bam', 'Bai', 'Md5sum'].each {
             linkMapSourceLink.put(roddyBamFile."work${it}File", roddyBamFile."final${it}File")
         }
@@ -148,12 +148,12 @@ class LinkFilesToFinalDestinationService {
             linkMapSourceLink.put(roddyBamFile.workMetadataTableFile, roddyBamFile.finalMetadataTableFile)
         }
 
-        //collect links for every execution store
+        // collect links for every execution store
         [roddyBamFile.workExecutionDirectories, roddyBamFile.finalExecutionDirectories].transpose().each {
             linkMapSourceLink.put(it[0], it[1])
         }
 
-        //collect links for the single lane qa
+        // collect links for the single lane qa
         Map<SeqTrack, File> workSingleLaneQADirectories = roddyBamFile.workSingleLaneQADirectories
         Map<SeqTrack, File> finalSingleLaneQADirectories = roddyBamFile.finalSingleLaneQADirectories
         workSingleLaneQADirectories.each { seqTrack, singleLaneQaWorkDir ->
@@ -165,7 +165,7 @@ class LinkFilesToFinalDestinationService {
             lsdfFilesService.deleteFilesRecursive(realm, [roddyBamFile.baseBamFile.finalMergedQADirectory])
         }
 
-        //create the collected links
+        // create the collected links
         linkFileUtils.createAndValidateLinks(linkMapSourceLink, realm, roddyBamFile.project.unixGroup)
     }
 
@@ -213,7 +213,7 @@ class LinkFilesToFinalDestinationService {
             if (!roddyBamFile.baseBamFile.isOldStructureUsed()) {
                 filesToDelete.add(roddyBamFile.baseBamFile.workBamFile)
                 filesToDelete.add(roddyBamFile.baseBamFile.workBaiFile)
-                //the md5sum is kept: roddyBamFile.baseBamFile.workMd5sumFile
+                // the md5sum is kept: roddyBamFile.baseBamFile.workMd5sumFile
             }
         } else {
             List<RoddyBamFile> roddyBamFiles = RoddyBamFile.findAllByWorkPackageAndIdNotEqual(roddyBamFile.mergingWorkPackage, roddyBamFile.id)

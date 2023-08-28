@@ -89,7 +89,7 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
             return
         }
         if (plan == null && Environment.current != Environment.TEST) {
-            final String beanName = this.beanName //necessary for criteria
+            final String beanName = this.beanName // necessary for criteria
             final Collection<JobExecutionPlan> plans
             try {
                 plans = JobExecutionPlan.createCriteria().list {
@@ -99,8 +99,8 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
                     }
                 }
             } catch (MissingMethodException ignored) {
-                //This happens if this method is called before Grails created dynamic finders
-                //in the domain classes. It doesn't matter because this method will be called later again.
+                // This happens if this method is called before Grails created dynamic finders
+                // in the domain classes. It doesn't matter because this method will be called later again.
                 return
             }
             final int planCount = plans.size()

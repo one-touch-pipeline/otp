@@ -153,7 +153,7 @@ abstract class AbstractCellRangerAlignmentWorkflowTests extends AbstractAlignmen
         then:
         checkResults()
 
-        when: //check also setting mwp as final
+        when: // check also setting mwp as final
         SessionUtils.withTransaction {
             doWithAuth(ADMIN) {
                 cellRangerConfigurationService.selectMwpAsFinal(CellRangerMergingWorkPackage.get(mwp.id))

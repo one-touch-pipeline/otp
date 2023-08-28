@@ -62,7 +62,7 @@ class SingleCellBamFile extends AbstractBamFile implements HasIdentifier, Proces
     @Deprecated
     static final String ORIGINAL_BAI_FILE_NAME = 'possorted_genome_bam.bam.bai'
 
-    //is created manually
+    // is created manually
     /**
      * @deprecated use {@link SingleCellBamFileService#ORIGINAL_BAM_MD5SUM_FILE_NAME} instead
      */

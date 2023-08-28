@@ -57,7 +57,7 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
         Realm realm = workflowStep.realm
         Path outputDir = getFileSystem(workflowStep).getPath(workflowStep.workflowRun.workDirectory)
 
-        //delete existing output directory in case of restart
+        // delete existing output directory in case of restart
         if (Files.exists(outputDir)) {
             logService.addSimpleLogEntry(workflowStep, "Deleting output directory ${outputDir}")
             fileService.deleteDirectoryRecursively(outputDir)
@@ -67,15 +67,15 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
 
         List<FastqcProcessedFile> fastqcProcessedFiles = getFastqcProcessedFiles(workflowStep)
 
-        //check if fastqc reports are provided and can be copied
+        // check if fastqc reports are provided and can be copied
         if (fastqcReportService.canFastqcReportsBeCopied(fastqcProcessedFiles)) {
-            //remotely run a script to copy the existing result files
+            // remotely run a script to copy the existing result files
             logService.addSimpleLogEntry(workflowStep, "fastqc reports found, copy them")
             fastqcReportService.copyExistingFastqcReports(realm, fastqcProcessedFiles, outputDir)
             return []
         }
         logService.addSimpleLogEntry(workflowStep, "no fastqc reports found, create script to create them")
-        //create and return the shell script only (w/o running it)
+        // create and return the shell script only (w/o running it)
         logService.addSimpleLogEntry(workflowStep, "no fastqc reports found, creating cluster scripts")
         return createFastQcClusterScript(fastqcProcessedFiles, outputDir, workflowStep)
     }

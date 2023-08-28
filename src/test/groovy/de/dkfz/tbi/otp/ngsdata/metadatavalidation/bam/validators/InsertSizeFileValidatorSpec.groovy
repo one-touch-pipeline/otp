@@ -62,7 +62,7 @@ class InsertSizeFileValidatorSpec extends Specification {
                 "${bamFile.absolutePath}\t./testFile\n" +
                 "${bamFile.absolutePath}\t${dir.name}\n" +
                 "${bamFile.absolutePath}\t${notReadAble.name}\n" +
-                "\tabc/testFile\n" + //ignored because of no bamFilePath
+                "\tabc/testFile\n" + // ignored because of no bamFilePath
                 "${bamFile.absolutePath}\t${insertFile.name}\n" // valid
         )
 

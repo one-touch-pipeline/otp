@@ -218,7 +218,7 @@ No user exists yet, create user ${currentUser} with admin rights.
                         username: currentUser,
                         email   : "admin@dummy.de",
                         enabled : true,
-                        password: "*", //need for plugin, but unused in OTP
+                        password: "*", // need for plugin, but unused in OTP
                         realName: currentUser,
                 ]).save(flush: true)
 

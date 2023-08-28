@@ -34,7 +34,7 @@ class ProcessingStepSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 JobDefinition,
                 JobExecutionPlan,
                 Process,
@@ -78,12 +78,12 @@ class ProcessingStepSpec extends Specification implements DataTest {
         then:
         ValidationException e = thrown()
 
-        if (jobDefinition) {
-            e.message.contains("on field 'jobDefinition': rejected value [null]")
+        if (!jobDefinition) {
+            assert e.message.contains("on field 'jobDefinition': rejected value [null]")
         }
 
-        if (process) {
-            e.message.contains("on field 'process': rejected value [null]")
+        if (!process) {
+            assert e.message.contains("on field 'process': rejected value [null]")
         }
 
         where:

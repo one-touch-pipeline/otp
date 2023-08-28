@@ -92,7 +92,7 @@ class SampleTypeSpec extends Specification implements DataTest, DomainFactoryCor
     }
 
     void "validate, when name already exist with underscore, then validation should pass"() {
-        //Some legacy objects has already underscore and needs therefore pass the revalidation
+        // Some legacy objects has already underscore and needs therefore pass the revalidation
         given:
         SampleType sampleType = new SampleType(
                 name: 'sample_type',

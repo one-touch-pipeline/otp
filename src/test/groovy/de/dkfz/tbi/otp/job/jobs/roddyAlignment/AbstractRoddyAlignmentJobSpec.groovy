@@ -191,7 +191,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
         errorMessage == e.cause.message
     }
 
-    //false positives, since rule can not recognize calling class
+    // false positives, since rule can not recognize calling class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
     @Unroll
     void "validate, when #file not exist, throw assert"() {
@@ -301,7 +301,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
         configService.clean()
     }
 
-    //false positives, since rule can not recognize calling class
+    // false positives, since rule can not recognize calling class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
     void "validate, when all fine and seqtype is RNA, return without exception"() {
         given:

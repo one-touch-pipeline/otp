@@ -129,7 +129,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
      * This method can be overridden if a workflow script needs some additional setup
      * before it can be loaded.
      */
-    //empty callback for subclasses
+    // empty callback for subclasses
     @SuppressWarnings('EmptyMethodInAbstractClass')
     protected void setupForLoadingWorkflow() {
         // do nothing by default

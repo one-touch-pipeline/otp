@@ -55,7 +55,7 @@ class SampleIdentifier implements Entity {
 
     static constraints = {
         name unique: true, nullable: false, blank: false, minSize: 3, validator: { String val, SampleIdentifier obj ->
-            //should neither start nor end with a space
+            // should neither start nor end with a space
             if (val.startsWith(' ') || val.endsWith(' ')) {
                 return 'untrimmed'
             }

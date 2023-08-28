@@ -81,7 +81,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         LibraryPreparationKit libraryPreparationKit1 = createLibraryPreparationKit(name: "l1")
         LibraryPreparationKit libraryPreparationKit2 = createLibraryPreparationKit(name: "l2")
 
-        //priority : 0b01111111 = 127
+        // priority : 0b01111111 = 127
         createEWCSHelperExtendedCriteria(
                 "ewcs1",
                 [project1] as Set<Project>,
@@ -91,7 +91,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
                 [referenceGenome1] as Set<ReferenceGenome>,
                 [libraryPreparationKit1] as Set<LibraryPreparationKit>
         )
-        //priority : 0b01011011 = 91
+        // priority : 0b01011011 = 91
         createEWCSHelperExtendedCriteria(
                 "ewcs2",
                 [project2] as Set<Project>,
@@ -101,7 +101,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
                 [referenceGenome2] as Set<ReferenceGenome>,
                 [] as Set<LibraryPreparationKit>
         )
-        //priority : 0b01111111 = 127
+        // priority : 0b01111111 = 127
         createEWCSHelperExtendedCriteria(
                 "ewcs3",
                 [project1, project2] as Set<Project>,
@@ -111,7 +111,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
                 [referenceGenome1, referenceGenome2] as Set<ReferenceGenome>,
                 [libraryPreparationKit1, libraryPreparationKit2] as Set<LibraryPreparationKit>
         )
-        //priority : 0b01110111 = 119
+        // priority : 0b01110111 = 119
         createEWCSHelperExtendedCriteria(
                 "ewcs4",
                 [project2] as Set<Project>,
@@ -121,7 +121,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
                 [] as Set<ReferenceGenome>,
                 [libraryPreparationKit1] as Set<LibraryPreparationKit>
         )
-        //priority : 0b00000001 = 1
+        // priority : 0b00000001 = 1
         createEWCSHelperExtendedCriteria(
                 "ewcs5",
                 [] as Set<Project>,

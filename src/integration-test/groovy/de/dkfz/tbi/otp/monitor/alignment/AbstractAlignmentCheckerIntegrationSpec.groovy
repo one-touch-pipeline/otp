@@ -66,10 +66,10 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification imp
 
     abstract Pipeline createPipeLine()
 
-    //for checking with data of other PipeLine
+    // for checking with data of other PipeLine
     abstract Pipeline createPipeLineForCrosschecking()
 
-    //for checking with data of other workflow
+    // for checking with data of other workflow
     abstract String getWorkflowNameForCrosschecking()
 
     List<SeqTrack> createSeqTracks(Map properties = [:]) {

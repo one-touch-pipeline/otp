@@ -103,7 +103,7 @@ class EgaSubmissionService {
         Project project = submission.project
 
         int size = sampleIdSeqTypeIdList.size()
-        //use explicit collection classes to set the capacity (improve performance)
+        // use explicit collection classes to set the capacity (improve performance)
         List<SampleIdSeqTypeId> listOfPairOfSampleIdAndSeqTypeId = new ArrayList<SampleIdSeqTypeId>(size)
         Set<Long> sampleIds = new HashSet<Long>(size)
         Set<Long> seqTypeIds = new HashSet<Long>(15)
@@ -569,7 +569,7 @@ class BamFileAndSampleAlias implements Comparable<BamFileAndSampleAlias> {
         // Withdrawn BAMs can not be submitted (disabled and unchecked)
         // Imported BAMs are not supported (disabled and unchecked), regardless of withdrawn state.
         producedByOtp = !(bamFile instanceof ExternallyProcessedBamFile)
-        selectionEditable = false //Currently editable checkboxes are not supported
+        selectionEditable = false // Currently editable checkboxes are not supported
         defaultSelectionState = producedByOtp && !bamFile.withdrawn
     }
 

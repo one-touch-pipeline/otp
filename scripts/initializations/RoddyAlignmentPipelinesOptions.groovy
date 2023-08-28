@@ -31,7 +31,7 @@ List<SeqType> wgbs = [
         SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
 ]
 
-//WES
+// WES
 processingOptionService.createOrUpdate(
         OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_NAME,
         "AlignmentAndQCWorkflows",
@@ -68,7 +68,7 @@ processingOptionService.createOrUpdate(
         SeqTypeService.exomePairedSeqType.roddyName,
 )
 
-//WGS
+// WGS
 processingOptionService.createOrUpdate(
         OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_NAME,
         "AlignmentAndQCWorkflows",
@@ -105,7 +105,7 @@ processingOptionService.createOrUpdate(
         SeqTypeService.wholeGenomePairedSeqType.roddyName,
 )
 
-//WGBS && WGBS_TAG
+// WGBS && WGBS_TAG
 
 wgbs.each { SeqType seqType ->
     processingOptionService.createOrUpdate(
@@ -145,7 +145,7 @@ wgbs.each { SeqType seqType ->
     )
 }
 
-//RNA
+// RNA
 processingOptionService.createOrUpdate(
         OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_NAME,
         "RNAseqWorkflow",
@@ -192,7 +192,7 @@ processingOptionService.createOrUpdate(
         '0.6.5',
 )
 
-//ChipSeq
+// ChipSeq
 processingOptionService.createOrUpdate(
         OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_NAME,
         "AlignmentAndQCWorkflows",

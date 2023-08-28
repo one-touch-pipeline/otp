@@ -69,7 +69,7 @@ class SeqTrackService {
                 filteringClosure.delegate = delegate
                 filteringClosure.resolveStrategy = Closure.DELEGATE_FIRST
                 filteringClosure(filtering)
-                if (max != -1) { //-1 indicate in jquery datatable, that no paging is used. Therefore in that case no maxResult are set
+                if (max != -1) { // -1 indicate in jquery datatable, that no paging is used. Therefore in that case no maxResult are set
                     maxResults(max)
                 }
                 firstResult(offset)

@@ -1310,13 +1310,13 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         where:
         flag                     | flagInit | projectRole                 | role     | result
-        //USER false -> (desired)true, Role PI
+        // USER false -> (desired)true, Role PI
         "accessToFiles"          | false    | ProjectRole.Basic.PI        | USER     | true
         "manageUsers"            | false    | ProjectRole.Basic.PI        | USER     | true
         "manageUsersAndDelegate" | false    | ProjectRole.Basic.PI        | USER     | true
         "receivesNotifications"  | false    | ProjectRole.Basic.PI        | USER     | true
 
-        //OPERATOR false -> (desired)true, Role PI
+        // OPERATOR false -> (desired)true, Role PI
         "accessToFiles"          | false    | ProjectRole.Basic.PI        | OPERATOR | true
         "manageUsers"            | false    | ProjectRole.Basic.PI        | OPERATOR | true
         "manageUsersAndDelegate" | false    | ProjectRole.Basic.PI        | OPERATOR | true
@@ -1330,13 +1330,13 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         "receivesNotifications"  | false    | ProjectRole.Basic.PI        | ADMIN    | true
         "enabled"                | false    | ProjectRole.Basic.PI        | ADMIN    | true
 
-        //USER true -> (desired)false, Role PI
+        // USER true -> (desired)false, Role PI
         "accessToFiles"          | true     | ProjectRole.Basic.PI        | USER     | false
         "manageUsers"            | true     | ProjectRole.Basic.PI        | USER     | false
         "manageUsersAndDelegate" | true     | ProjectRole.Basic.PI        | USER     | false
         "receivesNotifications"  | true     | ProjectRole.Basic.PI        | USER     | false
 
-        //OPERATOR true -> (desired)false, Role PI
+        // OPERATOR true -> (desired)false, Role PI
         "accessToFiles"          | true     | ProjectRole.Basic.PI        | OPERATOR | false
         "manageUsers"            | true     | ProjectRole.Basic.PI        | OPERATOR | false
         "manageUsersAndDelegate" | true     | ProjectRole.Basic.PI        | OPERATOR | false
@@ -1350,14 +1350,14 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         "receivesNotifications"  | true     | ProjectRole.Basic.PI        | ADMIN    | false
         "enabled"                | true     | ProjectRole.Basic.PI        | ADMIN    | false
 
-        //USER false -> (desired)true, Role Submitter
+        // USER false -> (desired)true, Role Submitter
         "accessToFiles"          | false    | ProjectRole.Basic.SUBMITTER | USER     | true
         "manageUsers"            | false    | ProjectRole.Basic.SUBMITTER | USER     | true
         "manageUsersAndDelegate" | false    | ProjectRole.Basic.SUBMITTER | USER     | true
         "receivesNotifications"  | false    | ProjectRole.Basic.SUBMITTER | USER     | true
         "enabled"                | false    | ProjectRole.Basic.SUBMITTER | USER     | true
 
-        //OPERATOR false -> (desired)true, Role Submitter
+        // OPERATOR false -> (desired)true, Role Submitter
 
         "accessToFiles"          | false    | ProjectRole.Basic.SUBMITTER | OPERATOR | true
         "manageUsers"            | false    | ProjectRole.Basic.SUBMITTER | OPERATOR | true
@@ -1372,14 +1372,14 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         "receivesNotifications"  | false    | ProjectRole.Basic.SUBMITTER | ADMIN    | true
         "enabled"                | false    | ProjectRole.Basic.SUBMITTER | ADMIN    | true
 
-        //USER true -> (desired)false, Role Submitter
+        // USER true -> (desired)false, Role Submitter
         "accessToFiles"          | true     | ProjectRole.Basic.SUBMITTER | USER     | false
         "manageUsers"            | true     | ProjectRole.Basic.SUBMITTER | USER     | false
         "manageUsersAndDelegate" | true     | ProjectRole.Basic.SUBMITTER | USER     | false
         "receivesNotifications"  | true     | ProjectRole.Basic.SUBMITTER | USER     | false
         "enabled"                | true     | ProjectRole.Basic.SUBMITTER | USER     | false
 
-        //OPERATOR true -> (desired)false, Role Submitter
+        // OPERATOR true -> (desired)false, Role Submitter
         "accessToFiles"          | true     | ProjectRole.Basic.SUBMITTER | OPERATOR | false
         "manageUsers"            | true     | ProjectRole.Basic.SUBMITTER | OPERATOR | false
         "manageUsersAndDelegate" | true     | ProjectRole.Basic.SUBMITTER | OPERATOR | false
@@ -1421,9 +1421,9 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         where:
         flag      | flagInit | projectRole          | role
-        //USER false -> (desired)true, Role PI
+        // USER false -> (desired)true, Role PI
         "enabled" | false    | ProjectRole.Basic.PI | USER
-        //USER true -> (desired)false, Role PI
+        // USER true -> (desired)false, Role PI
         "enabled" | true     | ProjectRole.Basic.PI | USER
     }
 
@@ -1677,7 +1677,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         switch (operatorAction) {
             case UserProjectRoleService.OperatorAction.ADD:
             case UserProjectRoleService.OperatorAction.REMOVE:
-                scriptCommand == "${AD_GROUP_TOOL_PATH} ${operatorAction.name()} ${userProjectRole.project.unixGroup} ${userProjectRole.user.username}"
+                assert scriptCommand == "${AD_GROUP_TOOL_PATH} ${operatorAction.name()} ${userProjectRole.project.unixGroup} ${userProjectRole.user.username}"
                 break
             default:
                 throw new UnsupportedOperationException("Unhandled ${UserProjectRoleService.OperatorAction} '${operatorAction}'")

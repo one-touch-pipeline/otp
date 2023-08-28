@@ -44,8 +44,8 @@ import de.dkfz.tbi.otp.withdraw.UnwithdrawStateHolder
  * Input: See description of the input variables.
  */
 
-//--------------------------------------------------------
-//input
+// --------------------------------------------------------
+// input
 
 /**
  * Multi selector using:
@@ -132,18 +132,18 @@ boolean unwithdrawAnalysis = true
  */
 boolean tryRun = true
 
-//--------------------------------------------------------
+// --------------------------------------------------------
 // WORK
 assert fileName?.trim(): "no file name were given"
 
-//services
+// services
 ScriptInputHelperService scriptInputHelperService = ctx.scriptInputHelperService
 UnwithdrawService unwithdrawService = ctx.unwithdrawService
 
 assert (scriptInputHelperService.checkIfExactlyOneMultiLineStringContainsContent(
         [multiColumnInputSample, multiColumnInputSeqTrack, seqTracksIds])): "Please use exactly one multiColumnInput option for input"
 
-//load data
+// load data
 List<SeqTrackWithComment> seqTracksWithComments = [
         scriptInputHelperService.seqTracksBySampleDefinition(multiColumnInputSample),
         scriptInputHelperService.seqTracksByLaneDefinition(multiColumnInputSeqTrack),

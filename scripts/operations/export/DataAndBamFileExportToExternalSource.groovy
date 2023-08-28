@@ -48,7 +48,7 @@ import java.nio.file.Path
  *      - external: if enabled, copied data is additionally granted read and execute permissions at the group level
  */
 
-//input area
+// input area
 /**
  * List of pids, one per line
  */
@@ -78,22 +78,22 @@ String multiColumnInput = """
 
 """
 
-//************ Path to save creation script to filesystem including filename. (absolute path) ************//
+// ************ Path to save creation script to filesystem including filename. (absolute path) ************//
 String scriptOutputFile = ""
 
-//************ Path to copy files. Underneath, 'PID folders' will be created. (absolute path) ************//
+// ************ Path to copy files. Underneath, 'PID folders' will be created. (absolute path) ************//
 String targetOutputFolder = ""
 
-//************ Select whether FASTQ files should be copied (true/false) ************//
+// ************ Select whether FASTQ files should be copied (true/false) ************//
 boolean copyFastqFiles = false
 
-//************ Select whether BAM files should be copied (true/false) ************//
+// ************ Select whether BAM files should be copied (true/false) ************//
 boolean copyBamFiles = false
 
-//************ Select whether withdrawn data should be copied (true/false) ************//
+// ************ Select whether withdrawn data should be copied (true/false) ************//
 boolean copyWithdrawnData = false
 
-//************ Select whether analyses should be copied (true/false) ************//
+// ************ Select whether analyses should be copied (true/false) ************//
 Map<PipelineType, Boolean> copyAnalyses = [:]
 
 copyAnalyses.put(PipelineType.INDEL, false)
@@ -102,22 +102,22 @@ copyAnalyses.put(PipelineType.ACESEQ, false)
 copyAnalyses.put(PipelineType.SNV, false)
 copyAnalyses.put(PipelineType.RUN_YAPSA, false)
 
-//! Note: RNA_ANALYSIS will be exported only if copyBamFile is also set to be true !//
+// ! Note: RNA_ANALYSIS will be exported only if copyBamFile is also set to be true !//
 copyAnalyses.put(PipelineType.RNA_ANALYSIS, false)
 
-//************ Check if and which files exist (true/false) ************//
+// ************ Check if and which files exist (true/false) ************//
 boolean checkFileStatus = true
 
-//************ Generate a script for file list (true/false) [checkFileStatus must be false] ************//
+// ************ Generate a script for file list (true/false) [checkFileStatus must be false] ************//
 boolean getFileList = false
 
-//************ Select new unix group ************//
+// ************ Select new unix group ************//
 String unixGroup = ""
 
-//************ Select the permissions of the files. If true group can read/execute. If false group/others can read/execute************//
+// ************ Select the permissions of the files. If true group can read/execute. If false group/others can read/execute************//
 boolean external = true
 
-//************ adds COPY_TARGET_BASE and COPY_CONNECTION environment variables to mkdir and rsync************//
+// ************ adds COPY_TARGET_BASE and COPY_CONNECTION environment variables to mkdir and rsync************//
 boolean copyExternal = false
 
 // work area
@@ -183,11 +183,11 @@ scriptInputHelperService.parseAndSplitHelper([selectByIndividual, multiColumnInp
     assert paramsCount > 0: "Input must contain at least one column of PID"
     assert paramsCount in [1, 2, 5, 6, 7]: "Missing input data for seqType determination"
 
-    //required column
+    // required column
     Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(params[0]),
             "Could not find one individual with name ${params[0]}")
 
-    //optional columns
+    // optional columns
     SampleType sampleType = null
     if (paramsCount > 1) {
         sampleType = SampleTypeService.findSampleTypeByName(params[1])
@@ -216,7 +216,7 @@ scriptInputHelperService.parseAndSplitHelper([selectByIndividual, multiColumnInp
         md5sum = params[6]
     }
 
-    //find the seqTracks, which might be used for analysis
+    // find the seqTracks, which might be used for analysis
     List<SeqTrack> seqTracks = seqTrackService.findAllByIndividualSampleTypeSeqTypeSampleNameMd5sum(
             individual,
             sampleType,
@@ -227,7 +227,7 @@ scriptInputHelperService.parseAndSplitHelper([selectByIndividual, multiColumnInp
     assert seqTracks: "Could not find any seqtracks for ${params.join(' ')}"
     seqTrackList.addAll(seqTracks)
 
-    //find the bam files, which might be used for analysis
+    // find the bam files, which might be used for analysis
     List<AbstractBamFile> bamFiles = abstractBamFileService.findAllByIndividualSampleTypeSeqType(
             individual,
             sampleType,
@@ -317,7 +317,7 @@ scriptInputHelperService.parseAndSplitHelper([selectByIndividual, multiColumnInp
 }
 
 DataExportInput dataExportParameters = new DataExportInput([
-        //input parameters
+        // input parameters
         targetFolder        : targetFolder,
         checkFileStatus     : checkFileStatus,
         getFileList         : getFileList,
@@ -326,7 +326,7 @@ DataExportInput dataExportParameters = new DataExportInput([
         external            : external,
         copyExternal        : copyExternal,
         copyAnalyses        : copyAnalyses,
-        //preprocessed data for export
+        // preprocessed data for export
         seqTrackList   : seqTrackList,
         bamFileList    : bamFileList,
         analysisListMap: analysisListMap,
@@ -337,13 +337,13 @@ DataExportOutput emptyOutput = new DataExportOutput(
         listScript: "",
         consoleLog: "")
 List<DataExportOutput> outputList = [
-        //Output header information
+        // Output header information
         headerInfoOutput = dataExportService.exportHeaderInfo(dataExportParameters),
-        //Processing FASTQ Files
+        // Processing FASTQ Files
         seqTrackOutput = copyFastqFiles ? dataExportService.exportRawSequenceFiles(dataExportParameters) : emptyOutput,
-        //Processing BAM Files
+        // Processing BAM Files
         bamFileOutput = copyBamFiles ? dataExportService.exportBamFiles(dataExportParameters) : emptyOutput,
-        //Processing Analysis Files
+        // Processing Analysis Files
         analysisOutput = dataExportService.exportAnalysisFiles(dataExportParameters),
 ]
 
@@ -407,9 +407,9 @@ dataExportOverview.each {
     summaryString.append("\n")
 }
 
-//Out put the result
+// Out put the result
 outputFile << getBashScript(outputList)
-//set the correct permission (440) to the script file
+// set the correct permission (440) to the script file
 fileService.setPermission(outputFile, FileService.DEFAULT_FILE_PERMISSION)
 
 println "\nCreation script has been saved to ${outputFile}"

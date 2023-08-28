@@ -931,7 +931,7 @@ class SchedulerService {
      * @param job The job that the current thread just finished executing.
      */
     void finishedJobExecutionOnCurrentThread(final Job job) {
-        //log.debug "Job ${System.identityHashCode(job)}, Thread ${Thread.currentThread()}", new Throwable()
+        // log.debug "Job ${System.identityHashCode(job)}, Thread ${Thread.currentThread()}", new Throwable()
         notNull job
         final Job currentJob = jobExecutedByCurrentThread
         if (currentJob == null) {

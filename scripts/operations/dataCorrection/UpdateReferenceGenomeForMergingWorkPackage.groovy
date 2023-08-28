@@ -28,20 +28,20 @@ import de.dkfz.tbi.otp.utils.*
  * Script to update reference genome for one MergingWorkPackage
  */
 
-String referenceGenomeName = '' //Name of the new Reference Genome
-String statSizeFileName = '' //Name of the stat size file name (Only for PANCAN, depends on referenceGenomeName)
+String referenceGenomeName = '' // Name of the new Reference Genome
+String statSizeFileName = '' // Name of the stat size file name (Only for PANCAN, depends on referenceGenomeName)
 String pid = ''
 String sampleTypeName = ''
 SeqType seqType
 
-//seqType = SeqTypeService.exomePairedSeqType
-//seqType = SeqTypeService.wholeGenomePairedSeqType
-//seqType = SeqTypeService.wholeGenomeBisulfitePairedSeqType
-//seqType = SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType
-//seqType = SeqTypeService.rnaPairedSeqType
-//seqType = SeqTypeService.chipSeqPairedSeqType
+// seqType = SeqTypeService.exomePairedSeqType
+// seqType = SeqTypeService.wholeGenomePairedSeqType
+// seqType = SeqTypeService.wholeGenomeBisulfitePairedSeqType
+// seqType = SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType
+// seqType = SeqTypeService.rnaPairedSeqType
+// seqType = SeqTypeService.chipSeqPairedSeqType
 
-//--------------------------
+// --------------------------
 
 assert referenceGenomeName
 assert pid

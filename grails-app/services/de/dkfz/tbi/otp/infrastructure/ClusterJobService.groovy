@@ -233,11 +233,11 @@ class ClusterJobService {
     /**
      * returns true if a job belongs to data that is sequenced by X-Ten machines
      */
-    //There are cases that xten and non xten are together, so the null as third value is needed
+    // There are cases that xten and non xten are together, so the null as third value is needed
     @SuppressWarnings('BooleanMethodReturnsNull')
     static Boolean isXten(ClusterJob job) {
         if (!job.oldSystem) {
-            //new workflow system do not support access to seqtracks, which are needed to get that information
+            // new workflow system do not support access to seqtracks, which are needed to get that information
             return null
         }
         ProcessParameterObject workflowObject = findProcessParameterObjectByClusterJob(job)
@@ -253,7 +253,7 @@ class ClusterJobService {
      */
     static Long getBasesSum(ClusterJob job) {
         if (!job.oldSystem) {
-            //new workflow system do not support access to seqtracks, which are needed to get that information
+            // new workflow system do not support access to seqtracks, which are needed to get that information
             return null
         }
         return normalizePropertyToClusterJobs(job) { ProcessParameterObject workflowObject ->
@@ -266,7 +266,7 @@ class ClusterJobService {
      */
     static Long getFileSizesSum(ClusterJob job) {
         if (!job.oldSystem) {
-            //new workflow system do not support access to seqtracks, which are needed to get that information
+            // new workflow system do not support access to seqtracks, which are needed to get that information
             return null
         }
         return normalizePropertyToClusterJobs(job) { ProcessParameterObject workflowObject ->
@@ -280,7 +280,7 @@ class ClusterJobService {
      */
     static Long getReadsSum(ClusterJob job) {
         if (!job.oldSystem) {
-            //new workflow system do not support access to seqtracks, which are needed to get that information
+            // new workflow system do not support access to seqtracks, which are needed to get that information
             return null
         }
         return normalizePropertyToClusterJobs(job) { ProcessParameterObject workflowObject ->

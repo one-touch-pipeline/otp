@@ -40,7 +40,7 @@ import static groovyx.gpars.GParsPool.withPool
  */
 
 //////////////////////////////////////////////////////////////
-//User input parameters
+// User input parameters
 
 /**
  * Specifies how many seqTracks and related fastqcProcessedFiles to be processed together in one batch
@@ -106,7 +106,7 @@ void migrateToNewWorkflow(
         }
     }
 }
-//=================================================
+// =================================================
 
 List<List<Long>> seqTrackIdsWithDataFileCount = SeqTrack.executeQuery(
         """SELECT s.id, COUNT(f.id) FROM SeqTrack s
@@ -123,16 +123,16 @@ println "There are ${numFastqcProcessedFiles} Fastqc Processed Files of indexed 
 
 if (seqTrackIdsWithDataFileCount) {
 
-    //process the SeqTracks in chunks
+    // process the SeqTracks in chunks
     long numBatches = Math.ceil(numSeqTracks / batchSize) as long
     println "${numBatches} batches will be processed"
 
-    //fetch the FastQC Workflow
+    // fetch the FastQC Workflow
     Workflow workflow = workflowService.getExactlyOneWorkflow(WORKFLOW_NAME)
     assert workflow: "configured workflow ${WORKFLOW_NAME} does not exists"
     println "Migrate fastqcProcessedFiles to new workflow systems for Workflow \"${WORKFLOW_NAME}\""
 
-    //prepare batch for GPars pool
+    // prepare batch for GPars pool
     List<Integer> loop = []
     0.upto(numBatches - 1) {
         loop += it
@@ -144,15 +144,15 @@ if (seqTrackIdsWithDataFileCount) {
     dryRun && println("dry run, nothing is saved")
     print "Processing: "
     withPool(numCores, {
-        //loop through each batch and process it
+        // loop through each batch and process it
         loop.makeConcurrent().each {
             SessionUtils.withNewTransaction { session ->
-                //start the migration
+                // start the migration
                 int start = batchSize * it
                 int adjustedSize = Math.min((numSeqTracks - start), batchSize) - 1
                 List<SeqTrack> seqTracks = SeqTrack.findAllByIdInList(seqTrackIds[start..start + adjustedSize])
                 migrateToNewWorkflow(seqTracks, OUTPUT_ROLE)
-                //flush changes to the database
+                // flush changes to the database
                 if (!dryRun) {
                     session.flush()
                 }

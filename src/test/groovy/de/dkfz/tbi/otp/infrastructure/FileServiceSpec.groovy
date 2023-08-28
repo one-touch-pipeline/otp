@@ -130,7 +130,7 @@ class FileServiceSpec extends Specification implements DataTest {
         fileService.setPermissionViaBash(tempDir, realm, permissionString)
 
         then:
-        //sticky bit can't be checked via PosixFilePermission, so only posix part is checked
+        // sticky bit can't be checked via PosixFilePermission, so only posix part is checked
         TestCase.assertContainSame(Files.getPosixFilePermissions(tempDir), permissionPosix)
 
         where:
@@ -279,7 +279,7 @@ class FileServiceSpec extends Specification implements DataTest {
         'directory has no permission' | 'dir/dir'     | true       | '000'                    || CreateDirectoryException
     }
 
-    //----------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------
     // test for deleteDirectoryRecursively
 
     void "deleteDirectoryRecursively, if path does not exist, then do nothing"() {
@@ -368,7 +368,7 @@ class FileServiceSpec extends Specification implements DataTest {
         thrown(AssertionError)
     }
 
-    //----------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------
     // test for deleteDirectoryContent
 
     void "deleteDirectoryContent, if path does not exist, then do nothing"() {
@@ -454,7 +454,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Files.exists(linkedFolder)
     }
 
-    //----------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------
     // test for createFileWithContent using characters
 
     void "createFileWithContent, if file does not exist, then create file with given context"() {
@@ -563,7 +563,7 @@ class FileServiceSpec extends Specification implements DataTest {
         assert !permissions.contains(PosixFilePermission.OTHERS_EXECUTE)
     }
 
-    //----------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------
     // test for createFileWithContent using bytes
 
     void "createFileWithContent (byte), if file does not exist, then create file with given context"() {
@@ -653,7 +653,7 @@ class FileServiceSpec extends Specification implements DataTest {
         thrown(CreateDirectoryException)
     }
 
-    //----------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------
     // test for createLink
 
     void "createLink, if input is valid, then create link"() {
@@ -805,7 +805,7 @@ class FileServiceSpec extends Specification implements DataTest {
         'dir with dir'    | { Path p -> Files.createDirectories(p.resolve('child')) }
     }
 
-    //----------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------
     // test for correctPathPermissionRecursive
 
     void "correctPathPermissionRecursive, correct permission of output folder"() {
@@ -966,7 +966,7 @@ class FileServiceSpec extends Specification implements DataTest {
         e.message =~ /Cannot find any files with their filenames matching/
     }
 
-    //----------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------
     // test for isFileReadableAndNotEmpty
 
     void "isFileReadableAndNotEmpty, if file exists and has content, then return true"() {
@@ -1038,7 +1038,7 @@ class FileServiceSpec extends Specification implements DataTest {
         !fileService.isFileReadableAndNotEmpty(link, realm)
     }
 
-    //false positives, since rule can not recognize calling class
+    // false positives, since rule can not recognize calling class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
     void "ensureFileIsReadable, fails when the file does not exist"() {
         given:
@@ -1080,8 +1080,8 @@ class FileServiceSpec extends Specification implements DataTest {
         thrown(AssertionError)
     }
 
-    //----------------------------------------------------------------------------------------------------
-    //test for isFileReadableAndNotEmpty
+    // ----------------------------------------------------------------------------------------------------
+    // test for isFileReadableAndNotEmpty
 
     void "ensureFileIsReadableAndNotEmpty, if file exists and has content, then return without error"() {
         given:
@@ -1378,7 +1378,7 @@ class FileServiceSpec extends Specification implements DataTest {
         "neither"        || false      | false
     }
 
-    //----------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------
     // test for ensureDirIsReadable
 
     void "ensureDirIsReadable, if directory exists and has content, then return without error"() {
@@ -1493,7 +1493,7 @@ class FileServiceSpec extends Specification implements DataTest {
         content << [SOME_CONTENT, ""]
     }
 
-    //----------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------
     // test for createOrOverwriteScriptOutputFile
 
     void "createOrOverwriteScriptOutputFile, creates file if not already there"() {

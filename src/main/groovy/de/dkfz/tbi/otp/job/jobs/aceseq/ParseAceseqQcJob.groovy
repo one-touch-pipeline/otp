@@ -66,7 +66,7 @@ class ParseAceseqQcJob extends AbstractEndStateAwareJobImpl implements AutoResta
                 it.number == 1
             }
 
-            qcOne //the instance to used for qc
+            qcOne // the instance to used for qc
 
             List<Path> files = aceseqService.getAllFiles(aceseqInstance)
             files.each {

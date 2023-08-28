@@ -69,7 +69,6 @@ class QcTrafficLightServiceIntegrationSpec extends Specification implements Doma
                     errorThresholdUpper: 8,
             )
         }
-        //
         cellRangerQualityAssessment = AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createQa(bamFile, [
                 totalReadCounter: 5, allBasesMapped: 5,
         ])

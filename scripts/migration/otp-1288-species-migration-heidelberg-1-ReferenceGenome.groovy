@@ -112,7 +112,7 @@ List<List<Long>> listOfIndividualIdLists = individualIds.collate(batchSize)
 
 List<String> individualsWithProblems = []
 
-//check, will be done per batch
+// check, will be done per batch
 createMetadataSpeciesMap(mappingReferenceGenomeSpecies)
 
 Map<String, SpeciesWithStrain> creatSpeciesMap() {
@@ -258,7 +258,7 @@ List<String> individualMismatch = [].asSynchronized()
 List<String> sampleMismatch = [].asSynchronized()
 
 withPool(numCores, {
-    //loop through each batch and process it
+    // loop through each batch and process it
     listOfIndividualIdLists.makeConcurrent().each { List<Long> individualIdsBatch ->
         TransactionUtils.withNewTransaction { session ->
             List<AbstractBamFile> abstractBamFiles = AbstractBamFile.withCriteria {
@@ -275,7 +275,7 @@ withPool(numCores, {
             }
             Map<String, Map<String, SpeciesWithStrain>> metadataSpeciesMap = createMetadataSpeciesMap(mappingReferenceGenomeSpecies)
             updateSpecies(abstractBamFiles, metadataSpeciesMap, individualMismatch, sampleMismatch, individualsWithProblems)
-            //flush changes to the database
+            // flush changes to the database
             if (!dryRun) {
                 session.flush()
             }

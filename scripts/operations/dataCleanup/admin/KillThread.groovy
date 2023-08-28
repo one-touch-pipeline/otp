@@ -23,6 +23,6 @@ final Thread thread = Thread.allStackTraces.keySet().find {
  * SOFTWARE.
  */
 
-//thread.interrupt()
-//thread.stop()  // Use only if thread does not respond to interrupt()
+// thread.interrupt()
+// thread.stop()  // Use only if thread does not respond to interrupt()
 ''

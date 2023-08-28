@@ -34,8 +34,8 @@ import java.nio.file.*
  * for setup weskit: see https://gitlab.com/one-touch-pipeline/otp-wes-config
  */
 
-//-------------------
-//input
+// -------------------
+// input
 
 /**
  * path where the test data are located
@@ -46,8 +46,8 @@ String TEST_INPUT_EXTERN = ""
  */
 String TEST_OUTPUT_EXTERN = ""
 
-//-------------------
-//work
+// -------------------
+// work
 
 assert TEST_INPUT_EXTERN
 assert TEST_OUTPUT_EXTERN

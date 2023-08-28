@@ -115,7 +115,7 @@ class ScriptInputHelperServiceSpec extends Specification implements ServiceUnitT
         where:
         invalidProperty | invalidValue || errorText
         'id'            | -2           || 'Could not find seqTrack for id'
-        'comment'       | ''           || 'A multi input for seqType by ID is defined by 2 columns' //empty columns at the end are skipped, so column count is incorrect
+        'comment'       | ''           || 'A multi input for seqType by ID is defined by 2 columns' // empty columns at the end are skipped, so column count is incorrect
         'comment'       | "''"         || 'Comment may not be empty'
     }
 
@@ -165,7 +165,7 @@ class ScriptInputHelperServiceSpec extends Specification implements ServiceUnitT
         'seqType'       | 'unknownSeqTypeName'         || 'Could not find seqType'
         'libraryLayout' | SequencingReadType.MATE_PAIR || 'Could not find seqType'
         'singleCell'    | 'true'                       || 'Could not find seqType'
-        'comment'       | ''                           || 'A multi input for sample seqType is defined by 7 columns' //empty columns at the end are skipped, so column count is incorrect
+        'comment'       | ''                           || 'A multi input for sample seqType is defined by 7 columns' // empty columns at the end are skipped, so column count is incorrect
         'comment'       | "''"                         || 'Comment may not be empty'
     }
 

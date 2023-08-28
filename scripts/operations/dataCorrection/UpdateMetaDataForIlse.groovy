@@ -52,8 +52,8 @@ import java.nio.file.*
  * About the flag 'tryRun' the scripts change between only listing and also updating.
  */
 
-//--------------------------
-//input
+// --------------------------
+// input
 
 /**
  * The base directory of the midterm.
@@ -75,8 +75,8 @@ String ilseInput = """
  */
 boolean testRun = true
 
-//--------------------------
-//work
+// --------------------------
+// work
 
 FileSystemService fileSystemService = ctx.fileSystemService
 FileSystem fileSystem = fileSystemService.remoteFileSystemOnDefaultRealm

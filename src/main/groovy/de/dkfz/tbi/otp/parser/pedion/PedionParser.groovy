@@ -46,7 +46,7 @@ class PedionParser implements SampleIdentifierParser {
 
     static final String PROJECT_FUNDING_PERIOD = /^[A-Z]/
     static final String PROJECT_NUMBER = /[0-9]{2}/
-    static final String PROJECT_SUFFIX = /[PR]/  //P=prospective, R=Retrospective
+    static final String PROJECT_SUFFIX = /[PR]/  // P=prospective, R=Retrospective
 
     static final String PATIENT_PSEUDONYM = /[A-Z]{6}/
 

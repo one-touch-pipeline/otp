@@ -519,9 +519,9 @@ class FileService {
             Files.createDirectory(path)
         } catch (FileSystemException e) {
             if (Files.exists(path) && Files.isDirectory(path)) {
-                return //directory was created by another thread running parallel
-                //Because SFTP does not use the more specific FileAlreadyExistsException, using of Files.createDirectories(path) does not help,
-                //which catches only FileAlreadyExistsException.
+                return // directory was created by another thread running parallel
+                // Because SFTP does not use the more specific FileAlreadyExistsException, using of Files.createDirectories(path) does not help,
+                // which catches only FileAlreadyExistsException.
             }
             throw e
         }
@@ -547,7 +547,7 @@ class FileService {
      *
      * It won't fail if the directory does not exist.
      */
-    //false positives, since rule can not recognize calling class
+    // false positives, since rule can not recognize calling class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
     void deleteDirectoryRecursively(Path path) {
         assert path
@@ -659,7 +659,7 @@ class FileService {
         }
     }
 
-    //delete is for file system, not on domain class
+    // delete is for file system, not on domain class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
     private void createFileWithContentCommonPartHelper(Path path,
                                                        Realm realm,
@@ -681,8 +681,8 @@ class FileService {
         try {
             closure()
         } catch (IOException e) {
-            //IOExceptions are not RuntimeExceptions. Thus, together with Java which requires to declare them properly, they make problems.
-            //Otherwise the are replaced by java.lang.reflect.UndeclaredThrowableException without the origin exception
+            // IOExceptions are not RuntimeExceptions. Thus, together with Java which requires to declare them properly, they make problems.
+            // Otherwise the are replaced by java.lang.reflect.UndeclaredThrowableException without the origin exception
             throw new CreateFileException("Creating of file ${path} failed", e)
         }
         setPermission(path, filePermission)
@@ -696,7 +696,7 @@ class FileService {
      * When outputFolder not exist yet, it is created automatically including missing parent directories with the
      * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
      */
-    //false positives, since rule can not recognize calling class
+    // false positives, since rule can not recognize calling class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
     Path createOrOverwriteScriptOutputFile(Path outputFolder, String fileName, Realm realm) {
         Path p = outputFolder.resolve(fileName)
@@ -707,7 +707,7 @@ class FileService {
             Files.delete(p)
         }
 
-        //sftp does not support setting permission during creation, so it needs to be done afterwards.
+        // sftp does not support setting permission during creation, so it needs to be done afterwards.
         Files.createFile(p)
         Files.setPosixFilePermissions(p, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
         return p
@@ -735,7 +735,7 @@ class FileService {
      * @param groupString the name of the unix group of the associated project
      * @param options Option to adapt the behavior, see {@link CreateLinkOption}
      */
-    //false positives, since rule can not recognize calling class
+    // false positives, since rule can not recognize calling class
     @SuppressWarnings(['ExplicitFlushForDeleteRule', 'Instanceof'])
     void createLink(Path link, Path target, Realm realm, String groupString = '', CreateLinkOption... options) {
         assert link
@@ -750,7 +750,7 @@ class FileService {
             assert !Files.exists(link, LinkOption.NOFOLLOW_LINKS)
         }
         assert link.fileSystem == target.fileSystem
-        //SimpleAbstractPath doesn't take special meaning of "." and ".." into consideration
+        // SimpleAbstractPath doesn't take special meaning of "." and ".." into consideration
         assert link.every { it.toString() != ".." && it.toString() != "." }
 
         if (link == target) {

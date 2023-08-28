@@ -34,32 +34,32 @@ import de.dkfz.tbi.otp.parser.inform.InformSampleIdentifierParser
 import de.dkfz.tbi.otp.parser.itccp4.ITCC_4P_Parser
 import de.dkfz.tbi.otp.parser.pedion.PedionParser
 
-//----------------------------------------
-//input area
+// ----------------------------------------
+// input area
 
-//sample name
-//lines are trimmed, lines starting with # are ignored
+// sample name
+// lines are trimmed, lines starting with # are ignored
 String input = """
 #identifier1
 #identifier2
 
 """
 
-//uncomment the parser to use
+// uncomment the parser to use
 SampleIdentifierParser parser
-//parser = new DeepSampleIdentifierParser()
-//parser = new InformSampleIdentifierParser()
-//parser = new HipoSampleIdentifierParser()
-//parser = new Hipo2SampleIdentifierParser()
-//parser = new Hipo2SamplePreparationLabSampleIdentifierParser()
-//parser = new ITCC_4P_Parser()
-//parser = new OE0290_EORTC_SampleIdentifierParser()
-//parser = new SimpleProjectIndividualSampleTypeParser()
-//parser = new PedionParser()
-//parser = new Covid19SampleIdentifierParser()
+// parser = new DeepSampleIdentifierParser()
+// parser = new InformSampleIdentifierParser()
+// parser = new HipoSampleIdentifierParser()
+// parser = new Hipo2SampleIdentifierParser()
+// parser = new Hipo2SamplePreparationLabSampleIdentifierParser()
+// parser = new ITCC_4P_Parser()
+// parser = new OE0290_EORTC_SampleIdentifierParser()
+// parser = new SimpleProjectIndividualSampleTypeParser()
+// parser = new PedionParser()
+// parser = new Covid19SampleIdentifierParser()
 
-//----------------------------------------
-//work area
+// ----------------------------------------
+// work area
 assert parser: 'Please select one parser'
 
 List<String> output = []

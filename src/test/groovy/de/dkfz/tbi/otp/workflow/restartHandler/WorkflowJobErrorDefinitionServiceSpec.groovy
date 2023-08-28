@@ -59,7 +59,7 @@ class WorkflowJobErrorDefinitionServiceSpec extends Specification
     }
 
     @SuppressWarnings('UnnecessaryGetter')
-    //mock of get method
+    // mock of get method
     void "findMatchingJobErrorDefinition, when JobErrorDefinitions available for bean, then log the found cases and return matching definitions"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
@@ -151,7 +151,7 @@ class WorkflowJobErrorDefinitionServiceSpec extends Specification
         definition.mailText == cmd.mailText
     }
 
-    //false positives, since rule can not recognize calling class
+    // false positives, since rule can not recognize calling class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
     void "delete, when all fine, then create object and return it"() {
         given:

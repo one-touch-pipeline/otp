@@ -68,7 +68,7 @@ class WesRun implements Entity {
     /**
      * reference to the log of the instance
      */
-    WesRunLog wesRunLog //nullable, since filled by monitor
+    WesRunLog wesRunLog // nullable, since filled by monitor
 
     static Closure constraints = {
         wesRunLog nullable: true

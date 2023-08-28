@@ -74,11 +74,11 @@ import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.*
  * The flag 'overwriteExisting' indicates, that an existing file should be replaced.
  */
 
-//=============================================
+// =============================================
 // input area
 
-//column order: NEW_PROJECT NEW_PID OLD_PID SAMPLE_TYPE WGS/WES
-//WGS indicated 'WHOLE_GENOME PAIRD bulk', WES indicated 'EXOME PAIRED bulk'.
+// column order: NEW_PROJECT NEW_PID OLD_PID SAMPLE_TYPE WGS/WES
+// WGS indicated 'WHOLE_GENOME PAIRD bulk', WES indicated 'EXOME PAIRED bulk'.
 String input = """
 
 """
@@ -98,7 +98,7 @@ String fileName = ''
  */
 boolean overwriteExisting = false
 
-//=============================================
+// =============================================
 // work area
 
 String outputFieldDelimiter = '\t'
@@ -220,7 +220,7 @@ class BamExportImport {
         inputDataList.each { InputData inputData ->
             Map<String, String> metadata = inputData.metadata
             content << columns.collect { column ->
-                metadata[column] ?: '' //ensure that null is replaced by empty string
+                metadata[column] ?: '' // ensure that null is replaced by empty string
             }.join(outputFieldDelimiter)
         }
         return content.join('\n')

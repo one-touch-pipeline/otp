@@ -99,6 +99,8 @@ class ScriptBuilder {
         return encloseInBashScriptDescription(bashCommands.join("\n"))
     }
 
+    // Comment Delimiter is part of string
+    @SuppressWarnings("SpaceBeforeCommentDelimiter")
     private String encloseInGroovyDescription(String enclosedContent) {
         return """
                |/****************************************************************
@@ -112,6 +114,8 @@ class ScriptBuilder {
                |""".stripMargin()
     }
 
+    // Comment Delimiter is part of string
+    @SuppressWarnings("SpaceBeforeCommentDelimiter")
     private String encloseInMetaDescription(String enclosedContent) {
         return """|
                |/****************************************************************

@@ -48,7 +48,7 @@ class RoddyWorkflowConfigService {
     WorkflowConfigService workflowConfigService
     ConfigService configService
 
-    @SuppressWarnings('Println') //The method is written for scripts, so it needs the output in stdout
+    @SuppressWarnings('Println') // The method is written for scripts, so it needs the output in stdout
     void loadPanCanConfigAndTriggerAlignment(Project project, SeqType seqType, String programVersionToUse, Pipeline pipeline, String configFilePath,
                                              String configVersion, boolean adapterTrimmingNeeded, Individual individual) {
         assert individual : "The individual is not allowed to be null"

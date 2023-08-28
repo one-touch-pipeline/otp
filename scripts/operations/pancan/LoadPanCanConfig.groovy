@@ -37,12 +37,12 @@ String projectName = ''
 // If the PID is set, alignment will automatically triggered for that PID.
 String individualPid = ''
 
-//The roddy plugin version. It needs to be a valid value for Roddy.
-//For example: AlignmentAndQCWorkflows:1.1.39
+// The roddy plugin version. It needs to be a valid value for Roddy.
+// For example: AlignmentAndQCWorkflows:1.1.39
 String programVersionToUse = ''
 
-//The config version used. Has to be match the expression: '^v\d+_\d+$'
-//The first version of a file has 'v1_0
+// The config version used. Has to be match the expression: '^v\d+_\d+$'
+// The first version of a file has 'v1_0
 String configVersion = 'v1_0'
 
 /**
@@ -68,7 +68,7 @@ String configFilePath = ''
 
 boolean adapterTrimmingNeeded = false
 
-//-----------------------
+// -----------------------
 RoddyWorkflowConfigService roddyWorkflowConfigService = ctx.roddyWorkflowConfigService
 
 LogThreadLocal.withThreadLog(System.out, { Project.withTransaction {

@@ -148,7 +148,7 @@ class AbstractBamFileService {
 
             return basesMapped / length
         }
-        //In case of sequencing types that need a BED file this value stays 'null' since there is no differentiation between 'with N' and 'without N'
+        // In case of sequencing types that need a BED file this value stays 'null' since there is no differentiation between 'with N' and 'without N'
         return null
     }
 

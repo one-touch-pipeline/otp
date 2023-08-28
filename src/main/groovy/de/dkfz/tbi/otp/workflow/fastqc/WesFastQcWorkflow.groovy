@@ -47,7 +47,7 @@ class WesFastQcWorkflow implements OtpWorkflow {
                 FastqcWesPrepareJob.simpleName.uncapitalize(),
                 FastqcExecuteWesPipelineJob.simpleName.uncapitalize(),
                 FastqcWesValidationJob.simpleName.uncapitalize(),
-                //permission needs to be changed, since accessing of the zip content is only possible on local file system
+                // permission needs to be changed, since accessing of the zip content is only possible on local file system
                 SetCorrectPermissionJob.simpleName.uncapitalize(),
                 FastqcParseJob.simpleName.uncapitalize(),
                 FastqcLinkJob.simpleName.uncapitalize(),

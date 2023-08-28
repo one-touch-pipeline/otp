@@ -24,13 +24,13 @@ import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-//************ Username of user  ************//
+// ************ Username of user  ************//
 String username = ""
 
-//************ set receives Notifications (true/false) ************//
+// ************ set receives Notifications (true/false) ************//
 Boolean receivesNotifications = false
 
-//************ (optional) List of project names  ************//
+// ************ (optional) List of project names  ************//
 List projectNames = """
 #projectName1
 #projectName2

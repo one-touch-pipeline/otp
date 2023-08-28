@@ -82,8 +82,8 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
                 beanName   : { properties.restartedFrom?.beanName ?: "beanName_${nextId}" },
                 state      : WorkflowStep.State.CREATED,
         ], properties, false)
-        //it is necessary to add the step in the list of workflowRuns before saving
-        //otherwise hibernate try to save the step with null for workflow run, which will fail with sql exception
+        // it is necessary to add the step in the list of workflowRuns before saving
+        // otherwise hibernate try to save the step with null for workflow run, which will fail with sql exception
         step.workflowRun.addToWorkflowSteps(step)
         return step.save(flush: true)
     }

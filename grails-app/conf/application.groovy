@@ -115,14 +115,14 @@ grails.enable.native2ascii = true
 // whether to disable processing of multi part requests
 grails.web.disable.multipart=false
 
-//max upload size
+// max upload size
 grails.controllers.upload.maxFileSize = 10*1024*1024
 grails.controllers.upload.maxRequestSize = 10*1024*1024
 
 // request parameters to mask when logging exceptions
 grails.exceptionresolver.params.exclude = ['password']
 
-//databasemigration configuration
+// databasemigration configuration
 grails.plugin.databasemigration.changelogLocation = 'migrations'
 grails.plugin.databasemigration.changelogFileName = 'migration-wrapper.groovy'
 grails.plugin.databasemigration.updateOnStart = true
@@ -147,7 +147,7 @@ grails.databinding.autoGrowCollectionLimit = 65536
 
 grails.databinding.trimStrings = true
 
-//configure mail sending: disable mail sending for tests
+// configure mail sending: disable mail sending for tests
 environments {
     WORKFLOW_TEST {
         grails.mail.disabled=true
@@ -157,7 +157,7 @@ environments {
     }
 }
 
-//configure groovy web console
+// configure groovy web console
 grails.plugin.console.enabled = consoleEnabled
 environments {
     production {

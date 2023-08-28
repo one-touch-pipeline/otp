@@ -71,7 +71,7 @@ class OldClusterJobMonitor extends AbstractClusterJobMonitor {
     @Scheduled(fixedDelay = 30000L)
     void check() {
         if (!schedulerService.isActive()) {
-            return //job system is inactive
+            return // job system is inactive
         }
 
         doCheck()

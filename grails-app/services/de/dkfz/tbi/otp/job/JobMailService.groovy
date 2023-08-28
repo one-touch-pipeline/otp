@@ -56,7 +56,7 @@ class JobMailService {
 
         ProcessParameterObject object = step.processParameterObject
         if (!object) {
-            return //general workflow, no processing
+            return // general workflow, no processing
         }
         String subjectPrefix = object.processingPriority?.errorMailPrefix ?: "ERROR"
         Collection<SeqTrack> seqTracks = object.containedSeqTracks
@@ -111,7 +111,7 @@ class JobMailService {
                     clusterId          : clusterJob.clusterJobId,
                     jobName            : clusterJob.clusterJobName,
                     queue              : TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime)clusterJob.queued),
-                    //time when job is ready for start (no hold anymore)
+                    // time when job is ready for start (no hold anymore)
                     eligible           : TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime)clusterJob.eligible),
                     start              : TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime)clusterJob.started),
                     ended              : TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime)clusterJob.ended),

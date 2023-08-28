@@ -33,16 +33,16 @@ import java.nio.file.*
  * script to change group of all withdrawn data on file system to withdrawn.
  */
 
-//---------------------------------------
-//input
+// ---------------------------------------
+// input
 
 /**
  * full qualified name of the script to create
  */
 String file = ""
 
-//---------------------------------------
-//work
+// ---------------------------------------
+// work
 AbstractBamFileService abstractBamFileService = ctx.abstractBamFileService
 ProcessingOptionService processingOptionService = ctx.processingOptionService
 LsdfFilesService lsdfFilesService = ctx.lsdfFilesService
