@@ -285,18 +285,6 @@
                 </td>
             </tr>
             <tr>
-                <td><g:message code="project.customFinalNotification.message"/></td>
-                <td class="help" title="${g.message(code: "project.customFinalNotification.message.detail")}"></td>
-                <td>
-                    <otp:editorSwitch
-                            roles="ROLE_OPERATOR"
-                            template="dropDown"
-                            link="${g.createLink(controller: 'projectConfig', action: 'updateCustomFinalNotification')}"
-                            values="${["true", "false"]}"
-                            value="${selectedProject.customFinalNotification}"/>
-                </td>
-            </tr>
-            <tr>
                 <td><g:message code="project.publiclyAvailable"/></td>
                 <td></td>
                 <td>

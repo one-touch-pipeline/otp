@@ -83,11 +83,6 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
      */
     boolean qcTrafficLightNotification = true
 
-    /**
-     * flag to send final notification.
-     */
-    boolean customFinalNotification = false
-
     boolean closed = false
 
     Set<ProjectInfo> projectInfos

@@ -197,24 +197,6 @@ class NotificationCreator {
         }
         subject.append(' Processing Status Update')
 
-        List<String> recipients = []
-
-        List<Project> projects = seqTracks*.project.unique()
-
-        if (finalNotification && projects.size() == 1 && projects.first().customFinalNotification) {
-            List<IlseSubmission> ilseSubmissions = seqTracks*.ilseSubmission.findAll().unique()
-            if (ilseSubmissions) {
-                subject.append(" [S#${ilseSubmissions*.ilseNumber.sort().join(',')}]")
-            }
-            List<Individual> individuals = seqTracks*.individual.findAll().unique()
-            subject.append(" ${individuals*.pid.sort().join(', ')} ")
-            List<SeqType> seqTypes = seqTracks*.seqType.findAll().unique()
-            subject.append("(${seqTypes*.displayName.sort().join(', ')})")
-            if (ticket.automaticNotification) {
-                recipients.addAll(userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(projects))
-            }
-        }
-
         StringBuilder content = new StringBuilder()
         content.append("""\
         |${status}
@@ -231,11 +213,7 @@ class NotificationCreator {
         content.append(createNotificationTextService.messageSourceService.createMessage("notification.import.detail.link"))
         content.append(createLinksToImportDetailPage(ticket))
 
-        if (recipients) {
-            mailHelperService.sendEmail(subject.toString(), content.toString(), recipients)
-        } else {
-            mailHelperService.sendEmailToTicketSystem(subject.toString(), content.toString())
-        }
+        mailHelperService.sendEmailToTicketSystem(subject.toString(), content.toString())
     }
 
     private StringBuilder createLinksToImportDetailPage(OtrsTicket ticket) {

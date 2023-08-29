@@ -33,7 +33,6 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
-import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
 
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
@@ -196,43 +195,6 @@ ILSe 5678, runA, lane 1, ${sampleText}
 
         expect:
         notificationCreator.sendProcessingStatusOperatorNotification(ticket, [createSeqTrack()] as Set, new ProcessingStatus(), true)
-    }
-
-    void 'sendProcessingStatusOperatorNotification, when finalNotification is true and project.customFinalNotification is true and has an Ilse Number, sends final notification with correct subject'() {
-        given:
-        OtrsTicket ticket = createOtrsTicket()
-        SeqTrack seqTrack = createSeqTrackforCustomFinalNotification(createProject(), createIlseSubmission(), ticket)
-        String expectedHeader = "${ticketPrefix}#${ticket.ticketNumber} Final Processing Status Update [S#${seqTrack.ilseId}] ${seqTrack.individual.pid} " +
-                "(${seqTrack.seqType.displayName})"
-        notificationCreator.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmailToTicketSystem(expectedHeader, _)
-        }
-
-        expect:
-        notificationCreator.sendProcessingStatusOperatorNotification(ticket, [seqTrack] as Set, new ProcessingStatus(), true)
-    }
-
-    void 'sendProcessingStatusOperatorNotification, when finalNotification is true and project.customFinalNotification is true for multiple seqTracks, sends final notification with correct subject'() {
-        given:
-        OtrsTicket ticket = createOtrsTicket()
-        Project project = createProject()
-        List<SeqTrack> seqTracks = [
-                createSeqTrackforCustomFinalNotification(project, createIlseSubmission(), ticket),
-                createSeqTrackforCustomFinalNotification(project, createIlseSubmission(), ticket),
-                createSeqTrackforCustomFinalNotification(project, createIlseSubmission(), ticket),
-        ]
-
-        String ilseString = seqTracks*.ilseId.sort().join(',')
-        String pidString = seqTracks*.individual*.pid.sort().join(', ')
-        String seqTypeStringString = seqTracks*.seqType*.displayName.sort().join(', ')
-        String expectedHeader = "${ticketPrefix}#${ticket.ticketNumber} Final Processing Status Update [S#${ilseString}] ${pidString} (${seqTypeStringString})"
-
-        notificationCreator.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmailToTicketSystem(expectedHeader, _)
-        }
-
-        expect:
-        notificationCreator.sendProcessingStatusOperatorNotification(ticket, seqTracks as Set, new ProcessingStatus(), true)
     }
 
     void 'sendProcessingStatusOperatorNotification, when finalNotification is true, sending message contains a link to the import detail page'() {
@@ -408,22 +370,6 @@ ILSe 5678, runA, lane 1, ${sampleText}
         PARTLY_DONE_WONT_DO_MORE  | ALL_DONE                  || PARTLY_DONE_WONT_DO_MORE
         PARTLY_DONE_MIGHT_DO_MORE | ALL_DONE                  || PARTLY_DONE_MIGHT_DO_MORE
         ALL_DONE                  | ALL_DONE                  || ALL_DONE
-    }
-
-    private SeqTrack createSeqTrackforCustomFinalNotification(Project project, IlseSubmission ilseSubmission, OtrsTicket ticket) {
-        SeqTrack seqTrack = createSeqTrackWithOneFastqFile(
-                [
-                        ilseSubmission: ilseSubmission,
-                        sample        : createSample(
-                                individual: createIndividual(
-                                        project: project
-                                )
-                        ),
-                ],
-                [fastqImportInstance: createFastqImportInstance(otrsTicket: ticket), fileLinked: true])
-        project.customFinalNotification = true
-        project.save(flush: true)
-        return seqTrack
     }
 
     ProcessingOption setupBlacklistImportSourceNotificationProcessingOption(String blacklist) {

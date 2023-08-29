@@ -324,24 +324,6 @@ describe('Check projectConfig page', () => {
       cy.wait('@updateQcTrafficLightNotification').its('response.statusCode').should('eq', 200);
     });
 
-    it('should update the custom final notification flag', () => {
-      const cellKey = 'Send Custom Final Notifications';
-
-      cy.intercept('/projectConfig/updateCustomFinalNotification*').as('updateCustomFinalNotification');
-
-      cy.get('td').contains(cellKey).siblings().last()
-        .find('button.edit')
-        .click();
-      cy.get('td').contains(cellKey).siblings().last()
-        .find('select')
-        .select(1, { force: true });
-      cy.get('td').contains(cellKey).siblings().last()
-        .find('button.save')
-        .click();
-
-      cy.wait('@updateCustomFinalNotification').its('response.statusCode').should('eq', 200);
-    });
-
     it('should update the public flag', () => {
       const cellKey = 'Public';
 

@@ -1093,12 +1093,6 @@ echo 'OK'
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void updateCustomFinalNotification(Project project, boolean value) {
-        project.customFinalNotification = value
-        assert project.save(flush: true)
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void updateProcessingNotification(Project project, boolean value) {
         project.processingNotification = value
         assert project.save(flush: true)

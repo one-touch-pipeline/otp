@@ -1609,7 +1609,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         return seqTrackA
     }
 
-    void 'sendProcessingStatusOperatorNotification, when finalNotification is true and project.customFinalNotification is true and no Ilse, sends final notification with correct subject and to project list'() {
+    void 'sendProcessingStatusOperatorNotification, when finalNotification is true and no Ilse, sends final notification with correct subject and to project list'() {
         given:
         setupData()
 
@@ -1619,7 +1619,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         SessionUtils.withTransaction {
             ticket = createOtrsTicket()
-            userProjectRole = DomainFactory.createUserProjectRole(project: createProject(customFinalNotification: true))
+            userProjectRole = DomainFactory.createUserProjectRole(project: createProject())
             seqTrack = createSeqTrackWithOneFastqFile(
                     [
                             ilseSubmission: null,
@@ -1632,9 +1632,9 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                     [fastqImportInstance: createFastqImportInstance(otrsTicket: ticket), fileLinked: true])
             DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
             String prefix = otrsTicketService.getPrefixedTicketNumber(ticket)
-            String expectedHeader = "${prefix} Final Processing Status Update ${seqTrack.individual.pid} (${seqTrack.seqType.displayName})"
+            String expectedHeader = "${prefix} Final Processing Status Update"
             notificationCreator.mailHelperService = Mock(MailHelperService) {
-                1 * sendEmail(expectedHeader, _, [userProjectRole.user.email])
+                1 * sendEmailToTicketSystem(expectedHeader, _)
             }
         }
 
