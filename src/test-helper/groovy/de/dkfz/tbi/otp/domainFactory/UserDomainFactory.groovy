@@ -116,11 +116,11 @@ trait UserDomainFactory implements DomainFactoryCore {
         ], properties)
     }
 
-    PIUser createPIUser(Map properties = [:]) {
-        return createDomainObject(PIUser, [
-                pi: { createUser() },
-                deputyPI: { createUser() },
-                dateRightsGranted: new Date(),
+    DeputyRelation createDeputyRelation(Map properties = [:]) {
+        return createDomainObject(DeputyRelation, [
+                grantingDeputyUser: { createUser() },
+                deputyUser: { createUser() },
+                dateDeputyGranted: new Date(),
         ], properties)
     }
 }

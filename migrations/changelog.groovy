@@ -98,4 +98,6 @@ databaseChangeLog = {
     include file: 'changelogs/2023/otp-2181-rename-pancancer-to-roddy.groovy'
 
     include file: 'changelogs/2023/otp-1608-wes-fastq-workflow-test.groovy'
+
+    include file: 'changelogs/2023/otp-2206-create-gui-to-delegate-department-rights.groovy'
 }

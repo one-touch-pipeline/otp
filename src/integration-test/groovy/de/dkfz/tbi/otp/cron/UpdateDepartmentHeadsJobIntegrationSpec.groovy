@@ -37,7 +37,7 @@ import de.dkfz.tbi.otp.security.Department
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.security.user.DepartmentService
-import de.dkfz.tbi.otp.security.user.PIUserService
+import de.dkfz.tbi.otp.security.user.DeputyRelationService
 import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.utils.*
 
@@ -233,17 +233,17 @@ ${jsonLiteral(departments[0])}
     private UpdateDepartmentHeadsJob createJob(String returnJSON) {
         return new UpdateDepartmentHeadsJob([
                 processingOptionService: new ProcessingOptionService(),
-                departmentService      : new DepartmentService(auditLogService: Mock(AuditLogService) {
+                departmentService    : new DepartmentService(auditLogService: Mock(AuditLogService) {
                     _ * logAction(_, _) >> _
                 }),
-                remoteShellHelper      : Mock(RemoteShellHelper) {
+                remoteShellHelper    : Mock(RemoteShellHelper) {
                     1 * executeCommandReturnProcessOutput(_, _) >> { return new ProcessOutput(returnJSON, "", 0) }
                     0 * executeCommandReturnProcessOutput(_, _)
                 },
-                configService          : Mock(ConfigService) {
+                configService        : Mock(ConfigService) {
                     1 * getDefaultRealm() >> { createRealm() }
                 },
-                piUserService          : Mock(PIUserService),
+                deputyRelationService: Mock(DeputyRelationService),
         ])
     }
 }

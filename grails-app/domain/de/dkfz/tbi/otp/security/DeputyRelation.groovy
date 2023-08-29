@@ -26,13 +26,13 @@ import grails.gorm.hibernate.annotation.ManagedEntity
 import de.dkfz.tbi.otp.utils.Entity
 
 @ManagedEntity
-class PIUser implements Entity {
-    User pi
-    User deputyPI
-    Date dateRightsGranted
+class DeputyRelation implements Entity {
+    User grantingDeputyUser
+    User deputyUser
+    Date dateDeputyGranted
 
     static mapping = {
-        pi index: "pi_users_pi_idx"
-        deputyPI index: "pi_users_deputy_pi_idx"
+        grantingDeputyUser index: "deputy_relation_deputy_granting_user_idx"
+        deputyUser index: "deputy_relation_deputy_user_idx"
     }
 }

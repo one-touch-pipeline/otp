@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.cron
 
-import grails.converters.JSON
 import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.grails.web.json.JSONArray
@@ -35,7 +34,7 @@ import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.user.DepartmentCommand
 import de.dkfz.tbi.otp.security.user.DepartmentService
-import de.dkfz.tbi.otp.security.user.PIUserService
+import de.dkfz.tbi.otp.security.user.DeputyRelationService
 import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.utils.ProcessOutput
 import de.dkfz.tbi.otp.utils.SystemUserUtils
@@ -66,7 +65,7 @@ class UpdateDepartmentHeadsJob extends AbstractScheduledJob {
     DepartmentService departmentService
 
     @Autowired
-    PIUserService piUserService
+    DeputyRelationService deputyRelationService
 
     @Override
     boolean isAdditionalRunConditionMet() {
@@ -104,7 +103,7 @@ class UpdateDepartmentHeadsJob extends AbstractScheduledJob {
 
         SystemUserUtils.useSystemUser {
             departmentService.updateDepartments(departmentCommands)
-            piUserService.cleanUpPIUser()
+            deputyRelationService.cleanUpDeputyRelations()
         }
     }
 
