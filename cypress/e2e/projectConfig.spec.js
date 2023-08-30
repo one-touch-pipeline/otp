@@ -306,24 +306,6 @@ describe('Check projectConfig page', () => {
       cy.wait('@updateProcessingNotification').its('response.statusCode').should('eq', 200);
     });
 
-    it('should update the qc traffic light notification flag', () => {
-      const cellKey = 'Send QC status warning notifications';
-
-      cy.intercept('/projectConfig/updateQcTrafficLightNotification*').as('updateQcTrafficLightNotification');
-
-      cy.get('td').contains(cellKey).siblings().last()
-        .find('button.edit')
-        .click();
-      cy.get('td').contains(cellKey).siblings().last()
-        .find('select')
-        .select(1, { force: true });
-      cy.get('td').contains(cellKey).siblings().last()
-        .find('button.save')
-        .click();
-
-      cy.wait('@updateQcTrafficLightNotification').its('response.statusCode').should('eq', 200);
-    });
-
     it('should update the public flag', () => {
       const cellKey = 'Public';
 

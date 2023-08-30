@@ -80,7 +80,6 @@ class ProjectConfigController implements CheckAndCall {
             updateAnalysisDir                   : "POST",
             updateFingerPrinting                : "POST",
             updateProcessingNotification        : "POST",
-            updateQcTrafficLightNotification    : "POST",
     ]
 
     @PreAuthorize("isFullyAuthenticated()")
@@ -228,12 +227,6 @@ class ProjectConfigController implements CheckAndCall {
 
     def updateProcessingNotification(String value) {
         projectService.updateProcessingNotification(projectSelectionService.requestedProject, value.toBoolean())
-        Map map = [success: true]
-        render(map as JSON)
-    }
-
-    def updateQcTrafficLightNotification(String value) {
-        projectService.updateQcTrafficLightNotification(projectSelectionService.requestedProject, value.toBoolean())
         Map map = [success: true]
         render(map as JSON)
     }

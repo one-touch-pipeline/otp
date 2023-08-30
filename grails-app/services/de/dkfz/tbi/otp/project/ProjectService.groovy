@@ -1098,12 +1098,6 @@ echo 'OK'
         assert project.save(flush: true)
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void updateQcTrafficLightNotification(Project project, boolean value) {
-        project.qcTrafficLightNotification = value
-        assert project.save(flush: true)
-    }
-
     Map<String, List<Project>> getAllProjectsWithSharedUnixGroup() {
         return Project.list().groupBy { Project project ->
             project.unixGroup

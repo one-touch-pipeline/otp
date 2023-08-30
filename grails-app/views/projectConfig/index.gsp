@@ -273,18 +273,6 @@
                 </td>
             </tr>
             <tr>
-                <td><g:message code="project.qcTrafficLightNotification.message"/></td>
-                <td class="help" title="${g.message(code: "project.qcTrafficLightNotification.message.detail")}"></td>
-                <td>
-                    <otp:editorSwitch
-                            roles="ROLE_OPERATOR"
-                            template="dropDown"
-                            link="${g.createLink(controller: 'projectConfig', action: 'updateQcTrafficLightNotification')}"
-                            values="${["true", "false"]}"
-                            value="${selectedProject.qcTrafficLightNotification}"/>
-                </td>
-            </tr>
-            <tr>
                 <td><g:message code="project.publiclyAvailable"/></td>
                 <td></td>
                 <td>

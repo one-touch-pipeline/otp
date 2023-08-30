@@ -26,8 +26,4 @@
          title="${g.message(code: "notification.notificationSelection.notification.processing")}: ${project.processingNotification}">
         Proc
     </div>
-    <div class="item ${project.qcTrafficLightNotification}"
-         title="${g.message(code: "notification.notificationSelection.notification.other.qc")}: ${project.qcTrafficLightNotification}">
-        QC
-    </div>
 </div>

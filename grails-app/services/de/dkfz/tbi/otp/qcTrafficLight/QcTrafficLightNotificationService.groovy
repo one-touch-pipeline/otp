@@ -112,7 +112,7 @@ class QcTrafficLightNotificationService {
     }
 
     void informResultsAreWarned(AbstractBamFile bamFile) {
-        boolean projectNotification = bamFile.project.qcTrafficLightNotification
+        boolean projectNotification = bamFile.project.processingNotification
         boolean ticketNotification = otrsTicketService.findAllOtrsTickets(bamFile.containedSeqTracks).find {
             !it.finalNotificationSent && it.automaticNotification
         } as boolean

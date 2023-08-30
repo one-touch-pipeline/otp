@@ -87,7 +87,7 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
         final String TICKET_PREFIX = "prefix"
 
         AbstractBamFile bamFile = createBamFile()
-        bamFile.project.qcTrafficLightNotification = qcTrafficLightNotification
+        bamFile.project.processingNotification = processingNotification
         bamFile.project.save(flush: true)
 
         String emailSenderSalutation = DomainFactory.createProcessingOptionForEmailSenderSalutation().value
@@ -145,7 +145,7 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
         }
 
         service.mailHelperService = Mock(MailHelperService) {
-            if (emails && !finalNotificationSent && automaticNotification && qcTrafficLightNotification && !ilseNumbers) {
+            if (emails && !finalNotificationSent && automaticNotification && processingNotification && !ilseNumbers) {
                 1 * sendEmail(_, _, _) >> { String emailSubject, String content, List<String> receivers ->
                     assert emailSubject == subjectHeader + HEADER
                     assert content == BODY
@@ -163,12 +163,12 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
         service.informResultsAreWarned(bamFile)
 
         where:
-        name                                          | finalNotificationSent | automaticNotification | qcTrafficLightNotification | emails    | subjectHeader  | createIlse   || recipientsCount
-        'without userProjectRole'                     | false                 | true                  | true                       | []        | 'TO BE SENT: ' | false        || 1
-        'with userProjectRole'                        | false                 | true                  | true                       | ['email'] | ''             | false        || 2
-        'ticket has already send final notification'  | true                  | true                  | true                       | ['email'] | 'TO BE SENT: ' | false        || 1
-        'ticket has disabled automaticNotification'   | false                 | false                 | true                       | ['email'] | 'TO BE SENT: ' | false        || 1
-        'project has disabled automatic notification' | false                 | true                  | false                      | ['email'] | 'TO BE SENT: ' | false        || 1
-        'project with ilse numbers'                   | false                 | true                  | false                      | ['email'] | 'TO BE SENT: ' | true         || 1
+        name                                          | finalNotificationSent | automaticNotification | processingNotification | emails    | subjectHeader  | createIlse || recipientsCount
+        'without userProjectRole'                     | false                 | true                  | true                   | []        | 'TO BE SENT: ' | false      || 1
+        'with userProjectRole'                        | false                 | true                  | true                   | ['email'] | ''             | false      || 2
+        'ticket has already sent final notification'  | true                  | true                  | true                   | ['email'] | 'TO BE SENT: ' | false      || 1
+        'ticket has disabled automaticNotification'   | false                 | false                 | true                   | ['email'] | 'TO BE SENT: ' | false      || 1
+        'project has disabled automatic notification' | false                 | true                  | false                  | ['email'] | 'TO BE SENT: ' | false      || 1
+        'project with ilse numbers'                   | false                 | true                  | false                  | ['email'] | 'TO BE SENT: ' | true       || 1
     }
 }
