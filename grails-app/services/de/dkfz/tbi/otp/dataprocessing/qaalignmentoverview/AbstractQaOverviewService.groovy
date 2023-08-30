@@ -51,8 +51,8 @@ abstract class AbstractQaOverviewService {
             "left outer join bamFile.workflowArtefact artefact",
             "left outer join artefact.producedBy run",
             "left outer join run.workflowVersion version",
+            "left outer join mergingWorkPackage.referenceGenome referenceGenome",
             "left outer join mergingWorkPackage.referenceGenomeIndex referenceGenomeIndex",
-            "left outer join referenceGenomeIndex.referenceGenome referenceGenome",
             "left outer join referenceGenomeIndex.toolName toolName",
     ].asImmutable()
 
