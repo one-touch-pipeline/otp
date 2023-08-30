@@ -51,6 +51,7 @@ import de.dkfz.tbi.otp.utils.exceptions.CopyingOfFileFailedException
 import de.dkfz.tbi.otp.utils.exceptions.MetadataFileImportException
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
 import de.dkfz.tbi.util.TimeFormats
+import de.dkfz.tbi.util.TimeUtils
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 
@@ -431,7 +432,7 @@ class MetadataImportService {
                 uniqueColumnValue(rows, INSTRUMENT_MODEL),
                 uniqueColumnValue(rows, SEQUENCING_KIT) ?: null)
         String dateString = uniqueColumnValue(rows, RUN_DATE)
-        Date dateExecuted = dateString ? RunDateParserService.parseDate(TimeFormats.DATE.format, dateString) : null
+        Date dateExecuted = dateString ? TimeUtils.tryParseDate(TimeFormats.DATE, dateString) : null
 
         Run run = atMostOneElement(Run.findAllByName(runName))
         if (run) {

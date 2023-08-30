@@ -159,4 +159,19 @@ class TimeUtilsSpec extends Specification {
         2018 | 3     | 14
         2000 | 2     | 29
     }
+
+    @Unroll
+    void "test tryParseDate, when '#input' with format '#format' expect '#value'"() {
+        expect:
+        value == TimeUtils.tryParseDate(format, input)
+
+        where:
+        input                 || format                       || value
+        "12345"               || TimeFormats.DATE             || null
+        "abcdef"              || TimeFormats.DATE             || null
+        "1991-06-23"          || TimeFormats.DATE             || new Date(91, 5, 23) // months seem to count from 0 ?!?
+        "1991/06/23"          || TimeFormats.DATE_DIRECTORY   || new Date(91, 5, 23)
+        "23.06.1991"          || TimeFormats.DATE_2           || new Date(91, 5, 23)
+        "1991-06-23-00-00-00" || TimeFormats.DATE_TIME_DASHES || new Date(91, 5, 23, 0, 0, 0)
+    }
 }

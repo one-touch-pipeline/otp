@@ -22,11 +22,10 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import groovy.transform.CompileDynamic
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.Run
-import de.dkfz.tbi.otp.ngsdata.RunDateParserService
+
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -38,9 +37,6 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.RUN_ID
 
 @Component
 class RunRunDateValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
-
-    @Autowired
-    RunDateParserService runDateParserService
 
     @CompileDynamic
     @Override
@@ -64,10 +60,6 @@ class RunRunDateValidator extends AbstractValueTuplesValidator<MetadataValidatio
                 ValueTuple valueTuple = CollectionUtils.exactlyOneElement(valueTuplesOfRun)
                 Run run = CollectionUtils.atMostOneElement(Run.findAllByName(runName))
                 String runDate = valueTuple.getValue(RUN_DATE.name())
-                Date runDateFromRunName = runDateParserService.parseDateFromRunName(runName)
-                if (runDateFromRunName && TimeFormats.DATE.getFormattedDate(runDateFromRunName) != runDate) {
-                    context.addProblem(valueTuple.cells, LogLevel.WARNING, "Run date parsed from run name '${runName}' is not the same as '${runDate}'. OTP will use the run date from the '${RUN_DATE}' column.", "At least one run date parsed from run name is not the same as in the '${RUN_DATE}' column.")
-                }
                 if (run && run.dateExecuted && TimeFormats.DATE.getFormattedDate(run.dateExecuted) != runDate) {
                     context.addProblem(valueTuple.cells, LogLevel.ERROR, "Run '${runName}' is already registered in the OTP database with run date '${TimeFormats.DATE.getFormattedDate(run.dateExecuted)}', not with '${runDate}'.", "At least one run is already registered in the OTP database but with another date.")
                 }

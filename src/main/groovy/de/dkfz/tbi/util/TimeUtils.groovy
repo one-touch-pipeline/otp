@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.util
 
+import java.text.SimpleDateFormat
 import java.time.*
 import java.util.concurrent.TimeUnit
 
@@ -162,4 +163,19 @@ class TimeUtils {
     static ZonedDateTime toZonedDateTime(Date date) {
         return ZonedDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault())
     }
+
+    /**
+     * Tries to parse the text with a given format. Formats are defined by the TimeFormats class
+     */
+    static Date tryParseDate(TimeFormats format, String text) {
+        Date date = null
+        try {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format.format, Locale.ENGLISH)
+            date = simpleDateFormat.parse(text)
+        } catch (Exception ignored) {
+            // no exception
+        }
+        return date
+    }
+
 }
