@@ -39,7 +39,7 @@ class RoddySophiaStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStar
 
     @Override
     Pipeline createPipeline() {
-        DomainFactory.createSophiaPipelineLazy()
+        return DomainFactory.createSophiaPipelineLazy()
     }
 
     @Override

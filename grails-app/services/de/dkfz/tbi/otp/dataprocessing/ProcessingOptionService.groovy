@@ -85,23 +85,23 @@ class ProcessingOptionService {
     }
 
     int findOptionAsInteger(OptionName name, String type = null) {
-        Integer.parseInt(findOptionAsString(name, type))
+        return Integer.parseInt(findOptionAsString(name, type))
     }
 
     long findOptionAsLong(OptionName name, String type = null) {
-        Long.parseLong(findOptionAsString(name, type))
+        return Long.parseLong(findOptionAsString(name, type))
     }
 
     double findOptionAsDouble(OptionName name, String type = null) {
-        Double.parseDouble(findOptionAsString(name, type))
+        return Double.parseDouble(findOptionAsString(name, type))
     }
 
     boolean findOptionAsBoolean(OptionName name, String type = null) {
-        findOptionAsString(name, type) == "true"
+        return findOptionAsString(name, type) == "true"
     }
 
     List<String> findOptionAsList(OptionName name, String type = null) {
-        findOptionAsString(name, type)?.split(',')*.trim()
+        return findOptionAsString(name, type)?.split(',')*.trim()
     }
 
     @Deprecated

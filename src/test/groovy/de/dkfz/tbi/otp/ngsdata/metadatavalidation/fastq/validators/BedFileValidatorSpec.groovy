@@ -44,7 +44,7 @@ class BedFileValidatorSpec extends Specification implements DataTest, DomainFact
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 BedFile,
                 Individual,
                 LibraryPreparationKit,

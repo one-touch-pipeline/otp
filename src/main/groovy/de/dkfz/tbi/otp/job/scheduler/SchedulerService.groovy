@@ -100,7 +100,7 @@ class SchedulerService {
     private final ThreadLocal<Job> jobByThread = new ThreadLocal<Job>()
 
     boolean isActive() {
-        schedulerActive
+        return schedulerActive
     }
 
     /**

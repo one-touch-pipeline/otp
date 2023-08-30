@@ -98,7 +98,7 @@ class NotificationDigestService {
     }
 
     List<PreparedNotification> sendPreparedNotification(List<PreparedNotification> preparedNotifications) {
-        preparedNotifications.each { PreparedNotification preparedNotification ->
+        return preparedNotifications.each { PreparedNotification preparedNotification ->
             sendPreparedNotification(preparedNotification)
         }
     }

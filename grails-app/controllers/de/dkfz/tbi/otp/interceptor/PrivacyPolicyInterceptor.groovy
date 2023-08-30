@@ -57,7 +57,7 @@ class PrivacyPolicyInterceptor {
     }
 
     @Override
-    boolean after() { true }
+    boolean after() { return true }
 
     @Override
     void afterView() {

@@ -69,7 +69,7 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
 
         AbstractBamFile failedInstance = (AbstractBamFile) process.processParameterObject
 
-        AbstractBamFile.withTransaction {
+        return AbstractBamFile.withTransaction {
             failedInstance.withdraw()
             MergingWorkPackage mergingWorkPackage = failedInstance.workPackage
             mergingWorkPackage.needsProcessing = false
@@ -107,7 +107,7 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
 
     private static boolean isDataInstallationWFInProgress(MergingWorkPackage mergingWorkPackage) {
         assert mergingWorkPackage
-        mergingWorkPackage.seqTracks.find {
+        return mergingWorkPackage.seqTracks.find {
             it.dataInstallationState != SeqTrack.DataProcessingState.FINISHED
         }
     }

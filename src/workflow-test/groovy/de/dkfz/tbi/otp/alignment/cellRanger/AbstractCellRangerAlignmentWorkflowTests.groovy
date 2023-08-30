@@ -186,7 +186,7 @@ abstract class AbstractCellRangerAlignmentWorkflowTests extends AbstractAlignmen
 
     @Override
     String getJobSubmissionOptions() {
-        JsonOutput.toJson([
+        return JsonOutput.toJson([
                 (JobSubmissionOption.WALLTIME): Duration.ofHours(5).toString(),
                 (JobSubmissionOption.MEMORY)  : "60g",
                 (JobSubmissionOption.CORES)   : "16",

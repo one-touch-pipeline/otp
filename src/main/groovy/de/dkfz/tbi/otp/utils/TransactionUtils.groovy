@@ -31,6 +31,6 @@ class TransactionUtils {
      */
     @Deprecated
     static <T> T withNewTransaction(Closure<T> closure) {
-        Realm.withNewTransaction closure
+        return Realm.withNewTransaction(closure)
     }
 }

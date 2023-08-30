@@ -39,7 +39,7 @@ class AceseqResultsService extends AbstractAnalysisResultsService<AceseqInstance
     @Override
     Map getQcData(AceseqInstance analysis) {
         AceseqQc qc = CollectionUtils.atMostOneElement(AceseqQc.findAllByAceseqInstanceAndNumber(analysis, 1))
-        [
+        return [
                 tcc             : FormatHelper.formatNumber(qc?.tcc),
                 ploidy          : FormatHelper.formatNumber(qc?.ploidy),
                 ploidyFactor    : qc?.ploidyFactor,

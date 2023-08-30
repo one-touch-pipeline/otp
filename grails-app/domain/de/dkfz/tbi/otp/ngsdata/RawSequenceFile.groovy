@@ -171,7 +171,7 @@ abstract class RawSequenceFile implements CommentableWithProject, Entity {
 
     @Override
     String toString() {
-        fileName
+        return fileName
     }
 
     Individual getIndividual() {

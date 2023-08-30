@@ -44,7 +44,7 @@ class ReferenceGenomeProjectSeqTypeService {
 
     static ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqType(SeqTrack seqTrack) {
         assert seqTrack
-        getConfiguredReferenceGenomeProjectSeqType(seqTrack.project, seqTrack.seqType, seqTrack.sampleType)
+        return getConfiguredReferenceGenomeProjectSeqType(seqTrack.project, seqTrack.seqType, seqTrack.sampleType)
     }
 
     static ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqType(Project project, SeqType seqType) {

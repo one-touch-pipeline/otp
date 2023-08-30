@@ -223,6 +223,6 @@ class Cell {
             sb.insert(0, LETTERS[(col - 1) % LETTERS.length])
             col = (col - 1) / LETTERS.length
         }
-        sb.insert(0, LETTERS[col - 1])
+        return sb.insert(0, LETTERS[col - 1])
     }
 }

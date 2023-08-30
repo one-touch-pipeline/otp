@@ -72,7 +72,7 @@ class MonitorOutputCollector {
     }
 
     String getOutput() {
-        output.join('\n')
+        return output.join('\n')
     }
 
     String prefix(String text, String prefix = INDENT) {

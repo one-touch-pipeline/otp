@@ -39,7 +39,7 @@ class IndelResultsService extends AbstractAnalysisResultsService<IndelCallingIns
     Map getQcData(IndelCallingInstance analysis) {
         IndelQualityControl qc = CollectionUtils.atMostOneElement(IndelQualityControl.findAllByIndelCallingInstance(analysis))
         IndelSampleSwapDetection sampleSwap = CollectionUtils.atMostOneElement(IndelSampleSwapDetection.findAllByIndelCallingInstance(analysis))
-        [
+        return [
                 numIndels: qc?.numIndels ?: "",
                 numIns: qc?.numIns ?: "",
                 numDels: qc?.numDels ?: "",

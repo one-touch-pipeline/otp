@@ -32,7 +32,7 @@ class SampleTypeSpec extends Specification implements DataTest, DomainFactoryCor
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 SampleType,
         ]
     }

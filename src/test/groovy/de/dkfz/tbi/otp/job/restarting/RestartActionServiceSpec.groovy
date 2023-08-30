@@ -40,7 +40,7 @@ class RestartActionServiceSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 Process,
                 ProcessingStep,
                 ProcessingStepUpdate,

@@ -32,6 +32,6 @@ class SnvResultsService extends AbstractAnalysisResultsService<AbstractSnvCallin
 
     @Override
     Map getQcData(AbstractSnvCallingInstance analysis) {
-        [:]
+        return [:]
     }
 }

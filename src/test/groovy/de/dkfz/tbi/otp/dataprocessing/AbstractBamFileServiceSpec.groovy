@@ -42,7 +42,7 @@ class AbstractBamFileServiceSpec extends Specification implements DataTest, IsRo
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 FastqFile,
                 FastqImportInstance,
                 FileType,

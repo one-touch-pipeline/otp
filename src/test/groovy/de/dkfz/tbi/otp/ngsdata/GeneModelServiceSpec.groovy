@@ -33,7 +33,7 @@ class GeneModelServiceSpec extends Specification implements DataTest, ServiceUni
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 GeneModel,
                 ProcessingOption,
                 ReferenceGenome,

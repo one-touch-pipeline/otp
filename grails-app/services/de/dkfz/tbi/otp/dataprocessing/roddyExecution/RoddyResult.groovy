@@ -87,7 +87,7 @@ trait RoddyResult {
      */
     @Deprecated
     List<File> getWorkExecutionDirectories() {
-        roddyExecutionDirectoryNames.collect {
+        return roddyExecutionDirectoryNames.collect {
             new File(workExecutionStoreDirectory, it)
         }
     }

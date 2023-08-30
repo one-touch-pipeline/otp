@@ -50,7 +50,7 @@ abstract class AbstractSnvWorkflowTests extends AbstractRoddyBamFilePairAnalysis
         )
         createDirectories([new File(projectService.getSequencingDirectory(project).toString())])
 
-        config = doWithAuth(OPERATOR) {
+        return doWithAuth(OPERATOR) {
             projectService.configureSnvPipelineProject(
                     new RoddyConfiguration([
                             project          : project,
@@ -79,7 +79,7 @@ abstract class AbstractSnvWorkflowTests extends AbstractRoddyBamFilePairAnalysis
 
     @Override
     File getWorkflowData() {
-        new File(inputRootDirectory, 'snv')
+        return new File(inputRootDirectory, 'snv')
     }
 
     @Override

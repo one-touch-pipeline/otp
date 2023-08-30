@@ -40,7 +40,7 @@ class SeqTypeBamValidatorSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 SeqType,
         ]
     }

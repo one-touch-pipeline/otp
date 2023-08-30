@@ -112,7 +112,7 @@ class ReferenceGenomeSelectorService {
         Set<String> otpWorkflows = otpWorkflowService.lookupAlignableOtpWorkflowBeans().keySet()
         Set<SpeciesWithStrain> speciesWithStrainSet = speciesWithStrains as Set
         List<Workflow> workflows = Workflow.findAllByBeanNameInList(otpWorkflows as List)
-        ReferenceGenomeSelector.findAllByProjectAndSeqTypeAndWorkflowInList(project, seqType, workflows).
+        return ReferenceGenomeSelector.findAllByProjectAndSeqTypeAndWorkflowInList(project, seqType, workflows).
                 findAll { ReferenceGenomeSelector rgs ->
                     rgs.species == speciesWithStrainSet
                 }

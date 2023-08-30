@@ -45,7 +45,7 @@ class Document implements Entity {
         final String extension
 
         String getDisplayName() {
-            "${name()} (.${extension})"
+            return "${name()} (.${extension})"
         }
     }
 

@@ -88,6 +88,6 @@ class InfoController {
     def faq() { }
 
     String newsBanner() {
-        render(processingOptionService.findOptionAsString(ProcessingOption.OptionName.NEWS_BANNER))
+        return render(processingOptionService.findOptionAsString(ProcessingOption.OptionName.NEWS_BANNER))
     }
 }

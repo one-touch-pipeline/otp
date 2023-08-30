@@ -129,7 +129,7 @@ class MergingCriteriaService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<SeqPlatformGroup> findDefaultSeqPlatformGroupsOperator() {
-        findDefaultSeqPlatformGroups()
+        return findDefaultSeqPlatformGroups()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")

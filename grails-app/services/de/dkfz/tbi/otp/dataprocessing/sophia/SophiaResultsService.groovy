@@ -36,7 +36,7 @@ class SophiaResultsService extends AbstractAnalysisResultsService<SophiaInstance
     @Override
     Map getQcData(SophiaInstance analysis) {
         SophiaQc qc = CollectionUtils.atMostOneElement(SophiaQc.findAllBySophiaInstance(analysis))
-        [
+        return [
                 controlMassiveInvPrefilteringLevel: qc?.controlMassiveInvPrefilteringLevel,
                 tumorMassiveInvFilteringLevel: qc?.tumorMassiveInvFilteringLevel,
                 rnaContaminatedGenesMoreThanTwoIntron: qc?.rnaContaminatedGenesMoreThanTwoIntron,

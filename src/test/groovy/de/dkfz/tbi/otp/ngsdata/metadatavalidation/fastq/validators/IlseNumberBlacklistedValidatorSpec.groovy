@@ -37,7 +37,7 @@ class IlseNumberBlacklistedValidatorSpec extends Specification implements DataTe
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 Comment,
                 IlseSubmission,
         ]

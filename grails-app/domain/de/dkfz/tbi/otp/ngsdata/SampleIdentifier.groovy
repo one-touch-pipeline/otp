@@ -85,7 +85,7 @@ class SampleIdentifier implements Entity {
 
     @Override
     String toString() {
-        name
+        return name
     }
 
     static mapping = {

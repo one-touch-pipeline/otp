@@ -54,7 +54,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     }
 
     protected String getReferenceGenomeSpecificPath() {
-        'bwa06_1KGRef'
+        return 'bwa06_1KGRef'
     }
 
     protected String getChromosomeStatFileName() {
@@ -152,7 +152,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     abstract SeqType findSeqType()
 
     Pipeline findPipeline() {
-        DomainFactory.createPanCanPipeline()
+        return DomainFactory.createPanCanPipeline()
     }
 
     MergingWorkPackage createWorkPackage() {

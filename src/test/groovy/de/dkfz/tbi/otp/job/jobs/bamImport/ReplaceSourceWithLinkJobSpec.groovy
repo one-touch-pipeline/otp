@@ -46,7 +46,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 ExternalMergingWorkPackage,
                 ExternallyProcessedBamFile,
                 ImportProcess,

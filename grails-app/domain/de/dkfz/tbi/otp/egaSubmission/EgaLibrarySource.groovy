@@ -47,6 +47,6 @@ class EgaLibrarySource implements Entity {
 
     @Override
     String toString() {
-        "EgaLibrarySource ${this.librarySourceEgaName} (${seqTypes*.toString().join(", ")})"
+        return "EgaLibrarySource ${this.librarySourceEgaName} (${seqTypes*.toString().join(", ")})"
     }
 }

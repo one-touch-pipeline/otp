@@ -57,7 +57,7 @@ class SeqCenter implements Entity, ProjectFieldReferenceAble, Legacy {
 
     @Override
     String toString() {
-        name
+        return name
     }
 
     @Override

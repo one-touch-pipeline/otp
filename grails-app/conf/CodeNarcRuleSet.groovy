@@ -369,7 +369,7 @@ All the Rules that will be used for OTP
     }
     // ImplicitClosureParameter // There are more cases where this would deteriorate code quality instead of improving it
     ImplicitReturnStatement {
-        priority = LOW
+        priority = CRITICAL
     }
     InvertedCondition {
         priority = LOW

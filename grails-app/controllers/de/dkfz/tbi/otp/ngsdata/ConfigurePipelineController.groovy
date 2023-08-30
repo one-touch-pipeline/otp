@@ -334,14 +334,14 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
             ]
         }
 
-        render(data as JSON)
+        return render(data as JSON)
     }
 
     JSON getGeneModels(String referenceGenome) {
         Map data = [
                 data: geneModelService.findAllByReferenceGenomeName(referenceGenome)
         ]
-        render(data as JSON)
+        return render(data as JSON)
     }
 
     JSON getToolVersions(String referenceGenome) {
@@ -356,7 +356,7 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
         }
         data << ["defaultGenomeStarIndex": getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_RNA_DEFAULT_GENOME_STAR_INDEX)]
         data << ["data": toolNamesData]
-        render(data as JSON)
+        return render(data as JSON)
     }
 
     def invalidateConfig(InvalidateConfigurationCommand cmd) {
@@ -378,7 +378,7 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
     }
 
     private String getOption(OptionName name, String type = null) {
-        processingOptionService.findOptionAsString(name, type)
+        return processingOptionService.findOptionAsString(name, type)
     }
 }
 

@@ -678,31 +678,31 @@ class ProcessingOption implements Entity {
 
         @Override
         String toString() {
-            name()
+            return name()
         }
 
         Boolean getDeprecated() {
-            deprecated
+            return deprecated
         }
 
         String getDescription() {
-            description
+            return description
         }
 
         Necessity getNecessity() {
-            necessity
+            return necessity
         }
 
         String getDefaultValue() {
-            defaultValue
+            return defaultValue
         }
 
         TypeValidators getValidatorForValue() {
-            validatorForValue
+            return validatorForValue
         }
 
         TypeValidators getValidatorForType() {
-            validatorForType
+            return validatorForType
         }
     }
 

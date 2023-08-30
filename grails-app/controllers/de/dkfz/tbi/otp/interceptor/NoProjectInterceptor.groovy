@@ -67,11 +67,11 @@ class NoProjectInterceptor {
                 return false
             }
         }
-        true
+        return true
     }
 
     @Override
-    boolean after() { true }
+    boolean after() { return true }
 
     @Override
     void afterView() {

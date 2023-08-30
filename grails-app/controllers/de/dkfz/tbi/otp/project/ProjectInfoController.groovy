@@ -122,7 +122,7 @@ class ProjectInfoController implements CheckAndCall {
     }
 
     JSON updateProjectInfoComment(UpdateProjectInfoCommentCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        return checkErrorAndCallMethod(cmd) {
             projectInfoService.updateProjectInfoComment(cmd.projectInfo, cmd.value)
         }
     }

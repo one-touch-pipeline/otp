@@ -35,7 +35,7 @@ class CellRangerMergingWorkPackageSpec extends Specification implements CellRang
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 CellRangerMergingWorkPackage,
                 Individual,
                 Pipeline,

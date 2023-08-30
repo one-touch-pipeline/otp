@@ -162,11 +162,11 @@ class SampleOverviewController {
         dataToRender.anythingWithdrawn = anythingWithdrawn
         dataToRender.columnsToHide = columnsToHide
 
-        render(dataToRender as JSON)
+        return render(dataToRender as JSON)
     }
 
     private List<Pipeline> findPipelines() {
-        Pipeline.findAllByType(Pipeline.Type.ALIGNMENT, [sort: "id"])
+        return Pipeline.findAllByType(Pipeline.Type.ALIGNMENT, [sort: "id"])
     }
 }
 

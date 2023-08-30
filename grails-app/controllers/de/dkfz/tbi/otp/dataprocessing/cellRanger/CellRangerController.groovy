@@ -117,7 +117,7 @@ class GroupedMwp implements Comparable {
     List<CellRangerMergingWorkPackage> mwps
 
     boolean isAtLeastOneInProgress() {
-        mwps.any { !it.bamFileInProjectFolder }
+        return mwps.any { !it.bamFileInProjectFolder }
     }
 
     boolean isAnyUnsetAndNoneFinal() {
@@ -130,7 +130,7 @@ class GroupedMwp implements Comparable {
 
     @Override
     int compareTo(Object o) {
-        this.sample.individual.displayName <=> o.sample.individual.displayName ?:
+        return this.sample.individual.displayName <=> o.sample.individual.displayName ?:
                 this.sample.sampleType.displayName <=> o.sample.sampleType.displayName ?:
                         this.seqType.nameWithLibraryLayout <=> o.seqType.nameWithLibraryLayout ?:
                                 this.programVersion <=> o.programVersion ?:

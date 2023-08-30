@@ -45,11 +45,11 @@ class CreateJobStateLogFileHelper {
     }
 
     static String convertLogFileEntryToString(LogFileEntry entry) {
-        "${entry.clusterJobId}:${entry.statusCode}:${entry.timeStamp}:${entry.jobClass}"
+        return "${entry.clusterJobId}:${entry.statusCode}:${entry.timeStamp}:${entry.jobClass}"
     }
 
     // when using PBS, the cluster job ID also contains a host name
     static String convertLogFileEntryToStringIncludingHost(LogFileEntry entry) {
-        "${entry.clusterJobId}.host.name:${entry.statusCode}:${entry.timeStamp}:${entry.jobClass}"
+        return "${entry.clusterJobId}.host.name:${entry.statusCode}:${entry.timeStamp}:${entry.jobClass}"
     }
 }

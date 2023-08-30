@@ -150,11 +150,11 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
         }
 
         Individual getIndividual() {
-            sample.individual
+            return sample.individual
         }
 
         Project getProject() {
-            individual.project
+            return individual.project
         }
 
         void assertBamFile(ExternallyProcessedBamFile epmbf) {

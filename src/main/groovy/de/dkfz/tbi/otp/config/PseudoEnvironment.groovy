@@ -59,6 +59,6 @@ enum PseudoEnvironment {
     }
 
     String getIco() {
-        this.ico ?: "favicon_light_slate_blue.ico"
+        return this.ico ?: "favicon_light_slate_blue.ico"
     }
 }

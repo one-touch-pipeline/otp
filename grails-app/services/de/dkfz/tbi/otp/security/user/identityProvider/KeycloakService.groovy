@@ -200,11 +200,11 @@ class KeycloakService implements IdentityProvider {
     }
 
     private ParameterizedTypeReference getKeycloakUserTypeReference() {
-        new ParameterizedTypeReference<List<KeycloakUser>>() { }
+        return new ParameterizedTypeReference<List<KeycloakUser>>() { }
     }
 
     private ParameterizedTypeReference getKeycloakGroupTypeReference() {
-        new ParameterizedTypeReference<List<KeycloakGroup>>() { }
+        return new ParameterizedTypeReference<List<KeycloakGroup>>() { }
     }
 
     private List<IdpUserDetails> castKeycloakUsersIntoIdpUserDetails(List<KeycloakUser> keycloakUsers) {

@@ -65,7 +65,7 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
     ]
 
     final Map createBamFileProperties() {
-        DomainFactory.randomBamFileProperties + [
+        return DomainFactory.randomBamFileProperties + [
                 coverage            : COVERAGE,
                 qcTrafficLightStatus: AbstractBamFile.QcTrafficLightStatus.QC_PASSED,
         ]
@@ -223,7 +223,7 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
 
     @Override
     File getBamFilePairBaseDirectory() {
-        new File(inputRootDirectory, 'bamFiles')
+        return new File(inputRootDirectory, 'bamFiles')
     }
 
     void createBedFileAndLibPrepKit() {

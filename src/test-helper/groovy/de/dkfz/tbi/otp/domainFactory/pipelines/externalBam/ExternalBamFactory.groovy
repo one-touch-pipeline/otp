@@ -33,12 +33,12 @@ trait ExternalBamFactory implements IsAlignment {
 
     @Override
     Pipeline findOrCreatePipeline() {
-        findOrCreatePipeline(Pipeline.Name.EXTERNALLY_PROCESSED, Pipeline.Type.ALIGNMENT)
+        return findOrCreatePipeline(Pipeline.Name.EXTERNALLY_PROCESSED, Pipeline.Type.ALIGNMENT)
     }
 
     @Override
     ExternalMergingWorkPackage createMergingWorkPackage(Map properties = [:], boolean saveAndValidate = true) {
-        createDomainObject(ExternalMergingWorkPackage, [
+        return createDomainObject(ExternalMergingWorkPackage, [
                 sample         : { createSample() },
                 seqType        : { createSeqType() },
                 pipeline       : { findOrCreatePipeline() },

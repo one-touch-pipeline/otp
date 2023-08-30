@@ -39,7 +39,7 @@ class RoddyAceseqStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStar
 
     @Override
     Pipeline createPipeline() {
-        DomainFactory.createAceseqPipelineLazy()
+        return DomainFactory.createAceseqPipelineLazy()
     }
 
     @Override

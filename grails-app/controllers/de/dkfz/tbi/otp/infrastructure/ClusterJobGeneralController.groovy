@@ -107,35 +107,35 @@ class ClusterJobGeneralController {
         dataToRender.iTotalRecords = clusterJobService.countAllClusterJobsByDateBetween(startDate, endDate, cmd.sSearch)
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = data
-        render(dataToRender as JSON)
+        return render(dataToRender as JSON)
     }
 
     JSON getAllExitCodes() {
-        renderPieDataAsJSON(clusterJobService.&findAllExitCodesByDateBetween)
+        return renderPieDataAsJSON(clusterJobService.&findAllExitCodesByDateBetween)
     }
 
     JSON getAllExitStatuses() {
-        renderPieDataAsJSON(clusterJobService.&findAllExitStatusesByDateBetween)
+        return renderPieDataAsJSON(clusterJobService.&findAllExitStatusesByDateBetween)
     }
 
     JSON getAllFailed() {
-        renderLineDataAsJSON(clusterJobService.&findAllFailedByDateBetween, ['failed'])
+        return renderLineDataAsJSON(clusterJobService.&findAllFailedByDateBetween, ['failed'])
     }
 
     JSON getAllStates() {
-        renderLineDataAsJSON(clusterJobService.&findAllStatesByDateBetween, ['queued', 'started', 'ended'])
+        return renderLineDataAsJSON(clusterJobService.&findAllStatesByDateBetween, ['queued', 'started', 'ended'])
     }
 
     JSON getAllStatesTimeDistribution() {
-        renderPieDataAsJSON(clusterJobService.&findAllStatesTimeDistributionByDateBetween)
+        return renderPieDataAsJSON(clusterJobService.&findAllStatesTimeDistributionByDateBetween)
     }
 
     JSON getAllAvgCoreUsage() {
-        renderLineDataAsJSON(clusterJobService.&findAllAvgCoreUsageByDateBetween, ['cores'])
+        return renderLineDataAsJSON(clusterJobService.&findAllAvgCoreUsageByDateBetween, ['cores'])
     }
 
     JSON getAllMemoryUsage() {
-        renderLineDataAsJSON(clusterJobService.&findAllMemoryUsageByDateBetween, ['memory'])
+        return renderLineDataAsJSON(clusterJobService.&findAllMemoryUsageByDateBetween, ['memory'])
     }
 
     private JSON renderLineDataAsJSON(Closure<Map<String, List>> method, List keys) {
@@ -155,7 +155,7 @@ class ClusterJobGeneralController {
         dataToRender.labels = results.days
         dataToRender.keys = keys
 
-        render(dataToRender as JSON)
+        return render(dataToRender as JSON)
     }
 
     private JSON renderPieDataAsJSON(Closure<List> method) {
@@ -175,6 +175,6 @@ class ClusterJobGeneralController {
             }
         }
 
-        render(dataToRender as JSON)
+        return render(dataToRender as JSON)
     }
 }

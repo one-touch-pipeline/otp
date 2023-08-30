@@ -45,7 +45,7 @@ class ParseAceseqQcJobSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 AbstractBamFile,
                 AceseqInstance,
                 AceseqQc,
@@ -83,7 +83,7 @@ class ParseAceseqQcJobSpec extends Specification implements DataTest {
     // using loadExternalBeans() would be preferable but doesn't work
     @Override
     Closure doWithSpring() {
-        { ->
+        return { ->
             [
                     Short, Short.TYPE,
                     Integer, Integer.TYPE,

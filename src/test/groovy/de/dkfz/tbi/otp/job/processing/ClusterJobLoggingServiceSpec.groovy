@@ -40,7 +40,7 @@ class ClusterJobLoggingServiceSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 JobDefinition,
                 JobExecutionPlan,
                 Process,

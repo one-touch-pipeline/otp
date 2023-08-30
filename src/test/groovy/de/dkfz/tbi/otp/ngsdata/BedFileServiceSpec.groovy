@@ -36,7 +36,7 @@ class BedFileServiceSpec extends Specification implements DataTest, ServiceUnitT
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 BedFile,
                 ProcessingOption,
         ]

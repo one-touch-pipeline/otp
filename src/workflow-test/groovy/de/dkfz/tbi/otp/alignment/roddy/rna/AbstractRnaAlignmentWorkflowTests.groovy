@@ -146,7 +146,7 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
 
     @Override
     Pipeline findPipeline() {
-        DomainFactory.createRnaPipeline()
+        return DomainFactory.createRnaPipeline()
     }
 
     @Override
@@ -272,7 +272,7 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
 
     @Override
     protected String getReferenceGenomeSpecificPath() {
-        'bwa06_1KGRef_PhiX'
+        return 'bwa06_1KGRef_PhiX'
     }
 
     @Override
@@ -289,6 +289,6 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
 
     @Override
     Duration getTimeout() {
-        Duration.ofHours(5)
+        return Duration.ofHours(5)
     }
 }

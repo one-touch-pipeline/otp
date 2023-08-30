@@ -146,7 +146,7 @@ class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelin
 
     @Override
     protected Pipeline getPipeline() {
-        Pipeline.Name.CELL_RANGER.pipeline
+        return Pipeline.Name.CELL_RANGER.pipeline
     }
 
     @SuppressWarnings('MissingOverrideAnnotation') // for an unknown reason the groovy compiler doesnt work with @Override in this case

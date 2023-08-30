@@ -51,7 +51,7 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 FastqFile,
                 FastqImportInstance,
                 FileType,

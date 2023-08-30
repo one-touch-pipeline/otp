@@ -397,7 +397,7 @@ class MetadataImportService {
     }
 
     protected List<SeqTrack> getSeqTracksWithConfiguredAlignment(List<SeqTrack> seqTracks) {
-        seqTracks.findAll { SeqTrack seqTrack ->
+        return seqTracks.findAll { SeqTrack seqTrack ->
             ConfigPerProjectAndSeqType.findAllByProjectAndSeqTypeAndPipelineInListAndObsoleteDateIsNull(
                     seqTrack.project,
                     seqTrack.seqType,

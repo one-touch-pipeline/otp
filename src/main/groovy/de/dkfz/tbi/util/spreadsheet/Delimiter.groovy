@@ -49,7 +49,7 @@ enum Delimiter {
                     "Please (have someone) rewrite the code to use 'detectDelimiter(context)' instead.")
         }
 
-        this.delimiter
+        return this.delimiter
     }
 
     String getDisplayName() {
@@ -60,7 +60,7 @@ enum Delimiter {
                     "be able to select this.")
         }
 
-        this.displayName
+        return this.displayName
     }
 
     /** returns all the "normal" values, that don't need special handling. */

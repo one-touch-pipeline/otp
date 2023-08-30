@@ -82,7 +82,7 @@ class RunYapsaPipelineCheckerIntegrationSpec extends AbstractVariantCallingPipel
     // RunYapsa is not a Roddy workflow, so the default doesn't work...
     @Override
     ConfigPerProjectAndSeqType createConfig(SamplePair samplePair, Map properties = [:]) {
-        DomainFactory.createRunYapsaConfigLazy([
+        return DomainFactory.createRunYapsaConfigLazy([
                 pipeline: createPipeLine(),
                 seqType : samplePair.seqType,
                 project : samplePair.project,

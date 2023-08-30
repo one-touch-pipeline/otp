@@ -42,7 +42,7 @@ class RunYapsaStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStartJo
 
     @Override
     Pipeline createPipeline() {
-        DomainFactory.createRunYapsaPipelineLazy()
+        return DomainFactory.createRunYapsaPipelineLazy()
     }
 
     @Override

@@ -73,7 +73,7 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification imp
     abstract String getWorkflowNameForCrosschecking()
 
     List<SeqTrack> createSeqTracks(Map properties = [:]) {
-        seqTypes.collect {
+        return seqTypes.collect {
             SeqTrack seqTrack = DomainFactory.createSeqTrack([
                     seqType              : it,
                     libraryPreparationKit: properties.hasProperty('libraryPreparationKit') ? properties.libraryPreparationKit :
@@ -97,7 +97,7 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification imp
 
     List<SeqTrack> createSeqTracksWithConfig(Map configProperties = [:], Map seqTrackProperties = [:]) {
         Workflow w = configProperties.remove("workflow")
-        createSeqTracks(seqTrackProperties).each {
+        return createSeqTracks(seqTrackProperties).each {
             if (workflow) {
                 createWorkflowVersionSelector([
                         project        : it.project,
@@ -115,7 +115,7 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification imp
     }
 
     List<SeqTrack> createSeqTracksWithMergingWorkPackages(Map mergingWorkPackageProperties = [:], Map seqTrackProperties = [:]) {
-        createSeqTracks(seqTrackProperties).each {
+        return createSeqTracks(seqTrackProperties).each {
             createMWP(it, mergingWorkPackageProperties)
         }
     }
@@ -147,13 +147,13 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification imp
     }
 
     AbstractBamFile createBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
-        DomainFactory.createRoddyBamFile([
+        return DomainFactory.createRoddyBamFile([
                 workPackage: mergingWorkPackage,
         ] + properties)
     }
 
     List<AbstractBamFile> createBamFiles(Map bamProperties = [:], Map mergingWorkPackageProperties = [:]) {
-        createMergingWorkPackages(mergingWorkPackageProperties).collect {
+        return createMergingWorkPackages(mergingWorkPackageProperties).collect {
             createBamFile(it, bamProperties)
         }
     }

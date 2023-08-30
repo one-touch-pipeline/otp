@@ -53,7 +53,7 @@ class AceseqController extends AbstractAnalysisController {
 
         dataToRender.archived = project.archived
 
-        render(dataToRender as JSON)
+        return render(dataToRender as JSON)
     }
 
     Map plots(BamFilePairAnalysisCommand cmd) {

@@ -52,7 +52,7 @@ abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalys
         )
         createDirectories([new File(projectService.getSequencingDirectory(project).toString())])
 
-        config = doWithAuth(OPERATOR) {
+        return doWithAuth(OPERATOR) {
             projectService.configureIndelPipelineProject(
                     new RoddyConfiguration([
                             project          : project,
@@ -85,7 +85,7 @@ abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalys
 
     @Override
     File getWorkflowData() {
-        new File(inputRootDirectory, 'indel')
+        return new File(inputRootDirectory, 'indel')
     }
 
     @Override
@@ -96,6 +96,6 @@ abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalys
 
     @Override
     Duration getTimeout() {
-        Duration.ofHours(5)
+        return Duration.ofHours(5)
     }
 }

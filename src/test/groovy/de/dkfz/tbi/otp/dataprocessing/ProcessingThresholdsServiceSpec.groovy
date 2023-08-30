@@ -34,7 +34,7 @@ class ProcessingThresholdsServiceSpec extends Specification implements DataTest,
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 Individual,
                 ProcessingThresholds,
                 Project,

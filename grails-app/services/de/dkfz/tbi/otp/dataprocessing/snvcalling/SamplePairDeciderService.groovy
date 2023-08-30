@@ -136,14 +136,14 @@ class SamplePairDeciderService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<SamplePair> findOrCreateSamplePairs(List<AbstractMergingWorkPackage> diseases, AbstractMergingWorkPackage control) {
-        diseases.collect { AbstractMergingWorkPackage disease ->
+        return diseases.collect { AbstractMergingWorkPackage disease ->
             return findOrCreateSamplePair(disease, control)
         }
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<SamplePair> findOrCreateSamplePairs(AbstractMergingWorkPackage disease, List<AbstractMergingWorkPackage> controls) {
-        controls.collect { AbstractMergingWorkPackage control ->
+        return controls.collect { AbstractMergingWorkPackage control ->
             return findOrCreateSamplePair(disease, control)
         }
     }

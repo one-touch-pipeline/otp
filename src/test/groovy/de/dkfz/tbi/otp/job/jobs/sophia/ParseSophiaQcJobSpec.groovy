@@ -43,7 +43,7 @@ class ParseSophiaQcJobSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 AbstractBamFile,
                 RawSequenceFile,
                 FastqFile,

@@ -73,7 +73,7 @@ class RawSequenceFileController {
                 date: TimeFormats.WEEKDAY_DATE_TIME.getFormattedDate(rawSequenceFile.comment.modificationDate),
                 author: rawSequenceFile.comment.author,
         ]
-        render(dataToRender as JSON)
+        return render(dataToRender as JSON)
     }
 
     private String formatFileSize(long fileSize) {

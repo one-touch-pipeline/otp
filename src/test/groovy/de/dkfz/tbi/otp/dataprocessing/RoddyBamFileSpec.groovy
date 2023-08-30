@@ -37,7 +37,7 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 AbstractBamFile,
                 Comment,
                 RawSequenceFile,

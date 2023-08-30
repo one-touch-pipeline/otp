@@ -80,7 +80,7 @@ class SoftwareToolController implements CheckAndCall {
             return
         }
         Map data = [success: true, softwareTool: softwareToolService.updateSoftwareTool(cmd.id, cmd.value.trim(), cmd.legacy)]
-        render(data as JSON)
+        return render(data as JSON)
     }
 
     JSON updateSoftwareToolIdentifier(UpdateCommand cmd) {
@@ -94,7 +94,7 @@ class SoftwareToolController implements CheckAndCall {
             return
         }
         Map data = [success: true, softwareToolIdentifier: softwareToolService.updateSoftwareToolIdentifier(cmd.id, cmd.value.trim())]
-        render(data as JSON)
+        return render(data as JSON)
     }
 
     JSON createSoftwareToolIdentifier(UpdateCommand cmd) {
@@ -109,7 +109,7 @@ class SoftwareToolController implements CheckAndCall {
         }
         SoftwareTool softwareTool = softwareToolService.getSoftwareTool(cmd.id)
         Map data = [success: true, softwareToolIdentifier: softwareToolService.createSoftwareToolIdentifier(softwareTool, cmd.value.trim())]
-        render(data as JSON)
+        return render(data as JSON)
     }
 }
 

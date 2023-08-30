@@ -29,6 +29,6 @@ class RunYapsaResultsService extends AbstractAnalysisResultsService<RunYapsaInst
 
     @Override
     Map getQcData(RunYapsaInstance analysis) {
-        [:]
+        return [:]
     }
 }

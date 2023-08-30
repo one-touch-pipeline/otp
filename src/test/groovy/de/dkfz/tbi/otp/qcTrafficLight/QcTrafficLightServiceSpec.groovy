@@ -39,7 +39,7 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 AbstractBamFile,
                 RawSequenceFile,
                 Comment,

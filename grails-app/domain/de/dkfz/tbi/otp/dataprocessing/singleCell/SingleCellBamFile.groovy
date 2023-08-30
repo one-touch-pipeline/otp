@@ -242,7 +242,7 @@ class SingleCellBamFile extends AbstractBamFile implements HasIdentifier, Proces
      */
     @Deprecated
     Map<String, String> getFileMappingForLinks() {
-        CREATED_RESULT_FILES_AND_DIRS.collectEntries {
+        return CREATED_RESULT_FILES_AND_DIRS.collectEntries {
             [(getLinkNameForFile(it)): it]
         }
     }
@@ -341,7 +341,7 @@ class SingleCellBamFile extends AbstractBamFile implements HasIdentifier, Proces
 
     @Override
     CellRangerQualityAssessment getQualityAssessment() {
-        CellRangerQualityAssessment.createCriteria().get {
+        return CellRangerQualityAssessment.createCriteria().get {
             qualityAssessmentMergedPass {
                 eq 'abstractBamFile', this
             }

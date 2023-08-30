@@ -86,7 +86,7 @@ class Pipeline implements Entity {
 
         @Deprecated
         Pipeline getPipeline() {
-            CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
+            return CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
                     type,
                     this,
             ))

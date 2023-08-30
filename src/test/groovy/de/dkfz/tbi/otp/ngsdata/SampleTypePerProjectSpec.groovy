@@ -31,7 +31,7 @@ class SampleTypePerProjectSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 SampleTypePerProject,
         ]
     }

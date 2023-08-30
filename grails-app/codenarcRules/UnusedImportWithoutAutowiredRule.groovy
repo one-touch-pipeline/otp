@@ -60,7 +60,7 @@ class UnusedImportWithoutAutowiredRule extends AbstractRule {
 
     private String findReference(SourceCode sourceCode, String alias, String className = null) {
         def aliasSameAsNonQualifiedClassName = className && className.endsWith(alias)
-        sourceCode.lines.find { line ->
+        return sourceCode.lines.find { line ->
             String aliasPattern = Pattern.quote(alias)
             if (!isImportStatementForAlias(line, aliasPattern)) {
                 def aliasCount = countUsage(line, aliasPattern)
@@ -72,7 +72,7 @@ class UnusedImportWithoutAutowiredRule extends AbstractRule {
 
     private boolean isImportStatementForAlias(String line, String pattern) {
         final importPattern = /import\s+.*/ + pattern
-        line =~ importPattern
+        return line =~ importPattern
     }
 
     private int countUsage(String line, String pattern) {

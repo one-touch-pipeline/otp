@@ -38,7 +38,7 @@ class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTe
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 JobDefinition,
                 JobExecutionPlan,
                 Process,

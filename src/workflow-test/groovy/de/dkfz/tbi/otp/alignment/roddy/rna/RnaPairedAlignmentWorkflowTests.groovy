@@ -30,7 +30,7 @@ class RnaPairedAlignmentWorkflowTests extends AbstractRnaAlignmentWorkflowTests 
 
     @Override
     SeqType findSeqType() {
-        DomainFactory.createRnaPairedSeqType()
+        return DomainFactory.createRnaPairedSeqType()
     }
 
     @Override

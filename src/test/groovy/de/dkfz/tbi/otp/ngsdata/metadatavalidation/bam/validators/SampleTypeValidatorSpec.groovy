@@ -39,7 +39,7 @@ class SampleTypeValidatorSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 SampleType,
         ]
     }

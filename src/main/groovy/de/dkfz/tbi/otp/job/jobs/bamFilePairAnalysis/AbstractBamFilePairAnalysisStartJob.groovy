@@ -93,7 +93,7 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
 
         tryToDeleteResultFilesOfFailedInstance(failedAnalysis)
 
-        BamFilePairAnalysis.withTransaction {
+        return BamFilePairAnalysis.withTransaction {
             failedAnalysis.withdrawn = true
             assert failedAnalysis.save(flush: true)
 

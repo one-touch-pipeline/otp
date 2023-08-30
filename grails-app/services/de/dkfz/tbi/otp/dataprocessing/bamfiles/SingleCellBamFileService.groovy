@@ -109,7 +109,7 @@ class SingleCellBamFileService<T extends AbstractBamFile> extends AbstractAbstra
      * Map of names to use for link and name used by CellRanger
      */
     Map<String, String> getFileMappingForLinks(SingleCellBamFile bamFile) {
-        CREATED_RESULT_FILES_AND_DIRS.collectEntries {
+        return CREATED_RESULT_FILES_AND_DIRS.collectEntries {
             [(getLinkNameForFile(bamFile, it)): it]
         }
     }

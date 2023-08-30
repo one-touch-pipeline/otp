@@ -49,7 +49,7 @@ trait DomainFactoryProcessingPriority implements DomainFactoryCore {
     }
 
     ProcessingPriority findOrCreateProcessingPriorityNormal() {
-        findOrCreateProcessingPriority([
+        return findOrCreateProcessingPriority([
                 name             : PRIORITY_NAME_NORMAL,
                 priority         : PRIORITY_VALUE_NORMAL,
                 errorMailPrefix  : PRIORITY_NAME_NORMAL + ERROR_SUFFIX,
@@ -59,7 +59,7 @@ trait DomainFactoryProcessingPriority implements DomainFactoryCore {
     }
 
     ProcessingPriority findOrCreateProcessingPriorityFastrack() {
-        findOrCreateProcessingPriority([
+        return findOrCreateProcessingPriority([
                 name             : PRIORITY_NAME_FASTTRACK,
                 priority         : PRIORITY_VALUE_FASTTRACK,
                 errorMailPrefix  : PRIORITY_NAME_FASTTRACK + ERROR_SUFFIX,
@@ -69,7 +69,7 @@ trait DomainFactoryProcessingPriority implements DomainFactoryCore {
     }
 
     ProcessingPriority findOrCreateProcessingPriorityMinimum() {
-        findOrCreateProcessingPriority([
+        return findOrCreateProcessingPriority([
                 name             : PRIORITY_NAME_MINIMUM,
                 priority         : PRIORITY_VALUE_MINIMUM,
                 errorMailPrefix  : PRIORITY_NAME_MINIMUM + ERROR_SUFFIX,
@@ -79,7 +79,7 @@ trait DomainFactoryProcessingPriority implements DomainFactoryCore {
     }
 
     ProcessingPriority findOrCreateProcessingPriorityMaximum() {
-        findOrCreateProcessingPriority([
+        return findOrCreateProcessingPriority([
                 name             : PRIORITY_NAME_MAXIMUM,
                 priority         : PRIORITY_VALUE_MAXIMUM,
                 errorMailPrefix  : PRIORITY_NAME_MAXIMUM + ERROR_SUFFIX,

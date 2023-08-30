@@ -70,6 +70,6 @@ class ProjectSelectionService {
     }
 
     private HttpServletRequest getCurrentRequest() {
-        WebUtils.retrieveGrailsWebRequest().currentRequest
+        return WebUtils.retrieveGrailsWebRequest().currentRequest
     }
 }

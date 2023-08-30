@@ -115,7 +115,7 @@ enum TypeValidators {
     }
 
     boolean validate(String value) {
-        value != null && validator(value)
+        return value != null && validator(value)
     }
 
     /**
@@ -156,6 +156,6 @@ enum TypeValidators {
         List<String> result = jobNames.collectMany { String jobName ->
             [jobName] + seqTypes.collect { String seqType -> "${jobName}_${seqType}" }
         }
-        result.sort()
+        return result.sort()
     }
 }

@@ -94,6 +94,6 @@ class SophiaService extends AbstractBamFileAnalysisService<SophiaInstance> imple
     }
 
     private String getFileNamePrefix(SophiaInstance instance) {
-        "svs_${instance.individual.pid}_${instance.samplePair.sampleType1.name.toLowerCase()}-${instance.samplePair.sampleType2.name.toLowerCase()}"
+        return "svs_${instance.individual.pid}_${instance.samplePair.sampleType1.name.toLowerCase()}-${instance.samplePair.sampleType2.name.toLowerCase()}"
     }
 }

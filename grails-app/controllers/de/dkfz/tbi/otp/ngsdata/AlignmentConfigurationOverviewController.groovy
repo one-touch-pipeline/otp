@@ -102,7 +102,7 @@ class AlignmentConfigurationOverviewController {
         }
 
         Map map = [alignmentInfo: alignmentInfo, alignmentError: alignmentError]
-        render(map as JSON)
+        return render(map as JSON)
     }
 
     /**
@@ -136,6 +136,6 @@ class AlignmentConfigurationOverviewController {
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = data
-        render(dataToRender as JSON)
+        return render(dataToRender as JSON)
     }
 }

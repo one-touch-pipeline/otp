@@ -321,7 +321,7 @@ class SeqTrack implements ProcessParameterObject, Entity, Artefact {
     }
 
     ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqType() {
-        ReferenceGenomeProjectSeqTypeService.getConfiguredReferenceGenomeProjectSeqType(this)
+        return ReferenceGenomeProjectSeqTypeService.getConfiguredReferenceGenomeProjectSeqType(this)
     }
 
     List<RawSequenceFile> getSequenceFiles() {

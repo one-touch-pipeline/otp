@@ -225,7 +225,7 @@ class ProjectRequestController implements CheckAndCall {
     @SuppressWarnings('ExplicitFlushForDeleteRule')
     JSON delete(ProjectRequest projectRequest) {
         projectRequestStateProvider.getCurrentState(projectRequest).delete(projectRequest)
-        render([:] as JSON)
+        return render([:] as JSON)
     }
 
     def create(ProjectRequest projectRequest) {

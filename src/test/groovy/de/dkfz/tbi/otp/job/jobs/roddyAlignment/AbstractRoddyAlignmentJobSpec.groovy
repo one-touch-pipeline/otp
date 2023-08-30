@@ -335,7 +335,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
     }
 
     private static String createMinimalSamFile(Collection<String> readGroup) {
-        """\
+        return """\
         |@HD\tVN:1.5\tSO:coordinate
         |@SQ\tSN:ref\tLN:45
         |${readGroup.collect { "@RG\tID:${it}\tLB:2_TTAGGC\tSM:sample_tumor_123" }.join('\n')}

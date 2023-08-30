@@ -201,15 +201,15 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     }
 
     Map studyMetadata() {
-        getEgaSubmission params.id as Long
+        return getEgaSubmission(params.id as Long)
     }
 
     Map sampleMetadata() {
-        getEgaSubmission params.id as Long
+        return getEgaSubmission(params.id as Long)
     }
 
     Map experimentalMetadata() {
-        getEgaSubmission(params.id as Long) { EgaSubmission egaSubmission ->
+        return getEgaSubmission(params.id as Long) { EgaSubmission egaSubmission ->
             return [
                     metadata: egaSubmissionService.getExperimentalMetadata(egaSubmission)
             ]
@@ -294,10 +294,10 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                         [headerCell.text, row.getCellByColumnTitle(headerCell.text).text]
                     }
                 } as Closure<Map<String, String>>))
-                render(data as JSON)
+                return render(data as JSON)
             }
         })
-        render([:] as JSON)
+        return render([:] as JSON)
     }
 
     OutputStream selectSamplesCsvDownload(SelectSampleDownloadCommand cmd) {
@@ -305,6 +305,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         response.contentType = CSV.mimeType
         response.setHeader("Content-disposition", "filename=select_samples.csv")
         response.outputStream << content.bytes
+        return response.outputStream
     }
 
     def sampleInformationUploadForm(UploadFormSubmitCommand cmd) {
@@ -567,8 +568,8 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     }
 
     JSON updateSubmissionState(UpdateSubmissionStateSubmitCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
-            egaSubmissionService.updateSubmissionState(cmd.submission, cmd.state)
+        return checkErrorAndCallMethod(cmd) {
+            return egaSubmissionService.updateSubmissionState(cmd.submission, cmd.state)
         }
     }
 
@@ -595,7 +596,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = data
-        render(dataToRender as JSON)
+        return render(dataToRender as JSON)
     }
 
     def updatePubMedId(UpdatePubMedIdSubmitCommand cmd) {

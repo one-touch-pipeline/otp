@@ -125,25 +125,25 @@ class MetaDataFieldsController implements CheckAndCall {
     }
 
     JSON updateAutoImportDirectory(UpdateSeqCenterAbsolutePathCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        return checkErrorAndCallMethod(cmd) {
             seqCenterService.updateAutoImportDirectory(cmd.seqCenter, cmd.absolutePath)
         }
     }
 
     JSON updateAutoImportable(UpdateSeqCenterFlagCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        return checkErrorAndCallMethod(cmd) {
             seqCenterService.updateAutoImportable(cmd.seqCenter, cmd.flag)
         }
     }
 
     JSON updateCopyMetadataFile(UpdateSeqCenterFlagCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        return checkErrorAndCallMethod(cmd) {
             seqCenterService.updateCopyMetadateFile(cmd.seqCenter, cmd.flag)
         }
     }
 
     JSON createLibraryPreparationKit(CreateLibraryPreparationKitCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        return checkErrorAndCallMethod(cmd) {
             libraryPreparationKitService.create(cmd.name, [
                     adapterFile                     : cmd.adapterFile,
                     reverseComplementAdapterSequence: cmd.reverseComplementAdapterSequence,
@@ -152,51 +152,51 @@ class MetaDataFieldsController implements CheckAndCall {
     }
 
     JSON addAdapterFileToLibraryPreparationKit(AddAdapterFileToLibraryPreparationKitCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        return checkErrorAndCallMethod(cmd) {
             libraryPreparationKitService.addAdapterFileToLibraryPreparationKit(cmd.libraryPreparationKit, cmd.adapterFile)
         }
     }
 
     JSON addAdapterSequenceToLibraryPreparationKit(AddAdapterSequenceToLibraryPreparationKitCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        return checkErrorAndCallMethod(cmd) {
             libraryPreparationKitService.addAdapterSequenceToLibraryPreparationKit(cmd.libraryPreparationKit, cmd.reverseComplementAdapterSequence)
         }
     }
 
     JSON createAntibodyTarget(CreateAntibodyTargetCommand cmd) {
-        checkErrorAndCallMethod(cmd) { antibodyTargetService.create(cmd.name) }
+        return checkErrorAndCallMethod(cmd) { antibodyTargetService.create(cmd.name) }
     }
 
     JSON createSeqCenter(CreateSeqCenterCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        return checkErrorAndCallMethod(cmd) {
             seqCenterService.createSeqCenter(cmd.name, cmd.dirName)
         }
     }
 
     JSON createSeqPlatform(CreateSeqPlatformCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        return checkErrorAndCallMethod(cmd) {
             seqPlatformService.createNewSeqPlatform(cmd.platform, cmd.model, cmd.kit)
         }
     }
 
     JSON createSeqPlatformModelLabelImportAlias(CreateSeqPlatformModelLabelImportAliasCommand cmd) {
-        createImportAlias(cmd)
+        return createImportAlias(cmd)
     }
 
     JSON createSequencingKitLabelImportAlias(CreateSequencingKitLabelImportAliasCommand cmd) {
-        createImportAlias(cmd)
+        return createImportAlias(cmd)
     }
 
     JSON createSeqTypeImportAlias(CreateSeqTypeImportAliasCommand cmd) {
-        createImportAlias(cmd)
+        return createImportAlias(cmd)
     }
 
     JSON createAntibodyTargetImportAlias(CreateAntibodyTargetImportAliasCommand cmd) {
-        createImportAlias(cmd)
+        return createImportAlias(cmd)
     }
 
     JSON createLibraryPreparationKitImportAlias(CreateLibraryPreparationKitImportAliasCommand cmd) {
-        createImportAlias(cmd)
+        return createImportAlias(cmd)
     }
 
     def changeLibPrepKitLegacyState(LibPrepKitLegacyCommand cmd) {
@@ -265,7 +265,7 @@ class MetaDataFieldsController implements CheckAndCall {
 
     JSON createLayout(CreateLayoutCommand cmd) {
         SeqType seqType = seqTypeService.findByNameOrImportAlias(cmd.name, [singleCell: cmd.singleCell])
-        checkErrorAndCallMethod(cmd) {
+        return checkErrorAndCallMethod(cmd) {
             seqTypeService.createMultiple(seqType.name, cmd.libraryLayouts, [
                     dirName          : seqType.dirName,
                     displayName      : seqType.displayName,
@@ -276,7 +276,7 @@ class MetaDataFieldsController implements CheckAndCall {
     }
 
     JSON toggleNeedsBedFile(SeqTypeCommand cmd) {
-        checkErrorAndCallMethod(cmd, {
+        return checkErrorAndCallMethod(cmd, {
             seqTypeService.toggleNeedsBedFileFlag(cmd.seqType)
         })
     }
@@ -477,7 +477,7 @@ class CreateLibraryPreparationKitImportAliasCommand extends AbstractCreateImport
 
     @Override
     AbstractMetadataFieldsService getService() {
-        libraryPreparationKitService
+        return libraryPreparationKitService
     }
 }
 

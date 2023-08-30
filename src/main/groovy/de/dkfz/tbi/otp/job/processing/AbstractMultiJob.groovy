@@ -176,6 +176,7 @@ abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl implements 
     }
 
     @Override
+    @SuppressWarnings('ImplicitReturnStatement')
     boolean isResumable() {
         synchronized (lockForResumable) {
             return !executing

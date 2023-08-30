@@ -40,7 +40,7 @@ class OptionsInterceptor {
     }
 
     @Override
-    boolean before() { true }
+    boolean before() { return true }
 
     @Override
     boolean after() {
@@ -107,7 +107,7 @@ class OptionsInterceptor {
 
             model.uriWithParams = "${request.forwardURI - request.contextPath}?${request.queryString}"
         }
-        true
+        return true
     }
 
     @Override

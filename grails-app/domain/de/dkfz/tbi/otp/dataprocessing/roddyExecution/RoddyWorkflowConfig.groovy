@@ -189,7 +189,7 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
     static File getStandardConfigDirectory(Project project, Pipeline.Name pipelineName) {
         assert project
         assert pipelineName
-        LsdfFilesService.getPath(
+        return LsdfFilesService.getPath(
                 project.projectDirectory.path,
                 CONFIG_PATH_ELEMENT,
                 pipelineName.name(),

@@ -42,7 +42,7 @@ class UserRole implements Serializable, Entity {
             return false
         }
 
-        other.user?.id == user?.id &&
+        return other.user?.id == user?.id &&
                 other.role?.id == role?.id
     }
 
@@ -55,16 +55,16 @@ class UserRole implements Serializable, Entity {
         if (role) {
             builder.append(role.id)
         }
-        builder.toHashCode()
+        return builder.toHashCode()
     }
 
     static UserRole get(long userId, long roleId) {
-        find 'from UserRole where user.id=:userId and role.id=:roleId',
-                [userId: userId, roleId: roleId]
+        return find('from UserRole where user.id=:userId and role.id=:roleId',
+                [userId: userId, roleId: roleId])
     }
 
     static UserRole create(User user, Role role) {
-        RolesService.createUserRole(user, role)
+        return RolesService.createUserRole(user, role)
     }
 
     static void removeAll(User user) {

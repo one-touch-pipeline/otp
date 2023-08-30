@@ -27,7 +27,7 @@ class SequencingKitLabelServiceSpec extends AbstractMetadataFieldsServiceSpec<Se
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 SequencingKitLabel,
         ]
     }

@@ -57,25 +57,25 @@ class JobErrorDefinitionController implements CheckAndCall {
     }
 
     JSON addJobErrorDefinition(UpdateJobErrorDefinitionCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        return checkErrorAndCallMethod(cmd) {
             jobErrorDefinitionService.addErrorExpression(cmd.typeSelect, cmd.actionSelect, cmd.errorExpression, cmd.basedJobErrorDefinition)
         }
     }
 
     JSON addNewJobErrorDefinition(UpdateNewJobErrorDefinitionCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        return checkErrorAndCallMethod(cmd) {
             jobErrorDefinitionService.addErrorExpressionFirstLevel(JobErrorDefinition.Type.MESSAGE, cmd.actionSelect, cmd.errorExpression)
         }
     }
 
     JSON updateErrorExpression(UpdateErrorExpressionCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        return checkErrorAndCallMethod(cmd) {
             jobErrorDefinitionService.updateErrorExpression(cmd.jobErrorDefinition, cmd.errorExpression)
         }
     }
 
     JSON addNewJob(UpdateAddNewJobCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        return checkErrorAndCallMethod(cmd) {
             String jobDefinitionName = cmd.jobDefinitionString.substring(0, cmd.jobDefinitionString.indexOf('-') - 1)
             String jobExecutionPlanName = cmd.jobDefinitionString.substring(cmd.jobDefinitionString.indexOf('-') + 2)
             JobDefinition jobDefinition = jobErrorDefinitionService.findByjobDefinitionNameAndjobExecutionPlanName(jobDefinitionName, jobExecutionPlanName)

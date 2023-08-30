@@ -43,7 +43,7 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTes
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 Project,
                 Individual,
                 Realm,

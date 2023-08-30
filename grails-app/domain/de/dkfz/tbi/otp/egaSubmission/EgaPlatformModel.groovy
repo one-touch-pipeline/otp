@@ -43,6 +43,6 @@ class EgaPlatformModel implements Entity {
     @Override
     String toString() {
         // EGA sequencing machine aliases are similar enough to OTP-terms that we don't need both in the string representation.
-        platformModelEgaName
+        return platformModelEgaName
     }
 }

@@ -51,11 +51,11 @@ class SampleSubmissionObject implements Entity, SubmissionObject {
     }
 
     Project getProject() {
-        sample.project
+        return sample.project
     }
 
     @Override
     String toString() {
-        "${sample.individual.displayName} ${seqType.displayNameWithLibraryLayout} ${sample.sampleType.displayName}"
+        return "${sample.individual.displayName} ${seqType.displayNameWithLibraryLayout} ${sample.sampleType.displayName}"
     }
 }

@@ -28,7 +28,7 @@ import java.nio.file.Path
 abstract class AbstractJsonParseJob extends AbstractParseJob {
 
     @Override
-    @SuppressWarnings("UnusedMethodParameter")
+    @SuppressWarnings(["UnusedMethodParameter", "ImplicitReturnStatement"]) // To be deleted after implementation of method
     Map<String, String> parseFile(WorkflowStep workflowStep) {
     }
 

@@ -210,7 +210,7 @@ class DomainFactory {
     }
 
     static Pipeline createPanCanPipeline() {
-        createPipeline(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT)
+        return createPipeline(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT)
     }
 
     static Pipeline createRoddyRnaPipeline() {
@@ -381,7 +381,7 @@ class DomainFactory {
     }
 
     static ProcessingOption createProcessingOptionForOtrsTicketPrefix(String prefix = "Prefix ${counter++}") {
-        createProcessingOptionLazy(
+        return createProcessingOptionLazy(
                 name: OptionName.TICKET_SYSTEM_NUMBER_PREFIX,
                 type: null,
                 project: null,
@@ -390,7 +390,7 @@ class DomainFactory {
     }
 
     static ProcessingOption createProcessingOptionForTicketSystemEmail(String ticketSystemEmail = HelperUtils.randomEmail) {
-        createProcessingOptionLazy(
+        return createProcessingOptionLazy(
                 name: OptionName.EMAIL_TICKET_SYSTEM,
                 type: null,
                 project: null,
@@ -399,7 +399,7 @@ class DomainFactory {
     }
 
     static ProcessingOption createProcessingOptionForEmailSenderSalutation(String message = "the service team${counter++}") {
-        createProcessingOptionLazy(
+        return createProcessingOptionLazy(
                 name: OptionName.HELP_DESK_TEAM_NAME,
                 type: null,
                 project: null,
@@ -1091,7 +1091,7 @@ class DomainFactory {
     }
 
     static AceseqQc createAceseqQcWithExistingAceseqInstance(AceseqInstance aceseqInstance) {
-        createAceseqQc([:], [:], [:], aceseqInstance)
+        return createAceseqQc([:], [:], [:], aceseqInstance)
     }
 
     static AceseqQc createAceseqQc(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:], AceseqInstance aceseqInstance = null) {
@@ -1357,7 +1357,7 @@ class DomainFactory {
     }
 
     static Map<String, ?> baseMergingWorkPackageProperties(Map properties) {
-        [
+        return [
                 libraryPreparationKit: { properties.seqType?.isWgbs() ? null : createLibraryPreparationKit() },
                 sample               : { createSample() },
                 seqPlatformGroup     : { createSeqPlatformGroup() },
@@ -1650,7 +1650,7 @@ class DomainFactory {
                     requestedCores   : 10,
                     requestedMemory  : 1000,
             ]) {
-        createDomainObject(ClusterJob, [
+        return createDomainObject(ClusterJob, [
                 processingStep: processingStep,
                 realm         : clusterJobIdentifier.realm,
                 clusterJobId  : clusterJobIdentifier.clusterJobId,
@@ -1666,7 +1666,7 @@ class DomainFactory {
     private static SeqType createSeqTypeLazy(SeqTypeNames seqTypeNames, String displayName, String dirName,
                                              String roddyName = null, SequencingReadType libraryLayout = SequencingReadType.PAIRED,
                                              boolean singleCell = false, boolean hasAntibodyTarget = false, boolean needsBedFile = false) {
-        findOrCreateDomainObject(SeqType, [:], [
+        return findOrCreateDomainObject(SeqType, [:], [
                 name             : seqTypeNames.seqTypeName,
                 displayName      : displayName,
                 dirName          : dirName,
@@ -1679,42 +1679,42 @@ class DomainFactory {
     }
 
     static SeqType createWholeGenomeSeqType(SequencingReadType libraryLayout = SequencingReadType.PAIRED) {
-        createSeqTypeLazy(SeqTypeNames.WHOLE_GENOME, 'WGS', 'whole_genome_sequencing', 'WGS', libraryLayout)
+        return createSeqTypeLazy(SeqTypeNames.WHOLE_GENOME, 'WGS', 'whole_genome_sequencing', 'WGS', libraryLayout)
     }
 
     static SeqType createExomeSeqType(SequencingReadType libraryLayout = SequencingReadType.PAIRED) {
-        createSeqTypeLazy(SeqTypeNames.EXOME, 'EXOME', 'exon_sequencing', 'WES', libraryLayout, false, false, true)
+        return createSeqTypeLazy(SeqTypeNames.EXOME, 'EXOME', 'exon_sequencing', 'WES', libraryLayout, false, false, true)
     }
 
     static SeqType createWholeGenomeBisulfiteSeqType() {
-        createSeqTypeLazy(SeqTypeNames.WHOLE_GENOME_BISULFITE, 'WGBS', 'whole_genome_bisulfite_sequencing', 'WGBS')
+        return createSeqTypeLazy(SeqTypeNames.WHOLE_GENOME_BISULFITE, 'WGBS', 'whole_genome_bisulfite_sequencing', 'WGBS')
     }
 
     static SeqType createWholeGenomeBisulfiteTagmentationSeqType() {
-        createSeqTypeLazy(SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION, 'WGBS_TAG', 'whole_genome_bisulfite_tagmentation_sequencing', 'WGBSTAG')
+        return createSeqTypeLazy(SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION, 'WGBS_TAG', 'whole_genome_bisulfite_tagmentation_sequencing', 'WGBSTAG')
     }
 
     static SeqType createChipSeqType(SequencingReadType libraryLayout = SequencingReadType.PAIRED) {
-        createSeqTypeLazy(SeqTypeNames.CHIP_SEQ, 'ChIP', 'chip_seq_sequencing', "CHIPSEQ", libraryLayout, false, true)
+        return createSeqTypeLazy(SeqTypeNames.CHIP_SEQ, 'ChIP', 'chip_seq_sequencing', "CHIPSEQ", libraryLayout, false, true)
     }
 
     static SeqType createRnaPairedSeqType() {
-        createSeqTypeLazy(SeqTypeNames.RNA, 'RNA', 'rna_sequencing', "RNA")
+        return createSeqTypeLazy(SeqTypeNames.RNA, 'RNA', 'rna_sequencing', "RNA")
     }
 
     static SeqType createRnaSingleSeqType() {
-        createSeqTypeLazy(SeqTypeNames.RNA, 'RNA', 'rna_sequencing', "RNA", SequencingReadType.SINGLE)
+        return createSeqTypeLazy(SeqTypeNames.RNA, 'RNA', 'rna_sequencing', "RNA", SequencingReadType.SINGLE)
     }
 
     static List<SeqType> createDefaultOtpAlignableSeqTypes() {
-        [
+        return [
                 createWholeGenomeSeqType(),
                 createExomeSeqType(),
         ]
     }
 
     static List<SeqType> createPanCanAlignableSeqTypes() {
-        [
+        return [
                 createWholeGenomeSeqType(),
                 createExomeSeqType(),
                 createWholeGenomeBisulfiteSeqType(),
@@ -1724,27 +1724,27 @@ class DomainFactory {
     }
 
     static List<SeqType> createRnaAlignableSeqTypes() {
-        [
+        return [
                 createRnaPairedSeqType(),
                 createRnaSingleSeqType(),
         ]
     }
 
     static List<SeqType> createRoddyAlignableSeqTypes() {
-        [
+        return [
                 createPanCanAlignableSeqTypes(),
                 createRnaAlignableSeqTypes(),
         ].flatten() as List<SeqType>
     }
 
     static List<SeqType> createCellRangerAlignableSeqTypes() {
-        [
+        return [
                 proxyCellRanger.createSeqType(),
         ].flatten() as List<SeqType>
     }
 
     static List<SeqType> createAllAlignableSeqTypes() {
-        [
+        return [
                 createDefaultOtpAlignableSeqTypes(),
                 createRoddyAlignableSeqTypes(),
                 createCellRangerAlignableSeqTypes(),
@@ -1752,46 +1752,46 @@ class DomainFactory {
     }
 
     static List<SeqType> createSnvSeqTypes() {
-        [
+        return [
                 createWholeGenomeSeqType(),
                 createExomeSeqType(),
         ]
     }
 
     static List<SeqType> createIndelSeqTypes() {
-        [
+        return [
                 createWholeGenomeSeqType(),
                 createExomeSeqType(),
         ]
     }
 
     static List<SeqType> createSophiaSeqTypes() {
-        [
+        return [
                 createWholeGenomeSeqType(),
                 createExomeSeqType(),
         ]
     }
 
     static List<SeqType> createAceseqSeqTypes() {
-        [
+        return [
                 createWholeGenomeSeqType(),
         ]
     }
 
     static List<SeqType> createRunYapsaSeqTypes() {
-        [
+        return [
                 createWholeGenomeSeqType(),
                 createExomeSeqType(),
         ]
     }
 
     static List<SeqType> createAllAnalysableSeqTypes() {
-        [
+        return [
                 createSnvSeqTypes(),
                 createIndelSeqTypes(),
                 createSophiaSeqTypes(),
                 createAceseqSeqTypes(),
-        ].flatten().unique()
+        ].flatten().unique() as List<SeqType>
     }
 
     static MetaDataKey createMetaDataKeyLazy(Map properties = [:]) {
@@ -2171,7 +2171,7 @@ class DomainFactory {
     }
 
     static AggregateSequences createAggregateSequences(Map properties = [:]) {
-        createDomainObject(AggregateSequences, [
+        return createDomainObject(AggregateSequences, [
                 seqTypeId              : counter++,
                 seqPlatformId          : counter++,
                 seqPlatformModelLabelId: counter++,

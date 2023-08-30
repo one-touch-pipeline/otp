@@ -58,7 +58,7 @@ class Run implements ProcessParameterObject, Entity {
 
     @Override
     String toString() {
-        name
+        return name
     }
 
     /*

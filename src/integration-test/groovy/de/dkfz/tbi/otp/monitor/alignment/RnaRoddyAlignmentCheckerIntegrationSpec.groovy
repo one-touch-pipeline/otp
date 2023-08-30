@@ -65,7 +65,7 @@ class RnaRoddyAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerIn
 
     @Override
     RoddyBamFile createBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
-        createBamFile([
+        return createBamFile([
                 workPackage: mergingWorkPackage,
         ] + properties)
     }

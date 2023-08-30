@@ -193,7 +193,7 @@ class ProcessingStep implements Serializable, Entity {
      * @return the non-qualified class name, or <code>null</code> if {@link #jobClass} is <code>null</code>.
      */
     String getNonQualifiedJobClass() {
-        jobClass?.split('\\.')?.last()
+        return jobClass?.split('\\.')?.last()
     }
 
     /**

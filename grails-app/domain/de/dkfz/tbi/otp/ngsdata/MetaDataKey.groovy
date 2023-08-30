@@ -36,6 +36,6 @@ class MetaDataKey implements Entity {
 
     @Override
     String toString() {
-        name
+        return name
     }
 }

@@ -47,7 +47,7 @@ abstract class AbstractRoddyBamFilePairAnalysisWorkflowTests<Instance extends Ba
     boolean ignoreExternalBamFileTest = false
 
     void setupData() {
-        createConfig()
+        config = createConfig()
     }
 
     @IgnoreIf({ instance.ignoreRoddyBamFileTest })

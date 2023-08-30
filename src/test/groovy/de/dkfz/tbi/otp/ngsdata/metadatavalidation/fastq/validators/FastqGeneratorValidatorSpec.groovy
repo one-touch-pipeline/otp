@@ -37,7 +37,7 @@ class FastqGeneratorValidatorSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 SoftwareTool,
                 SoftwareToolIdentifier,
         ]

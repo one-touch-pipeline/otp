@@ -33,7 +33,7 @@ class RawSequenceFileSpec extends Specification implements DataTest, DomainFacto
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 RawSequenceFile,
                 FastqFile,
                 FileType,

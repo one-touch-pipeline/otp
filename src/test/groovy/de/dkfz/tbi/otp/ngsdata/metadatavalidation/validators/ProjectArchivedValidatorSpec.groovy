@@ -40,7 +40,7 @@ class ProjectArchivedValidatorSpec extends Specification implements DataTest, Do
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 ProcessingOption,
                 Project,
                 Realm,

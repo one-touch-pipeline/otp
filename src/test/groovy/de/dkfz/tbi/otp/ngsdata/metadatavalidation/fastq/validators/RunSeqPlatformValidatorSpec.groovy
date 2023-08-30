@@ -38,7 +38,7 @@ class RunSeqPlatformValidatorSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 Run,
                 SeqCenter,
                 SeqPlatform,

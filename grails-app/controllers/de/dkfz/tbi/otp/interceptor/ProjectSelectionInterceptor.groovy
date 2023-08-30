@@ -44,7 +44,7 @@ class ProjectSelectionInterceptor {
         if (securityService.loggedIn) {
             projectSelectionService.selectedProject = params.remove(ProjectSelectionService.PROJECT_SELECTION_PARAMETER) as String
         }
-        true
+        return true
     }
 
     @Override
@@ -54,7 +54,7 @@ class ProjectSelectionInterceptor {
             model.availableProjects = projectService.allProjects
             model.projectParameter = ProjectSelectionService.PROJECT_SELECTION_PARAMETER
         }
-        true
+        return true
     }
 
     @Override

@@ -41,7 +41,7 @@ trait RoddyResultServiceTrait<T extends RoddyResult> {
     }
 
     List<Path> getWorkExecutionDirectories(T rr) {
-        rr.roddyExecutionDirectoryNames.collect {
+        return rr.roddyExecutionDirectoryNames.collect {
             getWorkExecutionStoreDirectory(rr).resolve(it)
         }
     }

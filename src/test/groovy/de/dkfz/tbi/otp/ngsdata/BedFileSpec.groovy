@@ -28,7 +28,7 @@ class BedFileSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 BedFile,
         ]
     }

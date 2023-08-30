@@ -87,7 +87,7 @@ class SampleTypeService {
     }
 
     static SampleType findSampleTypeByName(String name) {
-        atMostOneElement(SampleType.findAllByNameIlike(SqlUtil.replaceWildcardCharactersInLikeExpression(name)))
+        return atMostOneElement(SampleType.findAllByNameIlike(SqlUtil.replaceWildcardCharactersInLikeExpression(name)))
     }
 
     /**

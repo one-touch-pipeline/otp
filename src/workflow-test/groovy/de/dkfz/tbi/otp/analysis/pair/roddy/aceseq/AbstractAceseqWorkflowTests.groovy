@@ -74,8 +74,8 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
         ])
         createDirectories([new File(projectService.getSequencingDirectory(project).toString())])
 
-        doWithAuth(OPERATOR) {
-            config = projectService.configureAceseqPipelineProject(
+        return doWithAuth(OPERATOR) {
+            projectService.configureAceseqPipelineProject(
                     new RoddyConfiguration([
                             project          : project,
                             seqType          : seqType,
@@ -149,11 +149,11 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
     @Override
     File getWorkflowData() {
-        new File(inputRootDirectory, 'aceseq')
+        return new File(inputRootDirectory, 'aceseq')
     }
 
     @Override
     Duration getTimeout() {
-        Duration.ofHours(24)
+        return Duration.ofHours(24)
     }
 }

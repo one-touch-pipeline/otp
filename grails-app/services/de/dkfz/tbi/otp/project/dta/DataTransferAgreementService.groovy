@@ -127,7 +127,7 @@ class DataTransferAgreementService {
 
     @CompileDynamic
     List<DataTransferAgreement> getSortedDataTransferAgreementsByProject(Project project) {
-        DataTransferAgreement.findAllByProject(project, [sort: "dateCreated", order: "desc"])
+        return DataTransferAgreement.findAllByProject(project, [sort: "dateCreated", order: "desc"])
     }
 
     /**

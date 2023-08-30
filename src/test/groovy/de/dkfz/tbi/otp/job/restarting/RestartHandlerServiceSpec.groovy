@@ -35,7 +35,7 @@ class RestartHandlerServiceSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 JobErrorDefinition,
                 JobDefinition,
                 JobExecutionPlan,

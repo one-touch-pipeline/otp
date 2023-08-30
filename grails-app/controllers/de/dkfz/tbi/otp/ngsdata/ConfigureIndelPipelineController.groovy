@@ -32,7 +32,7 @@ class ConfigureIndelPipelineController extends AbstractConfigureRoddyPipelineCon
 
     @Override
     protected Pipeline getPipeline() {
-        Pipeline.Name.RODDY_INDEL.pipeline
+        return Pipeline.Name.RODDY_INDEL.pipeline
     }
 
     @SuppressWarnings('MissingOverrideAnnotation') // for an unknown reason the groovy compiler doesnt work with @Override in this case

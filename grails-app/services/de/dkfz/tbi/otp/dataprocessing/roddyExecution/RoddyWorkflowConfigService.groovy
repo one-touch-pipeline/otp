@@ -77,7 +77,7 @@ class RoddyWorkflowConfigService {
     }
 
     protected String getMd5sum(String configFilePath) {
-        new File(configFilePath).text.encodeAsMD5() as String
+        return new File(configFilePath).text.encodeAsMD5() as String
     }
 
     RoddyWorkflowConfig importProjectConfigFile(Project project, SeqType seqType, String programVersionToUse, Pipeline pipeline, String configFilePath,

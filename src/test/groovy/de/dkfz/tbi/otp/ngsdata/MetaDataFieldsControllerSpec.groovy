@@ -37,7 +37,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 AntibodyTarget,
                 LibraryPreparationKit,
                 Project,

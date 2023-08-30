@@ -70,7 +70,7 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
         ])
         createDirectories([new File(projectService.getSequencingDirectory(project).toString())])
 
-        config = doWithAuth(OPERATOR) {
+        return doWithAuth(OPERATOR) {
             projectService.configureSophiaPipelineProject(
                     new RoddyConfiguration([
                             project          : project,
@@ -144,11 +144,11 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
     @Override
     File getWorkflowData() {
-        new File(inputRootDirectory, 'sophia')
+        return new File(inputRootDirectory, 'sophia')
     }
 
     @Override
     Duration getTimeout() {
-        Duration.ofHours(5)
+        return Duration.ofHours(5)
     }
 }

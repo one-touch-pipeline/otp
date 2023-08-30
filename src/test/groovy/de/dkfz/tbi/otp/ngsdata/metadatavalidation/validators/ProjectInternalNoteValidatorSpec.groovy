@@ -43,7 +43,7 @@ class ProjectInternalNoteValidatorSpec extends Specification implements DataTest
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 ProcessingOption,
                 Project,
                 Realm,

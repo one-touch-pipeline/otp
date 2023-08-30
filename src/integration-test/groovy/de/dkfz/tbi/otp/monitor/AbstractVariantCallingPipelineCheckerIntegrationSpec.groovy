@@ -468,11 +468,11 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
     abstract BamFilePairAnalysis createAnalysis(Map properties)
 
     BamFilePairAnalysis createAnalysis() {
-        createAnalysis([:])
+        return createAnalysis([:])
     }
 
     ConfigPerProjectAndSeqType createConfig(SamplePair samplePair, Map properties = [:]) {
-        DomainFactory.createRoddyWorkflowConfig([
+        return DomainFactory.createRoddyWorkflowConfig([
                 pipeline: createPipeLine(),
                 seqType : samplePair.seqType,
                 project : samplePair.project,
@@ -486,7 +486,7 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
     abstract BamFilePairAnalysis createAnalysisForCrosschecking(Map properties)
 
     BamFilePairAnalysis createAnalysisForCrosschecking() {
-        createAnalysisForCrosschecking([:])
+        return createAnalysisForCrosschecking([:])
     }
 
     SamplePair createSamplePair(Map properties = [:]) {

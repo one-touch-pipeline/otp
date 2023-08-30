@@ -48,7 +48,7 @@ class ConfigureRunYapsaPipelineController extends AbstractConfigureNonRoddyPipel
 
     @Override
     protected Pipeline getPipeline() {
-        Pipeline.Name.RUN_YAPSA.pipeline
+        return Pipeline.Name.RUN_YAPSA.pipeline
     }
 
     @SuppressWarnings('MissingOverrideAnnotation') // for an unknown reason the groovy compiler doesnt work with @Override in this case

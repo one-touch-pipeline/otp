@@ -43,7 +43,7 @@ class RoddySnvCallingStartJobIntegrationSpec extends AbstractBamFilePairAnalysis
 
     @Override
     Pipeline createPipeline() {
-        DomainFactory.createRoddySnvPipelineLazy()
+        return DomainFactory.createRoddySnvPipelineLazy()
     }
 
     @Override

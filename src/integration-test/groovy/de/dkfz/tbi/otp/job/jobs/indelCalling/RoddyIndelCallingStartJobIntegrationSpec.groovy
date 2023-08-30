@@ -43,7 +43,7 @@ class RoddyIndelCallingStartJobIntegrationSpec extends AbstractBamFilePairAnalys
 
     @Override
     Pipeline createPipeline() {
-        DomainFactory.createIndelPipelineLazy()
+        return DomainFactory.createIndelPipelineLazy()
     }
 
     @Override

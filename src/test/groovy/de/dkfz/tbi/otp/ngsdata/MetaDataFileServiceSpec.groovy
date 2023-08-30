@@ -31,7 +31,7 @@ class MetaDataFileServiceSpec extends Specification implements ServiceUnitTest<M
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 MetaDataFile,
                 FastqImportInstance,
         ]

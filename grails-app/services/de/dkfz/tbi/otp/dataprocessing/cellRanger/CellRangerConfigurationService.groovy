@@ -71,19 +71,19 @@ class CellRangerConfigurationService {
     OtrsTicketService otrsTicketService
 
     SeqType getSeqType() {
-        CollectionUtils.exactlyOneElement(seqTypes)
+        return CollectionUtils.exactlyOneElement(seqTypes)
     }
 
     List<SeqType> getSeqTypes() {
-        pipeline.seqTypes
+        return pipeline.seqTypes
     }
 
     Pipeline getPipeline() {
-        CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.CELL_RANGER))
+        return CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.CELL_RANGER))
     }
 
     MergingCriteria getMergingCriteria(Project project) {
-        CollectionUtils.atMostOneElement(
+        return CollectionUtils.atMostOneElement(
                 MergingCriteria.findAllByProjectAndSeqType(project, seqType)
         )
     }
@@ -99,7 +99,7 @@ class CellRangerConfigurationService {
     }
 
     CellRangerConfig getWorkflowConfig(Project project) {
-        CollectionUtils.atMostOneElement(
+        return CollectionUtils.atMostOneElement(
                 CellRangerConfig.findAllWhere(
                         project: project,
                         seqType: seqType,

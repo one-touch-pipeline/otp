@@ -45,7 +45,7 @@ class DeleteConcreteArtefactsOfOmittedWorkflowArtefactsJob extends AbstractSched
     }
 
     private boolean hasNoDependentConcreteArtefact(WorkflowArtefact workflowArtefact) {
-        WorkflowRunInputArtefact.findAllByWorkflowArtefact(workflowArtefact)*.workflowRun*.outputArtefacts.every {
+        return WorkflowRunInputArtefact.findAllByWorkflowArtefact(workflowArtefact)*.workflowRun*.outputArtefacts.every {
             it.values().every {
                 !(it.artefact.orElse(null))
             }

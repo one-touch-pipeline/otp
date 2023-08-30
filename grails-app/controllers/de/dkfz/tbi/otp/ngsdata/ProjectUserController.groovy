@@ -162,7 +162,7 @@ class ProjectUserController implements CheckAndCall {
     }
 
     JSON addRoleToUserProjectRole(UpdateProjectRoleCommand cmd) {
-        checkErrorAndCallMethod(cmd, {
+        return checkErrorAndCallMethod(cmd, {
             userProjectRoleService.addProjectRolesToProjectUserRole(cmd.userProjectRole, ProjectRole.findAllByNameInList(cmd.newRoles))
         }) {
             UserProjectRole currentUserProjectRole = UserProjectRole.get(cmd.userProjectRole.id)
@@ -193,7 +193,7 @@ class ProjectUserController implements CheckAndCall {
     }
 
     JSON deleteProjectRole(DeleteProjectRoleCommand cmd) {
-        checkErrorAndCallMethod(cmd, {
+        return checkErrorAndCallMethod(cmd, {
             userProjectRoleService.deleteProjectUserRole(cmd.userProjectRole, CollectionUtils.exactlyOneElement(ProjectRole.findAllByName(cmd.currentRole)))
         }) {
             return [currentRole: cmd.currentRole]
@@ -201,13 +201,13 @@ class ProjectUserController implements CheckAndCall {
     }
 
     JSON setAccessToOtp(SetFlagCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        return checkErrorAndCallMethod(cmd) {
             userProjectRoleService.setAccessToOtp(cmd.userProjectRole, cmd.value)
         }
     }
 
     JSON setAccessToFiles(SetFlagCommand cmd) {
-        checkErrorAndCallMethod(cmd, {
+        return checkErrorAndCallMethod(cmd, {
             userProjectRoleService.setAccessToFilesWithUserNotification(cmd.userProjectRole, cmd.value)
         }) {
             IdpUserDetails idpUserDetails = identityProvider.getIdpUserDetailsByUsername(cmd.userProjectRole.user.username)
@@ -217,37 +217,37 @@ class ProjectUserController implements CheckAndCall {
     }
 
     JSON setManageUsers(SetFlagCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        return checkErrorAndCallMethod(cmd) {
             userProjectRoleService.setManageUsers(cmd.userProjectRole, cmd.value)
         }
     }
 
     JSON setManageUsersAndDelegate(SetFlagCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        return checkErrorAndCallMethod(cmd) {
             userProjectRoleService.setManageUsersAndDelegate(cmd.userProjectRole, cmd.value)
         }
     }
 
     JSON setReceivesNotifications(SetFlagCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        return checkErrorAndCallMethod(cmd) {
             userProjectRoleService.setReceivesNotifications(cmd.userProjectRole, cmd.value)
         }
     }
 
     JSON setEnabled(SetFlagCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        return checkErrorAndCallMethod(cmd) {
             userProjectRoleService.setEnabled(cmd.userProjectRole, cmd.value)
         }
     }
 
     JSON updateName(UpdateUserRealNameCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        return checkErrorAndCallMethod(cmd) {
             userService.updateRealName(cmd.user, cmd.newName)
         }
     }
 
     JSON updateEmail(UpdateUserEmailCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        return checkErrorAndCallMethod(cmd) {
             userService.updateEmail(cmd.user, cmd.newEmail)
         }
     }

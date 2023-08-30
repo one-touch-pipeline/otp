@@ -64,7 +64,7 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
         )
         createDirectories([new File(projectService.getSequencingDirectory(project).toString())])
 
-        config = DomainFactory.createRunYapsaConfig([
+        return DomainFactory.createRunYapsaConfig([
                 programVersion: processingOptionService.findOptionAsString(OptionName.PIPELINE_RUNYAPSA_DEFAULT_VERSION),
                 project       : samplePair.project,
                 seqType       : samplePair.seqType,
@@ -123,11 +123,11 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
 
     @Override
     File getWorkflowData() {
-        new File(inputRootDirectory, 'runYapsa')
+        return new File(inputRootDirectory, 'runYapsa')
     }
 
     @Override
     Duration getTimeout() {
-        Duration.ofHours(24)
+        return Duration.ofHours(24)
     }
 }

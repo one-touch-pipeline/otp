@@ -29,7 +29,7 @@ class WorkflowConfigServiceSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        []
+        return []
     }
 
     @Unroll

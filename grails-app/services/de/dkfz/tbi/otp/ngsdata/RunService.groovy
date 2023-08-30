@@ -110,7 +110,7 @@ class RunService {
             Map dataElement = [files: RawSequenceFile.findAllBySeqTrack(track)]
             returnData.put(track, dataElement)
         }
-        returnData
+        return returnData
     }
 
     /**

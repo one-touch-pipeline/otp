@@ -36,7 +36,7 @@ class RoddyWorkflowConfigSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 Pipeline,
                 Project,
                 Realm,

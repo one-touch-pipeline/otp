@@ -57,6 +57,6 @@ class GeneModel implements Entity {
 
     @Override
     String toString() {
-        fileName
+        return fileName
     }
 }

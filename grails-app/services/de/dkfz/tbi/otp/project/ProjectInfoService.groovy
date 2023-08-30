@@ -123,6 +123,6 @@ class ProjectInfoService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     ProjectInfo updateProjectInfoComment(ProjectInfo projectInfo, String comment) {
         projectInfo.comment = comment
-        projectInfo.save(flush: true)
+        return projectInfo.save(flush: true)
     }
 }

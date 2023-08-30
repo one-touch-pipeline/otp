@@ -32,7 +32,7 @@ class ConfigureAceseqPipelineController extends AbstractConfigureRoddyPipelineCo
 
     @Override
     protected Pipeline getPipeline() {
-        Pipeline.Name.RODDY_ACESEQ.pipeline
+        return Pipeline.Name.RODDY_ACESEQ.pipeline
     }
 
     @SuppressWarnings('MissingOverrideAnnotation') // for an unknown reason the groovy compiler doesnt work with @Override in this case

@@ -48,6 +48,6 @@ class FileType implements Entity {
 
     @Override
     String toString() {
-        "${type}-${subType}"
+        return "${type}-${subType}"
     }
 }

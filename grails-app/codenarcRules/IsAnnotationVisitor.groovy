@@ -31,7 +31,7 @@ trait IsAnnotationVisitor {
         return Modifier.isAbstract(node.modifiers) || Modifier.isInterface(node.modifiers) || isEnum(node.modifiers) || Traits.isTrait(node)
     }
     String buildErrorString(String value) {
-        "Missing ${value} Annotation."
+        return "Missing ${value} Annotation."
     }
 
     boolean isEnum(int mod) {

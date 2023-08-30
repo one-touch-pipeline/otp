@@ -40,7 +40,7 @@ class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<R
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 AbstractBamFile,
                 Comment,
                 RawSequenceFile,

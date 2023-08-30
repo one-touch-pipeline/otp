@@ -70,6 +70,6 @@ class DomainReferenceFieldDefinition extends AbstractFieldDefinition {
     }
 
     String shortClassName() {
-        domainClassName.substring(domainClassName.lastIndexOf('.') + 1)
+        return domainClassName.substring(domainClassName.lastIndexOf('.') + 1)
     }
 }

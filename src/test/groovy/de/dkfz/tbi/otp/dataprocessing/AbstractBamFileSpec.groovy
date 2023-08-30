@@ -35,7 +35,7 @@ class AbstractBamFileSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 FileType,
                 MergingWorkPackage,
                 RawSequenceFile,

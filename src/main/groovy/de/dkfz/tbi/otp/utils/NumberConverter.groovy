@@ -29,7 +29,7 @@ class NumberConverter implements ValueConverter {
 
     @Override
     boolean canConvert(Object value) {
-        value instanceof String
+        return value instanceof String
     }
 
     @Override

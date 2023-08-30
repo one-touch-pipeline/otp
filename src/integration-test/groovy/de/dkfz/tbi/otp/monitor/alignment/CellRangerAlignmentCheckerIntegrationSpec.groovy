@@ -64,7 +64,7 @@ class CellRangerAlignmentCheckerIntegrationSpec extends AbstractAlignmentChecker
 
     @Override
     AbstractBamFile createBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
-        createBamFile([
+        return createBamFile([
                 workPackage: mergingWorkPackage,
         ] + properties)
     }
@@ -79,7 +79,7 @@ class CellRangerAlignmentCheckerIntegrationSpec extends AbstractAlignmentChecker
 
     @Override
     List<SeqTrack> createSeqTracksWithConfig(Map configProperties = [:], Map seqTrackProperties = [:]) {
-        createSeqTracks(seqTrackProperties).each {
+        return createSeqTracks(seqTrackProperties).each {
             createCellRangerConfig([
                     seqType: it.seqType,
                     project: it.project,

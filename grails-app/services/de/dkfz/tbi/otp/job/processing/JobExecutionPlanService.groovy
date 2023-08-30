@@ -326,7 +326,7 @@ class JobExecutionPlanService {
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Map<String, Long> processCount(List<JobExecutionPlan> plans = []) {
-        Process.createCriteria().list {
+        return Process.createCriteria().list {
             createAlias("jobExecutionPlan", "jep")
             if (plans) {
                 'in'("jobExecutionPlan", plans)
@@ -348,7 +348,7 @@ class JobExecutionPlanService {
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Map<String, Long> finishedProcessCount(List<JobExecutionPlan> plans = []) {
-        Process.createCriteria().list {
+        return Process.createCriteria().list {
             createAlias("jobExecutionPlan", "jep")
             if (plans) {
                 'in'("jobExecutionPlan", plans)
@@ -411,7 +411,7 @@ class JobExecutionPlanService {
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Map<String, Date> lastProcessDate(List<JobExecutionPlan> plans, ExecutionState state) {
-        ProcessingStepUpdate.createCriteria().list {
+        return ProcessingStepUpdate.createCriteria().list {
             createAlias("processingStep.process.jobExecutionPlan", "jep")
             processingStep {
                 isNull("next")

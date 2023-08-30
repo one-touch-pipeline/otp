@@ -27,6 +27,6 @@ trait RoddyBamFileAnalysis implements BamFileAnalysisServiceTrait {
 
     @Override
     String getConfigName() {
-        RoddyWorkflowConfig.name
+        return RoddyWorkflowConfig.name
     }
 }

@@ -197,7 +197,7 @@ class RoddyBamFileService extends AbstractAbstractBamFileService<RoddyBamFile> i
     }
 
     List<Path> getFinalExecutionDirectories(RoddyBamFile bamFile, PathOption... options) {
-        bamFile.roddyExecutionDirectoryNames.collect {
+        return bamFile.roddyExecutionDirectoryNames.collect {
             getFinalExecutionStoreDirectory(bamFile, options).resolve(it)
         }
     }

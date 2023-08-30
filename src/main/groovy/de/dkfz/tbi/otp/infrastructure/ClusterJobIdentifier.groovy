@@ -35,7 +35,7 @@ class ClusterJobIdentifier {
     final String clusterJobId
 
     long getRealmId() {
-        realm.id
+        return realm.id
     }
 
     ClusterJobIdentifier(final Realm realm, final String clusterJobId) {

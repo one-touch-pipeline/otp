@@ -36,7 +36,7 @@ class EgaFileContentServiceSpec extends Specification implements EgaSubmissionFa
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 BamFileSubmissionObject,
                 RawSequenceFileSubmissionObject,
                 EgaSubmission,

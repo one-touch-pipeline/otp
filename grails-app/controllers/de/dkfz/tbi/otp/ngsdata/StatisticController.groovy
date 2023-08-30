@@ -63,7 +63,7 @@ class StatisticController {
         }
 
         List data = statisticService.projectCountPerDay(projectGroup)
-        render(statisticService.projectCountPerDate(data) as JSON)
+        return render(statisticService.projectCountPerDate(data) as JSON)
     }
 
     @PreAuthorize('permitAll()')
@@ -75,7 +75,7 @@ class StatisticController {
         }
 
         List data = statisticService.laneCountPerDay(projects)
-        render(statisticService.dataPerDate(data) as JSON)
+        return render(statisticService.dataPerDate(data) as JSON)
     }
 
     JSON gigaBasesPerDay(ProjectGroupCommand command) {
@@ -86,7 +86,7 @@ class StatisticController {
         }
 
         List data = statisticService.gigaBasesPerDay(projects)
-        render(statisticService.dataPerDate(data) as JSON)
+        return render(statisticService.dataPerDate(data) as JSON)
     }
 
     JSON sampleCountPerSequenceType(ProjectGroupCommand command) {
@@ -128,7 +128,7 @@ class StatisticController {
                 data            : values,
                 count           : values.size(),
         ]
-        render(dataToRender as JSON)
+        return render(dataToRender as JSON)
     }
 
     JSON patientsCountPerSequenceType(ProjectGroupCommand command) {
@@ -175,7 +175,7 @@ class StatisticController {
                 data            : values,
                 count           : values.size(),
         ]
-        render(dataToRender as JSON)
+        return render(dataToRender as JSON)
     }
 
     JSON projectCountPerSequenceType(ProjectGroupCommand command) {
@@ -222,7 +222,7 @@ class StatisticController {
                 data            : values,
                 count           : values.size(),
         ]
-        render(dataToRender as JSON)
+        return render(dataToRender as JSON)
     }
 
     JSON sampleTypeCountBySeqType() {
@@ -249,7 +249,7 @@ class StatisticController {
                 data            : values,
                 count           : values.size(),
         ]
-        render(dataToRender as JSON)
+        return render(dataToRender as JSON)
     }
 
     JSON laneCountPerDateByProject() {

@@ -66,7 +66,7 @@ class RunYapsaService extends AbstractBamFileAnalysisService<RunYapsaInstance> i
 
     @Override
     String getConfigName() {
-        RunYapsaConfig.name
+        return RunYapsaConfig.name
     }
 
     @Override

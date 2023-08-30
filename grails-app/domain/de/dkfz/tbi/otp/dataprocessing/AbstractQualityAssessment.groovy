@@ -134,36 +134,36 @@ abstract class AbstractQualityAssessment implements Entity {
 
     @QcThresholdEvaluated
     Double getPercentDuplicates() {
-        calculatePercentage(duplicates , totalReadCounter)
+        return calculatePercentage(duplicates , totalReadCounter)
     }
 
     @QcThresholdEvaluated
     Double getPercentProperlyPaired() {
-        calculatePercentage(properlyPaired, pairedInSequencing)
+        return calculatePercentage(properlyPaired, pairedInSequencing)
     }
 
     @QcThresholdEvaluated
     Double getPercentDiffChr() {
-        calculatePercentage(withMateMappedToDifferentChr, totalReadCounter)
+        return calculatePercentage(withMateMappedToDifferentChr, totalReadCounter)
     }
 
     @QcThresholdEvaluated
     Double getPercentMappedReads() {
-        calculatePercentage(totalMappedReadCounter, totalReadCounter)
+        return calculatePercentage(totalMappedReadCounter, totalReadCounter)
     }
 
     @QcThresholdEvaluated
     Double getPercentSingletons() {
-        calculatePercentage(singletons, totalReadCounter)
+        return calculatePercentage(singletons, totalReadCounter)
     }
 
     @QcThresholdEvaluated
     Double getOnTargetRatio() {
-        calculatePercentage(onTargetMappedBases, allBasesMapped)
+        return calculatePercentage(onTargetMappedBases, allBasesMapped)
     }
 
     private static Double calculatePercentage(Number numerator, Number denominator) {
-        numerator != null && denominator ?
+        return numerator != null && denominator ?
                 numerator / denominator * 100.0 : null
     }
 

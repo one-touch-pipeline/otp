@@ -38,7 +38,7 @@ class SampleTypeIndividualValidatorSpec extends Specification implements DataTes
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 Individual,
                 Project,
                 Realm,

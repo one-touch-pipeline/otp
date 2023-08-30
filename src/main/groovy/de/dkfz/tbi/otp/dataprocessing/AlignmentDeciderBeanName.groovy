@@ -46,6 +46,6 @@ enum AlignmentDeciderBeanName {
 
     /** @deprecated */
     static String findByBeanName(String bean) {
-        values().find { it.beanName == bean }
+        return values().find { it.beanName == bean }
     }
 }

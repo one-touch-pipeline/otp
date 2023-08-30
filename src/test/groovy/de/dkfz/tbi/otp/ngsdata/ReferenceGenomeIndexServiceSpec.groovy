@@ -34,7 +34,7 @@ class ReferenceGenomeIndexServiceSpec extends Specification implements DataTest,
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 ProcessingOption,
                 ReferenceGenome,
                 ReferenceGenomeIndex,

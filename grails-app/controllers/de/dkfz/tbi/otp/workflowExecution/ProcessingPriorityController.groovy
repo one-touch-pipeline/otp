@@ -82,6 +82,6 @@ class ProcessingPriorityController {
             response.sendError(HttpStatus.BAD_REQUEST.value(), g.message(code: "processingPriority.fetch.failure") as String)
         }
 
-        render(processingPriorityService.getReferences(processingPriorityService.getPriority(id)) as JSON)
+        return render(processingPriorityService.getReferences(processingPriorityService.getPriority(id)) as JSON)
     }
 }

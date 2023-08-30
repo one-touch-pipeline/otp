@@ -351,7 +351,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
 
     JSON saveComment(CommentCommand cmd) {
         Map retMap = [:]
-        checkErrorAndCallMethod(cmd, {
+        return checkErrorAndCallMethod(cmd, {
             IlseSubmission ilseSubmission = ilseSubmissionService.findById(cmd.id)
             commentService.saveComment(ilseSubmission, cmd.comment)
             retMap << [
@@ -375,19 +375,19 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
     JSON updateSeqCenterComment(OtrsTicket otrsTicket, String value) {
         otrsTicketService.saveSeqCenterComment(otrsTicket, value)
         Map map = [success: true]
-        render(map as JSON)
+        return render(map as JSON)
     }
 
     JSON updateAutomaticNotificationFlag(OtrsTicket otrsTicket, String value) {
         metadataImportService.updateAutomaticNotificationFlag(otrsTicket, value.toBoolean())
         Map map = [success: true]
-        render(map as JSON)
+        return render(map as JSON)
     }
 
     JSON updateFinalNotificationFlag(OtrsTicket otrsTicket, String value) {
         metadataImportService.updateFinalNotificationFlag(otrsTicket, value.toBoolean())
         Map map = [success: true]
-        render(map as JSON)
+        return render(map as JSON)
     }
 
     class SpreadsheetDTO {

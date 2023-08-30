@@ -40,7 +40,7 @@ class Md5sumUniqueValidatorSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 ExternallyProcessedBamFile,
                 RawSequenceFile,
                 ExternalMergingWorkPackage,

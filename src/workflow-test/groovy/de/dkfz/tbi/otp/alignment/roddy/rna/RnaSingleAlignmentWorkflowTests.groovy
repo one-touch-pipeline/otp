@@ -28,6 +28,6 @@ class RnaSingleAlignmentWorkflowTests extends AbstractRnaAlignmentWorkflowTests 
 
     @Override
     SeqType findSeqType() {
-        DomainFactory.createRnaSingleSeqType()
+        return DomainFactory.createRnaSingleSeqType()
     }
 }

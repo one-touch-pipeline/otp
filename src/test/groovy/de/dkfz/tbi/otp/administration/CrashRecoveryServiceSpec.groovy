@@ -35,7 +35,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 Parameter,
                 ProcessingError,
                 ProcessingStepUpdate,

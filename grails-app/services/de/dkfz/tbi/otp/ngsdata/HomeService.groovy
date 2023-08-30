@@ -34,11 +34,11 @@ class HomeService {
     ProjectService projectService
 
     List<ProjectData> getAllProjects() {
-        getProjectData(projectService.allProjects)
+        return getProjectData(projectService.allProjects)
     }
 
     List<ProjectData> getAllPublicProjects() {
-        getProjectData(projectService.allPublicProjects)
+        return getProjectData(projectService.allPublicProjects)
     }
 
     private List<ProjectData> getProjectData(List<Project> projects) {

@@ -40,7 +40,7 @@ class ProjectClosedValidatorSpec extends Specification implements DataTest, Doma
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 ProcessingOption,
                 Project,
                 Realm,

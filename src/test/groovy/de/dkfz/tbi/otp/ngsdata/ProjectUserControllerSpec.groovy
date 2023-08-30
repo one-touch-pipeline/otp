@@ -44,7 +44,7 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 ProcessingOption,
                 Project,
                 ProjectRole,

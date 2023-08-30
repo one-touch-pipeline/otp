@@ -102,7 +102,7 @@ class UserAdministrationController implements CheckAndCall {
     }
 
     JSON enable(UpdateUserFlagCommand cmd) {
-        checkErrorAndCallMethod(cmd, { userService.enableUser(cmd.user, cmd.flag) })
+        return checkErrorAndCallMethod(cmd, { userService.enableUser(cmd.user, cmd.flag) })
     }
 
     def show(SelectUserCommand cmd) {
@@ -159,11 +159,11 @@ class UserAdministrationController implements CheckAndCall {
     }
 
     JSON addRole(AddOrRemoveRoleCommand cmd) {
-        checkErrorAndCallMethod(cmd, { userService.addRoleToUser(cmd.user, cmd.role) })
+        return checkErrorAndCallMethod(cmd, { userService.addRoleToUser(cmd.user, cmd.role) })
     }
 
     JSON removeRole(AddOrRemoveRoleCommand cmd) {
-        checkErrorAndCallMethod(cmd, { userService.removeRoleFromUser(cmd.user, cmd.role) })
+        return checkErrorAndCallMethod(cmd, { userService.removeRoleFromUser(cmd.user, cmd.role) })
     }
 }
 

@@ -35,7 +35,7 @@ class SequenceControllerSpec extends Specification implements ControllerUnitTest
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 RawSequenceFile,
                 ProcessingPriority,
                 Project,

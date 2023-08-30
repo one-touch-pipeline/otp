@@ -42,6 +42,6 @@ class EgaLibraryStrategy implements Entity {
 
     @Override
     String toString() {
-        "EgaLibraryStrategy ${this.libraryStrategyEgaName} (${seqTypes*.toString().join(", ")})"
+        return "EgaLibraryStrategy ${this.libraryStrategyEgaName} (${seqTypes*.toString().join(", ")})"
     }
 }

@@ -44,7 +44,7 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 ClusterJob,
                 JobDefinition,
                 JobExecutionPlan,

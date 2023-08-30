@@ -38,7 +38,7 @@ class FilenameValidatorSpec extends Specification implements DataTest, DomainFac
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 FileType,
         ]
     }

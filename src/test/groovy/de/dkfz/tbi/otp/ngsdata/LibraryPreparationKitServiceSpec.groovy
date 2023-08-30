@@ -39,7 +39,7 @@ class LibraryPreparationKitServiceSpec extends AbstractMetadataFieldsServiceSpec
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 LibraryPreparationKit,
         ]
     }

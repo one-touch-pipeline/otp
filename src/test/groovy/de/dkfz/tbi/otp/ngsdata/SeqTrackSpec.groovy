@@ -39,7 +39,7 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 RawSequenceFile,
                 FastqFile,
                 MergingWorkPackage,

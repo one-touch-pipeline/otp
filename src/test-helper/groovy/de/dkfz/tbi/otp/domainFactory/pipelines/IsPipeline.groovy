@@ -56,7 +56,7 @@ trait IsPipeline implements DomainFactoryCore {
 
     @Override
     SeqType createSeqType(Map properties = [:], boolean saveAndValidate = true) {
-        findOrCreateDomainObject(SeqType, seqTypeProperties, properties ?: seqTypeProperties, saveAndValidate).refresh()
+        return findOrCreateDomainObject(SeqType, seqTypeProperties, properties ?: seqTypeProperties, saveAndValidate).refresh()
     }
 
     Pipeline findOrCreatePipeline(Pipeline.Name name, Pipeline.Type type) {

@@ -43,6 +43,6 @@ class EgaLibrarySelection implements Entity {
     @Override
     String toString() {
         // Don't include the (potentially dozens of) libPrepKits in the string representation.
-        librarySelectionEgaName
+        return librarySelectionEgaName
     }
 }

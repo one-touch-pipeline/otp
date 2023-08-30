@@ -40,7 +40,7 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest, Workfl
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 Individual,
                 Pipeline,
                 ProcessingOption,

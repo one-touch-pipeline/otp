@@ -36,7 +36,7 @@ class ClusterJobManagerFactoryServiceSpec extends Specification implements DataT
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 ProcessingOption,
                 Realm,
         ]

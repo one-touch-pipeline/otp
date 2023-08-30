@@ -212,7 +212,7 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
     }
 
     boolean hasMultipleLibraries() {
-        this.seqTracks*.libraryDirectoryName.unique().size() > 1
+        return this.seqTracks*.libraryDirectoryName.unique().size() > 1
     }
 
     @Override
@@ -493,7 +493,7 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
      */
     @Deprecated
     List<File> getFinalExecutionDirectories() {
-        this.roddyExecutionDirectoryNames.collect {
+        return this.roddyExecutionDirectoryNames.collect {
             new File(this.finalExecutionStoreDirectory, it)
         }
     }

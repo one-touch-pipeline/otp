@@ -37,7 +37,7 @@ class AbstractMergingWorkPackageSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 AbstractBamFile,
                 AbstractMergingWorkPackage,
                 AntibodyTarget,
@@ -191,7 +191,7 @@ class AbstractMergingWorkPackageSpec extends Specification implements DataTest {
     }
 
     TestAbstractMergingWorkPackage createTestAbstractMergingWorkPackage(Map properties) {
-        new TestAbstractMergingWorkPackage([
+        return new TestAbstractMergingWorkPackage([
                 sample:                new Sample(),
                 referenceGenome:       new ReferenceGenome(),
                 pipeline:              DomainFactory.createPanCanPipeline(),

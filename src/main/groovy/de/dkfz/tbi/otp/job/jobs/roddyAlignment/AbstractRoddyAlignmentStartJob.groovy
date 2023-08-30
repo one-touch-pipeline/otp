@@ -38,7 +38,7 @@ abstract class AbstractRoddyAlignmentStartJob extends AbstractAlignmentStartJob 
             ConfigPerProjectAndSeqType config,
             AbstractBamFile baseBamFile
     ) {
-        new RoddyBamFile(
+        return new RoddyBamFile(
                 workPackage: mergingWorkPackage,
                 identifier: identifier,
                 workDirectoryName: "${RoddyBamFile.WORK_DIR_PREFIX}_${identifier}",

@@ -48,7 +48,7 @@ class BamMetadataImportServiceSpec extends Specification implements DomainFactor
 
     @Override
     Class[] getDomainClassesToMock() {
-        [
+        return [
                 ExternalMergingWorkPackage,
                 ExternallyProcessedBamFile,
                 ExternallyProcessedBamFileQualityAssessment,
