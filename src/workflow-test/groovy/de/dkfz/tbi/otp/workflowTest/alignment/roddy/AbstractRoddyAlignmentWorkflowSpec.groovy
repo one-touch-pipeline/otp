@@ -396,16 +396,6 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
         return workflowArtefacts
     }
 
-    protected void checkAllAfterSuccessfulExecution_alignBaseBamAndNewLanes() {
-        SessionUtils.withTransaction {
-            checkDataBaseState_alignBaseBamAndNewLanes()
-            RoddyBamFile latestBamFile = CollectionUtils.exactlyOneElement(RoddyBamFile.findAllByIdentifier(1))
-            assertBaseFileSystemState(latestBamFile)
-
-            checkQC(latestBamFile)
-        }
-    }
-
     protected void checkQC(RoddyBamFile bamFile) {
         QualityAssessmentMergedPass qaPass = CollectionUtils.exactlyOneElement(QualityAssessmentMergedPass.findAllWhere(
                 abstractBamFile: bamFile,
@@ -443,25 +433,6 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
             assert libraryQas
             assert libraryQas*.libraryDirectoryName as Set == bamFile.seqTracks*.libraryDirectoryName as Set
         }
-    }
-
-    protected void checkDataBaseState_alignBaseBamAndNewLanes() {
-        checkWorkPackageState()
-
-        assert RoddyBamFile.findAll().size() == 2
-        RoddyBamFile firstBamFile = CollectionUtils.exactlyOneElement(RoddyBamFile.findAllByIdentifier(0))
-        RoddyBamFile latestBamFile = CollectionUtils.exactlyOneElement(RoddyBamFile.findAllByIdentifier(1))
-
-        List<SeqTrack> seqTrackOfFirstBamFile = SeqTrack.findAllByLaneIdInList(["readGroup1"])
-
-        checkFirstBamFileState(firstBamFile, false, [
-                seqTracks         : seqTrackOfFirstBamFile,
-                containedSeqTracks: seqTrackOfFirstBamFile,
-        ])
-        assertBamFileFileSystemPropertiesSet(firstBamFile)
-
-        checkLatestBamFileState(latestBamFile, firstBamFile)
-        assertBamFileFileSystemPropertiesSet(latestBamFile)
     }
 
     protected void checkFirstBamFileState(RoddyBamFile bamFile, boolean isMostResentBamFile, Map bamFileProperties = [:]) {
@@ -597,7 +568,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
         }
     }
 
-    protected void verify_alignLanesOnly_NoBaseBamExist_TwoLanes(SeqTrack firstSeqTrack, SeqTrack secondSeqTrack) {
+    protected void verify_alignLanesOnly_TwoLanes(SeqTrack firstSeqTrack, SeqTrack secondSeqTrack) {
         SessionUtils.withTransaction {
             checkWorkPackageState()
 

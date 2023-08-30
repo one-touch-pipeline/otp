@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -57,7 +57,7 @@ abstract class AbstractPanCancerWorkflowSpec extends AbstractRoddyAlignmentWorkf
         return true
     }
 
-    void "test align lanes only, no base bam file exists, one lane, all fine"() {
+    void "test align lanes only, one lane, all fine"() {
         given:
         SessionUtils.withTransaction {
             createSeqTrack("readGroup1")

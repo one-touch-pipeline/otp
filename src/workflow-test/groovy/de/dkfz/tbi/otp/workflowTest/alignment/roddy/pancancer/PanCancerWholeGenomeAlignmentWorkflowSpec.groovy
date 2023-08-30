@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@ class PanCancerWholeGenomeAlignmentWorkflowSpec extends AbstractPanCancerWorkflo
         return SeqTypeService.wholeGenomePairedSeqType
     }
 
-    void "test alignLanesOnly, no base bam file exists, one lane, with adapterTrimming, all fine"() {
+    void "test alignLanesOnly, one lane, with adapterTrimming, all fine"() {
         given:
         SessionUtils.withTransaction {
             createSeqTrack("readGroup1")

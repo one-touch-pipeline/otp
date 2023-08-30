@@ -76,7 +76,7 @@ class WgbsAlignmentWorkflowSpec extends AbstractRoddyAlignmentWorkflowSpec imple
         ].asImmutable()
     }
 
-    void "test alignLanesOnly, no base bam file exists, one lane, with adapterTrimming, all fine"() {
+    void "test alignLanesOnly, one lane, with adapterTrimming, all fine"() {
         given:
         SessionUtils.withTransaction {
             createSeqTrack("readGroup1")
@@ -93,7 +93,7 @@ class WgbsAlignmentWorkflowSpec extends AbstractRoddyAlignmentWorkflowSpec imple
     }
 
     @Unroll
-    void "test alignLanesOnly, no base bam file exists, two libraries #setLibrary, all fine"() {
+    void "test alignLanesOnly, two libraries #setLibrary, all fine"() {
         given:
         SeqTrack firstSeqTrack
         SeqTrack secondSeqTrack
@@ -113,7 +113,7 @@ class WgbsAlignmentWorkflowSpec extends AbstractRoddyAlignmentWorkflowSpec imple
         execute(1, 2)
 
         then:
-        verify_alignLanesOnly_NoBaseBamExist_TwoLanes(firstSeqTrack, secondSeqTrack)
+        verify_alignLanesOnly_TwoLanes(firstSeqTrack, secondSeqTrack)
 
         where:
         setLibrary | _

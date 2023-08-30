@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -49,7 +49,7 @@ class PanCancerChipSeqAlignmentWorkflowSpec extends AbstractPanCancerWorkflowSpe
         log.debug("Finish setup ${this.class.simpleName}")
     }
 
-    void "test align lanes only, no base bam file exists, two lanes, same antibody, all fine"() {
+    void "test align lanes only, two lanes, same antibody, all fine"() {
         given:
         SeqTrack firstSeqTrack
         SeqTrack secondSeqTrack
@@ -64,10 +64,10 @@ class PanCancerChipSeqAlignmentWorkflowSpec extends AbstractPanCancerWorkflowSpe
         execute(1, 4)
 
         then:
-        verify_alignLanesOnly_NoBaseBamExist_TwoLanes(firstSeqTrack, secondSeqTrack)
+        verify_alignLanesOnly_TwoLanes(firstSeqTrack, secondSeqTrack)
     }
 
-    void "test align lanes only, no base bam file exists, two lanes, different antibody, all fine"() {
+    void "test align lanes only, two lanes, different antibody, all fine"() {
         given:
         SeqTrack firstSeqTrack
         SeqTrack secondSeqTrack
