@@ -44,6 +44,7 @@ class RnaAlignmentWorkflow extends AlignmentWorkflow {
     List<String> getJobBeanNames() {
         return [
                 SetCorrectPermissionJob.simpleName.uncapitalize(),
+                RnaAlignmentLinkJob.simpleName.uncapitalize(),
                 RoddyAlignmentPrepareJob.simpleName.uncapitalize(),
         ]
     }

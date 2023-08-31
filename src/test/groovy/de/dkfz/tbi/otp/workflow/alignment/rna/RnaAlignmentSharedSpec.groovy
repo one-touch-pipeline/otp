@@ -37,7 +37,7 @@ import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-class RnaAlignmentSharedSpec  extends Specification implements WorkflowSystemDomainFactory, DataTest, RoddyRnaFactory {
+class RnaAlignmentSharedSpec extends Specification implements WorkflowSystemDomainFactory, DataTest, RoddyRnaFactory {
 
     private WorkflowStep workflowStep
     private RnaAlignmentShared rnaAlignmentSharedInstance
