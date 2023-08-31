@@ -23,15 +23,14 @@ package migration
 
 import groovy.transform.Field
 
-import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
-import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.util.concurrent.atomic.AtomicInteger
@@ -69,7 +68,7 @@ String processPriority = 'prod-prio3'
 
 assert batchSize > 1
 
-@Field final String WORKFLOW_NAME = WgbsWorkflow.WORKFLOW
+@Field final String WORKFLOW_NAME = WgbsWorkflow.WGBS_WORKFLOW
 
 @Field final RoddyBamFileService roddyBamFileService = ctx.roddyBamFileService
 @Field final WorkflowService workflowService = ctx.workflowService

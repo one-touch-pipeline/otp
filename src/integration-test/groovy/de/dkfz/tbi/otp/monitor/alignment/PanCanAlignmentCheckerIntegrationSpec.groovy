@@ -28,8 +28,8 @@ import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
-import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 
 @Rollback
 class PanCanAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerIntegrationSpec {
@@ -65,7 +65,7 @@ class PanCanAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerInte
 
     @Override
     String getWorkflowNameForCrosschecking() {
-        return WgbsWorkflow.WORKFLOW
+        return WgbsWorkflow.WGBS_WORKFLOW
     }
 
     void "workflowName, should return PanCanWorkflow"() {

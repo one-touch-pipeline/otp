@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.workflowExecution.decider
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.ArtefactType
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
@@ -40,7 +40,7 @@ class WgbsDeciderSpec extends AbstractAlignmentDeciderSpec {
 
     void "getWorkflowName"() {
         expect:
-        decider.workflowName == WgbsWorkflow.WORKFLOW
+        decider.workflowName == WgbsWorkflow.WGBS_WORKFLOW
     }
 
     void "getInputFastqRole"() {
@@ -61,10 +61,10 @@ class WgbsDeciderSpec extends AbstractAlignmentDeciderSpec {
     void "getWorkflow"() {
         given:
         decider.workflowService = new WorkflowService()
-        createWorkflow(name: WgbsWorkflow.WORKFLOW)
+        createWorkflow(name: WgbsWorkflow.WGBS_WORKFLOW)
 
         expect:
-        decider.workflow.name == WgbsWorkflow.WORKFLOW
+        decider.workflow.name == WgbsWorkflow.WGBS_WORKFLOW
     }
 
     void "getSupportedInputArtefactTypes"() {

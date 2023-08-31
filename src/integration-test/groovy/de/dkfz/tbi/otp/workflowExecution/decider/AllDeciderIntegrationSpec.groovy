@@ -27,8 +27,8 @@ import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.FastqcWorkflowDomainFactory
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
-import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
 @Rollback
@@ -41,7 +41,7 @@ class AllDeciderIntegrationSpec extends Specification implements ServiceUnitTest
         createBashFastqcWorkflowVersion()
         createWesFastqcWorkflowVersion()
         createWorkflow(name: PanCancerWorkflow.WORKFLOW)
-        createWorkflow(name: WgbsWorkflow.WORKFLOW)
+        createWorkflow(name: WgbsWorkflow.WGBS_WORKFLOW)
         WorkflowStep workflowStep = createWorkflowStep()
         WorkflowArtefact wa1 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun,
                 artefactType: ArtefactType.RUN_YAPSA)

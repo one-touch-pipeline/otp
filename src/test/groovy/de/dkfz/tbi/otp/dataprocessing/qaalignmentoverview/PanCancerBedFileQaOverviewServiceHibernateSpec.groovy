@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdService
 import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 

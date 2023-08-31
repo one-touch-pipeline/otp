@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.domainFactory.workflowSystem
 
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
 

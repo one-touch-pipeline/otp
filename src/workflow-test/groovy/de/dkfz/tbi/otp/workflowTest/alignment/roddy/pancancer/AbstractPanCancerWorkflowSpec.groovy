@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.workflowTest.alignment.roddy.pancancer
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.utils.SessionUtils
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.OtpWorkflow
 import de.dkfz.tbi.otp.workflowExecution.decider.AbstractWorkflowDecider
 import de.dkfz.tbi.otp.workflowExecution.decider.PanCancerDecider

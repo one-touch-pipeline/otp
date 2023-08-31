@@ -25,8 +25,8 @@ import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerShared
 import de.dkfz.tbi.otp.workflow.jobs.AbstractFragmentJob
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerShared
 import de.dkfz.tbi.otp.workflowExecution.SingleSelectSelectorExtendedCriteria
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 

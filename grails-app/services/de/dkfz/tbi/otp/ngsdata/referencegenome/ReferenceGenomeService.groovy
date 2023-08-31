@@ -37,8 +37,8 @@ import de.dkfz.tbi.otp.ngsdata.taxonomy.Species
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
-import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.FileSystem
@@ -254,7 +254,7 @@ class ReferenceGenomeService {
 
             new ExternalWorkflowConfigSelector(
                     name: confName,
-                    workflows: Workflow.findAllByNameInList([PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WORKFLOW]) as Set,
+                    workflows: Workflow.findAllByNameInList([PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WGBS_WORKFLOW]) as Set,
                     workflowVersions: [] as Set,
                     projects: [] as Set,
                     seqTypes: [] as Set,

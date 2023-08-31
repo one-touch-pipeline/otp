@@ -26,8 +26,8 @@ import grails.gorm.transactions.Rollback
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
-import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 
 @Rollback
 class WgbsRoddyAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerIntegrationSpec {
@@ -39,7 +39,7 @@ class WgbsRoddyAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerI
 
     @Override
     String getWorkflowName() {
-        return WgbsWorkflow.WORKFLOW
+        return WgbsWorkflow.WGBS_WORKFLOW
     }
 
     @Override

@@ -26,7 +26,7 @@ import spock.lang.Unroll
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.SessionUtils
-import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.OtpWorkflow
 import de.dkfz.tbi.otp.workflowExecution.decider.AbstractWorkflowDecider
 import de.dkfz.tbi.otp.workflowExecution.decider.WgbsDecider
@@ -49,7 +49,7 @@ class WgbsAlignmentWorkflowSpec extends AbstractRoddyAlignmentWorkflowSpec imple
 
     @Override
     String getWorkflowName() {
-        return WgbsWorkflow.WORKFLOW
+        return WgbsWorkflow.WGBS_WORKFLOW
     }
 
     @Override

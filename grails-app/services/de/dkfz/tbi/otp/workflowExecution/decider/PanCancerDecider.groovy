@@ -25,7 +25,7 @@ import grails.gorm.transactions.Transactional
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 
 @Component
 @Transactional

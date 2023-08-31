@@ -34,8 +34,8 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
-import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 
 @Rollback
 @Integration
@@ -67,8 +67,8 @@ class AllAlignmentsCheckerIntegrationSpec extends Specification implements Workf
 
         createWorkflow(name: PanCancerWorkflow.WORKFLOW, supportedSeqTypes: [DomainFactory.createWholeGenomeSeqType(), DomainFactory.createExomeSeqType(),
                                                                              DomainFactory.createChipSeqType(),] as Set)
-        createWorkflow(name: WgbsWorkflow.WORKFLOW, supportedSeqTypes: [DomainFactory.createWholeGenomeBisulfiteSeqType(),
-                                                                        DomainFactory.createWholeGenomeBisulfiteTagmentationSeqType(),] as Set)
+        createWorkflow(name: WgbsWorkflow.WGBS_WORKFLOW, supportedSeqTypes: [DomainFactory.createWholeGenomeBisulfiteSeqType(),
+                                                                             DomainFactory.createWholeGenomeBisulfiteTagmentationSeqType(),] as Set)
 
         RnaRoddyBamFile rnaRoddyBamFile = createBamFile([
                 fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,

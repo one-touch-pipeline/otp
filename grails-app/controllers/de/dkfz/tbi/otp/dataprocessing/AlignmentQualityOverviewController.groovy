@@ -42,8 +42,8 @@ import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
-import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
 import java.nio.file.*
@@ -199,7 +199,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                 header = ['alignment.quality.noSeqType']
                 break
             case workflowService.getSupportedSeqTypes(PanCancerWorkflow.WORKFLOW).findAll { !it.needsBedFile }:
-            case workflowService.getSupportedSeqTypes(WgbsWorkflow.WORKFLOW):
+            case workflowService.getSupportedSeqTypes(WgbsWorkflow.WGBS_WORKFLOW):
                 header = HEADER_PANCANCER_AND_WGBS
                 columnsSelectionKey = "PANCANCER_AND_WGBS"
                 break

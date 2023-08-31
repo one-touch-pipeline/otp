@@ -33,7 +33,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.HelperUtils
-import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 
@@ -392,7 +392,7 @@ trait DomainFactoryCore implements DomainFactoryHelper {
     }
 
     MergingCriteria createMergingCriteria(Map properties = [:]) {
-        WorkflowSystemDomainFactoryInstance.INSTANCE.findOrCreateWorkflow(WgbsWorkflow.WORKFLOW)
+        WorkflowSystemDomainFactoryInstance.INSTANCE.findOrCreateWorkflow(WgbsWorkflow.WGBS_WORKFLOW)
         return createDomainObject(MergingCriteria, [
                 project: { createProject() },
                 seqType: { createSeqType() },
@@ -400,7 +400,7 @@ trait DomainFactoryCore implements DomainFactoryHelper {
     }
 
     MergingCriteria createMergingCriteriaLazy(Map properties) {
-        Workflow wgbsWorkflow = WorkflowSystemDomainFactoryInstance.INSTANCE.findOrCreateWorkflow(WgbsWorkflow.WORKFLOW)
+        Workflow wgbsWorkflow = WorkflowSystemDomainFactoryInstance.INSTANCE.findOrCreateWorkflow(WgbsWorkflow.WGBS_WORKFLOW)
         if ((properties.get("seqType") as SeqType) in wgbsWorkflow.supportedSeqTypes && !properties.hasProperty("useLibPrepKit")) {
             properties.put("useLibPrepKit", false)
         }

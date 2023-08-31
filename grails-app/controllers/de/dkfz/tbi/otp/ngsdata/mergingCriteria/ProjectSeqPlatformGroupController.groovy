@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteriaService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -70,7 +70,7 @@ class ProjectSeqPlatformGroupController {
         List<SeqPlatform> allUsedSpecificSeqPlatforms = seqPlatformGroupsPerProjectAndSeqType*.seqPlatforms?.flatten() as List<SeqPlatform>
         List<SeqPlatform> allSeqPlatformsWithoutGroup = SeqPlatform.all.sort { it.toString() } - allUsedSpecificSeqPlatforms
         List<SeqType> availableSeqTypes = SeqTypeService.allAlignableSeqTypes
-        boolean noLibPrepKit = cmd.seqType in workflowService.getSupportedSeqTypes(WgbsWorkflow.WORKFLOW)
+        boolean noLibPrepKit = cmd.seqType in workflowService.getSupportedSeqTypes(WgbsWorkflow.WGBS_WORKFLOW)
 
         return [
                 mergingCriteria                      : mergingCriteria,

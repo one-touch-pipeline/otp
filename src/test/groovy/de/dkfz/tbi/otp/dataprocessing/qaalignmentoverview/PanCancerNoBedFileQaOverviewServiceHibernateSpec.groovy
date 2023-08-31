@@ -29,8 +29,8 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdService
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
-import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
@@ -101,7 +101,7 @@ class PanCancerNoBedFileQaOverviewServiceHibernateSpec extends HibernateSpec imp
 
         service.workflowService = Mock(WorkflowService) {
             1 * getSupportedSeqTypes(PanCancerWorkflow.WORKFLOW) >> seqTypesOfPanCanWorkflow
-            1 * getSupportedSeqTypes(WgbsWorkflow.WORKFLOW) >> seqTypeForWgbsAlignment
+            1 * getSupportedSeqTypes(WgbsWorkflow.WGBS_WORKFLOW) >> seqTypeForWgbsAlignment
             0 * _
         }
 

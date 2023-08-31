@@ -28,8 +28,8 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.FormatHelper
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
-import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
@@ -59,7 +59,7 @@ class PanCancerNoBedFileQaOverviewService extends AbstractRoddyQaOverviewService
         return (
                 workflowService.getSupportedSeqTypes(PanCancerWorkflow.WORKFLOW).findAll {
                     !it.needsBedFile
-                } + workflowService.getSupportedSeqTypes(WgbsWorkflow.WORKFLOW)
+                } + workflowService.getSupportedSeqTypes(WgbsWorkflow.WGBS_WORKFLOW)
         ) as List
     }
 

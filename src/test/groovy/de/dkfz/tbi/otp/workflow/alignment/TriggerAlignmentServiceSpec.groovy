@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.withdraw.RoddyBamFileWithdrawService
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 import de.dkfz.tbi.otp.workflowExecution.decider.DeciderResult

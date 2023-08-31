@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyMergedBamQa
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.FormatHelper
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 

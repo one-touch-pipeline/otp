@@ -25,7 +25,7 @@ import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 
 class WgbsRoddyAlignmentChecker extends AbstractRoddyAlignmentChecker {
@@ -40,6 +40,6 @@ class WgbsRoddyAlignmentChecker extends AbstractRoddyAlignmentChecker {
     @CompileDynamic
     @Override
     Workflow getWorkflow() {
-        return CollectionUtils.exactlyOneElement(Workflow.findAllByName(WgbsWorkflow.WORKFLOW))
+        return CollectionUtils.exactlyOneElement(Workflow.findAllByName(WgbsWorkflow.WGBS_WORKFLOW))
     }
 }

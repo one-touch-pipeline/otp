@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.util.TimeFormats
 
@@ -65,7 +65,7 @@ Pipeline pipeline = Pipeline.findByName(Pipeline.Name.PANCAN_ALIGNMENT)
 
 // the name of the new workflow in the new system
 @Field
-String nameNewWorkflow = WgbsWorkflow.WORKFLOW
+String nameNewWorkflow = WgbsWorkflow.WGBS_WORKFLOW
 
 // name of the roddy plugin
 @Field

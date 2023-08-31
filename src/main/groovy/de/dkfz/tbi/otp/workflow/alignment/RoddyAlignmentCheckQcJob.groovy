@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.workflow.jobs.AbstractCheckQcJob
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerShared
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerShared
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 @Component

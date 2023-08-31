@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.workflowExecution.decider
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.ArtefactType
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 

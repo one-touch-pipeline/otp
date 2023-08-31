@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 
 @Rollback
 @Integration
@@ -41,7 +41,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
 
     void setupData() {
         createUserAndRoles()
-        createWorkflow(name: WgbsWorkflow.WORKFLOW)
+        createWorkflow(name: WgbsWorkflow.WGBS_WORKFLOW)
     }
 
     void "test findMergingCriteria, no MergingCriteria exists"() {

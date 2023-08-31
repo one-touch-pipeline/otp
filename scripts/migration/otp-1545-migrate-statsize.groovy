@@ -1,8 +1,8 @@
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType
 import de.dkfz.tbi.otp.ngsdata.StatSizeFileName
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
-import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigSelector
 import de.dkfz.tbi.otp.workflowExecution.SelectorType
@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.workflowExecution.Workflow
  * SOFTWARE.
  */
 
-List<Workflow> workflows = Workflow.findAllByNameInList([PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WORKFLOW])
+List<Workflow> workflows = Workflow.findAllByNameInList([PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WGBS_WORKFLOW])
 
 ReferenceGenome.withTransaction {
     Map defaultFileName = [:]

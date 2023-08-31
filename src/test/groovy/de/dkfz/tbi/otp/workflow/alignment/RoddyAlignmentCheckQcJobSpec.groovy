@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightNotificationService
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
-import de.dkfz.tbi.otp.workflow.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
 class RoddyAlignmentCheckQcJobSpec extends Specification implements WorkflowSystemDomainFactory, DataTest, RoddyPancanFactory {

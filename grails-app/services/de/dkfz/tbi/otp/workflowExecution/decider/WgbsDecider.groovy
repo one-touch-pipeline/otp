@@ -25,7 +25,7 @@ import grails.gorm.transactions.Transactional
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.workflow.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 
 @Component
 @Transactional
@@ -39,7 +39,7 @@ class WgbsDecider extends AbstractAlignmentDecider {
 
     @Override
     final String getWorkflowName() {
-        return WgbsWorkflow.WORKFLOW
+        return WgbsWorkflow.WGBS_WORKFLOW
     }
 
     @Override
