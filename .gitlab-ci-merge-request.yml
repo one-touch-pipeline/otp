@@ -27,8 +27,8 @@ image: registry.gitlab.com/one-touch-pipeline/otp/otp-ci-java-17:2023-06-23
 update reviewer:
   stage: update merge request
   dependencies: [ ]
-  only:
-    - branches
+  rules:
+    - !reference [.only-branch, rules]
   script:
     - devScripts/gitlab-ci/mergeRequest/updateReviewer.sh
 
@@ -38,7 +38,7 @@ update labels from youtrack:
   needs: [ ]
   variables:
     GIT_DEPTH: "0"
-  only:
-    - branches
+  rules:
+    - !reference [.only-branch, rules]
   script:
     - devScripts/gitlab-ci/mergeRequest/addLabelsFromYoutrack.sh

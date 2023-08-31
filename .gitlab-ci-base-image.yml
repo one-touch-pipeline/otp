@@ -29,6 +29,8 @@ build-base-image:
   needs: []
   variables:
     IMAGE_NAME: otp-ci-java-17
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
   script:
     - CURRENT_DATE_TAG=$(date '+%Y-%m-%d')
     - mkdir -p /kaniko/.docker
@@ -39,4 +41,15 @@ build-base-image:
       --dockerfile "./Dockerfile"
       --destination "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${CURRENT_DATE_TAG}"
       --destination "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:latest"
-  when: manual
+
+build-base-image-depend:
+  stage: build
+  needs:
+    - build-base-image
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+  script:
+    - echo "On none master, scheduled pipelines should fail. Otherwise, the branch has a successfully pipeline and could be merged."
+    - exit 1

@@ -49,6 +49,8 @@ variables:
   stage: test
   dependencies: [ ]
   needs: [ ]
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
   cache:
     - key:
         files:
@@ -79,9 +81,8 @@ otp license:
   stage: scanning
   dependencies: [ ]
   needs: [ ]
-  only:
-    - branches
-    - tags
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
   script:
     - groovy devScripts/gitlab-ci/license-checker/licensecheck.groovy
 
@@ -96,7 +97,9 @@ unit tests:
     - set -e
     - ./gradlew --build-cache test
   rules:
-    - if: $CI_COMMIT_BRANCH
+    - if: $CI_COMMIT_TAG
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
       changes:
         compare_to: 'refs/heads/master'
         ##have to be the same list as in integration tests & test coverage
@@ -120,6 +123,7 @@ unit tests:
     paths:
       - build/test-results/test/*.xml
       - build/reports/tests
+      - build/reports/jacoco
       - build/jacoco
     reports:
       junit: build/test-results/test/*.xml
@@ -144,7 +148,9 @@ integration tests:
     - set -e
     - ./gradlew --build-cache integrationTest
   rules:
-    - if: $CI_COMMIT_BRANCH
+    - if: $CI_COMMIT_TAG
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
       changes:
         compare_to: 'refs/heads/master'
         ##have to be the same list as in unit tests & test coverage
@@ -168,6 +174,7 @@ integration tests:
     paths:
       - build/test-results/integrationTest/*.xml
       - build/reports/tests
+      - build/reports/jacoco
       - build/jacoco
     reports:
       junit: build/test-results/integrationTest/*.xml
@@ -197,7 +204,9 @@ test coverage:
     - ./gradlew --build-cache --exclude-task test --exclude-task integrationTest --rerun-tasks jacocoAllTestReport jacocoToCobertura
   when: always
   rules:
-    - if: $CI_COMMIT_BRANCH
+    - if: $CI_COMMIT_TAG
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
       changes:
         compare_to: 'refs/heads/master'
         ##have to be the same list as in unit tests & integration test
@@ -270,7 +279,9 @@ test migration:
 cypress tests:
   extends: .abstract_base_template
   rules:
-    - if: '$CI_COMMIT_BRANCH && $ENABLE_CYPRESS == "true"'
+    - if: $CI_COMMIT_TAG
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH && $ENABLE_CYPRESS == "true"'
       changes:
         compare_to: 'refs/heads/master'
         paths:
@@ -278,6 +289,7 @@ cypress tests:
         - grails-app/**/*
         - src/main/**/*
         - cypress/**/*
+        - docker/**/*
         - build.gradle
         - gradle.properties
         - cypress.config.js
@@ -309,8 +321,6 @@ cypress tests:
 codenarc:
   extends: .abstract_base_template
   stage: codestyle
-  only:
-    - branches
   script:
     - set -e
     - ./gradlew --build-cache codenarcAll
@@ -328,8 +338,6 @@ codenarc:
 eslint:
   extends: .abstract_base_template
   stage: codestyle
-  only:
-    - branches
   script:
     - set -e
     - ./gradlew --build-cache esLintExportCi
@@ -395,6 +403,8 @@ generate_changelog:
 # https://docs.gitlab.com/ee/user/project/pages/introduction.html#gitlab-ciyml-for-a-repository-where-theres-also-actual-code
 pages:
   stage: public doc
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   dependencies:
     - create doc
   script:
@@ -403,7 +413,5 @@ pages:
     expire_in: 1 day
     paths:
       - public
-  only:
-    - master
   variables:
     GIT_STRATEGY: none

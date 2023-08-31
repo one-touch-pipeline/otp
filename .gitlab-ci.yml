@@ -52,10 +52,18 @@ stages:
 # ------------------------------------------------------
 # jobs stage scanning
 # ------------------------------------------------------
+
+.only-branch:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
+
+
 gemnasium-dependency_scanning:
   stage: scanning
   dependencies: [ ]
   needs: [ ]
+  rules:
+    - !reference [.only-branch, rules]
   script:
     - /analyzer run
 
@@ -63,6 +71,8 @@ gemnasium-maven-dependency_scanning:
   stage: scanning
   dependencies: [ ]
   needs: [ ]
+  rules:
+    - !reference [.only-branch, rules]
   script:
     - /analyzer run
 
@@ -70,6 +80,8 @@ license_scanning:
   stage: scanning
   dependencies: [ ]
   needs: [ ]
+  rules:
+    - !reference [.only-branch, rules]
   artifacts:
     paths:
       - gl-license-scanning-report.json
@@ -80,9 +92,9 @@ new licenses:
   image: groovy:3.0-jdk17-alpine
   stage: scanning
   needs: ["license_scanning"]
+  rules:
+    - !reference [.only-branch, rules]
   dependencies:
     - license_scanning
-  only:
-    - branches
   script:
     - groovy devScripts/gitlab-ci/license-checker/findNewLicenses.groovy

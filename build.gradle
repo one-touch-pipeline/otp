@@ -218,6 +218,13 @@ jacocoToCobertura {
     splitByPackage.set(true)
     inputFile.set(layout.buildDirectory.file("reports/jacoco/allTest/jacoco.xml"))
     outputFile.set(layout.buildDirectory.file("reports/jacocoToCobertura/cobertura.xml"))
+    sourceDirectories.from(
+            layout.projectDirectory.dir("src/main/groovy"),
+            layout.projectDirectory.dir("grails-app/controllers"),
+            layout.projectDirectory.dir("grails-app/services"),
+            layout.projectDirectory.dir("grails-app/domain"),
+            layout.projectDirectory.dir("grails-app/init"),
+    )
 }
 
 test {

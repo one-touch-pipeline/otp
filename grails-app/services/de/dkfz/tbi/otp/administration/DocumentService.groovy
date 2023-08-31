@@ -80,7 +80,7 @@ class DocumentService {
     @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Errors updateDocument(DocumentType documentType, byte[] content, String link, Document.FormatType formatType) {
-        Document document = (Document)atMostOneElement(Document.findAllByDocumentType(documentType)) ?: new Document(documentType: documentType)
+        Document document = (Document) atMostOneElement(Document.findAllByDocumentType(documentType)) ?: new Document(documentType: documentType)
         if (formatType == Document.FormatType.LINK) {
             document.content = null
             document.link = link
