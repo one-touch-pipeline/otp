@@ -38,7 +38,7 @@ buildscript {
         classpath "com.bertramlabs.plugins:asset-pipeline-gradle:4.3.0"
         classpath "com.bertramlabs.plugins:less-asset-pipeline:4.3.0"
         classpath "com.bertramlabs.plugins:sass-asset-pipeline:4.3.0"
-        classpath 'org.grails.plugins:database-migration:4.2.0'
+        classpath 'org.grails.plugins:database-migration:4.2.1'
     }
 }
 
@@ -404,7 +404,7 @@ dependencies {
     implementation "org.grails.plugins:grails-console:2.1.1"
     implementation "org.grails.plugins:mail:3.0.0"
 
-    implementation ("org.grails.plugins:database-migration:4.2.0") {
+    implementation ("org.grails.plugins:database-migration:4.2.1") {
         exclude group: "org.grails", module: "grails-shell"
     }
     implementation 'org.liquibase:liquibase-core:4.19.0'
