@@ -67,13 +67,11 @@ class MetadataValidationService {
         } else if (!(acceptedExtensions.any { metadataFile.toString().endsWith(it) })) {
             problems.addProblem(Collections.emptySet(), LogLevel.ERROR, "The file name of '${metadataFile}' does not end with an accepted extension: " +
                     "${acceptedExtensions}")
+        } else if (!Files.exists(metadataFile)) {
+            problems.addProblem(Collections.emptySet(), LogLevel.ERROR,
+                    "${pathForMessage(metadataFile)} does not exist or cannot be accessed by OTP.")
         } else if (!Files.isRegularFile(metadataFile)) {
-            if (Files.exists(metadataFile)) {
-                problems.addProblem(Collections.emptySet(), LogLevel.ERROR, "${pathForMessage(metadataFile)} is not a file.")
-            } else {
-                problems.addProblem(Collections.emptySet(), LogLevel.ERROR,
-                        "${pathForMessage(metadataFile)} does not exist or cannot be accessed by OTP.")
-            }
+            problems.addProblem(Collections.emptySet(), LogLevel.ERROR, "${pathForMessage(metadataFile)} is not a file.")
         } else if (!fileService.fileIsReadable(metadataFile, configService.defaultRealm)) {
             problems.addProblem(Collections.emptySet(), LogLevel.ERROR, "${pathForMessage(metadataFile)} is not readable.")
         } else if (Files.size(metadataFile) == 0L) {
