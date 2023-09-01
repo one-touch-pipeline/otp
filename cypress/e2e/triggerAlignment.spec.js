@@ -282,13 +282,14 @@ describe('Check trigger alignment page', () => {
     });
 
     it('should not be able to visit the page', () => {
-      cy.request({
-        url: '/triggerAlignment/index',
-        followRedirect: false,
-        failOnStatusCode: false
-      }).then((resp) => {
-        expect(resp.status).to.eq(403);
-      });
+      cy.checkAccessDenied('/triggerAlignment/index');
+      cy.checkAccessDenied('/triggerAlignment/generateWarnings');
+      cy.checkAccessDenied('/triggerAlignment/triggerAlignment');
+      cy.checkAccessDenied('/searchSeqTrack/searchSeqTrackByProjectSeqType');
+      cy.checkAccessDenied('/searchSeqTrack/searchSeqTrackByPidSeqType');
+      cy.checkAccessDenied('/searchSeqTrack/searchSeqTrackByLaneId');
+      cy.checkAccessDenied('/searchSeqTrack/searchSeqTrackByIlseNumber');
+      cy.checkAccessDenied('/searchSeqTrack/searchSeqTrackByMultiInput');
     });
   });
 });

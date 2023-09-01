@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -244,6 +244,21 @@ describe('Check workflow config page', () => {
       cy.get('.selector').find('#workflowSelector').select('Cell Ranger', { force: true });
       cy.visit('/workflowConfig/index?project=ExampleProject&selector.id=-1#workflowConfigModal');
       cy.get('#otpToastBox').should('exist').and('contain', 'Failed fetching Selector by selectorId: ');
+    });
+  });
+
+  context('when user is normal user', () => {
+    beforeEach(() => {
+      cy.loginAsUser();
+    });
+
+    it('should not be able to visit the page', () => {
+      cy.checkAccessDenied('/workflowConfig');
+      cy.checkAccessDenied('/workflowConfig/create');
+      cy.checkAccessDenied('/workflowConfig/data');
+      cy.checkAccessDenied('/workflowConfig/fragments');
+      cy.checkAccessDenied('/workflowConfig/deprecate');
+      cy.checkAccessDenied('/workflowConfigViewer/build');
     });
   });
 });

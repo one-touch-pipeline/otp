@@ -496,4 +496,36 @@ describe('Check metadata data fields page', () => {
       });
     });
   });
+
+  context('when user is normal user', () => {
+    beforeEach(() => {
+      cy.loginAsUser();
+    });
+
+    it('should not be able to visit the page', () => {
+      cy.checkAccessDenied('/metaDataFields');
+      cy.checkAccessDenied('/metaDataFields/libraryPreparationKits');
+      cy.checkAccessDenied('/metaDataFields/createLibraryPreparationKitImportAlias');
+      cy.checkAccessDenied('/metaDataFields/addAdapterFileToLibraryPreparationKit');
+      cy.checkAccessDenied('/metaDataFields/addAdapterSequenceToLibraryPreparationKit');
+      cy.checkAccessDenied('/metaDataFields/changeLibPrepKitLegacyState');
+      cy.checkAccessDenied('/metaDataFields/createLibraryPreparationKit');
+      cy.checkAccessDenied('/metaDataFields/antibodyTargets');
+      cy.checkAccessDenied('/metaDataFields/createAntibodyTargetImportAlias');
+      cy.checkAccessDenied('/metaDataFields/changeAntibodyTargetLegacyState');
+      cy.checkAccessDenied('/metaDataFields/createAntibodyTarget');
+      cy.checkAccessDenied('/metaDataFields/seqCenters');
+      cy.checkAccessDenied('/metaDataFields/changeSeqCenterLegacyState');
+      cy.checkAccessDenied('/metaDataFields/createSeqCenter');
+      cy.checkAccessDenied('/metaDataFields/seqPlatforms');
+      cy.checkAccessDenied('/metaDataFields/createSeqPlatformModelLabelImportAlias');
+      cy.checkAccessDenied('/metaDataFields/changeSeqPlatformLegacyState');
+      cy.checkAccessDenied('/metaDataFields/createSeqPlatform');
+      cy.checkAccessDenied('/metaDataFields/toggleNeedsBedFile');
+      cy.checkAccessDenied('/metaDataFields/createLayout');
+      cy.checkAccessDenied('/metaDataFields/createSeqTypeImportAlias');
+      cy.checkAccessDenied('/metaDataFields/changeSeqTypeLegacyState');
+      cy.checkAccessDenied('/metaDataFields/createSeqType');
+    });
+  });
 });

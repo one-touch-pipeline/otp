@@ -39,5 +39,6 @@ module.exports = defineConfig({
   viewportWidth: 1440,
   video: false,
   videoUploadOnPasses: false,
-  videosFolder: 'cypress/videos'
+  videosFolder: 'cypress/videos',
+  watchForFileChanges: false
 });

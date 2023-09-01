@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -53,6 +53,17 @@ describe('Check sampleOverview page', () => {
       cy.get('table#searchCriteriaTableSeqType').find('tr').eq(0).find('td.remove input')
         .click({ force: true });
       cy.get('span#select2--container').contains('WGS PAIRED bulk').should('not.exist');
+    });
+  });
+
+  context('when user is normal user', () => {
+    beforeEach(() => {
+      cy.loginAsUser();
+    });
+
+    it('should not be able to select a project on index page', () => {
+      cy.visit('/sampleOverview/index');
+      cy.get('select#project option').should('not.have.text', 'Example project 1');
     });
   });
 });

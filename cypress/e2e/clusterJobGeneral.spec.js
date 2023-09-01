@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -115,6 +115,24 @@ describe('Check cluster job general page', () => {
       cy.wait('@dataTableSource').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
       });
+    });
+  });
+
+  context('when user is normal user', () => {
+    beforeEach(() => {
+      cy.loginAsUser();
+    });
+
+    it('should not be able to visit the page', () => {
+      cy.checkAccessDenied('/clusterJobGeneral/index');
+      cy.checkAccessDenied('/clusterJobGeneral/findAllClusterJobsByDateBetween');
+      cy.checkAccessDenied('/clusterJobGeneral/getAllStatesTimeDistribution');
+      cy.checkAccessDenied('/clusterJobGeneral/getAllExitCodes');
+      cy.checkAccessDenied('/clusterJobGeneral/getAllExitStatuses');
+      cy.checkAccessDenied('/clusterJobGeneral/getAllStates');
+      cy.checkAccessDenied('/clusterJobGeneral/getAllFailed');
+      cy.checkAccessDenied('/clusterJobGeneral/getAllAvgCoreUsage');
+      cy.checkAccessDenied('/clusterJobGeneral/getAllMemoryUsage');
     });
   });
 });

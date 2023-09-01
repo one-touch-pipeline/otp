@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,6 +37,17 @@ describe('Check cluster job detail page', () => {
         cy.visit(clusterJobDetailAnkerLink.prop('href'));
         cy.checkPage('/clusterJobDetail/show');
       });
+    });
+  });
+
+  context('when user is normal user', () => {
+    beforeEach(() => {
+      cy.loginAsUser();
+    });
+
+    it('should not be able to visit the page', () => {
+      cy.checkAccessDenied('/clusterJobGeneral/index');
+      cy.checkAccessDenied('/clusterJobDetail/show');
     });
   });
 });

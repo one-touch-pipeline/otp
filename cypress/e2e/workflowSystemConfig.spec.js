@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -106,6 +106,19 @@ describe('Check workflow system configuration page', () => {
           cy.get('@wvRow').find('td').eq(3).should('have.text', '');
         });
       });
+    });
+  });
+
+  context('when user is normal user', () => {
+    beforeEach(() => {
+      cy.loginAsUser();
+    });
+
+    it('should not be able to visit the page', () => {
+      cy.checkAccessDenied('/workflowSystemConfig/index');
+      cy.checkAccessDenied('/workflowSystemConfig/updateWorkflow');
+      cy.checkAccessDenied('/workflowSystemConfig/getWorkflowVersions');
+      cy.checkAccessDenied('/workflowSystemConfig/updateWorkflowVersion');
     });
   });
 });

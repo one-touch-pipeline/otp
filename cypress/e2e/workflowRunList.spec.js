@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -66,6 +66,17 @@ describe('Check workflow run list page', () => {
     it('should restart a failed workflow run', () => {
       cy.get('td button.restart-run-btn').first().click();
       cy.get('.toast-body').should('contain.text', 'success');
+    });
+  });
+
+  context('when user is normal user', () => {
+    beforeEach(() => {
+      cy.loginAsUser();
+    });
+
+    it('should not be able to visit the page', () => {
+      cy.checkAccessDenied('/workflowRunList/index');
+      cy.checkAccessDenied('/workflowRunList/data');
     });
   });
 });

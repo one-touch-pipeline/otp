@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -155,6 +155,18 @@ Cypress.Commands.add('clearDownloadsFolder', () => {
   cy.exec(`rm ${downloadsFolder}/*`, {
     log: true,
     failOnNonZeroExit: false
+  });
+});
+
+Cypress.Commands.add('checkAccessDenied', (url) => {
+  'use strict';
+
+  cy.request({
+    url,
+    followRedirect: false,
+    failOnStatusCode: false
+  }).then((resp) => {
+    expect(resp.status).to.be.eq(403);
   });
 });
 

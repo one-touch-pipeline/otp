@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -138,6 +138,21 @@ describe('Check workflow run details page', () => {
         cy.location('pathname').should('contain', '/workflowRunDetails/index');
         cy.get('#statusDot').should('have.attr', 'data-status', 'FAILED_FINAL');
       });
+    });
+  });
+
+  context('when user is normal user', () => {
+    beforeEach(() => {
+      cy.loginAsUser();
+    });
+
+    it('should not be able to visit the page', () => {
+      cy.checkAccessDenied('/workflowRunList/index');
+      cy.checkAccessDenied('/workflowRunDetails/data');
+      cy.checkAccessDenied('/workflowRunDetails/showError');
+      cy.checkAccessDenied('/workflowRunDetails/showLogs');
+      cy.checkAccessDenied('/workflowRunDetails/saveComment');
+      cy.checkAccessDenied('/workflowRunDetails/setFailedFinal');
     });
   });
 });

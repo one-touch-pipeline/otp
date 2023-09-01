@@ -23,6 +23,17 @@
 describe('Check projectConfig page', () => {
   'use strict';
 
+  context('when user is normal user', () => {
+    beforeEach(() => {
+      cy.loginAsUser();
+    });
+
+    it('should not see the edit button on the index page', () => {
+      cy.visit('/projectConfig/index');
+      cy.get('button.edit').should('not.exist');
+    });
+  });
+
   context('when user is an operator', () => {
     beforeEach(() => {
       cy.loginAsOperator();

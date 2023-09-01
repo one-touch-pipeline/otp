@@ -77,7 +77,7 @@
     </table>
 
     <h2>${g.message(code: "workflowSelection.alignment")}</h2>
-    <table class="table table-sm table-striped">
+    <table id="alignment" class="table table-sm table-striped">
         <tr>
             <th>${g.message(code: "workflowSelection.workflow")}</th>
             <th>${g.message(code: "workflowSelection.seqType")}</th>
@@ -175,7 +175,7 @@
     </table>
 
     <h2>${g.message(code: 'workflowSelection.mergingCriteria')}</h2>
-    <table class="table table-sm table-striped">
+    <table id="mergingCriteria" class="table table-sm table-striped">
         <tr>
             <th>${g.message(code: 'workflowSelection.seqType')}</th>
             <th>${g.message(code: 'workflowSelection.libPrepKit')}</th>

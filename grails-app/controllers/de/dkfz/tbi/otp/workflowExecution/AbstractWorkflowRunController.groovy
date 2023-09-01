@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.validation.Validateable
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.config.ConfigService
@@ -43,6 +44,7 @@ abstract class AbstractWorkflowRunController implements CheckAndCall {
             restartRun         : "POST",
     ]
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     def setFailedFinal(RunUpdateCommand cmd) {
         checkErrorAndCallMethodWithFlashMessageWithoutTokenCheck(cmd, "workflowRun.list.setFailed") {
             assert cmd.step: 'No steps defined.'
@@ -51,6 +53,7 @@ abstract class AbstractWorkflowRunController implements CheckAndCall {
         redirect uri: cmd.redirect
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     def restartStep(RunUpdateCommand cmd) {
         checkErrorAndCallMethodWithFlashMessageWithoutTokenCheck(cmd, "workflowRun.list.restartSteps") {
             assert cmd.step: 'No steps defined.'
@@ -59,6 +62,7 @@ abstract class AbstractWorkflowRunController implements CheckAndCall {
         redirect uri: cmd.redirect
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     def restartPreviousStep(RunUpdateCommand cmd) {
         checkErrorAndCallMethodWithFlashMessageWithoutTokenCheck(cmd, "workflowRun.list.restartSteps") {
             assert cmd.step: 'No steps defined.'
@@ -67,6 +71,7 @@ abstract class AbstractWorkflowRunController implements CheckAndCall {
         redirect uri: cmd.redirect
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     def restartRun(RunUpdateCommand cmd) {
         checkErrorAndCallMethodWithFlashMessageWithoutTokenCheck(cmd, "workflowRun.list.restartRuns") {
             assert cmd.step: 'No steps defined.'

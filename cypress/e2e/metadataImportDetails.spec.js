@@ -49,4 +49,14 @@ describe('Check metadata import details page', () => {
       });
     });
   });
+
+  context('when user is normal user', () => {
+    beforeEach(() => {
+      cy.loginAsUser();
+    });
+
+    it('should not be able to visit the page', () => {
+      cy.checkAccessDenied('/metadataImport/updateSeqCenterComment');
+    });
+  });
 });
