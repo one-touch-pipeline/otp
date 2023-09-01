@@ -245,11 +245,11 @@ class DeletionService {
         }
 
         rawSequenceFiles = rawSequenceFiles - withdrawnFiles
-        List<SeqTrack> seqTracks = rawSequenceFiles*.seqTrack.unique()
+        List<SeqTrack> seqTrackList = rawSequenceFiles*.seqTrack.unique()
 
         // in case there are no dataFiles/seqTracks left this can be ignored.
-        if (seqTracks) {
-            List<ExternallyProcessedBamFile> externallyProcessedBamFiles = seqTrackService.returnExternallyProcessedBamFiles(seqTracks)
+        if (seqTrackList) {
+            List<ExternallyProcessedBamFile> externallyProcessedBamFiles = seqTrackService.returnExternallyProcessedBamFiles(seqTrackList)
             assert (!externallyProcessedBamFiles || everythingVerified):
                     "There are ${externallyProcessedBamFiles.size()} external merged bam files attached to this project. " +
                             "Clarify if the realignment shall be done anyway."
@@ -262,21 +262,31 @@ class DeletionService {
 
         output << "delete content in db...\n\n"
 
-        seqTracks.each { SeqTrack seqTrack ->
+        seqTrackList.each { SeqTrack seqTrack ->
             File processingDir = new File(dataProcessingFilesService.getOutputDirectory(
                     seqTrack.individual, DataProcessingFilesService.OutputDirectories.MERGING).toString())
             if (processingDir.exists()) {
                 dirsToDelete.add(processingDir.path)
             }
 
-            Set<AbstractBamFile> bamFiles = MergingWorkPackage.findAllBySampleAndSeqType(seqTrack.sample, seqTrack.seqType)*.bamFileInProjectFolder
+            Set<AbstractBamFile> bamFiles = (RoddyBamFile.createCriteria().listDistinct {
+                seqTracks {
+                    eq("id", seqTrack.id)
+                }
+            } + SingleCellBamFile.createCriteria().listDistinct {
+                seqTracks {
+                    eq("id", seqTrack.id)
+                }
+            }).findAll { AbstractBamFile bamFile ->
+                bamFile.isMostRecentBamFile()
+            } as Set
             bamFiles.each { AbstractBamFile bamfile ->
                 if (bamfile) {
                     Path mergingDir = abstractBamFileService.getBaseDirectory(bamfile)
                     if (Files.exists(mergingDir)) {
                         List<ExternallyProcessedBamFile> files = seqTrackService.returnExternallyProcessedBamFiles([seqTrack])
                         files.each {
-                            externalMergedBamFolders.add(it.nonOtpFolder.absoluteDataManagementPath.path)
+                            externalMergedBamFolders.add(it.nonOtpFolder.absolutePath)
                         }
                         Files.list(mergingDir).each {
                             dirsToDelete.add(it)
@@ -295,7 +305,7 @@ class DeletionService {
         Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "Delete_${projectName}.sh", realm)
         bashScriptToMoveFiles << AbstractDataSwapService.BASH_HEADER
 
-        (dirsToDelete - externalMergedBamFolders).each {
+        (dirsToDelete*.toString() - externalMergedBamFolders).each {
             bashScriptToMoveFiles << "rm -rf ${it}\n"
         }
 
@@ -303,7 +313,7 @@ class DeletionService {
 
         println output
 
-        return seqTracks
+        return seqTrackList
     }
 
     /**

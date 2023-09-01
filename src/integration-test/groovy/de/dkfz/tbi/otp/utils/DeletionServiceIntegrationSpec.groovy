@@ -28,14 +28,14 @@ import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.AbstractSnvCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
+import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryInstance
 import de.dkfz.tbi.otp.domainFactory.submissions.ega.EgaSubmissionFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.egaSubmission.EgaSubmission
@@ -51,9 +51,7 @@ import de.dkfz.tbi.otp.project.dta.*
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.workflowExecution.*
 
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
+import java.nio.file.*
 
 @Rollback
 @Integration
@@ -64,6 +62,8 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
     LsdfFilesService lsdfFilesService
     SnvCallingService snvCallingService
     FileService fileService
+    RoddyBamFileService roddyBamFileService
+    ExternallyProcessedBamFileService externallyProcessedBamFileService
 
     String seqDir = "/seq-dir"
 
@@ -1042,6 +1042,50 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
         thrown(AssertionError)
     }
 
+    void "testDeleteProcessingFilesOfProject_NoProcessedData_ExternallyProcessedBamFile_ShouldFail"() {
+        given:
+        setupDataForProcessingFiles()
+        SeqTrack st = deleteProcessingFilesOfProject_NoProcessedData_Setup()
+        createFastqFiles([st])
+        createExternallyProcessedBamFile([st])
+
+        when:
+        deletionService.deleteProcessingFilesOfProject(st.project.name, outputFolder, false, true, [st])
+
+        then:
+        AssertionError e = thrown()
+        e.message.contains('external merged bam files attached to this project')
+    }
+
+    void "testDeleteProcessingFilesOfProject_NoProcessedData_ExternallyProcessedBamFile_NoOtpBamFile_ShouldNotFail"() {
+        given:
+        setupDataForProcessingFiles()
+        SeqTrack st = deleteProcessingFilesOfProject_NoProcessedData_Setup()
+        createFastqFiles([st])
+        createExternallyProcessedBamFile([st])
+
+        when:
+        deletionService.deleteProcessingFilesOfProject(st.project.name, outputFolder, true, true, [st])
+
+        then:
+        noExceptionThrown()
+    }
+
+    void "testDeleteProcessingFilesOfProject_NoProcessedData_ExternallyProcessedBamFile_WithOtpBamFile_ShouldNotFail"() {
+        given:
+        setupDataForProcessingFiles()
+        SeqTrack st = deleteProcessingFilesOfProject_NoProcessedData_Setup()
+        createFastqFiles([st])
+        createExternallyProcessedBamFile([st])
+        createRoddyBamFileHelper([st])
+
+        when:
+        deletionService.deleteProcessingFilesOfProject(st.project.name, outputFolder, true, true, [st])
+
+        then:
+        noExceptionThrown()
+    }
+
     private SeqTrack deleteProcessingFilesOfProject_NoProcessedData_Setup() {
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoFastqFiles()
 
@@ -1079,6 +1123,28 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
 
     private void createFastqFiles(AbstractBamFile bamFile) {
         createFastqFiles(bamFile.containedSeqTracks as List)
+    }
+
+    private void createRoddyBamFileHelper(List<SeqTrack> seqTracks) {
+        RoddyBamFile roddyBamFile = createBamFile([
+                workPackage: createMergingWorkPackage([
+                        sample   : seqTracks.first().sample,
+                        seqType  : seqTracks.first().seqType,
+                        seqTracks: seqTracks,
+                ]),
+                seqTracks  : seqTracks,
+        ])
+        CreateFileHelper.createFile(roddyBamFileService.getFinalBamFile(roddyBamFile))
+    }
+
+    private void createExternallyProcessedBamFile(List<SeqTrack> seqTracks) {
+        ExternallyProcessedBamFile externallyProcessedBamFile = ExternalBamFactoryInstance.INSTANCE.createBamFile([
+                workPackage: ExternalBamFactoryInstance.INSTANCE.createMergingWorkPackage([
+                        sample : seqTracks.first().sample,
+                        seqType: seqTracks.first().seqType,
+                ]),
+        ])
+        CreateFileHelper.createFile(externallyProcessedBamFileService.getBamFile(externallyProcessedBamFile))
     }
 
     private void dataBaseSetupForBamFiles(AbstractBamFile bamFile, boolean addRealm = true) {
