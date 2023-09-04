@@ -22,14 +22,14 @@
 package de.dkfz.tbi.otp.workflowExecution.decider
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
 import de.dkfz.tbi.otp.workflowExecution.ArtefactType
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
-class WgbsDeciderSpec extends AbstractAlignmentDeciderSpec {
+class RnaAlignmentDeciderSpec extends AbstractAlignmentDeciderSpec {
 
     void setup() {
-        decider = new WgbsDecider()
+        decider = new RnaAlignmentDecider()
         useFastqcCount = 0
     }
 
@@ -40,12 +40,12 @@ class WgbsDeciderSpec extends AbstractAlignmentDeciderSpec {
 
     void "getWorkflowName"() {
         expect:
-        decider.workflowName == WgbsWorkflow.WGBS_WORKFLOW
+        decider.workflowName == RnaAlignmentWorkflow.WORKFLOW
     }
 
     void "getInputFastqRole"() {
         expect:
-        decider.inputFastqRole == WgbsWorkflow.INPUT_FASTQ
+        decider.inputFastqRole == RnaAlignmentWorkflow.INPUT_FASTQ
     }
 
     void "getInputFastqcRole"() {
@@ -55,16 +55,16 @@ class WgbsDeciderSpec extends AbstractAlignmentDeciderSpec {
 
     void "getOutputBamRole"() {
         expect:
-        decider.outputBamRole == WgbsWorkflow.OUTPUT_BAM
+        decider.outputBamRole == RnaAlignmentWorkflow.OUTPUT_BAM
     }
 
     void "getWorkflow"() {
         given:
         decider.workflowService = new WorkflowService()
-        createWorkflow(name: WgbsWorkflow.WGBS_WORKFLOW)
+        createWorkflow(name: RnaAlignmentWorkflow.WORKFLOW)
 
         expect:
-        decider.workflow.name == WgbsWorkflow.WGBS_WORKFLOW
+        decider.workflow.name == RnaAlignmentWorkflow.WORKFLOW
     }
 
     void "getSupportedInputArtefactTypes"() {
