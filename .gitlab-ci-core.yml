@@ -135,11 +135,6 @@ unit tests:
         prefix: gradle-$CI_JOB_NAME
       paths:
         - $GRADLE_USER_HOME
-    - key: jacoco-unit-$CI_PIPELINE_ID
-      when: 'always'
-      policy: push
-      paths:
-        - $BUILD_DIR
 
 integration tests:
   extends: .abstract_base_template
@@ -186,11 +181,6 @@ integration tests:
         prefix: gradle-$CI_JOB_NAME
       paths:
         - $GRADLE_USER_HOME
-    - key: jacoco-integration-$CI_PIPELINE_ID
-      when: 'always'
-      policy: push
-      paths:
-        - $BUILD_DIR
 
 test coverage:
   extends: .abstract_base_template
@@ -198,10 +188,13 @@ test coverage:
   needs:
     - unit tests
     - integration tests
+  dependencies:
+    - unit tests
+    - integration tests
   coverage: '/Instruction Coverage: (\d+(?:\.\d+)?)%/'
   script:
     - set -e
-    - ./gradlew --build-cache --exclude-task test --exclude-task integrationTest --rerun-tasks jacocoAllTestReport jacocoToCobertura
+    - ./gradlew --build-cache --exclude-task test --exclude-task integrationTest --rerun-tasks classes jacocoAllTestReport jacocoToCobertura
   when: always
   rules:
     - if: $CI_COMMIT_TAG
@@ -242,14 +235,6 @@ test coverage:
         prefix: gradle-$CI_JOB_NAME
       paths:
         - $GRADLE_USER_HOME
-    - key: jacoco-unit-$CI_PIPELINE_ID
-      policy: pull
-      paths:
-        - $BUILD_DIR
-    - key: jacoco-integration-$CI_PIPELINE_ID
-      policy: pull
-      paths:
-        - $BUILD_DIR
 
 test migration:
   extends: .abstract_base_template
@@ -279,9 +264,11 @@ test migration:
 cypress tests:
   extends: .abstract_base_template
   rules:
+    - if: $ENABLE_CYPRESS == "false"
+      when: never
     - if: $CI_COMMIT_TAG
     - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH && $ENABLE_CYPRESS == "true"'
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
       changes:
         compare_to: 'refs/heads/master'
         paths:
@@ -295,6 +282,7 @@ cypress tests:
         - cypress.config.js
         - package.json
         - package-lock.json
+        - .gitlab-ci-core.yml
   stage: test
   variables:
     DOCKER_HOST: tcp://docker:2375
