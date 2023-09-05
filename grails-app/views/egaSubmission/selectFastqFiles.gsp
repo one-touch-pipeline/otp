@@ -57,6 +57,7 @@
                         </g:if>
                         <th></th>
                         <th><g:message code="egaSubmission.individual"/></th>
+                        <th><g:message code="egaSubmission.uuid"/></th>
                         <th><g:message code="egaSubmission.seqTypeDisplayName"/></th>
                         <th><g:message code="egaSubmission.sequencingReadType"/></th>
                         <th><g:message code="egaSubmission.singleCellDisplayName"/></th>
@@ -89,6 +90,7 @@
                                     </g:if>
                                 </td>
                                 <td>${it.rawSequenceFile.individual.displayName}</td>
+                                <td>${it.rawSequenceFile.individual.uuid}</td>
                                 <td>${it.rawSequenceFile.seqType.displayName}</td>
                                 <td>${it.rawSequenceFile.seqType.libraryLayout}</td>
                                 <td>${it.rawSequenceFile.seqType.singleCellDisplayName}</td>

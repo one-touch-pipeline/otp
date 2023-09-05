@@ -57,6 +57,7 @@
                         </g:if>
                         <th></th>
                         <th><g:message code="egaSubmission.individual"/></th>
+                        <th><g:message code="egaSubmission.uuid"/></th>
                         <th><g:message code="egaSubmission.seqType"/></th>
                         <th><g:message code="egaSubmission.sampleType"/></th>
                         <th><g:message code="egaSubmission.sampleAlias"/></th>
@@ -79,6 +80,7 @@
                                 </g:if>
                             </td>
                             <td>${it.bamFile.individual.displayName}</td>
+                            <td>${it.bamFile.individual.uuid}</td>
                             <td>${it.bamFile.seqType.toString()}</td>
                             <td>${it.bamFile.sampleType.displayName}</td>
                             <td>${it.sampleSubmissionObject.egaAliasName}<g:hiddenField name="egaSampleAlias[${i}]"

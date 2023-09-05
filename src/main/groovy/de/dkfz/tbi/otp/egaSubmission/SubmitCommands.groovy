@@ -190,6 +190,7 @@ class SelectSampleDownloadCommand implements Validateable {
     @BindUsing({ obj, source ->
         source['selectedSamples'].collect {
             new EgaMapKey(it["individualName"] as String,
+                    it["individualUuid"] as String,
                     it["seqTypeName"] as String,
                     it["sequencingReadType"] as String,
                     it["singleCell"] as String,

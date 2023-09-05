@@ -56,6 +56,7 @@ class EgaSubmissionFileService {
 
     enum EgaColumnName {
         INDIVIDUAL("Individual"),
+        INDIVIDUAL_UUID("Patient UUID"),
         SAMPLE_TYPE("Sample Type"),
         SEQ_TYPE_NAME("Sequence Type Name"),
         SEQUENCING_READ_TYPE("Sequencing Read Type"),
@@ -131,6 +132,7 @@ class EgaSubmissionFileService {
         egaMapKeys.each { it ->
             contentBody.append([
                     it.individualName,
+                    it.individualUuid,
                     it.seqTypeName,
                     it.sequencingReadType,
                     it.singleCell,
@@ -140,6 +142,7 @@ class EgaSubmissionFileService {
 
         String contentHeader = [
                 INDIVIDUAL,
+                EgaColumnName.INDIVIDUAL_UUID,
                 SEQ_TYPE_NAME,
                 SEQUENCING_READ_TYPE,
                 SINGLE_CELL,
@@ -157,6 +160,7 @@ class EgaSubmissionFileService {
 
             contentBody.append([
                     sampleSubmissionObject.sample.individual.displayName,
+                    sampleSubmissionObject.sample.individual.uuid,
                     sampleSubmissionObject.seqType.displayName,
                     sampleSubmissionObject.seqType.libraryLayout,
                     sampleSubmissionObject.seqType.singleCellDisplayName,
@@ -167,6 +171,7 @@ class EgaSubmissionFileService {
 
         String contentHeader = [
                 INDIVIDUAL,
+                EgaColumnName.INDIVIDUAL_UUID,
                 SEQ_TYPE_NAME,
                 SEQUENCING_READ_TYPE,
                 SINGLE_CELL,
@@ -186,6 +191,7 @@ class EgaSubmissionFileService {
         dataFilesAndSampleAliases.each {
             contentBody.append([
                     it.rawSequenceFile.individual.displayName,
+                    it.rawSequenceFile.individual.uuid,
                     it.rawSequenceFile.seqType.displayName,
                     it.rawSequenceFile.seqType.libraryLayout,
                     it.rawSequenceFile.seqType.singleCellDisplayName,
@@ -203,6 +209,7 @@ class EgaSubmissionFileService {
 
         String contentHeader = [
                 INDIVIDUAL,
+                INDIVIDUAL_UUID,
                 SEQ_TYPE_NAME,
                 SEQUENCING_READ_TYPE,
                 SINGLE_CELL,
@@ -229,6 +236,7 @@ class EgaSubmissionFileService {
         bamFilesAndSampleAliases.each {
             contentBody.append([
                     it.bamFile.individual.displayName,
+                    it.bamFile.individual.uuid,
                     it.bamFile.seqType.displayName,
                     it.bamFile.seqType.libraryLayout,
                     it.bamFile.seqType.singleCellDisplayName,
@@ -241,6 +249,7 @@ class EgaSubmissionFileService {
 
         String contentHeader = [
                 INDIVIDUAL,
+                INDIVIDUAL_UUID,
                 SEQ_TYPE_NAME,
                 SEQUENCING_READ_TYPE,
                 SINGLE_CELL,

@@ -37,6 +37,7 @@
                 <tr>
                     <th><g:message code="egaSubmission.SubmissionProject"/></th>
                     <th><g:message code="egaSubmission.individual"/></th>
+                    <th><g:message code="egaSubmission.uuid"/></th>
                     <th><g:message code="egaSubmission.sampleMetadata.egaPid"/></th>
                     <th><g:message code="egaSubmission.sampleType"/></th>
                     <th><g:message code="egaSubmission.sampleAlias"/></th>
@@ -60,6 +61,7 @@
                     <tr>
                         <td>${submission.project.name}</td>
                         <td>${it.sample.individual.displayName}</td>
+                        <td>${it.sample.individual.uuid}</td>
                         <td><g:message code="egaSubmission.egaPid"/> ${it.sample.individual.displayName}</td>
                         <td>${it.sample.displayName}</td>
                         <td>${it.egaAliasName}</td>

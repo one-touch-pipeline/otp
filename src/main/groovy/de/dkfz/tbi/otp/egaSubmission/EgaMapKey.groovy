@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,6 +32,7 @@ import static de.dkfz.tbi.otp.egaSubmission.EgaSubmissionFileService.EgaColumnNa
 @ToString
 class EgaMapKey implements Comparable<EgaMapKey> {
     final String individualName
+    final String individualUuid
     final String seqTypeName
     final String sequencingReadType
     final String singleCell
@@ -39,6 +40,7 @@ class EgaMapKey implements Comparable<EgaMapKey> {
 
     EgaMapKey(Row row) {
         individualName = row.getCellByColumnTitle(INDIVIDUAL.value).text
+        individualUuid = row.getCellByColumnTitle(INDIVIDUAL_UUID.value).text
         sampleTypeName = row.getCellByColumnTitle(SAMPLE_TYPE.value).text
         seqTypeName = row.getCellByColumnTitle(SEQ_TYPE_NAME.value).text
         sequencingReadType = row.getCellByColumnTitle(SEQUENCING_READ_TYPE.value).text
@@ -47,14 +49,16 @@ class EgaMapKey implements Comparable<EgaMapKey> {
 
     EgaMapKey(SampleSubmissionObject sampleSubmissionObject) {
         individualName = sampleSubmissionObject.sample.individual.displayName
+        individualUuid = sampleSubmissionObject.sample.individual.uuid
         sampleTypeName = sampleSubmissionObject.sample.sampleType.displayName
         seqTypeName = sampleSubmissionObject.seqType.displayName
         sequencingReadType = sampleSubmissionObject.seqType.libraryLayout
         singleCell = sampleSubmissionObject.seqType.singleCellDisplayName
     }
 
-    EgaMapKey(String individualName, String seqTypeName, String sequencingReadType, String singleCell, String sampleTypeName) {
+    EgaMapKey(String individualName, String individualUuid, String seqTypeName, String sequencingReadType, String singleCell, String sampleTypeName) {
         this.individualName = individualName
+        this.individualUuid = individualUuid
         this.seqTypeName = seqTypeName
         this.sequencingReadType = sequencingReadType
         this.singleCell = singleCell
@@ -64,9 +68,10 @@ class EgaMapKey implements Comparable<EgaMapKey> {
     @Override
     int compareTo(EgaMapKey egaMapKey) {
         return individualName <=> egaMapKey.individualName ?:
-                sampleTypeName <=> egaMapKey.sampleTypeName ?:
-                        sequencingReadType <=> egaMapKey.sequencingReadType ?:
-                                singleCell <=> egaMapKey.singleCell ?:
-                                        seqTypeName <=> egaMapKey.seqTypeName
+                individualUuid <=> egaMapKey.individualUuid ?:
+                        sampleTypeName <=> egaMapKey.sampleTypeName ?:
+                                sequencingReadType <=> egaMapKey.sequencingReadType ?:
+                                        singleCell <=> egaMapKey.singleCell ?:
+                                                seqTypeName <=> egaMapKey.seqTypeName
     }
 }

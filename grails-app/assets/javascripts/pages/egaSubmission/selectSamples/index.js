@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,6 +45,7 @@ function downloadCsvOfSelectedSamples() {
     for (let i = 0; i < selectedRows.length; i++) {
       selectedSamples.push({
         individualName: selectedRows[i].individual,
+        individualUuid: selectedRows[i].uuid,
         sampleTypeName: selectedRows[i].sampleType,
         seqTypeName: selectedRows[i].seqTypeDisplayName,
         sequencingReadType: selectedRows[i].sequencingReadType,
@@ -102,7 +103,8 @@ function uploadCsvOfSelectedSamples() {
     }).then((response) => response.json()).then((json) => {
       const table = $('#selectSamplesTable').DataTable();
 
-      const header = ['Individual', 'Sequence Type Name', 'Sequencing Read Type', 'Single Cell', 'Sample Type'];
+      const header = ['Individual', 'Patient UUID', 'Sequence Type Name', 'Sequencing Read Type', 'Single Cell',
+        'Sample Type'];
       const foundSamples = new Set([]);
 
       table.rows().eq(0).each((rowIdx) => {
@@ -112,7 +114,8 @@ function uploadCsvOfSelectedSamples() {
             table.cell(rowIdx, 2).data() === sample[header[1]] &&
             table.cell(rowIdx, 3).data() === sample[header[2]] &&
             table.cell(rowIdx, 4).data() === sample[header[3]] &&
-            table.cell(rowIdx, 5).data() === sample[header[4]]) {
+            table.cell(rowIdx, 5).data() === sample[header[4]] &&
+            table.cell(rowIdx, 6).data() === sample[header[5]]) {
             foundSamples.add(sample);
             table.cell(rowIdx, 0).node().children[0].checked = true;
           }

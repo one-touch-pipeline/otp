@@ -379,7 +379,7 @@ class EgaSubmissionService {
 
     @CompileDynamic
     List<SampleAndSeqTypeAndDataFileProjection> getSamplesWithSeqType(Project project) {
-        String hqlQuery = """SELECT sample.id, individual.pid, sampleType.name, seqType, sequenceFile.fileExists FROM SeqTrack seqTrack
+        String hqlQuery = """SELECT sample.id, individual.pid, individual.uuid, sampleType.name, seqType, sequenceFile.fileExists FROM SeqTrack seqTrack
            INNER JOIN Sample sample ON sample.id=seqTrack.sample.id
            INNER JOIN SampleType sampleType ON sampleType.id=sample.sampleType.id
            INNER JOIN Individual individual ON individual.id=sample.individual.id
@@ -389,16 +389,17 @@ class EgaSubmissionService {
            ORDER BY individual.pid ASC
         """
         return SeqTrack.executeQuery(hqlQuery, [projectId: project.id]).unique().collect {
-            SeqType seqType = it[3]
+            SeqType seqType = it[4]
             return new SampleAndSeqTypeAndDataFileProjection(
                     sampleId: it[0],
                     pid: it[1],
-                    sampleTypeName: it[2],
+                    uuid: it[2],
+                    sampleTypeName: it[3],
                     seqTypeId: seqType.id,
                     seqTypeName: seqType.displayName,
                     sequencingReadType: seqType.libraryLayout,
                     singleCellDisplayName: seqType.singleCellDisplayName,
-                    fileExists: it[4]
+                    fileExists: it[5]
             )
         }
     }
@@ -585,6 +586,7 @@ class BamFileAndSampleAlias implements Comparable<BamFileAndSampleAlias> {
 class SampleAndSeqTypeAndDataFileProjection implements Comparable<SampleAndSeqTypeAndDataFileProjection> {
     long sampleId
     String pid
+    String uuid
     String sampleTypeName
     long seqTypeId
     String seqTypeName

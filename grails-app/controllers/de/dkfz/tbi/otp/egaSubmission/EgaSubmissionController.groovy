@@ -318,6 +318,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             Map validateRows = egaSubmissionValidationService.validateRows(spreadsheet, cmd.submission)
             Map validateColumns = egaSubmissionValidationService.validateColumns(spreadsheet, [
                     INDIVIDUAL,
+                    INDIVIDUAL_UUID,
                     SEQ_TYPE_NAME,
                     SEQUENCING_READ_TYPE,
                     SINGLE_CELL,
@@ -586,6 +587,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                     identifier           : "${it.sampleId}-${it.seqTypeId}",
                     sampleId             : "${it.sampleId}",
                     individual           : it.pid,
+                    uuid                 : it.uuid,
                     seqTypeDisplayName   : it.seqTypeName,
                     sequencingReadType   : it.sequencingReadType,
                     singleCellDisplayName: it.singleCellDisplayName,

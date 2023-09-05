@@ -53,6 +53,7 @@
                 <thead>
                     <tr>
                         <th><g:message code="egaSubmission.individual"/></th>
+                        <th><g:message code="egaSubmission.uuid"/></th>
                         <th><g:message code="egaSubmission.seqTypeDisplayName"/></th>
                         <th><g:message code="egaSubmission.sequencingReadType"/></th>
                         <th><g:message code="egaSubmission.singleCellDisplayName"/></th>
@@ -63,6 +64,7 @@
                 <tbody>
                     <g:each status="i" in="${sampleSubmissionObjects}" var="it">
                         <g:set var="individual" value="${it.sample.individual.displayName}" />
+                        <g:set var="uuid" value="${it.sample.individual.uuid}" />
                         <g:set var="seqTypeDisplayName" value="${it.seqType.displayName}" />
                         <g:set var="sequencingReadType" value="${it.seqType.libraryLayout}" />
                         <g:set var="singleCellDisplayName" value="${it.seqType.singleCellDisplayName}" />
@@ -71,6 +73,7 @@
                         <tr>
                             <g:hiddenField name="sampleObjectId[${i}]" value="${it.id}"/>
                             <td>${individual}</td>
+                            <td>${uuid}</td>
                             <td>${seqTypeDisplayName}</td>
                             <td>${sequencingReadType}</td>
                             <td>${singleCellDisplayName}</td>

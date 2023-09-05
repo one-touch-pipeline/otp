@@ -82,6 +82,7 @@
         <div class="otpDataTables" id="sampleTable" data-project="${project}">
             <g:set var="dataTableHeaders" value="${[
                     'individual',
+                    'uuid',
                     'seqTypeDisplayName',
                     'sequencingReadType',
                     'singleCellDisplayName',

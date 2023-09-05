@@ -103,18 +103,21 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
 
         then:
         content == "${INDIVIDUAL.value}," +
+                "${INDIVIDUAL_UUID.value}," +
                 "${SEQ_TYPE_NAME.value}," +
                 "${SEQUENCING_READ_TYPE.value}," +
                 "${SINGLE_CELL.value}," +
                 "${SAMPLE_TYPE.value}," +
                 "${EGA_SAMPLE_ALIAS.value}\n" +
                 "${sampleSubmissionObject1.sample.individual.displayName}," +
+                "${sampleSubmissionObject1.sample.individual.uuid}," +
                 "${sampleSubmissionObject1.seqType.displayName}," +
                 "${sampleSubmissionObject1.seqType.libraryLayout}," +
                 "${sampleSubmissionObject1.seqType.singleCellDisplayName}," +
                 "${sampleSubmissionObject1.sample.sampleType.displayName}," +
                 "${egaSampleAlias[0]}\n" +
                 "${sampleSubmissionObject2.sample.individual.displayName}," +
+                "${sampleSubmissionObject2.sample.individual.uuid}," +
                 "${sampleSubmissionObject2.seqType.displayName}," +
                 "${sampleSubmissionObject2.seqType.libraryLayout}," +
                 "${sampleSubmissionObject2.seqType.singleCellDisplayName}," +
@@ -165,6 +168,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
 
         then:
         content == "${INDIVIDUAL.value}," +
+                "${INDIVIDUAL_UUID.value}," +
                 "${SEQ_TYPE_NAME.value}," +
                 "${SEQUENCING_READ_TYPE.value}," +
                 "${SINGLE_CELL.value}," +
@@ -178,6 +182,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
                 "${EGA_FILE_ALIAS.value}," +
                 "${FILENAME.value}\n" +
                 "${submissionObject.sequenceFile.individual.displayName}," +
+                "${submissionObject.sequenceFile.individual.uuid}," +
                 "${submissionObject.sequenceFile.seqType.displayName}," +
                 "${submissionObject.sequenceFile.seqType.libraryLayout}," +
                 "${submissionObject.sequenceFile.seqType.singleCellDisplayName}," +
@@ -219,6 +224,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
 
         then:
         content == "${INDIVIDUAL.value}," +
+                "${INDIVIDUAL_UUID.value}," +
                 "${SEQ_TYPE_NAME.value}," +
                 "${SEQUENCING_READ_TYPE.value}," +
                 "${SINGLE_CELL.value}," +
@@ -227,6 +233,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
                 "${EGA_FILE_ALIAS.value}," +
                 "${FILENAME.value}\n" +
                 "${bamFileSubmissionObject.bamFile.individual.displayName}," +
+                "${bamFileSubmissionObject.bamFile.individual.uuid}," +
                 "${bamFileSubmissionObject.bamFile.seqType.displayName}," +
                 "${bamFileSubmissionObject.bamFile.seqType.libraryLayout}," +
                 "${bamFileSubmissionObject.bamFile.seqType.singleCellDisplayName}," +
