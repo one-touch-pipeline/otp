@@ -27,10 +27,9 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
-import de.dkfz.tbi.otp.workflow.jobs.AbstractExecuteRoddyPipelineJob
+import de.dkfz.tbi.otp.workflow.alignment.RoddyAlignmentExecuteJob
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerShared
 import de.dkfz.tbi.otp.workflow.shared.JobFailedException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -40,7 +39,7 @@ import java.nio.file.Path
 
 @Component
 @Slf4j
-class WgbsExecuteJob extends AbstractExecuteRoddyPipelineJob implements PanCancerShared {
+class WgbsExecuteJob extends RoddyAlignmentExecuteJob implements PanCancerShared {
 
     @Autowired
     BedFileService bedFileService
@@ -50,16 +49,6 @@ class WgbsExecuteJob extends AbstractExecuteRoddyPipelineJob implements PanCance
 
     @Autowired
     RoddyBamFileService roddyBamFileService
-
-    @Override
-    protected final RoddyResult getRoddyResult(WorkflowStep workflowStep) {
-        return getRoddyBamFile(workflowStep)
-    }
-
-    @Override
-    protected final String getRoddyWorkflowName() {
-        return "AlignmentAndQCWorkflows"
-    }
 
     @Override
     protected final String getAnalysisConfiguration(SeqType seqType) {
@@ -73,11 +62,10 @@ class WgbsExecuteJob extends AbstractExecuteRoddyPipelineJob implements PanCance
 
     @Override
     protected final Map<String, String> getConfigurationValues(WorkflowStep workflowStep, String combinedConfig) {
+        Map<String, String> conf = super.getConfigurationValues(workflowStep, combinedConfig)
+
         RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
 
-        Map<String, String> conf = [:]
-
-        conf.putAll(roddyConfigValueService.getAlignmentValues(roddyBamFile, combinedConfig))
         conf.putAll(roddyConfigValueService.getChromosomeIndexParameterWithMitochondrion(roddyBamFile.referenceGenome))
 
         if (roddyBamFile.referenceGenome.cytosinePositionsIndex) {

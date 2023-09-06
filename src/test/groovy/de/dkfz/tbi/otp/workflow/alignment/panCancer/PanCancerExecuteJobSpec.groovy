@@ -91,6 +91,7 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, Workflo
             getRoddyBamFile(workflowStep) >> roddyBamFile
         }
 
+        job.processingOptionService = new ProcessingOptionService()
         job.bedFileService = Mock(BedFileService)
         job.roddyConfigValueService = new RoddyConfigValueService()
         job.roddyConfigValueService.referenceGenomeService = Mock(ReferenceGenomeService) {
@@ -166,6 +167,7 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, Workflo
         roddyBamFile.mergingWorkPackage.save(flush: true)
 
         Map<String, String> expectedCommand = [
+                "sharedFilesBaseDirectory"         : null,
                 "INDEX_PREFIX"                     : "/fasta-path",
                 "GENOME_FA"                        : "/fasta-path",
                 "possibleControlSampleNamePrefixes": roddyBamFile.sampleType.dirName,
@@ -193,6 +195,7 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, Workflo
         job.roddyConfigValueService.referenceGenomeService.fingerPrintingFile(roddyBamFile.referenceGenome) >> { new File("/fingerprint-path") }
 
         Map<String, String> expectedCommand = [
+                "sharedFilesBaseDirectory"         : null,
                 "INDEX_PREFIX"                     : "/fasta-path",
                 "GENOME_FA"                        : "/fasta-path",
                 "possibleControlSampleNamePrefixes": roddyBamFile.sampleType.dirName,
@@ -214,6 +217,7 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, Workflo
         setupDataForGetConfigurationValues()
 
         Map<String, String> expectedCommand = [
+                "sharedFilesBaseDirectory"         : null,
                 "INDEX_PREFIX"                     : "/fasta-path",
                 "GENOME_FA"                        : "/fasta-path",
                 "possibleControlSampleNamePrefixes": roddyBamFile.sampleType.dirName,
@@ -248,6 +252,7 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, Workflo
         job.getRoddyBamFile(workflowStep2) >> { roddyBamFile2 }
 
         Map<String, String> expectedCommand = [
+                "sharedFilesBaseDirectory"         : null,
                 "INDEX_PREFIX"                     : "/fasta-path",
                 "GENOME_FA"                        : "/fasta-path",
                 "possibleControlSampleNamePrefixes": roddyBamFile2.sampleType.dirName,

@@ -19,52 +19,58 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.alignment.panCancer
+package de.dkfz.tbi.otp.workflow.alignment.rna
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
+import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SequencingReadType
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.alignment.RoddyAlignmentExecuteJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 @Component
 @Slf4j
-class PanCancerExecuteJob extends RoddyAlignmentExecuteJob implements PanCancerShared {
+class RnaAlignmentExecuteJob extends RoddyAlignmentExecuteJob implements RnaAlignmentShared {
 
     @Autowired
-    BedFileService bedFileService
+    RoddyConfigValueService roddyConfigValueService
 
     @Override
-    protected final String getAnalysisConfiguration(SeqType seqType) {
-        return seqType.needsBedFile ? 'exomeAnalysis' : 'qcAnalysis'
+    protected String getRoddyWorkflowName() {
+        return "RNAseqWorkflow"
     }
 
     @Override
-    protected final boolean getFilenameSectionKillSwitch() {
-        return true
+    protected String getAnalysisConfiguration(SeqType seqType) {
+        return 'RNAseqAnalysis'
     }
 
     @Override
     protected final Map<String, String> getConfigurationValues(WorkflowStep workflowStep, String combinedConfig) {
         Map<String, String> conf = super.getConfigurationValues(workflowStep, combinedConfig)
 
-        RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
+        RnaRoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
 
         conf.putAll(roddyConfigValueService.getFilesToMerge(roddyBamFile))
 
-        if (roddyBamFile.seqType.needsBedFile) {
-            BedFile bedFile = roddyBamFile.bedFile
-            File bedFilePath = bedFileService.filePath(bedFile) as File
-            conf.put("TARGET_REGIONS_FILE", bedFilePath.toString())
-            conf.put("TARGETSIZE", bedFile.targetSize.toString())
-        }
+        String adapterSequence = CollectionUtils.exactlyOneElement(
+                roddyBamFile.containedSeqTracks*.libraryPreparationKit*.reverseComplementAdapterSequence.unique().findAll(),
+                "There is not exactly one reverse complement adapter sequence available for fastq file(s) for the bam file ${roddyBamFile}")
+        assert adapterSequence: "adapterSequence not found in the BAM file ${roddyBamFile}"
+        conf.put("ADAPTER_SEQ", adapterSequence)
+        // the following two variables need to be provided since Roddy does not use the normal path definition for RNA
+        conf.put("ALIGNMENT_DIR", getWorkDirectory(workflowStep).toString())
+        conf.put("outputBaseDirectory", getWorkDirectory(workflowStep).toString())
 
-        RoddyBamFile baseBamFile = roddyBamFile.baseBamFile
-        if (baseBamFile) {
-            conf.put("bam", baseBamFile.pathForFurtherProcessing.toString())
+        if (roddyBamFile.seqType.libraryLayout == SequencingReadType.SINGLE) {
+            conf.put("useSingleEndProcessing", Boolean.TRUE.toString())
+        } else if (roddyBamFile.seqType.libraryLayout == SequencingReadType.PAIRED) {
+            conf.put("useSingleEndProcessing", Boolean.FALSE.toString())
         }
 
         return conf

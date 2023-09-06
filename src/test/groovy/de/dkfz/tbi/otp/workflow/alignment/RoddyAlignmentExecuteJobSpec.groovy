@@ -19,16 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.alignment.wgbs
+package de.dkfz.tbi.otp.workflow.alignment
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.TempDir
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
@@ -36,17 +36,27 @@ import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentExecuteJob
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class WgbsExecuteJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, IsRoddy {
+class RoddyAlignmentExecuteJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, IsRoddy {
+
+    @TempDir
+    Path tempDir
+
+    RoddyAlignmentExecuteJob job
+    RoddyBamFile roddyBamFile
+    WorkflowStep workflowStep
+
+    TestConfigService configService
 
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                BedFile,
+                RoddyBamFile,
                 FastqFile,
                 FastqImportInstance,
                 FileType,
@@ -58,7 +68,6 @@ class WgbsExecuteJobSpec extends Specification implements DataTest, WorkflowSyst
                 ProcessingPriority,
                 Project,
                 Realm,
-                ReferenceGenomeEntry,
                 ReferenceGenomeProjectSeqType,
                 RoddyBamFile,
                 RoddyWorkflowConfig,
@@ -69,36 +78,35 @@ class WgbsExecuteJobSpec extends Specification implements DataTest, WorkflowSyst
         ]
     }
 
-    @TempDir
-    Path tempDir
-
-    WgbsExecuteJob job
-    RoddyBamFile roddyBamFile
-    WorkflowStep workflowStep
-
-    TestConfigService configService
+    static final String WORK_DIRECTORY_NAME = "work"
 
     void setupDataForGetConfigurationValues() {
         roddyBamFile = createBamFile([
                 md5sum                      : null,
                 fileOperationStatus         : AbstractBamFile.FileOperationStatus.DECLARED,
                 roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
+                workDirectoryName           : WORK_DIRECTORY_NAME,
+                seqTracks                   : [createSeqTrack([
+                        libraryPreparationKit: createLibraryPreparationKit()
+                ])],
         ])
         workflowStep = createWorkflowStep()
 
-        job = Spy(WgbsExecuteJob) {
+        job = Spy(RoddyAlignmentExecuteJob) {
             getRoddyBamFile(workflowStep) >> roddyBamFile
         }
 
         job.processingOptionService = new ProcessingOptionService()
-        job.bedFileService = Mock(BedFileService)
         job.roddyConfigValueService = new RoddyConfigValueService()
-        job.referenceGenomeService = Mock(ReferenceGenomeService) {
+
+        job.roddyConfigValueService.referenceGenomeService = Mock(ReferenceGenomeService) {
             fastaFilePath(roddyBamFile.referenceGenome) >> { new File("/fasta-path") }
             chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage) >> { new File("/chrom-size-path") }
-            cytosinePositionIndexFilePath(roddyBamFile.referenceGenome) >> { new File("/cytosine-position-index-path") }
         }
-        job.roddyConfigValueService.referenceGenomeService = job.referenceGenomeService
+        job.roddyConfigValueService.lsdfFilesService = new LsdfFilesService()
+        job.roddyConfigValueService.lsdfFilesService.individualService = Mock(IndividualService) {
+            getViewByPidPath(_, _) >> { Paths.get("/viewbypidpath") }
+        }
 
         DomainFactory.createRoddyAlignableSeqTypes()
 
@@ -106,7 +114,7 @@ class WgbsExecuteJobSpec extends Specification implements DataTest, WorkflowSyst
                 (OtpProperty.PATH_PROJECT_ROOT): tempDir.toString(),
         ])
 
-        DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(tempDir.toString(), "reference_genomes").path)
+        DomainFactory.createProcessingOptionBasePathReferenceGenome(tempDir.resolve("reference_genomes").toString())
     }
 
     void cleanup() {
@@ -115,42 +123,42 @@ class WgbsExecuteJobSpec extends Specification implements DataTest, WorkflowSyst
 
     void "test getRoddyResult"() {
         given:
-        RoddyBamFile bamFile = createBamFile()
         WorkflowStep workflowStep = createWorkflowStep()
-        WgbsExecuteJob job = Spy(WgbsExecuteJob) {
-            1 * getRoddyBamFile(workflowStep) >> bamFile
+        RnaAlignmentExecuteJob job = Spy(RnaAlignmentExecuteJob) {
+            1 * getRoddyBamFile(workflowStep) >> roddyBamFile
         }
 
         expect:
-        job.getRoddyResult(workflowStep) == bamFile
+        job.getRoddyResult(workflowStep) == roddyBamFile
     }
 
     void "test getRoddyWorkflowName"() {
         expect:
-        new WgbsExecuteJob().roddyWorkflowName == "AlignmentAndQCWorkflows"
+        new RoddyAlignmentExecuteJob().roddyWorkflowName == "AlignmentAndQCWorkflows"
     }
 
     void "test getAnalysisConfiguration"() {
+        given:
+        DomainFactory.createRoddyAlignableSeqTypes()
+
         expect:
-        new WgbsExecuteJob().getAnalysisConfiguration(createSeqType()) == "bisulfiteCoreAnalysis"
+        new RoddyAlignmentExecuteJob().getAnalysisConfiguration(seqTypeClosure()) == result
+
+        where:
+        // created objects in where part are not deleted during cleanup (in integration tests), hence we use closures for consistency also in unit test
+        result          || seqTypeClosure
+        "qcAnalysis"    || { DomainFactory.createChipSeqType() }
+        "qcAnalysis"    || { DomainFactory.createWholeGenomeSeqType() }
     }
 
     void "test getFileNamesKillSwitch"() {
         expect:
-        new WgbsExecuteJob().filenameSectionKillSwitch
+        new RoddyAlignmentExecuteJob().filenameSectionKillSwitch == false
     }
 
-    void "test getConfigurationValues"() {
+    void "test getConfigurationValues, with general alignment configs"() {
         given:
         setupDataForGetConfigurationValues()
-
-        DomainFactory.createReferenceGenomeEntries(roddyBamFile.referenceGenome, ["adsf"])
-
-        ReferenceGenome referenceGenome = roddyBamFile.referenceGenome
-        referenceGenome.cytosinePositionsIndex = "cytosinePositionsIndex"
-        referenceGenome.save(flush: true)
-
-        job.roddyConfigValueService.chromosomeIdentifierSortingService = new ChromosomeIdentifierSortingService()
 
         Map<String, String> expectedCommand = [
                 "sharedFilesBaseDirectory"         : null,
@@ -159,57 +167,17 @@ class WgbsExecuteJobSpec extends Specification implements DataTest, WorkflowSyst
                 "possibleControlSampleNamePrefixes": roddyBamFile.sampleType.dirName,
                 "possibleTumorSampleNamePrefixes"  : "",
                 "runFingerprinting"                : "false",
-                "CHROMOSOME_INDICES"               : "( adsf )",
-                "CYTOSINE_POSITIONS_INDEX"         : "/cytosine-position-index-path",
         ]
 
         when:
         Map<String, String> actualCommand = job.getConfigurationValues(workflowStep, "{}")
 
         then:
-        new HashMap(expectedCommand) == new HashMap(actualCommand)
-    }
-
-    void "test getConfigurationValues, with fingerprinting"() {
-        given:
-        setupDataForGetConfigurationValues()
-        DomainFactory.createReferenceGenomeEntries(roddyBamFile.referenceGenome, ["adsf"])
-
-        ReferenceGenome referenceGenome = roddyBamFile.referenceGenome
-        referenceGenome.cytosinePositionsIndex = "cytosinePositionsIndex"
-        referenceGenome.fingerPrintingFileName = "fingerprintingFile"
-        referenceGenome.save(flush: true)
-
-        job.roddyConfigValueService.referenceGenomeService.fingerPrintingFile(roddyBamFile.referenceGenome) >> { new File("/fingerprint-path") }
-        job.roddyConfigValueService.chromosomeIdentifierSortingService = new ChromosomeIdentifierSortingService()
-
-        Map<String, String> expectedCommand = [
-                "sharedFilesBaseDirectory"         : null,
-                "INDEX_PREFIX"                     : "/fasta-path",
-                "GENOME_FA"                        : "/fasta-path",
-                "possibleControlSampleNamePrefixes": roddyBamFile.sampleType.dirName,
-                "possibleTumorSampleNamePrefixes"  : "",
-                "runFingerprinting"                : "true",
-                "fingerprintingSitesFile"          : "/fingerprint-path",
-                "CHROMOSOME_INDICES"               : "( adsf )",
-                "CYTOSINE_POSITIONS_INDEX"         : "/cytosine-position-index-path",
-        ]
-
-        when:
-        Map<String, String> actualCommand = job.getConfigurationValues(workflowStep, "{}")
-
-        then:
-        new HashMap(expectedCommand) == new HashMap(actualCommand)
+        TestCase.assertContainSame(expectedCommand, actualCommand)
     }
 
     void "test getAdditionalParameters"() {
-        given:
-        setupDataForGetConfigurationValues()
-        job.roddyBamFileService = Mock(RoddyBamFileService) {
-            getWorkMetadataTableFile(_) >> Paths.get("/asdf")
-        }
-
         expect:
-        job.getAdditionalParameters(workflowStep) == ["--usemetadatatable=/asdf"]
+        new RoddyAlignmentExecuteJob().getAdditionalParameters(createWorkflowStep()) == []
     }
 }
