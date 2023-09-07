@@ -29,15 +29,12 @@ include:
   - local: '.gitlab-ci-core.yml'
   - local: '.gitlab-ci-base-image.yml'
   - local: '.gitlab-ci-merge-request.yml'
-  - template: Dependency-Scanning.gitlab-ci.yml
-  - template: License-Scanning.gitlab-ci.yml
+  - template: Jobs/Dependency-Scanning.gitlab-ci.yml
 
 variables:
-  #Default is: DS_DEFAULT_ANALYZERS: "gemnasium, gemnasium-python, gemnasium-maven, bundler-audit"`
-  DS_DEFAULT_ANALYZERS: "gemnasium, gemnasium-maven, bundler-audit"
   DS_EXCLUDED_ANALYZERS: "gemnasium-python"
   DS_JAVA_VERSION: 17
-  LICENSE_MANAGEMENT_VERSION: 4
+  DS_MAX_DEPTH: -1
 
 stages:
   - scanning
@@ -57,22 +54,22 @@ stages:
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
 
-
 gemnasium-dependency_scanning:
   stage: scanning
   dependencies: [ ]
   needs: [ ]
   rules:
-    - !reference [.only-branch, rules]
+    - !reference [ .only-branch, rules ]
   script:
     - /analyzer run
+
 
 gemnasium-maven-dependency_scanning:
   stage: scanning
   dependencies: [ ]
   needs: [ ]
   rules:
-    - !reference [.only-branch, rules]
+    - !reference [ .only-branch, rules ]
   script:
     - /analyzer run
 
@@ -80,8 +77,17 @@ license_scanning:
   stage: scanning
   dependencies: [ ]
   needs: [ ]
+  image:
+    name: registry.gitlab.com/gitlab-org/security-products/analyzers/license-finder:latest
+    entrypoint: [ "" ]
+  variables:
+    LM_REPORT_VERSION: "2.1"
+    CI_PROJECT_DIR: "."
+    LM_JAVA_VERSION: "11"
   rules:
-    - !reference [.only-branch, rules]
+    - !reference [ .only-branch, rules ]
+  script:
+    - /run.sh analyze .
   artifacts:
     paths:
       - gl-license-scanning-report.json

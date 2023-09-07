@@ -76,7 +76,7 @@ variables:
 # jobs stage scanning
 # ------------------------------------------------------
 
-otp license:
+license check:
   image: groovy:3.0-jdk17-alpine
   stage: scanning
   dependencies: [ ]

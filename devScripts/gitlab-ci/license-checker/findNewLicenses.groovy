@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,6 @@ import groovy.json.JsonSlurper
 
 @CompileStatic
 class FindNewLicenses {
-
     static final String REPORT_FILE_NAME = "gl-license-scanning-report.json"
 
     static final List<String> allowedLicenses = [
@@ -66,8 +65,10 @@ class FindNewLicenses {
             "GNU Lesser General Public License v2.1 or later",
             "GNU Library General Public License v2.1 or later",
             "Lesser General Public License, version 3 or greater",
+            "GPL v2 with the Classpath exception",
             "GPL-2.0-with-classpath-exception",
             "GPL-3.0",
+            "ISC License",
             "LGPL-2.1",
             "LGPL-2.1+",
             "LGPL-2.1-or-later",
@@ -85,10 +86,24 @@ class FindNewLicenses {
             "Public Domain, per Creative Commons CC0",
             "Revised BSD",
             "The (New) BSD License",
+            "Universal Permissive License, Version 1.0",
+            "ISC",
             "The Unlicense",
-            "unknown",
             "Unlicense",
     ]*.toUpperCase()
+
+    static final List<Map> allowedDependencies = [
+            [name: "RoddyToolLib", version: "2.4.0"],
+            [name: "bedutils", version: "0.0.8"],
+            [name: "grolifant", version: "0.11"],
+            [name: "jsr166y", version: "1.7.0"],
+            [name: "jta", version: "1.1"],
+            [name: "mail", version: "3.0.0"],
+            [name: "multiverse-core", version: "0.7.0"],
+            [name: "rhino", version: "1.7R5-20130223-1"],
+            [name: "scaffolding-core", version: "2.1.0"],
+            [name: "webdriver-binaries-gradle-plugin", version: "2.4"],
+    ] as List<Map>
 
     /**
      * Read license report json file which is passed by the ci pipeline.
@@ -107,7 +122,8 @@ class FindNewLicenses {
         List<String> newDirectLicenses = []
 
         parsedReport.licenses.each { Map license ->
-            if (!allowedLicenses.contains(license.name.toString().toUpperCase())) {
+            String licenseName = license.name.toString().toUpperCase()
+            if (!allowedLicenses.contains(licenseName) && licenseName != 'UNKNOWN') {
                 newDirectLicenses.add(license.name as String)
             }
         }
@@ -123,7 +139,7 @@ class FindNewLicenses {
             license.name.toString()
         }
         List<String> indirectLicenses = ((parsedReport.dependencies as List<Map>)*.licenses).flatten() as List<String>
-        List<String> allLicences =  (directLicenses + indirectLicenses)*.toUpperCase().unique()
+        List<String> allLicences = (directLicenses + indirectLicenses)*.toUpperCase().unique()
 
         return allowedLicenses.findAll { String allowedLicense ->
             return !allLicences.contains(allowedLicense)
@@ -138,11 +154,33 @@ class FindNewLicenses {
         List<String> indirectLicenses = ((parsedReport.dependencies as List<Map>)*.licenses as List<String>).flatten().unique() as List<String>
 
         indirectLicenses.each { String license ->
-            if (!allowedLicenses.contains(license.toUpperCase())) {
+            if (!allowedLicenses.contains(license.toUpperCase()) && license != 'unknown') {
                 newIndirectLicenses.add(license)
             }
         }
         return newIndirectLicenses.unique().sort { it.toUpperCase() }
+    }
+
+    static List<Map> getUnknownDependencies(Map parsedReport) {
+        List<Map> unknownDependencies = []
+
+        parsedReport.dependencies.each { Map dependency ->
+            if ((dependency.licenses as List<String>)*.toLowerCase().contains("unknown")) {
+                unknownDependencies.add([name: dependency.name, version: dependency.version])
+            }
+        }
+        return unknownDependencies.unique()
+    }
+
+    /**
+     * Retrieve unknown Dependencies not contained in whitelisted Dependencies.
+     */
+    static List<Map> filterUnknownDependencies(Map parsedReport) {
+        List<Map> unknownDependencies = getUnknownDependencies(parsedReport)
+
+        return unknownDependencies.findAll { Map dependency ->
+            !allowedDependencies.contains([name: dependency.name, version: dependency.version])
+        }
     }
 
     static void main(String... args) {
@@ -150,6 +188,11 @@ class FindNewLicenses {
         List<String> newDirectLicenses = getNewDirectLicenses(parsedReport)
         List<String> newIndirectLicenses = getNewIndirectLicenses(parsedReport)
         List<String> unusedLicenses = getUnusedLicences(parsedReport)
+        List<Map> unknownDependencies = filterUnknownDependencies(parsedReport)
+
+        String displayUnkownDependencies = unknownDependencies.collect {
+            return "[name: \"${it.name}\", version: \"${it.version}\"]"
+        }.join(", \n")
 
         println "${unusedLicenses.size()} unused licenses:"
         println unusedLicenses ?: "-"
@@ -159,7 +202,11 @@ class FindNewLicenses {
         println ""
         println "${newIndirectLicenses.size()} new indirect licenses:"
         println newIndirectLicenses ?: "-"
+        println ""
+        println "${unknownDependencies.size()} dependencies with unknown licenses:"
+        println displayUnkownDependencies ?: "-"
 
-        assert newDirectLicenses == [] && newIndirectLicenses == [] : "New licenses are found. Please check if they are compatible with OTP."
+        assert newDirectLicenses == [] && newIndirectLicenses == []: "New licenses are found. Please check if they are compatible with OTP."
+        assert unusedLicenses == []: "There are unused Licenses, which can be removed from the white list."
     }
 }
