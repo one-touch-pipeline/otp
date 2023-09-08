@@ -66,7 +66,6 @@ class PanCancerNoBedFileQaOverviewService extends AbstractRoddyQaOverviewService
     @Override
     protected List<String> additionalJoinDomains() {
         return [
-                "join mergingWorkPackage.referenceGenome referenceGenome",
         ]
     }
 

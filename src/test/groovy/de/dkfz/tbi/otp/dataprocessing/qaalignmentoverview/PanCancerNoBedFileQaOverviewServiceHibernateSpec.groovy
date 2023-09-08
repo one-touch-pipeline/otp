@@ -115,7 +115,6 @@ class PanCancerNoBedFileQaOverviewServiceHibernateSpec extends HibernateSpec imp
 
         expect:
         service.additionalJoinDomains() == [
-                "join mergingWorkPackage.referenceGenome referenceGenome",
         ]
     }
 

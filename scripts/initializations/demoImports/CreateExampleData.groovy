@@ -24,9 +24,9 @@ import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.SingleCellBamFileService
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
+import de.dkfz.tbi.otp.dataprocessing.qaalignmentoverview.PanCancerNoBedFileQaOverviewService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
@@ -39,13 +39,18 @@ import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
 import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.RoddyConfigService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.fastqc.WesFastQcWorkflow
+import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.file.FileSystem
@@ -62,7 +67,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
  * - fastq
  * - fastqc
  * - bam files
- *   - PanCancer / Wgbs alignment: WGS PAIRED, WES PAIRED, WGBS PAIRED, and WGBS_TAG PAIRED
+ *   - PanCancer / Wgbs alignment: WGS PAIRED, WES PAIRED, WGBS PAIRED, WGBS_TAG PAIRED, Chip PAIRED
  *   - rna alignment: RNA PAIRED, RNA SINGLE
  *   - cell ranger: 10xSingleCellRnaSeqType PAIRED
  * - snv
@@ -124,15 +129,21 @@ class ExampleData {
     boolean markRawSequenceFilesAsExisting = true
 
     /**
-     * The SeqTypes using panCancer / wgbs alignment
+     * The SeqTypes using panCancer
      */
     List<SeqType> panCanSeqTypes = [
             SeqTypeService.exomePairedSeqType,
             SeqTypeService.wholeGenomePairedSeqType,
+            SeqTypeService.chipSeqPairedSeqType,
+    ]
+
+    /**
+     * The SeqTypes using wgbs alignment
+     */
+    List<SeqType> wgbsAlignmentSeqTypes = [
             SeqTypeService.wholeGenomeBisulfitePairedSeqType,
             SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
     ]
-
     /**
      * The SeqTypes using rna alignment
      */
@@ -185,7 +196,8 @@ class ExampleData {
      * If analysis are created, each singleCellWellLabelSampleTypeNames is combined with each controlSampleTypeNames.
      */
     List<String> singleCellWellLabelSampleTypeNames = [
-            "tumor03",
+            "blood01",
+            "blood02",
     ]
 // ------------------------------
 // work
@@ -193,6 +205,8 @@ class ExampleData {
     AbstractBamFileService abstractBamFileService
 
     RoddyBamFileService roddyBamFileService
+
+    RnaRoddyBamFileService rnaRoddyBamFileService
 
     FastqcDataFilesService fastqcDataFilesService
 
@@ -222,10 +236,8 @@ class ExampleData {
 
     DocumentService documentService
 
-    static final List<String> chromosomeXY = [
-            "X",
-            "Y",
-    ]
+    SeqTypeService seqTypeService
+    RoddyConfigService roddyConfigService
 
     Project project
     FastqImportInstance fastqImportInstance
@@ -239,17 +251,20 @@ class ExampleData {
     ReferenceGenome referenceGenomeMouse
     ReferenceGenome referenceGenomeHumanMouse
     ReferenceGenome singleCellReferenceGenomeHuman
+    ReferenceGenomeIndex cellRangerReferenceGenomeIndex
     SeqCenter seqCenter
     SeqPlatform seqPlatform
     SeqPlatformGroup seqPlatformGroup
     SoftwareTool softwareTool
+    AntibodyTarget antibodyTarget
     IlseSubmission ilseSubmission
+    User otpUser
 
+    int commentCounter = Comment.count()
     int individualCounter = Individual.count()
+    int rawSequenceFileCounter = RawSequenceFile.count()
     int runCounter = Run.count()
     int seqTrackCounter = SeqTrack.count()
-    int rawSequenceFileCounter = RawSequenceFile.count()
-    int commentCounter = Comment.count()
 
     Map<SampleType, MixedInSpecies> diseaseSampleTypes = [:]
     List<SampleType> singleCellWellLabelSampleTypes = []
@@ -278,47 +293,48 @@ class ExampleData {
             findOrCreateSampleType(it)
         }
 
-        analyseAbleSeqType = SeqTypeService.allAnalysableSeqTypes.findAll {
-            panCanSeqTypes.contains(it)
-        }
+        analyseAbleSeqType = SeqTypeService.allAnalysableSeqTypes
 
+        otpUser = User.findByUsername("otp")
         processingPriority = findOrCreateProcessingPriority()
         fileType = findOrCreateFileType()
         libraryPreparationKit = findOrCreateLibraryPreparationKit()
         realm = findOrCreateRealm()
         speciesWithStrainHuman = findOrCreateSpeciesWithStrainHuman()
         speciesWithStrainMouse = findOrCreateSpeciesWithStrainMouse()
-        referenceGenomeHuman = findOrCreateReferenceGenome("1KGRef_PhiX")
+        referenceGenomeHuman = findOrCreateReferenceGenome("1KGRef_PhiX", [speciesWithStrainHuman], [])
         referenceGenomeMouse = findOrCreateReferenceGenome("GRCm38mm_PhiX", [], [speciesWithStrainMouse.species])
         referenceGenomeHumanMouse = findOrCreateReferenceGenome("hs37d5_GRCm38mm_PhiX", [speciesWithStrainHuman], [speciesWithStrainMouse.species])
-        singleCellReferenceGenomeHuman = findOrCreateReferenceGenome("hg_GRCh38")
+        singleCellReferenceGenomeHuman = findOrCreateReferenceGenome("hg_GRCh38", [speciesWithStrainHuman], [])
+        cellRangerReferenceGenomeIndex = findOrCreateCellRangerReferenceGenomeIndex()
         seqCenter = findOrCreateSeqCenter()
         seqPlatform = findOrCreateSeqPlatform()
         seqPlatformGroup = findOrCreateSeqPlatformGroup()
         softwareTool = findOrCreateSoftwareTool()
+        antibodyTarget = findOrCreateAntibodyTarget()
 
         ilseSubmission = createIlseSubmission()
         fastqImportInstance = createFastqImportInstance()
         createMetaDataFile()
         project = findOrCreateProject(projectName)
-        diseaseSampleTypes.each { SampleType sampleType, MixedInSpecies mixedInSpecies ->
-            findOrCreateSampleTypePerProject(sampleType, SampleTypePerProject.Category.DISEASE)
-        }
-        singleCellWellLabelSampleTypes.each { SampleType sampleType ->
+        [
+                diseaseSampleTypes.keySet(),
+                singleCellWellLabelSampleTypes,
+        ].flatten().each { SampleType sampleType ->
             findOrCreateSampleTypePerProject(sampleType, SampleTypePerProject.Category.DISEASE)
         }
         controlSampleTypes.each { SampleType sampleType ->
             findOrCreateSampleTypePerProject(sampleType, SampleTypePerProject.Category.CONTROL)
         }
-        [
-                panCanSeqTypes,
-                rnaSeqTypes,
-                singleCellSeqTypes,
-        ].flatten().each {
+        seqTypeService.findAlignAbleSeqTypes().each {
             findOrCreateMergingCriteria(it)
         }
+        configureWorkflowsNewSystem()
         findOrCreateProcessingThresholds()
         createDocumentTestData()
+        SessionUtils.withTransaction {
+            it.flush()
+        }
     }
 
     void createObjects() {
@@ -446,48 +462,45 @@ class ExampleData {
 
     void createPanCancerBamFilesOnFilesystem() {
         println "creating dummy pancaner bam files on file system"
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
 
         roddyBamFiles.each { RoddyBamFile bam ->
-            Map<File, File> filesMap = [
-                    (bam.finalBamFile)   : bam.workBamFile,
-                    (bam.finalBaiFile)   : bam.workBaiFile,
-                    (bam.finalMd5sumFile): bam.workMd5sumFile,
+            Path workDir = roddyBamFileService.getWorkDirectory(bam)
+            Map<Path, Path> filesMap = [
+                    (roddyBamFileService.getFinalBamFile(bam))   : roddyBamFileService.getWorkBamFile(bam),
+                    (roddyBamFileService.getFinalBaiFile(bam))   : roddyBamFileService.getWorkBaiFile(bam),
+                    (roddyBamFileService.getFinalMd5sumFile(bam)): roddyBamFileService.getWorkMd5sumFile(bam),
             ]
 
-            Map<File, File> dirsMap = [
-                    (bam.finalMergedQADirectory)      : bam.workMergedQADirectory,
-                    (bam.finalExecutionStoreDirectory): bam.workExecutionStoreDirectory,
+            Map<Path, Path> dirsMap = [
+                    (roddyBamFileService.getFinalMergedQADirectory(bam))      : roddyBamFileService.getWorkMergedQADirectory(bam),
+                    (roddyBamFileService.getFinalExecutionStoreDirectory(bam)): roddyBamFileService.getWorkExecutionStoreDirectory(bam),
             ]
-            List<File> dirs = [bam.workDirectory]
-            dirs.addAll(bam.workSingleLaneQADirectories.values())
+            List<Path> dirs = [workDir]
+            dirs.addAll(roddyBamFileService.getWorkSingleLaneQADirectories(bam).values())
 
             if (bam.seqType.isWgbs()) {
-                filesMap[bam.finalMetadataTableFile] = bam.workMetadataTableFile
+                filesMap[roddyBamFileService.getFinalMetadataTableFile(bam)] = roddyBamFileService.getWorkMetadataTableFile(bam)
                 if (bam.containedSeqTracks*.libraryDirectoryName.unique().size() > 1) {
-                    dirs.addAll(bam.workLibraryQADirectories.values())
-                    dirs.addAll(bam.workLibraryMethylationDirectories.values())
+                    dirs.addAll(roddyBamFileService.getWorkLibraryQADirectories(bam).values())
+                    dirs.addAll(roddyBamFileService.getWorkLibraryMethylationDirectories(bam).values())
                 }
             }
 
             dirs.each {
-                Path path = fileSystem.getPath(it.toString())
-                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path, realm)
+                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(it)
             }
 
-            dirsMap.each {
-                Path pathFinal = fileSystem.getPath(it.key.toString())
-                Path pathWork = fileSystem.getPath(it.value.toString())
+            dirsMap.each { Path pathFinal, Path pathWork ->
                 fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(pathWork, realm)
-                fileService.createLink(pathFinal, pathWork, realm, CreateLinkOption.DELETE_EXISTING_FILE)
+                fileService.createLink(pathFinal, pathWork, CreateLinkOption.DELETE_EXISTING_FILE)
             }
 
-            filesMap.each {
-                Path pathFinal = fileSystem.getPath(it.key.toString())
-                Path pathWork = fileSystem.getPath(it.value.toString())
+            filesMap.each { Path pathFinal, Path pathWork ->
                 fileService.createFileWithContent(pathWork, pathWork.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
-                fileService.createLink(pathFinal, pathWork, realm, CreateLinkOption.DELETE_EXISTING_FILE)
+                fileService.createLink(pathFinal, pathWork, CreateLinkOption.DELETE_EXISTING_FILE)
             }
+            Path config = roddyConfigService.getConfigFile(workDir)
+            fileService.createFileWithContent(config, config.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
         }
     }
 
@@ -500,9 +513,9 @@ class ExampleData {
             Path workDir = roddyBamFileService.getWorkDirectory(bam)
 
             Map<Path, Path> filesMap = [
-                    (roddyBamFileService.getFinalBamFile(bam))   : roddyBamFileService.getWorkBamFile(bam),
-                    (roddyBamFileService.getFinalBaiFile(bam))   : roddyBamFileService.getWorkBaiFile(bam),
-                    (roddyBamFileService.getFinalMd5sumFile(bam)): roddyBamFileService.getWorkMd5sumFile(bam),
+                    (rnaRoddyBamFileService.getFinalBamFile(bam))   : rnaRoddyBamFileService.getWorkBamFile(bam),
+                    (rnaRoddyBamFileService.getFinalBaiFile(bam))   : rnaRoddyBamFileService.getWorkBaiFile(bam),
+                    (rnaRoddyBamFileService.getFinalMd5sumFile(bam)): rnaRoddyBamFileService.getWorkMd5sumFile(bam),
             ]
 
             [
@@ -526,7 +539,7 @@ class ExampleData {
             [
                     "featureCounts",
                     "featureCounts_dexseq",
-                    "fusions_arriba",
+                    RnaRoddyBamFileService.ARRIBA_FOLDER,
                     "${bam.sampleType.name}_${bam.individual.pid}_star_logs_and_files",
             ].each {
                 dirsMap[baseDir.resolve(it)] = workDir.resolve(it)
@@ -547,6 +560,10 @@ class ExampleData {
                 fileService.createFileWithContent(pathWork, pathWork.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
                 fileService.createLink(pathFinal, pathWork, realm, CreateLinkOption.DELETE_EXISTING_FILE)
             }
+            Path plot = rnaRoddyBamFileService.getWorkArribaFusionPlotPdf(bam)
+            fileService.createFileWithContent(plot, plot.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
+            Path config = roddyConfigService.getConfigFile(workDir)
+            fileService.createFileWithContent(config, config.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
         }
     }
 
@@ -705,9 +722,82 @@ class ExampleData {
 
     void createDocumentTestData() {
         Set<DocumentType> documentTypes = documentService.listDocumentTypes()
-        documentService.updateDocument(documentTypes[0], "PROJECT_FORM".bytes, "some link", Document.FormatType.TXT)
-        documentService.updateDocument(documentTypes[1], "METADATA_TEMPLATE".bytes, "some link", Document.FormatType.TXT)
-        documentService.updateDocument(documentTypes[2], "PROCESSING_INFORMATION".bytes, "some link", Document.FormatType.TXT)
+        documentService.updateDocument(documentTypes[0], "PROJECT_FORM".bytes, "", Document.FormatType.TXT)
+        documentService.updateDocument(documentTypes[1], "METADATA_TEMPLATE".bytes, "", Document.FormatType.TXT)
+        documentService.updateDocument(documentTypes[2], "PROCESSING_INFORMATION".bytes, "", Document.FormatType.TXT)
+    }
+
+    void configureWorkflowsNewSystem() {
+        ensureWorkflowConfigured(WesFastQcWorkflow.WORKFLOW, null)
+        panCanSeqTypes.each {
+            ensureWorkflowConfigured(PanCancerWorkflow.WORKFLOW, it)
+            ensureReferenceGenomeConfigured(PanCancerWorkflow.WORKFLOW, it)
+        }
+        wgbsAlignmentSeqTypes.each {
+            ensureWorkflowConfigured(WgbsWorkflow.WGBS_WORKFLOW, it)
+            ensureReferenceGenomeConfigured(WgbsWorkflow.WGBS_WORKFLOW, it)
+        }
+        rnaSeqTypes.each {
+            ensureWorkflowConfigured(RnaAlignmentWorkflow.WORKFLOW, it)
+            ensureReferenceGenomeConfigured(RnaAlignmentWorkflow.WORKFLOW, it)
+        }
+    }
+
+    void ensureWorkflowConfigured(String workflowName, SeqType seqType) {
+        Workflow workflow = CollectionUtils.exactlyOneElement(Workflow.findAllByName(workflowName))
+        WorkflowVersion workflowVersionToUse = CollectionUtils.exactlyOneElement(
+                WorkflowVersion.findAllByWorkflow(workflow, [sort: 'id', order: 'desc', max: 1])
+        )
+
+        List<WorkflowVersionSelector> workflowVersionSelectors = WorkflowVersionSelector.withCriteria {
+            eq('project', project)
+            if (seqType) {
+                eq('seqType', seqType)
+            } else {
+                isNull('seqType')
+            }
+            workflowVersion {
+                eq('workflow', workflow)
+            }
+        }
+
+        if (!workflowVersionSelectors) {
+            println "- configure workflow: ${workflowName} ${project.name} ${seqType?.displayNameWithLibraryLayout ?: ''}"
+            new WorkflowVersionSelector([
+                    project        : project,
+                    seqType        : seqType,
+                    workflowVersion: workflowVersionToUse,
+            ]).save(flush: false)
+        }
+    }
+
+    void ensureReferenceGenomeConfigured(String workflowName, SeqType seqType) {
+        Workflow workflow = CollectionUtils.exactlyOneElement(Workflow.findAllByName(workflowName))
+        List<ReferenceGenomeSelector> referenceGenomeSelectors = ReferenceGenomeSelector.findAllByProjectAndSeqTypeAndWorkflow(project, seqType, workflow)
+        if (!referenceGenomeSelectors) {
+            println "- configure reference genome for: ${workflowName} ${project.name} ${seqType?.displayNameWithLibraryLayout ?: ''}"
+            new ReferenceGenomeSelector([
+                    project        : project,
+                    seqType        : seqType,
+                    workflow       : workflow,
+                    species        : [speciesWithStrainHuman] as Set,
+                    referenceGenome: referenceGenomeHuman,
+            ]).save(flush: false)
+            new ReferenceGenomeSelector([
+                    project        : project,
+                    seqType        : seqType,
+                    workflow       : workflow,
+                    species        : [speciesWithStrainMouse] as Set,
+                    referenceGenome: referenceGenomeMouse,
+            ]).save(flush: false)
+            new ReferenceGenomeSelector([
+                    project        : project,
+                    seqType        : seqType,
+                    workflow       : workflow,
+                    species        : [speciesWithStrainHuman, speciesWithStrainMouse] as Set,
+                    referenceGenome: referenceGenomeHumanMouse,
+            ]).save(flush: false)
+        }
     }
 
     void findOrCreateProcessingThresholds() {
@@ -785,18 +875,18 @@ class ExampleData {
 
     Realm findOrCreateRealm() {
         return CollectionUtils.atMostOneElement(Realm.findAllByName(realmName)) ?: new Realm([
-                name                       : realmName,
+                name: realmName,
         ]).save(flush: false)
     }
 
     ReferenceGenome findOrCreateReferenceGenome(String name,
-                                                Collection<SpeciesWithStrain> speciesWithStrains = [speciesWithStrainHuman],
-                                                Collection<Species> speciesCollection = []) {
+                                                Collection<SpeciesWithStrain> speciesWithStrains,
+                                                Collection<Species> speciesCollection) {
         ReferenceGenome referenceGenome = CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(name))
         if (referenceGenome) {
             return referenceGenome
         }
-        return new ReferenceGenome([
+        ReferenceGenome referenceGenomeCreated = new ReferenceGenome([
                 name                        : name,
                 path                        : name,
                 fileNamePrefix              : name,
@@ -806,9 +896,22 @@ class ExampleData {
                 lengthRefChromosomes        : 100,
                 lengthRefChromosomesWithoutN: 100,
                 length                      : 100,
-                speciesWithStrains          : speciesWithStrains as Set,
+                speciesWithStrain           : speciesWithStrains as Set,
                 species                     : speciesCollection as Set,
         ]).save(flush: false)
+
+        PanCancerNoBedFileQaOverviewService.CHROMOSOMES_XY.each {
+            new ReferenceGenomeEntry([
+                    name           : it,
+                    alias          : it,
+                    length         : 100,
+                    lengthWithoutN : 100,
+                    classification : ReferenceGenomeEntry.Classification.CHROMOSOME,
+                    referenceGenome: referenceGenomeCreated,
+            ]).save(flush: false)
+        }
+
+        return referenceGenomeCreated
     }
 
     SeqCenter findOrCreateSeqCenter() {
@@ -868,6 +971,13 @@ class ExampleData {
         ]).save(flush: true)
     }
 
+    AntibodyTarget findOrCreateAntibodyTarget() {
+        String name = "AntibodyTarget"
+        return CollectionUtils.atMostOneElement(AntibodyTarget.findAllByName(name)) ?: new AntibodyTarget([
+                name: "AntibodyTarget",
+        ]).save(flush: true)
+    }
+
     IlseSubmission createIlseSubmission() {
         return new IlseSubmission([
                 ilseNumber: 10000 + IlseSubmission.count()
@@ -883,7 +993,7 @@ class ExampleData {
     FastqImportInstance createFastqImportInstance() {
         return new FastqImportInstance([
                 importMode: FastqImportInstance.ImportMode.MANUAL,
-                ticket: createTicket(),
+                ticket    : createTicket(),
         ]).save(flush: true)
     }
 
@@ -898,21 +1008,21 @@ class ExampleData {
 
     Project findOrCreateProject(String projectName) {
         return CollectionUtils.atMostOneElement(Project.findAllByName(projectName)) ?: new Project([
-                name               : projectName,
-                dirName            : projectName,
-                individualPrefix   : "prefix_${Project.count()}",
-                realm              : realm,
-                processingPriority : processingPriority,
-                projectType        : Project.ProjectType.SEQUENCING,
-                unixGroup          : "developer",
-                speciesWithStrains : [speciesWithStrainHuman] as Set,
+                name              : projectName,
+                dirName           : projectName,
+                individualPrefix  : "${projectName}_",
+                realm             : realm,
+                processingPriority: processingPriority,
+                projectType       : Project.ProjectType.SEQUENCING,
+                unixGroup         : "developer",
+                speciesWithStrains: [speciesWithStrainHuman] as Set,
         ]).save(flush: true)
     }
 
     Individual createIndividual(Project project) {
         return new Individual([
                 project: project,
-                pid    : "pid_${individualCounter++}",
+                pid    : "${projectName}_${individualCounter++}",
                 type   : Individual.Type.REAL,
                 species: speciesWithStrainHuman,
         ]).save(flush: false)
@@ -928,7 +1038,10 @@ class ExampleData {
     }
 
     List<AbstractBamFile> createSampleWithSeqTracksAndPanCancerBamFile(Sample sample) {
-        return panCanSeqTypes.collect { SeqType seqType ->
+        return [
+                panCanSeqTypes,
+                wgbsAlignmentSeqTypes,
+        ].flatten().collect { SeqType seqType ->
             println "    - for: ${seqType}"
             List<SeqTrack> seqTracks = (1..lanesPerSampleAndSeqType).collect {
                 SeqTrack seqTrack = createSeqTrack(sample, seqType)
@@ -1016,6 +1129,7 @@ class ExampleData {
                 libraryPreparationKit: libraryPreparationKit,
                 kitInfoReliability   : InformationReliability.KNOWN,
                 ilseSubmission       : ilseSubmission,
+                antibodyTarget       : seqType.hasAntibodyTarget ? antibodyTarget : null
         ]).save(flush: false)
 
         (1..seqType.libraryLayout.mateCount).each {
@@ -1079,13 +1193,14 @@ class ExampleData {
         return new MergingWorkPackage([
                 sample               : seqTrack.sample,
                 seqType              : seqTrack.seqType,
+                antibodyTarget       : seqTrack.antibodyTarget,
                 seqTracks            : seqTracks as Set,
                 referenceGenome      : (seqTracks.first().sample.mixedInSpecies ? referenceGenomeHumanMouse : referenceGenomeHuman),
                 pipeline             : pipeline,
                 statSizeFileName     : null,
                 seqPlatformGroup     : seqPlatformGroup,
                 libraryPreparationKit: seqTrack.seqType.isWgbs() ? null : libraryPreparationKit,
-        ]).save(flush: true)
+        ]).save(flush: false)
     }
 
     CellRangerMergingWorkPackage createCellRangerMergingWorkPackage(List<SeqTrack> seqTracks, CellRangerConfig config, Pipeline pipeline, Integer cells) {
@@ -1100,8 +1215,8 @@ class ExampleData {
                 pipeline             : pipeline,
                 seqPlatformGroup     : seqPlatformGroup,
                 libraryPreparationKit: libraryPreparationKit,
-                referenceGenomeIndex : findOrCreateCellRangerReferenceGenomeIndex(),
-                requester            : User.findByUsername("otp"),
+                referenceGenomeIndex : cellRangerReferenceGenomeIndex,
+                requester            : otpUser,
                 expectedCells        : cells,
         ]).save(flush: false)
 
@@ -1128,6 +1243,34 @@ class ExampleData {
 
         cellRangerMergingWorkPackage.bamFileInProjectFolder = singleCellBamFile
         cellRangerMergingWorkPackage.save(flush: false)
+
+        QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass([
+                abstractBamFile: singleCellBamFile,
+        ]).save(flush: false)
+
+        new CellRangerQualityAssessment([
+                qualityAssessmentMergedPass              : qualityAssessmentMergedPass,
+                referenceLength                          : null,
+                estimatedNumberOfCells                   : 1234,
+                meanReadsPerCell                         : 123456,
+                medianGenesPerCell                       : 1234,
+                numberOfReads                            : 123456789,
+                validBarcodes                            : 12.3,
+                sequencingSaturation                     : 45.6,
+                q30BasesInBarcode                        : 78.9,
+                q30BasesInRnaRead                        : 98.7,
+                q30BasesInUmi                            : 65.4,
+                readsMappedToGenome                      : 32.1,
+                readsMappedConfidentlyToGenome           : 11.1,
+                readsMappedConfidentlyToIntergenicRegions: 2.2,
+                readsMappedConfidentlyToIntronicRegions  : 33.3,
+                readsMappedConfidentlyToExonicRegions    : 44.4,
+                readsMappedConfidentlyToTranscriptome    : 55.5,
+                readsMappedAntisenseToGene               : 6.6,
+                fractionReadsInCells                     : 77.7,
+                totalGenesDetected                       : 54321,
+                medianUmiCountsPerCell                   : 12345,
+        ]).save(flush: false)
 
         singleCellBamFiles << singleCellBamFile
         return singleCellBamFile
@@ -1162,7 +1305,7 @@ class ExampleData {
         ]).save(flush: false)
 
         createRoddyMergedBamQaAll(qualityAssessmentMergedPass)
-        chromosomeXY.each {
+        PanCancerNoBedFileQaOverviewService.CHROMOSOMES_XY.each {
             createRoddyMergedBamQaChromosome(qualityAssessmentMergedPass, it)
         }
         roddyBamFiles << roddyBamFile
@@ -1229,7 +1372,7 @@ class ExampleData {
                 seqType       : seqType,
                 pipeline      : pipeline,
                 programVersion: "1.2.3-4",
-        ]).save(flush: false)
+        ]).save(flush: true)
     }
 
     RoddyWorkflowConfig findOrCreateRoddyWorkflowConfig(MergingWorkPackage mergingWorkPackage) {
@@ -1238,21 +1381,32 @@ class ExampleData {
         if (searchRoddyWorkflowConfig) {
             return searchRoddyWorkflowConfig
         }
-        String file = "/tmp/file_${RoddyWorkflowConfig.count()}.xml"
+        String programVersion = "1.2.3-4"
+        String configVersion = "v1_0"
+
+        String file = RoddyWorkflowConfig.getStandardConfigFile(
+                mergingWorkPackage.project,
+                mergingWorkPackage.pipeline.name,
+                mergingWorkPackage.seqType,
+                programVersion,
+                configVersion,
+        ).toString()
+
         if (createFilesOnFilesystem) {
             Path path = fileSystemService.remoteFileSystem.getPath(file)
-            path.text = "someDummyContent"
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path.parent)
+            fileService.createFileWithContent(path, "someDummyContent", null, FileService.DEFAULT_FILE_PERMISSION, true)
         }
         return new RoddyWorkflowConfig([
                 project              : mergingWorkPackage.project,
                 seqType              : mergingWorkPackage.seqType,
                 pipeline             : mergingWorkPackage.pipeline,
-                programVersion       : "PanCan:1.2.3-4",
+                programVersion       : "${mergingWorkPackage.pipeline.name}:${programVersion}",
                 configFilePath       : file,
-                configVersion        : "v1_0",
+                configVersion        : configVersion,
                 nameUsedInConfig     : "name",
                 md5sum               : "0" * 32,
-                adapterTrimmingNeeded: mergingWorkPackage.seqType.isWgbs() || mergingWorkPackage.seqType.isRna(),
+                adapterTrimmingNeeded: mergingWorkPackage.seqType.isWgbs() || mergingWorkPackage.seqType.isRna() || mergingWorkPackage.seqType.isChipSeq(),
         ]).save(flush: true)
     }
 
@@ -1612,7 +1766,10 @@ Project.withTransaction {
             singleCellMappingFileService  : ctx.singleCellMappingFileService,
             documentService               : ctx.documentService,
             roddyBamFileService           : ctx.roddyBamFileService,
+            rnaRoddyBamFileService        : ctx.rnaRoddyBamFileService,
             runYapsaService               : ctx.runYapsaService,
+            seqTypeService                : ctx.seqTypeService,
+            roddyConfigService            : ctx.roddyConfigService,
     ])
 
     exampleData.init()
