@@ -118,4 +118,26 @@ class DepartmentServiceSpec extends Specification implements DataTest, UserDomai
         then:
         Department.count == 2
     }
+
+    void "getDepartmentsForDepartmentHead, should return all department where user is head of"() {
+        given:
+        User departmentHead = createUser()
+        createDepartment()
+        Department department1 = createDepartment([departmentHeads: [departmentHead]])
+        Department department2 = createDepartment([departmentHeads: [departmentHead, createUser()]])
+
+        expect:
+        CollectionUtils.containSame(departmentService.getDepartmentsForDepartmentHead(departmentHead), [department1, department2])
+    }
+
+    void "getDepartmentsForDepartmentHead, should return no department, if user is no head of any department"() {
+        given:
+        User user = createUser()
+        createDepartment()
+        createDepartment()
+        createDepartment()
+
+        expect:
+        departmentService.getDepartmentsForDepartmentHead(user).empty
+    }
 }

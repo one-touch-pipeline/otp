@@ -232,7 +232,7 @@ No user exists yet, create user ${currentUser} with admin rights.
         }
     }
 
-    User findOrCreateUserWithLdapData(String username) {
+    User findOrCreateUserWithLdapData(String username) throws LdapUserCreationException {
         IdpUserDetails idpUserDetails = identityProvider.getIdpUserDetailsByUsername(username)
         if (!idpUserDetails) {
             throw new LdapUserCreationException("'${username}' can not be resolved to a user via LDAP")

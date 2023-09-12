@@ -37,6 +37,7 @@ class NoProjectInterceptor {
         matchAll()
                 .except(controller: 'error')
                 .except(controller: 'projectRequest')
+                .except(controller: 'departmentConfiguration')
                 .except(controller: 'ldap')
                 .except(controller: 'projectCreation')
                 .except(controller: 'privacyPolicy')
@@ -57,6 +58,8 @@ class NoProjectInterceptor {
                 .except(controller: 'console')
                 .except(uri: '/static/**')
                 .except(uri: '/webjars/**')
+                .except(uri: '/statistic/projectCountPerDate**')
+                .except(uri: '/statistic/laneCountPerDate**')
     }
 
     @Override

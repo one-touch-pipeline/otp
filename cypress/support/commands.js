@@ -70,6 +70,15 @@ Cypress.Commands.add('loginAsUser', () => {
   login(username, password);
 });
 
+Cypress.Commands.add('loginAsDepartmentHeadUser', () => {
+  'use strict';
+
+  const username = Cypress.env('departmentHead_username');
+  const password = Cypress.env('departmentHead_password');
+
+  login(username, password);
+});
+
 Cypress.Commands.add('loginAsOperator', () => {
   'use strict';
 
@@ -169,6 +178,20 @@ Cypress.Commands.add('checkAccessDenied', (url) => {
     expect(resp.status).to.be.eq(403);
   });
 });
+
+
+Cypress.Commands.add('checkNotFound', (url) => {
+  'use strict';
+
+  cy.request({
+    url,
+    followRedirect: false,
+    failOnStatusCode: false
+  }).then((resp) => {
+    expect(resp.status).to.be.eq(404);
+  });
+});
+
 
 const validateSession = () => {
   'use strict';

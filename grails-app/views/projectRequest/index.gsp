@@ -315,7 +315,6 @@
 
         <!-- submit/draft form actions -->
         <g:render template="templates/submitArea" model="[buttonActions: buttonActions]"/>
-
     </g:form>
 
     <div class="clone-remove-target clone-template hidden">

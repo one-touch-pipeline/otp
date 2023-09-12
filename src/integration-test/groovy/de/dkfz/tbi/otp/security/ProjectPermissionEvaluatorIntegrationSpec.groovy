@@ -321,4 +321,24 @@ class ProjectPermissionEvaluatorIntegrationSpec extends Specification implements
         expect:
         !permissionEvaluator.hasPermission(authentication, user, "IS_DEPARTMENT_HEAD")
     }
+
+    void "hasPermission, IS_DEPARTMENT_HEAD restricts when authenticated user is not passed user"() {
+        given:
+        setupData()
+        User otherUser = createUser()
+        createDepartment([
+                departmentHeads: [otherUser, createUser()],
+        ])
+
+        expect:
+        !permissionEvaluator.hasPermission(authentication, otherUser, "IS_DEPARTMENT_HEAD")
+    }
+
+    void "hasPermission, IS_DEPARTMENT_HEAD restricts when authenticated user is not head of any department"() {
+        given:
+        setupData()
+
+        expect:
+        !permissionEvaluator.hasPermission(authentication, null, "IS_DEPARTMENT_HEAD")
+    }
 }

@@ -44,6 +44,94 @@ describe('Click all menu items in the menu bar', () => {
     checkCommonMenuItems();
   });
 
+  context('when user is normal user which is a department head', () => {
+    beforeEach(() => {
+      cy.loginAsDepartmentHeadUser();
+      cy.visit('/');
+    });
+
+    it('should look at the number of menu items', () => {
+      const menuBar = 'div.menuContainer';
+      const menuBarItem = 'li:not(.nav_container)';
+      cy.get(menuBar).find(menuBarItem)
+        .should('have.length', 28).and('contain', 'a');
+    });
+
+    it('should check denied access and click common Project menu items', () => {
+      cy.checkNotFound('/sampleOverview/index');
+      cy.checkNotFound('/individual/list');
+      cy.checkNotFound('/sequence/index');
+    });
+
+    it('should check the number of Project menu items and check links', () => {
+      cy.get('li.navigation').contains('Project').parent().find('li')
+        .should('have.length', 7);
+      cy.checkNotFound('/projectOverview/index');
+      cy.checkNotFound('/projectConfig/index');
+      cy.checkNotFound('/workflowSelection/index');
+      cy.checkNotFound('/projectUser/index');
+
+      cy.get('.navigation li').contains('Department Config').click({ force: true });
+      cy.checkPage('/departmentConfiguration/index');
+
+      cy.get('.navigation li').contains('Project request').click({ force: true });
+      cy.checkPage('/projectRequest/index');
+
+      cy.checkNotFound('/sampleIdentifierOverview/index');
+    });
+
+    it('should check the number of menu items and click all Results menu items', () => {
+      cy.get('li.navigation').contains('Results').parent().find('li')
+        .should('have.length', 7);
+      cy.checkNotFound('/alignmentQualityOverview/index');
+      cy.checkNotFound('/cellRanger/finalRunSelection');
+      cy.checkNotFound('/snv/results');
+      cy.checkNotFound('/indel/results');
+      cy.checkNotFound('/aceseq/results');
+      cy.checkNotFound('/sophia/results');
+      cy.checkNotFound('/runYapsa/results');
+    });
+
+    it('should not find the Home page', () => {
+      cy.checkNotFound('/home/index');
+    });
+
+    it('should check the number of menu items and click all Info menu items', () => {
+      cy.get('li.navigation').contains('Info ▽').parent().find('li')
+        .should('have.length', 6);
+      cy.get('.navigation li').contains('About').click({ force: true });
+      cy.checkPage('/');
+
+      cy.get('.navigation li').contains('In numbers').click({ force: true });
+      cy.checkPage('/info/numbers');
+
+      cy.get('.navigation li').contains('Contact').click({ force: true });
+      cy.checkPage('/info/contact');
+
+      cy.get('.navigation li').contains('Imprint').click({ force: true });
+      cy.checkPage('/info/imprint');
+
+      cy.get('.navigation li').contains('Partners').click({ force: true });
+      cy.checkPage('/info/partners');
+
+      cy.get('.navigation li').contains('Templates').click({ force: true });
+      cy.checkPage('/info/templates');
+    });
+
+    it('should click the logout menu item', () => {
+      cy.intercept('/auth/logout*').as('logout');
+      cy.intercept('/logout*').as('postLogout');
+
+      cy.get('li.menuContainerItem').contains('Logout').click({ force: true });
+
+      cy.wait('@logout').then(() => {
+        cy.wait('@postLogout').then(() => {
+          cy.checkPage('');
+        });
+      });
+    });
+  });
+
   context('when user is an operator', () => {
     beforeEach(() => {
       cy.loginAsOperator();
@@ -187,7 +275,6 @@ describe('Click all menu items in the menu bar', () => {
     checkCommonMenuItems();
   });
 });
-
 function checkCommonMenuItems() {
   'use strict';
 
@@ -201,10 +288,12 @@ function checkCommonMenuItems() {
     cy.checkPage('/individual/list');
   });
 
+
   it('should click the Sequences menu item', () => {
     cy.get('li.menuContainerItem').contains('Sequences').click();
     cy.checkPage('/sequence/index');
   });
+
 
   it('should click common Project menu items', () => {
     cy.get('.navigation li').contains('Project Specific Statistics').click({ force: true });

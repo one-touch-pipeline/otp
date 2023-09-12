@@ -82,6 +82,8 @@ class ProjectPermissionEvaluator implements PermissionEvaluator {
             switch (targetType) {
                 case Project.name:
                     return checkProjectRolePermission(auth, Project.get(targetId), (String) permission)
+                case User.name:
+                    return checkUserPermission(auth, User.get(targetId), (String) permission)
                 case null:
                     return checkObjectIndependentPermission(auth, permission)
                 default:
@@ -112,6 +114,8 @@ class ProjectPermissionEvaluator implements PermissionEvaluator {
                     }
                     eq("enabled", true)
                 }
+            case "IS_DEPARTMENT_HEAD":
+                return userService.isDepartmentHead(activeUser)
             default:
                 return false
         }
@@ -180,7 +184,11 @@ class ProjectPermissionEvaluator implements PermissionEvaluator {
         if (!activeUser) {
             return false
         }
-
-        return (permission == 'IS_DEPARTMENT_HEAD' && user == activeUser && userService.isDepartmentHead(user))
+        switch (permission) {
+            case "IS_DEPARTMENT_HEAD":
+                return user == activeUser && userService.isDepartmentHead(user)
+            default:
+                return false
+        }
     }
 }

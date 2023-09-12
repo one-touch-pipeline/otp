@@ -19,24 +19,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.security
 
-import grails.gorm.hibernate.annotation.ManagedEntity
+$(() => {
+  'use strict';
 
-import de.dkfz.tbi.otp.utils.Entity
-
-@ManagedEntity
-class DeputyRelation implements Entity {
-    User grantingDeputyUser
-    User deputyUser
-    Date dateDeputyGranted
-
-    static mapping = {
-        grantingDeputyUser index: "deputy_relation_deputy_granting_user_idx"
-        deputyUser index: "deputy_relation_deputy_user_idx"
-    }
-
-    static constraints = {
-        deputyUser unique: 'grantingDeputyUser'
-    }
-}
+  $('.seqPlatformGroupSelector select').on('change', (event) => {
+    $(event.target.parentElement).find('button[type=submit]').prop('disabled', event.target.value === 'null');
+  });
+});

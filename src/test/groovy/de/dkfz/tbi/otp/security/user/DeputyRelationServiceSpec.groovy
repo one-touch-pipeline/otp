@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -73,10 +73,11 @@ class DeputyRelationServiceSpec extends Specification implements DataTest, UserD
         User deputyUser = createUser()
 
         when:
-        deputyRelationService.grantDepartmentDeputyRights(departmentHead, deputyUser)
+        deputyRelationService.grantDepartmentDeputyRights(departmentHead, deputyUser.username)
 
         then:
         1 * deputyRelationService.auditLogService.logAction(_, _) >> _
+        1 * userService.findOrCreateUserWithLdapData(deputyUser.username) >> deputyUser
         1 * userService.isDepartmentHead(departmentHead) >> true
         DeputyRelation.findAllByDeputyUser(deputyUser).size() == 1
     }
@@ -89,23 +90,24 @@ class DeputyRelationServiceSpec extends Specification implements DataTest, UserD
         User deputyUser = createUser()
 
         when:
-        deputyRelationService.grantDepartmentDeputyRights(grantingUser, deputyUser)
+        deputyRelationService.grantDepartmentDeputyRights(grantingUser, deputyUser.username)
 
         then:
         1 * userService.isDepartmentHead(grantingUser) >> false
         thrown(RightsNotGrantedException)
     }
 
-    void "revokeDepartmentDeputyRights, when called with departmentHead and deputyUser"() {
+    void "revokeDeputyRelation should delete relation, when called with existing relation"() {
         given:
         deputyRelationService = new DeputyRelationService(auditLogService: Mock(AuditLogService),)
         User departmentHead = createUser()
         createDepartment([departmentHeads: [departmentHead, createUser()]])
         User deputyUser = createUser()
-        createDeputyRelation([grantingDeputyUser: departmentHead, deputyUser: deputyUser, dateDeputyGranted: new Date()])
+        DeputyRelation deputyRelation = createDeputyRelation()
+        createDeputyRelation()
 
         when:
-        deputyRelationService.revokeDepartmentDeputyRights(departmentHead, deputyUser)
+        deputyRelationService.revokeDeputyRelation(deputyRelation)
 
         then:
         1 * deputyRelationService.auditLogService.logAction(_, _) >> _
@@ -127,7 +129,7 @@ class DeputyRelationServiceSpec extends Specification implements DataTest, UserD
         DeputyRelation.findAllByDeputyUser(deputyUser).size() == 0
     }
 
-    void "revokedeputyUserRightsForHead, when called with departmentHead"() {
+    void "revokeDeputyUserRightsForHead, when called with departmentHead"() {
         given:
         deputyRelationService = new DeputyRelationService(auditLogService: Mock(AuditLogService),)
         User departmentHead = createUser()

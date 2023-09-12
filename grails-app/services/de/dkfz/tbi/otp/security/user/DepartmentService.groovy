@@ -84,6 +84,17 @@ class DepartmentService {
         log.info("Created Department: ${department}")
         department.save(flush: true)
     }
+
+    @CompileDynamic
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#departmentHead, 'IS_DEPARTMENT_HEAD')")
+    List<Department> getDepartmentsForDepartmentHead(User departmentHead) {
+        assert departmentHead: "Department Head has to be not null"
+        return Department.createCriteria().list {
+            departmentHeads {
+                idEq(departmentHead.id)
+            }
+        } as List<Department>
+    }
 }
 
 class DepartmentCommand implements Validateable {

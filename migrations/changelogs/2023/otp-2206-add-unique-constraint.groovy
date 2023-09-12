@@ -19,24 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.security
 
-import grails.gorm.hibernate.annotation.ManagedEntity
+databaseChangeLog = {
 
-import de.dkfz.tbi.otp.utils.Entity
-
-@ManagedEntity
-class DeputyRelation implements Entity {
-    User grantingDeputyUser
-    User deputyUser
-    Date dateDeputyGranted
-
-    static mapping = {
-        grantingDeputyUser index: "deputy_relation_deputy_granting_user_idx"
-        deputyUser index: "deputy_relation_deputy_user_idx"
-    }
-
-    static constraints = {
-        deputyUser unique: 'grantingDeputyUser'
+    changeSet(author: "-", id: "1692880688855-90") {
+        addUniqueConstraint(columnNames: "granting_deputy_user_id, deputy_user_id", constraintName: "UKd89300594f14a9f3e9b0ee0afe02", tableName: "deputy_relation")
     }
 }

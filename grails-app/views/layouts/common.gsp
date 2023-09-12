@@ -66,19 +66,21 @@
                                                 code="otp.menu.projectSpecificStatistics"/></g:link></li>
                                         <li><g:link controller="projectConfig" action="index"><g:message code="otp.menu.projectConfig"/></g:link></li>
                                         <li><g:link controller="workflowSelection" action="index"><g:message
-                                                code="otp.menu.alignmenAndAnalysis"/></g:link></li>
+                                                code="otp.menu.alignmentAndAnalysis"/></g:link></li>
                                         <li><g:link controller="projectUser" action="index"><g:message code="otp.menu.userManagement"/></g:link></li>
+                                        <sec:access expression="hasPermission(null, 'IS_DEPARTMENT_HEAD')">
+                                            <li><g:link controller="departmentConfiguration" action="index"><g:message
+                                                    code="otp.menu.departmentConfig"/></g:link></li>
+                                        </sec:access>
                                         <li><g:link controller="projectRequest" action="index"><g:message
                                                 code="otp.menu.projectRequest"/></g:link></li>
                                         <li><g:link controller="sampleIdentifierOverview" action="index"><g:message
                                                 code="otp.menu.sampleNameOverview"/></g:link></li>
                                         <sec:ifAnyGranted roles="ROLE_OPERATOR">
                                             <li class="allGranted"><g:link controller="projectInfo" action="list"><g:message
-                                                    code="projectOverview.projectInfos" /></g:link></li>
+                                                    code="projectOverview.projectInfos"/></g:link></li>
                                             <li class="allGranted"><g:link controller="dataTransfer" action="index"><g:message
-                                                    code="dataTransfer.menu.title" /></g:link></li>
-                                        </sec:ifAnyGranted>
-                                        <sec:ifAnyGranted roles="ROLE_OPERATOR">
+                                                    code="dataTransfer.menu.title"/></g:link></li>
                                             <li class="allGranted"><g:link controller="projectFields" action="index"><g:message
                                                     code="otp.menu.configureProjectInformation"/></g:link></li>
                                         </sec:ifAnyGranted>
@@ -154,15 +156,20 @@
                                         <ul>
                                             <li><g:link controller="systemStatus" action="index"><g:message code="otp.menu.systemStatus"/></g:link></li>
                                             <li><g:link controller="workflowSystemConfig" action="index"><g:message code="otp.menu.systemConfig"/></g:link></li>
-                                            <li><g:link controller="workflowSelection" action="index"><g:message code="otp.menu.workflowSelection"/></g:link></li>
-                                            <li><g:link controller="workflowRunOverview" action="index"><g:message code="otp.menu.workflowRunOverview"/></g:link></li>
+                                            <li><g:link controller="workflowSelection" action="index"><g:message
+                                                    code="otp.menu.workflowSelection"/></g:link></li>
+                                            <li><g:link controller="workflowRunOverview" action="index"><g:message
+                                                    code="otp.menu.workflowRunOverview"/></g:link></li>
                                             <li><g:link controller="workflowRunList" action="index"><g:message code="otp.menu.workflowRunList"/></g:link></li>
                                             <li><g:link controller="workflowConfig" action="index"><g:message code="otp.menu.workflowConfig"/></g:link></li>
-                                            <li><g:link controller="workflowConfigViewer" action="index"><g:message code="otp.menu.workflowConfigViewer"/></g:link></li>
+                                            <li><g:link controller="workflowConfigViewer" action="index"><g:message
+                                                    code="otp.menu.workflowConfigViewer"/></g:link></li>
                                             <li><g:link controller="crashRepair" action="index"><g:message code="otp.menu.workflowCrashRepair"/></g:link></li>
-                                            <li><g:link controller="workflowJobErrorDefinition" action="index"><g:message code="otp.menu.workflowRestartHandler"/></g:link></li>
+                                            <li><g:link controller="workflowJobErrorDefinition" action="index"><g:message
+                                                    code="otp.menu.workflowRestartHandler"/></g:link></li>
                                             <li><g:link controller="triggerAlignment" action="index"><g:message code="otp.menu.triggerAlignment"/></g:link></li>
-                                            <li><g:link controller="processingPriority" action="index"><g:message code="otp.menu.processingPriority"/></g:link></li>
+                                            <li><g:link controller="processingPriority" action="index"><g:message
+                                                    code="otp.menu.processingPriority"/></g:link></li>
                                         </ul>
                                     </li>
                                 </ul>

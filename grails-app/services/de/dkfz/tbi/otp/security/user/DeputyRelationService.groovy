@@ -58,11 +58,13 @@ class DeputyRelationService {
         return userService.isDepartmentHead(user) || !DeputyRelation.findAllByDeputyUser(user).isEmpty()
     }
 
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#departmentHead, 'IS_DEPARTMENT_HEAD')")
-    void grantDepartmentDeputyRights(User departmentHead, User departmentDeputy) {
+    void grantDepartmentDeputyRights(User departmentHead, String departmentDeputyUsername) throws RightsNotGrantedException, AssertionError {
         assert departmentHead: "Department Head cannot be null"
-        assert departmentDeputy: "Department Deputy cannot be null"
+        assert departmentDeputyUsername: "Department Deputy username cannot be null"
         if (userService.isDepartmentHead(departmentHead)) {
+            User departmentDeputy = userService.findOrCreateUserWithLdapData(departmentDeputyUsername)
             new DeputyRelation([grantingDeputyUser: departmentHead, deputyUser: departmentDeputy, dateDeputyGranted: new Date()]).save(flush: true)
             String message = "${departmentDeputy} was granted deputy rights for department head ${departmentHead}"
             auditLogService.logAction(AuditLog.Action.GRANT_DEPUTY_PI_RIGHTS, message)
@@ -75,13 +77,12 @@ class DeputyRelationService {
      * deletes records from {@link DeputyRelation} table if a department head revokes rights for a department deputy
      */
     @CompileDynamic
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#departmentHead, 'IS_DEPARTMENT_HEAD')")
-    void revokeDepartmentDeputyRights(User departmentHead, User departmentDeputy) {
-        assert departmentHead: "Department Head cannot be null"
-        assert departmentDeputy: "Department Deputy cannot be null"
-        String message = "Department Deputy rights have been revoked for ${departmentDeputy} by department head ${departmentHead}"
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#deputyRelation.grantingDeputyUser, 'IS_DEPARTMENT_HEAD')")
+    void revokeDeputyRelation(DeputyRelation deputyRelation) {
+        assert deputyRelation: "Deputy Relation cannot be null"
+        String message = "Deputy relation rights have been revoked for ${deputyRelation.deputyUser} by department head ${deputyRelation.grantingDeputyUser}"
         auditLogService.logAction(AuditLog.Action.REVOKE_DEPARTMENT_DEPUTY_RIGHTS, message)
-        DeputyRelation.findAllByGrantingDeputyUserAndDeputyUser(departmentHead, departmentDeputy)*.delete(flush: true)
+        deputyRelation.delete(flush: true)
     }
 
     /**
@@ -108,5 +109,15 @@ class DeputyRelationService {
             auditLogService.logAction(AuditLog.Action.REVOKE_DEPARTMENT_DEPUTY_RIGHTS, message)
             it.delete(flush: true)
         }
+    }
+
+    /**
+     * @returns all deputies that are registered for a department head
+     */
+    @CompileDynamic
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#departmentHead, 'IS_DEPARTMENT_HEAD')")
+    List<DeputyRelation> getAllDeputiesForDepartmentHead(User departmentHead) {
+        assert departmentHead: "Department Head cannot be null"
+        return DeputyRelation.findAllByGrantingDeputyUser(departmentHead)
     }
 }
