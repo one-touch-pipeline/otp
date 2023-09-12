@@ -412,7 +412,7 @@ dependencies {
     implementation 'org.codenarc:CodeNarc:3.3.0'
 
     // JS and CSS libraries
-    implementation 'org.webjars:jquery:3.7.0'
+    implementation 'org.webjars:jquery:3.7.1'
     implementation 'org.webjars:bootstrap:4.6.0'
     implementation 'org.webjars.npm:bootstrap-icons:1.10.5'
     implementation 'org.webjars.npm:ttskch__select2-bootstrap4-theme:1.5.2'

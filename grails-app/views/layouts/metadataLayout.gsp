@@ -26,7 +26,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <title><g:layoutTitle default="OTP"/></title>
-    <script type="text/javascript" src="${otp.serverUrl()}/webjars/jquery/3.7.0/jquery.js"></script>
+    <script type="text/javascript" src="${otp.serverUrl()}/webjars/jquery/${otp.assetVersion([name: 'jquery'])}/jquery.js"></script>
     <script type="text/javascript" src="${otp.serverUrl()}/webjars/datatables/1.13.5/js/jquery.dataTables.js"></script>
     <asset:javascript src="modules/defaultPageDependencies.js"/>
     <asset:stylesheet src="modules/metadataImport.css"/>

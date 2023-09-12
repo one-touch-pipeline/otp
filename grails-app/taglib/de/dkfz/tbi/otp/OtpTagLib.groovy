@@ -112,6 +112,15 @@ class OtpTagLib {
         out << configService.configServerUrl
     }
 
+    def assetVersion = { Map asset ->
+        switch (asset.name) {
+            case "jquery":
+                out << "3.7.1"
+                break
+            default: out << ""
+        }
+    }
+
     /**
      * Returns an environment depending favicon
      */
