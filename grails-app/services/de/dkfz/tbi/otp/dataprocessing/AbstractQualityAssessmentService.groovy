@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,9 +26,13 @@ import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 import org.grails.web.json.JSONObject
 
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
+import de.dkfz.tbi.otp.utils.CollectionUtils
+
+import java.nio.file.Path
 
 import static de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification.CONTIG
 import static de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification.UNDEFINED
@@ -38,7 +42,7 @@ import static de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification.UNDEFI
 class AbstractQualityAssessmentService {
 
     AbstractBamFileService abstractBamFileService
-
+    RoddyBamFileService roddyBamFileService
     ReferenceGenomeService referenceGenomeService
 
     void assertListContainsAllChromosomeNamesInReferenceGenome(Collection<String> chromosomeNames, ReferenceGenome referenceGenome) {
@@ -50,7 +54,7 @@ class AbstractQualityAssessmentService {
         assert !missedElements: "Missed chromosomes: ${missedElements.join(', ')} (expected: ${expectedChromosomeNames}; found ${chromosomeNames})."
     }
 
-    private Map<String, Map> parseRoddyQaStatistics(RoddyBamFile roddyBamFile, File qualityControlJsonFile, Closure qualityControlTargetExtractJsonFile) {
+    private Map<String, Map> parseRoddyQaStatistics(RoddyBamFile roddyBamFile, Path qualityControlJsonFile, Closure qualityControlTargetExtractJsonFile) {
         Map<String, Map> chromosomeInformation = [:]
 
         JSONObject qualityControlJson = JSON.parse(qualityControlJsonFile.text)
@@ -91,7 +95,7 @@ class AbstractQualityAssessmentService {
     }
 
     void parseRoddySingleLaneQaStatistics(RoddyBamFile roddyBamFile) {
-        Map<SeqTrack, File> qaFilesPerSeqTrack = roddyBamFile.workSingleLaneQAJsonFiles
+        Map<SeqTrack, Path> qaFilesPerSeqTrack = roddyBamFileService.getWorkSingleLaneQAJsonFiles(roddyBamFile)
         qaFilesPerSeqTrack.each { seqTrack, qaFile ->
             Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(roddyBamFile, qaFile, null)
             chromosomeInformation.each { chromosome, chromosomeValues ->
@@ -105,7 +109,7 @@ class AbstractQualityAssessmentService {
     }
 
     RoddyMergedBamQa parseRoddyMergedBamQaStatistics(RoddyBamFile roddyBamFile) {
-        File qaFile = roddyBamFile.workMergedQAJsonFile
+        Path qaFile = roddyBamFileService.getWorkMergedQAJsonFile(roddyBamFile)
         Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(roddyBamFile, qaFile, { roddyBamFile.workMergedQATargetExtractJsonFile })
 
         List<RoddyMergedBamQa> chromosomeInformationQa = chromosomeInformation.collect { chromosome, chromosomeValues ->
@@ -128,17 +132,23 @@ class AbstractQualityAssessmentService {
     }
 
     RnaQualityAssessment parseRnaRoddyBamFileQaStatistics(RnaRoddyBamFile rnaRoddyBamFile) {
-        File qaFile = rnaRoddyBamFile.workMergedQAJsonFile
+        Path qaFile = roddyBamFileService.getWorkMergedQAJsonFile(rnaRoddyBamFile)
         Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(rnaRoddyBamFile, qaFile, null)
-        RnaQualityAssessment rnaQualityAssessment = new RnaQualityAssessment((chromosomeInformation.get(RnaQualityAssessment.ALL)))
+        QualityAssessmentMergedPass pass = rnaRoddyBamFile.findOrSaveQaPass()
+        RnaQualityAssessment rnaQualityAssessment = CollectionUtils.atMostOneElement(RnaQualityAssessment.findAllByQualityAssessmentMergedPass(pass))
+        if (rnaQualityAssessment) {
+            rnaQualityAssessment.properties = (chromosomeInformation.get(RnaQualityAssessment.ALL))
+        } else {
+            rnaQualityAssessment = new RnaQualityAssessment((chromosomeInformation.get(RnaQualityAssessment.ALL)))
+        }
         rnaQualityAssessment.chromosome = RnaQualityAssessment.ALL
-        rnaQualityAssessment.qualityAssessmentMergedPass = rnaRoddyBamFile.findOrSaveQaPass()
+        rnaQualityAssessment.qualityAssessmentMergedPass = pass
         assert rnaQualityAssessment.save(flush: true)
         return rnaQualityAssessment
     }
 
     void parseRoddyLibraryQaStatistics(RoddyBamFile roddyBamFile) {
-        Map<String, File> qaFilesPerLibrary = roddyBamFile.workLibraryQAJsonFiles
+        Map<String, Path> qaFilesPerLibrary = roddyBamFileService.getWorkLibraryQAJsonFiles(roddyBamFile)
 
         qaFilesPerLibrary.each { lib, qaFile ->
             Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(roddyBamFile, qaFile, null)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -64,8 +64,8 @@ trait RoddyRnaFactory implements IsAlignment, IsRoddy {
                 pairedRead2                      : null,
                 percentageMatesOnDifferentChr    : null,
                 referenceLength                  : null,
-                properlyPairedPercentage         : 0,
-                singletonsPercentage             : 0,
+                properlyPairedPercentage         : 12.34,
+                singletonsPercentage             : 0.12,
                 alternativeAlignments            : 0,
                 baseMismatchRate                 : 0.0123456789,
                 chimericPairs                    : 0,
