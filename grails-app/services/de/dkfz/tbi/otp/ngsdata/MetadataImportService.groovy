@@ -22,12 +22,14 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
+import grails.web.mapping.LinkGenerator
 import groovy.transform.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.InformationReliability
+import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
@@ -73,6 +75,9 @@ class MetadataImportService {
 
     @Autowired
     ApplicationContext applicationContext
+
+    @Autowired
+    LinkGenerator linkGenerator
 
     @Autowired
     RemoteShellHelper remoteShellHelper
@@ -196,6 +201,7 @@ class MetadataImportService {
         ticket.finalNotificationSent = finalNotificationSent
         assert ticket.save(flush: true)
     }
+
     protected Path createPathTargetForMetadataFile(MetadataValidationContext context, String ticketNumber) {
         FileSystem fileSystem = fileSystemService.getRemoteFileSystem(configService.defaultRealm)
         String oldName = context.metadataFile.fileName
@@ -394,8 +400,23 @@ class MetadataImportService {
                 body += "\n"
             }
 
+            body += "\n\n Link to the Processing Thresholds Page:\n"
+            List<Project> projects = seqTracks*.project.unique()
+            projects.each { Project project ->
+                body += getNoThresholdSetLink(project) + "\n"
+            }
+
             mailHelperService.sendEmailToTicketSystem(subject.toString(), body)
         }
+    }
+
+    private String getNoThresholdSetLink(Project project) {
+        return linkGenerator.link(
+                controller: "processingThreshold",
+                action: "index",
+                absolute: true,
+                params: [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): project.name]
+        )
     }
 
     private void importRuns(MetadataValidationContext context, FastqImportInstance fastqImportInstance, Collection<Row> metadataFileRows) {

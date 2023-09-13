@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
+import grails.web.mapping.LinkGenerator
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
@@ -70,10 +71,15 @@ class MetadataImportServiceIntegrationSpec extends Specification implements Doma
         service.processingThresholdsService = Mock(ProcessingThresholdsService) {
             getSeqTracksWithoutProcessingThreshold(_) >> [st2]
         }
+        service.linkGenerator = Mock(LinkGenerator) {
+            2 * link(_) >> "link1" >> "link2"
+        }
         service.mailHelperService = Mock(MailHelperService) {
             1 * sendEmailToTicketSystem(_, _) >> { String subject, String body ->
                 assert subject.contains("threshold")
                 assert subject.contains("category")
+                assert body.contains("link1")
+                assert body.contains("link2")
                 assert body.contains(st1.project.displayName)
                 assert body.contains(p1.project.displayName)
                 assert body.contains(p1.sampleType.displayName)
