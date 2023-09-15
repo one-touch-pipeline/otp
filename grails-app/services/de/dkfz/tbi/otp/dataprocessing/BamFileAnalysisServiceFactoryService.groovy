@@ -36,7 +36,7 @@ class BamFileAnalysisServiceFactoryService {
     SnvCallingService snvCallingService
     SophiaService sophiaService
 
-    AbstractBamFileAnalysisService<? extends BamFilePairAnalysis> getService(BamFilePairAnalysis bfpa) {
+    AbstractBamFileAnalysisService<? extends BamFilePairAnalysis> getService(Class<? extends BamFilePairAnalysis> clazz) {
         Map<Class<? extends BamFilePairAnalysis>, AbstractBamFileAnalysisService<? extends BamFilePairAnalysis>> map = [
                 (AceseqInstance)         : aceseqService,
                 (IndelCallingInstance)   : indelCallingService,
@@ -45,10 +45,15 @@ class BamFileAnalysisServiceFactoryService {
                 (SnvCallingInstance)     : snvCallingService,
                 (SophiaInstance)         : sophiaService,
         ]
-        AbstractBamFileAnalysisService<? extends BamFilePairAnalysis> result = map[bfpa.class]
+
+        AbstractBamFileAnalysisService<? extends BamFilePairAnalysis> result = map[clazz]
         if (!result) {
-            throw new IllegalArgumentException("No service exists for ${bfpa.class.simpleName}")
+            throw new IllegalArgumentException("No service exists for ${clazz.simpleName}")
         }
         return result
+    }
+
+    AbstractBamFileAnalysisService<? extends BamFilePairAnalysis> getService(BamFilePairAnalysis bfpa) {
+        return getService(bfpa.class)
     }
 }

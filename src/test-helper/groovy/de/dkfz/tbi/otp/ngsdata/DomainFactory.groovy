@@ -1114,6 +1114,17 @@ class DomainFactory {
         return createDomainObject(RunYapsaInstance, map, properties)
     }
 
+    static RunYapsaInstance createRunYapsaInstanceWithSameSamplePair(BamFilePairAnalysis instance, Map properties = [:]) {
+        return createDomainObject(RunYapsaInstance, [
+                processingState   : AnalysisProcessingStates.FINISHED,
+                sampleType1BamFile: instance.sampleType1BamFile,
+                sampleType2BamFile: instance.sampleType2BamFile,
+                config            : createRunYapsaConfigLazy(pipeline: createRunYapsaPipelineLazy(), project: instance.project, seqType: instance.seqType),
+                instanceName      : "instance-${counter++}",
+                samplePair        : instance.samplePair,
+        ], properties)
+    }
+
     @Deprecated
     static AntibodyTarget createAntibodyTarget(Map properties = [:]) {
         return proxyCore.createAntibodyTarget(properties)

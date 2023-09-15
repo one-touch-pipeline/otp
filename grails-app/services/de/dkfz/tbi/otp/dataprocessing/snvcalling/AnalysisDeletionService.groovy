@@ -32,24 +32,28 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 
 import java.nio.file.Path
 
-@CompileDynamic
 @Transactional
 class AnalysisDeletionService {
-    AceseqService aceseqService
+
     FileService fileService
-    IndelCallingService indelCallingService
-    SnvCallingService snvCallingService
-    SophiaService sophiaService
-    RunYapsaService runYapsaService
     BamFileAnalysisServiceFactoryService bamFileAnalysisServiceFactoryService
+
+    static final List<Class<?>> ANALYSIS_CLASSES = [
+            RoddySnvCallingInstance,
+            IndelCallingInstance,
+            AceseqInstance,
+            SophiaInstance,
+            RunYapsaInstance,
+    ].asImmutable()
 
     /**
      * Delete all subclasses of BamFilePairAnalysis (such as SnvCallingInstance, IndelCallingInstance, etc) from the database.
      */
+    @CompileDynamic
     File deleteInstance(BamFilePairAnalysis analysisInstance) {
         Path directory = bamFileAnalysisServiceFactoryService.getService(analysisInstance).getWorkDirectory(analysisInstance)
         switch (analysisInstance) {
-            case { it instanceof IndelCallingInstance } :
+            case { it instanceof IndelCallingInstance }:
                 List<IndelQualityControl> indelQualityControl = IndelQualityControl.findAllByIndelCallingInstance(analysisInstance, [sort: 'id', order: 'desc'])
                 indelQualityControl.each {
                     it.delete(flush: true)
@@ -60,13 +64,13 @@ class AnalysisDeletionService {
                     it.delete(flush: true)
                 }
                 break
-            case { it instanceof SophiaInstance } :
+            case { it instanceof SophiaInstance }:
                 List<SophiaQc> sophiaQc = SophiaQc.findAllBySophiaInstance(analysisInstance, [sort: 'id', order: 'desc'])
                 sophiaQc.each {
                     it.delete(flush: true)
                 }
                 break
-            case { it instanceof AceseqInstance } :
+            case { it instanceof AceseqInstance }:
                 List<AceseqQc> aceseqQc = AceseqQc.findAllByAceseqInstance(analysisInstance, [sort: 'id', order: 'desc'])
                 aceseqQc.each {
                     it.delete(flush: true)
@@ -81,27 +85,31 @@ class AnalysisDeletionService {
      * Delete empty SamplePairs (SamplePairs with no further subclasses of BamFilePairAnalysis).
      * The SamplePair directories are parent directories of the subclasses of BamFilePairAnalysis directories,
      * therefore this method has to run after deleteInstance().
+     *
+     * Directory deletion needs to take account multiple sample pairs for the same sample, caused by multi bam files, for example roddy and external.
      */
+    @CompileDynamic
     List<File> deleteSamplePairsWithoutAnalysisInstances(List<SamplePair> samplePairs) {
         List<Path> directoriesToDelete = []
-        samplePairs.unique().each { SamplePair samplePair ->
-            if (!AbstractSnvCallingInstance.findAllBySamplePair(samplePair)) {
-                directoriesToDelete << snvCallingService.getSamplePairPath(samplePair)
+        samplePairs.unique().each { SamplePair paramSamplePair ->
+            ANALYSIS_CLASSES.each { Class<?> clazz ->
+                List<BamFilePairAnalysis> foundAnalysis = clazz.withCriteria {
+                    samplePair {
+                        mergingWorkPackage1 {
+                            eq('sample', paramSamplePair.mergingWorkPackage1.sample)
+                            eq('seqType', paramSamplePair.seqType)
+                        }
+                        mergingWorkPackage2 {
+                            eq('sample', paramSamplePair.mergingWorkPackage2.sample)
+                        }
+                    }
+                }
+                if (!foundAnalysis) {
+                    directoriesToDelete << bamFileAnalysisServiceFactoryService.getService(clazz).getSamplePairPath(paramSamplePair)
+                }
             }
-            if (!IndelCallingInstance.findAllBySamplePair(samplePair)) {
-                directoriesToDelete << indelCallingService.getSamplePairPath(samplePair)
-            }
-            if (!AceseqInstance.findAllBySamplePair(samplePair)) {
-                directoriesToDelete << aceseqService.getSamplePairPath(samplePair)
-            }
-            if (!SophiaInstance.findAllBySamplePair(samplePair)) {
-                directoriesToDelete << sophiaService.getSamplePairPath(samplePair)
-            }
-            if (!RunYapsaInstance.findAllBySamplePair(samplePair)) {
-                directoriesToDelete << runYapsaService.getSamplePairPath(samplePair)
-            }
-            if (!BamFilePairAnalysis.findAllBySamplePair(samplePair)) {
-                samplePair.delete(flush: true)
+            if (!BamFilePairAnalysis.findAllBySamplePair(paramSamplePair)) {
+                paramSamplePair.delete(flush: true)
             }
         }
         return directoriesToDelete.collect { fileService.toFile(it) }
