@@ -39,6 +39,11 @@ import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 class ExternallyProcessedBamFile extends AbstractBamFile {
 
     /**
+     * name of folder for imported bam files
+     */
+    static final String NON_OTP = "nonOTP"
+
+    /**
      * Name of the bam file
      */
     String fileName
@@ -156,7 +161,7 @@ class ExternallyProcessedBamFile extends AbstractBamFile {
     @Deprecated
     File getNonOtpFolder() {
         String relative = MergedAlignmentDataFileService.buildRelativePath(seqType, sample)
-        return new OtpPath(project, relative, "nonOTP").absoluteDataManagementPath
+        return new OtpPath(project, relative, NON_OTP).absoluteDataManagementPath
     }
 
     /**

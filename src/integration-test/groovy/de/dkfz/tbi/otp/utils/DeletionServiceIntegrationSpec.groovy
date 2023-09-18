@@ -28,8 +28,7 @@ import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -63,6 +62,7 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
     SnvCallingService snvCallingService
     FileService fileService
     RoddyBamFileService roddyBamFileService
+    SingleCellBamFileService singleCellBamFileService
     ExternallyProcessedBamFileService externallyProcessedBamFileService
 
     String seqDir = "/seq-dir"
@@ -1061,6 +1061,7 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
         SeqTrack st = deleteProcessingFilesOfProject_NoProcessedData_Setup()
         createFastqFiles([st])
         createExternallyProcessedBamFile([st])
+        Path file = outputFolder.resolve("Delete_${st.project.name}.sh")
 
         when:
         deletionService.deleteProcessingFilesOfProject(st.project.name, outputFolder, false, true, [st])
@@ -1068,6 +1069,8 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
         then:
         AssertionError e = thrown()
         e.message.contains('external merged bam files attached to this project')
+
+        !Files.exists(file)
     }
 
     void "testDeleteProcessingFilesOfProject_NoProcessedData_ExternallyProcessedBamFile_NoOtpBamFile_ShouldNotFail"() {
@@ -1076,12 +1079,14 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
         SeqTrack st = deleteProcessingFilesOfProject_NoProcessedData_Setup()
         createFastqFiles([st])
         createExternallyProcessedBamFile([st])
+        Path file = outputFolder.resolve("Delete_${st.project.name}.sh")
 
         when:
         deletionService.deleteProcessingFilesOfProject(st.project.name, outputFolder, true, true, [st])
 
         then:
-        noExceptionThrown()
+        Files.exists(file)
+        !file.text.contains(ExternallyProcessedBamFile.NON_OTP)
     }
 
     void "testDeleteProcessingFilesOfProject_NoProcessedData_ExternallyProcessedBamFile_WithOtpBamFile_ShouldNotFail"() {
@@ -1090,13 +1095,33 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
         SeqTrack st = deleteProcessingFilesOfProject_NoProcessedData_Setup()
         createFastqFiles([st])
         createExternallyProcessedBamFile([st])
-        createRoddyBamFileHelper([st])
+        RoddyBamFile roddyBamFilePath = createRoddyBamFileHelper([st])
+        Path file = outputFolder.resolve("Delete_${st.project.name}.sh")
 
         when:
         deletionService.deleteProcessingFilesOfProject(st.project.name, outputFolder, true, true, [st])
 
         then:
-        noExceptionThrown()
+        !file.text.contains(ExternallyProcessedBamFile.NON_OTP)
+        !file.text.contains(roddyBamFilePath.toString() + '\n')
+    }
+
+    void "testDeleteProcessingFilesOfProject_NoProcessedData_ExternallyProcessedBamFile_WithCellRangerBamFile_ShouldNotFail"() {
+        given:
+        setupDataForProcessingFiles()
+        SeqTrack st = deleteProcessingFilesOfProject_NoProcessedData_Setup()
+        createFastqFiles([st])
+        createExternallyProcessedBamFile([st])
+        SingleCellBamFile singleCellBamFile = createSingleCellBamFileHelper([st])
+        Path file = outputFolder.resolve("Delete_${st.project.name}.sh")
+        Path cellRangerPath = singleCellBamFileService.abstractBamFileService.getBaseDirectory(singleCellBamFile)
+
+        when:
+        deletionService.deleteProcessingFilesOfProject(st.project.name, outputFolder, true, true, [st])
+
+        then:
+        !file.text.contains(ExternallyProcessedBamFile.NON_OTP)
+        !file.text.contains(cellRangerPath.toString() + '\n')
     }
 
     private SeqTrack deleteProcessingFilesOfProject_NoProcessedData_Setup() {
@@ -1138,7 +1163,7 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
         createFastqFiles(bamFile.containedSeqTracks as List)
     }
 
-    private void createRoddyBamFileHelper(List<SeqTrack> seqTracks) {
+    private RoddyBamFile createRoddyBamFileHelper(List<SeqTrack> seqTracks) {
         RoddyBamFile roddyBamFile = createBamFile([
                 workPackage: createMergingWorkPackage([
                         sample   : seqTracks.first().sample,
@@ -1148,6 +1173,20 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
                 seqTracks  : seqTracks,
         ])
         CreateFileHelper.createFile(roddyBamFileService.getFinalBamFile(roddyBamFile))
+        return roddyBamFile
+    }
+
+    private SingleCellBamFile createSingleCellBamFileHelper(List<SeqTrack> seqTracks) {
+        SingleCellBamFile singleCellBamFile = DomainFactory.proxyCellRanger.createBamFile([
+                workPackage: DomainFactory.proxyCellRanger.createMergingWorkPackage([
+                        sample   : seqTracks.first().sample,
+                        seqType  : seqTracks.first().seqType,
+                        seqTracks: seqTracks,
+                ]),
+                seqTracks  : seqTracks,
+        ])
+        CreateFileHelper.createFile(singleCellBamFileService.getWorkDirectory(singleCellBamFile).resolve(singleCellBamFile.bamFileName))
+        return singleCellBamFile
     }
 
     private void createExternallyProcessedBamFile(List<SeqTrack> seqTracks) {

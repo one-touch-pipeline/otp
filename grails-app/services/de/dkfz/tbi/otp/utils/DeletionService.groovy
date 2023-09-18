@@ -27,6 +27,7 @@ import groovy.transform.CompileDynamic
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.SingleCellBamFileService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
@@ -72,6 +73,7 @@ class DeletionService {
     RunService runService
     SeqTrackService seqTrackService
     WorkflowDeletionService workflowDeletionService
+    SingleCellBamFileService singleCellBamFileService
 
     void deleteProjectContent(Project project) {
         assert !project.archived
@@ -296,7 +298,7 @@ class DeletionService {
                             externalMergedBamFolders.add(it.nonOtpFolder.absolutePath)
                         }
                         Files.list(mergingDir).each {
-                            dirsToDelete.add(it)
+                            dirsToDelete.add(it.toString())
                         }
                     }
                 }
@@ -380,7 +382,15 @@ class DeletionService {
             mergingWorkPackage.save(flush: true, validate: false) // since object is deleted later, no validation is necessary
             deleteQualityAssessmentInfoForAbstractBamFile(bamFile)
             deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(bamFile.id.toString(), bamFile.class.name))
-            dirsToDelete << new File(abstractBamFileService.getBaseDirectory(bamFile).toString())
+            Path baseDir = abstractBamFileService.getBaseDirectory(bamFile)
+            if (Files.exists(baseDir)) {
+                Files.list(baseDir).findAll {
+                    it.fileName.toString() != ExternallyProcessedBamFile.NON_OTP
+                }.each {
+                    println "found: ${it}"
+                    dirsToDelete << new File(it.toString())
+                }
+            }
             bamFile.delete(flush: true)
             // The MerginWorkPackage can only be deleted if all corresponding RoddyBamFiles are removed already
             if (!RoddyBamFile.findAllByWorkPackage(mergingWorkPackage)) {
@@ -403,7 +413,14 @@ class DeletionService {
             crmwp.save(flush: true, validate: false)
             deleteQualityAssessmentInfoForAbstractBamFile(bamFile)
             deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(bamFile.id.toString(), bamFile.class.name))
-            dirsToDelete << bamFile.workDirectory
+            Path workDirectory = singleCellBamFileService.getWorkDirectory(bamFile)
+            if (Files.exists(workDirectory)) {
+                Files.list(workDirectory).findAll {
+                    it.fileName != ExternallyProcessedBamFile.NON_OTP
+                }.each {
+                    dirsToDelete << new File(it.toString())
+                }
+            }
             bamFile.delete(flush: true)
             if (!SingleCellBamFile.findAllByWorkPackage(crmwp)) {
                 crmwp.delete(flush: true)
