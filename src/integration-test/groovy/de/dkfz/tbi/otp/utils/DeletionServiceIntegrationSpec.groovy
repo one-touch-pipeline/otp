@@ -150,9 +150,6 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         createWorkflowVersionSelector(project: project)
         createWorkflowVersionSelector(project: project)
         createExternalWorkflowConfigSelector(projects: [project])
-        (1..5).each {
-            createWorkflowRun(project: project, restartedFrom: createWorkflowRun(project: project))
-        }
 
         when:
         deletionService.deleteProjectContent(project)
@@ -179,6 +176,22 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         then:
         AssertionError e = thrown(AssertionError)
         e.message.contains("There are Ega Submissions connected to this Project, thus it can not be deleted")
+    }
+
+    void "deleteProjectContent, for project with workflowRuns"() {
+        given:
+        setupData()
+        Project project = createProject()
+        (1..5).each {
+            createWorkflowRun(project: project, restartedFrom: createWorkflowRun(project: project))
+        }
+
+        when:
+        deletionService.deleteProjectContent(project)
+
+        then:
+        AssertionError e = thrown(AssertionError)
+        e.message.contains("There are workflow runs connected to this Project, thus it can not be deleted")
     }
 
     void "deleteSeqTrack, delete an empty run"() {

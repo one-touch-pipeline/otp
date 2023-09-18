@@ -40,10 +40,12 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectInfo
+import de.dkfz.tbi.otp.project.ProjectRequest
 import de.dkfz.tbi.otp.project.dta.DataTransferAgreement
 import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
 import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigSelector
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -76,6 +78,11 @@ class DeletionService {
 
         assert !EgaSubmission.findAllByProject(project): "There are Ega Submissions connected to this Project, thus it can not be deleted"
 
+        // Delete any project requests associated with this project
+        ProjectRequest.findAllByProject(project).each {
+            it.delete(flush: true)
+        }
+
         // Delete individuals for a project
         Individual.findAllByProject(project).each { individual ->
             deleteIndividual(individual, false)
@@ -90,7 +97,7 @@ class DeletionService {
 
         workflowDeletionService.deleteReferenceGenomeSelector(project)
 
-        workflowDeletionService.deleteWorkflowRun(project)
+        assert WorkflowRun.findAllByProject(project).empty : "There are workflow runs connected to this Project, thus it can not be deleted"
 
         // remove project from ExternalWorkflowConfigSelector or delete selector completely
         deleteProjectsExternalWorkflowConfigSelector(project)

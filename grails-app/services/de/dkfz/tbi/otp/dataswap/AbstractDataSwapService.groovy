@@ -253,6 +253,8 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
             String oldFilename = it.fileName
             it.project = data.projectSwap.new
             it.fileName = it.vbpFileName = data.rawSequenceFileSwaps.find { swap -> swap.old == it.fileName }.new
+            it.seqTrack.workflowArtefact?.producedBy?.project = data.projectSwap.new
+            it.seqTrack.workflowArtefact?.producedBy?.save(flush: false)
             if (it.mateNumber == null && it.fileWithdrawn && it.fileType &&
                     it.fileType.type == FileType.Type.SEQUENCE && it.fileType.vbpPath == "/sequence/") {
                 data.log << "\n====> set mate number for withdrawn data file"
