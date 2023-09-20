@@ -26,6 +26,7 @@ import grails.gorm.transactions.Rollback
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.TestMessageSourceService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.ngsdata.*
@@ -40,9 +41,14 @@ class QcTrafficLightNotificationServiceIntegrationSpec extends Specification imp
 
     TicketService ticketService
 
+    void setupData() {
+        qcTrafficLightNotificationService.messageSourceService = new TestMessageSourceService()
+    }
+
     @Unroll
     void "createResultsAreWarnedSubject, properly builds subject"() {
         given:
+        setupData()
         DomainFactory.createProcessingOptionForTicketPrefix()
 
         List<Ticket> tickets = (1..2).collect {

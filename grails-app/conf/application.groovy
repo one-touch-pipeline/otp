@@ -19,21 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
-
-Properties otpProperties = ConfigService.parsePropertiesFile()
-Boolean consoleEnabled = Boolean.parseBoolean(otpProperties.getProperty(OtpProperty.GRAILS_CONSOLE.key))
-String grailsConsoleRelativePath = otpProperties.getProperty(OtpProperty.GRAILS_CONSOLE_RELATIVE_PATH.key)
-String trustStorePath = otpProperties.getProperty(OtpProperty.TRUSTSTORE_PATH.key)
-String trustStorePassword = otpProperties.getProperty(OtpProperty.TRUSTSTORE_PASSWORD.key)
-String trustStoreType = otpProperties.getProperty(OtpProperty.TRUSTSTORE_TYPE.key)
-String keycloakClientId = otpProperties.getProperty(OtpProperty.KEYCLOAK_CLIENT_ID.key)
-String keycloakClientSecret = otpProperties.getProperty(OtpProperty.KEYCLOAK_CLIENT_SECRET.key)
-String keycloakServer = otpProperties.getProperty(OtpProperty.KEYCLOAK_SERVER.key)
-String keycloakRealm = otpProperties.getProperty(OtpProperty.KEYCLOAK_REALM.key)
-
 spring {
     jmx {
         uniqueNames = true
@@ -156,30 +141,3 @@ environments {
         grails.mail.disabled=true
     }
 }
-
-// configure groovy web console
-grails.plugin.console.enabled = consoleEnabled
-environments {
-    production {
-        grails.plugin.console.baseUrl=grailsConsoleRelativePath
-    }
-    development {
-        grails.plugin.console.baseUrl=grailsConsoleRelativePath ?: '/console'
-    }
-}
-grails.plugin.console.fileStore.remote.defaultPath=System.getenv("CONSOLE_REMOTE_DEFAULTPATH")
-
-if (trustStorePath) {
-    System.setProperty("javax.net.ssl.trustStore", trustStorePath)
-}
-if (trustStorePassword) {
-    System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword)
-}
-if (trustStoreType) {
-    System.setProperty("javax.net.ssl.trustStoreType", trustStoreType)
-}
-
-spring.security.oauth2.client.registration.keycloak.authorizationGrantType="client_credentials"
-spring.security.oauth2.client.registration.keycloak.clientId=keycloakClientId
-spring.security.oauth2.client.registration.keycloak.clientSecret=keycloakClientSecret
-spring.security.oauth2.client.provider.keycloak.tokenUri="${keycloakServer}/realms/${keycloakRealm}/protocol/openid-connect/token"

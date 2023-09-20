@@ -30,17 +30,33 @@ import static java.util.concurrent.TimeUnit.*
 
 Properties otpProperties = ConfigService.parsePropertiesFile()
 
+Boolean consoleEnabled = Boolean.parseBoolean(otpProperties.getProperty(OtpProperty.GRAILS_CONSOLE.key))
+String grailsConsoleRelativePath = otpProperties.getProperty(OtpProperty.GRAILS_CONSOLE_RELATIVE_PATH.key)
+String trustStorePath = otpProperties.getProperty(OtpProperty.TRUSTSTORE_PATH.key)
+String trustStorePassword = otpProperties.getProperty(OtpProperty.TRUSTSTORE_PASSWORD.key)
+String trustStoreType = otpProperties.getProperty(OtpProperty.TRUSTSTORE_TYPE.key)
+String keycloakClientId = otpProperties.getProperty(OtpProperty.KEYCLOAK_CLIENT_ID.key)
+String keycloakClientSecret = otpProperties.getProperty(OtpProperty.KEYCLOAK_CLIENT_SECRET.key)
+String keycloakServer = otpProperties.getProperty(OtpProperty.KEYCLOAK_SERVER.key)
+String keycloakRealm = otpProperties.getProperty(OtpProperty.KEYCLOAK_REALM.key)
+String serverURL = otpProperties.getProperty(OtpProperty.CONFIG_SERVER_URL.key)
+String schedulerEnabled = otpProperties.getProperty(OtpProperty.SCHEDULER_ENABLED.key)
+String server = otpProperties.getProperty(OtpProperty.DATABASE_SERVER.key)
+String port = otpProperties.getProperty(OtpProperty.DATABASE_PORT.key)
+String database = otpProperties.getProperty(OtpProperty.DATABASE_SCHEMA.key)
+String databaseUsername = otpProperties.getProperty(OtpProperty.DATABASE_USERNAME.key)
+String databasePassword = otpProperties.getProperty(OtpProperty.DATABASE_PASSWORD.key)
+
 // set per-environment serverURL stem for creating absolute links
 environments {
     development {
         grails.logging.jul.usebridge = true
-        grails.serverURL = otpProperties.getProperty(OtpProperty.CONFIG_SERVER_URL.key) ?: "http://localhost:8080"
-        scheduler.enabled = otpProperties.getProperty(OtpProperty.SCHEDULER_ENABLED.key) ?: OtpProperty.SCHEDULER_ENABLED.defaultValue
-
+        grails.serverURL = serverURL ?: "http://localhost:8080"
+        scheduler.enabled = schedulerEnabled ?: OtpProperty.SCHEDULER_ENABLED.defaultValue
     }
     production {
         grails.logging.jul.usebridge = false
-        grails.serverURL = otpProperties.getProperty(OtpProperty.CONFIG_SERVER_URL.key)
+        grails.serverURL = serverURL
     }
     WORKFLOW_TEST {
         grails.serverURL = "http://localhost"
@@ -50,15 +66,11 @@ environments {
     }
 }
 
-String server = otpProperties.getProperty(OtpProperty.DATABASE_SERVER.key)
-String port = otpProperties.getProperty(OtpProperty.DATABASE_PORT.key)
-String database = otpProperties.getProperty(OtpProperty.DATABASE_SCHEMA.key)
-
 dataSource {
     driverClassName = "org.postgresql.Driver"
     dialect = PostgreSQL9Dialect
-    username = otpProperties.getProperty(OtpProperty.DATABASE_USERNAME.key)
-    password = otpProperties.getProperty(OtpProperty.DATABASE_PASSWORD.key)
+    username = databaseUsername
+    password = databasePassword
     url = "jdbc:postgresql://${server}:${port}/${database}"
     dbCreate = "none"
 }
@@ -194,3 +206,31 @@ grails.gorm.default.constraints = {
 grails.gorm.default.mapping = {
     id generator: 'sequence'
 }
+
+
+// configure groovy web console
+grails.plugin.console.enabled = consoleEnabled
+environments {
+    production {
+        grails.plugin.console.baseUrl=grailsConsoleRelativePath
+    }
+    development {
+        grails.plugin.console.baseUrl=grailsConsoleRelativePath ?: '/console'
+    }
+}
+grails.plugin.console.fileStore.remote.defaultPath=System.getenv("CONSOLE_REMOTE_DEFAULTPATH")
+
+if (trustStorePath) {
+    System.setProperty("javax.net.ssl.trustStore", trustStorePath)
+}
+if (trustStorePassword) {
+    System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword)
+}
+if (trustStoreType) {
+    System.setProperty("javax.net.ssl.trustStoreType", trustStoreType)
+}
+
+spring.security.oauth2.client.registration.keycloak.authorizationGrantType="client_credentials"
+spring.security.oauth2.client.registration.keycloak.clientId=keycloakClientId
+spring.security.oauth2.client.registration.keycloak.clientSecret=keycloakClientSecret
+spring.security.oauth2.client.provider.keycloak.tokenUri="${keycloakServer}/realms/${keycloakRealm}/protocol/openid-connect/token"

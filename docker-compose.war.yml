@@ -23,17 +23,23 @@
 
 version: '3.0'
 services:
-  otp-war:
+  war:
     container_name: otp-war
     build:
       dockerfile: docker/otp-war/Dockerfile
       context: .
+      args:
+        GRADLE_PROXY_ENABLED: $GRADLE_PROXY_ENABLED
+        GRADLE_PROXY_HOST: $GRADLE_PROXY_HOST
+        GRADLE_PROXY_PORT: $GRADLE_PROXY_PORT
     env_file:
       - .env
     ports:
       - "${HOST_IP:-127.0.0.1}:${OTP_PORT:-8080}:8080"
     volumes:
+      - .otp.war.properties:/root/.otp.properties
       - filesystem:/home/otp/filesystem
     depends_on:
       - postgres
-    network_mode: host
+    networks:
+      otp:

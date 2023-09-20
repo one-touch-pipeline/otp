@@ -21,9 +21,25 @@
 # This Docker image takes a prebuilt war file and deploys it on a production like tomcat server.
 # It is helpful to test scenarios in a prod-like way. Hot reloading is not available.
 
-FROM tomcat:8.5-jre17
+FROM registry.gitlab.com/one-touch-pipeline/otp/otp-ci-java-17:2023-06-23 as builder
 
-COPY .otp.war.properties /root/.otp.properties
-COPY build/libs/otp.war /usr/local/tomcat/webapps/
+ARG GRADLE_PROXY_ENABLED=false
+ARG GRADLE_PROXY_HOST
+ARG GRADLE_PROXY_PORT
+
+COPY --chown=otp . .
+
+RUN if [ "$GRADLE_PROXY_ENABLED" = "true" ] ; then \
+    echo "systemProp.http.proxyHost=${GRADLE_PROXY_HOST}" >> ./gradle.properties && \
+    echo "systemProp.http.proxyPort=${GRADLE_PROXY_PORT}" >> ./gradle.properties && \
+    echo "systemProp.https.proxyHost=${GRADLE_PROXY_HOST}" >> ./gradle.properties && \
+    echo "systemProp.https.proxyPort=${GRADLE_PROXY_PORT}" >> ./gradle.properties \
+    ; fi
+
+RUN ./gradlew war
+
+FROM tomcat:9.0-jre17
+
+COPY --from=builder /home/otp/build/libs/otp.war /usr/local/tomcat/webapps/
 
 EXPOSE 8080

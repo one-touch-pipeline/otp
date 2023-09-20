@@ -28,6 +28,7 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.AbstractIntegrationSpecWithoutRollbackAnnotation
+import de.dkfz.tbi.otp.TestMessageSourceService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
@@ -95,6 +96,8 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
     ]*.asImmutable().asImmutable()
 
     void setupData() {
+        createNotificationTextService.messageSourceService = new TestMessageSourceService()
+
         // Overwrite the autowired service with a new instance for each test, so mocks do not have to be cleaned up
         notificationCreator = new NotificationCreator(
                 mailHelperService: mailHelperService,

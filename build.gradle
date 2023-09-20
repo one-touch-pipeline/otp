@@ -20,9 +20,9 @@
  * SOFTWARE.
  */
 
-import com.gradle.scan.plugin.PublishedBuildScan
-import grails.util.Environment
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+import grails.util.Environment
 
 import static java.util.concurrent.TimeUnit.SECONDS
 
@@ -66,7 +66,7 @@ buildScan {
         String gitlabUrl = "https://gitlab.com/one-touch-pipeline/otp"
         value 'Git Commit ID', commitId
         buildScan.link 'Source', "$gitlabUrl/-/commit/$commitId"
-        buildScanPublished { PublishedBuildScan scan ->
+        buildScanPublished { scan ->
             file("$buildDir/scan-journal.log") << "${new Date()} - ${scan.buildScanId} - ${scan.buildScanUri}\n"
         }
     }
@@ -136,7 +136,7 @@ sourceSets {
 }
 
 def generatedSourcesDir = "$buildDir/generated/openapi"
-task generateWes(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
+task generateWes(type: GenerateTask) {
     generatorName = "java"
     library = "webclient"
     inputSpec = "${sourceSets.main.resources.srcDirs[0]}/wes-api/workflow_execution_service.swagger.yaml"
@@ -232,9 +232,23 @@ test {
     finalizedBy jacocoTestReport // report is always generated after tests run
 }
 
+check {
+    // Check should run all Test tasks including the workflow tests for example.
+    dependsOn(tasks.withType(Test).toArray())
+}
 
-integrationTest {
+mergeTestReports {
+    // Problem with grails-gradle-plugin which let integrationTest get finalized by mergeTestReports which depend on all Tasks of type Test.
+    // Thus all Tests are run after running integrationTest, which should not happen.
+    dependsOn.clear()
+}
+
+integrationTest() {
+    testLogging.events = ["SKIPPED", "FAILED", "STANDARD_ERROR"]
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
     useJUnitPlatform()
+    shouldRunAfter test
     finalizedBy jacocoIntegrationTestReport // report is always generated after tests run
     boolean usePostgresDocker = "TRUE".equalsIgnoreCase(System.getenv('USE_POSTGRES'))
     systemProperty "usePostgresDocker", usePostgresDocker.toString()
@@ -297,6 +311,7 @@ integrationTest {
 
 task workflowTest(type: Test) {
     useJUnitPlatform()
+    testLogging.events = ["FAILED", "STANDARD_ERROR"]
     testClassesDirs = sourceSets.workflowTest.output.classesDirs
     classpath = sourceSets.workflowTest.runtimeClasspath
     reports.html.enabled = true
@@ -537,6 +552,8 @@ tasks.withType(CodeNarc) {
 }
 
 war {
+    // The dependance on groovy pages was removed in a grails gradle plugin version
+    dependsOn compileGroovyPages
     archiveName = 'otp.war'
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     enabled = true

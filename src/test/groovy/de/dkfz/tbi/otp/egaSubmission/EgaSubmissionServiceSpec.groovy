@@ -157,7 +157,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         EgaSubmission.State.FILE_UPLOAD_STARTED == submission.state
     }
 
-    void "test update state without files"() {
+    void "test update state without files should fail with validation error"() {
         given:
         EgaSubmission submission = createEgaSubmission()
 
@@ -166,7 +166,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
 
         then:
         ValidationException exception = thrown()
-        exception.message.contains("rejected value [[]]")
+        exception.message.contains("Validation error occurred during call to save()")
     }
 
     void "updatePubMedId, when submission is not null it should succeed"() {
