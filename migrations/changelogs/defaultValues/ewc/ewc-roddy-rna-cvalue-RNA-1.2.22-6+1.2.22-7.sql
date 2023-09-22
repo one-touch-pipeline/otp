@@ -428,9 +428,6 @@
 '            "FEATURE_COUNT_CORES": {' ||
 '                "value": "8"' ||
 '            },' ||
-'            "useSingleEndProcessing": {' ||
-'                "value": "false"' ||
-'            }' ||
 '        }' ||
 '    }' ||
 '}'

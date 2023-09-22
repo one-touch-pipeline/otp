@@ -114,4 +114,6 @@ databaseChangeLog = {
     include file: 'changelogs/2023/otp-2205.groovy'
 
     include file: 'changelogs/2023/otp-2206-add-unique-constraint.groovy'
+
+    include file: 'changelogs/2023/otp-2246.groovy'
 }

@@ -164,8 +164,6 @@ class RnaAlignmentExecuteJobSpec extends Specification implements DataTest, Work
         given:
         setupDataForGetConfigurationValues()
 
-        roddyBamFile.seqType.libraryLayout = libraryLayout
-
         Map<String, String> expectedCommand = [
                 "sharedFilesBaseDirectory"         : null,
                 "INDEX_PREFIX"                     : "/fasta-path",
@@ -177,7 +175,6 @@ class RnaAlignmentExecuteJobSpec extends Specification implements DataTest, Work
                 "ADAPTER_SEQ"                      : ADAPTER_SEQUENCE,
                 "ALIGNMENT_DIR"                    : tempDir.toString(),
                 "outputBaseDirectory"              : tempDir.toString(),
-                "useSingleEndProcessing"           : useSingleEndProcessing,
         ]
 
         when:
@@ -185,11 +182,6 @@ class RnaAlignmentExecuteJobSpec extends Specification implements DataTest, Work
 
         then:
         TestCase.assertContainSame(expectedCommand, actualCommand)
-
-        where:
-        libraryLayout                || useSingleEndProcessing
-        SequencingReadType.SINGLE    || Boolean.TRUE.toString()
-        SequencingReadType.PAIRED    || Boolean.FALSE.toString()
     }
 
     void "test getAdditionalParameters"() {

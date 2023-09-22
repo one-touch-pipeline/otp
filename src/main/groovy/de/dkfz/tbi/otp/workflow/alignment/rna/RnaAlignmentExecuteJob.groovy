@@ -22,13 +22,10 @@
 package de.dkfz.tbi.otp.workflow.alignment.rna
 
 import groovy.util.logging.Slf4j
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
-import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
 import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.SequencingReadType
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.alignment.RoddyAlignmentExecuteJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -36,9 +33,6 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 @Component
 @Slf4j
 class RnaAlignmentExecuteJob extends RoddyAlignmentExecuteJob implements RnaAlignmentShared {
-
-    @Autowired
-    RoddyConfigValueService roddyConfigValueService
 
     @Override
     protected String getRoddyWorkflowName() {
@@ -66,12 +60,6 @@ class RnaAlignmentExecuteJob extends RoddyAlignmentExecuteJob implements RnaAlig
         // the following two variables need to be provided since Roddy does not use the normal path definition for RNA
         conf.put("ALIGNMENT_DIR", getWorkDirectory(workflowStep).toString())
         conf.put("outputBaseDirectory", getWorkDirectory(workflowStep).toString())
-
-        if (roddyBamFile.seqType.libraryLayout == SequencingReadType.SINGLE) {
-            conf.put("useSingleEndProcessing", Boolean.TRUE.toString())
-        } else if (roddyBamFile.seqType.libraryLayout == SequencingReadType.PAIRED) {
-            conf.put("useSingleEndProcessing", Boolean.FALSE.toString())
-        }
 
         return conf
     }
