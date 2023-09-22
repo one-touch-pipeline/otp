@@ -19,12 +19,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.alignment.panCancer
+package de.dkfz.tbi.otp.workflow.alignment.rna
 
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
 import de.dkfz.tbi.otp.workflow.alignment.AbstractRoddyAlignmentValidationJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -32,29 +33,17 @@ import java.nio.file.Path
 
 @Component
 @Slf4j
-class PanCancerValidationJob extends AbstractRoddyAlignmentValidationJob implements PanCancerShared {
+class RnaAlignmentValidationJob extends AbstractRoddyAlignmentValidationJob implements RnaAlignmentShared {
 
-    /**
-     * Returns the expected files for validation
-     *
-     * @return the following paths
-     * <ul>
-     *     <li>super.getExpectedFiles</li>
-     *     <li>workMergedQAJsonFile</li>
-     *     <li>workMergedQATargetExtractJsonFile (if seq type needs BED file)</li>
-     * </ul>
-     */
+    RnaRoddyBamFileService rnaRoddyBamFileService
+
     @Override
     protected List<Path> getExpectedFiles(WorkflowStep workflowStep) {
         RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
-
         List<Path> expectedFiles = super.getExpectedFiles(workflowStep)
 
-        if (roddyBamFile.seqType.needsBedFile) {
-            expectedFiles.add(roddyBamFileService.getWorkMergedQATargetExtractJsonFile(roddyBamFile))
-        }
-
-        expectedFiles.addAll(roddyBamFileService.getWorkSingleLaneQAJsonFiles(roddyBamFile).values())
+        expectedFiles.add(rnaRoddyBamFileService.getCorrespondingWorkChimericBamFile(roddyBamFile))
+        expectedFiles.add(rnaRoddyBamFileService.getWorkArribaFusionPlotPdf(roddyBamFile))
 
         return expectedFiles
     }

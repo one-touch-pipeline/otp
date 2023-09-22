@@ -47,4 +47,16 @@ class WgbsValidationJob extends PanCancerValidationJob {
 
         return directories
     }
+
+    @Override
+    protected List<Path> getExpectedFiles(WorkflowStep workflowStep) {
+        List<Path> expectedFiles = super.getExpectedFiles(workflowStep)
+
+        RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
+
+        if (roddyBamFile.hasMultipleLibraries()) {
+            expectedFiles.addAll(roddyBamFileService.getWorkLibraryQAJsonFiles(roddyBamFile).values())
+        }
+        return expectedFiles
+    }
 }

@@ -19,13 +19,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.alignment.wgbs
+package de.dkfz.tbi.otp.workflow.alignment.rna
 
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileService
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.alignment.alignment.AbstractRoddyAlignmentValidationJobSpec
@@ -33,70 +35,59 @@ import de.dkfz.tbi.otp.workflow.alignment.alignment.AbstractRoddyAlignmentValida
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class WgbsValidationJobSpec extends AbstractRoddyAlignmentValidationJobSpec {
+class RnaAlignmentValidationJobSpec extends AbstractRoddyAlignmentValidationJobSpec {
 
     @Override
     protected String workflowName() {
-        return WgbsWorkflow.WORKFLOW
+        return RnaAlignmentWorkflow.WORKFLOW
     }
 
     @Override
-    protected WgbsValidationJob createJob() {
-        return new WgbsValidationJob()
+    protected RnaAlignmentValidationJob createJob() {
+        return new RnaAlignmentValidationJob()
     }
 
     @Override
     protected AbstractBamFile createRoddyBamFile() {
-        return createRoddyBamFile(RoddyBamFile)
+        return createRoddyBamFile(RnaRoddyBamFile)
     }
 
     @Override
     Class[] getDomainClassesToMock() {
         return super.domainClassesToMock + [
-                RoddyBamFile,
+                RnaRoddyBamFile,
         ]
     }
 
     @Unroll
     void "test getExpectedFiles() and getExpectedDirectories, when called the correct paths (files or directories) should be returned"() {
         given:
-        RoddyBamFileService roddyBamFileService = new RoddyBamFileService()
-        roddyBamFileService.abstractBamFileService = Mock(AbstractBamFileService) {
+        RnaRoddyBamFileService rnaRoddyBamFileService = new RnaRoddyBamFileService()
+        rnaRoddyBamFileService.abstractBamFileService = Mock(AbstractBamFileService) {
             getBaseDirectory(_) >> Paths.get("/")
         }
 
-        if (multipleLibraries) {
-            abstractBamFile.seqTracks.first().libraryName = "2"
-            abstractBamFile.seqTracks.first().normalizedLibraryName = "2"
-            abstractBamFile.seqTracks.add(createSeqTrackWithTwoFastqFile(libraryName: "1"))
-            abstractBamFile.numberOfMergedLanes = 2
-            abstractBamFile.save(flush: true)
-        }
-
         List<Path> expectedFiles = [
-                roddyBamFileService.getWorkBamFile(abstractBamFile),
-                roddyBamFileService.getWorkBaiFile(abstractBamFile),
-                roddyBamFileService.getWorkMd5sumFile(abstractBamFile),
-                roddyBamFileService.getWorkMergedQAJsonFile(abstractBamFile),
-        ] + roddyBamFileService.getWorkSingleLaneQAJsonFiles(abstractBamFile).values()
-
-        List<Path> expectedDirectories = [
-                roddyBamFileService.getWorkDirectory(abstractBamFile),
-                roddyBamFileService.getWorkExecutionStoreDirectory(abstractBamFile),
-                roddyBamFileService.getWorkMergedQADirectory(abstractBamFile),
-                roddyBamFileService.getWorkMergedMethylationDirectory(abstractBamFile),
+                rnaRoddyBamFileService.getWorkBamFile(abstractBamFile),
+                rnaRoddyBamFileService.getWorkBaiFile(abstractBamFile),
+                rnaRoddyBamFileService.getWorkMd5sumFile(abstractBamFile),
+                rnaRoddyBamFileService.getWorkMergedQAJsonFile(abstractBamFile),
+                rnaRoddyBamFileService.getCorrespondingWorkChimericBamFile(abstractBamFile),
+                rnaRoddyBamFileService.getWorkArribaFusionPlotPdf(abstractBamFile),
         ]
 
-        if (multipleLibraries) {
-            expectedFiles.addAll(roddyBamFileService.getWorkLibraryQAJsonFiles(abstractBamFile).values())
-            expectedDirectories.addAll(roddyBamFileService.getWorkLibraryMethylationDirectories(abstractBamFile).values().unique(false))
-        }
+        List<Path> expectedDirectories = [
+                rnaRoddyBamFileService.getWorkDirectory(abstractBamFile),
+                rnaRoddyBamFileService.getWorkExecutionStoreDirectory(abstractBamFile),
+                rnaRoddyBamFileService.getWorkMergedQADirectory(abstractBamFile),
+        ]
 
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
             _ * getOutputArtefact(_, _) >> abstractBamFile
         }
         job.fileSystemService = new TestFileSystemService()
-        job.roddyBamFileService = roddyBamFileService
+        job.roddyBamFileService = rnaRoddyBamFileService
+        job.rnaRoddyBamFileService = rnaRoddyBamFileService
 
         when:
         List<Path> files = job.getExpectedFiles(workflowStep)
@@ -107,6 +98,6 @@ class WgbsValidationJobSpec extends AbstractRoddyAlignmentValidationJobSpec {
         TestCase.assertContainSame(directories, expectedDirectories)
 
         where:
-        multipleLibraries << [true, false]
+        needsBedFile << [true, false]
     }
 }

@@ -46,6 +46,7 @@ class RnaAlignmentWorkflow extends AlignmentWorkflow {
                 SetCorrectPermissionJob.simpleName.uncapitalize(),
                 RnaAlignmentLinkJob.simpleName.uncapitalize(),
                 RoddyAlignmentPrepareJob.simpleName.uncapitalize(),
+                RnaAlignmentValidationJob.simpleName.uncapitalize(),
                 RnaAlignmentCleanUpJob.simpleName.uncapitalize(),
         ]
     }
