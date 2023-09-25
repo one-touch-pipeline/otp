@@ -24,12 +24,8 @@ package de.dkfz.tbi.otp.workflow.alignment.wgbs
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.workflow.alignment.RoddyAlignmentCheckQcJob
-import de.dkfz.tbi.otp.workflow.alignment.RoddyAlignmentFinishJob
-import de.dkfz.tbi.otp.workflow.alignment.RoddyAlignmentFragmentJob
-import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerCleanUpJob
-import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerConditionalFailJob
-import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.*
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.*
 import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
 import de.dkfz.tbi.otp.workflowExecution.Artefact
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact

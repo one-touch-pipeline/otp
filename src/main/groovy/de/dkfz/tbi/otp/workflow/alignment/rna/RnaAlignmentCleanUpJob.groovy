@@ -19,13 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.alignment.panCancer
+package de.dkfz.tbi.otp.workflow.alignment.rna
 
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import de.dkfz.tbi.otp.dataprocessing.LinkFilesToFinalDestinationService
-import de.dkfz.tbi.otp.workflow.jobs.AbstractCleanUpJob
+
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
+import de.dkfz.tbi.otp.workflow.alignment.AbstractRoddyAlignmentCleanUpJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Files
@@ -33,22 +36,23 @@ import java.nio.file.Path
 
 @Component
 @Slf4j
-class PanCancerCleanUpJob extends AbstractCleanUpJob implements PanCancerShared {
+@CompileDynamic
+class RnaAlignmentCleanUpJob extends AbstractRoddyAlignmentCleanUpJob implements RnaAlignmentShared {
 
     @Autowired
-    LinkFilesToFinalDestinationService linkFilesToFinalDestinationService
+    RoddyBamFileService roddyBamFileService
 
     @Override
     List<Path> getFilesToDelete(WorkflowStep workflowStep) {
-        return (linkFilesToFinalDestinationService.getFilesToCleanup(getRoddyBamFile(workflowStep), workflowStep.realm) +
-                linkFilesToFinalDestinationService.getOldResultsToCleanup(getRoddyBamFile(workflowStep), workflowStep.realm))
-                .findAll { !Files.isDirectory(it) }
-    }
+        List<Path> files = super.getFilesToDelete(workflowStep)
 
-    @Override
-    List<Path> getDirectoriesToDelete(WorkflowStep workflowStep) {
-        return (linkFilesToFinalDestinationService.getFilesToCleanup(getRoddyBamFile(workflowStep), workflowStep.realm) +
-                linkFilesToFinalDestinationService.getOldResultsToCleanup(getRoddyBamFile(workflowStep), workflowStep.realm))
-                .findAll { Files.isDirectory(it) }
+        RnaRoddyBamFile rnaRoddyBamFile = getRoddyBamFile(workflowStep)
+        Path baseDir = roddyBamFileService.getBaseDirectory(rnaRoddyBamFile)
+        baseDir.eachFile { Path path ->
+            if (Files.isSymbolicLink(path)) {
+                files << path
+            }
+        }
+        return files
     }
 }

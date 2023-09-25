@@ -26,13 +26,10 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.workflow.alignment.AlignmentWorkflow
-import de.dkfz.tbi.otp.workflow.alignment.RoddyAlignmentPrepareJob
-import de.dkfz.tbi.otp.workflow.alignment.RoddyAlignmentCheckQcJob
-import de.dkfz.tbi.otp.workflow.alignment.RoddyAlignmentFinishJob
-import de.dkfz.tbi.otp.workflow.alignment.RoddyAlignmentFragmentJob
+import de.dkfz.tbi.otp.workflow.alignment.*
 import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
-import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflowExecution.Artefact
+import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
 /**
  * represents the PanCancer Workflow

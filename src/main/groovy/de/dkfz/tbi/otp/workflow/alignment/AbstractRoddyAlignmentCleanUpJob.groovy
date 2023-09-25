@@ -19,36 +19,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.alignment.panCancer
+package de.dkfz.tbi.otp.workflow.alignment
 
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import de.dkfz.tbi.otp.dataprocessing.LinkFilesToFinalDestinationService
+
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractCleanUpJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.Files
 import java.nio.file.Path
 
 @Component
 @Slf4j
-class PanCancerCleanUpJob extends AbstractCleanUpJob implements PanCancerShared {
+abstract class AbstractRoddyAlignmentCleanUpJob extends AbstractCleanUpJob implements AlignmentWorkflowShared {
 
     @Autowired
-    LinkFilesToFinalDestinationService linkFilesToFinalDestinationService
+    RoddyBamFileService roddyBamFileService
 
     @Override
     List<Path> getFilesToDelete(WorkflowStep workflowStep) {
-        return (linkFilesToFinalDestinationService.getFilesToCleanup(getRoddyBamFile(workflowStep), workflowStep.realm) +
-                linkFilesToFinalDestinationService.getOldResultsToCleanup(getRoddyBamFile(workflowStep), workflowStep.realm))
-                .findAll { !Files.isDirectory(it) }
+        return []
     }
 
+    @CompileDynamic
     @Override
     List<Path> getDirectoriesToDelete(WorkflowStep workflowStep) {
-        return (linkFilesToFinalDestinationService.getFilesToCleanup(getRoddyBamFile(workflowStep), workflowStep.realm) +
-                linkFilesToFinalDestinationService.getOldResultsToCleanup(getRoddyBamFile(workflowStep), workflowStep.realm))
-                .findAll { Files.isDirectory(it) }
+        RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
+        List<RoddyBamFile> roddyBamFiles = RoddyBamFile.findAllByWorkPackageAndIdNotEqual(roddyBamFile.mergingWorkPackage, roddyBamFile.id)
+        List<Path> workDirs = roddyBamFiles.collect { RoddyBamFile bamFile ->
+            roddyBamFileService.getWorkDirectory(bamFile)
+        }
+        return workDirs
     }
 }
