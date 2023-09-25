@@ -117,6 +117,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             'alignment.quality.createdWithVersion',
             'alignment.quality.referenceGenome',
             'alignment.quality.date',
+            'alignment.quality.configFile',
     ].asImmutable()
 
     private static final List<String> HEADER_PANCANCER_BED = HEADER_COMMON + [

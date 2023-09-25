@@ -44,8 +44,8 @@ abstract class AbstractRoddyQaOverviewService extends AbstractQaOverviewService 
         ]
     }
 
-    protected Map<String, ?> getRoddyConfig(long bamId, WorkflowRun.State state) {
-        return state == WorkflowRun.State.LEGACY ?
+    protected Map<String, ?> getConfigXML(long bamId, WorkflowRun.State state) {
+        return !state || state == WorkflowRun.State.LEGACY ?
                 [configFile: 'N/A'] :
                 [
                         configFile: [

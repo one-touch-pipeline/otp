@@ -24,11 +24,11 @@ $(() => {
   'use strict';
 
   /**
-     * Formats the all cells in a table row and puts them in the correct order
-     * @param row map containing the data in one row with column names as the keys
-     * @param columnNames name of the columns in the correct order
-     * @returns {Array}
-     */
+   * Formats the all cells in a table row and puts them in the correct order
+   * @param row map containing the data in one row with column names as the keys
+   * @param columnNames name of the columns in the correct order
+   * @returns {Array}
+   */
   const tableRowsFormatter = function (row, columnNames) {
     let resultTableRow = [];
 
@@ -118,21 +118,42 @@ $(() => {
   };
 
   /**
-     * Get the list of the column names for the generic DataTable header depending on the selected seqType.
-     *
-     */
+   * Get the list of the column names for the generic DataTable header depending on the selected seqType.
+   *
+   */
   const getDataTableColumns = function () {
     const workflow = $('#seqType').data('columns');
 
     let columnNames = [
-      { data: 'bamId', visible: false, className: 'no_csv_export' },
+      {
+        data: 'bamId',
+        visible: false,
+        className: 'no_csv_export'
+      },
       { data: 'pid' },
       { data: 'sampleType' },
-      { data: 'qcStatusGui', className: 'no_csv_export maxWidth230', render: renderQcStatusColumn },
-      { data: 'qcStatus', visible: false },
-      { data: 'qcComment', visible: false },
-      { data: 'qcAuthor', visible: false },
-      { data: 'dbVersion', visible: false, className: 'no_csv_export' }
+      {
+        data: 'qcStatusGui',
+        className: 'no_csv_export maxWidth230',
+        render: renderQcStatusColumn
+      },
+      {
+        data: 'qcStatus',
+        visible: false
+      },
+      {
+        data: 'qcComment',
+        visible: false
+      },
+      {
+        data: 'qcAuthor',
+        visible: false
+      },
+      {
+        data: 'dbVersion',
+        visible: false,
+        className: 'no_csv_export'
+      }
     ];
 
     // coverage
@@ -221,7 +242,11 @@ $(() => {
         { data: 'pipelineName' },
         { data: 'createdWithVersion' },
         { data: 'referenceGenome' },
-        { data: 'dateFromFileSystem' },
+        { data: 'dateFromFileSystem' }
+      ]);
+    }
+    if (workflow !== 'CELL_RANGER') {
+      columnNames = columnNames.concat([
         { data: 'configFile' }
       ]);
     }
@@ -255,11 +280,12 @@ $(() => {
   };
 
   /**
-     * Sync the qc alignment data with the backend and render the fetched data into the DataTable.
-     *
-     * @param callback, fired when the sync and rendering is finished
-     */
-  const syncAndRenderDataTable = function (callback = () => {}) {
+   * Sync the qc alignment data with the backend and render the fetched data into the DataTable.
+   *
+   * @param callback, fired when the sync and rendering is finished
+   */
+  const syncAndRenderDataTable = function (callback = () => {
+  }) {
     const seqType = $('#seqType');
 
     if (seqType.val()) {
@@ -314,11 +340,11 @@ $(() => {
   };
 
   /**
-     * Fires an update ajax call to change the QC Status to the selected one.
-     *
-     * @param dropdownMenu, with the selectable status options
-     * @param abstractBamFileId
-     */
+   * Fires an update ajax call to change the QC Status to the selected one.
+   *
+   * @param dropdownMenu, with the selectable status options
+   * @param abstractBamFileId
+   */
   const changeQcStatus = function (dropdownMenu, abstractBamFileId) {
     const currentDropdownMenu = dropdownMenu;
     const oldValue = $(currentDropdownMenu).find('option[selected]').val();
@@ -376,24 +402,32 @@ $(() => {
   };
 
   /**
-     * Custom implementation of the DataTables render function for the qc status column.
-     * It takes care of the render type. When the type = "sort", the render function will
-     * return a sort key and otherwise the display value.
-     *
-     * @param data of the cell
-     * @param type for the rendering mode (sort|display|filter)
-     * @param row, data of the row
-     * @returns {number|*}
-     */
+   * Custom implementation of the DataTables render function for the qc status column.
+   * It takes care of the render type. When the type = "sort", the render function will
+   * return a sort key and otherwise the display value.
+   *
+   * @param data of the cell
+   * @param type for the rendering mode (sort|display|filter)
+   * @param row, data of the row
+   * @returns {number|*}
+   */
   const renderQcStatusColumn = function (data, type, row) {
     let position = 3;
 
     if (row.qcStatusOnly) {
       switch (row.qcStatusOnly) {
-        case 'ACCEPTED': position = 0; break;
-        case 'REJECTED': position = 1; break;
-        case 'BLOCKED': position = 2; break;
-        default: position = 3; break;
+        case 'ACCEPTED':
+          position = 0;
+          break;
+        case 'REJECTED':
+          position = 1;
+          break;
+        case 'BLOCKED':
+          position = 2;
+          break;
+        default:
+          position = 3;
+          break;
       }
     }
 
@@ -401,11 +435,11 @@ $(() => {
   };
 
   /**
-     * Generate a dynamic title for the modal headline depending on the new qc status.
-     *
-     * @param newQcStatus which is ACCEPTED or REJECTED
-     * @returns {string} new modal title
-     */
+   * Generate a dynamic title for the modal headline depending on the new qc status.
+   *
+   * @param newQcStatus which is ACCEPTED or REJECTED
+   * @returns {string} new modal title
+   */
   const buildModalTitle = function (newQcStatus) {
     let modalTitle = 'QC status';
 
@@ -419,12 +453,12 @@ $(() => {
   };
 
   /**
-     * Change the default text for the comment inside the modal.
-     * Default is the text of the last comment as long as the state doesn't change.
-     * The default comment will be cleared when the state changes.
-     *
-     * @param newQcStatus which is ACCEPTED or REJECTED
-     */
+   * Change the default text for the comment inside the modal.
+   * Default is the text of the last comment as long as the state doesn't change.
+   * The default comment will be cleared when the state changes.
+   *
+   * @param newQcStatus which is ACCEPTED or REJECTED
+   */
   const updateQcChangeDefaultComment = function (newQcStatus) {
     const modalInput = $('#modalInput');
 
@@ -435,12 +469,12 @@ $(() => {
   };
 
   /**
-     * Open the confirmation modal for the qc status change.
-     *
-     * @param title, shown in the headline
-     * @param confirmCallback, performed when confirm button was pressed
-     * @param closeCallback, performed when a close button was pressed
-     */
+   * Open the confirmation modal for the qc status change.
+   *
+   * @param title, shown in the headline
+   * @param confirmCallback, performed when confirm button was pressed
+   * @param closeCallback, performed when a close button was pressed
+   */
   const openConfirmationModal = function (title, confirmCallback, closeCallback) {
     const modal = $('#confirmModal');
     const confirmButton = modal.find('#confirmModal');
@@ -464,11 +498,11 @@ $(() => {
   };
 
   /**
-     * Get the data of a table row as a json object by it's id.
-     *
-     * @param id of the requested row
-     * @returns {*} json object of the row data
-     */
+   * Get the data of a table row as a json object by it's id.
+   *
+   * @param id of the requested row
+   * @returns {*} json object of the row data
+   */
   const getTableDataRowById = function (id) {
     const dataTable = $('#overviewTableProcessedMergedBMF').DataTable();
 
@@ -476,8 +510,8 @@ $(() => {
   };
 
   /**
-     * Bind onchange event to the QC status change dropdown menu.
-     */
+   * Bind onchange event to the QC status change dropdown menu.
+   */
   $('#overviewTableProcessedMergedBMF').on('change', '.qcDropdown', (event) => {
     changeQcStatus(event.target, $(event.target).data('id'));
   });

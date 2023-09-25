@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing.qaalignmentoverview
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractQualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.RnaQualityAssessment
@@ -29,6 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
 @Transactional(readOnly = true)
 class RnaQaOverviewService extends AbstractRoddyQaOverviewService {
@@ -118,8 +120,9 @@ class RnaQaOverviewService extends AbstractRoddyQaOverviewService {
     }
 
     @Override
+    @CompileDynamic
     protected Map<String, ?> extractSpecificValues(Project project, Map<String, ?> qaMap) {
-        return [
+        Map<String, ?> result = [
                 createdWithVersion: "${(qaMap.programVersion2 ?: qaMap.workflowVersion) ?: 'NA'}",
                 arribaPlots       : new TableCellValue(
                         archived: project.archived,
@@ -130,5 +133,7 @@ class RnaQaOverviewService extends AbstractRoddyQaOverviewService {
                                 params: ["abstractBamFile.id": qaMap.bamId],
                         ])),
         ]
+        result.putAll(getConfigXML(qaMap.bamId as long, qaMap.state as WorkflowRun.State))
+        return result
     }
 }

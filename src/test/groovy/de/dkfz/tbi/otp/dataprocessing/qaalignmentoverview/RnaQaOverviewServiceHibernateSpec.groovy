@@ -166,7 +166,7 @@ class RnaQaOverviewServiceHibernateSpec extends HibernateSpec implements RoddyPa
         then:
         service.linkGenerator.link(linkMap) >> link
 
-        ret.size() == 2
+        ret.size() == 3
         ret.containsKey('arribaPlots')
         TableCellValue arribaPlots = ret.arribaPlots
         arribaPlots.archived == archived

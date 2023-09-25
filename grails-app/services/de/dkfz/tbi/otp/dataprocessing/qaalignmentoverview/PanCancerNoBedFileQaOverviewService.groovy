@@ -115,7 +115,7 @@ class PanCancerNoBedFileQaOverviewService extends AbstractRoddyQaOverviewService
                 coverageX         : FormatHelper.formatNumber((Number) qaMap.coverageX), // ChrX Coverage w/o N
                 coverageY         : FormatHelper.formatNumber((Number) qaMap.coverageY), // ChrY Coverage w/o N
         ]
-        result.putAll(getRoddyConfig(qaMap.bamId as long, qaMap.state as WorkflowRun.State))
+        result.putAll(getConfigXML(qaMap.bamId as long, qaMap.state as WorkflowRun.State))
         return result
     }
 }

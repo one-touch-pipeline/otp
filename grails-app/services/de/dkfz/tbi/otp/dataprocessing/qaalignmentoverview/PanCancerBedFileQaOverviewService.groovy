@@ -92,7 +92,7 @@ class PanCancerBedFileQaOverviewService extends AbstractRoddyQaOverviewService {
                 createdWithVersion: "${(qaMap.programVersion2 ?: qaMap.workflowVersion) ?: 'NA'}",
                 targetCoverage    : FormatHelper.formatNumber((Double) qaMap.targetCoverage),
         ]
-        result.putAll(getRoddyConfig(qaMap.bamId as long, qaMap.state as WorkflowRun.State))
+        result.putAll(getConfigXML(qaMap.bamId as long, qaMap.state as WorkflowRun.State))
         return result
     }
 
