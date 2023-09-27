@@ -34,8 +34,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 @Slf4j
 class WgbsWorkflow extends PanCancerWorkflow {
 
-    // flaky behaviour when a final field has the same key like the super class
-    static final String WGBS_WORKFLOW = "WGBS alignment"
+    public static final String WORKFLOW = "WGBS alignment"
 
     @Override
     List<String> getJobBeanNames() {

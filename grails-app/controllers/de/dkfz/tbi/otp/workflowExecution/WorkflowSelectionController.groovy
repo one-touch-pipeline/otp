@@ -51,7 +51,7 @@ class WorkflowSelectionController implements CheckAndCall {
             updateMergingCriteriaSPG: "POST",
     ]
 
-    static final Set<String> FASTQC_WORKFLOWS = [
+    private static final Set<String> FASTQC_WORKFLOWS = [
             BashFastQcWorkflow.WORKFLOW,
             WesFastQcWorkflow.WORKFLOW,
     ]

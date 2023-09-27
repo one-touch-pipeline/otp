@@ -35,7 +35,7 @@ class WorkflowRunOverviewController {
             index: "GET",
     ]
 
-    static final Map<String, List<WorkflowRun.State>> STATES = [
+    private static final Map<String, List<WorkflowRun.State>> STATES = [
             ("Input required"): [
                     WorkflowRun.State.WAITING_FOR_USER,
                     WorkflowRun.State.FAILED,

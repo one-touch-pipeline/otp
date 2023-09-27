@@ -63,7 +63,7 @@ class FastqcLinkJobSpec extends Specification implements DataTest, FastqcWorkflo
 
         FastqcLinkJob job = new FastqcLinkJob()
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            _ * getOutputArtefacts(workflowStep, FastqcFragmentJob.OUTPUT_ROLE) >> [file1, file2]
+            _ * getOutputArtefacts(workflowStep, FastqcLinkJob.de_dkfz_tbi_otp_workflow_fastqc_FastqcShared__OUTPUT_ROLE) >> [file1, file2]
             0 * _
         }
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
@@ -107,7 +107,8 @@ class FastqcLinkJobSpec extends Specification implements DataTest, FastqcWorkflo
 
         FastqcLinkJob job = new FastqcLinkJob()
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            _ * getOutputArtefacts(workflowStep, FastqcFragmentJob.OUTPUT_ROLE) >> [file1]
+            _ * getOutputArtefacts(workflowStep,
+                    FastqcLinkJob.de_dkfz_tbi_otp_workflow_fastqc_FastqcShared__OUTPUT_ROLE) >> [file1]
             0 * _
         }
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {

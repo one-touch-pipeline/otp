@@ -39,9 +39,9 @@ import java.nio.file.Path
 @Transactional
 class JobStatusLoggingFileService extends AbstractLogDirectoryService {
 
-    final static String CHECKPOINT_LOG_DIR = 'cluster-checkpoint-log'
+    private final static String CHECKPOINT_LOG_DIR = 'cluster-checkpoint-log'
 
-    final static String LOGFILE_EXTENSION = '.log'
+    private final static String LOGFILE_EXTENSION = '.log'
 
     ClusterJobManagerFactoryService clusterJobManagerFactoryService
 

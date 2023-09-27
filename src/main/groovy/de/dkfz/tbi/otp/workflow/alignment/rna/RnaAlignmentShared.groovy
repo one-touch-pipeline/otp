@@ -27,7 +27,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 trait RnaAlignmentShared extends AlignmentWorkflowShared {
 
-    static final String WORKFLOW = RnaAlignmentWorkflow.WORKFLOW
+    private static final String WORKFLOW = RnaAlignmentWorkflow.WORKFLOW
 
     @Override
     RnaRoddyBamFile getRoddyBamFile(WorkflowStep workflowStep) {

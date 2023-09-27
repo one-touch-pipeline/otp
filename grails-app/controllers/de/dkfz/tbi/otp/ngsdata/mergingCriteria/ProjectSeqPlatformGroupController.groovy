@@ -70,7 +70,7 @@ class ProjectSeqPlatformGroupController {
         List<SeqPlatform> allUsedSpecificSeqPlatforms = seqPlatformGroupsPerProjectAndSeqType*.seqPlatforms?.flatten() as List<SeqPlatform>
         List<SeqPlatform> allSeqPlatformsWithoutGroup = SeqPlatform.all.sort { it.toString() } - allUsedSpecificSeqPlatforms
         List<SeqType> availableSeqTypes = SeqTypeService.allAlignableSeqTypes
-        boolean noLibPrepKit = cmd.seqType in workflowService.getSupportedSeqTypes(WgbsWorkflow.WGBS_WORKFLOW)
+        boolean noLibPrepKit = cmd.seqType in workflowService.getSupportedSeqTypes(WgbsWorkflow.WORKFLOW)
 
         return [
                 mergingCriteria                      : mergingCriteria,

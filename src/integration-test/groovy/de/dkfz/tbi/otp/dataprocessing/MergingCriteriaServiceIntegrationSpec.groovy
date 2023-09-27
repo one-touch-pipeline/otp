@@ -41,7 +41,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
 
     void setupData() {
         createUserAndRoles()
-        createWorkflow(name: WgbsWorkflow.WGBS_WORKFLOW)
+        createWorkflow(name: WgbsWorkflow.WORKFLOW)
     }
 
     void "test findMergingCriteria, no MergingCriteria exists"() {

@@ -33,8 +33,8 @@ import de.dkfz.tbi.otp.workflowExecution.*
 @Slf4j
 class DataInstallationWorkflow implements OtpWorkflow {
 
-    static final String WORKFLOW = "FASTQ installation"
-    static final String OUTPUT_FASTQ = "FASTQ"
+    public static final String WORKFLOW = "FASTQ installation"
+    public static final String OUTPUT_FASTQ = "FASTQ"
 
     @Override
     List<String> getJobBeanNames() {

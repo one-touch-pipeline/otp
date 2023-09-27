@@ -67,8 +67,8 @@ class AllAlignmentsCheckerIntegrationSpec extends Specification implements Workf
 
         createWorkflow(name: PanCancerWorkflow.WORKFLOW, supportedSeqTypes: [DomainFactory.createWholeGenomeSeqType(), DomainFactory.createExomeSeqType(),
                                                                              DomainFactory.createChipSeqType(),] as Set)
-        createWorkflow(name: WgbsWorkflow.WGBS_WORKFLOW, supportedSeqTypes: [DomainFactory.createWholeGenomeBisulfiteSeqType(),
-                                                                             DomainFactory.createWholeGenomeBisulfiteTagmentationSeqType(),] as Set)
+        createWorkflow(name: WgbsWorkflow.WORKFLOW, supportedSeqTypes: [DomainFactory.createWholeGenomeBisulfiteSeqType(),
+                                                                        DomainFactory.createWholeGenomeBisulfiteTagmentationSeqType(),] as Set)
 
         RnaRoddyBamFile rnaRoddyBamFile = createBamFile([
                 fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,

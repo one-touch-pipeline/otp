@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
 trait WgbsAlignmentWorkflowDomainFactory extends WorkflowSystemDomainFactory {
 
     Workflow findOrCreateWgbsAlignmenWorkflow() {
-        return findOrCreateWorkflow(WgbsWorkflow.WGBS_WORKFLOW, [beanName: WgbsWorkflow.simpleName.uncapitalize()])
+        return findOrCreateWorkflow(WgbsWorkflow.WORKFLOW, [beanName: WgbsWorkflow.simpleName.uncapitalize()])
     }
 
     WorkflowVersion createWgbsAlignmenWorkflowVersion(String version = "1.2.73-204") {

@@ -48,7 +48,7 @@ import de.dkfz.tbi.otp.workflowExecution.cluster.logs.JobStatusLoggingFileServic
 @Transactional
 class ClusterJobHandlingService {
 
-    static final String NESTED_FAIL_MESSAGE_FOR_KILL = "Failed to kill associated jobs following an error submitting the job"
+    private static final String NESTED_FAIL_MESSAGE_FOR_KILL = "Failed to kill associated jobs following an error submitting the job"
 
     ConfigService configService
 

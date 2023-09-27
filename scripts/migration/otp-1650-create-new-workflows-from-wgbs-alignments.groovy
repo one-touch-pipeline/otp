@@ -68,7 +68,7 @@ String processPriority = 'prod-prio3'
 
 assert batchSize > 1
 
-@Field final String WORKFLOW_NAME = WgbsWorkflow.WGBS_WORKFLOW
+@Field final String WORKFLOW_NAME = WgbsWorkflow.WORKFLOW
 
 @Field final RoddyBamFileService roddyBamFileService = ctx.roddyBamFileService
 @Field final WorkflowService workflowService = ctx.workflowService

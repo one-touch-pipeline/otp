@@ -39,7 +39,7 @@ import de.dkfz.tbi.otp.config.ConfigService
  */
 class WeskitAuthService {
 
-    static final String CLIENT_REGISTRATION_ID = "wes"
+    public static final String CLIENT_REGISTRATION_ID = "wes"
 
     ConfigService configService
 

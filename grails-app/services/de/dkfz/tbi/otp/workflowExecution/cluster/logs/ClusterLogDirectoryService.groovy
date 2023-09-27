@@ -37,7 +37,7 @@ import java.nio.file.Path
 @Transactional
 class ClusterLogDirectoryService extends AbstractLogDirectoryService {
 
-    final static String CLUSTER_LOG_BASE_DIR = 'cluster-log'
+    private final static String CLUSTER_LOG_BASE_DIR = 'cluster-log'
 
     @Override
     protected Path createAndGetLogDirectory(Date date) {

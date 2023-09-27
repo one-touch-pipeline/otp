@@ -26,7 +26,7 @@ import io.swagger.client.wes.model.State
 
 class RunStatusService {
 
-    static final List<State> END_STATES = [
+    private static final List<State> END_STATES = [
             State.COMPLETE,
             State.EXECUTOR_ERROR,
             State.SYSTEM_ERROR,

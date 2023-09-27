@@ -31,8 +31,8 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 trait DataInstallationShared extends WorkflowShared {
 
-    static final String WORKFLOW = DataInstallationWorkflow.WORKFLOW
-    static final String OUTPUT_ROLE = DataInstallationWorkflow.OUTPUT_FASTQ
+    private static final String WORKFLOW = DataInstallationWorkflow.WORKFLOW
+    public static final String OUTPUT_ROLE = DataInstallationWorkflow.OUTPUT_FASTQ
 
     @Autowired
     LsdfFilesService lsdfFilesService

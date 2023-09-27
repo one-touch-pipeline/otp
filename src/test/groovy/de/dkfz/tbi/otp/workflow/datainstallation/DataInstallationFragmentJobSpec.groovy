@@ -57,7 +57,8 @@ class DataInstallationFragmentJobSpec extends Specification implements DataTest,
 
         DataInstallationFragmentJob job = new DataInstallationFragmentJob()
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            _ * getOutputArtefact(workflowStep, DataInstallationFragmentJob.OUTPUT_ROLE) >> seqTrack
+            _ * getOutputArtefact(workflowStep,
+                    DataInstallationFragmentJob.de_dkfz_tbi_otp_workflow_datainstallation_DataInstallationShared__OUTPUT_ROLE) >> seqTrack
             0 * _
         }
 

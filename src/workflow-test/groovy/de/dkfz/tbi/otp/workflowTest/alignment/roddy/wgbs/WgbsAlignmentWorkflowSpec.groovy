@@ -49,7 +49,7 @@ class WgbsAlignmentWorkflowSpec extends AbstractRoddyAlignmentWorkflowSpec imple
 
     @Override
     String getWorkflowName() {
-        return WgbsWorkflow.WGBS_WORKFLOW
+        return WgbsWorkflow.WORKFLOW
     }
 
     @Override

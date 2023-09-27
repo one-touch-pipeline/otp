@@ -254,7 +254,7 @@ class ReferenceGenomeService {
 
             new ExternalWorkflowConfigSelector(
                     name: confName,
-                    workflows: Workflow.findAllByNameInList([PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WGBS_WORKFLOW]) as Set,
+                    workflows: Workflow.findAllByNameInList([PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WORKFLOW]) as Set,
                     workflowVersions: [] as Set,
                     projects: [] as Set,
                     seqTypes: [] as Set,

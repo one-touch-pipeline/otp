@@ -103,7 +103,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         DomainFactory.createIndelPipelineLazy()
         DomainFactory.createSophiaPipelineLazy()
         DomainFactory.createAceseqPipelineLazy()
-        createWorkflow(name: WgbsWorkflow.WGBS_WORKFLOW)
+        createWorkflow(name: WgbsWorkflow.WORKFLOW)
 
         int counter = 0
         projectService.remoteShellHelper = Stub(RemoteShellHelper) {

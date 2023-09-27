@@ -36,7 +36,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 @Slf4j
 class RnaAlignmentWorkflow extends AlignmentWorkflow {
 
-    static final String WORKFLOW = "RNA alignment"
+    public static final String WORKFLOW = "RNA alignment"
 
     final String userDocumentation = null
 

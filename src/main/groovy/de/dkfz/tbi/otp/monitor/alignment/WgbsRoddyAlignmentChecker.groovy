@@ -40,6 +40,6 @@ class WgbsRoddyAlignmentChecker extends AbstractRoddyAlignmentChecker {
     @CompileDynamic
     @Override
     Workflow getWorkflow() {
-        return CollectionUtils.exactlyOneElement(Workflow.findAllByName(WgbsWorkflow.WGBS_WORKFLOW))
+        return CollectionUtils.exactlyOneElement(Workflow.findAllByName(WgbsWorkflow.WORKFLOW))
     }
 }

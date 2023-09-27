@@ -35,7 +35,7 @@ import de.dkfz.tbi.otp.workflow.shared.WorkflowJobIsNotRestartableException
 @Transactional
 class JobService {
 
-    static final List<WorkflowRun.State> WORKFLOW_RUN_STATES_ALLOW_NEXT_JOB = [
+    private static final List<WorkflowRun.State> WORKFLOW_RUN_STATES_ALLOW_NEXT_JOB = [
             WorkflowRun.State.PENDING,
             WorkflowRun.State.RUNNING_WES,
             WorkflowRun.State.RUNNING_OTP,

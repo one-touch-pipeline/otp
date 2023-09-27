@@ -33,9 +33,9 @@ import de.dkfz.tbi.otp.workflowExecution.*
 @Slf4j
 class BashFastQcWorkflow implements OtpWorkflow {
 
-    static final String WORKFLOW = "Bash Fastqc"
-    static final String INPUT_FASTQ = "FASTQ"
-    static final String OUTPUT_FASTQC = "FASTQC"
+    public static final String WORKFLOW = "Bash Fastqc"
+    public static final String INPUT_FASTQ = "FASTQ"
+    public static final String OUTPUT_FASTQC = "FASTQC"
 
     @Override
     List<String> getJobBeanNames() {

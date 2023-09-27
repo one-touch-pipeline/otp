@@ -38,7 +38,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 @Slf4j
 class PanCancerWorkflow extends AlignmentWorkflow {
 
-    static final String WORKFLOW = "PanCancer alignment"
+    public static final String WORKFLOW = "PanCancer alignment"
 
     @Override
     List<String> getJobBeanNames() {

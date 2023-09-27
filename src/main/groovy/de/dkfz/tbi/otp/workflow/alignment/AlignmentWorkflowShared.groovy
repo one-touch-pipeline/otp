@@ -33,8 +33,7 @@ import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 trait AlignmentWorkflowShared implements WorkflowShared {
-    @SuppressWarnings("PropertyName")
-    static List<String> WORKFLOWS = [PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WGBS_WORKFLOW, RnaAlignmentWorkflow.WORKFLOW]
+    private static final List<String> WORKFLOWS = [PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WORKFLOW, RnaAlignmentWorkflow.WORKFLOW]
 
     @Autowired
     ConcreteArtefactService concreteArtefactService

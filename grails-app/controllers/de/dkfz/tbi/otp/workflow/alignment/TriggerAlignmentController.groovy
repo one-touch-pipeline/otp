@@ -31,9 +31,9 @@ import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
 class TriggerAlignmentController {
 
-    static final String PARAM_KEY_SEQ_TRACKS = 'seqTracks[]'
-    static final String PARAM_KEY_IGNORE_SEQ_GROUP = 'ignoreSeqPlatformGroup'
-    static final String PARAM_KEY_WITHDRAW_BAMFILES = 'withdrawBamFiles'
+    private static final String PARAM_KEY_SEQ_TRACKS = 'seqTracks[]'
+    private static final String PARAM_KEY_IGNORE_SEQ_GROUP = 'ignoreSeqPlatformGroup'
+    private static final String PARAM_KEY_WITHDRAW_BAMFILES = 'withdrawBamFiles'
 
     TriggerAlignmentService triggerAlignmentService
     SearchSeqTrackService searchSeqTrackService
@@ -45,7 +45,7 @@ class TriggerAlignmentController {
             triggerAlignment: "POST",
     ]
 
-    final static Map EMPTY_WARNINGS = [
+    private final static Map EMPTY_WARNINGS = [
             missingConfigs        : [].asImmutable(),
             seqPlatformGroups     : [].asImmutable(),
             libraryPreparationKits: [].asImmutable(),

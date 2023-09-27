@@ -34,9 +34,9 @@ import de.dkfz.tbi.otp.workflowExecution.*
 @Slf4j
 class WesFastQcWorkflow implements OtpWorkflow {
 
-    static final String WORKFLOW = "WES FastQC"
-    static final String INPUT_FASTQ = "FASTQ"
-    static final String OUTPUT_FASTQC = "FASTQC"
+    public static final String WORKFLOW = "WES FastQC"
+    public static final String INPUT_FASTQ = "FASTQ"
+    public static final String OUTPUT_FASTQC = "FASTQC"
 
     @Override
     List<String> getJobBeanNames() {

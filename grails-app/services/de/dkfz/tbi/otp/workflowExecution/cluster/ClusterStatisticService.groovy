@@ -42,7 +42,7 @@ import de.dkfz.tbi.otp.workflowExecution.cluster.logs.ClusterLogQueryResultFileS
 @Transactional
 class ClusterStatisticService {
 
-    static final int WAITING_TIME_FOR_SECOND_TRY_IN_MILLISECONDS = (Environment.current == Environment.TEST) ? 0 : 10000
+    private static final int WAITING_TIME_FOR_SECOND_TRY_IN_MILLISECONDS = (Environment.current == Environment.TEST) ? 0 : 10000
 
     ClusterJobManagerFactoryService clusterJobManagerFactoryService
 

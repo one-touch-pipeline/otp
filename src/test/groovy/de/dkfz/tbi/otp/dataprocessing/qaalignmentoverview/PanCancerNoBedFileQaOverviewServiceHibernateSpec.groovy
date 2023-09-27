@@ -101,7 +101,7 @@ class PanCancerNoBedFileQaOverviewServiceHibernateSpec extends HibernateSpec imp
 
         service.workflowService = Mock(WorkflowService) {
             1 * getSupportedSeqTypes(PanCancerWorkflow.WORKFLOW) >> seqTypesOfPanCanWorkflow
-            1 * getSupportedSeqTypes(WgbsWorkflow.WGBS_WORKFLOW) >> seqTypeForWgbsAlignment
+            1 * getSupportedSeqTypes(WgbsWorkflow.WORKFLOW) >> seqTypeForWgbsAlignment
             0 * _
         }
 

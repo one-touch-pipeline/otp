@@ -39,7 +39,7 @@ class WgbsRoddyAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerI
 
     @Override
     String getWorkflowName() {
-        return WgbsWorkflow.WGBS_WORKFLOW
+        return WgbsWorkflow.WORKFLOW
     }
 
     @Override

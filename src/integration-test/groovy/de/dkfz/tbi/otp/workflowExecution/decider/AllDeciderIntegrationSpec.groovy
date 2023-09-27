@@ -41,7 +41,7 @@ class AllDeciderIntegrationSpec extends Specification implements ServiceUnitTest
         createBashFastqcWorkflowVersion()
         createWesFastqcWorkflowVersion()
         createWorkflow(name: PanCancerWorkflow.WORKFLOW)
-        createWorkflow(name: WgbsWorkflow.WGBS_WORKFLOW)
+        createWorkflow(name: WgbsWorkflow.WORKFLOW)
         WorkflowStep workflowStep = createWorkflowStep()
         WorkflowArtefact wa1 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun,
                 artefactType: ArtefactType.RUN_YAPSA)

@@ -320,7 +320,7 @@ class CalculatePriorityDTO {
      * <p>
      * @see: <a href="https://one-touch-pipeline.myjetbrains.com/youtrack/issue/otp-913">otp-913</a>
      */
-    static final Map<String, Integer> PROPS_PRIORITY_MAP = [
+    public static final Map<String, Integer> PROPS_PRIORITY_MAP = [
             selectorType          : 0b0001000000000000,
             // reserved bit
             // reserved bit

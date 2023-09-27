@@ -45,9 +45,9 @@ class WeskitAccessService {
     /**
      * Timeout for the weskit call.
      */
-    static final Duration TIMEOUT = Duration.ofMinutes(30)
+    private static final Duration TIMEOUT = Duration.ofMinutes(30)
 
-    static final int JSON_INDENT_FACTOR = 4
+    private static final int JSON_INDENT_FACTOR = 4
 
     ConfigService configService
 

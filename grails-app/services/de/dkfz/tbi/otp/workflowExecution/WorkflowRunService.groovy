@@ -44,9 +44,9 @@ import java.time.LocalDateTime
 @Transactional
 class WorkflowRunService {
 
-    static final int PESSIMISTIC_WRITE_TIME_OUT = 10000
+    public static final int PESSIMISTIC_WRITE_TIME_OUT = 10000
 
-    final static List<WorkflowRun.State> STATES_COUNTING_AS_RUNNING = [
+    public final static List<WorkflowRun.State> STATES_COUNTING_AS_RUNNING = [
             WorkflowRun.State.RUNNING_OTP,
             WorkflowRun.State.RUNNING_WES,
     ].asImmutable()

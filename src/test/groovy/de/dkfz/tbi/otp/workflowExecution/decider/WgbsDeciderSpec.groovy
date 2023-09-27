@@ -40,7 +40,7 @@ class WgbsDeciderSpec extends AbstractAlignmentDeciderSpec {
 
     void "getWorkflowName"() {
         expect:
-        decider.workflowName == WgbsWorkflow.WGBS_WORKFLOW
+        decider.workflowName == WgbsWorkflow.WORKFLOW
     }
 
     void "getInputFastqRole"() {
@@ -61,10 +61,10 @@ class WgbsDeciderSpec extends AbstractAlignmentDeciderSpec {
     void "getWorkflow"() {
         given:
         decider.workflowService = new WorkflowService()
-        createWorkflow(name: WgbsWorkflow.WGBS_WORKFLOW)
+        createWorkflow(name: WgbsWorkflow.WORKFLOW)
 
         expect:
-        decider.workflow.name == WgbsWorkflow.WGBS_WORKFLOW
+        decider.workflow.name == WgbsWorkflow.WORKFLOW
     }
 
     void "getSupportedInputArtefactTypes"() {

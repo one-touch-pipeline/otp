@@ -41,7 +41,7 @@ class RnaAlignmentSharedSpec extends Specification implements WorkflowSystemDoma
 
     private WorkflowStep workflowStep
     private RnaAlignmentShared rnaAlignmentSharedInstance
-    private final List<String> alignmentWorkflowNames = [PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WGBS_WORKFLOW, RnaAlignmentWorkflow.WORKFLOW]
+    private final List<String> alignmentWorkflowNames = [PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WORKFLOW, RnaAlignmentWorkflow.WORKFLOW]
 
     @Override
     Class[] getDomainClassesToMock() {

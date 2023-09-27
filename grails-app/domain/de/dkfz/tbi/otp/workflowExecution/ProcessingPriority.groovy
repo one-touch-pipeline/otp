@@ -32,19 +32,19 @@ class ProcessingPriority implements Entity {
 
     // Constant needed for start jobs/tests of old workflow system
     @Deprecated
-    static final int SUPREMUM = Integer.MAX_VALUE
+    public static final int SUPREMUM = Integer.MAX_VALUE
 
     // Constant needed for start jobs/tests of old workflow system
     @Deprecated
-    static final int MINIMUM = Integer.MIN_VALUE
+    public static final int MINIMUM = Integer.MIN_VALUE
 
     // Constant needed for start jobs/tests of old workflow system
     @Deprecated
-    static final int FAST_TRACK = 1000
+    public static final int FAST_TRACK = 1000
 
     // Constant needed for start jobs/tests of old workflow system
     @Deprecated
-    static final int NORMAL = 0
+    public static final int NORMAL = 0
 
     /**
      * A name for the user

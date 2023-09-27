@@ -65,7 +65,7 @@ class PanCanAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerInte
 
     @Override
     String getWorkflowNameForCrosschecking() {
-        return WgbsWorkflow.WGBS_WORKFLOW
+        return WgbsWorkflow.WORKFLOW
     }
 
     void "workflowName, should return PanCanWorkflow"() {

@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 trait PanCancerShared extends AlignmentWorkflowShared {
 
-    private static final List<String> WORKFLOWS = [PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WGBS_WORKFLOW]
+    private static final List<String> WORKFLOWS = [PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WORKFLOW]
 
     @Autowired
     LsdfFilesService lsdfFilesService

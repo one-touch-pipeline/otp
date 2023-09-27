@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.workflowExecution.Workflow
  * SOFTWARE.
  */
 
-List<Workflow> workflows = Workflow.findAllByNameInList([PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WGBS_WORKFLOW])
+List<Workflow> workflows = Workflow.findAllByNameInList([PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WORKFLOW])
 
 ReferenceGenome.withTransaction {
     Map defaultFileName = [:]

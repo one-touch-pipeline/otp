@@ -42,7 +42,7 @@ class PanCancerSharedSpec extends Specification implements WorkflowSystemDomainF
 
     private WorkflowStep workflowStep
     private PanCancerShared panCancerSharedInstance
-    private final List<String> alignmentWorkflowNames = [PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WGBS_WORKFLOW, RnaAlignmentWorkflow.WORKFLOW]
+    private final List<String> alignmentWorkflowNames = [PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WORKFLOW, RnaAlignmentWorkflow.WORKFLOW]
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -91,7 +91,7 @@ class PanCancerSharedSpec extends Specification implements WorkflowSystemDomainF
         panCancerSharedInstance.getFastqcProcessedFiles(workflowStep)
 
         then:
-        1 * panCancerSharedInstance.checkWorkflowName(workflowStep, [PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WGBS_WORKFLOW]) >> _
+        1 * panCancerSharedInstance.checkWorkflowName(workflowStep, [PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WORKFLOW]) >> _
 
         then:
         1 * panCancerSharedInstance.concreteArtefactService.getInputArtefacts(workflowStep, PanCancerWorkflow.INPUT_FASTQC) >> _
@@ -106,7 +106,7 @@ class PanCancerSharedSpec extends Specification implements WorkflowSystemDomainF
         panCancerSharedInstance.getBaseRoddyBamFile(workflowStep)
 
         then:
-        1 * panCancerSharedInstance.checkWorkflowName(workflowStep, [PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WGBS_WORKFLOW]) >> _
+        1 * panCancerSharedInstance.checkWorkflowName(workflowStep, [PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WORKFLOW]) >> _
 
         then:
         1 * panCancerSharedInstance.concreteArtefactService.getInputArtefact(workflowStep, PanCancerWorkflow.INPUT_BASE_BAM_FILE, false) >> bamFile

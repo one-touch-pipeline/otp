@@ -32,13 +32,13 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 trait FastqcShared extends WorkflowShared {
 
-    static final List<String> ALLOWED_WORKFLOWS = [
+    private static final List<String> ALLOWED_WORKFLOWS = [
             BashFastQcWorkflow.WORKFLOW,
             WesFastQcWorkflow.WORKFLOW,
     ]
 
-    static final String INPUT_ROLE = BashFastQcWorkflow.INPUT_FASTQ
-    static final String OUTPUT_ROLE = BashFastQcWorkflow.OUTPUT_FASTQC
+    public static final String INPUT_ROLE = BashFastQcWorkflow.INPUT_FASTQ
+    public static final String OUTPUT_ROLE = BashFastQcWorkflow.OUTPUT_FASTQC
 
     @Autowired
     LsdfFilesService lsdfFilesService

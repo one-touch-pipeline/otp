@@ -39,7 +39,7 @@ class WgbsDecider extends AbstractAlignmentDecider {
 
     @Override
     final String getWorkflowName() {
-        return WgbsWorkflow.WGBS_WORKFLOW
+        return WgbsWorkflow.WORKFLOW
     }
 
     @Override

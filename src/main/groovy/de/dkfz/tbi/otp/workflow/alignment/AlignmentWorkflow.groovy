@@ -25,10 +25,10 @@ import de.dkfz.tbi.otp.workflowExecution.OtpWorkflow
 
 abstract class AlignmentWorkflow implements OtpWorkflow {
 
-    static final String INPUT_FASTQ = "FASTQ"
-    static final String INPUT_FASTQC = "FASTQC"
-    static final String INPUT_BASE_BAM_FILE = "BASE_BAM_FILE"
-    static final String OUTPUT_BAM = "BAM"
+    public static final String INPUT_FASTQ = "FASTQ"
+    public static final String INPUT_FASTQC = "FASTQC"
+    public static final String INPUT_BASE_BAM_FILE = "BASE_BAM_FILE"
+    public static final String OUTPUT_BAM = "BAM"
 
     @Override
     boolean isAlignment() {

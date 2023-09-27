@@ -37,11 +37,11 @@ import de.dkfz.tbi.otp.workflowExecution.decider.fastqc.FastqcArtefactData
 @Transactional
 class FastqcArtefactService {
 
-    static final int INDEX_0 = 0
-    static final int INDEX_1 = 1
-    static final int INDEX_2 = 2
+    private static final int INDEX_0 = 0
+    private static final int INDEX_1 = 1
+    private static final int INDEX_2 = 2
 
-    final static String HQL_FIND_SEQ_TRACKS_FOR_WORKFLOW_ARTEFACTS = """
+    private final static String HQL_FIND_SEQ_TRACKS_FOR_WORKFLOW_ARTEFACTS = """
         select
             wa,
             st,
@@ -74,7 +74,7 @@ class FastqcArtefactService {
             )
         """
 
-    final static String HQL_FIND_RELATED_FAST_QC_FOR_SEQ_TRACKS = """
+    private final static String HQL_FIND_RELATED_FAST_QC_FOR_SEQ_TRACKS = """
         select distinct
             wa,
             fastqc,
@@ -95,7 +95,7 @@ class FastqcArtefactService {
             and wa.withdrawnDate is null
         """
 
-    final static String HQL_WORKFLOW_VERSION_SELECTOR = """
+    private final static String HQL_WORKFLOW_VERSION_SELECTOR = """
         select distinct
             selector
         from
@@ -109,7 +109,7 @@ class FastqcArtefactService {
             and selector.deprecationDate is null
         """
 
-    final static String HQL_FETCH_DATA_FILES = """
+    private final static String HQL_FETCH_DATA_FILES = """
         select distinct
             df,
             st

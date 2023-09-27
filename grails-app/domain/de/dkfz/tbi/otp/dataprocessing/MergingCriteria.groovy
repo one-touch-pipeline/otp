@@ -52,7 +52,7 @@ class MergingCriteria implements Entity {
                 return "exome"
             }
 
-            if (obj.seqType in CollectionUtils.exactlyOneElement(Workflow.findAllByName(WgbsWorkflow.WGBS_WORKFLOW)).supportedSeqTypes && val) {
+            if (obj.seqType in CollectionUtils.exactlyOneElement(Workflow.findAllByName(WgbsWorkflow.WORKFLOW)).supportedSeqTypes && val) {
                 return "wgbs"
             }
         }

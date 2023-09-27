@@ -37,7 +37,7 @@ class RoddyService implements WorkflowShared {
 
     RoddyBamFileService roddyBamFileService
 
-    static final String OUTPUT_BAM = "BAM"
+    private static final String OUTPUT_BAM = "BAM"
 
     List<String> getReadGroupsInBam(WorkflowStep workflowStep) {
         final RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)

@@ -734,8 +734,8 @@ class ExampleData {
             ensureReferenceGenomeConfigured(PanCancerWorkflow.WORKFLOW, it)
         }
         wgbsAlignmentSeqTypes.each {
-            ensureWorkflowConfigured(WgbsWorkflow.WGBS_WORKFLOW, it)
-            ensureReferenceGenomeConfigured(WgbsWorkflow.WGBS_WORKFLOW, it)
+            ensureWorkflowConfigured(WgbsWorkflow.WORKFLOW, it)
+            ensureReferenceGenomeConfigured(WgbsWorkflow.WORKFLOW, it)
         }
         rnaSeqTypes.each {
             ensureWorkflowConfigured(RnaAlignmentWorkflow.WORKFLOW, it)

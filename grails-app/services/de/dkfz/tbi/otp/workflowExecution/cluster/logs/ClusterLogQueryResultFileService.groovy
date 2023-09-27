@@ -35,7 +35,7 @@ import java.nio.file.Path
 @Transactional
 class ClusterLogQueryResultFileService extends AbstractLogDirectoryService {
 
-    static final String CLUSTER_JOB_STATES_LOG_DIRECTORY = "cluster-jobs-state"
+    private static final String CLUSTER_JOB_STATES_LOG_DIRECTORY = "cluster-jobs-state"
 
     @Override
     protected Path createAndGetLogDirectory(Date date) {

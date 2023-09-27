@@ -383,7 +383,7 @@ trait DomainFactoryCore implements DomainFactoryHelper {
     }
 
     MergingCriteria createMergingCriteria(Map properties = [:]) {
-        WorkflowSystemDomainFactoryInstance.INSTANCE.findOrCreateWorkflow(WgbsWorkflow.WGBS_WORKFLOW)
+        WorkflowSystemDomainFactoryInstance.INSTANCE.findOrCreateWorkflow(WgbsWorkflow.WORKFLOW)
         return createDomainObject(MergingCriteria, [
                 project: { createProject() },
                 seqType: { createSeqType() },
@@ -391,7 +391,7 @@ trait DomainFactoryCore implements DomainFactoryHelper {
     }
 
     MergingCriteria createMergingCriteriaLazy(Map properties) {
-        Workflow wgbsWorkflow = WorkflowSystemDomainFactoryInstance.INSTANCE.findOrCreateWorkflow(WgbsWorkflow.WGBS_WORKFLOW)
+        Workflow wgbsWorkflow = WorkflowSystemDomainFactoryInstance.INSTANCE.findOrCreateWorkflow(WgbsWorkflow.WORKFLOW)
         if ((properties.get("seqType") as SeqType) in wgbsWorkflow.supportedSeqTypes && !properties.hasProperty("useLibPrepKit")) {
             properties.put("useLibPrepKit", false)
         }

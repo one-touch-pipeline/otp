@@ -58,7 +58,7 @@ class FastqcFragmentJobSpec extends Specification implements DataTest, FastqcWor
 
         FastqcFragmentJob job = new FastqcFragmentJob()
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            _ * getInputArtefact(workflowStep, FastqcFragmentJob.INPUT_ROLE) >> seqTrack
+            _ * getInputArtefact(workflowStep, FastqcFragmentJob.de_dkfz_tbi_otp_workflow_fastqc_FastqcShared__INPUT_ROLE) >> seqTrack
             0 * _
         }
 

@@ -59,7 +59,7 @@ class PanCancerNoBedFileQaOverviewService extends AbstractRoddyQaOverviewService
         return (
                 workflowService.getSupportedSeqTypes(PanCancerWorkflow.WORKFLOW).findAll {
                     !it.needsBedFile
-                } + workflowService.getSupportedSeqTypes(WgbsWorkflow.WGBS_WORKFLOW)
+                } + workflowService.getSupportedSeqTypes(WgbsWorkflow.WORKFLOW)
         ) as List
     }
 

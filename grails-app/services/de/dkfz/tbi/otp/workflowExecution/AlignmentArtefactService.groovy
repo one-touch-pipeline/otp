@@ -37,18 +37,18 @@ import de.dkfz.tbi.otp.workflowExecution.decider.alignment.AlignmentWorkPackageG
 @Transactional
 class AlignmentArtefactService {
 
-    static final int INDEX_0 = 0
-    static final int INDEX_1 = 1
-    static final int INDEX_2 = 2
-    static final int INDEX_3 = 3
-    static final int INDEX_4 = 4
-    static final int INDEX_5 = 5
-    static final int INDEX_6 = 6
-    static final int INDEX_7 = 7
-    static final int INDEX_8 = 8
-    static final int INDEX_9 = 9
+    private static final int INDEX_0 = 0
+    private static final int INDEX_1 = 1
+    private static final int INDEX_2 = 2
+    private static final int INDEX_3 = 3
+    private static final int INDEX_4 = 4
+    private static final int INDEX_5 = 5
+    private static final int INDEX_6 = 6
+    private static final int INDEX_7 = 7
+    private static final int INDEX_8 = 8
+    private static final int INDEX_9 = 9
 
-    final static String HQL_FIND_SEQ_TRACKS_FOR_WORKFLOW_ARTEFACTS = """
+    private final static String HQL_FIND_SEQ_TRACKS_FOR_WORKFLOW_ARTEFACTS = """
         select
             wa,
             st,
@@ -90,7 +90,7 @@ class AlignmentArtefactService {
             )
         """
 
-    final static String HQL_FIND_FAST_QC_FOR_WORKFLOW_ARTEFACTS = """
+    private final static String HQL_FIND_FAST_QC_FOR_WORKFLOW_ARTEFACTS = """
         select
             wa,
             fastqc,
@@ -125,7 +125,7 @@ class AlignmentArtefactService {
             and df.fileWithdrawn = false
         """
 
-    final static String HQL_FIND_BAM_FILES_FOR_WORKFLOW_ARTEFACTS = """
+    private final static String HQL_FIND_BAM_FILES_FOR_WORKFLOW_ARTEFACTS = """
         select
             wa,
             bamFile,
@@ -158,7 +158,7 @@ class AlignmentArtefactService {
             and wa.withdrawnDate is null
         """
 
-    final static String HQL_FIND_RELATED_SEQ_TRACKS_FOR_SEQ_TRACKS = """
+    private final static String HQL_FIND_RELATED_SEQ_TRACKS_FOR_SEQ_TRACKS = """
         select distinct
             wa,
             st,
@@ -202,7 +202,7 @@ class AlignmentArtefactService {
             )
         """
 
-    final static String HQL_FIND_RELATED_FAST_QC_FOR_SEQ_TRACKS = """
+    private final static String HQL_FIND_RELATED_FAST_QC_FOR_SEQ_TRACKS = """
         select distinct
             wa,
             fastqc,
@@ -241,7 +241,7 @@ class AlignmentArtefactService {
             and wa.withdrawnDate is null
         """
 
-    final static String HQL_FIND_RELATED_BAM_FILES_FOR_SEQ_TRACKS = """
+    private final static String HQL_FIND_RELATED_BAM_FILES_FOR_SEQ_TRACKS = """
         select distinct
             wa,
             bamFile,
@@ -284,7 +284,7 @@ class AlignmentArtefactService {
             )
         """
 
-    final static String HQL_WORKFLOW_VERSION_SELECTOR = """
+    private final static String HQL_WORKFLOW_VERSION_SELECTOR = """
         select distinct
             selector
         from
@@ -298,7 +298,7 @@ class AlignmentArtefactService {
             and selector.deprecationDate is null
         """
 
-    final static String HQL_REFERENCE_GENOME = """
+    private final static String HQL_REFERENCE_GENOME = """
         select distinct
             selector
         from
@@ -314,7 +314,7 @@ class AlignmentArtefactService {
             and selector.workflow = :workflow
         """
 
-    final static String HQL_MERGING_CRITERIA = """
+    private final static String HQL_MERGING_CRITERIA = """
         select distinct
             mergingCriteria
         from
@@ -326,7 +326,7 @@ class AlignmentArtefactService {
             and mergingCriteria.seqType = st.seqType
         """
 
-    final static String HQL_SPECIFIC_SEQ_PLATFORM_GROUP = """
+    private final static String HQL_SPECIFIC_SEQ_PLATFORM_GROUP = """
         select distinct
             mergingCriteria.project,
             mergingCriteria.seqType,
@@ -344,7 +344,7 @@ class AlignmentArtefactService {
             and mergingCriteria.useSeqPlatformGroup = '${MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC}'
         """
 
-    final static String HQL_DEFAULT_SEQ_PLATFORM_GROUP = """
+    private final static String HQL_DEFAULT_SEQ_PLATFORM_GROUP = """
         select distinct
             seqPlatform,
             seqPlatformGroup
@@ -357,7 +357,7 @@ class AlignmentArtefactService {
             seqPlatformGroup.mergingCriteria is null
         """
 
-    final static String HQL_FETCH_WORK_PACKAGES = """
+    private final static String HQL_FETCH_WORK_PACKAGES = """
         select distinct
             sample,
             seqType,
@@ -375,7 +375,7 @@ class AlignmentArtefactService {
             and mergingWorkPackage.seqType = st.seqType
         """
 
-    final static String HQL_FETCH_DATA_FILES = """
+    private final static String HQL_FETCH_DATA_FILES = """
         select distinct
             df,
             st

@@ -200,7 +200,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                 header = ['alignment.quality.noSeqType']
                 break
             case workflowService.getSupportedSeqTypes(PanCancerWorkflow.WORKFLOW).findAll { !it.needsBedFile }:
-            case workflowService.getSupportedSeqTypes(WgbsWorkflow.WGBS_WORKFLOW):
+            case workflowService.getSupportedSeqTypes(WgbsWorkflow.WORKFLOW):
                 header = HEADER_PANCANCER_AND_WGBS
                 columnsSelectionKey = "PANCANCER_AND_WGBS"
                 break

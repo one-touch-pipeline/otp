@@ -76,7 +76,7 @@ class MergingCriteriaSpec extends Specification implements DataTest, WorkflowSys
     void "test that for WGBS data LibPrepKit must be false, should fail when it is true"() {
         given:
         SeqType seqType = DomainFactory.createWholeGenomeBisulfiteSeqType()
-        createWorkflow(name: WgbsWorkflow.WGBS_WORKFLOW, supportedSeqTypes: [seqType] as Set)
+        createWorkflow(name: WgbsWorkflow.WORKFLOW, supportedSeqTypes: [seqType] as Set)
         MergingCriteria mergingCriteria = DomainFactory.createMergingCriteria()
 
         when:
