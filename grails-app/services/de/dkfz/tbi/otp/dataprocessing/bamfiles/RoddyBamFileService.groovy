@@ -26,7 +26,6 @@ import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.filestore.FilestoreService
-import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 import java.nio.file.Path
@@ -58,102 +57,95 @@ class RoddyBamFileService extends AbstractAbstractBamFileService<RoddyBamFile> i
         return "${bamFile.bamFileName}.md5"
     }
 
-    // Example: ${OtpProperty#PATH_PROJECT_ROOT}/${project}/sequencing/whole_genome_sequencing/view-by-pid/somePid/control/paired/merged-alignment/.merging_3
-    @Override
-    Path getWorkDirectory(RoddyBamFile bamFile) {
-        return getBaseDirectory(bamFile).resolve(bamFile.workDirectoryName)
-    }
-
-    Path getWorkDirectory(RoddyBamFile bamFile, PathOption... options) {
-        return getBaseDirectory(bamFile, options).resolve(bamFile.workDirectoryName)
-    }
-
     @Override
     Path getBaseDirectory(RoddyBamFile bamFile) {
         return abstractBamFileService.getBaseDirectory(bamFile)
     }
 
-    Path getBaseDirectory(RoddyBamFile bamFile, PathOption... options) {
-        if (options.contains(PathOption.REAL_PATH) && bamFile.workflowArtefact.producedBy.workFolder) {
+    @Override
+    Path getWorkDirectory(RoddyBamFile bamFile) {
+        if (bamFile.workflowArtefact?.producedBy?.workFolder) {
             return filestoreService.getWorkFolderPath(bamFile.workflowArtefact.producedBy)
         }
-        return getBaseDirectory(bamFile)
+        // Example:
+        // ${OtpProperty#PATH_PROJECT_ROOT}/${project}/sequencing/whole_genome_sequencing/view-by-pid/somePid/control/paired/merged-alignment/.merging_3
+        return getBaseDirectory(bamFile).resolve(bamFile.workDirectoryName)
     }
 
-    Path getFinalQADirectory(RoddyBamFile bamFile, PathOption... options) {
-        return getBaseDirectory(bamFile, options).resolve(QUALITY_CONTROL_DIR)
+    Path getFinalQADirectory(RoddyBamFile bamFile) {
+        return getBaseDirectory(bamFile).resolve(QUALITY_CONTROL_DIR)
     }
 
-    Path getWorkQADirectory(RoddyBamFile bamFile, PathOption... options) {
-        return getWorkDirectory(bamFile, options).resolve(QUALITY_CONTROL_DIR)
+    Path getWorkQADirectory(RoddyBamFile bamFile) {
+        return getWorkDirectory(bamFile).resolve(QUALITY_CONTROL_DIR)
     }
 
-    Path getWorkMethylationDirectory(RoddyBamFile bamFile, PathOption... options) {
-        return getWorkDirectory(bamFile, options).resolve(METHYLATION_DIR)
+    Path getFinalMethylationDirectory(RoddyBamFile bamFile) {
+        return getBaseDirectory(bamFile).resolve(METHYLATION_DIR)
     }
 
-    Path getFinalMethylationDirectory(RoddyBamFile bamFile, PathOption... options) {
-        return getBaseDirectory(bamFile, options).resolve(METHYLATION_DIR)
+    Path getWorkMethylationDirectory(RoddyBamFile bamFile) {
+        return getWorkDirectory(bamFile).resolve(METHYLATION_DIR)
     }
 
-    Path getFinalMergedQADirectory(RoddyBamFile bamFile, PathOption... options) {
-        return getFinalQADirectory(bamFile, options).resolve(MERGED_DIR)
+    Path getFinalMergedQADirectory(RoddyBamFile bamFile) {
+        return getFinalQADirectory(bamFile).resolve(MERGED_DIR)
     }
 
-    Path getWorkMergedQADirectory(RoddyBamFile bamFile, PathOption... options) {
-        return getWorkQADirectory(bamFile, options).resolve(MERGED_DIR)
+    Path getWorkMergedQADirectory(RoddyBamFile bamFile) {
+        return getWorkQADirectory(bamFile).resolve(MERGED_DIR)
     }
 
-    Map<String, Path> getFinalLibraryQADirectories(RoddyBamFile bamFile, PathOption... options) {
-        return getLibraryDirectories(bamFile, getFinalQADirectory(bamFile, options))
+    Map<String, Path> getFinalLibraryQADirectories(RoddyBamFile bamFile) {
+        return getLibraryDirectories(bamFile, getFinalQADirectory(bamFile))
     }
 
-    Map<String, Path> getWorkLibraryQADirectories(RoddyBamFile bamFile, PathOption... options) {
-        return getLibraryDirectories(bamFile, getWorkQADirectory(bamFile, options))
+    Map<String, Path> getWorkLibraryQADirectories(RoddyBamFile bamFile) {
+        return getLibraryDirectories(bamFile, getWorkQADirectory(bamFile))
     }
 
-    Path getFinalMergedMethylationDirectory(RoddyBamFile bamFile, PathOption... options) {
-        return getFinalMethylationDirectory(bamFile, options).resolve(MERGED_DIR)
+    Path getFinalMergedMethylationDirectory(RoddyBamFile bamFile) {
+        return getFinalMethylationDirectory(bamFile).resolve(MERGED_DIR)
     }
 
-    Path getWorkMergedMethylationDirectory(RoddyBamFile bamFile, PathOption... options) {
-        return getWorkMethylationDirectory(bamFile, options).resolve(MERGED_DIR)
+    Path getWorkMergedMethylationDirectory(RoddyBamFile bamFile) {
+        return getWorkMethylationDirectory(bamFile).resolve(MERGED_DIR)
     }
 
-    Map<String, Path> getFinalLibraryMethylationDirectories(RoddyBamFile bamFile, PathOption... options) {
-        return getLibraryDirectories(bamFile, getFinalMethylationDirectory(bamFile, options))
+    Map<String, Path> getFinalLibraryMethylationDirectories(RoddyBamFile bamFile) {
+        return getLibraryDirectories(bamFile, getFinalMethylationDirectory(bamFile))
     }
 
-    Map<String, Path> getWorkLibraryMethylationDirectories(RoddyBamFile bamFile, PathOption... options) {
-        return getLibraryDirectories(bamFile, getWorkMethylationDirectory(bamFile, options))
+    Map<String, Path> getWorkLibraryMethylationDirectories(RoddyBamFile bamFile) {
+        return getLibraryDirectories(bamFile, getWorkMethylationDirectory(bamFile))
     }
 
-    Path getFinalMergedQAJsonFile(RoddyBamFile bamFile, PathOption... options) {
-        return getFinalMergedQADirectory(bamFile, options).resolve(QUALITY_CONTROL_JSON_FILE_NAME)
+    Path getFinalMergedQAJsonFile(RoddyBamFile bamFile) {
+        return getFinalMergedQADirectory(bamFile).resolve(QUALITY_CONTROL_JSON_FILE_NAME)
     }
 
-    Path getWorkMergedQAJsonFile(RoddyBamFile bamFile, PathOption... options) {
-        return getWorkMergedQADirectory(bamFile, options).resolve(QUALITY_CONTROL_JSON_FILE_NAME)
+    Path getWorkMergedQAJsonFile(RoddyBamFile bamFile) {
+        return getWorkMergedQADirectory(bamFile).resolve(QUALITY_CONTROL_JSON_FILE_NAME)
     }
 
-    Path getWorkMergedQATargetExtractJsonFile(RoddyBamFile bamFile, PathOption... options) {
-        return getWorkMergedQADirectory(bamFile, options).resolve(QUALITY_CONTROL_TARGET_EXTRACT_JSON_FILE_NAME)
+    Path getWorkMergedQATargetExtractJsonFile(RoddyBamFile bamFile) {
+        return getWorkMergedQADirectory(bamFile).resolve(QUALITY_CONTROL_TARGET_EXTRACT_JSON_FILE_NAME)
     }
 
-    Map<SeqTrack, Path> getFinalSingleLaneQADirectories(RoddyBamFile bamFile, PathOption... options) {
-        return getSingleLaneQADirectoriesHelper(bamFile, getFinalQADirectory(bamFile, options))
+    Map<SeqTrack, Path> getFinalSingleLaneQADirectories(RoddyBamFile bamFile) {
+        return getSingleLaneQADirectoriesHelper(bamFile, getFinalQADirectory(bamFile))
     }
 
-    Map<SeqTrack, Path> getWorkSingleLaneQADirectories(RoddyBamFile bamFile, PathOption... options) {
-        return getSingleLaneQADirectoriesHelper(bamFile, getWorkQADirectory(bamFile, options))
+    Map<SeqTrack, Path> getWorkSingleLaneQADirectories(RoddyBamFile bamFile) {
+        return getSingleLaneQADirectoriesHelper(bamFile, getWorkQADirectory(bamFile))
     }
 
-    Map<SeqTrack, Path> getFinalSingleLaneQAJsonFiles(RoddyBamFile bamFile, PathOption... options) {
-        return getSingleLaneQAJsonFiles(bamFile, 'Final', options)
+    Map<SeqTrack, Path> getFinalSingleLaneQAJsonFiles(RoddyBamFile bamFile) {
+        return getSingleLaneQAJsonFiles(bamFile, 'Final')
     }
 
-    Map<SeqTrack, Path> getWorkSingleLaneQAJsonFiles(RoddyBamFile bamFile, PathOption... options) {
-        return getSingleLaneQAJsonFiles(bamFile, 'Work', options)
+    Map<SeqTrack, Path> getWorkSingleLaneQAJsonFiles(RoddyBamFile bamFile) {
+        return getSingleLaneQAJsonFiles(bamFile, 'Work')
     }
 
     private Map<String, Path> getLibraryDirectories(RoddyBamFile bamFile, Path baseDirectory) {
@@ -162,22 +154,22 @@ class RoddyBamFileService extends AbstractAbstractBamFileService<RoddyBamFile> i
         }
     }
 
-    private Map<SeqTrack, Path> getSingleLaneQAJsonFiles(RoddyBamFile bamFile, String workOrFinal, PathOption... options) {
-        return "get${workOrFinal}SingleLaneQADirectories"(bamFile, options).collectEntries { SeqTrack seqTrack, Path directory ->
+    private Map<SeqTrack, Path> getSingleLaneQAJsonFiles(RoddyBamFile bamFile, String workOrFinal) {
+        return "get${workOrFinal}SingleLaneQADirectories"(bamFile).collectEntries { SeqTrack seqTrack, Path directory ->
             [(seqTrack): directory.resolve(QUALITY_CONTROL_JSON_FILE_NAME)]
         }
     }
 
-    Map<String, Path> getFinalLibraryQAJsonFiles(RoddyBamFile bamFile, PathOption... options) {
-        return getLibraryQAJsonFiles(bamFile, 'Final', options)
+    Map<String, Path> getFinalLibraryQAJsonFiles(RoddyBamFile bamFile) {
+        return getLibraryQAJsonFiles(bamFile, 'Final')
     }
 
-    Map<String, Path> getWorkLibraryQAJsonFiles(RoddyBamFile bamFile, PathOption... options) {
-        return getLibraryQAJsonFiles(bamFile, 'Work', options)
+    Map<String, Path> getWorkLibraryQAJsonFiles(RoddyBamFile bamFile) {
+        return getLibraryQAJsonFiles(bamFile, 'Work')
     }
 
-    private Map<String, Path> getLibraryQAJsonFiles(RoddyBamFile bamFile, String workOrFinal, PathOption... options) {
-        return "get${workOrFinal}LibraryQADirectories"(bamFile, options).collectEntries { String lib, Path directory ->
+    private Map<String, Path> getLibraryQAJsonFiles(RoddyBamFile bamFile, String workOrFinal) {
+        return "get${workOrFinal}LibraryQADirectories"(bamFile).collectEntries { String lib, Path directory ->
             [(lib): directory.resolve(QUALITY_CONTROL_JSON_FILE_NAME)]
         }
     }
@@ -192,59 +184,55 @@ class RoddyBamFileService extends AbstractAbstractBamFileService<RoddyBamFile> i
         return directoriesPerSeqTrack
     }
 
-    Path getFinalExecutionStoreDirectory(RoddyBamFile bamFile, PathOption... options) {
-        return getBaseDirectory(bamFile, options).resolve(RODDY_EXECUTION_STORE_DIR)
+    Path getFinalExecutionStoreDirectory(RoddyBamFile bamFile) {
+        return getBaseDirectory(bamFile).resolve(RODDY_EXECUTION_STORE_DIR)
     }
 
-    List<Path> getFinalExecutionDirectories(RoddyBamFile bamFile, PathOption... options) {
+    List<Path> getFinalExecutionDirectories(RoddyBamFile bamFile) {
         return bamFile.roddyExecutionDirectoryNames.collect {
-            getFinalExecutionStoreDirectory(bamFile, options).resolve(it)
+            getFinalExecutionStoreDirectory(bamFile).resolve(it)
         }
     }
 
-    Path getFinalBamFile(RoddyBamFile bamFile, PathOption... options) {
-        return getBaseDirectory(bamFile, options).resolve(bamFile.bamFileName)
+    Path getFinalBamFile(RoddyBamFile bamFile) {
+        return getBaseDirectory(bamFile).resolve(bamFile.bamFileName)
     }
 
-    Path getWorkBamFile(RoddyBamFile bamFile, PathOption... options) {
-        return getWorkDirectory(bamFile, options).resolve(bamFile.bamFileName)
+    Path getWorkBamFile(RoddyBamFile bamFile) {
+        return getWorkDirectory(bamFile).resolve(bamFile.bamFileName)
     }
 
-    Path getFinalBaiFile(RoddyBamFile bamFile, PathOption... options) {
-        return getBaseDirectory(bamFile, options).resolve(bamFile.baiFileName)
+    Path getFinalBaiFile(RoddyBamFile bamFile) {
+        return getBaseDirectory(bamFile).resolve(bamFile.baiFileName)
     }
 
-    Path getWorkBaiFile(RoddyBamFile bamFile, PathOption... options) {
-        return getWorkDirectory(bamFile, options).resolve(bamFile.baiFileName)
+    Path getWorkBaiFile(RoddyBamFile bamFile) {
+        return getWorkDirectory(bamFile).resolve(bamFile.baiFileName)
     }
 
-    Path getFinalMd5sumFile(RoddyBamFile bamFile, PathOption... options) {
-        return getBaseDirectory(bamFile, options).resolve(getMd5sumFileName(bamFile))
+    Path getFinalMd5sumFile(RoddyBamFile bamFile) {
+        return getBaseDirectory(bamFile).resolve(getMd5sumFileName(bamFile))
     }
 
-    Path getWorkMd5sumFile(RoddyBamFile bamFile, PathOption... options) {
-        return getWorkDirectory(bamFile, options).resolve(getMd5sumFileName(bamFile))
+    Path getWorkMd5sumFile(RoddyBamFile bamFile) {
+        return getWorkDirectory(bamFile).resolve(getMd5sumFileName(bamFile))
     }
 
-    Path getFinalMetadataTableFile(RoddyBamFile bamFile, PathOption... options) {
-        return getBaseDirectory(bamFile, options).resolve(METADATATABLE_FILE)
+    Path getFinalMetadataTableFile(RoddyBamFile bamFile) {
+        return getBaseDirectory(bamFile).resolve(METADATATABLE_FILE)
     }
 
-    Path getWorkMetadataTableFile(RoddyBamFile bamFile, PathOption... options) {
-        return getWorkDirectory(bamFile, options).resolve(METADATATABLE_FILE)
+    Path getWorkMetadataTableFile(RoddyBamFile bamFile) {
+        return getWorkDirectory(bamFile).resolve(METADATATABLE_FILE)
     }
 
-    Path getFinalInsertSizeDirectory(RoddyBamFile bamFile, PathOption... options) {
-        return getFinalMergedQADirectory(bamFile, options).resolve(INSERT_SIZE_FILE_DIRECTORY)
+    Path getFinalInsertSizeDirectory(RoddyBamFile bamFile) {
+        return getFinalMergedQADirectory(bamFile).resolve(INSERT_SIZE_FILE_DIRECTORY)
     }
 
     @Override
     Path getFinalInsertSizeFile(RoddyBamFile bamFile) {
         return getFinalInsertSizeDirectory(bamFile).resolve("${bamFile.sampleType.dirName}_${bamFile.individual.pid}_${INSERT_SIZE_FILE_SUFFIX}")
-    }
-
-    Path getFinalInsertSizeFile(RoddyBamFile bamFile, PathOption... options) {
-        return getFinalInsertSizeDirectory(bamFile, options).resolve("${bamFile.sampleType.dirName}_${bamFile.individual.pid}_${INSERT_SIZE_FILE_SUFFIX}")
     }
 
     /**
@@ -269,9 +257,5 @@ class RoddyBamFileService extends AbstractAbstractBamFileService<RoddyBamFile> i
     @Override
     protected Path getPathForFurtherProcessingNoCheck(RoddyBamFile bamFile) {
         return isOldStructureUsed(bamFile) ? getFinalBamFile(bamFile) : getWorkBamFile(bamFile)
-    }
-
-    protected Path getPathForFurtherProcessingNoCheck(RoddyBamFile bamFile, PathOption... options) {
-        return isOldStructureUsed(bamFile) ? getFinalBamFile(bamFile, options) : getWorkBamFile(bamFile, options)
     }
 }

@@ -30,13 +30,15 @@ import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 
 import java.nio.file.*
 
-class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<RoddyBamFileService>, IsRoddy, DataTest {
+class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<RoddyBamFileService>, WorkflowSystemDomainFactory, IsRoddy, DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -81,6 +83,7 @@ class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<R
 
     RoddyBamFile roddyBamFile
     String baseDir = "/base-dir"
+    String workFolder = "/work-folder"
 
     def setup() {
         roddyBamFile = createBamFile(
@@ -89,6 +92,9 @@ class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<R
 
         service.abstractBamFileService = Mock(AbstractBamFileService) {
             getBaseDirectory(_) >> Paths.get(baseDir)
+        }
+        service.filestoreService = Mock(FilestoreService) {
+            getWorkFolderPath(_) >> Paths.get(workFolder)
         }
     }
 
@@ -111,9 +117,17 @@ class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<R
         expectedPath == service.getFinalInsertSizeFile(roddyBamFile)
     }
 
-    void "test getWorkDirectory"() {
+    void "test getWorkDirectory, when workFolder doesn't exist"() {
         expect:
         Paths.get("${baseDir}/${roddyBamFile.workDirectoryName}") == service.getWorkDirectory(roddyBamFile)
+    }
+
+    void "test getWorkDirectory, when workFolder exists"() {
+        given:
+        roddyBamFile.workflowArtefact = createWorkflowArtefact(producedBy: createWorkflowRun(workFolder: createWorkFolder()))
+
+        expect:
+        service.getWorkDirectory(roddyBamFile) == Paths.get(workFolder)
     }
 
     void "test getWorkQADirectory"() {

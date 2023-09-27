@@ -25,7 +25,6 @@ import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
-import de.dkfz.tbi.otp.filestore.PathOption
 
 import java.nio.file.Path
 
@@ -37,13 +36,13 @@ class RnaRoddyBamFileService extends RoddyBamFileService {
     static final String ARRIBA_PLOT_SUFFIX = ".fusions.pdf"
 
     @Override
-    Path getWorkMergedQADirectory(RoddyBamFile bamFile, PathOption... options) {
-        return getWorkQADirectory(bamFile, options)
+    Path getFinalMergedQADirectory(RoddyBamFile bamFile) {
+        return getFinalQADirectory(bamFile)
     }
 
     @Override
-    Path getFinalMergedQADirectory(RoddyBamFile bamFile, PathOption... options) {
-        return getFinalQADirectory(bamFile, options)
+    Path getWorkMergedQADirectory(RoddyBamFile bamFile) {
+        return getWorkQADirectory(bamFile)
     }
 
     Path getCorrespondingWorkChimericBamFile(RnaRoddyBamFile bamFile) {
