@@ -24,7 +24,7 @@
 <head>
     <meta name='layout' content='main'/>
     <title><g:message code="security.login.title"/></title>
-    <asset:stylesheet src="modules/info.css"/>
+    <asset:stylesheet src="info.less"/>
     <asset:javascript src="common/FocusLogin.js"/>
 </head>
 

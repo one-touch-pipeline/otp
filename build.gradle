@@ -22,7 +22,6 @@
 
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
-import grails.util.Environment
 
 import static java.util.concurrent.TimeUnit.SECONDS
 
@@ -35,9 +34,7 @@ buildscript {
     dependencies {
         classpath "org.grails:grails-gradle-plugin:$grailsGradlePluginVersion"
         classpath "org.grails.plugins:hibernate5:8.0.0"
-        classpath "com.bertramlabs.plugins:asset-pipeline-gradle:4.3.0"
-        classpath "com.bertramlabs.plugins:less-asset-pipeline:4.3.0"
-        classpath "com.bertramlabs.plugins:sass-asset-pipeline:4.3.0"
+
         classpath 'org.grails.plugins:database-migration:4.2.1'
     }
 }
@@ -55,6 +52,11 @@ plugins {
     // https://gitlab.com/barfuin/gradle-jacoco-log
     id 'org.barfuin.gradle.jacocolog' version '3.1.0'
 
+    // plugin to handle static resources like js or css
+    // http://www.asset-pipeline.com/manual/#getting-started
+    // http://www.asset-pipeline.com/manual/#configuration
+    // plugins for less / sass available
+    id "com.bertramlabs.asset-pipeline" version "4.4.0"
 }
 
 buildScan {
@@ -78,7 +80,6 @@ apply plugin: 'java'
 apply plugin: "idea"
 apply plugin: "war"
 apply plugin: "org.grails.grails-web"
-apply plugin: "com.bertramlabs.asset-pipeline"
 apply plugin: "org.grails.grails-gsp"
 apply plugin: "codenarc"
 
@@ -366,15 +367,23 @@ dependencies {
     runtimeOnly "com.h2database:h2"
     runtimeOnly "org.apache.tomcat:tomcat-jdbc"
     runtimeOnly "javax.xml.bind:jaxb-api:2.3.1"
-    runtimeOnly "com.bertramlabs.plugins:asset-pipeline-grails:4.3.0"
-    runtimeOnly "com.bertramlabs.plugins:less-asset-pipeline:4.3.0"
-    runtimeOnly "com.bertramlabs.plugins:sass-asset-pipeline:4.3.0"
     testImplementation "org.grails:grails-gorm-testing-support:3.0.0"
     testImplementation "org.grails:grails-web-testing-support:3.0.0"
     testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.10.0"
     workflowTestImplementation "org.grails:grails-gorm-testing-support:3.0.0"
     workflowTestImplementation "org.grails:grails-web-testing-support:3.0.0"
     workflowTestRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.10.0"
+
+    //assets
+    // needed for gradle bootRun
+    runtimeOnly "com.bertramlabs.plugins:asset-pipeline-grails:4.3.0"
+    runtimeOnly "com.bertramlabs.plugins:less-asset-pipeline:4.4.0"
+    runtimeOnly "com.bertramlabs.plugins:sass-asset-pipeline:4.4.0"
+
+    // needed for assetCompile
+    assets "com.bertramlabs.plugins:less-asset-pipeline:4.4.0"
+    //assets "com.bertramlabs.plugins:sass-asset-pipeline:4.4.0" // will fail the assertCompile task
+
 
     // JDBC
     runtimeOnly 'org.postgresql:postgresql:42.6.0'
@@ -492,10 +501,24 @@ tasks.withType(Test) {
 
 assets {
     minifyJs = true
-    minifyCss = true
+    //minify css creates an css, which is ignored by the browser
+    minifyCss = false
+    //create js maps
+    enableSourceMaps = true
+    //use multi threading
+    maxThreads = 8
+    //only provide files with digest
+    skipNonDigests = true
     minifyOptions = [
-            languageMode  : 'ES6',
-            targetLanguage: 'ES5',
+            optimizationLevel: 'SIMPLE',
+            angularPass      : true, // Can use @ngInject annotation for Angular Apps
+            languageMode     : 'ES6',
+            targetLanguage   : 'ES5',
+            excludes         : [
+                    // do not minify files from the webjars
+                    // files included via `//= require` in own files will still processed
+                    'webjars/**/*'
+            ]
     ]
     excludes = [
             '**/chart.js/**/*',
@@ -503,6 +526,28 @@ assets {
             '**/datatables-fixedcolumns/*/css/fixedColumns.bootstrap4.scss',
             '**/ttskch__select2-bootstrap4-theme/**/*.scss',
             '**/datatables-plugins/**/*',
+
+            // diverse file formats existing in webjars, but not needed to be delivered as assert
+            'webjars/**/license',
+            'webjars/**/LICENSE',
+            'webjars/**/*.html',
+            'webjars/**/*.iml',
+            'webjars/**/*.json',
+            'webjars/**/*.md',
+            'webjars/**/*.mjs',
+            'webjars/**/*.nuspec',
+            'webjars/**/*.properties',
+            'webjars/**/*.psd',
+            'webjars/**/*.svg',
+            'webjars/**/*.ts',
+            'webjars/**/*.txt',
+            'webjars/**/*.woff',
+            'webjars/**/*.woff2',
+            'webjars/**/*.xml',
+            'webjars/**/*.yml',
+
+            // use instead css or include it via `//= require`, since some scss make problems
+            'webjars/**/*.scss',
     ]
 }
 
