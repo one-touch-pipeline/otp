@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,6 @@ import grails.gorm.hibernate.annotation.ManagedEntity
 
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
@@ -139,10 +138,6 @@ class WorkflowStep implements Commentable, Entity {
         return WorkflowLog.findAllByWorkflowStep(this).sort {
             it.dateCreated
         }
-    }
-
-    Realm getRealm() {
-        return workflowRun.realm
     }
 
     String displayInfo() {

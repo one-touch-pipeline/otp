@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -46,12 +46,11 @@ abstract class AbstractLinkJob extends AbstractJob {
             Project project = workflowStep.workflowRun.project
 
             // create directory before linking to set it with correct group
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(entry.link.parent, project.realm, project.unixGroup)
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(entry.link.parent, null, project.unixGroup)
 
             fileService.createLink(
                     entry.link,
                     entry.target,
-                    workflowStep.workflowRun.project.realm,
                     CreateLinkOption.DELETE_EXISTING_FILE,
             )
         }

@@ -47,7 +47,6 @@ class ExecutionHelperService {
      */
     @Deprecated
     String getGroup(Realm realm, File directory) {
-        assert realm: 'realm may not be null'
         assert directory: 'directory may not be null'
         ProcessOutput result = remoteShellHelper.executeCommandReturnProcessOutput(realm, "stat -c '%G' ${directory}")
         if (result.exitCode != 0) {
@@ -61,7 +60,6 @@ class ExecutionHelperService {
      */
     @Deprecated
     String setGroup(Realm realm, File directory, String group) {
-        assert realm: 'realm may not be null'
         assert directory: 'directory may not be null'
         assert group: 'group may not be null'
         ProcessOutput result = remoteShellHelper.executeCommandReturnProcessOutput(realm, "chgrp -h ${group} ${directory}")
@@ -76,7 +74,6 @@ class ExecutionHelperService {
      */
     @Deprecated
     String setPermission(Realm realm, File directory, String permission) {
-        assert realm: 'realm may not be null'
         assert directory: 'directory may not be null'
         assert permission: 'permission may not be null'
         ProcessOutput result = remoteShellHelper.executeCommandReturnProcessOutput(realm, "chmod  ${permission} ${directory}")

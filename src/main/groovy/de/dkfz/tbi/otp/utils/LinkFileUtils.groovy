@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -51,7 +51,6 @@ class LinkFileUtils {
     @Deprecated
     void createAndValidateLinks(Map<File, File> targetLinkMap, Realm realm, String unixGroup = '')  {
         assert targetLinkMap
-        assert realm
 
         if (!targetLinkMap.isEmpty()) {
             FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)

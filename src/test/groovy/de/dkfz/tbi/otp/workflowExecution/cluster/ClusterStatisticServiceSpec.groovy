@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -50,17 +50,15 @@ class ClusterStatisticServiceSpec extends Specification implements ServiceUnitTe
     void "retrieveAndSaveJobInformationAfterJobStarted, #name"() {
         given:
         String clusterId = "${nextId}"
-        Realm realm = createRealm()
         ClusterJob job = createClusterJob([
                 clusterJobId: clusterId,
-                realm       : realm,
         ])
 
         int amendClusterJobCallCount = calledAmendClusterJob ? 1 : 0
 
         int counter = 0
         service.clusterJobManagerFactoryService = Mock(ClusterJobManagerFactoryService) {
-            1 * getJobManager(realm) >> Mock(BatchEuphoriaJobManager) {
+            1 * getJobManager() >> Mock(BatchEuphoriaJobManager) {
                 queryExtendedJobStateByIdCallCount * queryExtendedJobStateById(_) >> { List<BEJobID> jobIds ->
                     assert jobIds.size() == 1
                     if (counter < exceptionCount) {
@@ -91,14 +89,12 @@ class ClusterStatisticServiceSpec extends Specification implements ServiceUnitTe
     void "retrieveAndSaveJobStatisticsAfterJobFinished, when getting data is fine, then fill cluster job"() {
         given:
         String clusterId = "${nextId}"
-        Realm realm = new Realm()
         ClusterJob job = new ClusterJob([
                 clusterJobId: clusterId,
-                realm       : realm,
         ])
 
         service.clusterJobManagerFactoryService = Mock(ClusterJobManagerFactoryService) {
-            1 * getJobManager(realm) >> Mock(BatchEuphoriaJobManager) {
+            1 * getJobManager() >> Mock(BatchEuphoriaJobManager) {
                 1 * queryExtendedJobStateById(_) >> { List<BEJobID> jobIds ->
                     assert jobIds.size() == 1
                     return [(new BEJobID(clusterId)): new GenericJobInfo(null, null, null, null, null)]

@@ -160,7 +160,6 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
                 validated     : false,
                 oldSystem     : oldSystem,
                 checkStatus   : ClusterJob.CheckStatus.CREATED,
-                realm         : { createRealm() },
                 clusterJobId  : "clusterJobId_${nextId}",
                 userName      : "userName_${nextId}",
                 clusterJobName: "clusterJobName_${nextId}_jobClass",

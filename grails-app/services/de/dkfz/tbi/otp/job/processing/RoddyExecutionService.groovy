@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,6 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.ProcessOutput
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -75,9 +74,8 @@ class RoddyExecutionService {
         }
     }
 
-    ProcessOutput execute(String cmd, Realm realm) {
+    ProcessOutput execute(String cmd) {
         assert cmd
-        assert realm
 
         numberOfRoddyProcesses = numberOfRoddyProcesses ?:
                 new Semaphore(processingOptionService.findOptionAsInteger(ProcessingOption.OptionName.MAXIMUM_EXECUTED_RODDY_PROCESSES), true)
@@ -85,7 +83,7 @@ class RoddyExecutionService {
         ProcessOutput output
         numberOfRoddyProcesses.acquire()
         try {
-            output = remoteShellHelper.executeCommandReturnProcessOutput(realm, cmd).assertExitCodeZero()
+            output = remoteShellHelper.executeCommandReturnProcessOutput(cmd).assertExitCodeZero()
         } finally {
             numberOfRoddyProcesses.release()
         }
@@ -124,9 +122,7 @@ class RoddyExecutionService {
                             roddyResult.project.realm, jobId, configService.sshUser, processingStep, roddyResult.seqType, jobName, jobClass
                     )
                 } else {
-                    clusterJob = clusterJobService.createClusterJob(
-                            roddyResult.project.realm, jobId, configService.sshUser, workflowStep, jobName, jobClass
-                    )
+                    clusterJob = clusterJobService.createClusterJob(jobId, configService.sshUser, workflowStep, jobName, jobClass)
                 }
                 submittedClusterJobs.add(clusterJob)
             }

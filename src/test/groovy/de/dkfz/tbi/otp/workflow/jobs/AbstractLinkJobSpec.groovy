@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -61,8 +61,8 @@ class AbstractLinkJobSpec extends Specification implements DataTest, WorkflowSys
 
         then:
         1 * job.getLinkMap(workflowStep) >> { [new LinkEntry(target: target1, link: link1), new LinkEntry(target: target2, link: link2)] }
-        1 * job.fileService.createLink(link1, target1, workflowStep.workflowRun.project.realm, CreateLinkOption.DELETE_EXISTING_FILE)
-        1 * job.fileService.createLink(link2, target2, workflowStep.workflowRun.project.realm, CreateLinkOption.DELETE_EXISTING_FILE)
+        1 * job.fileService.createLink(link1, target1, CreateLinkOption.DELETE_EXISTING_FILE)
+        1 * job.fileService.createLink(link2, target2, CreateLinkOption.DELETE_EXISTING_FILE)
         1 * job.doFurtherWork(workflowStep) >> null
         1 * job.saveResult(workflowStep) >> null
         1 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)

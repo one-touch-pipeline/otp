@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +34,10 @@ import static org.springframework.util.Assert.notNull
 
 /**
  * A service to construct paths and messages for logging the status of cluster jobs.
+ *
+ * @deprecated old system, use JobStatusLoggingFileService instead
  */
+@Deprecated
 @Transactional
 class JobStatusLoggingService {
 
@@ -44,8 +47,8 @@ class JobStatusLoggingService {
     final static LOGFILE_EXTENSION = '.log'
     final static STATUS_LOGGING_BASE_DIR = 'log/status'
 
-    private String shellSnippetForClusterJobId(Realm realm) {
-        return "\$(echo \${${clusterJobManagerFactoryService.getJobManager(realm).jobIdVariable}} | cut -d. -f1)"
+    private String shellSnippetForClusterJobId() {
+        return "\$(echo \${${clusterJobManagerFactoryService.jobManager.jobIdVariable}} | cut -d. -f1)"
     }
 
     /**
@@ -69,14 +72,13 @@ class JobStatusLoggingService {
      *          (Read: pass the job ID except if the returned string is used in a cluster job shell script)
      * @return the location of the status log file
      */
-    String constructLogFileLocation(Realm realm, ProcessingStep processingStep, String clusterJobId = null) {
-        notNull realm, 'No realm specified.'
+    @SuppressWarnings("UnusedMethodParameter")
+    String constructLogFileLocation(Realm realm = null, ProcessingStep processingStep, String clusterJobId = null) {
         String baseDir = logFileBaseDir(processingStep)
         String fileName = [
                 "joblog",
                 processingStep.process.id,
-                clusterJobId ?: shellSnippetForClusterJobId(realm),
-                realm.id,
+                clusterJobId ?: shellSnippetForClusterJobId(),
         ].join("_")
         return "${baseDir}/${fileName}${LOGFILE_EXTENSION}"
     }
@@ -98,13 +100,14 @@ class JobStatusLoggingService {
      *          of the cluster job id is returned. (Read: To get a message usable for logging, do not provide it.)
      * @return a logging message
      */
-    String constructMessage(Realm realm, ProcessingStep processingStep, String clusterJobId = null) {
+    @SuppressWarnings("UnusedMethodParameter")
+    String constructMessage(Realm realm = null, ProcessingStep processingStep, String clusterJobId = null) {
         notNull processingStep, 'No processing step specified.'
         String message = [
                 processingStep.jobDefinition.plan.name,
                 processingStep.nonQualifiedJobClass,
                 processingStep.id,
-                clusterJobId ?: shellSnippetForClusterJobId(realm),
+                clusterJobId ?: shellSnippetForClusterJobId(),
         ].join(',')
         return "${message}" as String
     }
@@ -122,55 +125,45 @@ class JobStatusLoggingService {
             final ProcessingStep processingStep, final Collection<ClusterJobIdentifier> clusterJobs) {
         notNull processingStep
         notNull clusterJobs
-        def invalidInput = clusterJobs.findAll({ it == null || it.realm == null || it.clusterJobId == null })
+        def invalidInput = clusterJobs.findAll({ it == null || it.clusterJobId == null })
         assert invalidInput == []: "clusterJobs argument contains null values: ${invalidInput}"
-        final Map<Realm, Collection<ClusterJobIdentifier>> clusterJobMap = (clusterJobs.groupBy({
-            it.realm
-        }).collectEntries { realm, clusterJob ->
-            [(realm): clusterJob]
-        } as Map<Realm, Collection<ClusterJobIdentifier>>)
-        assert clusterJobMap.values().flatten().size() == clusterJobs.size()
-        return failedOrNotFinishedClusterJobs(processingStep, clusterJobMap)
+        return failedOrNotFinishedClusterJobs2(processingStep, clusterJobs)
     }
 
     /**
      * Checks if cluster jobs have finished successfully.
      *
-     * @param clusterJobMap The cluster jobs to be checked. Mapping from {@link Realm} to a collection of cluster
-     *     job identifiers on that realm.
+     * @param clusterJobs The cluster jobs to be checked.
      *
      * @return The jobs which have not completed successfully. This includes jobs which have failed and jobs which have
      *     not finished yet.
      */
-    Collection<ClusterJobIdentifier> failedOrNotFinishedClusterJobs(
-            final ProcessingStep processingStep, final Map<Realm, Collection<ClusterJobIdentifier>> clusterJobMap) {
+    Collection<ClusterJobIdentifier> failedOrNotFinishedClusterJobs2(
+            final ProcessingStep processingStep, final Collection<ClusterJobIdentifier> clusterJobs) {
         notNull processingStep
-        notNull clusterJobMap
+        notNull clusterJobs
 
         // OTP-967: try to figure out why processingStep sometimes returns NULL for .jobClass
         // lets try explicitly reconnecting it..
         processingStep.refresh()
 
         final Collection<ClusterJobIdentifier> failedOrNotFinishedClusterJobs = []
-        clusterJobMap.each { Realm realm, Collection<ClusterJobIdentifier> clusterJobs ->
-            notNull realm
-            notNull clusterJobs
-            clusterJobs.each {
-                final File logFile = new File(constructLogFileLocation(realm, processingStep, it.clusterJobId))
-                String logFileText = ''
-                try {
-                    logFileText = logFile.text
-                } catch (final FileNotFoundException e) {
-                    threadLog?.debug "Cluster job status log file ${logFile} not found."
-                }
-                notNull it
-                final String expectedLogMessage = constructMessage(realm, processingStep, it.clusterJobId)
-                if (!(logFileText =~ /(?:^|\s)${Pattern.quote(expectedLogMessage)}(?:$|\s)/)) {
-                    threadLog?.debug "Did not find \"${expectedLogMessage}\" in ${logFile}."
-                    failedOrNotFinishedClusterJobs.add(new ClusterJobIdentifier(it))
-                }
+        clusterJobs.each {
+            final File logFile = new File(constructLogFileLocation(null, processingStep, it.clusterJobId))
+            String logFileText = ''
+            try {
+                logFileText = logFile.text
+            } catch (final FileNotFoundException e) {
+                threadLog?.debug "Cluster job status log file ${logFile} not found."
+            }
+            notNull it
+            final String expectedLogMessage = constructMessage(null, processingStep, it.clusterJobId)
+            if (!(logFileText =~ /(?:^|\s)${Pattern.quote(expectedLogMessage)}(?:$|\s)/)) {
+                threadLog?.debug "Did not find \"${expectedLogMessage}\" in ${logFile}."
+                failedOrNotFinishedClusterJobs.add(new ClusterJobIdentifier(it))
             }
         }
+
         return failedOrNotFinishedClusterJobs
     }
 }

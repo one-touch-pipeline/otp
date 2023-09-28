@@ -792,7 +792,6 @@ class FileService {
         assert path
         assert path.absolute
         assert Files.exists(path)
-        assert realm
         assert group
 
         correctPathAndGroupPermissionRecursiveInternal(path, realm, group)

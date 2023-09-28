@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -59,7 +59,6 @@ class LinkRnaAlignmentFilesToFinalDestinationJob extends AbstractEndStateAwareJo
             final RnaRoddyBamFile roddyBamFile = processParameterObject
 
             Realm realm = roddyBamFile.project.realm
-            assert realm: "Realm should not be null"
 
             linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)
             linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanupRna(roddyBamFile, realm)

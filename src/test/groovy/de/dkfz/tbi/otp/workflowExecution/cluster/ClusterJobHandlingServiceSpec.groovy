@@ -78,7 +78,6 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
     void "createBeJobsToSend, when all fine, then create BeJobs"() {
         given:
         workflowStep = createWorkflowStep()
-        Realm realm = createRealm()
 
         Map<JobSubmissionOption, String> jobSubmissionOptionMapInitial = [(JobSubmissionOption.MEMORY): "${nextId}M",]
         Map<JobSubmissionOption, String> jobSubmissionOptionMapMerged = [(JobSubmissionOption.QUEUE): "queue${nextId}",] + jobSubmissionOptionMapInitial
@@ -108,8 +107,8 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
             1 * wrapScript(script2, logFileName, logMessage) >> wrappedScript2
         }
         service.jobStatusLoggingFileService = Mock(JobStatusLoggingFileService) {
-            1 * constructLogFileLocation(realm, workflowStep) >> logFileName
-            1 * constructMessage(realm, workflowStep) >> logMessage
+            1 * constructLogFileLocation(workflowStep) >> logFileName
+            1 * constructMessage(workflowStep) >> logMessage
         }
         service.clusterLogDirectoryService = Mock(ClusterLogDirectoryService) {
             1 * createAndGetLogDirectory(workflowStep) >> clusterLogDirectory
@@ -126,7 +125,7 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
         BatchEuphoriaJobManager jobManager = Mock(BatchEuphoriaJobManager)
 
         when:
-        List<BEJob> beJobs = service.createBeJobsToSend(jobManager, realm, workflowStep, scripts, jobSubmissionOptionMapInitial)
+        List<BEJob> beJobs = service.createBeJobsToSend(jobManager, workflowStep, scripts, jobSubmissionOptionMapInitial)
 
         then:
         beJobs.size() == 2
@@ -338,7 +337,6 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
     void "createAndSaveClusterJobs, when all fine, then create all cluster jobs and no exception thrown"() {
         given:
         setupJobData()
-        Realm realm = createRealm()
 
         String sshUser = "sshuser${nextId}"
 
@@ -346,8 +344,7 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
             1 * getSshUser() >> sshUser
         }
         service.clusterJobService = Mock(ClusterJobService) {
-            2 * createClusterJob(realm, _, sshUser, workflowStep, _) >> { Realm realm2, String clusterJobId, String userName,
-                                                                          WorkflowStep workflowStep, String clusterJobName ->
+            2 * createClusterJob(_, sshUser, workflowStep, _) >> { String clusterJobId, String userName, WorkflowStep workflowStep, String clusterJobName ->
                 new ClusterJob([clusterJobId: clusterJobId])
             }
         }
@@ -357,7 +354,7 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
         }
 
         when:
-        List<ClusterJob> clusterJobs = service.createAndSaveClusterJobs(realm, workflowStep, jobs)
+        List<ClusterJob> clusterJobs = service.createAndSaveClusterJobs(workflowStep, jobs)
 
         then:
         TestCase.assertContainSame(clusterJobs*.clusterJobId, jobs*.jobID*.shortID)

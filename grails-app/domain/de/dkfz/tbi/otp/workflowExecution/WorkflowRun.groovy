@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,6 @@ import org.grails.web.json.JSONObject
 
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.filestore.WorkFolder
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
@@ -170,10 +169,6 @@ class WorkflowRun implements Commentable, Entity {
             count++
         }
         return count
-    }
-
-    Realm getRealm() {
-        return project.realm
     }
 
     @SuppressWarnings("Instanceof")

@@ -27,7 +27,6 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqTrackService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractExecuteClusterPipelineJob
 import de.dkfz.tbi.otp.workflow.shared.NoWorkflowVersionSpecifiedException
@@ -54,14 +53,13 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
 
     @Override
     protected List<String> createScripts(WorkflowStep workflowStep) {
-        Realm realm = workflowStep.realm
-        Path outputDir = getFileSystem(workflowStep).getPath(workflowStep.workflowRun.workDirectory)
+        Path outputDir = fileSystemService.remoteFileSystem.getPath(workflowStep.workflowRun.workDirectory)
 
         // delete existing output directory in case of restart
         if (Files.exists(outputDir)) {
             logService.addSimpleLogEntry(workflowStep, "Deleting output directory ${outputDir}")
             fileService.deleteDirectoryRecursively(outputDir)
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDir, workflowStep.workflowRun.project.realm,
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDir, null,
                     workflowStep.workflowRun.project.unixGroup,)
         }
 
@@ -71,7 +69,7 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
         if (fastqcReportService.canFastqcReportsBeCopied(fastqcProcessedFiles)) {
             // remotely run a script to copy the existing result files
             logService.addSimpleLogEntry(workflowStep, "fastqc reports found, copy them")
-            fastqcReportService.copyExistingFastqcReports(realm, fastqcProcessedFiles, outputDir)
+            fastqcReportService.copyExistingFastqcReports(fastqcProcessedFiles, outputDir)
             return []
         }
         logService.addSimpleLogEntry(workflowStep, "no fastqc reports found, create script to create them")

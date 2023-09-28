@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.workflowExecution.cluster.logs
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.job.processing.ClusterJobManagerFactoryService
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
@@ -45,8 +44,8 @@ class JobStatusLoggingFileService extends AbstractLogDirectoryService {
 
     ClusterJobManagerFactoryService clusterJobManagerFactoryService
 
-    private String shellSnippetForClusterJobId(Realm realm) {
-        return "\$(echo \${${clusterJobManagerFactoryService.getJobManager(realm).jobIdVariable}} | cut -d. -f1)"
+    private String shellSnippetForClusterJobId() {
+        return "\$(echo \${${clusterJobManagerFactoryService.jobManager.jobIdVariable}} | cut -d. -f1)"
     }
 
     @Override
@@ -66,8 +65,7 @@ class JobStatusLoggingFileService extends AbstractLogDirectoryService {
      *          (Read: pass the job ID except if the returned string is used in a cluster job shell script)
      * @return the location of the status log file
      */
-    String constructLogFileLocation(Realm realm, WorkflowStep workflowStep, String clusterJobId = null) {
-        assert realm
+    String constructLogFileLocation(WorkflowStep workflowStep, String clusterJobId = null) {
         assert workflowStep
 
         Path logDirectory = createAndGetLogDirectory(workflowStep.dateCreated)
@@ -75,8 +73,7 @@ class JobStatusLoggingFileService extends AbstractLogDirectoryService {
         String fileName = [
                 "joblog",
                 workflowStep.id,
-                clusterJobId ?: shellSnippetForClusterJobId(realm),
-                realm.id,
+                clusterJobId ?: shellSnippetForClusterJobId(),
         ].join("_") + LOGFILE_EXTENSION
 
         return "${logDirectory}/${fileName}"
@@ -86,13 +83,13 @@ class JobStatusLoggingFileService extends AbstractLogDirectoryService {
      * Constructs a logging message for the status logging from a workflow step.
      * The message is a comma-separated list of elements.
      */
-    String constructMessage(Realm realm, WorkflowStep workflowStep, String clusterJobId = null) {
+    String constructMessage(WorkflowStep workflowStep, String clusterJobId = null) {
         assert workflowStep
         return [
                 workflowStep.workflowRun.workflow.name,
                 workflowStep.beanName,
                 workflowStep.id,
-                clusterJobId ?: shellSnippetForClusterJobId(realm),
+                clusterJobId ?: shellSnippetForClusterJobId(),
         ].join(',')
     }
 }

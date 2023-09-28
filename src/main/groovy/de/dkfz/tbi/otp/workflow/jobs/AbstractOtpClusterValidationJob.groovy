@@ -25,12 +25,12 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStepService
 
-import java.nio.file.*
+import java.nio.file.FileSystem
+import java.nio.file.Path
 import java.util.regex.Pattern
 
 /**
@@ -48,15 +48,14 @@ abstract class AbstractOtpClusterValidationJob extends AbstractValidationJob {
      */
     @Override
     protected void ensureExternalJobsRunThrough(WorkflowStep workflowStep) {
-        Realm realm = workflowStep.realm
         Collection<ClusterJob> clusterJobs = workflowStepService.getPreviousRunningWorkflowStep(workflowStep).clusterJobs
-        FileSystem fileSystem = getFileSystem(workflowStep)
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
         logService.addSimpleLogEntry(workflowStep, "Start checking of ${clusterJobs.size()} cluster jobs for finished successfully (run till the end).")
 
         List<String> problems = clusterJobs.sort {
             it.clusterJobId
         }.collect { ClusterJob clusterJob ->
-            checkSingleClusterJobAndReturnErrorMessage(realm, fileSystem, clusterJob)
+            checkSingleClusterJobAndReturnErrorMessage(fileSystem, clusterJob)
         }.findAll()
 
         if (problems.isEmpty()) {
@@ -69,19 +68,19 @@ abstract class AbstractOtpClusterValidationJob extends AbstractValidationJob {
         }
     }
 
-    private String checkSingleClusterJobAndReturnErrorMessage(Realm realm, FileSystem fileSystem, ClusterJob clusterJob) {
+    private String checkSingleClusterJobAndReturnErrorMessage(FileSystem fileSystem, ClusterJob clusterJob) {
         if (clusterJob.checkStatus != ClusterJob.CheckStatus.FINISHED) {
             return "Cluster job ${clusterJob.clusterJobId} is in state ${clusterJob.checkStatus} instead of FINISHED"
         }
 
-        Path logFile = fileSystem.getPath(jobStatusLoggingFileService.constructLogFileLocation(realm, clusterJob.workflowStep, clusterJob.clusterJobId))
+        Path logFile = fileSystem.getPath(jobStatusLoggingFileService.constructLogFileLocation(clusterJob.workflowStep, clusterJob.clusterJobId))
         try {
             FileService.ensureFileIsReadableAndNotEmptyStatic(logFile)
         } catch (AssertionError e) {
             return "Cluster job ${clusterJob.clusterJobId} status log file ${logFile} has the following problem: ${e.message}"
         }
 
-        String expectedLogMessage = jobStatusLoggingFileService.constructMessage(realm, clusterJob.workflowStep, clusterJob.clusterJobId)
+        String expectedLogMessage = jobStatusLoggingFileService.constructMessage(clusterJob.workflowStep, clusterJob.clusterJobId)
         String logFileText = logFile.text
         return (logFileText =~ /(?:^|\s)${Pattern.quote(expectedLogMessage)}(?:$|\s)/) ? null :
             "Did not find \"${expectedLogMessage}\" in ${logFile}."

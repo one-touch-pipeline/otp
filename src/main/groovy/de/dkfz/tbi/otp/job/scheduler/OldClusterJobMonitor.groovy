@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,11 +29,9 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 import de.dkfz.roddy.execution.jobs.JobState
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.workflowExecution.cluster.ClusterStatisticService
 
 /**
@@ -107,18 +105,18 @@ ${schedulerService.running.collect { "    ${it}  ${it.processingStep}" }.join('\
             if (jobHasFinished) {
                 if (jobEndState == ExecutionState.FAILURE) {
                     log.info("NOT notifying ${monitoringJob} that cluster job ${clusterJob.clusterJobId}" +
-                            " has finished on realm ${clusterJob.realm}, because that job has already failed.")
+                            " has finished, because that job has already failed.")
                 } else if (jobEndState == ExecutionState.SUCCESS) {
                     log.debug("Cluster Job finished successfully but is still monitoring" +
-                            " ${clusterJob.clusterJobId} on realm ${clusterJob.realm}.")
+                            " ${clusterJob.clusterJobId}.")
                 } else {
                     throw new OtpRuntimeException("${monitoringJob} is still monitoring cluster job" +
-                            " ${clusterJob.clusterJobId} on realm ${clusterJob.realm}, although it has" +
+                            " ${clusterJob.clusterJobId}, although it has" +
                             " already finished with end state ${jobEndState}.")
                 }
             } else {
                 log.info("Notifying ${monitoringJob} that cluster job ${clusterJob.clusterJobId}" +
-                        " has finished on realm ${clusterJob.realm}.")
+                        " has finished.")
                 scheduler.doInJobContext(monitoringJob) {
                     monitoringJob.finished(clusterJob)
                 }
@@ -127,8 +125,8 @@ ${schedulerService.running.collect { "    ${it}  ${it.processingStep}" }.join('\
     }
 
     @Override
-    protected Map<ClusterJobIdentifier, JobState> retrieveKnownJobsWithState(Realm realm) {
-        return clusterJobSchedulerService.retrieveKnownJobsWithState(realm)
+    protected Map<String, JobState> retrieveKnownJobsWithState() {
+        return clusterJobSchedulerService.retrieveKnownJobsWithState()
     }
 
     @Override

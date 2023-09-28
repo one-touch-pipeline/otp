@@ -178,15 +178,6 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
         service.deleteFilesRecursive(realm, [])
     }
 
-    void "test deleteFilesRecursive, when realm is null, should fail"() {
-        when:
-        service.deleteFilesRecursive(null, [tempDir])
-
-        then:
-        def e = thrown(AssertionError)
-        e.message.contains('realm may not be null.')
-    }
-
     void "test deleteFilesRecursive, when filesOrDirectories is null, should fail"() {
         given:
         Realm realm = DomainFactory.createRealm()

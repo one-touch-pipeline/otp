@@ -53,7 +53,7 @@ abstract class AbstractExecuteClusterPipelineJob extends AbstractExecutePipeline
 
     private void submitScripts(WorkflowStep workflowStep, List<String> scripts) {
         Map<JobSubmissionOption, String> jobSubmissionOptions = getJobSubmissionOptions(workflowStep.workflowRun)
-        clusterAccessService.executeJobs(workflowStep.workflowRun.project.realm, workflowStep, scripts, jobSubmissionOptions)
+        clusterAccessService.executeJobs(workflowStep, scripts, jobSubmissionOptions)
     }
 
     private Map<JobSubmissionOption, String> getJobSubmissionOptions(WorkflowRun run) {

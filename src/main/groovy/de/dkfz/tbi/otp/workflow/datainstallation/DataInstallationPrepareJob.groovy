@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -57,7 +57,7 @@ class DataInstallationPrepareJob extends AbstractPrepareJob implements DataInsta
         logService.addSimpleLogEntry(workflowStep, "Creating work directory ${runDirectory}")
         fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(
                 runDirectory,
-                workflowStep.workflowRun.project.realm,
+                null,
                 workflowStep.workflowRun.project.unixGroup,
         )
     }

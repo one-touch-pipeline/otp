@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,6 @@ import de.dkfz.roddy.execution.jobs.BatchEuphoriaJobManager
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.processing.ClusterJobManagerFactoryService
 import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.workflow.shared.RunningClusterJobException
 import de.dkfz.tbi.otp.workflowExecution.*
 
@@ -48,23 +47,22 @@ class ClusterAccessService {
 
     WorkflowRunService workflowRunService
 
-    List<String> executeJobs(Realm realm, WorkflowStep workflowStep, List<String> scripts, Map<JobSubmissionOption, String> jobSubmissionOptions = [:])
+    List<String> executeJobs(WorkflowStep workflowStep, List<String> scripts, Map<JobSubmissionOption, String> jobSubmissionOptions = [:])
             throws Throwable {
         if (!scripts) {
             throw new NoScriptsGivenWorkflowException("No job scripts specified.")
         }
-        assert realm: 'No realm specified.'
 
         ensureNoClusterJobIsInChecking(workflowStep)
 
-        BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.getJobManager(realm)
+        BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.jobManager
 
         logService.addSimpleLogEntry(workflowStep, "Submitting ${scripts.size()} jobs")
         scripts.eachWithIndex { String script, int index ->
             logService.addSimpleLogEntry(workflowStep, "Job ${index}:\n${script}")
         }
 
-        List<BEJob> beJobs = clusterJobHandlingService.createBeJobsToSend(jobManager, realm, workflowStep, scripts, jobSubmissionOptions)
+        List<BEJob> beJobs = clusterJobHandlingService.createBeJobsToSend(jobManager, workflowStep, scripts, jobSubmissionOptions)
 
         // begin of not restartable area
         workflowRunService.markJobAsNotRestartableInSeparateTransaction(workflowStep.workflowRun)
@@ -73,7 +71,7 @@ class ClusterAccessService {
 
         clusterJobHandlingService.startJob(jobManager, workflowStep, beJobs)
 
-        List<ClusterJob> clusterJobs = clusterJobHandlingService.createAndSaveClusterJobs(realm, workflowStep, beJobs)
+        List<ClusterJob> clusterJobs = clusterJobHandlingService.createAndSaveClusterJobs(workflowStep, beJobs)
 
         clusterJobHandlingService.collectJobStatistics(workflowStep, clusterJobs)
 

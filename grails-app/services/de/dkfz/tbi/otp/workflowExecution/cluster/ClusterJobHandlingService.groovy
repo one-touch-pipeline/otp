@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 import de.dkfz.tbi.otp.workflowExecution.cluster.logs.ClusterLogDirectoryService
@@ -68,15 +67,15 @@ class ClusterJobHandlingService {
 
     LogService logService
 
-    List<BEJob> createBeJobsToSend(BatchEuphoriaJobManager jobManager, Realm realm, WorkflowStep workflowStep, List<String> scripts,
+    List<BEJob> createBeJobsToSend(BatchEuphoriaJobManager jobManager, WorkflowStep workflowStep, List<String> scripts,
                                    Map<JobSubmissionOption, String> jobSubmissionOptions = [:]) {
         logService.addSimpleLogEntry(workflowStep, "Start preparing ${scripts.size()} scripts for sending to cluster")
         Map<JobSubmissionOption, String> combined = clusterJobHelperService.mergeResources(workflowStep.workflowRun.priority, jobSubmissionOptions)
         ResourceSet resourceSet = clusterJobHelperService.createResourceSet(combined)
         String jobName = clusterJobHelperService.constructJobName(workflowStep)
 
-        String logFileName = jobStatusLoggingFileService.constructLogFileLocation(realm, workflowStep)
-        String logMessage = jobStatusLoggingFileService.constructMessage(realm, workflowStep)
+        String logFileName = jobStatusLoggingFileService.constructLogFileLocation(workflowStep)
+        String logMessage = jobStatusLoggingFileService.constructMessage(workflowStep)
         File clusterLogDirectory = fileService.toFile(clusterLogDirectoryService.createAndGetLogDirectory(workflowStep))
 
         List<BEJob> beJobs = scripts.collect {
@@ -152,13 +151,11 @@ class ClusterJobHandlingService {
         logService.addSimpleLogEntry(workflowStep, "Finish starting ${beJobs.size()} cluster jobs: ${jobToString(beJobs)}")
     }
 
-    List<ClusterJob> createAndSaveClusterJobs(Realm realm, WorkflowStep workflowStep, List<BEJob> beJobs) {
+    List<ClusterJob> createAndSaveClusterJobs(WorkflowStep workflowStep, List<BEJob> beJobs) {
         logService.addSimpleLogEntry(workflowStep, "Begin creating  ${beJobs.size()} cluster job statistic: ${jobToString(beJobs)}")
         String sshUser = configService.sshUser
         List<ClusterJob> clusterJobs = beJobs.collect { BEJob job ->
-            clusterJobService.createClusterJob(
-                    realm, job.jobID.shortID, sshUser, workflowStep, job.jobName
-            )
+            clusterJobService.createClusterJob(job.jobID.shortID, sshUser, workflowStep, job.jobName)
         }
         logService.addSimpleLogEntry(workflowStep, "Finish creating ${beJobs.size()} cluster job statistic: ${jobToString(beJobs)}")
         return clusterJobs

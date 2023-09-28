@@ -86,17 +86,6 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
         e.message.contains('directory')
     }
 
-    void "test getGroup realm is null should fail"() {
-        when:
-        LogThreadLocal.withThreadLog(System.out) {
-            service.getGroup(null, tempDir.toFile())
-        }
-
-        then:
-        Throwable e = thrown(AssertionError)
-        e.message.contains('realm')
-    }
-
     @SuppressWarnings('ConstantAssertExpression')
     void "test getGroup remoteShellHelper executeCommand throws exception should fail"() {
         given:
@@ -116,17 +105,6 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
         then:
         Throwable e = thrown(AssertionError)
         e.message.contains(FAIL_MESSAGE)
-    }
-
-    void "test setGroup realm is null should fail"() {
-        when:
-        LogThreadLocal.withThreadLog(System.out) {
-            service.setGroup(null, tempDir.toFile(), DUMMY_GROUP)
-        }
-
-        then:
-        Throwable e = thrown(AssertionError)
-        e.message.contains('realm')
     }
 
     void "test setGroup directory is null should fail"() {
@@ -194,17 +172,6 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
         LogThreadLocal.withThreadLog(System.out) {
             LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("stat -c '%a' ${tmpFile}")
         }.trim() == PERMISSION
-    }
-
-    void "test setPermission realm is null should fail"() {
-        when:
-        LogThreadLocal.withThreadLog(System.out) {
-            service.setPermission(null, tempDir.toFile(), DUMMY_PERMISSION)
-        }
-
-        then:
-        Throwable e = thrown(AssertionError)
-        e.message.contains('realm')
     }
 
     void "test setPermission directory is null should fail"() {

@@ -251,7 +251,6 @@ class LsdfFilesService {
      */
     @Deprecated
     void deleteFilesRecursive(Realm realm, Collection<File> filesOrDirectories) {
-        assert realm: 'realm may not be null'
         assert filesOrDirectories != null: 'filesOrDirectories may not be null'
         if (filesOrDirectories.empty) {
             return // nothing to do

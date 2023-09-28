@@ -83,7 +83,6 @@ class ExecuteRoddyCommandService {
         assert roddyResult: "The input roddyResult is not allowed to be null"
         assert nameInConfigFile: "The input nameInConfigFile is not allowed to be null"
         assert analysisIDinConfigFile: "The input analysisIDinConfigFile is not allowed to be null"
-        assert realm: "The input realm is not allowed to be null"
 
         if (roddyResult.roddyExecutionDirectoryNames && !roddyResult.workDirectory.exists()) {
             roddyResult.roddyExecutionDirectoryNames.clear()
@@ -198,7 +197,6 @@ class ExecuteRoddyCommandService {
      */
     @Deprecated
     void createWorkOutputDirectory(Realm realm, File file) {
-        assert realm: "Realm must not be null"
         assert file: "File must not be null"
         String fileList = [
                 file,

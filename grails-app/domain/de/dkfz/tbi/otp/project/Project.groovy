@@ -51,8 +51,10 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
     String individualPrefix
     String internalNotes
     String dirName
-    Realm realm
     String dirAnalysis
+
+    @Deprecated
+    Realm realm
 
     /**
      * Historic flag to signal whether the individualPrefix field has to be unqiue or not.

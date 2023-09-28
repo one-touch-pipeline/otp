@@ -19,40 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.jobs
 
-import groovy.util.logging.Slf4j
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
+databaseChangeLog = {
 
-import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
-
-import java.nio.file.Path
-
-/**
- * Sets the permission and groups of result files
- */
-@Component
-@Slf4j
-class SetCorrectPermissionJob extends AbstractJob {
-
-    @Autowired
-    FileService fileService
-
-    @Override
-    void execute(WorkflowStep workflowStep) {
-        correctPermission(workflowStep)
+    changeSet(author: "-", id: "1696597914405-95") {
+        dropForeignKeyConstraint(baseTableName: "cluster_job", constraintName: "cluster_job_realm_id_fkey")
     }
 
-    @Override
-    final JobStage getJobStage() {
-        return JobStage.CORRECT_PERMISSION
-    }
-
-    void correctPermission(WorkflowStep workflowStep) {
-        Path workDirectory = getWorkDirectory(workflowStep)
-        fileService.correctPathPermissionAndGroupRecursive(workDirectory, workflowStep.workflowRun.project.unixGroup)
-        workflowStateChangeService.changeStateToSuccess(workflowStep)
+    changeSet(author: "-", id: "1696597914405-126") {
+        dropColumn(columnName: "realm_id", tableName: "cluster_job")
     }
 }

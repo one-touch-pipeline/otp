@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,35 +27,28 @@ import groovy.transform.EqualsAndHashCode
 import de.dkfz.tbi.otp.ngsdata.Realm
 
 @CompileDynamic
-@EqualsAndHashCode(includes = ["clusterJobId", "realm"])
+@EqualsAndHashCode(includes = ["clusterJobId"])
 class ClusterJobIdentifier {
-
-    final Realm realm
 
     final String clusterJobId
 
-    long getRealmId() {
-        return realm.id
-    }
-
+    @SuppressWarnings("UnusedMethodParameter")
     ClusterJobIdentifier(final Realm realm, final String clusterJobId) {
-        assert realm : "Realm not specified"
         assert clusterJobId : "Cluster job ID not specified"
-        this.realm = realm
         this.clusterJobId = clusterJobId
     }
 
     ClusterJobIdentifier(final ClusterJobIdentifier identifier) {
-        this(identifier.realm, identifier.clusterJobId)
+        this(null, identifier.clusterJobId)
     }
 
     ClusterJobIdentifier(final ClusterJob clusterJob) {
-        this(clusterJob.realm, clusterJob.clusterJobId)
+        this(null, clusterJob.clusterJobId)
     }
 
     @Override
     String toString() {
-        return "Cluster job ${clusterJobId} on ${realm}"
+        return "Cluster job ${clusterJobId}"
     }
 
     static List<ClusterJobIdentifier> asClusterJobIdentifierList(final Collection<? extends ClusterJob> c) {

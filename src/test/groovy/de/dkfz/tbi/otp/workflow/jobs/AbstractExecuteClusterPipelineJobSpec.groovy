@@ -87,7 +87,7 @@ class AbstractExecuteClusterPipelineJobSpec extends Specification implements Dat
             0 * _
         }
         job.clusterAccessService = Mock(ClusterAccessService) {
-            1 * executeJobs(workflowStep.workflowRun.project.realm, workflowStep, scripts, _)
+            1 * executeJobs(workflowStep, scripts, _)
         }
         job.logService = Mock(LogService)
 
@@ -116,7 +116,7 @@ class AbstractExecuteClusterPipelineJobSpec extends Specification implements Dat
         job.execute(workflowStep)
 
         then:
-        1 * job.clusterAccessService.executeJobs(workflowStep.workflowRun.project.realm, workflowStep, scripts,
+        1 * job.clusterAccessService.executeJobs(workflowStep, scripts,
                 [(JobSubmissionOption.NODE_FEATURE): 'node_2', (JobSubmissionOption.CORES): 'cores_1'])
     }
 }

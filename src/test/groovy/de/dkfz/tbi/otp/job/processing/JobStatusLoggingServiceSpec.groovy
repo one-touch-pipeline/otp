@@ -72,7 +72,7 @@ class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTe
         realm = DomainFactory.createRealm()
         configService = new TestConfigService([(OtpProperty.PATH_CLUSTER_LOGS_OTP): LOGGING_ROOT_PATH])
         service.configService = configService
-        expectedLogFilePath = "/fakeRootPath/log/status/joblog_${ARBITRARY_PROCESS_ID}_${ARBITRARY_PBS_ID}_${realm.id}.log"
+        expectedLogFilePath = "/fakeRootPath/log/status/joblog_${ARBITRARY_PROCESS_ID}_${ARBITRARY_PBS_ID}.log"
     }
 
     void cleanup() {
@@ -82,14 +82,6 @@ class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTe
     void "test logFileBaseDir, when processing step is null"() {
         when:
         service.logFileBaseDir(null)
-
-        then:
-        thrown(IllegalArgumentException)
-    }
-
-    void "test constructLogFileLocation, when realm is null"() {
-        when:
-        service.constructLogFileLocation(null, new ProcessingStep())
 
         then:
         thrown(IllegalArgumentException)
@@ -121,7 +113,7 @@ class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTe
 
         expect:
         service.constructLogFileLocation(realm, processingStep) ==
-                "${EXPECTED_BASE_PATH}/joblog_${ARBITRARY_PROCESS_ID}_\$(echo \${PBS_JOBID} | cut -d. -f1)_${realm.id}.log"
+                "${EXPECTED_BASE_PATH}/joblog_${ARBITRARY_PROCESS_ID}_\$(echo \${PBS_JOBID} | cut -d. -f1).log"
     }
 
     void "test constructLogFileLocation, when cluster job ID is passed"() {

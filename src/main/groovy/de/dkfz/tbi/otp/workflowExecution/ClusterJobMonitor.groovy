@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,11 +27,10 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+
 import de.dkfz.roddy.execution.jobs.JobState
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.scheduler.AbstractClusterJobMonitor
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.workflowExecution.cluster.ClusterStatisticService
 
 /**
@@ -80,8 +79,8 @@ class ClusterJobMonitor extends AbstractClusterJobMonitor {
     }
 
     @Override
-    protected Map<ClusterJobIdentifier, JobState> retrieveKnownJobsWithState(Realm realm) {
-        return clusterStatisticService.retrieveKnownJobsWithState(realm)
+    protected Map<String, JobState> retrieveKnownJobsWithState() {
+        return clusterStatisticService.retrieveKnownJobsWithState()
     }
 
     @Override

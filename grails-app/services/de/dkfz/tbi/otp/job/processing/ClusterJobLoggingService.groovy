@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,7 +48,6 @@ class ClusterJobLoggingService {
     }
 
     File createAndGetLogDirectory(Realm realm, ProcessingStep processingStep) {
-        assert realm: 'No realm specified.'
         File logDirectory = getLogDirectory(processingStep)
         if (!logDirectory.exists()) {
             // race condition between threads and within NFS can be ignored, since createDirectoryRecursivelyAndSetPermissionsViaBash handle them

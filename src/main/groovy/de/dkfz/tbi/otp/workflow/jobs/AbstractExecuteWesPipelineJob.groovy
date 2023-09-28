@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -116,7 +116,7 @@ abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob 
             logService.addSimpleLogEntry(workflowStep, "Create ${parameters.size()} weskit calls")
             parameters.each { Path path, Map<String, String> parameter ->
                 // define directory to store its output
-                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path, workflowStep.realm)
+                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path)
 
                 // config should be created each time since it is modified with mergeSortedMaps method
                 Map<String, String> config = mapper.readValue(workflowStep.workflowRun.combinedConfig, HashMap)

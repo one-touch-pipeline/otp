@@ -1658,7 +1658,6 @@ class DomainFactory {
             ]) {
         return createDomainObject(ClusterJob, [
                 processingStep: processingStep,
-                realm         : clusterJobIdentifier.realm,
                 clusterJobId  : clusterJobIdentifier.clusterJobId,
                 userName      : "userName_${counter++}",
         ], myProps)

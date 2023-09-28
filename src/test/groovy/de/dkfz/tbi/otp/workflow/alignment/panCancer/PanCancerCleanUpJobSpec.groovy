@@ -75,8 +75,8 @@ class PanCancerCleanUpJobSpec extends Specification implements DataTest, Workflo
             getRoddyBamFile(workflowStep) >> bamFile
         }
         job.linkFilesToFinalDestinationService = Mock(LinkFilesToFinalDestinationService) {
-            1 * getFilesToCleanup(_, _) >> [dir1, file1]
-            1 * getOldResultsToCleanup(_, _) >> [dir2, file2]
+            1 * getFilesToCleanup(_) >> [dir1, file1]
+            1 * getOldResultsToCleanup(_) >> [dir2, file2]
         }
         job.fileService = Mock(FileService)
 
@@ -99,8 +99,8 @@ class PanCancerCleanUpJobSpec extends Specification implements DataTest, Workflo
             getRoddyBamFile(workflowStep) >> bamFile
         }
         job.linkFilesToFinalDestinationService = Mock(LinkFilesToFinalDestinationService) {
-            1 * getFilesToCleanup(_, _) >> [dir1, file1]
-            1 * getOldResultsToCleanup(_, _) >> [dir2, file2]
+            1 * getFilesToCleanup(_) >> [dir1, file1]
+            1 * getOldResultsToCleanup(_) >> [dir2, file2]
         }
         job.fileService = Mock(FileService)
 

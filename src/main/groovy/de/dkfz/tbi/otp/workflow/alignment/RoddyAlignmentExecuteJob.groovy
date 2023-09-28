@@ -27,7 +27,6 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.workflow.jobs.AbstractExecuteRoddyPipelineJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -79,6 +78,6 @@ class RoddyAlignmentExecuteJob extends AbstractExecuteRoddyPipelineJob implement
     }
 
     @Override
-    protected void createAdditionalConfigFiles(WorkflowStep workflowStep, Path configPath, Realm realm) {
+    protected void createAdditionalConfigFiles(WorkflowStep workflowStep, Path configPath) {
     }
 }

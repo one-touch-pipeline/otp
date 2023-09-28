@@ -76,7 +76,7 @@ class FastqcExecuteWesPipelineJob extends AbstractExecuteWesPipelineJob implemen
         List<FastqcProcessedFile> fastqcProcessedFiles = getFastqcProcessedFiles(workflowStep)
         if (fastqcProcessedFiles.every { it.fileCopied }) {
             logService.addSimpleLogEntry(workflowStep, "fastqc reports found, copy them")
-            fastqcReportService.copyExistingFastqcReportsNewSystem(workflowStep.realm, fastqcProcessedFiles)
+            fastqcReportService.copyExistingFastqcReportsNewSystem(fastqcProcessedFiles)
             return false
         }
         logService.addSimpleLogEntry(workflowStep, "no fastqc reports found, create wes call")

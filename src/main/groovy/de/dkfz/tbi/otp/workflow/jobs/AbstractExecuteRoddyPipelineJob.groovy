@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -64,8 +64,7 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
     final void execute(WorkflowStep workflowStep) {
         assert workflowStep.workflowRun.combinedConfig
         RoddyResult roddyResult = getRoddyResult(workflowStep)
-        Realm realm = workflowStep.workflowRun.realm
-        FileSystem fs = fileSystemService.getRemoteFileSystem(realm)
+        FileSystem fs = fileSystemService.remoteFileSystem
         Path outputDir = fs.getPath(roddyResult.workDirectory.absolutePath)
         Path confDir = roddyConfigService.getConfigDirectory(outputDir)
         Path confFile = roddyConfigService.getConfigFile(outputDir)
@@ -86,9 +85,9 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
         )
         logService.addSimpleLogEntry(workflowStep, "The final xml:\n${xmlConfig}")
 
-        fileService.createFileWithContent(confFile, xmlConfig, realm, FileService.DEFAULT_FILE_PERMISSION, true)
+        fileService.createFileWithContent(confFile, xmlConfig, null, FileService.DEFAULT_FILE_PERMISSION, true)
 
-        createAdditionalConfigFiles(workflowStep, confDir, realm)
+        createAdditionalConfigFiles(workflowStep, confDir)
 
         String command = roddyCommandService.createRoddyCommand(
                 roddyResult.individual,
@@ -99,7 +98,7 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
 
         // begin of non-restartable area
         workflowRunService.markJobAsNotRestartableInSeparateTransaction(workflowStep.workflowRun)
-        ProcessOutput output = roddyExecutionService.execute(command, realm)
+        ProcessOutput output = roddyExecutionService.execute(command)
         // end of non-restartable area
         workflowStep.workflowRun.with {
             // done in same transaction in which cluster jobs are saved
@@ -130,5 +129,5 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
 
     protected abstract List<String> getAdditionalParameters(WorkflowStep workflowStep)
 
-    protected abstract void createAdditionalConfigFiles(WorkflowStep workflowStep, Path configPath, Realm realm)
+    protected abstract void createAdditionalConfigFiles(WorkflowStep workflowStep, Path configPath)
 }

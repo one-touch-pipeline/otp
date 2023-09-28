@@ -26,13 +26,14 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.utils.LinkEntry
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerLinkJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
 
 @Component
 @Slf4j
-class WgbsLinkJob extends de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerLinkJob {
+class WgbsLinkJob extends PanCancerLinkJob {
 
     @Override
     protected List<LinkEntry> getLinkMap(WorkflowStep workflowStep) {

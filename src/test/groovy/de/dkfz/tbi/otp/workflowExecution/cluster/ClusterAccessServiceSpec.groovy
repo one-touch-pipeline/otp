@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -46,7 +46,6 @@ class ClusterAccessServiceSpec extends Specification implements ServiceUnitTest<
 
     void "executeJobs, when multiple scripts given, then all methods of preparation, sending and starting are called and for each a cluster id is returned"() {
         given:
-        Realm realm = createRealm()
         WorkflowStep workflowStep = createWorkflowStep()
 
         BatchEuphoriaJobManager batchEuphoriaJobManager = Mock(BatchEuphoriaJobManager)
@@ -63,14 +62,14 @@ class ClusterAccessServiceSpec extends Specification implements ServiceUnitTest<
         }
 
         service.clusterJobManagerFactoryService = Mock(ClusterJobManagerFactoryService) {
-            1 * getJobManager(realm) >> batchEuphoriaJobManager
+            1 * getJobManager() >> batchEuphoriaJobManager
             0 * _
         }
         service.clusterJobHandlingService = Mock(ClusterJobHandlingService) {
-            1 * createBeJobsToSend(batchEuphoriaJobManager, realm, workflowStep, scripts, [:]) >> beJobs
+            1 * createBeJobsToSend(batchEuphoriaJobManager, workflowStep, scripts, [:]) >> beJobs
             1 * sendJobs(batchEuphoriaJobManager, workflowStep, beJobs)
             1 * startJob(batchEuphoriaJobManager, workflowStep, beJobs)
-            1 * createAndSaveClusterJobs(realm, workflowStep, beJobs) >> clusterJobs
+            1 * createAndSaveClusterJobs(workflowStep, beJobs) >> clusterJobs
             1 * collectJobStatistics(workflowStep, clusterJobs)
             1 * startMonitorClusterJob(workflowStep, clusterJobs)
             0 * _
@@ -83,7 +82,7 @@ class ClusterAccessServiceSpec extends Specification implements ServiceUnitTest<
         service.logService = Mock(LogService)
 
         when:
-        List<String> result = service.executeJobs(realm, workflowStep, scripts)
+        List<String> result = service.executeJobs(workflowStep, scripts)
 
         then:
         result == ids
@@ -91,11 +90,10 @@ class ClusterAccessServiceSpec extends Specification implements ServiceUnitTest<
 
     void "executeJobs, when no scripts are given, then throw exception"() {
         given:
-        Realm realm = createRealm()
         WorkflowStep workflowStep = createWorkflowStep()
 
         when:
-        service.executeJobs(realm, workflowStep, [])
+        service.executeJobs(workflowStep, [])
 
         then:
         thrown(NoScriptsGivenWorkflowException)
@@ -103,7 +101,6 @@ class ClusterAccessServiceSpec extends Specification implements ServiceUnitTest<
 
     void "executeJobs, when workflowRun has running cluster jobs, then throw a RunningClusterJobException"() {
         given:
-        Realm realm = createRealm()
         WorkflowStep previous = createWorkflowStep()
         WorkflowStep workflowStep = createWorkflowStep([
                 previous: previous,
@@ -129,7 +126,7 @@ class ClusterAccessServiceSpec extends Specification implements ServiceUnitTest<
         }
 
         when:
-        service.executeJobs(realm, workflowStep, scripts)
+        service.executeJobs(workflowStep, scripts)
 
         then:
         thrown(RunningClusterJobException)

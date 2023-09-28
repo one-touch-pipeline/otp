@@ -61,13 +61,13 @@ abstract class AbstractPrepareJob extends AbstractJob {
             String group = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
             fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(
                     workFolder.parent,
-                    workflowStep.workflowRun.project.realm,
+                    null,
                     group,
                     fileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING
             )
             fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(
                     workFolder,
-                    workflowStep.workflowRun.project.realm,
+                    null,
                     group,
                     fileService.OWNER_DIRECTORY_PERMISSION_STRING
             )
@@ -79,7 +79,7 @@ abstract class AbstractPrepareJob extends AbstractJob {
                 logService.addSimpleLogEntry(workflowStep, "Creating work directory ${workDirectory}")
                 fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(
                         workDirectory,
-                        workflowStep.workflowRun.project.realm,
+                        null,
                         workflowStep.workflowRun.project.unixGroup,
                 )
                 workflowStep.workflowRun.workDirectory = workDirectory
@@ -89,7 +89,6 @@ abstract class AbstractPrepareJob extends AbstractJob {
                 if (protectWorkDirectory) {
                     fileService.setGroupViaBash(
                             workDirectory,
-                            workflowStep.workflowRun.project.realm,
                             processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
                     )
                 }
@@ -101,7 +100,6 @@ abstract class AbstractPrepareJob extends AbstractJob {
             fileService.createLink(
                     entry.link,
                     entry.target,
-                    workflowStep.workflowRun.project.realm,
                     CreateLinkOption.DELETE_EXISTING_FILE,
             )
         }

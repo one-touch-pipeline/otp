@@ -47,11 +47,11 @@ class FastqcLinkJob extends AbstractLinkJob implements FastqcShared {
         files.each {
             links.add(new LinkEntry(link: fastqcDataFilesService.fastqcOutputPath(it),
                     target: fastqcDataFilesService.fastqcOutputPath(it, PathOption.REAL_PATH)))
-            if (fileService.fileIsReadable(fastqcDataFilesService.fastqcHtmlPath(it, PathOption.REAL_PATH), workflowStep.realm)) {
+            if (fileService.fileIsReadable(fastqcDataFilesService.fastqcHtmlPath(it, PathOption.REAL_PATH))) {
                 links.add(new LinkEntry(link: fastqcDataFilesService.fastqcHtmlPath(it),
                         target: fastqcDataFilesService.fastqcHtmlPath(it, PathOption.REAL_PATH)))
             }
-            if (fileService.fileIsReadable(fastqcDataFilesService.fastqcOutputMd5sumPath(it, PathOption.REAL_PATH), workflowStep.realm)) {
+            if (fileService.fileIsReadable(fastqcDataFilesService.fastqcOutputMd5sumPath(it, PathOption.REAL_PATH))) {
                 links.add(new LinkEntry(link: fastqcDataFilesService.fastqcOutputMd5sumPath(it),
                         target: fastqcDataFilesService.fastqcOutputMd5sumPath(it, PathOption.REAL_PATH)))
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -124,7 +124,7 @@ class ClusterJobIntegrationSpec extends Specification implements WorkflowSystemD
         clusterJob.errors.allErrors.empty == (notNullableProperty == null)
 
         where:
-        notNullableProperty << [null, "realm", "clusterJobId", "userName", "clusterJobName", "jobClass", "queued"]
+        notNullableProperty << [null, "clusterJobId", "userName", "clusterJobName", "jobClass", "queued"]
     }
 
     @Unroll

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,8 +27,6 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.roddy.execution.jobs.JobState
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 
 @Component
@@ -47,11 +45,9 @@ abstract class AbstractClusterJobMonitor {
     protected void doCheck() {
         List<ClusterJob> clusterJobsToCheck = fetchClusterJobsFromDatabase()
 
-        clusterJobsToCheck.groupBy { ClusterJob clusterJob ->
-            clusterJob.realm
-        }.each { Realm realm, List<ClusterJob> clusterJobs ->
-            LogUsedTimeUtils.logUsedTime("${name}: handle cluster jobs for realm ${realm.name}") {
-                checkClusterAndClusterJobs(realm, clusterJobs)
+        if (clusterJobsToCheck) {
+            LogUsedTimeUtils.logUsedTime("${name}: handle cluster jobs") {
+                checkClusterAndClusterJobs(clusterJobsToCheck)
             }
         }
     }
@@ -65,39 +61,38 @@ abstract class AbstractClusterJobMonitor {
         LogUsedTimeUtils.logUsedTime("${name}: fetch cluster jobs from database") {
             clusterJobsToCheck = findAllClusterJobsToCheck()
         }
-        clusterJobsToCheck*.realm.unique()*.name // init realm, since it is needed later outside the transaction
         log.debug("${name}: Check for finished cluster jobs: ${clusterJobsToCheck.size()}")
         return clusterJobsToCheck
     }
 
     /**
-     * Helper to get the clusterJob states from the cluster and do checks using {@link #checkClusterJobs(Realm, List, Map)}
+     * Helper to get the clusterJob states from the cluster and do checks using {@link #checkClusterJobs(List, Map)}
      */
     @SuppressWarnings('CatchThrowable')
-    protected void checkClusterAndClusterJobs(Realm realm, List<ClusterJob> clusterJobs) {
-        Map<ClusterJobIdentifier, JobState> jobStates
+    protected void checkClusterAndClusterJobs(List<ClusterJob> clusterJobs) {
+        Map<String, JobState> jobStates
         try {
-            LogUsedTimeUtils.logUsedTime("${name}: fetch cluster jobs state from cluster on realm ${realm.name}") {
-                jobStates = retrieveKnownJobsWithState(realm)
+            LogUsedTimeUtils.logUsedTime("${name}: fetch cluster jobs state from cluster") {
+                jobStates = retrieveKnownJobsWithState()
             }
-            log.debug("${name}: Retrieving job states for ${realm}: ${jobStates.size()}")
+            log.debug("${name}: Retrieving job states: ${jobStates.size()}")
         } catch (Throwable e) {
-            log.error("${name}: Retrieving job states for ${realm} failed, skip", e)
+            log.error("${name}: Retrieving job states failed, skip", e)
             return
         }
 
         LogUsedTimeUtils.logUsedTime("${name}: checking all ${clusterJobs.size()} cluster jobs") {
-            checkClusterJobs(realm, clusterJobs, jobStates)
+            checkClusterJobs(clusterJobs, jobStates)
         }
     }
 
     /**
      * Helper to do the finish checking of each job and handler finished jobs via {@link #handleFinishedClusterJobWrapper(ClusterJob)}
      */
-    protected void checkClusterJobs(Realm realm, List<ClusterJob> clusterJobs, Map<ClusterJobIdentifier, JobState> jobStates) {
+    protected void checkClusterJobs(List<ClusterJob> clusterJobs, Map<String, JobState> jobStates) {
         List<String> finishedClusterJobIds = []
         clusterJobs.each { ClusterJob clusterJob ->
-            JobState status = jobStates.get(new ClusterJobIdentifier(clusterJob), JobState.COMPLETED_UNKNOWN)
+            JobState status = jobStates.get(clusterJob.clusterJobId, JobState.COMPLETED_UNKNOWN)
             log.debug("${name}: Checking cluster job ID ${clusterJob.clusterJobId}: ${status}")
 
             // .isDummy() and .isStarted() are roddy only states that should not occur
@@ -106,7 +101,7 @@ abstract class AbstractClusterJobMonitor {
                 finishedClusterJobIds.add(clusterJob.clusterJobId)
             }
         }
-        log.debug("${name}: Finshed ${finishedClusterJobIds.size()} cluster jobs on ${realm}" +
+        log.debug("${name}: Finshed ${finishedClusterJobIds.size()} cluster jobs" +
                 "${finishedClusterJobIds ? ": ${finishedClusterJobIds.sort().join(', ')}" : ""}")
     }
 
@@ -147,7 +142,7 @@ abstract class AbstractClusterJobMonitor {
      */
     abstract protected void handleFinishedClusterJobs(final ClusterJob clusterJob)
 
-    abstract protected Map<ClusterJobIdentifier, JobState> retrieveKnownJobsWithState(Realm realm)
+    abstract protected Map<String, JobState> retrieveKnownJobsWithState()
 
     abstract protected void retrieveAndSaveJobStatisticsAfterJobFinished(ClusterJob clusterJob)
 

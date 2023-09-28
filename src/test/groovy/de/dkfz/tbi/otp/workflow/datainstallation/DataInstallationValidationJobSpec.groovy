@@ -59,7 +59,7 @@ class DataInstallationValidationJobSpec extends Specification implements DataTes
             1 * getFileFinalPath(_) >> { RawSequenceFile rawSequenceFile -> rawSequenceFile.fileName }
         }
         job.fileSystemService = Mock(FileSystemService) {
-            getRemoteFileSystem(_) >> FileSystems.default
+            getRemoteFileSystem() >> FileSystems.default
         }
 
         when:
@@ -131,7 +131,7 @@ class DataInstallationValidationJobSpec extends Specification implements DataTes
             _ * getSeqTrack(workflowStep) >> seqTrack
         }
         job.fileSystemService = Mock(FileSystemService) {
-            getRemoteFileSystem(_) >> FileSystems.default
+            getRemoteFileSystem() >> FileSystems.default
         }
         job.lsdfFilesService = Mock(LsdfFilesService) {
             getFileFinalPath(_) >> Paths.get("")

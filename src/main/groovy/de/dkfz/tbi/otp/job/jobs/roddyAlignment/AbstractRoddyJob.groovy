@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -64,7 +64,7 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
             final Realm realm = roddyResult.project.realm
             String cmd = prepareAndReturnWorkflowSpecificCommand(roddyResult, realm)
 
-            ProcessOutput output = roddyExecutionService.execute(cmd, realm)
+            ProcessOutput output = roddyExecutionService.execute(cmd)
 
             Collection<ClusterJob> submittedClusterJobs = roddyExecutionService.createClusterJobObjects(roddyResult, output, null, processingStep)
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,8 @@ import org.slf4j.event.Level
 import de.dkfz.roddy.execution.jobs.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.ClusterJobManagerFactoryService
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.utils.logging.AbstractSimpleLogger
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.cluster.logs.ClusterLogQueryResultFileService
 
@@ -57,22 +56,19 @@ class ClusterStatisticService {
     /**
      * Returns a map of jobs the cluster job scheduler knows about
      *
-     * @param realm The realm to connect to
-     * @param userName The name of the user whose jobs should be checked
      * @return A map containing job identifiers and their status
      */
-    Map<ClusterJobIdentifier, JobState> retrieveKnownJobsWithState(Realm realm) throws Exception {
-        assert realm: "No realm specified."
-        BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.getJobManager(realm)
+    Map<String, JobState> retrieveKnownJobsWithState() throws Exception {
+        BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.jobManager
 
         Map<BEJobID, JobState> jobStates = queryAndLogAllClusterJobs(jobManager)
 
         return jobStates.collectEntries { BEJobID jobId, JobState state ->
             [
-                    new ClusterJobIdentifier(realm, jobId.id),
+                    jobId.id,
                     state,
             ]
-        } as Map<ClusterJobIdentifier, JobState>
+        } as Map<String, JobState>
     }
 
     private Map<BEJobID, JobState> queryAndLogAllClusterJobs(BatchEuphoriaJobManager jobManager) {
@@ -91,7 +87,7 @@ class ClusterStatisticService {
     @SuppressWarnings("CatchThrowable")
     void retrieveAndSaveJobInformationAfterJobStarted(ClusterJob clusterJob) throws Exception {
         BEJobID beJobID = new BEJobID(clusterJob.clusterJobId)
-        BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.getJobManager(clusterJob.realm)
+        BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.jobManager
         GenericJobInfo jobInfo
 
         try {
@@ -118,7 +114,7 @@ class ClusterStatisticService {
 
     void retrieveAndSaveJobStatisticsAfterJobFinished(ClusterJob clusterJob) throws Exception {
         BEJobID beJobId = new BEJobID(clusterJob.clusterJobId)
-        BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.getJobManager(clusterJob.realm)
+        BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.jobManager
         GenericJobInfo jobInfo = jobManager.queryExtendedJobStateById([beJobId]).get(beJobId)
 
         if (jobInfo) {

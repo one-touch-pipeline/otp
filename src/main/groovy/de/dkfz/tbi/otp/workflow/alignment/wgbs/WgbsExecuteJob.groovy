@@ -84,7 +84,7 @@ class WgbsExecuteJob extends RoddyAlignmentExecuteJob implements PanCancerShared
     }
 
     @Override
-    protected final void createAdditionalConfigFiles(WorkflowStep workflowStep, Path configPath, Realm realm) {
+    protected final void createAdditionalConfigFiles(WorkflowStep workflowStep, Path configPath) {
         Path file = configPath.resolve("coAppAndRef.xml")
         if (Files.exists(file)) {
             return
@@ -95,6 +95,6 @@ class WgbsExecuteJob extends RoddyAlignmentExecuteJob implements PanCancerShared
             |               description='This file is a workaround since Roddy plugin imports this config.'>
             |</configuration>
             |""".stripMargin()
-        fileService.createFileWithContent(configPath.resolve("coAppAndRef.xml"), coAppAndRef, realm)
+        fileService.createFileWithContent(configPath.resolve("coAppAndRef.xml"), coAppAndRef)
     }
 }

@@ -1651,7 +1651,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep(props.jobClass)
         assert processingStep
 
-        ClusterJob job = DomainFactory.createClusterJob(realm: realm, userName: "unixUser", processingStep: processingStep, seqType: props.seqType)
+        ClusterJob job = DomainFactory.createClusterJob(userName: "unixUser", processingStep: processingStep, seqType: props.seqType)
 
         job.clusterJobName = "test_" + processingStep.nonQualifiedJobClass
 

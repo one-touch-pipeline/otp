@@ -82,7 +82,7 @@ class FastqcLinkJobSpec extends Specification implements DataTest, FastqcWorkflo
             fastqcOutputMd5sumPath(file2, PathOption.REAL_PATH) >> Paths.get("/file2-md5-real")
         }
         job.fileService = Mock(FileService) {
-            fileIsReadable(_, _) >> true
+            fileIsReadable(_) >> true
         }
 
         expect:
@@ -116,8 +116,8 @@ class FastqcLinkJobSpec extends Specification implements DataTest, FastqcWorkflo
             fastqcOutputMd5sumPath(file1, PathOption.REAL_PATH) >> Paths.get("/file1-md5-real")
         }
         job.fileService = Mock(FileService) {
-            fileIsReadable(Paths.get("/file1-htm-real"), _) >> htmlExists
-            fileIsReadable(Paths.get("/file1-md5-real"), _) >> md5Exists
+            fileIsReadable(Paths.get("/file1-htm-real")) >> htmlExists
+            fileIsReadable(Paths.get("/file1-md5-real")) >> md5Exists
         }
 
         when:

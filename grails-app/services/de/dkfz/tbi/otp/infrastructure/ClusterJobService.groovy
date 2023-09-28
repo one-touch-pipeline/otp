@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -100,7 +100,7 @@ class ClusterJobService {
     /**
      * creates a cluster job object with at this time known attributes
      */
-    @SuppressWarnings("ParameterCount")
+    @SuppressWarnings(["ParameterCount", "UnusedMethodParameter"])
     @Deprecated
     ClusterJob createClusterJob(Realm realm, String clusterJobId, String userName,
                                 ProcessingStep processingStep, SeqType seqType = null,
@@ -109,7 +109,6 @@ class ClusterJobService {
         ClusterJob job = new ClusterJob(
                 processingStep: processingStep,
                 individual: processingStep.processParameterObject?.individual,
-                realm: realm,
                 clusterJobId: clusterJobId,
                 userName: userName,
                 clusterJobName: clusterJobName,
@@ -125,13 +124,12 @@ class ClusterJobService {
      * creates a cluster job object with at this time known attributes
      */
     @SuppressWarnings("ParameterCount")
-    ClusterJob createClusterJob(Realm realm, String clusterJobId, String userName,
+    ClusterJob createClusterJob(String clusterJobId, String userName,
                                 WorkflowStep workflowStep, String clusterJobName,
                                 String jobClass = workflowStep.class.simpleName) {
         ClusterJob job = new ClusterJob([
                 workflowStep  : workflowStep,
                 oldSystem     : false,
-                realm         : realm,
                 clusterJobId  : clusterJobId,
                 userName      : userName,
                 clusterJobName: clusterJobName,
@@ -200,8 +198,8 @@ class ClusterJobService {
         if (!clusterJob.jobLog) {
             return false
         }
-        FileSystem fs = fileSystemService.getRemoteFileSystem(clusterJob.realm)
-        return fileService.fileIsReadable(fs.getPath(clusterJob.jobLog), clusterJob.realm)
+        FileSystem fs = fileSystemService.remoteFileSystem
+        return fileService.fileIsReadable(fs.getPath(clusterJob.jobLog))
     }
 
     /**
@@ -215,7 +213,7 @@ class ClusterJobService {
             return "Path to job log not set."
         }
         try {
-            FileSystem fs = fileSystemService.getRemoteFileSystem(clusterJob.realm)
+            FileSystem fs = fileSystemService.remoteFileSystem
             return fs.getPath(clusterJob.jobLog).text
         } catch (IOException e) {
             return e.message

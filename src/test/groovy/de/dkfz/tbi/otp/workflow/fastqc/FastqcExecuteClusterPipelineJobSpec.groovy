@@ -181,7 +181,7 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
 
         job.fastqcReportService = Mock(FastqcReportService) {
             1 * canFastqcReportsBeCopied([fastqcProcessedFile1, fastqcProcessedFile2]) >> true
-            1 * copyExistingFastqcReports(step.realm, [fastqcProcessedFile1, fastqcProcessedFile2], _)
+            1 * copyExistingFastqcReports([fastqcProcessedFile1, fastqcProcessedFile2], _)
             0 * _
         }
 

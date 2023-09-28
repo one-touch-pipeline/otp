@@ -86,7 +86,7 @@ class RoddyAlignmentConditionalFailJob extends AbstractConditionalFailJob implem
             }
 
             final Collection<Path> missingPaths = paths.findAll { Path path ->
-                !fileService.isFileReadableAndNotEmpty(path, configService.defaultRealm)
+                !fileService.isFileReadableAndNotEmpty(path)
             }
 
             if (missingPaths) {

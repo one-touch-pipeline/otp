@@ -255,18 +255,6 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         e.message.contains("The input analysisIDinConfigFile is not allowed to be null")
     }
 
-    void "test defaultRoddyExecutionCommand_RealmIsNull_ShouldFail"() {
-        given:
-        setupData()
-
-        when:
-        executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID, null)
-
-        then:
-        Throwable e = thrown(AssertionError)
-        e.message.contains("The input realm is not allowed to be null")
-    }
-
     // false positives, since rule can not recognize calling class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
     void "test defaultRoddyExecutionCommand_ProcessingOptionRoddyApplicationIniDoesNotExistInFilesystem_ShouldFail"() {
@@ -442,17 +430,6 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
 
         then:
         expectedCmd == actualCmd
-    }
-
-    void "test createWorkOutputDirectory_RealmIsNull_ShouldFail"() {
-        given:
-        setupData()
-
-        when:
-        executeRoddyCommandService.createWorkOutputDirectory(null, tmpOutputDir)
-
-        then:
-        thrown(AssertionError)
     }
 
     void "test createWorkOutputDirectory_FileIsNull_ShouldFail"() {

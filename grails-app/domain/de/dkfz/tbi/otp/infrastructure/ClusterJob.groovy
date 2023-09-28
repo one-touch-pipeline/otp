@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -105,10 +105,6 @@ class ClusterJob implements Entity {
      */
     CheckStatus checkStatus = CheckStatus.CREATED
 
-    /**
-     * Reference to the used realm
-     */
-    Realm realm
     /**
      * Id of the cluster job
      */
@@ -235,7 +231,6 @@ class ClusterJob implements Entity {
 
     static constraints = {
         validated(nullable: false)
-        realm(nullable: false)
         clusterJobId(blank: false, nullable: false)
         userName blank: false
         clusterJobName(blank: false, nullable: false)
@@ -293,7 +288,6 @@ class ClusterJob implements Entity {
         workflowStep index: "cluster_job_workflow_step_idx"
         oldSystem index: "cluster_job_old_system_check_status_idx"
         checkStatus index: "cluster_job_old_system_check_status_idx"
-        realm index: "cluster_job_realm_idx"
         individual index: "cluster_job_individual_idx"
     }
 
@@ -390,7 +384,6 @@ class ClusterJob implements Entity {
 
     static ClusterJob getByClusterJobIdentifier(ClusterJobIdentifier identifier, ProcessingStep processingStep) {
         return exactlyOneElement(findAllWhere(
-                realm: identifier.realm,
                 clusterJobId: identifier.clusterJobId,
                 processingStep: processingStep,
         ))
@@ -398,6 +391,6 @@ class ClusterJob implements Entity {
 
     @Override
     String toString() {
-        return "Cluster job ${clusterJobId} on realm ${realm}"
+        return "Cluster job ${clusterJobId}"
     }
 }

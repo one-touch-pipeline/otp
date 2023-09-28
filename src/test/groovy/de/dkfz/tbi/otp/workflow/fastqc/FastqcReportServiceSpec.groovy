@@ -223,11 +223,11 @@ class FastqcReportServiceSpec extends Specification implements DataTest, FastqcD
         }
 
         service.remoteShellHelper = Mock(RemoteShellHelper) {
-            2 * executeCommandReturnProcessOutput(step.realm, _) >> new ProcessOutput("", "", 0)
+            2 * executeCommandReturnProcessOutput(_) >> new ProcessOutput("", "", 0)
         }
 
         expect:
-        service.copyExistingFastqcReports(step.realm, [fastqcProcessedFile1, fastqcProcessedFile2], sourceDir)
+        service.copyExistingFastqcReports([fastqcProcessedFile1, fastqcProcessedFile2], sourceDir)
     }
 
     @Unroll
@@ -251,7 +251,7 @@ class FastqcReportServiceSpec extends Specification implements DataTest, FastqcD
         }
 
         service.fileService = Mock(FileService) {
-            2 * createDirectoryRecursivelyAndSetPermissionsViaBash(targetDir, step.realm)
+            2 * createDirectoryRecursivelyAndSetPermissionsViaBash(targetDir)
             1 * ensureFileIsReadableAndNotEmpty(sourceFastqc1)
             1 * ensureFileIsReadableAndNotEmpty(sourceFastqc2)
             1 * ensureFileIsReadableAndNotEmpty(targetFastqc1)
@@ -260,10 +260,10 @@ class FastqcReportServiceSpec extends Specification implements DataTest, FastqcD
         }
 
         service.remoteShellHelper = Mock(RemoteShellHelper) {
-            2 * executeCommandReturnProcessOutput(step.realm, _) >> new ProcessOutput("", "", 0)
+            2 * executeCommandReturnProcessOutput(_) >> new ProcessOutput("", "", 0)
         }
 
         expect:
-        service.copyExistingFastqcReportsNewSystem(step.realm, [fastqcProcessedFile1, fastqcProcessedFile2])
+        service.copyExistingFastqcReportsNewSystem([fastqcProcessedFile1, fastqcProcessedFile2])
     }
 }

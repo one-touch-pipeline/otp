@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -56,7 +56,7 @@ class FastqcConditionalFailJob extends AbstractConditionalFailJob implements Fas
         final Collection<Path> missingPaths = rawSequenceFiles.collect { RawSequenceFile file ->
             lsdfFilesService.getFileViewByPidPathAsPath(file)
         }.findAll { Path path ->
-            !fileService.isFileReadableAndNotEmpty(path, configService.defaultRealm)
+            !fileService.isFileReadableAndNotEmpty(path)
         }
         if (missingPaths) {
             throw new WorkflowException("The following ${missingPaths.size()} files are missing:\n${missingPaths.join("\n")}")

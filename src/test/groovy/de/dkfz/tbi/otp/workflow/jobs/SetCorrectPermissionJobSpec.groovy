@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -67,8 +67,8 @@ class SetCorrectPermissionJobSpec extends Specification implements DataTest, Wor
         job.execute(workflowStep)
 
         then:
-        1 * job.fileSystemService.getRemoteFileSystem(realm) >> FileSystems.default
-        1 * job.fileService.correctPathPermissionAndGroupRecursive(workflowDirectoryPath, realm, unixGroup) >> _
+        1 * job.fileSystemService.remoteFileSystem >> FileSystems.default
+        1 * job.fileService.correctPathPermissionAndGroupRecursive(workflowDirectoryPath, unixGroup) >> _
         1 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
     }
 }

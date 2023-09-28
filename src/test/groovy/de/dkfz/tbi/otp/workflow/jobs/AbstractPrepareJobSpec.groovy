@@ -68,11 +68,11 @@ class AbstractPrepareJobSpec extends Specification implements DataTest, Workflow
         then:
         1 * job.buildWorkDirectoryPath(workflowStep) >> workDirectory
         1 * job.shouldWorkDirectoryBeProtected() >> false
-        1 * job.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workDirectory, _, workflowStep.workflowRun.project.unixGroup) >> null
+        1 * job.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workDirectory, null, workflowStep.workflowRun.project.unixGroup) >> null
         workflowStep.workflowRun.workDirectory == workDirectory.toString()
 
         1 * job.generateMapForLinking(workflowStep) >> [new LinkEntry(link, target)]
-        1 * job.fileService.createLink(target, link, _, CreateLinkOption.DELETE_EXISTING_FILE) >> null
+        1 * job.fileService.createLink(target, link, CreateLinkOption.DELETE_EXISTING_FILE) >> null
 
         1 * job.doFurtherPreparation(workflowStep) >> null
 
@@ -100,14 +100,14 @@ class AbstractPrepareJobSpec extends Specification implements DataTest, Workflow
         then:
         1 * job.buildWorkDirectoryPath(workflowStep) >> workDirectory
         1 * job.shouldWorkDirectoryBeProtected() >> true
-        1 * job.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workDirectory, _, workflowStep.workflowRun.project.unixGroup) >> null
+        1 * job.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workDirectory, null, workflowStep.workflowRun.project.unixGroup) >> null
         workflowStep.workflowRun.workDirectory == workDirectory.toString()
 
         1 * job.processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP) >> testGroup
-        1 * job.fileService.setGroupViaBash(workDirectory, _, testGroup)
+        1 * job.fileService.setGroupViaBash(workDirectory, testGroup)
 
         1 * job.generateMapForLinking(workflowStep) >> [new LinkEntry(link, target)]
-        1 * job.fileService.createLink(target, link, _, CreateLinkOption.DELETE_EXISTING_FILE) >> null
+        1 * job.fileService.createLink(target, link, CreateLinkOption.DELETE_EXISTING_FILE) >> null
 
         1 * job.doFurtherPreparation(workflowStep) >> null
 
@@ -140,11 +140,11 @@ class AbstractPrepareJobSpec extends Specification implements DataTest, Workflow
         1 * job.filestoreService.getWorkFolderPath(_) >> workFolder
         1 * job.processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP) >> testGroup
 
-        1 * job.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workFolder.parent, workflowStep.workflowRun.project.realm, testGroup, "2755")
-        1 * job.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workFolder, workflowStep.workflowRun.project.realm, testGroup, "2700")
+        1 * job.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workFolder.parent, null, testGroup, "2755")
+        1 * job.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workFolder, null, testGroup, "2700")
 
         1 * job.generateMapForLinking(workflowStep) >> [new LinkEntry(link, target)]
-        1 * job.fileService.createLink(target, link, _, CreateLinkOption.DELETE_EXISTING_FILE) >> null
+        1 * job.fileService.createLink(target, link, CreateLinkOption.DELETE_EXISTING_FILE) >> null
 
         1 * job.doFurtherPreparation(workflowStep) >> null
 

@@ -42,7 +42,7 @@ class DataInstallationValidationJob extends AbstractOtpClusterValidationJob impl
     @Override
     protected List<Path> getExpectedFiles(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
-        FileSystem fs = getFileSystem(workflowStep)
+        FileSystem fs = fileSystemService.remoteFileSystem
 
         return seqTrack.sequenceFiles.collect { RawSequenceFile rawSequenceFile ->
             fs.getPath(lsdfFilesService.getFileFinalPath(rawSequenceFile))
@@ -71,7 +71,7 @@ class DataInstallationValidationJob extends AbstractOtpClusterValidationJob impl
     @Override
     protected void saveResult(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
-        FileSystem fs = getFileSystem(workflowStep)
+        FileSystem fs = fileSystemService.remoteFileSystem
 
         seqTrack.sequenceFiles.collect { RawSequenceFile rawSequenceFile ->
             Path targetPath = fs.getPath(lsdfFilesService.getFileFinalPath(rawSequenceFile))

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,9 +26,7 @@ import spock.lang.Specification
 
 import de.dkfz.roddy.execution.jobs.JobState
 import de.dkfz.tbi.TestConstants
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.JobMailService
 import de.dkfz.tbi.otp.job.jobs.MonitoringTestJob
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
@@ -38,6 +36,7 @@ import de.dkfz.tbi.otp.job.restarting.RestartHandlerService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.workflowExecution.cluster.ClusterStatisticService
 
@@ -99,36 +98,26 @@ class OldClusterJobMonitorSpec extends Specification implements DataTest {
      */
     void "check multiple cases for checking jobs"() {
         given:
-        Realm realm1 = DomainFactory.createRealm()
-        Realm realm2 = DomainFactory.createRealm()
-        Realm realmFailingGetValues = DomainFactory.createRealm()
-
         DomainFactory.createClusterJob([
                 checkStatus: ClusterJob.CheckStatus.CREATED,
         ])
         DomainFactory.createClusterJob([
                 checkStatus: ClusterJob.CheckStatus.CREATED,
-                realm      : realm1,
         ])
         ClusterJob clusterJobCheckingRealm1 = DomainFactory.createClusterJob([
                 checkStatus: ClusterJob.CheckStatus.CHECKING,
-                realm      : realm1,
         ])
         ClusterJob clusterJobCheckingRealm2a = DomainFactory.createClusterJob([
                 checkStatus: ClusterJob.CheckStatus.CHECKING,
-                realm      : realm2,
         ])
         ClusterJob clusterJobCheckingRealm2b = DomainFactory.createClusterJob([
                 checkStatus: ClusterJob.CheckStatus.CHECKING,
-                realm      : realm2,
         ])
         DomainFactory.createClusterJob([
                 checkStatus: ClusterJob.CheckStatus.FINISHED,
-                realm      : realm2,
         ])
         ClusterJob clusterJobCheckingRealmFailingGetValues = DomainFactory.createClusterJob([
                 checkStatus: ClusterJob.CheckStatus.CHECKING,
-                realm      : realmFailingGetValues,
         ])
         DomainFactory.createClusterJob([
                 checkStatus: ClusterJob.CheckStatus.FINISHED,
@@ -144,29 +133,28 @@ class OldClusterJobMonitorSpec extends Specification implements DataTest {
             1 * finished(clusterJobCheckingRealm2b)
             0 * _
         }
+        MonitoringJob monitoringJobF = Mock(MonitoringJob) {
+            1 * getEndState() >> { throw new InvalidStateException() }
+            1 * finished(clusterJobCheckingRealmFailingGetValues)
+            0 * _
+        }
 
         clusterJobMonitor = new OldClusterJobMonitor()
         clusterJobMonitor.schedulerService = Mock(SchedulerService) {
             1 * isActive() >> true
             1 * getJobForProcessingStep(clusterJobCheckingRealm1.processingStep) >> monitoringJob1
             1 * getJobForProcessingStep(clusterJobCheckingRealm2b.processingStep) >> monitoringJob2
+            1 * getJobForProcessingStep(clusterJobCheckingRealmFailingGetValues.processingStep) >> monitoringJobF
             0 * _
         }
         GroovySpy(Realm, global: true)
         clusterJobMonitor.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
-            1 * retrieveKnownJobsWithState(realm1) >> { Realm realm ->
+            1 * retrieveKnownJobsWithState() >> { ->
                 return [
-                        (new ClusterJobIdentifier(realm1, clusterJobCheckingRealm1.clusterJobId)): JobState.COMPLETED_SUCCESSFUL,
+                        (clusterJobCheckingRealm1.clusterJobId): JobState.COMPLETED_SUCCESSFUL,
+                        (clusterJobCheckingRealm2a.clusterJobId): JobState.RUNNING,
+                        (clusterJobCheckingRealm2b.clusterJobId): JobState.COMPLETED_SUCCESSFUL,
                 ]
-            }
-            1 * retrieveKnownJobsWithState(realm2) >> { Realm realm ->
-                return [
-                        (new ClusterJobIdentifier(realm2, clusterJobCheckingRealm2a.clusterJobId)): JobState.RUNNING,
-                        (new ClusterJobIdentifier(realm2, clusterJobCheckingRealm2b.clusterJobId)): JobState.COMPLETED_SUCCESSFUL,
-                ]
-            }
-            1 * retrieveKnownJobsWithState(realmFailingGetValues) >> { Realm realm ->
-                throw new OtpRuntimeException('No values')
             }
             0 * _
         }
@@ -177,10 +165,10 @@ class OldClusterJobMonitorSpec extends Specification implements DataTest {
             }
         }
         clusterJobMonitor.scheduler = Mock(Scheduler) {
-            2 * doWithErrorHandling(_, _, _) >> { MonitoringJob job, Closure closure, boolean rethrow ->
+            3 * doWithErrorHandling(_, _, _) >> { MonitoringJob job, Closure closure, boolean rethrow ->
                 return closure.call()
             }
-            2 * doInJobContext(_, _) >> { MonitoringJob job, Closure closure ->
+            3 * doInJobContext(_, _) >> { MonitoringJob job, Closure closure ->
                 return closure.call()
             }
             0 * _
@@ -200,7 +188,7 @@ class OldClusterJobMonitorSpec extends Specification implements DataTest {
         clusterJobCheckingRealm2b.checkStatus == ClusterJob.CheckStatus.FINISHED
 
         clusterJobCheckingRealmFailingGetValues.refresh()
-        clusterJobCheckingRealmFailingGetValues.checkStatus == ClusterJob.CheckStatus.CHECKING
+        clusterJobCheckingRealmFailingGetValues.checkStatus == ClusterJob.CheckStatus.FINISHED
 
         cleanup:
         GroovySystem.metaClassRegistry.removeMetaClass(Realm)

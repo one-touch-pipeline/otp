@@ -38,10 +38,9 @@ import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.utils.logging.AbstractSimpleLogger
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
-import de.dkfz.tbi.otp.workflowExecution.cluster.ClusterStatisticService
 
 import java.nio.file.FileSystem
 import java.nio.file.Path
@@ -77,7 +76,6 @@ class ClusterJobSchedulerService {
     FileService fileService
     JobStatusLoggingService jobStatusLoggingService
     ProcessingOptionService processingOptionService
-    ClusterStatisticService clusterStatisticService
     FileSystemService fileSystemService
 
     /**
@@ -96,7 +94,6 @@ class ClusterJobSchedulerService {
         if (!script) {
             throw new ProcessingException("No job script specified.")
         }
-        assert realm: 'No realm specified.'
 
         ProcessingStep processingStep = schedulerService.jobExecutedByCurrentThread.processingStep
         processingStep.refresh() // processingStep.jobClass might be outdated by now
@@ -187,23 +184,20 @@ class ClusterJobSchedulerService {
     /**
      * Returns a map of jobs the cluster job scheduler knows about
      *
-     * @param realm The realm to connect to
-     * @param userName The name of the user whose jobs should be checked
      * @return A map containing job identifiers and their status
      */
     @Deprecated
-    Map<ClusterJobIdentifier, JobState> retrieveKnownJobsWithState(Realm realm) throws Exception {
-        assert realm: "No realm specified."
-        BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.getJobManager(realm)
+    Map<String, JobState> retrieveKnownJobsWithState() throws Exception {
+        BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.jobManager
 
         Map<BEJobID, JobState> jobStates = queryAndLogAllClusterJobs(jobManager)
 
         return jobStates.collectEntries { BEJobID jobId, JobState state ->
             [
-                    new ClusterJobIdentifier(realm, jobId.id),
+                    jobId.id,
                     state,
             ]
-        } as Map<ClusterJobIdentifier, JobState>
+        } as Map<String, JobState>
     }
 
     @Deprecated
@@ -239,7 +233,7 @@ class ClusterJobSchedulerService {
     @Deprecated
     void retrieveAndSaveJobInformationAfterJobStarted(ClusterJob clusterJob) throws Exception {
         BEJobID beJobID = new BEJobID(clusterJob.clusterJobId)
-        BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.getJobManager(clusterJob.realm)
+        BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.jobManager
         GenericJobInfo jobInfo = null
 
         try {

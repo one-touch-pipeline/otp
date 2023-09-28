@@ -81,7 +81,6 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
 
     void "retrieveKnownJobsWithState, when qstat output is empty, returns empty map"() {
         given:
-        Realm realm = DomainFactory.createRealm()
         File logFolder = TestCase.uniqueNonExistentPath
         ClusterJobSchedulerService service = new ClusterJobSchedulerService()
         service.clusterJobManagerFactoryService = new ClusterJobManagerFactoryService()
@@ -109,7 +108,7 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
         }
 
         when:
-        Map<ClusterJobIdentifier, JobState> result = service.retrieveKnownJobsWithState(realm)
+        Map<ClusterJobIdentifier, JobState> result = service.retrieveKnownJobsWithState()
 
         then:
         result.isEmpty() // can not written as .empty
@@ -151,7 +150,7 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
         }
 
         ProcessOutput out = new ProcessOutput("${clusterJobId}.pbs", "", 0)
-        ClusterJob clusterJob = DomainFactory.createClusterJob(clusterJobId: clusterJobId, realm: realm)
+        ClusterJob clusterJob = DomainFactory.createClusterJob(clusterJobId: clusterJobId)
         DomainFactory.createProcessingStepUpdate(processingStep: clusterJob.processingStep)
 
         when:
@@ -169,10 +168,8 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
     void "retrieveAndSaveJobInformationAfterJobStarted, #name"() {
         given:
         String clusterId = 1234
-        Realm realm = DomainFactory.createRealm()
         ClusterJob job = DomainFactory.createClusterJob([
                 clusterJobId: clusterId,
-                realm       : realm,
         ])
 
         int amendClusterJobCallCount = calledAmendClusterJob ? 1 : 0
@@ -180,7 +177,7 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
         int counter = 0
         ClusterJobSchedulerService clusterJobSchedulerService = new ClusterJobSchedulerService([
                 clusterJobManagerFactoryService: Mock(ClusterJobManagerFactoryService) {
-                    1 * getJobManager(realm) >> {
+                    1 * getJobManager() >> {
                         return Mock(BatchEuphoriaJobManager) {
                             queryExtendedJobStateByIdCallCount * queryExtendedJobStateById(_) >> { List<BEJobID> jobIds ->
                                 assert jobIds.size() == 1

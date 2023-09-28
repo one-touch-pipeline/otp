@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -123,15 +123,6 @@ class ClusterJobLoggingServiceSpec extends Specification implements DataTest {
 
         then:
         noExceptionThrown()
-    }
-
-    void "test createAndGetLogDirectory, when realm is null throw exception"() {
-        when:
-        service.createAndGetLogDirectory(null, processingStepUpdate.processingStep)
-
-        then:
-        AssertionError e = thrown()
-        e.message.contains('realm')
     }
 
     void "test createAndGetLogDirectory, when processingStep is null throw exception"() {

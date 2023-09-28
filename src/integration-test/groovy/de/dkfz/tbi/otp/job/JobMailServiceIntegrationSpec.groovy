@@ -87,7 +87,6 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
         List<ClusterJob> completedClusterJobs = []
         completedCount.times {
             ClusterJob clusterJob = DomainFactory.createClusterJob([
-                    realm         : realm,
                     processingStep: step,
                     exitStatus    : ClusterJob.Status.COMPLETED,
             ])
@@ -100,7 +99,6 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
         List<ClusterJob> failedClusterJobs = []
         failedCount.times {
             failedClusterJobs << DomainFactory.createClusterJob([
-                    realm         : realm,
                     processingStep: step,
                     exitStatus    : ClusterJob.Status.FAILED,
             ])

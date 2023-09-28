@@ -130,7 +130,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         assert (filesNotToBeCalledFor + tmpFiles + tmpDirectories) as Set == roddyBamFile.workDirectory.listFiles() as Set
 
         when:
-        List<Path> files = linkFilesToFinalDestinationService.getFilesToCleanup(roddyBamFile, realm)
+        List<Path> files = linkFilesToFinalDestinationService.getFilesToCleanup(roddyBamFile)
 
         then:
         filesNotToBeCalledFor.every {
@@ -236,18 +236,6 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         e.message.contains("roddyBamFile")
     }
 
-    void "test linkNewResults_realmIsNull_shouldFail"() {
-        given:
-        setupData()
-
-        when:
-        linkFilesToFinalDestinationService.linkNewResults(roddyBamFile, null)
-
-        then:
-        Throwable e = thrown(AssertionError)
-        e.message.contains("realm")
-    }
-
     void "test linkNewResults_bamHasOldStructure_shouldFail"() {
         given:
         setupData()
@@ -308,7 +296,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         linkFilesToFinalDestinationService.fileService = new FileService()
 
         when:
-        List<Path> files = linkFilesToFinalDestinationService.getOldResultsToCleanup(roddyBamFile2, realm)
+        List<Path> files = linkFilesToFinalDestinationService.getOldResultsToCleanup(roddyBamFile2)
 
         then:
         filesToDelete.every {
@@ -329,7 +317,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
 
         expect:
-        [] == linkFilesToFinalDestinationService.getOldResultsToCleanup(roddyBamFile2, realm)
+        [] == linkFilesToFinalDestinationService.getOldResultsToCleanup(roddyBamFile2)
     }
 
     void testCleanupOldResults_withoutBaseBamFile_butBamFilesOfWorkPackageExist_allFine() {
@@ -343,7 +331,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         assert roddyBamFile.workDirectory.exists()
 
         when:
-        List<Path> files = linkFilesToFinalDestinationService.getOldResultsToCleanup(roddyBamFile2, realm)
+        List<Path> files = linkFilesToFinalDestinationService.getOldResultsToCleanup(roddyBamFile2)
 
         then:
         files*.toString().contains(roddyBamFile.workDirectory.toString())
@@ -368,7 +356,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         assert roddyBamFile2.workDirectory.exists()
 
         when:
-        List<Path> files = linkFilesToFinalDestinationService.getOldResultsToCleanup(roddyBamFile2, realm)
+        List<Path> files = linkFilesToFinalDestinationService.getOldResultsToCleanup(roddyBamFile2)
 
         then:
         !files*.toString().contains(roddyBamFile2.workDirectory.toString())
@@ -389,7 +377,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
         when:
-        List<Path> files = linkFilesToFinalDestinationService.getOldResultsToCleanup(roddyBamFile, realm)
+        List<Path> files = linkFilesToFinalDestinationService.getOldResultsToCleanup(roddyBamFile)
 
         then:
         !files*.toString().contains(roddyBamFile.workDirectory.toString())
@@ -400,23 +388,11 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         setupData()
 
         when:
-        linkFilesToFinalDestinationService.getOldResultsToCleanup(null, realm)
+        linkFilesToFinalDestinationService.getOldResultsToCleanup(null)
 
         then:
         Throwable e = thrown(AssertionError)
         e.message.contains("roddyBamFile")
-    }
-
-    void "test getOldResultsToCleanup, realmIsNull, shouldFail"() {
-        given:
-        setupData()
-
-        when:
-        linkFilesToFinalDestinationService.getOldResultsToCleanup(roddyBamFile, null)
-
-        then:
-        Throwable e = thrown(AssertionError)
-        e.message.contains("realm")
     }
 
     void "test getOldResultsToCleanup, bamHasOldStructure, shouldFail"() {
@@ -426,7 +402,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         roddyBamFile.save(flush: true)
 
         when:
-        linkFilesToFinalDestinationService.getOldResultsToCleanup(roddyBamFile, realm)
+        linkFilesToFinalDestinationService.getOldResultsToCleanup(roddyBamFile)
 
         then:
         Throwable e = thrown(AssertionError)

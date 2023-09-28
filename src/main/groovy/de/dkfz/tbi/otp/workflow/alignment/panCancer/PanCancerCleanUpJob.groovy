@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflow.alignment.panCancer
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+
 import de.dkfz.tbi.otp.dataprocessing.LinkFilesToFinalDestinationService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractCleanUpJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -40,15 +41,15 @@ class PanCancerCleanUpJob extends AbstractCleanUpJob implements PanCancerShared 
 
     @Override
     List<Path> getFilesToDelete(WorkflowStep workflowStep) {
-        return (linkFilesToFinalDestinationService.getFilesToCleanup(getRoddyBamFile(workflowStep), workflowStep.realm) +
-                linkFilesToFinalDestinationService.getOldResultsToCleanup(getRoddyBamFile(workflowStep), workflowStep.realm))
+        return (linkFilesToFinalDestinationService.getFilesToCleanup(getRoddyBamFile(workflowStep)) +
+                linkFilesToFinalDestinationService.getOldResultsToCleanup(getRoddyBamFile(workflowStep)))
                 .findAll { !Files.isDirectory(it) }
     }
 
     @Override
     List<Path> getDirectoriesToDelete(WorkflowStep workflowStep) {
-        return (linkFilesToFinalDestinationService.getFilesToCleanup(getRoddyBamFile(workflowStep), workflowStep.realm) +
-                linkFilesToFinalDestinationService.getOldResultsToCleanup(getRoddyBamFile(workflowStep), workflowStep.realm))
+        return (linkFilesToFinalDestinationService.getFilesToCleanup(getRoddyBamFile(workflowStep)) +
+                linkFilesToFinalDestinationService.getOldResultsToCleanup(getRoddyBamFile(workflowStep)))
                 .findAll { Files.isDirectory(it) }
     }
 }

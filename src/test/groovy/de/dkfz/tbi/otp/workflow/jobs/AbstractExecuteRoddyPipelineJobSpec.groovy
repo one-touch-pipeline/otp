@@ -93,7 +93,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
             1 * getFilenameSectionKillSwitch() >> { true }
             1 * getConfigurationValues(_, _) >> { [a: "b"] }
             1 * getAdditionalParameters(_) >> { ["c", "d"] }
-            1 * createAdditionalConfigFiles(_, _, _) >> { return }
+            1 * createAdditionalConfigFiles(_, _) >> { return }
         }
         job.clusterJobHandlingService = Mock(ClusterJobHandlingService)
         job.fileService = Mock(FileService)
@@ -122,7 +122,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         1 * job.roddyCommandService.createRoddyCommand(_, _, ["c", "d"]) >> { cmd }
         1 * job.roddyExecutionService.clearRoddyExecutionStoreDirectory(bamFile)
         1 * job.workflowRunService.markJobAsNotRestartableInSeparateTransaction(workflowStep.workflowRun)
-        1 * job.roddyExecutionService.execute(cmd, _) >> { processOutput }
+        1 * job.roddyExecutionService.execute(cmd) >> { processOutput }
         1 * job.roddyExecutionService.createClusterJobObjects(bamFile, processOutput, workflowStep) >> { clusterJobs }
         1 * job.roddyExecutionService.saveRoddyExecutionStoreDirectory(_, processOutput.stderr, _)
         1 * job.clusterJobHandlingService.collectJobStatistics(workflowStep, clusterJobs)
@@ -151,7 +151,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
             1 * getFilenameSectionKillSwitch() >> { true }
             1 * getConfigurationValues(_, _) >> { [a: "b"] }
             1 * getAdditionalParameters(_) >> { ["c", "d"] }
-            1 * createAdditionalConfigFiles(_, _, _) >> { return }
+            1 * createAdditionalConfigFiles(_, _) >> { return }
         }
         job.clusterJobHandlingService = Mock(ClusterJobHandlingService)
         job.fileService = Mock(FileService)
@@ -180,7 +180,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         1 * job.roddyCommandService.createRoddyCommand(_, _, ["c", "d"]) >> { cmd }
         1 * job.roddyExecutionService.clearRoddyExecutionStoreDirectory(bamFile)
         1 * job.workflowRunService.markJobAsNotRestartableInSeparateTransaction(workflowStep.workflowRun)
-        1 * job.roddyExecutionService.execute(cmd, _) >> { processOutput }
+        1 * job.roddyExecutionService.execute(cmd) >> { processOutput }
         1 * job.roddyExecutionService.createClusterJobObjects(bamFile, processOutput, workflowStep) >> { [] }
         0 * job.roddyExecutionService.saveRoddyExecutionStoreDirectory(_, processOutput.stderr, _)
         0 * job.clusterJobHandlingService.collectJobStatistics(workflowStep, _)
@@ -210,7 +210,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
             1 * getFilenameSectionKillSwitch() >> { true }
             1 * getConfigurationValues(_, _) >> { [a: "b"] }
             1 * getAdditionalParameters(_) >> { ["c", "d"] }
-            1 * createAdditionalConfigFiles(_, _, _) >> { return }
+            1 * createAdditionalConfigFiles(_, _) >> { return }
         }
         job.clusterJobHandlingService = Mock(ClusterJobHandlingService)
         job.fileService = Mock(FileService)
@@ -239,7 +239,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         1 * job.roddyCommandService.createRoddyCommand(_, _, ["c", "d"]) >> { cmd }
         1 * job.roddyExecutionService.clearRoddyExecutionStoreDirectory(bamFile)
         1 * job.workflowRunService.markJobAsNotRestartableInSeparateTransaction(workflowStep.workflowRun)
-        1 * job.roddyExecutionService.execute(cmd, _) >> { throw new RoddyException("") }
+        1 * job.roddyExecutionService.execute(cmd) >> { throw new RoddyException("") }
         0 * job.roddyExecutionService.createClusterJobObjects(bamFile, processOutput, workflowStep) >> { clusterJobs }
         0 * job.roddyExecutionService.saveRoddyExecutionStoreDirectory(_, processOutput.stderr, _)
         0 * job.clusterJobHandlingService.collectJobStatistics(workflowStep, clusterJobs)

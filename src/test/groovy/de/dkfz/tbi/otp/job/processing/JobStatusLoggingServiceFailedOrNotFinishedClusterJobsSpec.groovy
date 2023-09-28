@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -110,7 +110,6 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsSpec extends Specific
         final String prefixOfId3 = '12'
         final String suffixOfId3 = '34'
         final String id3 = prefixOfId3 + suffixOfId3
-        final String id5 = '1005'
         successfulJobOnRealm1 = new ClusterJobIdentifier(realm1, id1)
         failedJobOnRealm1 = new ClusterJobIdentifier(realm1, id2)
         jobIdsOnRealm1 = [
@@ -120,8 +119,8 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsSpec extends Specific
         successfulJobOnRealm2 = new ClusterJobIdentifier(realm2, id3)
         failedJob1OnRealm2 = new ClusterJobIdentifier(realm2, prefixOfId3)
         failedJob2OnRealm2 = new ClusterJobIdentifier(realm2, suffixOfId3)
-        mixedUpJob1 = new ClusterJobIdentifier(realm2, successfulJobOnRealm1.clusterJobId)
-        mixedUpJob2 = new ClusterJobIdentifier(realm2, failedJobOnRealm1.clusterJobId)
+        mixedUpJob1 = new ClusterJobIdentifier(realm2, "4")
+        mixedUpJob2 = new ClusterJobIdentifier(realm2, "5")
         jobIdsOnRealm2 = [
                 successfulJobOnRealm2.clusterJobId,
                 failedJob1OnRealm2.clusterJobId,
@@ -135,11 +134,11 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsSpec extends Specific
                 mixedUpJob1,
                 mixedUpJob2,
         ]
-        jobOnRealmWithEmptyLogFile = new ClusterJobIdentifier(realmWithEmptyLogFile, id5)
-        jobOnRealmWithoutLogFile = new ClusterJobIdentifier(realmWithoutLogFile, id5)
-        jobOnRealmWithoutLogDir = new ClusterJobIdentifier(realmWithoutLogDir, id5)
-        successfulJobOnRealmWithSameLogDirAs1 = new ClusterJobIdentifier(realmWithSameLogDirAs1, failedJobOnRealm1.clusterJobId)
-        failedJobOnRealmWithSameLogDirAs1 = new ClusterJobIdentifier(realmWithSameLogDirAs1, successfulJobOnRealm1.clusterJobId)
+        jobOnRealmWithEmptyLogFile = new ClusterJobIdentifier(realmWithEmptyLogFile, "6")
+        jobOnRealmWithoutLogFile = new ClusterJobIdentifier(realmWithoutLogFile, "7")
+        jobOnRealmWithoutLogDir = new ClusterJobIdentifier(realmWithoutLogDir, "8")
+        successfulJobOnRealmWithSameLogDirAs1 = new ClusterJobIdentifier(realmWithSameLogDirAs1, "9")
+        failedJobOnRealmWithSameLogDirAs1 = new ClusterJobIdentifier(realmWithSameLogDirAs1, "10")
         jobIdsOnRealmWithSameLogDirAs1 = [
                 successfulJobOnRealmWithSameLogDirAs1.clusterJobId,
                 failedJobOnRealmWithSameLogDirAs1.clusterJobId,
@@ -172,16 +171,16 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsSpec extends Specific
 
     void "test failedOrNotFinishedClusterJobs, with realm1 and collection of IDs"() {
         expect:
-        service.failedOrNotFinishedClusterJobs(processingStep, [(realm1): jobIdsOnRealm1.collect {
+        service.failedOrNotFinishedClusterJobs2(processingStep, jobIdsOnRealm1.collect {
             new ClusterJobIdentifier(realm1, it)
-        }]) == [failedJobOnRealm1]
+        }) == [failedJobOnRealm1]
     }
 
     void "test failedOrNotFinishedClusterJobs, with realm2 and collection of IDs"() {
         when:
-        final Collection<ClusterJobIdentifier> unsuccessfulClusterJobs = service.failedOrNotFinishedClusterJobs(processingStep, [(realm2): jobIdsOnRealm2.collect {
+        final Collection<ClusterJobIdentifier> unsuccessfulClusterJobs = service.failedOrNotFinishedClusterJobs2(processingStep, jobIdsOnRealm2.collect {
             new ClusterJobIdentifier(realm2, it)
-        }])
+        })
 
         then:
         unsuccessfulClusterJobs.size() == unsuccessfulJobsOnRealm2.size()
@@ -190,16 +189,14 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsSpec extends Specific
 
     void "test failedOrNotFinishedClusterJobs, with realmWithEmptyLogFile and collection of IDs"() {
         expect:
-        service.failedOrNotFinishedClusterJobs(processingStep,
-                [(realmWithEmptyLogFile): [jobOnRealmWithEmptyLogFile],]
-        ) == [jobOnRealmWithEmptyLogFile]
+        service.failedOrNotFinishedClusterJobs2(processingStep, [jobOnRealmWithEmptyLogFile]) == [jobOnRealmWithEmptyLogFile]
     }
 
     void "test failedOrNotFinishedClusterJobs, with realmWithSameLogDirAs1 and collection of IDs"() {
         expect:
-        service.failedOrNotFinishedClusterJobs(processingStep, [(realmWithSameLogDirAs1): jobIdsOnRealmWithSameLogDirAs1.collect {
+        service.failedOrNotFinishedClusterJobs2(processingStep, jobIdsOnRealmWithSameLogDirAs1.collect {
             new ClusterJobIdentifier(realmWithSameLogDirAs1, it)
-        }]) == [failedJobOnRealmWithSameLogDirAs1]
+        }) == [failedJobOnRealmWithSameLogDirAs1]
     }
 
     void "test failedOrNotFinishedClusterJobs, with collection of cluster job identifiers"() {
@@ -226,19 +223,19 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsSpec extends Specific
 
     void "test failedOrNotFinishedClusterJobs, with argument map"() {
         when:
-        final Collection<ClusterJobIdentifier> unsuccessfulClusterJobs = service.failedOrNotFinishedClusterJobs(processingStep, [
-                (realm1)                : jobIdsOnRealm1.collect {
-                    new ClusterJobIdentifier(realm1, it)
-                },
-                (realm2)                : jobIdsOnRealm2.collect {
-                    new ClusterJobIdentifier(realm2, it)
-                },
-                (realmWithEmptyLogFile) : [new ClusterJobIdentifier(realmWithEmptyLogFile, jobOnRealmWithEmptyLogFile.clusterJobId)],
-                (realmWithoutLogFile)   : [new ClusterJobIdentifier(realmWithoutLogFile, jobOnRealmWithoutLogFile.clusterJobId)],
-                (realmWithoutLogDir)    : [new ClusterJobIdentifier(realmWithoutLogDir, jobOnRealmWithoutLogDir.clusterJobId)],
-                (realmWithSameLogDirAs1): jobIdsOnRealmWithSameLogDirAs1.collect {
-                    new ClusterJobIdentifier(realmWithSameLogDirAs1, it)
-                },
+        final Collection<ClusterJobIdentifier> unsuccessfulClusterJobs = service.failedOrNotFinishedClusterJobs2(processingStep, [
+                successfulJobOnRealm1,
+                failedJobOnRealm1,
+                successfulJobOnRealm2,
+                failedJob1OnRealm2,
+                failedJob2OnRealm2,
+                mixedUpJob1,
+                mixedUpJob2,
+                jobOnRealmWithEmptyLogFile,
+                jobOnRealmWithoutLogFile,
+                jobOnRealmWithoutLogDir,
+                successfulJobOnRealmWithSameLogDirAs1,
+                failedJobOnRealmWithSameLogDirAs1,
         ])
 
         then:

@@ -118,7 +118,6 @@ class LinkFilesToFinalDestinationService {
     @Deprecated
     void linkNewResults(RoddyBamFile roddyBamFile, Realm realm) {
         assert roddyBamFile: "Input roddyBamFile must not be null"
-        assert realm: "Input realm must not be null"
         assert !roddyBamFile.isOldStructureUsed()
 
         Map<File, File> linkMapSourceLink = [:]
@@ -179,9 +178,8 @@ class LinkFilesToFinalDestinationService {
         linkFileUtils.createAndValidateLinks(links, realm, roddyBamFile.project.unixGroup)
     }
 
-    List<Path> getFilesToCleanup(RoddyBamFile roddyBamFile, Realm realm) {
+    List<Path> getFilesToCleanup(RoddyBamFile roddyBamFile) {
         assert roddyBamFile: "Input roddyBamFile must not be null"
-        assert realm: "Input realm must not be null"
         assert !roddyBamFile.isOldStructureUsed()
 
         List<File> expectedFiles = [
@@ -198,13 +196,12 @@ class LinkFilesToFinalDestinationService {
         }
         List<File> foundFiles = roddyBamFile.workDirectory.listFiles() ?: []
         List<File> filesToDelete = foundFiles - expectedFiles
-        FileSystem fs = fileSystemService.getRemoteFileSystem(realm)
+        FileSystem fs = fileSystemService.remoteFileSystem
         return filesToDelete.collect { fileService.toPath(it, fs) }
     }
 
-    List<Path> getOldResultsToCleanup(RoddyBamFile roddyBamFile, Realm realm) {
+    List<Path> getOldResultsToCleanup(RoddyBamFile roddyBamFile) {
         assert roddyBamFile: "Input roddyBamFile must not be null"
-        assert realm: "Input realm must not be null"
         assert !roddyBamFile.isOldStructureUsed()
 
         List<File> filesToDelete = []
@@ -237,7 +234,7 @@ class LinkFilesToFinalDestinationService {
                 }
             }
         }
-        FileSystem fs = fileSystemService.getRemoteFileSystem(realm)
+        FileSystem fs = fileSystemService.remoteFileSystem
         return filesToDelete.collect { fileService.toPath(it, fs) }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,6 @@ import grails.testing.services.ServiceUnitTest
 
 import de.dkfz.roddy.execution.jobs.BatchEuphoriaJobManager
 import de.dkfz.tbi.otp.job.processing.ClusterJobManagerFactoryService
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Files
@@ -51,7 +50,7 @@ class JobStatusLoggingFileServiceSpec extends AbstractLogDirectoryServiceSpec im
 
     private void mockClusterJobManagerFactoryService() {
         service.clusterJobManagerFactoryService = Mock(ClusterJobManagerFactoryService) {
-            1 * getJobManager(realm) >> { Realm realm ->
+            1 * getJobManager() >> { ->
                 return Mock(BatchEuphoriaJobManager) {
                     1 * getJobIdVariable() >> CLUSTER_JOB_ID_VARIABLE
                     0 * _
@@ -70,7 +69,7 @@ class JobStatusLoggingFileServiceSpec extends AbstractLogDirectoryServiceSpec im
         mockPathDoesNotExist(expected, 2)
 
         when:
-        String path = service.constructLogFileLocation(realm, workflowStep)
+        String path = service.constructLogFileLocation(workflowStep)
 
         then:
         path == file
@@ -86,7 +85,7 @@ class JobStatusLoggingFileServiceSpec extends AbstractLogDirectoryServiceSpec im
         mockPathExist(1)
 
         when:
-        String path = service.constructLogFileLocation(realm, workflowStep)
+        String path = service.constructLogFileLocation(workflowStep)
 
         then:
         path == file
@@ -102,7 +101,7 @@ class JobStatusLoggingFileServiceSpec extends AbstractLogDirectoryServiceSpec im
         mockPathDoesNotExist(expected, 2)
 
         when:
-        String path = service.constructLogFileLocation(realm, workflowStep, clusterId)
+        String path = service.constructLogFileLocation(workflowStep, clusterId)
 
         then:
         path == file
@@ -119,7 +118,7 @@ class JobStatusLoggingFileServiceSpec extends AbstractLogDirectoryServiceSpec im
         mockPathExist(1)
 
         when:
-        String path = service.constructLogFileLocation(realm, workflowStep, clusterId)
+        String path = service.constructLogFileLocation(workflowStep, clusterId)
 
         then:
         path == file
@@ -137,7 +136,7 @@ class JobStatusLoggingFileServiceSpec extends AbstractLogDirectoryServiceSpec im
         ].join(',')
 
         when:
-        String message = service.constructMessage(realm, workflowStep)
+        String message = service.constructMessage(workflowStep)
 
         then:
         message == expected
@@ -155,7 +154,7 @@ class JobStatusLoggingFileServiceSpec extends AbstractLogDirectoryServiceSpec im
         ].join(',')
 
         when:
-        String message = service.constructMessage(realm, workflowStep, clusterId)
+        String message = service.constructMessage(workflowStep, clusterId)
 
         then:
         message == expected
@@ -166,10 +165,10 @@ class JobStatusLoggingFileServiceSpec extends AbstractLogDirectoryServiceSpec im
     }
 
     private String expectedFilePattern(WorkflowStep workflowStep) {
-        return "${expectedPath(workflowStep)}/joblog_${workflowStep.id}_\$(echo \${${CLUSTER_JOB_ID_VARIABLE}} | cut -d. -f1)_${realm.id}.log"
+        return "${expectedPath(workflowStep)}/joblog_${workflowStep.id}_\$(echo \${${CLUSTER_JOB_ID_VARIABLE}} | cut -d. -f1).log"
     }
 
     private String expectedFileName(WorkflowStep workflowStep, String clusterId) {
-        return "${expectedPath(workflowStep)}/joblog_${workflowStep.id}_${clusterId}_${realm.id}.log"
+        return "${expectedPath(workflowStep)}/joblog_${workflowStep.id}_${clusterId}.log"
     }
 }

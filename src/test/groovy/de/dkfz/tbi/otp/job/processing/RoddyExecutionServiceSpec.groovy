@@ -138,10 +138,10 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
         roddyExecutionService.remoteShellHelper = Mock(RemoteShellHelper)
 
         when:
-        ProcessOutput result = roddyExecutionService.execute(cmd, realm)
+        ProcessOutput result = roddyExecutionService.execute(cmd)
 
         then:
-        1 * roddyExecutionService.remoteShellHelper.executeCommandReturnProcessOutput(realm, cmd) >> { output }
+        1 * roddyExecutionService.remoteShellHelper.executeCommandReturnProcessOutput(cmd) >> { output }
         result == output
     }
 
@@ -149,13 +149,13 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
         given:
         setupData()
         roddyExecutionService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { Realm realm, String cmd ->
+            executeCommandReturnProcessOutput(_) >> { String cmd ->
                 return new ProcessOutput("", "sadfasdf${cause}asdfsadf", 0)
             }
         }
 
         when:
-        roddyExecutionService.execute("qwertz", realm)
+        roddyExecutionService.execute("qwertz")
 
         then:
         RuntimeException e = thrown(RoddyException)
@@ -184,7 +184,6 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
             it.clusterJobId == SNV_CALLING_META_SCRIPT_PBSID &&
                     it.clusterJobName == SNV_CALLING_META_SCRIPT_JOB_NAME &&
                     it.jobClass == SNV_CALLING_META_SCRIPT_JOB_CLASS &&
-                    it.realm == realm &&
                     !it.validated &&
                     it.workflowStep == workflowStep &&
                     it.processingStep == null &&
@@ -205,7 +204,6 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
             it.clusterJobId == SNV_ANNOTATION_PBSID &&
                     it.clusterJobName == SNV_ANNOTATION_JOB_NAME &&
                     it.jobClass == SNV_ANNOTATION_JOB_CLASS &&
-                    it.realm == realm &&
                     !it.validated &&
                     it.workflowStep == workflowStep &&
                     it.processingStep == null &&
@@ -226,7 +224,6 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
             it.clusterJobId == ALIGN_AND_PAIR_SLIM_PBSID &&
                     it.clusterJobName == ALIGN_AND_PAIR_SLIM_JOB_NAME &&
                     it.jobClass == ALIGN_AND_PAIR_SLIM_JOB_CLASS &&
-                    it.realm == realm &&
                     !it.validated &&
                     it.workflowStep == workflowStep &&
                     it.processingStep == null &&

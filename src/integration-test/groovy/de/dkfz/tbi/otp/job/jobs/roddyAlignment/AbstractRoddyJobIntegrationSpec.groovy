@@ -132,7 +132,7 @@ newLine"""
         result == NextAction.WAIT_FOR_CLUSTER_JOBS
 
         and:
-        1 * roddyJob.roddyExecutionService.remoteShellHelper.executeCommandReturnProcessOutput(_, _) >>
+        1 * roddyJob.roddyExecutionService.remoteShellHelper.executeCommandReturnProcessOutput(_) >>
                 new ProcessOutput(stdout: stdout, stderr: stderr, exitCode: 0)
         0 * roddyJob.validate()
         0 * roddyJob.validate(_)
@@ -154,7 +154,7 @@ newLine"""
 
         and:
         1 * roddyJob.validate() >> _
-        1 * roddyJob.roddyExecutionService.remoteShellHelper.executeCommandReturnProcessOutput(_, _) >> outputNoClusterJobsSubmitted
+        1 * roddyJob.roddyExecutionService.remoteShellHelper.executeCommandReturnProcessOutput(_) >> outputNoClusterJobsSubmitted
     }
 
     @SuppressWarnings("ThrowRuntimeException")
@@ -175,7 +175,7 @@ newLine"""
         e.cause?.message == TestConstants.ARBITRARY_MESSAGE
 
         and:
-        1 * roddyJob.roddyExecutionService.remoteShellHelper.executeCommandReturnProcessOutput(_, _) >> outputNoClusterJobsSubmitted
+        1 * roddyJob.roddyExecutionService.remoteShellHelper.executeCommandReturnProcessOutput(_) >> outputNoClusterJobsSubmitted
         _ * roddyJob.validate() >> { throw new RuntimeException(TestConstants.ARBITRARY_MESSAGE) }
     }
 
@@ -215,7 +215,7 @@ newLine"""
         and:
         0 * roddyJob.metaClass.validate()
         0 * roddyJob.validate()
-        1 * roddyJob.roddyExecutionService.remoteShellHelper.executeCommandReturnProcessOutput(_, _) >>
+        1 * roddyJob.roddyExecutionService.remoteShellHelper.executeCommandReturnProcessOutput(_) >>
                 new ProcessOutput(stdout: stdout, stderr: stderr, exitCode: 0)
     }
 
@@ -239,7 +239,7 @@ newLine"""
         e.message == message
 
         and:
-        1 * roddyJob.roddyExecutionService.remoteShellHelper.executeCommandReturnProcessOutput(_, _) >>
+        1 * roddyJob.roddyExecutionService.remoteShellHelper.executeCommandReturnProcessOutput(_) >>
                 new ProcessOutput(stdout: stderr, stderr: cause, exitCode: 0)
 
         where:

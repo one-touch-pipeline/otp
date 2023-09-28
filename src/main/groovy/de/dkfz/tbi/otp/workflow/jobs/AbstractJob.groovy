@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.workflowExecution.*
 
-import java.nio.file.FileSystem
 import java.nio.file.Path
 
 /**
@@ -44,16 +43,9 @@ abstract class AbstractJob implements Job {
     WorkflowStateChangeService workflowStateChangeService
 
     /**
-     * returns the remote file system
-     */
-    protected FileSystem getFileSystem(WorkflowStep workflowStep) {
-        return fileSystemService.getRemoteFileSystem(workflowStep.workflowRun.project.realm)
-    }
-
-    /**
      * returns the work directory as remote Path
      */
     protected Path getWorkDirectory(WorkflowStep workflowStep) {
-        return getFileSystem(workflowStep).getPath(workflowStep.workflowRun.workDirectory)
+        return fileSystemService.remoteFileSystem.getPath(workflowStep.workflowRun.workDirectory)
     }
 }

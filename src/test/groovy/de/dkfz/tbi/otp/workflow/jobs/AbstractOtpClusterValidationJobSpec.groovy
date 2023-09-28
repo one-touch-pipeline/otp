@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,18 +22,14 @@
 package de.dkfz.tbi.otp.workflow.jobs
 
 import grails.testing.gorm.DataTest
-import spock.lang.Specification
-import spock.lang.TempDir
-import spock.lang.Unroll
+import spock.lang.*
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
-import de.dkfz.tbi.otp.workflowExecution.LogService
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStepService
+import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.cluster.logs.JobStatusLoggingFileService
 
 import java.nio.file.FileSystems
@@ -60,7 +56,7 @@ class AbstractOtpClusterValidationJobSpec extends Specification implements DataT
     private void setupData() {
         job = Spy(AbstractOtpClusterValidationJob)
         job.fileSystemService = Mock(FileSystemService) {
-            _ * getRemoteFileSystem(_) >> FileSystems.default
+            _ * getRemoteFileSystem() >> FileSystems.default
         }
         job.logService = Mock(LogService)
         job.jobStatusLoggingFileService = Mock(JobStatusLoggingFileService)
@@ -117,7 +113,7 @@ class AbstractOtpClusterValidationJobSpec extends Specification implements DataT
         given:
         File file = tempDir.resolve("NonExistingFile.txt").toFile()
         setupDataWithClusterJob()
-        1 * job.jobStatusLoggingFileService.constructLogFileLocation(_, _, _) >> file.path
+        1 * job.jobStatusLoggingFileService.constructLogFileLocation(_, _) >> file.path
 
         when:
         job.ensureExternalJobsRunThrough(workflowStepValidatingClusterJob)
@@ -133,7 +129,7 @@ class AbstractOtpClusterValidationJobSpec extends Specification implements DataT
         file.readable = false
 
         setupDataWithClusterJob()
-        1 * job.jobStatusLoggingFileService.constructLogFileLocation(_, _, _) >> file.path
+        1 * job.jobStatusLoggingFileService.constructLogFileLocation(_, _) >> file.path
 
         when:
         job.ensureExternalJobsRunThrough(workflowStepValidatingClusterJob)
@@ -149,8 +145,8 @@ class AbstractOtpClusterValidationJobSpec extends Specification implements DataT
         file.text = 'wrong message'
 
         setupDataWithClusterJob()
-        1 * job.jobStatusLoggingFileService.constructLogFileLocation(_, _, _) >> file.path
-        1 * job.jobStatusLoggingFileService.constructMessage(_, _, _) >> 'right message'
+        1 * job.jobStatusLoggingFileService.constructLogFileLocation(_, _) >> file.path
+        1 * job.jobStatusLoggingFileService.constructMessage(_, _) >> 'right message'
 
         when:
         job.ensureExternalJobsRunThrough(workflowStepValidatingClusterJob)
@@ -167,8 +163,8 @@ class AbstractOtpClusterValidationJobSpec extends Specification implements DataT
         file.text = message
 
         setupDataWithClusterJob()
-        1 * job.jobStatusLoggingFileService.constructLogFileLocation(_, _, _) >> file.path
-        1 * job.jobStatusLoggingFileService.constructMessage(_, _, _) >> message
+        1 * job.jobStatusLoggingFileService.constructLogFileLocation(_, _) >> file.path
+        1 * job.jobStatusLoggingFileService.constructMessage(_, _) >> message
 
         when:
         job.ensureExternalJobsRunThrough(workflowStepValidatingClusterJob)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.HelperUtils
 
 class ClusterJobSpec extends Specification implements DataTest {
@@ -39,13 +40,12 @@ class ClusterJobSpec extends Specification implements DataTest {
     void "test findByClusterJobIdentifier"() {
         given:
         ClusterJob clusterJob = DomainFactory.createClusterJob()
-        ClusterJobIdentifier identifier = new ClusterJobIdentifier(clusterJob)
+        Realm realm = DomainFactory.createRealm()
+        ClusterJobIdentifier identifier = new ClusterJobIdentifier(realm, clusterJob.clusterJobId)
         DomainFactory.createClusterJob(
-                realm: identifier.realm,
                 clusterJobId: HelperUtils.uniqueString,
         )
         DomainFactory.createClusterJob(
-                realm: DomainFactory.createRealm(),
                 clusterJobId: identifier.clusterJobId,
         )
 
