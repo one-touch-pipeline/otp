@@ -85,7 +85,7 @@ class GenerateAndSendKPIsForNBI extends AbstractScheduledJob {
             ].join('\n')
         }.join('\n\n')
 
-        mailHelperService.sendEmailToTicketSystem("KPIs for de.NBI - " + fromDate.month.name(), kpiMailContent)
+        mailHelperService.sendEmailToTicketSystem("KPIs for de.NBI - ${fromDate.month} ${fromDate.year}", kpiMailContent)
     }
 
     /**
