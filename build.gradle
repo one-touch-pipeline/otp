@@ -397,7 +397,7 @@ dependencies {
     implementation 'org.springframework.security:spring-security-ldap:5.8.7'
     implementation 'org.springframework.security:spring-security-oauth2-client:5.8.7'
 
-    implementation "org.openapitools:openapi-generator-gradle-plugin:7.0.0"
+    implementation "org.openapitools:openapi-generator-gradle-plugin:7.0.1"
 
     integrationTestImplementation sourceSets.testHelper.output
     integrationTestRuntimeOnly sourceSets.testHelper.output

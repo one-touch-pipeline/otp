@@ -40,7 +40,6 @@ class FindNewLicenses {
             "BSD License 3",
             "BSD-2-Clause",
             "BSD-3-Clause",
-            "BSD 3-clause",
             "CDDL+GPL License",
             "CDDL + GPLv2 with classpath exception",
             "CDDL-1.0",
