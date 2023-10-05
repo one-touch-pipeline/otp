@@ -21,9 +21,13 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.converters.JSON
+import grails.databinding.BindUsing
+import grails.databinding.SimpleMapDataBindingSource
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
 
+import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
@@ -33,7 +37,7 @@ import de.dkfz.tbi.otp.ngsdata.referencegenome.ToolNameService
 import de.dkfz.tbi.otp.project.Project
 
 @PreAuthorize('isFullyAuthenticated()')
-class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelineController {
+class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelineController implements CheckAndCall {
 
     CellRangerConfigurationService cellRangerConfigurationService
     ReferenceGenomeIndexService referenceGenomeIndexService
@@ -41,58 +45,76 @@ class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelin
     ToolNameService toolNameService
 
     static allowedMethods = [
-            index                   : "GET",
-            updateVersion           : "POST",
-            updateAutomaticExecution: "POST",
-            createMwp               : "POST",
+            index                                : "GET",
+            updateVersion                        : "POST",
+            updateAutomaticExecution             : "POST",
+            createMwp                            : "POST",
+            getIndividualsAndSampleTypesBySeqType: "POST",
     ]
 
     static final List<String> ALLOWED_CELL_TYPE = ["neither", "expected", "enforced"]
 
-    def index(CellRangerSelectionCommand cmd) {
+    def index() {
         Project project = projectSelectionService.selectedProject
 
         SeqType seqType = cellRangerConfigurationService.seqType
         List<SeqType> seqTypes = cellRangerConfigurationService.seqTypes
-        Pipeline pipeline = cellRangerConfigurationService.pipeline
 
         CellRangerConfig config = cellRangerConfigurationService.getWorkflowConfig(project)
         boolean configExists = config && cellRangerConfigurationService.getMergingCriteria(project)
 
-        CellRangerConfigurationService.Samples samples = cellRangerConfigurationService.getSamples(project, cmd.individual, cmd.sampleType)
+        List<Sample> samples = cellRangerConfigurationService.getAllSamples(project, [], [])
 
-        List<Individual> allIndividuals = samples.allSamples*.individual.unique()
-        List<SampleType> allSampleTypes = samples.allSamples*.sampleType.unique()
-
-        List<Individual> selectedIndividuals = samples.selectedSamples*.individual.unique()
-        List<SampleType> selectedSampleTypes = samples.selectedSamples*.sampleType.unique()
-
-        List<CellRangerMergingWorkPackage> mwps = cellRangerConfigurationService.findMergingWorkPackage(samples.selectedSamples, pipeline)
-
-        mwps.sort { a, b ->
-            a.individual.pid <=> b.individual.pid ?: a.sampleType.name <=> b.sampleType.name
-        }
+        List<Individual> allIndividuals = samples*.individual.unique()
+        List<SampleType> allSampleTypes = samples*.sampleType.unique()
 
         ToolName toolName = toolNameService.findToolNameByNameAndType('CELL_RANGER', ToolName.Type.SINGLE_CELL)
 
-        return getModelValues(seqType) + [
+        return [
                 createMwpCmd               : flash.createMwpCmd as CreateMwpCommand,
                 updateAutomaticExecutionCmd: flash.updateAutomaticExecutionCmd as UpdateAutomaticExecutionCommand,
                 configExists               : configExists,
                 config                     : config,
                 allIndividuals             : allIndividuals,
-                individual                 : cmd.individual,
                 allSampleTypes             : allSampleTypes,
-                sampleType                 : cmd.sampleType,
-                seqType                    : seqType,
                 seqTypes                   : seqTypes,
-                samples                    : samples.selectedSamples,
-                referenceGenomeIndex       : cmd.reference,
                 referenceGenomeIndexes     : toolName?.referenceGenomeIndexes,
-                selectedIndividuals        : selectedIndividuals,
-                selectedSampleTypes        : selectedSampleTypes,
-                mwps                       : mwps,
-        ]
+        ] + getModelValues(seqType)
+    }
+
+    JSON getIndividualsAndSampleTypesBySeqType(CellRangerSelectionCommand cmd) {
+        Pipeline pipeline = cellRangerConfigurationService.pipeline
+        List<Sample> samples = cellRangerConfigurationService.getAllSamples(cmd.selectedProject, cmd.individuals, cmd.sampleTypes)
+
+        List<CellRangerMergingWorkPackage> mwps = cellRangerConfigurationService.findMergingWorkPackage(samples, pipeline)
+
+        mwps.sort { a, b ->
+            a.individual.pid <=> b.individual.pid ?: a.sampleType.name <=> b.sampleType.name
+        }
+
+        return render([
+                samples: samples.collect { sample ->
+                    [
+                            sampleId  : sample.id,
+                            individual: sample.individual.toString(),
+                            sampleType: sample.sampleType.toString(),
+                            seqType   : cellRangerConfigurationService.seqType.displayNameWithLibraryLayout,
+                    ]
+                },
+                mwps   : mwps.collect { mwp ->
+                    [
+                            individual            : mwp.individual.toString(),
+                            sampleType            : mwp.sampleType.toString(),
+                            seqType               : mwp.seqType.displayNameWithLibraryLayout,
+                            config                : mwp.config.programVersion,
+                            referenceGenome       : mwp.referenceGenome.toString(),
+                            referenceGenomeIndex  : mwp.referenceGenomeIndex.toolWithVersion,
+                            expectedCells         : mwp.expectedCells,
+                            enforcedCells         : mwp.enforcedCells,
+                            bamFileInProjectFolder: mwp.bamFileInProjectFolder?.fileOperationStatus?.toString() ?: "N/A",
+                    ]
+                },
+        ] as JSON)
     }
 
     def updateVersion(ConfigureCellRangerSubmitCommand cmd) {
@@ -112,7 +134,7 @@ class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelin
         if (!cmd.validate()) {
             flash.updateAutomaticExecutionCmd = cmd
             flash.message = new FlashMessage(g.message(code: "cellRanger.store.failure") as String, cmd.errors)
-            return redirect(action: "index", params: params)
+            return defaultIndexRedirect()
         }
 
         Errors errors = cellRangerConfigurationService.configureAutoRun(project, cmd.enableAutoExec, cmd.expectedCellsValue, cmd.enforcedCellsValue,
@@ -123,35 +145,27 @@ class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelin
         } else {
             flash.message = new FlashMessage(g.message(code: "cellRanger.store.success") as String)
         }
-        redirect(action: "index", params: params)
+        return defaultIndexRedirect()
     }
 
-    def createMwp(CreateMwpCommand cmd) {
-        Map<String, Object> params = [:]
-        params.put("individual.id", cmd.individual?.id ?: "")
-        params.put("sampleType.id", cmd.sampleType?.id ?: "")
+    JSON createMwp(CreateMwpCommand cmd) {
+        return checkErrorAndCallMethodReturns(cmd) {
+            cellRangerConfigurationService.prepareCellRangerExecution(
+                    cmd.samples,
+                    cmd.expectedCellsValue,
+                    cmd.enforcedCellsValue,
+                    cmd.referenceGenomeIndex,
+            )
+            return [:] as JSON
+        } as JSON
+    }
 
-        if (!cmd.validate()) {
-            flash.createMwpCmd = cmd
-            flash.message = new FlashMessage(g.message(code: "cellRanger.store.failure") as String, cmd.errors)
-            return redirect(action: "index", params: params)
-        }
-        Errors errors = cellRangerConfigurationService.prepareCellRangerExecution(
-                cmd.expectedCellsValue,
-                cmd.enforcedCellsValue,
-                cmd.referenceGenomeIndex,
-                projectSelectionService.requestedProject,
-                cmd.individual,
-                cmd.sampleType,
-                cmd.seqType,
-        )
-        if (errors) {
-            flash.createMwpCmd = cmd
-            flash.message = new FlashMessage(g.message(code: "cellRanger.store.failure") as String, errors)
-        } else {
-            flash.message = new FlashMessage(g.message(code: "cellRanger.store.success") as String)
-        }
-        redirect(action: "index", params: params)
+    private void defaultIndexRedirect() {
+        redirect(action: "index", params: [
+                "individuals"            : params.individuals,
+                "sampleTypes"            : params.sampleTypes,
+                "referenceGenomeIndex.id": params["referenceGenomeIndex.id"],
+        ])
     }
 
     @Override
@@ -159,7 +173,8 @@ class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelin
         return Pipeline.Name.CELL_RANGER.pipeline
     }
 
-    @SuppressWarnings('MissingOverrideAnnotation') // for an unknown reason the groovy compiler doesnt work with @Override in this case
+    @SuppressWarnings('MissingOverrideAnnotation')
+    // for an unknown reason the groovy compiler doesnt work with @Override in this case
     protected CellRangerConfig getLatestConfig(Project project, SeqType seqType) {
         return projectService.getLatestCellRangerConfig(project, seqType)
     }
@@ -188,25 +203,42 @@ class UpdateAutomaticExecutionCommand {
 }
 
 class CellRangerSelectionCommand extends BaseConfigurePipelineSubmitCommand {
-    Individual individual
-    SampleType sampleType
-    ReferenceGenomeIndex reference
+    Project selectedProject
+    // BindUsing is needed, because one value is not send as array but multiple values are sent as array from frontend.
+    @BindUsing({ CellRangerSelectionCommand obj, SimpleMapDataBindingSource source ->
+        return Individual.getAll(source['individuals']) as List<Individual>
+    })
+    List<Individual> individuals
+
+    // BindUsing is needed, because one value is not send as array but multiple values are sent as array from frontend.
+    @BindUsing({ CellRangerSelectionCommand obj, SimpleMapDataBindingSource source ->
+        return SampleType.getAll(source['sampleTypes']) as List<SampleType>
+    })
+    List<SampleType> sampleTypes
 
     static constraints = {
-        individual nullable: true
-        sampleType nullable: true
+        individuals nullable: true
+        sampleTypes nullable: true
         seqType nullable: true
-        reference nullable: true
+        selectedProject nullable: false
     }
 }
 
-class CreateMwpCommand extends CellRangerSelectionCommand {
+class CreateMwpCommand extends BaseConfigurePipelineSubmitCommand {
     Integer expectedCellsValue
     Integer enforcedCellsValue
+
+    // BindUsing is needed, because one value is not send as array but multiple values are sent as array from frontend.
+    @BindUsing({ CreateMwpCommand obj, SimpleMapDataBindingSource source ->
+        return Sample.getAll(source['samples']) as List<Sample>
+    })
+    List<Sample> samples
     ReferenceGenomeIndex referenceGenomeIndex
 
     static constraints = {
+        samples nullable: false
         expectedCellsValue nullable: true
         enforcedCellsValue nullable: true
+        referenceGenomeIndex nullable: false
     }
 }

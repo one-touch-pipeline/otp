@@ -138,27 +138,22 @@ class CellRangerConfigurationService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
-    Samples getSamples(Project project, Individual ind, SampleType sampleType) {
-        List<Sample> allSamples = Sample.createCriteria().list {
+    List<Sample> getAllSamples(Project project, List<Individual> individuals, List<SampleType> sampleTypes) {
+        return Sample.createCriteria().listDistinct {
             seqTracks {
                 eq("seqType", seqType)
             }
             individual {
                 eq("project", project)
             }
-        }
-
-        List<Sample> selectedSamples = allSamples.findAll {
-            if (ind && it.individual != ind) {
-                return false
+            if (individuals) {
+                'in'("individual", individuals)
             }
-            return (!sampleType || it.sampleType == sampleType)
-        }
 
-        return new Samples(
-                allSamples,
-                selectedSamples,
-        )
+            if (sampleTypes) {
+                'in'("sampleType", sampleTypes)
+            }
+        } as List<Sample>
     }
 
     Map<PlatformGroupAndKit, List<SeqTrack>> getSeqTracksGroupedByPlatformGroupAndKit(Collection<SeqTrack> seqTracks) {
@@ -185,26 +180,12 @@ class CellRangerConfigurationService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
-    Errors prepareCellRangerExecution(
-            Integer expectedCells,
-            Integer enforcedCells,
-            ReferenceGenomeIndex referenceGenomeIndex,
-            Project project,
-            Individual individual,
-            SampleType sampleType,
-            SeqType seqType
-    ) {
-        List<Sample> samples = new ArrayList(getSamples(project, individual, sampleType).selectedSamples).unique()
+    void prepareCellRangerExecution(List<Sample> samples, Integer expectedCells, Integer enforcedCells, ReferenceGenomeIndex referenceGenomeIndex) {
         CellRangerMwpParameter parameter = new CellRangerMwpParameter(expectedCells, enforcedCells, referenceGenomeIndex, seqType)
 
-        try {
-            User requester = securityService.currentUser
-            List<CellRangerMergingWorkPackage> mwps = createMergingWorkPackagesForSamples(samples, parameter, requester)
-            resetAllTicketsOfSeqTracksForCellRangerExecution(mwps.collectMany { return it.seqTracks } as Set<SeqTrack>)
-        } catch (ValidationException e) {
-            return e.errors
-        }
-        return null
+        User requester = securityService.currentUser
+        List<CellRangerMergingWorkPackage> mwps = createMergingWorkPackagesForSamples(samples, parameter, requester)
+        resetAllTicketsOfSeqTracksForCellRangerExecution(mwps.collectMany { return it.seqTracks } as Set<SeqTrack>)
     }
 
     void resetAllTicketsOfSeqTracksForCellRangerExecution(Set<SeqTrack> seqTracks) {

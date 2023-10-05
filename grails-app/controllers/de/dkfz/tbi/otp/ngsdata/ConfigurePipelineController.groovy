@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
+import grails.validation.Validateable
 import groovy.transform.ToString
 import org.springframework.security.access.prepost.PreAuthorize
 
@@ -475,7 +476,7 @@ class InvalidateConfigurationCommand extends BaseConfigurePipelineSubmitCommand 
 }
 
 @ToString(includeNames = true)
-class BaseConfigurePipelineSubmitCommand implements Serializable {
+class BaseConfigurePipelineSubmitCommand implements Serializable, Validateable {
     SeqType seqType
 
     static constraints = {

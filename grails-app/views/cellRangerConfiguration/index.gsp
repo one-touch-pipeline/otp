@@ -24,20 +24,20 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <meta name="layout" content="main"/>
     <title>${g.message(code: "cellRanger.title", args: [selectedProject?.name])}</title>
     <asset:javascript src="common/CommentBox.js"/>
     <asset:javascript src="pages/cellRanger/index/cellRanger.js"/>
 </head>
+
 <body>
-<div class="body">
+<div class="container-fluid otp-main-container">
     <g:set var="archived" value="${selectedProject.archived ? 'archived' : ''}"/>
 
-    <g:render template="/templates/messages"/>
     <div class="project-selection-header-container">
         <div class="grid-element">
-            <g:render template="/templates/projectSelection"/>
+            <g:render template="/templates/bootstrap/projectSelection"/>
         </div>
+
         <div class="grid-element comment-box">
             <g:render template="/templates/commentBox" model="[
                     commentable     : selectedProject,
@@ -46,15 +46,17 @@
             ]"/>
         </div>
     </div>
+
     <div>
         <g:render template="/projectConfig/tabMenu"/>
     </div>
+    <br>
 
     <h1><g:message code="cellRanger.title" args="[selectedProject.name, seqType.displayName]"/></h1>
 
     <g:render template="/templates/quickNavigationBar" model="[
-            linkText : g.message(code: 'cellRanger.linkTo.runSelectionPage'),
-            link : g.createLink(controller: 'cellRanger', action: 'finalRunSelection'),
+            linkText: g.message(code: 'cellRanger.linkTo.runSelectionPage'),
+            link    : g.createLink(controller: 'cellRanger', action: 'finalRunSelection'),
             tooltip : g.message(code: 'cellRanger.linkTo.runSelectionPage.tooltip')
     ]"/>
 
@@ -64,84 +66,89 @@
         </otp:annotation>
     </g:if>
 
-    <h2>Configure version</h2>
+    <h2><g:message code="configurePipeline.configureVersion.title"/></h2>
+    <g:message code="configurePipeline.cellRanger.info"/>
+
     <g:form action="updateVersion" params='["seqType.id": seqType.id, overviewController: controllerName]' method='POST'>
-        <table class="pipelineTable">
-            <tr>
-                <th></th>
-                <th></th>
-                <th><g:message code="configurePipeline.header.defaultValue"/></th>
-                <th><g:message code="configurePipeline.header.info"/></th>
-            </tr>
-            <tr>
-                <td class="myKey"><g:message code="configurePipeline.version"/></td>
-                <td><g:select name="programVersion" class="use-select-2" value="${currentVersion}" from="${availableVersions}" noSelection="${["": "Select version"]}"/></td>
-                <td>${defaultVersion}</td>
-                <td><g:message code="configurePipeline.cellRanger.info"/></td>
-            </tr>
-            <tr>
-                <td colspan="4">&nbsp;</td>
-            </tr>
-            <tr>
-                <td class="myKey"></td>
-                <td><g:submitButton class="${archived}" name="submit" value="Submit"/></td>
-            </tr>
-        </table>
+        <div class="form-group row">
+            <label for="versionSelect" class="col-sm-2 col-form-label">
+                <g:message code="configurePipeline.version"/>
+                (default: ${defaultVersion})
+            </label>
+            <g:select name="programVersion" id="versionSelect" class="use-select-2 col-sm-4" value="${currentVersion}" from="${availableVersions}"
+                      noSelection="${["": "Select version"]}"/>
+
+            <div class="col-sm-5">
+                <g:submitButton class="${archived} btn btn-primary" name="submit" value="Submit"/>
+            </div>
+        </div>
     </g:form>
     <g:if test="${currentVersion}">
         <sec:ifAllGranted roles="ROLE_OPERATOR">
             <g:form controller="configurePipeline" action="invalidateConfig" method="POST"
                     params='["seqType.id": seqType.id, "pipeline.id": pipeline.id, "originAction": actionName, overviewController: "cellRangerConfiguration"]'>
-                <g:submitButton class="${archived}" name="invalidateConfig" value="Invalidate Config"/>
+                <g:submitButton class="${archived} btn btn-primary" name="invalidateConfig" value="Invalidate Config"/>
             </g:form>
         </sec:ifAllGranted>
     </g:if>
-    <br>
 
     <hr>
 
     <h2>${g.message(code: "cellRanger.automaticRun")}</h2>
     <g:if test="${configExists}">
         <div id="updateAutomaticExecution">
-            <g:form action="updateAutomaticExecution" params='["seqType.id": seqType.id, overviewController: controllerName]' method='POST'>
-                <g:checkBox id="enableAutoExec" name="enableAutoExec" value="${config.autoExec}"/><label for="enableAutoExec">${g.message(code: "cellRanger.automaticRun.enable")}</label>
-                <br><br>
+            <g:form name="" action="updateAutomaticExecution" params='["seqType.id": seqType.id, overviewController: controllerName]' method='POST'>
+                <g:set var="checked" value="${config.autoExec ? 'checked' : ''}"/>
+
+                <div class="custom-control custom-checkbox pb-3">
+                    <g:checkBox id="enableAutoExec" name="enableAutoExec" value="${config.autoExec}" class="custom-control-input"/>
+                    <label class="custom-control-label" for="enableAutoExec">${g.message(code: "cellRanger.automaticRun.enable")}</label>
+                </div>
 
                 <div class="automaticSettings">
-                    <div>
-                        <strong>${g.message(code: "cellRanger.create.referenceGenomeIndex")}:</strong>
-                        <g:select id="referenceGenomeIndex2" name="referenceGenomeIndex.id" class="use-select-2"
+                    <div class="form-group col-md-6">
+                        <label for="referenceGenomeIndex2">
+                            ${g.message(code: "cellRanger.create.referenceGenomeIndex")}
+
+                        </label>
+                        <g:select id="referenceGenomeIndex2" name="referenceGenomeIndex.id" class="use-select-2 form-control"
                                   from="${referenceGenomeIndexes}"
                                   value="${updateAutomaticExecutionCmd ? updateAutomaticExecutionCmd.referenceGenomeIndex.id == 'expected' : config.referenceGenomeIndex?.id}"
                                   optionKey="id" noSelection="${[(""): "Select a reference"]}"
                                   required="true"/>
                     </div>
 
-                    <div>
-                        <strong>${g.message(code: "cellRanger.create.expectedOrEnforcedCells")}:</strong><br>
-                        <label>
-                            <g:radio name="expectedOrEnforcedCells" value="neither"
+                    <div class="form-group col-md-6">
+                        <label for="referenceGenomeIndex2">
+                            ${g.message(code: "cellRanger.create.expectedOrEnforcedCells")}
+                        </label>
+
+                        <div class="custom-control custom-radio">
+                            <g:radio name="expectedOrEnforcedCells" value="neither" id="defaultExpectedCells" class="custom-control-input"
                                      checked="${updateAutomaticExecutionCmd ? (updateAutomaticExecutionCmd.expectedCellsValue == null && updateAutomaticExecutionCmd.enforcedCellsValue == null) : (config.expectedCells == null && config.enforcedCells == null)}"/>
-                            ${g.message(code: "cellRanger.default")}
-                        </label>
-                        <br>
-                        <label>
-                            <g:radio name="expectedOrEnforcedCells" value="expected"
+                            <label class="custom-control-label" for="defaultExpectedCells">${g.message(code: "cellRanger.default")}</label>
+                        </div>
+
+                        <div class="custom-control custom-radio">
+                            <g:radio name="expectedOrEnforcedCells" value="expected" class="custom-control-input" id="expectedCellsRadio"
                                      checked="${updateAutomaticExecutionCmd ? updateAutomaticExecutionCmd.expectedCellsValue : config.expectedCells}"/>
-                            ${g.message(code: "cellRanger.expectedCells")}
-                        </label>
-                        <input name="expectedCellsValue" value="${updateAutomaticExecutionCmd?.expectedCellsValue ?: config.expectedCells}" required/>
-                        <br>
-                        <label>
-                            <g:radio name="expectedOrEnforcedCells" value="enforced"
+
+                            <label class="custom-control-label" for="expectedCellsRadio">${g.message(code: "cellRanger.expectedCells")}</label>
+                            <input name="expectedCellsValue" class="form-control"
+                                   value="${updateAutomaticExecutionCmd?.expectedCellsValue ?: config.expectedCells}" required/>
+                        </div>
+
+                        <div class="custom-control custom-radio">
+                            <g:radio name="expectedOrEnforcedCells" value="enforced" class="custom-control-input" id="enforcedCellsRadio"
                                      checked="${updateAutomaticExecutionCmd ? updateAutomaticExecutionCmd.enforcedCellsValue : config.enforcedCells}"/>
-                            ${g.message(code: "cellRanger.enforcedCells")}
+                            <label class="custom-control-label" for="enforcedCellsRadio">${g.message(code: "cellRanger.enforcedCells")}</label>
+                            <input name="enforcedCellsValue" class="form-control"
+                                   value="${updateAutomaticExecutionCmd?.enforcedCellsValue ?: config.enforcedCells}" required/>
                         </label>
-                        <input name="enforcedCellsValue" value="${updateAutomaticExecutionCmd?.enforcedCellsValue ?: config.enforcedCells}" required/>
-                        <br><br>
+                        </div>
                     </div>
                 </div>
-                <g:submitButton id="save" name="Save"/>
+                <g:submitButton id="save" name="Save" class="btn btn-primary"/>
             </g:form>
         </div>
     </g:if>
@@ -155,119 +162,121 @@
     <otp:annotation type="info">${g.message(code: "cellRanger.hashedSamplesInfo")}</otp:annotation>
     <otp:annotation type="info">${g.message(code: "cellRanger.xenograftSamplesInfo")}</otp:annotation>
     <g:if test="${configExists}">
-        <g:form action="index" method="GET">
-            <input type="hidden" name="${projectParameter}" value="${selectedProject.name}"/>
-            <div class="cell-ranger-selection-grid-wrapper">
-                <div>
-                    <strong>${g.message(code: "cellRanger.individual")}:</strong><br>
-                    <g:select name="individual.id" class="use-select-2" from="${allIndividuals}" optionKey="id" value="${individual?.id}"
-                              noSelection="${[(""): "All Individuals"]}" onChange="submit()"/>
+        <g:form name="sampleForm" action="createMwp" method="POST">
+            <input type="hidden" name="selectedProject.id" value="${selectedProject.id}"/>
+
+            <div class="row">
+                <div class="col-sm">
+                    <table class="table-sm table-striped table-hover key-value-table key-input pb-3">
+                        <tr>
+                            <td><label for="individualSelect">${g.message(code: "cellRanger.individual")}</label></td>
+                            <td>
+                                <g:select multiple="multiple" id="individualSelect" name="individuals" class="use-select-2" from="${allIndividuals}"
+                                          value="${params?["individual.id"]?.split(',')}"
+                                          optionKey="id" noSelection="${[(""): "All Individuals"]}"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><label for="sampleTypeSelect">${g.message(code: "cellRanger.sampleType")}</label></td>
+                            <td>
+                                <g:select multiple="multiple" id="sampleTypeSelect" name="sampleTypes" class="use-select-2" from="${allSampleTypes}"
+                                          value="${params?["sampleType.id"]?.split(',')}"
+                                          optionKey="id" noSelection="${[(""): "All Sample Types"]}"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="referenceGenomeSelect">${g.message(code: "cellRanger.create.referenceGenomeIndex")}</label>
+                            </td>
+                            <td>
+                                <g:select id="referenceGenomeSelect" name="referenceGenomeIndex.id" class="use-select-2"
+                                          from="${referenceGenomeIndexes}"
+                                          value="${createMwpCmd?.referenceGenomeIndex?.id ?: params?["reference.id"] ?: params?["referenceGenomeIndex.id"]}"
+                                          optionKey="id" noSelection="${[(""): "Select a reference"]}" required="true"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><label for="seqTypeSelect">${g.message(code: "cellRanger.seqType")}</label></td>
+                            <td>
+                                <g:select id="seqTypeSelect" name="seqType.id" class="use-select-2"
+                                          from="${seqTypes}" value="${createMwpCmd?.seqType?.id ?: params?["seqType.id"] ?: seqType.id}"
+                                          optionKey="id" noSelection="${[(""): "Select a seq type"]}" required="true"/>
+                            </td>
+                        </tr>
+                    </table>
                 </div>
-                <div>
-                    <strong>${g.message(code: "cellRanger.sampleType")}:</strong><br>
-                    <g:select name="sampleType.id" class="use-select-2" from="${allSampleTypes}" optionKey="id" value="${sampleType?.id}"
-                              noSelection="${[(""): "All Sample Types"]}" onChange="submit()"/>
-                </div>
-                <div>
-                    <strong>${g.message(code: "cellRanger.seqType")}:</strong><br>
-                    ${seqType}
-                    <input type="hidden" name="seqType.id" value="${seqType.id}"/>
+
+                <div class="col-sm">
+                    <div class="form-group col-md-6">
+                        <label for="referenceGenomeIndex2">
+                            ${g.message(code: "cellRanger.create.expectedOrEnforcedCells")}
+                        </label>
+
+                        <div class="custom-control custom-radio">
+                            <g:radio name="expectedOrEnforcedCells" value="neither" id="defaultExpectedCells2" class="custom-control-input"
+                                     checked="${!createMwpCmd || (createMwpCmd.expectedCellsValue == null && createMwpCmd.enforcedCellsValue == null)}"/>
+                            <label class="custom-control-label" for="defaultExpectedCells2">${g.message(code: "cellRanger.default")}</label>
+                        </div>
+
+                        <div class="custom-control custom-radio">
+                            <g:radio name="expectedOrEnforcedCells" value="expected" class="custom-control-input" id="expectedCellsRadio2"
+                                     checked="${createMwpCmd && createMwpCmd.expectedCellsValue != null && createMwpCmd.enforcedCellsValue == null}"/>
+
+                            <label class="custom-control-label" for="expectedCellsRadio2">${g.message(code: "cellRanger.expectedCells")}</label>
+                            <input name="expectedCellsValue" class="form-control" value="${createMwpCmd?.expectedCellsValue}" required/>
+                        </div>
+
+                        <div class="custom-control custom-radio">
+                            <g:radio name="expectedOrEnforcedCells" value="enforced" class="custom-control-input" id="enforcedCellsRadio2"
+                                     checked="${createMwpCmd && createMwpCmd.expectedCellsValue == null && createMwpCmd.enforcedCellsValue != null}"/>
+                            <label class="custom-control-label" for="enforcedCellsRadio2">${g.message(code: "cellRanger.enforcedCells")}</label>
+                            <input name="enforcedCellsValue" class="form-control" value="${createMwpCmd?.enforcedCellsValue}" required/>
+                        </label>
+                        </div>
+                    </div>
                 </div>
             </div>
         </g:form>
-        <br>
-        <g:if test="${samples}">
-            <h3>${g.message(code: "cellRanger.header.create")}:</h3>
-            <g:form action="createMwp" method="POST">
-                <input type="hidden" name="sampleType.id" value="${sampleType?.id}"/>
-                <input type="hidden" name="individual.id" value="${individual?.id}"/>
-                <input type="hidden" name="seqType.id" value="${seqType?.id}"/>
 
-                <div class="cell-ranger-creation-grid-wrapper">
-                    <div class="row one">
-                        <div>
-                            <strong>${g.message(code: "cellRanger.create.referenceGenomeIndex")}:</strong>
-                            <g:select id="referenceGenomeIndex" name="referenceGenomeIndex.id" class="use-select-2"
-                                      from="${referenceGenomeIndexes}" value="${createMwpCmd?.referenceGenomeIndex?.id ?: referenceGenomeIndex?.id}"
-                                      optionKey="id" noSelection="${[(""): "Select a reference"]}"
-                                      required="true"/>
-                        </div>
-                    </div>
-                    <div class="row two">
-                        <div>
-                            <strong>${g.message(code: "cellRanger.create.selectedIndividuals")}:</strong>
-                            <ul class="scrollable">
-                                <g:each in="${selectedIndividuals}" var="individual">
-                                    <li>${individual}</li>
-                                </g:each>
-                            </ul>
-                        </div>
-                        <div>
-                            <strong>${g.message(code: "cellRanger.create.selectedSampleTypes")}:</strong>
-                            <ul class="scrollable">
-                                <g:each in="${selectedSampleTypes}" var="sampleType">
-                                    <li>${sampleType}</li>
-                                </g:each>
-                            </ul>
-                        </div>
-                        <div>
-                            <strong>${g.message(code: "cellRanger.create.expectedOrEnforcedCells")}:</strong><br><br>
-                            <label>
-                                <g:radio name="expectedOrEnforcedCells" value="neither" checked="${createMwpCmd ? (createMwpCmd.expectedCellsValue == null && createMwpCmd.enforcedCellsValue == null) : false}"/>
-                                ${g.message(code: "cellRanger.default")}
-                            </label>
-                            <br>
-                            <label>
-                                <g:radio name="expectedOrEnforcedCells" value="expected" checked="${createMwpCmd ? createMwpCmd.expectedCellsValue : false}"/>
-                                ${g.message(code: "cellRanger.expectedCells")}
-                            </label>
-                            <input name="expectedCellsValue" value="${createMwpCmd?.expectedCellsValue}" required/>
-                            <br>
-                            <label>
-                                <g:radio name="expectedOrEnforcedCells" value="enforced" checked="${createMwpCmd ? createMwpCmd.enforcedCellsValue : false}"/>
-                                ${g.message(code: "cellRanger.enforcedCells")}
-                            </label>
-                            <input name="enforcedCellsValue" value="${createMwpCmd?.enforcedCellsValue}" required/>
-                            <br><br>
-                        </div>
-                    </div>
-                    <div class="row three ${archived}">
-                        <g:submitButton id="execute" name="Execute Cell Ranger"/>
-                    </div>
-                </div>
-            </g:form>
-            <br>
-            <h3>${g.message(code: "cellRanger.header.processes")}:</h3>
-            <table>
-                <tr>
-                    <th>${g.message(code: "cellRanger.individual")}</th>
-                    <th>${g.message(code: "cellRanger.sampleType")}</th>
-                    <th>${g.message(code: "cellRanger.seqType")}</th>
-                    <th>${g.message(code: "cellRanger.config.programVersion")}</th>
-                    <th>${g.message(code: "cellRanger.referenceGenome")}</th>
-                    <th>${g.message(code: "cellRanger.referenceGenomeIndex")}</th>
-                    <th>${g.message(code: "cellRanger.expectedCells")}</th>
-                    <th>${g.message(code: "cellRanger.enforcedCells")}</th>
-                    <th>${g.message(code: "cellRanger.processingStatus")}</th>
-                </tr>
-                <g:each var="mwp" in="${mwps}">
-                    <tr>
-                        <td>${mwp.individual}</td>
-                        <td>${mwp.sampleType}</td>
-                        <td>${mwp.seqType}</td>
-                        <td>${mwp.config.programVersion}</td>
-                        <td>${mwp.referenceGenome}</td>
-                        <td>${mwp.referenceGenomeIndex.toolWithVersion}</td>
-                        <td>${mwp.expectedCells}</td>
-                        <td>${mwp.enforcedCells}</td>
-                        <td>${mwp.bamFileInProjectFolder ? mwp.bamFileInProjectFolder.fileOperationStatus : "N/A"}</td>
-                    </tr>
-                </g:each>
-            </table>
-        </g:if>
-        <g:else>
-            <p>${g.message(code: "cellRanger.noSamples")}</p>
-        </g:else>
+        <h3>${g.message(code: "cellRanger.header.create")}:</h3>
+        <table id="sampleTable" class="table table-sm table-striped table-hover table-bordered w-100 fixed-table-header">
+            <thead><tr>
+                <th></th>
+                <th>${g.message(code: "cellRanger.create.selectedIndividuals")}</th>
+                <th>${g.message(code: "cellRanger.create.selectedSampleTypes")}</th>
+                <th>${g.message(code: "cellRanger.create.selectedSeqType")}</th>
+            </tr></thead>
+            <tbody>
+            </tbody>
+            <tfoot>
+            </tfoot>
+        </table>
+        <button id="executeButton" class="btn btn-primary" type="button">
+            ${g.message(code: "cellRanger.execute")}
+            <span id="executeSpinner" class="spinner-border spinner-border-sm" hidden role="status" aria-hidden="true">
+                <span class="sr-only">Loading...</span>
+            </span>
+        </button>
+
+        <h3>${g.message(code: "cellRanger.header.processes")}:</h3>
+        <table id="mwpTable" class="table table-sm table-striped table-hover table-bordered w-100 fixed-table-header">
+            <thead>
+            <tr>
+                <th>${g.message(code: "cellRanger.individual")}</th>
+                <th>${g.message(code: "cellRanger.sampleType")}</th>
+                <th>${g.message(code: "cellRanger.seqType")}</th>
+                <th>${g.message(code: "cellRanger.config.programVersion")}</th>
+                <th>${g.message(code: "cellRanger.referenceGenome")}</th>
+                <th>${g.message(code: "cellRanger.referenceGenomeIndex")}</th>
+                <th>${g.message(code: "cellRanger.expectedCells")}</th>
+                <th>${g.message(code: "cellRanger.enforcedCells")}</th>
+                <th>${g.message(code: "cellRanger.processingStatus")}</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+
     </g:if>
     <g:else>
         <otp:annotation type="info">${g.message(code: "cellRanger.noConfig")}</otp:annotation>

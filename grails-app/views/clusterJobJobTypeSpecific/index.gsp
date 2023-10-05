@@ -35,7 +35,7 @@
         <div class="rounded-page-header-box">
             <div>
                 <span>Job Class: <g:select class="use-select-2" name="jobClassSelect" id="jobClassSelect" from="${jobClasses}"/></span>
-                <span>Seq. Type: <select name="seqTypeSelect" id="seqTypeSelect"></select></span>
+                <span>Seq. Type: <select name="seqTypeSelect" style="width: 250px" id="seqTypeSelect"></select></span>
             </div>
             <br/>
             <div>

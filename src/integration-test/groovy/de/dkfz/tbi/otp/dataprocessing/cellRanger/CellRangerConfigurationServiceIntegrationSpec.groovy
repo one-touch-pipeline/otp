@@ -50,12 +50,16 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
     CellRangerConfigurationService cellRangerConfigurationService
     Project project
     SeqType seqType
-    Individual individual
-    SampleType sampleType
+    Individual individualA
+    Individual individualB
+    SampleType sampleTypeA
+    SampleType sampleTypeB
     Sample sampleA
     Sample sampleB
+    Sample sampleC
     SeqTrack seqTrackA
     SeqTrack seqTrackB
+    SeqTrack seqTrackC
     ReferenceGenomeIndex referenceGenomeIndex
     User requester
 
@@ -87,17 +91,21 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
 
         createMergingCriteria(project: project, seqType: seqType)
 
-        individual = createIndividual(project: project)
-        sampleType = createSampleType()
-        sampleA = createSample(individual: individual, sampleType: sampleType)
+        individualA = createIndividual(project: project)
+        sampleTypeA = createSampleType()
+        sampleA = createSample(individual: individualA, sampleType: sampleTypeA)
         seqTrackA = createSeqTrack(seqType: seqType, sample: sampleA)
         sampleA.refresh()
 
-        Individual individualB = createIndividual(project: project)
-        SampleType sampleTypeB = createSampleType()
+        individualB = createIndividual(project: project)
+        sampleTypeB = createSampleType()
         sampleB = createSample(individual: individualB, sampleType: sampleTypeB)
         seqTrackB = createSeqTrack(seqType: seqType, sample: sampleB)
         sampleB.refresh()
+
+        sampleC = createSample(individual: individualA, sampleType: sampleTypeB)
+        seqTrackC = createSeqTrack(seqType: seqType, sample: sampleC)
+        sampleC.refresh()
     }
 
     /**
@@ -136,32 +144,56 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         return seqTracks
     }
 
-    void "test getSamples"() {
+    void "getAllSample should return all sample that contain combinations of individuals and sample types provided"() {
         given:
         setupData()
 
         when:
-        CellRangerConfigurationService.Samples samples = doWithAuth(ADMIN) {
-            cellRangerConfigurationService.getSamples(project, individual, sampleType)
+        List<Sample> samples = doWithAuth(ADMIN) {
+            cellRangerConfigurationService.getAllSamples(project, [individualB], [sampleTypeB])
         }
 
         then:
-        TestCase.assertContainSame(samples.allSamples, [sampleA, sampleB])
-        TestCase.assertContainSame(samples.selectedSamples, [sampleA])
+        TestCase.assertContainSame(samples, [sampleB])
     }
 
-    void "test getSamples for whole project"() {
+    void "getAllSample should return all samples, when no restrictions are made for individuals nor sample types"() {
         given:
         setupData()
 
         when:
-        CellRangerConfigurationService.Samples samples = doWithAuth(ADMIN) {
-            cellRangerConfigurationService.getSamples(project, null, null)
+        List<Sample> samples = doWithAuth(ADMIN) {
+            cellRangerConfigurationService.getAllSamples(project, [], [])
         }
 
         then:
-        TestCase.assertContainSame(samples.allSamples, [sampleA, sampleB])
-        TestCase.assertContainSame(samples.selectedSamples, [sampleA, sampleB])
+        TestCase.assertContainSame(samples, [sampleA, sampleB, sampleC])
+    }
+
+    void "getAllSample should return all samples, when all existing individuals and sample types are selected"() {
+        given:
+        setupData()
+
+        when:
+        List<Sample> samples = doWithAuth(ADMIN) {
+            cellRangerConfigurationService.getAllSamples(project, [individualA, individualB], [sampleTypeA, sampleTypeB])
+        }
+
+        then:
+        TestCase.assertContainSame(samples, [sampleA, sampleB, sampleC])
+    }
+
+    void "getAllSamples, should return only the samples that contain one of the selected individuals and one of the selected sampleTypes"() {
+        given:
+        setupData()
+
+        when:
+        List<Sample> samples = doWithAuth(ADMIN) {
+            cellRangerConfigurationService.getAllSamples(project, [individualA], [sampleTypeA, sampleTypeB])
+        }
+
+        then:
+        TestCase.assertContainSame(samples, [sampleA, sampleC])
     }
 
     void "test getSeqTracksGroupedByPlatformGroupAndKit properly groups SeqTracks by SeqPlatformGroup and LibPrepKit"() {
@@ -188,6 +220,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
                 sequenceFiles: [
                         createFastqFile(seqTrack: seqTrackA),
                         createFastqFile(seqTrack: seqTrackB),
+                        createFastqFile(seqTrack: seqTrackB),
                 ] as Set<RawSequenceFile>,
                 ticket: createTicketWithEndDatesAndNotificationSent(),
         )
@@ -196,13 +229,10 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         when:
         Errors errors = doWithAuth(ADMIN) {
             cellRangerConfigurationService.prepareCellRangerExecution(
+                    [sampleA],
                     expectedParameter.expectedCells,
                     expectedParameter.enforcedCells,
                     expectedParameter.referenceGenomeIndex,
-                    project,
-                    individual,
-                    sampleType,
-                    expectedParameter.seqType
             )
         }
 
@@ -308,7 +338,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         mwp.sample == sampleA
         mwp.seqTracks == [seqTrackA] as Set
         mwp.project == project
-        mwp.individual == individual
+        mwp.individual == individualA
         mwpUsesParameter(mwp, parameter)
 
         where:
