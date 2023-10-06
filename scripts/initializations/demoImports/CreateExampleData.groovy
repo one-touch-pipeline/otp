@@ -121,6 +121,11 @@ class ExampleData {
     boolean createFilesOnFilesystem = true
 
     /**
+     * A flag indicating to use CRAM instead of FASTQ files for WGS/WES
+     */
+    boolean usingCram = true
+
+    /**
      * Should data files be marked as existing when no files were created?
      * Only taking effect if createFilesOnFilesystem is false.
      *
@@ -199,6 +204,19 @@ class ExampleData {
             "blood01",
             "blood02",
     ]
+
+    /**
+     * The raw sequence file types can be either FASTQ or CRAM.
+     * Currently only WGS and WES seq types can have CRAM file.
+     */
+    enum RawSequenceFileType {
+        FASTQ,
+        CRAM,
+
+        static String getFileSuffix(RawSequenceFileType type) {
+            return type == FASTQ ? "fastq.gz" : "cram.gz"
+        }
+    }
 // ------------------------------
 // work
 
@@ -1132,8 +1150,15 @@ class ExampleData {
                 antibodyTarget       : seqType.hasAntibodyTarget ? antibodyTarget : null
         ]).save(flush: false)
 
-        (1..seqType.libraryLayout.mateCount).each {
-            createFastqFile(seqTrack, it)
+        // Currently CRAM files are available only for WGS and WES
+        if (usingCram && (seqType.wgs || seqType.exome)) {
+            (1..seqType.libraryLayout.mateCount).each {
+                createCramFile(seqTrack, it)
+            }
+        } else {
+            (1..seqType.libraryLayout.mateCount).each {
+                createFastqFile(seqTrack, it)
+            }
         }
 
         return seqTrack
@@ -1149,9 +1174,10 @@ class ExampleData {
         ]).save(flush: false)
     }
 
-    RawSequenceFile createFastqFile(SeqTrack seqTrack, int mateNumber) {
-        String fileName = "file_${rawSequenceFileCounter++}_L${seqTrack.laneId}_R${mateNumber}.fastq.gz"
-        RawSequenceFile rawSequenceFile = new FastqFile([
+    // Create either a fastq or cram file depending on its RawSequenceFileType
+    RawSequenceFile createRawSeqFile(SeqTrack seqTrack, int mateNumber, RawSequenceFileType rawSequenceFileType) {
+        String fileName = "file_${rawSequenceFileCounter++}_L${seqTrack.laneId}_R${mateNumber}.${RawSequenceFileType.getFileSuffix(rawSequenceFileType)}"
+        Map parameters = [
                 seqTrack           : seqTrack,
                 mateNumber         : mateNumber,
                 fastqImportInstance: fastqImportInstance,
@@ -1169,12 +1195,25 @@ class ExampleData {
                 fileSize           : 1000000000,
                 nReads             : 185000000,
                 dateLastChecked    : new Date()
-        ]).save(flush: false)
+        ]
+
+        RawSequenceFile rawSequenceFile = rawSequenceFileType == RawSequenceFileType.CRAM
+                ? new SequenceCramFile(parameters + [cramMd5sum: "1" * 32])
+                : new FastqFile(parameters)
+        rawSequenceFile.save(flush: false)
 
         rawSequenceFiles << rawSequenceFile
         createFastqcProcessedFiles(rawSequenceFile)
 
         return rawSequenceFile
+    }
+
+    RawSequenceFile createFastqFile(SeqTrack seqTrack, int mateNumber) {
+        return createRawSeqFile(seqTrack, mateNumber, RawSequenceFileType.FASTQ)
+    }
+
+    RawSequenceFile createCramFile(SeqTrack seqTrack, int mateNumber) {
+        return createRawSeqFile(seqTrack, mateNumber, RawSequenceFileType.CRAM)
     }
 
     FastqcProcessedFile createFastqcProcessedFiles(RawSequenceFile rawSequenceFile) {
