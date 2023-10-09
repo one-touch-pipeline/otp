@@ -23,9 +23,14 @@ import grails.util.Environment
 import org.springframework.web.servlet.i18n.FixedLocaleResolver
 
 import de.dkfz.tbi.otp.ProjectLinkGenerator
+import de.dkfz.tbi.otp.handler.CustomExceptionResolver
 import de.dkfz.tbi.otp.utils.NumberConverter
 
 beans = {
+    exceptionHandler(CustomExceptionResolver) {
+        // this is required so that calls to super work
+        exceptionMappings = ['java.lang.Exception': '/error']
+    }
     if (Environment.current == Environment.TEST) {
         // use Class.forName because classes in test-helper are not found in production env
         fileSystemService(Class.forName("de.dkfz.tbi.otp.job.processing.TestFileSystemService"))
