@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.workflow.alignment.AlignmentWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.RoddyAlignmentConditionalFailJob
 import de.dkfz.tbi.otp.workflow.alignment.RoddyAlignmentPrepareJob
 import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
 import de.dkfz.tbi.otp.workflowExecution.Artefact
@@ -48,6 +49,7 @@ class RnaAlignmentWorkflow extends AlignmentWorkflow {
                 RoddyAlignmentPrepareJob.simpleName.uncapitalize(),
                 RnaAlignmentValidationJob.simpleName.uncapitalize(),
                 RnaAlignmentCleanUpJob.simpleName.uncapitalize(),
+                RoddyAlignmentConditionalFailJob.simpleName.uncapitalize(),
         ]
     }
 

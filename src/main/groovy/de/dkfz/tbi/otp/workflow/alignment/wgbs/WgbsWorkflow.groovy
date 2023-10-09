@@ -40,7 +40,7 @@ class WgbsWorkflow extends PanCancerWorkflow {
     List<String> getJobBeanNames() {
         return [
                 RoddyAlignmentFragmentJob.simpleName.uncapitalize(),
-                PanCancerConditionalFailJob.simpleName.uncapitalize(),
+                RoddyAlignmentConditionalFailJob.simpleName.uncapitalize(),
                 WgbsPrepareJob.simpleName.uncapitalize(),
                 WgbsExecuteJob.simpleName.uncapitalize(),
                 WgbsValidationJob.simpleName.uncapitalize(),

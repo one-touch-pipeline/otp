@@ -19,35 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.alignment.wgbs
 
-import grails.testing.gorm.DataTest
-import spock.lang.Specification
+databaseChangeLog = {
 
-import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
-
-class WgbsWorkflowSpec extends Specification implements RoddyPancanFactory, DataTest {
-
-    WgbsWorkflow wgbsWorkflow
-
-    void setup() {
-        wgbsWorkflow = new WgbsWorkflow()
-    }
-
-    void "getJobBeanNames, should return all WGBS Workflow bean names in correct order"() {
-        expect:
-        wgbsWorkflow.jobBeanNames == [
-                "roddyAlignmentFragmentJob",
-                "roddyAlignmentConditionalFailJob",
-                "wgbsPrepareJob",
-                "wgbsExecuteJob",
-                "wgbsValidationJob",
-                "wgbsParseJob",
-                "roddyAlignmentCheckQcJob",
-                "panCancerCleanUpJob",
-                "wgbsLinkJob",
-                "setCorrectPermissionJob",
-                "roddyAlignmentFinishJob",
-        ]
+    changeSet(author: "-", id: "otp-2173") {
+        sql("""
+UPDATE workflow_step
+SET bean_name = 'roddyAlignmentConditionalFailJob'
+WHERE bean_name = 'panCancerConditionalFailJob';
+""")
     }
 }

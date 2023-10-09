@@ -44,7 +44,7 @@ class PanCancerWorkflow extends AlignmentWorkflow {
     List<String> getJobBeanNames() {
         return [
                 RoddyAlignmentFragmentJob.simpleName.uncapitalize(),
-                PanCancerConditionalFailJob.simpleName.uncapitalize(),
+                RoddyAlignmentConditionalFailJob.simpleName.uncapitalize(),
                 RoddyAlignmentPrepareJob.simpleName.uncapitalize(),
                 PanCancerExecuteJob.simpleName.uncapitalize(),
                 PanCancerValidationJob.simpleName.uncapitalize(),

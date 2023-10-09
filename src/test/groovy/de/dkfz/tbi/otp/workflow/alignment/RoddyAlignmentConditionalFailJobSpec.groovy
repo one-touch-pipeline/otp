@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.alignment.panCancer
+package de.dkfz.tbi.otp.workflow.alignment
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
@@ -42,7 +42,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 import java.nio.file.FileSystems
 import java.nio.file.Path
 
-class PanCancerConditionalFailJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
+class RoddyAlignmentConditionalFailJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
     @TempDir
     Path tempDir
@@ -65,7 +65,7 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
                 createSeqTrackWithTwoFastqFile([:], [fileName: "SecondSeqTrack_123_R1.gz"], [fileName: "SecondSeqTrack_123_R2.gz"]),
         ]
 
-        PanCancerConditionalFailJob job = Spy(PanCancerConditionalFailJob) {
+        RoddyAlignmentConditionalFailJob job = Spy(RoddyAlignmentConditionalFailJob) {
             getSeqTracks(workflowStep) >> seqTracks
         }
 
@@ -101,7 +101,7 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
         WorkflowStep workflowStep = createWorkflowStep()
         List<SeqTrack> seqTracks = [createSeqTrack()]
 
-        PanCancerConditionalFailJob job = Spy(PanCancerConditionalFailJob) {
+        RoddyAlignmentConditionalFailJob job = Spy(RoddyAlignmentConditionalFailJob) {
             getSeqTracks(workflowStep) >> seqTracks
         }
 
@@ -117,12 +117,12 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
         e.message.contains("has no dataFiles")
     }
 
-    void "test check, fails because a seqTrack has not exactly two dataFiles"() {
+    void "test check, succeeds when a seqTrack with single seqType has only one dataFile"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
-        List<SeqTrack> seqTracks = [createSeqTrackWithOneFastqFile()]
+        List<SeqTrack> seqTracks = [createSeqTrackWithOneFastqFile([seqType: createSeqTypeSingle()])]
 
-        PanCancerConditionalFailJob job = Spy(PanCancerConditionalFailJob) {
+        RoddyAlignmentConditionalFailJob job = Spy(RoddyAlignmentConditionalFailJob) {
             getSeqTracks(workflowStep) >> seqTracks
         }
 
@@ -130,12 +130,22 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
             getRemoteFileSystem(_) >> FileSystems.default
         }
 
+        job.lsdfFilesService = Mock(LsdfFilesService) {
+            getFileViewByPidPathAsPath(_) >> { RawSequenceFile file, PathOption... options ->
+                return CreateFileHelper.createFile(tempDir.resolve(file.fileName))
+            }
+        }
+        job.configService = Mock(ConfigService)
+        job.fileService = new FileService()
+        job.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
+
         when:
         job.check(workflowStep)
 
         then:
-        WorkflowException e = thrown(WorkflowException)
-        e.message.contains("has not exactly two dataFiles")
+        notThrown(WorkflowException)
     }
 
     void "test check, fails because physical files are missing for a seqTrack"() {
@@ -146,7 +156,7 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
                 createSeqTrackWithTwoFastqFile(),
         ]
 
-        PanCancerConditionalFailJob job = Spy(PanCancerConditionalFailJob) {
+        RoddyAlignmentConditionalFailJob job = Spy(RoddyAlignmentConditionalFailJob) {
             getSeqTracks(workflowStep) >> seqTracks
         }
 
@@ -179,7 +189,7 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
                 createSeqTrackWithTwoFastqFile([:], [fileName: "DataFileFileName_123_R1.gz"], [fileName: "DataFileFileName_123_R2.gz"]),
         ]
 
-        PanCancerConditionalFailJob job = Spy(PanCancerConditionalFailJob) {
+        RoddyAlignmentConditionalFailJob job = Spy(RoddyAlignmentConditionalFailJob) {
             getSeqTracks(workflowStep) >> seqTracks
         }
 
@@ -209,14 +219,17 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
     void "test check, fails with multiple errors in one exception"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
+        SeqTrack seqTrack = createSeqTrack([seqType: createSeqTypeSingle()])
         List<SeqTrack> seqTracks = [
+                seqTrack,
                 createSeqTrack(),
-                createSeqTrackWithOneFastqFile(),
+                createSeqTrackWithOneFastqFile([seqType: createSeqTypePaired()]),
                 createSeqTrackWithTwoFastqFile([:], [fileName: "A_R1.gz"], [fileName: "A_R2.gz"]),
                 createSeqTrackWithTwoFastqFile([:], [fileName: "DataFileFileName_123_R1.gz"], [fileName: "DataFileFileName_123_R2.gz"]),
         ]
-
-        PanCancerConditionalFailJob job = Spy(PanCancerConditionalFailJob) {
+        createFastqFile([seqTrack: seqTrack])
+        createFastqFile([seqTrack: seqTrack])
+        RoddyAlignmentConditionalFailJob job = Spy(RoddyAlignmentConditionalFailJob) {
             getSeqTracks(workflowStep) >> seqTracks
         }
 
@@ -241,6 +254,7 @@ class PanCancerConditionalFailJobSpec extends Specification implements DataTest,
         then:
         WorkflowException e = thrown(WorkflowException)
         e.message.contains("files are missing")
+        e.message.contains("has not exactly one dataFile")
         e.message.contains("has not exactly two dataFiles")
         e.message.contains("has no dataFiles")
     }

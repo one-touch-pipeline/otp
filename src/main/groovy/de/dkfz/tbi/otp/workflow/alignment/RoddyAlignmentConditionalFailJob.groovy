@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.alignment.panCancer
+package de.dkfz.tbi.otp.workflow.alignment
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
@@ -36,7 +36,7 @@ import java.nio.file.Path
 
 @Component
 @Slf4j
-class PanCancerConditionalFailJob extends AbstractConditionalFailJob implements PanCancerShared {
+class RoddyAlignmentConditionalFailJob extends AbstractConditionalFailJob implements AlignmentWorkflowShared {
 
     @Autowired
     FileService fileService
@@ -44,10 +44,13 @@ class PanCancerConditionalFailJob extends AbstractConditionalFailJob implements 
     @Autowired
     ConfigService configService
 
+    @Autowired
+    LsdfFilesService lsdfFilesService
+
     /**
      * Check that:
      *      - input files in viewByPid folders exists and are readable
-     *      - all seqTracks have exact two read dataFiles (ignoring index data)
+     *      - all seqTracks have exact one or two read dataFiles (ignoring index data)
      *      - the file names of each seqTrack are correct
      *      - file name order in Roddy is correct (it's a double check since it cannot be wrong ordered with exactly two dataFiles)
      *
@@ -68,7 +71,12 @@ class PanCancerConditionalFailJob extends AbstractConditionalFailJob implements 
                 return errorMessages.push("SeqTrack '${seqTrack}' has no dataFiles." as String)
             }
 
-            if (nonIndexRawSequenceFiles.size() != 2) {
+            if (seqTrack.seqType.libraryLayout.mateCount == 1 && nonIndexRawSequenceFiles.size() != 1) {
+                return errorMessages.push("SeqTrack '${seqTrack}' has not exactly one dataFile. " +
+                        "It has ${nonIndexRawSequenceFiles} (index files are ignored)." as String)
+            }
+
+            if (seqTrack.seqType.libraryLayout.mateCount == 2 && nonIndexRawSequenceFiles.size() != 2) {
                 return errorMessages.push("SeqTrack '${seqTrack}' has not exactly two dataFiles. " +
                         "It has ${nonIndexRawSequenceFiles} (index files are ignored)." as String)
             }
@@ -87,19 +95,23 @@ class PanCancerConditionalFailJob extends AbstractConditionalFailJob implements 
 
             allRawSequenceFiles.addAll(paths)
 
-            try {
-                MetaDataService.ensurePairedSequenceFileNameConsistency(nonIndexRawSequenceFiles[0].fileName, nonIndexRawSequenceFiles[1].fileName)
-            } catch (IllegalFileNameException e) {
-                return errorMessages.push("SeqTrack '${seqTrack}' file name inconsistency:\n" + e.message as String)
+            if (seqTrack.seqType.libraryLayout.mateCount == 2) {
+                try {
+                    MetaDataService.ensurePairedSequenceFileNameConsistency(nonIndexRawSequenceFiles[0].fileName, nonIndexRawSequenceFiles[1].fileName)
+                } catch (IllegalFileNameException e) {
+                    return errorMessages.push("SeqTrack '${seqTrack}' file name inconsistency:\n" + e.message as String)
+                }
             }
         }
 
-        try {
-            MetaDataService.ensurePairedSequenceFileNameOrder(allRawSequenceFiles.collect {
-                fileService.toFile(it)
-            })
-        } catch (IllegalFileNameException e) {
-            errorMessages.push("File name order of the seqTracks dataFiles is not correct:\n" + e.message)
+        if (seqTracks.first().seqType.libraryLayout.mateCount == 2) {
+            try {
+                MetaDataService.ensurePairedSequenceFileNameOrder(allRawSequenceFiles.collect {
+                    fileService.toFile(it)
+                })
+            } catch (IllegalFileNameException e) {
+                errorMessages.push("File name order of the seqTracks dataFiles is not correct:\n" + e.message)
+            }
         }
 
         if (errorMessages) {
