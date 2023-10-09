@@ -23,7 +23,7 @@
     <head>
         <title><g:layoutTitle default="OTP"/></title>
         <script type="text/javascript" src="${otp.serverUrl()}/webjars/jquery/${otp.assetVersion([name: 'jquery'])}/jquery.js"></script>
-        <script type="text/javascript" src="${otp.serverUrl()}/webjars/chart.js/4.3.3/dist/chart.umd.js"></script>
+        <script type="text/javascript" src="${otp.serverUrl()}/webjars/chart.js/4.4.0/dist/chart.umd.js"></script>
         <script type="text/javascript" src="${otp.serverUrl()}/webjars/chartjs-plugin-datalabels/2.2.0/dist/chartjs-plugin-datalabels.js"></script>
         <script type="text/javascript" src="${otp.serverUrl()}/webjars/datatables/1.13.5/js/jquery.dataTables.js"></script>
         <script type="text/javascript" src="${otp.serverUrl()}/webjars/datatables/1.13.5/js/dataTables.bootstrap4.js"></script>
