@@ -314,6 +314,7 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
                |
                |## add entry to new mapping file
                |touch '${mappingFile}'
+               |chgrp '${rawSequenceFile.project.unixGroup}' '${mappingFile}'
                |chmod 640 '${mappingFile}'
                |echo '${mappingEntry}' >> '${mappingFile}'
                |chmod 440 '${mappingFile}'

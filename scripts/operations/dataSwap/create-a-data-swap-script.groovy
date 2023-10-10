@@ -66,6 +66,8 @@ def swapMap = """
 #oldPid oldSampleType newPid newSampleType
 #oldPid oldSampleType newPid newSampleType
 #oldPid sampleType newPid sampleType
+
+
 """.split("\n")*.trim().findAll {
     it && !it.startsWith('#')
 }.collectEntries {
@@ -166,6 +168,7 @@ Closure<ScriptBuilder> createScripts = { String swapLabel ->
     Set<String> createdSamples = [] as Set
 
     builder.addGroovyCommand(Snippets.databaseFixingHeader(swapLabel))
+    builder.addMetaInfo("/*\n")
 
     swapMap.each { String key, String value ->
         builder.addMetaInfo("swap of '${key}' to '${value}'")

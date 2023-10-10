@@ -334,6 +334,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                                 |
                                 |## add entry to new mapping file
                                 |touch '${NEW_MAPPING_PATH}'
+                                |chgrp '${rawSequenceFile.project.unixGroup}' '${NEW_MAPPING_PATH}'
                                 |chmod 640 '${NEW_MAPPING_PATH}'
                                 |echo '${NEW_ENTRY}' >> '${NEW_MAPPING_PATH}'
                                 |chmod 440 '${NEW_MAPPING_PATH}'
@@ -1069,6 +1070,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                                  |chmod 440 '${rawSequenceFilePaths[it].oldWellMappingFileEntryName}'
                                  |\n## add entry to new mapping file
                                  |touch '${rawSequenceFilePaths[it].newWellMappingFile}'
+                                 |chgrp '${it.project.unixGroup}' '${rawSequenceFilePaths[it].newWellMappingFile}'
                                  |chmod 640 '${rawSequenceFilePaths[it].newWellMappingFile}'
                                  |echo '${rawSequenceFilePaths[it].newWellMappingFileEntryName}' >> '${rawSequenceFilePaths[it].newWellMappingFile}'
                                  |chmod 440 '${rawSequenceFilePaths[it].newWellMappingFile}'
