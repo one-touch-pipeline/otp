@@ -46,8 +46,6 @@ class ProcessingOptionController {
     ProcessingOptionService processingOptionService
     PropertiesValidationService propertiesValidationService
 
-    private static final int MAX_LENGTH = 100
-
     def index() {
         List<ProcessingOption> existingOptions = processingOptionService.listProcessingOptions()
 
@@ -116,9 +114,7 @@ class ProcessingOptionController {
                 ),
                 value: new TableCellValue(
                         value: processingOption?.value ?
-                                processingOption.value.length() > MAX_LENGTH ?
-                                        "...${processingOption.value[-MAX_LENGTH..-1]}" :
-                                        processingOption.value :
+                                processingOption.value :
                                 "",
                         warnColor: (problemType in [OptionProblem.ProblemType.VALUE_INVALID, OptionProblem.ProblemType.MISSING]) ?
                                 TableCellValue.WarnColor.ERROR : TableCellValue.WarnColor.OKAY,
