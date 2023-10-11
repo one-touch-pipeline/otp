@@ -50,6 +50,10 @@ $(() => {
       map.boxes.prop('checked', false);
     });
 
+    setForMap.forEach((map) => {
+      map.boxes.prop('checked', false);
+    });
+
     // remove hidden checkboxes
     setAndBlockMap.forEach((map) => {
       map.boxes.each((index, box) => {
@@ -62,8 +66,6 @@ $(() => {
 
     $(e.target).find('option:selected').each(function () {
       setForMap.forEach((map) => {
-        map.boxes.prop('checked', false);
-
         if (this.text === map.role) {
           map.boxes.prop('checked', true);
         }
