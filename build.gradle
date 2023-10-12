@@ -538,11 +538,8 @@ assets {
             'webjars/**/*.nuspec',
             'webjars/**/*.properties',
             'webjars/**/*.psd',
-            'webjars/**/*.svg',
             'webjars/**/*.ts',
             'webjars/**/*.txt',
-            'webjars/**/*.woff',
-            'webjars/**/*.woff2',
             'webjars/**/*.xml',
             'webjars/**/*.yml',
 
