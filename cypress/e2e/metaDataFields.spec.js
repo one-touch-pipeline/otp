@@ -495,6 +495,14 @@ describe('Check metadata data fields page', () => {
         cy.get('@tableCells').eq(10).contains('false');
       });
     });
+
+    it('should visit the software page and download the csv', () => {
+      cy.visit('/softwareTool/list');
+
+      cy.get('#metadatafields-datatable').should('exist');
+      cy.get('div#metadatafields-datatable_wrapper button').contains('Download').click();
+      cy.checkDownloadByContent('Software_Tools', '.csv', ['Tool Name','Tool Version','Version Aliases','Legacy']);
+    });
   });
 
   context('when user is normal user', () => {
@@ -526,6 +534,12 @@ describe('Check metadata data fields page', () => {
       cy.checkAccessDenied('/metaDataFields/createSeqTypeImportAlias');
       cy.checkAccessDenied('/metaDataFields/changeSeqTypeLegacyState');
       cy.checkAccessDenied('/metaDataFields/createSeqType');
+      cy.checkAccessDenied('/softwareTool/list');
+      cy.checkAccessDenied('/softwareTool/changeSoftwareToolLegacyState');
+      cy.checkAccessDenied('/softwareTool/createSoftwareTool');
+      cy.checkAccessDenied('/softwareTool/updateSoftwareTool');
+      cy.checkAccessDenied('/softwareTool/updateSoftwareToolIdentifier');
+      cy.checkAccessDenied('/softwareTool/createSoftwareToolIdentifier');
     });
   });
 });

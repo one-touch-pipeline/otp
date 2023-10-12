@@ -41,10 +41,10 @@
         <table id="metadatafields-datatable" class="software-table fixed-table-header">
             <thead>
                 <tr>
-                    <th class="export_column"><g:message code="softwareTool.list.version"/></th>
-                    <th class="export_column"><g:message code="softwareTool.list.aliases"/></th>
+                    <th><g:message code="softwareTool.list.version"/></th>
+                    <th><g:message code="softwareTool.list.aliases"/></th>
                     <th></th>
-                    <th class="export_column"><g:message code="softwareTool.list.legacy"/></th>
+                    <th><g:message code="softwareTool.list.legacy"/></th>
                     <th class="export_column" hidden><g:message code="softwareTool.list.tool"/></th>
                     <th class="export_column" hidden><g:message code="softwareTool.list.version"/></th>
                     <th class="export_column" hidden><g:message code="softwareTool.list.aliases"/></th>
@@ -61,10 +61,10 @@
                     <td hidden></td>
                     <td hidden></td>
                     <td hidden></td>
+                    <td hidden></td>
                 </tr>
                 <g:each var="softwareTool" in="${softwareToolPerProgramName[programName]}">
                     <tr class="${softwareTool.legacy ? 'text-muted' : ''}">
-                     <tr>
                          <td>
                              <otp:editorSwitch
                                      roles="ROLE_OPERATOR"

@@ -23,3 +23,4 @@
 <td hidden>${softwareTool.programName}</td>
 <td hidden>${softwareTool.programVersion}</td>
 <td hidden>${identifier*.name?.join("; ")}</td>
+<td hidden>${softwareTool.legacy}</td>
