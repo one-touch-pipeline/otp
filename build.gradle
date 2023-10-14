@@ -409,7 +409,7 @@ dependencies {
 
     // bioinformatics tools
     implementation "com.gitlab.one-touch-pipeline:bedutils:0.0.8"
-    implementation "com.github.samtools:htsjdk:4.0.1"
+    implementation "com.github.samtools:htsjdk:4.0.2"
 
     // library for interacting with cluster job schedulers
     implementation('com.github.theroddywms:BatchEuphoria:0.1.4')
