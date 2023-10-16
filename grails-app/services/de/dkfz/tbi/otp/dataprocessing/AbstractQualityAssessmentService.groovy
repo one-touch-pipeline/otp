@@ -26,6 +26,7 @@ import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 import org.grails.web.json.JSONObject
 
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.ngsdata.*
@@ -43,6 +44,7 @@ class AbstractQualityAssessmentService {
 
     AbstractBamFileService abstractBamFileService
     RoddyBamFileService roddyBamFileService
+    RnaRoddyBamFileService rnaRoddyBamFileService
     ReferenceGenomeService referenceGenomeService
 
     void assertListContainsAllChromosomeNamesInReferenceGenome(Collection<String> chromosomeNames, ReferenceGenome referenceGenome) {
@@ -132,7 +134,7 @@ class AbstractQualityAssessmentService {
     }
 
     RnaQualityAssessment parseRnaRoddyBamFileQaStatistics(RnaRoddyBamFile rnaRoddyBamFile) {
-        Path qaFile = roddyBamFileService.getWorkMergedQAJsonFile(rnaRoddyBamFile)
+        Path qaFile = rnaRoddyBamFileService.getWorkMergedQAJsonFile(rnaRoddyBamFile)
         Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(rnaRoddyBamFile, qaFile, null)
         QualityAssessmentMergedPass pass = rnaRoddyBamFile.findOrSaveQaPass()
         RnaQualityAssessment rnaQualityAssessment = CollectionUtils.atMostOneElement(RnaQualityAssessment.findAllByQualityAssessmentMergedPass(pass))

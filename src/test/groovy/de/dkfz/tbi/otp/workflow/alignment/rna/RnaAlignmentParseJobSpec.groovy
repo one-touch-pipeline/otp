@@ -26,7 +26,7 @@ import spock.lang.Specification
 import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
@@ -83,7 +83,7 @@ class RnaAlignmentParseJobSpec extends Specification implements WorkflowSystemDo
 
         job = Spy(RnaAlignmentParseJob)
         job.abstractQualityAssessmentService = new AbstractQualityAssessmentService()
-        job.abstractQualityAssessmentService.roddyBamFileService = Mock(RoddyBamFileService) {
+        job.abstractQualityAssessmentService.rnaRoddyBamFileService = Mock(RnaRoddyBamFileService) {
             getWorkMergedQAJsonFile(_) >> mergedQAJsonFile
         }
         job.qcTrafficLightService = Mock(QcTrafficLightService)
@@ -120,7 +120,7 @@ class RnaAlignmentParseJobSpec extends Specification implements WorkflowSystemDo
 
         job = Spy(RnaAlignmentParseJob)
         job.abstractQualityAssessmentService = new AbstractQualityAssessmentService()
-        job.abstractQualityAssessmentService.roddyBamFileService = Mock(RoddyBamFileService) {
+        job.abstractQualityAssessmentService.rnaRoddyBamFileService = Mock(RnaRoddyBamFileService) {
             getWorkMergedQAJsonFile(_) >> mergedQAJsonFile
         }
         job.qcTrafficLightService = Mock(QcTrafficLightService)
