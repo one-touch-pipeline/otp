@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.security.user
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.exceptions.RightsNotGrantedException
@@ -180,5 +181,21 @@ class DeputyRelationServiceSpec extends Specification implements DataTest, UserD
 
         expect:
         !deputyRelationService.hasDepartmentRights(user)
+    }
+
+    void "listDeputiesByHead, returns the department heads and their deputies"() {
+        given:
+        deputyRelationService = new DeputyRelationService()
+        DeputyRelation deputyRelation1 = createDeputyRelation()
+        DeputyRelation deputyRelation2 = createDeputyRelation()
+        DeputyRelation deputyRelation3 = createDeputyRelation(grantingDeputyUser: deputyRelation2.grantingDeputyUser)
+        Map expect = [
+                (deputyRelation1.grantingDeputyUser): [deputyRelation1.deputyUser.toString()],
+                (deputyRelation2.grantingDeputyUser): [deputyRelation2.deputyUser.toString(), deputyRelation3.deputyUser.toString()],
+
+        ]
+
+        expect:
+        TestCase.assertContainSame(deputyRelationService.listDeputiesByHead(), expect)
     }
 }

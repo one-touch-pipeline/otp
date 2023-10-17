@@ -135,6 +135,7 @@
                                                     code="otp.menu.bamMetadataImport"/></g:link></li>
                                             <li><g:link controller="metadataImport" action="blacklistedIlseNumbers"><g:message
                                                     code="otp.menu.blacklistedIlseNumbers"/></g:link></li>
+                                            <li><g:link controller="departmentOverview" action="index"><g:message code="otp.menu.departments"/></g:link></li>
                                             <li><g:link controller="projectCreation" action="index"><g:message code="otp.menu.projectCreation"/></g:link></li>
                                             <li><g:link controller="individual" action="insert"><g:message code="otp.menu.createIndividual"/></g:link></li>
                                             <li><g:link controller="bulkSampleCreation" action="index"><g:message code="otp.menu.createSample"/></g:link></li>

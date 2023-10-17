@@ -95,6 +95,11 @@ class DepartmentService {
             }
         } as List<Department>
     }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    List<Department> listDepartments() {
+        return Department.all
+    }
 }
 
 class DepartmentCommand implements Validateable {

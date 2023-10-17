@@ -120,4 +120,16 @@ class DeputyRelationService {
         assert departmentHead: "Department Head cannot be null"
         return DeputyRelation.findAllByGrantingDeputyUser(departmentHead)
     }
+
+    /**
+     * @returns a Map containing all deputies by their respective heads
+     */
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    Map<User, List<String>> listDeputiesByHead() {
+        Map deputiesByHead = [:]
+        DeputyRelation.all.groupBy { it.grantingDeputyUser }.each { User user, List<DeputyRelation> deputyRelations ->
+            deputiesByHead << [(user): deputyRelations*.deputyUser*.toString()]
+        }
+        return deputiesByHead
+    }
 }

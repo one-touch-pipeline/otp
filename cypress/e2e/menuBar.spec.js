@@ -142,7 +142,7 @@ describe('Click all menu items in the menu bar', () => {
       const menuBar = 'div.menuContainer';
       const menuBarItem = 'li:not(.nav_container)';
       cy.get(menuBar).find(menuBarItem)
-        .should('have.length', 67).and('contain', 'a');
+        .should('have.length', 68).and('contain', 'a');
     });
 
     it('should check the number of menu items and click additional Project menu items', () => {
@@ -182,7 +182,7 @@ describe('Click all menu items in the menu bar', () => {
 
     it('should check the number of menu items and click all Operator menu items', () => {
       cy.get('li.navigation').contains('Operator').parent().find('li')
-        .should('have.length', 11);
+        .should('have.length', 12);
       cy.get('.navigation li').contains('FASTQ Import').click({ force: true });
       cy.checkPage('/metadataImport/index');
       cy.go('back');
@@ -193,6 +193,9 @@ describe('Click all menu items in the menu bar', () => {
 
       cy.get('.navigation li').contains('Blacklisted ILSe No').click({ force: true });
       cy.checkPage('/metadataImport/blacklistedIlseNumbers');
+
+      cy.get('.navigation li').contains('Departments').click({ force: true });
+      cy.checkPage('/departmentOverview/index');
 
       cy.get('.navigation li').contains('New Project').click({ force: true });
       cy.checkPage('/projectCreation/index');
