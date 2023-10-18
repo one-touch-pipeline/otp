@@ -125,39 +125,6 @@ class AlignmentArtefactService {
             and df.fileWithdrawn = false
         """
 
-    private final static String HQL_FIND_BAM_FILES_FOR_WORKFLOW_ARTEFACTS = """
-        select
-            wa,
-            bamFile,
-            project,
-            seqType,
-            individual,
-            sampleType,
-            sample,
-            antibodyTarget,
-            libraryPreparationKit,
-            seqPlatformGroup
-        from
-            AbstractBamFile bamFile
-            join bamFile.workflowArtefact wa
-            join bamFile.workPackage mergingWorkPackage
-            join mergingWorkPackage.sample sample
-            join sample.sampleType sampleType
-            join sample.individual individual
-            join individual.project project
-            join mergingWorkPackage.seqType seqType
-            left outer join mergingWorkPackage.seqPlatformGroup seqPlatformGroup
-            left outer join mergingWorkPackage.antibodyTarget antibodyTarget
-            left outer join mergingWorkPackage.libraryPreparationKit libraryPreparationKit
-        where
-            wa in (:workflowArtefacts)
-            and mergingWorkPackage.seqType in (:seqTypes)
-            and bamFile.withdrawn = false
-            and wa.state <> '${WorkflowArtefact.State.FAILED}'
-            and wa.state <> '${WorkflowArtefact.State.OMITTED}'
-            and wa.withdrawnDate is null
-        """
-
     private final static String HQL_FIND_RELATED_SEQ_TRACKS_FOR_SEQ_TRACKS = """
         select distinct
             wa,
@@ -401,13 +368,6 @@ class AlignmentArtefactService {
                                                                                        Collection<SeqType> seqTypes = SeqType.list()) {
         return LogUsedTimeUtils.logUsedTime(log, "          fetchFastqcProcessedFileArtefacts") {
             return this.<FastqcProcessedFile> executeHelper(HQL_FIND_FAST_QC_FOR_WORKFLOW_ARTEFACTS, workflowArtefacts, seqTypes, false)
-        }
-    }
-
-    List<AlignmentArtefactData<RoddyBamFile>> fetchBamArtefacts(Collection<WorkflowArtefact> workflowArtefacts,
-                                                                Collection<SeqType> seqTypes = SeqType.list()) {
-        return LogUsedTimeUtils.logUsedTime(log, "          fetchBamArtefacts") {
-            return this.<RoddyBamFile> executeHelper(HQL_FIND_BAM_FILES_FOR_WORKFLOW_ARTEFACTS, workflowArtefacts, seqTypes, true)
         }
     }
 

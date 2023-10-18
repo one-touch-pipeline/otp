@@ -72,7 +72,6 @@ class RnaAlignmentWorkflow extends AlignmentWorkflow {
                 workPackage        : mergingWorkPackage,
                 identifier         : identifier,
                 workDirectoryName  : "${RnaRoddyBamFile.WORK_DIR_PREFIX}_${identifier}",
-                baseBamFile        : rnaRoddyBamFile.baseBamFile,
                 seqTracks          : rnaRoddyBamFile.seqTracks.collect() as Set,
                 config             : rnaRoddyBamFile.config,
                 numberOfMergedLanes: rnaRoddyBamFile.containedSeqTracks.size(),

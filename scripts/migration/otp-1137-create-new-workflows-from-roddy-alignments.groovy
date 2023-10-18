@@ -211,17 +211,6 @@ void migrateToNewWorkflow(
             ]).save(flush: false)
         }
 
-        if (roddyBamFile.baseBamFile) {
-            WorkflowArtefact base = workflowArtefactMap[roddyBamFile.baseBamFile]
-            assert base: "input artefact of ${base} can't be null. Something went wrong"
-
-            new WorkflowRunInputArtefact([
-                    workflowRun     : workflowRun,
-                    role            : PanCancerWorkflow.INPUT_BASE_BAM_FILE,
-                    workflowArtefact: base,
-            ]).save(flush: false)
-        }
-
         WorkflowArtefact workflowArtefact = new WorkflowArtefact([
                 producedBy  : workflowRun,
                 state       : WorkflowArtefact.State.SUCCESS,

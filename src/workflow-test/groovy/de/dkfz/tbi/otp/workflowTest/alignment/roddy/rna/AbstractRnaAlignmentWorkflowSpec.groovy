@@ -187,7 +187,7 @@ abstract class AbstractRnaAlignmentWorkflowSpec extends AbstractRoddyAlignmentWo
         ])
     }
 
-    void "testAlignLanesOnly_NoBaseBamExist_OneLane_allFine"() {
+    void "testAlignLanesOnly_OneLane_allFine"() {
         given:
         SessionUtils.withTransaction {
             createSeqTrack("readGroup1")
@@ -202,7 +202,7 @@ abstract class AbstractRnaAlignmentWorkflowSpec extends AbstractRoddyAlignmentWo
         verify_AlignLanesOnly_AllFine()
     }
 
-    void "testAlignLanesOnly_withoutArribaProcessing_NoBaseBamExist_OneLane_allFine"() {
+    void "testAlignLanesOnly_withoutArribaProcessing_OneLane_allFine"() {
         given:
         SessionUtils.withTransaction {
             createSeqTrack("readGroup1")
@@ -228,8 +228,8 @@ abstract class AbstractRnaAlignmentWorkflowSpec extends AbstractRoddyAlignmentWo
     }
 
     @Override
-    protected void assertWorkflowWorkDirectoryFileSystemState(RoddyBamFile bamFile, boolean isBaseBamFile) {
-        rnaRoddyFileAssertHelper.assertWorkDirectoryFileSystemState(bamFile, isBaseBamFile, rnaRoddyBamFileService, roddyConfigService)
+    protected void assertWorkflowWorkDirectoryFileSystemState(RoddyBamFile bamFile) {
+        rnaRoddyFileAssertHelper.assertWorkDirectoryFileSystemState(bamFile, rnaRoddyBamFileService, roddyConfigService)
     }
 
     @Override

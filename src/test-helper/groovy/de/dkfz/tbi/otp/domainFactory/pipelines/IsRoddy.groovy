@@ -45,7 +45,7 @@ trait IsRoddy implements IsPipeline {
     }
 
     public <T> T createRoddyBamFile(Map properties = [:], Class<T> clazz) {
-        MergingWorkPackage workPackage = properties.workPackage ?: properties.baseBamFile?.workPackage
+        MergingWorkPackage workPackage = properties.workPackage
         if (!workPackage) {
             Map workPackageProperties = properties.seqTracks ?
                     [
@@ -70,9 +70,6 @@ trait IsRoddy implements IsPipeline {
         )
 
         Collection<SeqTrack> seqTracks = properties.seqTracks ?: [DomainFactory.createSeqTrackWithFastqFiles(workPackage)]
-        if (properties.baseBamFile && properties.baseBamFile.seqTracks) {
-            seqTracks += properties.baseBamFile.seqTracks
-        }
         workPackage.seqTracks = seqTracks
         workPackage.save(flush: true)
 

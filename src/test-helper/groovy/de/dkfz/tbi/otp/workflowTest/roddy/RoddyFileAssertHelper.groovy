@@ -64,9 +64,6 @@ class RoddyFileAssertHelper implements RoddyFileAssertTrait {
                 rootLinks.addAll(roddyBamFileService.getFinalLibraryQADirectories(bamFile).values())
             }
         }
-        if (bamFile.baseBamFile) {
-            rootDirs << roddyBamFileService.getWorkDirectory(bamFile.baseBamFile)
-        }
         fileAssertHelper.assertDirectoryContentReadable(rootDirs, [], rootLinks)
 
         assertQaFileSystemState(bamFile, roddyBamFileService)
@@ -75,9 +72,6 @@ class RoddyFileAssertHelper implements RoddyFileAssertTrait {
     private void assertQaFileSystemState(RoddyBamFile bamFile, RoddyBamFileService roddyBamFileService) {
         // content of the final qa dir
         List<Path> qaDirs = roddyBamFileService.getFinalSingleLaneQADirectories(bamFile).values() + [roddyBamFileService.getFinalMergedQADirectory(bamFile)]
-        if (bamFile.baseBamFile) {
-            qaDirs.addAll(roddyBamFileService.getFinalSingleLaneQADirectories(bamFile.baseBamFile).values())
-        }
         if (bamFile.seqType.wgbs && bamFile.hasMultipleLibraries()) {
             qaDirs.addAll(roddyBamFileService.getFinalLibraryQADirectories(bamFile).values())
         }
@@ -97,8 +91,7 @@ class RoddyFileAssertHelper implements RoddyFileAssertTrait {
         }
     }
 
-    void assertWorkDirectoryFileSystemState(RoddyBamFile bamFile, boolean isBaseBamFile, RoddyBamFileService roddyBamFileService,
-                                                             RoddyConfigService roddyConfigService) {
+    void assertWorkDirectoryFileSystemState(RoddyBamFile bamFile, RoddyBamFileService roddyBamFileService, RoddyConfigService roddyConfigService) {
         List<Path> rootDirs = [
                 roddyBamFileService.getWorkQADirectory(bamFile),
                 roddyBamFileService.getWorkExecutionStoreDirectory(bamFile),
@@ -106,13 +99,9 @@ class RoddyFileAssertHelper implements RoddyFileAssertTrait {
                 roddyConfigService.getConfigDirectory(roddyBamFileService.getWorkDirectory(bamFile)),
         ]
         List<Path> rootFiles = []
-        if (isBaseBamFile) {
-            rootFiles << roddyBamFileService.getWorkMd5sumFile(bamFile)
-        } else {
-            rootFiles << roddyBamFileService.getWorkBamFile(bamFile)
-            rootFiles << roddyBamFileService.getWorkBaiFile(bamFile)
-            rootFiles << roddyBamFileService.getWorkMd5sumFile(bamFile)
-        }
+        rootFiles << roddyBamFileService.getWorkBamFile(bamFile)
+        rootFiles << roddyBamFileService.getWorkBaiFile(bamFile)
+        rootFiles << roddyBamFileService.getWorkMd5sumFile(bamFile)
 
         rootDirs.addAll(getAdditionalDirectories(bamFile, roddyBamFileService))
         rootFiles.addAll(getAdditionalFiles(bamFile, roddyBamFileService))

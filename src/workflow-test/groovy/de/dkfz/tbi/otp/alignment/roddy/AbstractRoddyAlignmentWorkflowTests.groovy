@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.alignment.roddy
 
 import grails.converters.JSON
-import org.grails.web.json.JSONObject
 
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.alignment.AbstractAlignmentWorkflowTest
@@ -32,7 +31,6 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.PanCanAlignmentConfiguration
 import de.dkfz.tbi.otp.project.ProjectService
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.workflowTest.FileAssertHelper
@@ -248,203 +246,16 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         return seqTrack
     }
 
-    List<File> createFileListForFirstBam(RoddyBamFile firstBamFile, String finalOrWork) {
-        Map<SeqTrack, File> singleLaneQa = firstBamFile."${finalOrWork}SingleLaneQAJsonFiles"
-        List<File> baseAndQaJsonFiles = [
-                firstBamFile."${finalOrWork}BaiFile",
-                firstBamFile."${finalOrWork}Md5sumFile",
-                firstBamFile."${finalOrWork}MergedQAJsonFile",
-                singleLaneQa.values(),
-        ].flatten()
-
-        File roddyExecutionDirectory = new File(firstBamFile."${finalOrWork}ExecutionStoreDirectory", firstBamFile.roddyExecutionDirectoryNames.first())
-        List<File> executionStorageFiles = filesInRoddyExecutionDir.collect {
-            new File(roddyExecutionDirectory, it)
-        }
-
-        return [baseAndQaJsonFiles, executionStorageFiles].flatten()
-    }
-
-    Map<File, File> createLinkMapForFirstBamFile(RoddyBamFile firstBamFile) {
-        Map<File, File> linkMapSourceLink = [:]
-
-        ['Bam', 'Bai', 'Md5sum'].each {
-            linkMapSourceLink.put(firstBamFile."work${it}File", firstBamFile."final${it}File")
-        }
-        linkMapSourceLink.put(firstBamFile.workMergedQADirectory, firstBamFile.finalMergedQADirectory)
-
-        [firstBamFile.workExecutionDirectories, firstBamFile.finalExecutionDirectories].transpose().each {
-            linkMapSourceLink.put(it[0], it[1])
-        }
-
-        Map<SeqTrack, File> workSingleLaneQADirectories = firstBamFile.workSingleLaneQADirectories
-        Map<SeqTrack, File> finalSingleLaneQADirectories = firstBamFile.finalSingleLaneQADirectories
-        workSingleLaneQADirectories.each { seqTrack, singleLaneQaWorkDir ->
-            File singleLaneQcDirFinal = finalSingleLaneQADirectories.get(seqTrack)
-            linkMapSourceLink.put(singleLaneQaWorkDir, singleLaneQcDirFinal)
-        }
-
-        return linkMapSourceLink
-    }
-
-    RoddyBamFile createFirstRoddyBamFile(boolean oldStructure = false) {
-        assert firstBamFile.exists()
-
-        MergingWorkPackage workPackage = exactlyOneElement(MergingWorkPackage.findAll())
-
-        SeqTrack seqTrack = createSeqTrack("readGroup1", [run: DomainFactory.createRun(
-                name: 'runName_33',  // This name is encoded in @RG of the test BAM file
-                seqPlatform: DomainFactory.createSeqPlatformWithSeqPlatformGroup(seqPlatformGroups: [workPackage.seqPlatformGroup]),
-        )])
-
-        RoddyBamFile firstBamFile = new RoddyBamFile(
-                workPackage: workPackage,
-                identifier: RoddyBamFile.nextIdentifier(workPackage),
-                seqTracks: [seqTrack] as Set,
-                config: exactlyOneElement(RoddyWorkflowConfig.findAllByObsoleteDateIsNull()),
-                numberOfMergedLanes: 1,
-                fileOperationStatus: FileOperationStatus.PROCESSED,
-                md5sum: calculateMd5Sum(firstBamFile),
-                fileSize: firstBamFile.size(),
-                dateFromFileSystem: new Date(firstBamFile.lastModified()),
-                roddyExecutionDirectoryNames: ['exec_123456_123456789_bla_bla']
-        )
-        if (!oldStructure) {
-            firstBamFile.workDirectoryName = "${RoddyBamFile.WORK_DIR_PREFIX}_0"
-        }
-        assert firstBamFile.save(flush: true)
-
-        Map<File, String> filesWithContent = [:]
-        Map<File, String> links = [:]
-
-        links[this.firstBamFile] = firstBamFile.finalBamFile
-
-        if (oldStructure) {
-            filesWithContent << createFileListForFirstBam(firstBamFile, 'final').collectEntries {
-                [(it): TEST_CONTENT]
-            }
-            links[this.firstBamFile] = firstBamFile.finalBamFile
-        } else {
-            filesWithContent << createFileListForFirstBam(firstBamFile, 'work').collectEntries {
-                [(it): TEST_CONTENT]
-            }
-            links[this.firstBamFile] = firstBamFile.workBamFile
-            links << createLinkMapForFirstBamFile(firstBamFile)
-        }
-
-        createFilesWithContent(filesWithContent)
-        linkFileUtils.createAndValidateLinks(links)
-
-        workPackage.bamFileInProjectFolder = firstBamFile
-        workPackage.needsProcessing = false
-        assert workPackage.save(flush: true)
-
-        return firstBamFile
-    }
-
-    static void setUpFingerPrintingFile() {
-        ReferenceGenome referenceGenome = CollectionUtils.exactlyOneElement(ReferenceGenome.list())
-        referenceGenome.fingerPrintingFileName = "snp138Common.n1000.vh20140318.bed"
-        assert referenceGenome.save(flush: true)
-    }
-
-    void checkAllAfterSuccessfulExecution_alignBaseBamAndNewLanes() {
-        SessionUtils.withTransaction {
-            checkDataBaseState_alignBaseBamAndNewLanes()
-            RoddyBamFile latestBamFile = CollectionUtils.atMostOneElement(RoddyBamFile.findAllByIdentifier(1))
-            checkFileSystemState(latestBamFile)
-
-            checkQC(latestBamFile)
-        }
-    }
-
-    void checkQC(RoddyBamFile bamFile) {
-        bamFile.seqTracks.each {
-            List<RoddySingleLaneQa> qa = RoddySingleLaneQa.findAllBySeqTrack(it)
-            assert qa
-            qa.each {
-                assert it.abstractBamFile == bamFile
-            }
-        }
-
-        bamFile.finalSingleLaneQAJsonFiles.each { seqTrack, qaFile ->
-            JSONObject json = JSON.parse(qaFile.text)
-            Iterator chromosomes = json.keys()
-            chromosomes.each { String chromosome ->
-                assert CollectionUtils.atMostOneElement(RoddySingleLaneQa.findAllByChromosomeAndSeqTrack(chromosome, seqTrack))
-            }
-        }
-        RoddyMergedBamQa mergedQa = CollectionUtils.atMostOneElement(RoddyMergedBamQa.findAllByAbstractBamFileAndChromosome(bamFile, RoddyQualityAssessment.ALL))
-        assert mergedQa
-        JSONObject json = JSON.parse(bamFile.finalMergedQAJsonFile.text)
-        json.keys().each { String chromosome ->
-            assert CollectionUtils.atMostOneElement(RoddyMergedBamQa.findAllByChromosomeAndAbstractBamFile(chromosome, bamFile))
-        }
-        assert bamFile.coverage == mergedQa.genomeWithoutNCoverageQcBases
-        assert bamFile.coverageWithN == abstractBamFileService.calculateCoverageWithN(bamFile)
-
-        assert bamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED
-        assert bamFile.qcTrafficLightStatus == AbstractBamFile.QcTrafficLightStatus.UNCHECKED
-
-        if (bamFile.seqType.wgbs && bamFile.hasMultipleLibraries()) {
-            List<RoddyLibraryQa> libraryQas = RoddyLibraryQa.findAllByAbstractBamFile(bamFile)
-            assert libraryQas
-            assert libraryQas*.libraryDirectoryName as Set == bamFile.seqTracks*.libraryDirectoryName as Set
-        }
-    }
-
-    void checkAllAfterRoddyClusterJobsRestartAndSuccessfulExecution_alignBaseBamAndNewLanes() {
-        SessionUtils.withTransaction {
-            checkDataBaseState_alignBaseBamAndNewLanes()
-            RoddyBamFile latestBamFile = CollectionUtils.atMostOneElement(RoddyBamFile.findAllByIdentifier(1))
-            checkFileSystemState(latestBamFile)
-        }
-    }
-
-    void checkDataBaseState_alignBaseBamAndNewLanes() {
-        checkWorkPackageState()
-
-        assert RoddyBamFile.findAll().size() == 2
-        RoddyBamFile firstBamFile = CollectionUtils.atMostOneElement(RoddyBamFile.findAllByIdentifier(0))
-        RoddyBamFile latestBamFile = CollectionUtils.atMostOneElement(RoddyBamFile.findAllByIdentifier(1))
-
-        List<SeqTrack> seqTrackOfFirstBamFile = SeqTrack.findAllByLaneIdInList(["readGroup1"])
-
-        checkFirstBamFileState(firstBamFile, false, [
-                seqTracks         : seqTrackOfFirstBamFile,
-                containedSeqTracks: seqTrackOfFirstBamFile,
-        ])
-        assertBamFileFileSystemPropertiesSet(firstBamFile)
-
-        checkLatestBamFileState(latestBamFile, firstBamFile)
-        assertBamFileFileSystemPropertiesSet(latestBamFile)
-    }
-
     void checkFirstBamFileState(RoddyBamFile bamFile, boolean isMostResentBamFile, Map bamFileProperties = [:]) {
         List<SeqTrack> seqTracks = SeqTrack.findAllByLaneIdInList(["readGroup1", "readGroup2"])
         checkBamFileState(bamFile, [
                 identifier         : 0,
                 mostResentBamFile  : isMostResentBamFile,
-                baseBamFile        : null,
                 seqTracks          : seqTracks,
                 containedSeqTracks : seqTracks,
                 fileOperationStatus: FileOperationStatus.PROCESSED,
                 withdrawn          : false,
         ] + bamFileProperties)
-    }
-
-    void checkLatestBamFileState(RoddyBamFile latestBamFile, RoddyBamFile firstbamFile, Map latestBamFileProperties = [:]) {
-        SeqTrack firstSeqTrack = CollectionUtils.atMostOneElement(SeqTrack.findAllByLaneId("readGroup1"))
-        SeqTrack secondSeqTrack = CollectionUtils.atMostOneElement(SeqTrack.findAllByLaneId("readGroup2"))
-        checkBamFileState(latestBamFile, [
-                identifier         : 1,
-                mostResentBamFile  : true,
-                baseBamFile        : firstbamFile,
-                seqTracks          : [secondSeqTrack],
-                containedSeqTracks : [firstSeqTrack, secondSeqTrack],
-                fileOperationStatus: FileOperationStatus.PROCESSED,
-                withdrawn          : false,
-        ] + latestBamFileProperties)
     }
 
     void assertBamFileFileSystemPropertiesSet(RoddyBamFile bamFile) {
@@ -453,17 +264,10 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         assert bamFile.fileSize > 0
     }
 
-    void assertBamFileFileSystemPropertiesNotSet(RoddyBamFile bamFile) {
-        assert bamFile.md5sum == null
-        assert bamFile.dateFromFileSystem == null
-        assert bamFile.fileSize == -1L
-    }
-
     void checkBamFileState(RoddyBamFile bamFile, Map bamFileProperties) {
         MergingWorkPackage workPackage = bamFileProperties.mergingWorkPackage ?: exactlyOneElement(MergingWorkPackage.findAll())
         RoddyWorkflowConfig projectConfig = exactlyOneElement(RoddyWorkflowConfig.findAllByObsoleteDateIsNull())
 
-        assert bamFileProperties.baseBamFile?.id == bamFile.baseBamFile?.id
         assert bamFileProperties.seqTracks.size() == bamFile.seqTracks.size()
         assert bamFileProperties.seqTracks*.id.containsAll(bamFile.seqTracks*.id)
         assert bamFileProperties.containedSeqTracks.size() == bamFile.containedSeqTracks.size()
@@ -515,17 +319,11 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
                             bamFile.finalLibraryQADirectories.values()
                 }
             }
-            if (bamFile.baseBamFile && !bamFile.baseBamFile.oldStructureUsed) {
-                rootDirs << bamFile.baseBamFile.workDirectory
-            }
             fileAssertHelper.assertDirectoryContentReadable(rootDirs*.toPath(), [], rootLinks*.toPath())
         }
 
         // check work directories
         checkWorkDirFileSystemState(bamFile)
-        if (bamFile.baseBamFile && !bamFile.baseBamFile.oldStructureUsed) {
-            checkWorkDirFileSystemState(bamFile.baseBamFile, true)
-        }
 
         // check md5sum content
         assert bamFile.md5sum == bamFile.finalMd5sumFile.text.replaceAll("\n", "")
@@ -534,13 +332,6 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         if (!bamFile.seqType.rna) {
             List<File> qaDirs = bamFile.finalSingleLaneQADirectories.values() + [bamFile.finalMergedQADirectory]
             List<File> qaSubDirs = []
-            if (bamFile.baseBamFile) {
-                if (bamFile.baseBamFile.oldStructureUsed) {
-                    qaSubDirs.addAll(bamFile.baseBamFile.finalSingleLaneQADirectories.values())
-                } else {
-                    qaDirs.addAll(bamFile.baseBamFile.finalSingleLaneQADirectories.values())
-                }
-            }
             if (bamFile.seqType.wgbs && bamFile.hasMultipleLibraries()) {
                 qaDirs.addAll(bamFile.finalLibraryQADirectories.values())
             }
@@ -558,9 +349,6 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
 
         // all roddyExecutionDirs have been linked
         List<File> expectedRoddyExecutionDirs = bamFile.finalExecutionDirectories
-        if (bamFile.baseBamFile) {
-            expectedRoddyExecutionDirs += bamFile.baseBamFile.finalExecutionDirectories
-        }
         fileAssertHelper.assertDirectoryContentReadable(expectedRoddyExecutionDirs*.toPath())
 
         // content of the bam file
@@ -574,7 +362,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         checkInputIsNotDeleted()
     }
 
-    void checkWorkDirFileSystemState(RoddyBamFile bamFile, boolean isBaseBamFile = false) {
+    void checkWorkDirFileSystemState(RoddyBamFile bamFile) {
         // content of the work dir: root
         if (!bamFile.seqType.rna) {
             List<File> rootDirs = [
@@ -583,17 +371,11 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
                     bamFile.workMergedQADirectory,
             ]
             List<File> rootFiles
-            if (isBaseBamFile) {
-                rootFiles = [
-                        bamFile.workMd5sumFile,
-                ]
-            } else {
-                rootFiles = [
-                        bamFile.workBamFile,
-                        bamFile.workBaiFile,
-                        bamFile.workMd5sumFile,
-                ]
-            }
+            rootFiles = [
+                    bamFile.workBamFile,
+                    bamFile.workBaiFile,
+                    bamFile.workMd5sumFile,
+            ]
             if (bamFile.seqType.wgbs) {
                 rootDirs += [
                         bamFile.workMethylationDirectory,
@@ -641,40 +423,6 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         fastqFiles.each { RawSequenceFile rawSequenceFile ->
             fileService.ensureFileIsReadableAndNotEmpty((lsdfFilesService.getFileFinalPath(rawSequenceFile) as File).toPath())
             fileService.ensureFileIsReadableAndNotEmpty((lsdfFilesService.getFileViewByPidPath(rawSequenceFile) as File).toPath())
-        }
-    }
-
-    void verify_AlignLanesOnly_AllFine() {
-        SessionUtils.withTransaction {
-            checkWorkPackageState()
-
-            RoddyBamFile bamFile = exactlyOneElement(RoddyBamFile.findAll())
-            checkFirstBamFileState(bamFile, true)
-            assertBamFileFileSystemPropertiesSet(bamFile)
-
-            checkFileSystemState(bamFile)
-
-            checkQC(bamFile)
-        }
-    }
-
-    void fastTrackSetup() {
-        SeqTrack seqTrack = createSeqTrack("readGroup1")
-        assert seqTrack.project.save(flush: true)
-        updateProcessingPriorityToFastrack()
-    }
-
-    protected void check_alignLanesOnly_NoBaseBamExist_TwoLanes(SeqTrack firstSeqTrack, SeqTrack secondSeqTrack) {
-        SessionUtils.withTransaction {
-            checkWorkPackageState()
-
-            RoddyBamFile bamFile = exactlyOneElement(RoddyBamFile.findAll())
-            checkLatestBamFileState(bamFile, null, [seqTracks: [firstSeqTrack, secondSeqTrack], identifier: 0L,])
-            assertBamFileFileSystemPropertiesSet(bamFile)
-
-            checkFileSystemState(bamFile)
-
-            checkQC(bamFile)
         }
     }
 }

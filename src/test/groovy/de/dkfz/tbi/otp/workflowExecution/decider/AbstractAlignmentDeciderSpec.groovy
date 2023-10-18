@@ -53,7 +53,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
     protected MergingWorkPackage baseMergingWorkPackage
     protected SeqPlatformGroup seqPlatformGroup
     protected ReferenceGenome referenceGenome
-    protected RoddyBamFile baseBamFile
+    protected RoddyBamFile bamFile
     protected Workflow workflow
     protected WorkflowVersion workflowVersion
 
@@ -84,13 +84,11 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
 
         AlignmentArtefactData<SeqTrack> seqTrackData = createAlignmentArtefactData(seqTrack)
         AlignmentArtefactData<FastqcProcessedFile> fastqcProcessedFileData = createAlignmentArtefactData()
-        AlignmentArtefactData<RoddyBamFile> roddyBamFileData = createAlignmentArtefactData()
 
         decider.alignmentArtefactService = Mock(AlignmentArtefactService) {
             0 * _
             1 * fetchSeqTrackArtefacts(inputArtefacts, seqTypes) >> [seqTrackData]
             useFastqcCount * fetchFastqcProcessedFileArtefacts(inputArtefacts, seqTypes) >> [fastqcProcessedFileData]
-            1 * fetchBamArtefacts(inputArtefacts, seqTypes) >> [roddyBamFileData]
         }
 
         when:
@@ -99,7 +97,6 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         then:
         dataList.seqTrackData == [seqTrackData]
         dataList.fastqcProcessedFileData == (useFastqcCount ? [fastqcProcessedFileData] : [])
-        dataList.bamData == [roddyBamFileData]
     }
 
     void "fetchAdditionalArtefacts"() {
@@ -189,8 +186,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         and: 'input objects'
         AlignmentArtefactData<SeqTrack> seqTrackData = createAlignmentArtefactData(seqTrack)
         AlignmentArtefactData<FastqcProcessedFile> fastqcProcessedFileData = createAlignmentArtefactData()
-        AlignmentArtefactData<RoddyBamFile> roddyBamFileData = createAlignmentArtefactData()
-        AlignmentArtefactDataList dataList = new AlignmentArtefactDataList([seqTrackData], [fastqcProcessedFileData], [roddyBamFileData])
+        AlignmentArtefactDataList dataList = new AlignmentArtefactDataList([seqTrackData], [fastqcProcessedFileData])
 
         and: 'mocked services'
         decider.alignmentArtefactService = Mock(AlignmentArtefactService) {
@@ -229,8 +225,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         and: 'input objects'
         AlignmentArtefactData<SeqTrack> seqTrackData = createAlignmentArtefactData(seqTrack)
         AlignmentArtefactData<FastqcProcessedFile> fastqcProcessedFileData = createAlignmentArtefactData()
-        AlignmentArtefactData<RoddyBamFile> roddyBamFileData = createAlignmentArtefactData()
-        AlignmentArtefactDataList dataList = new AlignmentArtefactDataList([seqTrackData], [fastqcProcessedFileData], [roddyBamFileData])
+        AlignmentArtefactDataList dataList = new AlignmentArtefactDataList([seqTrackData], [fastqcProcessedFileData])
 
         and: 'mocked services'
         decider.alignmentArtefactService = Mock(AlignmentArtefactService) {
@@ -661,7 +656,6 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         alignmentArtefactDataListMap.each { AlignmentDeciderGroup group, AlignmentArtefactDataList list ->
             TestCase.assertContainSame(list.seqTrackData, fastqDeciderGroups[group])
             TestCase.assertContainSame(list.fastqcProcessedFileData, fastqcDeciderGroups[group] ?: [])
-            TestCase.assertContainSame(list.bamData, [])
         }
     }
 
@@ -717,7 +711,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         LibraryPreparationKit libraryPreparationKitExpected = useLibPrepKit ? seqTrack.libraryPreparationKit : null
 
         when:
-        AlignmentDeciderGroup group = decider.createAlignmentDeciderGroup(data, ignoreSeqPlatformGroup, additionalData, false)
+        AlignmentDeciderGroup group = decider.createAlignmentDeciderGroup(data, ignoreSeqPlatformGroup, additionalData)
 
         then:
         group.individual == seqTrack.individual
@@ -750,11 +744,8 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
     void "createWorkflowRunsAndOutputArtefacts, when #name, then create new bam file and add no warning"() {
         given:
         createDataForCreateWorkflowRunsAndOutputArtefacts(existingMergingWorkPackage, [
-                existingBaseBamFile       : existingBaseBamFile,
-                baseBamFileWithdrawn      : baseBamFileWithdrawn,
                 noSeqPlatformGroupSeqTrack: noSeqPlatformGroupSeqTrack,
                 noSeqPlatformGroupMwp     : noSeqPlatformGroupMwp,
-
         ])
 
         and: 'expected input artefacts'
@@ -777,12 +768,11 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         workflowArtefact.outputRole == decider.outputBamRole
 
         List<RoddyBamFile> roddyBamFiles = RoddyBamFile.list()
-        roddyBamFiles.size() == (existingBaseBamFile ? 2 : 1)
+        roddyBamFiles.size() == 1
         RoddyBamFile bamFile = roddyBamFiles.last()
         bamFile.workflowArtefact == workflowArtefact
         CollectionUtils.containSame(bamFile.seqTracks, expectedSeqTracks)
         CollectionUtils.containSame(bamFile.containedSeqTracks, seqTracks)
-        bamFile.baseBamFile == null
         bamFile.numberOfMergedLanes == 2
 
         MergingWorkPackage mergingWorkPackage = bamFile.mergingWorkPackage
@@ -802,15 +792,13 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         TestCase.assertContainSame(run.inputArtefacts.values(), expectedInputArtefacts)
 
         where:
-        name                                                  | existingMergingWorkPackage | existingBaseBamFile | baseBamFileWithdrawn | noSeqPlatformGroupSeqTrack | noSeqPlatformGroupMwp
-        'no mergingWorkPackage'                               | false                      | false               | false                | false                      | false
-        'mergingWorkPackage exist, but no bam file'           | true                       | false               | false                | false                      | false
-        'base bam exist and is not withdrawn'                 | true                       | true                | false                | false                      | false
-        'base bam exist and is withdrawn'                     | true                       | true                | true                 | false                      | false
-        'no seqplatformgroup for SeqTrack & MWP do not exist' | false                      | false               | false                | true                       | false
-        'no seqplatformgroup for SeqTrack & MWP  exist'       | true                       | false               | false                | true                       | false
-        'no seqplatformgroup for MWP'                         | true                       | false               | false                | false                      | true
-        'no seqplatformgroup for MWP & SeqTrack'              | true                       | false               | false                | true                       | true
+        name                                                  | existingMergingWorkPackage | noSeqPlatformGroupSeqTrack | noSeqPlatformGroupMwp
+        'no mergingWorkPackage'                               | false                      | false                      | false
+        'mergingWorkPackage exist, but no bam file'           | true                       | false                      | false
+        'no seqplatformgroup for SeqTrack & MWP do not exist' | false                      | true                       | false
+        'no seqplatformgroup for SeqTrack & MWP  exist'       | true                       | true                       | false
+        'no seqplatformgroup for MWP'                         | true                       | false                      | true
+        'no seqplatformgroup for MWP & SeqTrack'              | true                       | true                       | true
     }
 
     @Unroll
@@ -833,28 +821,12 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         where:
         name                            | createMwp | key                     | value | mailCount || warningMessagePart
         'no seqtracks'                  | false     | 'noSeqTrack'            | true  | 0         || "since no seqTracks"
-        'no new seqTracks'              | true      | 'noNewSeqTrack'         | true  | 0         || "since no new seqTracks found"
+        'existing BAM file'             | true      | 'existingBamFile'       | true  | 0         || "since existing BAM file with the same seqTracks found"
         'no species'                    | false     | 'noSpecies'             | true  | 0         || "since no species is defined for individual"
         'no reference genome'           | false     | 'noReferenceGenome'     | true  | 0         || "since no reference genome is configured for"
         'wrong library preparation kit' | true      | 'wrongLibPrepKit'       | true  | 1         || "since existing MergingWorkPackage and Lanes do not match"
         'wrong seqplatformgroup'        | true      | 'wrongSeqPlatformGroup' | true  | 1         || "since existing MergingWorkPackage and Lanes do not match"
         'wrong referenceGenome'         | true      | 'wrongReferenceGenome'  | true  | 0         || "since existing MergingWorkPackage uses ReferenceGenome"
-    }
-
-    void "createWorkflowRunsAndOutputArtefacts, when the wrong MergingWorkPackage is returned, then throw an assertion"() {
-        given:
-        createDataForCreateWorkflowRunsAndOutputArtefacts(true, [wrongMergingWorkPackage: true])
-
-        and: 'services'
-        createEmptyServicesForCreateWorkflowRunsAndOutputArtefacts(0)
-
-        when:
-        decider.createWorkflowRunsAndOutputArtefacts(projectSeqTypeGroup, alignmentDeciderGroup,
-                dataList, additionalDataList, additionalData, workflowVersion)
-
-        then:
-        AssertionError e = thrown()
-        e.message.contains('workPackage == baseBamFile.mergingWorkPackage')
     }
 
     private Pipeline findOrCreatePanCanPipeline() {
@@ -937,11 +909,8 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
 
     private Map<String, ?> createDefaultMapForCreateWorkflowRunsAndOutputArtefactsDomains() {
         return [
-                existingBaseBamFile       : false,
-                baseBamFileWithdrawn      : false,
-
                 noSeqTrack                : false,
-                noNewSeqTrack             : false,
+                existingBamFile           : false,
                 missingFastqc             : false,
                 toManyFastqc              : false,
                 noSpecies                 : false,
@@ -1037,7 +1006,6 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
 
         additionalData = new AlignmentAdditionalData(referenceGenomeMap, [:], [:], [:], [:], rawSequenceFileMap, findOrCreatePanCanPipeline())
 
-        // base bam file
         if (createMwp) {
             baseMergingWorkPackage = createMergingWorkPackage([
                     sample               : seqTrack1.sample,
@@ -1047,22 +1015,19 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
                     libraryPreparationKit: values.wrongLibPrepKit ? createLibraryPreparationKit() : seqTrack1.libraryPreparationKit,
                     referenceGenome      : values.wrongReferenceGenome ? createReferenceGenome() : referenceGenome,
                     pipeline             : findOrCreatePipeline(),
-
             ])
             AlignmentWorkPackageGroup group = new AlignmentWorkPackageGroup(baseMergingWorkPackage.sample, baseMergingWorkPackage.seqType, baseMergingWorkPackage.antibodyTarget)
             additionalData.mergingWorkPackageMap[group] = baseMergingWorkPackage
 
-            if (values.existingBaseBamFile || values.wrongMergingWorkPackage || values.noNewSeqTrack) {
-                baseBamFile = createBamFile([
+            if (values.existingBamFile) {
+                bamFile = createBamFile([
                         workflowArtefact: createWorkflowArtefact([
                                 artefactType: ArtefactType.BAM,
                         ]),
-                        workPackage     : values.wrongMergingWorkPackage ? createMergingWorkPackage() : baseMergingWorkPackage,
-                        seqTracks       : values.noNewSeqTrack ? seqTracks : [seqTrack1],
+                        workPackage     : baseMergingWorkPackage,
+                        seqTracks       : seqTracks,
                 ])
-                if (!values.baseBamFileWithdrawn) {
-                    additionalDataList.bamData << createAlignmentArtefactDataForRoddyBamFile(baseBamFile)
-                }
+                additionalDataList.bamData << createAlignmentArtefactDataForRoddyBamFile(bamFile)
             }
         }
     }

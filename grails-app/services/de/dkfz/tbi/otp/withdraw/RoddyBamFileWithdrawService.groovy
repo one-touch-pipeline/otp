@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,16 +38,6 @@ class RoddyBamFileWithdrawService extends AbstractWithdrawBamFileService<RoddyBa
                 'in'('id', seqTrackList*.id)
             }
         }
-        return addRoddyBamFilesRecursively(roddyBamFiles)
-    }
-
-    List<RoddyBamFile> addRoddyBamFilesRecursively(List<RoddyBamFile> roddyBamFiles) {
-        if (roddyBamFiles) {
-            return [
-                    roddyBamFiles,
-                    addRoddyBamFilesRecursively(RoddyBamFile.findAllByBaseBamFileInList(roddyBamFiles)),
-            ].flatten()
-        }
-        return []
+        return roddyBamFiles
     }
 }

@@ -36,9 +36,9 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationWorkflow
 import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
-import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowTest.FileAssertHelper
 import de.dkfz.tbi.otp.workflowTest.alignment.AbstractAlignmentWorkflowSpec
@@ -434,7 +434,6 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
         checkBamFileState(bamFile, [
                 identifier         : 0,
                 mostResentBamFile  : isMostResentBamFile,
-                baseBamFile        : null,
                 seqTracks          : seqTracks,
                 containedSeqTracks : seqTracks,
                 fileOperationStatus: FileOperationStatus.PROCESSED,
@@ -442,13 +441,12 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
         ] + bamFileProperties)
     }
 
-    protected void checkLatestBamFileState(RoddyBamFile latestBamFile, RoddyBamFile firstBamFile, Map latestBamFileProperties = [:]) {
+    protected void checkLatestBamFileState(RoddyBamFile latestBamFile, Map latestBamFileProperties = [:]) {
         SeqTrack firstSeqTrack = CollectionUtils.exactlyOneElement(SeqTrack.findAllByLaneId("readGroup1"))
         SeqTrack secondSeqTrack = CollectionUtils.exactlyOneElement(SeqTrack.findAllByLaneId("readGroup2"))
         checkBamFileState(latestBamFile, [
                 identifier         : 1,
                 mostResentBamFile  : true,
-                baseBamFile        : firstBamFile,
                 seqTracks          : [secondSeqTrack],
                 containedSeqTracks : [firstSeqTrack, secondSeqTrack],
                 fileOperationStatus: FileOperationStatus.PROCESSED,
@@ -465,7 +463,6 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
     protected void checkBamFileState(RoddyBamFile bamFile, Map bamFileProperties) {
         MergingWorkPackage workPackage = bamFileProperties.mergingWorkPackage ?: CollectionUtils.exactlyOneElement(MergingWorkPackage.list())
 
-        assert bamFileProperties.baseBamFile?.id == bamFile.baseBamFile?.id
         assert bamFileProperties.seqTracks.size() == bamFile.seqTracks.size()
         assert bamFileProperties.seqTracks*.id.containsAll(bamFile.seqTracks*.id)
         assert bamFileProperties.containedSeqTracks.size() == bamFile.containedSeqTracks.size()
@@ -488,10 +485,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
     }
 
     protected void assertBaseFileSystemState(RoddyBamFile bamFile) {
-        assertWorkDirectoryFileSystemState(bamFile, false)
-        if (bamFile.baseBamFile) {
-            assertWorkDirectoryFileSystemState(bamFile.baseBamFile, true)
-        }
+        assertWorkDirectoryFileSystemState(bamFile)
         assertRoddyExecutionDirectories(bamFile)
         assertBamFileFileOnFileSystem(bamFile)
         assertWorkflowFileSystemState(bamFile)
@@ -499,7 +493,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
         verifyInputIsNotDeleted()
     }
 
-    protected void assertWorkDirectoryFileSystemState(RoddyBamFile bamFile, boolean isBaseBamFile) {
+    protected void assertWorkDirectoryFileSystemState(RoddyBamFile bamFile) {
         //  content of the work dir: executionStoreDirectory
         fileAssertHelper.assertDirectoryContentReadable(roddyBamFileService.getWorkExecutionDirectories(bamFile))
 
@@ -515,14 +509,11 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
         fileAssertHelper.assertFileIsReadableAndNotEmpty(qaJson)
         JSON.parse(qaJson.text) // throws ConverterException when the JSON content is not valid
 
-        assertWorkflowWorkDirectoryFileSystemState(bamFile, isBaseBamFile)
+        assertWorkflowWorkDirectoryFileSystemState(bamFile)
     }
 
     private void assertRoddyExecutionDirectories(RoddyBamFile bamFile) {
         List<Path> expectedRoddyExecutionDirs = roddyBamFileService.getFinalExecutionDirectories(bamFile)
-        if (bamFile.baseBamFile) {
-            expectedRoddyExecutionDirs.addAll(roddyBamFileService.getFinalExecutionDirectories(bamFile.baseBamFile))
-        }
         fileAssertHelper.assertDirectoryContentReadable(expectedRoddyExecutionDirs)
     }
 
@@ -566,7 +557,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
             checkWorkPackageState()
 
             RoddyBamFile bamFile = CollectionUtils.exactlyOneElement(RoddyBamFile.list())
-            checkLatestBamFileState(bamFile, null, [seqTracks: [firstSeqTrack, secondSeqTrack], identifier: 0L,])
+            checkLatestBamFileState(bamFile, [seqTracks: [firstSeqTrack, secondSeqTrack], identifier: 0L,])
             assertBamFileFileSystemPropertiesSet(bamFile)
 
             assertBaseFileSystemState(bamFile)
@@ -583,5 +574,5 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
 
     abstract protected void assertWorkflowFileSystemState(RoddyBamFile bamFile)
 
-    abstract protected void assertWorkflowWorkDirectoryFileSystemState(RoddyBamFile bamFile, boolean isBaseBamFile)
+    abstract protected void assertWorkflowWorkDirectoryFileSystemState(RoddyBamFile bamFile)
 }

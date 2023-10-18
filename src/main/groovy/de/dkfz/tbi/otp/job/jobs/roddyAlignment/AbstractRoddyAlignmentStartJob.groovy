@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,14 +35,11 @@ abstract class AbstractRoddyAlignmentStartJob extends AbstractAlignmentStartJob 
             MergingWorkPackage mergingWorkPackage,
             int identifier,
             Set<SeqTrack> seqTracks,
-            ConfigPerProjectAndSeqType config,
-            AbstractBamFile baseBamFile
-    ) {
+            ConfigPerProjectAndSeqType config) {
         return new RoddyBamFile(
                 workPackage: mergingWorkPackage,
                 identifier: identifier,
                 workDirectoryName: "${RoddyBamFile.WORK_DIR_PREFIX}_${identifier}",
-                baseBamFile: baseBamFile,
                 seqTracks: seqTracks,
                 config: config,
         )

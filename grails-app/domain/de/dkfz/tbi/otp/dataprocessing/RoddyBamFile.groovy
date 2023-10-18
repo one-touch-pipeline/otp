@@ -37,8 +37,6 @@ import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 
 /**
  * This bam file is produced by some Roddy alignment workflow.
- * The file is based on earlier created bam file (with the same workflow), if exists and
- * new SeqTracks which were not merged into the earlier created bam file (base bam file).
  */
 @ManagedEntity
 class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, ProcessParameterObject, RoddyResult {
@@ -93,8 +91,6 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
     @Deprecated
     static final String INSERT_SIZE_FILE_DIRECTORY = 'insertsize_distribution'
 
-    RoddyBamFile baseBamFile
-
     /**
      * Contains all seqTracks including the parents
      */
@@ -117,12 +113,7 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
             obj.isConsistentAndContainsNoWithdrawnData().each {
                 errors.reject(null, it)
             }
-            // Should contain all SeqTracks of the baseBamFile
-            if (obj.baseBamFile && !val.containsAll(obj.baseBamFile.seqTracks)) {
-                errors.reject("RoddyBamFile has to contain all its baseBamFiles seqTracks", it)
-            }
         }
-        baseBamFile nullable: true
         workflowArtefact nullable: true
 
         workPackage validator: { val, obj ->
@@ -148,7 +139,6 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
     }
 
     static mapping = {
-        baseBamFile index: "roddy_bam_file_base_bam_file_idx"
         config index: "roddy_bam_file_config_idx"
     }
 
@@ -159,17 +149,6 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
             if (!expression) {
                 errors << errorMessage
             }
-        }
-
-        if (baseBamFile) {
-            assertAndTrackOnError !mergingWorkPackage || mergingWorkPackage.satisfiesCriteria(baseBamFile),
-                    "the base bam file does not satisfy work package criteria"
-
-            assertAndTrackOnError baseBamFile.md5sum != null,
-                    "the base bam file is not finished"
-
-            assertAndTrackOnError withdrawn || !baseBamFile.withdrawn,
-                    "base bam file is withdrawn for not withdrawn bam file ${this}"
         }
 
         Set<SeqTrack> allContainedSeqTracks = this.containedSeqTracks
@@ -593,18 +572,6 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
     @Override
     protected File getPathForFurtherProcessingNoCheck() {
         return isOldStructureUsed() ? finalBamFile : workBamFile
-    }
-
-    @Override
-    void withdraw() {
-        withTransaction {
-            // get later bam files
-            RoddyBamFile.findAllByBaseBamFile(this).each {
-                it.withdraw()
-            }
-
-            super.withdraw()
-        }
     }
 
     Long getNumberOfReadsFromQa() {

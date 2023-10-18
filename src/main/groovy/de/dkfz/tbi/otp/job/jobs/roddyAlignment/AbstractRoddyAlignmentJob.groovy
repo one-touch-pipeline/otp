@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -90,12 +90,6 @@ abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyB
 
         executeRoddyCommandService.correctPermissions(roddyBamFile)
 
-        try {
-            ensureCorrectBaseBamFileIsOnFileSystem(roddyBamFile.baseBamFile)
-        } catch (AssertionError e) {
-            throw new RuntimeException('The input BAM file seems to have changed on the file system while this job was processing it.', e)
-        }
-
         ['Bam', 'Bai', 'Md5sum'].each {
             LsdfFilesService.ensureFileIsReadableAndNotEmpty(roddyBamFile."work${it}File")
         }
@@ -140,14 +134,6 @@ abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyB
                                          |${expectedReadGroups.join('\n')}
                                          |""".stripMargin()
             )
-        }
-    }
-
-    void ensureCorrectBaseBamFileIsOnFileSystem(RoddyBamFile baseBamFile) {
-        if (baseBamFile) {
-            File bamFilePath = baseBamFile.pathForFurtherProcessing
-            assert bamFilePath.exists()
-            assert baseBamFile.fileSize == bamFilePath.length()
         }
     }
 

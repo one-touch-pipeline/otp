@@ -79,7 +79,6 @@ class PanCancerWorkflowSpec extends Specification implements RoddyPancanFactory,
         outputRoddyBamFile.mergingWorkPackage == roddyBamFile.mergingWorkPackage
         outputRoddyBamFile.identifier == 1
         outputRoddyBamFile.workDirectoryName == "${RoddyBamFile.WORK_DIR_PREFIX}_1"
-        outputRoddyBamFile.baseBamFile == roddyBamFile.baseBamFile
         outputRoddyBamFile.seqTracks == roddyBamFile.seqTracks
         outputRoddyBamFile.config == roddyBamFile.config
         outputRoddyBamFile.numberOfMergedLanes == roddyBamFile.numberOfMergedLanes

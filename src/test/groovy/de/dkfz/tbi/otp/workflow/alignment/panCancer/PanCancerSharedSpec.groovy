@@ -27,11 +27,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.FastqFile
-import de.dkfz.tbi.otp.ngsdata.FastqImportInstance
-import de.dkfz.tbi.otp.ngsdata.FileType
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
@@ -95,21 +91,6 @@ class PanCancerSharedSpec extends Specification implements WorkflowSystemDomainF
 
         then:
         1 * panCancerSharedInstance.concreteArtefactService.getInputArtefacts(workflowStep, PanCancerWorkflow.INPUT_FASTQC) >> _
-    }
-
-    void "getBaseRoddyBamFile, should call checkWorkflowName and getInputArtefact with correct arguments and in order"() {
-        given:
-        createData()
-        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
-
-        when:
-        panCancerSharedInstance.getBaseRoddyBamFile(workflowStep)
-
-        then:
-        1 * panCancerSharedInstance.checkWorkflowName(workflowStep, [PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WORKFLOW])
-
-        then:
-        1 * panCancerSharedInstance.concreteArtefactService.getInputArtefact(workflowStep, PanCancerWorkflow.INPUT_BASE_BAM_FILE, false) >> bamFile
     }
 
     void "getRoddyBamFile, should call checkWorkflowName and getInputArtefact with correct arguments and in order"() {

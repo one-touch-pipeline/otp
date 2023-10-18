@@ -156,7 +156,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
                     throw new AssertionError(errorMessage)
                 }
             }
-            0 * ensureCorrectBaseBamFileIsOnFileSystem(_)
         }
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
 
@@ -166,28 +165,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
         then:
         AssertionError e = thrown()
         errorMessage == e.message
-    }
-
-    void "validate, when baseBamFile change, throw assert"() {
-        given:
-        String errorMessage = HelperUtils.uniqueString
-        AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
-            getExecuteRoddyCommandService() >> Mock(ExecuteRoddyCommandService) {
-                1 * correctPermissions(_) >> { }
-            }
-            1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> {
-                throw new AssertionError(errorMessage)
-            }
-        }
-        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
-
-        when:
-        abstractRoddyAlignmentJob.validate(roddyBamFile)
-
-        then:
-        RuntimeException e = thrown()
-        e.message.contains('The input BAM file seems to have changed ')
-        errorMessage == e.cause.message
     }
 
     // false positives, since rule can not recognize calling class
@@ -201,7 +178,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
                 1 * correctPermissions(_) >> { }
             }
             getConfigService() >> configService
-            1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> { }
             validateReadGroups(_) >> { }
             workflowSpecificValidation(_) >> { }
         }
@@ -249,7 +225,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
                 1 * correctPermissions(_) >> { }
             }
             getConfigService() >> configService
-            1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> { }
             validateReadGroups(_) >> { }
             workflowSpecificValidation(_) >> { }
         }
@@ -279,7 +254,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
                 1 * correctPermissions(_) >> { }
             }
             getConfigService() >> configService
-            1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> { }
             1 * validateReadGroups(_) >> { }
             1 * workflowSpecificValidation(_) >> { }
         }
@@ -310,7 +284,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
                 1 * correctPermissions(_) >> { }
             }
             getConfigService() >> configService
-            1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> { }
             1 * validateReadGroups(_) >> { }
             1 * workflowSpecificValidation(_) >> { }
         }
@@ -402,55 +375,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
 
         when:
         abstractRoddyAlignmentJob.validateReadGroups(roddyBamFile)
-
-        then:
-        noExceptionThrown()
-
-        cleanup:
-        configService.clean()
-    }
-
-    void "ensureCorrectBaseBamFileIsOnFileSystem, if no base bam file, all fine"() {
-        when:
-        Spy(AbstractRoddyAlignmentJob).ensureCorrectBaseBamFileIsOnFileSystem(null)
-
-        then:
-        noExceptionThrown()
-    }
-
-    void "ensureCorrectBaseBamFileIsOnFileSystem, base bam file exist but not on file system, throw assert"() {
-        given:
-        RoddyBamFile baseRoddyBamFile = DomainFactory.createRoddyBamFile()
-
-        baseRoddyBamFile.mergingWorkPackage.bamFileInProjectFolder = baseRoddyBamFile
-        assert baseRoddyBamFile.mergingWorkPackage.save(flush: true)
-
-        AbstractRoddyAlignmentJob job = Spy(AbstractRoddyAlignmentJob)
-
-        when:
-        job.ensureCorrectBaseBamFileIsOnFileSystem(baseRoddyBamFile)
-
-        then:
-        AssertionError e = thrown()
-        e.message.contains('assert bamFilePath.exists()')
-    }
-
-    void "ensureCorrectBaseBamFileIsOnFileSystem, base bam file exist and is correct, return without exception"() {
-        given:
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
-        RoddyBamFile baseRoddyBamFile = DomainFactory.createRoddyBamFile()
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(baseRoddyBamFile)
-
-        baseRoddyBamFile.mergingWorkPackage.bamFileInProjectFolder = baseRoddyBamFile
-        assert baseRoddyBamFile.mergingWorkPackage.save(flush: true)
-
-        baseRoddyBamFile.fileSize = baseRoddyBamFile.workBamFile.length()
-        assert baseRoddyBamFile.save(flush: true)
-
-        AbstractRoddyAlignmentJob job = Spy(AbstractRoddyAlignmentJob)
-
-        when:
-        job.ensureCorrectBaseBamFileIsOnFileSystem(baseRoddyBamFile)
 
         then:
         noExceptionThrown()

@@ -175,139 +175,34 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
     }
 
     @Test
-    void testFindBamFileInProjectFolder_WhenNoRoddyBamFile_ShouldReturnNull() {
-        setupData()
-        MergingWorkPackage mwp = createMergingWorkPackage()
-
-        assert AbstractAlignmentStartJob.findBamFileInProjectFolder(mwp) == null
-    }
-
-    @Test
-    void testFindBamFileInProjectFolder_WhenNoRoddyBamFileInProgressOrProcessed_ShouldReturnNull() {
-        setupData()
-        MergingWorkPackage mwp = createMergingWorkPackage()
-        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
-                workPackage        : mwp,
-                fileOperationStatus: AbstractBamFile.FileOperationStatus.DECLARED,
-                md5sum             : null,
-                withdrawn          : true,
-        ])
-        DomainFactory.createRoddyBamFile([
-                workPackage        : mwp,
-                fileOperationStatus: AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING,
-                md5sum             : null,
-                withdrawn          : true,
-                config             : roddyBamFile.config,
-        ])
-
-        assert AbstractAlignmentStartJob.findBamFileInProjectFolder(mwp) == null
-    }
-
-    @Test
-    void testFindBamFileInProjectFolder_WhenLatestBamFileIsInProgress_ShouldReturnNull() {
-        setupData()
-        MergingWorkPackage mwp = createMergingWorkPackage()
-        RoddyBamFile rbf = DomainFactory.createRoddyBamFile([
-                workPackage        : mwp,
-                fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
-        ])
-        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
-                workPackage        : mwp,
-                fileOperationStatus: AbstractBamFile.FileOperationStatus.INPROGRESS,
-                md5sum             : null,
-                withdrawn          : true,
-                config             : rbf.config,
-        ])
-
-        mwp.bamFileInProjectFolder = roddyBamFile
-
-        assert AbstractAlignmentStartJob.findBamFileInProjectFolder(mwp) == null
-    }
-
-    @Test
-    void testFindBamFileInProjectFolder_WhenLatestBamFileNeitherInProgressNorProcessed_ShouldReturnEarlierFile() {
-        setupData()
-        MergingWorkPackage mwp = createMergingWorkPackage()
-        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
-                workPackage        : mwp,
-                fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
-        ])
-        DomainFactory.createRoddyBamFile([
-                workPackage        : mwp,
-                fileOperationStatus: AbstractBamFile.FileOperationStatus.DECLARED,
-                md5sum             : null,
-                withdrawn          : true,
-                config             : roddyBamFile.config,
-        ])
-
-        mwp.bamFileInProjectFolder = roddyBamFile
-
-        assert roddyBamFile == AbstractAlignmentStartJob.findBamFileInProjectFolder(mwp)
-    }
-
-    @Test
-    void testFindUsableBaseBamFile_WhenMergingWorkPackageHasNoBamFile_ShouldReturnNull() {
-        setupData()
-        assert testAbstractAlignmentStartJob.findUsableBaseBamFile(DomainFactory.createMergingWorkPackage()) == null
-    }
-
-    @Test
-    void testFindUsableBaseBamFile_WhenBamFileInProjectFolderIsWithdrawn_ShouldReturnNull() {
-        setupData()
-        MergingWorkPackage mwp = createMergingWorkPackage()
-        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
-                workPackage: mwp,
-                withdrawn  : true,
-        ])
-
-        mwp.bamFileInProjectFolder = bamFile
-
-        assert testAbstractAlignmentStartJob.findUsableBaseBamFile(bamFile.mergingWorkPackage) == null
-    }
-
-    @Test
-    void testFindUsableBaseBamFile_WhenBamFileInProjectFolderIsUsable_ShouldReturnIt() {
-        setupData()
-        MergingWorkPackage mwp = createMergingWorkPackage()
-        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
-                workPackage: mwp,
-        ])
-
-        mwp.bamFileInProjectFolder = bamFile
-
-        assert bamFile == testAbstractAlignmentStartJob.findUsableBaseBamFile(bamFile.mergingWorkPackage)
-    }
-
-    @Test
-    void testCreateRoddyBamFile_WithoutIndividualConfig_WhenBaseBamFileIsNull() {
+    void testCreateRoddyBamFile_WithoutIndividualConfig() {
         setupData()
         MergingWorkPackage mwp = createMergingWorkPackage()
         DomainFactory.createRoddyWorkflowConfig([pipeline: mwp.pipeline, project: mwp.project])
-        helperTestCreateRoddyBamFile_WhenBaseBamFileIsNull(mwp)
+        helperTestCreateRoddyBamFile(mwp)
     }
 
     @Test
-    void testCreateRoddyBamFile_WithIndividualConfig_WhenBaseBamFileIsNull() {
+    void testCreateRoddyBamFile_WithIndividualConfig() {
         setupData()
         MergingWorkPackage mwp = createMergingWorkPackage()
         DomainFactory.createRoddyWorkflowConfig([pipeline: mwp.pipeline, project: mwp.project])
         RoddyWorkflowConfig config = DomainFactory.createRoddyWorkflowConfig([pipeline: mwp.pipeline, project: mwp.project, individual: mwp.individual])
-        RoddyBamFile rbf = helperTestCreateRoddyBamFile_WhenBaseBamFileIsNull(mwp)
+        RoddyBamFile rbf = helperTestCreateRoddyBamFile(mwp)
 
         assert rbf.config == config
     }
 
-    RoddyBamFile helperTestCreateRoddyBamFile_WhenBaseBamFileIsNull(MergingWorkPackage mwp) {
+    RoddyBamFile helperTestCreateRoddyBamFile(MergingWorkPackage mwp) {
         setupData()
         Collection<SeqTrack> seqTracks = [DomainFactory.createSeqTrackWithFastqFiles(mwp)]
         mwp.seqTracks = seqTracks
         mwp.save(flush: true)
         DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
 
-        RoddyBamFile rbf = testAbstractAlignmentStartJob.createBamFile(mwp, null)
+        RoddyBamFile rbf = testAbstractAlignmentStartJob.createBamFile(mwp)
 
         assertRoddyBamFileConsistencyWithMwp(rbf, mwp)
-        assert rbf.baseBamFile == null
         assert TestCase.containSame(seqTracks, rbf.seqTracks)
         assert seqTracks.size() == rbf.numberOfMergedLanes
         assert TestCase.containSame(seqTracks, rbf.containedSeqTracks)
@@ -318,33 +213,7 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
     }
 
     @Test
-    void testCreateRoddyBamFile_WhenBaseBamFileIsNotNull() {
-        setupData()
-        RoddyBamFile baseBamFile = DomainFactory.createRoddyBamFile()
-        MergingWorkPackage mwp = baseBamFile.mergingWorkPackage
-        Collection<SeqTrack> additionalSeqTracks = [
-                DomainFactory.createSeqTrackWithFastqFiles(mwp),
-                DomainFactory.createSeqTrackWithFastqFiles(mwp),
-                DomainFactory.createSeqTrackWithFastqFiles(mwp),
-        ]
-        mwp.seqTracks.addAll(additionalSeqTracks)
-        mwp.save(flush: true)
-
-        DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
-
-        RoddyBamFile rbf = testAbstractAlignmentStartJob.createBamFile(mwp, baseBamFile)
-
-        assertRoddyBamFileConsistencyWithMwp(rbf, mwp)
-        assert baseBamFile == rbf.baseBamFile
-        assert TestCase.containSame(baseBamFile.seqTracks + additionalSeqTracks, rbf.seqTracks)
-        assert baseBamFile.numberOfMergedLanes + additionalSeqTracks.size() == rbf.numberOfMergedLanes
-        assert TestCase.containSame(additionalSeqTracks + baseBamFile.containedSeqTracks, rbf.containedSeqTracks)
-        assert rbf.workDirectoryName && rbf.workDirectoryName.startsWith(RoddyBamFile.WORK_DIR_PREFIX)
-        assert !rbf.oldStructureUsed
-    }
-
-    @Test
-    void testCreateRoddyBamFile_WhenBaseBamFileIsNullAndNoConfigAvailable_ShouldFail() {
+    void testCreateRoddyBamFile_WhenNoConfigAvailable_ShouldFail() {
         setupData()
         MergingWorkPackage mwp = createMergingWorkPackage()
         DomainFactory.createSeqTrackWithFastqFiles(mwp)
@@ -353,7 +222,7 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
         assert RoddyWorkflowConfig.list().size() == 0
 
         assert TestCase.shouldFail(AssertionError) {
-            testAbstractAlignmentStartJob.createBamFile(mwp, null)
+            testAbstractAlignmentStartJob.createBamFile(mwp)
         }.contains('RoddyWorkflowConfig')
     }
 

@@ -344,13 +344,11 @@ class DeletionService {
 
         // for RoddyBamFiles
         MergingWorkPackage mergingWorkPackage = null
-        List<RoddyBamFile> bamFilesFetch = RoddyBamFile.createCriteria().listDistinct {
+        List<RoddyBamFile> bamFiles = RoddyBamFile.createCriteria().listDistinct {
             seqTracks {
                 eq("id", seqTrack.id)
             }
-        }
-        List<RoddyBamFile> bamFiles = addRoddyBamFilesRecursively(bamFilesFetch).unique().sort {
-            -it.id
+            order("id", "desc")
         }
 
         if (bamFiles) {
@@ -364,14 +362,6 @@ class DeletionService {
                 deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(it.id.toString(), it.class.name))
             }
             dirsToDelete.addAll(analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(samplePairs))
-        }
-
-        // Disconnect bam files from base bam files before starting with deleting of the list
-        bamFiles.each { RoddyBamFile bamFile ->
-            if (bamFile.baseBamFile) {
-                bamFile.baseBamFile = null
-                bamFile.save(flush: true, validate: false) // since object is deleted in next loop, no validation is necessary here
-            }
         }
 
         // delete bam files
@@ -442,13 +432,6 @@ class DeletionService {
         }
 
         return dirsToDelete
-    }
-
-    /**
-     * helper to include all bam files based on any given BamFiles recursively.
-     */
-    protected List<RoddyBamFile> addRoddyBamFilesRecursively(List<RoddyBamFile> roddyBamFiles) {
-        return roddyBamFiles ? roddyBamFiles + addRoddyBamFilesRecursively(RoddyBamFile.findAllByBaseBamFileInList(roddyBamFiles)) : []
     }
 
     void deleteProcessParameters(List<ProcessParameter> processParameters) {

@@ -27,7 +27,6 @@ abstract class AlignmentWorkflow implements OtpWorkflow {
 
     public static final String INPUT_FASTQ = "FASTQ"
     public static final String INPUT_FASTQC = "FASTQC"
-    public static final String INPUT_BASE_BAM_FILE = "BASE_BAM_FILE"
     public static final String OUTPUT_BAM = "BAM"
 
     @Override

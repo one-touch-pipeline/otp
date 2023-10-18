@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.workflow.alignment.panCancer
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.workflow.alignment.AlignmentWorkflowShared
 import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
@@ -40,11 +39,5 @@ trait PanCancerShared extends AlignmentWorkflowShared {
     List<FastqcProcessedFile> getFastqcProcessedFiles(WorkflowStep workflowStep) {
         checkWorkflowName(workflowStep, WORKFLOWS)
         return concreteArtefactService.<FastqcProcessedFile> getInputArtefacts(workflowStep, PanCancerWorkflow.INPUT_FASTQC)
-    }
-
-    RoddyBamFile getBaseRoddyBamFile(WorkflowStep workflowStep) {
-        checkWorkflowName(workflowStep, WORKFLOWS)
-        return concreteArtefactService.<RoddyBamFile> getInputArtefact(workflowStep,
-                PanCancerWorkflow.INPUT_BASE_BAM_FILE, false)
     }
 }

@@ -62,11 +62,6 @@ class PanCancerExecuteJob extends RoddyAlignmentExecuteJob implements PanCancerS
             conf.put("TARGETSIZE", bedFile.targetSize.toString())
         }
 
-        RoddyBamFile baseBamFile = roddyBamFile.baseBamFile
-        if (baseBamFile) {
-            conf.put("bam", baseBamFile.pathForFurtherProcessing.toString())
-        }
-
         return conf
     }
 }

@@ -36,8 +36,6 @@ import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
-import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.Path
@@ -184,7 +182,7 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, Workflo
         TestCase.assertContainSame(expectedCommand, actualCommand)
     }
 
-    void "test getConfigurationValues, with whole genome seq. type, without base bam file, with fingerprinting"() {
+    void "test getConfigurationValues, with whole genome seq. type, with fingerprinting"() {
         given:
         setupDataForGetConfigurationValues()
         ReferenceGenome referenceGenome = roddyBamFile.referenceGenome
@@ -211,7 +209,7 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, Workflo
         TestCase.assertContainSame(expectedCommand, actualCommand)
     }
 
-    void "test getConfigurationValues, with whole genome seq. type, without base bam file"() {
+    void "test getConfigurationValues, with whole genome seq. type"() {
         given:
         setupDataForGetConfigurationValues()
 
@@ -227,42 +225,6 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, Workflo
 
         when:
         Map<String, String> actualCommand = job.getConfigurationValues(workflowStep, "{}")
-
-        then:
-        TestCase.assertContainSame(expectedCommand, actualCommand)
-    }
-
-    void "test getConfigurationValues, with whole genome seq. type, with base bam file"() {
-        given:
-        setupDataForGetConfigurationValues()
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-
-        roddyBamFile.fileOperationStatus = AbstractBamFile.FileOperationStatus.PROCESSED
-        roddyBamFile.md5sum = HelperUtils.randomMd5sum
-        roddyBamFile.fileSize = roddyBamFile.workBaiFile.size()
-        roddyBamFile.save(flush: true)
-
-        roddyBamFile.mergingWorkPackage.bamFileInProjectFolder = roddyBamFile
-        roddyBamFile.mergingWorkPackage.save(flush: true)
-
-        RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
-
-        WorkflowStep workflowStep2 = createWorkflowStep()
-        job.getRoddyBamFile(workflowStep2) >> { roddyBamFile2 }
-
-        Map<String, String> expectedCommand = [
-                "sharedFilesBaseDirectory"         : null,
-                "INDEX_PREFIX"                     : "/fasta-path",
-                "GENOME_FA"                        : "/fasta-path",
-                "possibleControlSampleNamePrefixes": roddyBamFile2.sampleType.dirName,
-                "possibleTumorSampleNamePrefixes"  : "",
-                "runFingerprinting"                : "false",
-                "fastq_list"                       : fastqFilesAsString(roddyBamFile2),
-                "bam"                              : roddyBamFile.workBamFile.path,
-        ]
-
-        when:
-        Map<String, String> actualCommand = job.getConfigurationValues(workflowStep2, "{}")
 
         then:
         TestCase.assertContainSame(expectedCommand, actualCommand)

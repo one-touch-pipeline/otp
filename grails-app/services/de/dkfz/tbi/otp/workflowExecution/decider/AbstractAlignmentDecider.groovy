@@ -95,7 +95,7 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
         return new AlignmentArtefactDataList(
                 alignmentArtefactService.fetchSeqTrackArtefacts(inputArtefacts, seqTypes),
                 requiresFastqcResults() ? alignmentArtefactService.fetchFastqcProcessedFileArtefacts(inputArtefacts, seqTypes) : [],
-                alignmentArtefactService.fetchBamArtefacts(inputArtefacts, seqTypes)
+                []
         )
     }
 
@@ -156,24 +156,21 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
             map[createAlignmentDeciderGroup(it, ignoreSeqPlatformGroup, additionalData)].fastqcProcessedFileData << it
         }
         inputArtefactDataList.bamData.each {
-            map[createAlignmentDeciderGroup(it, ignoreSeqPlatformGroup, additionalData, true)].bamData << it
+            map[createAlignmentDeciderGroup(it, ignoreSeqPlatformGroup, additionalData)].bamData << it
         }
         return map
     }
 
     protected AlignmentDeciderGroup createAlignmentDeciderGroup(AlignmentArtefactData<?> data,
                                                                 boolean ignoreSeqPlatformGroup,
-                                                                AlignmentAdditionalData additionalData,
-                                                                boolean fromBam = false) {
+                                                                AlignmentAdditionalData additionalData) {
         ProjectSeqTypeGroup projectSeqTypePair = new ProjectSeqTypeGroup(data.project, data.seqType)
         MergingCriteria mergingCriteria = additionalData.mergingCriteriaMap[projectSeqTypePair]
         assert mergingCriteria
 
         LibraryPreparationKit libraryPreparationKit = mergingCriteria.useLibPrepKit ? data.libraryPreparationKit : null
         SeqPlatformGroup seqPlatformGroup
-        if (fromBam) {
-            seqPlatformGroup = ignoreSeqPlatformGroup ? null : data.seqPlatformGroup
-        } else if (ignoreSeqPlatformGroup || mergingCriteria.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING) {
+        if (ignoreSeqPlatformGroup || mergingCriteria.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING) {
             seqPlatformGroup = null
         } else {
             Map<SeqPlatform, SeqPlatformGroup> seqPlatformGroupMap =
@@ -200,10 +197,10 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
         AlignmentArtefactDataList allArtefacts = new AlignmentArtefactDataList(
                 givenArtefacts.seqTrackData + additionalArtefacts.seqTrackData,
                 givenArtefacts.fastqcProcessedFileData + additionalArtefacts.fastqcProcessedFileData,
-                givenArtefacts.bamData + additionalArtefacts.bamData,
+                additionalArtefacts.bamData,
         )
 
-        RoddyBamFile baseBamFile = allArtefacts.bamData.find()?.artefact
+        RoddyBamFile existingBamFile = allArtefacts.bamData.find()?.artefact
         List<SeqTrack> seqTracks = allArtefacts.seqTrackData*.artefact
 
         if (seqTracks.empty) {
@@ -211,9 +208,8 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
             return deciderResult
         }
 
-        List<SeqTrack> newSeqTracks = seqTracks - (baseBamFile?.containedSeqTracks ?: [])
-        if (!newSeqTracks) {
-            deciderResult.warnings << "skip ${group}, since no new seqTracks found".toString()
+        if (seqTracks as Set == existingBamFile?.seqTracks) {
+            deciderResult.warnings << "skip ${group}, since existing BAM file with the same seqTracks found".toString()
             return deciderResult
         }
 
@@ -261,9 +257,6 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
         MergingWorkPackage workPackage = additionalData.mergingWorkPackageMap[alignmentWorkPackageGroup]
 
         if (workPackage) {
-            if (baseBamFile) {
-                assert workPackage == baseBamFile.mergingWorkPackage
-            }
             if (workPackage.referenceGenome != referenceGenome) {
                 deciderResult.warnings << ("skip ${group}, since existing MergingWorkPackage uses ReferenceGenome '${workPackage.referenceGenome}', " +
                         "but the configured one is '${referenceGenome}'").toString()
@@ -359,7 +352,6 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
                 workPackage: workPackage,
                 identifier: identifier,
                 workDirectoryName: "${RoddyBamFileService.WORK_DIR_PREFIX}_${identifier}",
-                baseBamFile: null,
                 seqTracks: seqTrackSet,
                 numberOfMergedLanes: seqTrackSet.size(),
         ])

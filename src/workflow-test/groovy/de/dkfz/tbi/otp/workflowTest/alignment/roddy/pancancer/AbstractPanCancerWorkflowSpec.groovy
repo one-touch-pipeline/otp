@@ -93,7 +93,7 @@ abstract class AbstractPanCancerWorkflowSpec extends AbstractRoddyAlignmentWorkf
     }
 
     @Override
-    protected void assertWorkflowWorkDirectoryFileSystemState(RoddyBamFile bamFile, boolean isBaseBamFile) {
-        roddyFileAssertHelper.assertWorkDirectoryFileSystemState(bamFile, isBaseBamFile, roddyBamFileService, roddyConfigService)
+    protected void assertWorkflowWorkDirectoryFileSystemState(RoddyBamFile bamFile) {
+        roddyFileAssertHelper.assertWorkDirectoryFileSystemState(bamFile, roddyBamFileService, roddyConfigService)
     }
 }

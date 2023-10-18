@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -51,8 +51,7 @@ class CellRangerStartJob extends AbstractAlignmentStartJob implements Restartabl
             MergingWorkPackage mergingWorkPackage,
             int identifier,
             Set<SeqTrack> seqTracks,
-            ConfigPerProjectAndSeqType config,
-            AbstractBamFile baseBamFile = null) {
+            ConfigPerProjectAndSeqType config) {
         return new SingleCellBamFile(
                 workPackage        : mergingWorkPackage,
                 identifier         : identifier,
@@ -74,10 +73,5 @@ class CellRangerStartJob extends AbstractAlignmentStartJob implements Restartabl
         )
         assert config: "Could not find a ${CellRangerConfig.simpleName} for ${mwp.project}, ${mwp.seqType} and ${mwp.pipeline}"
         return config
-    }
-
-    @Override
-    RoddyBamFile findUsableBaseBamFile(MergingWorkPackage mergingWorkPackage) {
-        return null
     }
 }

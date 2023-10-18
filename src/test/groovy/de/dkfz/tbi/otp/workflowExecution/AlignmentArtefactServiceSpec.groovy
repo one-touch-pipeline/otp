@@ -176,20 +176,6 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
         result.first() == expected
     }
 
-    void "fetchBamArtefacts, when called for workflowArtefacts and seqTypes, then return AlignmentArtefactData of expected BamFile"() {
-        given:
-        setupData()
-
-        AlignmentArtefactData<RoddyBamFile> expected = createAlignmentArtefactDataForRoddyBamFile(bamFile1)
-
-        when:
-        List<AlignmentArtefactData<RoddyBamFile>> result = alignmentArtefactService.fetchBamArtefacts(workflowArtefacts, seqTypes)
-
-        then:
-        result.size() == 1
-        result.first() == expected
-    }
-
     void "fetchRelatedSeqTrackArtefactsForSeqTracks, when called for workflowArtefacts and seqTypes, then return AlignmentArtefactData of expected SeqTrack"() {
         given:
         setupDataWithRelated()

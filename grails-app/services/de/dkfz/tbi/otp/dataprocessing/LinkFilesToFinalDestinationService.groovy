@@ -27,10 +27,9 @@ import groovy.transform.CompileDynamic
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
-import de.dkfz.tbi.otp.job.processing.RoddyConfigService
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightCheckService
 import de.dkfz.tbi.otp.utils.*
 
@@ -161,10 +160,6 @@ class LinkFilesToFinalDestinationService {
             linkMapSourceLink.put(singleLaneQaWorkDir, singleLaneQcDirFinal)
         }
 
-        if (roddyBamFile.baseBamFile?.isOldStructureUsed()) {
-            lsdfFilesService.deleteFilesRecursive([roddyBamFile.baseBamFile.finalMergedQADirectory])
-        }
-
         // create the collected links
         linkFileUtils.createAndValidateLinks(linkMapSourceLink, roddyBamFile.project.unixGroup)
     }
@@ -208,32 +203,24 @@ class LinkFilesToFinalDestinationService {
 
         List<File> filesToDelete = []
         List<File> roddyDirsToDelete = []
-        if (roddyBamFile.baseBamFile) {
-            if (!roddyBamFile.baseBamFile.isOldStructureUsed()) {
-                filesToDelete.add(roddyBamFile.baseBamFile.workBamFile)
-                filesToDelete.add(roddyBamFile.baseBamFile.workBaiFile)
-                // the md5sum is kept: roddyBamFile.baseBamFile.workMd5sumFile
+        List<RoddyBamFile> roddyBamFiles = RoddyBamFile.findAllByWorkPackageAndIdNotEqual(roddyBamFile.mergingWorkPackage, roddyBamFile.id)
+        if (roddyBamFiles) {
+            List<File> workDirs = roddyBamFiles.findAll { !it.isOldStructureUsed() }*.workDirectory
+            filesToDelete.addAll(workDirs)
+            filesToDelete.add(roddyBamFile.finalExecutionStoreDirectory)
+            filesToDelete.add(roddyBamFile.finalQADirectory)
+            if (roddyBamFile.seqType.isWgbs()) {
+                filesToDelete.add(roddyBamFile.finalMethylationDirectory)
             }
-        } else {
-            List<RoddyBamFile> roddyBamFiles = RoddyBamFile.findAllByWorkPackageAndIdNotEqual(roddyBamFile.mergingWorkPackage, roddyBamFile.id)
-            if (roddyBamFiles) {
-                List<File> workDirs = roddyBamFiles.findAll { !it.isOldStructureUsed() }*.workDirectory
-                filesToDelete.addAll(workDirs)
-                filesToDelete.add(roddyBamFile.finalExecutionStoreDirectory)
-                filesToDelete.add(roddyBamFile.finalQADirectory)
-                if (roddyBamFile.seqType.isWgbs()) {
-                    filesToDelete.add(roddyBamFile.finalMethylationDirectory)
-                }
-                roddyDirsToDelete.addAll(workDirs)
-                roddyBamFiles.findAll {
-                    it.isOldStructureUsed()
-                }.each {
-                    roddyDirsToDelete.addAll(it.finalExecutionDirectories)
-                    roddyDirsToDelete.addAll(it.finalSingleLaneQADirectories.values())
-                }
-                if (roddyBamFiles.max { it.identifier }.oldStructureUsed) {
-                    roddyDirsToDelete.add(roddyBamFile.finalMergedQADirectory)
-                }
+            roddyDirsToDelete.addAll(workDirs)
+            roddyBamFiles.findAll {
+                it.isOldStructureUsed()
+            }.each {
+                roddyDirsToDelete.addAll(it.finalExecutionDirectories)
+                roddyDirsToDelete.addAll(it.finalSingleLaneQADirectories.values())
+            }
+            if (roddyBamFiles.max { it.identifier }.oldStructureUsed) {
+                roddyDirsToDelete.add(roddyBamFile.finalMergedQADirectory)
             }
         }
         FileSystem fs = fileSystemService.remoteFileSystem

@@ -74,7 +74,6 @@ class PanCancerWorkflow extends AlignmentWorkflow {
                 workPackage        : mergingWorkPackage,
                 identifier         : identifier,
                 workDirectoryName  : "${RoddyBamFile.WORK_DIR_PREFIX}_${identifier}",
-                baseBamFile        : roddyBamFile.baseBamFile,
                 seqTracks          : roddyBamFile.seqTracks.collect() as Set,
                 config             : roddyBamFile.config,
                 numberOfMergedLanes: roddyBamFile.containedSeqTracks.size(),

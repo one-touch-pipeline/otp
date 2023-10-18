@@ -41,7 +41,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTests implements DomainFactoryCore {
 
-    void "testAlignLanesOnly_NoBaseBamExist_OneLane_allFine"() {
+    void "testAlignLanesOnly_OneLane_allFine"() {
         given:
         SessionUtils.withTransaction {
             createProjectConfigRna(exactlyOneElement(MergingWorkPackage.findAll()), [:])
@@ -66,7 +66,7 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
         }
     }
 
-    void "testAlignLanesOnly_withoutArribaProcessing_NoBaseBamExist_OneLane_allFine"() {
+    void "testAlignLanesOnly_withoutArribaProcessing_OneLane_allFine"() {
         given:
         SessionUtils.withTransaction {
             createProjectConfigRna(exactlyOneElement(MergingWorkPackage.findAll()), [

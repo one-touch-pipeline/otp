@@ -54,9 +54,6 @@ class ExecutePanCanJob extends AbstractRoddyAlignmentJob implements AutoRestarta
 
         List<String> filesToMerge = getFilesToMerge(roddyBamFile)
 
-        RoddyBamFile baseBamFile = roddyBamFile.baseBamFile
-        ensureCorrectBaseBamFileIsOnFileSystem(baseBamFile)
-
         List<String> cValues = prepareAndReturnAlignmentCValues(roddyBamFile)
 
         if (roddyBamFile.seqType.name == SeqTypeNames.EXOME.seqTypeName) {
@@ -66,9 +63,6 @@ class ExecutePanCanJob extends AbstractRoddyAlignmentJob implements AutoRestarta
             cValues.add("TARGETSIZE:${bedFile.targetSize}")
         }
         cValues.add("fastq_list:${filesToMerge.join(";")}")
-        if (baseBamFile) {
-            cValues.add("bam:${baseBamFile.pathForFurtherProcessing}")
-        }
 
         return cValues
     }

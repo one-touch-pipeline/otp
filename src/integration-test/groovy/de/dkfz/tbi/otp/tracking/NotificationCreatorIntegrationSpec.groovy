@@ -354,18 +354,19 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             )
             createMergingCriteriaLazy(project: seqTrack1.project, seqType: seqTrack1.seqType)
             createMergingCriteriaLazy(project: seqTrack2.project, seqType: seqTrack2.seqType)
-            RoddyBamFile baseBamFile = DomainFactory.createRoddyBamFile([
+            RoddyBamFile abstractBamFile = DomainFactory.createRoddyBamFile([
                     workPackage: DomainFactory.createMergingWorkPackage(
                             MergingWorkPackage.getMergingProperties(seqTrack2) +
                                     [pipeline: DomainFactory.createPanCanPipeline()]
                     )
-            ])
-            AbstractBamFile abstractBamFile = saveBamFileInProjectFolder(
-                    DomainFactory.createRoddyBamFile(
-                            baseBamFile,
-                            DomainFactory.randomBamFileProperties + [seqTracks: [seqTrack2] + baseBamFile.seqTracks],
-                    )
-            )
+            ] + DomainFactory.randomBamFileProperties)
+
+            abstractBamFile.seqTracks +=  [seqTrack2] + abstractBamFile.seqTracks
+            abstractBamFile.numberOfMergedLanes = 2
+            abstractBamFile.save(flush: true)
+
+            saveBamFileInProjectFolder(abstractBamFile)
+
             ((MergingWorkPackage) (abstractBamFile.workPackage)).seqTracks.add(seqTrack2)
             abstractBamFile.workPackage.save(flush: true)
             ProcessingStatus expectedStatus = [
@@ -463,16 +464,18 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             createMergingCriteriaLazy(project: seqTrack1.project, seqType: seqTrack1.seqType)
             createMergingCriteriaLazy(project: seqTrack2.project, seqType: seqTrack2.seqType)
 
-            RoddyBamFile baseBamFile = DomainFactory.createRoddyBamFile([
+            RoddyBamFile abstractBamFile = DomainFactory.createRoddyBamFile([
                     workPackage: DomainFactory.createMergingWorkPackage(
                             MergingWorkPackage.getMergingProperties(seqTrack2) +
                                     [pipeline: DomainFactory.createPanCanPipeline()]
                     )
-            ])
-            saveBamFileInProjectFolder(DomainFactory.createRoddyBamFile(
-                    baseBamFile,
-                    DomainFactory.randomBamFileProperties + [seqTracks: [seqTrack2] + baseBamFile.seqTracks],
-            ))
+            ] + DomainFactory.randomBamFileProperties)
+
+            abstractBamFile.seqTracks +=  [seqTrack2] + abstractBamFile.seqTracks
+            abstractBamFile.numberOfMergedLanes = 2
+            abstractBamFile.save(flush: true)
+
+            saveBamFileInProjectFolder(abstractBamFile)
 
             String prefix = "the prefix"
             DomainFactory.createProcessingOptionForTicketPrefix(prefix)

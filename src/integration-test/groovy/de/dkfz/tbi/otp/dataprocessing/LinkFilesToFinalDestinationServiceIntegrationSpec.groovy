@@ -267,58 +267,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         ].flatten()
     }
 
-    void "test getOldResultsToCleanup, with base bam file, all fine"() {
-        given:
-        setupData()
-        finishOperationStateOfRoddyBamFile(roddyBamFile)
-        RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
-
-        List<File> filesToDelete = [
-                roddyBamFile.workBamFile,
-                roddyBamFile.workBaiFile,
-        ]
-        List<File> filesToKeep = [
-                roddyBamFile.workMd5sumFile,
-                roddyBamFile.workExecutionDirectories,
-                roddyBamFile.workMergedQADirectory,
-                roddyBamFile.workSingleLaneQADirectories.values(),
-        ].flatten()
-        [filesToKeep, filesToDelete].flatten().each {
-            assert it.exists()
-        }
-
-        linkFilesToFinalDestinationService = new LinkFilesToFinalDestinationService()
-        linkFilesToFinalDestinationService.fileSystemService = new TestFileSystemService()
-        linkFilesToFinalDestinationService.fileService = new FileService()
-
-        when:
-        List<Path> files = linkFilesToFinalDestinationService.getOldResultsToCleanup(roddyBamFile2)
-
-        then:
-        filesToDelete.every {
-            files*.toString().contains(it.toString())
-        }
-        filesToKeep.every {
-            !files*.toString().contains(it.toString())
-        }
-    }
-
-    void "test getOldResultsToCleanup, withBaseBamFileOfOldStructure, allFine"() {
-        given:
-        setupData()
-        finishOperationStateOfRoddyBamFile(roddyBamFile)
-        roddyBamFile.workDirectoryName = null
-        roddyBamFile.save(flush: true)
-        RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
-
-        expect:
-        [] == linkFilesToFinalDestinationService.getOldResultsToCleanup(roddyBamFile2)
-    }
-
-    void testCleanupOldResults_withoutBaseBamFile_butBamFilesOfWorkPackageExist_allFine() {
+    void testCleanupOldResults_bamFilesOfWorkPackageExist_allFine() {
         given:
         setupData()
         DomainFactory.createRoddyBamFile(workPackage: roddyBamFile.workPackage, config: roddyBamFile.config)
@@ -338,7 +287,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         files*.toString().contains(roddyBamFile.finalQADirectory.toString())
     }
 
-    void testCleanupOldResults_withoutBaseBamFile_butBamFilesOfWorkPackageExistInOldStructure(boolean latestIsOld) {
+    void testCleanupOldResults_bamFilesOfWorkPackageExistInOldStructure(boolean latestIsOld) {
         given:
         setupData()
         if (latestIsOld) {
@@ -369,7 +318,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         latestIsOld << [true, false]
     }
 
-    void "test getOldResultsToCleanup, withoutBaseBamFileAndWithoutOtherBamFilesOfTheSameWorkPackage, allFine"() {
+    void "test getOldResultsToCleanup, withoutOtherBamFilesOfTheSameWorkPackage, allFine"() {
         given:
         setupData()
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
@@ -487,12 +436,5 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         then:
         Throwable e = thrown(AssertionError)
         e.message.contains('Collection contains 2 elements. Expected 1')
-    }
-
-    private void finishOperationStateOfRoddyBamFile(RoddyBamFile roddyBamFile) {
-        roddyBamFile.md5sum = HelperUtils.randomMd5sum
-        roddyBamFile.fileOperationStatus = AbstractBamFile.FileOperationStatus.PROCESSED
-        roddyBamFile.fileSize = 1000
-        roddyBamFile.save(flush: true)
     }
 }

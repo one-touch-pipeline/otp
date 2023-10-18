@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,8 +41,6 @@ class RoddyBamFileWithdrawServiceSpec extends AbstractWithdrawBamFileServiceSpec
     void "collectObjects, when called, then return all bamFiles containing the seqTracks"() {
         given:
         RoddyBamFile bamFile1 = createBamFile()
-        RoddyBamFile bamFile2 = createBamFile([baseBamFile: bamFile1])
-        RoddyBamFile bamFile3 = createBamFile([baseBamFile: bamFile2])
         createBamFile()
         createBamFile()
 
@@ -50,6 +48,6 @@ class RoddyBamFileWithdrawServiceSpec extends AbstractWithdrawBamFileServiceSpec
         List<RoddyBamFile> result = service.collectObjects([bamFile1.seqTracks.first()])
 
         then:
-        TestCase.assertContainSame(result, [bamFile1, bamFile2, bamFile3])
+        TestCase.assertContainSame(result, [bamFile1])
     }
 }

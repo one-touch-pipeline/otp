@@ -21,20 +21,21 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.*
 import org.springframework.validation.Errors
 import org.springframework.validation.FieldError
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 @Rollback
 @Integration
-class RoddyBamFileIntegrationTests {
+class RoddyBamFileIntegrationTests implements RoddyPancanFactory {
 
     @Before
     void setup() {
@@ -48,13 +49,13 @@ class RoddyBamFileIntegrationTests {
 
     @Test
     void testConstraints_allFine() {
-        RoddyBamFile bamFile = createRoddyBamFileWithBaseBamFile()
+        RoddyBamFile bamFile = createRBF()
         assert bamFile.save(flush: true)
     }
 
     @Test
     void test_CheckThatSeqtracksConnectionIsSavedToDatabase() {
-        DomainFactory.createRoddyBamFile()
+        createBamFile()
 
         assert RoddyBamFile.withCriteria {
             seqTracks {
@@ -65,14 +66,14 @@ class RoddyBamFileIntegrationTests {
 
     @Test
     void testConstraints_noSeqTracks_shouldFail() {
-        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
+        RoddyBamFile bamFile = createBamFile()
         bamFile.seqTracks = [] as Set
         TestCase.assertAtLeastExpectedValidateError(bamFile, 'seqTracks', 'minSize.notmet', bamFile.seqTracks)
     }
 
     @Test
     void testConstraints_notRoddyPipelineName_shouldFail() {
-        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
+        RoddyBamFile bamFile = createBamFile()
         bamFile.workPackage.pipeline.name = Pipeline.Name.DEFAULT_OTP
         bamFile.config.pipeline.name = Pipeline.Name.DEFAULT_OTP
 
@@ -88,28 +89,29 @@ class RoddyBamFileIntegrationTests {
 
     @Test
     void testConstraints_pipelineInConfigAndWorkPackageInconsistent_shouldFail() {
-        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
+        RoddyBamFile bamFile = createBamFile()
         bamFile.config.pipeline = DomainFactory.createDefaultOtpPipeline()
         TestCase.assertValidateError(bamFile, 'config', 'validator.invalid', bamFile.config)
     }
 
     @Test
     void testConstraints_notUniqueIdentifierForWorkPackage_shouldFail() {
-        RoddyBamFile bamFile = createRoddyBamFileWithBaseBamFile()
-        bamFile.identifier = bamFile.baseBamFile.identifier
+        RoddyBamFile bamFile = createRBF()
+        RoddyBamFile bamFile2 = createBamFile(workPackage: bamFile.workPackage)
+        bamFile.identifier = bamFile2.identifier
         TestCase.assertValidateError(bamFile, 'identifier', 'validator.invalid', bamFile.identifier)
     }
 
     @Test
     void testConstraints_workPackageIsNull_shouldFail() {
-        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
+        RoddyBamFile bamFile = createBamFile()
         bamFile.workPackage = null
         TestCase.assertAtLeastExpectedValidateError(bamFile, 'workPackage', 'nullable', bamFile.workPackage)
     }
 
     @Test
     void testIsConsistentAndContainsNoWithdrawnData_seqTrackDoesNotBelongToBamFileWorkPackage_isAlsoValid() {
-        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
+        RoddyBamFile bamFile = createBamFile()
         SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
         DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
         seqTrack.seqType = DomainFactory.createSeqType()
@@ -117,46 +119,15 @@ class RoddyBamFileIntegrationTests {
     }
 
     @Test
-    void testIsConsistentAndContainsNoWithdrawnData_baseBamFileHasDifferentWorkPackageFromBamFile_shouldReturnErrorMessage() {
-        RoddyBamFile bamFile = createRoddyBamFileWithBaseBamFile()
-        bamFile.baseBamFile.workPackage = DomainFactory.createMergingWorkPackage()
-        assert ["the base bam file does not satisfy work package criteria"] == bamFile.isConsistentAndContainsNoWithdrawnData()
-    }
-
-    @Test
-    void testIsConsistentAndContainsNoWithdrawnData_baseBamFileIsNotFinished_shouldReturnErrorMessage() {
-        RoddyBamFile bamFile = createRoddyBamFileWithBaseBamFile()
-        bamFile.baseBamFile.md5sum = null
-        bamFile.baseBamFile.fileSize = -1
-        bamFile.baseBamFile.fileOperationStatus = AbstractBamFile.FileOperationStatus.DECLARED
-        assert ["the base bam file is not finished"] == bamFile.isConsistentAndContainsNoWithdrawnData()
-    }
-
-    @Test
-    void testIsConsistentAndContainsNoWithdrawnData_withdrawnBamFileWithWithdrawnBaseBamFile_succeeds() {
-        RoddyBamFile bamFile = createRoddyBamFileWithBaseBamFile()
-        bamFile.withdrawn = true
-        bamFile.baseBamFile.withdrawn = true
-        assert bamFile.isConsistentAndContainsNoWithdrawnData().empty
-    }
-
-    @Test
-    void testIsConsistentAndContainsNoWithdrawnData_withdrawnBamFileWithNotWithdrawnBaseBamFile_succeeds() {
-        RoddyBamFile bamFile = createRoddyBamFileWithBaseBamFile()
+    void testIsConsistentAndContainsNoWithdrawnData_withdrawnBamFile_succeeds() {
+        RoddyBamFile bamFile = createRBF()
         bamFile.withdrawn = true
         assert bamFile.isConsistentAndContainsNoWithdrawnData().empty
-    }
-
-    @Test
-    void testIsConsistentAndContainsNoWithdrawnData_notWithdrawnBamFileWithWithdrawnBaseBamFile_shouldReturnErrorMessage() {
-        RoddyBamFile bamFile = createRoddyBamFileWithBaseBamFile()
-        bamFile.baseBamFile.withdrawn = true
-        assert ["base bam file is withdrawn for not withdrawn bam file ${bamFile}" as String] == bamFile.isConsistentAndContainsNoWithdrawnData()
     }
 
     @Test
     void testIsConsistentAndContainsNoWithdrawnData_withdrawnBamFileWithWithdrawnSeqTracks_succeeds() {
-        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([withdrawn: true])
+        RoddyBamFile bamFile = createBamFile([withdrawn: true])
         List<RawSequenceFile> rawSequenceFiles = RawSequenceFile.findAll()
         rawSequenceFiles*.fileWithdrawn = true
         rawSequenceFiles*.save(flush: true)
@@ -165,13 +136,13 @@ class RoddyBamFileIntegrationTests {
 
     @Test
     void testIsConsistentAndContainsNoWithdrawnData_withdrawnBamFileWithNotWithdrawnSeqTracks_succeeds() {
-        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([withdrawn: true])
+        RoddyBamFile bamFile = createBamFile([withdrawn: true])
         assert [] == bamFile.isConsistentAndContainsNoWithdrawnData()
     }
 
     @Test
     void testIsConsistentAndContainsNoWithdrawnData_notWithdrawnBamFileWithWithdrawnSeqTracks_shouldReturnErrorMessage() {
-        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
+        RoddyBamFile bamFile = createBamFile()
         List<RawSequenceFile> rawSequenceFiles = RawSequenceFile.findAll()
         rawSequenceFiles*.fileWithdrawn = true
         rawSequenceFiles*.save(flush: true)
@@ -180,23 +151,15 @@ class RoddyBamFileIntegrationTests {
 
     @Test
     void testIsConsistentAndContainsNoWithdrawnData_numberOfMergedLanesNotEqualToNumberOfContainedLanes_shouldReturnErrorMessage() {
-        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
+        RoddyBamFile bamFile = createBamFile()
         bamFile.numberOfMergedLanes = 5
         assert ["total number of merged lanes is not equal to number of contained seq tracks: 5 vs 1"] == bamFile.isConsistentAndContainsNoWithdrawnData()
     }
 
     @Test
-    void testGetContainedSeqTracks() {
-        RoddyBamFile bamFile = createRoddyBamFileWithBaseBamFile()
-        assert bamFile.containedSeqTracks == [bamFile.seqTracks, bamFile.baseBamFile.seqTracks].flatten() as Set
-        assert bamFile.baseBamFile.containedSeqTracks == bamFile.baseBamFile.seqTracks
-    }
-
-    @Test
     void testIsMostRecentBamFile() {
-        RoddyBamFile bamFile = createRoddyBamFileWithBaseBamFile()
+        RoddyBamFile bamFile = createRBF()
         assert bamFile.isMostRecentBamFile()
-        assert !bamFile.baseBamFile.isMostRecentBamFile()
     }
 
     @Test
@@ -207,41 +170,26 @@ class RoddyBamFileIntegrationTests {
 
     @Test
     void testMaxIdentifier_roddyBamFileExistsForWorkPackage() {
-        RoddyBamFile bamFile = createRoddyBamFileWithBaseBamFile()
-        assert RoddyBamFile.maxIdentifier(bamFile.workPackage) == 1
+        RoddyBamFile bamFile = createRBF()
+        assert RoddyBamFile.maxIdentifier(bamFile.workPackage) == 0
     }
 
-    private RoddyBamFile createRoddyBamFileWithBaseBamFile() {
-        return DomainFactory.createRoddyBamFile(DomainFactory.createRoddyBamFile(), [
+    private RoddyBamFile createRBF() {
+        return createBamFile([
                 md5sum: null,
                 fileOperationStatus: AbstractBamFile.FileOperationStatus.DECLARED,
                 fileSize: -1,
-            ]
-        )
+        ])
     }
 
     @Test
     void testWithdraw_singleFile_ShouldSetToWithdrawn() {
-        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
+        RoddyBamFile roddyBamFile = createBamFile()
         assert !roddyBamFile.withdrawn
 
         LogThreadLocal.withThreadLog(System.out) {
             roddyBamFile.withdraw()
         }
         assert roddyBamFile.withdrawn
-    }
-
-    @Test
-    void testWithdraw_fileHierarchy_StartWithFile2_ShouldSetFile2And3ToWithdrawn() {
-        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
-        RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
-        RoddyBamFile roddyBamFile3 = DomainFactory.createRoddyBamFile(roddyBamFile2)
-
-        LogThreadLocal.withThreadLog(System.out) {
-            roddyBamFile2.withdraw()
-        }
-        assert !roddyBamFile.withdrawn
-        assert roddyBamFile2.withdrawn
-        assert roddyBamFile3.withdrawn
     }
 }

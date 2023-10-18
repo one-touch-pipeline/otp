@@ -89,8 +89,8 @@ class PanCancerChipSeqAlignmentWorkflowSpec extends AbstractPanCancerWorkflowSpe
             List<RoddyBamFile> bamFiles = RoddyBamFile.list([sort: 'id'])
             assert bamFiles.size() == 2
 
-            checkLatestBamFileState(bamFiles[0], null, [mergingWorkPackage: bamFiles[0].workPackage, seqTracks: [firstSeqTrack], containedSeqTracks: [firstSeqTrack], identifier: 0L,])
-            checkLatestBamFileState(bamFiles[1], null, [mergingWorkPackage: bamFiles[1].workPackage, seqTracks: [secondSeqTrack], containedSeqTracks: [secondSeqTrack], identifier: 0L,])
+            checkLatestBamFileState(bamFiles[0], [mergingWorkPackage: bamFiles[0].workPackage, seqTracks: [firstSeqTrack], containedSeqTracks: [firstSeqTrack], identifier: 0L,])
+            checkLatestBamFileState(bamFiles[1], [mergingWorkPackage: bamFiles[1].workPackage, seqTracks: [secondSeqTrack], containedSeqTracks: [secondSeqTrack], identifier: 0L,])
 
             bamFiles.each { RoddyBamFile bamFile ->
                 assert !bamFile.mergingWorkPackage.needsProcessing

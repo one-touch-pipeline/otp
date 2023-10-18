@@ -458,22 +458,6 @@ class DomainFactory {
         return proxyRoddy.createBamFile(properties)
     }
 
-    static createRoddyBamFile(RoddyBamFile baseBamFile, Map bamFileProperties = [:]) {
-        RoddyBamFile bamFile = createDomainObject(RoddyBamFile, [
-                baseBamFile        : baseBamFile,
-                config             : baseBamFile.config,
-                workPackage        : baseBamFile.workPackage,
-                identifier         : baseBamFile.identifier + 1,
-                numberOfMergedLanes: baseBamFile.numberOfMergedLanes + 1,
-                workDirectoryName  : "${RoddyBamFile.WORK_DIR_PREFIX}_${counter++}",
-                seqTracks          : bamFileProperties.seqTracks ? bamFileProperties.seqTracks + baseBamFile.seqTracks : [createSeqTrackWithFastqFiles(baseBamFile.workPackage)] + baseBamFile.seqTracks,
-                md5sum             : HelperUtils.randomMd5sum,
-                fileOperationStatus: FileOperationStatus.PROCESSED,
-                fileSize           : 10000,
-        ], bamFileProperties)
-        return bamFile
-    }
-
     /**
      * Because RoddyMergedBamQa defines a unique constraint with 'class', the instance can only be created in integration tests.
      */

@@ -19,38 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.job.jobs.rnaAlignment
 
-import groovy.util.logging.Slf4j
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
+databaseChangeLog = {
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
-import de.dkfz.tbi.otp.job.jobs.roddyAlignment.AbstractRoddyAlignmentStartJob
-import de.dkfz.tbi.otp.ngsdata.*
-
-@Component('rnaAlignmentStartJob')
-@Scope('singleton')
-@Slf4j
-class RnaAlignmentStartJob extends AbstractRoddyAlignmentStartJob {
-    @Override
-    List<SeqType> getSeqTypes() {
-        return SeqTypeService.rnaAlignableSeqTypes
+    changeSet(author: "-", id: "1697628903201-94") {
+        dropForeignKeyConstraint(baseTableName: "abstract_bam_file", constraintName: "abstract_bam_file_base_bam_file_id_fkey")
     }
 
-    @Override
-    AbstractBamFile reallyCreateBamFile(
-            MergingWorkPackage mergingWorkPackage,
-            int identifier,
-            Set<SeqTrack> seqTracks,
-            ConfigPerProjectAndSeqType config) {
-        return new RnaRoddyBamFile(
-                workPackage: mergingWorkPackage,
-                identifier: identifier,
-                workDirectoryName: "${RoddyBamFile.WORK_DIR_PREFIX}_${identifier}",
-                seqTracks: seqTracks,
-                config: config,
-        )
+    changeSet(author: "-", id: "1697628903201-126") {
+        dropColumn(columnName: "base_bam_file_id", tableName: "abstract_bam_file")
     }
 }
