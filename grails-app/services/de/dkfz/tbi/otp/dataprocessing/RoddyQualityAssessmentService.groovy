@@ -50,7 +50,7 @@ class RoddyQualityAssessmentService {
     void parseRoddySingleLaneQaStatistics(RoddyBamFile roddyBamFile) {
         Map<SeqTrack, Path> qaFilesPerSeqTrack = roddyBamFileService.getWorkSingleLaneQAJsonFiles(roddyBamFile)
         qaFilesPerSeqTrack.each { seqTrack, qaFile ->
-            Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(roddyBamFile, qaFile, null)
+            Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(roddyBamFile, qaFile)
             chromosomeInformation.each { chromosome, chromosomeValues ->
                 RoddySingleLaneQa qa = new RoddySingleLaneQa(handleNaValue(chromosomeValues))
                 qa.seqTrack = seqTrack
@@ -63,7 +63,8 @@ class RoddyQualityAssessmentService {
 
     RoddyMergedBamQa parseRoddyMergedBamQaStatistics(RoddyBamFile roddyBamFile) {
         Path qaFile = roddyBamFileService.getWorkMergedQAJsonFile(roddyBamFile)
-        Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(roddyBamFile, qaFile) { roddyBamFile.workMergedQATargetExtractJsonFile }
+        Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(roddyBamFile, qaFile,
+                roddyBamFileService.getWorkMergedQATargetExtractJsonFile(roddyBamFile))
 
         List<RoddyMergedBamQa> chromosomeInformationQa = chromosomeInformation.collect { chromosome, chromosomeValues ->
             RoddyMergedBamQa qa = new RoddyMergedBamQa(handleNaValue(chromosomeValues))
@@ -88,7 +89,7 @@ class RoddyQualityAssessmentService {
         Map<String, Path> qaFilesPerLibrary = roddyBamFileService.getWorkLibraryQAJsonFiles(roddyBamFile)
 
         qaFilesPerLibrary.each { lib, qaFile ->
-            Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(roddyBamFile, qaFile, null)
+            Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(roddyBamFile, qaFile)
             chromosomeInformation.each { chromosome, chromosomeValues ->
                 RoddyLibraryQa qa = new RoddyLibraryQa(chromosomeValues)
                 qa.libraryDirectoryName = lib
@@ -101,7 +102,7 @@ class RoddyQualityAssessmentService {
 
     RnaQualityAssessment parseRnaRoddyBamFileQaStatistics(RnaRoddyBamFile rnaRoddyBamFile) {
         Path qaFile = rnaRoddyBamFileService.getWorkMergedQAJsonFile(rnaRoddyBamFile)
-        Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(rnaRoddyBamFile, qaFile, null)
+        Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(rnaRoddyBamFile, qaFile)
         RnaQualityAssessment rnaQualityAssessment = CollectionUtils.atMostOneElement(RnaQualityAssessment.findAllByAbstractBamFile(rnaRoddyBamFile))
         if (rnaQualityAssessment) {
             rnaQualityAssessment.properties = (chromosomeInformation.get(RnaQualityAssessment.ALL))
@@ -114,13 +115,13 @@ class RoddyQualityAssessmentService {
         return rnaQualityAssessment
     }
 
-    private Map<String, Map> parseRoddyQaStatistics(RoddyBamFile roddyBamFile, Path qualityControlJsonFile, Closure qualityControlTargetExtractJsonFile) {
+    private Map<String, Map> parseRoddyQaStatistics(RoddyBamFile roddyBamFile, Path qualityControlJsonFile, Path qualityControlTargetExtractJsonFile = null) {
         Map<String, Map> chromosomeInformation = [:]
 
         JSONObject qualityControlJson = JSON.parse(qualityControlJsonFile.text)
         JSONObject qualityControlTargetExtractJson
         if (roddyBamFile.seqType.needsBedFile && qualityControlTargetExtractJsonFile != null) {
-            qualityControlTargetExtractJson = JSON.parse(qualityControlTargetExtractJsonFile().text)
+            qualityControlTargetExtractJson = JSON.parse(qualityControlTargetExtractJsonFile.text)
         }
         List<String> chromosomeNames = ReferenceGenomeEntry.findAllByReferenceGenomeAndClassificationInList(
                 roddyBamFile.referenceGenome, [CONTIG, UNDEFINED])*.name
