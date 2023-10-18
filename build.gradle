@@ -390,12 +390,12 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
-    implementation 'org.springframework.security:spring-security-core:5.8.7'
-    implementation 'org.springframework.security:spring-security-oauth2-jose:5.8.7'
-    implementation 'org.springframework.security:spring-security-config:5.8.7'
-    implementation 'org.springframework.security:spring-security-web:5.8.7'
-    implementation 'org.springframework.security:spring-security-ldap:5.8.7'
-    implementation 'org.springframework.security:spring-security-oauth2-client:5.8.7'
+    implementation 'org.springframework.security:spring-security-core:5.8.8'
+    implementation 'org.springframework.security:spring-security-oauth2-jose:5.8.8'
+    implementation 'org.springframework.security:spring-security-config:5.8.8'
+    implementation 'org.springframework.security:spring-security-web:5.8.8'
+    implementation 'org.springframework.security:spring-security-ldap:5.8.8'
+    implementation 'org.springframework.security:spring-security-oauth2-client:5.8.8'
 
     implementation "org.openapitools:openapi-generator-gradle-plugin:7.0.1"
 
