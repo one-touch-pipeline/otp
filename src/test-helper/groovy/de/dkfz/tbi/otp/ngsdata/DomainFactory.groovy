@@ -1785,20 +1785,13 @@ class DomainFactory {
         return createProcessingThresholdsForMergingWorkPackage(bamFile.mergingWorkPackage, properties)
     }
 
-    static void createQaFileOnFileSystem(File qaFile, long chromosome8QcBasesMapped) {
-        createQaFileOnFileSystem(qaFile, [chromosome8QcBasesMapped: chromosome8QcBasesMapped])
-    }
-
-    static void createQaFileOnFileSystem(File qaFile, Map properties = [:]) {
+    static String getQaFileContent(Map properties = [:]) {
         Map map = [
                 chromosome8QcBasesMapped     : '1866013',
                 percentageMatesOnDifferentChr: '1.551',
         ] + properties
 
-        qaFile.parentFile.mkdirs()
-        // the values are from the documentation on the Wiki: https://wiki.local/NGS/OTP-Roddy+Interface#HTheQCData
-        qaFile <<
-                """
+        return """\
 {
   "8": {
     "genomeWithoutNCoverageQcBases": 0.011,
