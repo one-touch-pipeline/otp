@@ -52,10 +52,15 @@ class RoddyQualityAssessmentService {
         qaFilesPerSeqTrack.each { seqTrack, qaFile ->
             Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(roddyBamFile, qaFile)
             chromosomeInformation.each { chromosome, chromosomeValues ->
-                RoddySingleLaneQa qa = new RoddySingleLaneQa(handleNaValue(chromosomeValues))
-                qa.seqTrack = seqTrack
+                RoddySingleLaneQa qa = CollectionUtils.atMostOneElement(RoddySingleLaneQa.findAllByAbstractBamFileAndChromosomeAndSeqTrack(roddyBamFile, chromosome, seqTrack))
+                if (qa) {
+                    qa.properties = chromosomeValues
+                } else {
+                    qa = new RoddySingleLaneQa(chromosomeValues)
+                    qa.abstractBamFile = roddyBamFile
+                    qa.seqTrack = seqTrack
+                }
                 assert qa.chromosome == chromosome
-                qa.abstractBamFile = roddyBamFile
                 assert qa.save(flush: true)
             }
         }
@@ -67,9 +72,14 @@ class RoddyQualityAssessmentService {
                 roddyBamFileService.getWorkMergedQATargetExtractJsonFile(roddyBamFile))
 
         List<RoddyMergedBamQa> chromosomeInformationQa = chromosomeInformation.collect { chromosome, chromosomeValues ->
-            RoddyMergedBamQa qa = new RoddyMergedBamQa(handleNaValue(chromosomeValues))
+            RoddyMergedBamQa qa = CollectionUtils.atMostOneElement(RoddyMergedBamQa.findAllByAbstractBamFileAndChromosome(roddyBamFile, chromosome))
+            if (qa) {
+                qa.properties = handleNaValue(chromosomeValues)
+            } else {
+                qa = new RoddyMergedBamQa(handleNaValue(chromosomeValues))
+                qa.abstractBamFile = roddyBamFile
+            }
             assert qa.chromosome == chromosome
-            qa.abstractBamFile = roddyBamFile
             assert qa.save(flush: true)
             return qa
         }
@@ -91,10 +101,15 @@ class RoddyQualityAssessmentService {
         qaFilesPerLibrary.each { lib, qaFile ->
             Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(roddyBamFile, qaFile)
             chromosomeInformation.each { chromosome, chromosomeValues ->
-                RoddyLibraryQa qa = new RoddyLibraryQa(chromosomeValues)
-                qa.libraryDirectoryName = lib
+                RoddyLibraryQa qa = CollectionUtils.atMostOneElement(RoddyLibraryQa.findAllByAbstractBamFileAndChromosomeAndLibraryDirectoryName(roddyBamFile, chromosome, lib))
+                if (qa) {
+                    qa.properties = chromosomeValues
+                } else {
+                    qa = new RoddyLibraryQa(chromosomeValues)
+                    qa.abstractBamFile = roddyBamFile
+                    qa.libraryDirectoryName = lib
+                }
                 assert qa.chromosome == chromosome
-                qa.abstractBamFile = roddyBamFile
                 assert qa.save(flush: true)
             }
         }
@@ -103,16 +118,17 @@ class RoddyQualityAssessmentService {
     RnaQualityAssessment parseRnaRoddyBamFileQaStatistics(RnaRoddyBamFile rnaRoddyBamFile) {
         Path qaFile = rnaRoddyBamFileService.getWorkMergedQAJsonFile(rnaRoddyBamFile)
         Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(rnaRoddyBamFile, qaFile)
-        RnaQualityAssessment rnaQualityAssessment = CollectionUtils.atMostOneElement(RnaQualityAssessment.findAllByAbstractBamFile(rnaRoddyBamFile))
-        if (rnaQualityAssessment) {
-            rnaQualityAssessment.properties = (chromosomeInformation.get(RnaQualityAssessment.ALL))
+        RnaQualityAssessment qa = CollectionUtils.atMostOneElement(RnaQualityAssessment.findAllByAbstractBamFile(rnaRoddyBamFile))
+        if (qa) {
+            qa.properties = (chromosomeInformation.get(RnaQualityAssessment.ALL))
         } else {
-            rnaQualityAssessment = new RnaQualityAssessment((chromosomeInformation.get(RnaQualityAssessment.ALL)))
+            qa = new RnaQualityAssessment((chromosomeInformation.get(RnaQualityAssessment.ALL)))
+            qa.abstractBamFile = rnaRoddyBamFile
+            qa.chromosome = RnaQualityAssessment.ALL
         }
-        rnaQualityAssessment.chromosome = RnaQualityAssessment.ALL
-        rnaQualityAssessment.abstractBamFile = rnaRoddyBamFile
-        assert rnaQualityAssessment.save(flush: true)
-        return rnaQualityAssessment
+        assert qa.chromosome == RnaQualityAssessment.ALL
+        assert qa.save(flush: true)
+        return qa
     }
 
     private Map<String, Map> parseRoddyQaStatistics(RoddyBamFile roddyBamFile, Path qualityControlJsonFile, Path qualityControlTargetExtractJsonFile = null) {
