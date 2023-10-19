@@ -38,6 +38,7 @@ import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.project.additionalField.*
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.security.*
+import de.dkfz.tbi.otp.security.user.DepartmentService
 import de.dkfz.tbi.otp.security.user.SwitchedUserDeniedException
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
@@ -61,13 +62,38 @@ class ProjectRequestService {
     SecurityService securityService
     UserProjectRoleService userProjectRoleService
     ConfigService configService
+    DepartmentService departmentService
+
+    boolean piBelongsToDepartment(List<String> piUsernameList, String department) {
+        List<String> piUsernames = User.findAllByUsernameInList(piUsernameList)*.username
+        return departmentService.getListOfPIForDepartment(department).any {
+            it.key in piUsernames }
+    }
 
     ProjectRequest saveProjectRequestFromCommand(ProjectRequestCreationCommand cmd) throws OtpRuntimeException {
         securityService.ensureNotSwitchedUser()
         ProjectRequest projectRequest
-        Set<ProjectRequestUser> users = projectRequestUserService.saveProjectRequestUsersFromCommands(cmd.users)
+        Set<ProjectRequestUser> users = []
+        Set<ProjectRequestUser> piUsers = []
+        if (cmd.users.findAll()*.username.findAll().size() > 0) {
+            users = projectRequestUserService.saveProjectRequestUsersFromCommands(cmd.users)
+        }
+        if (cmd.piUsers.findAll()*.username.findAll().size() > 0) {
+            // check if the processing Option is enabled then the PI/deputy should belong to the department
+            if (processingOptionService.findOptionAsString(ProcessingOption.OptionName.ENABLE_PROJECT_REQUEST_PI).toBoolean()) {
+                String department = cmd.additionalFieldValue.find {
+                    CollectionUtils.atMostOneElement(AbstractFieldDefinition.findAllById(it.key as Long)).name == 'Organizational Unit'
+                }.value
+                if (piBelongsToDepartment(cmd.piUsers*.username, department)) {
+                    piUsers = projectRequestUserService.saveProjectRequestUsersFromCommands(cmd.piUsers)
+                }
+            } else {
+                piUsers = projectRequestUserService.saveProjectRequestUsersFromCommands(cmd.piUsers)
+            }
+        }
+
         ProjectRequestPersistentState state = projectRequestPersistentStateService
-                .saveProjectRequestPersistentStateForProjectRequest(cmd.projectRequest, users as List)
+                .saveProjectRequestPersistentStateForProjectRequest(cmd.projectRequest, piUsers as List)
         Set<Keyword> newKeywords = cmd.keywords.collect { Keyword.findOrCreateWhere(name: it) } as Set
 
         Map<String, Object> projectRequestParameters = [
@@ -89,6 +115,7 @@ class ProjectRequestService {
                 requesterComment        : cmd.requesterComment,
                 comments                : cmd.projectRequest?.comments ?: [],
                 requester               : cmd.projectRequest?.requester ?: securityService.currentUser,
+                piUsers                 : piUsers,
                 users                   : users,
         ]
         if (cmd.projectRequest) {
@@ -180,7 +207,7 @@ class ProjectRequestService {
     }
 
     void deleteProjectRequest(ProjectRequest projectRequest) {
-        Set<ProjectRequestUser> projectRequestUsers = projectRequest.users
+        Set<ProjectRequestUser> projectRequestUsers = projectRequest.users + projectRequest.piUsers
         ProjectRequestPersistentState projectRequestPersistentState = projectRequest.state
         projectRequest.delete(flush: true)
         projectRequestPersistentStateService.deleteProjectRequestState(projectRequestPersistentState)
@@ -212,7 +239,8 @@ class ProjectRequestService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void addProjectRequestUsersToProject(ProjectRequest projectRequest) {
-        projectRequest.users.each { ProjectRequestUser projectRequestUser ->
+        List<ProjectRequestUser> allUsers = (projectRequest.users + projectRequest.piUsers).toList()
+        allUsers.each { ProjectRequestUser projectRequestUser ->
             userProjectRoleService.createUserProjectRole(
                     projectRequestUser.user,
                     projectRequest.project,
@@ -485,8 +513,8 @@ class ProjectRequestService {
             and {
                 or {
                     and {
-                        users {
-                            'in'("user", currentUser)
+                        piUsers {
+                            'eq'("user", currentUser)
                             projectRoles {
                                 'in'("name", ProjectRole.Basic.PI.toString())
                             }

@@ -29,11 +29,12 @@ import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.UserAndRoles
 
 import javax.naming.OperationNotSupportedException
 
 @SuppressWarnings('ExplicitFlushForDeleteRule')
-class ApprovalSpec extends Specification implements UserDomainFactory, DataTest {
+class ApprovalSpec extends Specification implements UserDomainFactory, DataTest, UserAndRoles {
 
     @Override
     Class[] getDomainClassesToMock() {

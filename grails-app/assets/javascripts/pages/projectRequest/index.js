@@ -98,7 +98,7 @@ $(() => {
                                 </i>
                               </div>        
                               <div class="col-sm-10">
-                                <${abstractField.fieldType} id="additionalFieldValue[${abstractField.id}]"
+                                <${abstractField.fieldType} id="${abstractField.name.toLowerCase().replace(' ', '')}"
                                               class="form-control"
                                               type="${abstractField.inputType}"
                                               name="additionalFieldValue[${abstractField.id}]"
@@ -108,6 +108,7 @@ $(() => {
                             </div>`;
           });
           abstractFieldContainer.html(htmlContent);
+          addEventHandlerToOU();
         },
         error(error) {
           if (error && error.responseJSON && error.responseJSON.message) {
@@ -165,4 +166,56 @@ $(() => {
       });
     }
   }).trigger('change');
+
+  // function to set the list of possible PIs information
+  const setPossiblePIs = (department) => {
+    const piSelectors = $('.pi-selector');
+    piSelectors.empty();
+    // fetch the data with ajax
+    if (department) {
+      $.ajax({
+        url: $.otp.createLink({
+          controller: 'projectRequest',
+          action: 'getPIs'
+        }),
+        dataType: 'json',
+        type: 'GET',
+        data: {
+          department
+        },
+        success(data) {
+          const piList = [];
+
+          $.each(data, (key, value) => {
+            piList.push({ key, value });
+          });
+          piSelectors.append($('<option disabled selected></option>').val('')
+            .html('Please choose a deputy PI from the list below'));
+          for (let index = 0; index < piList.length; index++) {
+            // eslint-disable-next-line max-len
+            piSelectors.append($('<option></option>').val(piList[index].key).html(`${piList[index].value} (${piList[index].key})`));
+          }
+          const forms = $('.piUsers');
+          for (let newIndex = 0; newIndex < forms.length - 1; newIndex++) {
+            const hiddenFieldName = `piUsers${newIndex}_username_hiddenField`;
+            const hiddenUsername = $(`#${hiddenFieldName}`);
+            hiddenUsername[0].parentElement.children[1].value = hiddenUsername.val();
+          }
+        },
+        error(error) {
+          if (error && error.responseJSON && error.responseJSON.message) {
+            $.otp.toaster.showErrorToast('Fetching PIs failed', error.responseJSON.message);
+          } else {
+            $.otp.toaster.showErrorToast('Fetching PIs failed', 'Unknown error during fetching.');
+          }
+        }
+      });
+    }
+  };
+
+  function addEventHandlerToOU() {
+    $('#organizationalunit').on('change', (e) => {
+      setPossiblePIs($(e.target).val());
+    }).trigger('change');
+  }
 });

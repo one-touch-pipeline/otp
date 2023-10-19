@@ -20,7 +20,7 @@
   - SOFTWARE.
   --}%
 <%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page import="de.dkfz.tbi.otp.project.projectRequest.StoragePeriod" %>
+<%@ page import="de.dkfz.tbi.otp.ngsdata.ProjectRole; de.dkfz.tbi.otp.project.projectRequest.StoragePeriod" %>
 <%@ page import="de.dkfz.tbi.otp.project.additionalField.ProjectFieldType;" %>
 <%@ page import="de.dkfz.tbi.otp.config.TypeValidators;" %>
 <%@ page import="de.dkfz.tbi.otp.project.additionalField.FieldExistenceType;" %>
@@ -280,45 +280,17 @@
             </div>
         </div>
 
-        <!-- User adding -->
-        <div class="container user-form">
-            <div class="row">
-                <div class="col-sm-9">
-                    <h3>Add user</h3>
-                    <p>${g.message(code: "projectRequest.users.detail")}</p>
-                </div>
-
-                <div class="col-sm-3">
-                    <button class="btn btn-primary user-add-button" id="clone-add">
-                        <i class="bi bi-plus"></i>
-                    </button>
-                </div>
-            </div>
-
-            <div class="clone-target" id="accordion" data-highest-index="${cmd?.users?.size() ?: 1}">
-                <g:if test="${cmd?.users}">
-                    <g:each in="${cmd?.users}" var="user" status="i">
-                        <g:if test="${user}">
-                            <div class="clone-remove-target">
-                                <g:render template="templates/userFormAccordion" model="[index: i, user: user, availableRoles: availableRoles]"/>
-                            </div>
-                        </g:if>
-                    </g:each>
-                </g:if>
-                <g:else>
-                    <div class="clone-remove-target">
-                        <g:render template="templates/userFormAccordion" model="[index: 1, emptyForm: true, availableRoles: availableRoles]"/>
-                    </div>
-                </g:else>
-            </div>
-        </div>
+        <g:render template="/templates/bootstrap/userTabBar" model="[tabs: ['pi', 'user']]"/>
 
         <!-- submit/draft form actions -->
         <g:render template="templates/submitArea" model="[buttonActions: buttonActions]"/>
     </g:form>
 
-    <div class="clone-remove-target clone-template hidden">
-        <g:render template="templates/userFormAccordion" model="[index: 'template-index', availableRoles: availableRoles]"/>
+    <div class="clone-remove-target-2 clone-template-2 hidden">
+        <g:render template="templates/piUserFormAccordion" model="[index: 'template-index', availableRoles: availableRoles]"/>
+    </div>
+    <div class="clone-remove-target-1 clone-template-1 hidden">
+        <g:render template="templates/userFormAccordion" model="[index: 'template-index', availableRoles: userRoles]"/>
     </div>
 </div>
 

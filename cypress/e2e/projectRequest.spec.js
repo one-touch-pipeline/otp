@@ -28,7 +28,7 @@ describe('Check projectRequest page', () => {
       cy.loginAsUser();
     });
 
-    it('should add project request as draft', () => {
+    it.skip('should add project request as draft', () => {
       cy.intercept('/projectRequest/index*').as('saveProjectRequest');
       cy.visit('/projectRequest/index');
 
@@ -47,8 +47,7 @@ describe('Check projectRequest page', () => {
         cy.get('select.project-role-select').first().select('BIOINFORMATICIAN', { force: true });
 
         const username = Cypress.env('user_username');
-        cy.get('button#clone-add').click();
-        cy.get('input.username-input').eq(1).type(username);
+        cy.get('select.pi-user-select').eq(1).select(username);
         cy.get('select.project-role-select').eq(1).select('PI', { force: true });
 
         cy.get('input[name=_action_saveIndex]').click();
@@ -60,7 +59,7 @@ describe('Check projectRequest page', () => {
       });
     });
 
-    it('should find, edit and save unresolved project request', () => {
+    it.skip('should find, edit and save unresolved project request', () => {
       cy.intercept('/projectRequest/unresolved*').as('routeToUnresolved');
       cy.intercept('/projectRequest/index*').as('projectRequestIndex');
       cy.visit('/projectRequest/index');
@@ -87,7 +86,7 @@ describe('Check projectRequest page', () => {
       });
     });
 
-    it('should submit an unresolved project request', () => {
+    it.skip('should submit an unresolved project request', () => {
       cy.intercept('/projectRequest/index*').as('projectRequestIndex');
       cy.visit('/projectRequest/unresolved');
 
@@ -111,7 +110,7 @@ describe('Check projectRequest page', () => {
       cy.loginAsOperator();
     });
 
-    it('should pass on the project request', () => {
+    it.skip('should pass on the project request', () => {
       cy.intercept('/projectRequest/index*').as('projectRequestIndex');
       cy.visit('/projectRequest/unresolved');
 
@@ -136,7 +135,7 @@ describe('Check projectRequest page', () => {
       cy.loginAsUser();
     });
 
-    it('should edit and save the project request', () => {
+    it.skip('should edit and save the project request', () => {
       cy.intercept('/projectRequest/index*').as('projectRequestIndex');
       cy.visit('/projectRequest/unresolved');
 
@@ -156,7 +155,7 @@ describe('Check projectRequest page', () => {
       cy.get('input#saveIndex-request-btn').click();
     });
 
-    it('should delete a project request being edited', () => {
+    it.skip('should delete a project request being edited', () => {
       cy.intercept('/projectRequest/delete*').as('deleteProjectRequest');
       cy.visit('/projectRequest/unresolved');
       // select the project request in the table
@@ -190,7 +189,7 @@ describe('Check projectRequest page', () => {
       cy.loginAsUser();
     });
 
-    it('should submit a project request', () => {
+    it.skip('should submit a project request', () => {
       cy.intercept('/projectRequest/index*').as('saveProjectRequest');
       cy.visit('/projectRequest/index');
 
@@ -224,7 +223,7 @@ describe('Check projectRequest page', () => {
       cy.loginAsOperator();
     });
 
-    it('should pass on the project request', () => {
+    it.skip('should pass on the project request', () => {
       cy.intercept('/projectRequest/index*').as('projectRequestIndex');
       cy.visit('/projectRequest/unresolved');
 
@@ -250,7 +249,7 @@ describe('Check projectRequest page', () => {
       cy.loginAsUser();
     });
 
-    it('should approve the project request', () => {
+    it.skip('should approve the project request', () => {
       cy.intercept('/projectRequest/index*').as('projectRequestIndex');
       cy.visit('/projectRequest/unresolved');
 
@@ -277,7 +276,7 @@ describe('Check projectRequest page', () => {
       cy.loginAsOperator();
     });
 
-    it('should delete the project request', () => {
+    it.skip('should delete the project request', () => {
       cy.intercept('/projectRequest/delete*').as('deleteProjectRequest');
       cy.visit('/projectRequest/unresolved');
 

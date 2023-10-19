@@ -65,7 +65,6 @@ class ProjectRequestUserService {
         if (disabledUser) {
             throw new UserDisabledException("Project request contains at least one disabled user.")
         }
-
         // When the user adds/removes user form elements dynamically it creates holes in the indexes, which are converted to null objects upon
         // command object binding. So we remove them with findAll.
         return users.findAll().collect { ProjectRequestUserCommand user ->

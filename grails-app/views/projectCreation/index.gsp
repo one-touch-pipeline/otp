@@ -99,7 +99,7 @@
                 <tr>
                     <td><g:message code="projectRequest.users"/></td>
                     <td>
-                        <g:render template="/projectRequest/templates/projectRequestUserTable" model="[users: projectRequest.users]"/>
+                        <g:render template="/projectRequest/templates/projectRequestUserTable" model="[users: projectRequest.piUsers + projectRequest.users]"/>
                     </td>
                 </tr>
                 <tr>

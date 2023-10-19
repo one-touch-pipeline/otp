@@ -23,50 +23,56 @@
 $(() => {
   'use strict';
 
-  $('#clone-add').on('click', (e) => {
-    e.preventDefault();
-    const target = $('.clone-target');
-    target.data('highest-index', target.data('highest-index') + 1);
-    const index = target.data('highest-index');
+  [1, 2].forEach((value) => {
+    const field = `clone-add-${value}`;
+    $(`#${field}`).on('click', (e) => {
+      e.preventDefault();
+      const target = $(`.clone-target-${value}`);
+      target.data('highest-index', target.data('highest-index') + 1);
+      const index = target.data('highest-index');
 
-    // close all other cards
-    target.find('a, div').each(() => {
-      const oldComponent = this;
-      $(oldComponent).removeClass('show');
-      $(oldComponent).attr('aria-expanded', false);
-    });
-
-    const clone = $('.clone-template').clone(true, true);
-
-    // replace the template-index with the current index to fulfill the array like indexing
-    // prop[0], prop[1], ...
-    clone.find('input, select, label, div, a').each(function () {
-      const component = this;
-      $.each(['name', 'id', 'for', 'data-bs-target',
-        'aria-controls', 'data-select2-id', 'aria-labelledby'], function () {
-        const attribute = this;
-        $.otp.cloneField.replaceTemplateIndexInProperty(component, attribute, index);
+      // close all other cards
+      target.find('a, div').each(() => {
+        const oldComponent = this;
+        $(oldComponent).removeClass('show');
+        $(oldComponent).attr('aria-expanded', false);
       });
+
+      const clone = $(`.clone-template-${value}`).clone(true, true);
+
+      // replace the template-index with the current index to fulfill the array like indexing
+      // prop[0], prop[1], ...
+      clone.find('input, select, label, div, a').each(function () {
+        const component = this;
+        $.each(['name', 'id', 'for', 'data-target', 'data-bs-target',
+          'aria-controls', 'data-select2-id', 'aria-labelledby'], function () {
+          const attribute = this;
+          $.otp.cloneField.replaceTemplateIndexInProperty(component, attribute, index);
+        });
+      });
+
+      // Add the cloned and cleaned element to the clone-target container
+      target.append(clone);
+
+      $.otp.applySelect2($('select.use-select-2-after-clone', clone));
+
+      // Remove the clone-template class, as only the actual template should have it
+      // eslint-disable-next-line max-len
+      $(`.clone-target-${value} > .clone-template-${value}`).removeClass(`clone-template-${value}`).removeClass('hidden');
+      return false;
     });
-
-    // Add the cloned and cleaned element to the clone-target container
-    target.append(clone);
-
-    $.otp.applySelect2($('select.use-select-2-after-clone', clone));
-
-    // Remove the clone-template class, as only the actual template should have it
-    $('.clone-target > .clone-template').removeClass('clone-template').removeClass('hidden');
-    return false;
   });
 
-  // Remove user field if remove button is clicked. When the last user form is removed add a new one.
-  $('.clone-remove').on('click', function (e) {
-    const numberOfUserForms = $('.clone-target .clone-remove-target').length;
-    e.preventDefault();
-    $(this).closest('.clone-remove-target').remove();
-    if (numberOfUserForms === 1) {
-      $('#clone-add').click();
-    }
+  [1, 2].forEach((value) => {
+    // Remove user field if remove button is clicked. When the last user form is removed add a new one.
+    $(`.clone-remove-${value}`).on('click', function (e) {
+      const numberOfUserForms = $(`.clone-target-${value} .clone-remove-target-${value}`).length;
+      e.preventDefault();
+      $(this).closest(`.clone-remove-target-${value}`).remove();
+      if (numberOfUserForms === 1) {
+        $(`#clone-add-${value}`).click();
+      }
+    });
   });
 });
 

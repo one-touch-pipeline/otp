@@ -1,5 +1,3 @@
-#!/bin/bash
-
 #
 # Copyright 2011-2023 The OTP authors
 #
@@ -27,6 +25,8 @@
 # since the tool generates much false positives, they are removed afterwards
 # see the comments on the regular expression for more details
 # for simpler debugging, the result of each step is kept in a tmp directory
+
+#!/bin/bash
 
 set -e
 

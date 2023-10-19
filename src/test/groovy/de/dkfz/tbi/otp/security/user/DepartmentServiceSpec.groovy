@@ -23,14 +23,13 @@ package de.dkfz.tbi.otp.security.user
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
-
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
-import de.dkfz.tbi.otp.security.AuditLogService
-import de.dkfz.tbi.otp.security.Department
-import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-class DepartmentServiceSpec extends Specification implements DataTest, UserDomainFactory {
+class DepartmentServiceSpec extends Specification implements DataTest, DomainFactoryCore, UserDomainFactory {
 
     DepartmentService departmentService
 
@@ -39,7 +38,32 @@ class DepartmentServiceSpec extends Specification implements DataTest, UserDomai
         return [
                 User,
                 Department,
+                DeputyRelation,
         ]
+    }
+
+    void "getListOfPIForDepartment, returns PIs of department"() {
+        given:
+        User head = DomainFactory.createUser()
+        User deputy = DomainFactory.createUser()
+        createDepartment([ouNumber: 'OE1234', departmentHeads: [head] as Set<User>])
+        createDeputyRelation([grantingDeputyUser: head, deputyUser: deputy])
+
+        when:
+        Map<String, String> pis = new DepartmentService().getListOfPIForDepartment('OE1234')
+
+        then:
+        pis.size() == 2
+    }
+
+    void "getListOfPIForDepartment, returns empty list"() {
+        given:
+
+        when:
+        Map<String, String> pis = new DepartmentService().getListOfPIForDepartment('OE1234')
+
+        then:
+        pis.size() == 0
     }
 
     void setup() {

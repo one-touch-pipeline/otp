@@ -1,5 +1,5 @@
 %{--
-  - Copyright 2011-2022 The OTP authors
+  - Copyright 2011-2023 The OTP authors
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
   - of this software and associated documentation files (the "Software"), to deal
@@ -36,87 +36,88 @@
 
 <div class="${accordionItem ? '' : 'card'}">
     <div class="card-body pb-1">
-        <div class="mb-3 row">
-            <g:set var="description" value="${listMode ? "users[${index}].username" : "username"}"/>
-            <label class="col-sm-2 col-form-label"
-                   for="${description}">${g.message(code: "projectUser.addMember.username")}</label>
+        <div class="form-group row">
+            <g:set var="description" value="${listMode ? "piUsers[${index}].username" : "username"}"/>
+            <label class="col-sm-2 col-form-label" for="${description}">${g.message(code: "projectUser.addMember.username")}</label>
 
-            <div class="user-auto-complete col-sm-10">
-                <input class="username-input input-field autocompleted form-control"
-                       name="${description}"
-                       id="${description}"
-                       value="${user?.username}"
-                       autocomplete="off"/>
+            <div class="col-sm-10">
+                <input type="hidden" value="${piUser?.username}" id="piUsers${index}_username_hiddenField" class="piUsers">
+                <select class="form-control pi-selector" name="${description}" id="${description}"></select>
             </div>
         </div>
 
-        <div class="mb-3 row">
-            <g:set var="description" value="${listMode ? "users[${index}].projectRoles" : "projectRoles"}"/>
+        <div class="form-group row">
+            <g:set var="description" value="${listMode ? "piUsers[${index}].projectRoles" : "projectRoles"}"/>
             <label class="col-sm-2 col-form-label"
                    for="${description}">${g.message(code: "projectUser.addMember.role")}</label>
 
             <div class="col-sm-10">
-                <g:set var="select2Variant" value="${(user || emptyForm) ? "use-select-2" : "use-select-2-after-clone"}"/>
-                <select class="project-role-select input-field form-control ${select2Variant}" name="${description}"
-                        id="${description}"
+                <g:set var="select2Variant" value="${(piUser || emptyForm) ? "use-select-2" : "use-select-2-after-clone"}"/>
+                <select class="pi-role-select input-field form-control ${select2Variant}" name="${description}" id="${description}"
                         multiple="multiple">
                     <g:each in="${availableRoles}" var="role">
-                        <g:set var="selected" value="${role in user?.projectRoles ? "selected" : ""}"/>
-                        <option value="${role.id}" ${selected}>${role.name}</option>
+                        <g:set var="selected" value="${role in piUser?.projectRoles ? "selected" : ""}"/>
+                        <g:if test="${role.name == 'PI'}">
+                            <option value="${role.id}" selected>${role.name}</option>
+                        </g:if>
+                        <g:else>
+                            <option value="${role.id}" ${selected}>${role.name}</option>
+                        </g:else>
                     </g:each>
                 </select>
+                <input class="form-control" type=hidden name="piUsers[${index}].projectRoles">
             </div>
         </div>
 
-        <div class="mb-3 row">
+        <div class="form-group row">
             <g:if test="${checkboxes.contains('otpAccess')}">
-                <g:set var="description" value="${listMode ? "users[${index}].accessToOtp" : "accessToOtp"}"/>
+                <g:set var="description" value="${listMode ? "piUsers[${index}].accessToOtp" : "accessToOtp"}"/>
                 <div class="col-sm-2">
                     <g:checkBox class="input-field" name="${description}"
                                 id="${description}_checkbox"
-                                value="${user ? user?.accessToOtp : true}"/>
+                                value="${piUser ? piUser?.accessToOtp : true}"/>
                     <label class="col-form-label"
                            for="${description}_checkbox">${g.message(code: "projectUser.addMember.accessToOtp")}</label>
                 </div>
             </g:if>
 
             <g:if test="${checkboxes.contains('fileAccess')}">
-                <g:set var="description" value="${listMode ? "users[${index}].accessToFiles" : "accessToFiles"}"/>
+                <g:set var="description" value="${listMode ? "piUsers[${index}].accessToFiles" : "accessToFiles"}"/>
                 <div class="col-sm-2">
                     <g:checkBox class="set-for-BIOINFORMATICIAN set-for-LEAD_BIOINFORMATICIAN input-field" name="${description}"
                                 id="${description}_checkbox"
-                                value="${user?.accessToFiles}"/>
+                                value="${piUser?.accessToFiles}"/>
                     <label class="col-form-label"
                            for="${description}_checkbox">${g.message(code: "projectUser.addMember.accessToFiles")}</label>
                 </div>
             </g:if>
 
             <g:if test="${checkboxes.contains('manageUsers')}">
-                <g:set var="description" value="${listMode ? "users[${index}].manageUsers" : "manageUsers"}"/>
+                <g:set var="description" value="${listMode ? "piUsers[${index}].manageUsers" : "manageUsers"}"/>
                 <g:hiddenField class="hidden-manage-users-field" id="${description}_hiddenField" name="${description}" value="true" disabled="true"/>
                 <div class="col-sm-2">
                     <g:checkBox class="set-and-block-for-PI set-and-block-for-COORDINATOR input-field"
                                 name="${description}"
                                 id="${description}_checkbox"
-                                value="${user?.manageUsers}"/>
+                                value="${piUser?.manageUsers}"/>
                     <label class="col-form-label"
                            for="${description}_checkbox">${g.message(code: "projectUser.addMember.manageUsers")}</label>
                 </div>
             </g:if>
 
             <g:if test="${checkboxes.contains('manageUsersAndDelegate')}">
-                <g:set var="description" value="${listMode ? "users[${index}].manageUsersAndDelegate" : "manageUsersAndDelegate"}"/>
+                <g:set var="description" value="${listMode ? "piUsers[${index}].manageUsersAndDelegate" : "manageUsersAndDelegate"}"/>
                 <div class="col-sm-3">
                     <g:checkBox class="set-and-block-for-PI input-field" name="${description}"
                                 id="${description}_checkbox"
-                                value="${user?.manageUsersAndDelegate}"/>
+                                value="${piUser?.manageUsersAndDelegate}"/>
                     <label class="col-form-label"
                            for="${description}_checkbox">${g.message(code: "projectUser.addMember.manageUsersAndDelegate")}</label>
                 </div>
             </g:if>
 
             <g:if test="${checkboxes.contains('receivesNotifications')}">
-                <g:set var="description" value="${listMode ? "users[${index}].receivesNotifications" : "receivesNotifications"}"/>
+                <g:set var="description" value="${listMode ? "piUsers[${index}].receivesNotifications" : "receivesNotifications"}"/>
                 <div class="col-sm-3">
                     <g:checkBox class="input-field" name="${description}"
                                 id="${description}_checkbox"

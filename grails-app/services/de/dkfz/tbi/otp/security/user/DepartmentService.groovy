@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,12 +29,41 @@ import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.security.AuditLog
 import de.dkfz.tbi.otp.security.AuditLogService
 import de.dkfz.tbi.otp.security.Department
+import de.dkfz.tbi.otp.security.DeputyRelation
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
+@CompileDynamic
 @Transactional
 class DepartmentService {
 
     AuditLogService auditLogService
+
+    Map<String, String> getListOfPIForDepartment(String department) {
+        List<User> departmentHeads = getListOfHeadsForDepartment(department)
+        Map<String, String> result = [:]
+        departmentHeads.each { User head ->
+            result << [(head.username): head.realName]
+            List<User> deputies = DeputyRelation.findAllByGrantingDeputyUser(head)*.deputyUser
+            deputies.each { User deputy ->
+                result << [(deputy.username): deputy.realName]
+            }
+        }
+        return result.sort { a, b -> a.value <=> b.value }
+    }
+
+    Map<String, String> listOfAllUsers() {
+        Map<String, String> result = [:]
+        User.findAllByEnabled(true).each {
+            result << [(it.username): it.realName]
+        }
+        return result.sort { a, b -> a.value <=> b.value }
+    }
+
+    List<User> getListOfHeadsForDepartment(String department) {
+        List<User> departmentHeads = CollectionUtils.atMostOneElement(Department.findAllByOuNumber(department))?.departmentHeads as List<User> ?: []
+        return departmentHeads
+    }
 
     @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

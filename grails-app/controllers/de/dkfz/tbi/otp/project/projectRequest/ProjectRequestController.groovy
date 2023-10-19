@@ -44,6 +44,7 @@ import de.dkfz.tbi.otp.project.additionalField.*
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.user.DepartmentService
 import de.dkfz.tbi.otp.security.user.SwitchedUserDeniedException
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StringUtils
@@ -59,6 +60,7 @@ class ProjectRequestController implements CheckAndCall {
     ProjectRequestService projectRequestService
     ProcessingOptionService processingOptionService
     SecurityService securityService
+    DepartmentService departmentService
 
     @Autowired
     ProjectRequestStateProvider projectRequestStateProvider
@@ -77,6 +79,7 @@ class ProjectRequestController implements CheckAndCall {
             all                : "GET",
             resolved           : "GET",
             getAdditionalFields: "POST",
+            getPIs             : "GET",
             submitIndex        : "POST",
             reject             : "POST",
             passOn             : "POST",
@@ -104,6 +107,7 @@ class ProjectRequestController implements CheckAndCall {
                 speciesWithStrains    : SpeciesWithStrain.all.sort { it.displayName },
                 storagePeriod         : StoragePeriod.values(),
                 availableRoles        : ProjectRole.findAll(),
+                userRoles             : ProjectRole.findAllByNameNotEqual('PI'),
                 sequencingCenters     : SeqCenter.all.unique().sort(),
                 faqProjectTypeLink    : processingOptionService.findOptionAsString(ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_FAQ_PROJECT_TYPE_LINK),
                 cmd                   : cmd,
@@ -140,7 +144,7 @@ class ProjectRequestController implements CheckAndCall {
         List<AbstractFieldDefinition> fieldDefinitions = projectRequestService.listAndFetchAbstractFields(projectRequest.projectType,
                 ProjectPageType.PROJECT_REQUEST)
 
-        boolean isProjectAuthority = ProjectRoleService.projectRolesContainAuthoritativeRole(projectRequest.users.find {
+        boolean isProjectAuthority = ProjectRoleService.projectRolesContainAuthoritativeRole(projectRequest.piUsers.find {
             it.user == securityService.currentUser
         }?.projectRoles)
 
@@ -253,6 +257,13 @@ class ProjectRequestController implements CheckAndCall {
                 return response.sendError(HttpStatus.BAD_REQUEST.value(), workflowException.message)
             }
         }
+    }
+
+    JSON getPIs(String department) {
+        if (processingOptionService.findOptionAsString(ProcessingOption.OptionName.ENABLE_PROJECT_REQUEST_PI).toBoolean()) {
+            return render(departmentService.getListOfPIForDepartment(department) as JSON)
+        }
+        return render(departmentService.listOfAllUsers() as JSON)
     }
 
     private Map<String, String> convertToMapForFrontend(AbstractFieldDefinition abstractFieldDefinition,
@@ -377,6 +388,7 @@ class ProjectRequestCreationCommand implements Validateable {
     List<SeqType> seqTypes = []
     List<String> customSeqTypes = []
     String requesterComment
+    List<ProjectRequestUserCommand> piUsers
     List<ProjectRequestUserCommand> users
 
     List<String> additionalFieldName = []
@@ -418,14 +430,20 @@ class ProjectRequestCreationCommand implements Validateable {
                 return "projectRequest.approxNoOfSamples.null"
             }
         }
-        users validator: { val, obj ->
+        piUsers validator: { val, obj ->
             List<ProjectRequestUserCommand> value = val?.toList()?.findAll() ?: []
             if (!value.any { ProjectRequestUserCommand cmd ->
                 ProjectRoleService.projectRolesContainAuthoritativeRole(cmd.projectRoles)
             }) {
                 return "projectRequest.users.no.authority"
             }
-            if (value*.username.size() != value*.username.unique().size()) {
+            if (value*.username.size() != value*.username.unique().size() || !val*.username.intersect(obj.users*.username).isEmpty()) {
+                return "projectRequest.users.unique"
+            }
+        }
+        users validator: { val, obj ->
+            List<ProjectRequestUserCommand> value = val?.toList()?.findAll() ?: []
+            if (value*.username.size() != value*.username.unique().size() || !val*.username.intersect(obj.piUsers*.username).isEmpty()) {
                 return "projectRequest.users.unique"
             }
         }
@@ -554,6 +572,7 @@ class ProjectRequestCreationCommand implements Validateable {
                 seqTypes: projectRequest.seqTypes as List ?: [],
                 customSeqTypes: projectRequest.customSeqTypes as List ?: [],
                 requesterComment: projectRequest.requesterComment,
+                piUsers: ProjectRequestUserCommand.fromProjectRequestUsers(projectRequest.piUsers),
                 users: ProjectRequestUserCommand.fromProjectRequestUsers(projectRequest.users),
         )
     }

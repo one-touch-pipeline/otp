@@ -189,6 +189,12 @@
                     </g:if>
 
                     <tr>
+                        <td>${g.message(code: "projectRequest.piUsers")}</td>
+                        <td>
+                            <g:render template="/projectRequest/templates/projectRequestUserTable" model="[users: projectRequest.piUsers]"/>
+                        </td>
+                    </tr>
+                    <tr>
                         <td>${g.message(code: "projectRequest.users")}</td>
                         <td>
                             <g:render template="/projectRequest/templates/projectRequestUserTable" model="[users: projectRequest.users]"/>

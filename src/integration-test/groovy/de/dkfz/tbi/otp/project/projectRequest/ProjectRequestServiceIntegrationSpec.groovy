@@ -41,6 +41,7 @@ import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.project.additionalField.*
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.security.*
+import de.dkfz.tbi.otp.security.user.DepartmentService
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
@@ -54,6 +55,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
     ProjectRequestStateProvider projectRequestStateProvider
     SecurityService securityService
     TestConfigService configService
+    DepartmentService departmentService
 
     final String subject = "subject"
     final String body = "body"
@@ -77,9 +79,71 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                         projectRequestStateProvider: Mock(ProjectRequestStateProvider)
                 ]),
                 configService                       : configService,
+                departmentService                   : Mock(DepartmentService),
         ])
     }
 
+    void "piBelongsToDepartment returns true when some users from list belongs to the given department"() {
+        given:
+        User user1 = createUser(username: 'u1', realName: 'user1')
+        createUser(username: 'u2', realName: 'user2')
+        createDepartment([ouNumber: 'dept1', departmentHeads: [user1]])
+        projectRequestService.departmentService.getListOfHeadsForDepartment('dept1') >> [user1]
+        projectRequestService.departmentService.getListOfPIForDepartment('dept1') >> ['u1': 'user1']
+
+        expect:
+        projectRequestService.piBelongsToDepartment(['u1', 'u2'], 'dept1')
+    }
+
+    void "piBelongsToDepartment returns false when user from list doesn't belong to the given department"() {
+        given:
+        createUser(username: 'u1', realName: 'user1')
+        User user2 = createUser(username: 'u2', realName: 'user2')
+        createDepartment([ouNumber: 'dept1', departmentHeads: [user2]])
+        projectRequestService.departmentService.getListOfHeadsForDepartment('dept1') >> [user2]
+        projectRequestService.departmentService.getListOfPIForDepartment('dept1') >> ['u2': 'user2']
+
+        expect:
+        !projectRequestService.piBelongsToDepartment(['u1'], 'dept1')
+    }
+
+    void "piBelongsToDepartment returns false when the user from list belongs to another department"() {
+        given:
+        User user1 = createUser(username: 'u1', realName: 'user1')
+        User user2 = createUser(username: 'u2', realName: 'user2')
+        createDepartment([ouNumber: 'dept1', departmentHeads: [user1]])
+        createDepartment([ouNumber: 'dept2', departmentHeads: [user2]])
+        projectRequestService.departmentService.getListOfHeadsForDepartment('dept2') >> [user2]
+        projectRequestService.departmentService.getListOfPIForDepartment('dept2') >> ['u2': 'user2']
+
+        expect:
+        !projectRequestService.piBelongsToDepartment(['u1'], 'dept2')
+    }
+
+    void "piBelongsToDepartment returns true when all users belong to given department"() {
+        given:
+        User user1 = createUser(username: 'u1', realName: 'user1')
+        User user2 = createUser(username: 'u2', realName: 'user2')
+        createDepartment([ouNumber: 'dept1', departmentHeads: [user1, user2]])
+        projectRequestService.departmentService.getListOfHeadsForDepartment('dept1') >> [user1, user2]
+        projectRequestService.departmentService.getListOfPIForDepartment('dept1') >> ['u1': 'user1', 'u2': 'user2']
+
+        expect:
+        projectRequestService.piBelongsToDepartment(['u1', 'u2'], 'dept1')
+    }
+
+    void "piBelongsToDepartment returns false when none of the users from list belong to given department"() {
+        given:
+        createUser(username: 'u1')
+        createUser(username: 'u2')
+        User user3 = createUser(username: 'u3')
+        createDepartment([ouNumber: 'dept1', departmentHeads: [user3]])
+        projectRequestService.departmentService.getListOfHeadsForDepartment('dept1') >> [user3]
+        projectRequestService.departmentService.getListOfPIForDepartment('dept1') >> ['u3': 'user3']
+
+        expect:
+        !projectRequestService.piBelongsToDepartment(['u1', 'u2'], 'dept1')
+    }
     void "sendSubmitEmail"() {
         given:
         final User requester = createUser()
@@ -471,6 +535,17 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         0 * _
     }
 
+    ProjectRequestCreationCommand createProjectRequestCreationCommand(Map properties = [:]) {
+        return new ProjectRequestCreationCommand([
+                name       : "projectRequest${nextId}",
+                projectType: Project.ProjectType.SEQUENCING,
+                description: "A description, that is long enough to full fill the requirements of the command object.",
+                keywords   : [createKeyword(), createKeyword()],
+                users      : [createProjectRequestUser()],
+                piUsers    : [createProjectRequestUser([projectRoles: [pi]])],
+        ] + properties)
+    }
+
     @Unroll
     void "saveProjectRequestFromCommand, should save projectRequest and translate all parameters"() {
         given:
@@ -480,7 +555,10 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         SeqCenter seqCenter = createSeqCenter()
         SpeciesWithStrain speciesWithStrain = createSpeciesWithStrain()
         List<Keyword> keywords = ['keyword1', 'keyword2', 'test keyword']
-        Set<ProjectRequestUser> users = [createProjectRequestUser([projectRoles: [pi]]), createProjectRequestUser()]
+        ProjectRequestUser user = createProjectRequestUser()
+        ProjectRequestUser piUser = createProjectRequestUser([projectRoles: [pi]])
+        List<ProjectRequestUserCommand> users = [new ProjectRequestUserCommand([projectRequestUser: user, username: user.username])]
+        List<ProjectRequestUserCommand> piUsers = [new ProjectRequestUserCommand(projectRequestUser: piUser, username: piUser.username)]
         ProjectRequestPersistentState projectRequestPersistentState = createProjectRequestPersistentState()
         ProjectRequest projectRequest = projectRequestExists ? createProjectRequest([state: projectRequestPersistentState]) : null
         ProjectRequestCreationCommand cmd = new ProjectRequestCreationCommand([
@@ -500,6 +578,9 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 requesterComment        : "Comments for the request.",
                 projectType             : Project.ProjectType.SEQUENCING,
         ])
+        cmd.users = users
+        cmd.piUsers = piUsers
+        findOrCreateProcessingOption(name: ProcessingOption.OptionName.ENABLE_PROJECT_REQUEST_PI, value: false)
         projectRequestService.projectRequestStateProvider = projectRequestStateProvider
         projectRequestService.projectRequestPersistentStateService.projectRequestStateProvider = projectRequestStateProvider
 
@@ -507,8 +588,10 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         ProjectRequest result = projectRequestService.saveProjectRequestFromCommand(cmd)
 
         then:
+        1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.ENABLE_PROJECT_REQUEST_PI) >> false
         1 * projectRequestService.securityService.ensureNotSwitchedUser()
-        1 * projectRequestService.projectRequestUserService.saveProjectRequestUsersFromCommands(_) >> users
+        1 * projectRequestService.projectRequestUserService.saveProjectRequestUsersFromCommands(cmd.users) >> ([user] as Set<ProjectRequestUser>)
+        1 * projectRequestService.projectRequestUserService.saveProjectRequestUsersFromCommands(cmd.piUsers) >> ([piUser] as Set<ProjectRequestUser>)
         (projectRequestExists ? 0 : 1) * projectRequestService.securityService.currentUser >> currentUser
         1 * projectRequestService.auditLogService.logAction(_, _) >> _
         0 * _
@@ -517,7 +600,8 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         ProjectRequest.count == 1
         result.name == cmd.name
         result.requester == (projectRequestExists ? projectRequest.requester : currentUser)
-        result.users == users
+        result.users == [user] as Set<ProjectRequestUser>
+        result.piUsers == [piUser] as Set<ProjectRequestUser>
         result.project == null
         projectRequestExists ? result.state == projectRequestPersistentState : result.state.beanName == "initial"
         TestCase.assertContainSame(result.customSpeciesWithStrains, cmd.customSpeciesWithStrains)
@@ -630,20 +714,15 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         createAllBasicProjectRoles()
 
         Project project = createProject()
+        List<ProjectRequestUser> prPiUserList = [createProjectRequestUser(
+                projectRoles: [pi],
+                accessToOtp: accessToOtp,
+                accessToFiles: accessToFiles,
+                manageUsers: manageUsers,
+                manageUsersAndDelegate: manageUsersAndDelegate,
+        ),]
         List<ProjectRequestUser> prUserList = [createProjectRequestUser(
-                projectRoles: [other, pi],
-                accessToOtp: accessToOtp,
-                accessToFiles: accessToFiles,
-                manageUsers: manageUsers,
-                manageUsersAndDelegate: manageUsersAndDelegate,
-        ), createProjectRequestUser(
-                projectRoles: [coordinator],
-                accessToOtp: accessToOtp,
-                accessToFiles: accessToFiles,
-                manageUsers: manageUsers,
-                manageUsersAndDelegate: manageUsersAndDelegate,
-        ), createProjectRequestUser(
-                projectRoles: [bioinformatician, other],
+                projectRoles: [bioinformatician],
                 accessToOtp: accessToOtp,
                 accessToFiles: accessToFiles,
                 manageUsers: manageUsers,
@@ -652,6 +731,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         ProjectRequest projectRequest = createProjectRequest([
                 state  : createProjectRequestPersistentState([beanName: "created"]),
                 project: project,
+                piUsers: prPiUserList,
                 users  : prUserList,
         ])
 
@@ -661,25 +741,18 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         }
 
         then:
+        1 * projectRequestService.userProjectRoleService.createUserProjectRole(prPiUserList[0].user, projectRequest.project, prPiUserList[0].projectRoles, [
+                accessToOtp           : prPiUserList[0].accessToOtp,
+                accessToFiles         : prPiUserList[0].accessToFiles,
+                manageUsers           : prPiUserList[0].manageUsers,
+                manageUsersAndDelegate: prPiUserList[0].manageUsersAndDelegate,
+                receivesNotifications : true,
+        ])
         1 * projectRequestService.userProjectRoleService.createUserProjectRole(prUserList[0].user, projectRequest.project, prUserList[0].projectRoles, [
                 accessToOtp           : prUserList[0].accessToOtp,
                 accessToFiles         : prUserList[0].accessToFiles,
                 manageUsers           : prUserList[0].manageUsers,
                 manageUsersAndDelegate: prUserList[0].manageUsersAndDelegate,
-                receivesNotifications : true,
-        ])
-        1 * projectRequestService.userProjectRoleService.createUserProjectRole(prUserList[1].user, projectRequest.project, prUserList[1].projectRoles, [
-                accessToOtp           : prUserList[1].accessToOtp,
-                accessToFiles         : prUserList[1].accessToFiles,
-                manageUsers           : prUserList[1].manageUsers,
-                manageUsersAndDelegate: prUserList[1].manageUsersAndDelegate,
-                receivesNotifications : true,
-        ])
-        1 * projectRequestService.userProjectRoleService.createUserProjectRole(prUserList[2].user, projectRequest.project, prUserList[2].projectRoles, [
-                accessToOtp           : prUserList[2].accessToOtp,
-                accessToFiles         : prUserList[2].accessToFiles,
-                manageUsers           : prUserList[2].manageUsers,
-                manageUsersAndDelegate: prUserList[2].manageUsersAndDelegate,
                 receivesNotifications : true,
         ])
         0 * _

@@ -38,6 +38,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity, CommentableWithHistory {
     User requester
 
+    Set<ProjectRequestUser> piUsers
     Set<ProjectRequestUser> users
     Project project
 
@@ -75,14 +76,20 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity, Comme
         approxNoOfSamples nullable: true
         requesterComment nullable: true
 
-        users validator: { val, obj ->
+        piUsers validator: { val, obj ->
             List<ProjectRequestUser> value = val?.toList()?.findAll() ?: []
-            if (!value.findAll().any { ProjectRequestUser user ->
-                ProjectRoleService.projectRolesContainAuthoritativeRole(user.projectRoles)
+            if (!value.findAll().any { ProjectRequestUser piUser ->
+                ProjectRoleService.projectRolesContainAuthoritativeRole(piUser.projectRoles)
             }) {
                 return "projectRequest.users.no.authority"
             }
-            if (value*.username.size() != value*.username.unique().size()) {
+            if (value*.username.size() != value*.username.unique().size() || !val*.username.intersect(obj.users*.username).isEmpty()) {
+                return "projectRequest.users.unique"
+            }
+        }
+        users validator: { val, obj ->
+            List<ProjectRequestUser> value = val?.toList()?.findAll() ?: []
+            if (value*.username.size() != value*.username.unique().size() || !val*.username.intersect(obj.piUsers*.username).isEmpty()) {
                 return "projectRequest.users.unique"
             }
         }
@@ -90,6 +97,7 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity, Comme
 
     static hasMany = [
             seqTypes          : SeqType,
+            piUsers           : ProjectRequestUser,
             users             : ProjectRequestUser,
             projectFields     : AbstractFieldValue,
             speciesWithStrains: SpeciesWithStrain,
@@ -101,6 +109,7 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity, Comme
         description type: "text"
         requester index: "project_request_requester_idx"
         users index: "project_request_users_idx"
+        piUsers joinTable: "project_request_pi_user"
         seqTypes index: "project_request_seqTypes_idx"
         state index: "project_request_state_idx"
     }

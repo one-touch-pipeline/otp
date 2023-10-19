@@ -89,13 +89,17 @@ trait UserDomainFactory implements DomainFactoryCore {
                 description: "description_${nextId}",
                 projectType: Project.ProjectType.SEQUENCING,
                 requester  : { createUser() },
-                users      : {
+                piUsers    : {
                     [
                             createProjectRequestUser([
                                     projectRoles: [createOrGetAuthorityProjectRole()] as Set<ProjectRole>,
                             ]),
                     ]
-                },
+                }, users   : {
+            [
+                    createProjectRequestUser(),
+            ]
+        },
                 state      : createProjectRequestPersistentState(stateProperties),
                 project    : stateProperties["beanName"] == "created" ? { createProject() } : null,
         ], properties, saveAndValidate)

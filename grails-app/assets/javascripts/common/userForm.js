@@ -25,7 +25,7 @@ $(() => {
 
   // Automatically check boxes with class set-for-ROLE and
   // auto check and disable boxes with class set-and-block-for-ROLE
-  $('.project-role-select').on('change', (e) => {
+  $('.project-role-select, .pi-role-select').on('change', (e) => {
     const roles = ['PI', 'BIOINFORMATICIAN', 'LEAD_BIOINFORMATICIAN', 'COORDINATOR'];
     const hiddenCheckboxPrefix = 'hidden-checkbox';
 
