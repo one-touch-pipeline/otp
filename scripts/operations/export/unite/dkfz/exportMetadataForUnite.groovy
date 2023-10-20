@@ -1,19 +1,5 @@
-import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.cellRanger.GroupedMwp
-import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.utils.CollectionUtils
-
-import java.nio.file.FileSystem
-import java.nio.file.Path
-
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +20,22 @@ import java.nio.file.Path
  * SOFTWARE.
  */
 
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.GroupedMwp
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
+
+import java.nio.file.FileSystem
+import java.nio.file.Path
+
+
+
 /*
 Input Area
 */
@@ -50,7 +52,8 @@ def alignmentQualityOverview(Project p, Path file, SeqType seqType) {
     header << "PROJECT\tOTP_PID\tOTP_SAMPLE_TYPE\tSEQUENCING_TYPE\tBAM_FILE\tCOVERAGE"
     boolean first = true
 
-    List<AbstractQualityAssessment> dataOverall = ctx.qualityAssessmentMergedService.findAllByProjectAndSeqType(p, seqType)
+    QualityAssessmentMergedService qualityAssessmentMergedService = ctx.qualityAssessmentMergedService
+    List<AbstractQualityAssessment> dataOverall = qualityAssessmentMergedService.findAllByProjectAndSeqType(p, seqType)
     dataOverall.each { AbstractQualityAssessment aqa ->
         if (first) {
             header << aqa.properties.sort()*.key*.toString()*.toUpperCase().join("\t")
@@ -58,8 +61,7 @@ def alignmentQualityOverview(Project p, Path file, SeqType seqType) {
             first = false
         }
         def outString = [p.name]
-        QualityAssessmentMergedPass qualityAssessmentMergedPass = aqa.qualityAssessmentMergedPass
-        AbstractBamFile bam = qualityAssessmentMergedPass.abstractBamFile
+        AbstractBamFile bam = aqa.abstractBamFile
         outString << bam.individual.pid
         outString << bam.sampleType.name
         outString << bam.seqType.nameWithLibraryLayout

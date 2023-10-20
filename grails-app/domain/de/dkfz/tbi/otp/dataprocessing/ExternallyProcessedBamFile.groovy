@@ -113,11 +113,9 @@ class ExternallyProcessedBamFile extends AbstractBamFile {
 
     @Override
     AbstractQualityAssessment getQualityAssessment() {
-        return CollectionUtils.exactlyOneElement(ExternallyProcessedBamFileQualityAssessment.createCriteria().list {
-            qualityAssessmentMergedPass {
-                abstractBamFile {
-                    eq 'id', this.id
-                }
+        return CollectionUtils.atMostOneElement(ExternallyProcessedBamFileQualityAssessment.withCriteria {
+            abstractBamFile {
+                eq 'id', this.id
             }
         })
     }

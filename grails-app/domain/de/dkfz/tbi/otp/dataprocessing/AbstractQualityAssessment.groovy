@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,11 +27,16 @@ import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdEvaluated
 import de.dkfz.tbi.otp.utils.Entity
 
 /**
- * Be aware of semantic differences between the values produced by
- * qa.jar and by Roddy QC. See the comments of OTP-1731 for details.
+ * Quality assessment results for alignment workflows
  */
 @ManagedEntity
 abstract class AbstractQualityAssessment implements Entity {
+
+    AbstractBamFile abstractBamFile
+
+    static belongsTo = [
+            abstractBamFile: AbstractBamFile,
+    ]
 
     /**
      * length of the chromosome/genome of the reference
@@ -199,5 +204,6 @@ abstract class AbstractQualityAssessment implements Entity {
 
     static mapping = {
         'class' index: "abstract_quality_assessment_class_idx"
+        abstractBamFile index: "abstract_quality_assessment_abstract_bam_file_idx"
     }
 }

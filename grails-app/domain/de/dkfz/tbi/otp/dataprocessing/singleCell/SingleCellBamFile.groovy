@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -326,26 +326,13 @@ class SingleCellBamFile extends AbstractBamFile implements HasIdentifier, Proces
         return seqTracks
     }
 
-    QualityAssessmentMergedPass findOrSaveQaPass() {
-        QualityAssessmentMergedPass assessmentMergedPass = CollectionUtils.atMostOneElement(QualityAssessmentMergedPass.findAllWhere(
-                abstractBamFile: this,
-        ))
-        if (!assessmentMergedPass) {
-            assessmentMergedPass = new QualityAssessmentMergedPass(
-                    abstractBamFile: this,
-            )
-            assessmentMergedPass.save(flush: true)
-        }
-        return assessmentMergedPass
-    }
-
     @Override
     CellRangerQualityAssessment getQualityAssessment() {
-        return CellRangerQualityAssessment.createCriteria().get {
-            qualityAssessmentMergedPass {
-                eq 'abstractBamFile', this
+        return CollectionUtils.atMostOneElement(CellRangerQualityAssessment.withCriteria {
+            abstractBamFile {
+                eq 'id', this.id
             }
-        } as CellRangerQualityAssessment
+        })
     }
 
     @Override

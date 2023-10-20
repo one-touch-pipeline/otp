@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.domainFactory.pipelines
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.AbstractQualityAssessment
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 trait IsAlignment implements IsPipeline {
 
@@ -58,9 +57,7 @@ trait IsAlignment implements IsPipeline {
 
     AbstractQualityAssessment createQa(AbstractBamFile abstractBamFile, Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(qaClass, defaultValuesForAbstractQualityAssessment + [
-                qualityAssessmentMergedPass: DomainFactory.createQualityAssessmentMergedPass(
-                        abstractBamFile: abstractBamFile
-                ),
+                abstractBamFile: abstractBamFile,
         ] + qaValuesProperties, properties, saveAndValidate)
     }
 }

@@ -128,15 +128,10 @@ ExternallyProcessedBamFile.withTransaction {
         }
 
         ExternallyProcessedBamFileQualityAssessment.createCriteria().list {
-            qualityAssessmentMergedPass {
-                eq('abstractBamFile', epmbf)
-            }
+            eq('abstractBamFile', epmbf)
         }.each { ExternallyProcessedBamFileQualityAssessment qualityAssessment ->
             println "  --> delete qa: ${qualityAssessment}"
-            QualityAssessmentMergedPass qualityAssessmentMergedPass = qualityAssessment.qualityAssessmentMergedPass
             qualityAssessment.delete(flush: true)
-            qualityAssessmentMergedPass.delete(flush: true)
-
         }
 
         ImportProcess.withCriteria {

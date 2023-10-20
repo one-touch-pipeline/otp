@@ -40,7 +40,7 @@ import static de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification.UNDEFI
 
 @CompileDynamic
 @Transactional
-class AbstractQualityAssessmentService {
+class RoddyQualityAssessmentService {
 
     AbstractBamFileService abstractBamFileService
     RoddyBamFileService roddyBamFileService
@@ -104,7 +104,7 @@ class AbstractQualityAssessmentService {
                 RoddySingleLaneQa qa = new RoddySingleLaneQa(handleNaValue(chromosomeValues))
                 qa.seqTrack = seqTrack
                 assert qa.chromosome == chromosome
-                qa.qualityAssessmentMergedPass = roddyBamFile.findOrSaveQaPass()
+                qa.abstractBamFile = roddyBamFile
                 assert qa.save(flush: true)
             }
         }
@@ -117,7 +117,7 @@ class AbstractQualityAssessmentService {
         List<RoddyMergedBamQa> chromosomeInformationQa = chromosomeInformation.collect { chromosome, chromosomeValues ->
             RoddyMergedBamQa qa = new RoddyMergedBamQa(handleNaValue(chromosomeValues))
             assert qa.chromosome == chromosome
-            qa.qualityAssessmentMergedPass = roddyBamFile.findOrSaveQaPass()
+            qa.abstractBamFile = roddyBamFile
             assert qa.save(flush: true)
             return qa
         }
@@ -136,15 +136,14 @@ class AbstractQualityAssessmentService {
     RnaQualityAssessment parseRnaRoddyBamFileQaStatistics(RnaRoddyBamFile rnaRoddyBamFile) {
         Path qaFile = rnaRoddyBamFileService.getWorkMergedQAJsonFile(rnaRoddyBamFile)
         Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(rnaRoddyBamFile, qaFile, null)
-        QualityAssessmentMergedPass pass = rnaRoddyBamFile.findOrSaveQaPass()
-        RnaQualityAssessment rnaQualityAssessment = CollectionUtils.atMostOneElement(RnaQualityAssessment.findAllByQualityAssessmentMergedPass(pass))
+        RnaQualityAssessment rnaQualityAssessment = CollectionUtils.atMostOneElement(RnaQualityAssessment.findAllByAbstractBamFile(rnaRoddyBamFile))
         if (rnaQualityAssessment) {
             rnaQualityAssessment.properties = (chromosomeInformation.get(RnaQualityAssessment.ALL))
         } else {
             rnaQualityAssessment = new RnaQualityAssessment((chromosomeInformation.get(RnaQualityAssessment.ALL)))
         }
         rnaQualityAssessment.chromosome = RnaQualityAssessment.ALL
-        rnaQualityAssessment.qualityAssessmentMergedPass = pass
+        rnaQualityAssessment.abstractBamFile = rnaRoddyBamFile
         assert rnaQualityAssessment.save(flush: true)
         return rnaQualityAssessment
     }
@@ -158,7 +157,7 @@ class AbstractQualityAssessmentService {
                 RoddyLibraryQa qa = new RoddyLibraryQa(chromosomeValues)
                 qa.libraryDirectoryName = lib
                 assert qa.chromosome == chromosome
-                qa.qualityAssessmentMergedPass = roddyBamFile.findOrSaveQaPass()
+                qa.abstractBamFile = roddyBamFile
                 assert qa.save(flush: true)
             }
         }

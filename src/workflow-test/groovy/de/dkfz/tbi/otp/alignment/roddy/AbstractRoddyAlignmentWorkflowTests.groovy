@@ -360,16 +360,11 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     }
 
     void checkQC(RoddyBamFile bamFile) {
-        QualityAssessmentMergedPass qaPass = CollectionUtils.atMostOneElement(QualityAssessmentMergedPass.findAllWhere(
-                abstractBamFile: bamFile,
-        ))
-        assert qaPass
-
         bamFile.seqTracks.each {
             List<RoddySingleLaneQa> qa = RoddySingleLaneQa.findAllBySeqTrack(it)
             assert qa
             qa.each {
-                assert it.qualityAssessmentMergedPass == qaPass
+                assert it.abstractBamFile == bamFile
             }
         }
 
@@ -380,11 +375,11 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
                 assert CollectionUtils.atMostOneElement(RoddySingleLaneQa.findAllByChromosomeAndSeqTrack(chromosome, seqTrack))
             }
         }
-        RoddyMergedBamQa mergedQa = CollectionUtils.atMostOneElement(RoddyMergedBamQa.findAllByQualityAssessmentMergedPassAndChromosome(qaPass, RoddyQualityAssessment.ALL))
+        RoddyMergedBamQa mergedQa = CollectionUtils.atMostOneElement(RoddyMergedBamQa.findAllByAbstractBamFileAndChromosome(bamFile, RoddyQualityAssessment.ALL))
         assert mergedQa
         JSONObject json = JSON.parse(bamFile.finalMergedQAJsonFile.text)
         json.keys().each { String chromosome ->
-            assert CollectionUtils.atMostOneElement(RoddyMergedBamQa.findAllByChromosomeAndQualityAssessmentMergedPass(chromosome, qaPass))
+            assert CollectionUtils.atMostOneElement(RoddyMergedBamQa.findAllByChromosomeAndAbstractBamFile(chromosome, bamFile))
         }
         assert bamFile.coverage == mergedQa.genomeWithoutNCoverageQcBases
         assert bamFile.coverageWithN == abstractBamFileService.calculateCoverageWithN(bamFile)
@@ -393,7 +388,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         assert bamFile.qcTrafficLightStatus == AbstractBamFile.QcTrafficLightStatus.UNCHECKED
 
         if (bamFile.seqType.wgbs && bamFile.hasMultipleLibraries()) {
-            List<RoddyLibraryQa> libraryQas = RoddyLibraryQa.findAllByQualityAssessmentMergedPass(qaPass)
+            List<RoddyLibraryQa> libraryQas = RoddyLibraryQa.findAllByAbstractBamFile(bamFile)
             assert libraryQas
             assert libraryQas*.libraryDirectoryName as Set == bamFile.seqTracks*.libraryDirectoryName as Set
         }

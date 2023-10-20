@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -76,15 +76,11 @@ bamFiles.each { AbstractBamFile bamFile ->
     AbstractQualityAssessment qc = CollectionUtils.exactlyOneElement(
             bamFile.seqType.name == 'RNA' ?
                     RnaQualityAssessment.createCriteria().list {
-                        qualityAssessmentMergedPass {
-                            eq('abstractBamFile', bamFile)
-                        }
+                        eq('abstractBamFile', bamFile)
                         eq('chromosome', RoddyQualityAssessment.ALL)
                     } :
                     RoddyMergedBamQa.createCriteria().list {
-                        qualityAssessmentMergedPass {
-                            eq('abstractBamFile', bamFile)
-                        }
+                        eq('abstractBamFile', bamFile)
                         eq('chromosome', RoddyQualityAssessment.ALL)
                     }
     )

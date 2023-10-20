@@ -29,6 +29,7 @@ import spock.lang.TempDir
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.*
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -814,19 +815,27 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
         setupDataForProcessingFiles()
         AbstractBamFile abstractBamFile = DomainFactory.createRoddyBamFile()
 
-        QualityAssessmentMergedPass qualityAssessmentPass = DomainFactory.createQualityAssessmentMergedPass(abstractBamFile: abstractBamFile)
-        RoddyLibraryQa roddyLibraryQa = DomainFactory.createRoddyLibraryQa(qualityAssessmentMergedPass: qualityAssessmentPass,
-                genomeWithoutNCoverageQcBases: 0, referenceLength: 0)
-        RoddyMergedBamQa roddyMergedBamQa = DomainFactory.createRoddyMergedBamQa(qualityAssessmentMergedPass: qualityAssessmentPass,
-                genomeWithoutNCoverageQcBases: 0, referenceLength: 0)
-        RoddySingleLaneQa roddySingleLaneQa = DomainFactory.createRoddySingleLaneQa(seqTrack: abstractBamFile.seqTracks.iterator().next(),
-                qualityAssessmentMergedPass: qualityAssessmentPass, genomeWithoutNCoverageQcBases: 0, referenceLength: 0)
+        RoddyLibraryQa roddyLibraryQa = DomainFactory.createRoddyLibraryQa(
+                abstractBamFile: abstractBamFile,
+                genomeWithoutNCoverageQcBases: 0,
+                referenceLength: 0,
+        )
+        RoddyMergedBamQa roddyMergedBamQa = DomainFactory.createRoddyMergedBamQa(
+                abstractBamFile: abstractBamFile,
+                genomeWithoutNCoverageQcBases: 0,
+                referenceLength: 0,
+        )
+        RoddySingleLaneQa roddySingleLaneQa = DomainFactory.createRoddySingleLaneQa(
+                seqTrack: abstractBamFile.seqTracks.iterator().next(),
+                abstractBamFile: abstractBamFile,
+                genomeWithoutNCoverageQcBases: 0,
+                referenceLength: 0,
+        )
 
         when:
         deletionService.deleteQualityAssessmentInfoForAbstractBamFile(abstractBamFile)
 
         then:
-        !QualityAssessmentMergedPass.get(qualityAssessmentPass.id)
         !RoddyLibraryQa.get(roddyLibraryQa.id)
         !RoddyMergedBamQa.get(roddyMergedBamQa.id)
         !RoddySingleLaneQa.get(roddySingleLaneQa.id)
@@ -837,13 +846,13 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
         setupDataForProcessingFiles()
         AbstractBamFile abstractBamFile = DomainFactory.proxyCellRanger.createBamFile()
 
-        QualityAssessmentMergedPass qualityAssessmentPass = DomainFactory.createQualityAssessmentMergedPass(abstractBamFile: abstractBamFile)
+        CellRangerQualityAssessment qualityAssessment = DomainFactory.proxyCellRanger.createQa(abstractBamFile)
 
         when:
         deletionService.deleteQualityAssessmentInfoForAbstractBamFile(abstractBamFile)
 
         then:
-        !QualityAssessmentMergedPass.get(qualityAssessmentPass.id)
+        !CellRangerQualityAssessment.get(qualityAssessment.id)
     }
 
     void "testDeleteQualityAssessmentInfoForAbstractBamFile_null"() {

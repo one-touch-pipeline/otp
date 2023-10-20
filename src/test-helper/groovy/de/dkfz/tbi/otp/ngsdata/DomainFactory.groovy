@@ -254,12 +254,6 @@ class DomainFactory {
         return (atMostOneElement(Pipeline.list(max: 1)) ?: createPanCanPipeline())
     }
 
-    static QualityAssessmentMergedPass createQualityAssessmentMergedPass(Map properties = [:]) {
-        return createDomainObject(QualityAssessmentMergedPass, [
-                abstractBamFile: { createRoddyBamFile() }
-        ], properties)
-    }
-
     @Deprecated
     static Map<String, ?> getDefaultValuesForAbstractQualityAssessment() {
         return proxyCellRanger.defaultValuesForAbstractQualityAssessment
@@ -509,19 +503,13 @@ class DomainFactory {
      */
     static createRoddyMergedBamQa(RoddyBamFile roddyBamFile, Map properties = [:]) {
         return createRoddyMergedBamQa([
-                qualityAssessmentMergedPass: createQualityAssessmentMergedPass(
-                        abstractBamFile: roddyBamFile
-                ),
-                referenceLength            : 1,
+                abstractBamFile: roddyBamFile,
+                referenceLength: 1,
         ] + properties)
     }
 
     static Map roddyQualityAssessmentProperties = [
-            qualityAssessmentMergedPass  : {
-                createQualityAssessmentMergedPass(
-                        abstractBamFile: createRoddyBamFile()
-                )
-            },
+            abstractBamFile              : { createRoddyBamFile() },
             chromosome                   : RoddyQualityAssessment.ALL,
             insertSizeCV                 : 0,
             percentageMatesOnDifferentChr: 0,
@@ -789,15 +777,11 @@ class DomainFactory {
      */
     static ExternallyProcessedBamFileQualityAssessment createExternallyProcessedBamFileQualityAssessment(Map properties = [:], AbstractBamFile mbf) {
         return createDomainObject(ExternallyProcessedBamFileQualityAssessment, [
-                properlyPaired             : 1919,
-                pairedInSequencing         : 2120,
-                insertSizeMedian           : 406,
-                insertSizeCV               : 23,
-                qualityAssessmentMergedPass: {
-                    createDomainObject(QualityAssessmentMergedPass, [
-                            abstractBamFile: mbf,
-                    ], [:])
-                },
+                properlyPaired    : 1919,
+                pairedInSequencing: 2120,
+                insertSizeMedian  : 406,
+                insertSizeCV      : 23,
+                abstractBamFile   : mbf,
         ], properties)
     }
 

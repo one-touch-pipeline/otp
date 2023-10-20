@@ -63,8 +63,7 @@ class SophiaService extends AbstractBamFileAnalysisService<SophiaInstance> imple
                 AND ambf${number}.maximumReadLength IS NOT NULL
                 AND EXISTS (
                     FROM ExternallyProcessedBamFileQualityAssessment epmbfqa
-                    JOIN epmbfqa.qualityAssessmentMergedPass pass
-                    WHERE pass.abstractBamFile = ambf${number}
+                    WHERE epmbfqa.abstractBamFile = ambf${number}
                 )
             )
         )

@@ -23,11 +23,7 @@ package de.dkfz.tbi.otp.workflowTest.alignment.roddy.rna
 
 import grails.converters.JSON
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.dataprocessing.QualityAssessmentMergedPass
-import de.dkfz.tbi.otp.dataprocessing.RnaQualityAssessment
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -238,11 +234,7 @@ abstract class AbstractRnaAlignmentWorkflowSpec extends AbstractRoddyAlignmentWo
 
     @Override
     protected void checkQC(RoddyBamFile bamFile) {
-        QualityAssessmentMergedPass qaPass = CollectionUtils.exactlyOneElement(QualityAssessmentMergedPass.findAllWhere(
-                abstractBamFile: bamFile,
-        ))
-
-        CollectionUtils.exactlyOneElement(RnaQualityAssessment.findAllByQualityAssessmentMergedPass(qaPass))
+        CollectionUtils.exactlyOneElement(RnaQualityAssessment.findAllByAbstractBamFile(bamFile))
 
         JSON.parse(bamFile.finalMergedQAJsonFile.text)
         assert bamFile.finalMergedQAJsonFile.text.trim() != ""

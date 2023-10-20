@@ -61,7 +61,7 @@ class PanCancerParseJobSpec extends Specification implements DataTest, WorkflowS
         PanCancerParseJob job = Spy(PanCancerParseJob) {
             1 * getRoddyBamFile(workflowStep) >> roddyBamFile
         }
-        job.abstractQualityAssessmentService = Mock(AbstractQualityAssessmentService)
+        job.abstractQualityAssessmentService = Mock(RoddyQualityAssessmentService)
         job.qcTrafficLightService = Mock(QcTrafficLightService)
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
 

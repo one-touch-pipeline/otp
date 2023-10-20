@@ -683,17 +683,9 @@ class DeletionService {
     private void deleteQualityAssessmentInfoForAbstractBamFile(AbstractBamFile abstractBamFile) {
         notNull(abstractBamFile, "The input AbstractBamFile is null")
         if (abstractBamFile instanceof RoddyBamFile) {
-            List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses = QualityAssessmentMergedPass.findAllByAbstractBamFile(abstractBamFile)
-            if (qualityAssessmentMergedPasses) {
-                RoddyQualityAssessment.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete(flush: true)
-            }
-            qualityAssessmentMergedPasses*.delete(flush: true)
+            RoddyQualityAssessment.findAllByAbstractBamFile(abstractBamFile)*.delete(flush: true)
         } else if (abstractBamFile instanceof SingleCellBamFile) {
-            List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses = QualityAssessmentMergedPass.findAllByAbstractBamFile(abstractBamFile)
-            if (qualityAssessmentMergedPasses) {
-                CellRangerQualityAssessment.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete(flush: true)
-            }
-            qualityAssessmentMergedPasses*.delete(flush: true)
+            CellRangerQualityAssessment.findAllByAbstractBamFile(abstractBamFile)*.delete(flush: true)
         } else {
             throw new NotSupportedException("This BamFile type " + abstractBamFile + " is not supported")
         }

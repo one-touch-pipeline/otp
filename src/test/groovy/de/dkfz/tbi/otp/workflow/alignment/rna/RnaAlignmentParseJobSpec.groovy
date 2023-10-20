@@ -54,7 +54,6 @@ class RnaAlignmentParseJobSpec extends Specification implements WorkflowSystemDo
                 Pipeline,
                 ProcessingPriority,
                 Project,
-                QualityAssessmentMergedPass,
                 Realm,
                 ReferenceGenomeEntry,
                 ReferenceGenomeProjectSeqType,
@@ -81,7 +80,7 @@ class RnaAlignmentParseJobSpec extends Specification implements WorkflowSystemDo
         mergedQAJsonFile.text = qaFileContent
 
         job = Spy(RnaAlignmentParseJob)
-        job.abstractQualityAssessmentService = new AbstractQualityAssessmentService()
+        job.abstractQualityAssessmentService = new RoddyQualityAssessmentService()
         job.abstractQualityAssessmentService.rnaRoddyBamFileService = Mock(RnaRoddyBamFileService) {
             getWorkMergedQAJsonFile(_) >> mergedQAJsonFile
         }
@@ -92,8 +91,7 @@ class RnaAlignmentParseJobSpec extends Specification implements WorkflowSystemDo
         job.execute(workflowStep)
 
         then:
-        QualityAssessmentMergedPass pass = CollectionUtils.exactlyOneElement(QualityAssessmentMergedPass.findAllByAbstractBamFile(bamFile))
-        RnaQualityAssessment qa = CollectionUtils.exactlyOneElement(RnaQualityAssessment.findAllByQualityAssessmentMergedPass(pass))
+        RnaQualityAssessment qa = CollectionUtils.exactlyOneElement(RnaQualityAssessment.findAllByAbstractBamFile(bamFile))
         qaValuesProperties.each { k, v ->
             assert qa."${k}" == v
         }
@@ -110,13 +108,12 @@ class RnaAlignmentParseJobSpec extends Specification implements WorkflowSystemDo
                 insertSizeMean                   : 999,
                 intergenicRate                   : 777.123,
         ]) as RnaQualityAssessment
-        QualityAssessmentMergedPass existingPass = existingQa.qualityAssessmentMergedPass
 
         Path mergedQAJsonFile = tempDir.resolve("qa.json")
         mergedQAJsonFile.text = qaFileContent
 
         job = Spy(RnaAlignmentParseJob)
-        job.abstractQualityAssessmentService = new AbstractQualityAssessmentService()
+        job.abstractQualityAssessmentService = new RoddyQualityAssessmentService()
         job.abstractQualityAssessmentService.rnaRoddyBamFileService = Mock(RnaRoddyBamFileService) {
             getWorkMergedQAJsonFile(_) >> mergedQAJsonFile
         }
@@ -127,14 +124,12 @@ class RnaAlignmentParseJobSpec extends Specification implements WorkflowSystemDo
         job.execute(workflowStep)
 
         then:
-        QualityAssessmentMergedPass pass = CollectionUtils.exactlyOneElement(QualityAssessmentMergedPass.findAllByAbstractBamFile(bamFile))
-        RnaQualityAssessment qa = CollectionUtils.exactlyOneElement(RnaQualityAssessment.findAllByQualityAssessmentMergedPass(pass))
+        RnaQualityAssessment qa = CollectionUtils.exactlyOneElement(RnaQualityAssessment.findAllByAbstractBamFile(bamFile))
         qaValuesProperties.each { k, v ->
             assert qa."${k}" == v
         }
-        // check that existing objects are reused
+        // check that existing object is reused
         qa == existingQa
-        pass == existingPass
 
         1 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
         bamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED

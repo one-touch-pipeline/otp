@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,9 +35,9 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 @Rollback
 @Integration
-class AbstractQualityAssessmentServiceIntegrationTests {
+class RoddyQualityAssessmentServiceIntegrationTests {
 
-    AbstractQualityAssessmentService abstractQualityAssessmentService
+    RoddyQualityAssessmentService roddyQualityAssessmentService
     TestConfigService configService
 
     final static REFERENCE_GENOME_LENGTH = 80
@@ -80,7 +80,7 @@ class AbstractQualityAssessmentServiceIntegrationTests {
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         final Long ARBITRARY_UNUSED_VALUE = 1
         RoddyMergedBamQa mergedQa = new RoddyMergedBamQa([
-                qualityAssessmentMergedPass : DomainFactory.createQualityAssessmentMergedPass(abstractBamFile: roddyBamFile),
+                abstractBamFile: roddyBamFile,
                 qcBasesMapped : QC_BASES_MAPPED,
                 genomeWithoutNCoverageQcBases: EXPECTED_COVERAGE,
                 chromosome: RoddyQualityAssessment.ALL,
@@ -108,7 +108,7 @@ class AbstractQualityAssessmentServiceIntegrationTests {
         roddyBamFile.referenceGenome.lengthWithoutN = REFERENCE_GENOME_LENGTH
         assert roddyBamFile.referenceGenome.save(flush: true)
 
-        abstractQualityAssessmentService.saveCoverageToRoddyBamFile(roddyBamFile)
+        roddyQualityAssessmentService.saveCoverageToRoddyBamFile(roddyBamFile)
 
         assert roddyBamFile.coverage == EXPECTED_COVERAGE
         assert roddyBamFile.coverageWithN == EXPECTED_COVERAGE_WITH_N
@@ -135,7 +135,7 @@ class AbstractQualityAssessmentServiceIntegrationTests {
     private void testParseRoddyMergedBamQaStatistics_allFine(String mergedBamOrSingleLane, SeqType seqType, Long qcBasesMappedExpected, Long allBasesMappedExpected, Long onTargetMappedBasesExpected) {
         RoddyBamFile roddyBamFile = setUpForParseRoddyQaStatistics(seqType)
 
-        abstractQualityAssessmentService."parseRoddy${mergedBamOrSingleLane}QaStatistics"(roddyBamFile)
+        roddyQualityAssessmentService."parseRoddy${mergedBamOrSingleLane}QaStatistics"(roddyBamFile)
 
         Collection<RoddyQualityAssessment> qas = RoddyQualityAssessment.list()
         assert TestCase.containSame(qas*.class*.simpleName.unique(), ["Roddy${mergedBamOrSingleLane}Qa"])
@@ -168,7 +168,7 @@ class AbstractQualityAssessmentServiceIntegrationTests {
                 alias: '9',
         )
         TestCase.shouldFailWithMessage(AssertionError, /^Missed chromosomes: .+ \(expected: .*; found .*\).*/, {
-            abstractQualityAssessmentService.parseRoddyMergedBamQaStatistics(roddyBamFile)
+            roddyQualityAssessmentService.parseRoddyMergedBamQaStatistics(roddyBamFile)
         })
     }
 
@@ -198,7 +198,7 @@ class AbstractQualityAssessmentServiceIntegrationTests {
         ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome()
         DomainFactory.createReferenceGenomeEntries(referenceGenome, chromosomeNamesFromOtp)
 
-        abstractQualityAssessmentService.assertListContainsAllChromosomeNamesInReferenceGenome(chromosomeNamesFromRoddyJson, referenceGenome)
+        roddyQualityAssessmentService.assertListContainsAllChromosomeNamesInReferenceGenome(chromosomeNamesFromRoddyJson, referenceGenome)
     }
 
     @Test
@@ -209,7 +209,7 @@ class AbstractQualityAssessmentServiceIntegrationTests {
         ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome()
         DomainFactory.createReferenceGenomeEntries(referenceGenome, chromosomeNamesFromOtp)
 
-        abstractQualityAssessmentService.assertListContainsAllChromosomeNamesInReferenceGenome(chromosomeNamesFromRoddyJson, referenceGenome)
+        roddyQualityAssessmentService.assertListContainsAllChromosomeNamesInReferenceGenome(chromosomeNamesFromRoddyJson, referenceGenome)
     }
 
     @Test
@@ -221,7 +221,7 @@ class AbstractQualityAssessmentServiceIntegrationTests {
         DomainFactory.createReferenceGenomeEntries(referenceGenome, chromosomeNamesFromOtp)
 
         TestCase.shouldFailWithMessage(AssertionError, /^Missed chromosomes: .+ \(expected: .*; found .*\).*/, {
-            abstractQualityAssessmentService.assertListContainsAllChromosomeNamesInReferenceGenome(chromosomeNamesFromRoddyJson, referenceGenome)
+            roddyQualityAssessmentService.assertListContainsAllChromosomeNamesInReferenceGenome(chromosomeNamesFromRoddyJson, referenceGenome)
         })
     }
 

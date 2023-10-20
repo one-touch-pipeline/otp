@@ -37,7 +37,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 class PanCancerParseJob extends AbstractJob implements PanCancerShared {
 
     @Autowired
-    AbstractQualityAssessmentService abstractQualityAssessmentService
+    RoddyQualityAssessmentService abstractQualityAssessmentService
 
     @Autowired
     QcTrafficLightService qcTrafficLightService

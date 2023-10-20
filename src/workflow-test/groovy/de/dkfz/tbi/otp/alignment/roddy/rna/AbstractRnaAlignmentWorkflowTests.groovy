@@ -127,12 +127,7 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
     }
 
     static void checkQcRna(RnaRoddyBamFile bamFile) {
-        QualityAssessmentMergedPass qaPass = CollectionUtils.atMostOneElement(QualityAssessmentMergedPass.findAllWhere(
-                abstractBamFile: bamFile,
-        ))
-        assert qaPass
-
-        RnaQualityAssessment rnaQa = CollectionUtils.atMostOneElement(RnaQualityAssessment.findAllByQualityAssessmentMergedPass(qaPass))
+        RnaQualityAssessment rnaQa = CollectionUtils.atMostOneElement(RnaQualityAssessment.findAllByAbstractBamFile(bamFile))
         assert rnaQa
 
         JSON.parse(bamFile.finalMergedQAJsonFile.text)

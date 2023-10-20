@@ -194,11 +194,13 @@ class BamMetadataImportService {
 
                     def qcValues = new JsonSlurper().parse(qualityControlFilePath.bytes)
 
-                    new ExternallyProcessedBamFileQualityAssessment(properlyPaired: qcValues.all.properlyPaired,
+                    new ExternallyProcessedBamFileQualityAssessment(
+                            properlyPaired: qcValues.all.properlyPaired,
                             pairedInSequencing: qcValues.all.pairedInSequencing,
                             insertSizeMedian: qcValues.all.insertSizeMedian,
                             insertSizeCV: qcValues.all.insertSizeCV,
-                            qualityAssessmentMergedPass: new QualityAssessmentMergedPass([abstractBamFile: epmbf,]).save(flush: true),).save(flush: true)
+                            abstractBamFile: epmbf,
+                    ).save(flush: true)
 
                     if (!epmbf.furtherFiles.find {
                         Path furtherPath = bamFileParent.resolve(it)

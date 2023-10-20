@@ -36,17 +36,19 @@ class SearchSeqTrackServiceSpec extends HibernateSpec implements ServiceUnitTest
     List<Class> getDomainClasses() {
         return [
                 AbstractBamFile,
-                RoddyBamFile,
-                RawSequenceFile,
-                Project,
-                SampleType,
-                SeqType,
-                Sample,
-                Individual,
-                SeqTrack,
-                ExternallyProcessedBamFile,
                 ExternalMergingWorkPackage,
+                ExternallyProcessedBamFile,
                 FastqFile,
+                Individual,
+                MergingWorkPackage,
+                Project,
+                RawSequenceFile,
+                ReferenceGenomeProjectSeqType,
+                RoddyBamFile,
+                Sample,
+                SampleType,
+                SeqTrack,
+                SeqType,
         ]
     }
 

@@ -198,31 +198,16 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
         return seqTracks
     }
 
-    QualityAssessmentMergedPass findOrSaveQaPass() {
-        QualityAssessmentMergedPass assessmentMergedPass = CollectionUtils.atMostOneElement(QualityAssessmentMergedPass.findAllWhere(
-                abstractBamFile: this,
-        ))
-        if (!assessmentMergedPass) {
-            assessmentMergedPass = new QualityAssessmentMergedPass(
-                    abstractBamFile: this,
-            )
-            assessmentMergedPass.save(flush: true)
-        }
-        return assessmentMergedPass
-    }
-
     boolean hasMultipleLibraries() {
         return this.seqTracks*.libraryDirectoryName.unique().size() > 1
     }
 
     @Override
     AbstractQualityAssessment getQualityAssessment() {
-        return CollectionUtils.exactlyOneElement(RoddyMergedBamQa.createCriteria().list {
+        return CollectionUtils.atMostOneElement(RoddyMergedBamQa.withCriteria {
             eq 'chromosome', RoddyQualityAssessment.ALL
-            qualityAssessmentMergedPass {
-                abstractBamFile {
-                    eq 'id', this.id
-                }
+            abstractBamFile {
+                eq 'id', this.id
             }
         })
     }

@@ -85,8 +85,7 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
             |    )
             |from
             |    ${AbstractQualityAssessment.name} qa
-            |    join qa.qualityAssessmentMergedPass qaPass
-            |    join qaPass.abstractBamFile bamFile
+            |    join qa.abstractBamFile bamFile
             |    join bamFile.workPackage mergingWorkPackage
             |    join mergingWorkPackage.sample sample
             |    join mergingWorkPackage.pipeline pipeline
@@ -157,8 +156,7 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
             |    )
             |from
             |    ${AbstractQualityAssessment.name} qa
-            |    join qa.qualityAssessmentMergedPass qaPass
-            |    join qaPass.abstractBamFile bamFile
+            |    join qa.abstractBamFile bamFile
             |    join bamFile.workPackage mergingWorkPackage
             |    join mergingWorkPackage.sample sample
             |    join mergingWorkPackage.pipeline pipeline
@@ -236,8 +234,7 @@ class AbstractQaOverviewServiceHibernateSpec extends HibernateSpec implements Ro
             |    )
             |from
             |    ${AbstractQualityAssessment.name} qa
-            |    join qa.qualityAssessmentMergedPass qaPass
-            |    join qaPass.abstractBamFile bamFile
+            |    join qa.abstractBamFile bamFile
             |    join bamFile.workPackage mergingWorkPackage
             |    join mergingWorkPackage.sample sample
             |    join mergingWorkPackage.pipeline pipeline

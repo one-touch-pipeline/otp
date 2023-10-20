@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -77,12 +77,13 @@ class RoddyBamFileIntegrationSpec extends Specification {
         given:
         long pairedRead = DomainFactory.counter++
         long numberOfReads = 2 * pairedRead
-        RoddyMergedBamQa qa = DomainFactory.createRoddyMergedBamQa([
+        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
+        DomainFactory.createRoddyMergedBamQa([
+                abstractBamFile: roddyBamFile,
                 pairedRead1    : pairedRead,
                 pairedRead2    : pairedRead,
                 referenceLength: 0,
         ])
-        RoddyBamFile roddyBamFile = qa.roddyBamFile
 
         expect:
         numberOfReads == roddyBamFile.numberOfReadsFromQa
@@ -91,12 +92,9 @@ class RoddyBamFileIntegrationSpec extends Specification {
     void "test getQualityAssessment"() {
         given:
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
-        QualityAssessmentMergedPass qaPass = DomainFactory.createQualityAssessmentMergedPass(
-                abstractBamFile: bamFile,
-        )
         DomainFactory.createRoddyMergedBamQa(
                 NULL_QA_VALUES + [
-                        qualityAssessmentMergedPass  : qaPass,
+                        abstractBamFile              : bamFile,
                         chromosome                   : '12',
                         referenceLength              : 1,
                         genomeWithoutNCoverageQcBases: 1,
@@ -105,7 +103,7 @@ class RoddyBamFileIntegrationSpec extends Specification {
 
         RoddyMergedBamQa mergedQa = DomainFactory.createRoddyMergedBamQa(
                 ARBITRARY_QA_VALUES + [
-                        qualityAssessmentMergedPass  : qaPass,
+                        abstractBamFile              : bamFile,
                         chromosome                   : RoddyQualityAssessment.ALL,
                         insertSizeCV                 : 123,
                         percentageMatesOnDifferentChr: 0.123,

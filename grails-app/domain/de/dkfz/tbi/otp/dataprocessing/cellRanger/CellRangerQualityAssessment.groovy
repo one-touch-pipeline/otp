@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,22 +22,22 @@
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
 import grails.gorm.hibernate.annotation.ManagedEntity
+import org.hibernate.Hibernate
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractQualityAssessment
-import de.dkfz.tbi.otp.dataprocessing.QualityAssessmentWithMergedPass
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdEvaluated
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightValue
 
 @ManagedEntity
-class CellRangerQualityAssessment extends AbstractQualityAssessment implements QualityAssessmentWithMergedPass, QcTrafficLightValue {
+class CellRangerQualityAssessment extends AbstractQualityAssessment implements QcTrafficLightValue {
 
     Integer getExpectedCells() {
-        return ((CellRangerMergingWorkPackage) qualityAssessmentMergedPass.mergingWorkPackage).expectedCells
+        return ((CellRangerMergingWorkPackage) abstractBamFile.mergingWorkPackage).expectedCells
     }
 
     Integer getEnforcedCells() {
-        return ((CellRangerMergingWorkPackage) qualityAssessmentMergedPass.mergingWorkPackage).enforcedCells
+        return ((CellRangerMergingWorkPackage) abstractBamFile.mergingWorkPackage).enforcedCells
     }
 
     /**
@@ -163,10 +163,14 @@ class CellRangerQualityAssessment extends AbstractQualityAssessment implements Q
     Double medianUmiCountsPerCell
 
     static constraints = {
+        abstractBamFile(validator: {
+            SingleCellBamFile.isAssignableFrom(Hibernate.getClass(it))
+        })
+
         referenceLength validator: { it == null }
     }
 
     SingleCellBamFile getBamFile() {
-        return qualityAssessmentMergedPass.abstractBamFile as SingleCellBamFile
+        return abstractBamFile as SingleCellBamFile
     }
 }

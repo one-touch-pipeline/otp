@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@ class RoddyMergedBamQa extends RoddyQualityAssessment implements QcTrafficLightV
     static constraints = {
         chromosome(validator: { val, obj ->
             RoddyMergedBamQa roddyMergedBamQa = CollectionUtils.atMostOneElement(
-                    RoddyMergedBamQa.findAllByQualityAssessmentMergedPassAndChromosome(obj.qualityAssessmentMergedPass, val))
+                    RoddyMergedBamQa.findAllByAbstractBamFileAndChromosome(obj.abstractBamFile, val))
             if (roddyMergedBamQa && roddyMergedBamQa != obj) {
                 return "unique"
             }

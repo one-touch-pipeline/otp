@@ -1348,12 +1348,8 @@ class ExampleData {
         cellRangerMergingWorkPackage.bamFileInProjectFolder = singleCellBamFile
         cellRangerMergingWorkPackage.save(flush: false)
 
-        QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass([
-                abstractBamFile: singleCellBamFile,
-        ]).save(flush: false)
-
         new CellRangerQualityAssessment([
-                qualityAssessmentMergedPass              : qualityAssessmentMergedPass,
+                abstractBamFile                          : singleCellBamFile,
                 referenceLength                          : null,
                 estimatedNumberOfCells                   : 1234,
                 meanReadsPerCell                         : 123456,
@@ -1427,14 +1423,9 @@ class ExampleData {
         mergingWorkPackage.bamFileInProjectFolder = roddyBamFile
         mergingWorkPackage.save(flush: false)
 
-        QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass([
-                abstractBamFile: roddyBamFile,
-                identifier     : 0,
-        ]).save(flush: false)
-
-        createRoddyMergedBamQaAll(qualityAssessmentMergedPass)
+        createRoddyMergedBamQaAll(roddyBamFile)
         PanCancerNoBedFileQaOverviewService.CHROMOSOMES_XY.each {
-            createRoddyMergedBamQaChromosome(qualityAssessmentMergedPass, it)
+            createRoddyMergedBamQaChromosome(roddyBamFile, it)
         }
         roddyBamFiles << roddyBamFile
         return roddyBamFile
@@ -1467,12 +1458,7 @@ class ExampleData {
         mergingWorkPackage.bamFileInProjectFolder = roddyBamFile
         mergingWorkPackage.save(flush: false)
 
-        QualityAssessmentMergedPass qualityAssessmentMergedPass = new QualityAssessmentMergedPass([
-                abstractBamFile: roddyBamFile,
-                identifier     : 0,
-        ]).save(flush: false)
-
-        createRnaRoddyMergedBamQaAll(qualityAssessmentMergedPass)
+        createRnaRoddyMergedBamQaAll(roddyBamFile)
         rnaRoddyBamFiles << roddyBamFile
         return roddyBamFile
     }
@@ -1550,8 +1536,8 @@ class ExampleData {
         ]).save(flush: false)
     }
 
-    RoddyMergedBamQa createRoddyMergedBamQaAll(QualityAssessmentMergedPass qualityAssessmentMergedPass) {
-        return createRoddyMergedBamQa(qualityAssessmentMergedPass, [
+    RoddyMergedBamQa createRoddyMergedBamQaAll(RoddyBamFile abstractBamFile) {
+        return createRoddyMergedBamQa(abstractBamFile, [
                 chromosome                     : RoddyQualityAssessment.ALL,
                 totalMappedReadCounter         : 100,
                 pairedRead1                    : 100,
@@ -1571,10 +1557,10 @@ class ExampleData {
         ])
     }
 
-    RnaQualityAssessment createRnaRoddyMergedBamQaAll(QualityAssessmentMergedPass qualityAssessmentMergedPass) {
-        boolean isPaired = qualityAssessmentMergedPass.mergingWorkPackage.seqType.libraryLayout.mateCount == 2
+    RnaQualityAssessment createRnaRoddyMergedBamQaAll(RnaRoddyBamFile abstractBamFile) {
+        boolean isPaired = abstractBamFile.mergingWorkPackage.seqType.libraryLayout.mateCount == 2
         return new RnaQualityAssessment([
-                qualityAssessmentMergedPass      : qualityAssessmentMergedPass,
+                abstractBamFile                  : abstractBamFile,
                 chromosome                       : RoddyQualityAssessment.ALL,
                 qcBasesMapped                    : 0,
                 totalReadCounter                 : 0,
@@ -1651,15 +1637,15 @@ class ExampleData {
         ]).save(flush: false)
     }
 
-    RoddyMergedBamQa createRoddyMergedBamQaChromosome(QualityAssessmentMergedPass qualityAssessmentMergedPass, String chromosome) {
-        return createRoddyMergedBamQa(qualityAssessmentMergedPass, [
+    RoddyMergedBamQa createRoddyMergedBamQaChromosome(RoddyBamFile abstractBamFile, String chromosome) {
+        return createRoddyMergedBamQa(abstractBamFile, [
                 chromosome: chromosome,
         ])
     }
 
-    RoddyMergedBamQa createRoddyMergedBamQa(QualityAssessmentMergedPass qualityAssessmentMergedPass, Map map) {
+    RoddyMergedBamQa createRoddyMergedBamQa(RoddyBamFile abstractBamFile, Map map) {
         return new RoddyMergedBamQa([
-                qualityAssessmentMergedPass  : qualityAssessmentMergedPass,
+                abstractBamFile              : abstractBamFile,
                 referenceLength              : 100,
                 genomeWithoutNCoverageQcBases: 100,
         ] + map).save(flush: false)

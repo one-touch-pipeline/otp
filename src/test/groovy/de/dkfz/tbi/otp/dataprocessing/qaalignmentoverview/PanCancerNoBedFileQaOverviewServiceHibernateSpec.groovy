@@ -141,11 +141,11 @@ class PanCancerNoBedFileQaOverviewServiceHibernateSpec extends HibernateSpec imp
                 "entryX.alias = 'X'",
                 "entryX.referenceGenome = referenceGenome",
                 "entryX.name = qaX.chromosome",
-                "qaX.qualityAssessmentMergedPass = qaPass",
+                "qaX.abstractBamFile = bamFile",
                 "entryY.alias = 'Y'",
                 "entryY.referenceGenome = referenceGenome",
                 "entryY.name = qaY.chromosome",
-                "qaY.qualityAssessmentMergedPass = qaPass",
+                "qaY.abstractBamFile = bamFile",
         ]
     }
 

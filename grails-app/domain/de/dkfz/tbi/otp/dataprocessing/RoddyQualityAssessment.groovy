@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,10 +27,7 @@ import org.hibernate.Hibernate
 import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdEvaluated
 
 @ManagedEntity
-abstract class RoddyQualityAssessment extends AbstractQualityAssessment implements QualityAssessmentWithMergedPass {
-
-    // We could also link directly to RoddyBamFile, but then Grails fails to start up the application context for an
-    // unclear reason. So as a workaround we have an indirect link via QualityAssessmentMergedPass.
+abstract class RoddyQualityAssessment extends AbstractQualityAssessment {
 
     static final String ALL = "all"
 
@@ -57,13 +54,9 @@ abstract class RoddyQualityAssessment extends AbstractQualityAssessment implemen
         }
     }
 
-    static belongsTo = [
-            qualityAssessmentMergedPass: QualityAssessmentMergedPass,
-    ]
-
     static constraints = {
-        qualityAssessmentMergedPass(validator: {
-            RoddyBamFile.isAssignableFrom(Hibernate.getClass(it.abstractBamFile))
+        abstractBamFile(validator: {
+            RoddyBamFile.isAssignableFrom(Hibernate.getClass(it))
         })
 
         chromosome blank: false
@@ -89,12 +82,8 @@ abstract class RoddyQualityAssessment extends AbstractQualityAssessment implemen
         genomeWithoutNCoverageQcBases nullable: true, validator: { it != null }
     }
 
-    static mapping = {
-        qualityAssessmentMergedPass index: "abstract_quality_assessment_quality_assessment_merged_pass_idx"
-    }
-
     RoddyBamFile getRoddyBamFile() {
-        return (RoddyBamFile)qualityAssessmentMergedPass.abstractBamFile
+        return (RoddyBamFile)abstractBamFile
     }
 
     RoddyBamFile getBamFile() {

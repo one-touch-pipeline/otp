@@ -314,9 +314,7 @@ class MolgenisExporter {
 
     static RoddyMergedBamQa getRoddyMergedBamQaAll(AbstractBamFile bamFile) {
         List<RoddyMergedBamQa> qas = RoddyMergedBamQa.withCriteria {
-            qualityAssessmentMergedPass {
-                eq("abstractBamFile", bamFile)
-            }
+            eq("abstractBamFile", bamFile)
             eq("chromosome", RoddyQualityAssessment.ALL)
         }
         return CollectionUtils.atMostOneElement(qas)

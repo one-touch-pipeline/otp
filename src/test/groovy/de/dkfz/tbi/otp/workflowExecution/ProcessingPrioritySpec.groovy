@@ -52,7 +52,6 @@ class ProcessingPrioritySpec extends Specification implements DataTest, DomainFa
                 FastqFile,
                 IndelCallingInstance,
                 MergingCriteria,
-                QualityAssessmentMergedPass,
                 ReferenceGenomeProjectSeqType,
                 RnaRoddyBamFile,
                 RoddyBamFile,
@@ -85,7 +84,6 @@ class ProcessingPrioritySpec extends Specification implements DataTest, DomainFa
         clazz                       | createClousure
         SeqTrack                    | { createSeqTrack() }
         // alignment
-        QualityAssessmentMergedPass | { DomainFactory.createQualityAssessmentMergedPass() }
         RoddyBamFile                | { DomainFactory.createRoddyBamFile() }
         RnaRoddyBamFile             | { AlignmentPipelineFactory.RoddyRnaFactoryInstance.INSTANCE.createBamFile() }
         SingleCellBamFile           | { AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createBamFile() }

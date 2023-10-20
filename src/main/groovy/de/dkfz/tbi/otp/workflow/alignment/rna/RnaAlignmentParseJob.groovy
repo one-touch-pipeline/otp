@@ -35,7 +35,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 class RnaAlignmentParseJob extends AbstractJob implements RnaAlignmentShared {
 
     @Autowired
-    AbstractQualityAssessmentService abstractQualityAssessmentService
+    RoddyQualityAssessmentService abstractQualityAssessmentService
 
     @Override
     void execute(WorkflowStep workflowStep) throws Throwable {

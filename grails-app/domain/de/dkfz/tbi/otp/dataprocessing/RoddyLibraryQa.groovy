@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,8 +32,8 @@ class RoddyLibraryQa extends RoddyQualityAssessment {
 
     static constraints = {
         chromosome validator: { String chromosome, RoddyLibraryQa roddyLibraryQa ->
-            RoddyLibraryQa result = CollectionUtils.atMostOneElement(RoddyLibraryQa.findAllByChromosomeAndQualityAssessmentMergedPassAndLibraryDirectoryName(
-                    chromosome, roddyLibraryQa.qualityAssessmentMergedPass, roddyLibraryQa.libraryDirectoryName))
+            RoddyLibraryQa result = CollectionUtils.atMostOneElement(RoddyLibraryQa.findAllByChromosomeAndAbstractBamFileAndLibraryDirectoryName(
+                    chromosome, roddyLibraryQa.abstractBamFile, roddyLibraryQa.libraryDirectoryName))
             if (result && result.id != roddyLibraryQa.id) {
                 return 'unique'
             }

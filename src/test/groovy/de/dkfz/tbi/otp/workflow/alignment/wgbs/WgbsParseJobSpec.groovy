@@ -68,7 +68,7 @@ class WgbsParseJobSpec extends Specification implements DataTest, WorkflowSystem
         WgbsParseJob job = Spy(WgbsParseJob) {
             2 * getRoddyBamFile(workflowStep) >> roddyBamFile
         }
-        job.abstractQualityAssessmentService = Mock(AbstractQualityAssessmentService)
+        job.abstractQualityAssessmentService = Mock(RoddyQualityAssessmentService)
         job.qcTrafficLightService = Mock(QcTrafficLightService)
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
 

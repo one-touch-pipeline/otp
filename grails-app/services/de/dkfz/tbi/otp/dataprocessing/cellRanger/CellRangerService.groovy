@@ -184,7 +184,7 @@ class CellRangerService {
                 throw new NumberFormatException("Failed to parse '${cell.text}'\n")
             }
         }
-        qa.qualityAssessmentMergedPass = singleCellBamFile.findOrSaveQaPass()
+        qa.abstractBamFile = singleCellBamFile
         qa.save(flush: true)
         return qa
     }

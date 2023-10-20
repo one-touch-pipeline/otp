@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.hibernate.annotation.ManagedEntity
+import org.hibernate.Hibernate
 
 import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdEvaluated
 
@@ -29,8 +30,7 @@ import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdEvaluated
  * Keeps all needed QA parameters for externally processed BAM files at the moment only for Sophia
  */
 @ManagedEntity
-class ExternallyProcessedBamFileQualityAssessment extends AbstractQualityAssessment
-        implements QualityAssessmentWithMergedPass, SophiaWorkflowQualityAssessment {
+class ExternallyProcessedBamFileQualityAssessment extends AbstractQualityAssessment implements SophiaWorkflowQualityAssessment {
 
     /**
      * insert size
@@ -38,11 +38,11 @@ class ExternallyProcessedBamFileQualityAssessment extends AbstractQualityAssessm
     @QcThresholdEvaluated
     Double insertSizeCV
 
-    static belongsTo = [
-            qualityAssessmentMergedPass: QualityAssessmentMergedPass,
-    ]
-
     static constraints = {
+        abstractBamFile(validator: {
+            ExternallyProcessedBamFile.isAssignableFrom(Hibernate.getClass(it))
+        })
+
         referenceLength validator: { it == null }
         insertSizeCV nullable: false
         properlyPaired nullable: false

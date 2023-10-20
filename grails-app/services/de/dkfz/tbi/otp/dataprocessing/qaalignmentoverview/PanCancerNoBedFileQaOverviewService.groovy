@@ -86,7 +86,7 @@ class PanCancerNoBedFileQaOverviewService extends AbstractRoddyQaOverviewService
                     "entry${chromosome}.alias = '${chromosome}'",
                     "entry${chromosome}.referenceGenome = referenceGenome",
                     "entry${chromosome}.name = qa${chromosome}.chromosome",
-                    "qa${chromosome}.qualityAssessmentMergedPass = qaPass",
+                    "qa${chromosome}.abstractBamFile = bamFile",
             ]
         } as List<String>)
     }
