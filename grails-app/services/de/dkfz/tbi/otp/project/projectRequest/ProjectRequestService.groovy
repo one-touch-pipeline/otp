@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.ngsdata.ProjectRole
 import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.project.additionalField.*
+import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.security.user.SwitchedUserDeniedException
 import de.dkfz.tbi.otp.utils.*
@@ -67,11 +68,13 @@ class ProjectRequestService {
         Set<ProjectRequestUser> users = projectRequestUserService.saveProjectRequestUsersFromCommands(cmd.users)
         ProjectRequestPersistentState state = projectRequestPersistentStateService
                 .saveProjectRequestPersistentStateForProjectRequest(cmd.projectRequest, users as List)
+        Set<Keyword> newKeywords = cmd.keywords.collect { Keyword.findOrCreateWhere(name: it) } as Set
+
         Map<String, Object> projectRequestParameters = [
                 name                    : cmd.name,
                 state                   : state,
                 description             : cmd.description,
-                keywords                : cmd.keywords,
+                keywords                : newKeywords,
                 endDate                 : cmd.endDate,
                 storageUntil            : resolveStoragePeriodToLocalDate(cmd.storagePeriod, cmd.storageUntil),
                 relatedProjects         : cmd.relatedProjects,
@@ -89,8 +92,22 @@ class ProjectRequestService {
                 users                   : users,
         ]
         if (cmd.projectRequest) {
+            Set<Keyword> keywordsToDelete = cmd.projectRequest.keywords.findAll { Keyword keyword ->
+                !(keyword in newKeywords) &&
+                !Project.createCriteria().list {
+                    keywords {
+                        'in'('id', [keyword.id])
+                    }
+                } && !ProjectRequest.createCriteria().list {
+                    keywords {
+                        'in'('id', [keyword.id])
+                    }
+                    ne('id', cmd.projectRequest.id)
+                }
+            }
             projectRequest = cmd.projectRequest
             InvokerHelper.setProperties(projectRequest, projectRequestParameters)
+            keywordsToDelete*.delete(flush: true)
             logAction(projectRequest, "request edited")
         } else {
             projectRequest = new ProjectRequest(projectRequestParameters)

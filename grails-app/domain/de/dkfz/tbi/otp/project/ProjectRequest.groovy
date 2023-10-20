@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.CommentableWithHistory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.additionalField.AbstractFieldValue
+import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.Entity
 
@@ -42,7 +43,6 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity, Comme
 
     ProjectRequestPersistentState state
     Set<String> customSpeciesWithStrains
-    Set<String> keywords
     Set<SeqCenter> sequencingCenters
     Set<String> customSequencingCenters
     Integer approxNoOfSamples
@@ -94,6 +94,7 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity, Comme
             projectFields     : AbstractFieldValue,
             speciesWithStrains: SpeciesWithStrain,
             sequencingCenters : SeqCenter,
+            keywords          : Keyword,
     ]
 
     static Closure mapping = {

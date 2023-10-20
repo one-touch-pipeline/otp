@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -519,7 +519,7 @@ class ProjectRequestCreationCommand implements Validateable {
         LocalDate storageUntil = projectRequest.storageUntil
         StoragePeriod storagePeriod = storageUntil ? StoragePeriod.USER_DEFINED : StoragePeriod.INFINITELY
 
-        List<String> keywords = projectRequest.keywords as List ?: [null]
+        List<String> keywords = projectRequest.keywords*.name as List ?: [null]
         List<String> speciesWithStrainList = projectRequest.customSpeciesWithStrains as List ?: []
         List<String> seqTypesList = projectRequest.customSeqTypes as List ?: []
         List<String> sequencingCenterList = projectRequest.customSequencingCenters as List ?: []

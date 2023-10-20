@@ -27,7 +27,7 @@
         <g:submitButton name="${[
                 "add"   : "<",
                 "remove": ">",
-        ][action] ?: "undefined"}"/>
+        ][action] ?: "undefined"}" id="${action}-${keyword.name}"/>
         ${action == "add" ? keyword.name : ""}
     </g:form>
 </div>

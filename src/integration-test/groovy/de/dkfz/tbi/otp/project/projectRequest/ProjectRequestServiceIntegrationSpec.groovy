@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -531,7 +531,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         result.project == null
         projectRequestExists ? result.state == projectRequestPersistentState : result.state.beanName == "initial"
         result.customSpeciesWithStrains == cmd.customSpeciesWithStrains as Set
-        result.keywords == cmd.keywords as Set
+        result.keywords*.name as Set == cmd.keywords as Set
         result.sequencingCenters == cmd.sequencingCenters as Set
         result.approxNoOfSamples == cmd.approxNoOfSamples
         result.seqTypes == cmd.seqTypes as Set
@@ -542,7 +542,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         where:
         storagePeriod              | storageUntil               | resultStorageUntil            | projectRequestExists
         StoragePeriod.TEN_YEARS    | null                       | LocalDate.now().plusYears(10) | true
-        StoragePeriod.USER_DEFINED | LocalDate.of(2000, 12, 1) | storageUntil                  | true
+        StoragePeriod.USER_DEFINED | LocalDate.of(2000, 12, 1)  | storageUntil                  | true
         StoragePeriod.INFINITELY   | null                       | null                          | false
     }
 

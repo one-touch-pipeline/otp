@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,18 +23,12 @@ package de.dkfz.tbi.otp.searchability
 
 import grails.gorm.hibernate.annotation.ManagedEntity
 
-import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
 @ManagedEntity
 class Keyword implements Entity {
 
     String name
-
-    static belongsTo = Project
-    static hasMany = [
-            projects: Project,
-    ]
 
     static constraints = {
         name(blank: false, unique: true, size: 1..255)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.project
 import de.dkfz.tbi.otp.ngsdata.TumorEntity
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.additionalField.AbstractFieldValue
+import de.dkfz.tbi.otp.searchability.Keyword
 
 import java.time.LocalDate
 
@@ -45,4 +46,5 @@ trait ProjectPropertiesGivenWithRequest {
 
     Project.ProjectType projectType
 
+    Set<Keyword> keywords = [] as Set
 }

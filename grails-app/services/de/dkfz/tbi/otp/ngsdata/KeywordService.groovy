@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@ import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectRequest
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StringUtils
@@ -43,15 +44,23 @@ class KeywordService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void addKeywordToProject(Keyword keyword, Project project) {
-        project.addToKeywords(keyword)
+        project.keywords.add(keyword)
         project.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     boolean removeKeywordFromProjectAndUnusedKeyword(Keyword keyword, Project project) {
-        keyword.removeFromProjects(project)
+        project.keywords.remove(keyword)
         keyword.save(flush: true)
-        if (keyword.projects.isEmpty()) {
+        if (!Project.createCriteria().list {
+            keywords {
+                'in'('id', [keyword.id])
+            }
+        } && !ProjectRequest.createCriteria().list {
+            keywords {
+                'in'('id', [keyword.id])
+            }
+        }) {
             keyword.delete(flush: true)
             return true
         }
