@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,56 +23,155 @@ package de.dkfz.tbi.otp.workflow.alignment.panCancer
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+
+import java.nio.file.Path
 
 class PanCancerParseJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, RoddyPancanFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                WorkflowStep,
-                Pipeline,
-                LibraryPreparationKit,
-                SampleType,
-                Sample,
-                ReferenceGenomeProjectSeqType,
-                FileType,
-                FastqImportInstance,
-                MergingWorkPackage,
-                RoddyWorkflowConfig,
-                RoddyBamFile,
                 FastqFile,
+                FastqImportInstance,
+                FileType,
+                LibraryPreparationKit,
+                MergingWorkPackage,
+                Pipeline,
+                ReferenceGenomeEntry,
+                ReferenceGenomeProjectSeqType,
+                RoddyBamFile,
+                RoddyMergedBamQa,
+                RoddySingleLaneQa,
+                RoddyWorkflowConfig,
+                Sample,
+                SampleType,
+                WorkflowStep,
         ]
     }
+
+    @TempDir
+    Path tempDir
 
     void "test execution"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
         RoddyBamFile roddyBamFile = createRoddyBamFile(RoddyBamFile)
 
-        PanCancerParseJob job = Spy(PanCancerParseJob) {
-            1 * getRoddyBamFile(workflowStep) >> roddyBamFile
+        Path mergedQAJsonFile = tempDir.resolve("qa.json")
+        mergedQAJsonFile.text = DomainFactory.qaFileContent
+
+        PanCancerParseJob job = Spy(PanCancerParseJob)
+        job.roddyQualityAssessmentService = new RoddyQualityAssessmentService()
+        job.roddyQualityAssessmentService.roddyBamFileService = Mock(RoddyBamFileService) {
+            getWorkSingleLaneQAJsonFiles(_) >> [(roddyBamFile.seqTracks.first()): mergedQAJsonFile]
+            getWorkMergedQAJsonFile(_) >> mergedQAJsonFile
+            getWorkMergedQATargetExtractJsonFile(_) >> mergedQAJsonFile
         }
-        job.abstractQualityAssessmentService = Mock(RoddyQualityAssessmentService)
+        job.roddyQualityAssessmentService.referenceGenomeService = new ReferenceGenomeService()
+        job.roddyQualityAssessmentService.abstractBamFileService = new AbstractBamFileService()
         job.qcTrafficLightService = Mock(QcTrafficLightService)
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
+        job.getRoddyBamFile(workflowStep) >> roddyBamFile
 
         when:
         job.execute(workflowStep)
 
         then:
-        1 * job.abstractQualityAssessmentService.parseRoddySingleLaneQaStatistics(roddyBamFile)
-        1 * job.abstractQualityAssessmentService.parseRoddyMergedBamQaStatistics(roddyBamFile)
-        1 * job.abstractQualityAssessmentService.saveCoverageToRoddyBamFile(roddyBamFile)
+        List<RoddySingleLaneQa> singleLaneQa = RoddySingleLaneQa.findAllByAbstractBamFile(roddyBamFile)
+        singleLaneQa.each { qa ->
+            DomainFactory.qaValuesProperties[qa.chromosome].each { k, v ->
+                assert qa."${k}" == v
+            }
+        }
+        List<RoddyMergedBamQa> mergedQa = RoddyMergedBamQa.findAllByAbstractBamFile(roddyBamFile)
+        mergedQa.each { qa ->
+            DomainFactory.qaValuesProperties[qa.chromosome].each { k, v ->
+                assert qa."${k}" == v
+            }
+        }
+
+        roddyBamFile.coverage == 0.011
+        roddyBamFile.coverageWithN == 1866013.0
+
         1 * job.qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(roddyBamFile, _)
         1 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
+        roddyBamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED
+    }
+
+    void "test execute, when QA exists, objects should be reused"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep()
+        RoddyBamFile roddyBamFile = createRoddyBamFile(RoddyBamFile)
+        List<RoddyMergedBamQa> existingMergedQa = DomainFactory.qaValuesProperties.collect { k, v ->
+            new RoddyMergedBamQa(v + [
+                    abstractBamFile              : roddyBamFile,
+                    chromosome8QcBasesMapped     : 999,
+                    percentageMatesOnDifferentChr: 777.123,
+            ]).save(flush: true)
+        }
+        List<RoddySingleLaneQa> existingSingleLaneQa = DomainFactory.qaValuesProperties.collect { k, v ->
+            new RoddySingleLaneQa(v + [
+                    abstractBamFile              : roddyBamFile,
+                    seqTrack                     : roddyBamFile.seqTracks.first(),
+                    chromosome8QcBasesMapped     : 999,
+                    percentageMatesOnDifferentChr: 777.123,
+            ]).save(flush: true)
+        }
+
+        Path mergedQAJsonFile = tempDir.resolve("qa.json")
+        mergedQAJsonFile.text = DomainFactory.qaFileContent
+
+        PanCancerParseJob job = Spy(PanCancerParseJob)
+        job.roddyQualityAssessmentService = new RoddyQualityAssessmentService()
+        job.roddyQualityAssessmentService.roddyBamFileService = Mock(RoddyBamFileService) {
+            getWorkSingleLaneQAJsonFiles(_) >> [(roddyBamFile.seqTracks.first()): mergedQAJsonFile]
+            getWorkMergedQAJsonFile(_) >> mergedQAJsonFile
+            getWorkMergedQATargetExtractJsonFile(_) >> mergedQAJsonFile
+        }
+        job.roddyQualityAssessmentService.referenceGenomeService = new ReferenceGenomeService()
+        job.roddyQualityAssessmentService.abstractBamFileService = new AbstractBamFileService()
+        job.qcTrafficLightService = Mock(QcTrafficLightService)
+        job.workflowStateChangeService = Mock(WorkflowStateChangeService)
+        job.getRoddyBamFile(workflowStep) >> roddyBamFile
+
+        when:
+        job.execute(workflowStep)
+
+        then:
+        List<RoddySingleLaneQa> singleLaneQa = RoddySingleLaneQa.findAllByAbstractBamFile(roddyBamFile)
+        singleLaneQa.each { qa ->
+            DomainFactory.qaValuesProperties[qa.chromosome].each { k, v ->
+                assert qa."${k}" == v
+            }
+        }
+        CollectionUtils.containSame(singleLaneQa, existingSingleLaneQa)
+
+        List<RoddyMergedBamQa> mergedQa = RoddyMergedBamQa.findAllByAbstractBamFile(roddyBamFile)
+        mergedQa.each { qa ->
+            DomainFactory.qaValuesProperties[qa.chromosome].each { k, v ->
+                assert qa."${k}" == v
+            }
+        }
+        CollectionUtils.containSame(mergedQa, existingMergedQa)
+
+        roddyBamFile.coverage == 0.011
+        roddyBamFile.coverageWithN == 1866013.0
+
+        1 * job.qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(roddyBamFile, _)
+        1 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
+        roddyBamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED
     }
 }

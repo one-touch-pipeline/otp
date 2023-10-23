@@ -37,7 +37,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 class PanCancerParseJob extends AbstractJob implements PanCancerShared {
 
     @Autowired
-    RoddyQualityAssessmentService abstractQualityAssessmentService
+    RoddyQualityAssessmentService roddyQualityAssessmentService
 
     @Autowired
     QcTrafficLightService qcTrafficLightService
@@ -54,9 +54,9 @@ class PanCancerParseJob extends AbstractJob implements PanCancerShared {
         // was not processed by flush()
         roddyBamFile.containedSeqTracks
 
-        abstractQualityAssessmentService.parseRoddySingleLaneQaStatistics(roddyBamFile)
-        RoddyQualityAssessment qa = abstractQualityAssessmentService.parseRoddyMergedBamQaStatistics(roddyBamFile)
-        abstractQualityAssessmentService.saveCoverageToRoddyBamFile(roddyBamFile)
+        roddyQualityAssessmentService.parseRoddySingleLaneQaStatistics(roddyBamFile)
+        RoddyQualityAssessment qa = roddyQualityAssessmentService.parseRoddyMergedBamQaStatistics(roddyBamFile)
+        roddyQualityAssessmentService.saveCoverageToRoddyBamFile(roddyBamFile)
         roddyBamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.FINISHED
         qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(roddyBamFile, (QcTrafficLightValue) qa)
         roddyBamFile.save(flush: true)

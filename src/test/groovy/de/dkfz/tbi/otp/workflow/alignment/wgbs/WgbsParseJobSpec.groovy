@@ -68,7 +68,7 @@ class WgbsParseJobSpec extends Specification implements DataTest, WorkflowSystem
         WgbsParseJob job = Spy(WgbsParseJob) {
             2 * getRoddyBamFile(workflowStep) >> roddyBamFile
         }
-        job.abstractQualityAssessmentService = Mock(RoddyQualityAssessmentService)
+        job.roddyQualityAssessmentService = Mock(RoddyQualityAssessmentService)
         job.qcTrafficLightService = Mock(QcTrafficLightService)
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
 
@@ -76,11 +76,11 @@ class WgbsParseJobSpec extends Specification implements DataTest, WorkflowSystem
         job.execute(workflowStep)
 
         then:
-        1 * job.abstractQualityAssessmentService.parseRoddySingleLaneQaStatistics(roddyBamFile)
-        1 * job.abstractQualityAssessmentService.parseRoddyMergedBamQaStatistics(roddyBamFile)
-        1 * job.abstractQualityAssessmentService.saveCoverageToRoddyBamFile(roddyBamFile)
+        1 * job.roddyQualityAssessmentService.parseRoddySingleLaneQaStatistics(roddyBamFile)
+        1 * job.roddyQualityAssessmentService.parseRoddyMergedBamQaStatistics(roddyBamFile)
+        1 * job.roddyQualityAssessmentService.saveCoverageToRoddyBamFile(roddyBamFile)
         1 * job.qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(roddyBamFile, _)
-        methodCall * job.abstractQualityAssessmentService.parseRoddyLibraryQaStatistics(roddyBamFile)
+        methodCall * job.roddyQualityAssessmentService.parseRoddyLibraryQaStatistics(roddyBamFile)
 
         where:
         multipleLibraries || methodCall

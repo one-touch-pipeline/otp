@@ -38,7 +38,7 @@ class WgbsParseJob extends PanCancerParseJob {
 
         final RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
         if (roddyBamFile.hasMultipleLibraries()) {
-            abstractQualityAssessmentService.parseRoddyLibraryQaStatistics(roddyBamFile)
+            roddyQualityAssessmentService.parseRoddyLibraryQaStatistics(roddyBamFile)
         }
     }
 }
