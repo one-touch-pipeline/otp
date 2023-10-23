@@ -158,6 +158,7 @@ class AddProjectInfoCommand implements Validateable {
         comment nullable: true
 
         projectInfoFile(validator: { val, obj ->
+            // max file size is limited via spring: grails.controllers.upload.maxFileSize
             if (val.empty) {
                 return "empty"
             }
@@ -166,9 +167,6 @@ class AddProjectInfoCommand implements Validateable {
             }
             if (ProjectInfo.findAllByProjectAndFileName(obj.project ?: obj.projectSelectionService.requestedProject, val.originalFilename).size() != 0) {
                 return "duplicate"
-            }
-            if (val.size > ProjectService.PROJECT_INFO_MAX_SIZE) {
-                return "size"
             }
         })
     }

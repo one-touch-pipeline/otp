@@ -81,7 +81,6 @@ class ProjectService {
     static final String RUN_FEATURE_COUNTS_DEXSEQ = "RUN_FEATURE_COUNTS_DEXSEQ"
 
     static final String PROJECT_INFO = "projectInfo"
-    static final Long PROJECT_INFO_MAX_SIZE = 20 * FACTOR_1024 * FACTOR_1024
 
     @Autowired
     RemoteShellHelper remoteShellHelper

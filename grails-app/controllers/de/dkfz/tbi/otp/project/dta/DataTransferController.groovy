@@ -31,7 +31,6 @@ import org.springframework.web.multipart.MultipartFile
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
@@ -366,15 +365,13 @@ trait MultipartFilesCommand implements Validateable {
     List<MultipartFile> files
 
     static constraints = {
+        // max file size is limited via spring: grails.controllers.upload.maxFileSize
         files validator: { val, obj ->
             val && val.every { file ->
                 if (file.empty) {
                     return "empty"
                 }
-                if (!OtpPathValidator.isValidPathComponent(file.originalFilename)) {
-                    return "invalid.name"
-                }
-                return (file.size > ProjectService.PROJECT_INFO_MAX_SIZE) ? 'size' : true
+                return OtpPathValidator.isValidPathComponent(file.originalFilename) ? true : "invalid.name"
             }
         }
     }

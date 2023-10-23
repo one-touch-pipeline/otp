@@ -101,8 +101,8 @@ grails.enable.native2ascii = true
 grails.web.disable.multipart=false
 
 // max upload size
-grails.controllers.upload.maxFileSize = 10*1024*1024
-grails.controllers.upload.maxRequestSize = 10*1024*1024
+grails.controllers.upload.maxFileSize = 100 * 1024 * 1024
+grails.controllers.upload.maxRequestSize = 100 * 1024 * 1024
 
 // request parameters to mask when logging exceptions
 grails.exceptionresolver.params.exclude = ['password']

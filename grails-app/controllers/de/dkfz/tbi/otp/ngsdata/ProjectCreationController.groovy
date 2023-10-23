@@ -336,14 +336,12 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
         usersToCopyFromBaseProject(nullable: true)
         tumorEntity(nullable: true)
         projectInfoFile(nullable: true, validator: { val, obj ->
+            // max file size is limited via spring: grails.controllers.upload.maxFileSize
             if (val?.empty) {
                 return "empty"
             }
             if (val && !OtpPathValidator.isValidPathComponent(val.originalFilename)) {
                 return "invalid"
-            }
-            if (val?.size > ProjectService.PROJECT_INFO_MAX_SIZE) {
-                return "size"
             }
         })
         projectInfoToCopy(nullable: true)
