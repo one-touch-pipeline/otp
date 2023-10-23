@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -189,6 +189,13 @@ class RnaQualityAssessment extends RoddyQualityAssessment implements QcTrafficLi
         abstractBamFile(validator: {
             RnaRoddyBamFile.isAssignableFrom(Hibernate.getClass(it))
         })
+
+        chromosome validator: { String chromosome, RnaQualityAssessment qa ->
+            if (RnaQualityAssessment.countByIdNotEqualAndAbstractBamFile(qa.id, qa.abstractBamFile)) {
+                return 'unique'
+            }
+            return chromosome == ALL
+        }
 
         genomeWithoutNCoverageQcBases validator: { it == null }
         insertSizeCV validator: { it == null }

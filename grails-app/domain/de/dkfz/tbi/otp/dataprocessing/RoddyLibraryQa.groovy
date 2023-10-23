@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,8 +23,6 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.hibernate.annotation.ManagedEntity
 
-import de.dkfz.tbi.otp.utils.CollectionUtils
-
 @ManagedEntity
 class RoddyLibraryQa extends RoddyQualityAssessment {
 
@@ -32,9 +30,8 @@ class RoddyLibraryQa extends RoddyQualityAssessment {
 
     static constraints = {
         chromosome validator: { String chromosome, RoddyLibraryQa roddyLibraryQa ->
-            RoddyLibraryQa result = CollectionUtils.atMostOneElement(RoddyLibraryQa.findAllByChromosomeAndAbstractBamFileAndLibraryDirectoryName(
-                    chromosome, roddyLibraryQa.abstractBamFile, roddyLibraryQa.libraryDirectoryName))
-            if (result && result.id != roddyLibraryQa.id) {
+            if (RoddyLibraryQa.countByIdNotEqualAndChromosomeAndAbstractBamFileAndLibraryDirectoryName(roddyLibraryQa.id,
+                    chromosome, roddyLibraryQa.abstractBamFile, roddyLibraryQa.libraryDirectoryName)) {
                 return 'unique'
             }
         }

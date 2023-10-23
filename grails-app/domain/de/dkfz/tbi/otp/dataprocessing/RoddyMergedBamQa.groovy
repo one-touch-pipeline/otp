@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,16 +24,13 @@ package de.dkfz.tbi.otp.dataprocessing
 import grails.gorm.hibernate.annotation.ManagedEntity
 
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightValue
-import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @ManagedEntity
 class RoddyMergedBamQa extends RoddyQualityAssessment implements QcTrafficLightValue, SophiaWorkflowQualityAssessment {
 
     static constraints = {
         chromosome(validator: { val, obj ->
-            RoddyMergedBamQa roddyMergedBamQa = CollectionUtils.atMostOneElement(
-                    RoddyMergedBamQa.findAllByAbstractBamFileAndChromosome(obj.abstractBamFile, val))
-            if (roddyMergedBamQa && roddyMergedBamQa != obj) {
+            if (RoddyMergedBamQa.countByIdNotEqualAndAbstractBamFileAndChromosome(obj.id, obj.abstractBamFile, val)) {
                 return "unique"
             }
         })

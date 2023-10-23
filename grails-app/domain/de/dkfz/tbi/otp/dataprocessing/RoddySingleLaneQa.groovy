@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.dataprocessing
 import grails.gorm.hibernate.annotation.ManagedEntity
 
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @ManagedEntity
 class RoddySingleLaneQa extends RoddyQualityAssessment {
@@ -37,9 +36,8 @@ class RoddySingleLaneQa extends RoddyQualityAssessment {
 
     static constraints = {
         chromosome validator: { String chromosome, RoddySingleLaneQa roddySingleLaneQa ->
-            RoddySingleLaneQa result = CollectionUtils.atMostOneElement(RoddySingleLaneQa.findAllByChromosomeAndSeqTrackAndAbstractBamFile(
-                    chromosome, roddySingleLaneQa.seqTrack, roddySingleLaneQa.abstractBamFile))
-            if (result && result.id != roddySingleLaneQa.id) {
+            if (RoddySingleLaneQa.countByIdNotEqualAndChromosomeAndSeqTrackAndAbstractBamFile(roddySingleLaneQa.id,
+                    chromosome, roddySingleLaneQa.seqTrack, roddySingleLaneQa.abstractBamFile)) {
                 return 'unique'
             }
         }
