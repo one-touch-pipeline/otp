@@ -132,7 +132,7 @@ class RoddyWorkflowConfigService {
         FileSystem fs = fileSystemService.remoteFileSystem
         Path configFile = fs.getPath(config.configFilePath)
 
-        fileService.ensureFileIsReadableAndNotEmpty(configFile, configService.defaultRealm)
+        fileService.ensureFileIsReadableAndNotEmpty(configFile)
         List<String> patternHelper = [
                 "${Pattern.quote(config.pipeline.name.name())}",
                 "${Pattern.quote(config.seqType.roddyName)}",

@@ -87,7 +87,7 @@ abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl implements 
         if (allFinished) {
             final int finishedCount = ClusterJob.countByProcessingStepAndCheckStatus(processingStep, ClusterJob.CheckStatus.FINISHED)
             log.info "All ${finishedCount} cluster jobs have finished."
-            /* The specification of {@link MonitoringJob#finished(String, Realm)} says that this
+            /* The specification of {@link MonitoringJob#finished(String)} says that this
              * finished() method shall return quickly. So call callExecute() asynchronously.
              */
             callExecute()

@@ -331,11 +331,6 @@ abstract class AbstractBamFile implements CommentableWithProject, Entity {
                 "this: ${this}\nprocessableBamFileInProjectFolder: ${processableBamFileInProjectFolder}")
     }
 
-    @Deprecated
-    Realm getRealm() {
-        return project?.realm
-    }
-
     /**
      * @deprecated use {@link AbstractAbstractBamFileService#getPathForFurtherProcessingNoCheck} and
      * {@link AbstractBamFileServiceFactoryService#getService()}

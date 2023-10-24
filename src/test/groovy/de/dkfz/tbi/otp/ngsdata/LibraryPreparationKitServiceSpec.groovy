@@ -217,7 +217,6 @@ class LibraryPreparationKitServiceSpec extends AbstractMetadataFieldsServiceSpec
         adapterFile.text = content
 
         LibraryPreparationKit kit = createLibraryPreparationKit(adapterFile: adapterFile.toAbsolutePath())
-        Realm realm = new Realm()
 
         service.fileService = new FileService()
         service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
@@ -225,7 +224,7 @@ class LibraryPreparationKitServiceSpec extends AbstractMetadataFieldsServiceSpec
         }
 
         expect:
-        content == service.getAdapterFileContentToRender(kit, realm)
+        content == service.getAdapterFileContentToRender(kit)
 
         where:
         content << ["some content", ""]
@@ -239,7 +238,6 @@ class LibraryPreparationKitServiceSpec extends AbstractMetadataFieldsServiceSpec
         new RandomAccessFile(adapterFile.toFile(), "rw").length = 5242880L + 1L
 
         LibraryPreparationKit kit = createLibraryPreparationKit(adapterFile: adapterFile.toAbsolutePath())
-        Realm realm = new Realm()
 
         service.fileService = new FileService()
         service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
@@ -247,7 +245,7 @@ class LibraryPreparationKitServiceSpec extends AbstractMetadataFieldsServiceSpec
         }
 
         when:
-        service.getAdapterFileContentToRender(kit, realm)
+        service.getAdapterFileContentToRender(kit)
 
         then:
         AssertionError e = thrown(AssertionError)
@@ -264,7 +262,6 @@ class LibraryPreparationKitServiceSpec extends AbstractMetadataFieldsServiceSpec
         Files.setPosixFilePermissions(adapterFile, [] as Set)
 
         LibraryPreparationKit kit = createLibraryPreparationKit(adapterFile: adapterFile.toAbsolutePath())
-        Realm realm = new Realm()
 
         service.fileService = new FileService()
         service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
@@ -272,7 +269,7 @@ class LibraryPreparationKitServiceSpec extends AbstractMetadataFieldsServiceSpec
         }
 
         when:
-        service.getAdapterFileContentToRender(kit, realm)
+        service.getAdapterFileContentToRender(kit)
 
         then:
         thrown(AssertionError)

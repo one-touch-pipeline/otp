@@ -127,7 +127,6 @@ class FastqcExecuteWesPipelineJobSpec extends Specification implements DataTest,
                 FastqcProcessedFile,
                 WorkflowArtefact,
                 WorkflowStep,
-                Realm,
                 ProcessingOption,
         ]
     }

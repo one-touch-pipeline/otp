@@ -73,7 +73,6 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.*
 import java.nio.file.attribute.PosixFilePermission
 
-import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.REALM_DEFAULT_VALUE
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 // =============================================
@@ -509,10 +508,7 @@ class MetaDataExport {
             assert !Files.exists(outputFile): "Original outputfile ${outputFileOrg} already exists"
         }
 
-        String realmName = fileSystemService.processingOptionService.findOptionAsString(REALM_DEFAULT_VALUE)
-        Realm realm = CollectionUtils.atMostOneElement(Realm.findAllByName(realmName))
-
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputFile.parent, realm)
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputFile.parent)
 
         writeMetadata(rawSequenceFiles, outputFile, exportOnlyWhiteListedColumns)
         fileService.setPermission(outputFile, [

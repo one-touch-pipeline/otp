@@ -53,9 +53,6 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
     String dirName
     String dirAnalysis
 
-    @Deprecated
-    Realm realm
-
     /**
      * Historic flag to signal whether the individualPrefix field has to be unqiue or not.
      *
@@ -120,7 +117,6 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
 
     static belongsTo = [
             projectGroup: ProjectGroup,
-            realm       : Realm,
     ]
 
     static mappedBy = [
@@ -151,8 +147,6 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
         dirName(blank: false, unique: true, shared: "relativePath")
 
         dirAnalysis(nullable: true, shared: "absolutePath")
-
-        realm(nullable: false)
 
         projectGroup(nullable: true)
 
@@ -189,7 +183,6 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
         processingPriority index: "project_processing_priority_idx"
         name index: "project_name_idx"
         nameInMetadataFiles index: "project_name_in_metadata_files_idx"
-        realm index: "project_realm_idx"
         unixGroup index: "project_unix_group_idx"
         dirAnalysis type: "text"
         description type: "text"

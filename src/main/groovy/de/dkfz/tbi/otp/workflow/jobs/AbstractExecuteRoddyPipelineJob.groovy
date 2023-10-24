@@ -85,7 +85,7 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
         )
         logService.addSimpleLogEntry(workflowStep, "The final xml:\n${xmlConfig}")
 
-        fileService.createFileWithContent(confFile, xmlConfig, null, FileService.DEFAULT_FILE_PERMISSION, true)
+        fileService.createFileWithContent(confFile, xmlConfig, FileService.DEFAULT_FILE_PERMISSION, true)
 
         createAdditionalConfigFiles(workflowStep, confDir)
 

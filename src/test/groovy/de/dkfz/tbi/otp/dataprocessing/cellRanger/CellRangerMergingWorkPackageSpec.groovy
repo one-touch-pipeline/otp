@@ -40,7 +40,6 @@ class CellRangerMergingWorkPackageSpec extends Specification implements CellRang
                 Individual,
                 Pipeline,
                 Project,
-                Realm,
                 ReferenceGenome,
                 ReferenceGenomeIndex,
                 SeqType,

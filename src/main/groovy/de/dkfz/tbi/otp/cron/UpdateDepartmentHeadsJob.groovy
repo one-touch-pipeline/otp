@@ -28,7 +28,6 @@ import org.grails.web.json.JSONException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.security.User
@@ -54,9 +53,6 @@ class UpdateDepartmentHeadsJob extends AbstractScheduledJob {
 
     @Autowired
     RemoteShellHelper remoteShellHelper
-
-    @Autowired
-    ConfigService configService
 
     @Autowired
     ProcessingOptionService processingOptionService
@@ -109,7 +105,7 @@ class UpdateDepartmentHeadsJob extends AbstractScheduledJob {
 
     protected JSONArray getDepartmentInfo() {
         String call = processingOptionService.findOptionAsString(DEPARTMENT_WITH_ALL_INFO_SCRIPT)
-        ProcessOutput output = remoteShellHelper.executeCommandReturnProcessOutput(configService.defaultRealm, call).assertExitCodeZeroAndStderrEmpty()
+        ProcessOutput output = remoteShellHelper.executeCommandReturnProcessOutput(call).assertExitCodeZeroAndStderrEmpty()
         return convertJsonArrayStringToList(output.stdout)
     }
 

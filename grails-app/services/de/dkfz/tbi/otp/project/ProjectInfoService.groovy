@@ -104,16 +104,12 @@ class ProjectInfoService {
     private Path uploadProjectInfoToProjectFolder(ProjectInfo projectInfo, byte[] content) {
         Path file = getPath(projectInfo)
 
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(file.parent, projectInfo.project.realm,
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(file.parent,
                 '', FileService.OWNER_DIRECTORY_PERMISSION_STRING)
-        fileService.createFileWithContent(file, content, projectInfo.project.realm, [PosixFilePermission.OWNER_READ] as Set)
-        fileService.setGroupViaBash(file, projectInfo.project.realm, projectInfo.project.unixGroup)
+        fileService.createFileWithContent(file, content, [PosixFilePermission.OWNER_READ] as Set)
+        fileService.setGroupViaBash(file, projectInfo.project.unixGroup)
 
         return file
-    }
-
-    FileSystem getRemoteFileSystemForProject(Project project) {
-        return fileSystemService.getRemoteFileSystem(project.realm)
     }
 
     Path getPath(ProjectInfo projectInfo) {

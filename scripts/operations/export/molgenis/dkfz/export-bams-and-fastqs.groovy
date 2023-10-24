@@ -322,7 +322,6 @@ class MolgenisExporter {
 }
 
 String timestamp = TimeFormats.DATE_TIME_DASHES.getFormattedDate(new Date())
-Realm realm = ctx.configService.defaultRealm
 
 final Path baseDirectory = ctx.fileService.toPath(ctx.configService.scriptOutputPath, ctx.fileSystemService.getRemoteFilesystem)
 final Path outputExportDirectory = baseDirectory.resolve("export").resolve("molgenis").resolve(timestamp)
@@ -349,7 +348,7 @@ projects.each { Project project ->
     } as List<AbstractBamFile>
 
     final Path outputDirectory = outputExportDirectory.resolve(project.name)
-    ctx.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDirectory, realm)
+    ctx.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDirectory)
     ctx.fileService.setPermission(outputDirectory, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
 
     MolgenisExporter exporter = new MolgenisExporter(ctx: ctx)

@@ -33,7 +33,7 @@ import de.dkfz.tbi.otp.job.processing.*
  * A {@link Job} that watches for cluster jobs to finish. It also checks whether the job has logged a message in
  * the job status log file and fails if at least one job was not successful.
  *
- * It requires the input job parameters for cluster job IDs and realms to be set.
+ * It requires the input job parameters for cluster job IDs.
  *
  * @see JobParameterKeys
  *

@@ -29,7 +29,6 @@ import de.dkfz.roddy.execution.jobs.*
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.processing.ClusterJobManagerFactoryService
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.workflow.shared.RunningClusterJobException
 import de.dkfz.tbi.otp.workflowExecution.*
 
@@ -39,7 +38,6 @@ class ClusterAccessServiceSpec extends Specification implements ServiceUnitTest<
     Class[] getDomainClassesToMock() {
         return [
                 ClusterJob,
-                Realm,
                 WorkflowStep,
         ]
     }

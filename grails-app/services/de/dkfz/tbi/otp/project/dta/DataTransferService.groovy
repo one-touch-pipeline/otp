@@ -30,7 +30,6 @@ import de.dkfz.tbi.otp.FileNotFoundException
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.utils.FileNameGenerator
 
@@ -133,11 +132,10 @@ class DataTransferService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     private Path uploadDataTransferDocumentToRemoteFileSystem(DataTransferDocument transferDocument, byte[] fileContent) {
         Path path = getPathOnRemoteFileSystem(transferDocument)
-        Realm realm = transferDocument.dataTransfer.dataTransferAgreement.project.realm
 
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path.parent, realm, '', FileService.OWNER_DIRECTORY_PERMISSION_STRING)
-        fileService.createFileWithContent(path, fileContent, realm, [PosixFilePermission.OWNER_READ] as Set<PosixFilePermission>)
-        fileService.setGroupViaBash(path, realm, transferDocument.dataTransfer.dataTransferAgreement.project.unixGroup)
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path.parent, '', FileService.OWNER_DIRECTORY_PERMISSION_STRING)
+        fileService.createFileWithContent(path, fileContent, [PosixFilePermission.OWNER_READ] as Set<PosixFilePermission>)
+        fileService.setGroupViaBash(path, transferDocument.dataTransfer.dataTransferAgreement.project.unixGroup)
 
         return path
     }

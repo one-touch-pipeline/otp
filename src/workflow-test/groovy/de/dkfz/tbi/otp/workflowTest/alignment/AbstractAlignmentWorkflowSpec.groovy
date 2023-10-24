@@ -49,8 +49,8 @@ abstract class AbstractAlignmentWorkflowSpec extends AbstractDecidedWorkflowSpec
             rawSequenceFile.save(flush: true)
             Path linkFastqFile = lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile)
             Path linkViewByPid = lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile)
-            fileService.createLink(linkFastqFile, sourceFastqFile, realm)
-            fileService.createLink(linkViewByPid, linkFastqFile, realm)
+            fileService.createLink(linkFastqFile, sourceFastqFile)
+            fileService.createLink(linkViewByPid, linkFastqFile)
         }
     }
 
@@ -60,7 +60,7 @@ abstract class AbstractAlignmentWorkflowSpec extends AbstractDecidedWorkflowSpec
     void linkReferenceGenomeDirectoryToReference(ReferenceGenome referenceGenome) {
         Path target = referenceDataDirectory.resolve("reference-genomes").resolve(referenceGenome.path)
         Path link = remoteFileSystem.getPath(referenceGenomeService.referenceGenomeDirectory(referenceGenome, false).absolutePath)
-        fileService.createLink(link, target, realm)
+        fileService.createLink(link, target)
     }
 
     /**
@@ -69,6 +69,6 @@ abstract class AbstractAlignmentWorkflowSpec extends AbstractDecidedWorkflowSpec
     void linkAdapterDirectoryToReference(LibraryPreparationKit libraryPreparationKit) {
         Path target = referenceDataDirectory.resolve("adapters")
         Path link = remoteFileSystem.getPath(libraryPreparationKit.adapterFile).parent
-        fileService.createLink(link, target, realm)
+        fileService.createLink(link, target)
     }
 }

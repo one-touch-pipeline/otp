@@ -110,7 +110,7 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
             linkFileUtils.createAndValidateLinks([
                     (tumorInsertSizeFile)  : finalTumorInsertSizeFile,
                     (controlInsertSizeFile): finalControlInsertSizeFile,
-            ], realm)
+            ])
         }
     }
 

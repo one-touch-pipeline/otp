@@ -34,7 +34,6 @@ class IndividualSpec extends Specification implements DataTest, DomainFactoryCor
         return [
                 Individual,
                 Project,
-                Realm,
                 Sample,
                 SampleType,
                 SeqType,

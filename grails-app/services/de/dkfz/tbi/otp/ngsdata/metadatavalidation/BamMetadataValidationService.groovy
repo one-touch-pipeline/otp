@@ -108,7 +108,7 @@ class BamMetadataValidationService extends MetadataValidationService {
     }
 
     void checkFile(Path file, Problems problems) {
-        if (!fileService.fileIsReadable(file, configService.defaultRealm)) {
+        if (!fileService.fileIsReadable(file)) {
             problems.addProblem(Collections.emptySet(), LogLevel.ERROR, "${pathForMessage(file)} is not readable.")
         } else if (Files.size(file) == 0L) {
             problems.addProblem(Collections.emptySet(), LogLevel.WARNING, "${pathForMessage(file)} is empty.")

@@ -29,7 +29,6 @@ import org.springframework.web.multipart.MultipartFile
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.FileNameGenerator
@@ -143,8 +142,7 @@ class DataTransferAgreementService {
             throw new FileNotFoundException("The DTA document ${dtaDocument?.fileName} was not found.")
         }
 
-        Path file = fileSystemService.getRemoteFileSystem(dtaDocument.dataTransferAgreement.project.realm)
-                .getPath(getPathOnRemoteFileSystem(dtaDocument).toString())
+        Path file = fileSystemService.remoteFileSystem.getPath(getPathOnRemoteFileSystem(dtaDocument).toString())
 
         if (!Files.exists(file)) {
             throw new FileNotFoundException("The DTA document ${dtaDocument.fileName} was not found.")
@@ -193,14 +191,12 @@ class DataTransferAgreementService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     private Path uploadDataTransferAgreementToRemoteFileSystem(DataTransferAgreementDocument dtaFile, byte[] fileContent) {
         Path absoluteFilePath = getPathOnRemoteFileSystem(dtaFile)
-        Realm realm = dtaFile.dataTransferAgreement.project.realm
-        Path path = fileSystemService.getRemoteFileSystem(realm).getPath(absoluteFilePath.toString())
 
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path.parent, realm, '', FileService.OWNER_DIRECTORY_PERMISSION_STRING)
-        fileService.createFileWithContent(path, fileContent, realm, [PosixFilePermission.OWNER_READ] as Set<PosixFilePermission>)
-        executionHelperService.setGroup(realm, new File(absoluteFilePath.toString()), dtaFile.dataTransferAgreement.project.unixGroup)
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(absoluteFilePath.parent, '', FileService.OWNER_DIRECTORY_PERMISSION_STRING)
+        fileService.createFileWithContent(absoluteFilePath, fileContent, [PosixFilePermission.OWNER_READ] as Set<PosixFilePermission>)
+        fileService.setGroupViaBash(absoluteFilePath, dtaFile.dataTransferAgreement.project.unixGroup)
 
-        return path
+        return absoluteFilePath
     }
 
     /**

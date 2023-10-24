@@ -40,7 +40,7 @@ import de.dkfz.tbi.otp.job.scheduler.Scheduler
 interface MonitoringJob extends EndStateAwareJob {
 
     /**
-     * Callback to inform that the tracked cluster job finished on the Realm.
+     * Callback to inform that the tracked cluster job finished.
      *
      * <p>
      * An implementing class should use this method to have custom code

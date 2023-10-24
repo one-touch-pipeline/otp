@@ -71,6 +71,6 @@ class WgbsPrepareJob extends AbstractPrepareJob implements PanCancerShared {
         Path metadataFile = roddyBamFileService.getWorkMetadataTableFile(roddyBamFile)
         String content = roddyConfigValueService.createMetadataTable(seqTracks)
         Files.deleteIfExists(metadataFile)
-        fileService.createFileWithContent(metadataFile, content, null, fileService.DEFAULT_BAM_FILE_PERMISSION)
+        fileService.createFileWithContent(metadataFile, content, fileService.DEFAULT_BAM_FILE_PERMISSION)
     }
 }

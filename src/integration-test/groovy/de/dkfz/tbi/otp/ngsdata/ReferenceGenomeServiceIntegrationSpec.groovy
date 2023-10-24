@@ -74,7 +74,6 @@ class ReferenceGenomeServiceIntegrationSpec extends Specification implements Use
 
         File referenceGenomeDirectory = Files.createDirectories(tempDir.resolve("reference_genomes/${referenceGenome.path}")).toFile()
         DomainFactory.createProcessingOptionBasePathReferenceGenome(referenceGenomeDirectory.parent)
-        DomainFactory.createDefaultRealmWithProcessingOption()
     }
 
     void cleanup() {
@@ -123,8 +122,6 @@ class ReferenceGenomeServiceIntegrationSpec extends Specification implements Use
         String chromosomeSuffix = ""
         Set<Species> species = [createSpecies(), createSpecies()] as Set
         Set<SpeciesWithStrain> speciesWithStrain = [createSpeciesWithStrain(), createSpeciesWithStrain()] as Set
-
-        DomainFactory.createDefaultRealmWithProcessingOption()
 
         Files.createDirectories(tempDir.resolve("reference_genomes").resolve(path))
 

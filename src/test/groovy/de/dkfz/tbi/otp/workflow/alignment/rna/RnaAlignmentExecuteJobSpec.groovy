@@ -66,7 +66,6 @@ class RnaAlignmentExecuteJobSpec extends Specification implements DataTest, Work
                 ProcessingOption,
                 ProcessingPriority,
                 Project,
-                Realm,
                 ReferenceGenomeProjectSeqType,
                 RoddyBamFile,
                 RoddyWorkflowConfig,

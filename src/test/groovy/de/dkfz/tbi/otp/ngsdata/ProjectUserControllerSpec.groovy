@@ -48,7 +48,6 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
                 ProcessingOption,
                 Project,
                 ProjectRole,
-                Realm,
                 Role,
                 User,
                 UserProjectRole,

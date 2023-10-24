@@ -25,12 +25,12 @@ import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.file.FileSystem
 
 @Transactional
+@Deprecated
 class ClusterJobLoggingService {
 
     final static CLUSTER_LOG_BASE_DIR = 'clusterLog'
@@ -47,12 +47,12 @@ class ClusterJobLoggingService {
         return new File("${configService.loggingRootPath}/${CLUSTER_LOG_BASE_DIR}/${dateDirectory}")
     }
 
-    File createAndGetLogDirectory(Realm realm, ProcessingStep processingStep) {
+    File createAndGetLogDirectory(ProcessingStep processingStep) {
         File logDirectory = getLogDirectory(processingStep)
         if (!logDirectory.exists()) {
             // race condition between threads and within NFS can be ignored, since createDirectoryRecursivelyAndSetPermissionsViaBash handle them
-            FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(fileSystem.getPath(logDirectory.toString()), realm)
+            FileSystem fileSystem = fileSystemService.remoteFileSystem
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(fileSystem.getPath(logDirectory.toString()))
         }
         return logDirectory
     }

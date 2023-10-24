@@ -42,7 +42,6 @@ class FastqcParseJobSpec extends Specification implements DataTest, WorkflowSyst
         return [
                 FastqFile,
                 FastqcProcessedFile,
-                Realm,
                 SeqTrack,
                 WorkflowStep,
                 WorkflowRun,

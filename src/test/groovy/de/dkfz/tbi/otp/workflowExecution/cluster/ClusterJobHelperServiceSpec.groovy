@@ -31,7 +31,6 @@ import de.dkfz.roddy.config.ResourceSet
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -42,7 +41,6 @@ class ClusterJobHelperServiceSpec extends Specification implements ServiceUnitTe
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                Realm,
                 WorkflowStep,
         ]
     }

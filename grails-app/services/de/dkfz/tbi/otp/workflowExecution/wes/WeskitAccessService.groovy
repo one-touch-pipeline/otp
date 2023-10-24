@@ -173,6 +173,6 @@ class WeskitAccessService {
         assert parameter.workDirectory.absolute
         assert Files.exists(parameter.workDirectory)
         assert Files.isDirectory(parameter.workDirectory)
-        assert fileService.fileIsReadable(parameter.workDirectory, configService.defaultRealm)
+        assert fileService.fileIsReadable(parameter.workDirectory)
     }
 }

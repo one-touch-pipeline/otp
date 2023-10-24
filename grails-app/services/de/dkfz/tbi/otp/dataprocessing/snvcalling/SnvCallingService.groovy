@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import grails.gorm.transactions.Transactional
 
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.FileService
 
@@ -36,8 +35,6 @@ class SnvCallingService extends AbstractBamFileAnalysisService<AbstractSnvCallin
     private final static String SNV_RESULTS_PREFIX = 'snvs_'
 
     FileService fileService
-
-    ConfigService configService
 
     @Override
     protected String getProcessingStateCheck() {
@@ -61,7 +58,7 @@ class SnvCallingService extends AbstractBamFileAnalysisService<AbstractSnvCallin
         final String minConfScore = /[0-9]/
         final String matcherForFileRequiredForRunYapsa =
                 /.*${SNV_RESULTS_PREFIX}${individualService.getEscapedPid(bamFilePairAnalysis.individual)}_somatic_snvs_conf_${minConfScore}_to_10.vcf/
-        return fileService.getFoundFileInPathEnsureIsReadableAndNotEmpty(workDirectory, matcherForFileRequiredForRunYapsa, configService.defaultRealm)
+        return fileService.getFoundFileInPathEnsureIsReadableAndNotEmpty(workDirectory, matcherForFileRequiredForRunYapsa)
     }
 
     @Override

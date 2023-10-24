@@ -310,8 +310,7 @@ class DeletionService {
             }
         }
 
-        Realm realm = configService.defaultRealm
-        Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "Delete_${projectName}.sh", realm)
+        Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "Delete_${projectName}.sh")
         bashScriptToMoveFiles << AbstractDataSwapService.BASH_HEADER
 
         (dirsToDelete*.toString() - externalMergedBamFolders).each {

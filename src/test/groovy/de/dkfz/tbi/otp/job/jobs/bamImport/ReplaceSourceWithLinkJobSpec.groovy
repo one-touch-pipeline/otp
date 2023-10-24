@@ -58,7 +58,6 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
                 ProcessingStep,
                 ProcessParameter,
                 Project,
-                Realm,
                 ReferenceGenome,
                 Sample,
                 SampleType,
@@ -170,7 +169,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
         linkingJob.linkFileUtils = new LinkFileUtils()
         linkingJob.linkFileUtils.fileService = new FileService()
         linkingJob.linkFileUtils.fileSystemService = Mock(FileSystemService) {
-            _ * getRemoteFileSystem(_) >> FileSystems.default
+            _ * getRemoteFileSystem() >> FileSystems.default
             0 * _
         }
         linkingJob.fileSystemService = new TestFileSystemService()

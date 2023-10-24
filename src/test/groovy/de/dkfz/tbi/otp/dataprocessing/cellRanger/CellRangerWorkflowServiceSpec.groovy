@@ -54,7 +54,6 @@ class CellRangerWorkflowServiceSpec extends Specification implements CellRangerF
                 MergingCriteria,
                 Pipeline,
                 Project,
-                Realm,
                 ReferenceGenome,
                 ReferenceGenomeProjectSeqType,
                 ReferenceGenomeIndex,
@@ -86,7 +85,7 @@ class CellRangerWorkflowServiceSpec extends Specification implements CellRangerF
 
         CellRangerWorkflowService service = new CellRangerWorkflowService([
                 fileSystemService: Mock(FileSystemService) {
-                    _ * getRemoteFileSystem(_) >> FileSystems.default
+                    _ * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
                 fileService      : new FileService(),
@@ -119,7 +118,7 @@ class CellRangerWorkflowServiceSpec extends Specification implements CellRangerF
 
         CellRangerWorkflowService service = new CellRangerWorkflowService([
                 fileSystemService: Mock(FileSystemService) {
-                    _ * getRemoteFileSystem(_) >> FileSystems.default
+                    _ * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
                 fileService      : new FileService(),
@@ -147,7 +146,7 @@ class CellRangerWorkflowServiceSpec extends Specification implements CellRangerF
 
         CellRangerWorkflowService service = new CellRangerWorkflowService([
                 fileSystemService: Mock(FileSystemService) {
-                    _ * getRemoteFileSystem(_) >> FileSystems.default
+                    _ * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
                 fileService      : new FileService(),
@@ -187,7 +186,7 @@ class CellRangerWorkflowServiceSpec extends Specification implements CellRangerF
 
         CellRangerWorkflowService service = new CellRangerWorkflowService([
                 fileSystemService: Mock(FileSystemService) {
-                    _ * getRemoteFileSystem(_) >> FileSystems.default
+                    _ * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
                 fileService      : Mock(FileService) {
@@ -212,11 +211,11 @@ class CellRangerWorkflowServiceSpec extends Specification implements CellRangerF
 
         CellRangerWorkflowService service = new CellRangerWorkflowService([
                 fileSystemService: Mock(FileSystemService) {
-                    _ * getRemoteFileSystem(_) >> FileSystems.default
+                    _ * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
                 fileService      : Mock(FileService) {
-                    1 * correctPathPermissionAndGroupRecursive(workDirectory, _, _)
+                    1 * correctPathPermissionAndGroupRecursive(workDirectory, _)
                     0 * _
                 },
         ])

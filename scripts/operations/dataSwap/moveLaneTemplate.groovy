@@ -61,13 +61,12 @@ FileSystemService fileSystemService = ctx.fileSystemService
 FileService fileService = ctx.fileService
 LaneSwapService laneSwapService = ctx.laneSwapService
 
-Realm realm = configService.defaultRealm
-FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+FileSystem fileSystem = fileSystemService.remoteFileSystem
 
 StringBuilder outputStringBuilder = new StringBuilder()
 
 final Path scriptOutputDirectory = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve('sample_swap')
-fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(scriptOutputDirectory, realm)
+fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(scriptOutputDirectory)
 fileService.setPermission(scriptOutputDirectory, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
 
 /** have we manually checked yet if all (potentially symlinked) fastq datafiles still exist on the filesystem? */

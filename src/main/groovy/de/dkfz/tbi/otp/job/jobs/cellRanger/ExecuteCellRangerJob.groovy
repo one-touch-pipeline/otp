@@ -35,9 +35,7 @@ import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.Realm
 
-import java.nio.file.FileSystem
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -68,24 +66,21 @@ class ExecuteCellRangerJob extends AbstractOtpJob implements AutoRestartableJob 
     @Override
     protected NextAction maybeSubmit() throws Throwable {
         final SingleCellBamFile singleCellBamFile = processParameterObject
-        final Realm realm = singleCellBamFile.project.realm
 
         prepareInputStructure(singleCellBamFile)
 
         String jobScript = createScript(singleCellBamFile)
 
-        clusterJobSchedulerService.executeJob(realm, jobScript)
+        clusterJobSchedulerService.executeJob(jobScript)
 
         return NextAction.WAIT_FOR_CLUSTER_JOBS
     }
 
     private void prepareInputStructure(SingleCellBamFile singleCellBamFile) {
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(singleCellBamFile.realm)
         String unixGroup = singleCellBamFile.project.unixGroup
-
-        Path workDirectory = fileSystem.getPath(singleCellBamFile.workDirectory.path)
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workDirectory, singleCellBamFile.realm, unixGroup)
-        fileService.setPermissionViaBash(workDirectory, singleCellBamFile.project.realm, FileService.OWNER_DIRECTORY_PERMISSION_STRING)
+        Path workDirectory = singleCellBamFileService.getWorkDirectory(singleCellBamFile)
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workDirectory, unixGroup)
+        fileService.setPermissionViaBash(workDirectory, FileService.OWNER_DIRECTORY_PERMISSION_STRING)
 
         cellRangerService.deleteOutputDirectoryStructureIfExists(singleCellBamFile)
         cellRangerService.createInputDirectoryStructure(singleCellBamFile)

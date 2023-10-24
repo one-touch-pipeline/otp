@@ -36,7 +36,6 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.logging.AbstractSimpleLogger
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
@@ -79,9 +78,8 @@ class ClusterJobSchedulerService {
     FileSystemService fileSystemService
 
     /**
-     * Executes a job on a cluster specified by the realm.
+     * Executes a job on the cluster.
      *
-     * @param realm The realm which identifies the submission host of the cluster
      * @param script The script to be run on the cluster
      * @param environmentVariables environment variables to set for the job
      * @param jobSubmissionOptions additional options for the job
@@ -89,7 +87,7 @@ class ClusterJobSchedulerService {
      */
     @Deprecated
     @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
-    String executeJob(Realm realm, String script, Map<String, String> environmentVariables = [:],
+    String executeJob(String script, Map<String, String> environmentVariables = [:],
                       Map<JobSubmissionOption, String> jobSubmissionOptions = [:]) throws Throwable {
         if (!script) {
             throw new ProcessingException("No job script specified.")
@@ -101,7 +99,7 @@ class ClusterJobSchedulerService {
 
         SeqType seqType = domainObject?.seqType
 
-        Map<JobSubmissionOption, String> options = clusterJobSubmissionOptionsService.readOptionsFromDatabase(processingStep, realm)
+        Map<JobSubmissionOption, String> options = clusterJobSubmissionOptionsService.readOptionsFromDatabase(processingStep)
         options.putAll(jobSubmissionOptions)
 
         ProcessingPriority processingPriority = domainObject?.processingPriority
@@ -113,9 +111,9 @@ class ClusterJobSchedulerService {
         }
 
         String jobName = processingStep.clusterJobName
-        String logFile = jobStatusLoggingService.constructLogFileLocation(realm, processingStep)
-        String logMessage = jobStatusLoggingService.constructMessage(realm, processingStep)
-        File clusterLogDirectory = clusterJobLoggingService.createAndGetLogDirectory(realm, processingStep)
+        String logFile = jobStatusLoggingService.constructLogFileLocation(processingStep)
+        String logMessage = jobStatusLoggingService.constructMessage(processingStep)
+        File clusterLogDirectory = clusterJobLoggingService.createAndGetLogDirectory(processingStep)
 
         String scriptText = """\
             |# OTP: Fail on first non-zero exit code
@@ -134,7 +132,7 @@ class ClusterJobSchedulerService {
             |echo "${logMessage}" >> "${logFile}"
             |""".stripMargin()
 
-        BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.getJobManager(realm)
+        BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.jobManager
 
         ResourceSet resourceSet = new ResourceSet(
                 options.get(JobSubmissionOption.MEMORY) ? new BufferValue(options.get(JobSubmissionOption.MEMORY)) : null,
@@ -172,7 +170,7 @@ class ClusterJobSchedulerService {
         jobManager.startHeldJobs([job])
 
         ClusterJob clusterJob = clusterJobService.createClusterJob(
-                realm, job.jobID.shortID, configService.sshUser, processingStep, seqType, jobName
+                job.jobID.shortID, configService.sshUser, processingStep, seqType, jobName
         )
         retrieveAndSaveJobInformationAfterJobStarted(clusterJob)
 
@@ -211,7 +209,7 @@ class ClusterJobSchedulerService {
 
         Path logFile = pathForLogging()
 
-        fileService.createFileWithContentOnDefaultRealm(logFile, logStringBuilder.toString())
+        fileService.createFileWithContent(logFile, logStringBuilder.toString())
 
         return jobStates
     }

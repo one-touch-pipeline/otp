@@ -36,7 +36,6 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.SshAuthMethod
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.LoginFailedRemoteFileSystemException
-import de.dkfz.tbi.otp.ngsdata.Realm
 
 import java.nio.file.*
 
@@ -101,12 +100,6 @@ class FileSystemService {
             }
         }
         return fileSystem
-    }
-
-    @Deprecated
-    @SuppressWarnings("UnusedMethodParameter")
-    FileSystem getRemoteFileSystem(Realm realm) throws Throwable {
-        return remoteFileSystem
     }
 
     @Scheduled(fixedDelay = 30000L)

@@ -52,7 +52,6 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
                 ProcessingOption,
                 ProcessingStep,
                 ProcessingStepUpdate,
-                Realm,
                 SeqType,
         ]
     }
@@ -61,14 +60,13 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
 
     void "retrieveKnownJobsWithState, when qstat fails, throws exception"(String stderr, int exitCode) {
         given:
-        Realm realm = DomainFactory.createRealm()
         ClusterJobSchedulerService service = new ClusterJobSchedulerService()
         service.configService = Mock(ConfigService) {
             getSshUser() >> SSHUSER
         }
 
         when:
-        service.retrieveKnownJobsWithState(realm)
+        service.retrieveKnownJobsWithState()
 
         then:
         thrown(Exception)
@@ -101,7 +99,7 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
             1 * getLoggingRootPath() >> logFolder
         }
         service.fileService = Mock(FileService) {
-            1 * createFileWithContentOnDefaultRealm(_, _)
+            1 * createFileWithContent(_, _)
         }
         service.fileSystemService = Mock(FileSystemService) {
             1 * getRemoteFileSystem() >> FileSystems.default
@@ -118,7 +116,6 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
         given:
         ClusterJobSchedulerService service = new ClusterJobSchedulerService()
         SeqType seqType = DomainFactory.createSeqType()
-        Realm realm = DomainFactory.createRealm()
         String clusterJobId = "123"
         ProcessingPriority processingPriority = createProcessingPriority()
 
@@ -154,12 +151,12 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
         DomainFactory.createProcessingStepUpdate(processingStep: clusterJob.processingStep)
 
         when:
-        String result = service.executeJob(realm, "run the job")
+        String result = service.executeJob("run the job")
 
         then:
         4 * service.clusterJobManagerFactoryService.remoteShellHelper.executeCommandReturnProcessOutput(_ as String) >> out
-        1 * service.clusterJobService.createClusterJob(realm, clusterJobId, SSHUSER, step, seqType, _ as String) >> clusterJob
-        1 * service.clusterJobLoggingService.createAndGetLogDirectory(_, _) >> { TestCase.uniqueNonExistentPath }
+        1 * service.clusterJobService.createClusterJob(clusterJobId, SSHUSER, step, seqType, _ as String) >> clusterJob
+        1 * service.clusterJobLoggingService.createAndGetLogDirectory(_) >> { TestCase.uniqueNonExistentPath }
         result == clusterJobId
     }
 

@@ -55,7 +55,6 @@ class ParseSophiaQcJobSpec extends Specification implements DataTest {
                 Pipeline,
                 Project,
                 QcThreshold,
-                Realm,
                 ReferenceGenome,
                 RoddyBamFile,
                 RoddyWorkflowConfig,

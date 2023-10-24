@@ -52,7 +52,6 @@ class AbstractBamFileServiceSpec extends Specification implements DataTest, IsRo
                 Pipeline,
                 ProcessingPriority,
                 Project,
-                Realm,
                 ReferenceGenomeProjectSeqType,
                 RoddyBamFile,
                 RoddyWorkflowConfig,

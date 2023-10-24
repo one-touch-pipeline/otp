@@ -145,4 +145,4 @@ String script = [
 
 Path path = fileSystemService.remoteFileSystem.getPath(file)
 
-fileService.createFileWithContentOnDefaultRealm(path, script)
+fileService.createFileWithContent(path, script)

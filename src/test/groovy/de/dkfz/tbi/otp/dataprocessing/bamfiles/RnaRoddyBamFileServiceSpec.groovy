@@ -48,7 +48,6 @@ class RnaRoddyBamFileServiceSpec extends Specification implements ServiceUnitTes
                 MergingCriteria,
                 Pipeline,
                 Project,
-                Realm,
                 ReferenceGenome,
                 ReferenceGenomeProjectSeqType,
                 RnaRoddyBamFile,

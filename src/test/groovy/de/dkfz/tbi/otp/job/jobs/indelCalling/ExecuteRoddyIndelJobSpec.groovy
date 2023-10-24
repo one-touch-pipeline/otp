@@ -74,7 +74,6 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
                 ReferenceGenome,
                 ReferenceGenomeEntry,
                 ReferenceGenomeProjectSeqType,
-                Realm,
                 RoddyBamFile,
                 RoddyWorkflowConfig,
                 Run,
@@ -113,7 +112,7 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
                     0 * _
                 },
                 fileSystemService     : Mock(FileSystemService) {
-                    _ * getRemoteFileSystem(_) >> FileSystems.default
+                    _ * remoteFileSystem >> FileSystems.default
                 },
                 fileService           : new FileService([
                         remoteShellHelper: Mock(RemoteShellHelper) {
@@ -198,7 +197,7 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
                     1 * filePath(_) >> bedFile
                 },
                 fileSystemService     : Mock(FileSystemService) {
-                    _ * getRemoteFileSystem(_) >> FileSystems.default
+                    _ * remoteFileSystem >> FileSystems.default
                 },
                 fileService           : new FileService([
                         remoteShellHelper: Mock(RemoteShellHelper) {
@@ -302,7 +301,7 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_, _)
+                    1 * correctPermissionsAndGroups(_)
                 },
                 indelCallingService       : Spy(IndelCallingService) {
                     1 * validateInputBamFiles(_) >> { }
@@ -338,7 +337,7 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_, _) >> {
+                    1 * correctPermissionsAndGroups(_) >> {
                         throw new AssertionError(md5sum)
                     }
                 },
@@ -367,7 +366,7 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_, _)
+                    1 * correctPermissionsAndGroups(_)
                 },
         ])
 

@@ -98,7 +98,6 @@ class AbstractAnalysisResultsServiceIntegrationSpec extends Specification implem
 
         abstractAnalysisResultsService = Mock(AbstractAnalysisResultsService)
         BamFilePairAnalysis analysisInstance = DomainFactory."create${analysis}InstanceWithRoddyBamFiles"()
-        DomainFactory.createRealm()
 
         when:
         File file

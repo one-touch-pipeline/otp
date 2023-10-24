@@ -73,9 +73,6 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
                 ]),
         ])
 
-        Realm realm = DomainFactory.createRealm()
-        seqTrack.project.realm = realm
-
         DomainFactory.createProcessingOptionLazy([
                 name : ProcessingOption.OptionName.TICKET_SYSTEM_URL,
                 type : null,
@@ -92,9 +89,9 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
                     exitStatus    : ClusterJob.Status.COMPLETED,
             ])
             completedClusterJobs << clusterJob
-            File logFile = new File(jobStatusLoggingService.constructLogFileLocation(realm, step, clusterJob.clusterJobId))
+            File logFile = new File(jobStatusLoggingService.constructLogFileLocation(step, clusterJob.clusterJobId))
             logFile.parentFile.mkdirs()
-            logFile << jobStatusLoggingService.constructMessage(realm, step, clusterJob.clusterJobId) << '\n'
+            logFile << jobStatusLoggingService.constructMessage(step, clusterJob.clusterJobId) << '\n'
         }
 
         List<ClusterJob> failedClusterJobs = []

@@ -58,7 +58,6 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
                 ProcessingOption,
                 ProcessingPriority,
                 Project,
-                Realm,
                 ReferenceGenome,
                 ReferenceGenomeEntry,
                 StatSizeFileName,
@@ -108,7 +107,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         referenceGenomeEntryTwo.save(flush: true)
     }
 
-    void testRealmFilePathToDirectoryCorrect() {
+    void testFilePathToDirectoryCorrect() {
         given:
         setupTest()
         File pathExp = directory
@@ -120,7 +119,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         pathExp == pathAct
     }
 
-    void testRealmFilePathToDirectoryNullRefGen() {
+    void testFilePathToDirectoryNullRefGen() {
         given:
         setupTest()
         referenceGenome = null
@@ -132,7 +131,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         thrown IllegalArgumentException
     }
 
-    void testRealmFilePathToDirectoryCanNotReadDirectory() {
+    void testFilePathToDirectoryCanNotReadDirectory2() {
         given:
         setupTest()
         directory.deleteDir()
@@ -145,7 +144,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         thrown RuntimeException
     }
 
-    void testRealmFilePathToDirectoryCanNotReadDirectory_NoFileCheck() {
+    void testFilePathToDirectoryCanNotReadDirectory_NoFileCheck() {
         given:
         setupTest()
         boolean deletion = directory.deleteDir()

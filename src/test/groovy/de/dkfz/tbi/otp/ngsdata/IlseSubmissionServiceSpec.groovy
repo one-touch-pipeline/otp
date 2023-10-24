@@ -46,7 +46,6 @@ class IlseSubmissionServiceSpec extends Specification implements DataTest, Domai
                 Individual,
                 ProcessingPriority,
                 Project,
-                Realm,
                 Sample,
                 SampleType,
         ]

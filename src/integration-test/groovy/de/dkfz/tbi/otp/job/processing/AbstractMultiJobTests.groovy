@@ -34,7 +34,6 @@ import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.restarting.RestartCheckerService
 import de.dkfz.tbi.otp.job.scheduler.*
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.*
 
@@ -62,7 +61,6 @@ class AbstractMultiJobTests implements UserAndRoles {
     Scheduler scheduler
 
     ProcessingStep step
-    Realm realm
     ClusterJobIdentifier clusterJob1
     ClusterJobIdentifier clusterJob2
     ClusterJobIdentifier clusterJob3
@@ -79,10 +77,9 @@ class AbstractMultiJobTests implements UserAndRoles {
     void setupData() {
         SessionUtils.withTransaction {
             step = createAndSaveProcessingStep()
-            realm = createRealm()
-            clusterJob1 = new ClusterJobIdentifier(realm, CLUSTER_JOB_1_ID)
-            clusterJob2 = new ClusterJobIdentifier(realm, CLUSTER_JOB_2_ID)
-            clusterJob3 = new ClusterJobIdentifier(realm, CLUSTER_JOB_3_ID)
+            clusterJob1 = new ClusterJobIdentifier(CLUSTER_JOB_1_ID)
+            clusterJob2 = new ClusterJobIdentifier(CLUSTER_JOB_2_ID)
+            clusterJob3 = new ClusterJobIdentifier(CLUSTER_JOB_3_ID)
             clusterJobs1 = [clusterJob1, clusterJob2]
             clusterJobs2 = [clusterJob3]
 
@@ -110,7 +107,6 @@ class AbstractMultiJobTests implements UserAndRoles {
                 }
                 [
                         ClusterJob,
-                        Realm,
                         ProcessingError,
                         ProcessingStepUpdate,
                         ProcessingStep,

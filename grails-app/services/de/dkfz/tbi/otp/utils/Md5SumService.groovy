@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.utils
 
 import grails.gorm.transactions.Transactional
 
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
 
 import java.nio.file.Files
@@ -33,14 +32,13 @@ import java.nio.file.Path
 class Md5SumService {
 
     FileService fileService
-    ConfigService configService
 
     String extractMd5Sum(Path md5Sum) {
         assert md5Sum: "Parameter md5Sum is null"
         assert md5Sum.isAbsolute() : "The md5sum file '${md5Sum}' is not absolute"
         assert Files.exists(md5Sum): "The md5sum file '${md5Sum}' does not exist"
         assert Files.isRegularFile(md5Sum): "The md5sum file '${md5Sum}' is not a file"
-        assert fileService.fileIsReadable(md5Sum, configService.defaultRealm): "The md5sum file '${md5Sum}' is not readable"
+        assert fileService.fileIsReadable(md5Sum): "The md5sum file '${md5Sum}' is not readable"
         assert md5Sum.text: "The md5sum file '${md5Sum}' is empty"
 
         String md5sum = md5Sum.text.replaceAll("\n", "").toLowerCase(Locale.ENGLISH)

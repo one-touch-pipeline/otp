@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.workflow.restartHandler.logging
 
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.workflow.restartHandler.LogWithIdentifier
@@ -34,7 +33,6 @@ import java.nio.file.Path
 
 trait RestartHandlerLogService {
 
-    ConfigService configService
     LogService logService
     FileSystemService fileSystemService
     FileService fileService
@@ -48,10 +46,10 @@ trait RestartHandlerLogService {
     abstract Collection<LogWithIdentifier> createLogsWithIdentifier(WorkflowStep workflowStep)
 
     LogWithIdentifier createLogWithIdentifier(String filePath, String identifier, WorkflowStep workflowStep) {
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(workflowStep.workflowRun.project.realm)
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
         Path file = fileSystem.getPath(filePath)
 
-        if (!fileService.fileIsReadable(file, configService.defaultRealm)) {
+        if (!fileService.fileIsReadable(file)) {
             logService.addSimpleLogEntry(workflowStep, "The log file '${file}' does not exist.")
         } else if (fileService.fileSizeExceeded(file, maxFileSize)) {
             logService.addSimpleLogEntry(workflowStep, "The log file '${file}' is bigger than the ${maxFileSizeInMiB} MB threshold.")

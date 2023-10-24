@@ -26,7 +26,6 @@ import spock.lang.Specification
 import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
@@ -49,36 +48,35 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
 
     void "test setGroup & getGroup allFine"() {
         given:
-        Realm realmObject = new Realm()
         File tmpFile = tempDir.toFile()
         String group = new TestConfigService().testingGroup
 
         when:
         service.remoteShellHelper = [
-                executeCommandReturnProcessOutput: { Realm realm, String command ->
+                executeCommandReturnProcessOutput: { String command ->
                     LocalShellHelper.executeAndWait(command)
                 }
         ] as RemoteShellHelper
 
         then:
         assert LogThreadLocal.withThreadLog(System.out) {
-            service.getGroup(realmObject, tmpFile)
+            service.getGroup(tmpFile)
         } != group: "Cannot test setGroup if OTP property \"otp.testing.group\" is also the user's primary group." +
                 " Please update your .otp.properties to use a different group that is not your primary group!"
 
         LogThreadLocal.withThreadLog(System.out) {
-            service.setGroup(realmObject, tmpFile, group)
+            service.setGroup(tmpFile, group)
         }.empty
 
         LogThreadLocal.withThreadLog(System.out) {
-            service.getGroup(realmObject, tmpFile)
+            service.getGroup(tmpFile)
         } == group
     }
 
     void "test getGroup directory is null should fail"() {
         when:
         LogThreadLocal.withThreadLog(System.out) {
-            service.getGroup(new Realm(), null)
+            service.getGroup(null)
         }
 
         then:
@@ -92,14 +90,14 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
         final String FAIL_MESSAGE = HelperUtils.uniqueString
         File tmpFile = tempDir.toFile()
         service.remoteShellHelper = [
-                executeCommandReturnProcessOutput: { Realm realm, String command ->
+                executeCommandReturnProcessOutput: { String command ->
                     assert false: FAIL_MESSAGE
                 }
         ] as RemoteShellHelper
 
         when:
         LogThreadLocal.withThreadLog(System.out) {
-            service.getGroup(new Realm(), tmpFile)
+            service.getGroup(tmpFile)
         }
 
         then:
@@ -110,7 +108,7 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
     void "test setGroup directory is null should fail"() {
         when:
         LogThreadLocal.withThreadLog(System.out) {
-            service.setGroup(new Realm(), null, DUMMY_GROUP)
+            service.setGroup(null, DUMMY_GROUP)
         }
 
         then:
@@ -121,7 +119,7 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
     void "test setGroup group is null should fail"() {
         when:
         LogThreadLocal.withThreadLog(System.out) {
-            service.setGroup(new Realm(), tempDir.toFile(), null)
+            service.setGroup(tempDir.toFile(), null)
         }
 
         then:
@@ -135,14 +133,14 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
         final String FAIL_MESSAGE = HelperUtils.uniqueString
         File tmpFile = tempDir.toFile()
         service.remoteShellHelper = [
-                executeCommandReturnProcessOutput: { Realm realm, String command ->
+                executeCommandReturnProcessOutput: { String command ->
                     assert false: FAIL_MESSAGE
                 }
         ] as RemoteShellHelper
 
         when:
         LogThreadLocal.withThreadLog(System.out) {
-            service.setGroup(new Realm(), tmpFile, DUMMY_GROUP)
+            service.setGroup(tmpFile, DUMMY_GROUP)
         }
 
         then:
@@ -155,7 +153,7 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
         String PERMISSION = '777'
         File tmpFile = tempDir.toFile()
         service.remoteShellHelper = [
-                executeCommandReturnProcessOutput: { Realm realm, String command ->
+                executeCommandReturnProcessOutput: { String command ->
                     LocalShellHelper.executeAndWait(command)
                 }
         ] as RemoteShellHelper
@@ -166,7 +164,7 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
         }.trim() != PERMISSION
 
         LogThreadLocal.withThreadLog(System.out) {
-            service.setPermission(new Realm(), tmpFile, PERMISSION)
+            service.setPermission(tmpFile, PERMISSION)
         }.empty
 
         LogThreadLocal.withThreadLog(System.out) {
@@ -177,7 +175,7 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
     void "test setPermission directory is null should fail"() {
         when:
         LogThreadLocal.withThreadLog(System.out) {
-            service.setPermission(new Realm(), null, DUMMY_PERMISSION)
+            service.setPermission(null, DUMMY_PERMISSION)
         }
 
         then:
@@ -188,7 +186,7 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
     void "test setPermission permission is null should fail"() {
         when:
         LogThreadLocal.withThreadLog(System.out) {
-            service.setPermission(new Realm(), tempDir.toFile(), null)
+            service.setPermission(tempDir.toFile(), null)
         }
 
         then:
@@ -202,14 +200,14 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
         final String FAIL_MESSAGE = HelperUtils.uniqueString
         File tmpFile = tempDir.toFile()
         service.remoteShellHelper = [
-                executeCommandReturnProcessOutput: { Realm realm, String command ->
+                executeCommandReturnProcessOutput: { String command ->
                     assert false: FAIL_MESSAGE
                 }
         ] as RemoteShellHelper
 
         when:
         LogThreadLocal.withThreadLog(System.out) {
-            service.setPermission(new Realm(), tmpFile, DUMMY_PERMISSION)
+            service.setPermission(tmpFile, DUMMY_PERMISSION)
         }
 
         then:

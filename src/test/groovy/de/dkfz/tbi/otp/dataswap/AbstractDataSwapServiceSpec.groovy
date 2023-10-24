@@ -27,7 +27,6 @@ import spock.lang.*
 
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.CommentService
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
@@ -511,18 +510,13 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
 
     void "createGroovyConsoleScriptToRestartAlignments, when no seq track given just write comment header to script file"() {
         given:
-        final Realm realm = createRealm()
-
         final String bashScriptName = "TEST-SCRIPT"
         final Path scriptOutputDirectory = tempDir.resolve("files")
 
         Files.createDirectory(scriptOutputDirectory)
 
-        service.configService = Mock(ConfigService) {
-            1 * getDefaultRealm() >> realm
-        }
         service.fileService = Mock(FileService) {
-            1 * createOrOverwriteScriptOutputFile(_, _, _) >> Files.createFile(scriptOutputDirectory.resolve("restartAli_${bashScriptName}.groovy"))
+            1 * createOrOverwriteScriptOutputFile(_, _) >> Files.createFile(scriptOutputDirectory.resolve("restartAli_${bashScriptName}.groovy"))
         }
 
         final DataSwapParameters parameters = new DataSwapParameters(
@@ -544,7 +538,6 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
 
     void "createGroovyConsoleScriptToRestartAlignments, when seq track given write comment header and seq track comments to script file"() {
         given:
-        final Realm realm = createRealm()
         final List<SeqTrack> seqTrackList = (0..1).collect { createSeqTrack() }
 
         final String bashScriptName = "TEST-SCRIPT"
@@ -552,11 +545,8 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
 
         Files.createDirectory(scriptOutputDirectory)
 
-        service.configService = Mock(ConfigService) {
-            1 * getDefaultRealm() >> realm
-        }
         service.fileService = Mock(FileService) {
-            1 * createOrOverwriteScriptOutputFile(_, _, _) >> Files.createFile(scriptOutputDirectory.resolve("restartAli_${bashScriptName}.groovy"))
+            1 * createOrOverwriteScriptOutputFile(_, _) >> Files.createFile(scriptOutputDirectory.resolve("restartAli_${bashScriptName}.groovy"))
         }
 
         final DataSwapParameters parameters = new DataSwapParameters(

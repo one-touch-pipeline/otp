@@ -41,7 +41,6 @@ class ReferenceGenomeSelectorServiceSpec extends Specification implements Servic
         return [
                 ProcessingPriority,
                 Project,
-                Realm,
                 ReferenceGenomeSelector,
                 SeqType,
                 Workflow,

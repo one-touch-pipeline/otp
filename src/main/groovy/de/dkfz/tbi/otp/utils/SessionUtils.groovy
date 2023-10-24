@@ -21,23 +21,23 @@
  */
 package de.dkfz.tbi.otp.utils
 
-import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.project.Project
 
 class SessionUtils {
     static <T> T withNewSession(Closure<T> closure) {
-        return Realm.withNewSession { session ->
+        return Project.withNewSession { session ->
             closure(session)
         }
     }
 
     static <T> T withTransaction(Closure<T> closure) {
-        return Realm.withTransaction { status ->
+        return Project.withTransaction { status ->
             closure(status)
         }
     }
 
     static <T> T withNewTransaction(Closure<T> closure) {
-        return Realm.withNewTransaction { status ->
+        return Project.withNewTransaction { status ->
             closure(status)
         }
     }

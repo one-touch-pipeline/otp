@@ -55,7 +55,6 @@ abstract class AbstractBamFileAnalysisServiceSpec extends Specification implemen
                 ProcessingOption,
                 ProcessingThresholds,
                 Project,
-                Realm,
                 ReferenceGenome,
                 RoddyBamFile,
                 RoddySnvCallingInstance,

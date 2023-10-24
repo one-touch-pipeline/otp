@@ -67,7 +67,6 @@ class RoddyAlignmentExecuteJobSpec extends Specification implements DataTest, Wo
                 ProcessingOption,
                 ProcessingPriority,
                 Project,
-                Realm,
                 ReferenceGenomeProjectSeqType,
                 RoddyBamFile,
                 RoddyWorkflowConfig,

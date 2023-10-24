@@ -55,7 +55,6 @@ class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<R
                 Pipeline,
                 ProcessingOption,
                 Project,
-                Realm,
                 ReferenceGenome,
                 ReferenceGenomeProjectSeqType,
                 RoddyBamFile,

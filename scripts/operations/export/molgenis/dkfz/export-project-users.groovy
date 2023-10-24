@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 import de.dkfz.tbi.otp.security.User
@@ -86,11 +85,9 @@ class MolgenisGlobal {
     static String SEPARATOR_LINE = "\n"
 }
 
-Realm realm = ctx.configService.defaultRealm
-
 String timestamp = TimeFormats.DATE_TIME_DASHES.getFormattedDate(new Date())
 final Path outputDirectory = ctx.fileService.toPath(ctx.configService.scriptOutputPath, ctx.fileSystemService.getRemoteFilesystem).resolve("export").resolve("molgenis").resolve("${timestamp}-projects-and-users")
-ctx.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDirectory, realm)
+ctx.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDirectory)
 ctx.fileService.setPermission(outputDirectory, ctx.fileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
 
 println "Writing to: ${outputDirectory}"

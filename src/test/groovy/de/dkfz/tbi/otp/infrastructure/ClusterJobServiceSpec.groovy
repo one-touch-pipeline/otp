@@ -28,7 +28,6 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.HelperUtils
 
 import java.time.LocalDate
@@ -44,7 +43,6 @@ class ClusterJobServiceSpec extends Specification implements DataTest, ServiceUn
     @Override
     Class<?>[] getDomainClassesToMock() {
         return [
-                Realm,
                 JobExecutionPlan,
                 ProcessingStep,
                 ClusterJob,
@@ -73,8 +71,7 @@ class ClusterJobServiceSpec extends Specification implements DataTest, ServiceUn
     void test_getClusterJobByIdentifier() {
         given:
         ClusterJob clusterJob = DomainFactory.createClusterJob()
-        Realm realm = DomainFactory.createRealm()
-        ClusterJobIdentifier identifier = new ClusterJobIdentifier(realm, clusterJob.clusterJobId)
+        ClusterJobIdentifier identifier = new ClusterJobIdentifier(clusterJob.clusterJobId)
         DomainFactory.createClusterJob(
                 clusterJobId: HelperUtils.uniqueString,
         )

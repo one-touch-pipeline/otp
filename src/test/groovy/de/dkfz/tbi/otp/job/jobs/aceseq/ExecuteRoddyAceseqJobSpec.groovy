@@ -74,7 +74,6 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
                 SeqType,
                 SoftwareTool,
                 SophiaInstance,
-                Realm,
                 ReferenceGenome,
                 ReferenceGenomeEntry,
                 ReferenceGenomeProjectSeqType,
@@ -220,7 +219,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
         ExecuteRoddyAceseqJob job = new ExecuteRoddyAceseqJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_, _) >> { }
+                    1 * correctPermissionsAndGroups(_) >> { }
                 },
                 aceseqService             : Mock(AceseqService) {
                     1 * validateInputBamFiles(_) >> { }
@@ -253,7 +252,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
         ExecuteRoddyAceseqJob job = new ExecuteRoddyAceseqJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_, _) >> {
+                    1 * correctPermissionsAndGroups(_) >> {
                         throw new AssertionError(md5sum)
                     }
                 },
@@ -280,7 +279,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
         ExecuteRoddyAceseqJob job = new ExecuteRoddyAceseqJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_, _) >> { }
+                    1 * correctPermissionsAndGroups(_) >> { }
                 },
         ])
 

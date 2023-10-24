@@ -57,7 +57,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         projectInfoService = new ProjectInfoService(
                 executionHelperService: Mock(ExecutionHelperService),
                 fileSystemService     : Mock(FileSystemService) {
-                    _ * getRemoteFileSystem(_) >> FileSystems.default
+                    _ * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
                 fileService           : new FileService([

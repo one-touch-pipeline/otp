@@ -82,16 +82,12 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
         }
         service.seqTrackService = new SeqTrackService()
 
-        Realm realm = createRealm()
         service.configService = new TestConfigService([
                 (OtpProperty.PATH_PROJECT_ROOT): tempDir.toString(),
         ])
-        service.configService.processingOptionService = Mock(ProcessingOptionService) {
-            _ * findOptionAsString(ProcessingOption.OptionName.REALM_DEFAULT_VALUE) >> realm.name
-        }
         service.fileService = Mock(FileService) {
-            1 * createOrOverwriteScriptOutputFile(scriptFolder, "${scriptName}.sh", realm) >> bashScriptPath
-            _ * createOrOverwriteScriptOutputFile(_, _, _) >> CreateFileHelper.createFile(tempDir.resolve("test2.txt"))
+            1 * createOrOverwriteScriptOutputFile(scriptFolder, "${scriptName}.sh") >> bashScriptPath
+            _ * createOrOverwriteScriptOutputFile(_, _) >> CreateFileHelper.createFile(tempDir.resolve("test2.txt"))
         }
         CommentService mockedCommendService = Mock(CommentService) {
             _ * saveComment(_, _) >> null

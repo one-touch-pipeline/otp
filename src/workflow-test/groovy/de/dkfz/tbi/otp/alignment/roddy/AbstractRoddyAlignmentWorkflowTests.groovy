@@ -105,7 +105,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     void setup() {
         SessionUtils.withTransaction {
             String group = configService.testingGroup
-            executionHelperService.setGroup(realm, configService.rootPath as File, group)
+            executionHelperService.setGroup(configService.rootPath as File, group)
 
             setUpFilesVariables()
 
@@ -187,7 +187,6 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         workPackage.sampleType.name = "control"
         workPackage.sampleType.save(flush: true)
 
-        workPackage.project.realm = realm
         workPackage.project.save(flush: true)
 
         workPackage.seqPlatformGroup.mergingCriteria = DomainFactory.createMergingCriteria(
@@ -334,7 +333,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         }
 
         createFilesWithContent(filesWithContent)
-        linkFileUtils.createAndValidateLinks(links, realm)
+        linkFileUtils.createAndValidateLinks(links)
 
         workPackage.bamFileInProjectFolder = firstBamFile
         workPackage.needsProcessing = false
@@ -632,7 +631,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         // check that given files exist in the execution store:
         bamFile.workExecutionDirectories.each { executionStore ->
             filesInRoddyExecutionDir.each { String fileName ->
-                fileService.ensureFileIsReadableAndNotEmpty(new File(executionStore.absolutePath, fileName).toPath(), realm)
+                fileService.ensureFileIsReadableAndNotEmpty(new File(executionStore.absolutePath, fileName).toPath())
             }
         }
     }
@@ -640,8 +639,8 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     void checkInputIsNotDeleted() {
         List<RawSequenceFile> fastqFiles = RawSequenceFile.findAll()
         fastqFiles.each { RawSequenceFile rawSequenceFile ->
-            fileService.ensureFileIsReadableAndNotEmpty((lsdfFilesService.getFileFinalPath(rawSequenceFile) as File).toPath(), realm)
-            fileService.ensureFileIsReadableAndNotEmpty((lsdfFilesService.getFileViewByPidPath(rawSequenceFile) as File).toPath(), realm)
+            fileService.ensureFileIsReadableAndNotEmpty((lsdfFilesService.getFileFinalPath(rawSequenceFile) as File).toPath())
+            fileService.ensureFileIsReadableAndNotEmpty((lsdfFilesService.getFileViewByPidPath(rawSequenceFile) as File).toPath())
         }
     }
 

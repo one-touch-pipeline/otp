@@ -35,10 +35,6 @@ trait ProcessParameterObject {
         return individual?.project
     }
 
-    Realm getRealm() {
-        return project?.realm
-    }
-
     abstract Set<SeqTrack> getContainedSeqTracks()
 
     ProcessingPriority getProcessingPriority() {

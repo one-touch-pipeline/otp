@@ -213,7 +213,7 @@ class WithdrawHelperService {
         String script = createBashScript(withdrawStateHolder)
 
         fileService.deleteDirectoryRecursively(outputFile) // delete file if already exists
-        fileService.createFileWithContentOnDefaultRealm(outputFile, script, FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION)
+        fileService.createFileWithContent(outputFile, script, FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION)
 
         withdrawStateHolder.summary << "\nScript Path:"
         withdrawStateHolder.summary << outputFile

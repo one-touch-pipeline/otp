@@ -28,8 +28,6 @@ import spock.lang.TempDir
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
 
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -38,15 +36,12 @@ class LinkFileUtilsSpec extends Specification implements DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
-        return [
-                Realm,
-        ]
+        return []
     }
 
     LinkFileUtils linkFileUtils
 
     File testDirectory
-    Realm realm
 
     @TempDir
     Path tempDir
@@ -57,26 +52,16 @@ class LinkFileUtilsSpec extends Specification implements DataTest {
             assert testDirectory.mkdirs()
         }
 
-        realm = DomainFactory.createRealm()
-
         linkFileUtils = new LinkFileUtils()
         linkFileUtils.fileSystemService = Mock(FileSystemService) {
-            _ * getRemoteFileSystem(_) >>  testDirectory.toPath().fileSystem
+            _ * getRemoteFileSystem() >>  testDirectory.toPath().fileSystem
         }
         linkFileUtils.fileService = new FileService()
     }
 
     void "test createAndValidateLinks, when map is null, should fail"() {
         when:
-        linkFileUtils.createAndValidateLinks(null, realm)
-
-        then:
-        thrown(AssertionError)
-    }
-
-    void "test createAndValidateLinks, when realm is null, should fail"() {
-        when:
-        linkFileUtils.createAndValidateLinks([:], null)
+        linkFileUtils.createAndValidateLinks(null)
 
         then:
         thrown(AssertionError)
@@ -89,7 +74,7 @@ class LinkFileUtilsSpec extends Specification implements DataTest {
         File linkFile = new File(testDirectory, "linkFile")
 
         when:
-        linkFileUtils.createAndValidateLinks([(sourceFile): linkFile], realm)
+        linkFileUtils.createAndValidateLinks([(sourceFile): linkFile])
 
         then:
         linkFile.exists()
@@ -105,7 +90,7 @@ class LinkFileUtilsSpec extends Specification implements DataTest {
         linkFile << oldContent
 
         when:
-        linkFileUtils.createAndValidateLinks([(sourceFile): linkFile], realm)
+        linkFileUtils.createAndValidateLinks([(sourceFile): linkFile])
 
         then:
         linkFile.exists()
@@ -121,7 +106,7 @@ class LinkFileUtilsSpec extends Specification implements DataTest {
         assert linkFile.mkdirs()
 
         when:
-        linkFileUtils.createAndValidateLinks([(sourceFile): linkFile], realm)
+        linkFileUtils.createAndValidateLinks([(sourceFile): linkFile])
 
         then:
         linkFile.exists() && !linkFile.isDirectory()
@@ -144,7 +129,7 @@ class LinkFileUtilsSpec extends Specification implements DataTest {
         }
 
         when:
-        linkFileUtils.createAndValidateLinks([(sourceFile): linkFile], realm)
+        linkFileUtils.createAndValidateLinks([(sourceFile): linkFile])
 
         then:
         linkFile.exists()

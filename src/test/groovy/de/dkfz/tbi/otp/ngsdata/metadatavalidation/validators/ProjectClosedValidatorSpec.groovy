@@ -43,7 +43,6 @@ class ProjectClosedValidatorSpec extends Specification implements DataTest, Doma
         return [
                 ProcessingOption,
                 Project,
-                Realm,
                 SampleIdentifier,
         ]
     }

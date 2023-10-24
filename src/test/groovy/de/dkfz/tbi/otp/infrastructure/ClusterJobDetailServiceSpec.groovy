@@ -27,7 +27,6 @@ import spock.lang.Shared
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 import de.dkfz.tbi.otp.workflowExecution.Workflow
@@ -63,7 +62,6 @@ class ClusterJobDetailServiceSpec extends Specification implements DataTest, Ser
         return [
                 Workflow,
                 ProcessingPriority,
-                Realm,
                 Project,
                 WorkflowRun,
         ]

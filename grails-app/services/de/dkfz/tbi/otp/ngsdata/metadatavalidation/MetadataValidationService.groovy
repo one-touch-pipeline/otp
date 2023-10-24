@@ -25,7 +25,6 @@ import groovy.transform.CompileDynamic
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
 
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
@@ -42,8 +41,6 @@ import static de.dkfz.tbi.otp.utils.HelperUtils.byteArrayToHexString
 class MetadataValidationService {
 
     FileService fileService
-
-    ConfigService configService
 
     static String pathForMessage(Path path) {
         Path canonicalPath = canonicalPath(path)
@@ -72,7 +69,7 @@ class MetadataValidationService {
                     "${pathForMessage(metadataFile)} does not exist or cannot be accessed by OTP.")
         } else if (!Files.isRegularFile(metadataFile)) {
             problems.addProblem(Collections.emptySet(), LogLevel.ERROR, "${pathForMessage(metadataFile)} is not a file.")
-        } else if (!fileService.fileIsReadable(metadataFile, configService.defaultRealm)) {
+        } else if (!fileService.fileIsReadable(metadataFile)) {
             problems.addProblem(Collections.emptySet(), LogLevel.ERROR, "${pathForMessage(metadataFile)} is not readable.")
         } else if (Files.size(metadataFile) == 0L) {
             problems.addProblem(Collections.emptySet(), LogLevel.ERROR, "${pathForMessage(metadataFile)} is empty.")

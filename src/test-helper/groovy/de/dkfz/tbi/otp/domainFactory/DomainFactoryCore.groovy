@@ -53,12 +53,6 @@ trait DomainFactoryCore implements DomainFactoryHelper {
         ], properties, saveAndValidate)
     }
 
-    Realm createRealm(Map realmProperties = [:]) {
-        return createDomainObject(Realm, [
-                name                       : "realmName_${nextId}",
-        ], realmProperties)
-    }
-
     Project createProject(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(Project, [
                 name                          : "project_${nextId}",
@@ -66,7 +60,6 @@ trait DomainFactoryCore implements DomainFactoryHelper {
                 dirName                       : "projectDirName_${nextId}",
                 projectType                   : Project.ProjectType.SEQUENCING,
                 storageUntil                  : LocalDate.now(),
-                realm                         : { createRealm() },
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
                 unixGroup                     : "unixGroup_${nextId}",
                 processingPriority            : { createProcessingPriority() },

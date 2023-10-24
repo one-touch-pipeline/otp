@@ -43,7 +43,6 @@ class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTe
                 Process,
                 ProcessingOption,
                 ProcessingStep,
-                Realm,
         ]
     }
 
@@ -53,7 +52,6 @@ class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTe
     final static String EXPECTED_BASE_PATH = '/fakeRootPath/log/status'
 
     final static Long ARBITRARY_ID = 23
-    final static Long ARBITRARY_REALM_ID = 987
     final static Long ARBITRARY_PROCESS_ID = 12345
     final static String ARBITRARY_PBS_ID = '4711'
 
@@ -66,10 +64,8 @@ class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTe
     }
 
     String expectedLogFilePath
-    Realm realm
 
     void setup() {
-        realm = DomainFactory.createRealm()
         configService = new TestConfigService([(OtpProperty.PATH_CLUSTER_LOGS_OTP): LOGGING_ROOT_PATH])
         service.configService = configService
         expectedLogFilePath = "/fakeRootPath/log/status/joblog_${ARBITRARY_PROCESS_ID}_${ARBITRARY_PBS_ID}.log"
@@ -89,7 +85,7 @@ class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTe
 
     void "test constructLogFileLocation, when processing step is null"() {
         when:
-        service.constructLogFileLocation(new Realm(), null)
+        service.constructLogFileLocation(null)
 
         then:
         thrown(IllegalArgumentException)
@@ -112,7 +108,7 @@ class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTe
         }
 
         expect:
-        service.constructLogFileLocation(realm, processingStep) ==
+        service.constructLogFileLocation(processingStep) ==
                 "${EXPECTED_BASE_PATH}/joblog_${ARBITRARY_PROCESS_ID}_\$(echo \${PBS_JOBID} | cut -d. -f1).log"
     }
 
@@ -121,12 +117,12 @@ class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTe
         ProcessingStep processingStep = createFakeProcessingStep()
 
         expect:
-        expectedLogFilePath == service.constructLogFileLocation(realm, processingStep, ARBITRARY_PBS_ID)
+        expectedLogFilePath == service.constructLogFileLocation(processingStep, ARBITRARY_PBS_ID)
     }
 
     void "test constructMessage, when processing step is null"() {
         when:
-        service.constructMessage(realm, null)
+        service.constructMessage(null)
 
         then:
         thrown(IllegalArgumentException)
@@ -141,7 +137,7 @@ class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTe
         }
 
         expect:
-        service.constructMessage(realm, processingStep) ==
+        service.constructMessage(processingStep) ==
                 "${processingStep.jobExecutionPlan.name},DummyJob,${ARBITRARY_ID},\$(echo \${PBS_JOBID} | cut -d. -f1)"
     }
 
@@ -150,7 +146,7 @@ class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTe
         ProcessingStep processingStep = createFakeProcessingStep()
 
         expect:
-        service.constructMessage(null, processingStep, ARBITRARY_PBS_ID) ==
+        service.constructMessage(processingStep, ARBITRARY_PBS_ID) ==
                 "${processingStep.jobExecutionPlan.name},DummyJob,${ARBITRARY_ID},${ARBITRARY_PBS_ID}"
     }
 }

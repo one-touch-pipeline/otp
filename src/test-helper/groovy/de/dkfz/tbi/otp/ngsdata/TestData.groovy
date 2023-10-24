@@ -46,9 +46,6 @@ class TestData {
     File file
 
     @Deprecated
-    Realm realm
-
-    @Deprecated
     Project project
 
     @Deprecated
@@ -117,12 +114,9 @@ class TestData {
             file << "test"
         }
 
-        realm = DomainFactory.createRealm()
-
         project = createProject([
             name : "otp_test_project",
             dirName : "otp_test_project",
-            realm : realm,
         ])
         assertNotNull(project.save(flush: true))
 

@@ -71,7 +71,6 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
                 FastqImportInstance,
                 FileType,
                 RawSequenceFile,
-                Realm,
                 RoddyWorkflowConfig,
                 Run,
                 FastqFile,

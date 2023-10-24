@@ -27,7 +27,6 @@ import org.codehaus.groovy.runtime.typehandling.GroovyCastException
 import org.grails.web.json.JSONArray
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
@@ -237,11 +236,8 @@ ${jsonLiteral(departments[0])}
                     _ * logAction(_, _) >> _
                 }),
                 remoteShellHelper    : Mock(RemoteShellHelper) {
-                    1 * executeCommandReturnProcessOutput(_, _) >> { return new ProcessOutput(returnJSON, "", 0) }
-                    0 * executeCommandReturnProcessOutput(_, _)
-                },
-                configService        : Mock(ConfigService) {
-                    1 * getDefaultRealm() >> { createRealm() }
+                    1 * executeCommandReturnProcessOutput(_) >> { return new ProcessOutput(returnJSON, "", 0) }
+                    0 * executeCommandReturnProcessOutput(_)
                 },
                 deputyRelationService: Mock(DeputyRelationService),
         ])

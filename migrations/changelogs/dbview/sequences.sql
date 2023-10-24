@@ -37,7 +37,6 @@ SELECT st.id                                                                    
        s.sample_type_id,
        s.individual_id,
        p.id                                                                                               AS project_id,
-       re.id                                                                                              AS realm_id,
 
        st.quality_encoding,
        st.fastqc_state,
@@ -65,7 +64,6 @@ SELECT st.id                                                                    
        sampleType.name                                                                                    AS sample_type_name,
        i.type,
        i.pid,
-       re.name                                                                                                    AS realm_name,
        p.name                                                                                                     AS project_name,
        p.dir_name                                                                                                 AS project_dir_name,
        p.archived                                                                                                 AS file_archived,
@@ -103,8 +101,6 @@ FROM seq_track AS st
                     ON s.individual_id = i.id
          INNER JOIN project AS p
                     ON i.project_id = p.id
-         INNER JOIN realm AS re
-                    ON p.realm_id = re.id
          INNER JOIN seq_center AS sc
                     ON r.seq_center_id = sc.id
          LEFT OUTER JOIN ilse_submission ilse

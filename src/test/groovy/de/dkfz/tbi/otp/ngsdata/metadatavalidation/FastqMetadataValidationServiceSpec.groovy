@@ -25,13 +25,11 @@ import grails.testing.gorm.DataTest
 import org.junit.ClassRule
 import spock.lang.*
 
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.FastqFile
 import de.dkfz.tbi.otp.ngsdata.FastqImportInstance
 import de.dkfz.tbi.otp.ngsdata.Individual
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.Sample
 import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
@@ -50,7 +48,6 @@ class FastqMetadataValidationServiceSpec extends Specification implements Domain
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                Realm,
                 ProcessingPriority,
                 Project,
                 Individual,
@@ -94,17 +91,13 @@ class FastqMetadataValidationServiceSpec extends Specification implements Domain
                 "7 x Undetermined_1 Undetermined x\n" +
                 "8 fastq x x ${md5sum}\n" +
                 "").replaceAll(' ', '\t').getBytes(MetadataValidationContext.CHARSET)
-        Realm realm = new Realm()
 
         when:
         MetadataValidationContext context = metadataValidationFileService.createFromFile(file, directoryStructure, "", ignoreMd5sum)
 
         then:
-        metadataValidationFileService.configService = Mock(ConfigService) {
-            1 * getDefaultRealm() >> realm
-        }
         metadataValidationFileService.fileService = Mock(FileService) {
-            1 * fileIsReadable(_, realm) >> true
+            1 * fileIsReadable(_) >> true
         }
 
         and:
@@ -129,17 +122,13 @@ class FastqMetadataValidationServiceSpec extends Specification implements Domain
         file.bytes = ("UNKNOWN ${ALIGN_TOOL} ${SEQUENCING_READ_TYPE.importAliases.first()}\n" +
                 "1 2 3"
         ).replaceAll(' ', '\t').getBytes(MetadataValidationContext.CHARSET)
-        Realm realm = new Realm()
 
         when:
         MetadataValidationContext context = metadataValidationFileService.createFromFile(file, directoryStructure, "")
 
         then:
-        metadataValidationFileService.configService = Mock(ConfigService) {
-            1 * getDefaultRealm() >> realm
-        }
         metadataValidationFileService.fileService = Mock(FileService) {
-            1 * fileIsReadable(_, realm) >> true
+            1 * fileIsReadable(_) >> true
         }
 
         and:

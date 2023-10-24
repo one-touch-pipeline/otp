@@ -35,7 +35,6 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.SshAuthMethod
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
@@ -82,29 +81,13 @@ class RemoteShellHelper {
     /**
      * Executes a command remotely and logs stdout and stderr
      *
-     * @param realm ignored
      * @param command The command to be executed
      * @return standard output of the command executed
      * @deprecated use executeCommandReturnProcessOutput instead
      */
     @Deprecated
-    @SuppressWarnings("UnusedMethodParameter")
-    String executeCommand(Realm realm, String command) {
-        return executeCommandReturnProcessOutput(realm, command).stdout
-    }
-
-    /**
-     * Executes a command remotely and logs stdout and stderr
-     *
-     * @param realm ignored
-     * @param command The command to be executed
-     * @return process output of the command executed
-     * @deprecated use executeCommandReturnProcessOutput instead
-     */
-    @Deprecated
-    @SuppressWarnings("UnusedMethodParameter")
-    ProcessOutput executeCommandReturnProcessOutput(Realm realm, String command) {
-        return executeCommandReturnProcessOutput(command)
+    String executeCommand(String command) {
+        return executeCommandReturnProcessOutput(command).stdout
     }
 
     /**

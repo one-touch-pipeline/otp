@@ -60,7 +60,7 @@ abstract class AbstractCellRangerAlignmentWorkflowTests extends AbstractAlignmen
     @Override
     void setup() {
         SessionUtils.withTransaction {
-            Project project = createProject(realm: realm)
+            Project project = createProject()
             Individual individual = DomainFactory.createIndividual(project: project)
             sample = createSample(individual: individual)
 

@@ -64,7 +64,6 @@ class Sequence implements Serializable {
     long sampleTypeId
     long individualId
     long projectId
-    long realmId
 
     /** fields from {@link SeqTrack} */
     String laneId
@@ -124,9 +123,6 @@ class Sequence implements Serializable {
     String projectName
     String projectDirName
 
-    /** fields from {@link Realm} */
-    String realmName
-
     /** fields from {@link SeqCenter} */
     String seqCenterName
     String seqCenterDirName
@@ -166,7 +162,6 @@ class Sequence implements Serializable {
         projectId column: 'project_id'
         ilseId column: 'ilse_id'
         libraryPreparationKit column: 'library_preparation_kit'
-        realmId column: 'realm_id'
         id composite: [
                 'seqTrackId',
                 'seqTypeId',

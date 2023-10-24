@@ -38,7 +38,6 @@ class MergingCriteriaSpec extends Specification implements DataTest, WorkflowSys
         return [
                 MergingCriteria,
                 Project,
-                Realm,
                 SeqType,
                 Workflow,
         ]

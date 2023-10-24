@@ -27,13 +27,11 @@ import spock.lang.Specification
 import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.otp.workflow.restartHandler.LogWithIdentifier
@@ -58,10 +56,10 @@ class ClusterJobLogServiceSpec extends Specification implements ServiceUnitTest<
 
     void setupData() {
         service.fileSystemService = Mock(FileSystemService) {
-            getRemoteFileSystem(_ as Realm) >> FileSystems.default
+            _ * getRemoteFileSystem() >> FileSystems.default
+            0 * _
         }
         service.logService = Mock(LogService)
-        service.configService = Mock(ConfigService)
         service.fileService = Spy(FileService)
         service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }

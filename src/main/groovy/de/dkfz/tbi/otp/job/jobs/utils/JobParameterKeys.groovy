@@ -36,11 +36,5 @@ class JobParameterKeys {
      */
     @Deprecated
     static final String JOB_ID_LIST = '__pbsIds'
-    /**
-     * @deprecated Create/use a subclass of {@link AbstractMultiJob}, then cluster job IDs no longer have to be passed
-     * between jobs.
-     */
-    @Deprecated
-    static final String REALM = '__pbsRealm'
     static final String SCRIPT = 'SCRIPT'
 }

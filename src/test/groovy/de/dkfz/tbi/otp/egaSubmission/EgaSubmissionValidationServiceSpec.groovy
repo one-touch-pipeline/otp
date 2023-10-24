@@ -51,7 +51,6 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
                 MergingWorkPackage,
                 Pipeline,
                 Project,
-                Realm,
                 ReferenceGenome,
                 ReferenceGenomeProjectSeqType,
                 RoddyBamFile,

@@ -44,7 +44,6 @@ class RnaRoddyBamFileSpec extends Specification implements RoddyRnaFactory, Data
                 MergingCriteria,
                 Pipeline,
                 Project,
-                Realm,
                 ReferenceGenome,
                 ReferenceGenomeProjectSeqType,
                 RnaRoddyBamFile,

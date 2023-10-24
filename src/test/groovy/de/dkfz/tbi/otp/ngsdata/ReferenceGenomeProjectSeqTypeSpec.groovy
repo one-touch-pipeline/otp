@@ -46,7 +46,6 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTes
         return [
                 Project,
                 Individual,
-                Realm,
                 Run,
                 SeqTrack,
                 Sample,

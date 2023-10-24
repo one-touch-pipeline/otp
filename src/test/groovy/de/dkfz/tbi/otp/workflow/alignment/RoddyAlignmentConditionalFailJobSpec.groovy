@@ -70,7 +70,7 @@ class RoddyAlignmentConditionalFailJobSpec extends Specification implements Data
         }
 
         job.fileSystemService = Mock(FileSystemService) {
-            getRemoteFileSystem(_) >> FileSystems.default
+            getRemoteFileSystem() >> FileSystems.default
         }
 
         job.lsdfFilesService = Mock(LsdfFilesService) {
@@ -106,7 +106,7 @@ class RoddyAlignmentConditionalFailJobSpec extends Specification implements Data
         }
 
         job.fileSystemService = Mock(FileSystemService) {
-            getRemoteFileSystem(_) >> FileSystems.default
+            getRemoteFileSystem() >> FileSystems.default
         }
 
         when:
@@ -127,7 +127,7 @@ class RoddyAlignmentConditionalFailJobSpec extends Specification implements Data
         }
 
         job.fileSystemService = Mock(FileSystemService) {
-            getRemoteFileSystem(_) >> FileSystems.default
+            getRemoteFileSystem() >> FileSystems.default
         }
 
         job.lsdfFilesService = Mock(LsdfFilesService) {
@@ -161,7 +161,7 @@ class RoddyAlignmentConditionalFailJobSpec extends Specification implements Data
         }
 
         job.fileSystemService = Mock(FileSystemService) {
-            getRemoteFileSystem(_) >> FileSystems.default
+            getRemoteFileSystem() >> FileSystems.default
         }
 
         job.lsdfFilesService = Mock(LsdfFilesService) {
@@ -194,7 +194,7 @@ class RoddyAlignmentConditionalFailJobSpec extends Specification implements Data
         }
 
         job.fileSystemService = Mock(FileSystemService) {
-            getRemoteFileSystem(_) >> FileSystems.default
+            getRemoteFileSystem() >> FileSystems.default
         }
 
         job.lsdfFilesService = Mock(LsdfFilesService) {
@@ -234,7 +234,7 @@ class RoddyAlignmentConditionalFailJobSpec extends Specification implements Data
         }
 
         job.fileSystemService = Mock(FileSystemService) {
-            getRemoteFileSystem(_) >> FileSystems.default
+            getRemoteFileSystem() >> FileSystems.default
         }
 
         job.lsdfFilesService = Mock(LsdfFilesService) {

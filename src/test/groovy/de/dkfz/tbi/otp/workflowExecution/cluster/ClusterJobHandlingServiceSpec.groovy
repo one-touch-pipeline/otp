@@ -36,7 +36,6 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 import de.dkfz.tbi.otp.workflowExecution.cluster.logs.ClusterLogDirectoryService
@@ -52,7 +51,6 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
     Class[] getDomainClassesToMock() {
         return [
                 ClusterJob,
-                Realm,
                 WorkflowStep,
         ]
     }

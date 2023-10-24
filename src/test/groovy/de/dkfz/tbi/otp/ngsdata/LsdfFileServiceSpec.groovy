@@ -45,7 +45,6 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
         return [
                 FastqFile,
                 FastqImportInstance,
-                Realm,
                 SeqTrack,
         ]
     }
@@ -142,9 +141,8 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
 
     void "test deleteFilesRecursive"() {
         given:
-        Realm realm = DomainFactory.createRealm()
         service.remoteShellHelper = [
-                executeCommand: { Realm realm2, String command ->
+                executeCommand: { String command ->
                     LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
                 }
         ] as RemoteShellHelper
@@ -156,7 +154,7 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
         ]
 
         when:
-        service.deleteFilesRecursive(realm, files)
+        service.deleteFilesRecursive(files)
 
         then:
         files.each {
@@ -166,24 +164,20 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
 
     void "test deleteFilesRecursive, when filesOrDirectories is empty"() {
         given:
-        Realm realm = DomainFactory.createRealm()
         service.remoteShellHelper = [
-                executeCommand: { Realm realm2, String command ->
+                executeCommand: { String command ->
                     assert false: 'Should not be called'
                 }
         ] as RemoteShellHelper
         service.createClusterScriptService = new CreateClusterScriptService()
 
         expect:
-        service.deleteFilesRecursive(realm, [])
+        service.deleteFilesRecursive([])
     }
 
     void "test deleteFilesRecursive, when filesOrDirectories is null, should fail"() {
-        given:
-        Realm realm = DomainFactory.createRealm()
-
         when:
-        service.deleteFilesRecursive(realm, null)
+        service.deleteFilesRecursive(null)
 
         then:
         def e = thrown(AssertionError)
@@ -193,9 +187,8 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
     void "test deleteFilesRecursive, when deletion fails, should not delete files"() {
         given:
         final String MESSAGE = HelperUtils.uniqueString
-        Realm realm = DomainFactory.createRealm()
         service.remoteShellHelper = [
-                executeCommand: { Realm realm2, String command ->
+                executeCommand: { String command ->
                     assert false: MESSAGE
                 }
         ] as RemoteShellHelper
@@ -208,7 +201,7 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
         ]
 
         when:
-        service.deleteFilesRecursive(realm, files)
+        service.deleteFilesRecursive(files)
 
         then:
         def e = thrown(AssertionError)

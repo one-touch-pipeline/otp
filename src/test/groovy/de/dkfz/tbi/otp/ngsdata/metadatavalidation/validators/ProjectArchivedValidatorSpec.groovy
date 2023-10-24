@@ -43,7 +43,6 @@ class ProjectArchivedValidatorSpec extends Specification implements DataTest, Do
         return [
                 ProcessingOption,
                 Project,
-                Realm,
                 SampleIdentifier,
         ]
     }

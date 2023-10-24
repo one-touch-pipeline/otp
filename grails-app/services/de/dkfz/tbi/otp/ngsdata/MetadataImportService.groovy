@@ -203,7 +203,7 @@ class MetadataImportService {
     }
 
     protected Path createPathTargetForMetadataFile(MetadataValidationContext context, String ticketNumber) {
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(configService.defaultRealm)
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
         String oldName = context.metadataFile.fileName
 
         Date date = new Date()
@@ -225,9 +225,9 @@ class MetadataImportService {
         try {
             if (!Files.exists(targetFile)) {
                 // create the directory and set the permission with owner and group access (setgid bit) explicitly
-                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(targetFile.parent, configService.defaultRealm,
+                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(targetFile.parent,
                         "", FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
-                fileService.createFileWithContentOnDefaultRealm(targetFile, context.content)
+                fileService.createFileWithContent(targetFile, context.content)
             }
             assert Files.readAllBytes(targetFile) == context.content
 

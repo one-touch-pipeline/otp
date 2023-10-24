@@ -26,14 +26,14 @@ import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.project.Project
 
 class WorkflowRunSchedulerSpec extends Specification implements ServiceUnitTest<WorkflowRunScheduler>, DataTest, WorkflowSystemDomainFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                Realm,
+                Project,
         ]
     }
 

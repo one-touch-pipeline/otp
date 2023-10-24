@@ -38,7 +38,6 @@ class MetadataValidationContextSpec extends Specification implements DomainFacto
         return [
                 FastqFile,
                 SeqType,
-                Realm,
                 RawSequenceFile,
         ]
     }

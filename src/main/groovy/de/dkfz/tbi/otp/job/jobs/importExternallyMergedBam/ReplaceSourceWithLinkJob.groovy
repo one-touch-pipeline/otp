@@ -33,7 +33,6 @@ import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ImportProcess
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.LinkFileUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 
@@ -67,8 +66,6 @@ class ReplaceSourceWithLinkJob extends AbstractEndStateAwareJobImpl {
             final ImportProcess importProcess = processParameterObject
             if (importProcess.linkOperation.replaceSourceWithLink) {
                 importProcess.externallyProcessedBamFiles.each { ExternallyProcessedBamFile epmbf ->
-                    Realm realm = epmbf.project.realm
-
                     File sourceBam = new File(epmbf.importedFrom)
                     File sourceBaseDir = sourceBam.parentFile
                     File sourceBai = new File(sourceBaseDir, epmbf.baiFileName)
@@ -94,7 +91,7 @@ class ReplaceSourceWithLinkJob extends AbstractEndStateAwareJobImpl {
                     }
 
                     if (filteredMap) {
-                        linkFileUtils.createAndValidateLinks(filteredMap, realm, epmbf.project.unixGroup)
+                        linkFileUtils.createAndValidateLinks(filteredMap, epmbf.project.unixGroup)
                     }
                 }
             }

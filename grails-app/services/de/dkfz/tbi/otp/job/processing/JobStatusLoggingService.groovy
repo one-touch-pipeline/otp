@@ -25,7 +25,6 @@ import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.ngsdata.Realm
 
 import java.util.regex.Pattern
 
@@ -65,15 +64,13 @@ class JobStatusLoggingService {
     /**
      * Get the location of the status log file of a workflow.
      *
-     * @param realm the realm the job runs in
      * @param processingStep the processing step of the job
      * @param clusterJobId an optional cluster job ID. If <code>null</code>, shell code to retrieve the numeric part
      *          of the cluster job id is returned.
      *          (Read: pass the job ID except if the returned string is used in a cluster job shell script)
      * @return the location of the status log file
      */
-    @SuppressWarnings("UnusedMethodParameter")
-    String constructLogFileLocation(Realm realm = null, ProcessingStep processingStep, String clusterJobId = null) {
+    String constructLogFileLocation(ProcessingStep processingStep, String clusterJobId = null) {
         String baseDir = logFileBaseDir(processingStep)
         String fileName = [
                 "joblog",
@@ -100,8 +97,7 @@ class JobStatusLoggingService {
      *          of the cluster job id is returned. (Read: To get a message usable for logging, do not provide it.)
      * @return a logging message
      */
-    @SuppressWarnings("UnusedMethodParameter")
-    String constructMessage(Realm realm = null, ProcessingStep processingStep, String clusterJobId = null) {
+    String constructMessage(ProcessingStep processingStep, String clusterJobId = null) {
         notNull processingStep, 'No processing step specified.'
         String message = [
                 processingStep.jobDefinition.plan.name,
@@ -149,7 +145,7 @@ class JobStatusLoggingService {
 
         final Collection<ClusterJobIdentifier> failedOrNotFinishedClusterJobs = []
         clusterJobs.each {
-            final File logFile = new File(constructLogFileLocation(null, processingStep, it.clusterJobId))
+            final File logFile = new File(constructLogFileLocation(processingStep, it.clusterJobId))
             String logFileText = ''
             try {
                 logFileText = logFile.text
@@ -157,7 +153,7 @@ class JobStatusLoggingService {
                 threadLog?.debug "Cluster job status log file ${logFile} not found."
             }
             notNull it
-            final String expectedLogMessage = constructMessage(null, processingStep, it.clusterJobId)
+            final String expectedLogMessage = constructMessage(processingStep, it.clusterJobId)
             if (!(logFileText =~ /(?:^|\s)${Pattern.quote(expectedLogMessage)}(?:$|\s)/)) {
                 threadLog?.debug "Did not find \"${expectedLogMessage}\" in ${logFile}."
                 failedOrNotFinishedClusterJobs.add(new ClusterJobIdentifier(it))

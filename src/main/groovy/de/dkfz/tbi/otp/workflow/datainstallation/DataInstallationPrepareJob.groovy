@@ -57,7 +57,6 @@ class DataInstallationPrepareJob extends AbstractPrepareJob implements DataInsta
         logService.addSimpleLogEntry(workflowStep, "Creating work directory ${runDirectory}")
         fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(
                 runDirectory,
-                null,
                 workflowStep.workflowRun.project.unixGroup,
         )
     }

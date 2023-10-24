@@ -41,7 +41,6 @@ class SampleTypeIndividualValidatorSpec extends Specification implements DataTes
         return [
                 Individual,
                 Project,
-                Realm,
                 Sample,
                 SampleType,
         ]

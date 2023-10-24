@@ -43,7 +43,6 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
                 RawSequenceFile,
                 FastqFile,
                 MergingWorkPackage,
-                Realm,
                 SeqTrack,
         ]
     }

@@ -37,7 +37,6 @@ class AggregateSequences implements Serializable {
     long sampleTypeId
     long individualId
     long projectId
-    long realmId
 
     /** aggregated fields from {@link SeqTrack} */
     long laneCount
@@ -75,9 +74,6 @@ class AggregateSequences implements Serializable {
     String projectName
     String projectDirName
 
-    /** fields from {@link Realm} */
-    String realmName
-
     /** fields from {@link SeqCenter} */
     String seqCenterName
     String seqCenterDirName
@@ -95,7 +91,6 @@ class AggregateSequences implements Serializable {
         sampleTypeId column: 'sample_type_id'
         individualId column: 'individual_id'
         projectId column: 'project_id'
-        realmId column: 'realm_id'
         id composite: ['seqTypeId', 'seqPlatformId', 'sampleId', 'seqCenterId', 'sampleTypeId', 'individualId', 'projectId']
     }
 

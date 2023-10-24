@@ -70,7 +70,7 @@ class DataProcessingFilesService {
 
     @Deprecated // legacy data
     Path getOutputDirectory(Individual individual, OutputDirectories dir) {
-        Path p = fileSystemService.getRemoteFileSystem(individual.project.realm).getPath(
+        Path p = fileSystemService.remoteFileSystem.getPath(
                 configService.processingRootPath.absolutePath,
                 individual.project.dirName,
                 'results_per_pid',

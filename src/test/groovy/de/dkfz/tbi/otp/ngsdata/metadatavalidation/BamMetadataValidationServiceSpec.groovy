@@ -24,9 +24,7 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation
 import spock.lang.Specification
 import spock.lang.TempDir
 
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.utils.*
@@ -58,17 +56,13 @@ class BamMetadataValidationServiceSpec extends Specification {
         file.bytes = ("UNKNOWN ${BAM_FILE_PATH} ${SEQUENCING_READ_TYPE.importAliases.first()}\n" +
                 "1 2 3"
         ).replaceAll(' ', '\t').getBytes(MetadataValidationContext.CHARSET)
-        Realm realm = new Realm()
 
         when:
         BamMetadataValidationContext context = bamMetadataValidationFileService.createFromFile(file, [], FileSystems.default, false)
 
         then:
-        bamMetadataValidationFileService.configService = Mock(ConfigService) {
-            1 * getDefaultRealm() >> realm
-        }
         bamMetadataValidationFileService.fileService = Mock(FileService) {
-            1 * fileIsReadable(_, realm) >> true
+            1 * fileIsReadable(_) >> true
         }
 
         and:
@@ -98,17 +92,13 @@ class BamMetadataValidationServiceSpec extends Specification {
         assert Files.createDirectories(subfolder)
         Path file2 = subfolder.resolve("file2.txt")
         file2.write("something other")
-        Realm realm = new Realm()
 
         when:
         bamMetadataValidationFileService.checkFilesInDirectory(folder, problems)
 
         then:
-        bamMetadataValidationFileService.configService = Mock(ConfigService) {
-            1 * getDefaultRealm() >> realm
-        }
         bamMetadataValidationFileService.fileService = Mock(FileService) {
-            1 * fileIsReadable(_, realm) >> true
+            1 * fileIsReadable(_) >> true
         }
 
         and:
@@ -119,17 +109,13 @@ class BamMetadataValidationServiceSpec extends Specification {
         given:
         Path notReadAble = CreateFileHelper.createFile(tempDir.resolve('notReadable.txt'))
         assert LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("chmod a-r ${notReadAble.toAbsolutePath()} && echo OK").trim() == 'OK'
-        Realm realm = new Realm()
 
         when:
         bamMetadataValidationFileService.checkFile(notReadAble, problems)
 
         then:
-        bamMetadataValidationFileService.configService = Mock(ConfigService) {
-            1 * getDefaultRealm() >> realm
-        }
         bamMetadataValidationFileService.fileService = Mock(FileService) {
-            1 * fileIsReadable(_, realm) >> false
+            1 * fileIsReadable(_) >> false
         }
 
         and:
@@ -141,17 +127,13 @@ class BamMetadataValidationServiceSpec extends Specification {
     void "checkFile, when is empty, add the corresponding problem"() {
         given:
         Path emptyFile = CreateFileHelper.createFile(tempDir.resolve('emptyFile.txt'), "")
-        Realm realm = new Realm()
 
         when:
         bamMetadataValidationFileService.checkFile(emptyFile, problems)
 
         then:
-        bamMetadataValidationFileService.configService = Mock(ConfigService) {
-            1 * getDefaultRealm() >> realm
-        }
         bamMetadataValidationFileService.fileService = Mock(FileService) {
-            1 * fileIsReadable(_, realm) >> true
+            1 * fileIsReadable(_) >> true
         }
 
         and:
@@ -162,11 +144,9 @@ class BamMetadataValidationServiceSpec extends Specification {
 
     void "checkFile, when is to large, add the corresponding problem"() {
         given:
-        bamMetadataValidationFileService.configService = Mock(ConfigService)
         bamMetadataValidationFileService.fileService = Mock(FileService)
 
         Path bigFile = CreateFileHelper.createFile(tempDir.resolve('bigFile.txt'))
-        Realm realm = new Realm()
 
         bamMetadataValidationFileService.fileService.fileSizeExceeded(_, _) >> true
 
@@ -174,8 +154,7 @@ class BamMetadataValidationServiceSpec extends Specification {
         bamMetadataValidationFileService.checkFile(bigFile, problems)
 
         then:
-        1 * bamMetadataValidationFileService.configService.defaultRealm >> realm
-        1 * bamMetadataValidationFileService.fileService.fileIsReadable(_, realm) >> true
+        1 * bamMetadataValidationFileService.fileService.fileIsReadable(_) >> true
 
         and:
         Problem problem = exactlyOneElement(problems.problems)

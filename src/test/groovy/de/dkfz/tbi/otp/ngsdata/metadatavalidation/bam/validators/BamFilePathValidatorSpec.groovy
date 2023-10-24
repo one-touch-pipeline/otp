@@ -26,7 +26,6 @@ import org.junit.ClassRule
 import spock.lang.*
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.FileType
@@ -98,7 +97,6 @@ class BamFilePathValidatorSpec extends Specification implements DataTest {
                           "'${notReadableFile.absolutePath}' is not readable.", "At least one file is not readable."),
         ]
         BamFilePathValidator validator = new BamFilePathValidator()
-        validator.configService = Mock(ConfigService)
         validator.fileService = new FileService()
         validator.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }

@@ -1645,9 +1645,6 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
                 xten    : false,
         ] + myProps
 
-        Realm realm = DomainFactory.createRealm()
-        assert realm.save([flush: true])
-
         ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep(props.jobClass)
         assert processingStep
 

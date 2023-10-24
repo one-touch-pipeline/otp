@@ -52,7 +52,6 @@ class SampleValidatorSpec extends Specification implements DataTest, DomainFacto
                 Individual,
                 ProcessingOption,
                 Project,
-                Realm,
                 Sample,
                 SampleIdentifier,
                 SampleType,

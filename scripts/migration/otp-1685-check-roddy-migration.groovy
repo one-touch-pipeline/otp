@@ -98,10 +98,7 @@ RemoteShellHelper remoteShellHelper = ctx.remoteShellHelper
 ProcessingOptionService processingOptionService = ctx.processingOptionService
 
 @Field
-Realm realm = configService.defaultRealm
-
-@Field
-FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+FileSystem fileSystem = fileSystemService.remoteFileSystem
 
 @Field
 Semaphore semaphore = new Semaphore(10)
@@ -120,14 +117,14 @@ String featureTogglesConfigPath = processingOptionService.findOptionAsString(Pro
 Path base = fileSystem.getPath(configService.scriptOutputPath.toString()).resolve('checkXmlMigration').
         resolve(TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date()))
 
-fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(base, realm)
+fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(base)
 println "Base Directory:\n${base}"
 
 List<String> handleRoddyCall(String cmd, Path commandOutput, String nameUsedInConfig, Path extractedOutput) {
     ProcessOutput output
     try {
         semaphore.acquire()
-        output = remoteShellHelper.executeCommandReturnProcessOutput(realm, cmd)
+        output = remoteShellHelper.executeCommandReturnProcessOutput(cmd)
     } finally {
         semaphore.release()
     }
@@ -144,7 +141,7 @@ ${output.stdout}
 
 ----------------------------------------
 ${output.stderr}
-""", realm)
+""")
 
     if (output.exitCode != 0) {
         throw new NotSupportedException("Roddy call fail.")
@@ -185,7 +182,7 @@ ${output.stderr}
                 !it.startsWith('USERGROUP =')
     }.sort()
 
-    fileService.createFileWithContent(extractedOutput, result.join('\n') + '\n', realm)
+    fileService.createFileWithContent(extractedOutput, result.join('\n') + '\n')
     return result
 }
 
@@ -223,7 +220,7 @@ GParsPool.withPool(parallel) {
                         '[^a-zA-Z0-9_]', '-')
                 String plugin = roddyWorkflowConfig.programVersion.split(':')[1]
                 work = base.resolve(plugin).resolve(projectName)
-                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(work, realm)
+                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(work)
 
                 // -------------
                 // old system
@@ -252,10 +249,10 @@ GParsPool.withPool(parallel) {
 
                 List<ExternalWorkflowConfigSelector> selectors = configSelectorService.findAllSelectorsSortedByPriority(extendedCriteria)
                 List<ExternalWorkflowConfigFragment> fragments = selectors*.externalWorkflowConfigFragment
-                fileService.createFileWithContent(work.resolve('21-selectors'), selectors*.name.join('\n') + '\n', realm)
+                fileService.createFileWithContent(work.resolve('21-selectors'), selectors*.name.join('\n') + '\n')
 
                 String fragmentJson = configFragmentService.mergeSortedFragments(fragments)
-                fileService.createFileWithContent(work.resolve('22-json'), JsonOutput.prettyPrint(fragmentJson) + '\n', realm)
+                fileService.createFileWithContent(work.resolve('22-json'), JsonOutput.prettyPrint(fragmentJson) + '\n')
 
                 // parameter
                 String combinedConfig = fragmentJson
@@ -276,10 +273,10 @@ GParsPool.withPool(parallel) {
                         queue,
                         filenameSectionKillSwitch
                 )
-                fileService.createFileWithContent(work.resolve('23-xml'), newXml + '\n', realm)
+                fileService.createFileWithContent(work.resolve('23-xml'), newXml + '\n')
 
                 Path configDir = work.resolve('config')
-                fileService.createFileWithContent(configDir.resolve('config.xml'), newXml, realm)
+                fileService.createFileWithContent(configDir.resolve('config.xml'), newXml)
 
                 String cmdNew = [
                         loadModule,
@@ -318,10 +315,10 @@ ${c2Set*.toString().sort().join('\n')}
 in both (${c3Set.size()}):
 ${c3Set*.toString().sort().join('\n')}
 """
-                fileService.createFileWithContent(work.resolve('31-onlyInOld'), c1Set*.toString().sort().join('\n') + '\n', realm)
-                fileService.createFileWithContent(work.resolve('32-onlyInNew'), c2Set*.toString().sort().join('\n') + '\n', realm)
-                fileService.createFileWithContent(work.resolve('33-inBoth'), c3Set*.toString().sort().join('\n') + '\n', realm)
-                fileService.createFileWithContent(work.resolve('34-compared'), compared, realm)
+                fileService.createFileWithContent(work.resolve('31-onlyInOld'), c1Set*.toString().sort().join('\n') + '\n')
+                fileService.createFileWithContent(work.resolve('32-onlyInNew'), c2Set*.toString().sort().join('\n') + '\n')
+                fileService.createFileWithContent(work.resolve('33-inBoth'), c3Set*.toString().sort().join('\n') + '\n')
+                fileService.createFileWithContent(work.resolve('34-compared'), compared)
 
                 if (c1Set || c2Set) {
                     out << """
@@ -339,7 +336,7 @@ ${c2Set*.toString().sort().join('\n')}
             out << "\n Exception:"
             out << stacktrace
             Path exceptionOut = work ? work.resolve('44-exception') : base.resolve("exceptionOut-${roddyWorkflowConfig.id}")
-            fileService.createFileWithContent(exceptionOut, stacktrace, realm)
+            fileService.createFileWithContent(exceptionOut, stacktrace)
         }
         return out.join('\n')
     }.join('\n\n')

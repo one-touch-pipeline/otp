@@ -36,7 +36,6 @@ class ExternalMergingWorkPackageSpec extends Specification implements DataTest {
                 Individual,
                 Pipeline,
                 Project,
-                Realm,
                 ReferenceGenome,
                 Sample,
                 SampleType,

@@ -65,7 +65,7 @@ class BulkSampleCreationController {
         if (cmd.hasErrors()) {
             flash.message = new FlashMessage("Error", cmd.errors)
         } else {
-            Realm.withTransaction { status ->
+            Sample.withTransaction { status ->
                 List<String> errors = sampleIdentifierService.createBulkSamples(
                         sampleIdentifierService.removeExcessWhitespaceFromCharacterDelimitedText(cmd.sampleText, cmd.delimiter),
                         cmd.delimiter,

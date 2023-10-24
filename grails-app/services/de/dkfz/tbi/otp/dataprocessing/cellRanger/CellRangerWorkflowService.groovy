@@ -39,7 +39,7 @@ class CellRangerWorkflowService {
     FileService fileService
 
     void linkResultFiles(SingleCellBamFile singleCellBamFile) {
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(singleCellBamFile.realm)
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
         Path workDirectory = fileSystem.getPath(singleCellBamFile.workDirectory.absolutePath)
         Path resultDirectory = fileSystem.getPath(singleCellBamFile.resultDirectory.absolutePath)
         String unixGroup = singleCellBamFile.project.unixGroup
@@ -48,13 +48,13 @@ class CellRangerWorkflowService {
             Path link = workDirectory.resolve(linkName)
             Path target = resultDirectory.resolve(resultPathName)
             if (!Files.exists(link, LinkOption.NOFOLLOW_LINKS)) {
-                fileService.createLink(link, target, singleCellBamFile.realm, unixGroup)
+                fileService.createLink(link, target, unixGroup)
             }
         }
     }
 
     void cleanupOutputDirectory(SingleCellBamFile singleCellBamFile) {
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(singleCellBamFile.realm)
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
         Path outputDirectory = fileSystem.getPath(singleCellBamFile.outputDirectory.absolutePath)
         Path resultDirectory = fileSystem.getPath(singleCellBamFile.resultDirectory.absolutePath)
 
@@ -74,14 +74,14 @@ class CellRangerWorkflowService {
     }
 
     void deleteOutputDirectory(SingleCellBamFile singleCellBamFile) {
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(singleCellBamFile.realm)
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
         Path workDirectory = fileSystem.getPath(singleCellBamFile.workDirectory.absolutePath)
         fileService.deleteDirectoryRecursively(workDirectory)
     }
 
     void correctFilePermissions(SingleCellBamFile singleCellBamFile) {
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(singleCellBamFile.realm)
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
         Path workDirectory = fileSystem.getPath(singleCellBamFile.workDirectory.absolutePath)
-        fileService.correctPathPermissionAndGroupRecursive(workDirectory, singleCellBamFile.realm, singleCellBamFile.project.unixGroup)
+        fileService.correctPathPermissionAndGroupRecursive(workDirectory, singleCellBamFile.project.unixGroup)
     }
 }

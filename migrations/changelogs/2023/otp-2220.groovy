@@ -19,26 +19,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
 
-import grails.gorm.hibernate.annotation.ManagedEntity
-
-import de.dkfz.tbi.otp.utils.Entity
-
-@ManagedEntity
-@Deprecated
-class Realm implements Entity, Serializable {
-
-    @Deprecated
-    String name
-
-    static constraints = {
-        name unique: true, blank: false
+databaseChangeLog = {
+    changeSet(author: "strubelp", id: "1698262206515-1") {
+        sql("""
+            DROP VIEW IF EXISTS aggregate_sequences;
+            DROP VIEW IF EXISTS sequences;
+        """)
     }
-
-    @Override
-    @Deprecated
-    String toString() {
-        return "Realm ${id} ${name}"
+    changeSet(author: "strubelp", id: "1698262206515-2") {
+        sql("""
+                DELETE FROM processing_option WHERE name='REALM_DEFAULT_VALUE';
+        """)
+    }
+    changeSet(author: "strubelp", id: "1698262206515-96") {
+        dropForeignKeyConstraint(baseTableName: "project", constraintName: "project_realm_id_fkey")
+    }
+    changeSet(author: "strubelp", id: "1698262206515-110") {
+        dropUniqueConstraint(constraintName: "unique_realm_name_constraint", tableName: "realm")
+    }
+    changeSet(author: "strubelp", id: "1698262206515-111") {
+        dropTable(tableName: "realm")
+    }
+    changeSet(author: "strubelp", id: "1698262206515-128") {
+        dropColumn(columnName: "realm_id", tableName: "project")
     }
 }

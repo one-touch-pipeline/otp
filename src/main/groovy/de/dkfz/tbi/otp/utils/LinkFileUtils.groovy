@@ -27,7 +27,6 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.Realm
 
 import java.nio.file.FileSystem
 import java.nio.file.Path
@@ -46,25 +45,25 @@ class LinkFileUtils {
      * Creates relative symbolic links.
      * Links which already exist are overwritten, parent directories are created automatically if necessary.
      * @param targetLinkMap The values of the map are used as link names, the keys as the targets.
-     * @deprecated use {@link FileService#createLink(Path, Path, Realm, CreateLinkOption[])}
+     * @deprecated use {@link FileService#createLink(Path, Path, CreateLinkOption[])}
      */
     @Deprecated
-    void createAndValidateLinks(Map<File, File> targetLinkMap, Realm realm, String unixGroup = '')  {
+    void createAndValidateLinks(Map<File, File> targetLinkMap, String unixGroup = '')  {
         assert targetLinkMap
 
         if (!targetLinkMap.isEmpty()) {
-            FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+            FileSystem fileSystem = fileSystemService.remoteFileSystem
 
             targetLinkMap.values().each {
                 Path dir = fileService.toPath(it, fileSystem)
                 fileService.deleteDirectoryRecursively(dir)
-                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(dir.parent, realm, unixGroup)
+                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(dir.parent, unixGroup)
             }
 
             targetLinkMap.each { File target, File link ->
                 Path targetPath = fileService.toPath(target, fileSystem)
                 Path linkPath = fileService.toPath(link, fileSystem)
-                fileService.createLink(linkPath, targetPath, realm, CreateLinkOption.DELETE_EXISTING_FILE)
+                fileService.createLink(linkPath, targetPath, CreateLinkOption.DELETE_EXISTING_FILE)
             }
         }
     }

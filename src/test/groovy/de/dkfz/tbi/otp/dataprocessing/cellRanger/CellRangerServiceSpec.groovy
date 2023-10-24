@@ -26,7 +26,6 @@ import spock.lang.*
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
@@ -59,7 +58,6 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
                 MetaDataKey,
                 Pipeline,
                 Project,
-                Realm,
                 ReferenceGenome,
                 ReferenceGenomeProjectSeqType,
                 ReferenceGenomeIndex,
@@ -124,7 +122,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
 
         CellRangerService cellRangerService = new CellRangerService([
                 fileSystemService: Mock(FileSystemService) {
-                    1 * getRemoteFileSystem(_) >> FileSystems.default
+                    1 * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
                 lsdfFilesService : Mock(LsdfFilesService),
@@ -138,27 +136,27 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         1 * cellRangerService.fileService.deleteDirectoryRecursively(sampleDirectory)
 
         then:
-        1 * cellRangerService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(sampleDirectory, _, _)
+        1 * cellRangerService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(sampleDirectory, _)
 
         then:
-        1 * cellRangerService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(sampleIdentifierPath, _, _)
+        1 * cellRangerService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(sampleIdentifierPath, _)
 
         2 * cellRangerService.lsdfFilesService.getFileViewByPidPath(_) >>> [
                 file1,
                 file2,
         ]
-        1 * cellRangerService.fileService.createLink(mate1, filePath1, singleCellBamFile.realm, _)
-        1 * cellRangerService.fileService.createLink(mate2, filePath2, singleCellBamFile.realm, _)
+        1 * cellRangerService.fileService.createLink(mate1, filePath1, _, _)
+        1 * cellRangerService.fileService.createLink(mate2, filePath2, _, _)
 
         then:
-        1 * cellRangerService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(sampleDirectory.resolve(sampleIdentifier2DirName), _, _)
+        1 * cellRangerService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(sampleDirectory.resolve(sampleIdentifier2DirName), _)
 
         2 * cellRangerService.lsdfFilesService.getFileViewByPidPath(_) >>> [
                 file3,
                 file4,
         ]
-        1 * cellRangerService.fileService.createLink(mate3, filePath3, singleCellBamFile.realm, _)
-        1 * cellRangerService.fileService.createLink(mate4, filePath4, singleCellBamFile.realm, _)
+        1 * cellRangerService.fileService.createLink(mate3, filePath3, _, _)
+        1 * cellRangerService.fileService.createLink(mate4, filePath4, _, _)
     }
 
     void "deleteOutputDirectoryStructureIfExists, if singleCellBamFile given, then delete the output directory"() {
@@ -170,7 +168,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
 
         CellRangerService cellRangerService = new CellRangerService([
                 fileSystemService: Mock(FileSystemService) {
-                    1 * getRemoteFileSystem(_) >> FileSystems.default
+                    1 * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
                 fileService      : Mock(FileService),
@@ -186,7 +184,6 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
     void "validateFilesExistsInResultDirectory, if singleCellBamFile given and all files exist, then throw no exception"() {
         given:
         new TestConfigService(tempDir)
-        Realm realm = new Realm()
 
         SingleCellBamFile singleCellBamFile = createBamFile()
         File result = singleCellBamFile.resultDirectory
@@ -200,11 +197,8 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         }
 
         CellRangerService cellRangerService = new CellRangerService([
-                configService    : Mock(ConfigService) {
-                    _ * getDefaultRealm() >> realm
-                },
                 fileSystemService: Mock(FileSystemService) {
-                    1 * getRemoteFileSystem(_) >> FileSystems.default
+                    1 * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
                 fileService      : new FileService(),
@@ -224,7 +218,6 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
     void "validateFilesExistsInResultDirectory, if singleCellBamFile given and file/directory '#missingFile' does not exist, then throw an assert"() {
         given:
         new TestConfigService(tempDir)
-        Realm realm = new Realm()
 
         SingleCellBamFile singleCellBamFile = createBamFile()
         File result = singleCellBamFile.resultDirectory
@@ -238,11 +231,8 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         }
 
         CellRangerService cellRangerService = new CellRangerService([
-                configService    : Mock(ConfigService) {
-                    _ * getDefaultRealm() >> realm
-                },
                 fileSystemService: Mock(FileSystemService) {
-                    1 * getRemoteFileSystem(_) >> FileSystems.default
+                    1 * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
                 fileService      : new FileService(),
@@ -339,7 +329,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
                     }
                 },
                 fileSystemService         : Mock(FileSystemService) {
-                    _ * getRemoteFileSystem(_) >> FileSystems.default
+                    _ * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
         ])
@@ -392,7 +382,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
                     }
                 },
                 fileSystemService         : Mock(FileSystemService) {
-                    _ * getRemoteFileSystem(_) >> FileSystems.default
+                    _ * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
         ])

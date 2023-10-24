@@ -24,7 +24,6 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.project.Project
 
 import java.nio.file.*
@@ -41,8 +40,7 @@ List<Project> projects = Project.list(sort: 'name')
 
 String withdrawnUnixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.WITHDRAWN_UNIX_GROUP)
 
-Realm realm = configService.defaultRealm
-FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+FileSystem fileSystem = fileSystemService.remoteFileSystem
 Path scriptPath = fileSystem.getPath(configService.scriptOutputPath.toString())
 Path basePath = scriptPath.resolve("migrationFastqcNewDirectoryLevel")
 
@@ -126,7 +124,7 @@ withPool(numCores, {
             }
             scriptPerProject << "\n\necho end of script ${file}\n"
             Files.deleteIfExists(file)
-            fileService.createFileWithContent(file, scriptPerProject.join(''), realm)
+            fileService.createFileWithContent(file, scriptPerProject.join(''))
             scriptAllProjects << "bash ${file}"
         }
     }
@@ -134,7 +132,7 @@ withPool(numCores, {
 
 Path file = basePath.resolve("all.sh")
 Files.deleteIfExists(file)
-fileService.createFileWithContent(file, scriptAllProjects.join('\n'), realm)
+fileService.createFileWithContent(file, scriptAllProjects.join('\n'))
 
 println "Script generated at: ${file}"
 

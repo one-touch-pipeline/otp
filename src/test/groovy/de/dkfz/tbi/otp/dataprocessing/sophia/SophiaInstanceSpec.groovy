@@ -50,7 +50,6 @@ class SophiaInstanceSpec extends Specification implements DataTest {
                 MergingWorkPackage,
                 Pipeline,
                 Project,
-                Realm,
                 ReferenceGenome,
                 RoddyBamFile,
                 RoddyWorkflowConfig,
@@ -83,7 +82,6 @@ class SophiaInstanceSpec extends Specification implements DataTest {
      * so later on temp files can be generated and paths tested
      */
     void setup() {
-        DomainFactory.createRealm()
         configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
 
         this.instance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()

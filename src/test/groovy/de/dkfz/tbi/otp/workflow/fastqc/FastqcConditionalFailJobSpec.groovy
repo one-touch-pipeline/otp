@@ -66,7 +66,7 @@ class FastqcConditionalFailJobSpec extends Specification implements DataTest, Wo
             getSeqTrack(workflowStep) >> seqTrack
         }
         job.fileSystemService = Mock(FileSystemService) {
-            getRemoteFileSystem(_) >> FileSystems.default
+            getRemoteFileSystem() >> FileSystems.default
         }
         job.lsdfFilesService = Mock(LsdfFilesService) {
             getFileViewByPidPathAsPath(_) >> path
@@ -110,7 +110,7 @@ class FastqcConditionalFailJobSpec extends Specification implements DataTest, Wo
             getSeqTrack(workflowStep) >> seqTrack
         }
         job.fileSystemService = Mock(FileSystemService) {
-            getRemoteFileSystem(_) >> FileSystems.default
+            getRemoteFileSystem() >> FileSystems.default
         }
         job.lsdfFilesService = Mock(LsdfFilesService) {
             getFileViewByPidPathAsPath(_) >> TestCase.uniqueNonExistentPath.toPath()

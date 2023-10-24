@@ -83,9 +83,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
 
         File bam = new File(inputRootDirectory, "bamFiles/wgs/tumor_SOMEPID_merged.mdup.bam")
 
-        remoteShellHelper.executeCommandReturnProcessOutput(realm,
-                "cp ${bam} ${new File(targetDir, bamFileName)}"
-        )
+        remoteShellHelper.executeCommandReturnProcessOutput("cp ${bam} ${new File(targetDir, bamFileName)}")
 
         if (useLink) {
             Map<String, String> map = ([
@@ -100,7 +98,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
             ] : []))
             linkFileUtils.createAndValidateLinks(map.collectEntries { key, value ->
                 [(new File(targetDir, key)): new File(baseDir, value)]
-            }, realm)
+            })
         }
 
         File bamFile = new File(baseDir, bamFileName)
@@ -152,7 +150,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
 
     void setupFiles(boolean furtherFiles) {
         SessionUtils.withTransaction {
-            Project project = createProject(realm: realm)
+            Project project = createProject()
             createDirectories([new File(ftpDir), new File(projectService.getProjectDirectory(project).toString())])
             ExternallyProcessedBamFile epmbf01 = createFile(project, '1', furtherFiles, false)
             ExternallyProcessedBamFile epmbf02 = createFile(project, '2', furtherFiles, true)
@@ -240,7 +238,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
                     Path source = baseDirSource.resolve(it)
                     Path target = baseDirTarget.resolve(it)
                     assert Files.isSymbolicLink(source)
-                    fileService.ensureFileIsReadableAndNotEmpty(target, realm)
+                    fileService.ensureFileIsReadableAndNotEmpty(target)
                     assert source.toRealPath() == target
                 }
             }
@@ -340,11 +338,11 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
     }
 
     protected void checkThatDirectoryExistAndIsNotLink(Path path) {
-        fileService.ensureDirIsReadable(path, configService.defaultRealm)
+        fileService.ensureDirIsReadable(path)
     }
 
     protected void checkThatFileExistAndIsNotLink(Path path) {
-        fileService.ensureFileIsReadableAndNotEmpty(path, realm)
+        fileService.ensureFileIsReadableAndNotEmpty(path)
         assert !Files.isSymbolicLink(path)
     }
 

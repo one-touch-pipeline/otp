@@ -46,7 +46,6 @@ class ProjectServiceSpec extends Specification implements DataTest, DomainFactor
                 ConfigPerProjectAndSeqType,
                 Pipeline,
                 Project,
-                Realm,
                 RunYapsaConfig,
                 SeqType,
         ]

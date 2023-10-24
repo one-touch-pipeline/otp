@@ -26,7 +26,6 @@ import org.junit.ClassRule
 import spock.lang.*
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -45,9 +44,7 @@ class MetadataValidationServiceSpec extends Specification implements DomainFacto
 
     @Override
     Class[] getDomainClassesToMock() {
-        return [
-                Realm,
-        ]
+        return []
     }
 
     @Shared
@@ -63,18 +60,12 @@ class MetadataValidationServiceSpec extends Specification implements DomainFacto
 
     @Unroll
     void 'readPath, when file cannot be opened, adds an error #problemMessage'() {
-        given:
-        Realm realm = new Realm()
-
         when:
         ContentWithPathAndProblems contentWithProblems = metadataValidationFileService.readPath(path)
 
         then:
-        metadataValidationFileService.configService = Mock(ConfigService) {
-            readableCheckCount * getDefaultRealm() >> realm
-        }
         metadataValidationFileService.fileService = Mock(FileService) {
-            readableCheckCount * fileIsReadable(_, realm) >> readable
+            readableCheckCount * fileIsReadable(_) >> readable
         }
 
         and:
@@ -108,17 +99,13 @@ class MetadataValidationServiceSpec extends Specification implements DomainFacto
         given:
         Path file = tempDir.resolve("${HelperUtils.uniqueString}.tsv")
         file.bytes = 'a\n\n'.getBytes(MetadataValidationContext.CHARSET)
-        Realm realm = new Realm()
 
         when:
         Map infoMetadata = metadataValidationFileService.readAndCheckFile(file)
 
         then:
-        metadataValidationFileService.configService = Mock(ConfigService) {
-            1 * getDefaultRealm() >> realm
-        }
         metadataValidationFileService.fileService = Mock(FileService) {
-            1 * fileIsReadable(file, realm) >> true
+            1 * fileIsReadable(file) >> true
         }
 
         and:

@@ -250,13 +250,13 @@ class LsdfFilesService {
      * @deprecated use {@link FileService#deleteDirectoryRecursively(Path)}
      */
     @Deprecated
-    void deleteFilesRecursive(Realm realm, Collection<File> filesOrDirectories) {
+    void deleteFilesRecursive(Collection<File> filesOrDirectories) {
         assert filesOrDirectories != null: 'filesOrDirectories may not be null'
         if (filesOrDirectories.empty) {
             return // nothing to do
         }
         String cmd = createClusterScriptService.removeDirs(filesOrDirectories, CreateClusterScriptService.RemoveOption.RECURSIVE_FORCE)
-        assert remoteShellHelper.executeCommand(realm, cmd) ==~ /^0\s*$/
+        assert remoteShellHelper.executeCommand(cmd) ==~ /^0\s*$/
         filesOrDirectories.each {
             waitUntilDoesNotExist(it)
         }

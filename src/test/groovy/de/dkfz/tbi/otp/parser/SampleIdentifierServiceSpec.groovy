@@ -52,7 +52,6 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
                 Individual,
                 ProcessingOption,
                 Project,
-                Realm,
                 Sample,
                 SampleIdentifier,
                 SampleType,

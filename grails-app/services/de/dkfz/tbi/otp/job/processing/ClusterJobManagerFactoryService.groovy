@@ -32,7 +32,6 @@ import de.dkfz.roddy.execution.jobs.cluster.pbs.PBSJobManager
 import de.dkfz.roddy.execution.jobs.cluster.slurm.SlurmJobManager
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.ngsdata.JobScheduler
-import de.dkfz.tbi.otp.ngsdata.Realm
 
 import java.time.Duration
 
@@ -43,12 +42,6 @@ class ClusterJobManagerFactoryService {
     ConfigService configService
 
     private BatchEuphoriaJobManager manager = null
-
-    @Deprecated
-    @SuppressWarnings("UnusedMethodParameter")
-    BatchEuphoriaJobManager getJobManager(Realm realm) {
-        return jobManager
-    }
 
     BatchEuphoriaJobManager getJobManager() {
         if (manager == null) {

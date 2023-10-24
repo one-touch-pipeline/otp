@@ -42,7 +42,6 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
                 LibraryPreparationKit,
                 Project,
                 ProjectRole,
-                Realm,
                 Role,
                 SeqCenter,
                 SeqPlatform,

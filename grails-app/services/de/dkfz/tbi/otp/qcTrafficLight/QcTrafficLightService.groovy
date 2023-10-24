@@ -57,12 +57,11 @@ class QcTrafficLightService {
 
     private Map<SeqType, Closure<Void>> initQcHandlerMap() {
         Map<SeqType, Closure<Void>> map = [:]
-        Realm realm = configService.defaultRealm
         addToQcHandler(map, SeqTypeService.panCanAlignableSeqTypes) { AbstractBamFile roddyBamFile ->
-            linkFilesToFinalDestinationService.linkNewResults((RoddyBamFile)roddyBamFile, realm)
+            linkFilesToFinalDestinationService.linkNewResults((RoddyBamFile)roddyBamFile)
         }
         addToQcHandler(map, SeqTypeService.rnaAlignableSeqTypes) { AbstractBamFile roddyBamFile ->
-            linkFilesToFinalDestinationService.linkNewRnaResults((RnaRoddyBamFile)roddyBamFile, realm)
+            linkFilesToFinalDestinationService.linkNewRnaResults((RnaRoddyBamFile)roddyBamFile)
         }
         addToQcHandler(map, SeqTypeService.cellRangerAlignableSeqTypes) { AbstractBamFile roddyBamFile ->
             cellRangerWorkflowService.linkResultFiles((SingleCellBamFile)roddyBamFile)

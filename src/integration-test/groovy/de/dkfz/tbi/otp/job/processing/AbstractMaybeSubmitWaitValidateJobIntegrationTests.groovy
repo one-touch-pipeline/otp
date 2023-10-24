@@ -28,7 +28,6 @@ import org.junit.Test
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
 
 @Rollback
 @Integration
@@ -48,12 +47,11 @@ class AbstractMaybeSubmitWaitValidateJobIntegrationTests extends TestCase {
     @Test
     void testCreateExceptionString() {
         setupData()
-        Realm realm = DomainFactory.createRealm()
 
-        ClusterJob clusterJob1 = clusterJobService.createClusterJob(realm, "1111", 'user', processingStep)
+        ClusterJob clusterJob1 = clusterJobService.createClusterJob("1111", 'user', processingStep)
         ClusterJobIdentifier identifier1 = new ClusterJobIdentifier(clusterJob1)
 
-        ClusterJob clusterJob2 = clusterJobService.createClusterJob(realm, "2222", 'user', processingStep)
+        ClusterJob clusterJob2 = clusterJobService.createClusterJob("2222", 'user', processingStep)
         ClusterJobIdentifier identifier2 = new ClusterJobIdentifier(clusterJob2)
 
         Map failedClusterJobs = [(identifier2): "Failed2.", (identifier1): "Failed1."]

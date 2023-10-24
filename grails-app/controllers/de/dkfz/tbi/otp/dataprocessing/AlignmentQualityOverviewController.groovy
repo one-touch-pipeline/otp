@@ -27,7 +27,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerService
 import de.dkfz.tbi.otp.dataprocessing.qaalignmentoverview.QaOverviewService
@@ -165,7 +165,6 @@ class AlignmentQualityOverviewController implements CheckAndCall {
 
     CellRangerConfigurationService cellRangerConfigurationService
     CellRangerService cellRangerService
-    ConfigService configService
     FileService fileService
     FileSystemService fileSystemService
     ProcessingOptionService processingOptionService
@@ -178,6 +177,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
     RoddyResultServiceFactoryService roddyResultServiceFactoryService
     SeqTypeService seqTypeService
     WorkflowService workflowService
+    RnaRoddyBamFileService rnaRoddyBamFileService
 
     def index(AlignmentQcCommand cmd) {
         Project project = projectSelectionService.selectedProject
@@ -314,10 +314,9 @@ class AlignmentQualityOverviewController implements CheckAndCall {
         // This page is semi-generic over AbstractBamFile, with lots of SeqType-specific handling sprinkled all over.
         // This link is only generated for seqType RNA, so this cast is probably safe.
         RnaRoddyBamFile rrbf = cmd.abstractBamFile as RnaRoddyBamFile
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(cmd.abstractBamFile.realm)
-        Path file = fileSystem.getPath(rrbf.workArribaFusionPlotPdf)
+        Path file = rnaRoddyBamFileService.getWorkArribaFusionPlotPdf(rrbf)
 
-        if (fileService.fileIsReadable(file, configService.defaultRealm)) {
+        if (fileService.fileIsReadable(file)) {
             render(file: file.bytes, contentType: "application/pdf")
         } else {
             render(text: "no plot available", contentType: "text/plain")
@@ -329,7 +328,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
         Path workDir = roddyResultServiceFactoryService.getService(roddyResult).getWorkDirectory(roddyResult)
         Path configFile = roddyConfigService.getConfigFile(workDir)
 
-        if (fileService.fileIsReadable(configFile, configService.defaultRealm)) {
+        if (fileService.fileIsReadable(configFile)) {
             render(
                     file: configFile.bytes,
                     contentType: "text/plain",

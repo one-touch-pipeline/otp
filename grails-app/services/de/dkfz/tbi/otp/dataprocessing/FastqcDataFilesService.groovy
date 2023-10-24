@@ -25,7 +25,6 @@ import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -57,7 +56,6 @@ class FastqcDataFilesService {
     FileService fileService
     FileSystemService fileSystemService
     FilestoreService filestoreService
-    ConfigService configService
 
     private Path fastqcUUidFolder(FastqcProcessedFile fastqcProcessedFile) {
         return filestoreService.getWorkFolderPath(fastqcProcessedFile.workflowArtefact.producedBy)
@@ -156,7 +154,7 @@ class FastqcDataFilesService {
 
     void updateFastqcProcessedFile(FastqcProcessedFile fastqc) {
         Path path = fastqcOutputPath(fastqc)
-        if (fileService.fileIsReadable(path, configService.defaultRealm)) {
+        if (fileService.fileIsReadable(path)) {
             fastqc.fileExists = true
             fastqc.fileSize = Files.size(path)
             fastqc.dateFromFileSystem = new Date(Files.getLastModifiedTime(path).toMillis())

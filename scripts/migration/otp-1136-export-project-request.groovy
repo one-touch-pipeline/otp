@@ -25,7 +25,6 @@ package migration
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.Realm
 
 import de.dkfz.tbi.otp.project.ProjectRequest
 
@@ -45,8 +44,7 @@ ConfigService configService = ctx.configService
 FileSystemService fileSystemService = ctx.fileSystemService
 FileService fileService = ctx.fileService
 
-Realm realm = configService.defaultRealm
-FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+FileSystem fileSystem = fileSystemService.remoteFileSystem
 Path path = fileSystem.getPath(fileName)
 
 String contentHeader = "projectRequestId\tprojectRequestName\torganizationalUnit\tcostCenter"
@@ -62,6 +60,6 @@ String content = ProjectRequest.list().sort{
 }.join('\n')
 
 String output = [contentHeader, content].join('\n')
-fileService.createFileWithContent(path, output, realm)
+fileService.createFileWithContent(path, output)
 
 println "Project data from Database has been exported to ${fileName}"

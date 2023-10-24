@@ -30,7 +30,6 @@ import org.grails.web.json.JSONObject
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqType
 
 @CompileDynamic
@@ -48,8 +47,7 @@ class ClusterJobSubmissionOptionsService {
      * Options are Map<JobSubmissionOption, String> serialized as JSON
      */
     @Deprecated // old workflow system
-    @SuppressWarnings("UnusedMethodParameter")
-    Map<JobSubmissionOption, String> readOptionsFromDatabase(ProcessingStep processingStep, Realm realm) {
+    Map<JobSubmissionOption, String> readOptionsFromDatabase(ProcessingStep processingStep) {
         ProcessParameterObject parameterObject = processingStep.processParameterObject
         assert parameterObject
         SeqType seqType = parameterObject.seqType

@@ -84,11 +84,12 @@ class LinkFilesToFinalDestinationService {
         }
     }
 
-    void linkToFinalDestinationAndCleanupRna(RnaRoddyBamFile roddyBamFile, Realm realm) {
-        executeRoddyCommandService.correctPermissionsAndGroups(roddyBamFile, realm)
-        cleanupOldRnaResults(roddyBamFile, realm)
+    @Deprecated
+    void linkToFinalDestinationAndCleanupRna(RnaRoddyBamFile roddyBamFile) {
+        executeRoddyCommandService.correctPermissionsAndGroups(roddyBamFile)
+        cleanupOldRnaResults(roddyBamFile)
         handleQcCheckAndSetBamFile(roddyBamFile) {
-            linkNewRnaResults(roddyBamFile, realm)
+            linkNewRnaResults(roddyBamFile)
         }
     }
 
@@ -116,7 +117,7 @@ class LinkFilesToFinalDestinationService {
      * Link files (replaces existing files)
      */
     @Deprecated
-    void linkNewResults(RoddyBamFile roddyBamFile, Realm realm) {
+    void linkNewResults(RoddyBamFile roddyBamFile) {
         assert roddyBamFile: "Input roddyBamFile must not be null"
         assert !roddyBamFile.isOldStructureUsed()
 
@@ -161,21 +162,22 @@ class LinkFilesToFinalDestinationService {
         }
 
         if (roddyBamFile.baseBamFile?.isOldStructureUsed()) {
-            lsdfFilesService.deleteFilesRecursive(realm, [roddyBamFile.baseBamFile.finalMergedQADirectory])
+            lsdfFilesService.deleteFilesRecursive([roddyBamFile.baseBamFile.finalMergedQADirectory])
         }
 
         // create the collected links
-        linkFileUtils.createAndValidateLinks(linkMapSourceLink, realm, roddyBamFile.project.unixGroup)
+        linkFileUtils.createAndValidateLinks(linkMapSourceLink, roddyBamFile.project.unixGroup)
     }
 
-    void linkNewRnaResults(RnaRoddyBamFile roddyBamFile, Realm realm) {
+    @Deprecated
+    void linkNewRnaResults(RnaRoddyBamFile roddyBamFile) {
         File baseDirectory = roddyBamFile.baseDirectory
         Map<File, File> links = roddyBamFile.workDirectory.listFiles().findAll {
             !it.name.startsWith(".")
         }.collectEntries { File source ->
             [(source): new File(baseDirectory, source.name)]
         }
-        linkFileUtils.createAndValidateLinks(links, realm, roddyBamFile.project.unixGroup)
+        linkFileUtils.createAndValidateLinks(links, roddyBamFile.project.unixGroup)
     }
 
     List<Path> getFilesToCleanup(RoddyBamFile roddyBamFile) {
@@ -238,13 +240,14 @@ class LinkFilesToFinalDestinationService {
         return filesToDelete.collect { fileService.toPath(it, fs) }
     }
 
-    void cleanupOldRnaResults(RnaRoddyBamFile roddyBamFile, Realm realm) {
+    @Deprecated
+    void cleanupOldRnaResults(RnaRoddyBamFile roddyBamFile) {
         List<RoddyBamFile> roddyBamFiles = RoddyBamFile.findAllByWorkPackageAndIdNotEqual(roddyBamFile.mergingWorkPackage, roddyBamFile.id)
         List<File> workDirs = roddyBamFiles*.workDirectory
         if (workDirs) {
-            lsdfFilesService.deleteFilesRecursive(realm, workDirs)
+            lsdfFilesService.deleteFilesRecursive(workDirs)
         }
         String cmd = "find ${roddyBamFile.baseDirectory} -maxdepth 1 -lname '.merging*/*' -delete;"
-        remoteShellHelper.executeCommandReturnProcessOutput(realm, cmd)
+        remoteShellHelper.executeCommandReturnProcessOutput(cmd)
     }
 }

@@ -50,7 +50,6 @@ class NotificationDigestServiceSpec extends Specification implements DomainFacto
                 ProcessingPriority,
                 Project,
                 ProjectRole,
-                Realm,
                 Sample,
                 SampleType,
                 UserProjectRole,

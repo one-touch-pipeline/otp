@@ -29,7 +29,6 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
@@ -429,7 +428,6 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
                 fileService: new FileService(),
                 individualService: individualService,
         )
-        snvCallingService.configService = Mock(ConfigService)
         snvCallingService.fileService = new FileService()
         snvCallingService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }

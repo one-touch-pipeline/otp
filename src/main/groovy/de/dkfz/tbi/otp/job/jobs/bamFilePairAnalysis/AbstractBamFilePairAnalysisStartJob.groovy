@@ -31,7 +31,6 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.job.jobs.RestartableStartJob
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
@@ -111,11 +110,9 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
     }
 
     private void tryToDeleteResultFilesOfFailedInstance(BamFilePairAnalysis analysis) {
-        Realm realm = analysis.project.realm
-
         String deleteFiles = "rm -rf ${bamFileAnalysisServiceFactoryService.getService(analysis).getWorkDirectory(analysis)}"
 
-        remoteShellHelper.executeCommandReturnProcessOutput(realm, deleteFiles)
+        remoteShellHelper.executeCommandReturnProcessOutput(deleteFiles)
     }
 
     SamplePair findSamplePairToProcess(int minPriority) {

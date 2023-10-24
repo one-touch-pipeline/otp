@@ -245,7 +245,7 @@ class BamExportImport {
     }
 
     void writeFile(Path path, String content) {
-        fileService.createFileWithContentOnDefaultRealm(path, content, FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION)
+        fileService.createFileWithContent(path, content, FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION)
     }
 
     Path handleInput(List<String> input, String filename, boolean overwriteExisting) {

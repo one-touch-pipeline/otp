@@ -27,7 +27,6 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -39,7 +38,6 @@ class SetCorrectPermissionJobSpec extends Specification implements DataTest, Wor
     Class[] getDomainClassesToMock() {
         return [
                 WorkflowStep,
-                Realm,
         ]
     }
 
@@ -48,13 +46,11 @@ class SetCorrectPermissionJobSpec extends Specification implements DataTest, Wor
         final String workflowDirectory = "some/dir/to/test"
         final Path workflowDirectoryPath = Paths.get(workflowDirectory)
         final String unixGroup = "someGroup"
-        final Realm realm = createRealm()
         final WorkflowStep workflowStep = createWorkflowStep(
                 workflowRun: createWorkflowRun(
                         workDirectory: workflowDirectory,
                         project: createProject(
                                 unixGroup: unixGroup,
-                                realm: realm
                         )
                 )
         )

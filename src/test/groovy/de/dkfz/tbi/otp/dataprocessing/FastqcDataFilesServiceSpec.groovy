@@ -26,7 +26,6 @@ import grails.testing.services.ServiceUnitTest
 import spock.lang.*
 
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.filestore.FilestoreService
@@ -71,7 +70,6 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
     SeqTrack seqTrack
     RawSequenceFile rawSequenceFile
     FastqcProcessedFile fastqcProcessedFile
-    Realm realm
 
     private PathOption[] pathOptions
 
@@ -85,7 +83,6 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         service.fileSystemService = new TestFileSystemService()
 
         seqTrack = createSeqTrack()
-        realm = seqTrack.project.realm
 
         rawSequenceFile = createFastqFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run])
         fastqcProcessedFile = createFastqcProcessedFile([sequenceFile: rawSequenceFile])
@@ -297,11 +294,8 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         service.updateFastqcProcessedFile(fastqcProcessedFile)
 
         then:
-        service.configService = Mock(ConfigService) {
-            1 * getDefaultRealm() >> realm
-        }
         service.fileService = Mock(FileService) {
-            1 * fileIsReadable(path, realm) >> true
+            1 * fileIsReadable(path) >> true
         }
 
         and:
@@ -315,11 +309,8 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
         service.updateFastqcProcessedFile(fastqcProcessedFile)
 
         then:
-        service.configService = Mock(ConfigService) {
-            1 * getDefaultRealm() >> realm
-        }
         service.fileService = Mock(FileService) {
-            1 * fileIsReadable(_, realm) >> false
+            1 * fileIsReadable(_) >> false
         }
 
         and:

@@ -74,12 +74,11 @@ class ExecuteRoddyCommandService {
      * @param roddyResult , This is the roddyResult on which each workflow works on (i.e. RoddyBamFile)
      * @param nameInConfigFile , This is the part before the @ in the ProjectConfigFile (i.e. $workflow_$version)
      * @param analysisIDinConfigFile , This is the part after the @ in the ProjectConfigFile (i.e. EXOME)
-     * @param realm , This is the realm to work on.
      * @deprecated use {@link RoddyCommandService} for the new WF system
      */
     @CompileDynamic
     @Deprecated
-    String defaultRoddyExecutionCommand(RoddyResult roddyResult, String nameInConfigFile, String analysisIDinConfigFile, Realm realm) {
+    String defaultRoddyExecutionCommand(RoddyResult roddyResult, String nameInConfigFile, String analysisIDinConfigFile) {
         assert roddyResult: "The input roddyResult is not allowed to be null"
         assert nameInConfigFile: "The input nameInConfigFile is not allowed to be null"
         assert analysisIDinConfigFile: "The input analysisIDinConfigFile is not allowed to be null"
@@ -90,7 +89,7 @@ class ExecuteRoddyCommandService {
         }
 
         File workOutputDir = roddyResult.workDirectory
-        createWorkOutputDirectory(realm, workOutputDir)
+        createWorkOutputDirectory(workOutputDir)
 
         RoddyWorkflowConfig config = roddyResult.config
 
@@ -196,7 +195,7 @@ class ExecuteRoddyCommandService {
      * @deprecated use {@link RoddyCommandService} for the new WF system
      */
     @Deprecated
-    void createWorkOutputDirectory(Realm realm, File file) {
+    void createWorkOutputDirectory(File file) {
         assert file: "File must not be null"
         String fileList = [
                 file,
@@ -205,13 +204,13 @@ class ExecuteRoddyCommandService {
                 file.parentFile.parentFile.parentFile,
         ].join(' ')
         if (file.exists()) {
-            remoteShellHelper.executeCommand(realm, """\
+            remoteShellHelper.executeCommand("""\
                 |umask 027
                 |chgrp -h ${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)} ${file}
                 |chmod 2750 ${fileList}""".stripMargin()
             )
         } else {
-            remoteShellHelper.executeCommand(realm, """\
+            remoteShellHelper.executeCommand("""\
                 |umask 027
                 |mkdir -m 2750 -p ${file} && \\
                 |chgrp -h ${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)} ${file}
@@ -227,17 +226,17 @@ class ExecuteRoddyCommandService {
      * chgrp resets setgid and setuid on the affected files so you need to apply the group first and then
      * apply the permissions.
      */
-    void correctPermissionsAndGroups(RoddyResult roddyResult, Realm realm) {
-        String group = executionHelperService.getGroup(roddyResult.project.realm, roddyResult.baseDirectory)
-        executionHelperService.setGroup(realm, roddyResult.workDirectory, group)
-        correctGroups(roddyResult, realm)
+    void correctPermissionsAndGroups(RoddyResult roddyResult) {
+        String group = executionHelperService.getGroup(roddyResult.baseDirectory)
+        executionHelperService.setGroup(roddyResult.workDirectory, group)
+        correctGroups(roddyResult)
 
-        correctPermissions(roddyResult, realm)
-        executionHelperService.setPermission(realm, roddyResult.workDirectory, FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
+        correctPermissions(roddyResult)
+        executionHelperService.setPermission(roddyResult.workDirectory, FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
     }
 
     @SuppressWarnings('LineLength')
-    void correctPermissions(RoddyResult roddyResult, Realm realm) {
+    void correctPermissions(RoddyResult roddyResult) {
         assert roddyResult: "roddyResult should not be null"
         String cmd = """\
             set -e
@@ -257,13 +256,13 @@ class ExecuteRoddyCommandService {
             echo "correct file permission for bam/bai files"
             find -type f -not -perm 444 \\( -name "*.bam" -or -name "*.bai" \\) -print -exec chmod 444 '{}' \\; | wc -l
             """.stripIndent()
-        remoteShellHelper.executeCommandReturnProcessOutput(realm, cmd).assertExitCodeZeroAndStderrEmpty()
+        remoteShellHelper.executeCommandReturnProcessOutput(cmd).assertExitCodeZeroAndStderrEmpty()
     }
 
     /**
      * When using this be aware that chgrp resets the setgid and setuid of the affected files.
      */
-    void correctGroups(RoddyResult roddyResult, Realm realm) {
+    void correctGroups(RoddyResult roddyResult) {
         assert roddyResult: "roddyResult should not be null"
         String cmd = """\
             set -e
@@ -277,7 +276,7 @@ class ExecuteRoddyCommandService {
 
             find -not -group \$groupname -print -exec chgrp -h \$groupname '{}' \\; | wc -l
             """.stripIndent()
-        remoteShellHelper.executeCommandReturnProcessOutput(realm, cmd).assertExitCodeZeroAndStderrEmpty()
+        remoteShellHelper.executeCommandReturnProcessOutput(cmd).assertExitCodeZeroAndStderrEmpty()
     }
 
     /**

@@ -150,7 +150,7 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Specif
         }
 
         service.remoteShellHelper = Mock(RemoteShellHelper) {
-            1 * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String cmd ->
+            1 * executeCommandReturnProcessOutput(_) >> { String cmd ->
                 assert cmd == "rm -rf /asdf"
             }
         }

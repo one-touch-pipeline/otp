@@ -50,7 +50,6 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
                 Pipeline,
                 ProcessingOption,
                 Project,
-                Realm,
                 ReferenceGenome,
                 ReferenceGenomeProjectSeqType,
                 RoddyBamFile,

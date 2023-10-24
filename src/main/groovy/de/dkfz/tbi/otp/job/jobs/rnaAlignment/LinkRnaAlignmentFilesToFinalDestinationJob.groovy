@@ -33,7 +33,6 @@ import de.dkfz.tbi.otp.dataprocessing.LinkFilesToFinalDestinationService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import de.dkfz.tbi.otp.utils.SessionUtils
 
@@ -58,10 +57,8 @@ class LinkRnaAlignmentFilesToFinalDestinationJob extends AbstractEndStateAwareJo
         SessionUtils.withNewSession {
             final RnaRoddyBamFile roddyBamFile = processParameterObject
 
-            Realm realm = roddyBamFile.project.realm
-
             linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)
-            linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanupRna(roddyBamFile, realm)
+            linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanupRna(roddyBamFile)
             succeed()
         }
     }

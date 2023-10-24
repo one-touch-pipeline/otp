@@ -57,7 +57,6 @@ class RoddyBamFile_PropertiesSpec extends Specification implements DataTest, Dom
                 Pipeline,
                 ProcessingPriority,
                 Project,
-                Realm,
                 ReferenceGenome,
                 RoddyBamFile,
                 RoddyWorkflowConfig,

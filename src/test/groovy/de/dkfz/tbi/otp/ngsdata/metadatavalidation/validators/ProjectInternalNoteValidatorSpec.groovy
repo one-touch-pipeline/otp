@@ -46,7 +46,6 @@ class ProjectInternalNoteValidatorSpec extends Specification implements DataTest
         return [
                 ProcessingOption,
                 Project,
-                Realm,
                 SampleIdentifier,
         ]
     }

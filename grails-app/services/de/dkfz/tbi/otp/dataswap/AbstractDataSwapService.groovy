@@ -410,7 +410,7 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
      */
     void createGroovyConsoleScriptToRestartAlignments(DataSwapData data) {
         Path groovyConsoleScriptToRestartAlignments = fileService.createOrOverwriteScriptOutputFile(
-                data.scriptOutputDirectory, "restartAli_${data.bashScriptName}.groovy", configService.defaultRealm
+                data.scriptOutputDirectory, "restartAli_${data.bashScriptName}.groovy"
         )
         groovyConsoleScriptToRestartAlignments << ALIGNMENT_SCRIPT_HEADER
 
@@ -456,8 +456,7 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
      * @return Path to bash script
      */
     void createMoveFilesScript(D data) {
-        Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(data.scriptOutputDirectory,
-                "${data.bashScriptName}.sh", configService.defaultRealm)
+        Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(data.scriptOutputDirectory, "${data.bashScriptName}.sh")
         bashScriptToMoveFiles << data.moveFilesCommands.join()
     }
 

@@ -45,7 +45,6 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest, Workfl
                 Pipeline,
                 ProcessingOption,
                 Project,
-                Realm,
                 ReferenceGenome,
                 ReferenceGenomeProjectSeqType,
                 RoddyWorkflowConfig,
@@ -77,7 +76,7 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest, Workfl
         ])
 
         service.remoteShellHelper = Mock(RemoteShellHelper) {
-            1 * executeCommandReturnProcessOutput(_, _) >> {
+            1 * executeCommandReturnProcessOutput(_) >> {
                 new ProcessOutput("""
                     useAcceleratedHardware=${useConvey}
                     markDuplicatesVariant=${mergeTool.name}
@@ -139,7 +138,7 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest, Workfl
         ])
 
         service.remoteShellHelper = Mock(RemoteShellHelper) {
-            1 * executeCommandReturnProcessOutput(_, _) >> {
+            1 * executeCommandReturnProcessOutput(_) >> {
                 new ProcessOutput("""
                     |SAMTOOLS_VERSION=1.0
                     |SAMBAMBA_VERSION=3.0
@@ -180,7 +179,7 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest, Workfl
         ])
 
         service.remoteShellHelper = Mock(RemoteShellHelper) {
-            1 * executeCommandReturnProcessOutput(_, _) >> {
+            1 * executeCommandReturnProcessOutput(_) >> {
                 new ProcessOutput(stdout, stderr.replaceFirst('roddyWorkflowConfig', roddyWorkflowConfig.nameUsedInConfig), exitcode)
             }
         }

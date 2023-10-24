@@ -54,8 +54,6 @@ HAVING COUNT(t.table_name) = 3;
  > UNION ALL
  */
 CREATE TABLE union_helper_table AS
-SELECT id, date_created, 'realm' as source FROM realm
-UNION ALL
 SELECT id, date_created, 'merging_set' as source FROM merging_set
 UNION ALL
 SELECT id, date_created, 'alignment_params' as source FROM alignment_params

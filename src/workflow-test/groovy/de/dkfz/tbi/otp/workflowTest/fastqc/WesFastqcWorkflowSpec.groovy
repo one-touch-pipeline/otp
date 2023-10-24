@@ -141,8 +141,8 @@ class WesFastqcWorkflowSpec extends AbstractDecidedWorkflowSpec {
         log.info("Domain data created")
 
         allRawSequenceFiles.each {
-            fileService.createLink(lsdfFilesService.getFileFinalPathAsPath(it), sourceFastq, realm)
-            fileService.createLink(lsdfFilesService.getFileViewByPidPathAsPath(it), lsdfFilesService.getFileFinalPathAsPath(it), realm)
+            fileService.createLink(lsdfFilesService.getFileFinalPathAsPath(it), sourceFastq)
+            fileService.createLink(lsdfFilesService.getFileViewByPidPathAsPath(it), lsdfFilesService.getFileFinalPathAsPath(it))
         }
         log.info("File system prepared")
 
@@ -168,7 +168,7 @@ class WesFastqcWorkflowSpec extends AbstractDecidedWorkflowSpec {
             setupWorkflow('gz', 1)
             Path initialPath = lsdfFilesService.getFileInitialPathAsPath(allRawSequenceFiles.first()).parent
             allRawSequenceFiles.each {
-                fileService.createLink(initialPath.resolve(it.fileName.replace('.fastq.gz', '_fastqc.zip')), expectedFastqc, realm)
+                fileService.createLink(initialPath.resolve(it.fileName.replace('.fastq.gz', '_fastqc.zip')), expectedFastqc)
             }
             decide(1, BASE_NAMES.size())
         }

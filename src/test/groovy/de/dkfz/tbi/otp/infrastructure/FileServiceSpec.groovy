@@ -27,7 +27,6 @@ import spock.lang.*
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.*
 
 import java.nio.charset.StandardCharsets
@@ -124,10 +123,9 @@ class FileServiceSpec extends Specification implements DataTest {
     void "setPermissionViaBash, if permission set to #permissionString, then path has expected permissionPosix"() {
         given:
         mockRemoteShellHelper()
-        Realm realm = new Realm()
 
         when:
-        fileService.setPermissionViaBash(tempDir, realm, permissionString)
+        fileService.setPermissionViaBash(tempDir, permissionString)
 
         then:
         // sticky bit can't be checked via PosixFilePermission, so only posix part is checked
@@ -145,10 +143,9 @@ class FileServiceSpec extends Specification implements DataTest {
         given:
         String permissionString = HelperUtils.uniqueString
         mockRemoteShellHelper()
-        Realm realm = new Realm()
 
         when:
-        fileService.setPermissionViaBash(tempDir, realm, permissionString)
+        fileService.setPermissionViaBash(tempDir, permissionString)
 
         then:
         ChangeFilePermissionException e = thrown()
@@ -160,10 +157,9 @@ class FileServiceSpec extends Specification implements DataTest {
     void "setGroupViaBash, if group is set to #group, then path has expected group"() {
         given:
         mockRemoteShellHelper()
-        Realm realm = new Realm()
 
         when:
-        fileService.setGroupViaBash(tempDir, realm, group)
+        fileService.setGroupViaBash(tempDir, group)
 
         then:
         Files.getFileAttributeView(tempDir, PosixFileAttributeView, LinkOption.NOFOLLOW_LINKS).readAttributes().group().name == group
@@ -178,11 +174,10 @@ class FileServiceSpec extends Specification implements DataTest {
     void "setGroupViaBash, if group is set to unknown group, then throw ChangeFileGroupException"() {
         given:
         mockRemoteShellHelper()
-        Realm realm = new Realm()
         String group = HelperUtils.uniqueString
 
         when:
-        fileService.setGroupViaBash(tempDir, realm, group)
+        fileService.setGroupViaBash(tempDir, group)
 
         then:
         ChangeFileGroupException e = thrown()
@@ -214,7 +209,6 @@ class FileServiceSpec extends Specification implements DataTest {
         mockRemoteShellHelper()
         TestConfigService configService = new TestConfigService()
 
-        Realm realm = new Realm()
         String group = firstGroup ? configService.testingGroup : configService.workflowProjectUnixGroup
 
         Path directory1 = tempDir.resolve('directory1')
@@ -222,7 +216,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path directory3 = directory2.resolve('directory3')
 
         when:
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(directory3, realm, group, permission)
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(directory3, group, permission)
 
         then:
         [
@@ -250,7 +244,6 @@ class FileServiceSpec extends Specification implements DataTest {
         mockRemoteShellHelper()
         TestConfigService configService = new TestConfigService()
 
-        Realm realm = new Realm()
         String group = validGroup ? configService.testingGroup : HelperUtils.randomMd5sum
 
         Path filePath = tempDir.resolve("folder")
@@ -259,7 +252,7 @@ class FileServiceSpec extends Specification implements DataTest {
         CreateFileHelper.createFile(filePath.resolve('file'))
 
         when:
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(directory, realm, group, permission)
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(directory, group, permission)
 
         then:
         OtpFileSystemException e = thrown()
@@ -462,7 +455,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path newFile = tempDir.resolve('newFile')
 
         when:
-        fileService.createFileWithContent(newFile, SOME_CONTENT, new Realm())
+        fileService.createFileWithContent(newFile, SOME_CONTENT)
 
         then:
         assertFile(newFile)
@@ -475,7 +468,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path newFile = tempDir.resolve('newFolder/newFile')
 
         when:
-        fileService.createFileWithContent(newFile, SOME_CONTENT, new Realm())
+        fileService.createFileWithContent(newFile, SOME_CONTENT)
 
         then:
         assertDirectory(newFile.parent)
@@ -487,7 +480,7 @@ class FileServiceSpec extends Specification implements DataTest {
     void "createFileWithContent, if parameter is #cases, throw assertion"() {
         when:
         mockRemoteShellHelper()
-        fileService.createFileWithContent(path, SOME_CONTENT, new Realm())
+        fileService.createFileWithContent(path, SOME_CONTENT)
 
         then:
         thrown(AssertionError)
@@ -507,7 +500,7 @@ class FileServiceSpec extends Specification implements DataTest {
         assert Files.isRegularFile(path)
 
         when:
-        fileService.createFileWithContent(path, SOME_CONTENT, new Realm())
+        fileService.createFileWithContent(path, SOME_CONTENT)
 
         then:
         thrown(AssertionError)
@@ -523,7 +516,7 @@ class FileServiceSpec extends Specification implements DataTest {
         assert path.text == oldContent
 
         when:
-        fileService.createFileWithContent(path, SOME_CONTENT, new Realm(), FileService.DEFAULT_FILE_PERMISSION, true)
+        fileService.createFileWithContent(path, SOME_CONTENT, FileService.DEFAULT_FILE_PERMISSION, true)
 
         then:
         path.text == SOME_CONTENT
@@ -538,7 +531,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path newFile = filePath.resolve('newDirectory')
 
         when:
-        fileService.createFileWithContent(newFile, SOME_CONTENT, new Realm())
+        fileService.createFileWithContent(newFile, SOME_CONTENT)
 
         then:
         thrown(CreateDirectoryException)
@@ -572,7 +565,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path newFile = tempDir.resolve('newFile')
 
         when:
-        fileService.createFileWithContent(newFile, SOME_BYTE_CONTENT, new Realm())
+        fileService.createFileWithContent(newFile, SOME_BYTE_CONTENT)
 
         then:
         assertFile(newFile)
@@ -585,7 +578,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path newFile = tempDir.resolve('newFolder/newFile')
 
         when:
-        fileService.createFileWithContent(newFile, SOME_BYTE_CONTENT, new Realm())
+        fileService.createFileWithContent(newFile, SOME_BYTE_CONTENT)
 
         then:
         assertDirectory(newFile.parent)
@@ -597,7 +590,7 @@ class FileServiceSpec extends Specification implements DataTest {
     void "createFileWithContent (byte), if parameter is #cases, throw assertion"() {
         when:
         mockRemoteShellHelper()
-        fileService.createFileWithContent(path, SOME_BYTE_CONTENT, new Realm())
+        fileService.createFileWithContent(path, SOME_BYTE_CONTENT)
 
         then:
         thrown(AssertionError)
@@ -617,7 +610,7 @@ class FileServiceSpec extends Specification implements DataTest {
         assert Files.isRegularFile(path)
 
         when:
-        fileService.createFileWithContent(path, SOME_BYTE_CONTENT, new Realm())
+        fileService.createFileWithContent(path, SOME_BYTE_CONTENT)
 
         then:
         thrown(AssertionError)
@@ -632,7 +625,7 @@ class FileServiceSpec extends Specification implements DataTest {
         assert path.bytes != SOME_BYTE_CONTENT
 
         when:
-        fileService.createFileWithContent(path, SOME_BYTE_CONTENT, new Realm(), FileService.DEFAULT_FILE_PERMISSION, true)
+        fileService.createFileWithContent(path, SOME_BYTE_CONTENT, FileService.DEFAULT_FILE_PERMISSION, true)
 
         then:
         path.bytes == SOME_BYTE_CONTENT
@@ -647,7 +640,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path newFile = filePath.resolve('newDirectory')
 
         when:
-        fileService.createFileWithContent(newFile, SOME_BYTE_CONTENT, new Realm())
+        fileService.createFileWithContent(newFile, SOME_BYTE_CONTENT)
 
         then:
         thrown(CreateDirectoryException)
@@ -819,7 +812,6 @@ class FileServiceSpec extends Specification implements DataTest {
         Path file = dir2.resolve('file')
         Path bamFile = dir2.resolve('file.bam')
         Path baiFile = dir2.resolve('file.bam.bai')
-        Realm realm = new Realm()
 
         Path link = dir2.resolve('link')
 
@@ -842,7 +834,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Files.createSymbolicLink(link, file)
 
         when:
-        fileService.correctPathPermissionAndGroupRecursive(tempDir, realm, group)
+        fileService.correctPathPermissionAndGroupRecursive(tempDir, group)
 
         then:
         Files.getPosixFilePermissions(tempDir) == POSIX_DIRECTORY_PERMISSION_PART
@@ -862,7 +854,6 @@ class FileServiceSpec extends Specification implements DataTest {
         given:
         Path expected = CreateFileHelper.createFile(tempDir.resolve("Test1_XYZ.csv"))
         CreateFileHelper.createFile(tempDir.resolve("Test1_ABC.csv"))
-        Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
@@ -870,19 +861,18 @@ class FileServiceSpec extends Specification implements DataTest {
         String matcher = "Test[0-9]_XYZ.csv"
 
         expect:
-        fileService.findFileInPath(tempDir, matcher, realm) == expected
+        fileService.findFileInPath(tempDir, matcher) == expected
     }
 
     void "findFileInPath, file can not be found with regular expression"() {
         given:
         CreateFileHelper.createFile(tempDir.resolve("file.txt"))
-        Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
-        fileService.findFileInPath(tempDir, "not-matching", realm)
+        fileService.findFileInPath(tempDir, "not-matching")
 
         then:
         AssertionError e = thrown()
@@ -894,13 +884,12 @@ class FileServiceSpec extends Specification implements DataTest {
         String matcher = "this-matches"
         Path parent = tempDir.resolve("${matcher}")
         CreateFileHelper.createFile(tempDir.resolve("${matcher}/file.txt"))
-        Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
-        fileService.findFileInPath(parent, matcher, realm)
+        fileService.findFileInPath(parent, matcher)
 
         then:
         AssertionError e = thrown()
@@ -910,7 +899,6 @@ class FileServiceSpec extends Specification implements DataTest {
     @Unroll
     void "findAllFilesInPath, finds all files with regex: #matcher"() {
         given:
-        Realm realm = new Realm()
         List<Path> files = ["file1.txt", "file2.txt", "record3.txt"].collect {
             CreateFileHelper.createFile(tempDir.resolve(it))
         }
@@ -919,7 +907,7 @@ class FileServiceSpec extends Specification implements DataTest {
         }
 
         when:
-        List<Path> output = fileService.findAllFilesInPath(tempDir, matcher, realm)
+        List<Path> output = fileService.findAllFilesInPath(tempDir, matcher)
 
         then:
         CollectionUtils.containSame(files[expectedFiles], output)
@@ -934,13 +922,12 @@ class FileServiceSpec extends Specification implements DataTest {
     void "findAllFilesInPath, cannot find a file"() {
         given:
         CreateFileHelper.createFile(tempDir.resolve("fileNotFound.txt"))
-        Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
-        fileService.findAllFilesInPath(tempDir, "wantToFindFile.txt", realm)
+        fileService.findAllFilesInPath(tempDir, "wantToFindFile.txt")
 
         then:
         AssertionError e = thrown()
@@ -953,13 +940,12 @@ class FileServiceSpec extends Specification implements DataTest {
         Path parent = tempDir.resolve("${matcher}")
         CreateFileHelper.createFile(tempDir.resolve("${matcher}/file1.txt"))
         CreateFileHelper.createFile(tempDir.resolve("${matcher}/file2.txt"))
-        Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
-        fileService.findAllFilesInPath(parent, matcher, realm)
+        fileService.findAllFilesInPath(parent, matcher)
 
         then:
         AssertionError e = thrown()
@@ -972,19 +958,17 @@ class FileServiceSpec extends Specification implements DataTest {
     void "isFileReadableAndNotEmpty, if file exists and has content, then return true"() {
         given:
         Path file = CreateFileHelper.createFile(tempDir.resolve("test.txt"))
-        Realm realm = new Realm()
         file.text = SOME_CONTENT
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         expect:
-        fileService.isFileReadableAndNotEmpty(file, realm)
+        fileService.isFileReadableAndNotEmpty(file)
     }
 
     void "isFileReadableAndNotEmpty, if file exists but is empty, then return false"() {
         given:
-        Realm realm = new Realm()
         Path file = CreateFileHelper.createFile(tempDir.resolve("test.txt"))
         file.text = ''
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
@@ -992,12 +976,11 @@ class FileServiceSpec extends Specification implements DataTest {
         }
 
         expect:
-        !fileService.isFileReadableAndNotEmpty(file, realm)
+        !fileService.isFileReadableAndNotEmpty(file)
     }
 
     void "isFileReadableAndNotEmpty, if file exists and has content, but is not readable, then return false"() {
         given:
-        Realm realm = new Realm()
         Path file = CreateFileHelper.createFile(tempDir.resolve("test.txt"), SOME_CONTENT)
         Files.setPosixFilePermissions(file, [] as Set)
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
@@ -1005,27 +988,24 @@ class FileServiceSpec extends Specification implements DataTest {
         }
 
         expect:
-        !fileService.isFileReadableAndNotEmpty(file, realm)
+        !fileService.isFileReadableAndNotEmpty(file)
     }
 
     void "isFileReadableAndNotEmpty, if file does not exist, then return false"() {
         given:
-        Realm realm = new Realm()
         Path nonExistingFile = tempDir.resolve('i-shouldnt-exist.tmp')
 
         expect:
-        !fileService.isFileReadableAndNotEmpty(nonExistingFile, realm)
+        !fileService.isFileReadableAndNotEmpty(nonExistingFile)
     }
 
     void "isFileReadableAndNotEmpty, if path is a directory, then return false"() {
         expect:
-        Realm realm = new Realm()
-        !fileService.isFileReadableAndNotEmpty(tempDir, realm)
+        !fileService.isFileReadableAndNotEmpty(tempDir)
     }
 
     void "isFileReadableAndNotEmpty, if path is a link to a file, then return false"() {
         given:
-        Realm realm = new Realm()
         Path path = Files.createDirectory(tempDir.resolve("folder"))
         Path file = Files.createFile(path.resolve("file"))
         Path link = path.resolve("link")
@@ -1035,7 +1015,7 @@ class FileServiceSpec extends Specification implements DataTest {
         }
 
         expect:
-        !fileService.isFileReadableAndNotEmpty(link, realm)
+        !fileService.isFileReadableAndNotEmpty(link)
     }
 
     // false positives, since rule can not recognize calling class
@@ -1044,21 +1024,17 @@ class FileServiceSpec extends Specification implements DataTest {
         given:
         File file = CreateFileHelper.createFile(tempDir.resolve("test.txt")).toFile()
         file.delete()
-        Realm realm = new Realm()
 
         when:
-        fileService.ensureFileIsReadable(file.toPath(), realm)
+        fileService.ensureFileIsReadable(file.toPath())
 
         then:
         thrown(AssertionError)
     }
 
     void "ensureFileIsReadable, fails when file is no regular file"() {
-        given:
-        Realm realm = new Realm()
-
         when:
-        fileService.ensureFileIsReadable(tempDir, realm)
+        fileService.ensureFileIsReadable(tempDir)
 
         then:
         thrown(AssertionError)
@@ -1068,13 +1044,12 @@ class FileServiceSpec extends Specification implements DataTest {
         given:
         File file = CreateFileHelper.createFile(tempDir.resolve("test.txt")).toFile()
         file.readable = false
-        Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
-        fileService.ensureFileIsReadable(file.toPath(), realm)
+        fileService.ensureFileIsReadable(file.toPath())
 
         then:
         thrown(AssertionError)
@@ -1087,13 +1062,12 @@ class FileServiceSpec extends Specification implements DataTest {
         given:
         Path path = CreateFileHelper.createFile(tempDir.resolve("test.txt"))
         path.text = SOME_CONTENT
-        Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
-        fileService.ensureFileIsReadableAndNotEmpty(path, realm)
+        fileService.ensureFileIsReadableAndNotEmpty(path)
 
         then:
         noExceptionThrown()
@@ -1103,13 +1077,12 @@ class FileServiceSpec extends Specification implements DataTest {
         given:
         Path path = CreateFileHelper.createFile(tempDir.resolve("test.txt"))
         path.text = ''
-        Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
-        fileService.ensureFileIsReadableAndNotEmpty(path, realm)
+        fileService.ensureFileIsReadableAndNotEmpty(path)
 
         then:
         thrown(AssertionError)
@@ -1120,13 +1093,12 @@ class FileServiceSpec extends Specification implements DataTest {
         Path path = CreateFileHelper.createFile(tempDir.resolve("test.txt"))
         path.text = SOME_CONTENT
         Files.setPosixFilePermissions(path, [] as Set)
-        Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
-        fileService.ensureFileIsReadableAndNotEmpty(path, realm)
+        fileService.ensureFileIsReadableAndNotEmpty(path)
 
         then:
         thrown(AssertionError)
@@ -1135,21 +1107,17 @@ class FileServiceSpec extends Specification implements DataTest {
     void "ensureFileIsReadableAndNotEmpty, if file does not exist, then throw an assertion"() {
         given:
         Path file = tempDir.resolve('file')
-        Realm realm = new Realm()
 
         when:
-        fileService.ensureFileIsReadableAndNotEmpty(file, realm)
+        fileService.ensureFileIsReadableAndNotEmpty(file)
 
         then:
         thrown(AssertionError)
     }
 
     void "ensureFileIsReadableAndNotEmpty, if path is a directory, then throw an assertion"() {
-        given:
-        Realm realm = new Realm()
-
         when:
-        fileService.ensureFileIsReadableAndNotEmpty(tempDir, realm)
+        fileService.ensureFileIsReadableAndNotEmpty(tempDir)
 
         then:
         thrown(AssertionError)
@@ -1160,10 +1128,9 @@ class FileServiceSpec extends Specification implements DataTest {
         Path dir = Files.createDirectory(tempDir.resolve("folder"))
         Path link = tempDir.resolve('link')
         Files.createSymbolicLink(link, dir)
-        Realm realm = new Realm()
 
         when:
-        fileService.ensureFileIsReadableAndNotEmpty(link, realm)
+        fileService.ensureFileIsReadableAndNotEmpty(link)
 
         then:
         thrown(AssertionError)
@@ -1172,10 +1139,9 @@ class FileServiceSpec extends Specification implements DataTest {
     void "ensureFileIsReadableAndNotEmpty, if path is not absolute, then throw an assertion"() {
         given:
         Path path = new File('relativePath').toPath()
-        Realm realm = new Realm()
 
         when:
-        fileService.ensureFileIsReadableAndNotEmpty(path, realm)
+        fileService.ensureFileIsReadableAndNotEmpty(path)
 
         then:
         thrown(AssertionError)
@@ -1184,13 +1150,12 @@ class FileServiceSpec extends Specification implements DataTest {
     void "ensureDirIsReadableAndNotEmpty, if directory exists and has content, then return without error"() {
         given:
         Files.createDirectory(tempDir.resolve('newFolder'))
-        Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
-        fileService.ensureDirIsReadableAndNotEmpty(tempDir, realm)
+        fileService.ensureDirIsReadableAndNotEmpty(tempDir)
 
         then:
         noExceptionThrown()
@@ -1198,13 +1163,12 @@ class FileServiceSpec extends Specification implements DataTest {
 
     void "ensureDirIsReadableAndNotEmpty, if directory exists but is empty, then throw an assertion"() {
         given:
-        Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
-        fileService.ensureDirIsReadableAndNotEmpty(tempDir, realm)
+        fileService.ensureDirIsReadableAndNotEmpty(tempDir)
 
         then:
         thrown(AssertionError)
@@ -1214,20 +1178,18 @@ class FileServiceSpec extends Specification implements DataTest {
         given:
         mockRemoteShellHelper()
         Path dir = Files.createDirectory(tempDir.resolve("folder"))
-        Realm realm = new Realm()
 
         expect:
-        fileService.fileIsReadable(dir, realm)
+        fileService.fileIsReadable(dir)
     }
 
     void "fileIsReadable, if file is readable, then return true"() {
         given:
         mockRemoteShellHelper()
         Path dir = Files.createDirectory(tempDir.resolve("folder"))
-        Realm realm = new Realm()
 
         expect:
-        fileService.fileIsReadable(Files.createFile(dir.resolve("file")), realm)
+        fileService.fileIsReadable(Files.createFile(dir.resolve("file")))
     }
 
     void "fileIsReadable, if file is not readable, then return false"() {
@@ -1237,10 +1199,9 @@ class FileServiceSpec extends Specification implements DataTest {
         Path file = Files.createFile(dir.resolve("file"))
         Set<PosixFilePermission> noReadPermissions = PosixFilePermissions.fromString("-wx-wx-wx")
         Files.setPosixFilePermissions(file, noReadPermissions)
-        Realm realm = new Realm()
 
         expect:
-        !fileService.fileIsReadable(file, realm)
+        !fileService.fileIsReadable(file)
     }
 
     void "fileIsReadable, if directory is not readable, then return false"() {
@@ -1249,10 +1210,9 @@ class FileServiceSpec extends Specification implements DataTest {
         Path dir = Files.createDirectory(tempDir.resolve("folder"))
         Set<PosixFilePermission> noReadPermissions = PosixFilePermissions.fromString("-wx-wx-wx")
         Files.setPosixFilePermissions(dir, noReadPermissions)
-        Realm realm = new Realm()
 
         expect:
-        !fileService.fileIsReadable(dir, realm)
+        !fileService.fileIsReadable(dir)
 
         cleanup:
         // directory has to be set readable, that the tempDir can be deleted afterwards
@@ -1263,10 +1223,9 @@ class FileServiceSpec extends Specification implements DataTest {
     void "fileIsReadable, if path not exists, then return false"() {
         given:
         mockRemoteShellHelper()
-        Realm realm = new Realm()
 
         expect:
-        !fileService.fileIsReadable(Paths.get("/path/not/exists"), realm)
+        !fileService.fileIsReadable(Paths.get("/path/not/exists"))
     }
 
     void "ensureDirIsReadableAndNotEmpty, if directory exist and has content, but is not readable, then throw an assertion"() {
@@ -1276,13 +1235,12 @@ class FileServiceSpec extends Specification implements DataTest {
         Files.createFile(dir.resolve("file"))
         Files.setPosixFilePermissions(dir, noReadPermissions)
         assert Files.isDirectory(dir)
-        Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
-        fileService.ensureDirIsReadableAndNotEmpty(dir, realm)
+        fileService.ensureDirIsReadableAndNotEmpty(dir)
 
         then:
         thrown(AssertionError)
@@ -1296,10 +1254,9 @@ class FileServiceSpec extends Specification implements DataTest {
     void "ensureDirIsReadableAndNotEmpty, if directory does not exist, then throw an assertion"() {
         given:
         Path newFolder = tempDir.resolve('newFolder')
-        Realm realm = new Realm()
 
         when:
-        fileService.ensureDirIsReadableAndNotEmpty(newFolder, realm)
+        fileService.ensureDirIsReadableAndNotEmpty(newFolder)
 
         then:
         thrown(AssertionError)
@@ -1308,10 +1265,9 @@ class FileServiceSpec extends Specification implements DataTest {
     void "ensureDirIsReadableAndNotEmpty, if path is a file, then throw an assertion"() {
         given:
         Path path = CreateFileHelper.createFile(tempDir.resolve("test.txt"))
-        Realm realm = new Realm()
 
         when:
-        fileService.ensureDirIsReadableAndNotEmpty(path, realm)
+        fileService.ensureDirIsReadableAndNotEmpty(path)
 
         then:
         thrown(AssertionError)
@@ -1321,10 +1277,9 @@ class FileServiceSpec extends Specification implements DataTest {
         given:
         Path file = tempDir.resolve('link')
         Files.createSymbolicLink(file, CreateFileHelper.createFile(tempDir.resolve("test.txt")))
-        Realm realm = new Realm()
 
         when:
-        fileService.ensureDirIsReadableAndNotEmpty(file, realm)
+        fileService.ensureDirIsReadableAndNotEmpty(file)
 
         then:
         thrown(AssertionError)
@@ -1333,10 +1288,9 @@ class FileServiceSpec extends Specification implements DataTest {
     void "ensureDirIsReadableAndNotEmpty, if path is not absolute, then throw an assertion"() {
         given:
         Path path = new File('relativePath').toPath()
-        Realm realm = new Realm()
 
         when:
-        fileService.ensureDirIsReadableAndNotEmpty(path, realm)
+        fileService.ensureDirIsReadableAndNotEmpty(path)
 
         then:
         thrown(AssertionError)
@@ -1345,13 +1299,12 @@ class FileServiceSpec extends Specification implements DataTest {
     void "ensureDirIsReadableAndExecutable, succeed when isReadable and isExecutable"() {
         given:
         tempDir.toFile().executable = true
-        Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
-        fileService.ensureDirIsReadableAndExecutable(tempDir, realm)
+        fileService.ensureDirIsReadableAndExecutable(tempDir)
 
         then:
         noExceptionThrown()
@@ -1363,10 +1316,9 @@ class FileServiceSpec extends Specification implements DataTest {
         Path path = tempDir.resolve("folder")
         path.toFile().executable = executable
         path.toFile().readable = readable
-        Realm realm = new Realm()
 
         when:
-        fileService.ensureDirIsReadableAndExecutable(path, realm)
+        fileService.ensureDirIsReadableAndExecutable(path)
 
         then:
         thrown(AssertionError)
@@ -1384,13 +1336,12 @@ class FileServiceSpec extends Specification implements DataTest {
     void "ensureDirIsReadable, if directory exists and has content, then return without error"() {
         given:
         Files.createDirectory(tempDir.resolve('newFolder'))
-        Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
-        fileService.ensureDirIsReadable(tempDir, realm)
+        fileService.ensureDirIsReadable(tempDir)
 
         then:
         noExceptionThrown()
@@ -1398,13 +1349,12 @@ class FileServiceSpec extends Specification implements DataTest {
 
     void "ensureDirIsReadable, if directory exists and is empty, then return without error"() {
         given:
-        Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
-        fileService.ensureDirIsReadable(tempDir, realm)
+        fileService.ensureDirIsReadable(tempDir)
 
         then:
         noExceptionThrown()
@@ -1414,13 +1364,12 @@ class FileServiceSpec extends Specification implements DataTest {
         given:
         Path path = Files.createDirectory(tempDir.resolve("folder"))
         Files.setPosixFilePermissions(path, [] as Set)
-        Realm realm = new Realm()
         fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
         when:
-        fileService.ensureDirIsReadable(path, realm)
+        fileService.ensureDirIsReadable(path)
 
         then:
         thrown(AssertionError)
@@ -1434,10 +1383,9 @@ class FileServiceSpec extends Specification implements DataTest {
     void "ensureDirIsReadable, if directory does not exist, then throw an assertion"() {
         given:
         Path newFolder = tempDir.resolve('newFolder')
-        Realm realm = new Realm()
 
         when:
-        fileService.ensureDirIsReadable(newFolder, realm)
+        fileService.ensureDirIsReadable(newFolder)
 
         then:
         thrown(AssertionError)
@@ -1446,10 +1394,9 @@ class FileServiceSpec extends Specification implements DataTest {
     void "ensureDirIsReadable, if path is a file, then throw an assertion"() {
         given:
         Path file = Files.createFile(tempDir.resolve("file.md"))
-        Realm realm = new Realm()
 
         when:
-        fileService.ensureDirIsReadable(file, realm)
+        fileService.ensureDirIsReadable(file)
 
         then:
         thrown(AssertionError)
@@ -1460,10 +1407,9 @@ class FileServiceSpec extends Specification implements DataTest {
         Path link = tempDir.resolve('link')
         Path file = Files.createFile(tempDir.resolve("file.md"))
         Files.createSymbolicLink(link, file)
-        Realm realm = new Realm()
 
         when:
-        fileService.ensureDirIsReadable(link, realm)
+        fileService.ensureDirIsReadable(link)
 
         then:
         thrown(AssertionError)
@@ -1472,10 +1418,9 @@ class FileServiceSpec extends Specification implements DataTest {
     void "ensureDirIsReadable, if path is not absolute, then throw an assertion"() {
         given:
         Path path = new File('relativePath').toPath()
-        Realm realm = new Realm()
 
         when:
-        fileService.ensureDirIsReadable(path, realm)
+        fileService.ensureDirIsReadable(path)
 
         then:
         thrown(AssertionError)
@@ -1503,7 +1448,7 @@ class FileServiceSpec extends Specification implements DataTest {
         assert !Files.exists(newFile)
 
         when:
-        fileService.createOrOverwriteScriptOutputFile(tempDir, newName, new Realm())
+        fileService.createOrOverwriteScriptOutputFile(tempDir, newName)
 
         then:
         Files.exists(newFile)
@@ -1517,7 +1462,7 @@ class FileServiceSpec extends Specification implements DataTest {
         assert newFile.text == SOME_CONTENT
 
         when:
-        fileService.createOrOverwriteScriptOutputFile(tempDir, newName, new Realm())
+        fileService.createOrOverwriteScriptOutputFile(tempDir, newName)
 
         then:
         newFile.text.empty
@@ -1529,7 +1474,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path newFile = tempDir.resolve(newName)
 
         when:
-        fileService.createOrOverwriteScriptOutputFile(tempDir, newName, new Realm())
+        fileService.createOrOverwriteScriptOutputFile(tempDir, newName)
 
         then:
         Files.getPosixFilePermissions(newFile).containsAll([

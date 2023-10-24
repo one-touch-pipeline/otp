@@ -103,8 +103,6 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
 
     String testDataDir
     String ftpDir
-
-    Realm realm
     ProcessingPriority processingPriority
 
     File schemaDump
@@ -153,7 +151,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
     void setup() {
         doCleanup()
         SessionUtils.withTransaction {
-            setupDirectoriesAndRealm()
+            setupDirectories()
 
             sql = new Sql(dataSource)
             schemaDump = new File(TestCase.createEmptyTestDirectory(), "test-database-dump.sql")
@@ -167,7 +165,6 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
             findOrCreateProcessingOption(name: OptionName.WITHDRAWN_UNIX_GROUP, value: configService.testingGroup)
             findOrCreateProcessingOption(name: OptionName.TICKET_SYSTEM_URL, value: "1234")
             findOrCreateProcessingOption(name: OptionName.TICKET_SYSTEM_NUMBER_PREFIX, value: "asdf")
-            findOrCreateProcessingOption(name: OptionName.REALM_DEFAULT_VALUE, value: realm.name)
             findOrCreateProcessingOption(name: OptionName.EMAIL_REPLY_TO, value: HelperUtils.randomEmail)
             findOrCreateProcessingOption(name: OptionName.EMAIL_TICKET_SYSTEM, value: HelperUtils.randomEmail)
             findOrCreateProcessingOption(name: OptionName.EMAIL_SENDER, value: HelperUtils.randomEmail)
@@ -267,17 +264,11 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
         TestCase.cleanTestDirectory()
     }
 
-    protected void setupDirectoriesAndRealm() {
+    protected void setupDirectories() {
         // check whether the wf test root dir is mounted
         // (assume it is mounted if it exists and contains files)
         File rootDirectory = inputRootDirectory
         assert rootDirectory.list()?.size(): "${rootDirectory} seems not to be mounted"
-
-        Map realmParams = [
-                name                       : 'REALM_NAME',
-        ]
-
-        realm = Realm.list().find() ?: DomainFactory.createRealm(realmParams)
 
         setupBaseDirectory()
 
@@ -319,9 +310,9 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
     }
 
     void createDirectories(List<File> files) {
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
         files.each {
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(fileSystem.getPath(it.toString()), realm, '',
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(fileSystem.getPath(it.toString()), '',
                     FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
         }
     }
@@ -331,7 +322,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
         String cmd = files.collect { File key, String value ->
             "echo '${value}' > ${key}"
         }.join('\n')
-        remoteShellHelper.executeCommand(realm, cmd)
+        remoteShellHelper.executeCommand(cmd)
         files.each { File key, String value ->
             FileService.waitUntilExists(key.toPath())
             assert key.text == value + '\n'
@@ -424,7 +415,7 @@ TEMP_DIR=`mktemp -d -p ${resultRootDirectory.absolutePath} ${this.class.simpleNa
 chmod g+rwx \$TEMP_DIR
 echo \$TEMP_DIR
 """
-            baseDirectory = new File(remoteShellHelper.executeCommandReturnProcessOutput(realm, mkDirs)
+            baseDirectory = new File(remoteShellHelper.executeCommandReturnProcessOutput(mkDirs)
                     .assertExitCodeZeroAndStderrEmpty().stdout.trim())
         }
     }
@@ -447,7 +438,7 @@ echo \$TEMP_DIR
                 chromosomeSuffix: '',
                 chromosomePrefix: '',
         )
-        fileService.ensureFileIsReadableAndNotEmpty(source.toPath(), realm)
+        fileService.ensureFileIsReadableAndNotEmpty(source.toPath())
 
         ["21", "22"].each { String chromosomeName ->
             DomainFactory.createReferenceGenomeEntry(
@@ -460,7 +451,6 @@ echo \$TEMP_DIR
 
         linkFileUtils.createAndValidateLinks(
                 [(sourceDir): referenceGenomeService.referenceGenomeDirectory(referenceGenome, false)],
-                realm
         )
         return referenceGenome
     }
@@ -549,7 +539,6 @@ echo \$TEMP_DIR
         String unixGroup = configService.workflowProjectUnixGroup
         Project.list().each {
             it.unixGroup = unixGroup
-            it.realm = realm
             it.processingPriority = processingPriority
             it.save(flush: true)
         }
@@ -583,8 +572,8 @@ echo \$TEMP_DIR
     protected void setPermissionsRecursive(File directory, String modeDir, String modeFile) {
         assert directory.absolutePath.startsWith(baseDirectory.absolutePath)
         String cmd = "find -L ${directory} -user ${configService.sshUser} -type d -not -perm ${modeDir} -exec chmod ${modeDir} '{}' \\; 2>&1"
-        assert remoteShellHelper.executeCommand(realm, cmd).empty
+        assert remoteShellHelper.executeCommand(cmd).empty
         cmd = "find -L ${directory} -user ${configService.sshUser} -type f -not -perm ${modeFile} -exec chmod ${modeFile} '{}' \\; 2>&1"
-        assert remoteShellHelper.executeCommand(realm, cmd).empty
+        assert remoteShellHelper.executeCommand(cmd).empty
     }
 }

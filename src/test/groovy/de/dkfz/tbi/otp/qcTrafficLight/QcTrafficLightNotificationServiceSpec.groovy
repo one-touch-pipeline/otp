@@ -58,7 +58,6 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
                 Pipeline,
                 ProcessingOption,
                 Project,
-                Realm,
                 ReferenceGenome,
                 ReferenceGenomeProjectSeqType,
                 RnaRoddyBamFile,

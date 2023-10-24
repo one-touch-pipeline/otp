@@ -112,11 +112,10 @@ class AlignmentInfoService {
      */
     @Deprecated
     protected ProcessOutput getRoddyProcessOutput(RoddyWorkflowConfig workflowConfig) {
-        Realm realm = workflowConfig.project.realm
         String nameInConfigFile = workflowConfig.nameUsedInConfig
         String cmd = executeRoddyCommandService.roddyGetRuntimeConfigCommand(workflowConfig, nameInConfigFile, workflowConfig.seqType.roddyName)
 
-        ProcessOutput output = remoteShellHelper.executeCommandReturnProcessOutput(realm, cmd)
+        ProcessOutput output = remoteShellHelper.executeCommandReturnProcessOutput(cmd)
 
         if (output.exitCode != 0) {
             log?.debug("Alignment information can't be detected:\n${output}")

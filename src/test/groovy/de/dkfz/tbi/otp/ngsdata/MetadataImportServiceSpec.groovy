@@ -29,7 +29,6 @@ import spock.lang.*
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
@@ -89,7 +88,6 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
                 Pipeline,
                 ProcessingOption,
                 Project,
-                Realm,
                 RoddyWorkflowConfig,
                 Run,
                 FastqImportInstance,
@@ -163,7 +161,6 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
             getBean(directoryStructureName.beanName, DirectoryStructure) >> directoryStructure
         }
         service.fastqMetadataValidationService = new FastqMetadataValidationService()
-        service.fastqMetadataValidationService.configService = Mock(ConfigService)
         service.fastqMetadataValidationService.fileService = new FileService()
         service.fastqMetadataValidationService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
@@ -186,8 +183,6 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         SeqCenter seqCenter = createSeqCenter(autoImportable: true, autoImportDir: "/auto-import-dir")
         DirectoryStructure directoryStructure = [:] as DirectoryStructure
         DirectoryStructureBeanName directoryStructureName = DirectoryStructureBeanName.SAME_DIRECTORY
-
-        DomainFactory.createDefaultRealmWithProcessingOption()
 
         Path runDir = Files.createDirectory(tempDir.resolve("run"))
         Path metadataFile = Files.createFile(runDir.resolve("metadata.tsv"))
@@ -265,8 +260,6 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         MetadataValidationContext context2 = MetadataValidationContextFactory.createContext([metadataFile: path2, content: 'c\td\te'.bytes])
         MetaDataFile metadataFile2 = DomainFactory.createMetaDataFile()
 
-        DomainFactory.createDefaultRealmWithProcessingOption()
-
         List<ContentWithPathAndProblems> contentWithProblems = [
                 new ContentWithPathAndProblems(content1, path1),
                 new ContentWithPathAndProblems(content2, path2),
@@ -319,8 +312,6 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         MetadataValidationContext context2 = MetadataValidationContextFactory.createContext(
                 [metadataFile: Paths.get("${seqCenter.autoImportDir}/002222/data/2222_meta.tsv")])
         MetaDataFile metadataFile2 = DomainFactory.createMetaDataFile()
-
-        DomainFactory.createDefaultRealmWithProcessingOption()
 
         MetadataImportService service = Spy(MetadataImportService) {
             2 * copyMetadataFile(_, _) >> null
@@ -484,7 +475,6 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
         service.configService = new TestConfigService()
         service.configService.processingOptionService = new ProcessingOptionService()
         service.fastqMetadataValidationService = new FastqMetadataValidationService()
-        service.fastqMetadataValidationService.configService = Mock(ConfigService)
         service.fastqMetadataValidationService.fileService = new FileService()
         service.fastqMetadataValidationService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
@@ -517,7 +507,6 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
     void "validateAndImportMultiple when some are invalid, throws AutoImportFailedException"() {
         given:
         SeqCenter seqCenter = createSeqCenter(autoImportable: true, autoImportDir: "/auto-import-dir")
-        DomainFactory.createDefaultRealmWithProcessingOption()
 
         Problems problems = new Problems()
         problems.addProblem([] as Set, LogLevel.ERROR, "An Error occurred")
@@ -1735,7 +1724,6 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         file.text = content
         Path targetDirectory = Files.createDirectory(tempDir.resolve('target'))
         ProcessingOptionService processingOptionService = new ProcessingOptionService()
-        DomainFactory.createDefaultRealmWithProcessingOption()
         MetadataImportService service = new MetadataImportService()
         service.configService = new TestConfigService([
                 (OtpProperty.PATH_METADATA_STORAGE): targetDirectory.toString(),
@@ -1769,7 +1757,7 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
             1 * sendEmailToTicketSystem(_, _)
         }
         data.service.fileService = Mock(FileService) {
-            1 * createFileWithContentOnDefaultRealm(_, _) >> {
+            1 * createFileWithContent(_, _) >> {
                 throw new CreateFileException("Creating of file failed")
             }
         }

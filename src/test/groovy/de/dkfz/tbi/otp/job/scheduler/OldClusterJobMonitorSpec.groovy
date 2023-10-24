@@ -34,7 +34,6 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.restarting.RestartCheckerService
 import de.dkfz.tbi.otp.job.restarting.RestartHandlerService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
@@ -50,7 +49,6 @@ class OldClusterJobMonitorSpec extends Specification implements DataTest {
     Class[] getDomainClassesToMock() {
         return [
                 ClusterJob,
-                Realm,
                 ProcessingStep,
                 ProcessingStepUpdate,
                 JobExecutionPlan,
@@ -92,7 +90,7 @@ class OldClusterJobMonitorSpec extends Specification implements DataTest {
      * - job state from cluster
      *      - successful
      *      - fail to get values
-     * - cluster check for realm
+     * - cluster check
      *      - successful
      *      - fail
      */
@@ -104,19 +102,19 @@ class OldClusterJobMonitorSpec extends Specification implements DataTest {
         DomainFactory.createClusterJob([
                 checkStatus: ClusterJob.CheckStatus.CREATED,
         ])
-        ClusterJob clusterJobCheckingRealm1 = DomainFactory.createClusterJob([
+        ClusterJob clusterJobChecking1 = DomainFactory.createClusterJob([
                 checkStatus: ClusterJob.CheckStatus.CHECKING,
         ])
-        ClusterJob clusterJobCheckingRealm2a = DomainFactory.createClusterJob([
+        ClusterJob clusterJobChecking2a = DomainFactory.createClusterJob([
                 checkStatus: ClusterJob.CheckStatus.CHECKING,
         ])
-        ClusterJob clusterJobCheckingRealm2b = DomainFactory.createClusterJob([
+        ClusterJob clusterJobChecking2b = DomainFactory.createClusterJob([
                 checkStatus: ClusterJob.CheckStatus.CHECKING,
         ])
         DomainFactory.createClusterJob([
                 checkStatus: ClusterJob.CheckStatus.FINISHED,
         ])
-        ClusterJob clusterJobCheckingRealmFailingGetValues = DomainFactory.createClusterJob([
+        ClusterJob clusterJobCheckingFailingGetValues = DomainFactory.createClusterJob([
                 checkStatus: ClusterJob.CheckStatus.CHECKING,
         ])
         DomainFactory.createClusterJob([
@@ -125,42 +123,41 @@ class OldClusterJobMonitorSpec extends Specification implements DataTest {
 
         MonitoringJob monitoringJob1 = Mock(MonitoringJob) {
             1 * getEndState() >> { throw new InvalidStateException() }
-            1 * finished(clusterJobCheckingRealm1)
+            1 * finished(clusterJobChecking1)
             0 * _
         }
         MonitoringJob monitoringJob2 = Mock(MonitoringJob) {
             1 * getEndState() >> { throw new InvalidStateException() }
-            1 * finished(clusterJobCheckingRealm2b)
+            1 * finished(clusterJobChecking2b)
             0 * _
         }
         MonitoringJob monitoringJobF = Mock(MonitoringJob) {
             1 * getEndState() >> { throw new InvalidStateException() }
-            1 * finished(clusterJobCheckingRealmFailingGetValues)
+            1 * finished(clusterJobCheckingFailingGetValues)
             0 * _
         }
 
         clusterJobMonitor = new OldClusterJobMonitor()
         clusterJobMonitor.schedulerService = Mock(SchedulerService) {
             1 * isActive() >> true
-            1 * getJobForProcessingStep(clusterJobCheckingRealm1.processingStep) >> monitoringJob1
-            1 * getJobForProcessingStep(clusterJobCheckingRealm2b.processingStep) >> monitoringJob2
-            1 * getJobForProcessingStep(clusterJobCheckingRealmFailingGetValues.processingStep) >> monitoringJobF
+            1 * getJobForProcessingStep(clusterJobChecking1.processingStep) >> monitoringJob1
+            1 * getJobForProcessingStep(clusterJobChecking2b.processingStep) >> monitoringJob2
+            1 * getJobForProcessingStep(clusterJobCheckingFailingGetValues.processingStep) >> monitoringJobF
             0 * _
         }
-        GroovySpy(Realm, global: true)
         clusterJobMonitor.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
             1 * retrieveKnownJobsWithState() >> { ->
                 return [
-                        (clusterJobCheckingRealm1.clusterJobId): JobState.COMPLETED_SUCCESSFUL,
-                        (clusterJobCheckingRealm2a.clusterJobId): JobState.RUNNING,
-                        (clusterJobCheckingRealm2b.clusterJobId): JobState.COMPLETED_SUCCESSFUL,
+                        (clusterJobChecking1.clusterJobId): JobState.COMPLETED_SUCCESSFUL,
+                        (clusterJobChecking2a.clusterJobId): JobState.RUNNING,
+                        (clusterJobChecking2b.clusterJobId): JobState.COMPLETED_SUCCESSFUL,
                 ]
             }
             0 * _
         }
         clusterJobMonitor.clusterStatisticService = Mock(ClusterStatisticService) {
-            1 * retrieveAndSaveJobStatisticsAfterJobFinished(clusterJobCheckingRealm1)
-            1 * retrieveAndSaveJobStatisticsAfterJobFinished(clusterJobCheckingRealm2b) >> { ClusterJob clusterJob ->
+            1 * retrieveAndSaveJobStatisticsAfterJobFinished(clusterJobChecking1)
+            1 * retrieveAndSaveJobStatisticsAfterJobFinished(clusterJobChecking2b) >> { ClusterJob clusterJob ->
                 throw new OtpRuntimeException("")
             }
         }
@@ -178,20 +175,17 @@ class OldClusterJobMonitorSpec extends Specification implements DataTest {
         clusterJobMonitor.check()
 
         then:
-        clusterJobCheckingRealm1.refresh()
-        clusterJobCheckingRealm1.checkStatus == ClusterJob.CheckStatus.FINISHED
+        clusterJobChecking1.refresh()
+        clusterJobChecking1.checkStatus == ClusterJob.CheckStatus.FINISHED
 
-        clusterJobCheckingRealm2a.refresh()
-        clusterJobCheckingRealm2a.checkStatus == ClusterJob.CheckStatus.CHECKING
+        clusterJobChecking2a.refresh()
+        clusterJobChecking2a.checkStatus == ClusterJob.CheckStatus.CHECKING
 
-        clusterJobCheckingRealm2b.refresh()
-        clusterJobCheckingRealm2b.checkStatus == ClusterJob.CheckStatus.FINISHED
+        clusterJobChecking2b.refresh()
+        clusterJobChecking2b.checkStatus == ClusterJob.CheckStatus.FINISHED
 
-        clusterJobCheckingRealmFailingGetValues.refresh()
-        clusterJobCheckingRealmFailingGetValues.checkStatus == ClusterJob.CheckStatus.FINISHED
-
-        cleanup:
-        GroovySystem.metaClassRegistry.removeMetaClass(Realm)
+        clusterJobCheckingFailingGetValues.refresh()
+        clusterJobCheckingFailingGetValues.checkStatus == ClusterJob.CheckStatus.FINISHED
     }
 
     void "check, if scheduler is inactive, do nothing "() {
@@ -233,16 +227,12 @@ class OldClusterJobMonitorSpec extends Specification implements DataTest {
         clusterJobMonitor.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
             0 * _
         }
-        GroovySpy(Realm, global: true)
 
         when:
         clusterJobMonitor.check()
 
         then:
         noExceptionThrown()
-
-        cleanup:
-        GroovySystem.metaClassRegistry.removeMetaClass(Realm)
     }
 
     void "test notifyJobAboutFinishedClusterJob success"() {

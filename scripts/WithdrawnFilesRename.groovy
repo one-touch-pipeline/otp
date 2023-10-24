@@ -24,7 +24,6 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.Realm
 
 import java.nio.file.FileSystem
 import java.nio.file.Path
@@ -42,11 +41,10 @@ ConfigService configService = ctx.configService
 FileSystemService fileSystemService = ctx.fileSystemService
 FileService fileService = ctx.fileService
 
-Realm realm = configService.defaultRealm
-FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+FileSystem fileSystem = fileSystemService.remoteFileSystem
 
 Path generated_script_to_run_manually = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve("withdraw").resolve("renameWithdrawnFiles.sh")
-fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(generated_script_to_run_manually.parent, realm)
+fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(generated_script_to_run_manually.parent)
 List<Path> renameFiles = []
 
 MergingWorkPackage.list().each { MergingWorkPackage mergingWorkPackage ->

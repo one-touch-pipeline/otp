@@ -41,7 +41,6 @@ class IndividualServiceSpec extends Specification implements DataTest, ServiceUn
                 Individual,
                 ProcessingPriority,
                 Project,
-                Realm,
                 SeqType,
         ]
     }

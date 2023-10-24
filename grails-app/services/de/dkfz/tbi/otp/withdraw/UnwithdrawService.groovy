@@ -138,7 +138,7 @@ class UnwithdrawService {
         Path outputFile = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve('withdrawn').resolve(withdrawStateHolder.scriptFileName)
 
         fileService.deleteDirectoryRecursively(outputFile) // delete file if already exists
-        fileService.createFileWithContentOnDefaultRealm(outputFile, withdrawStateHolder.script.join('\n'),
+        fileService.createFileWithContent(outputFile, withdrawStateHolder.script.join('\n'),
                 FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION)
 
         withdrawStateHolder.summary << "\nScript Path:"

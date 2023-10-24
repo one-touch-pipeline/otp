@@ -32,7 +32,6 @@ String sql = """
 select
     pipeline.name,
     project.name,
-    realm.jobScheduler,
     config.programVersion,
     count(analysis.id) as count
 from
@@ -41,7 +40,6 @@ from
     join analysis.config config
     join config.pipeline pipeline,
     ClusterJob job
-    join job.realm realm,
     ProcessParameter processParameter
 where
     cast(processParameter.value as long) = analysis.id
@@ -61,7 +59,6 @@ and
 group by
     pipeline.name,
     project.name,
-    realm.jobScheduler,
     config.programVersion
 
 """

@@ -57,7 +57,6 @@ class WgbsExecuteJobSpec extends Specification implements DataTest, WorkflowSyst
                 ProcessingOption,
                 ProcessingPriority,
                 Project,
-                Realm,
                 ReferenceGenomeEntry,
                 ReferenceGenomeProjectSeqType,
                 RoddyBamFile,

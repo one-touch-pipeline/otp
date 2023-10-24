@@ -29,7 +29,6 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.Realm
 
 import java.nio.file.*
 
@@ -37,7 +36,7 @@ class ScriptBuilderSpec extends Specification implements DataTest, RoddyPancanFa
 
     @Override
     Class[] getDomainClassesToMock() {
-        return [Realm]
+        return []
     }
 
     @TempDir
@@ -170,11 +169,10 @@ class ScriptBuilderSpec extends Specification implements DataTest, RoddyPancanFa
         result == expectedOutput
 
         and:
-        1 * configService.defaultRealm
-        1 * fileSystemService.getRemoteFileSystem(_) >> FileSystems.default
+        1 * fileSystemService.remoteFileSystem >> FileSystems.default
         1 * fileService.toPath(_, _) >> Paths.get("/")
         1 * configService.scriptOutputPath
-        1 * fileService.createOrOverwriteScriptOutputFile(_, _, _) >> tempDir.resolve("testFile")
+        1 * fileService.createOrOverwriteScriptOutputFile(_, _) >> tempDir.resolve("testFile")
         0 * _
 
         where:

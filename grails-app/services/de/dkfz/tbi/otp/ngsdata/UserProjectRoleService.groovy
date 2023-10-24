@@ -641,7 +641,7 @@ class UserProjectRoleService {
     CommandAndResult executeOrNotify(UserProjectRole userProjectRole, OperatorAction action) {
         String command = userProjectRoleService.commandTemplate(userProjectRole, action)
         if (processingOptionService.findOptionAsBoolean(ProcessingOption.OptionName.AD_GROUP_USER_SNIPPET_EXECUTE)) {
-            ProcessOutput processOutput = remoteShellHelper.executeCommandReturnProcessOutput(userProjectRole.project.realm, command)
+            ProcessOutput processOutput = remoteShellHelper.executeCommandReturnProcessOutput(command)
             return new CommandAndResult(command, processOutput)
         }
         return new CommandAndResult(command, null)

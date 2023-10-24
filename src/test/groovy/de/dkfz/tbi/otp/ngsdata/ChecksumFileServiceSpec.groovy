@@ -26,7 +26,6 @@ import spock.lang.Specification
 import spock.lang.TempDir
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.utils.CreateFileHelper
@@ -61,7 +60,6 @@ class ChecksumFileServiceSpec extends Specification implements DataTest {
 
     private void setupFirstMD5ChecksumFromFile() {
         checksumFileService = new ChecksumFileService()
-        checksumFileService.configService = Mock(ConfigService)
         checksumFileService.fileService = new FileService()
         checksumFileService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }

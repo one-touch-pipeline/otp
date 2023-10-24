@@ -79,7 +79,7 @@ class ClusterStatisticService {
             jobStates = jobManager.queryJobStatusAll()
         }
 
-        fileService.createFileWithContentOnDefaultRealm(clusterLogQueryResultFileService.logFileWithCreatingDirectory(), logStringBuilder.toString())
+        fileService.createFileWithContent(clusterLogQueryResultFileService.logFileWithCreatingDirectory(), logStringBuilder.toString())
 
         return jobStates
     }

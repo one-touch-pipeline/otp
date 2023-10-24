@@ -101,7 +101,6 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         createUserAndRoles()
         outputFolder = Files.createDirectory(tempDir.resolve("outputFolder"))
         configService.addOtpProperties(outputFolder)
-        DomainFactory.createDefaultRealmWithProcessingOption()
     }
 
     void cleanup() {
@@ -1208,14 +1207,10 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
         CreateFileHelper.createFile(externallyProcessedBamFileService.getBamFile(externallyProcessedBamFile))
     }
 
-    private void dataBaseSetupForBamFiles(AbstractBamFile bamFile, boolean addRealm = true) {
+    private void dataBaseSetupForBamFiles(AbstractBamFile bamFile) {
         AbstractMergingWorkPackage mergingWorkPackage = bamFile.mergingWorkPackage
         mergingWorkPackage.bamFileInProjectFolder = bamFile
         assert mergingWorkPackage.save(flush: true)
-        Project project = bamFile.project
-        if (addRealm) {
-            project.realm = DomainFactory.createRealm()
-        }
     }
 
     private RoddyBamFile deleteProcessingFilesOfProject_RBF_Setup() {
@@ -1273,7 +1268,7 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
         createFastqFiles(tumorBamFiles)
 
         AbstractBamFile controlBamFiles = snvCallingInstance.sampleType2BamFile
-        dataBaseSetupForBamFiles(controlBamFiles, false)
+        dataBaseSetupForBamFiles(controlBamFiles)
         createFastqFiles(controlBamFiles)
 
         File snvFolder = fileService.toFile(snvCallingService.getWorkDirectory(snvCallingInstance))

@@ -52,7 +52,6 @@ WorkflowRun.withNewTransaction {
     SeqTrack seqTrack = SeqTrack.findBySeqType(seqType)
     Individual individual = seqTrack.individual
     Project project = individual.project
-    Realm realm = project.realm
     ProcessingPriority priority = project.processingPriority
 
     String workflowName = "Example Workflow ${Workflow.count()}"
@@ -147,7 +146,6 @@ WorkflowRun.withNewTransaction {
                 oldSystem     : false,
                 workflowStep  : workflowStep,
                 jobLog        : "/tmp/log${i}.out",
-                realm         : realm,
                 jobClass      : "JobClass",
                 clusterJobName: "clusterJobName_${i}_JobClass",
                 clusterJobId  : 1000000 + i,
@@ -380,7 +378,7 @@ FileSystem fileSystem = fileSystemService.remoteFileSystem
     Path path = fileSystem.getPath("/tmp/log${it}.out")
     if (!Files.exists(path)) {
         println "create file: ${path}"
-        fileService.createFileWithContentOnDefaultRealm(path, "Example log ${it}\n\nSome content\nMorecontent")
+        fileService.createFileWithContent(path, "Example log ${it}\n\nSome content\nMorecontent")
     }
 }
 

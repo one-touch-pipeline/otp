@@ -72,7 +72,6 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
                 Pipeline,
                 ProcessingOption,
                 Project,
-                Realm,
                 ReferenceGenome,
                 ReferenceGenomeIndex,
                 ReferenceGenomeProjectSeqType,

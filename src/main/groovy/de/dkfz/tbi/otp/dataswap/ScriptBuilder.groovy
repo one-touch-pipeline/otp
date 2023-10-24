@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.dataswap
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.Realm
 
 import java.nio.file.FileSystem
 import java.nio.file.Path
@@ -136,12 +135,11 @@ class ScriptBuilder {
     }
 
     void writeBashScriptToFileSystem(String filename, String content) {
-        Realm realm = configService.getDefaultRealm() // codenarc-disable-line
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
         Path outDir = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve(this.relativeOutputDir.toString())
 
         try {
-            Path bashScriptPath = fileService.createOrOverwriteScriptOutputFile(outDir, filename, realm)
+            Path bashScriptPath = fileService.createOrOverwriteScriptOutputFile(outDir, filename)
             bashScriptPath << content
         } catch (IOException e) {
             println "Error while writing bash script: ${e}" // codenarc-disable-line

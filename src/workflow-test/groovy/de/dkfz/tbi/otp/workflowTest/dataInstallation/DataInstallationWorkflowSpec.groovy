@@ -82,13 +82,13 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
     private Path prepareFileSystemForFile(String fileName, String orgName) {
         Path path = referenceDataDirectory.resolve(DIRECTORY_IN_INPUT).resolve(orgName)
         Path link = additionalDataDirectory.resolve(fileName)
-        fileService.createLink(link, path, realm)
+        fileService.createLink(link, path)
         return path
     }
 
     private String md5sum(Path filepath) {
         String cmdMd5sum = "md5sum ${filepath}"
-        String output = remoteShellHelper.executeCommandReturnProcessOutput(realm, cmdMd5sum).assertExitCodeZeroAndStderrEmpty().stdout
+        String output = remoteShellHelper.executeCommandReturnProcessOutput(cmdMd5sum).assertExitCodeZeroAndStderrEmpty().stdout
         String md5sum = output.split().first()
         return md5sum
     }

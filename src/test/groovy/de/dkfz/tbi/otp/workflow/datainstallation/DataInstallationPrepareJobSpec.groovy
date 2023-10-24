@@ -64,7 +64,7 @@ class DataInstallationPrepareJobSpec extends Specification implements DataTest, 
             0 * _
         }
         job.fileService = Mock(FileService) {
-            1 * createDirectoryRecursivelyAndSetPermissionsViaBash(path, _, _)
+            1 * createDirectoryRecursivelyAndSetPermissionsViaBash(path, _)
             0 * _
         }
         job.logService = Mock(LogService)

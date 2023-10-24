@@ -102,9 +102,9 @@ class ClusterJobService {
     /**
      * creates a cluster job object with at this time known attributes
      */
-    @SuppressWarnings(["ParameterCount", "UnusedMethodParameter"])
+    @SuppressWarnings(["ParameterCount"])
     @Deprecated
-    ClusterJob createClusterJob(Realm realm, String clusterJobId, String userName,
+    ClusterJob createClusterJob(String clusterJobId, String userName,
                                 ProcessingStep processingStep, SeqType seqType = null,
                                 String clusterJobName = processingStep.clusterJobName,
                                 String jobClass = processingStep.nonQualifiedJobClass) {

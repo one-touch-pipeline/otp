@@ -41,8 +41,6 @@ class ClusterJobSubmissionOptionsServiceIntegrationSpec extends Specification {
         ClusterJobSubmissionOptionsService service = new ClusterJobSubmissionOptionsService()
         service.processingOptionService = new ProcessingOptionService()
 
-        Realm realm = DomainFactory.createRealm()
-
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
         ProcessParameterObject ppo = DomainFactory.createSeqTrack(seqType: seqType)
         ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep(ExecuteRunYapsaJob.simpleName, ppo)
@@ -59,7 +57,7 @@ class ClusterJobSubmissionOptionsServiceIntegrationSpec extends Specification {
         )
 
         expect:
-        result == service.readOptionsFromDatabase(processingStep, realm)
+        result == service.readOptionsFromDatabase(processingStep)
 
         where:
         jobSpecificOption   | jobAndSeqTypeSpecific || result

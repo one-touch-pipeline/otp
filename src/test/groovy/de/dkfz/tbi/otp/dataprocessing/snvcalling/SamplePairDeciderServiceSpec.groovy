@@ -45,7 +45,6 @@ class SamplePairDeciderServiceSpec extends Specification implements DataTest, Do
                 MergingWorkPackage,
                 Pipeline,
                 Project,
-                Realm,
                 ReferenceGenome,
                 Sample,
                 SamplePair,

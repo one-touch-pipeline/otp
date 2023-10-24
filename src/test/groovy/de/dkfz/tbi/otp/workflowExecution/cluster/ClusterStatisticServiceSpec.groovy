@@ -31,7 +31,6 @@ import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.ClusterJobManagerFactoryService
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -41,7 +40,6 @@ class ClusterStatisticServiceSpec extends Specification implements ServiceUnitTe
     Class[] getDomainClassesToMock() {
         return [
                 ClusterJob,
-                Realm,
                 WorkflowStep,
         ]
     }

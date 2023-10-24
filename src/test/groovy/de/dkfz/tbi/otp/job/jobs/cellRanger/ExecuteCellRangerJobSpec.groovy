@@ -36,7 +36,6 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
-import java.nio.file.FileSystems
 import java.nio.file.Path
 
 class ExecuteCellRangerJobSpec extends Specification implements CellRangerFactory, DataTest {
@@ -55,7 +54,6 @@ class ExecuteCellRangerJobSpec extends Specification implements CellRangerFactor
                 MergingCriteria,
                 Pipeline,
                 Project,
-                Realm,
                 ReferenceGenome,
                 ReferenceGenomeProjectSeqType,
                 ReferenceGenomeIndex,
@@ -99,10 +97,10 @@ class ExecuteCellRangerJobSpec extends Specification implements CellRangerFactor
                     1 * findOptionAsString(ProcessingOption.OptionName.COMMAND_ENABLE_MODULE) >> enableModul
                 },
                 fileSystemService         : Mock(FileSystemService) {
-                    1 * getRemoteFileSystem(_) >> FileSystems.default
                     0 * _
                 },
                 singleCellBamFileService   : Mock(SingleCellBamFileService) {
+                    1 * getWorkDirectory(_) >> workDirectory
                     1 * getResultDirectory(_) >> resultDirectory
                 },
         ])
@@ -130,10 +128,10 @@ class ExecuteCellRangerJobSpec extends Specification implements CellRangerFactor
 
         then:
         0 * job.fileService._
-        1 * job.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workDirectory, _, _)
+        1 * job.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workDirectory, _)
 
         then:
-        1 * job.fileService.setPermissionViaBash(workDirectory, _, FileService.OWNER_DIRECTORY_PERMISSION_STRING)
+        1 * job.fileService.setPermissionViaBash(workDirectory, FileService.OWNER_DIRECTORY_PERMISSION_STRING)
 
         then:
         1 * job.cellRangerService.deleteOutputDirectoryStructureIfExists(singleCellBamFile)
@@ -143,7 +141,7 @@ class ExecuteCellRangerJobSpec extends Specification implements CellRangerFactor
 
         then:
         1 * job.cellRangerService.createCellRangerParameters(singleCellBamFile) >> [(parameterKey): parameterValue]
-        1 * job.clusterJobSchedulerService.executeJob(singleCellBamFile.realm, _) >> { Realm realm, String script ->
+        1 * job.clusterJobSchedulerService.executeJob(_) >> { String script ->
             String simplifiedScript = script.split('\n')*.trim().findAll().join('\n')
             assert expectedSimplifiedScript == simplifiedScript
         }

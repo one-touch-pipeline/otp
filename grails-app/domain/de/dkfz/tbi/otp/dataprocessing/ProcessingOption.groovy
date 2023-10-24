@@ -377,13 +377,6 @@ class ProcessingOption implements Entity {
                 Necessity.REQUIRED, null, TypeValidators.PROCESSING_PRIORITY_NAME
         ),
 
-        // realm
-        /** @deprecated */
-        REALM_DEFAULT_VALUE(
-                "The default realm by name",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_WORD_TEXT, null, true
-        ),
-
         // email
         EMAIL_CLUSTER_ADMINISTRATION(
                 "Email address of the entity managing the cluster",

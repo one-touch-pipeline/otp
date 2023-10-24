@@ -68,7 +68,6 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, Workflo
                 ProcessingOption,
                 ProcessingPriority,
                 Project,
-                Realm,
                 ReferenceGenomeProjectSeqType,
                 RoddyBamFile,
                 RoddyWorkflowConfig,

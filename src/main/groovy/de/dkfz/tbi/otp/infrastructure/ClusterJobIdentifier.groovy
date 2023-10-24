@@ -24,26 +24,23 @@ package de.dkfz.tbi.otp.infrastructure
 import groovy.transform.CompileDynamic
 import groovy.transform.EqualsAndHashCode
 
-import de.dkfz.tbi.otp.ngsdata.Realm
-
 @CompileDynamic
 @EqualsAndHashCode(includes = ["clusterJobId"])
 class ClusterJobIdentifier {
 
     final String clusterJobId
 
-    @SuppressWarnings("UnusedMethodParameter")
-    ClusterJobIdentifier(final Realm realm, final String clusterJobId) {
+    ClusterJobIdentifier(final String clusterJobId) {
         assert clusterJobId : "Cluster job ID not specified"
         this.clusterJobId = clusterJobId
     }
 
     ClusterJobIdentifier(final ClusterJobIdentifier identifier) {
-        this(null, identifier.clusterJobId)
+        this(identifier.clusterJobId)
     }
 
     ClusterJobIdentifier(final ClusterJob clusterJob) {
-        this(null, clusterJob.clusterJobId)
+        this(clusterJob.clusterJobId)
     }
 
     @Override

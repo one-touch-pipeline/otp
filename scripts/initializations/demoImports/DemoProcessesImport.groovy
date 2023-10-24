@@ -28,7 +28,6 @@ import de.dkfz.tbi.otp.job.jobs.aceseq.RoddyAceseqStartJob
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.Realm
 
 import java.time.ZonedDateTime
 
@@ -74,11 +73,8 @@ JobExecutionPlan.withTransaction {
             previous: processingStepUpdate,
     ).save(flush: true)
 
-    Realm realm = Realm.findAll().first()
-
     new ClusterJob([
             validated     : true,
-            realm         : realm,
             clusterJobId  : "oldJob-" + processingStep1.id,
             clusterJobName: "Cluster Job " + processingStep1.id,
             jobClass      : "test",

@@ -49,13 +49,11 @@ class JobStateLogFileSpec extends Specification implements DataTest {
 
     @Override
     Class<?>[] getDomainClassesToMock() {
-        return [
-                Realm,
-        ]
+        return []
     }
 
     void setup() {
-        clusterJobIdentifier = new ClusterJobIdentifier(DomainFactory.createRealm(), "clusterJobId")
+        clusterJobIdentifier = new ClusterJobIdentifier("clusterJobId")
     }
 
     void testCreate_WhenInputIsCorrect_ShouldSetFileProperty() {

@@ -132,13 +132,6 @@ class JobExecutionPlanDSL {
                 name: JobParameterKeys.JOB_ID_LIST, jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT
         )
         type.save(flush: true)
-        ParameterType realmOutputType = new ParameterType(
-                name: JobParameterKeys.REALM,
-                jobDefinition: jobDefinition,
-                parameterUsage: ParameterUsage.OUTPUT,
-                className: "de.dkfz.tbi.otp.ngsdata.Realm"
-        )
-        realmOutputType.save(flush: true)
         JobDefinition watchdogJobDefinition = new JobDefinition(
                 name: "__WatchdogFor__" + jobDefinition.name, bean: watchdogBean, plan: jep, previous: jobDefinition
         )
@@ -147,17 +140,8 @@ class JobExecutionPlanDSL {
                 name: JobParameterKeys.JOB_ID_LIST, jobDefinition: watchdogJobDefinition, parameterUsage: ParameterUsage.INPUT
         )
         inputType.save(flush: true)
-        ParameterType realmInputType = new ParameterType(
-                name: JobParameterKeys.REALM,
-                jobDefinition: watchdogJobDefinition,
-                parameterUsage: ParameterUsage.INPUT,
-                className: "de.dkfz.tbi.otp.ngsdata.Realm"
-        )
-        realmInputType.save(flush: true)
         ParameterMapping mapping = new ParameterMapping(from: type, to: inputType, job: watchdogJobDefinition)
         mapping.save(flush: true)
-        ParameterMapping realmMapping = new ParameterMapping(from: realmOutputType, to: realmInputType, job: watchdogJobDefinition)
-        realmMapping.save(flush: true)
         helper.watchdogJobDefinition = watchdogJobDefinition
     }
 

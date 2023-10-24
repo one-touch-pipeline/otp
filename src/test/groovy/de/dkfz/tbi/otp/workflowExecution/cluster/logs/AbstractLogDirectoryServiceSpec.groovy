@@ -26,12 +26,9 @@ import spock.lang.Specification
 import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.file.FileSystems
@@ -44,24 +41,15 @@ abstract class AbstractLogDirectoryServiceSpec extends Specification implements 
 
     protected TestConfigService configService
 
-    protected Realm realm
-
     abstract AbstractLogDirectoryService getService()
 
     @Override
     Class[] getDomainClassesToMock() {
-        return [
-                Realm,
-        ]
+        return []
     }
 
     void setup() {
-        realm = createRealm()
-
         service.configService = configService = new TestConfigService(tempDir)
-        configService.processingOptionService = Mock(ProcessingOptionService) {
-            _ * findOptionAsString(ProcessingOption.OptionName.REALM_DEFAULT_VALUE) >> realm.name
-        }
     }
 
     protected void mockPathDoesNotExist(Path expected, int countRemoteFileSystem = 1) {
@@ -70,7 +58,7 @@ abstract class AbstractLogDirectoryServiceSpec extends Specification implements 
             0 * _
         }
         service.fileService = Mock(FileService) {
-            1 * createDirectoryRecursivelyAndSetPermissionsViaBash(expected, realm)
+            1 * createDirectoryRecursivelyAndSetPermissionsViaBash(expected)
             1 * changeFileSystem(expected, FileSystems.default) >> expected
             0 * _
         }

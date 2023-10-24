@@ -21,7 +21,6 @@
  */
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.util.spreadsheet.Row
@@ -40,8 +39,7 @@ assert !fileName.contains(' '): 'File name contains spaces, which is not allowed
 ConfigService configService = ctx.configService
 FileSystemService fileSystemService = ctx.fileSystemService
 
-Realm realm = configService.defaultRealm
-FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+FileSystem fileSystem = fileSystemService.remoteFileSystem
 Path path = fileSystem.getPath(fileName)
 
 Spreadsheet s = new Spreadsheet(path.text)

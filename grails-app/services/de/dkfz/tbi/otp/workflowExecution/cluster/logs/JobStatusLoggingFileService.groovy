@@ -58,7 +58,6 @@ class JobStatusLoggingFileService extends AbstractLogDirectoryService {
      *
      * If clusterJobId is given, the final file name is returned, otherwise a file pattern is returned using the cluster JOB_ID environment variable.
      *
-     * @param realm the realm the job runs in
      * @param workflowStep the workflowStep of the clusterJob
      * @param clusterJobId an optional cluster job ID. If <code>null</code>, shell code to retrieve the numeric part
      *          of the cluster job id is returned.

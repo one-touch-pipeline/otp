@@ -28,7 +28,6 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -42,7 +41,6 @@ class WorkflowVersionSelectorServiceSpec extends Specification implements Servic
         return [
                 ProcessingPriority,
                 Project,
-                Realm,
                 SeqType,
                 Workflow,
                 WorkflowVersion,

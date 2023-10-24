@@ -41,7 +41,6 @@ class IndividualValidatorSpec extends Specification implements DataTest {
     Class[] getDomainClassesToMock() {
         return [
                 Individual,
-                Realm,
                 Project,
         ]
     }

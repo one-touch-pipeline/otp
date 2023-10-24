@@ -28,7 +28,6 @@ import spock.lang.Specification
 import spock.lang.TempDir
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerService
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
@@ -67,7 +66,6 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
         createUserAndRoles()
         cellRangerService = new CellRangerService()
         cellRangerService.fileSystemService = new TestFileSystemService()
-        cellRangerService.configService = Mock(ConfigService)
         cellRangerService.fileService = new FileService()
         cellRangerService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }

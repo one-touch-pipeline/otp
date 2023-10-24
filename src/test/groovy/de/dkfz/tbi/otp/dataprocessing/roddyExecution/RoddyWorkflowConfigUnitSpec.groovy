@@ -47,7 +47,6 @@ class RoddyWorkflowConfigUnitSpec extends Specification implements DataTest {
                 Pipeline,
                 ProcessingPriority,
                 Project,
-                Realm,
                 RoddyWorkflowConfig,
                 SeqType,
         ]

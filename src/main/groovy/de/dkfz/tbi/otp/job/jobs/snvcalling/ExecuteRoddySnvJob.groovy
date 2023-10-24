@@ -101,7 +101,7 @@ class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<RoddySnvCallingInstanc
     protected void validate(RoddySnvCallingInstance roddySnvCallingInstance) throws Throwable {
         assert roddySnvCallingInstance: "The input roddyResult must not be null"
 
-        executeRoddyCommandService.correctPermissionsAndGroups(roddySnvCallingInstance, roddySnvCallingInstance.project.realm)
+        executeRoddyCommandService.correctPermissionsAndGroups(roddySnvCallingInstance)
 
         List<File> directories = [
                 roddySnvCallingInstance.workExecutionStoreDirectory,

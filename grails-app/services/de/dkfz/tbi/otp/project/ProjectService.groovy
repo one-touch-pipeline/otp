@@ -192,7 +192,6 @@ class ProjectService {
                 name                          : projectParams.name,
                 dirName                       : projectParams.dirName,
                 individualPrefix              : projectParams.individualPrefix,
-                realm                         : configService.defaultRealm,
                 projectType                   : projectParams.projectType,
                 storageUntil                  : projectParams.storageUntil,
                 projectGroup                  : CollectionUtils.atMostOneElement(ProjectGroup.findAllByName(projectParams.projectGroup)),
@@ -352,38 +351,36 @@ class ProjectService {
     }
 
     private void createProjectDirectoryIfNeeded(Project project) {
-        Realm realm = project.realm
         Path projectDirectory = getProjectDirectory(project)
 
         if (Files.exists(projectDirectory)) {
             // ensure correct permission and group
-            fileService.setGroupViaBash(projectDirectory, realm, project.unixGroup)
-            fileService.setPermissionViaBash(projectDirectory, realm, FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
+            fileService.setGroupViaBash(projectDirectory, project.unixGroup)
+            fileService.setPermissionViaBash(projectDirectory, FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
             return
         }
 
         fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectDirectory.parent,
-                realm, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectDirectory, realm, project.unixGroup)
+                '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectDirectory, project.unixGroup)
     }
 
     private void createAnalysisDirectoryIfPossible(Project project, Boolean sendMailInErrorCase = true)
             throws OtpFileSystemException, AssertionError, FileSystemException {
         assert project.dirAnalysis
-        Realm realm = project.realm
-        FileSystem fs = fileSystemService.getRemoteFileSystem(realm)
+        FileSystem fs = fileSystemService.remoteFileSystem
         Path analysisDirectory = fs.getPath(project.dirAnalysis)
         if (Files.exists(analysisDirectory)) {
             // ensure correct permission and group
-            fileService.setGroupViaBash(analysisDirectory, realm, project.unixGroup)
-            fileService.setPermissionViaBash(analysisDirectory, realm, FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
+            fileService.setGroupViaBash(analysisDirectory, project.unixGroup)
+            fileService.setPermissionViaBash(analysisDirectory, FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
             return
         }
 
         try {
             fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisDirectory.parent,
-                    realm, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisDirectory, realm, project.unixGroup,
+                    '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisDirectory, project.unixGroup,
                     FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
         } catch (FileSystemException | OtpFileSystemException e) {
             if (sendMailInErrorCase) {
@@ -724,7 +721,7 @@ class ProjectService {
         )
         File configDirectory = configFilePath.parentFile
 
-        executeScript(getScriptBash(configDirectory, xmlConfig, configFilePath), configuration.project)
+        executeScript(getScriptBash(configDirectory, xmlConfig, configFilePath))
 
         roddyWorkflowConfigService.importProjectConfigFile(
                 configuration.project,
@@ -782,7 +779,7 @@ class ProjectService {
 
         Path targetConfigDirectory = fileService.toPath(RoddyWorkflowConfig.getStandardConfigDirectory(targetProject, pipeline.name), remoteFileSystem)
 
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(targetConfigDirectory, targetProject.realm)
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(targetConfigDirectory)
 
         String nextConfigVersion = workflowConfigService.getNextConfigVersion(targetProjectConfig?.configVersion)
         String programVersion = parseVersionFromPluginVersionString(baseProjectRoddyConfig.programVersion)
@@ -882,7 +879,7 @@ class ProjectService {
         )
         File configDirectory = configFilePath.parentFile
 
-        executeScript(getScriptBash(configDirectory, xmlConfig, configFilePath), configuration.project)
+        executeScript(getScriptBash(configDirectory, xmlConfig, configFilePath))
 
         return roddyWorkflowConfigService.importProjectConfigFile(
                 configuration.project,
@@ -956,8 +953,7 @@ chmod 0440 ${configFilePath}
 """
     }
 
-    private void executeScript(String input, Project project, String mask = "0027") {
-        Realm realm = project.realm
+    private void executeScript(String input, String mask = "0027") {
         String script = """\
 #!/bin/bash
 set -evx
@@ -969,7 +965,7 @@ ${input}
 echo 'OK'
 """
         LogThreadLocal.withThreadLog(log) {
-            assert remoteShellHelper.executeCommandReturnProcessOutput(realm, script).stdout?.trim() == "OK"
+            assert remoteShellHelper.executeCommandReturnProcessOutput(script).stdout?.trim() == "OK"
         }
     }
 
@@ -979,7 +975,7 @@ echo 'OK'
      * @param unixGroup to check
      * @return true if the unixGroup exists, otherwise false
      */
-    private boolean isUnixGroupOnCluster(Realm realm, String unixGroup) {
+    private boolean isUnixGroupOnCluster(String unixGroup) {
         String script = """\
         #!/bin/bash
         if
@@ -991,7 +987,7 @@ echo 'OK'
         fi
         """.stripIndent()
 
-        return Boolean.valueOf(remoteShellHelper.executeCommandReturnProcessOutput(realm, script).stdout?.trim())
+        return Boolean.valueOf(remoteShellHelper.executeCommandReturnProcessOutput(script).stdout?.trim())
     }
 
     /**
@@ -1002,10 +998,9 @@ echo 'OK'
      *      - whether a unixGroup is shared by another project
      *
      * @param unixGroup to check
-     * @param realm to check if the unixGroup exists on it
      * @throws UnixGroupException if a validation fails
      */
-    private void validateUnixGroup(String unixGroup, Realm realm) throws UnixGroupException {
+    private void validateUnixGroup(String unixGroup) throws UnixGroupException {
         if (!OtpPathValidator.isValidPathComponent(unixGroup)) {
             throw new UnixGroupIsInvalidException("The unixGroup '${unixGroup}' contains invalid characters.")
         }
@@ -1014,7 +1009,7 @@ echo 'OK'
             throw new UnixGroupIsSharedException("Unix group ${unixGroup} is already used in another project.")
         }
 
-        if (!isUnixGroupOnCluster(realm, unixGroup)) {
+        if (!isUnixGroupOnCluster(unixGroup)) {
             throw new UnixGroupNotFoundException("Unix group ${unixGroup} does not exist on the cluster.")
         }
     }
@@ -1060,7 +1055,7 @@ echo 'OK'
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void updateUnixGroup(Project project, String unixGroup, boolean force = false) throws UnixGroupException {
         try {
-            validateUnixGroup(unixGroup, project.realm)
+            validateUnixGroup(unixGroup)
         } catch (UnixGroupIsSharedException isSharedException) {
             if (!force) {
                 throw isSharedException
@@ -1118,7 +1113,7 @@ echo 'OK'
     }
 
     Path getProjectDirectory(Project project) {
-        return fileSystemService.getRemoteFileSystem(project.realm).getPath(
+        return fileSystemService.remoteFileSystem.getPath(
                 configService.rootPath.absolutePath,
                 project.dirName,
         )

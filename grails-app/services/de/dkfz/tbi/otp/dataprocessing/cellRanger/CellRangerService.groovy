@@ -26,7 +26,6 @@ import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -87,54 +86,49 @@ class CellRangerService {
 
     CellRangerWorkflowService cellRangerWorkflowService
 
-    ConfigService configService
-
     void createInputDirectoryStructure(SingleCellBamFile singleCellBamFile) {
-        Realm realm = singleCellBamFile.realm
         String sampleName = singleCellBamFile.singleCellSampleName
 
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
         String unixGroup = singleCellBamFile.project.unixGroup
 
         Path sampleDirectory = fileSystem.getPath(singleCellBamFile.sampleDirectory.path)
 
         fileService.deleteDirectoryRecursively(sampleDirectory) // delete dir if exist from previous run
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(sampleDirectory, realm, unixGroup)
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(sampleDirectory, unixGroup)
 
         singleCellBamFile.containedSeqTracks.groupBy { it.sampleIdentifier }.each { String sampleIdentifier, List<SeqTrack> seqTracks ->
             String sampleIdentifierDirName = sampleIdentifierForDirectoryStructure(sampleIdentifier)
             Path sampleIdentifierDirectory = sampleDirectory.resolve(sampleIdentifierDirName)
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(sampleIdentifierDirectory, realm, unixGroup)
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(sampleIdentifierDirectory, unixGroup)
             seqTracks.sort { it.id }.withIndex(1).each { SeqTrack seqTrack, int laneCounter ->
                 seqTrack.sequenceFilesWhereIndexFileIsFalse.sort { it.id }.each { RawSequenceFile rawSequenceFile ->
                     String formattedLaneNumber = String.valueOf(laneCounter).padLeft(3, '0')
                     String fileName = "${sampleName}_S1_L${formattedLaneNumber}_R${rawSequenceFile.mateNumber}_${formattedLaneNumber}.fastq.gz"
                     Path link = sampleIdentifierDirectory.resolve(fileName)
                     Path target = fileSystem.getPath(lsdfFilesService.getFileViewByPidPath(rawSequenceFile))
-                    fileService.createLink(link, target, realm, unixGroup)
+                    fileService.createLink(link, target, unixGroup)
                 }
             }
         }
     }
 
     void deleteOutputDirectoryStructureIfExists(SingleCellBamFile singleCellBamFile) {
-        Realm realm = singleCellBamFile.realm
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
         Path outputDirectory = fileSystem.getPath(singleCellBamFile.outputDirectory.path)
         fileService.deleteDirectoryRecursively(outputDirectory)
     }
 
     void validateFilesExistsInResultDirectory(SingleCellBamFile singleCellBamFile) {
-        Realm realm = singleCellBamFile.realm
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
         Path resultDir = fileService.toPath(singleCellBamFile.resultDirectory, fileSystem)
 
         SingleCellBamFile.CREATED_RESULT_FILES.each {
-            fileService.ensureFileIsReadableAndNotEmpty(resultDir.resolve(it), configService.defaultRealm)
+            fileService.ensureFileIsReadableAndNotEmpty(resultDir.resolve(it))
         }
 
         SingleCellBamFile.CREATED_RESULT_DIRS.each {
-            fileService.ensureDirIsReadableAndNotEmpty(resultDir.resolve(it), configService.defaultRealm)
+            fileService.ensureDirIsReadableAndNotEmpty(resultDir.resolve(it))
         }
     }
 
@@ -172,7 +166,7 @@ class CellRangerService {
     }
 
     CellRangerQualityAssessment parseCellRangerQaStatistics(SingleCellBamFile singleCellBamFile) {
-        Path path = fileSystemService.getRemoteFileSystem(singleCellBamFile.realm).getPath(singleCellBamFile.qualityAssessmentCsvFile.absolutePath)
+        Path path = fileSystemService.remoteFileSystem.getPath(singleCellBamFile.qualityAssessmentCsvFile.absolutePath)
         Spreadsheet spreadsheet = new Spreadsheet(path.text, Delimiter.COMMA)
         CellRangerQualityAssessment qa = new CellRangerQualityAssessment()
         MetricsSummaryCsvColumn.values().each {
@@ -216,7 +210,7 @@ class CellRangerService {
     }
 
     private void updateBamFile(SingleCellBamFile singleCellBamFile) {
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(singleCellBamFile.realm)
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
         Path resultDirectory = fileSystem.getPath(singleCellBamFile.resultDirectory.path)
 
         Path bamFile = resultDirectory.resolve(SingleCellBamFile.ORIGINAL_BAM_FILE_NAME)
@@ -237,13 +231,13 @@ class CellRangerService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#singleCellBamFile.project, 'OTP_READ_ACCESS')")
     String getWebSummaryResultFileContent(SingleCellBamFile singleCellBamFile) throws NoSuchFileException, AccessDeniedException {
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(singleCellBamFile.realm)
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
 
         Path file = fileSystem.getPath(singleCellBamFile.webSummaryResultFile.path)
         if (!Files.exists(file)) {
             throw new NoSuchFileException(file.toAbsolutePath().toString())
         }
-        if (!fileService.fileIsReadable(file, configService.defaultRealm)) {
+        if (!fileService.fileIsReadable(file)) {
             throw new AccessDeniedException(file.toAbsolutePath().toString())
         }
         return file.text

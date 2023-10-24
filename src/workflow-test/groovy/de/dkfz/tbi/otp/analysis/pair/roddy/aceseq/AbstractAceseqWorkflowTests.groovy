@@ -128,7 +128,7 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
         linkFileUtils.createAndValidateLinks([
                 (sourceSophiaInputFile): sophiaInputFile,
-        ], realm)
+        ])
     }
 
     @Override

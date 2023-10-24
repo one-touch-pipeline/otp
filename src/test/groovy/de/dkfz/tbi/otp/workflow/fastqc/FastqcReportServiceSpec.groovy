@@ -137,7 +137,6 @@ class FastqcReportServiceSpec extends Specification implements DataTest, FastqcD
                 FastqcProcessedFile,
                 WorkflowArtefact,
                 WorkflowStep,
-                Realm,
                 ProcessingOption,
         ]
     }

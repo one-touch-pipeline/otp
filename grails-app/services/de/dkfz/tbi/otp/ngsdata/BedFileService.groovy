@@ -35,7 +35,6 @@ class BedFileService {
 
     /**
      * @return absolute path to the given {@link BedFile}
-     * at given {@link Realm}
      */
     String filePath(BedFile bedFile, boolean checkExistence = true) {
         notNull(bedFile, "bedFile must not be null")

@@ -26,7 +26,6 @@ import org.springframework.validation.Errors
 import org.springframework.validation.FieldError
 
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
 
@@ -210,7 +209,7 @@ class TestCase {
     }
 
     private static void mockExecuteCommandReturnProcessOutput(RemoteShellHelper remoteShellHelper) {
-        remoteShellHelper.metaClass.executeCommandReturnProcessOutput = { Realm realm, String command, String userName = null ->
+        remoteShellHelper.metaClass.executeCommandReturnProcessOutput = { String command, String userName = null ->
             return executeAndWait(command).assertExitCodeZeroAndStderrEmpty()
         }
     }

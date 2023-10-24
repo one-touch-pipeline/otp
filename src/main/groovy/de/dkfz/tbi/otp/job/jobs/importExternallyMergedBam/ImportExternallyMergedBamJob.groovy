@@ -34,7 +34,6 @@ import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.ChecksumFileService
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.project.ProjectService
 
 import java.nio.file.*
@@ -78,26 +77,25 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
     private NextAction linkSource(ImportProcess importProcess) throws Throwable {
         FileSystem fileSystem = fileSystemService.remoteFileSystem
         importProcess.externallyProcessedBamFiles.each { ExternallyProcessedBamFile epmbf ->
-            Realm realm = epmbf.realm
             Path targetBaseDir = fileSystem.getPath(epmbf.importedFrom).parent
             Path linkBaseDir = fileSystem.getPath(epmbf.importFolder.absolutePath)
 
-            linkMissingFiles(targetBaseDir, linkBaseDir, epmbf.bamFileName, realm)
-            linkMissingFiles(targetBaseDir, linkBaseDir, epmbf.baiFileName, realm)
+            linkMissingFiles(targetBaseDir, linkBaseDir, epmbf.bamFileName)
+            linkMissingFiles(targetBaseDir, linkBaseDir, epmbf.baiFileName)
 
             epmbf.furtherFiles.each { String relativePath ->
-                linkMissingFiles(targetBaseDir, linkBaseDir, relativePath, realm)
+                linkMissingFiles(targetBaseDir, linkBaseDir, relativePath)
             }
         }
         validate()
         return NextAction.SUCCEED
     }
 
-    private void linkMissingFiles(Path targetBaseDir, Path linkBaseDir, String pathToLink, Realm realm) {
+    private void linkMissingFiles(Path targetBaseDir, Path linkBaseDir, String pathToLink) {
         Path target = targetBaseDir.resolve(pathToLink)
         Path link = linkBaseDir.resolve(pathToLink)
         if (!Files.exists(link, LinkOption.NOFOLLOW_LINKS)) {
-            fileService.createLink(link, target, realm, CreateLinkOption.ABSOLUTE)
+            fileService.createLink(link, target, CreateLinkOption.ABSOLUTE)
         }
     }
 
@@ -114,7 +112,6 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
         File otpScriptDir = configService.toolsPath
 
         importProcess.externallyProcessedBamFiles.each { ExternallyProcessedBamFile epmbf ->
-            Realm realm = epmbf.project.realm
             File sourceBam = new File(epmbf.importedFrom)
             File sourceBaseDir = sourceBam.parentFile
             File sourceBai = new File(sourceBaseDir, epmbf.baiFileName)
@@ -186,14 +183,14 @@ md5sum -c ${targetBai}.md5sum
 
 ${furtherFilesMd5sumCheck}
 
-chgrp -hR ${executionHelperService.getGroup(epmbf.project.realm, new File(projectService.getProjectDirectory(epmbf.project).toString()))} ${targetBaseDir}
+chgrp -hR ${executionHelperService.getGroup(new File(projectService.getProjectDirectory(epmbf.project).toString()))} ${targetBaseDir}
 find ${targetBaseDir} -type d -not -perm 2750 -print -exec chmod 2750 '{}' \\;
 find ${targetBaseDir} -type f -not -perm 440 -not -name "*.bam" -not -name "*.bai" -not -name ".roddyExecCache.txt" -not -name "zippedAnalysesMD5.txt" -print -exec chmod 440 '{}' \\;
 find ${targetBaseDir} -type f -not -perm 444 \\( -name "*.bam" -or -name "*.bai" \\) -print -exec chmod 444 '{}' \\;
 
 touch ${checkpoint}
 """
-                clusterJobSchedulerService.executeJob(realm, cmd)
+                clusterJobSchedulerService.executeJob(cmd)
             }
         }
         if (action == NextAction.SUCCEED) {

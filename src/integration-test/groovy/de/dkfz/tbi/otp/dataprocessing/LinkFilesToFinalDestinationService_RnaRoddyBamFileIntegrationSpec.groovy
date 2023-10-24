@@ -29,7 +29,6 @@ import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
@@ -55,7 +54,6 @@ class LinkFilesToFinalDestinationService_RnaRoddyBamFileIntegrationSpec extends 
     @TempDir
     Path tempDir
     RnaRoddyBamFile roddyBamFile
-    Realm realm
     TestConfigService configService
 
     void setupData() {
@@ -67,7 +65,7 @@ class LinkFilesToFinalDestinationService_RnaRoddyBamFileIntegrationSpec extends 
         service.lsdfFilesService.remoteShellHelper = remoteShellHelper
         service.linkFileUtils.fileService = new FileService()
         service.linkFileUtils.fileSystemService = Mock(FileSystemService) {
-            _ * getRemoteFileSystem(_) >> FileSystems.default
+            _ * getRemoteFileSystem() >> FileSystems.default
             0 * _
         }
         service.executeRoddyCommandService = new ExecuteRoddyCommandService()
@@ -75,7 +73,6 @@ class LinkFilesToFinalDestinationService_RnaRoddyBamFileIntegrationSpec extends 
 
         roddyBamFile = createBamFile()
 
-        realm = roddyBamFile.project.realm
         configService.addOtpProperties(tempDir)
     }
 
@@ -90,7 +87,7 @@ class LinkFilesToFinalDestinationService_RnaRoddyBamFileIntegrationSpec extends 
 
         when:
         TestCase.withMockedremoteShellHelper(service.remoteShellHelper) {
-            service.linkNewRnaResults(roddyBamFile, realm)
+            service.linkNewRnaResults(roddyBamFile)
         }
 
         then:
@@ -114,15 +111,15 @@ class LinkFilesToFinalDestinationService_RnaRoddyBamFileIntegrationSpec extends 
         RnaRoddyBamFile roddyBamFile2 = createBamFile([workPackage: roddyBamFile.workPackage, config: roddyBamFile.config])
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
         TestCase.withMockedremoteShellHelper(service.remoteShellHelper) {
-            service.linkNewRnaResults(roddyBamFile2, realm)
+            service.linkNewRnaResults(roddyBamFile2)
         }
         assert roddyBamFile.workDirectory.exists()
 
         RemoteShellHelper remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { Realm realm, String command ->
+            executeCommandReturnProcessOutput(_) >> { String command ->
                 return LocalShellHelper.executeAndWait(command).assertExitCodeZeroAndStderrEmpty()
             }
-            executeCommand(_, _) >> { Realm realm, String command ->
+            executeCommand(_) >> { String command ->
                 return LocalShellHelper.executeAndWait(command).assertExitCodeZeroAndStderrEmpty().stdout
             }
         }
@@ -130,7 +127,7 @@ class LinkFilesToFinalDestinationService_RnaRoddyBamFileIntegrationSpec extends 
         service.lsdfFilesService.remoteShellHelper = remoteShellHelper
 
         when:
-        service.cleanupOldRnaResults(roddyBamFile, realm)
+        service.cleanupOldRnaResults(roddyBamFile)
 
         then:
         !roddyBamFile2.workDirectory.exists()
@@ -158,10 +155,9 @@ class LinkFilesToFinalDestinationService_RnaRoddyBamFileIntegrationSpec extends 
         ])
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         LinkFilesToFinalDestinationService linkFilesToFinalDestinationService = Spy {
-            1 * cleanupOldRnaResults(_, _) >> { RoddyBamFile roddyBamFile, Realm realm -> }
+            1 * cleanupOldRnaResults(_) >> { RoddyBamFile roddyBamFile -> }
         }
         linkFilesToFinalDestinationService.md5SumService = new Md5SumService()
-        linkFilesToFinalDestinationService.md5SumService.configService = Mock(ConfigService)
         linkFilesToFinalDestinationService.md5SumService.fileService = new FileService()
         linkFilesToFinalDestinationService.md5SumService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
@@ -171,17 +167,17 @@ class LinkFilesToFinalDestinationService_RnaRoddyBamFileIntegrationSpec extends 
             0 * informResultsAreWarned(_) >> { AbstractBamFile bamFile -> }
         }
         linkFilesToFinalDestinationService.executeRoddyCommandService = Mock(ExecuteRoddyCommandService) {
-            1 * correctPermissionsAndGroups(_, _) >> { RoddyResult roddyResult, Realm realm -> }
+            1 * correctPermissionsAndGroups(_) >> { RoddyResult roddyResult -> }
         }
         linkFilesToFinalDestinationService.linkFileUtils = Mock(LinkFileUtils) {
-            1 * createAndValidateLinks(_, _, _) >> { Map<File, File> sourceLinkMap, Realm realm, String unixGroup -> }
+            1 * createAndValidateLinks(_, _) >> { Map<File, File> sourceLinkMap, String unixGroup -> }
         }
         linkFilesToFinalDestinationService.abstractBamFileService = Mock(AbstractBamFileService) {
             1 * updateSamplePairStatusToNeedProcessing(_) >> { RoddyBamFile roddyBamFile -> }
         }
 
         when:
-        linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanupRna(roddyBamFile, realm)
+        linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanupRna(roddyBamFile)
 
         then:
         roddyBamFile.fileOperationStatus == AbstractBamFile.FileOperationStatus.PROCESSED

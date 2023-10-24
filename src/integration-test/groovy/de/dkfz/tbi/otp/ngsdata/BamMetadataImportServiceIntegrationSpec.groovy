@@ -28,7 +28,6 @@ import org.springframework.test.annotation.DirtiesContext
 import spock.lang.*
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
@@ -60,12 +59,10 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
     BamFilePathValidator bamFilePathValidator
 
     void setup() {
-        bamMetadataImportService.bamMetadataValidationService.configService = Mock(ConfigService)
         bamMetadataImportService.bamMetadataValidationService.fileService = new FileService()
         bamMetadataImportService.bamMetadataValidationService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
-        bamFilePathValidator.configService = Mock(ConfigService)
         bamFilePathValidator.fileService = new FileService()
         bamFilePathValidator.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }

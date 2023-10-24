@@ -145,23 +145,6 @@ class DomainFactory {
         return createDomainObject(domainClass, defaultProperties, parameterProperties)
     }
 
-    static Realm createRealm(Map realmProperties = [:]) {
-        return createDomainObject(Realm, [
-                name                       : 'realmName_' + (counter++),
-        ], realmProperties)
-    }
-
-    static Realm createDefaultRealmWithProcessingOption(Map realmProperties = [:]) {
-        Realm realm = createRealm(realmProperties)
-        createProcessingOptionLazy([
-                name   : OptionName.REALM_DEFAULT_VALUE,
-                type   : null,
-                project: null,
-                value  : realm.name,
-        ])
-        return realm
-    }
-
     static Role createRoleLazy(Map properties = [:]) {
         return findOrCreateDomainObject(Role, [
                 authority: "ROLE_${counter++}",
@@ -2170,7 +2153,6 @@ class DomainFactory {
                 sampleTypeId           : counter++,
                 individualId           : counter++,
                 projectId              : counter++,
-                realmId                : counter++,
                 laneCount              : counter++,
                 sum_N_BasePairs        : counter++,
                 sum_N_BasePairsGb      : counter++,
@@ -2184,7 +2166,6 @@ class DomainFactory {
                 type                   : Individual.Type.REAL,
                 projectName            : "projectName${counter++}",
                 projectDirName         : "projectDirName${counter++}",
-                realmName              : "realmName${counter++}",
                 seqCenterName          : "seqCenterName${counter++}",
                 seqCenterDirName       : "seqCenterDirName${counter++}",
         ], properties)
@@ -2214,7 +2195,6 @@ class DomainFactory {
                 projectName        : "projectName_${counter++}",
                 projectDirName     : "projectDirName_${counter++}",
                 qualityEncoding    : SeqTrack.QualityEncoding.UNKNOWN,
-                realmName          : "realmName_${counter++}",
                 sampleTypeName     : "sampleTypeName_${counter++}",
                 seqCenterDirName   : "seqCenterDirName_${counter++}",
                 seqCenterName      : "seqCenterName_${counter++}",

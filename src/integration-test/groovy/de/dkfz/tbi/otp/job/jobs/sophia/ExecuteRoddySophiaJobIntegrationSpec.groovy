@@ -68,7 +68,7 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
                     1 * validateInputBamFiles(_) >> { }
                 },
                 fileSystemService: Mock(FileSystemService) {
-                    _ * getRemoteFileSystem(_) >> FileSystems.default
+                    _ * getRemoteFileSystem() >> FileSystems.default
                 },
                 fileService      : new FileService([
                         remoteShellHelper: Mock(RemoteShellHelper) {
@@ -151,7 +151,7 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_, _)
+                    1 * correctPermissionsAndGroups(_)
                 },
                 sophiaService             : Spy(SophiaService) {
                     1 * validateInputBamFiles(_) >> { }
@@ -192,7 +192,7 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_, _) >> {
+                    1 * correctPermissionsAndGroups(_) >> {
                         throw new AssertionError(md5sum)
                     }
                 },
@@ -223,7 +223,7 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_, _)
+                    1 * correctPermissionsAndGroups(_)
                 },
         ])
         job.sophiaService = new SophiaService()

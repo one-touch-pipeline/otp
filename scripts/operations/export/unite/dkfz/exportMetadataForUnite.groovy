@@ -26,7 +26,6 @@ import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.GroupedMwp
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -205,18 +204,17 @@ ConfigService configService = ctx.configService
 FileSystemService fileSystemService = ctx.fileSystemService
 FileService fileService = ctx.fileService
 
-Realm realm = configService.defaultRealm
-FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+FileSystem fileSystem = fileSystemService.remoteFileSystem
 
 Path outputFolder = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve("export").resolve("UNITE").resolve("output")
-Path file = fileService.createOrOverwriteScriptOutputFile(outputFolder, "status.tsv", realm)
+Path file = fileService.createOrOverwriteScriptOutputFile(outputFolder, "status.tsv")
 
 file << new Date()
 
 projectNames.each { projectName ->
 
     Path outputFolderPerProject = outputFolder.resolve(projectName)
-    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputFolderPerProject, realm)
+    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputFolderPerProject)
 
     Project project = CollectionUtils.atMostOneElement(Project.findAllByName(projectName))
     assert project : "There is not project with the name ${projectName}"

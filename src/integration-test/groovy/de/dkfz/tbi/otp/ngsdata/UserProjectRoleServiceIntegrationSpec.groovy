@@ -323,9 +323,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 |${affectedUserUserDetail}
                 |${requesterUserDetail}""".stripMargin()
         )
-        1 * userProjectRoleService.remoteShellHelper.executeCommandReturnProcessOutput(
-                _, scriptCommand
-        ) >> new ProcessOutput("test-output", "test-error", exitCode)
+        1 * userProjectRoleService.remoteShellHelper.executeCommandReturnProcessOutput(scriptCommand) >>
+                new ProcessOutput("test-output", "test-error", exitCode)
 
         where:
         exitCode | operatorAction                               || result           | conjunction | subject

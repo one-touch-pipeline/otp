@@ -68,7 +68,6 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification implements Is
         sophiaInstance = DomainFactory.createSophiaInstanceWithSameSamplePair(snvCallingInstance)
         aceseqInstance = DomainFactory.createAceseqInstanceWithSameSamplePair(snvCallingInstance)
         runYapsaInstance = DomainFactory.createRunYapsaInstanceWithSameSamplePair(snvCallingInstance)
-        DomainFactory.createRealm()
 
         snvCallingInstance.processingState = AnalysisProcessingStates.FINISHED
         indelCallingInstance.processingState = AnalysisProcessingStates.FINISHED

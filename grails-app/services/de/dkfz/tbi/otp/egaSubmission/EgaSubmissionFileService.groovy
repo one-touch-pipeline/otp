@@ -278,10 +278,9 @@ class EgaSubmissionFileService {
         filesToCreate.each {
             Path path = basePath.resolve(it.key)
             Files.deleteIfExists(path)
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path.parent, submission.project.realm,
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path.parent,
                     "", FileService.OWNER_DIRECTORY_PERMISSION_STRING)
-            fileService.createFileWithContent(path, it.value, submission.project.realm,
-                    [PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE] as Set<PosixFilePermission>)
+            fileService.createFileWithContent(path, it.value, [PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE] as Set<PosixFilePermission>)
         }
     }
 

@@ -65,7 +65,6 @@ class ExecuteRunYapsaJobSpec extends Specification implements DataTest {
                 ProcessingOption,
                 ProcessingStep,
                 Project,
-                Realm,
                 ReferenceGenome,
                 ReferenceGenomeProjectSeqType,
                 RoddyBamFile,

@@ -24,7 +24,6 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.DeletionService
 
 import java.nio.file.FileSystem
@@ -78,8 +77,7 @@ FileService fileService = ctx.fileService
 ConfigService configService = ctx.configService
 FileSystemService fileSystemService = ctx.fileSystemService
 
-Realm realm = configService.defaultRealm
-FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+FileSystem fileSystem = fileSystemService.remoteFileSystem
 
 Path baseOutputDir = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve('sample_swap')
 
@@ -96,7 +94,7 @@ Individual.withTransaction {
         allFilesToRemove << deletionService.deleteIndividual(it, check)
     }
 
-    Path deleteFileCmd = fileService.createOrOverwriteScriptOutputFile(baseOutputDir, fileName, realm)
+    Path deleteFileCmd = fileService.createOrOverwriteScriptOutputFile(baseOutputDir, fileName)
 
     deleteFileCmd << allFilesToRemove.join('\n')
 

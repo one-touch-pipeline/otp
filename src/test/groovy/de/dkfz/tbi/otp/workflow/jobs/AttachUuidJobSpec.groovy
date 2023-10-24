@@ -26,7 +26,6 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.filestore.*
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.workflowExecution.*
 
 class AttachUuidJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
@@ -35,7 +34,6 @@ class AttachUuidJobSpec extends Specification implements DataTest, WorkflowSyste
     Class[] getDomainClassesToMock() {
         return [
                 WorkflowStep,
-                Realm,
         ]
     }
 

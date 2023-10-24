@@ -39,7 +39,6 @@ class SequenceControllerSpec extends Specification implements ControllerUnitTest
                 RawSequenceFile,
                 ProcessingPriority,
                 Project,
-                Realm,
                 SeqTrack,
                 Sequence,
         ]

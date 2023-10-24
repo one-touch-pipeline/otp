@@ -26,7 +26,6 @@ import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -56,7 +55,6 @@ class BamMetadataImportServiceSpec extends Specification implements DomainFactor
                 Individual,
                 Project,
                 Pipeline,
-                Realm,
                 ReferenceGenome,
                 Sample,
                 SampleType,
@@ -113,7 +111,6 @@ class BamMetadataImportServiceSpec extends Specification implements DomainFactor
         }
         service.fileSystemService = new TestFileSystemService()
         service.bamMetadataValidationService = new BamMetadataValidationService()
-        service.bamMetadataValidationService.configService = Mock(ConfigService)
         service.bamMetadataValidationService.fileService = new FileService()
         service.bamMetadataValidationService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }

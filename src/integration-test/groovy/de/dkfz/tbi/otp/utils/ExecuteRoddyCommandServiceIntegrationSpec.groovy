@@ -67,7 +67,6 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
     File roddyPath
     File roddyCommand
     File tmpOutputDir
-    Realm realm
     RoddyBamFile roddyBamFile
     File roddyBaseConfigsPath
     File applicationIniPath
@@ -88,8 +87,6 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         tmpOutputDir = Files.createDirectories(tempDir.resolve("temporaryOutputDir")).toFile()
         roddyBamFile = DomainFactory.createRoddyBamFile()
         configService.addOtpProperties(tempDir)
-        realm = roddyBamFile.project.realm
-        assert realm.save(flush: true)
 
         roddyBaseConfigsPath = new File(processingOptionService.findOptionAsString(OptionName.RODDY_BASE_CONFIGS_PATH))
         roddyBaseConfigsPath.mkdirs()
@@ -107,7 +104,6 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         configService.clean()
         roddyPath = null
         tmpOutputDir = null
-        realm = null
         roddyBamFile = null
         executeRoddyCommandService.remoteShellHelper = remoteShellHelper
     }
@@ -224,7 +220,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         setupData()
 
         when:
-        executeRoddyCommandService.defaultRoddyExecutionCommand(null, CONFIG_NAME, ANALYSIS_ID, realm)
+        executeRoddyCommandService.defaultRoddyExecutionCommand(null, CONFIG_NAME, ANALYSIS_ID)
 
         then:
         Throwable e = thrown(AssertionError)
@@ -236,7 +232,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         setupData()
 
         when:
-        executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, null, ANALYSIS_ID, realm)
+        executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, null, ANALYSIS_ID)
 
         then:
         Throwable e = thrown(AssertionError)
@@ -248,7 +244,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         setupData()
 
         when:
-        executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, null, realm)
+        executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, null)
 
         then:
         Throwable e = thrown(AssertionError)
@@ -262,7 +258,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         setupData()
 
         executeRoddyCommandService = Spy(ExecuteRoddyCommandService)
-        executeRoddyCommandService.createWorkOutputDirectory(_, _) >> { Realm realm, File file -> }
+        executeRoddyCommandService.createWorkOutputDirectory(_) >> { File file -> }
         executeRoddyCommandService.individualService = Mock(IndividualService) {
             getViewByPidPathBase(_, _) >> { Individual individual, SeqType seqType ->
                 Paths.get("/view-by-pid-path")
@@ -276,7 +272,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         assert applicationIniPath.delete()
 
         when:
-        executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID, realm)
+        executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID)
 
         then:
         Throwable e = thrown(AssertionError)
@@ -287,7 +283,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         given:
         setupData()
         executeRoddyCommandService = Spy(ExecuteRoddyCommandService)
-        executeRoddyCommandService.createWorkOutputDirectory(_, _) >> { Realm realm, File file -> }
+        executeRoddyCommandService.createWorkOutputDirectory(_) >> { File file -> }
         executeRoddyCommandService.individualService = Mock(IndividualService) {
             getViewByPidPathBase(_, _) >> { Individual individual, SeqType seqType ->
                 Paths.get("/view-by-pid-path")
@@ -301,7 +297,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         assert roddyBaseConfigsPath.deleteDir()
 
         when:
-        executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID, realm)
+        executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID)
 
         then:
         Throwable e = thrown(AssertionError)
@@ -325,7 +321,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         setupData()
         initRoddyModule()
         executeRoddyCommandService = Spy(ExecuteRoddyCommandService)
-        executeRoddyCommandService.createWorkOutputDirectory(_, _) >> { Realm realm, File file -> }
+        executeRoddyCommandService.createWorkOutputDirectory(_) >> { File file -> }
         executeRoddyCommandService.individualService = Mock(IndividualService) {
             getViewByPidPathBase(_, _) >> { Individual individual, SeqType seqType ->
                 Paths.get("/view-by-pid-path")
@@ -338,7 +334,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
 
         when:
         String actualCmd = LogThreadLocal.withThreadLog(System.out) {
-            executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID, realm)
+            executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID)
         }
 
         then:
@@ -357,7 +353,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         assert roddyBamFile.workDirectory.mkdirs()
 
         executeRoddyCommandService = Spy(ExecuteRoddyCommandService)
-        executeRoddyCommandService.createWorkOutputDirectory(_, _) >> { Realm realm, File file -> }
+        executeRoddyCommandService.createWorkOutputDirectory(_) >> { File file -> }
         executeRoddyCommandService.individualService = Mock(IndividualService) {
             getViewByPidPathBase(_, _) >> { Individual individual, SeqType seqType ->
                 Paths.get("/view-by-pid-path")
@@ -370,7 +366,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
 
         when:
         String actualCmd = LogThreadLocal.withThreadLog(System.out) {
-            executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID, realm)
+            executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID)
         }
 
         then:
@@ -390,7 +386,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         roddyBamFile.save(flush: true)
 
         executeRoddyCommandService = Spy(ExecuteRoddyCommandService)
-        executeRoddyCommandService.createWorkOutputDirectory(_, _) >> { Realm realm, File file -> }
+        executeRoddyCommandService.createWorkOutputDirectory(_) >> { File file -> }
         executeRoddyCommandService.individualService = Mock(IndividualService) {
             getViewByPidPathBase(_, _) >> { Individual individual, SeqType seqType ->
                 Paths.get("/view-by-pid-path")
@@ -403,7 +399,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
 
         when:
         String actualCmd = LogThreadLocal.withThreadLog(System.out) {
-            executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID, realm)
+            executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID)
         }
 
         then:
@@ -437,7 +433,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         setupData()
 
         when:
-        executeRoddyCommandService.createWorkOutputDirectory(realm, null)
+        executeRoddyCommandService.createWorkOutputDirectory(null)
 
         then:
         thrown(AssertionError)
@@ -450,13 +446,13 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         setupData()
         executeRoddyCommandService = new ExecuteRoddyCommandService()
         executeRoddyCommandService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommand(_, _) >> { Realm realm, String command -> }
+            executeCommand(_) >> { String command -> }
         }
         executeRoddyCommandService.processingOptionService = new ProcessingOptionService()
         tmpOutputDir.absoluteFile.delete()
 
         when:
-        executeRoddyCommandService.createWorkOutputDirectory(realm, tmpOutputDir)
+        executeRoddyCommandService.createWorkOutputDirectory(tmpOutputDir)
 
         then:
         thrown(AssertionError)
@@ -469,7 +465,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         setupData()
         executeRoddyCommandService = new ExecuteRoddyCommandService()
         executeRoddyCommandService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommand(_, _) >> { Realm realm, String command ->
+            executeCommand(_) >> { String command ->
                 ['bash', '-c', command].execute().waitFor()
             }
         }
@@ -477,7 +473,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         assert tmpOutputDir.delete()
 
         when:
-        executeRoddyCommandService.createWorkOutputDirectory(realm, tmpOutputDir)
+        executeRoddyCommandService.createWorkOutputDirectory(tmpOutputDir)
 
         then:
         tmpOutputDir.exists()
@@ -500,7 +496,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         setupData()
         executeRoddyCommandService = new ExecuteRoddyCommandService()
         executeRoddyCommandService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommand(_, _) >> { Realm realm, String command ->
+            executeCommand(_) >> { String command ->
                 ['bash', '-c', command].execute().waitFor()
             }
         }
@@ -508,7 +504,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         assert tmpOutputDir.exists()
 
         when:
-        executeRoddyCommandService.createWorkOutputDirectory(realm, tmpOutputDir)
+        executeRoddyCommandService.createWorkOutputDirectory(tmpOutputDir)
 
         then:
         String permissionAndGroup = LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
@@ -528,8 +524,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         given:
         setupData()
         executeRoddyCommandService.remoteShellHelper = [
-                executeCommandReturnProcessOutput: { Realm realm1, String cmd ->
-                    assert realm1 == realm
+                executeCommandReturnProcessOutput: { String cmd ->
                     ProcessOutput out = LocalShellHelper.executeAndWait(cmd)
                     out.assertExitCodeZeroAndStderrEmpty()
                     assert out.stdout == """\
@@ -560,7 +555,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
             """.stripIndent()).empty
 
         when:
-        executeRoddyCommandService.correctPermissions(roddyBamFile, realm)
+        executeRoddyCommandService.correctPermissions(roddyBamFile)
 
         then:
         String expected = """\
@@ -583,7 +578,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         setupData()
 
         when:
-        executeRoddyCommandService.correctPermissions(null, realm)
+        executeRoddyCommandService.correctPermissions(null)
 
         then:
         Throwable e = thrown(AssertionError)
@@ -598,8 +593,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         String primaryGroup = TestConfigService.primaryGroup
 
         executeRoddyCommandService.remoteShellHelper = [
-                executeCommandReturnProcessOutput: { Realm realm1, String cmd ->
-                    assert realm1 == realm
+                executeCommandReturnProcessOutput: { String cmd ->
                     ProcessOutput out = LocalShellHelper.executeAndWait(cmd)
                     out.assertExitCodeZeroAndStderrEmpty()
                     assert out.stdout == """\
@@ -617,7 +611,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         assert LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("chgrp -h ${testingGroup} ${roddyBamFile.workDirectory}/file").empty
 
         when:
-        executeRoddyCommandService.correctGroups(roddyBamFile, realm)
+        executeRoddyCommandService.correctGroups(roddyBamFile)
 
         then:
         "${primaryGroup}\n" as String == LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout(
@@ -630,7 +624,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         setupData()
 
         when:
-        executeRoddyCommandService.correctGroups(null, realm)
+        executeRoddyCommandService.correctGroups(null)
 
         then:
         Throwable e = thrown(AssertionError)
@@ -652,7 +646,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
             """.stripIndent()).empty
 
         RemoteShellHelper remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_, _) >> { Realm realm1, String cmd ->
+            executeCommandReturnProcessOutput(_) >> { String cmd ->
                 ProcessOutput out = LocalShellHelper.executeAndWait(cmd)
                 out.assertExitCodeZeroAndStderrEmpty()
                 return out
@@ -664,7 +658,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         executeRoddyCommandService.executionHelperService.remoteShellHelper = remoteShellHelper
 
         when:
-        executeRoddyCommandService.correctPermissionsAndGroups(roddyBamFile, realm)
+        executeRoddyCommandService.correctPermissionsAndGroups(roddyBamFile)
 
         then:
         String value = LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\

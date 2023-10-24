@@ -77,7 +77,7 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
                 roddyExecutionDirectoryNames: [],
         )
         abstractRoddyJob = Spy(AbstractRoddyJob)
-        clusterJobIdentifier = new ClusterJobIdentifier(DomainFactory.createRealm(), "clusterJobId")
+        clusterJobIdentifier = new ClusterJobIdentifier("clusterJobId")
 
         testConfigService = new TestConfigService()
     }
@@ -151,11 +151,10 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
     void "test failedOrNotFinishedClusterJobs, with multiple job state log files"() {
         given:
         testConfigService.addOtpProperty(OtpProperty.PATH_PROJECT_ROOT, tempDir.toString())
-        Realm realm = DomainFactory.createRealm()
-        ClusterJobIdentifier identifierA = new ClusterJobIdentifier(realm, "pbsId1")
-        ClusterJobIdentifier identifierB = new ClusterJobIdentifier(realm, "pbsId2")
-        ClusterJobIdentifier identifierC = new ClusterJobIdentifier(realm, "pbsId3")
-        ClusterJobIdentifier identifierD = new ClusterJobIdentifier(realm, "pbsId4")
+        ClusterJobIdentifier identifierA = new ClusterJobIdentifier("pbsId1")
+        ClusterJobIdentifier identifierB = new ClusterJobIdentifier("pbsId2")
+        ClusterJobIdentifier identifierC = new ClusterJobIdentifier("pbsId3")
+        ClusterJobIdentifier identifierD = new ClusterJobIdentifier("pbsId4")
 
         // JOB A, 2 entries, statusCode = 0 => successfully finished job, no output,
         //                                   same identifier in older executionStore marked as failed, should be ignored

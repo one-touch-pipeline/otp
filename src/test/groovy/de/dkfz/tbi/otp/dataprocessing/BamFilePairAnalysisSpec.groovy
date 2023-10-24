@@ -58,7 +58,6 @@ class BamFilePairAnalysisSpec extends Specification implements DataTest {
                 MockBamFilePairAnalysis,
                 Pipeline,
                 Project,
-                Realm,
                 ReferenceGenome,
                 ReferenceGenomeProjectSeqType,
                 RoddyBamFile,

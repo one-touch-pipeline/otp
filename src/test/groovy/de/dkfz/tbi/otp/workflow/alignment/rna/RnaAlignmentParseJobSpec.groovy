@@ -54,7 +54,6 @@ class RnaAlignmentParseJobSpec extends Specification implements WorkflowSystemDo
                 Pipeline,
                 ProcessingPriority,
                 Project,
-                Realm,
                 ReferenceGenomeEntry,
                 ReferenceGenomeProjectSeqType,
                 RnaQualityAssessment,

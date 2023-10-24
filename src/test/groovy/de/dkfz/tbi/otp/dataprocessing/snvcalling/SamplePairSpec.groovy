@@ -40,7 +40,6 @@ class SamplePairSpec extends Specification implements DataTest {
                 MergingWorkPackage,
                 Pipeline,
                 Project,
-                Realm,
                 ReferenceGenome,
                 Sample,
                 SamplePair,
@@ -52,10 +51,7 @@ class SamplePairSpec extends Specification implements DataTest {
     }
 
     List setUpForPathTests(String analysisName) {
-        Realm realm = DomainFactory.createRealm()
-        Project project = DomainFactory.createProject(
-                realm: realm,
-        )
+        Project project = DomainFactory.createProject()
         Individual individual = DomainFactory.createIndividual(
                 project: project,
         )

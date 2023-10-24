@@ -53,7 +53,6 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
                 Project,
                 ProcessingOption,
                 Ticket,
-                Realm,
                 ReferenceGenome,
                 ReferenceGenomeProjectSeqType,
                 RnaRoddyBamFile,
@@ -81,14 +80,13 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
         given:
         DomainFactory.createAllAlignableSeqTypes()
         RoddyBamFile roddyBamFile = rna ? RoddyRnaFactory.super.createBamFile() : DomainFactory.createRoddyBamFile()
-        DomainFactory.createDefaultRealmWithProcessingOption()
         testConfigService = new TestConfigService()
         roddyBamFile.comment = new Comment(comment: "oldComment", author: "author", modificationDate: new Date())
         roddyBamFile.qcTrafficLightStatus = prevQcStatus
         qcTrafficLightService = new QcTrafficLightService()
         qcTrafficLightService.linkFilesToFinalDestinationService = Mock(LinkFilesToFinalDestinationService) {
-            linkCount * linkNewResults(_, _)
-            linkRnaCount * linkNewRnaResults(_, _)
+            linkCount * linkNewResults(_)
+            linkRnaCount * linkNewRnaResults(_)
         }
         qcTrafficLightService.commentService = Mock(CommentService) {
             1 * saveComment(roddyBamFile, "comment")
@@ -146,12 +144,11 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
         ])
         Ticket ticket1 = DomainFactory.createTicketWithEndDatesAndNotificationSent()
         Ticket ticket2 = DomainFactory.createTicketWithEndDatesAndNotificationSent()
-        DomainFactory.createDefaultRealmWithProcessingOption()
 
         testConfigService = new TestConfigService()
         qcTrafficLightService = new QcTrafficLightService()
         qcTrafficLightService.linkFilesToFinalDestinationService = Mock(LinkFilesToFinalDestinationService) {
-            1 * linkNewResults(_, _)
+            1 * linkNewResults(_)
         }
         qcTrafficLightService.commentService = Mock(CommentService) {
             1 * saveComment(roddyBamFile, "comment")

@@ -69,24 +69,23 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
     ProcessingOptionService processingOptionService
 
     protected Path linkBamFileInWorkDirectory(AbstractBamFile abstractBamFile, Path workDirectory) {
-        Realm realm = abstractBamFile.realm
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
         String bamFileName = "${abstractBamFile.sampleType.dirName}_${abstractBamFile.individual.pid}_merged.mdup.bam"
         String baiFileName = "${bamFileName}.bai"
 
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
         Path targetFileBam = fileService.toPath(abstractBamFile.pathForFurtherProcessing, fileSystem)
         Path targetFileBai = targetFileBam.resolveSibling(abstractBamFile.baiFileName)
 
         Path linkBamFile = workDirectory.resolve(bamFileName)
         Path linkBaiFile = workDirectory.resolve(baiFileName)
-        fileService.createLink(linkBamFile, targetFileBam, realm, CreateLinkOption.DELETE_EXISTING_FILE)
-        fileService.createLink(linkBaiFile, targetFileBai, realm, CreateLinkOption.DELETE_EXISTING_FILE)
+        fileService.createLink(linkBamFile, targetFileBam, CreateLinkOption.DELETE_EXISTING_FILE)
+        fileService.createLink(linkBaiFile, targetFileBai, CreateLinkOption.DELETE_EXISTING_FILE)
         return linkBamFile
     }
 
     @SuppressWarnings('JavaIoPackageAccess')
     @Override
-    protected String prepareAndReturnWorkflowSpecificCommand(R roddyResult, Realm realm) throws Throwable {
+    protected String prepareAndReturnWorkflowSpecificCommand(R roddyResult) throws Throwable {
         assert roddyResult: "roddyResult must not be null"
 
         String analysisIDinConfigFile = executeRoddyCommandService.getAnalysisIDinConfigFile(roddyResult)
@@ -95,7 +94,7 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(new File(roddyResult.config.configFilePath))
 
         return [
-                executeRoddyCommandService.defaultRoddyExecutionCommand(roddyResult, nameInConfigFile, analysisIDinConfigFile, realm),
+                executeRoddyCommandService.defaultRoddyExecutionCommand(roddyResult, nameInConfigFile, analysisIDinConfigFile),
                 prepareAndReturnAdditionalImports(roddyResult),
                 prepareAndReturnWorkflowSpecificParameter(roddyResult),
                 prepareAndReturnCValues(roddyResult),

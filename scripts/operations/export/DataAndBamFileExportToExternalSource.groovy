@@ -137,8 +137,7 @@ AbstractBamFileService abstractBamFileService = ctx.abstractBamFileService
 SamplePairService samplePairService = ctx.samplePairService
 DataExportService dataExportService = ctx.dataExportService
 
-Realm realm = configService.defaultRealm
-FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+FileSystem fileSystem = fileSystemService.remoteFileSystem
 
 Path targetFolder = fileSystem.getPath(targetOutputFolder)
 
@@ -149,8 +148,8 @@ String outputFileName = scriptOutputPath.fileName
 String outputDir = scriptOutputPath.parent.toString()
 
 Path outputDirPath = fileService.toPath(new File(outputDir), fileSystem)
-fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDirPath, realm)
-Path outputFile = fileService.createOrOverwriteScriptOutputFile(outputDirPath, outputFileName, realm)
+fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDirPath)
+Path outputFile = fileService.createOrOverwriteScriptOutputFile(outputDirPath, outputFileName)
 
 assert scriptOutputPath.absolute: "scriptOutputPath is not an absolute path"
 assert targetFolder.absolute: "targetOutputFolder is not an absolute path"

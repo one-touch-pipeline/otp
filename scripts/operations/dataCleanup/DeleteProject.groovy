@@ -23,7 +23,6 @@
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
@@ -31,8 +30,6 @@ import de.dkfz.tbi.otp.utils.*
 
 import java.nio.file.FileSystem
 import java.nio.file.Path
-
-import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.REALM_DEFAULT_VALUE
 
 /**
  * Delete of a project or only parts.
@@ -96,9 +93,7 @@ FileService fileService = ctx.fileService
 FileSystem fileSystem = fileSystemService.remoteFileSystem
 Path outputFile = fileSystem.getPath(pathName)
 
-String realmName = fileSystemService.processingOptionService.findOptionAsString(REALM_DEFAULT_VALUE)
-Realm realm = CollectionUtils.atMostOneElement(Realm.findAllByName(realmName))
-fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputFile.parent, realm)
+fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputFile.parent)
 
 List<String> output = []
 

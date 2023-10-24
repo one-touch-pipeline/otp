@@ -70,7 +70,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
                 SoftwareTool,
                 ReferenceGenome,
                 ReferenceGenomeProjectSeqType,
-                Realm,
                 RnaRoddyBamFile,
                 RoddyBamFile,
                 RoddyWorkflowConfig,
@@ -153,7 +152,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
         String errorMessage = HelperUtils.uniqueString
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getExecuteRoddyCommandService() >> Mock(ExecuteRoddyCommandService) {
-                1 * correctPermissions(_, _) >> {
+                1 * correctPermissions(_) >> {
                     throw new AssertionError(errorMessage)
                 }
             }
@@ -174,7 +173,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
         String errorMessage = HelperUtils.uniqueString
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getExecuteRoddyCommandService() >> Mock(ExecuteRoddyCommandService) {
-                1 * correctPermissions(_, _) >> { }
+                1 * correctPermissions(_) >> { }
             }
             1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> {
                 throw new AssertionError(errorMessage)
@@ -199,7 +198,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
         TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getExecuteRoddyCommandService() >> Mock(ExecuteRoddyCommandService) {
-                1 * correctPermissions(_, _) >> { }
+                1 * correctPermissions(_) >> { }
             }
             getConfigService() >> configService
             1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> { }
@@ -247,7 +246,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
         TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getExecuteRoddyCommandService() >> Mock(ExecuteRoddyCommandService) {
-                1 * correctPermissions(_, _) >> { }
+                1 * correctPermissions(_) >> { }
             }
             getConfigService() >> configService
             1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> { }
@@ -277,7 +276,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
         TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getExecuteRoddyCommandService() >> Mock(ExecuteRoddyCommandService) {
-                1 * correctPermissions(_, _) >> { }
+                1 * correctPermissions(_) >> { }
             }
             getConfigService() >> configService
             1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> { }
@@ -308,7 +307,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements DataTest, R
         TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getExecuteRoddyCommandService() >> Mock(ExecuteRoddyCommandService) {
-                1 * correctPermissions(_, _) >> { }
+                1 * correctPermissions(_) >> { }
             }
             getConfigService() >> configService
             1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> { }

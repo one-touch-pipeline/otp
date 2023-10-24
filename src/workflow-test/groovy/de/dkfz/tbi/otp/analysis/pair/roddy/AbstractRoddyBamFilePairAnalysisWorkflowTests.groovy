@@ -94,7 +94,7 @@ abstract class AbstractRoddyBamFilePairAnalysisWorkflowTests<Instance extends Ba
             assert createdInstance.sampleType2BamFile == bamFileControl
 
             filesToCheck(createdInstance).flatten().each { Path file ->
-                fileService.ensureFileIsReadableAndNotEmpty(file, realm)
+                fileService.ensureFileIsReadableAndNotEmpty(file)
             }
             checkAnalysisSpecific(createdInstance)
         }

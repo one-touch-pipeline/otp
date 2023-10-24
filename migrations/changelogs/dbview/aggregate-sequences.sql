@@ -37,7 +37,6 @@ SELECT (SUM(st.n_base_pairs))::bigint              AS sum_n_base_pairs,
        s.sample_type_id,
        s.individual_id,
        p.id                                        AS project_id,
-       re.id                                       AS realm_id,
 
        sp.name                                     AS seq_platform_name,
        spml.name                                   AS seq_platform_model_label_name,
@@ -50,7 +49,6 @@ SELECT (SUM(st.n_base_pairs))::bigint              AS sum_n_base_pairs,
        sampleType.name                             AS sample_type_name,
        i.type,
        i.pid,
-       re.name                                     AS realm_name,
        p.name                                      AS project_name,
        p.dir_name                                  AS project_dir_name,
        sc.name                                     AS seq_center_name,
@@ -71,8 +69,6 @@ FROM seq_track AS st
                     ON s.individual_id = i.id
          INNER JOIN project AS p
                     ON i.project_id = p.id
-         INNER JOIN realm AS re
-                    ON p.realm_id = re.id
          INNER JOIN seq_center AS sc
                     ON r.seq_center_id = sc.id
          LEFT OUTER JOIN seq_platform_model_label spml
@@ -94,7 +90,6 @@ GROUP BY st.seq_type_id,
          s.sample_type_id,
          s.individual_id,
          p.id,
-         re.id,
          sp.name,
          spml.name,
          skl.name,
@@ -108,6 +103,5 @@ GROUP BY st.seq_type_id,
          i.pid,
          p.name,
          p.dir_name,
-         re.name,
          sc.name,
          sc.dir_name;

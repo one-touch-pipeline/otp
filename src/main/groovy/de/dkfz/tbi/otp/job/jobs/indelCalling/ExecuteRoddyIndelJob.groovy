@@ -105,7 +105,7 @@ class ExecuteRoddyIndelJob extends AbstractExecutePanCanJob<IndelCallingInstance
     protected void validate(IndelCallingInstance indelCallingInstance) throws Throwable {
         assert indelCallingInstance: "The input indelCallingInstance must not be null"
 
-        executeRoddyCommandService.correctPermissionsAndGroups(indelCallingInstance, indelCallingInstance.project.realm)
+        executeRoddyCommandService.correctPermissionsAndGroups(indelCallingInstance)
 
         List<File> directories = [
                 indelCallingInstance.workExecutionStoreDirectory,

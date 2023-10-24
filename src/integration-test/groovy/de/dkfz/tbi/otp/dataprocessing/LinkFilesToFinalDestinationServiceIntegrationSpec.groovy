@@ -46,7 +46,6 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
     LinkFilesToFinalDestinationService linkFilesToFinalDestinationService
 
     RoddyBamFile roddyBamFile
-    Realm realm
     TestConfigService configService
 
     @TempDir
@@ -63,7 +62,6 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         roddyBamFile.roddyExecutionDirectoryNames = ["exec_123456_123456789_test_test"]
         roddyBamFile.save(flush: true)
 
-        realm = roddyBamFile.project.realm
         configService.addOtpProperties(tempDir)
 
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
@@ -163,10 +161,10 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         linkFilesToFinalDestinationService.linkFileUtils = Mock(LinkFileUtils)
 
         when:
-        linkFilesToFinalDestinationService.linkNewResults(roddyBamFile, realm)
+        linkFilesToFinalDestinationService.linkNewResults(roddyBamFile)
 
         then:
-        1 * linkFilesToFinalDestinationService.linkFileUtils.createAndValidateLinks(_, _, _) >> { Map<File, File> targetLinkMap, Realm realm, String group ->
+        1 * linkFilesToFinalDestinationService.linkFileUtils.createAndValidateLinks(_, _) >> { Map<File, File> targetLinkMap, String group ->
             TestCase.assertContainSame(targetLinkMap.values(), linkedFiles)
         }
     }
@@ -184,10 +182,10 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         linkFilesToFinalDestinationService.linkFileUtils = Mock(LinkFileUtils)
 
         when:
-        linkFilesToFinalDestinationService.linkNewResults(roddyBamFile, realm)
+        linkFilesToFinalDestinationService.linkNewResults(roddyBamFile)
 
         then:
-        1 * linkFilesToFinalDestinationService.linkFileUtils.createAndValidateLinks(_, _, _) >> { Map<File, File> targetLinkMap, Realm realm, String group ->
+        1 * linkFilesToFinalDestinationService.linkFileUtils.createAndValidateLinks(_, _) >> { Map<File, File> targetLinkMap, String group ->
             TestCase.assertContainSame(targetLinkMap.values(), linkedFiles)
         }
     }
@@ -216,10 +214,10 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         linkFilesToFinalDestinationService.linkFileUtils = Mock(LinkFileUtils)
 
         when:
-        linkFilesToFinalDestinationService.linkNewResults(roddyBamFile, realm)
+        linkFilesToFinalDestinationService.linkNewResults(roddyBamFile)
 
         then:
-        1 * linkFilesToFinalDestinationService.linkFileUtils.createAndValidateLinks(_, _, _) >> { Map<File, File> targetLinkMap, Realm realm, String group ->
+        1 * linkFilesToFinalDestinationService.linkFileUtils.createAndValidateLinks(_, _) >> { Map<File, File> targetLinkMap, String group ->
             TestCase.assertContainSame(targetLinkMap.values(), linkedFiles)
         }
     }
@@ -229,7 +227,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         setupData()
 
         when:
-        linkFilesToFinalDestinationService.linkNewResults(null, realm)
+        linkFilesToFinalDestinationService.linkNewResults(null)
 
         then:
         Throwable e = thrown(AssertionError)
@@ -243,7 +241,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         roddyBamFile.save(flush: true)
 
         when:
-        linkFilesToFinalDestinationService.linkNewResults(roddyBamFile, realm)
+        linkFilesToFinalDestinationService.linkNewResults(roddyBamFile)
 
         then:
         Throwable e = thrown(AssertionError)

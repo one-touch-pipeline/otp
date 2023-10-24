@@ -120,8 +120,7 @@ builder.addGroovyCommand("""
           FileService fileService = ctx.fileService
           LaneSwapService laneSwapService = ctx.laneSwapService
           
-          Realm realm = configService.defaultRealm
-          FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+          FileSystem fileSystem = fileSystemService.remoteFileSystem
           
           StringBuilder log = new StringBuilder()
           
@@ -129,7 +128,7 @@ builder.addGroovyCommand("""
           // group-editable so non-server users can also work with it
           String swapLabel = "${swapLabel}"
           final Path SCRIPT_OUTPUT_DIRECTORY = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve('sample_swap').resolve(swapLabel)
-          fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(SCRIPT_OUTPUT_DIRECTORY, realm)
+          fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(SCRIPT_OUTPUT_DIRECTORY)
           fileService.setPermission(SCRIPT_OUTPUT_DIRECTORY, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
           
           /** did we manually check yet if all (potentially symlinked) fastq datafiles still exist on the filesystem? */

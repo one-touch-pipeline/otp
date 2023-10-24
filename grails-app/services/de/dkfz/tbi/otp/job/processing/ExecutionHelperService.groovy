@@ -25,7 +25,6 @@ import grails.gorm.transactions.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.ProcessOutput
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
@@ -46,9 +45,9 @@ class ExecutionHelperService {
      * @deprecated use {@link Project#unixGroup}
      */
     @Deprecated
-    String getGroup(Realm realm, File directory) {
+    String getGroup(File directory) {
         assert directory: 'directory may not be null'
-        ProcessOutput result = remoteShellHelper.executeCommandReturnProcessOutput(realm, "stat -c '%G' ${directory}")
+        ProcessOutput result = remoteShellHelper.executeCommandReturnProcessOutput("stat -c '%G' ${directory}")
         if (result.exitCode != 0) {
             throw new OtpRuntimeException("Getting group failed: ${result.stderr}; exit code: ${result.exitCode}")
         }
@@ -56,13 +55,13 @@ class ExecutionHelperService {
     }
 
     /**
-     * @deprecated use {@link FileService#setGroupViaBash(Path, Realm, String)}
+     * @deprecated use {@link FileService#setGroupViaBash(Path, String)}
      */
     @Deprecated
-    String setGroup(Realm realm, File directory, String group) {
+    String setGroup(File directory, String group) {
         assert directory: 'directory may not be null'
         assert group: 'group may not be null'
-        ProcessOutput result = remoteShellHelper.executeCommandReturnProcessOutput(realm, "chgrp -h ${group} ${directory}")
+        ProcessOutput result = remoteShellHelper.executeCommandReturnProcessOutput("chgrp -h ${group} ${directory}")
         if (result.exitCode != 0) {
             throw new OtpRuntimeException("Setting group '${group}' failed: ${result.stderr}; exit code: ${result.exitCode}")
         }
@@ -70,13 +69,13 @@ class ExecutionHelperService {
     }
 
     /**
-     * @deprecated use {@link FileService#setPermissionViaBash(Path, Realm, String)}
+     * @deprecated use {@link FileService#setPermissionViaBash(Path, String)}
      */
     @Deprecated
-    String setPermission(Realm realm, File directory, String permission) {
+    String setPermission(File directory, String permission) {
         assert directory: 'directory may not be null'
         assert permission: 'permission may not be null'
-        ProcessOutput result = remoteShellHelper.executeCommandReturnProcessOutput(realm, "chmod  ${permission} ${directory}")
+        ProcessOutput result = remoteShellHelper.executeCommandReturnProcessOutput("chmod  ${permission} ${directory}")
         if (result.exitCode != 0) {
             throw new OtpRuntimeException("Setting permission failed: ${result.stderr}; exit code: ${result.exitCode}")
         }

@@ -30,7 +30,6 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJobService
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
 
 class AbstractJobImplSpec extends Specification implements DataTest {
 
@@ -43,7 +42,6 @@ class AbstractJobImplSpec extends Specification implements DataTest {
                 Process,
                 ProcessingStep,
                 ProcessingStepUpdate,
-                Realm,
         ]
     }
 

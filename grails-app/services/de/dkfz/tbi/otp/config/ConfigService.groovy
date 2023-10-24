@@ -33,13 +33,10 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.JobScheduler
-import de.dkfz.tbi.otp.ngsdata.Realm
 
 import java.nio.file.FileSystem
 import java.nio.file.Path
 import java.time.*
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 @CompileDynamic
 @Transactional
@@ -79,11 +76,6 @@ class ConfigService implements ApplicationContextAware {
     @Deprecated
     static ConfigService getInstance() {
         return context.getBean("configService")
-    }
-
-    @Deprecated
-    Realm getDefaultRealm() {
-        return exactlyOneElement(Realm.findAllByName(processingOptionService.findOptionAsString(ProcessingOption.OptionName.REALM_DEFAULT_VALUE)))
     }
 
     File getRootPath() {

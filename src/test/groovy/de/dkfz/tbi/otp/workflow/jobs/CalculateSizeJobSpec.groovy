@@ -28,7 +28,6 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.filestore.WorkFolder
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.Paths
@@ -40,7 +39,6 @@ class CalculateSizeJobSpec extends Specification implements DataTest, WorkflowSy
     Class[] getDomainClassesToMock() {
         return [
                 WorkflowStep,
-                Realm,
         ]
     }
 

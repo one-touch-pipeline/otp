@@ -32,7 +32,6 @@ import spock.lang.Specification
 import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
@@ -80,7 +79,6 @@ class WeskitAccessServiceIntegrationSpec extends Specification implements Domain
         Mono<RunId> mockedMonoRunId = Mock(Mono) {
             1 * block(_) >> new RunId().runId(givenRunId)
         }
-        findOrCreateProcessingOption(ProcessingOption.OptionName.REALM_DEFAULT_VALUE, createRealm().name)
 
         and:
         Path workDir = baseDirectory.resolve('work').resolve("test")

@@ -39,7 +39,6 @@ class RunServiceSpec extends Specification implements DataTest, DomainFactoryCor
                 Individual,
                 MetaDataFile,
                 Project,
-                Realm,
                 Run,
                 FastqImportInstance,
                 Sample,

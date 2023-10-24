@@ -67,14 +67,13 @@ class IndividualSwapServiceIntegrationSpec extends Specification implements User
     void "swap, succeed if parameters match existing entities and data files"() {
         given:
         setupData()
-        DomainFactory.createDefaultRealmWithProcessingOption()
         final SeqType seqType = DomainFactory.createAllAlignableSeqTypes().first()
         MergingWorkPackage workPackage = createMergingWorkPackage(seqType: seqType)
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
                 roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
                 workPackage: workPackage,
         ])
-        Project newProject = DomainFactory.createProject(realm: bamFile.project.realm)
+        Project newProject = DomainFactory.createProject()
         String scriptName = "TEST-MOVE-INDIVIDUAL"
         SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
         List<String> fastqFileLinks = []

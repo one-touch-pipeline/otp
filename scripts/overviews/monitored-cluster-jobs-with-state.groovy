@@ -29,7 +29,6 @@
  * Suspicious cluster jobs are cluster jobs that are in a state, in which they should
  * be tracked, but aren't.
  *
- * This script expect all the jobs to run on the same realm, which by default is the default realm.
  */
 
 import de.dkfz.roddy.execution.jobs.*
@@ -39,17 +38,13 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.processing.ClusterJobManagerFactoryService
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.scheduler.OldClusterJobMonitor
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 ProcessingOptionService processingOptionService = ctx.processingOptionService
 ClusterJobManagerFactoryService clusterJobManagerFactoryService = ctx.clusterJobManagerFactoryService
 OldClusterJobMonitor oldClusterJobMonitor = ctx.oldClusterJobMonitor
 
-String defaultRealmName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.REALM_DEFAULT_VALUE)
-Realm realm = CollectionUtils.atMostOneElement(Realm.findAllByName(defaultRealmName))
-
-BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.getJobManager(realm)
+BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.getJobManager()
 Map<BEJobID, JobState> jobMap = jobManager.queryJobStatusAll()
 
 List<Process> suspiciousProcesses = []

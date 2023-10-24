@@ -66,7 +66,6 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
     void "swap, succeed if parameters match existing entities and data files"() {
         given:
         setupData()
-        DomainFactory.createDefaultRealmWithProcessingOption()
         final SeqType seqType = DomainFactory.createAllAlignableSeqTypes().first()
         MergingWorkPackage workPackage = createMergingWorkPackage(seqType: seqType)
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([

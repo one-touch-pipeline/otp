@@ -92,8 +92,7 @@ FileService fileService = ctx.fileService
 FileSystemService fileSystemService = ctx.fileSystemService
 SeqTypeService seqTypeService = ctx.seqTypeService
 
-Realm realm = configService.defaultRealm
-FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+FileSystem fileSystem = fileSystemService.remoteFileSystem
 
 assert pathName: 'No file name given, but this is required'
 assert !pathName.contains(' '): 'File name contains spaces, which is not allowed'
@@ -169,7 +168,7 @@ set -ve
 ${filesToDelete.collect { "rm -rf ${it}" }.join('\n')}
 
 """
-    fileService.createFileWithContentOnDefaultRealm(outputPath, content)
+    fileService.createFileWithContent(outputPath, content)
 
     println """
 deleted in OTP

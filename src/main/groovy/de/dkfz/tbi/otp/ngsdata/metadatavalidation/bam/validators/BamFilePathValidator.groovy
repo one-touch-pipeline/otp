@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.BamMetadataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
@@ -42,9 +41,6 @@ class BamFilePathValidator extends AbstractSingleValueValidator<BamMetadataValid
 
     @Autowired
     FileService fileService
-
-    @Autowired
-    ConfigService configService
 
     @Override
     Collection<String> getDescriptions() {
@@ -75,7 +71,7 @@ class BamFilePathValidator extends AbstractSingleValueValidator<BamMetadataValid
                         context.addProblem(cells, LogLevel.ERROR, "'${filePath}' does not exist or cannot be accessed by OTP.",
                                 "At least one file does not exist or cannot be accessed by OTP.")
                     }
-                } else if (!fileService.fileIsReadable(bamFile, configService.defaultRealm)) {
+                } else if (!fileService.fileIsReadable(bamFile)) {
                     context.addProblem(cells, LogLevel.ERROR, "'${filePath}' is not readable.", "At least one file is not readable.")
                 }
             } catch (Exception e) {

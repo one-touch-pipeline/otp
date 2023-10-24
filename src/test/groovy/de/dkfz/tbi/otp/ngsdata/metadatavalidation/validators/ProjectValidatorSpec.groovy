@@ -41,7 +41,6 @@ class ProjectValidatorSpec extends Specification implements DataTest {
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                Realm,
                 Project,
         ]
     }

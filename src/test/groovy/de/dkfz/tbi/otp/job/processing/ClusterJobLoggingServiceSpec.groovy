@@ -31,7 +31,6 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -46,7 +45,6 @@ class ClusterJobLoggingServiceSpec extends Specification implements DataTest {
                 Process,
                 ProcessingStep,
                 ProcessingStepUpdate,
-                Realm,
         ]
     }
 
@@ -55,18 +53,16 @@ class ClusterJobLoggingServiceSpec extends Specification implements DataTest {
     @TempDir
     Path tempDir
 
-    Realm realm
     ProcessingStepUpdate processingStepUpdate
     ClusterJobLoggingService service
 
     void setup() {
         configService = new TestConfigService([(OtpProperty.PATH_CLUSTER_LOGS_OTP): tempDir.toString()])
-        realm = DomainFactory.createRealm()
         processingStepUpdate = DomainFactory.createProcessingStepUpdate()
         service = new ClusterJobLoggingService()
         service.configService = configService
         service.fileService = Stub(FileService) {
-            createDirectoryRecursivelyAndSetPermissionsViaBash(_, _) >> { Path dir, Realm _ ->
+            createDirectoryRecursivelyAndSetPermissionsViaBash(_) >> { Path dir ->
                 Files.createDirectories(dir)
             }
         }
@@ -97,13 +93,13 @@ class ClusterJobLoggingServiceSpec extends Specification implements DataTest {
         given:
         service.fileSystemService = new TestFileSystemService()
         service.fileService = Mock(FileService) {
-            1 * createDirectoryRecursivelyAndSetPermissionsViaBash(_, _) >> { Path dir, Realm _ ->
+            1 * createDirectoryRecursivelyAndSetPermissionsViaBash(_) >> { Path dir ->
                 Files.createDirectories(dir)
             }
         }
 
         when:
-        File logDir = service.createAndGetLogDirectory(realm, processingStepUpdate.processingStep)
+        File logDir = service.createAndGetLogDirectory(processingStepUpdate.processingStep)
 
         then:
         logDir.exists()
@@ -113,13 +109,13 @@ class ClusterJobLoggingServiceSpec extends Specification implements DataTest {
         given:
         service.fileSystemService = new TestFileSystemService()
         service.fileService = Mock(FileService) {
-            3 * createDirectoryRecursivelyAndSetPermissionsViaBash(_, _)
+            3 * createDirectoryRecursivelyAndSetPermissionsViaBash(_)
         }
 
         when:
-        service.createAndGetLogDirectory(realm, processingStepUpdate.processingStep)
-        service.createAndGetLogDirectory(realm, processingStepUpdate.processingStep)
-        service.createAndGetLogDirectory(realm, processingStepUpdate.processingStep)
+        service.createAndGetLogDirectory(processingStepUpdate.processingStep)
+        service.createAndGetLogDirectory(processingStepUpdate.processingStep)
+        service.createAndGetLogDirectory(processingStepUpdate.processingStep)
 
         then:
         noExceptionThrown()
@@ -127,7 +123,7 @@ class ClusterJobLoggingServiceSpec extends Specification implements DataTest {
 
     void "test createAndGetLogDirectory, when processingStep is null throw exception"() {
         when:
-        service.createAndGetLogDirectory(realm, null)
+        service.createAndGetLogDirectory(null)
 
         then:
         AssertionError e = thrown()

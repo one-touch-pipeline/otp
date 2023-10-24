@@ -41,7 +41,7 @@ class FileAssertHelper {
 
     void assertPathIsReadable(final Path file) {
         assert file.absolute
-        assert fileService.fileIsReadable(file, configService.defaultRealm)
+        assert fileService.fileIsReadable(file)
     }
 
     void assertFileIsReadable(final Path file) {

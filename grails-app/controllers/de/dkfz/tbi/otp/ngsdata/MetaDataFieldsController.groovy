@@ -108,7 +108,7 @@ class MetaDataFieldsController implements CheckAndCall {
         String content = ""
         if (cmd.libraryPreparationKit) {
             try {
-                content = libraryPreparationKitService.getAdapterFileContentToRender(cmd.libraryPreparationKit, configService.defaultRealm)
+                content = libraryPreparationKitService.getAdapterFileContentToRender(cmd.libraryPreparationKit)
             } catch (AssertionError e) {
                 flash.message = new FlashMessage(g.message(code: "dataFields.adapterFile.error") as String, e.message)
                 redirect(action: "libraryPreparationKits")

@@ -46,7 +46,6 @@ class LibPrepKitAdapterValidatorSpec extends Specification implements DataTest {
                 Pipeline,
                 ProcessingOption,
                 Project,
-                Realm,
                 RoddyWorkflowConfig,
                 Sample,
                 SampleIdentifier,

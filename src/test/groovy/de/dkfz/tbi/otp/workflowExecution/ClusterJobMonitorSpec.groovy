@@ -30,7 +30,6 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class ClusterJobMonitorSpec extends Specification implements WorkflowSystemDomainFactory, DataTest {
@@ -41,7 +40,6 @@ class ClusterJobMonitorSpec extends Specification implements WorkflowSystemDomai
                 ClusterJob,
                 JobExecutionPlan,
                 ProcessingStep,
-                Realm,
         ]
     }
 

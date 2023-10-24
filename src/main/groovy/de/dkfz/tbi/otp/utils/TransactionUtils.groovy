@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.utils
 
-import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.project.Project
 
 @Deprecated
 class TransactionUtils {
@@ -31,6 +31,6 @@ class TransactionUtils {
      */
     @Deprecated
     static <T> T withNewTransaction(Closure<T> closure) {
-        return Realm.withNewTransaction(closure)
+        return Project.withNewTransaction(closure)
     }
 }

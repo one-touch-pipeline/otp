@@ -59,8 +59,7 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
         if (Files.exists(outputDir)) {
             logService.addSimpleLogEntry(workflowStep, "Deleting output directory ${outputDir}")
             fileService.deleteDirectoryRecursively(outputDir)
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDir, null,
-                    workflowStep.workflowRun.project.unixGroup,)
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDir, workflowStep.workflowRun.project.unixGroup,)
         }
 
         List<FastqcProcessedFile> fastqcProcessedFiles = getFastqcProcessedFiles(workflowStep)

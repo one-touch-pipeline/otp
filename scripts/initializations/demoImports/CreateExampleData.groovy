@@ -264,7 +264,6 @@ class ExampleData {
     FileType fileType
     LibraryPreparationKit libraryPreparationKit
     ProcessingPriority processingPriority
-    Realm realm
     SpeciesWithStrain speciesWithStrainHuman
     SpeciesWithStrain speciesWithStrainMouse
     ReferenceGenome referenceGenomeHuman
@@ -337,7 +336,6 @@ class ExampleData {
         processingPriority = findOrCreateProcessingPriority()
         fileType = findOrCreateFileType()
         libraryPreparationKit = findOrCreateLibraryPreparationKit()
-        realm = findOrCreateRealm()
         speciesWithStrainHuman = findOrCreateSpeciesWithStrainHuman()
         speciesWithStrainMouse = findOrCreateSpeciesWithStrainMouse()
         referenceGenomeHuman = findOrCreateReferenceGenome("1KGRef_PhiX", [speciesWithStrainHuman], [])
@@ -470,9 +468,9 @@ class ExampleData {
                     directPath,
                     directPathMd5sum,
             ].each {
-                fileService.createFileWithContent(it, it.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
+                fileService.createFileWithContent(it, it.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
             }
-            fileService.createLink(vbpPath, directPath, realm, CreateLinkOption.DELETE_EXISTING_FILE)
+            fileService.createLink(vbpPath, directPath, CreateLinkOption.DELETE_EXISTING_FILE)
         }
     }
 
@@ -485,7 +483,7 @@ class ExampleData {
                     fastqcPath,
                     fastqcMd5Path,
             ].each {
-                fileService.createFileWithContent(it, it.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
+                fileService.createFileWithContent(it, it.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
             }
         }
     }
@@ -497,7 +495,7 @@ class ExampleData {
                 Path target = lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile)
                 Path link = lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile, WellDirectory.ALL_WELL)
 
-                fileService.createLink(link, target, realm, CreateLinkOption.DELETE_EXISTING_FILE)
+                fileService.createLink(link, target, CreateLinkOption.DELETE_EXISTING_FILE)
 
                 singleCellMappingFileService.addMappingFileEntryIfMissing(rawSequenceFile)
             }
@@ -535,22 +533,22 @@ class ExampleData {
             }
 
             dirsMap.each { Path pathFinal, Path pathWork ->
-                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(pathWork, realm)
+                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(pathWork)
                 fileService.createLink(pathFinal, pathWork, CreateLinkOption.DELETE_EXISTING_FILE)
             }
 
             filesMap.each { Path pathFinal, Path pathWork ->
-                fileService.createFileWithContent(pathWork, pathWork.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
+                fileService.createFileWithContent(pathWork, pathWork.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
                 fileService.createLink(pathFinal, pathWork, CreateLinkOption.DELETE_EXISTING_FILE)
             }
             Path config = roddyConfigService.getConfigFile(workDir)
-            fileService.createFileWithContent(config, config.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
+            fileService.createFileWithContent(config, config.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
         }
     }
 
     void createRnaBamFilesOnFilesystem() {
         println "creating dummy rna bam files on file system"
-        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
 
         rnaRoddyBamFiles.each { RoddyBamFile bam ->
             Path baseDir = abstractBamFileService.getBaseDirectory(bam)
@@ -589,25 +587,25 @@ class ExampleData {
                 dirsMap[baseDir.resolve(it)] = workDir.resolve(it)
             }
 
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workDir, realm)
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workDir)
 
             dirsMap.each {
                 Path pathFinal = fileSystem.getPath(it.key.toString())
                 Path pathWork = fileSystem.getPath(it.value.toString())
-                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(pathWork, realm)
-                fileService.createLink(pathFinal, pathWork, realm, CreateLinkOption.DELETE_EXISTING_FILE)
+                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(pathWork)
+                fileService.createLink(pathFinal, pathWork, CreateLinkOption.DELETE_EXISTING_FILE)
             }
 
             filesMap.each {
                 Path pathFinal = fileSystem.getPath(it.key.toString())
                 Path pathWork = fileSystem.getPath(it.value.toString())
-                fileService.createFileWithContent(pathWork, pathWork.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
-                fileService.createLink(pathFinal, pathWork, realm, CreateLinkOption.DELETE_EXISTING_FILE)
+                fileService.createFileWithContent(pathWork, pathWork.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
+                fileService.createLink(pathFinal, pathWork, CreateLinkOption.DELETE_EXISTING_FILE)
             }
             Path plot = rnaRoddyBamFileService.getWorkArribaFusionPlotPdf(bam)
-            fileService.createFileWithContent(plot, plot.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
+            fileService.createFileWithContent(plot, plot.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
             Path config = roddyConfigService.getConfigFile(workDir)
-            fileService.createFileWithContent(config, config.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
+            fileService.createFileWithContent(config, config.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
         }
     }
 
@@ -620,7 +618,7 @@ class ExampleData {
                     snvCallingService.getSnvDeepAnnotationResult(snvCallingInstance),
                     snvCallingService.getCombinedPlotPath(snvCallingInstance),
             ].each {
-                fileService.createFileWithContent(it, it.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
+                fileService.createFileWithContent(it, it.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
             }
         }
     }
@@ -635,7 +633,7 @@ class ExampleData {
                     indelCallingService.getIndelQcJsonFile(indelCallingInstance),
                     indelCallingService.getSampleSwapJsonFile(indelCallingInstance),
             ].each {
-                fileService.createFileWithContent(it, it.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
+                fileService.createFileWithContent(it, it.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
             }
         }
     }
@@ -649,7 +647,7 @@ class ExampleData {
                     sophiaService.getFinalAceseqInputFile(sophiaInstance),
                     sophiaService.getQcJsonFile(sophiaInstance),
             ].each {
-                fileService.createFileWithContent(it, it.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
+                fileService.createFileWithContent(it, it.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
             }
         }
     }
@@ -680,7 +678,7 @@ class ExampleData {
                     base.resolve("${plotPrefixAceseqExtra}_3.png"),
                     base.resolve("${plotPrefixAceseqExtra}_5.png"),
             ].each {
-                fileService.createFileWithContent(it, it.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
+                fileService.createFileWithContent(it, it.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
             }
         }
     }
@@ -699,7 +697,7 @@ class ExampleData {
                     "snvs_${runYapsaInstance.individual.pid}_somatic_snvs_conf_8_to_10.vcfreportText.txt",
             ].each {
                 Path file = base.resolve(it)
-                fileService.createFileWithContent(file, file.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
+                fileService.createFileWithContent(file, file.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
             }
         }
     }
@@ -709,7 +707,7 @@ class ExampleData {
 
         singleCellBamFiles.each { SingleCellBamFile bam ->
             Path workdir = singleCellBamFileService.getWorkDirectory(bam)
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workdir, realm)
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workdir)
 
             Path resultsPath = singleCellBamFileService.getResultDirectory(bam)
 
@@ -718,17 +716,17 @@ class ExampleData {
                     singleCellBamFileService.getOutputDirectory(bam),
                     resultsPath,
             ].each {
-                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(it, realm)
+                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(it)
             }
 
             SingleCellBamFileService.CREATED_RESULT_DIRS.each {
                 Path path = resultsPath.resolve(it)
-                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path, realm)
+                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path)
             }
 
             SingleCellBamFileService.CREATED_RESULT_FILES.each {
                 Path path = resultsPath.resolve(it)
-                fileService.createFileWithContent(path, path.toString(), realm, FileService.DEFAULT_FILE_PERMISSION, true)
+                fileService.createFileWithContent(path, path.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
             }
 
             cellRangerWorkflowService.linkResultFiles(bam)
@@ -917,12 +915,6 @@ class ExampleData {
         ]).save(flush: false)
     }
 
-    Realm findOrCreateRealm() {
-        return Realm.last() ?: new Realm([
-                name: 'realm',
-        ]).save(flush: false)
-    }
-
     ReferenceGenome findOrCreateReferenceGenome(String name,
                                                 Collection<SpeciesWithStrain> speciesWithStrains,
                                                 Collection<Species> speciesCollection) {
@@ -1059,7 +1051,6 @@ class ExampleData {
                 name              : projectName,
                 dirName           : projectName,
                 individualPrefix  : "${projectName}_",
-                realm             : realm,
                 processingPriority: processingPriority,
                 projectType       : Project.ProjectType.SEQUENCING,
                 unixGroup         : "developer",
@@ -1513,7 +1504,7 @@ class ExampleData {
         if (createFilesOnFilesystem) {
             Path path = fileSystemService.remoteFileSystem.getPath(file)
             fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path.parent)
-            fileService.createFileWithContent(path, "someDummyContent", null, FileService.DEFAULT_FILE_PERMISSION, true)
+            fileService.createFileWithContent(path, "someDummyContent", FileService.DEFAULT_FILE_PERMISSION, true)
         }
         return new RoddyWorkflowConfig([
                 project              : mergingWorkPackage.project,

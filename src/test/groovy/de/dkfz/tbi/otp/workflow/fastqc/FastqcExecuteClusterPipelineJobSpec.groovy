@@ -141,7 +141,7 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
             _ * ensureFileIsReadableAndNotEmpty(_, _)
             _ * convertPermissionsToOctalString(_)
             callOfDelete * deleteDirectoryRecursively(_)
-            callOfDelete * createDirectoryRecursivelyAndSetPermissionsViaBash(_, _, _)
+            callOfDelete * createDirectoryRecursivelyAndSetPermissionsViaBash(_, _)
             0 * _
         }
         job.logService = Mock(LogService) {
@@ -164,7 +164,6 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
                 FastqcProcessedFile,
                 WorkflowArtefact,
                 WorkflowStep,
-                Realm,
                 ProcessingOption,
         ]
     }

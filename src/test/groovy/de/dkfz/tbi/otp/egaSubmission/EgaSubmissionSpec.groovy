@@ -49,7 +49,6 @@ class EgaSubmissionSpec extends Specification implements EgaSubmissionFactory, I
                 MergingWorkPackage,
                 Pipeline,
                 Project,
-                Realm,
                 ReferenceGenome,
                 ReferenceGenomeProjectSeqType,
                 RoddyBamFile,

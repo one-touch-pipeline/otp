@@ -30,7 +30,6 @@ import de.dkfz.tbi.otp.dataprocessing.DataProcessingFilesService.OutputDirectori
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.Individual
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.project.Project
 
 class DataProcessingFilesServiceSpec extends Specification implements DataTest, DomainFactoryCore {
@@ -40,7 +39,6 @@ class DataProcessingFilesServiceSpec extends Specification implements DataTest, 
         return [
                 Individual,
                 Project,
-                Realm,
         ]
     }
 

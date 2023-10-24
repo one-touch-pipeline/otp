@@ -49,7 +49,6 @@ class Md5sumUniqueValidatorSpec extends Specification implements DataTest {
                 Individual,
                 Pipeline,
                 Project,
-                Realm,
                 ReferenceGenome,
                 Run,
                 FastqImportInstance,

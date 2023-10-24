@@ -37,7 +37,6 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.otp.utils.ProcessOutput
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
@@ -57,7 +56,6 @@ class AbstractRoddyJobIntegrationSpec extends Specification {
 
     AbstractRoddyJob roddyJob
     RoddyBamFile roddyBamFile
-    Realm realm
 
     @Qualifier('TestConfigService')
     TestConfigService configService
@@ -67,8 +65,6 @@ class AbstractRoddyJobIntegrationSpec extends Specification {
 
     void setupData() {
         roddyBamFile = DomainFactory.createRoddyBamFile()
-
-        realm = roddyBamFile.project.realm
 
         outputNoClusterJobsSubmitted = new ProcessOutput(
                 stderr: "Creating the following execution directory to store information about this process:\n" +
@@ -80,7 +76,7 @@ class AbstractRoddyJobIntegrationSpec extends Specification {
 
         roddyJob = Spy(AbstractRoddyJob) {
             _ * getProcessParameterObject() >> roddyBamFile
-            _ * prepareAndReturnWorkflowSpecificCommand(_, _) >> "workflowSpecificCommand"
+            _ * prepareAndReturnWorkflowSpecificCommand(_) >> "workflowSpecificCommand"
             _ * getProcessingStep() >> DomainFactory.createAndSaveProcessingStep()
         }
 
@@ -252,16 +248,13 @@ newLine"""
         given:
         setupData()
 
-        Realm realm = DomainFactory.createRealm()
-        realm.save(flush: true)
-
         ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep()
         assert processingStep
 
-        ClusterJob clusterJob = clusterJobService.createClusterJob(realm, "0000", configService.sshUser, processingStep)
+        ClusterJob clusterJob = clusterJobService.createClusterJob("0000", configService.sshUser, processingStep)
         assert clusterJob
 
-        final ClusterJobIdentifier jobIdentifier = new ClusterJobIdentifier(realm, clusterJob.clusterJobId)
+        final ClusterJobIdentifier jobIdentifier = new ClusterJobIdentifier(clusterJob.clusterJobId)
 
         when:
         NextAction result = roddyJob.execute([jobIdentifier])

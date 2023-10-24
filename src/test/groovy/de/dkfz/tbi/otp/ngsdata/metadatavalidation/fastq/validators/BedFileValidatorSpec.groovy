@@ -54,7 +54,6 @@ class BedFileValidatorSpec extends Specification implements DataTest, DomainFact
                 SampleIdentifier,
                 SampleType,
                 SeqType,
-                Realm,
                 ReferenceGenome,
                 ReferenceGenomeProjectSeqType,
         ]

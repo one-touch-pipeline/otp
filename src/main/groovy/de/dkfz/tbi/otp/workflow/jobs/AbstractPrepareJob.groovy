@@ -61,13 +61,11 @@ abstract class AbstractPrepareJob extends AbstractJob {
             String group = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
             fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(
                     workFolder.parent,
-                    null,
                     group,
                     fileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING
             )
             fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(
                     workFolder,
-                    null,
                     group,
                     fileService.DEFAULT_DIRECTORY_PERMISSION_STRING
             )
@@ -79,7 +77,6 @@ abstract class AbstractPrepareJob extends AbstractJob {
                 logService.addSimpleLogEntry(workflowStep, "Creating work directory ${workDirectory}")
                 fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(
                         workDirectory,
-                        null,
                         workflowStep.workflowRun.project.unixGroup,
                 )
                 workflowStep.workflowRun.workDirectory = workDirectory

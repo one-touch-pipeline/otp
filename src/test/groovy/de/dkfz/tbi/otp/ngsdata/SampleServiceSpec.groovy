@@ -37,7 +37,6 @@ class SampleServiceSpec extends Specification implements DataTest, DomainFactory
         return [
                 Individual,
                 Project,
-                Realm,
                 Sample,
                 SampleType,
                 SeqType,

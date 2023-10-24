@@ -62,7 +62,6 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
                 ProcessingOption,
                 ProcessingPriority,
                 Project,
-                Realm,
                 ReferenceGenomeProjectSeqType,
                 RoddyBamFile,
                 RoddyWorkflowConfig,
@@ -101,7 +100,6 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
 
     RoddyExecutionService roddyExecutionService
     RoddyBamFile roddyBamFile
-    Realm realm
     TestConfigService configService
     int executeCommandCounter
     int validateCounter
@@ -117,7 +115,6 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
 
         roddyBamFile = createBamFile()
 
-        realm = roddyBamFile.project.realm
         configService = new TestConfigService()
 
         roddyExecutionService = new RoddyExecutionService()
@@ -427,7 +424,7 @@ newLine"""
 
     private void mockProcessOutput(String output, String error) {
         roddyExecutionService.remoteShellHelper = [
-                executeCommandReturnProcessOutput: { Realm realm, String cmd ->
+                executeCommandReturnProcessOutput: { String cmd ->
                     executeCommandCounter++
                     return new ProcessOutput(stdout: output, stderr: error, exitCode: 0)
                 }

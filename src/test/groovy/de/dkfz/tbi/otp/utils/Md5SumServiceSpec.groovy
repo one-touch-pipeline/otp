@@ -26,7 +26,6 @@ import spock.lang.Specification
 import spock.lang.TempDir
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 
@@ -42,7 +41,6 @@ class Md5SumServiceSpec extends Specification implements DataTest {
 
     void setup() {
         service = new Md5SumService()
-        service.configService = Mock(ConfigService)
         service.fileService = new FileService()
         service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }

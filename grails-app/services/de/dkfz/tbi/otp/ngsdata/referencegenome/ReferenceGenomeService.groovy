@@ -296,7 +296,7 @@ class ReferenceGenomeService {
             ].join("\t")
         }.join("\n")
 
-        fileService.createFileWithContentOnDefaultRealm(path, content)
+        fileService.createFileWithContent(path, content)
     }
 
     void checkReferenceGenomeFilesAvailability(AbstractMergingWorkPackage mergingWorkPackage) {

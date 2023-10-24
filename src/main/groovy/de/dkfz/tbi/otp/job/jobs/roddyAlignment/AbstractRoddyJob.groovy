@@ -30,7 +30,6 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.ProcessOutput
 
 import java.nio.file.FileSystem
@@ -59,17 +58,16 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
     @Override
     @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     protected final NextAction maybeSubmit() throws Throwable {
-        return Realm.withTransaction {
+        return ClusterJob.withTransaction {
             final RoddyResult roddyResult = refreshedProcessParameterObject
-            final Realm realm = roddyResult.project.realm
-            String cmd = prepareAndReturnWorkflowSpecificCommand(roddyResult, realm)
+            String cmd = prepareAndReturnWorkflowSpecificCommand(roddyResult)
 
             ProcessOutput output = roddyExecutionService.execute(cmd)
 
             Collection<ClusterJob> submittedClusterJobs = roddyExecutionService.createClusterJobObjects(roddyResult, output, null, processingStep)
 
             if (submittedClusterJobs) {
-                FileSystem fs = fileSystemService.getRemoteFileSystem(roddyResult.project.realm)
+                FileSystem fs = fileSystemService.remoteFileSystem
                 roddyExecutionService.saveRoddyExecutionStoreDirectory(roddyResult, output.stderr, fs)
                 submittedClusterJobs.each {
                     clusterJobSchedulerService.retrieveAndSaveJobInformationAfterJobStarted(it)
@@ -87,11 +85,11 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
         }
     }
 
-    protected abstract String prepareAndReturnWorkflowSpecificCommand(R roddyResult, Realm realm) throws Throwable
+    protected abstract String prepareAndReturnWorkflowSpecificCommand(R roddyResult) throws Throwable
 
     @Override
     protected void validate() throws Throwable {
-        Realm.withTransaction {
+        ClusterJob.withTransaction {
             final RoddyResult roddyResultObject = refreshedProcessParameterObject
             validate(roddyResultObject)
         }

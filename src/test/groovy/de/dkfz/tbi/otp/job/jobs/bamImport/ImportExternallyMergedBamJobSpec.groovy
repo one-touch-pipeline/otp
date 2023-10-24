@@ -27,7 +27,6 @@ import spock.lang.TempDir
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactory
@@ -66,7 +65,6 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
                 ProcessingStep,
                 ProcessParameter,
                 Project,
-                Realm,
                 ReferenceGenome,
                 Sample,
                 SampleType,
@@ -166,16 +164,16 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
             0 * executeJob(_, _)
         }
         importExternallyMergedBamJob.fileService = Mock(FileService) {
-            1 * createLink(target.resolve(epmbfWithMd5sum.bamFileName), source.resolve(epmbfWithMd5sum.bamFileName), _, _) >> {
-                Path linkPath, Path existingPath, Realm realm2, CreateLinkOption... options2 ->
+            1 * createLink(target.resolve(epmbfWithMd5sum.bamFileName), source.resolve(epmbfWithMd5sum.bamFileName), _) >> {
+                Path linkPath, Path existingPath, CreateLinkOption... options2 ->
                 CreateFileHelper.createSymbolicLinkFile(linkPath, existingPath)
             }
-            1 * createLink(target.resolve(epmbfWithMd5sum.baiFileName), source.resolve(epmbfWithMd5sum.baiFileName), _, _) >> {
-                Path linkPath, Path existingPath, Realm realm2, CreateLinkOption... options2 ->
+            1 * createLink(target.resolve(epmbfWithMd5sum.baiFileName), source.resolve(epmbfWithMd5sum.baiFileName), _) >> {
+                Path linkPath, Path existingPath, CreateLinkOption... options2 ->
                 CreateFileHelper.createSymbolicLinkFile(linkPath, existingPath)
             }
-            1 * createLink(target.resolve(SUB_DIRECTORY), source.resolve(SUB_DIRECTORY), _, _) >> {
-                Path linkPath, Path existingPath, Realm realm2, CreateLinkOption... options2 ->
+            1 * createLink(target.resolve(SUB_DIRECTORY), source.resolve(SUB_DIRECTORY), _) >> {
+                Path linkPath, Path existingPath, CreateLinkOption... options2 ->
                 CreateFileHelper.createSymbolicLinkFile(linkPath, existingPath)
             }
             0 * _
@@ -216,7 +214,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         createHelperObjects(importProcess)
         CreateFileHelper.createFile(epmbfWithMd5sum.bamFile)
         importExternallyMergedBamJob.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
-            1 * executeJob(_, _) >> { Realm realm, String command ->
+            1 * executeJob(_) >> { String command ->
                 assert command ==~ getScript("echo [0-9a-f]{32}  \\S+.bam > \\S+.bam.md5sum")
             }
         }
@@ -233,7 +231,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         createHelperObjects(importProcess)
         CreateFileHelper.createFile(epmbfWithoutMd5sum.bamFile)
         importExternallyMergedBamJob.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
-            1 * executeJob(_, _) >> { Realm realm, String command ->
+            1 * executeJob(_) >> { String command ->
                 assert command ==~ getScript("md5sum .* \\| sed -e 's#.*#.*#' > .*")
             }
         }
@@ -252,7 +250,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         CreateFileHelper.createFile(new File(epmbfWithoutMd5sum.importedFrom))
         CreateFileHelper.createFile(epmbfWithoutMd5sum.bamFile)
         importExternallyMergedBamJob.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
-            1 * executeJob(_, _) >> { Realm realm, String command ->
+            1 * executeJob(_) >> { String command ->
                 assert command ==~ getScript("md5sum .* \\| sed -e 's#.*#.*#' > .*")
             }
         }
@@ -329,7 +327,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         Files.createSymbolicLink(link.toPath(), targetOfLink.toPath())
 
         importExternallyMergedBamJob.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
-            1 * executeJob(_, _) >> { Realm realm, String command ->
+            1 * executeJob(_) >> { String command ->
                 LocalShellHelper.executeAndWait(command)
             }
         }
@@ -391,7 +389,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         Files.createSymbolicLink(link1.toPath(), targetOfLink1.toPath())
 
         importExternallyMergedBamJob.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
-            1 * executeJob(_, _) >> { Realm realm, String command ->
+            1 * executeJob(_) >> { String command ->
                 LocalShellHelper.executeAndWait(command)
             }
         }
@@ -578,7 +576,6 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
         importExternallyMergedBamJob.configService = configService
         importExternallyMergedBamJob.checksumFileService = new ChecksumFileService()
-        importExternallyMergedBamJob.checksumFileService.configService = Mock(ConfigService)
         importExternallyMergedBamJob.checksumFileService.fileService = new FileService()
         importExternallyMergedBamJob.checksumFileService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }

@@ -137,11 +137,6 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     protected Path additionalDataDirectory
 
     /**
-     * the realm used for the tests
-     */
-    protected Realm realm
-
-    /**
      * the priority used for the workflows
      */
     protected ProcessingPriority processingPriority
@@ -232,7 +227,6 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
             loadDefaultValuesScripts()
             createProcessingPriorityObject()
             initFastqImportInstance()
-            initRealm()
             initFileSystem()
             initBaseFolder()
             createUserAndRoles()
@@ -283,7 +277,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
             if (clusterJobs) {
                 log.debug("prepare to kill ${clusterJobs.size()} still running cluster jobs: ${clusterJobs*.clusterJobId}")
 
-                BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.getJobManager(realm)
+                BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.jobManager
                 List<BEJob> beJobs = clusterJobs.collect { ClusterJob clusterJob ->
                     BEJobID beJobId = new BEJobID(clusterJob.clusterJobId)
                     BEJob beJob = new BEJob(beJobId, jobManager)
@@ -311,7 +305,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         SessionUtils.withTransaction {
             logEntries << "Tree of the file structure"
             if (workingDirectory && Files.exists(workingDirectory)) {
-                logEntries << remoteShellHelper.executeCommandReturnProcessOutput(realm, "tree -augp ${workingDirectory}").assertExitCodeZero().stdout
+                logEntries << remoteShellHelper.executeCommandReturnProcessOutput("tree -augp ${workingDirectory}").assertExitCodeZero().stdout
             } else {
                 logEntries << "workflowResultDirectory doesn't exist yet"
             }
@@ -454,33 +448,6 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     }
 
     /**
-     * return existing realm instead of new
-     */
-    @Override
-    Realm createRealm() {
-        return realm
-    }
-
-    /**
-     * return existing realm instead of new
-     */
-    @Override
-    Realm createRealm(Map realmProperties) {
-        return realm
-    }
-
-    /**
-     * Setup realm correctly for the workflow test.
-     */
-    private void initRealm() {
-        log.debug("creating realm and set it to default")
-        realm = DomainFactoryCore.super.createRealm([
-                name                       : 'WorkflowTest',
-        ])
-        findOrCreateProcessingOption(name: OptionName.REALM_DEFAULT_VALUE, value: realm.name)
-    }
-
-    /**
      * Initialized file system depending properties.
      * That includes:
      * - {@link TestConfigService}
@@ -492,8 +459,6 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      *   - {@link #additionalDataDirectory}
      *
      * Also the {@link #workingDirectory} is created.
-     *
-     * It requires a valid realm {@link #initRealm()}.
      */
     private void initFileSystem() {
         log.debug("initializing fileSystem and depending options")
@@ -514,7 +479,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         referenceGenomeDirectory = workingDirectory.resolve("reference-genomes")
         additionalDataDirectory = workingDirectory.resolve('additional-data')
 
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workingDirectory, realm)
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workingDirectory)
 
         [
                 (OtpProperty.PATH_PROJECT_ROOT)    : "${workingDirectory}/projectPath",
@@ -543,7 +508,6 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      * It depends on the initialisation of:
      * - {@link #initFileSystem()}
      * - {@link #createProcessingPriorityObject()}
-     * - {@link #initRealm()}
      */
     private void initProcessingOption() {
         log.debug("creating processingOptions")
@@ -797,7 +761,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         log.debug("Checking file permissions")
         Files.walk(configService.rootPath.toPath()).each { Path path ->
             if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
-                assert fileService.getPermissionViaBash(path, realm, LinkOption.NOFOLLOW_LINKS) == fileService.DEFAULT_DIRECTORY_PERMISSION_STRING
+                assert fileService.getPermissionViaBash(path, LinkOption.NOFOLLOW_LINKS) == fileService.DEFAULT_DIRECTORY_PERMISSION_STRING
             }
             if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
                 Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(path, LinkOption.NOFOLLOW_LINKS)

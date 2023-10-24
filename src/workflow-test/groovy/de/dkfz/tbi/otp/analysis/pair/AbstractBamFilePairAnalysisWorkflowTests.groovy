@@ -146,7 +146,6 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
         seqType = bamFileTumor.seqType
         referenceGenome = bamFileControl.referenceGenome
 
-        project.realm = realm
         assert project.save(flush: true)
 
         individual.pid = PID
@@ -210,7 +209,7 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
                 (bamFileSet.diseaseBaiFile): diseaseBaiFile,
                 (bamFileSet.controlBamFile): controlBamFile,
                 (bamFileSet.controlBaiFile): controlBaiFile,
-        ], realm)
+        ])
 
         bamFileTumor.fileSize = bamFileSet.diseaseBamFile.size()
         assert bamFileTumor.save(flush: true)

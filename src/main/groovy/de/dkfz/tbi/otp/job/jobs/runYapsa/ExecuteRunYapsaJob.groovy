@@ -62,15 +62,14 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
     @Override
     protected final NextAction maybeSubmit() throws Throwable {
         final RunYapsaInstance runYapsaInstance = processParameterObject as RunYapsaInstance
-        final Realm realm = runYapsaInstance.project.realm
 
         fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(
                 runYapsaService.getWorkDirectory(runYapsaInstance),
-                realm, "", FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
+                "", FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
 
         String jobScript = createScript(runYapsaInstance)
 
-        clusterJobSchedulerService.executeJob(realm, jobScript)
+        clusterJobSchedulerService.executeJob(jobScript)
 
         return NextAction.WAIT_FOR_CLUSTER_JOBS
     }
@@ -117,11 +116,9 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
     @Override
     protected final void validate() throws Throwable {
         final RunYapsaInstance runYapsaInstance = processParameterObject as RunYapsaInstance
-        final Realm realm = runYapsaInstance.project.realm
 
         fileService.correctPathPermissionAndGroupRecursive(
                 runYapsaService.getWorkDirectory(runYapsaInstance),
-                realm,
                 runYapsaInstance.project.unixGroup,
         )
 

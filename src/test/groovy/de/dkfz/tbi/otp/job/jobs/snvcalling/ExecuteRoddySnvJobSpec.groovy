@@ -69,7 +69,6 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
                 ReferenceGenome,
                 ReferenceGenomeEntry,
                 ReferenceGenomeProjectSeqType,
-                Realm,
                 RoddyBamFile,
                 RoddySnvCallingInstance,
                 RoddyWorkflowConfig,
@@ -185,7 +184,7 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
         ExecuteRoddySnvJob job = new ExecuteRoddySnvJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_, _) >> { }
+                    1 * correctPermissionsAndGroups(_) >> { }
                 },
                 snvCallingService         : Spy(SnvCallingService) {
                     1 * validateInputBamFiles(_) >> { }
@@ -232,7 +231,7 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
         ExecuteRoddySnvJob job = new ExecuteRoddySnvJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_, _) >> {
+                    1 * correctPermissionsAndGroups(_) >> {
                         throw new AssertionError(md5sum)
                     }
                 },
@@ -264,7 +263,7 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
         ExecuteRoddySnvJob job = new ExecuteRoddySnvJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_, _) >> { }
+                    1 * correctPermissionsAndGroups(_) >> { }
                 },
         ])
 

@@ -212,9 +212,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
 
         sample = createSample([
                 individual: createIndividual([
-                        project: createProject([
-                                realm: realm,
-                        ]),
+                        project: createProject(),
                         pid    : PID,
                         species: human,
                 ]),

@@ -78,9 +78,9 @@ class LibraryPreparationKitService extends AbstractMetadataFieldsService<Library
         return fs.getPath(libraryPreparationKit.adapterFile)
     }
 
-    String getAdapterFileContentToRender(LibraryPreparationKit libraryPreparationKit, Realm realm) {
+    String getAdapterFileContentToRender(LibraryPreparationKit libraryPreparationKit) {
         Path path = getAdapterFileAsPath(libraryPreparationKit)
-        fileService.ensureFileIsReadable(path, realm)
+        fileService.ensureFileIsReadable(path)
         long size = Files.size(path)
         assert size <= 5242880L: "Adapter file is too large to be displayed in the GUI (${size} > 5MB)"
         return fileService.readFileToString(path, StandardCharsets.US_ASCII)

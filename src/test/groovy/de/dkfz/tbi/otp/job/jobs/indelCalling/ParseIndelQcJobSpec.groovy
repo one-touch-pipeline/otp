@@ -74,7 +74,6 @@ class ParseIndelQcJobSpec extends Specification implements DataTest {
                 ReferenceGenome,
                 ReferenceGenomeEntry,
                 ReferenceGenomeProjectSeqType,
-                Realm,
                 RoddyBamFile,
                 RoddyWorkflowConfig,
                 Run,
