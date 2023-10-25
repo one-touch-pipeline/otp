@@ -123,6 +123,8 @@ class JobService {
                 restartedFrom: stepToRestart,
                 workflowRun: run,
         ).save(flush: true)
+        run.state = WorkflowRun.State.RUNNING_OTP
+        run.save(flush: true)
         log.debug("create restarted job: ${restartedWorkflowStep.displayInfo()}")
     }
 
