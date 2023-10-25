@@ -235,7 +235,7 @@ List<SeqTrack> seqTracksPerMd5sum = selectByMd5Sum.split('\n')*.trim().findAll {
 }
 
 List<SampleType> sampleTypes = parseHelper(filterBySampleType, 'SampleTYpe') {
-    SampleType.findAllByNameIlike(it)
+    SampleType.findAllByName(it)
 }
 
 List<SeqType> seqTypes = filterBySeqTypeName.split('\n')*.trim().findAll {
@@ -264,7 +264,7 @@ List<SeqTrack> seqTrackPerMultiImport = multiColumnInput.split('\n')*.trim().fin
     assert valueSize in [5, 6]: "A multi input is defined by 5 or 6 columns"
     Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(values[0]),
             "Could not find one individual with name ${values[0]}")
-    SampleType sampleType = CollectionUtils.exactlyOneElement(SampleType.findAllByNameIlike(values[1]),
+    SampleType sampleType = CollectionUtils.exactlyOneElement(SampleType.findAllByName(values[1]),
             "Could not find one sampleType with name ${values[1]}")
 
     SequencingReadType libraryLayout = SequencingReadType.getByName(values[3])
