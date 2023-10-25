@@ -534,10 +534,12 @@
     "clientAuthenticatorType": "client-secret",
     "redirectUris": [
       "http://localhost:8080/login/oauth2/code/",
-      "http://localhost:8080/otp/login/oauth2/code/"
+      "http://localhost:8080/otp/login/oauth2/code/",
+      "http://localhost:4200/login"
     ],
     "webOrigins": [
-      "http://localhost:8080"
+      "http://localhost:8080",
+      "http://localhost:4200"
     ],
     "notBefore": 0,
     "bearerOnly": false,
