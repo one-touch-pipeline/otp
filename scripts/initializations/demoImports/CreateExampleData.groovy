@@ -20,6 +20,8 @@
  * SOFTWARE.
  */
 
+import groovy.transform.TupleConstructor
+
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.administration.*
@@ -46,9 +48,11 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.workflow.alignment.AlignmentWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationWorkflow
 import de.dkfz.tbi.otp.workflow.fastqc.WesFastQcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.util.TimeFormats
@@ -57,6 +61,7 @@ import java.nio.file.FileSystem
 import java.nio.file.Path
 import java.text.DecimalFormat
 import java.text.NumberFormat
+import java.time.LocalDateTime
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
@@ -64,30 +69,32 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
  * script to create example data.
  *
  * Its generates:
- * - fastq
- * - fastqc
+ * - fastq for all align-able seqTypes + two others
+ * - fastqc for all fastq
  * - bam files
- *   - PanCancer / Wgbs alignment: WGS PAIRED, WES PAIRED, WGBS PAIRED, WGBS_TAG PAIRED, Chip PAIRED
- *   - rna alignment: RNA PAIRED, RNA SINGLE
- *   - cell ranger: 10xSingleCellRnaSeqType PAIRED
- * - snv
- * - indel
- * - sophia
- * - aceseq
- * - runyapsa
+ *   - PanCancer alignment: WGS PAIRED, WES PAIRED, Chip PAIRED
+ *   - Wgbs alignment: WGBS PAIRED, WGBS_TAG PAIRED
+ *   - Rna alignment: RNA PAIRED, RNA SINGLE
+ *   - Cell ranger: 10xSingleCellRnaSeqType PAIRED
+ * - snv: WGS PAIRED, WES PAIRED
+ * - indel: WGS PAIRED, WES PAIRED
+ * - sophia: WGS PAIRED, WES PAIRED
+ * - aceseq: WGS PAIRED
+ * - runyapsa: WGS PAIRED, WES PAIRED
  *
- * It doesn't expect any existing data except the default SeqType's.
+ * It doesn't expect any existing data except the default SeqType's and workflows.
  *
  * The script can also generates dummy files for the objects. That is limited to the files OTP is aware of.
  * The real pipelines generates much more files.
  *
- * For file generation (on per default), the selected {@link ExampleData#realmName} needs to be valid for remote access.
+ * The script create the workflow artefacts of the new system for:
+ * - Fastq
+ * - Fastqc
+ * - PanCancer
+ * - WGBS Alignment
+ * - Rna Alignment
  *
- * The script do not create the workflow artefacts of the new system, therefore the following script in the given order needs to be executed:
- * - otp-592-create-new-workflows-from-seq-tracks.groovy
- * - otp-980-create-new-workflows-from-fastqc-processed-file.groovy
- * - otp-1137-create-new-workflows-from-roddy-alignments.groovy
- * - otp-1650-create-new-workflows-from-wgbs-alignments.groovy
+ * If more workflows are migrated, the corresponding script to create data needs to be executed.
  */
 class ExampleData {
 // ------------------------------
@@ -97,11 +104,6 @@ class ExampleData {
      * Name of the project for the example data. If it not exist, it is created.
      */
     String projectName = "ExampleProject"
-
-    /**
-     * Name of the realm to use. If it not exist, it is created in {@link #findOrCreateRealm()}.
-     */
-    String realmName = "dev_realm"
 
     /**
      * The count of patients to create
@@ -205,20 +207,20 @@ class ExampleData {
             "blood02",
     ]
 
+// ------------------------------
+// work
+
     /**
      * The raw sequence file types can be either FASTQ or CRAM.
      * Currently only WGS and WES seq types can have CRAM file.
      */
+    @TupleConstructor
     enum RawSequenceFileType {
-        FASTQ,
-        CRAM,
+        FASTQ('fastq.gz'),
+        CRAM('unaligned.cram')
 
-        static String getFileSuffix(RawSequenceFileType type) {
-            return type == FASTQ ? "fastq.gz" : "cram.gz"
-        }
+        final String type
     }
-// ------------------------------
-// work
 
     AbstractBamFileService abstractBamFileService
 
@@ -278,6 +280,14 @@ class ExampleData {
     IlseSubmission ilseSubmission
     User otpUser
 
+    final static Date FAST_QC_CREATE_DATE = LocalDateTime.of(2000,01,01,0,0,0).toDate()
+
+    Workflow workflowDataInstallation
+    Workflow workflowWesFastqc
+    Workflow workflowPanCancer
+    Workflow workflowWgbsAlignment
+    Workflow workflowRnaAlignment
+
     int commentCounter = Comment.count()
     int individualCounter = Individual.count()
     int rawSequenceFileCounter = RawSequenceFile.count()
@@ -299,6 +309,11 @@ class ExampleData {
     List<FastqcProcessedFile> fastqcProcessedFiles = []
 
     List<SeqType> analyseAbleSeqType = []
+    List<SeqType> snvSeqTypes =[]
+    List<SeqType> indelSeqTypes =[]
+    List<SeqType> sophiaSeqTypes =[]
+    List<SeqType> aceseqSeqTypes =[]
+    List<SeqType> runYapsaSeqTypes =[]
 
     void init() {
         diseaseSampleTypes = diseaseSampleTypeNames.collectEntries {
@@ -311,6 +326,11 @@ class ExampleData {
             findOrCreateSampleType(it)
         }
 
+        snvSeqTypes = SeqTypeService.snvPipelineSeqTypes
+        indelSeqTypes = SeqTypeService.indelPipelineSeqTypes
+        sophiaSeqTypes = SeqTypeService.sophiaPipelineSeqTypes
+        aceseqSeqTypes = SeqTypeService.aceseqPipelineSeqTypes
+        runYapsaSeqTypes = SeqTypeService.runYapsaPipelineSeqTypes
         analyseAbleSeqType = SeqTypeService.allAnalysableSeqTypes
 
         otpUser = User.findByUsername("otp")
@@ -330,6 +350,12 @@ class ExampleData {
         seqPlatformGroup = findOrCreateSeqPlatformGroup()
         softwareTool = findOrCreateSoftwareTool()
         antibodyTarget = findOrCreateAntibodyTarget()
+
+        workflowDataInstallation = findWorkflow(DataInstallationWorkflow.WORKFLOW)
+        workflowWesFastqc = findWorkflow(WesFastQcWorkflow.WORKFLOW)
+        workflowPanCancer = findWorkflow(PanCancerWorkflow.WORKFLOW)
+        workflowWgbsAlignment = findWorkflow(WgbsWorkflow.WORKFLOW)
+        workflowRnaAlignment = findWorkflow(RnaAlignmentWorkflow.WORKFLOW)
 
         ilseSubmission = createIlseSubmission()
         fastqImportInstance = createFastqImportInstance()
@@ -892,8 +918,8 @@ class ExampleData {
     }
 
     Realm findOrCreateRealm() {
-        return CollectionUtils.atMostOneElement(Realm.findAllByName(realmName)) ?: new Realm([
-                name: realmName,
+        return Realm.last() ?: new Realm([
+                name: 'realm',
         ]).save(flush: false)
     }
 
@@ -996,6 +1022,10 @@ class ExampleData {
         ]).save(flush: true)
     }
 
+    Workflow findWorkflow(String name) {
+        return CollectionUtils.exactlyOneElement(Workflow.findAllByName(name))
+    }
+
     IlseSubmission createIlseSubmission() {
         return new IlseSubmission([
                 ilseNumber: 10000 + IlseSubmission.count()
@@ -1040,7 +1070,7 @@ class ExampleData {
     Individual createIndividual(Project project) {
         return new Individual([
                 project: project,
-                pid    : "${projectName}_${individualCounter++}",
+                pid    : "${projectName}_pid_${individualCounter++}",
                 type   : Individual.Type.REAL,
                 species: speciesWithStrainHuman,
         ]).save(flush: false)
@@ -1048,7 +1078,7 @@ class ExampleData {
 
     void createSampleWithSeqTracks(Sample sample) {
         otherSeqTypes.collect { SeqType seqType ->
-            println "    - for: ${seqType}"
+            println "    - seqTracks for: ${seqType}"
             (1..lanesPerSampleAndSeqType).each {
                 createSeqTrack(sample, seqType)
             }
@@ -1060,7 +1090,7 @@ class ExampleData {
                 panCanSeqTypes,
                 wgbsAlignmentSeqTypes,
         ].flatten().collect { SeqType seqType ->
-            println "    - for: ${seqType}"
+            println "    - seqTracks for: ${seqType}"
             List<SeqTrack> seqTracks = (1..lanesPerSampleAndSeqType).collect {
                 SeqTrack seqTrack = createSeqTrack(sample, seqType)
                 println "      - seqtrack: ${seqTrack}"
@@ -1076,7 +1106,7 @@ class ExampleData {
 
     List<AbstractBamFile> createSampleWithSeqTracksAndRnaBamFile(Sample sample) {
         return rnaSeqTypes.collect { SeqType seqType ->
-            println "    - for: ${seqType}"
+            println "    - seqTracks for: ${seqType}"
             List<SeqTrack> seqTracks = (1..lanesPerSampleAndSeqType).collect {
                 SeqTrack seqTrack = createSeqTrack(sample, seqType)
                 println "      - seqtrack: ${seqTrack}"
@@ -1093,7 +1123,7 @@ class ExampleData {
     List<AbstractBamFile> createSingleCellSampleWithSeqTracksAndBamFile(Sample sample, List<SeqType> seqTypes,
                                                                         boolean createWellLabel = false) {
         return seqTypes.collect { SeqType seqType ->
-            println "    - for: ${seqType}"
+            println "    - seqTracks for: ${seqType}"
             List<SeqTrack> seqTracks = (1..lanesPerSampleAndSeqType).collect {
                 SeqTrack seqTrack = createSeqTrack(sample, seqType, createWellLabel)
                 println "      - seqtrack: ${seqTrack}"
@@ -1134,6 +1164,20 @@ class ExampleData {
 
     SeqTrack createSeqTrack(Sample sample, SeqType seqType, createWellLabel = false) {
         int count = seqTrackCounter++
+        String name = "${sample} ${seqType.displayNameWithLibraryLayout} ${count}"
+
+        WorkflowRun workflowRun = createWorkflowRun(
+                "/tmp/seqtrack",
+                workflowDataInstallation,
+                name,
+        ).save(flush: false)
+
+        WorkflowArtefact workflowArtefact = createWorkflowArtefact(
+                workflowRun,
+                DataInstallationWorkflow.OUTPUT_FASTQ,
+                name
+        ).save(flush: false)
+
         SeqTrack seqTrack = new SeqTrack([
                 sample               : sample,
                 seqType              : seqType,
@@ -1147,17 +1191,27 @@ class ExampleData {
                 libraryPreparationKit: libraryPreparationKit,
                 kitInfoReliability   : InformationReliability.KNOWN,
                 ilseSubmission       : ilseSubmission,
-                antibodyTarget       : seqType.hasAntibodyTarget ? antibodyTarget : null
+                antibodyTarget       : seqType.hasAntibodyTarget ? antibodyTarget : null,
+                nBasePairs           : 1000000000,
+                workflowArtefact     : workflowArtefact,
         ]).save(flush: false)
+
+        WorkflowRun workflowRunFastqc = createWorkflowRun(
+                "/tmp/fastqc",
+                workflowWesFastqc,
+                name,
+        ).save(flush: false)
+
+        createWorkflowRunInputArtefact(workflowRunFastqc, workflowArtefact, WesFastQcWorkflow.INPUT_FASTQ)
 
         // Currently CRAM files are available only for WGS and WES
         if (usingCram && (seqType.wgs || seqType.exome)) {
             (1..seqType.libraryLayout.mateCount).each {
-                createCramFile(seqTrack, it)
+                createCramFile(seqTrack, it, workflowRunFastqc)
             }
         } else {
             (1..seqType.libraryLayout.mateCount).each {
-                createFastqFile(seqTrack, it)
+                createFastqFile(seqTrack, it, workflowRunFastqc)
             }
         }
 
@@ -1175,8 +1229,8 @@ class ExampleData {
     }
 
     // Create either a fastq or cram file depending on its RawSequenceFileType
-    RawSequenceFile createRawSeqFile(SeqTrack seqTrack, int mateNumber, RawSequenceFileType rawSequenceFileType) {
-        String fileName = "file_${rawSequenceFileCounter++}_L${seqTrack.laneId}_R${mateNumber}.${RawSequenceFileType.getFileSuffix(rawSequenceFileType)}"
+    RawSequenceFile createRawSeqFile(SeqTrack seqTrack, int mateNumber, RawSequenceFileType rawSequenceFileType, WorkflowRun workflowRunFastqc) {
+        String fileName = "file_${rawSequenceFileCounter++}_L${seqTrack.laneId}_R${mateNumber}.${rawSequenceFileType.type}"
         Map parameters = [
                 seqTrack           : seqTrack,
                 mateNumber         : mateNumber,
@@ -1203,23 +1257,34 @@ class ExampleData {
         rawSequenceFile.save(flush: false)
 
         rawSequenceFiles << rawSequenceFile
-        createFastqcProcessedFiles(rawSequenceFile)
+        createFastqcProcessedFiles(rawSequenceFile, workflowRunFastqc)
 
         return rawSequenceFile
     }
 
-    RawSequenceFile createFastqFile(SeqTrack seqTrack, int mateNumber) {
-        return createRawSeqFile(seqTrack, mateNumber, RawSequenceFileType.FASTQ)
+    RawSequenceFile createFastqFile(SeqTrack seqTrack, int mateNumber, WorkflowRun workflowRunFastqc) {
+        return createRawSeqFile(seqTrack, mateNumber, RawSequenceFileType.FASTQ, workflowRunFastqc)
     }
 
-    RawSequenceFile createCramFile(SeqTrack seqTrack, int mateNumber) {
-        return createRawSeqFile(seqTrack, mateNumber, RawSequenceFileType.CRAM)
+    RawSequenceFile createCramFile(SeqTrack seqTrack, int mateNumber, WorkflowRun workflowRunFastqc) {
+        return createRawSeqFile(seqTrack, mateNumber, RawSequenceFileType.CRAM, workflowRunFastqc)
     }
 
-    FastqcProcessedFile createFastqcProcessedFiles(RawSequenceFile rawSequenceFile) {
+    FastqcProcessedFile createFastqcProcessedFiles(RawSequenceFile rawSequenceFile, WorkflowRun workflowRunFastqc) {
+        WorkflowArtefact workflowArtefact = createWorkflowArtefact(
+                workflowRunFastqc,
+                WesFastQcWorkflow.OUTPUT_FASTQC,
+                "${workflowRunFastqc.displayName} ${rawSequenceFile.fileName}"
+        ).save(flush: false)
+
         FastqcProcessedFile fastqcProcessedFile = new FastqcProcessedFile([
                 sequenceFile     : rawSequenceFile,
-                workDirectoryName: "bash-unknown-version-2000-01-01-00-00-00"
+                workDirectoryName: "wes-1.1.0-2000-01-01-00-00-00",
+                workflowArtefact : workflowArtefact,
+                contentUploaded:true,
+                fileExists:true,
+                fileSize: 100,
+                dateFromFileSystem: FAST_QC_CREATE_DATE,
         ]).save(flush: false)
 
         fastqcProcessedFiles << fastqcProcessedFile
@@ -1315,8 +1380,31 @@ class ExampleData {
         return singleCellBamFile
     }
 
+    WorkflowArtefact createRoddyWorkflowArtefactWithDependencies(MergingWorkPackage mergingWorkPackage) {
+        String name = "${mergingWorkPackage.sample} ${mergingWorkPackage.seqType} ${mergingWorkPackage.antibodyTarget ?: ''} ${mergingWorkPackage.libraryPreparationKit ?: ''} ${mergingWorkPackage.referenceGenome}"
+
+        WorkflowRun workflowRun = createWorkflowRun(
+                "/tmp/roddy",
+                workflowPanCancer,
+                name,
+        ).save(flush: false)
+
+        mergingWorkPackage.seqTracks.each {
+            createWorkflowRunInputArtefact(workflowRun, it.workflowArtefact, "${AlignmentWorkflow.INPUT_FASTQ} ${it.id}")
+        }
+
+        return createWorkflowArtefact(
+                workflowRun,
+                AlignmentWorkflow.OUTPUT_BAM,
+                name
+        ).save(flush: false)
+    }
+
     RoddyBamFile createRoddyBamFile(MergingWorkPackage mergingWorkPackage) {
         RoddyWorkflowConfig config = findOrCreateRoddyWorkflowConfig(mergingWorkPackage)
+
+        WorkflowArtefact workflowArtefact = createRoddyWorkflowArtefactWithDependencies(mergingWorkPackage)
+
         RoddyBamFile roddyBamFile = new RoddyBamFile([
                 workPackage            : mergingWorkPackage,
                 seqTracks              : mergingWorkPackage.seqTracks.collect() as Set,
@@ -1333,6 +1421,7 @@ class ExampleData {
                 qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
                 qcTrafficLightStatus   : AbstractBamFile.QcTrafficLightStatus.QC_PASSED,
                 comment                : createComment(),
+                workflowArtefact       : workflowArtefact,
         ]).save(flush: false)
 
         mergingWorkPackage.bamFileInProjectFolder = roddyBamFile
@@ -1353,6 +1442,9 @@ class ExampleData {
 
     RnaRoddyBamFile createRnaRoddyBamFile(MergingWorkPackage mergingWorkPackage) {
         RoddyWorkflowConfig config = findOrCreateRoddyWorkflowConfig(mergingWorkPackage)
+
+        WorkflowArtefact workflowArtefact = createRoddyWorkflowArtefactWithDependencies(mergingWorkPackage)
+
         RoddyBamFile roddyBamFile = new RnaRoddyBamFile([
                 workPackage            : mergingWorkPackage,
                 seqTracks              : mergingWorkPackage.seqTracks.collect() as Set,
@@ -1369,6 +1461,7 @@ class ExampleData {
                 qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
                 qcTrafficLightStatus   : AbstractBamFile.QcTrafficLightStatus.QC_PASSED,
                 comment                : createComment(),
+                workflowArtefact       : workflowArtefact,
         ]).save(flush: false)
 
         mergingWorkPackage.bamFileInProjectFolder = roddyBamFile
@@ -1587,6 +1680,9 @@ class ExampleData {
     }
 
     RoddySnvCallingInstance createRoddySnvCallingInstance(SamplePair samplePair) {
+        if (!snvSeqTypes.contains(samplePair.seqType)) {
+            return null
+        }
         RoddyWorkflowConfig config = getOrCreateConfig(samplePair, Pipeline.Name.RODDY_SNV)
         String instanceName = "results_${config.programVersion.replaceAll(":", "-")}_${config.configVersion}_${TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date())}"
         BamFilePairAnalysis analysis = new RoddySnvCallingInstance([
@@ -1603,6 +1699,9 @@ class ExampleData {
     }
 
     IndelCallingInstance createIndelCallingInstance(SamplePair samplePair) {
+        if (!indelSeqTypes.contains(samplePair.seqType)) {
+            return null
+        }
         RoddyWorkflowConfig config = getOrCreateConfig(samplePair, Pipeline.Name.RODDY_INDEL)
         String instanceName = "results_${config.programVersion.replaceAll(":", "-")}_${config.configVersion}_${TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date())}"
         BamFilePairAnalysis analysis = new IndelCallingInstance([
@@ -1675,6 +1774,9 @@ class ExampleData {
     }
 
     SophiaInstance createSophiaInstance(SamplePair samplePair) {
+        if (!sophiaSeqTypes.contains(samplePair.seqType)) {
+            return null
+        }
         RoddyWorkflowConfig config = getOrCreateConfig(samplePair, Pipeline.Name.RODDY_SOPHIA)
         String instanceName = "results_${config.programVersion.replaceAll(":", "-")}_${config.configVersion}_${TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date())}"
         BamFilePairAnalysis analysis = new SophiaInstance([
@@ -1701,6 +1803,9 @@ class ExampleData {
     }
 
     AceseqInstance createAceseqInstance(SamplePair samplePair) {
+        if (!aceseqSeqTypes.contains(samplePair.seqType)) {
+            return null
+        }
         RoddyWorkflowConfig config = getOrCreateConfig(samplePair, Pipeline.Name.RODDY_ACESEQ)
         String instanceName = "results_${config.programVersion.replaceAll(":", "-")}_${config.configVersion}_${TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date())}"
         BamFilePairAnalysis analysis = new AceseqInstance([
@@ -1729,6 +1834,9 @@ class ExampleData {
     }
 
     RunYapsaInstance createRunYapsaInstance(SamplePair samplePair) {
+        if (!runYapsaSeqTypes.contains(samplePair.seqType)) {
+            return null
+        }
         RunYapsaConfig config = getOrCreateRunYapsaConfig(samplePair, Pipeline.Name.RUN_YAPSA)
 
         String instanceName = "runYapsa_${config.programVersion.replaceAll("/", "-")}_${TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date())}"
@@ -1779,6 +1887,38 @@ class ExampleData {
                 pipeline      : pipeline,
                 programVersion: 'yapsa-devel/b765fa8',
                 previousConfig: null,
+        ]).save(flush: true)
+    }
+
+    WorkflowRun createWorkflowRun(String workDirectory, Workflow workflow, String name) {
+        return new WorkflowRun([
+                workDirectory   : workDirectory,
+                state           : WorkflowRun.State.SUCCESS,
+                project         : project,
+                combinedConfig  : '{}',
+                priority        : processingPriority,
+                workflowSteps   : [],
+                workflow        : workflow,
+                displayName     : name,
+                shortDisplayName: name,
+        ]).save(flush: false)
+    }
+
+    WorkflowArtefact createWorkflowArtefact(WorkflowRun workflowRun, String outputRole, String name) {
+        return new WorkflowArtefact([
+                producedBy  : workflowRun,
+                state       : WorkflowArtefact.State.SUCCESS,
+                outputRole  : outputRole,
+                artefactType: ArtefactType.FASTQ,
+                displayName : name,
+        ]).save(flush: true)
+    }
+
+    WorkflowRunInputArtefact createWorkflowRunInputArtefact(WorkflowRun workflowRun, WorkflowArtefact workflowArtefact, String role) {
+        return new WorkflowRunInputArtefact([
+                workflowRun     : workflowRun,
+                workflowArtefact: workflowArtefact,
+                role            : role,
         ]).save(flush: true)
     }
 }
