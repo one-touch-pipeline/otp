@@ -57,6 +57,7 @@ class LaneSwapServiceHibernateSpec extends HibernateSpec implements ServiceUnitT
     void "cleanupLeftOvers, when Sample has still connected #title it should do nothing"() {
         given:
         service.fileService = Mock(FileService)
+        service.sampleService = Mock(SampleService)
 
         final Individual individual = createIndividual()
         final Sample sample = createSample(individual: individual)
@@ -87,6 +88,9 @@ class LaneSwapServiceHibernateSpec extends HibernateSpec implements ServiceUnitT
         seqTrackRemain && SeqTrack.count || !SeqTrack.count
         bamRemain && ExternallyProcessedBamFile.count || !ExternallyProcessedBamFile.count
 
+        and:
+        1 * service.sampleService.getSamplesByIndividual(individual) >> [sample]
+
         where:
         bamRemain | seqTrackRemain | title
         true      | false          | "ExternallyProcessedBamFiles"
@@ -97,6 +101,7 @@ class LaneSwapServiceHibernateSpec extends HibernateSpec implements ServiceUnitT
     void "cleanupLeftOvers, when Sample has no connected SeqTracks or ExternallyProcessedBamFiles it should delete sample"() {
         given:
         service.fileService = Mock(FileService)
+        service.sampleService = Mock(SampleService)
 
         final Individual individual = createIndividual()
         final Sample sample = createSample(individual: individual)
@@ -122,11 +127,15 @@ class LaneSwapServiceHibernateSpec extends HibernateSpec implements ServiceUnitT
         bashScriptSnippet.contains("################ cleanup empty sample and pid directories ################")
         bashScriptSnippet.contains("rm -rf ${sampleDir}")
         !bashScriptSnippet.contains("rm -rf ${vbpPath}\n")
+
+        and:
+        1 * service.sampleService.getSamplesByIndividual(individual) >> [sample]
     }
 
     void "cleanupLeftOvers, when Sample has no connected SeqTracks or ExternallyProcessedBamFiles and Individual has no more samples it should delete sample and individual"() {
         given:
         service.fileService = Mock(FileService)
+        service.sampleService = Mock(SampleService)
 
         final Individual individual = createIndividual()
         final Sample sample = createSample(individual: individual)
@@ -151,5 +160,8 @@ class LaneSwapServiceHibernateSpec extends HibernateSpec implements ServiceUnitT
         bashScriptSnippet.contains("################ cleanup empty sample and pid directories ################")
         bashScriptSnippet.contains("rm -rf ${sampleDir}")
         bashScriptSnippet.contains("rm -rf ${vbpPath}")
+
+        and:
+        1 * service.sampleService.getSamplesByIndividual(individual) >> []
     }
 }

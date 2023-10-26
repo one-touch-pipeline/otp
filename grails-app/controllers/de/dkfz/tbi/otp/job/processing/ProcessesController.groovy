@@ -30,7 +30,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.FlashMessage
-import de.dkfz.tbi.otp.infrastructure.ClusterJobService
+import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.jobs.RestartableStartJob
 import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
@@ -100,6 +100,7 @@ class ProcessesController {
     CommentService commentService
     RestartActionService restartActionService
     ClusterJobService clusterJobService
+    ClusterJobDetailService clusterJobDetailService
     ProcessParameterService processParameterService
 
     def index() {
@@ -373,7 +374,12 @@ class ProcessesController {
         return [
                 step       : step,
                 hasLog     : processService.processingStepLogExists(step),
-                clusterJobs: clusterJobService.findAllByProcessingStep(step).sort { it.clusterJobId },
+                clusterJobsWrapper: clusterJobService.findAllByProcessingStep(step).sort { it.clusterJobId }.collect { ClusterJob clusterJob ->
+                    return [
+                            job                    : clusterJob,
+                            elapsedWalltimeAsHhMmSs: clusterJobDetailService.getElapsedWalltimeAsHhMmSs(clusterJob)
+                    ]
+                },
         ]
     }
 

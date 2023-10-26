@@ -238,7 +238,15 @@ class SeqTrackService {
                 eq("sampleType", sampleType)
             }
             eq("seqType", seqType)
-        }
+        } as List<SeqTrack>
+    }
+
+    List<SeqTrack> getSeqTracksByIndividual(Individual individual) {
+        return SeqTrack.createCriteria().list {
+            sample {
+                eq("individual", individual)
+            }
+        } as List<SeqTrack>
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -342,7 +350,7 @@ class SeqTrackService {
      * @param inputSeqTracks the SeqTracks to transform
      * @return the transformed Map
      */
-    static Map<SeqType, Map<SampleType, SeqTrackSet>> getSeqTrackSetsGroupedBySeqTypeAndSampleType(List<SeqTrack> inputSeqTracks) {
+    Map<SeqType, Map<SampleType, SeqTrackSet>> groupSeqTracksBySeqTypeAndSampleType(List<SeqTrack> inputSeqTracks) {
         Map<SeqType, Map<SampleType, SeqTrackSet>> fullyGroupedAsSets = [:]
         inputSeqTracks.groupBy({ it.seqType }, { it.sampleType }).collectEntries(fullyGroupedAsSets) { SeqType seqType,
                                                                                                        Map<SampleType, List<SeqTrack>> seqTracksPerSampleType ->

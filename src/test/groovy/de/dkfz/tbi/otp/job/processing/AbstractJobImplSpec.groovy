@@ -26,6 +26,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.infrastructure.ClusterJobService
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
@@ -94,6 +95,7 @@ class AbstractJobImplSpec extends Specification implements DataTest {
         }
         abstractJobImpl.jobStatusLoggingService = new JobStatusLoggingService()
         abstractJobImpl.jobStatusLoggingService.configService = configService
+        abstractJobImpl.clusterJobService = new ClusterJobService()
 
         ClusterJob clusterJobSend = DomainFactory.createClusterJob(processingStep: processingStepHierarchy.send)
 

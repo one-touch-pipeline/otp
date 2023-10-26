@@ -55,6 +55,7 @@ class SpeciesValidatorSpec extends Specification implements DataTest, DomainFact
         validator.speciesWithStrainService = new SpeciesWithStrainService()
         validator.sampleIdentifierService = new SampleIdentifierService()
         validator.validatorHelperService = new ValidatorHelperService()
+        validator.sampleService = new SampleService()
 
         Strain strain = createStrain(name: "No strain available")
         SpeciesWithStrain human = createSpeciesWithStrain(importAlias: ["human"] as Set,
@@ -155,6 +156,7 @@ unknownSampleName\tMOUSE\t
         validator.speciesWithStrainService = new SpeciesWithStrainService()
         validator.sampleIdentifierService = new SampleIdentifierService()
         validator.validatorHelperService = new ValidatorHelperService()
+        validator.sampleService = new SampleService()
 
         Strain strain = createStrain(name: "No strain available")
         SpeciesWithStrain human = createSpeciesWithStrain(importAlias: ["human"] as Set,

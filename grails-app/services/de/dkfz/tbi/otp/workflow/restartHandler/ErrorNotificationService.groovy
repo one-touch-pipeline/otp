@@ -26,6 +26,7 @@ import grails.web.mapping.LinkGenerator
 import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.infrastructure.ClusterJobDetailService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.tracking.TicketService
@@ -51,6 +52,8 @@ class ErrorNotificationService {
     LinkGenerator grailsLinkGenerator
 
     WorkflowStepService workflowStepService
+
+    ClusterJobDetailService clusterJobDetailService
 
     void sendMaintainer(WorkflowStep workflowStep, Throwable exceptionInJob, Throwable exceptionInExceptionHandling) {
         String subject = [
@@ -229,7 +232,7 @@ class ErrorNotificationService {
                 message << "Eligible time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime) clusterJob.eligible)}"
                 message << "Start time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime) clusterJob.started)}"
                 message << "End time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime) clusterJob.ended)}"
-                message << "Running hours: ${clusterJob.started && clusterJob.ended ? clusterJob.elapsedWalltime.toHours() : 'na'}"
+                message << "Running hours: ${clusterJob.started && clusterJob.ended ? clusterJobDetailService.calculateElapsedWalltime(job).toHours() : 'na'}"
                 message << "Requested walltime: ${clusterJob.requestedWalltime}"
                 message << "Log file: ${clusterJob.jobLog}"
                 message << "Log page: ${grailsLinkGenerator.link(controller: 'clusterJobDetail', action: 'show', id: clusterJob.id, absolute: 'true')}"

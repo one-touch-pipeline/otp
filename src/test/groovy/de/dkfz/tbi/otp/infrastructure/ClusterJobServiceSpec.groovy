@@ -25,7 +25,11 @@ import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.job.processing.ProcessingStep
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.utils.HelperUtils
 
 import java.time.LocalDate
 import java.time.ZoneId
@@ -41,6 +45,9 @@ class ClusterJobServiceSpec extends Specification implements DataTest, ServiceUn
     Class<?>[] getDomainClassesToMock() {
         return [
                 Realm,
+                JobExecutionPlan,
+                ProcessingStep,
+                ClusterJob,
         ]
     }
 
@@ -61,5 +68,21 @@ class ClusterJobServiceSpec extends Specification implements DataTest, ServiceUn
         expect:
         (1..10).collect { (it * 100.0) as String } == labels.first()
         (1..10).collect { (it * 100.0) as Double } == labels.last()
+    }
+
+    void test_getClusterJobByIdentifier() {
+        given:
+        ClusterJob clusterJob = DomainFactory.createClusterJob()
+        Realm realm = DomainFactory.createRealm()
+        ClusterJobIdentifier identifier = new ClusterJobIdentifier(realm, clusterJob.clusterJobId)
+        DomainFactory.createClusterJob(
+                clusterJobId: HelperUtils.uniqueString,
+        )
+        DomainFactory.createClusterJob(
+                clusterJobId: identifier.clusterJobId,
+        )
+
+        expect:
+        clusterJobService.getClusterJobByIdentifier(identifier, clusterJob.processingStep) == clusterJob
     }
 }

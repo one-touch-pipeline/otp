@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2019 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,37 +19,57 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.infrastructure
+package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.gorm.DataTest
+import spock.lang.Shared
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.project.Project
 
-class ClusterJobSpec extends Specification implements DataTest {
+class SampleServiceSpec extends Specification implements DataTest, DomainFactoryCore {
+    @Shared
+    SampleService sampleService
 
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                ClusterJob,
+                Individual,
+                Project,
+                Realm,
+                Sample,
+                SampleType,
+                SeqType,
         ]
     }
 
-    void "test findByClusterJobIdentifier"() {
+    void setupSpec() {
+        sampleService = new SampleService()
+    }
+
+    void "test getSamples, with one sample"() {
         given:
-        ClusterJob clusterJob = DomainFactory.createClusterJob()
-        Realm realm = DomainFactory.createRealm()
-        ClusterJobIdentifier identifier = new ClusterJobIdentifier(realm, clusterJob.clusterJobId)
-        DomainFactory.createClusterJob(
-                clusterJobId: HelperUtils.uniqueString,
+        Individual individual = createIndividual()
+
+        Sample sample1 = new Sample(
+                individual: individual,
+                sampleType: createSampleType(name: "name1")
         )
-        DomainFactory.createClusterJob(
-                clusterJobId: identifier.clusterJobId,
-        )
+        assert sample1.save(flush: true)
 
         expect:
-        ClusterJob.getByClusterJobIdentifier(identifier, clusterJob.processingStep) == clusterJob
+        [sample1] == sampleService.getSamplesByIndividual(individual)
+    }
+
+    void "test getSamples, with multiple samples"() {
+        given:
+        Individual individual = createIndividual()
+
+        Sample sample1 = createSample([individual: individual])
+        Sample sample2 = createSample([individual: individual])
+
+        expect:
+        [sample1, sample2] == sampleService.getSamplesByIndividual(individual)
     }
 }

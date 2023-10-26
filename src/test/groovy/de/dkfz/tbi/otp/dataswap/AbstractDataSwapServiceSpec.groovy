@@ -1149,6 +1149,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
     @Unroll
     void "cleanupLeftOverSamples, should create cleanup commands for samples and individual data if it has no samples left: #futherSample"() {
         given:
+        service.sampleService = Mock(SampleService)
         final Individual individual = createIndividual()
         if (futherSample) {
             createSample(individual: individual)
@@ -1172,6 +1173,9 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
 
         String cleanupIndividualCommand = "rm -rf ${vbpPath}\n"
         futherSample && !cleanupIndividualCommand || cleanupIndividualCommand
+
+        and:
+        1 * service.sampleService.getSamplesByIndividual(_) >> []
 
         where:
         futherSample << [true, false]

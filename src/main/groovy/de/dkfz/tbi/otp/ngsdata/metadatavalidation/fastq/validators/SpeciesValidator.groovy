@@ -51,6 +51,9 @@ class SpeciesValidator extends AbstractValueTuplesValidator<MetadataValidationCo
     @Autowired
     SampleIdentifierService sampleIdentifierService
 
+    @Autowired
+    SampleService sampleService
+
     @CompileDynamic
     @Override
     Collection<String> getDescriptions() {
@@ -89,7 +92,7 @@ class SpeciesValidator extends AbstractValueTuplesValidator<MetadataValidationCo
         Collection<ValueTuple> valueTuplesValidSpecies = valueTuples.findAll { ValueTuple valueTuple ->
             String speciesValue = valueTuple.getValue(SPECIES.name()).trim()
             if (speciesValue) {
-                List<Boolean> speciesAreKnown =  speciesValue.split(/\+/).collect {
+                List<Boolean> speciesAreKnown = speciesValue.split(/\+/).collect {
                     if (!speciesWithStrainService.getByAlias(it.trim())) {
                         if (unknownCells.containsKey(it)) {
                             unknownCells[it].addAll(valueTuple.cells)
@@ -111,8 +114,8 @@ class SpeciesValidator extends AbstractValueTuplesValidator<MetadataValidationCo
         }
         unknownCells.each { String speciesName, Set<Cell> cells ->
             context.addProblem(cells, LogLevel.ERROR,
-                                "The species '${speciesName}' is not known to OTP.",
-                                "Each value of the + separated list in field '${SPECIES}' has to be known to OTP.")
+                    "The species '${speciesName}' is not known to OTP.",
+                    "Each value of the + separated list in field '${SPECIES}' has to be known to OTP.")
         }
 
         List<Value> values = valueTuplesValidSpecies.collect {
@@ -147,9 +150,9 @@ class SpeciesValidator extends AbstractValueTuplesValidator<MetadataValidationCo
             }
         }
         values.groupBy { it.individual }.each { Individual individual, List<Value> value ->
+            List<SeqTrack> seqTracksWithIndividual = sampleService.getSamplesByIndividual(individual).collectMany { it.seqTracks ?: [] } as List<SeqTrack>
             if (individual && value.species.unique().size() == 1 &&
-                    (value*.species.first() != individual?.species) &&
-                            !(!individual.samples.collectMany { it.seqTracks ?: [] } && !individual.species)) {
+                    (value*.species.first() != individual?.species) && (seqTracksWithIndividual || individual.species)) {
                 context.addProblem(value.collectMany { it.valueTuple.cells } as Set, LogLevel.ERROR,
                         "Species '${value*.species.first()}' for PID '${individual}' doesn't match with existing PID with species '${individual.species}'.",
                         "If the PID already exists, the main species has to match."
@@ -160,7 +163,7 @@ class SpeciesValidator extends AbstractValueTuplesValidator<MetadataValidationCo
         values.groupBy { [it.pid, it.sampleType] }.each { List<String> sample, List<Value> value ->
             if (sample && value*.mixedInSpecies.unique().size() > 1) {
                 context.addProblem(value.collectMany { it.valueTuple.cells } as Set, LogLevel.ERROR,
-                        "Sample '${sample.join(" ")}' has distinct mixed-in species ${value*.mixedInSpecies.collect { "'${ it.join(",")}'" }.join(", ")}.",
+                        "Sample '${sample.join(" ")}' has distinct mixed-in species ${value*.mixedInSpecies.collect { "'${it.join(",")}'" }.join(", ")}.",
                         "All entries of a sample must have the same mixed-in species."
                 )
             }
@@ -168,7 +171,7 @@ class SpeciesValidator extends AbstractValueTuplesValidator<MetadataValidationCo
         values.groupBy { it.sample }.each { Sample sample, List<Value> value ->
             if (sample && value*.mixedInSpecies.unique().size() == 1 &&
                     (value*.mixedInSpecies.first() != (sample.mixedInSpecies ?: [] as Set)) &&
-                            !(!sample.seqTracks && !sample.mixedInSpecies)) {
+                    !(!sample.seqTracks && !sample.mixedInSpecies)) {
                 String message = ""
                 if (value*.mixedInSpecies.first()) {
                     message += "Mixed-in species '${value*.mixedInSpecies.first().join(",")}'"

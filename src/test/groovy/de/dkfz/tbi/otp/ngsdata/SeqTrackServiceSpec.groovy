@@ -187,7 +187,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest, DomainFacto
         ]
 
         when:
-        result = seqTrackService.getSeqTrackSetsGroupedBySeqTypeAndSampleType(seqTracks)
+        result = seqTrackService.groupSeqTracksBySeqTypeAndSampleType(seqTracks)
 
         then:
         seqTracks.each {

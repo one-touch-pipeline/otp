@@ -82,10 +82,9 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
     DeletionService deletionService
     SingleCellService singleCellService
     IndividualService individualService
-    DataProcessingFilesService dataProcessingFilesService
-    ProcessedAlignmentFileService processedAlignmentFileService
     AnalysisDeletionService analysisDeletionService
     FileSystemService fileSystemService
+    SampleService sampleService
 
     /**
      * Logs various arguments of DataSwapParameters in DataSwapParameters.log that can be examined later in the script output.
@@ -473,7 +472,7 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
         data.moveFilesCommands << "\n\n"
         data.moveFilesCommands << data.cleanupSampleTypePaths.collect { "rm -rf ${it}" }.join("\n")
 
-        if (!data.individualSwap.old.samples) {
+        if (!sampleService.getSamplesByIndividual(data.individualSwap.old)) {
             data.moveFilesCommands << "\n\n"
             cleanupLeftOverIndividual(data, true)
         }

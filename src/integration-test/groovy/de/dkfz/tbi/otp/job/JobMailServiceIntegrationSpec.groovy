@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.infrastructure.ClusterJobService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.Ticket
@@ -65,8 +66,8 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
         seqTrack.project.processingPriority = fasttrack ? findOrCreateProcessingPriorityFastrack() : findOrCreateProcessingPriorityNormal()
         seqTrack.project.save(flush: true)
 
-        DomainFactory.createFastqFile([
-                seqTrack: seqTrack,
+        createFastqFile([
+                seqTrack           : seqTrack,
                 fastqImportInstance: createFastqImportInstance([
                         ticket: ticket,
                 ]),
@@ -76,8 +77,8 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
         seqTrack.project.realm = realm
 
         DomainFactory.createProcessingOptionLazy([
-                name: ProcessingOption.OptionName.TICKET_SYSTEM_URL,
-                type: null,
+                name : ProcessingOption.OptionName.TICKET_SYSTEM_URL,
+                type : null,
                 value: "http:/localhost:8080",
         ])
         String url = ticketService.buildTicketDirectLink(ticket)
@@ -135,7 +136,8 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
                     processUrl(_) >> 'url'
                 },
                 jobStatusLoggingService: jobStatusLoggingService,
-                ticketService      : new TicketService(),
+                ticketService          : new TicketService(),
+                clusterJobService      : new ClusterJobService(),
         ])
 
         when:

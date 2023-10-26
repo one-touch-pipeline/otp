@@ -79,12 +79,12 @@ trait DomainFactoryCore implements DomainFactoryHelper {
         ], properties)
     }
 
-    Individual createIndividual(Map properties = [:]) {
+    Individual createIndividual(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(Individual, [
                 pid    : "pid_${nextId}",
                 type   : Individual.Type.REAL,
                 project: { createProject() },
-        ], properties)
+        ], properties, saveAndValidate)
     }
 
     SampleType createSampleType(Map properties = [:]) {

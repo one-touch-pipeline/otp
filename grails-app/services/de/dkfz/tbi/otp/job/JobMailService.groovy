@@ -25,7 +25,9 @@ import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.infrastructure.ClusterJobDetailService
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
+import de.dkfz.tbi.otp.infrastructure.ClusterJobService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.tracking.Ticket
@@ -47,6 +49,10 @@ class JobMailService {
     JobStatusLoggingService jobStatusLoggingService
 
     TicketService ticketService
+
+    ClusterJobService clusterJobService
+
+    ClusterJobDetailService clusterJobDetailService
 
     void sendErrorNotification(Job job, String errorMessage) {
         assert job: 'job may not be null'
@@ -72,7 +78,7 @@ class JobMailService {
         List<ClusterJobIdentifier> clusterJobIdentifiers = ClusterJobIdentifier.asClusterJobIdentifierList(clusterJobs)
         Collection<ClusterJobIdentifier> clusterJobIdentifiersToCheck = jobStatusLoggingService.failedOrNotFinishedClusterJobs(step, clusterJobIdentifiers)
         Collection<ClusterJob> clusterJobsToCheck = clusterJobIdentifiersToCheck.collect {
-            ClusterJob.getByClusterJobIdentifier(it, step)
+            clusterJobService.getClusterJobByIdentifier(it, step)
         }
 
         int restartedStepCount = restartCount(step)
@@ -115,7 +121,7 @@ class JobMailService {
                     eligible           : TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime)clusterJob.eligible),
                     start              : TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime)clusterJob.started),
                     ended              : TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime)clusterJob.ended),
-                    runningHours       : clusterJob.started && clusterJob.ended ? clusterJob.elapsedWalltime.toHours() : 'na',
+                    runningHours       : clusterJob.started && clusterJob.ended ? clusterJobDetailService.calculateElapsedWalltime(clusterJob).toHours() : 'na',
                     logFile            : clusterJob.jobLog,
                     exitStatus         : clusterJob.exitStatus,
                     exitCode           : clusterJob.exitCode,

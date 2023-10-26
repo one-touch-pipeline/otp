@@ -31,6 +31,7 @@ import org.hibernate.sql.JoinType
 import de.dkfz.tbi.otp.SqlUtil
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.infrastructure.ClusterJobDetailService
 import de.dkfz.tbi.otp.infrastructure.ClusterJobService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
@@ -43,6 +44,8 @@ import java.time.LocalDateTime
 @CompileDynamic
 @Transactional
 class WorkflowRunService {
+
+    ClusterJobDetailService clusterJobDetailService
 
     public static final int PESSIMISTIC_WRITE_TIME_OUT = 10000
 
@@ -353,7 +356,7 @@ class WorkflowRunService {
                     jobId   : clusterJob.clusterJobId,
                     hasLog  : clusterJobService.doesClusterJobLogExist(clusterJob),
                     node    : clusterJob.node ?: "-",
-                    wallTime: clusterJob.elapsedWalltimeAsHhMmSs,
+                    wallTime: clusterJobDetailService.getElapsedWalltimeAsHhMmSs(clusterJob),
                     exitCode: clusterJob.exitCode ?: "-",
             ]
         }

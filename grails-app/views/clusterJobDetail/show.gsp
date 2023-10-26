@@ -148,17 +148,17 @@ on the general cluster job page
                     <tr>
                         <td></td>
                         <td class="pl-3"><g:message code="jobstats.jobSpecific.detail.table.attribute.requestedWallTime"/></td>
-                        <td>${job.requestedWalltimeAsISO}</td>
+                        <td>${requestedWalltimeAsISO}</td>
                     </tr>
                     <tr>
                         <td></td>
                         <td class="pl-3"><g:message code="jobstats.jobSpecific.detail.table.attribute.elapsedWallTime"/></td>
-                        <td>${job.elapsedWalltimeAsISO}</td>
+                        <td>${elapsedWalltimeAsISO}</td>
                     </tr>
                     <tr>
                         <td></td>
                         <td class="pl-3"><g:message code="jobstats.jobSpecific.detail.table.attribute.wallTimeDifference"/></td>
-                        <td>${job.walltimeDiffAsISO}</td>
+                        <td>${walltimeDiffAsISO}</td>
                     </tr>
                 </table>
             </div>
@@ -193,12 +193,12 @@ on the general cluster job page
                     <tr>
                         <td></td>
                         <td class="pl-3"><g:message code="jobstats.jobSpecific.detail.table.attribute.cpuTime"/></td>
-                        <td>${job.cpuTimeAsISO}</td>
+                        <td>${cpuTimeAsISO}</td>
                     </tr>
                     <tr>
                         <td></td>
                         <td class="pl-3"><g:message code="jobstats.jobSpecific.detail.table.attribute.cpuAvgUtilised"/></td>
-                        <td>${job.cpuAvgUtilised?.round(2) ?: NA}</td>
+                        <td>${cpuAvgUtilised}</td>
                     </tr>
                 </table>
             </div>
@@ -225,7 +225,7 @@ on the general cluster job page
                     <tr>
                         <td></td>
                         <td class="pl-3"><g:message code="jobstats.jobSpecific.detail.table.attribute.memoryEfficiency"/></td>
-                        <td>${job.memoryEfficiency?.round(2) ?: NA}</td>
+                        <td>${memoryEfficiency}</td>
                     </tr>
                 </table>
             </div>

@@ -26,7 +26,6 @@ import grails.gorm.transactions.Rollback
 import org.junit.Test
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
@@ -37,13 +36,13 @@ class AbstractMaybeSubmitWaitValidateJobIntegrationTests extends TestCase {
 
     ClusterJobService clusterJobService
     AbstractMaybeSubmitWaitValidateJob abstractMaybeSubmitWaitValidateJob
-    ConfigService configService
     ProcessingStep processingStep
 
     void setupData() {
         abstractMaybeSubmitWaitValidateJob = [:] as AbstractMaybeSubmitWaitValidateJob
         processingStep = DomainFactory.createProcessingStep()
         abstractMaybeSubmitWaitValidateJob.setProcessingStep(processingStep)
+        abstractMaybeSubmitWaitValidateJob.clusterJobService = clusterJobService
     }
 
     @Test

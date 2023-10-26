@@ -114,6 +114,7 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
             _ * getRemoteFileSystem() >> FileSystems.default
         }
         service.deletionService = Mock(DeletionService)
+        service.sampleService = Mock(SampleService)
 
         // Domain
         SampleType newSampleType = createSampleType()
@@ -126,7 +127,7 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
         // creates the sample that will be on two SeqTracks of the same run
         // the same individual will have another Sample, but this is correct
         Sample falsyLabeledSample = createSample([
-                individual: oldIndividual,
+                individual    : oldIndividual,
                 mixedInSpecies: [TaxonomyFactoryInstance.INSTANCE.createSpeciesWithStrain(), TaxonomyFactoryInstance.INSTANCE.createSpeciesWithStrain()],
         ])
         Sample correctlyLabeledSample = createSample([
@@ -223,5 +224,8 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
 
         and: "Swapped sample should have the mixedInSpecies copied"
         CollectionUtils.exactlyOneElement(Sample.findAllByIndividual(newIndividual)).mixedInSpecies.size() == 2
+
+        and:
+        1 * service.sampleService.getSamplesByIndividual(oldIndividual) >> [falsyLabeledSample, correctlyLabeledSample]
     }
 }

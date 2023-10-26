@@ -31,57 +31,14 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
-import java.time.Duration
-import java.time.ZoneId
-import java.time.ZonedDateTime
-
 @Rollback
 @Integration
 class ClusterJobIntegrationSpec extends Specification implements WorkflowSystemDomainFactory {
-
-    static final int REQUESTED_MEMORY = 1000
-    static final int USED_MEMORY = 800
-    static final int CPU_TIME = 12 * 60 * 60 * 1000
-    static final int REQUESTED_CORES = 10
-    static final int USED_CORES = 10
-    static final int REQUESTED_WALLTIME = 24 * 60 * 60 * 1000
-    static final int ELAPSED_WALLTIME = 24 * 60 * 60 * 1000
-    static final ZonedDateTime QUEUED = ZonedDateTime.of(1993, 5, 15, 12, 0, 0, 0, ZoneId.systemDefault())
-    static final ZonedDateTime STARTED = QUEUED.plusDays(1)
-    static final ZonedDateTime ENDED = STARTED.plusDays(1)
 
     ProcessingOptionService processingOptionService
 
     void setupData() {
         findOrCreateProcessingOption([name: OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, value: "1.0"])
-    }
-
-    void "test getter"() {
-        given:
-        setupData()
-
-        ClusterJob clusterJob = createClusterJob(
-                queued: QUEUED,
-                started: STARTED,
-                ended: ENDED,
-                requestedWalltime: Duration.ofMillis(REQUESTED_WALLTIME),
-                requestedCores: REQUESTED_CORES,
-                usedCores: USED_CORES,
-                cpuTime: Duration.ofMillis(CPU_TIME),
-                requestedMemory: REQUESTED_MEMORY,
-                usedMemory: USED_MEMORY
-        )
-
-        expect:
-        Closure<Boolean> doublesEqual = { double d1, double d2, int p = 5 ->
-            return d1.round(p) == d2.round(p)
-        }
-
-        doublesEqual(clusterJob.memoryEfficiency, USED_MEMORY / REQUESTED_MEMORY)
-        doublesEqual(clusterJob.cpuTimePerCore, CPU_TIME / USED_CORES)
-        doublesEqual(clusterJob.cpuAvgUtilised, CPU_TIME / ELAPSED_WALLTIME)
-        doublesEqual(clusterJob.elapsedWalltime.toMillis(), ELAPSED_WALLTIME)
-        doublesEqual(clusterJob.walltimeDiff.toMillis(), REQUESTED_WALLTIME - ELAPSED_WALLTIME)
     }
 
     @Unroll

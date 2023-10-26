@@ -44,6 +44,10 @@ class SampleService {
         }
     }
 
+    List<Sample> getSamplesByIndividual(Individual individual) {
+        return Sample.findAllByIndividual(individual)
+    }
+
     List<Sample> getSamplesOfProject(Project project) {
         return Sample.withCriteria {
             individual {

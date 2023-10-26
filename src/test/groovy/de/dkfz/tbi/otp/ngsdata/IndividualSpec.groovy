@@ -24,11 +24,10 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.ngsdata.Individual.Type
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.project.Project
 
-class IndividualSpec extends Specification implements DataTest {
+class IndividualSpec extends Specification implements DataTest, DomainFactoryCore {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -41,8 +40,6 @@ class IndividualSpec extends Specification implements DataTest {
                 SeqType,
         ]
     }
-
-    TestConfigService configService
 
     void "test validate"() {
         given:
@@ -81,58 +78,12 @@ class IndividualSpec extends Specification implements DataTest {
 
     void "test validate, when pid is not unique"() {
         given:
-        Individual individual1 = createIndividual()
+        Individual individual1 = createIndividual([pid: 'pid'])
         assert individual1.validate()
         assert individual1.save(flush: true)
-        Individual individual2 = createIndividual()
+        Individual individual2 = createIndividual([pid: 'pid'], false)
 
         expect:
         !individual2.validate()
-    }
-
-    void "test getSamples, with one sample"() {
-        given:
-        Individual individual = createIndividual()
-        assert individual.validate()
-        assert individual.save(flush: true)
-
-        Sample sample1 = new Sample(
-                individual: individual,
-                sampleType: DomainFactory.createSampleType(name: "name1")
-        )
-        assert sample1.save(flush: true)
-
-        expect:
-        [sample1] == individual.samples
-    }
-
-    void "test getSamples, with multiple samples"() {
-        given:
-        Individual individual = createIndividual()
-        assert individual.validate()
-        assert individual.save(flush: true)
-
-        Sample sample1 = new Sample(
-                individual: individual,
-                sampleType: DomainFactory.createSampleType(name: "name1")
-        )
-        assert sample1.save(flush: true)
-
-        Sample sample2 = new Sample(
-                individual: individual,
-                sampleType: DomainFactory.createSampleType(name: "name2")
-        )
-        assert sample2.save(flush: true)
-
-        expect:
-        [sample1, sample2] == individual.samples
-    }
-
-    private Individual createIndividual() {
-        return new Individual(
-                pid: "pid",
-                type: Type.REAL,
-                project: DomainFactory.createProject()
-        )
     }
 }

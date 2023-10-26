@@ -37,6 +37,7 @@ import java.time.Duration
 class ClusterJobDetailController {
 
     ClusterJobService clusterJobService
+    ClusterJobDetailService clusterJobDetailService
 
     static allowedMethods = [
             show                     : "GET",
@@ -48,16 +49,28 @@ class ClusterJobDetailController {
         ClusterJob clusterJob = clusterJobService.findById(params.id as long)
         Individual individual = clusterJob ? clusterJobService.findProcessParameterObjectByClusterJob(clusterJob)?.individual : null
         Project project = clusterJob.oldSystem ? individual?.project : clusterJob.workflowStep.workflowRun.project
+        String memoryEfficiency = clusterJobDetailService.calculateMemoryEfficiency(clusterJob)?.round(2) ?: 'NA'
+        String cpuAvgUtilised = clusterJobDetailService.calculateCpuAvgUtilised(clusterJob)?.round(2) ?: 'NA'
+        String elapsedWalltimeAsISO = TimeUtils.getFormattedDuration(clusterJobDetailService.calculateElapsedWalltime(clusterJob))
+        String requestedWalltimeAsISO = TimeUtils.getFormattedDuration(clusterJob.requestedWalltime)
+        String walltimeDiffAsISO = TimeUtils.getFormattedDuration(clusterJobDetailService.calculateWalltimeDiff(clusterJob))
+        String cpuTimeAsISO = TimeUtils.getFormattedDuration(clusterJob.cpuTime)
 
         return [
-                'job'       : clusterJob,
-                'jobQueued' : TimeFormats.DATE_TIME.getFormattedZonedDateTime(clusterJob.queued),
-                'jobStarted': TimeFormats.DATE_TIME.getFormattedZonedDateTime(clusterJob.started),
-                'jobEnded'  : TimeFormats.DATE_TIME.getFormattedZonedDateTime(clusterJob.ended),
-                'individual': individual,
-                'project'   : project,
-                'NA'        : ClusterJob.NOT_AVAILABLE,
-                'nav'       : navigationCommand,
+                'job'                   : clusterJob,
+                'jobQueued'             : TimeFormats.DATE_TIME.getFormattedZonedDateTime(clusterJob.queued),
+                'jobStarted'            : TimeFormats.DATE_TIME.getFormattedZonedDateTime(clusterJob.started),
+                'jobEnded'              : TimeFormats.DATE_TIME.getFormattedZonedDateTime(clusterJob.ended),
+                'individual'            : individual,
+                'project'               : project,
+                'memoryEfficiency'      : memoryEfficiency,
+                'cpuAvgUtilised'        : cpuAvgUtilised,
+                'elapsedWalltimeAsISO'  : elapsedWalltimeAsISO,
+                'requestedWalltimeAsISO': requestedWalltimeAsISO,
+                'walltimeDiffAsISO'     : walltimeDiffAsISO,
+                'cpuTimeAsISO'          : cpuTimeAsISO,
+                'NA'                    : ClusterJob.NOT_AVAILABLE,
+                'nav'                   : navigationCommand,
         ]
     }
 

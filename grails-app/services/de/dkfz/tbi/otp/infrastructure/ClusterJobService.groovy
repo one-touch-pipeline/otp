@@ -40,6 +40,7 @@ import javax.sql.DataSource
 import java.nio.file.FileSystem
 import java.time.*
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 import static java.util.concurrent.TimeUnit.HOURS
 
 @CompileDynamic
@@ -49,6 +50,7 @@ class ClusterJobService {
     FileSystemService fileSystemService
     FileService fileService
     DataSource dataSource
+    ClusterJobDetailService clusterJobDetailService
 
     static final Long HOURS_TO_MILLIS = HOURS.toMillis(1)
     static final Duration DURATION_JOB_OBVIOUSLY_FAILED = Duration.ofMillis(9)
@@ -318,7 +320,8 @@ class ClusterJobService {
      * this can result to misleading statistics
      */
     void handleObviouslyFailedClusterJob(ClusterJob job) {
-        if (job.elapsedWalltime && job.elapsedWalltime <= DURATION_JOB_OBVIOUSLY_FAILED) {
+        Duration elapsedWalltime = clusterJobDetailService.calculateElapsedWalltime(job)
+        if (elapsedWalltime && elapsedWalltime <= DURATION_JOB_OBVIOUSLY_FAILED) {
             job.exitStatus = ClusterJob.Status.FAILED
             job.save(flush: true)
         }
@@ -1076,6 +1079,13 @@ SELECT
         List<String> labelsAsString = labels*.toString()
 
         return [labelsAsString, labels]
+    }
+
+    ClusterJob getClusterJobByIdentifier(ClusterJobIdentifier identifier, ProcessingStep processingStep) {
+        return exactlyOneElement(ClusterJob.findAllWhere(
+                clusterJobId: identifier.clusterJobId,
+                processingStep: processingStep,
+        ))
     }
 
     /**

@@ -78,6 +78,6 @@ class ReferenceGenomeSelector implements Entity {
 
     @Override
     String toString() {
-        return "RGS: (${project} ${seqType} ${species.sort { it.displayString }.join("+")} ${workflow}) -> (${referenceGenome})"
+        return "RGS: (${project} ${seqType} ${species.sort { it.toString() }.join("+")} ${workflow}) -> (${referenceGenome})"
     }
 }

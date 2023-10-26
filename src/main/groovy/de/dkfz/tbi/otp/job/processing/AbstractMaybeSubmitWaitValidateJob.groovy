@@ -24,9 +24,11 @@ package de.dkfz.tbi.otp.job.processing
 import grails.gorm.transactions.NotTransactional
 import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
+import de.dkfz.tbi.otp.infrastructure.ClusterJobService
 
 /**
  * Base class for jobs which maybe submit cluster jobs, wait for them to finish, and then validate their results.
@@ -34,6 +36,9 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 @CompileDynamic
 @Slf4j
 abstract class AbstractMaybeSubmitWaitValidateJob extends AbstractMultiJob {
+
+    @Autowired
+    ClusterJobService clusterJobService
 
     @NotTransactional
     @Override
@@ -63,7 +68,7 @@ abstract class AbstractMaybeSubmitWaitValidateJob extends AbstractMultiJob {
         List<String> failedClusterJobsDetails = []
         failedClusterJobs.sort(sortByClusterJobId).collect { ClusterJobIdentifier clusterJobIdentifier, String reason ->
             failedClusterJobsDetails.add("${clusterJobIdentifier}: " +
-                    "${reason}\n${"Log file: ${ClusterJob.getByClusterJobIdentifier(clusterJobIdentifier, processingStep).jobLog}"}\n")
+                    "${reason}\n${"Log file: ${clusterJobService.getClusterJobByIdentifier(clusterJobIdentifier, processingStep).jobLog}"}\n")
         }
 
         return "\n${failedJobsOfTotalJobs}\n\n${failedClusterJobsDetails.join("\n")}"
@@ -80,7 +85,7 @@ abstract class AbstractMaybeSubmitWaitValidateJob extends AbstractMultiJob {
         return failedOrNotFinishedClusterJobs(
                 ClusterJobIdentifier.asClusterJobIdentifierList(clusterJobs)
         ).collect { ClusterJobIdentifier identifier, String error ->
-            return ClusterJob.getByClusterJobIdentifier(identifier, processingStep)
+            return clusterJobService.getClusterJobByIdentifier(identifier, processingStep)
         }
     }
 

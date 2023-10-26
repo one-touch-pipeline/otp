@@ -77,21 +77,6 @@ class Individual implements CommentableWithProject, Entity {
     }
 
     /**
-     * @return List of Sample for this Individual
-     */
-    List<Sample> getSamples() {
-        return Sample.findAllByIndividual(this)
-    }
-
-    List<SeqTrack> getSeqTracks() {
-        return SeqTrack.createCriteria().list {
-            sample {
-                eq("individual", this)
-            }
-        }
-    }
-
-    /**
      * returns the folder viewByPid without the pid
      * Example: ${project}/sequencing/exon_sequencing/view-by-pid
      */

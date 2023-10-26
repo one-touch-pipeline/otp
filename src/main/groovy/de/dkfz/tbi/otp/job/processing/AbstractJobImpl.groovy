@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
+import de.dkfz.tbi.otp.infrastructure.ClusterJobService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
@@ -51,6 +52,9 @@ abstract class AbstractJobImpl implements Job {
 
     @Autowired
     JobStatusLoggingService jobStatusLoggingService
+
+    @Autowired
+    ClusterJobService clusterJobService
 
     // Not storing a reference to the {@link ProcessingStep} instance here, because it may be detached by the time it is
     // used again. Accessing it would result in Hibernate proxy errors (OTP-967).
@@ -212,7 +216,7 @@ abstract class AbstractJobImpl implements Job {
                 sendStep,
                 ClusterJobIdentifier.asClusterJobIdentifierList(clusterJobs)
         ).collect { ClusterJobIdentifier identifier ->
-            return ClusterJob.getByClusterJobIdentifier(identifier, sendStep)
+            return clusterJobService.getClusterJobByIdentifier(identifier, sendStep)
         }
     }
 }

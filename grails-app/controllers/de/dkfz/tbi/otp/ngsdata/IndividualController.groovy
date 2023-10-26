@@ -44,6 +44,7 @@ class IndividualController {
     ProjectService projectService
     CommentService commentService
     SampleIdentifierService sampleIdentifierService
+    SampleService sampleService
 
     static allowedMethods = [
             show                   : "GET",
@@ -77,8 +78,8 @@ class IndividualController {
                 comment            : individual.comment,
                 typeDropDown       : Individual.Type.values(),
                 sampleTypeDropDown : individualService.sampleTypeNames,
-                groupedSeqTrackSets: seqTrackService.getSeqTrackSetsGroupedBySeqTypeAndSampleType(individual.seqTracks),
-                samplesWrapper     : individual.samples.collect {
+                groupedSeqTrackSets: seqTrackService.groupSeqTracksBySeqTypeAndSampleType(seqTrackService.getSeqTracksByIndividual(individual)),
+                samplesWrapper     : sampleService.getSamplesByIndividual(individual).collect {
                     [
                             sample                 : it,
                             sampleIdentifierObjects: sampleIdentifierService.getSampleIdentifierObjects(it),

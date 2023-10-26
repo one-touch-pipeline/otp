@@ -31,13 +31,10 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
-import de.dkfz.tbi.util.TimeUtils
 
 import java.nio.file.Paths
 import java.time.Duration
 import java.time.ZonedDateTime
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 /**
  * A ClusterJob represents a single submitted or finished job on the cluster.
@@ -54,8 +51,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 class ClusterJob implements Entity {
 
     static final String NOT_AVAILABLE = "N/A"
-
-    static final int DIGIT_COUNT = 2
 
     /**
      * @deprecated old workflow system
@@ -305,88 +300,6 @@ class ClusterJob implements Entity {
             basesPerBytesFastq = ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, null, null) as float
             nBases = fileSize * basesPerBytesFastq
         }
-    }
-
-    /**
-     * describes how efficient the memory was used
-     * {@link #usedMemory} divided by {@link #requestedMemory}
-     */
-    Double getMemoryEfficiency() {
-        if (usedMemory != null && requestedMemory != null) {
-            return ((double) usedMemory) / requestedMemory
-        }
-        return null
-    }
-
-    /**
-     * cpu time per core
-     */
-    Double getCpuTimePerCore() {
-        if (cpuTime != null && usedCores != null) {
-            return cpuTime.toMillis() / usedCores
-        }
-        return null
-    }
-
-    /**
-     * average cpu cores utilized
-     */
-    Double getCpuAvgUtilised() {
-        if (cpuTime != null && elapsedWalltime != null && elapsedWalltime.toMillis() != 0) {
-            return ((double) cpuTime.toMillis()) / elapsedWalltime.toMillis()
-        }
-        return null
-    }
-
-    /**
-     * elapsed walltime for the job
-     */
-    Duration getElapsedWalltime() {
-        if (ended != null && started != null) {
-            return Duration.between(started, ended)
-        }
-        return null
-    }
-
-    /**
-     * difference of requested and elapsed walltime
-     */
-    Duration getWalltimeDiff() {
-        if (requestedWalltime != null && elapsedWalltime != null) {
-            return requestedWalltime - elapsedWalltime
-        }
-        return null
-    }
-
-    String getRequestedWalltimeAsISO() {
-        return TimeUtils.getFormattedDuration(requestedWalltime)
-    }
-
-    String getElapsedWalltimeAsISO() {
-        return TimeUtils.getFormattedDuration(elapsedWalltime)
-    }
-
-    String getElapsedWalltimeAsHhMmSs() {
-        return formatPeriodAsHhMmSs()
-    }
-
-    String getWalltimeDiffAsISO() {
-        return TimeUtils.getFormattedDuration(walltimeDiff)
-    }
-
-    String getCpuTimeAsISO() {
-        return TimeUtils.getFormattedDuration(cpuTime)
-    }
-
-    private String formatPeriodAsHhMmSs() {
-        return TimeUtils.getFormattedDurationForZonedDateTime(started, ended) ?: NOT_AVAILABLE
-    }
-
-    static ClusterJob getByClusterJobIdentifier(ClusterJobIdentifier identifier, ProcessingStep processingStep) {
-        return exactlyOneElement(findAllWhere(
-                clusterJobId: identifier.clusterJobId,
-                processingStep: processingStep,
-        ))
     }
 
     @Override

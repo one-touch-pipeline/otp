@@ -101,7 +101,7 @@
                 <th><g:message code="otp.blank"/></th>
                 <th><g:message code="workflow.paramater.table.headers.clusterJobName"/></th>
                 <th>
-                    <span onclick="$.otp.workflows.processingStep.promptClusterJobIds('${clusterJobs*.clusterJobId.join(" ")}')">
+                    <span onclick="$.otp.workflows.processingStep.promptClusterJobIds('${clusterJobsWrapper*.clusterJobId.join(" ")}')">
                         <u><g:message code="workflow.paramater.table.headers.clusterJob"/></u>
                     </span>
                 </th>
@@ -114,14 +114,14 @@
             </tr>
             </thead>
             <tbody>
-            <g:each var="clusterJob" in="${clusterJobs}" >
+            <g:each var="wrappedJob" in="${clusterJobsWrapper}" >
                 <tr>
                     <td></td>
-                    <td>${clusterJob.clusterJobName}</td>
-                    <td>${clusterJob.clusterJobId}</td>
+                    <td>${wrappedJob.job.clusterJobName}</td>
+                    <td>${wrappedJob.job.clusterJobId}</td>
                     <td>
-                        <g:if test="${clusterJob.jobLog && new File(clusterJob.jobLog).exists()}">
-                            <g:link controller="clusterJobDetail" action="showLog" id="${clusterJob.id}">
+                        <g:if test="${wrappedJob.job.jobLog && new File(wrappedJob.job.jobLog).exists()}">
+                            <g:link controller="clusterJobDetail" action="showLog" id="${wrappedJob.job.id}">
                                 <g:message code="workflow.paramater.table.inline.log"/>
                             </g:link>
                         </g:if><g:else>
@@ -129,15 +129,15 @@
                         </g:else>
                     </td>
                     <td>
-                        <g:link controller="clusterJobDetail" action="show" id="${clusterJob.id}">
+                        <g:link controller="clusterJobDetail" action="show" id="${wrappedJob.job.id}">
                             <g:message code="workflow.paramater.table.inline.jobDetails"/>
                         </g:link>
                     </td>
                     <td>
-                        <span class="clusterJobExitStatus ${clusterJob.exitStatus}">${"${clusterJob.exitStatus}: ${clusterJob.exitCode}"}</span>
+                        <span class="clusterJobExitStatus ${wrappedJob.job.exitStatus}">${"${wrappedJob.job.exitStatus}: ${wrappedJob.job.exitCode}"}</span>
                     </td>
-                    <td>${clusterJob.elapsedWalltimeAsHhMmSs}</td>
-                    <td>${clusterJob.node ?: "-"}</td>
+                    <td>${wrappedJob.elapsedWalltimeAsHhMmSs}</td>
+                    <td>${wrappedJob.job.node ?: "-"}</td>
                     <td></td>
                 </tr>
             </g:each>
