@@ -42,7 +42,8 @@ $(() => {
     // prop[0], prop[1], ...
     clone.find('input, select, label, div, a').each(function () {
       const component = this;
-      $.each(['name', 'id', 'for', 'data-target', 'aria-controls', 'data-select2-id', 'aria-labelledby'], function () {
+      $.each(['name', 'id', 'for', 'data-bs-target',
+        'aria-controls', 'data-select2-id', 'aria-labelledby'], function () {
         const attribute = this;
         $.otp.cloneField.replaceTemplateIndexInProperty(component, attribute, index);
       });

@@ -23,7 +23,7 @@
 <div class="accordion" id="warnAreaAccordion">
     <div class="card d-none" id="withdrawnSeqTracksWarningsCard">
         <div class="card-header">
-            <button class="btn btn-link w-100 text-left collapsed p-0" type="button" data-toggle="collapse" data-target="#collapseFive" aria-expanded="true"
+            <button class="btn btn-link w-100 text-left collapsed p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="true"
                     aria-controls="collapseFive">
                 <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerAlignment.warn.withdrawnWarnings.title"/>
             </button>
@@ -55,7 +55,7 @@
 
     <div class="card d-none" id="missingAlignmentConfigWarningsCard">
         <div class="card-header">
-            <button class="btn btn-link w-100 text-left collapsed p-0" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true"
+            <button class="btn btn-link w-100 text-left collapsed p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true"
                     aria-controls="collapseOne">
                 <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerAlignment.warn.missingAlignmentConfig.title"/>
             </button>
@@ -93,7 +93,7 @@
 
     <div class="card d-none" id="missingReferenceGenomeWarningsCard">
         <div class="card-header">
-            <button class="btn btn-link w-100 text-left collapsed p-0" type="button" data-toggle="collapse" data-target="#collapseFour" aria-expanded="true"
+            <button class="btn btn-link w-100 text-left collapsed p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="true"
                     aria-controls="collapseFour">
                 <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerAlignment.warn.missingReferenceGenomeConfig.title"/>
             </button>
@@ -132,7 +132,7 @@
 
     <div class="card d-none" id="seqPlatformWarningsCard">
         <div class="card-header">
-            <button class="btn btn-link w-100 text-left collapsed p-0" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true"
+            <button class="btn btn-link w-100 text-left collapsed p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="true"
                     aria-controls="collapseTwo">
                 <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerAlignment.warn.mismatchedSeqPlatform.title"/>
             </button>
@@ -164,7 +164,7 @@
 
     <div class="card d-none" id="libraryPrepKitWarningsCard">
         <div class="card-header">
-            <button class="btn btn-link w-100 text-left collapsed p-0" type="button" data-toggle="collapse" data-target="#collapseThree"
+            <button class="btn btn-link w-100 text-left collapsed p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree"
                     aria-expanded="true" aria-controls="collapseThree">
                 <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerAlignment.warn.mismatchedPreparationKit.title"/>
             </button>
@@ -196,7 +196,7 @@
 
     <div class="card d-none" id="missingLibraryPrepKitWarningsCard">
         <div class="card-header">
-            <button class="btn btn-link w-100 text-left collapsed p-0" type="button" data-toggle="collapse" data-target="#collapseSix"
+            <button class="btn btn-link w-100 text-left collapsed p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSix"
                     aria-expanded="true" aria-controls="collapseSix">
                 <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerAlignment.warn.missingPreparationKit.title"/>
             </button>

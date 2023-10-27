@@ -22,8 +22,11 @@
 #
 
 set -ev
-
 cd /home/otp
+
+# Config files for config per project and seq type
+mkdir configs
+tar -xf config_files.tar.gz -C ./configs && rm config_files.tar.gz
 
 #base file system according the dump
 tar -xf filesystem.tar.gz && rm filesystem.tar.gz

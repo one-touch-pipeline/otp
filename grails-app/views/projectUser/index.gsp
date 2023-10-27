@@ -90,7 +90,7 @@
                 <div class="form external non-ldap-user">
                     <div class="card">
                         <div class="card-body pb-1">
-                            <div class="form-group row">
+                            <div class="mb-3 row">
                                 <label class="col-sm-2 col-form-label" for="realName">${g.message(code: "projectUser.addMember.name")}</label>
 
                                 <div class="col-sm-10">
@@ -99,7 +99,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group row">
+                            <div class="mb-3 row">
                                 <label class="col-sm-2 col-form-label" for="email">${g.message(code: "projectUser.addMember.email")}</label>
 
                                 <div class="col-sm-10">
@@ -107,7 +107,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group row">
+                            <div class="mb-3 row">
                                 <label class="col-sm-2 col-form-label" for="projectRolesRealName">${g.message(code: "projectUser.addMember.role")}</label>
 
                                 <div class="col-sm-10">
@@ -122,7 +122,7 @@
 
                             </div>
 
-                            <div class="form-group row">
+                            <div class="mb-3 row">
                                 <div class="col-sm-2"></div>
 
                                 <div class="col-sm-10">
@@ -172,19 +172,15 @@
                             ${userEntry.realName}
                         </g:if>
                         <g:else>
-                            <otp:editorSwitch
-                                    roles="ROLE_OPERATOR"
-                                    link="${g.createLink(controller: 'projectUser', action: 'updateName', params: ["user.id": userEntry.user.id])}"
-                                    value="${userEntry.realName}"/>
+                            <otp:editorSwitch roles="ROLE_OPERATOR" value="${userEntry.realName}"
+                                              link="${g.createLink(controller: 'projectUser', action: 'updateName', params: ["user.id": userEntry.user.id])}"/>
                         </g:else>
                     </td>
                     <td><g:render template="securedLinkedUsername" model="[user: userEntry.user]"/></td>
                     <td>${userEntry.department}</td>
                     <td>
-                        <otp:editorSwitch
-                                roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'projectUser', action: 'updateEmail', params: ["user.id": userEntry.user.id])}"
-                                value="${userEntry.user.email}"/>
+                        <otp:editorSwitch roles="ROLE_OPERATOR" value="${userEntry.user.email}"
+                                          link="${g.createLink(controller: 'projectUser', action: 'updateEmail', params: ["user.id": userEntry.user.id])}"/>
                     </td>
                     <td>
                         <div class="loader"></div>
@@ -193,12 +189,8 @@
                             <sec:access
                                     expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
                                 <g:each in="${userEntry.projectRoleNames}" var="projectRoleName">
-                                    <otp:editorSwitch
-                                            template="remove"
-                                            link="${g.createLink(controller: "projectUser", action: "deleteProjectRole", params: ['userProjectRole.id': userEntry.userProjectRole.id, 'currentRole': projectRoleName])}"
-                                            value="${projectRoleName}"
-                                            confirmation="${confirmationText}"
-                                            name="${projectRoleName}"/>
+                                    <otp:editorSwitch template="remove" value="${projectRoleName}" confirmation="${confirmationText}" name="${projectRoleName}"
+                                                      link="${g.createLink(controller: "projectUser", action: "deleteProjectRole", params: ['userProjectRole.id': userEntry.userProjectRole.id, 'currentRole': projectRoleName])}"/>
                                 </g:each>
                                 <div class="submit-container">
                                     <g:select id="${userEntry.user.id}-selectorNewRoles"
@@ -259,7 +251,7 @@
                                                     code="default.button.cancel.label"/></button>
                                         </div>
 
-                                        <p class="modal-editor-switch-label" data-toggle="tooltip" data-placement="top"
+                                        <p class="modal-editor-switch-label" data-placement="top"
                                            title="${message(code: userEntry.fileAccess.toolTipKey) ?: ''}">
                                             <span class="icon-${userEntry.fileAccess}"></span>
                                             <button class="btn btn-primary edit" onclick="onFileAccessEditClick(this)">&nbsp;</button>
@@ -328,7 +320,7 @@
                         <div class="submit-container">
                             <input type="hidden" name="changeProjectAccessButton"
                                    value="${g.createLink(controller: "projectUser", action: "setEnabled", params: ["userProjectRole.id": userEntry.userProjectRole.id, "value": false])}"/>
-                            <button class="btn btn-primary changeProjectAccess js-add" ${disabled}  data-confirmation="${confirmationTextHtml ?:
+                            <button class="btn btn-primary changeProjectAccess js-add" ${disabled} data-confirmation="${confirmationTextHtml ?:
                                     g.message(code: "projectUser.deactivateConfirmation", args: [userEntry.user.username, selectedProject.name])}">
                                 <g:message code="projectUser.table.deactivateUser"/>
                             </button>

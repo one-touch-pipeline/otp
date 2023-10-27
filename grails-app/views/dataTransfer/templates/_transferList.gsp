@@ -44,7 +44,7 @@
                     </li>
                 </g:each>
             </ul>
-            <button type="button" class="btn btn-sm btn-primary alignment-add-files-btn" data-toggle="collapse" data-target="#addFileToTransfer-${transfer.id}"
+            <button type="button" class="btn btn-sm btn-primary alignment-add-files-btn" data-bs-toggle="collapse" data-bs-target="#addFileToTransfer-${transfer.id}"
                     aria-expanded="false" aria-controls="addFileToTransfer-${transfer.id}">
                 <i class="bi bi-folder-plus"></i> Add
             </button>

@@ -24,9 +24,12 @@ describe('Test clicking and visiting through all pages', () => {
   'use strict';
 
   context('when user is an operator', () => {
-    it('should check all available anker links', () => {
-      cy.visit('/');
+    beforeEach(() => {
       cy.loginAsOperator();
+      cy.visit('/home');
+    });
+
+    it('should check all available anker links', () => {
       cy.checkAllAnkerElements();
     });
   });

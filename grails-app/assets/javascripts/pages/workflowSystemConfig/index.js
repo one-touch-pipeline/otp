@@ -57,8 +57,8 @@ const renderWorkflowOverviewTable = (workflowData) => {
       {
         className: 'details-control',
         ordering: false,
-        render: () => `<button class="btn btn-xs btn-info spinner-button">
-          <i class="bi bi-chevron-bar-expand" id="versions-icon" data-original-title="Show/hide workflow versions"></i>
+        render: () => `<button class="btn btn-xs btn-info spinner-button" title="Show/hide workflow versions">
+          <i class="bi bi-chevron-bar-expand" id="versions-icon"></i>
           <span id="versions-spinner" class="spinner-border spinner-border-sm" role="status" 
           style="display: none" aria-hidden="true"></span></button>`
       },
@@ -135,13 +135,13 @@ const openAndRenderEditModal = (workflow) => {
 
   confirmButton.unbind('click');
   confirmButton.on('click', () => {
-    modal.hide();
+    modal.modal('hide');
     updateWorkflow(workflow, modal);
   });
 
   cancelButtons.unbind('click');
   cancelButtons.on('click', () => {
-    modal.hide();
+    modal.modal('hide');
   });
 
   updateModalWithCurrentWorkflow(workflow, modal);

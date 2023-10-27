@@ -94,11 +94,14 @@ $.otp.toaster = {
 
     const otpToast = `<div class="toast ${stateProps.toastClass}"\
                            role="alert" aria-live="assertive" aria-atomic="true" data-autohide="false">
-                        <div class="toast-header">
-                          <span class="otp-toast-icon-wrapper text-${state}">${stateProps.icon}</span>
-                          <strong class="mr-auto">${title}</strong>
-                          <small class="text-muted otp-toast-time-txt">${date}</small>
-                          <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                        <div class="toast-header justify-content-between">
+                          <span class="title-wrapper">
+                            <span class="otp-toast-icon-wrapper text-${state}">${stateProps.icon}</span>
+                            <strong class="mr-auto">${title}</strong>
+                            <small class="text-muted otp-toast-time-txt">${date}</small>
+                          </span>
+                          <button type="button" class="ml-2 btn btn-outline-secondary btn-sm mb-1 close" 
+                                  data-bs-dismiss="toast" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                           </button>
                         </div>

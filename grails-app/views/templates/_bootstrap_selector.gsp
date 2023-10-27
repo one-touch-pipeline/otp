@@ -26,8 +26,8 @@
         <div id="${selector.id}" class="card">
 
             <div class="card-header" id="heading${selector.id}">
-                <a class="stretched-link plain-link" data-toggle="collapse" href="#collapse${selector.id}" role="button" aria-expanded="true"
-                   data-target="#collapse${selector.id}" aria-controls="collapse${selector.id}">
+                <a class="stretched-link plain-link" data-bs-toggle="collapse" href="#collapse${selector.id}" role="button" aria-expanded="true"
+                   data-bs-target="#collapse${selector.id}" aria-controls="collapse${selector.id}">
                     <i class="bi bi-chevron-down float-right"></i>
                     ${selector.priority}
                     <g:link class="above-stretched-link" controller="workflowConfig" action="index" fragment="workflowConfigModal"
@@ -78,7 +78,7 @@
                         </g:else>
                         <pre class="collapse"
                              id="collapse-code${selector.id}">${grails.converters.JSON.parse(selector.externalWorkflowConfigFragment.configValues).toString(2)}</pre>
-                        <a role="button" class="collapsed" data-toggle="collapse" href="#collapse-code${selector.id}" aria-expanded="false"
+                        <a role="button" class="collapsed" data-bs-toggle="collapse" href="#collapse-code${selector.id}" aria-expanded="false"
                            aria-controls="collapse-code${selector.id}"></a>
                     </div>
 

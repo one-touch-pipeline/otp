@@ -175,13 +175,13 @@ function openConfirmationModal(text, confirmCallback, cancelCallback) {
 
   confirmButton.unbind('click');
   confirmButton.on('click', () => {
-    modal.hide();
+    modal.modal('hide');
     confirmCallback();
   });
 
   cancelButton.unbind('click');
   cancelButton.on('click', () => {
-    modal.hide();
+    modal.modal('hide');
 
     if (cancelCallback) {
       cancelCallback();

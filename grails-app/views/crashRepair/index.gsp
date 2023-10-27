@@ -52,19 +52,19 @@
             </g:if>
 
             <div class="btn-group float-right table-action-buttons" role="group" aria-label="table actions">
-                <button type="button" class="btn btn-primary" onclick="restartSelectedSteps()" title="${g.message(code: 'crashRepair.button.restartSteps.tooltip')}" data-toggle="tooltip" data-placement="bottom">
+                <button type="button" class="btn btn-primary" onclick="restartSelectedSteps()" title="${g.message(code: 'crashRepair.button.restartSteps.tooltip')}" data-bs-toggle="tooltip" data-placement="bottom">
                     <i class="bi bi-reply"></i>
                 </button>
-                <button type="button" class="btn btn-primary" onclick="restartSelectedWorkflowRuns()" title="${g.message(code: 'crashRepair.button.restartRuns.tooltip')}" data-toggle="tooltip" data-placement="bottom">
+                <button type="button" class="btn btn-primary" onclick="restartSelectedWorkflowRuns()" title="${g.message(code: 'crashRepair.button.restartRuns.tooltip')}" data-bs-toggle="tooltip" data-placement="bottom">
                     <i class="bi bi-reply-all"></i>
                 </button>
-                <button type="button" class="btn btn-primary" onclick="markSelectedStepsAsFailed()" title="${g.message(code: 'crashRepair.button.stepsFailed.tooltip')}" data-toggle="tooltip" data-placement="bottom">
+                <button type="button" class="btn btn-primary" onclick="markSelectedStepsAsFailed()" title="${g.message(code: 'crashRepair.button.stepsFailed.tooltip')}" data-bs-toggle="tooltip" data-placement="bottom">
                     <i class="bi bi-x-circle"></i>
                 </button>
-                <button type="button" class="btn btn-primary" onclick="markSelectedRunsAsFinalFailed()" title="${g.message(code: 'crashRepair.button.stepsFinalFailed.tooltip')}" data-toggle="tooltip" data-placement="bottom">
+                <button type="button" class="btn btn-primary" onclick="markSelectedRunsAsFinalFailed()" title="${g.message(code: 'crashRepair.button.stepsFinalFailed.tooltip')}" data-bs-toggle="tooltip" data-placement="bottom">
                     <i class="bi bi-file-earmark-x"></i>
                 </button>
-                <button type="button" class="btn btn-primary" onclick="syncWorkflowStepData()" title="${g.message(code: 'crashRepair.button.refreshData.tooltip')}" data-toggle="tooltip" data-placement="bottom">
+                <button type="button" class="btn btn-primary" onclick="syncWorkflowStepData()" title="${g.message(code: 'crashRepair.button.refreshData.tooltip')}" data-bs-toggle="tooltip" data-placement="bottom">
                     <i class="bi bi-arrow-repeat"></i>
                 </button>
             </div>

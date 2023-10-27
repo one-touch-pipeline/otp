@@ -236,7 +236,7 @@ class OtpTagLib {
                 out << "<h3 class='modal-title'>${attrs.title}</h3>"
             }
             if (attrs.closable == "true") {
-                out << "<button class='close closeModal' onclick='${attrs.onClose}' type='button' data-dismiss='modal'>&times;</button>"
+                out << "<button class='close closeModal' onclick='${attrs.onClose}' type='button' data-bs-dismiss='modal'>&times;</button>"
             }
             out << "</div>"
         }
@@ -245,7 +245,7 @@ class OtpTagLib {
         out << "</div>"
         if (attrs.type == "dialog") {
             out << "<div class='modal-footer'>"
-            out << "<button type='button' class='btn btn-secondary closeModal' data-dismiss='modal' onclick='${attrs.onClose}'>${closeText}</button>"
+            out << "<button type='button' class='btn btn-secondary closeModal' data-bs-dismiss='modal' onclick='${attrs.onClose}'>${closeText}</button>"
             if (attrs.submit) {
                 out << "<form id='modal-form' method='${attrs.submitMethod ?: "POST"}' action='${attrs.action}'>"
                 if (attrs.hiddenInput) {
@@ -256,7 +256,7 @@ class OtpTagLib {
                 out << "<button type='submit' class='btn btn-primary confirm'>${confirmText}</button>"
                 out << "</form>"
             } else {
-                out << "<button id='confirmModal' type='button' class='btn btn-primary confirm' data-dismiss='modal' onclick='${attrs.onConfirm}'>" +
+                out << "<button id='confirmModal' type='button' class='btn btn-primary confirm' data-bs-dismiss='modal' onclick='${attrs.onConfirm}'>" +
                         "${confirmText}</button>"
             }
             out << "</div>"

@@ -23,6 +23,9 @@ FROM ghcr.io/linuxserver/openssh-server
 ADD *.sh /custom-cont-init.d/
 RUN mkdir -p /home/otp
 
+# config per project and seq type files
+ADD https://gitlab.com/one-touch-pipeline/otp/-/wikis/uploads/ci/config_files.tar.gz /home/otp
+
 #cache file system for the dump
 ADD https://gitlab.com/one-touch-pipeline/otp/-/wikis/uploads/ci/filesystem.tar.gz /home/otp
 

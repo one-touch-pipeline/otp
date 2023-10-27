@@ -1,4 +1,5 @@
 /*
+/*
  * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -384,7 +385,7 @@ $(document).ready(() => {
         targets: [3],
         orderData: [2, 3, 4],
         render: (data, type, row) => `${row.exactMatch ? '<strong>' : ''}
-            <a href="#" data-toggle="modal" data-target="#workflowConfigModal">${data}</a>
+            <a href="#" data-bs-toggle="modal" data-bs-target="#workflowConfigModal">${data}</a>
             ${row.exactMatch ? '</strong>' : ''}`
       },
       {
@@ -408,16 +409,16 @@ $(document).ready(() => {
         orderable: false,
         render: (data, type, row) => {
           const disabled = row.selectorType === 'DEFAULT_VALUES' ? 'disabled' : '';
-          return `<button id="new-row" class="btn btn-sm btn-primary" type="button" data-toggle="modal" 
-            data-target="#workflowConfigModal" data-toggle="tooltip"
+          return `<button id="new-row" class="btn btn-sm btn-primary" type="button" data-bs-toggle="modal" 
+            data-bs-target="#workflowConfigModal" data-bs-toggle="tooltip"
             title="${$.otp.workflowConfig.TOOLTIPS.createButton}" data-operation="create">
             <i class="bi bi-plus-square"></i></button>
-            <button id="edit-row" class="btn btn-sm btn-primary" type="button" data-toggle="modal" 
-            data-target="#workflowConfigModal" data-toggle="tooltip"
+            <button id="edit-row" class="btn btn-sm btn-primary" type="button" data-bs-toggle="modal" 
+            data-bs-target="#workflowConfigModal" data-bs-toggle="tooltip"
             title="${$.otp.workflowConfig.TOOLTIPS.editButton}" data-operation="update" ${disabled}>
             <i class="bi bi-pencil"></i></button>
-            <button id="deprecate-row" class="btn btn-sm btn-danger" type="button" data-toggle="modal"
-            data-target="#workflowConfigModal" data-toggle="tooltip"
+            <button id="deprecate-row" class="btn btn-sm btn-danger" type="button" data-bs-toggle="modal"
+            data-bs-target="#workflowConfigModal" data-bs-toggle="tooltip"
             title="${$.otp.workflowConfig.TOOLTIPS.deprecateButton}" data-operation="deprecate" ${disabled}>
             <i class="bi bi-journal-code"></i></button>`;
         }

@@ -41,15 +41,15 @@
         <div class="row">
             <div class="col-sm">
                 <button id="search-button" type="button" class="btn btn-primary" title="${g.message(code: "workflowConfig.button.search.title")}"
-                        data-toggle="tooltip" onclick="$.otp.workflowConfig.search()">
+                        data-bs-toggle="tooltip" onclick="$.otp.workflowConfig.search()">
                     <g:message code="workflowConfig.button.search"/>
                 </button>
                 <button id="clear-button" type="button" class="btn btn-primary" title="${g.message(code: "workflowConfig.button.clear.title")}"
-                        data-toggle="tooltip" onclick="$.otp.workflowConfig.clear()">
+                        data-bs-toggle="tooltip" onclick="$.otp.workflowConfig.clear()">
                     <g:message code="workflowConfig.button.clear"/>
                 </button>
-                <button id="create-button" type="button" class="btn btn-primary" data-toggle="modal" title="${g.message(code: "workflowConfig.button.create.title")}"
-                        data-toggle="tooltip" data-target="#workflowConfigModal" data-operation="create">
+                <button id="create-button" type="button" class="btn btn-primary" data-bs-toggle="modal" title="${g.message(code: "workflowConfig.button.create.title")}"
+                        data-bs-toggle="tooltip" data-bs-target="#workflowConfigModal" data-operation="create">
                     <g:message code="workflowConfig.button.create"/>
                 </button>
             </div>

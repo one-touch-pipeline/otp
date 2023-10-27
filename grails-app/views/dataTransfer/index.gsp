@@ -51,7 +51,7 @@
             <div id="doc${dta.id}" class="card">
                 <div class="card-header" id="header-${i}">
                     <div class="collapse-title-container">
-                        <button class="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse" data-target="#collapse-dta-${i}"
+                        <button class="btn btn-link btn-block text-left collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-dta-${i}"
                                 aria-controls="collapse-dta-${i}" aria-expanded="false">
                             ${dta.dtaId ? "${dta.dtaId}, " : ""}
                             <strong>${dta.peerInstitution}</strong>
@@ -84,7 +84,7 @@
                                 </li>
                             </g:each>
                         </ul>
-                        <button type="button" class="btn btn-sm btn-primary alignment-add-files-btn" data-toggle="collapse" data-target="#addFileToDta-${i}" aria-expanded="false" aria-controls="addFileToDta-${i}">
+                        <button type="button" class="btn btn-sm btn-primary alignment-add-files-btn" data-bs-toggle="collapse" data-bs-target="#addFileToDta-${i}" aria-expanded="false" aria-controls="addFileToDta-${i}">
                             <i class="bi bi-folder-plus"></i> Add
                         </button>
 
@@ -111,7 +111,7 @@
 
                         <g:render template="templates/transferList" model="['dta': dta]"/>
 
-                        <button class="btn btn-sm btn-primary alignment-new-transfer-btn" data-toggle="collapse" data-target="#addTransfer-${i}" aria-expanded="${!cachedTransferCmd}" aria-controls="addTransfer-${i}">
+                        <button class="btn btn-sm btn-primary alignment-new-transfer-btn" data-bs-toggle="collapse" data-bs-target="#addTransfer-${i}" aria-expanded="${!cachedTransferCmd}" aria-controls="addTransfer-${i}">
                             ${g.message(code: 'dataTransfer.dta.transfer.new.expand')}
                         </button>
 

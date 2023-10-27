@@ -24,10 +24,6 @@ describe('Check projectRequest page', () => {
   'use strict';
 
   context('when user is a default user', () => {
-    before(() => {
-      cy.logout();
-    });
-
     beforeEach(() => {
       cy.loginAsUser();
     });
@@ -190,10 +186,6 @@ describe('Check projectRequest page', () => {
   });
 
   context('when user is a default user', () => {
-    before(() => {
-      cy.logout();
-    });
-
     beforeEach(() => {
       cy.loginAsUser();
     });

@@ -26,14 +26,14 @@
         <script type="text/javascript" src="${otp.serverUrl()}/webjars/chart.js/4.4.0/dist/chart.umd.js"></script>
         <script type="text/javascript" src="${otp.serverUrl()}/webjars/chartjs-plugin-datalabels/2.2.0/dist/chartjs-plugin-datalabels.js"></script>
         <script type="text/javascript" src="${otp.serverUrl()}/webjars/datatables/1.13.5/js/jquery.dataTables.js"></script>
-        <script type="text/javascript" src="${otp.serverUrl()}/webjars/datatables/1.13.5/js/dataTables.bootstrap4.js"></script>
+        <script type="text/javascript" src="${otp.serverUrl()}/webjars/datatables/1.13.5/js/dataTables.bootstrap5.js"></script>
         <script type="text/javascript" src="${otp.serverUrl()}/webjars/datatables-plugins/1.13.6/pagination/select.js"></script>
+        <script type="text/javascript" src="${otp.serverUrl()}/webjars/bootstrap/5.3.0/js/bootstrap.bundle.js"></script>
         <asset:javascript src="modules/application.js"/>
         <script type="text/javascript" src="${otp.serverUrl()}/webjars/datatables.net-scroller/js/dataTables.scroller.js"></script>
-        <script type="text/javascript" src="${otp.serverUrl()}/webjars/datatables.net-scroller-bs4/js/scroller.bootstrap4.js"></script>
         <asset:stylesheet src="modules/application.css"/>
         <script type="text/javascript" src="${otp.serverUrl()}/webjars/datatables-buttons/2.4.1/js/dataTables.buttons.js"></script>
-        <script type="text/javascript" src="${otp.serverUrl()}/webjars/datatables-buttons/2.4.1/js/buttons.bootstrap4.js"></script>
+        <script type="text/javascript" src="${otp.serverUrl()}/webjars/datatables-buttons/2.4.1/js/buttons.bootstrap5.js"></script>
         <script type="text/javascript" src="${otp.serverUrl()}/webjars/datatables-buttons/2.4.1/js/buttons.html5.js"></script>
         <asset:javascript src="dataTable.js"/>
         <g:layoutHead/>

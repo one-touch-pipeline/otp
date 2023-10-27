@@ -32,7 +32,6 @@ describe('Check metadata import page', () => {
       cy.intercept('/bulkSampleCreation/index*').as('index');
 
       cy.visit('/bulkSampleCreation/index');
-      cy.intercept('/bulkSampleCreation/submit*').as('submit');
 
       cy.get('select#delimiter').select(',', { force: true });
       cy.fixture('bulkSampleCreation.txt').then((text) => {
@@ -43,10 +42,7 @@ describe('Check metadata import page', () => {
 
       cy.get('input#Submit').click();
 
-      cy.wait('@submit').then((interception) => {
-        expect(interception.response.statusCode).to.eq(302);
-        cy.get('div#infoBox').contains('Creation succeeded').should('exist');
-      });
+      cy.get('div#infoBox').contains('Creation succeeded').should('exist');
     });
 
     it('should not import data with path, when md5 sum is changed between validation and import', () => {

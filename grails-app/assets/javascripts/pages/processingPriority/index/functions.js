@@ -305,7 +305,7 @@ $(document).ready(() => {
   });
 
   $('div.toolbar').html(`<button type="button" class="btn btn-primary"
-               data-toggle="modal" data-target="#processingPriorityModal">Create</button>`);
+               data-bs-toggle="modal" data-bs-target="#processingPriorityModal">Create</button>`);
 
   /*
      * Event handler triggered by Delete icon in the table

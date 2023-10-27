@@ -28,12 +28,14 @@ To use it, store a `FlashMessage` object in `flash.message`.
 <g:if test="${flash.message && flash.message instanceof FlashMessage}">
 <div id="otpToastBox" class="otpToastBox">
     <div class="toast ${(flash.message.errorObject || flash.message.errorList) ? "otpErrorToast" : "otpSuccessToast"} fade show" role="alert" aria-live="assertive" aria-atomic="true" data-autohide="false">
-        <div class="toast-header">
-            <span class="otp-toast-icon-wrapper  ${(flash.message.errorObject || flash.message.errorList) ? "text-danger" : "text-success"}">
-                <i class="${(flash.message.errorObject || flash.message.errorList) ? "bi-bug" : "bi-check-circle"}"></i>
+        <div class="toast-header justify-content-between">
+            <span class="title-wrapper">
+                <span class="otp-toast-icon-wrapper  ${(flash.message.errorObject || flash.message.errorList) ? "text-danger" : "text-success"}">
+                    <i class="${(flash.message.errorObject || flash.message.errorList) ? "bi-bug" : "bi-check-circle"}"></i>
+                </span>
+                <strong class="mr-auto">${flash.message.message}</strong>
             </span>
-            <strong class="mr-auto">${flash.message.message}</strong>
-            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+            <button type="button" class="btn btn-outline-secondary btn-sm ml-2 mb-1 close" data-bs-dismiss="toast" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>

@@ -105,8 +105,8 @@
                         </g:if>
                         <g:elseif test="${mwps.anyFinal}">
                             <button type="button" class="btn btn-outline-danger"
-                                    data-toggle="modal"
-                                    data-target="#confirmDeleteModal"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#confirmDeleteModal"
                                     data-sample="${mwps.sample.id}"
                                     data-seq-type="${mwps.seqType.id}"
                                     data-program-version="${mwps.programVersion}"

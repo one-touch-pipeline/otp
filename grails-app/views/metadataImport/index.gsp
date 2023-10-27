@@ -53,7 +53,7 @@
 
     <g:form name="metadata-import-form" useToken="true" controller="metadataImport" action="importByPathOrContent" enctype="multipart/form-data">
         <sec:ifAllGranted roles="ROLE_OPERATOR">
-            <div class="form-group row">
+            <div class="mb-3 row">
                 <label for="ticketNumber" class="col-sm-2 col-form-label">
                     <g:message code="metadataImport.ticketNumber"/>
                 </label>
@@ -71,7 +71,7 @@
                 </div>
             </div>
 
-            <div class="form-group row">
+            <div class="mb-3 row">
                 <label for="seqCenterComment" class="col-sm-2 col-form-label">
                     <g:message code="metadataImport.ticket.seqCenter.comment"/>
                 </label>
@@ -82,7 +82,7 @@
             </div>
         </sec:ifAllGranted>
 
-        <div class="form-group row" id="path-container">
+        <div class="mb-3 row" id="path-container">
             <label for="paths" class="col-sm-2 col-form-label">
                 <g:message code="metadataImport.path"/>
             </label>
@@ -118,7 +118,7 @@
 
         </div>
 
-        <div class="form-group row" id="file-container">
+        <div class="mb-3 row" id="file-container">
             <label for="contentList" class="col-sm-2 col-form-label">
                 <g:message code="metadataImport.contentList"/>
             </label>
@@ -138,7 +138,7 @@
             </div>
         </div>
 
-        <div class="form-group row">
+        <div class="mb-3 row">
             <label class="col-sm-2 col-form-label ">
                 <g:message code="metadataImport.metadataFileSource"/>
             </label>
@@ -156,7 +156,7 @@
             </div>
         </div>
 
-        <div class="form-group row">
+        <div class="mb-3 row">
             <label class="col-sm-2 col-form-label">
                 <g:message code="metadataImport.directoryStructure"/>
             </label>
@@ -177,7 +177,7 @@
             </div>
         </div>
 
-        <div class="form-group row">
+        <div class="mb-3 row">
             <div class="col-sm-2"></div>
 
             <div class="col-sm-10">

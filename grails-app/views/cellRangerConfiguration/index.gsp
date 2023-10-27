@@ -70,14 +70,13 @@
     <g:message code="configurePipeline.cellRanger.info"/>
 
     <g:form action="updateVersion" params='["seqType.id": seqType.id, overviewController: controllerName]' method='POST'>
-        <div class="form-group row">
+        <div class="mb-3 row">
             <label for="versionSelect" class="col-sm-2 col-form-label">
                 <g:message code="configurePipeline.version"/>
                 (default: ${defaultVersion})
             </label>
             <g:select name="programVersion" id="versionSelect" class="use-select-2 col-sm-4" value="${currentVersion}" from="${availableVersions}"
                       noSelection="${["": "Select version"]}"/>
-
             <div class="col-sm-5">
                 <g:submitButton class="${archived} btn btn-primary" name="submit" value="Submit"/>
             </div>

@@ -581,7 +581,7 @@ $(document).ready(() => {
   $.otp.applySelect2($('.use-select-2').not('.dont-use-select-2'));
 
   // close toasts that are not added with js
-  $('body').on('click', '[data-dismiss="toast"]', function () {
+  $('body').on('click', '[data-bs-dismiss="toast"]', function () {
     $(this).closest('.toast').toast('hide');
   });
 });

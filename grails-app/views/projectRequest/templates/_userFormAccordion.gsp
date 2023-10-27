@@ -25,7 +25,7 @@
         <g:hiddenField name="users[${index}].projectRequestUser.id" value="${user?.projectRequestUser?.id}"/>
 
         <div class="row align-items-center">
-            <a class="col-sm-9" id="user-form-title-${index}" data-toggle="collapse" data-target="#collapse-${index}" aria-expanded="true"
+            <a class="col-sm-9" id="user-form-title-${index}" data-bs-toggle="collapse" data-bs-target="#collapse-${index}" aria-expanded="true"
                aria-controls="collapse-${index}">
                 New User
             </a>

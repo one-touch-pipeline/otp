@@ -74,7 +74,7 @@ $(() => {
               }
             });
             return `<a title="${row.displayName.replaceAll('\n', '<br>')}" 
-                       data-toggle="tooltip" data-placement="bottom" href="${workflowRunDetailsPageLink}">
+                       data-bs-toggle="tooltip" data-placement="bottom" href="${workflowRunDetailsPageLink}">
                       ${row.shortName}
                     </a>`;
           }
@@ -136,7 +136,7 @@ $(() => {
                             ${restartStepButton} 
                             <div class="btn-group" role="group">
                               <button class="btn btn-xs btn-primary dropdown-toggle dropdown-toggle-split"
-                                      type="button" data-toggle="dropdown" 
+                                      type="button" data-bs-toggle="dropdown" 
                                       aria-haspopup="true" aria-expanded="false" 
                                       title="Restart previous steps" ${buttonsDisabled} ${stepsDisabled}>
                                 <span class="sr-only">Toggle Dropdown</span>

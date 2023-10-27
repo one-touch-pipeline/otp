@@ -36,35 +36,35 @@
 <ul class="nav nav-tabs" id="myTab" role="tablist">
     <g:if test="${tabs.contains('project')}">
         <li class="nav-item" role="presentation">
-            <a class="nav-link active" id="project-tab" data-toggle="tab" href="#project" role="tab" aria-controls="project" aria-selected="true">
+            <a class="nav-link active" id="project-tab" data-bs-toggle="tab" data-bs-target="#project" type="button" role="tab" aria-controls="project" aria-selected="true">
                 <g:message code="triggerAlignment.input.tab.project"/>
             </a>
         </li>
     </g:if>
     <g:if test="${tabs.contains('pid')}">
         <li class="nav-item" role="presentation">
-            <a class="nav-link" id="pid-tab" data-toggle="tab" href="#pid" role="tab" aria-controls="pid" aria-selected="false"
+            <a class="nav-link" id="pid-tab" data-bs-toggle="tab" data-bs-target="#pid" type="button" role="tab" aria-controls="pid" aria-selected="false"
             ><g:message code="triggerAlignment.input.tab.pid"/>
             </a>
         </li>
     </g:if>
     <g:if test="${tabs.contains('lane')}">
         <li class="nav-item" role="presentation">
-            <a class="nav-link" id="lane-tab" data-toggle="tab" href="#lane" role="tab" aria-controls="lane" aria-selected="false">
+            <a class="nav-link" id="lane-tab" data-bs-toggle="tab" data-bs-target="#lane" type="button" role="tab" aria-controls="lane" aria-selected="false">
                 <g:message code="triggerAlignment.input.tab.lane"/>
             </a>
         </li>
     </g:if>
     <g:if test="${tabs.contains('ilse')}">
         <li class="nav-item" role="presentation">
-            <a class="nav-link" id="ilse-tab" data-toggle="tab" href="#ilse" role="tab" aria-controls="ilse" aria-selected="false">
+            <a class="nav-link" id="ilse-tab" data-bs-toggle="tab" data-bs-target="#ilse" type="button" aria-controls="ilse" aria-selected="false">
                 <g:message code="triggerAlignment.input.tab.ilse"/>
             </a>
         </li>
     </g:if>
     <g:if test="${tabs.contains('multiInput')}">
         <li class="nav-item" role="presentation">
-            <a class="nav-link" id="multi-input-tab" data-toggle="tab" href="#multi-input" role="tab" aria-controls="multi-input" aria-selected="false">
+            <a class="nav-link" id="multi-input-tab" data-bs-toggle="tab" data-bs-target="#multi-input" type="button" role="tab" aria-controls="multi-input" aria-selected="false">
                 <g:message code="triggerAlignment.input.tab.multiInput"/>
             </a>
         </li>

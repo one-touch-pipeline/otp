@@ -109,8 +109,10 @@ Cypress.Commands.add('checkAllAnkerElements', (initial = true) => {
   cy.get(ankerElementWithHref)
     .each(($a) => {
       const href = $a.prop('href');
-      if (href.includes(Cypress.config().baseUrl) && !checkedHrefList.includes(href) && !excludedLinks.includes(href)) {
-        checkedHrefList.push(href);
+      const short = href.split('?')[0];
+      const { baseUrl } = Cypress.config();
+      if (href.includes(baseUrl) && !checkedHrefList.includes(short) && !excludedLinks.includes(short)) {
+        checkedHrefList.push(short);
         cy.log(`Try http request for ${href} and visit browser page.`);
         cy.request(href)
           .then((response) => {

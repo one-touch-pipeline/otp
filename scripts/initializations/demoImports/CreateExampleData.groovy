@@ -1870,7 +1870,7 @@ class ExampleData {
                                         adapterTrimmingNeeded: false,
                                         nameUsedInConfig     : nameUsedInConfig,
                                         md5sum               : HelperUtils.getRandomMd5sum(),
-                                        configFilePath       : "/dev/null/${nameUsedInConfig}_${samplePair.id}"
+                                        configFilePath       : "/home/otp/configs/${nameUsedInConfig}_${samplePair.id}"
         ]).save(flush: false)
     }
 

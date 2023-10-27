@@ -77,8 +77,8 @@ function renderStepDataTable(steps) {
         parameters: { id: step.workflowRunId, 'workflow.id': step.workflowId }
       })}" 
           title="${step.workflowRunName.replaceAll('\n', '<br>')}" 
-          data-toggle="tooltip" 
-          data-placement="bottom">
+          data-bs-toggle="tooltip" 
+          data-bs-placement="bottom">
          ${step.workflowRunShortName}
        </a>`,
       step.beanName,
@@ -89,28 +89,28 @@ function renderStepDataTable(steps) {
       `<div class="btn-group float-right row-action-buttons" role="group" aria-label="table actions">
            <button class="btn btn-primary" 
                    onclick="restartStep(${step.id})"${(!step.workflowRunJobCanBeRestarted ? 'disabled' : '')}
-                   data-toggle="tooltip" 
+                   data-bs-toggle="tooltip" 
                    data-placement="top" 
                    title="Restart step #${step.id}">
                <i class="bi bi-reply"></i>
            </button>
            <button class="btn btn-primary" 
                    onclick="restartWorkflowRun(${step.id})"
-                   data-toggle="tooltip" 
+                   data-bs-toggle="tooltip" 
                    data-placement="top" 
                    title="Restart workflow run #${step.workflowRunId}">
                <i class="bi bi-reply-all"></i>
            </button>
            <button class="btn btn-primary" 
                    onclick="setWorkflowStepAsFailed(${step.id})"
-                   data-toggle="tooltip" 
+                   data-bs-toggle="tooltip" 
                    data-placement="top" 
                    title="Mark #${step.id} as failed">
                <i class="bi bi-x-circle"></i>
            </button>
            <button class="btn btn-primary" 
                    onclick="setWorkflowRunAsFinalFailed(${step.id})"
-                   data-toggle="tooltip" 
+                   data-bs-toggle="tooltip" 
                    data-placement="top" 
                    title="Mark #${step.workflowRunId} as final failed">
                <i class="bi bi-file-earmark-x"></i>

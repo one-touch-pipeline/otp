@@ -52,7 +52,7 @@
         <g:hiddenField id="projectRequestId" name="projectRequest.id" value="${cmd?.projectRequest?.id}"/>
 
         <!-- Project Type* -->
-        <div class="form-group row">
+        <div class="mb-3 row">
             <div class="col-sm-2">
                 <label class="col-form-label" for="projectType">${g.message(code: "project.projectType")}*</label>
                 <g:if test="${faqProjectTypeLink}">
@@ -76,7 +76,7 @@
         </div>
 
         <!-- Project Name* -->
-        <div class="form-group row">
+        <div class="mb-3 row">
             <div class="col-sm-2">
                 <label class="col-form-label" for="name">${g.message(code: "project.name")}*</label>
                 <i class="helper-icon bi bi-question-circle-fill" title="${projectNameDescription}"></i>
@@ -98,7 +98,7 @@
         </div>
 
         <!-- Description* -->
-        <div class="form-group row">
+        <div class="mb-3 row">
             <div class="col-sm-2">
                 <label class="col-form-label" for="description">${g.message(code: "project.description")}*</label>
                 <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "projectRequest.description.detail")}"></i>
@@ -113,7 +113,7 @@
         </div>
 
         <!-- Keyword(s)* -->
-        <div class="form-group row">
+        <div class="mb-3 row">
             <div class="col-sm-2">
                 <label class="col-form-label" for="keywords">${g.message(code: "project.keywords")}*</label>
                 <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "projectRequest.keywords.detail")}"></i>
@@ -135,7 +135,7 @@
         </div>
 
         <!-- End Date -->
-        <div class="form-group row">
+        <div class="mb-3 row">
             <div class="col-sm-2">
                 <label class="col-form-label" for="endDate">${g.message(code: "project.endDate")}</label>
                 <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "projectRequest.endDate.detail")}"></i>
@@ -147,7 +147,7 @@
         </div>
 
         <!-- Storage Until* -->
-        <div class="form-group row">
+        <div class="mb-3 row">
             <div class="col-sm-2">
                 <label class="col-form-label" for="storagePeriod">${g.message(code: "project.storageUntil")}*</label>
                 <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "projectRequest.storageUntil.detail")}"></i>
@@ -173,7 +173,7 @@
         </div>
 
         <!-- Related Projects -->
-        <div class="form-group row">
+        <div class="mb-3 row">
             <div class="col-sm-2">
                 <label class="col-form-label" for="relatedProjects">${g.message(code: "project.relatedProjects")}</label>
                 <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "projectRequest.relatedProjects.detail")}"></i>
@@ -185,7 +185,7 @@
         </div>
 
         <!-- Species [with Strain]-->
-        <div class="form-group row">
+        <div class="mb-3 row">
             <div class="col-sm-2">
                 <label class="col-form-label" for="speciesWithStrainList" id="speciesWithStrainLabel">${g.message(code: "project.speciesWithStrain")}</label>
                 <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "projectRequest.speciesWithStrain.detail")}"></i>
@@ -206,7 +206,7 @@
         </div>
 
         <!-- Sequencing Center -->
-        <div class="form-group row">
+        <div class="mb-3 row">
             <div class="col-sm-2">
                 <label class="col-form-label" for="sequencingCenterList">${g.message(code: "projectRequest.sequencingCenter")}</label>
                 <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "projectRequest.sequencingCenter.detail")}"></i>
@@ -230,7 +230,7 @@
         </div>
 
         <!-- Approximate Number of Samples* -->
-        <div class="form-group row">
+        <div class="mb-3 row">
             <div class="col-sm-2">
                 <label class="col-form-label" id="approxNoOfSamplesLabel"
                        for="approxNoOfSamples">${g.message(code: "projectRequest.approxNoOfSamples")}*</label>
@@ -243,7 +243,7 @@
         </div>
 
         <!-- Sequencing Type(s)* -->
-        <div class="form-group row">
+        <div class="mb-3 row">
             <div class="col-sm-2">
                 <label class="col-form-label" for="seqTypesList" id="seqTypesLabel">${g.message(code: "projectRequest.seqTypes")}</label>
                 <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "projectRequest.seqTypes.detail")}"></i>
@@ -272,7 +272,7 @@
         </div>
 
         <!-- Comments -->
-        <div class="form-group row">
+        <div class="mb-3 row">
             <label class="col-sm-2 col-form-label" for="requesterComment">${g.message(code: "projectRequest.requesterComment")}</label>
 
             <div class="col-sm-10">

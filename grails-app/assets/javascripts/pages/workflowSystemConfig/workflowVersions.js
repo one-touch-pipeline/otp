@@ -154,13 +154,13 @@ const openAndRenderModificationModal = (workflowVersion) => {
 
   confirmButton.unbind('click');
   confirmButton.on('click', () => {
-    modal.hide();
+    modal.modal('hide');
     updateDeprecationStateWorkflowVersion(workflowVersion, modal);
   });
 
   cancelButtons.unbind('click');
   cancelButtons.on('click', () => {
-    modal.hide();
+    modal.modal('hide');
   });
 
   updateModalWithCurrentWorkflowVersion(workflowVersion, modal);

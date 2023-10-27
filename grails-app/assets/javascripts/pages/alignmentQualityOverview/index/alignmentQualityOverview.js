@@ -484,7 +484,7 @@ $(() => {
 
     confirmButton.unbind('click');
     confirmButton.on('click', () => {
-      modal.hide();
+      modal.modal('hide');
       const modalInput = modal.find('#modalInput').val();
       confirmCallback(modalInput);
     });

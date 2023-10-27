@@ -26,8 +26,8 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="workflowConfigModalLabel"><g:message code="workflowConfig.dialog.title"/></h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+                <button type="button" class="btn btn-primary close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="bi bi-x" aria-hidden="true"></i>
                 </button>
             </div>
 
@@ -91,7 +91,7 @@
 
                     <div class="row">
                         <div class="col-sm">
-                            <div class="input-group-prepend">
+                            <div class="input-group mb-3">
                                 <div class="input-group-prepend">
                                     <label class="input-group-text"><g:message code="workflowConfig.fragment.version"/></label>
                                 </div>
@@ -119,7 +119,7 @@
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <g:message code="default.button.cancel.label"/>
                 </button>
                 <button class="btn btn-warning check" title="${g.message(code: "workflowConfig.button.check.title")}" type="button">

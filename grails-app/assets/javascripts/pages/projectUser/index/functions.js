@@ -116,13 +116,13 @@ function openConfirmationModal(text, confirmCallback, cancelCallback) {
 
   confirmButton.unbind('click');
   confirmButton.on('click', () => {
-    modal.hide();
+    modal.modal('hide');
     confirmCallback();
   });
 
   cancelButtons.unbind('click');
   cancelButtons.on('click', () => {
-    modal.hide();
+    modal.modal('hide');
 
     if (cancelCallback) {
       cancelCallback();
@@ -225,7 +225,7 @@ $(document).ready(() => {
 
   $('.loaded-content').show();
   $('.loader').hide();
-  $('[data-toggle="tooltip"]').tooltip();
+  $('[data-bs-toggle="tooltip"]').tooltip();
   $('select.use-select-2').select2({
     allowClear: true,
     theme: 'bootstrap4'

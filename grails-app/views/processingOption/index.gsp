@@ -49,7 +49,7 @@
         <g:each status="rowIndex" in="${options}" var="option">
             <tr class="processing-options-row">
                 <th scope="row">${rowIndex+1}</th>
-                <td data-toggle="tooltip" data-placement="top" title="${option.name?.tooltip}">${option.name.value}</td>
+                <td data-bs-toggle="tooltip" data-placement="top" title="${option.name?.tooltip}">${option.name.value}</td>
                 <td class="${option.type.warnColor == TableCellValue.WarnColor.ERROR ? 'table-danger' : ''}">${option.type.value}</td>
                 <td id="value-cell-${rowIndex}" class="${option.value.warnColor == TableCellValue.WarnColor.ERROR ? 'table-danger' : ''}">
                     <div class="input-group">

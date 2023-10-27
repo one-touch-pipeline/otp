@@ -38,7 +38,7 @@ $(document).ready(() => {
 
     confirmButton.unbind('click');
     confirmButton.on('click', () => {
-      modal.hide();
+      modal.modal('hide');
       $.ajax({
         url: $.otp.createLink({ controller: 'projectRequest', action: 'delete' }),
         type: 'POST',
@@ -58,7 +58,7 @@ $(document).ready(() => {
 
     cancelButtons.unbind('click');
     cancelButtons.on('click', () => {
-      modal.hide();
+      modal.modal('hide');
     });
 
     modalBody.html('Are you sure?');
