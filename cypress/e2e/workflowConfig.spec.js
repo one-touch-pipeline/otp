@@ -37,10 +37,8 @@ describe('Check workflow config page', () => {
       cy.fixture('workflowConfig.json').then((config) => {
         cy.get('div.modal-content').should('be.visible');
 
-        // Dummy input, to prevent flaky typing
-        cy.get('div.modal-content').find('input[name="selectorName"]').type('x');
+        cy.checkedTyping(() => cy.get('div.modal-content').find('input[name="selectorName"]'), config[0].selectorName);
 
-        cy.get('div.modal-content').find('input[name="selectorName"]').clear().type(config[0].selectorName);
         cy.get('div.modal-content').find('select[name="workflows"]').select(config[0].workflows, { force: true });
         cy.get('div.modal-content').find('select[name="projects"]').select(config[0].projects, { force: true });
         cy.get('div.modal-content').find('select[name="referenceGenomes"]')
@@ -92,10 +90,8 @@ describe('Check workflow config page', () => {
         cy.get('div.modal-content').should('be.visible');
         cy.get('div.modal-content input[name="selectorName"]').should('have.value', config[0].selectorName);
 
-        // Dummy input, to prevent flaky typing
-        cy.get('div.modal-content').find('input[name="selectorName"]').type('x');
+        cy.checkedTyping(() => cy.get('div.modal-content').find('input[name="selectorName"]'), config[2].selectorName);
 
-        cy.get('div.modal-content input[name="selectorName"]').focus().clear().type(config[2].selectorName);
         cy.get('div.modal-content').find('select[name="workflows"]').select(config[2].workflows, { force: true });
         cy.get('div.modal-content').find('select[name="projects"]').select(config[2].projects, { force: true });
         cy.get('div.modal-content').find('select[name="referenceGenomes"]')
@@ -145,10 +141,7 @@ describe('Check workflow config page', () => {
         cy.get('div.modal-content').should('be.visible');
         cy.get('div.modal-content input[name="selectorName"]').should('have.value', config[2].selectorName);
 
-        // Dummy input, to prevent flaky typing
-        cy.get('div.modal-content').find('input[name="selectorName"]').type('x');
-
-        cy.get('div.modal-content input[name="selectorName"]').focus().clear().type(config[3].selectorName);
+        cy.checkedTyping(() => cy.get('div.modal-content input[name="selectorName"]'), config[3].selectorName);
         cy.get('div.modal-content').find('select[name="projects"]').select(config[3].projects, { force: true });
 
         cy.get('div.modal-content').find('#save-button').click();
@@ -186,17 +179,16 @@ describe('Check workflow config page', () => {
         cy.wait('@getWorkflowConfigFragments').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
           cy.get('div#workflowConfigModal').should('be.visible');
-          // Cypress has to wait, until eventListener for closing modal when clicking ok is appended
-          cy.wait(20);
           cy.get('div.modal-dialog button#save-button').should('be.visible').click();
         });
 
         cy.wait('@deprecateWorkflowConfig').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
           expect(interception.response.body.name).to.eq(config[2].selectorName);
+          cy.get('#workflowConfigModal button.close').click({ force: true });
+          cy.get('div#workflowConfigModal').should('not.be.visible');
         });
 
-        cy.get('div#workflowConfigModal').should('not.be.visible');
         cy.get('table#workflowConfigResult tr').contains(config[3].selectorName).parent()
           .parent()
           .find('#deprecate-row')
@@ -204,15 +196,15 @@ describe('Check workflow config page', () => {
         cy.wait('@getWorkflowConfigFragments').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
           cy.get('div#workflowConfigModal').should('be.visible');
-          // Cypress has to wait, until eventListener for closing modal when clicking ok is appended
-          cy.wait(20);
+
           cy.get('div.modal-dialog button#save-button').should('be.visible').click();
         });
         cy.wait('@deprecateWorkflowConfig').then((interception2) => {
           expect(interception2.response.statusCode).to.eq(200);
           expect(interception2.response.body.name).to.eq(config[3].selectorName);
+          cy.get('#workflowConfigModal button.close').click({ force: true });
+          cy.get('div#workflowConfigModal').should('not.be.visible');
         });
-        cy.get('div#workflowConfigModal').should('not.be.visible');
       });
     });
 

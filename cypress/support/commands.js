@@ -179,7 +179,6 @@ Cypress.Commands.add('checkAccessDenied', (url) => {
   });
 });
 
-
 Cypress.Commands.add('checkNotFound', (url) => {
   'use strict';
 
@@ -192,6 +191,17 @@ Cypress.Commands.add('checkNotFound', (url) => {
   });
 });
 
+/** Command to check the input for correctness, to prevent flaky inputs **/
+Cypress.Commands.add('checkedTyping', (commandFn, input) => {
+  'use strict';
+
+  commandFn().clear().type(input).invoke('val')
+    .then((currentValue) => {
+      if (currentValue.toString() !== input.toString()) {
+        cy.checkedTyping(commandFn, input);
+      }
+    });
+});
 
 const validateSession = () => {
   'use strict';

@@ -43,9 +43,8 @@ describe('Check workflow system configuration page', () => {
       cy.get('#editWorkflowModal').should('be.visible');
       cy.get('#editWorkflowModal').find('.modal-title').should('contain.text', 'Cell Ranger');
 
-      cy.get('#editWorkflowModal #modal-priority').type('x');
-      cy.get('#editWorkflowModal #modal-priority').clear().type(priority);
-      cy.get('#editWorkflowModal #modal-max-runs').clear().type(maxRuns);
+      cy.checkedTyping(() => cy.get('#editWorkflowModal #modal-priority'), priority)
+      cy.checkedTyping(() => cy.get('#editWorkflowModal #modal-max-runs'), maxRuns)
       cy.get('#editWorkflowModal #modal-seqTypes').select(supportedSeqType, { force: true });
 
       cy.get('#editWorkflowModal #confirmModal').click();
@@ -77,8 +76,7 @@ describe('Check workflow system configuration page', () => {
         cy.get('@deprecateBtn').click();
         cy.get('#updateWorkflowVersionModal').as('modal').should('be.visible');
 
-        cy.get('@modal').find('textarea#comment').type('x');
-        cy.get('@modal').find('textarea#comment').clear().type(comment);
+        cy.checkedTyping(() =>  cy.get('@modal').find('textarea#comment'), comment)
         cy.get('@modal').find('input#deprecate-state').check({ force: true });
 
         cy.get('@modal').find('button#confirmModal').click();

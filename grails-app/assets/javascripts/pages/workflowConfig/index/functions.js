@@ -733,11 +733,11 @@ $(document).ready(() => {
           $.otp.workflowConfig.getDataTable().row.add(response).draw();
         }
 
-        op = `${op}d`;
-        $.otp.toaster.showSuccessToast('Workflow Config', `Selector ${newSelector.name} has been ${op} successfully`);
-
         // close the dialog
         $.otp.workflowConfig.getDialog().modal('hide');
+
+        op = `${op}d`;
+        $.otp.toaster.showSuccessToast('Workflow Config', `Selector ${newSelector.name} has been ${op} successfully`);
       },
       error(err) {
         if (err && err.status && err.responseJSON) {
