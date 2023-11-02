@@ -48,11 +48,15 @@ class RnaAlignmentCleanUpJob extends AbstractRoddyAlignmentCleanUpJob implements
 
         RnaRoddyBamFile rnaRoddyBamFile = getRoddyBamFile(workflowStep)
         Path baseDir = roddyBamFileService.getBaseDirectory(rnaRoddyBamFile)
-        baseDir.eachFile { Path path ->
-            if (Files.isSymbolicLink(path)) {
-                files << path
+
+        if (fileService.fileIsReadable(baseDir)) {
+            baseDir.eachFile { Path path ->
+                if (Files.isSymbolicLink(path)) {
+                    files << path
+                }
             }
         }
+
         return files
     }
 }

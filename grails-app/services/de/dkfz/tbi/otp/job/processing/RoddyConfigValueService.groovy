@@ -29,6 +29,8 @@ import groovy.transform.CompileDynamic
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
+import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
@@ -75,6 +77,13 @@ class RoddyConfigValueService {
         }
 
         return cValues
+    }
+
+    boolean getRunArriba(WorkflowStep workflowStep) {
+        JsonNode combinedConfigJson = MAPPER.readTree(workflowStep.workflowRun.combinedConfig)
+        boolean value = combinedConfigJson?.RODDY?.cvalues?.fields()?.find { it.key == ProjectService.RUN_ARRIBA }?.value?.value?.asBoolean()
+
+        return value == null || value
     }
 
     private Map<String, String> getAdapterTrimmingFile(RoddyBamFile roddyBamFile, String combinedConfig) {

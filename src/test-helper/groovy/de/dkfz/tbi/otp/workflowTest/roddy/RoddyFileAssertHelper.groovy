@@ -35,7 +35,7 @@ import java.nio.file.Path
 import java.util.stream.Stream
 
 @Component
-class RoddyFileAssertHelper {
+class RoddyFileAssertHelper implements RoddyFileAssertTrait {
 
     @Autowired
     FileAssertHelper fileAssertHelper
@@ -67,7 +67,7 @@ class RoddyFileAssertHelper {
         if (bamFile.baseBamFile) {
             rootDirs << roddyBamFileService.getWorkDirectory(bamFile.baseBamFile)
         }
-        fileAssertHelper.assertDirectoryContent(roddyBamFileService.getBaseDirectory(bamFile), rootDirs, [], rootLinks)
+        fileAssertHelper.assertDirectoryContentReadable(rootDirs, [], rootLinks)
 
         assertQaFileSystemState(bamFile, roddyBamFileService)
     }
@@ -81,7 +81,7 @@ class RoddyFileAssertHelper {
         if (bamFile.seqType.wgbs && bamFile.hasMultipleLibraries()) {
             qaDirs.addAll(roddyBamFileService.getFinalLibraryQADirectories(bamFile).values())
         }
-        fileAssertHelper.assertDirectoryContent(roddyBamFileService.getFinalQADirectory(bamFile), [], [], qaDirs)
+        fileAssertHelper.assertDirectoryContentReadable([], [], qaDirs)
 
         // qa for merged and one for each read group and for each library (if available)
         int numberOfFilesInFinalQaDir = bamFile.numberOfMergedLanes + 1
@@ -113,17 +113,14 @@ class RoddyFileAssertHelper {
             rootFiles << roddyBamFileService.getWorkBaiFile(bamFile)
             rootFiles << roddyBamFileService.getWorkMd5sumFile(bamFile)
         }
-        if (bamFile.seqType.wgbs) {
-            rootDirs << roddyBamFileService.getWorkMethylationDirectory(bamFile)
-            rootDirs << roddyBamFileService.getWorkMergedMethylationDirectory(bamFile)
 
-            rootFiles << roddyBamFileService.getWorkMetadataTableFile(bamFile)
-            if (bamFile.hasMultipleLibraries()) {
-                rootDirs.addAll(roddyBamFileService.getWorkLibraryMethylationDirectories(bamFile).values())
-                rootDirs.addAll(roddyBamFileService.getWorkLibraryQADirectories(bamFile).values())
-            }
+        rootDirs.addAll(getAdditionalDirectories(bamFile, roddyBamFileService))
+        rootFiles.addAll(getAdditionalFiles(bamFile, roddyBamFileService))
+
+        fileAssertHelper.assertDirectoryContentReadable(rootDirs, rootFiles)
+        if (!bamFile.seqType.rna) {
+            fileAssertHelper.assertDirectorySameContent(getWorkDirectory(bamFile, roddyBamFileService), rootDirs, rootFiles)
         }
-        fileAssertHelper.assertDirectoryContent(roddyBamFileService.getWorkDirectory(bamFile), rootDirs, rootFiles)
 
         assertQaWorkDirectoryFileSystemState(bamFile, roddyBamFileService)
     }
@@ -141,7 +138,10 @@ class RoddyFileAssertHelper {
             qaJson.addAll(roddyBamFileService.getWorkLibraryQAJsonFiles(bamFile).values())
         }
 
-        fileAssertHelper.assertDirectoryContent(roddyBamFileService.getWorkQADirectory(bamFile), qaDirs)
+        fileAssertHelper.assertDirectoryContentReadable(qaDirs)
+        if (!bamFile.seqType.rna) {
+            fileAssertHelper.assertDirectorySameContent(getWorkQADirectory(bamFile, roddyBamFileService), qaDirs)
+        }
 
         qaJson.each {
             fileAssertHelper.assertFileIsReadableAndNotEmpty(it)

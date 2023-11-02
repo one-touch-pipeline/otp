@@ -137,7 +137,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         Workflow workflow = createWorkflow(name: decider.workflowName)
         SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
         RoddyBamFile roddyBamFile = createBamFile()
-        Pipeline pipeline = findOrCreatePipeline(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT)
+        Pipeline pipeline = findPipeline()
 
         ProjectSeqTypeGroup projectSeqTypeGroup = new ProjectSeqTypeGroup(seqTrack.project, seqTrack.seqType)
 
@@ -204,7 +204,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         }
         decider.pipelineService = Mock(PipelineService) {
             0 * _
-            1 * findByPipelineName(Pipeline.Name.PANCAN_ALIGNMENT) >> pipeline
+            1 * findByPipelineName(_) >> pipeline
         }
 
         when:
@@ -1139,5 +1139,9 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         decider.mailHelperService = Mock(MailHelperService) {
             mailCount * sendEmailToTicketSystem(_, _)
         }
+    }
+
+    protected Pipeline findPipeline() {
+        return findOrCreatePipeline(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT)
     }
 }

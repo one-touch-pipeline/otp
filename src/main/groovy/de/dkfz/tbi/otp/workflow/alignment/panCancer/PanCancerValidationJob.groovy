@@ -34,6 +34,16 @@ import java.nio.file.Path
 @Slf4j
 class PanCancerValidationJob extends AbstractRoddyAlignmentValidationJob implements PanCancerShared {
 
+    @Override
+    protected List<Path> getExpectedDirectories(WorkflowStep workflowStep) {
+        List<Path> directories = super.getExpectedDirectories(workflowStep)
+
+        RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
+        directories.add(roddyBamFileService.getWorkMergedQADirectory(roddyBamFile))
+
+        return directories
+    }
+
     /**
      * Returns the expected files for validation
      *
@@ -46,14 +56,14 @@ class PanCancerValidationJob extends AbstractRoddyAlignmentValidationJob impleme
      */
     @Override
     protected List<Path> getExpectedFiles(WorkflowStep workflowStep) {
-        RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
-
         List<Path> expectedFiles = super.getExpectedFiles(workflowStep)
 
+        RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
+
+        expectedFiles.add(roddyBamFileService.getWorkMergedQAJsonFile(roddyBamFile))
         if (roddyBamFile.seqType.needsBedFile) {
             expectedFiles.add(roddyBamFileService.getWorkMergedQATargetExtractJsonFile(roddyBamFile))
         }
-
         expectedFiles.addAll(roddyBamFileService.getWorkSingleLaneQAJsonFiles(roddyBamFile).values())
 
         return expectedFiles

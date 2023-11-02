@@ -524,7 +524,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
             if (bamFile.baseBamFile && !bamFile.baseBamFile.oldStructureUsed) {
                 rootDirs << bamFile.baseBamFile.workDirectory
             }
-            fileAssertHelper.assertDirectoryContent(bamFile.baseDirectory.toPath(), rootDirs*.toPath(), [], rootLinks*.toPath())
+            fileAssertHelper.assertDirectoryContentReadable(rootDirs*.toPath(), [], rootLinks*.toPath())
         }
 
         // check work directories
@@ -550,7 +550,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
             if (bamFile.seqType.wgbs && bamFile.hasMultipleLibraries()) {
                 qaDirs.addAll(bamFile.finalLibraryQADirectories.values())
             }
-            fileAssertHelper.assertDirectoryContent(bamFile.finalQADirectory.toPath(), qaSubDirs*.toPath(), [], qaDirs*.toPath())
+            fileAssertHelper.assertDirectoryContentReadable(qaSubDirs*.toPath(), [], qaDirs*.toPath())
         }
 
         // qa only for merged and one for each read group
@@ -567,7 +567,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         if (bamFile.baseBamFile) {
             expectedRoddyExecutionDirs += bamFile.baseBamFile.finalExecutionDirectories
         }
-        fileAssertHelper.assertDirectoryContent(bamFile.finalExecutionStoreDirectory.toPath(), expectedRoddyExecutionDirs*.toPath())
+        fileAssertHelper.assertDirectoryContentReadable(expectedRoddyExecutionDirs*.toPath())
 
         // content of the bam file
         LogThreadLocal.withThreadLog(System.out) {
@@ -611,7 +611,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
                             bamFile.workLibraryQADirectories.values()
                 }
             }
-            fileAssertHelper.assertDirectoryContent(bamFile.workDirectory.toPath(), rootDirs*.toPath(), rootFiles*.toPath())
+            fileAssertHelper.assertDirectoryContentReadable(rootDirs*.toPath(), rootFiles*.toPath())
         }
 
         // content of the work dir: qa
@@ -624,7 +624,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
                 qaDirs.addAll(bamFile.workLibraryQADirectories.values())
                 qaJson.addAll(bamFile.workLibraryQAJsonFiles.values())
             }
-            fileAssertHelper.assertDirectoryContent(bamFile.workQADirectory.toPath(), qaDirs*.toPath())
+            fileAssertHelper.assertDirectoryContentReadable(qaDirs*.toPath())
         }
         qaJson.each {
             assert it.exists() && it.file && it.canRead() && it.size() > 0
@@ -632,7 +632,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         }
 
         //  content of the work dir: executionStoreDirectory
-        fileAssertHelper.assertDirectoryContent(bamFile.workExecutionStoreDirectory.toPath(), bamFile.workExecutionDirectories*.toPath())
+        fileAssertHelper.assertDirectoryContentReadable(bamFile.workExecutionDirectories*.toPath())
 
         // check that given files exist in the execution store:
         bamFile.workExecutionDirectories.each { executionStore ->

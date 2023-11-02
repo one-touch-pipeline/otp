@@ -29,7 +29,6 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.utils.Md5SumService
-import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerShared
 import de.dkfz.tbi.otp.workflow.jobs.AbstractFinishJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -38,7 +37,7 @@ import java.nio.file.Path
 
 @Component
 @Slf4j
-class RoddyAlignmentFinishJob extends AbstractFinishJob implements PanCancerShared {
+class RoddyAlignmentFinishJob extends AbstractFinishJob implements AlignmentWorkflowShared {
 
     @Autowired
     FileService fileService

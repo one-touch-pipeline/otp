@@ -82,8 +82,8 @@ class WgbsValidationJobSpec extends AbstractRoddyAlignmentValidationJobSpec {
 
         List<Path> expectedDirectories = [
                 roddyBamFileService.getWorkDirectory(abstractBamFile),
-                roddyBamFileService.getWorkExecutionStoreDirectory(abstractBamFile),
                 roddyBamFileService.getWorkMergedQADirectory(abstractBamFile),
+                roddyBamFileService.getWorkExecutionStoreDirectory(abstractBamFile),
                 roddyBamFileService.getWorkMergedMethylationDirectory(abstractBamFile),
         ]
 

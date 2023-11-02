@@ -30,6 +30,8 @@ import de.dkfz.tbi.otp.workflowExecution.decider.PanCancerDecider
 import de.dkfz.tbi.otp.workflowTest.alignment.roddy.AbstractRoddyAlignmentWorkflowSpec
 import de.dkfz.tbi.otp.workflowTest.roddy.RoddyFileAssertHelper
 
+import java.nio.file.Path
+
 /**
  * base class for all PanCancer workflow tests
  */
@@ -57,6 +59,15 @@ abstract class AbstractPanCancerWorkflowSpec extends AbstractRoddyAlignmentWorkf
         return true
     }
 
+    @Override
+    void setup() {
+        log.debug("Start setup ${this.class.simpleName}")
+        SessionUtils.withTransaction {
+            createStatSizeFileFragment()
+        }
+        log.debug("Finish setup ${this.class.simpleName}")
+    }
+
     void "test align lanes only, one lane, all fine"() {
         given:
         SessionUtils.withTransaction {
@@ -69,6 +80,11 @@ abstract class AbstractPanCancerWorkflowSpec extends AbstractRoddyAlignmentWorkf
 
         then:
         verify_AlignLanesOnly_AllFine()
+    }
+
+    @Override
+    protected Path getWorkMergedQAJsonFile(RoddyBamFile bamFile) {
+        return roddyBamFileService.getWorkMergedQAJsonFile(bamFile)
     }
 
     @Override

@@ -25,6 +25,9 @@ import grails.gorm.transactions.Transactional
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
 
 @Component
@@ -52,5 +55,15 @@ class RnaAlignmentDecider extends AbstractAlignmentDecider {
     @Override
     final String getOutputBamRole() {
         return RnaAlignmentWorkflow.OUTPUT_BAM
+    }
+
+    @Override
+    final Pipeline.Name getPipelineName() {
+        return Pipeline.Name.RODDY_RNA_ALIGNMENT
+    }
+
+    @Override
+    RoddyBamFile createBamFileWithoutFlush(Map properties) {
+        return new RnaRoddyBamFile(properties).save(flush: false, deepValidate: false)
     }
 }

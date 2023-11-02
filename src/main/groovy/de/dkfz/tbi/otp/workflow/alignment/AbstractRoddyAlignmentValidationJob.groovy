@@ -58,7 +58,6 @@ abstract class AbstractRoddyAlignmentValidationJob extends AbstractRoddyClusterV
                 roddyBamFileService.getWorkBamFile(roddyBamFile),
                 roddyBamFileService.getWorkBaiFile(roddyBamFile),
                 roddyBamFileService.getWorkMd5sumFile(roddyBamFile),
-                roddyBamFileService.getWorkMergedQAJsonFile(roddyBamFile),
         ]
 
         return expectedFiles
@@ -70,7 +69,6 @@ abstract class AbstractRoddyAlignmentValidationJob extends AbstractRoddyClusterV
 
         return [
                 roddyBamFileService.getWorkDirectory(roddyBamFile),
-                roddyBamFileService.getWorkMergedQADirectory(roddyBamFile),
                 roddyBamFileService.getWorkExecutionStoreDirectory(roddyBamFile),
         ]
     }

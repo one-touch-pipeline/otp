@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2022 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,21 +19,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.alignment
+package de.dkfz.tbi.otp.workflowTest.referenceGenome
 
-import groovy.util.logging.Slf4j
-import org.springframework.stereotype.Component
+trait ReferenceGenomeHg37Phix extends UsingReferenceGenome {
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.workflow.jobs.AbstractCheckQcJob
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+    final String referenceGenomeFileNamePrefix = 'hs37d5_PhiX'
 
-@Component
-@Slf4j
-class RoddyAlignmentCheckQcJob extends AbstractCheckQcJob implements AlignmentWorkflowShared {
+    final String referenceGenomeSpecificPath = 'bwa06_1KGRef_PhiX'
 
-    @Override
-    protected AbstractBamFile getAbstractBamFile(WorkflowStep workflowStep) {
-        return getRoddyBamFile(workflowStep)
-    }
+    final String chromosomeLengthFilePath = 'hg19_chrTotalLength.tsv'
+
+    final String chromosomeStatFileName = 'hs37d5_PhiX.fa.chrLenOnlyACGT_realChromosomes.tab'
+
+    final String referenceGenomeCytosinePositionsIndex = null
+
+    final String fingerPrintingFileName = "snp138Common.n1000.vh20140318.bed"
 }

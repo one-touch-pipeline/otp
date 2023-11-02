@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileService
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
+import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.alignment.alignment.AbstractRoddyAlignmentValidationJobSpec
@@ -66,6 +67,9 @@ class RnaAlignmentValidationJobSpec extends AbstractRoddyAlignmentValidationJobS
         rnaRoddyBamFileService.abstractBamFileService = Mock(AbstractBamFileService) {
             getBaseDirectory(_) >> Paths.get("/")
         }
+        job.roddyConfigValueService = Mock(RoddyConfigValueService) {
+            getRunArriba(_) >> runArriba
+        }
 
         List<Path> expectedFiles = [
                 rnaRoddyBamFileService.getWorkBamFile(abstractBamFile),
@@ -73,13 +77,15 @@ class RnaAlignmentValidationJobSpec extends AbstractRoddyAlignmentValidationJobS
                 rnaRoddyBamFileService.getWorkMd5sumFile(abstractBamFile),
                 rnaRoddyBamFileService.getWorkMergedQAJsonFile(abstractBamFile),
                 rnaRoddyBamFileService.getCorrespondingWorkChimericBamFile(abstractBamFile),
-                rnaRoddyBamFileService.getWorkArribaFusionPlotPdf(abstractBamFile),
         ]
+        if (runArriba) {
+            expectedFiles.add(rnaRoddyBamFileService.getWorkArribaFusionPlotPdf(abstractBamFile))
+        }
 
         List<Path> expectedDirectories = [
                 rnaRoddyBamFileService.getWorkDirectory(abstractBamFile),
+                rnaRoddyBamFileService.getWorkQADirectory(abstractBamFile),
                 rnaRoddyBamFileService.getWorkExecutionStoreDirectory(abstractBamFile),
-                rnaRoddyBamFileService.getWorkMergedQADirectory(abstractBamFile),
         ]
 
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
@@ -98,6 +104,6 @@ class RnaAlignmentValidationJobSpec extends AbstractRoddyAlignmentValidationJobS
         TestCase.assertContainSame(directories, expectedDirectories)
 
         where:
-        needsBedFile << [true, false]
+        runArriba << [true, false]
     }
 }

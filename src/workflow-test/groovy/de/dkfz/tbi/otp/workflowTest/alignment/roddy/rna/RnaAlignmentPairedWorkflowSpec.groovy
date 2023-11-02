@@ -19,34 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.alignment
+package de.dkfz.tbi.otp.workflowTest.alignment.roddy.rna
 
-import groovy.util.logging.Slf4j
-import org.springframework.stereotype.Component
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.workflow.jobs.AbstractFragmentJob
-import de.dkfz.tbi.otp.workflowExecution.SingleSelectSelectorExtendedCriteria
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
-
-@Component
-@Slf4j
-class RoddyAlignmentFragmentJob extends AbstractFragmentJob implements AlignmentWorkflowShared {
+class RnaAlignmentPairedWorkflowSpec extends AbstractRnaAlignmentWorkflowSpec {
 
     @Override
-    protected List<SingleSelectSelectorExtendedCriteria> fetchSelectors(WorkflowStep workflowStep) {
-        RoddyBamFile bamFile = getRoddyBamFile(workflowStep)
-        return bamFile.containedSeqTracks*.libraryPreparationKit.unique().sort {
-            it?.name
-        }.collect {
-            new SingleSelectSelectorExtendedCriteria(
-                    workflowStep.workflowRun.workflowVersion.workflow,
-                    workflowStep.workflowRun.workflowVersion,
-                    bamFile.project,
-                    bamFile.seqType,
-                    bamFile.referenceGenome,
-                    it,
-            )
-        }
+    protected SeqType findSeqType() {
+        return SeqTypeService.rnaPairedSeqType
+    }
+
+    @Override
+    protected void setUpFilesVariables() {
+        testFastqFiles = [
+                readGroup1: [
+                        referenceDataDirectory.resolve('fastqFiles/rna/tumor/paired/run4/sequence/gerald_D1VCPACXX_x_R1.fastq.gz'),
+                        referenceDataDirectory.resolve('fastqFiles/rna/tumor/paired/run4/sequence/gerald_D1VCPACXX_x_R2.fastq.gz'),
+                ].asImmutable(),
+        ].asImmutable()
     }
 }

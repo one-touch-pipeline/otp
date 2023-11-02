@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -60,6 +61,9 @@ class RnaAlignmentCleanUpJobSpec extends Specification implements DataTest, Work
 
         RnaAlignmentCleanUpJob job = Spy(RnaAlignmentCleanUpJob) {
             getRoddyBamFile(workflowStep) >> bamFile
+        }
+        job.fileService = Mock(FileService) {
+            fileIsReadable(_) >> true
         }
 
         Path dir1 = tempDir.resolve("dir1")

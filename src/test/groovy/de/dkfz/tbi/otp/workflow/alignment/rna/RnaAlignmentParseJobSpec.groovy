@@ -33,7 +33,6 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.jobs.JobStage
 import de.dkfz.tbi.otp.workflowExecution.*
@@ -86,7 +85,6 @@ class RnaAlignmentParseJobSpec extends Specification implements WorkflowSystemDo
         job.abstractQualityAssessmentService.rnaRoddyBamFileService = Mock(RnaRoddyBamFileService) {
             getWorkMergedQAJsonFile(_) >> mergedQAJsonFile
         }
-        job.qcTrafficLightService = Mock(QcTrafficLightService)
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
         job.getRoddyBamFile(workflowStep) >> bamFile
 
@@ -100,7 +98,6 @@ class RnaAlignmentParseJobSpec extends Specification implements WorkflowSystemDo
             assert qa."${k}" == v
         }
 
-        1 * job.qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(bamFile, _)
         1 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
         bamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED
     }
@@ -123,7 +120,6 @@ class RnaAlignmentParseJobSpec extends Specification implements WorkflowSystemDo
         job.abstractQualityAssessmentService.rnaRoddyBamFileService = Mock(RnaRoddyBamFileService) {
             getWorkMergedQAJsonFile(_) >> mergedQAJsonFile
         }
-        job.qcTrafficLightService = Mock(QcTrafficLightService)
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
         job.getRoddyBamFile(workflowStep) >> bamFile
 
@@ -140,7 +136,6 @@ class RnaAlignmentParseJobSpec extends Specification implements WorkflowSystemDo
         qa == existingQa
         pass == existingPass
 
-        1 * job.qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(bamFile, _)
         1 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
         bamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED
     }

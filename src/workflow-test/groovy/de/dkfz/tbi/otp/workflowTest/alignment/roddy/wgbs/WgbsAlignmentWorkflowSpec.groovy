@@ -32,13 +32,15 @@ import de.dkfz.tbi.otp.workflowExecution.decider.AbstractWorkflowDecider
 import de.dkfz.tbi.otp.workflowExecution.decider.WgbsDecider
 import de.dkfz.tbi.otp.workflowTest.alignment.roddy.AbstractRoddyAlignmentWorkflowSpec
 import de.dkfz.tbi.otp.workflowTest.referenceGenome.ReferenceGenomeHs37Conv
-import de.dkfz.tbi.otp.workflowTest.roddy.RoddyFileAssertHelper
+import de.dkfz.tbi.otp.workflowTest.roddy.WgbsRoddyFileAssertHelper
+
+import java.nio.file.Path
 
 class WgbsAlignmentWorkflowSpec extends AbstractRoddyAlignmentWorkflowSpec implements ReferenceGenomeHs37Conv {
 
     WgbsDecider wgbsDecider
 
-    RoddyFileAssertHelper roddyFileAssertHelper
+    WgbsRoddyFileAssertHelper wgbsRoddyFileAssertHelper
 
     Class<? extends OtpWorkflow> workflowComponentClass = WgbsWorkflow
 
@@ -74,6 +76,15 @@ class WgbsAlignmentWorkflowSpec extends AbstractRoddyAlignmentWorkflowSpec imple
                         referenceDataDirectory.resolve('fastqFiles/wgbs/normal/paired/lib2/run1/sequence/gerald_D1VCPACXX_7_R2.fastq.bz2'),
                 ].asImmutable(),
         ].asImmutable()
+    }
+
+    @Override
+    void setup() {
+        log.debug("Start setup ${this.class.simpleName}")
+        SessionUtils.withTransaction {
+            createStatSizeFileFragment()
+        }
+        log.debug("Finish setup ${this.class.simpleName}")
     }
 
     void "test alignLanesOnly, one lane, with adapterTrimming, all fine"() {
@@ -122,12 +133,17 @@ class WgbsAlignmentWorkflowSpec extends AbstractRoddyAlignmentWorkflowSpec imple
     }
 
     @Override
+    protected Path getWorkMergedQAJsonFile(RoddyBamFile bamFile) {
+        return roddyBamFileService.getWorkMergedQAJsonFile(bamFile)
+    }
+
+    @Override
     protected void assertWorkflowFileSystemState(RoddyBamFile bamFile) {
-        roddyFileAssertHelper.assertFileSystemState(bamFile, roddyBamFileService)
+        wgbsRoddyFileAssertHelper.assertFileSystemState(bamFile, roddyBamFileService)
     }
 
     @Override
     protected void assertWorkflowWorkDirectoryFileSystemState(RoddyBamFile bamFile, boolean isBaseBamFile) {
-        roddyFileAssertHelper.assertWorkDirectoryFileSystemState(bamFile, isBaseBamFile, roddyBamFileService, roddyConfigService)
+        wgbsRoddyFileAssertHelper.assertWorkDirectoryFileSystemState(bamFile, isBaseBamFile, roddyBamFileService, roddyConfigService)
     }
 }

@@ -19,34 +19,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.alignment
-
-import groovy.util.logging.Slf4j
-import org.springframework.stereotype.Component
+package de.dkfz.tbi.otp.workflowTest.roddy
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.workflow.jobs.AbstractFragmentJob
-import de.dkfz.tbi.otp.workflowExecution.SingleSelectSelectorExtendedCriteria
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 
-@Component
-@Slf4j
-class RoddyAlignmentFragmentJob extends AbstractFragmentJob implements AlignmentWorkflowShared {
+import java.nio.file.Path
 
-    @Override
-    protected List<SingleSelectSelectorExtendedCriteria> fetchSelectors(WorkflowStep workflowStep) {
-        RoddyBamFile bamFile = getRoddyBamFile(workflowStep)
-        return bamFile.containedSeqTracks*.libraryPreparationKit.unique().sort {
-            it?.name
-        }.collect {
-            new SingleSelectSelectorExtendedCriteria(
-                    workflowStep.workflowRun.workflowVersion.workflow,
-                    workflowStep.workflowRun.workflowVersion,
-                    bamFile.project,
-                    bamFile.seqType,
-                    bamFile.referenceGenome,
-                    it,
-            )
-        }
+trait RoddyFileAssertTrait {
+
+    Path getWorkDirectory(RoddyBamFile bamFile, RoddyBamFileService roddyBamFileService) {
+        return roddyBamFileService.getWorkDirectory(bamFile)
+    }
+
+    Path getWorkQADirectory(RoddyBamFile bamFile, RoddyBamFileService roddyBamFileService) {
+        return roddyBamFileService.getWorkQADirectory(bamFile)
+    }
+
+    @SuppressWarnings("UnusedMethodParameter")
+    List<Path> getAdditionalDirectories(RoddyBamFile bamFile, RoddyBamFileService roddyBamFileService) {
+        return []
+    }
+
+    @SuppressWarnings("UnusedMethodParameter")
+    List<Path> getAdditionalFiles(RoddyBamFile bamFile, RoddyBamFileService roddyBamFileService) {
+        return []
     }
 }

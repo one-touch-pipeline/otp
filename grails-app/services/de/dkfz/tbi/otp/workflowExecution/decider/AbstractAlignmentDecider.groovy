@@ -72,6 +72,10 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
 
     abstract String getOutputBamRole()
 
+    abstract Pipeline.Name getPipelineName()
+
+    abstract RoddyBamFile createBamFileWithoutFlush(Map properties)
+
     @Override
     final protected Workflow getWorkflow() {
         return workflowService.getExactlyOneWorkflow(workflowName)
@@ -126,7 +130,7 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
                 alignmentArtefactService.fetchDefaultSeqPlatformGroup(),
                 alignmentArtefactService.fetchMergingWorkPackage(seqTracks),
                 requiresFastqcResults() ? alignmentArtefactService.fetchRawSequenceFiles(seqTracks) : [:],
-                pipelineService.findByPipelineName(Pipeline.Name.PANCAN_ALIGNMENT),
+                pipelineService.findByPipelineName(pipelineName),
         )
     }
 
@@ -350,15 +354,15 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
         ))
 
         int identifier = RoddyBamFile.nextIdentifier(workPackage)
-        RoddyBamFile bamFile = new RoddyBamFile(
+        RoddyBamFile bamFile = createBamFileWithoutFlush([
                 workflowArtefact: workflowOutputArtefact,
                 workPackage: workPackage,
                 identifier: identifier,
                 workDirectoryName: "${RoddyBamFileService.WORK_DIR_PREFIX}_${identifier}",
                 baseBamFile: null,
                 seqTracks: seqTrackSet,
-                numberOfMergedLanes: seqTrackSet.size()
-        ).save(flush: false, deepValidate: false)
+                numberOfMergedLanes: seqTrackSet.size(),
+        ])
 
         run.workDirectory = roddyBamFileService.getWorkDirectory(bamFile)
         run.save(flush: true, deepValidate: false)

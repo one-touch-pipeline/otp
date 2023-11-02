@@ -69,7 +69,7 @@ abstract class AbstractPrepareJob extends AbstractJob {
                     workFolder,
                     null,
                     group,
-                    fileService.OWNER_DIRECTORY_PERMISSION_STRING
+                    fileService.DEFAULT_DIRECTORY_PERMISSION_STRING
             )
             workflowStep.workflowRun.workDirectory = workFolder.toString()
             workflowStep.workflowRun.save(flush: true)

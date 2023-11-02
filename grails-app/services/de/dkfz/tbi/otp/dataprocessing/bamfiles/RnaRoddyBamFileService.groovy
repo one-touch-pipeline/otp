@@ -25,6 +25,7 @@ import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 import java.nio.file.Path
 
@@ -43,6 +44,16 @@ class RnaRoddyBamFileService extends RoddyBamFileService {
     @Override
     Path getWorkMergedQADirectory(RoddyBamFile bamFile) {
         return getWorkQADirectory(bamFile)
+    }
+
+    @Override
+    Map<SeqTrack, Path> getWorkSingleLaneQADirectories(RoddyBamFile bamFile) {
+        return [:]
+    }
+
+    @Override
+    Map<SeqTrack, Path> getFinalSingleLaneQADirectories(RoddyBamFile bamFile) {
+        return [:]
     }
 
     Path getCorrespondingWorkChimericBamFile(RnaRoddyBamFile bamFile) {

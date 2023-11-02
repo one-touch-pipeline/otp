@@ -22,11 +22,26 @@
 package de.dkfz.tbi.otp.workflowExecution.decider
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
 import de.dkfz.tbi.otp.workflowExecution.ArtefactType
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
 class RnaAlignmentDeciderSpec extends AbstractAlignmentDeciderSpec {
+
+    @Override
+    Class[] getDomainClassesToMock() {
+        return super.domainClassesToMock + [
+                RnaRoddyBamFile,
+                Pipeline,
+        ]
+    }
+
+    @Override
+    protected Pipeline findPipeline() {
+        return findOrCreatePipeline(Pipeline.Name.RODDY_RNA_ALIGNMENT, Pipeline.Type.ALIGNMENT)
+    }
 
     void setup() {
         decider = new RnaAlignmentDecider()

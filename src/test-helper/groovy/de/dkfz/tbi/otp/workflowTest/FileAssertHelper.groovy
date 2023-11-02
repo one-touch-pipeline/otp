@@ -64,7 +64,7 @@ class FileAssertHelper {
         assert Files.isExecutable(dir)
     }
 
-    void assertDirectoryContent(Path baseDir, List<Path> expectedDirs, List<Path> expectedFiles = [], List<Path> expectedLinks = []) {
+    void assertDirectoryContentReadable(List<Path> expectedDirs, List<Path> expectedFiles = [], List<Path> expectedLinks = []) {
         expectedDirs.each {
             assertDirectoryIsReadableAndExecutable(it)
         }
@@ -75,7 +75,9 @@ class FileAssertHelper {
             assertPathIsReadable(it)
             assert Files.isSymbolicLink(it)
         }
+    }
 
+    void assertDirectorySameContent(Path baseDir, List<Path> expectedDirs, List<Path> expectedFiles = [], List<Path> expectedLinks = []) {
         Set<Path> expectedEntries = (expectedDirs + expectedFiles + expectedLinks).findAll {
             it.parent == baseDir
         } as Set

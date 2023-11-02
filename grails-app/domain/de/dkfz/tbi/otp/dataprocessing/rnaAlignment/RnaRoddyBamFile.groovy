@@ -23,8 +23,9 @@ package de.dkfz.tbi.otp.dataprocessing.rnaAlignment
 
 import grails.gorm.hibernate.annotation.ManagedEntity
 
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.Paths
 
@@ -81,5 +82,17 @@ class RnaRoddyBamFile extends RoddyBamFile {
         String file = Paths.get(workDirectory as String, ARRIBA_FOLDER,
                 "${sampleType.dirName}_${individual.pid}${ARRIBA_PLOT_SUFFIX}")
         return file
+    }
+
+    @Override
+    AbstractQualityAssessment getQualityAssessment() {
+        return CollectionUtils.exactlyOneElement(RnaQualityAssessment.createCriteria().list {
+            eq 'chromosome', RoddyQualityAssessment.ALL
+            qualityAssessmentMergedPass {
+                abstractBamFile {
+                    eq 'id', this.id
+                }
+            }
+        })
     }
 }

@@ -27,6 +27,8 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.workflow.alignment.*
+import de.dkfz.tbi.otp.workflow.jobs.AttachUuidJob
+import de.dkfz.tbi.otp.workflow.jobs.CalculateSizeJob
 import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
 import de.dkfz.tbi.otp.workflowExecution.Artefact
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
@@ -42,13 +44,19 @@ class RnaAlignmentWorkflow extends AlignmentWorkflow {
     @Override
     List<String> getJobBeanNames() {
         return [
-                SetCorrectPermissionJob.simpleName.uncapitalize(),
-                RnaAlignmentLinkJob.simpleName.uncapitalize(),
-                RoddyAlignmentPrepareJob.simpleName.uncapitalize(),
-                RnaAlignmentValidationJob.simpleName.uncapitalize(),
-                RnaAlignmentCleanUpJob.simpleName.uncapitalize(),
+                RoddyAlignmentFragmentJob.simpleName.uncapitalize(),
                 RoddyAlignmentConditionalFailJob.simpleName.uncapitalize(),
+                AttachUuidJob.simpleName.uncapitalize(),
+                RoddyAlignmentPrepareJob.simpleName.uncapitalize(),
+                RnaAlignmentExecuteJob.simpleName.uncapitalize(),
+                RnaAlignmentValidationJob.simpleName.uncapitalize(),
                 RnaAlignmentParseJob.simpleName.uncapitalize(),
+                RoddyAlignmentCheckQcJob.simpleName.uncapitalize(),
+                RnaAlignmentCleanUpJob.simpleName.uncapitalize(),
+                SetCorrectPermissionJob.simpleName.uncapitalize(),
+                CalculateSizeJob.simpleName.uncapitalize(),
+                RnaAlignmentLinkJob.simpleName.uncapitalize(),
+                RoddyAlignmentFinishJob.simpleName.uncapitalize(),
         ]
     }
 

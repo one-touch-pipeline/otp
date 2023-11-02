@@ -22,10 +22,13 @@
 package de.dkfz.tbi.otp.workflow.alignment.rna
 
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
+import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
 import de.dkfz.tbi.otp.workflow.alignment.AbstractRoddyAlignmentValidationJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -35,15 +38,32 @@ import java.nio.file.Path
 @Slf4j
 class RnaAlignmentValidationJob extends AbstractRoddyAlignmentValidationJob implements RnaAlignmentShared {
 
+    @Autowired
     RnaRoddyBamFileService rnaRoddyBamFileService
+
+    @Autowired
+    RoddyConfigValueService roddyConfigValueService
+
+    @Override
+    protected List<Path> getExpectedDirectories(WorkflowStep workflowStep) {
+        List<Path> directories = super.getExpectedDirectories(workflowStep)
+
+        RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
+        directories.add(rnaRoddyBamFileService.getWorkMergedQADirectory(roddyBamFile))
+
+        return directories
+    }
 
     @Override
     protected List<Path> getExpectedFiles(WorkflowStep workflowStep) {
-        RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
         List<Path> expectedFiles = super.getExpectedFiles(workflowStep)
 
+        RnaRoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
+        expectedFiles.add(rnaRoddyBamFileService.getWorkMergedQAJsonFile(roddyBamFile))
         expectedFiles.add(rnaRoddyBamFileService.getCorrespondingWorkChimericBamFile(roddyBamFile))
-        expectedFiles.add(rnaRoddyBamFileService.getWorkArribaFusionPlotPdf(roddyBamFile))
+        if (roddyConfigValueService.getRunArriba(workflowStep)) {
+            expectedFiles.add(rnaRoddyBamFileService.getWorkArribaFusionPlotPdf(roddyBamFile))
+        }
 
         return expectedFiles
     }

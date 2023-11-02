@@ -19,34 +19,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.alignment
+package de.dkfz.tbi.otp.workflowTest.roddy
 
-import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.workflow.jobs.AbstractFragmentJob
-import de.dkfz.tbi.otp.workflowExecution.SingleSelectSelectorExtendedCriteria
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
+
+import java.nio.file.Path
 
 @Component
-@Slf4j
-class RoddyAlignmentFragmentJob extends AbstractFragmentJob implements AlignmentWorkflowShared {
+class RnaRoddyFileAssertHelper extends RoddyFileAssertHelper implements RoddyFileAssertTrait {
 
     @Override
-    protected List<SingleSelectSelectorExtendedCriteria> fetchSelectors(WorkflowStep workflowStep) {
-        RoddyBamFile bamFile = getRoddyBamFile(workflowStep)
-        return bamFile.containedSeqTracks*.libraryPreparationKit.unique().sort {
-            it?.name
-        }.collect {
-            new SingleSelectSelectorExtendedCriteria(
-                    workflowStep.workflowRun.workflowVersion.workflow,
-                    workflowStep.workflowRun.workflowVersion,
-                    bamFile.project,
-                    bamFile.seqType,
-                    bamFile.referenceGenome,
-                    it,
-            )
-        }
+    Path getWorkDirectory(RoddyBamFile bamFile, RoddyBamFileService rnaRoddyBamFileService) {
+        return rnaRoddyBamFileService.getWorkDirectory(bamFile)
+    }
+
+    @Override
+    Path getWorkQADirectory(RoddyBamFile bamFile, RoddyBamFileService rnaRoddyBamFileService) {
+        return rnaRoddyBamFileService.getWorkQADirectory(bamFile)
+    }
+
+    @Override
+    List<Path> getAdditionalDirectories(RoddyBamFile bamFile, RoddyBamFileService rnaRoddyBamFileService) {
+        return [
+        ]
+    }
+
+    @Override
+    List<Path> getAdditionalFiles(RoddyBamFile bamFile, RoddyBamFileService rnaRoddyBamFileService) {
+        return [
+                rnaRoddyBamFileService.getWorkMergedQAJsonFile(bamFile),
+                (rnaRoddyBamFileService as RnaRoddyBamFileService).getCorrespondingWorkChimericBamFile(bamFile),
+        ]
     }
 }

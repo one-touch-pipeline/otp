@@ -265,6 +265,9 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
     @Override
     @Deprecated
     File getWorkDirectory() {
+        if (workflowArtefact?.producedBy?.workFolder) {
+            return new File(workflowArtefact?.producedBy?.workDirectory)
+        }
         return new File(baseDirectory, workDirectoryName)
     }
 

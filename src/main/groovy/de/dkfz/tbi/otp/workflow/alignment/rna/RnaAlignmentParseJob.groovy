@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractJob
 import de.dkfz.tbi.otp.workflow.jobs.JobStage
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -38,16 +37,12 @@ class RnaAlignmentParseJob extends AbstractJob implements RnaAlignmentShared {
     @Autowired
     AbstractQualityAssessmentService abstractQualityAssessmentService
 
-    @Autowired
-    QcTrafficLightService qcTrafficLightService
-
     @Override
     void execute(WorkflowStep workflowStep) throws Throwable {
         final RoddyBamFile bamFile = getRoddyBamFile(workflowStep)
 
-        RnaQualityAssessment rnaQa = abstractQualityAssessmentService.parseRnaRoddyBamFileQaStatistics(bamFile)
+        abstractQualityAssessmentService.parseRnaRoddyBamFileQaStatistics(bamFile)
         bamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.FINISHED
-        qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(bamFile, rnaQa)
         bamFile.save(flush: true)
 
         workflowStateChangeService.changeStateToSuccess(workflowStep)

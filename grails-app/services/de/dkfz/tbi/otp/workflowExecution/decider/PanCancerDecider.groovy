@@ -25,7 +25,9 @@ import grails.gorm.transactions.Transactional
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
 
 @Component
 @Transactional
@@ -55,5 +57,15 @@ class PanCancerDecider extends AbstractAlignmentDecider {
     @Override
     final String getOutputBamRole() {
         return PanCancerWorkflow.OUTPUT_BAM
+    }
+
+    @Override
+    final Pipeline.Name getPipelineName() {
+        return Pipeline.Name.PANCAN_ALIGNMENT
+    }
+
+    @Override
+    RoddyBamFile createBamFileWithoutFlush(Map properties) {
+        return new RoddyBamFile(properties).save(flush: false, deepValidate: false)
     }
 }

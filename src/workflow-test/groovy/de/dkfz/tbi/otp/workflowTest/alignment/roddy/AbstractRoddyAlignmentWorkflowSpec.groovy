@@ -248,8 +248,6 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
         ])
         log.info("Create selectedProjectSeqTypeWorkflowVersion ${workflowVersionSelector}")
 
-        createFragments()
-
         if (seqType.needsBedFile) {
             BedFile bedFile = DomainFactory.createBedFile([
                     referenceGenome      : referenceGenome,
@@ -262,7 +260,9 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
         }
     }
 
-    private void createFragments() {
+    protected void createStatSizeFileFragment() {
+        workflowAlignment.refresh()
+        referenceGenome.refresh()
         createFragmentAndSelector("statSizeFileFragment", """
                     {
                         "RODDY": {
@@ -280,7 +280,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
         ])
     }
 
-    private void createFragmentAndSelector(String name, String json, Map selectors) {
+    protected void createFragmentAndSelector(String name, String json, Map selectors) {
         ExternalWorkflowConfigFragment fragment = createExternalWorkflowConfigFragment([
                 name        : name,
                 configValues: json.replaceAll('[ \n]+', ' '),
@@ -507,8 +507,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
 
     protected void assertWorkDirectoryFileSystemState(RoddyBamFile bamFile, boolean isBaseBamFile) {
         //  content of the work dir: executionStoreDirectory
-        fileAssertHelper.assertDirectoryContent(roddyBamFileService.getWorkExecutionStoreDirectory(bamFile),
-                roddyBamFileService.getWorkExecutionDirectories(bamFile))
+        fileAssertHelper.assertDirectoryContentReadable(roddyBamFileService.getWorkExecutionDirectories(bamFile))
 
         // check that given files exist in the execution store:
         roddyBamFileService.getWorkExecutionDirectories(bamFile).each { executionStore ->
@@ -518,7 +517,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
         }
 
         // check default json, additional needs to be checked in the subclass
-        Path qaJson = roddyBamFileService.getWorkMergedQAJsonFile(bamFile)
+        Path qaJson = getWorkMergedQAJsonFile(bamFile)
         fileAssertHelper.assertFileIsReadableAndNotEmpty(qaJson)
         JSON.parse(qaJson.text) // throws ConverterException when the JSON content is not valid
 
@@ -530,7 +529,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
         if (bamFile.baseBamFile) {
             expectedRoddyExecutionDirs.addAll(roddyBamFileService.getFinalExecutionDirectories(bamFile.baseBamFile))
         }
-        fileAssertHelper.assertDirectoryContent(roddyBamFileService.getFinalExecutionStoreDirectory(bamFile), expectedRoddyExecutionDirs)
+        fileAssertHelper.assertDirectoryContentReadable(expectedRoddyExecutionDirs)
     }
 
     private void assertBamFileFileOnFileSystem(RoddyBamFile bamFile) {
@@ -585,6 +584,8 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
     abstract protected boolean isFastQcRequired()
 
     abstract protected SeqType findSeqType()
+
+    abstract protected Path getWorkMergedQAJsonFile(RoddyBamFile bamFile)
 
     abstract protected void assertWorkflowFileSystemState(RoddyBamFile bamFile)
 
