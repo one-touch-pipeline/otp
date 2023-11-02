@@ -44,9 +44,7 @@ import de.dkfz.tbi.otp.project.additionalField.*
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.security.user.DepartmentService
-import de.dkfz.tbi.otp.security.user.DeputyRelationService
-import de.dkfz.tbi.otp.security.user.SwitchedUserDeniedException
+import de.dkfz.tbi.otp.security.user.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
@@ -95,10 +93,36 @@ class ProjectRequestController implements CheckAndCall {
         String projectNamePattern = processingOptionService.findOptionAsString(ProcessingOption.OptionName.REGEX_PROJECT_NAME_NEW_PROJECT_REQUEST)
         String projectNameDescription = processingOptionService.findOptionAsString(ProcessingOption.OptionName.DESCRIPTION_PROJECT_NAME_NEW_PROJECT_REQUEST)
         ProjectRequestCreationCommand cmd = flash.cmd as ProjectRequestCreationCommand
+        ProjectRequestUser projectRequestUser = new ProjectRequestUser()
         // This is required cause sometimes the projectRequest state is not processed right by the command object from flash
-        if (flash.cmd && flash.cmd.projectRequest) {
+        if (cmd && cmd.projectRequest) {
             cmd.projectRequest = CollectionUtils.exactlyOneElement(ProjectRequest.findAllById(flash.cmd.projectRequest.id))
+        } else {
+            cmd = new ProjectRequestCreationCommand()
+
+            projectRequestUser.user = securityService.currentUser
+            ProjectRole projectRole = new ProjectRole()
+            projectRole.name = ProjectRole.Basic.SUBMITTER.name()
+            projectRequestUser.projectRoles = [projectRole]
+
+            ProjectRequestUserCommand preaddedUser = new ProjectRequestUserCommand(
+                    projectRequestUser: projectRequestUser,
+                    username: projectRequestUser.username,
+                    projectRoles: projectRequestUser.projectRoles,
+                    accessToOtp: true,
+                    accessToFiles: false,
+                    manageUsers: false
+            )
+
+            if (projectRequestUser.projectRoles.any {
+                it.name == ProjectRole.Basic.PI.name()
+            }) {
+                cmd.piUsers = [preaddedUser]
+            } else {
+                cmd.users = [preaddedUser]
+            }
         }
+
         return [
                 buttonActions             : projectRequestStateProvider.getCurrentState(cmd?.projectRequest).getIndexActions(cmd?.projectRequest),
                 keywords                  : Keyword.listOrderByName(),
