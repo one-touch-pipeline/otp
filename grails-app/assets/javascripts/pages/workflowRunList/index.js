@@ -139,7 +139,7 @@ $(() => {
                                       type="button" data-bs-toggle="dropdown" 
                                       aria-haspopup="true" aria-expanded="false" 
                                       title="Restart previous steps" ${buttonsDisabled} ${stepsDisabled}>
-                                <span class="sr-only">Toggle Dropdown</span>
+                                <span class="sr-only"></span>
                               </button>
                               <div class="dropdown-menu dropdown-menu-right">`;
 
