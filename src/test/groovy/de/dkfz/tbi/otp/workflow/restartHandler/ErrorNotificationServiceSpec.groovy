@@ -30,11 +30,15 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.infrastructure.ClusterJobDetailService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.wes.*
+
+import java.time.Duration
+import java.time.ZonedDateTime
 
 class ErrorNotificationServiceSpec extends Specification
         implements ServiceUnitTest<ErrorNotificationService>, DataTest, DomainFactoryProcessingPriority, WorkflowSystemDomainFactory {
@@ -257,8 +261,17 @@ class ErrorNotificationServiceSpec extends Specification
 
         List<ClusterJob> clusterJobs = (1..3).collect {
             createClusterJob([
-                    workflowStep: prevStep,
-                    exitCode    : nextId,
+                    workflowStep     : prevStep,
+                    exitCode         : nextId,
+                    queued           : ZonedDateTime.now().minusHours(4),
+                    eligible         : ZonedDateTime.now().minusHours(3),
+                    started          : ZonedDateTime.now().minusHours(2),
+                    ended            : ZonedDateTime.now().minusHours(1),
+                    requestedWalltime: Duration.ofHours(10),
+                    jobLog           : "/tmp/log${it}",
+                    checkStatus      : ClusterJob.CheckStatus.FINISHED,
+                    exitStatus       : ClusterJob.Status.FAILED,
+                    node             : "node_1",
             ])
         }
 
@@ -267,6 +280,12 @@ class ErrorNotificationServiceSpec extends Specification
 
         service.workflowStepService = Mock(WorkflowStepService) {
             1 * getPreviousRunningWorkflowStep(step) >> prevStep
+        }
+        service.clusterJobDetailService = Mock(ClusterJobDetailService) {
+            0 * _
+        }
+        clusterJobs.each { clusterJob ->
+            1 * service.clusterJobDetailService.calculateElapsedWalltime(clusterJob) >> Duration.ofHours(1)
         }
 
         String expectedExpression = [
