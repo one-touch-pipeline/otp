@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.workflowExecution.*
 class BamImportWorkflow implements OtpWorkflow {
 
     public static final String WORKFLOW = "Bam Import"
+    public static final String OUTPUT_BAM = "Bam"
 
     @Override
     List<String> getJobBeanNames() {
