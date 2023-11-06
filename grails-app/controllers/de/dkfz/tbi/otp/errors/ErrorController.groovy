@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.utils.RequestUtilService
 
 import javax.servlet.http.HttpServletResponse
 
-@SuppressWarnings("SecureAllControllers")
+@SuppressWarnings("AuthorizeAnnotationForControllers")
 @Slf4j
 class ErrorController {
 

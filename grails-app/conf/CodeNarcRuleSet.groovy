@@ -59,9 +59,10 @@ All the Rules that will be used for OTP
         doNotApplyToFileNames = TEST
     }
     rule("file:grails-app/codenarcRules/ControllerMethodNotInAllowedMethodsRule.groovy")
-    rule("file:grails-app/codenarcRules/SecureAllControllerRule.groovy")
     rule("file:grails-app/codenarcRules/ManagedEntityAnnotationForEntityRule.groovy")
     rule("file:grails-app/codenarcRules/NoFilesReadableRule.groovy")
+    rule("file:grails-app/codenarcRules/ChildControllersNotAuthorizeAnnotatedRule.groovy")
+    rule("file:grails-app/codenarcRules/AuthorizeAnnotationForControllersRule.groovy")
 
     // rulesets/basic.xml
     AssertWithinFinallyBlock {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,38 +20,40 @@
  * SOFTWARE.
  */
 
-import org.codehaus.groovy.ast.AnnotationNode
-import org.codehaus.groovy.ast.ClassNode
+import org.codehaus.groovy.ast.*
 import org.codenarc.rule.AbstractAstVisitor
 import org.codenarc.rule.AbstractAstVisitorRule
+import org.codehaus.groovy.control.Phases
 
-class SecureAllControllersRule extends AbstractAstVisitorRule {
-    String name = 'SecureAllControllers'
+class ChildControllersNotAuthorizeAnnotatedRule extends AbstractAstVisitorRule {
     int priority = 1
-    String applyToFileNames = "*/*grails-app/controllers*/*Controller.groovy"
-    String description = 'All controllers should be secured with the "@PreAuthorize" annotation.'
-    Class astVisitorClass = SecureAllControllerRuleVisitor
+    String name = 'ChildControllersNotAuthorizeAnnotated'
+    String description = 'Ensures that a child class is not annotated if its parent class is already annotated.'
+    Class astVisitorClass = ChildControllersNotAuthorizeAnnotatedRuleVisitor
+    int compilerPhase = Phases.SEMANTIC_ANALYSIS
 }
 
-class SecureAllControllerRuleVisitor extends AbstractAstVisitor implements IsAnnotationVisitor {
+class ChildControllersNotAuthorizeAnnotatedRuleVisitor extends AbstractAstVisitor implements IsAnnotationVisitor {
 
-    private static final String CONTROLLER = 'Controller'
+    private static final List<String> ANNOTATIONS = [
+            "PreAuthorize",
+            "PostAuthorize",
+    ]
 
     @Override
     protected void visitClassEx(ClassNode node) {
-        if (isNoOrdinaryClass(node) || !node.name.endsWith(CONTROLLER)) {
+        if (isNoOrdinaryClass(node)) {
             return
         }
-        checkRule(node)
-    }
 
-    private void checkRule(ClassNode node) {
-        List<AnnotationNode> annotationNodeList = node.annotations
-
-        if (!annotationNodeList.any {
-            it.classNode.name == "PreAuthorize"
-        }) {
-            addViolation(node, buildErrorString("@PreAuthorize"))
+        if (!node.annotations*.classNode*.nameWithoutPackage.disjoint(ANNOTATIONS)) {
+            ClassNode parentNode = node.superClass.redirect()
+            if (!parentNode.annotations*.classNode*.nameWithoutPackage.disjoint(ANNOTATIONS)) {
+                String message = "Child class ${node.name} " +
+                        "should not have Security annotation (Pre|Post)Authorize if it's parent class " +
+                        "${parentNode.name} is already annotated."
+                addViolation(node, message)
+            }
         }
     }
 }
