@@ -23,8 +23,10 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import groovy.transform.CompileDynamic
 import groovyx.gpars.GParsPool
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
@@ -37,6 +39,9 @@ import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationServi
 
 @Component
 class DataFileExistenceValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+
+    @Autowired
+    FileService fileService
 
     @Override
     Collection<String> getDescriptions() {
@@ -83,7 +88,7 @@ class DataFileExistenceValidator extends AbstractValueTuplesValidator<MetadataVa
                     } else {
                         message = "${pathForMessage(path)} does not exist or cannot be accessed by OTP."
                     }
-                } else if (!Files.isReadable(path)) {
+                } else if (!fileService.fileIsReadable(path)) {
                     message = "File ${pathForMessage(path)} is not readable by OTP."
                 } else if (Files.size(path) == 0L) {
                     message = "${pathForMessage(path)} is empty."

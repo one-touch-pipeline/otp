@@ -25,15 +25,14 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.TempDir
 
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
+import java.nio.file.*
 import java.util.regex.Matcher
 
 import static de.dkfz.tbi.TestCase.assertContainSame
@@ -114,7 +113,14 @@ class DataFileExistenceValidatorSpec extends Specification implements DataTest {
                 new Problem((context.spreadsheet.dataRows[13].cells) as Set<Cell>,
                         LogLevel.ERROR, "File '${new File(dir, 'not_readable_file')}' is not readable by OTP.", "At least one file can not be accessed by OTP, does not exist, is empty or is not a file."),
         ]
-        DataFileExistenceValidator validator = new DataFileExistenceValidator()
+        DataFileExistenceValidator validator = new DataFileExistenceValidator([
+                fileService: Mock(FileService) {
+                    _ * fileIsReadable(_) >> { Path path ->
+                        return Files.isReadable(path)
+                    }
+                    0 * _
+                },
+        ])
 
         when:
         validator.validate(context)
