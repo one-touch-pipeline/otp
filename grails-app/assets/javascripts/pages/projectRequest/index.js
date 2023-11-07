@@ -184,23 +184,36 @@ $(() => {
           department
         },
         success(data) {
-          const piList = [];
-
-          $.each(data, (key, value) => {
-            piList.push({ key, value });
-          });
           piSelectors.append($('<option disabled selected></option>').val('')
             .html('Please choose a deputy PI from the list below'));
-          for (let index = 0; index < piList.length; index++) {
-            // eslint-disable-next-line max-len
-            piSelectors.append($('<option></option>').val(piList[index].key).html(`${piList[index].value} (${piList[index].key})`));
-          }
-          const forms = $('.piUsers');
-          for (let newIndex = 0; newIndex < forms.length - 1; newIndex++) {
-            const hiddenFieldName = `piUsers${newIndex}_username_hiddenField`;
-            const hiddenUsername = $(`#${hiddenFieldName}`);
-            hiddenUsername[0].parentElement.children[1].value = hiddenUsername.val();
-          }
+
+          data.deputies.forEach((deputy) => {
+            piSelectors.append($('<option></option>').val(deputy.username).html(deputy.displayName));
+          });
+
+          piSelectors.each((index, piSelector) => {
+            const selectElement = $(piSelector);
+            const showHeadCheckbox = selectElement.parent().parent().find('.show-head-checkbox');
+            const initialUsername = selectElement.parent().find('.initial-pi-user').val();
+
+            // Automatically enable show Heads, when there are no deputies
+            // or currently selected user is not deputy but head
+            const initialUsernameIsHead = data.departmentHeads.some((head) => head.username === initialUsername);
+            const initialUsernameIsDeputy = data.deputies.some((deputy) => deputy.username === initialUsername);
+
+            if ((data.deputies && data.deputies.length === 0) ||
+              (!initialUsernameIsDeputy && initialUsernameIsHead)) {
+              showHeadCheckbox.prop('checked', true);
+            }
+            const showHeads = showHeadCheckbox.prop('checked');
+
+            data.departmentHeads.forEach((head) => {
+              $(piSelector).append($(`<option class="head" ${showHeads ? '' : 'hidden'}></option>`).val(head.username)
+                .html(head.displayName));
+            });
+
+            selectElement.val(initialUsername);
+          });
         },
         error(error) {
           if (error && error.responseJSON && error.responseJSON.message) {
@@ -212,6 +225,18 @@ $(() => {
       });
     }
   };
+
+  $('.show-head-checkbox').on('change', (e) => {
+    const target = $(e.target);
+    const showHead = target.prop('checked');
+    const piOptions = target.parent().parent().find('.pi-selector').find('option.head');
+
+    if (showHead) {
+      piOptions.removeAttr('hidden');
+    } else {
+      piOptions.prop('hidden', true);
+    }
+  });
 
   function addEventHandlerToOU() {
     $('#organizationalunit').on('change', (e) => {

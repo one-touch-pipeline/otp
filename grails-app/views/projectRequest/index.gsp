@@ -68,7 +68,7 @@
             <div class="col-sm-10">
                 <g:select id="projectType" name="projectType" class="use-select-2 form-control"
                           from="${projectTypes}" value="${cmd?.projectType}"
-                          noSelection="${['':'']}"
+                          noSelection="${['': '']}"
                           data-placeholder="Select a project type"
                           autocomplete="off"
                           required="true"/>
@@ -159,7 +159,7 @@
                           name="storagePeriod"
                           from="${storagePeriod}"
                           value="${cmd?.storagePeriod}"
-                          noSelection="${['':'']}"
+                          noSelection="${['': '']}"
                           data-placeholder="Select a project type"
                           optionKey="name"
                           optionValue="description"
@@ -287,8 +287,10 @@
     </g:form>
 
     <div class="clone-remove-target-2 clone-template-2 hidden">
-        <g:render template="templates/piUserFormAccordion" model="[index: 'template-index', availableRoles: availableRoles]"/>
+        <g:render template="templates/piUserFormAccordion"
+                  model="[index: 'template-index', availableRoles: availableRoles, departmentPiFeatureEnabled: departmentPiFeatureEnabled]"/>
     </div>
+
     <div class="clone-remove-target-1 clone-template-1 hidden">
         <g:render template="templates/userFormAccordion" model="[index: 'template-index', availableRoles: userRoles]"/>
     </div>

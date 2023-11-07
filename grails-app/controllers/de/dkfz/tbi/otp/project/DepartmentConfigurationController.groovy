@@ -49,7 +49,7 @@ class DepartmentConfigurationController implements CheckAndCall {
 
     Map index() {
         User currentUser = securityService.currentUser
-        List<DeputyRelation> deputyRelationList = deputyRelationService.getAllDeputiesForDepartmentHead(currentUser)
+        List<DeputyRelation> deputyRelationList = deputyRelationService.getAllDeputyRelationsForDepartmentHead(currentUser)
         List<DepartmentDeputyDisplayDTO> departmentDeputyList = deputyRelationList.collect { deputyRelation ->
             return new DepartmentDeputyDisplayDTO(deputyRelation)
         }

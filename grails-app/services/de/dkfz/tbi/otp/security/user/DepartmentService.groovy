@@ -62,7 +62,7 @@ class DepartmentService {
 
     List<User> getListOfHeadsForDepartment(String department) {
         List<User> departmentHeads = CollectionUtils.atMostOneElement(Department.findAllByOuNumber(department))?.departmentHeads as List<User> ?: []
-        return departmentHeads
+        return departmentHeads.unique()
     }
 
     @CompileDynamic

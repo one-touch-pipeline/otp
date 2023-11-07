@@ -115,10 +115,17 @@ class DeputyRelationService {
      * @returns all deputies that are registered for a department head
      */
     @CompileDynamic
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#departmentHead, 'IS_DEPARTMENT_HEAD')")
-    List<DeputyRelation> getAllDeputiesForDepartmentHead(User departmentHead) {
+    List<DeputyRelation> getAllDeputyRelationsForDepartmentHead(User departmentHead) {
         assert departmentHead: "Department Head cannot be null"
         return DeputyRelation.findAllByGrantingDeputyUser(departmentHead)
+    }
+
+    @CompileDynamic
+    List<User> getAllDeputiesForDepartmentHeads(List<User> departmentHeads) {
+        List<DeputyRelation> deputyRelations = DeputyRelation.createCriteria().list {
+            'in'('grantingDeputyUser', departmentHeads)
+        } as List<DeputyRelation>
+        return deputyRelations*.deputyUser
     }
 
     /**

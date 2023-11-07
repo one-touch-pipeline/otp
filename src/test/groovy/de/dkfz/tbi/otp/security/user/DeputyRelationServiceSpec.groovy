@@ -198,4 +198,24 @@ class DeputyRelationServiceSpec extends Specification implements DataTest, UserD
         expect:
         TestCase.assertContainSame(deputyRelationService.listDeputiesByHead(), expect)
     }
+
+    void "getAllDeputiesForDepartmentHeads, should return all deputies for the departmentHeads"() {
+        given:
+        deputyRelationService = new DeputyRelationService()
+        User departmentHead1 = createUser()
+        User departmentHead2 = createUser()
+        User deputy1 = createUser()
+        User deputy2 = createUser()
+        User deputy3 = createUser()
+        createDeputyRelation([grantingDeputyUser: departmentHead1, deputyUser: deputy1])
+        createDeputyRelation()
+        createDeputyRelation([grantingDeputyUser: departmentHead1, deputyUser: deputy2])
+        createDeputyRelation([grantingDeputyUser: departmentHead2, deputyUser: deputy2])
+        createDeputyRelation([grantingDeputyUser: departmentHead2, deputyUser: deputy3])
+
+        expect:
+        TestCase.assertContainSame(
+                deputyRelationService.getAllDeputiesForDepartmentHeads([departmentHead1, departmentHead2]),
+                [deputy1, deputy2, deputy3])
+    }
 }

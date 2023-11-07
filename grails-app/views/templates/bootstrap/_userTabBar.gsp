@@ -38,70 +38,74 @@
 </ul>
 
 <div class="tab-content" id="inputTabsContent">
-<g:if test="${tabs.contains('pi')}">
-    <div class="tab-pane fade show active mt-2" id="pi" role="tabpanel" aria-labelledby="pi-tab">
-        <div class="container pi-user-form">
-            <div class="row">
-                <div class="col-sm-9">
-                    <h3>Add PI</h3>
-                    <p>${g.message(code: "projectRequest.piUsers.detail")}</p>
-                </div>
-                <div class="col-sm-3">
-                    <button class="btn btn-primary pi-user-add-button" id="clone-add-2">
-                        <i class="bi bi-plus"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="clone-target-2" id="accordion2" data-highest-index="1">
-                <g:if test="${cmd?.piUsers}">
-                    <g:each in="${cmd?.piUsers}" var="piUser" status="i">
-                        <g:if test="${piUser}">
-                            <div class="clone-remove-target-2">
-                                <g:render template="templates/piUserFormAccordion" model="[index: i, piUser: piUser, availableRoles: availableRoles]"/>
-                            </div>
-                        </g:if>
-                    </g:each>
-                </g:if>
-                <g:else>
-                    <div class="clone-remove-target-2">
-                        <g:render template="templates/piUserFormAccordion" model="[index: 0, emptyForm: true, availableRoles: availableRoles]"/>
+    <g:if test="${tabs.contains('pi')}">
+        <div class="tab-pane fade show active mt-2" id="pi" role="tabpanel" aria-labelledby="pi-tab">
+            <div class="container pi-user-form">
+                <div class="row">
+                    <div class="col-sm-9">
+                        <h3>Add PI</h3>
+
+                        <p>${g.message(code: "projectRequest.piUsers.detail")}</p>
                     </div>
-                </g:else>
+
+                    <div class="col-sm-3">
+                        <button class="btn btn-primary pi-user-add-button" id="clone-add-2">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="clone-target-2" id="accordion2" data-highest-index="1">
+                    <g:if test="${cmd?.piUsers}">
+                        <g:each in="${cmd?.piUsers}" var="piUser" status="i">
+                            <g:if test="${piUser}">
+                                <div class="clone-remove-target-2">
+                                    <g:render template="templates/piUserFormAccordion" model="[index: i, piUser: piUser, availableRoles: availableRoles]"/>
+                                </div>
+                            </g:if>
+                        </g:each>
+                    </g:if>
+                    <g:else>
+                        <div class="clone-remove-target-2">
+                            <g:render template="templates/piUserFormAccordion"
+                                      model="[index: 0, emptyForm: true, availableRoles: availableRoles, departmentPiFeatureEnabled: departmentPiFeatureEnabled]"/>
+                        </div>
+                    </g:else>
+                </div>
             </div>
         </div>
-    </div>
-</g:if>
-<g:if test="${tabs.contains('user')}">
-    <div class="tab-pane fade mt-2" id="user" role="tabpanel" aria-labelledby="user-tab">
-        <div class="container user-form">
-            <div class="row">
-                <div class="col-sm-9">
-                    <h3>Add user</h3>
-                    <p>${g.message(code: "projectRequest.users.detail")}</p>
-                </div>
-                <div class="col-sm-3">
-                    <button class="btn btn-primary user-add-button" id="clone-add-1">
-                        <i class="bi bi-plus"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="clone-target-1" id="accordion" data-highest-index="1">
-                <g:if test="${cmd?.users}">
-                    <g:each in="${cmd?.users}" var="user" status="i">
-                        <g:if test="${user}">
-                            <div class="clone-remove-target-1">
-                                <g:render template="templates/userFormAccordion" model="[index: i, user: user, availableRoles: userRoles]"/>
-                            </div>
-                        </g:if>
-                    </g:each>
-                </g:if>
-                <g:else>
-                    <div class="clone-remove-target-1">
-                        <g:render template="templates/userFormAccordion" model="[index: 0, emptyForm: true, availableRoles: userRoles]"/>
+    </g:if>
+    <g:if test="${tabs.contains('user')}">
+        <div class="tab-pane fade mt-2" id="user" role="tabpanel" aria-labelledby="user-tab">
+            <div class="container user-form">
+                <div class="row">
+                    <div class="col-sm-9">
+                        <h3>Add user</h3>
+                        <p>${g.message(code: "projectRequest.users.detail")}</p>
                     </div>
-                </g:else>
+                    <div class="col-sm-3">
+                        <button class="btn btn-primary user-add-button" id="clone-add-1">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="clone-target-1" id="accordion" data-highest-index="1">
+                    <g:if test="${cmd?.users}">
+                        <g:each in="${cmd?.users}" var="user" status="i">
+                            <g:if test="${user}">
+                                <div class="clone-remove-target-1">
+                                    <g:render template="templates/userFormAccordion" model="[index: i, user: user, availableRoles: userRoles]"/>
+                                </div>
+                            </g:if>
+                        </g:each>
+                    </g:if>
+                    <g:else>
+                        <div class="clone-remove-target-1">
+                            <g:render template="templates/userFormAccordion" model="[index: 0, emptyForm: true, availableRoles: userRoles]"/>
+                        </div>
+                    </g:else>
+                </div>
             </div>
         </div>
-    </div>
-</g:if>
+    </g:if>
 </div>

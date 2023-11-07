@@ -45,6 +45,7 @@ import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.user.DepartmentService
+import de.dkfz.tbi.otp.security.user.DeputyRelationService
 import de.dkfz.tbi.otp.security.user.SwitchedUserDeniedException
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StringUtils
@@ -61,6 +62,7 @@ class ProjectRequestController implements CheckAndCall {
     ProcessingOptionService processingOptionService
     SecurityService securityService
     DepartmentService departmentService
+    DeputyRelationService deputyRelationService
 
     @Autowired
     ProjectRequestStateProvider projectRequestStateProvider
@@ -98,19 +100,20 @@ class ProjectRequestController implements CheckAndCall {
             cmd.projectRequest = CollectionUtils.exactlyOneElement(ProjectRequest.findAllById(flash.cmd.projectRequest.id))
         }
         return [
-                buttonActions         : projectRequestStateProvider.getCurrentState(cmd?.projectRequest).getIndexActions(cmd?.projectRequest),
-                keywords              : Keyword.listOrderByName(),
-                projectNameDescription: projectNameDescription,
-                projectNamePattern    : projectNamePattern,
-                projectTypes          : ProjectType.values(),
-                seqTypes              : SeqType.all.sort { it.displayNameWithLibraryLayout },
-                speciesWithStrains    : SpeciesWithStrain.all.sort { it.displayName },
-                storagePeriod         : StoragePeriod.values(),
-                availableRoles        : ProjectRole.findAll(),
-                userRoles             : ProjectRole.findAllByNameNotEqual('PI'),
-                sequencingCenters     : SeqCenter.all.unique().sort(),
-                faqProjectTypeLink    : processingOptionService.findOptionAsString(ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_FAQ_PROJECT_TYPE_LINK),
-                cmd                   : cmd,
+                buttonActions             : projectRequestStateProvider.getCurrentState(cmd?.projectRequest).getIndexActions(cmd?.projectRequest),
+                keywords                  : Keyword.listOrderByName(),
+                projectNameDescription    : projectNameDescription,
+                projectNamePattern        : projectNamePattern,
+                projectTypes              : ProjectType.values(),
+                seqTypes                  : SeqType.all.sort { it.displayNameWithLibraryLayout },
+                speciesWithStrains        : SpeciesWithStrain.all.sort { it.displayName },
+                storagePeriod             : StoragePeriod.values(),
+                availableRoles            : ProjectRole.findAll(),
+                userRoles                 : ProjectRole.findAllByNameNotEqual('PI'),
+                sequencingCenters         : SeqCenter.all.unique().sort(),
+                faqProjectTypeLink        : processingOptionService.findOptionAsString(ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_FAQ_PROJECT_TYPE_LINK),
+                departmentPiFeatureEnabled: processingOptionService.findOptionAsBoolean(ProcessingOption.OptionName.ENABLE_PROJECT_REQUEST_PI),
+                cmd                       : cmd,
         ]
     }
 
@@ -260,10 +263,20 @@ class ProjectRequestController implements CheckAndCall {
     }
 
     JSON getPIs(String department) {
-        if (processingOptionService.findOptionAsString(ProcessingOption.OptionName.ENABLE_PROJECT_REQUEST_PI).toBoolean()) {
-            return render(departmentService.getListOfPIForDepartment(department) as JSON)
+        if (processingOptionService.findOptionAsBoolean(ProcessingOption.OptionName.ENABLE_PROJECT_REQUEST_PI)) {
+            List<User> departmentHeads = departmentService.getListOfHeadsForDepartment(department).sort { it -> it.toString() }
+            List<User> deputies = deputyRelationService.getAllDeputiesForDepartmentHeads(departmentHeads).sort { it -> it.toString() }
+
+            return render([
+                    departmentHeads: departmentHeads.collect { user ->
+                        [username: user.username, displayName: user.toString()]
+                    },
+                    deputies       : deputies.collect { user ->
+                        [username: user.username, displayName: user.toString()]
+                    },
+            ] as JSON)
         }
-        return render(departmentService.listOfAllUsers() as JSON)
+        return render([:] as JSON) // TODO in otp-2310
     }
 
     private Map<String, String> convertToMapForFrontend(AbstractFieldDefinition abstractFieldDefinition,
@@ -463,8 +476,7 @@ class ProjectRequestCreationCommand implements Validateable {
                         String errorMessage = "Field ${afd.name} : ${afd.regularExpressionError}"
                         errors.reject("${errorMessage}", null, "${errorMessage}")
                     }
-                }
-                else if (it.value && afd instanceof IntegerFieldDefinition) {
+                } else if (it.value && afd instanceof IntegerFieldDefinition) {
                     if (afd.allowedIntegerValues && !(afd.allowedIntegerValues.contains(it.value.toInteger()))) {
                         String errorMessage = "Field ${afd.name} with value ${it.value} is not valid, it should be one of ${afd.allowedIntegerValues}"
                         errors.reject("${errorMessage}", null, "${errorMessage}")
