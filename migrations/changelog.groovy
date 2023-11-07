@@ -130,4 +130,6 @@ databaseChangeLog = {
     include file: 'changelogs/2023/otp-2220.groovy'
 
     include file: 'changelogs/2023/otp-1465.groovy'
+
+    include file: 'changelogs/2023/otp-2333-set-bean-name-bam-import.groovy'
 }

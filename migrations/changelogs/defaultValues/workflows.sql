@@ -24,8 +24,8 @@ INSERT INTO workflow(id, version, name, bean_name, enabled, priority, date_creat
 VALUES (NEXTVAL('hibernate_sequence'), 0, 'FASTQ installation', 'dataInstallationWorkflow', TRUE, 0, NOW(), NOW(), 10)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated, max_parallel_workflows)
-VALUES (NEXTVAL('hibernate_sequence'), 0, 'Externally merged BAM files installation', TRUE, 0, NOW(), NOW(), 10)
+INSERT INTO workflow(id, version, name, bean_name, enabled, priority, date_created, last_updated, max_parallel_workflows)
+VALUES (NEXTVAL('hibernate_sequence'), 0, 'Externally merged BAM files installation', 'bamImportWorkflow', TRUE, 0, NOW(), NOW(), 10)
 ON CONFLICT DO NOTHING;
 
 

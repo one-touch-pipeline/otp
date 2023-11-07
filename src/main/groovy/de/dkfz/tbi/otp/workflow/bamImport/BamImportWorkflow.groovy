@@ -35,7 +35,7 @@ import de.dkfz.tbi.otp.workflowExecution.*
 @Slf4j
 class BamImportWorkflow implements OtpWorkflow {
 
-    public static final String WORKFLOW = "Bam Import"
+    public static final String WORKFLOW = "Externally merged BAM files installation"
     public static final String OUTPUT_BAM = "Bam"
 
     @Override
