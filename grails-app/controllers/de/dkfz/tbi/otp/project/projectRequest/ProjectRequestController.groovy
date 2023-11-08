@@ -276,7 +276,7 @@ class ProjectRequestController implements CheckAndCall {
                     },
             ] as JSON)
         }
-        return render([:] as JSON) // TODO in otp-2310
+        return render([:] as JSON)
     }
 
     private Map<String, String> convertToMapForFrontend(AbstractFieldDefinition abstractFieldDefinition,

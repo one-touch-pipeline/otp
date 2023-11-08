@@ -39,13 +39,12 @@
         <div class="form-group row">
             <g:set var="description" value="${listMode ? "piUsers[${index}].username" : "username"}"/>
             <label class="col-sm-2 col-form-label" for="${description}">${g.message(code: "projectUser.addMember.username")}</label>
-
-            <div class="${departmentPiFeatureEnabled ? "col-sm-8" : "col-sm-10"}">
-                <input type="hidden" value="${piUser?.username}" class="initial-pi-user">
-                <select class="form-control pi-selector" name="${description}" id="${description}"></select>
-            </div>
-
             <g:if test="${departmentPiFeatureEnabled}">
+                <div class="col-sm-8">
+                    <input type="hidden" value="${piUser?.username}" class="initial-pi-user">
+                    <select class="form-control pi-selector" name="${description}" id="${description}"></select>
+                </div>
+
                 <g:set var="description" value="${listMode ? "piUsers[${index}].showHeads" : "showHeads"}"/>
                 <div class="col-sm-2">
                     <g:checkBox class="show-head-checkbox" name="${description}" id="${description}_checkbox" value="${false}"/>
@@ -54,6 +53,15 @@
                     </label>
                 </div>
             </g:if>
+            <g:else>
+                <div class="user-auto-complete col-sm-10">
+                    <input class="username-input input-field autocompleted form-control"
+                           name="${description}"
+                           id="${description}"
+                           value="${piUser?.username}"
+                           autocomplete="off"/>
+                </div>
+            </g:else>
         </div>
 
         <div class="form-group row">
