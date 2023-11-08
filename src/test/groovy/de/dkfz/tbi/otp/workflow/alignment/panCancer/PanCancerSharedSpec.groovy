@@ -77,7 +77,7 @@ class PanCancerSharedSpec extends Specification implements WorkflowSystemDomainF
         panCancerSharedInstance.getSeqTracks(workflowStep)
 
         then:
-        1 * panCancerSharedInstance.checkWorkflowName(workflowStep, alignmentWorkflowNames) >> _
+        1 * panCancerSharedInstance.checkWorkflowName(workflowStep, alignmentWorkflowNames)
 
         then:
         1 * panCancerSharedInstance.concreteArtefactService.getInputArtefacts(workflowStep, PanCancerWorkflow.INPUT_FASTQ) >> _
@@ -91,7 +91,7 @@ class PanCancerSharedSpec extends Specification implements WorkflowSystemDomainF
         panCancerSharedInstance.getFastqcProcessedFiles(workflowStep)
 
         then:
-        1 * panCancerSharedInstance.checkWorkflowName(workflowStep, [PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WORKFLOW]) >> _
+        1 * panCancerSharedInstance.checkWorkflowName(workflowStep, [PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WORKFLOW])
 
         then:
         1 * panCancerSharedInstance.concreteArtefactService.getInputArtefacts(workflowStep, PanCancerWorkflow.INPUT_FASTQC) >> _
@@ -106,7 +106,7 @@ class PanCancerSharedSpec extends Specification implements WorkflowSystemDomainF
         panCancerSharedInstance.getBaseRoddyBamFile(workflowStep)
 
         then:
-        1 * panCancerSharedInstance.checkWorkflowName(workflowStep, [PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WORKFLOW]) >> _
+        1 * panCancerSharedInstance.checkWorkflowName(workflowStep, [PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WORKFLOW])
 
         then:
         1 * panCancerSharedInstance.concreteArtefactService.getInputArtefact(workflowStep, PanCancerWorkflow.INPUT_BASE_BAM_FILE, false) >> bamFile
@@ -121,7 +121,7 @@ class PanCancerSharedSpec extends Specification implements WorkflowSystemDomainF
         panCancerSharedInstance.getRoddyBamFile(workflowStep)
 
         then:
-        1 * panCancerSharedInstance.checkWorkflowName(workflowStep, alignmentWorkflowNames) >> _
+        1 * panCancerSharedInstance.checkWorkflowName(workflowStep, alignmentWorkflowNames)
 
         then:
         1 * panCancerSharedInstance.concreteArtefactService.getOutputArtefact(workflowStep, PanCancerWorkflow.OUTPUT_BAM) >> bamFile

@@ -65,7 +65,7 @@ class FastqcSharedSpec extends Specification implements WorkflowSystemDomainFact
         fastqcSharedInstance.getSeqTrack(workflowStep)
 
         then:
-        1 * fastqcSharedInstance.checkWorkflowName(workflowStep, _) >> _
+        1 * fastqcSharedInstance.checkWorkflowName(workflowStep, _)
 
         then:
         1 * fastqcSharedInstance.concreteArtefactService.getInputArtefact(workflowStep, BashFastQcWorkflow.INPUT_FASTQ) >> seqTrack
@@ -79,7 +79,7 @@ class FastqcSharedSpec extends Specification implements WorkflowSystemDomainFact
         fastqcSharedInstance.getFastqcProcessedFiles(workflowStep)
 
         then:
-        1 * fastqcSharedInstance.checkWorkflowName(workflowStep, _) >> _
+        1 * fastqcSharedInstance.checkWorkflowName(workflowStep, _)
 
         then:
         1 * fastqcSharedInstance.concreteArtefactService.getOutputArtefacts(workflowStep, BashFastQcWorkflow.OUTPUT_FASTQC) >> _

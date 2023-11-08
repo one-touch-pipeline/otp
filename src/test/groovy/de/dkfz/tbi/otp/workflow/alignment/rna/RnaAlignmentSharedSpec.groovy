@@ -75,7 +75,7 @@ class RnaAlignmentSharedSpec extends Specification implements WorkflowSystemDoma
         rnaAlignmentSharedInstance.getSeqTracks(workflowStep)
 
         then:
-        1 * rnaAlignmentSharedInstance.checkWorkflowName(workflowStep, alignmentWorkflowNames) >> _
+        1 * rnaAlignmentSharedInstance.checkWorkflowName(workflowStep, alignmentWorkflowNames)
 
         then:
         1 * rnaAlignmentSharedInstance.concreteArtefactService.getInputArtefacts(workflowStep, RnaAlignmentWorkflow.INPUT_FASTQ) >> _
@@ -90,7 +90,7 @@ class RnaAlignmentSharedSpec extends Specification implements WorkflowSystemDoma
         rnaAlignmentSharedInstance.getRoddyBamFile(workflowStep)
 
         then:
-        1 * rnaAlignmentSharedInstance.checkWorkflowName(workflowStep, RnaAlignmentWorkflow.WORKFLOW) >> _
+        1 * rnaAlignmentSharedInstance.checkWorkflowName(workflowStep, RnaAlignmentWorkflow.WORKFLOW)
 
         then:
         1 * rnaAlignmentSharedInstance.concreteArtefactService.getOutputArtefact(workflowStep, RnaAlignmentWorkflow.OUTPUT_BAM) >> bamFile

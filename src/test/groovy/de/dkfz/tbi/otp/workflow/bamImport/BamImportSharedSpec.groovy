@@ -19,52 +19,54 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.datainstallation
+package de.dkfz.tbi.otp.workflow.bamImport
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.dataprocessing.ExternalMergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.BamImportWorkflowDomainFactory
 import de.dkfz.tbi.otp.ngsdata.AntibodyTarget
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-class DataInstallationSharedSpec extends Specification implements WorkflowSystemDomainFactory, DataTest {
+class BamImportSharedSpec extends Specification implements BamImportWorkflowDomainFactory, DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
         return [
                 WorkflowRun,
                 WorkflowStep,
-                SeqTrack,
+                ExternalMergingWorkPackage,
+                ExternallyProcessedBamFile,
                 AntibodyTarget,
         ]
     }
 
-    void "getSeqTrack, should call checkWorkflowName and getOutputArtefact with correct arguments and in order"() {
+    void "getBamFile, should call checkWorkflowName and getOutputArtefact with correct arguments and in order"() {
         given:
-        final DataInstallationShared dataInstallationSharedInstance = Spy(DataInstallationSharedInstance)
-        dataInstallationSharedInstance.concreteArtefactService = Mock(ConcreteArtefactService)
+        final BamImportSharedInstance bamImportSharedInstance = Spy(BamImportSharedInstance)
+        bamImportSharedInstance.concreteArtefactService = Mock(ConcreteArtefactService)
         final WorkflowRun run = createWorkflowRun([
                 workflow: createWorkflow([
-                        name: DataInstallationWorkflow.WORKFLOW
+                        name: BamImportWorkflow.WORKFLOW
                 ]),
         ])
         final WorkflowStep workflowStep = createWorkflowStep([workflowRun: run])
-        SeqTrack seqTrack = createSeqTrack()
+        ExternallyProcessedBamFile bamFile = createBamFile()
 
         when:
-        dataInstallationSharedInstance.getSeqTrack(workflowStep)
+        bamImportSharedInstance.getBamFile(workflowStep)
 
         then:
-        1 * dataInstallationSharedInstance.checkWorkflowName(workflowStep, DataInstallationWorkflow.WORKFLOW)
+        1 * bamImportSharedInstance.checkWorkflowName(workflowStep, BamImportWorkflow.WORKFLOW)
 
         then:
-        1 * dataInstallationSharedInstance.concreteArtefactService.getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> seqTrack
+        1 * bamImportSharedInstance.concreteArtefactService.getOutputArtefact(workflowStep, BamImportWorkflow.OUTPUT_BAM) >> bamFile
     }
 
     @SuppressWarnings('EmptyClass')
-    class DataInstallationSharedInstance implements DataInstallationShared { }
+    class BamImportSharedInstance implements BamImportShared { }
 }
