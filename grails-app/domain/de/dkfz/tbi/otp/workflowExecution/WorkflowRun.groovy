@@ -79,6 +79,8 @@ class WorkflowRun implements Commentable, Entity {
 
     String shortDisplayName
 
+    String notificationText
+
     /**
      * Flag to indicate, whether restarting a job can cause problems.
      *
@@ -128,6 +130,7 @@ class WorkflowRun implements Commentable, Entity {
         shortDisplayName blank: false, nullable: false
 
         workFolder nullable: true, unique: true
+        notificationText nullable: true
     }
 
     static Closure mapping = {
@@ -139,6 +142,7 @@ class WorkflowRun implements Commentable, Entity {
         state index: 'workflow_run_state_idx'
         comment cascade: "all-delete-orphan"
         workDirectory type: 'text'
+        notificationText type: 'text'
     }
 
     Map<String, WorkflowArtefact> getInputArtefacts() {

@@ -87,7 +87,7 @@ class AlignmentInfoService {
                 }
     }
 
-    private Map<String, String> extractCValuesMapFromJsonConfigString(String config) {
+    Map<String, String> extractCValuesMapFromJsonConfigString(String config) {
         JsonNode node = MAPPER.readTree(config)
         return node.get('RODDY').get('cvalues').fields().collectEntries {
             [(it.key): it.value.get('value').asText()]

@@ -27,9 +27,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.workflow.alignment.*
-import de.dkfz.tbi.otp.workflow.jobs.AttachUuidJob
-import de.dkfz.tbi.otp.workflow.jobs.CalculateSizeJob
-import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
+import de.dkfz.tbi.otp.workflow.jobs.*
 import de.dkfz.tbi.otp.workflowExecution.Artefact
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
@@ -45,6 +43,9 @@ class RnaAlignmentWorkflow extends AlignmentWorkflow {
     List<String> getJobBeanNames() {
         return [
                 RoddyAlignmentFragmentJob.simpleName.uncapitalize(),
+                // will be uncommented after default fragments have been adapted
+                // Keep the order, since it is important
+//                RnaAlignmentCreateNotificationJob.simpleName.uncapitalize(),
                 RoddyAlignmentConditionalFailJob.simpleName.uncapitalize(),
                 AttachUuidJob.simpleName.uncapitalize(),
                 RoddyAlignmentPrepareJob.simpleName.uncapitalize(),
