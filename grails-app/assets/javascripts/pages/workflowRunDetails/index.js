@@ -118,7 +118,7 @@ $(() => {
     <thead>
       <tr class="table-info">
         <th></th>
-        <th>WES identifier</th>
+        <th>WorkflowExecutionSystem identifier</th>
         <th>State</th>
         <th>Subpath</th>
         <th>Log name</th>
@@ -134,7 +134,7 @@ $(() => {
                        </td>
                        <td>
                          ${$.otp.createLinkMarkup({
-    text: `WES run: ${wesRun.wesIdentifier}`,
+    text: `WorkflowExecutionSystem run: ${wesRun.wesIdentifier}`,
     controller: 'wesRun',
     action: 'show',
     id: wesRun.id,
@@ -212,7 +212,7 @@ $(() => {
     if (row.clusterJobs.length > 0) {
       const state = row.cummulatedClusterJobsState;
       const cssClass = statusToClassName(state);
-      return `<div title="${state} is the congregated state of the cluster/wes jobs" 
+      return `<div title="${state} is the congregated state of the cluster/WorkflowExecutionSystem jobs" 
                    class="ml-1 ${cssClass} small"></div>`;
     }
     return '';

@@ -33,7 +33,7 @@ import de.dkfz.tbi.otp.workflowExecution.*
 @Slf4j
 class BashFastQcWorkflow implements OtpWorkflow {
 
-    public static final String WORKFLOW = "Bash Fastqc"
+    public static final String WORKFLOW = "Bash FastQC"
     public static final String INPUT_FASTQ = "FASTQ"
     public static final String OUTPUT_FASTQC = "FASTQC"
 

@@ -69,7 +69,7 @@ describe('Check workflow config viewer page', () => {
       cy.intercept('/workflowConfigViewer/build*').as('buildConfig');
 
       cy.get('#otpToastBox').should('not.exist');
-      cy.get('.selector').find('#workflowSelector').select('Bash Fastqc', { force: true });
+      cy.get('.selector').find('#workflowSelector').select('Bash FastQC', { force: true });
       cy.get('.selector').find('#refGenSelector').select('1KGRef_PhiX', { force: true });
       cy.get('.selector').find('#libPrepKitSelector').select('NEBNext Methyl-seq Kit', { force: true });
 

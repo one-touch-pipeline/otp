@@ -124,7 +124,7 @@
 
     <g:if test="${workflowRun.state == WorkflowRun.State.RUNNING_WES}">
         <div class="alert alert-primary" role="alert">
-            Workflow is running in WES.
+            Workflow is running in WorkflowExecutionSystem.
         </div>
     </g:if>
 
