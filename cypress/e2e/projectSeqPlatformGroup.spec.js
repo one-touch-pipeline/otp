@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,8 +27,8 @@ describe('Check projectSeqPlatformGroup page', () => {
     beforeEach(() => {
       cy.intercept('/projectSeqPlatformGroup/update*').as('updateProjectSeqPlatformGroup');
       cy.loginAsOperator();
-      cy.visit('/alignmentConfigurationOverview/index');
-      cy.get('.merging-criteria-table tr td').find('a').first().click();
+      cy.visit('/workflowSelection/index');
+      cy.get('table#mergingCriteria tr td').find('a').first().click();
     });
 
     after(() => {
@@ -38,8 +38,8 @@ describe('Check projectSeqPlatformGroup page', () => {
       cy.wait('@updateProjectSeqPlatformGroup').then(() => {
         cy.get('input#libPrepKit').check();
 
-        cy.visit('/alignmentConfigurationOverview/index');
-        cy.get('table.merging-criteria-table tbody tr').last().find('a').click();
+        cy.visit('/workflowSelection/index');
+        cy.get('table#mergingCriteria tbody tr').last().find('a').click();
 
         cy.wait('@projectSeqPlatformGroupIndex').then(() => {
           cy.get('.seqPlatformGroupSelector button[type=submit].btn-danger').click();
@@ -91,14 +91,14 @@ describe('Check projectSeqPlatformGroup page', () => {
       cy.intercept('/projectSeqPlatformGroup/index*').as('projectSeqPlatformGroupIndex');
       cy.intercept('/projectSeqPlatformGroup/searchForSeqPlatformGroups*').as('searchForSeqPlatformGroups');
       cy.intercept('/projectSeqPlatformGroup/copySeqPlatformGroup*').as('copySeqPlatformGroup');
-      cy.visit('/alignmentConfigurationOverview/index');
-      cy.get('table.merging-criteria-table tbody tr').last().find('a').click();
+      cy.visit('/workflowSelection/index');
+      cy.get('table#mergingCriteria tbody tr').last().find('a').click();
 
       cy.wait('@projectSeqPlatformGroupIndex').then(() => {
         cy.get('select#useSeqPlatformGroup').select('USE_PROJECT_SEQ_TYPE_SPECIFIC', { force: true });
 
         cy.get('select#selectedProjectToCopyFrom').select('ExampleProject', { force: true });
-        cy.get('select#selectedSeqTypeToCopyFrom').select('10x_scRNA PAIRED single cell', { force: true });
+        cy.get('select#selectedSeqTypeToCopyFrom').select('ChIP PAIRED bulk', { force: true });
 
         cy.wait('@searchForSeqPlatformGroups').then((interception) => {
           expect(interception.response.statusCode).to.eq(302);
@@ -151,7 +151,7 @@ describe('Check projectSeqPlatformGroup page', () => {
         cy.location('pathname').should('match', /^\/projectSeqPlatformGroup\/index/);
         cy.get('.seqPlatformGroups').should('not.contain', 'Illumina HiSeq 2000 v2');
         cy.get('.alert.alert-info')
-          .contains('No group configured for ExampleProject and 10x_scRNA PAIRED single cell!')
+          .contains('No group configured for ExampleProject and ChIP PAIRED bulk!')
           .should('exist');
       });
     });

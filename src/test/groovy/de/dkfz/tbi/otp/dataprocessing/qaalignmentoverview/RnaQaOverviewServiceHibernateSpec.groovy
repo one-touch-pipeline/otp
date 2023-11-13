@@ -34,6 +34,8 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdService
 import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
+import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
+import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
 class RnaQaOverviewServiceHibernateSpec extends HibernateSpec implements RoddyPancanFactory {
 
@@ -73,6 +75,11 @@ class RnaQaOverviewServiceHibernateSpec extends HibernateSpec implements RoddyPa
         (1..3).collect {
             createSeqTypePaired()
             createSeqType()
+        }
+
+        service.workflowService = Mock(WorkflowService) {
+            1 * getSupportedSeqTypes(RnaAlignmentWorkflow.WORKFLOW) >> seqTypes
+            0 * _
         }
 
         expect:

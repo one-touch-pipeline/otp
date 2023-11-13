@@ -28,6 +28,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.FastqcWorkflowDomainFactory
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
@@ -42,6 +43,7 @@ class AllDeciderIntegrationSpec extends Specification implements ServiceUnitTest
         createWesFastqcWorkflowVersion()
         createWorkflow(name: PanCancerWorkflow.WORKFLOW)
         createWorkflow(name: WgbsWorkflow.WORKFLOW)
+        createWorkflow(name: RnaAlignmentWorkflow.WORKFLOW)
         WorkflowStep workflowStep = createWorkflowStep()
         WorkflowArtefact wa1 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun,
                 artefactType: ArtefactType.RUN_YAPSA)

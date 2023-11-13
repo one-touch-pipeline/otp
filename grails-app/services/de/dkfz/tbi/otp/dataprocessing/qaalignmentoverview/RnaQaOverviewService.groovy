@@ -27,10 +27,11 @@ import groovy.transform.CompileDynamic
 import de.dkfz.tbi.otp.dataprocessing.AbstractQualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.RnaQualityAssessment
 import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
+import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
+import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
 @Transactional(readOnly = true)
 class RnaQaOverviewService extends AbstractRoddyQaOverviewService {
@@ -83,6 +84,8 @@ class RnaQaOverviewService extends AbstractRoddyQaOverviewService {
             "rRNARate",
     ].asImmutable()
 
+    WorkflowService workflowService
+
     @Override
     Class<? extends AbstractQualityAssessment> qaClass() {
         return RnaQualityAssessment
@@ -90,7 +93,7 @@ class RnaQaOverviewService extends AbstractRoddyQaOverviewService {
 
     @Override
     List<SeqType> supportedSeqTypes() {
-        return SeqTypeService.rnaAlignableSeqTypes
+        return workflowService.getSupportedSeqTypes(RnaAlignmentWorkflow.WORKFLOW) as List
     }
 
     @Override

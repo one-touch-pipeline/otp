@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
@@ -55,6 +56,7 @@ class AllDecider implements Decider {
             FastqcDecider,
             PanCancerDecider,
             WgbsDecider,
+            RnaAlignmentDecider,
     ]
 
     @Override
@@ -76,9 +78,12 @@ class AllDecider implements Decider {
 
     Collection<SeqTrack> findAllSeqTracksInNewWorkflowSystem(Collection<SeqTrack> seqTracks) {
         Set<SeqType> supportedSeqTypes = workflowService.getSupportedSeqTypesOfVersions([
-                workflowService.getExactlyOneWorkflow(PanCancerWorkflow.WORKFLOW),
-                workflowService.getExactlyOneWorkflow(WgbsWorkflow.WORKFLOW),
-        ])
+                PanCancerWorkflow.WORKFLOW,
+                WgbsWorkflow.WORKFLOW,
+                RnaAlignmentWorkflow.WORKFLOW,
+        ].collect {
+            workflowService.getExactlyOneWorkflow(it)
+        }) as Set<SeqType>
         return seqTracks.findAll {
             supportedSeqTypes.contains(it.seqType)
         }

@@ -138,4 +138,6 @@ databaseChangeLog = {
     include file: 'changelogs/2023/otp-2260.groovy'
 
     include file: 'changelogs/2023/otp-2304-delete-old-rna-workflow-defaults.groovy'
+
+    include file: 'changelogs/2023/otp-2185.groovy'
 }

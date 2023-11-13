@@ -30,9 +30,9 @@ import spock.lang.Specification
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.tracking.TicketService
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.MailHelperService
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
@@ -61,19 +61,6 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
         decider.unalignableSeqTrackEmailCreator.mailHelperService = Mock(MailHelperService)
         decider.unalignableSeqTrackEmailCreator.ticketService = ticketService
         DomainFactory.createRoddyAlignableSeqTypes()
-    }
-
-    void testDecideAndPrepareForAlignment_whenEverythingIsOkay_shouldReturnWorkPackages() {
-        given:
-        setupData()
-        SeqTrack seqTrack = buildSeqTrack()
-
-        when:
-        Collection<MergingWorkPackage> workPackages = decider.decideAndPrepareForAlignment(seqTrack, true)
-
-        then:
-        assertSeqTrackProperties(exactlyOneElement(workPackages), seqTrack)
-        exactlyOneElement(workPackages).seqTracks == [seqTrack] as Set<SeqTrack>
     }
 
     void testFindOrSaveWorkPackagesTwice_whenEverythingIsOkay_workPackageShouldContainBothSeqTracks() {
@@ -122,187 +109,6 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
 
         then:
         workPackages.empty
-    }
-
-    void testDecideAndPrepareForAlignment_whenWrongReferenceGenome_shouldThrowAssertionError() {
-        given:
-        setupData()
-        SeqTrack seqTrack = buildSeqTrack()
-
-        DomainFactory.createMergingWorkPackage(
-                sample: seqTrack.sample,
-                seqType: seqTrack.seqType,
-                seqPlatformGroup: seqTrack.seqPlatformGroup,
-        )
-
-        expect:
-        shouldFail AssertionError, {
-            decider.decideAndPrepareForAlignment(seqTrack, true)
-        }
-    }
-
-    void testDecideAndPrepareForAlignment_whenWrongPipeline_shouldThrowAssertionError() {
-        given:
-        setupData()
-        SeqTrack seqTrack = buildSeqTrack()
-
-        DomainFactory.createMergingWorkPackage(
-                sample: seqTrack.sample,
-                seqType: seqTrack.seqType,
-                seqPlatformGroup: seqTrack.seqPlatformGroup,
-                referenceGenome: exactlyOneElement(ReferenceGenome.list()),
-                pipeline: findOrSaveByNameAndType(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT),
-        )
-
-        expect:
-        shouldFail AssertionError, {
-            decider.decideAndPrepareForAlignment(seqTrack, true)
-        }
-    }
-
-    void testDecideAndPrepareForAlignment_whenDifferentSeqPlatformGroup_shouldReturnEmptyListAndSendMail() {
-        given:
-        setupData()
-        String prefix = "PRFX"
-        DomainFactory.createProcessingOptionForTicketPrefix(prefix)
-
-        Ticket ticket = DomainFactory.createTicket()
-        FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance(ticket: ticket)
-        SeqTrack seqTrack = buildSeqTrack()
-        seqTrack.sequenceFiles*.fastqImportInstance = fastqImportInstance
-        seqTrack.sequenceFiles*.save(flush: true)
-
-        DomainFactory.createMergingWorkPackage(
-                sample: seqTrack.sample,
-                seqType: seqTrack.seqType,
-                referenceGenome: exactlyOneElement(ReferenceGenome.list()),
-                pipeline: findOrSaveByNameAndType(Pipeline.Name.RODDY_RNA_ALIGNMENT, Pipeline.Type.ALIGNMENT),
-        )
-
-        decider.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmailToTicketSystem(_, _) >> { String subject, String content ->
-                assert subject.contains(prefix)
-                assert subject.contains(ticket.ticketNumber)
-                assert subject.contains(seqTrack.sample.toString())
-            }
-        }
-
-        when:
-        Collection<MergingWorkPackage> workPackages = decider.decideAndPrepareForAlignment(seqTrack, true)
-
-        then:
-        workPackages.empty
-    }
-
-    void testDecideAndPrepareForAlignment_whenDifferentLibraryPreparationKit_shouldReturnEmptyListAndSendMailWithTicket() {
-        given:
-        setupData()
-        SeqTrack seqTrack; MergingWorkPackage workPackage
-        (seqTrack, workPackage) = prepareDifferentLibraryPreparationKit()
-
-        String prefix = "PRFX"
-        DomainFactory.createProcessingOptionForTicketPrefix(prefix)
-        Ticket ticket = DomainFactory.createTicket()
-        FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance(ticket: ticket)
-        seqTrack.sequenceFiles*.fastqImportInstance = fastqImportInstance
-        seqTrack.sequenceFiles*.save(flush: true)
-
-        decider.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmailToTicketSystem(_, _) >> { String subject, String content ->
-                assert subject.contains(prefix)
-                assert subject.contains(ticket.ticketNumber)
-                assert subject.contains(seqTrack.sample.toString())
-                assert content.contains(seqTrack.libraryPreparationKit.name)
-                assert content.contains(workPackage.libraryPreparationKit.name)
-            }
-        }
-
-        when:
-        Collection<MergingWorkPackage> workPackages = decider.decideAndPrepareForAlignment(seqTrack, true)
-
-        then:
-        workPackages.empty
-    }
-
-    void testDecideAndPrepareForAlignment_whenDifferentLibraryPreparationKit_shouldReturnEmptyListAndSendMailWithoutTicket() {
-        given:
-        setupData()
-        SeqTrack seqTrack; MergingWorkPackage workPackage
-        (seqTrack, workPackage) = prepareDifferentLibraryPreparationKit()
-
-        decider.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmailToTicketSystem(_, _) >> { String subject, String content ->
-                assert subject.contains(seqTrack.sample.toString())
-                assert content.contains(seqTrack.libraryPreparationKit.name)
-                assert content.contains(workPackage.libraryPreparationKit.name)
-            }
-        }
-
-        when:
-        Collection<MergingWorkPackage> workPackages = decider.decideAndPrepareForAlignment(seqTrack, true)
-
-        then:
-        workPackages.empty
-    }
-
-    void testDecideAndPrepareForAlignment_whenMergingWorkPackageExists_shouldReturnIt() {
-        given:
-        setupData()
-        SeqTrack seqTrack = buildSeqTrack()
-
-        MergingWorkPackage workPackage = new MergingWorkPackage(
-                sample: seqTrack.sample,
-                seqType: seqTrack.seqType,
-                seqPlatformGroup: seqTrack.seqPlatformGroup,
-                referenceGenome: exactlyOneElement(ReferenceGenome.list()),
-                pipeline: findOrSaveByNameAndType(Pipeline.Name.RODDY_RNA_ALIGNMENT, Pipeline.Type.ALIGNMENT),
-        )
-        workPackage.save(flush: true)
-
-        when:
-        Collection<MergingWorkPackage> workPackages = decider.decideAndPrepareForAlignment(seqTrack, true)
-
-        then:
-        assertSeqTrackProperties(exactlyOneElement(workPackages), seqTrack)
-        exactlyOneElement(workPackages).seqTracks.contains(seqTrack)
-        exactlyOneElement(workPackages).seqTracks.size() == 1
-    }
-
-    void testDecideAndPrepareForAlignment_callsEnsureConfigurationIsComplete() {
-        given:
-        setupData()
-        SeqTrack st = buildSeqTrack()
-        int callCount = 0
-        decider = newDecider(
-                ensureConfigurationIsComplete: { SeqTrack seqTrack ->
-                    assert seqTrack == st
-                    callCount++
-                }
-        )
-
-        when:
-        decider.decideAndPrepareForAlignment(st, true)
-
-        then:
-        callCount == 1
-    }
-
-    void testDecideAndPrepareForAlignment_callsPrepareForAlignment() {
-        given:
-        setupData()
-        SeqTrack st = buildSeqTrack()
-        Collection<MergingWorkPackage> calledForMergingWorkPackages = []
-        decider = newDecider(
-                prepareForAlignment: { MergingWorkPackage workPackage, SeqTrack seqTrack, boolean forceRealign ->
-                    assert seqTrack == st
-                    assert forceRealign == true
-                    calledForMergingWorkPackages.add(workPackage)
-                }
-        )
-
-        expect:
-        TestCase.assertContainSame(calledForMergingWorkPackages, decider.decideAndPrepareForAlignment(st, true))
-        calledForMergingWorkPackages.size() > 0
     }
 
     void testEnsureConfigurationIsComplete_whenReferenceGenomeNull_shouldThrowRuntimeException() {
@@ -426,24 +232,6 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
         return decider
     }
 
-    private List<Entity> prepareDifferentLibraryPreparationKit() {
-        SeqTrack seqTrack = buildSeqTrack()
-        seqTrack.libraryPreparationKit = DomainFactory.createLibraryPreparationKit()
-        seqTrack.kitInfoReliability = InformationReliability.KNOWN
-        seqTrack.save(flush: true)
-
-        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(
-                sample: seqTrack.sample,
-                seqType: seqTrack.seqType,
-                seqPlatformGroup: seqTrack.seqPlatformGroup,
-                referenceGenome: exactlyOneElement(ReferenceGenome.list()),
-                pipeline: findOrSaveByNameAndType(Pipeline.Name.RODDY_RNA_ALIGNMENT, Pipeline.Type.ALIGNMENT),
-        )
-        workPackage.save(flush: true)
-
-        return [seqTrack, workPackage]
-    }
-
     private SeqTrack buildSeqTrack() {
         TestData testData = new TestData()
         testData.createObjects()
@@ -457,10 +245,6 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
         DomainFactory.createRoddyWorkflowConfig(project: seqTrack.project, seqType: seqTrack.seqType,
                 pipeline: findOrSaveByNameAndType(Pipeline.Name.RODDY_RNA_ALIGNMENT, Pipeline.Type.ALIGNMENT))
         return seqTrack
-    }
-
-    private void assertSeqTrackProperties(MergingWorkPackage workPackage, SeqTrack seqTrack) {
-        assert workPackage.satisfiesCriteria(seqTrack)
     }
 
     private static Pipeline findOrSaveByNameAndType(Pipeline.Name name, Pipeline.Type type) {

@@ -43,6 +43,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
@@ -208,7 +209,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                 header = HEADER_PANCANCER_BED
                 columnsSelectionKey = "PANCANCER_BED"
                 break
-            case { it.name == SeqTypeNames.RNA.seqTypeName }:
+            case workflowService.getSupportedSeqTypes(RnaAlignmentWorkflow.WORKFLOW):
                 header = HEADER_RNA
                 columnsSelectionKey = "RNA"
                 break
