@@ -685,7 +685,7 @@ class FileService {
     /**
      * Create a link from link to target.
      *
-     * The destination has to exist, the link may only exist if option {@link CreateLinkOption#DELETE_EXISTING_FILE} is given.
+     * The target has to exist, the link may only exist if option {@link CreateLinkOption#DELETE_EXISTING_FILE} is given.
      * Both parameters have to be absolute.
      * Missing parent directories are created automatically with the {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
      *
@@ -695,11 +695,11 @@ class FileService {
      * and the link is recreated.
      *
      * If the target is a directory, link will be a link to that directory,
-     * if the target is a regular file, link will a link to that file,
+     * if the target is a regular file, link will be a link to that file,
      * it is NOT possible to use this method like {code ln -s /dir1/file.txt /dir2/}.
      *
      * @param link the path of the link
-     * @param target the exiting path the link point to
+     * @param target the existing path the link should point to
      * @param groupString the name of the unix group of the associated project
      * @param options Option to adapt the behavior, see {@link CreateLinkOption}
      */

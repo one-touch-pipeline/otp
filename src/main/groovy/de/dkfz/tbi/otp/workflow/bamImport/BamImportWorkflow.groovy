@@ -24,9 +24,7 @@ package de.dkfz.tbi.otp.workflow.bamImport
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.workflow.jobs.AttachUuidJob
-import de.dkfz.tbi.otp.workflow.jobs.OtpClusterCheckFragmentKeysJob
-import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
+import de.dkfz.tbi.otp.workflow.jobs.*
 import de.dkfz.tbi.otp.workflowExecution.*
 
 /**
@@ -42,20 +40,20 @@ class BamImportWorkflow implements OtpWorkflow {
     @Override
     List<String> getJobBeanNames() {
         return [
-                // BamImportFragmentJob.simpleName.uncapitalize(),
-                OtpClusterCheckFragmentKeysJob.simpleName.uncapitalize(),
-                // BamImportConditionalFailJob.simpleName.uncapitalize(),
-                AttachUuidJob.simpleName.uncapitalize(),
-                // BamImportPrepareJob.simpleName.uncapitalize(),
-                // BamImportCopyJob.simpleName.uncapitalize(),
-                // BamImportValidationJob.simpleName.uncapitalize(),
-                // BamImportLinkSourceJob.simpleName.uncapitalize(),
-                // BamImportReplaceSourceJob.simpleName.uncapitalize(),
-                SetCorrectPermissionJob.simpleName.uncapitalize(),
-                // CalculateFileSizeJob.simpleName.uncapitalize(),
-                BamImportLinkJob.simpleName.uncapitalize(),
-                BamImportFinishJob.simpleName.uncapitalize(),
-        ]
+                // BamImportFragmentJob,
+                OtpClusterCheckFragmentKeysJob,
+                // BamImportConditionalFailJob,
+                AttachUuidJob,
+                // BamImportPrepareJob,
+                // BamImportCopyJob,
+                // BamImportValidationJob,
+                // BamImportLinkSourceJob,
+                BamImportReplaceSourceJob,
+                SetCorrectPermissionJob,
+                // CalculateFileSizeJob,
+                BamImportLinkJob,
+                BamImportFinishJob,
+        ]*.simpleName*.uncapitalize()
     }
 
     /**

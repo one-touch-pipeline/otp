@@ -27,9 +27,11 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactory
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.utils.HelperUtils
 
+import java.nio.file.FileSystems
 import java.nio.file.Paths
 
 class ExternallyProcessedBamFileServiceSpec extends Specification implements ServiceUnitTest<ExternallyProcessedBamFileService>, DataTest, ExternalBamFactory {
@@ -44,12 +46,18 @@ class ExternallyProcessedBamFileServiceSpec extends Specification implements Ser
 
     ExternallyProcessedBamFile bamFile
     String testDir
+    String importDir
 
     void setup() {
-        bamFile = createBamFile()
+        importDir = "/path/to/bam/file"
+        String bamName = "bamFile.bam"
+        bamFile = createBamFile(fileName: bamName, importedFrom: "${importDir}/${bamName}")
         testDir = "/base-dir"
         service.abstractBamFileService = Mock(AbstractBamFileService) {
             getBaseDirectory(_) >> Paths.get("/base-dir")
+        }
+        service.fileSystemService = Mock(FileSystemService) {
+            remoteFileSystem >> FileSystems.default
         }
     }
 
@@ -85,6 +93,21 @@ class ExternallyProcessedBamFileServiceSpec extends Specification implements Ser
 
         expect:
         service.getFinalInsertSizeFile(bamFile).toString() == "/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}/insert-size-file"
+    }
+
+    void "test getSourceBamFilePath"() {
+        expect:
+        service.getSourceBamFilePath(bamFile).toString() == "${importDir}/${bamFile.bamFileName}"
+    }
+
+    void "test getSourceBaiFilePath"() {
+        expect:
+        service.getSourceBaiFilePath(bamFile).toString() == "${importDir}/${bamFile.baiFileName}"
+    }
+
+    void "test getSourceBaseDirFilePath"() {
+        expect:
+        service.getSourceBaseDirFilePath(bamFile).toString() == "${importDir}"
     }
 
     void "test getPathForFurtherProcessing, returns null since qcTrafficLightStatus is #status"() {
