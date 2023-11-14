@@ -88,10 +88,8 @@ class RnaRoddyBamFile extends RoddyBamFile {
     AbstractQualityAssessment getQualityAssessment() {
         return CollectionUtils.exactlyOneElement(RnaQualityAssessment.createCriteria().list {
             eq 'chromosome', RoddyQualityAssessment.ALL
-            qualityAssessmentMergedPass {
-                abstractBamFile {
-                    eq 'id', this.id
-                }
+            abstractBamFile {
+                eq 'id', this.id
             }
         })
     }
