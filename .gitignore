@@ -66,6 +66,7 @@ target-eclipse
 *.ipr
 *.iws
 out
+lib/
 
 ###others
 ## metrics file produced by devScripts/gitlab-ci/codenarc-informations.sh

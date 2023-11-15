@@ -74,6 +74,14 @@ class SampleIdentifierValidator extends AbstractValueTuplesValidator<AbstractMet
             String sampleName = valueTuple.getValue(SAMPLE_NAME.name())
             ParsedSampleIdentifier identifier = findExistingParsedSampleIdentifierForValueTuple(valueTuple)
 
+            if (sampleName ==~ /.*\s.*/) {
+                context.addProblem(
+                        valueTuple.cells,
+                        LogLevel.WARNING,
+                        "Sample Name '${sampleName}' contains whitespaces.",
+                        "The Sample Name contains at least one whitespace.")
+            }
+
             if (!identifier) {
                 return
             }

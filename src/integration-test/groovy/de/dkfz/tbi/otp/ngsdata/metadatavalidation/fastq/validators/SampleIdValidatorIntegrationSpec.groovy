@@ -143,6 +143,23 @@ class SampleIdValidatorIntegrationSpec extends Specification implements DomainFa
         problem.message.contains("Sample Name '${seqTrack.sampleIdentifier}' is already registered for another sample with the same pid and seq type.")
     }
 
+    void 'validate, fails when sampleIdentifier includes whitespaces'() {
+        given:
+        String sampleNameWithWhitespace = "sample with space"
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                "${MetaDataColumn.SAMPLE_NAME}\t${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.SEQUENCING_READ_TYPE}\t${MetaDataColumn.BASE_MATERIAL}\t${MetaDataColumn.PROJECT}\n" +
+                        "${sampleNameWithWhitespace}\tseqType\tseqReadType\tprojectName"
+        )
+
+        when:
+        validator.validate(context)
+
+        then:
+        Problem problem = exactlyOneElement(context.problems)
+        problem.level == LogLevel.WARNING
+        problem.message.contains("Sample Name '${sampleNameWithWhitespace}' contains whitespaces.")
+    }
+
     void 'validate, fails when parsed sampleIdentifier is already registered'() {
         given:
         Project project = createProject(
