@@ -266,7 +266,7 @@ $.otp.processingPriority = {
   openDialog() {
     'use strict';
 
-    return $('#processingPriorityModal').modal();
+    return $('#processingPriorityModal').modal('show');
   },
 
   closeDialog() {
