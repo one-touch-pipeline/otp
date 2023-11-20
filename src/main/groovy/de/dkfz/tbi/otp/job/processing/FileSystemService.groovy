@@ -22,8 +22,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import com.github.robtimus.filesystems.sftp.*
-import com.jcraft.jsch.IdentityRepository
-import com.jcraft.jsch.agentproxy.*
+import com.jcraft.jsch.*
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import grails.util.Environment
@@ -76,11 +75,8 @@ class FileSystemService {
                     config.put("PreferredAuthentications", "publickey")
                     break
                 case SshAuthMethod.SSH_AGENT:
-                    Connector connector = ConnectorFactory.default.createConnector()
-                    if (connector != null) {
-                        IdentityRepository repository = new RemoteIdentityRepository(connector)
-                        env.withIdentityRepository(repository)
-                    }
+                    IdentityRepository repository = new AgentIdentityRepository(new SSHAgentConnector())
+                    env.withIdentityRepository(repository)
                     break
                 case SshAuthMethod.PASSWORD:
                     env.withPassword(configService.sshPassword.toCharArray())

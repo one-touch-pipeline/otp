@@ -414,10 +414,8 @@ dependencies {
     // library for interacting with cluster job schedulers
     implementation('com.github.theroddywms:BatchEuphoria:0.1.4')
 
-    // ssh, ssh-agent proxy, and sftp libraries
-    implementation 'com.jcraft:jsch:0.1.55'
-    implementation "com.jcraft:jsch.agentproxy.jsch:0.0.9"
-    implementation "com.jcraft:jsch.agentproxy.connector-factory:0.0.9"
+    // libraries for SSH and SFTP
+    implementation 'com.github.mwiede:jsch:0.2.13'
     implementation 'com.github.robtimus:sftp-fs:3.2'
 
     // library for easy HTML editing

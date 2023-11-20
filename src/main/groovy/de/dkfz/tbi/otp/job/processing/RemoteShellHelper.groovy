@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.job.processing
 
 import com.jcraft.jsch.*
-import com.jcraft.jsch.agentproxy.*
 import grails.util.Environment
 import groovy.transform.Synchronized
 import groovy.util.logging.Slf4j
@@ -201,11 +200,8 @@ class RemoteShellHelper {
                         config.put("PreferredAuthentications", "publickey")
                         break
                     case SshAuthMethod.SSH_AGENT:
-                        Connector connector = ConnectorFactory.default.createConnector()
-                        if (connector != null) {
-                            IdentityRepository repository = new RemoteIdentityRepository(connector)
-                            jsch.identityRepository = repository
-                        }
+                        IdentityRepository repository = new AgentIdentityRepository(new SSHAgentConnector())
+                        jsch.identityRepository = repository
                         break
                 }
             }
