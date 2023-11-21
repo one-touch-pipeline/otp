@@ -386,7 +386,7 @@ dependencies {
 
 
     // JDBC
-    runtimeOnly 'org.postgresql:postgresql:42.6.0'
+    runtimeOnly 'org.postgresql:postgresql:42.7.0'
 
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
