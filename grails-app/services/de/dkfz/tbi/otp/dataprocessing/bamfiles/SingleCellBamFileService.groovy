@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@ import groovy.transform.CompileDynamic
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
+import de.dkfz.tbi.otp.filestore.PathOption
 
 import java.nio.file.Path
 
@@ -141,7 +142,7 @@ class SingleCellBamFileService<T extends AbstractBamFile> extends AbstractAbstra
     }
 
     @Override
-    Path getFinalInsertSizeFile(SingleCellBamFile bamFile) {
+    Path getFinalInsertSizeFile(SingleCellBamFile bamFile, PathOption... options) {
         throw new UnsupportedOperationException("Final insert size file is not implemented for single cell BAM files (${bamFile})")
     }
 

@@ -51,7 +51,7 @@ class BamImportWorkflow implements OtpWorkflow {
                 // BamImportReplaceSourceJob.simpleName.uncapitalize(),
                 SetCorrectPermissionJob.simpleName.uncapitalize(),
                 // CalculateFileSizeJob.simpleName.uncapitalize(),
-                // BamImportLinkJob.simpleName.uncapitalize(),
+                BamImportLinkJob.simpleName.uncapitalize(),
                 // BamImportFinishJob.simpleName.uncapitalize(),
         ]
     }

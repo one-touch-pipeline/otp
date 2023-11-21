@@ -26,6 +26,7 @@ import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.filestore.FilestoreService
+import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 import java.nio.file.Path
@@ -231,7 +232,7 @@ class RoddyBamFileService extends AbstractAbstractBamFileService<RoddyBamFile> i
     }
 
     @Override
-    Path getFinalInsertSizeFile(RoddyBamFile bamFile) {
+    Path getFinalInsertSizeFile(RoddyBamFile bamFile, PathOption... options) {
         return getFinalInsertSizeDirectory(bamFile).resolve("${bamFile.sampleType.dirName}_${bamFile.individual.pid}_${INSERT_SIZE_FILE_SUFFIX}")
     }
 

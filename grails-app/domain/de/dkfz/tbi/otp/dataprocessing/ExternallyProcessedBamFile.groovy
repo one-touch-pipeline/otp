@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
 import de.dkfz.tbi.otp.ngsdata.MergedAlignmentDataFileService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflowExecution.Artefact
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 
 /**
@@ -36,7 +37,7 @@ import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
  */
 @SuppressWarnings('JavaIoPackageAccess')
 @ManagedEntity
-class ExternallyProcessedBamFile extends AbstractBamFile {
+class ExternallyProcessedBamFile extends AbstractBamFile implements Artefact {
 
     /**
      * name of folder for imported bam files
@@ -204,5 +205,6 @@ class ExternallyProcessedBamFile extends AbstractBamFile {
         furtherFiles nullable: true
         insertSizeFile nullable: true, blank: false, maxSize: 1000, shared: "relativePath"
         maximumReadLength nullable: true, min: 0
+        workflowArtefact nullable: true
     }
 }

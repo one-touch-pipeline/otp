@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,8 @@ package de.dkfz.tbi.otp.dataprocessing.bamfiles
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.filestore.FilestoreService
+import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.project.ProjectService
 
 import java.nio.file.Path
@@ -32,31 +34,35 @@ import java.nio.file.Path
 class ExternallyProcessedBamFileService<T extends AbstractBamFile> extends AbstractAbstractBamFileService<ExternallyProcessedBamFile> {
 
     AbstractBamFileService abstractBamFileService
+    FilestoreService filestoreService
     ProjectService projectService
 
-    Path getBamFile(ExternallyProcessedBamFile bamFile) {
-        return getImportFolder(bamFile).resolve(bamFile.bamFileName)
+    Path getBamFile(ExternallyProcessedBamFile bamFile, PathOption... options) {
+        return getImportFolder(bamFile, options).resolve(bamFile.bamFileName)
     }
 
-    Path getBaiFile(ExternallyProcessedBamFile bamFile) {
-        return getImportFolder(bamFile).resolve(bamFile.baiFileName)
+    Path getBaiFile(ExternallyProcessedBamFile bamFile, PathOption... options) {
+        return getImportFolder(bamFile, options).resolve(bamFile.baiFileName)
     }
 
-    Path getBamMaxReadLengthFile(ExternallyProcessedBamFile bamFile) {
-        return getImportFolder(bamFile).resolve("${bamFile.bamFileName}.maxReadLength")
+    Path getBamMaxReadLengthFile(ExternallyProcessedBamFile bamFile, PathOption... options) {
+        return getImportFolder(bamFile, options).resolve("${bamFile.bamFileName}.maxReadLength")
     }
 
-    Path getNonOtpFolder(ExternallyProcessedBamFile bamFile) {
-        return  abstractBamFileService.getBaseDirectory(bamFile).resolve("nonOTP")
+    Path getNonOtpFolder(ExternallyProcessedBamFile bamFile, PathOption... options) {
+        if (options.contains(PathOption.REAL_PATH) && bamFile.workflowArtefact.producedBy.workFolder) {
+            return filestoreService.getWorkFolderPath(bamFile.workflowArtefact.producedBy)
+        }
+        return abstractBamFileService.getBaseDirectory(bamFile).resolve("nonOTP")
     }
 
-    Path getImportFolder(ExternallyProcessedBamFile bamFile) {
-        return getNonOtpFolder(bamFile).resolve("analysisImport_${bamFile.referenceGenome}")
+    Path getImportFolder(ExternallyProcessedBamFile bamFile, PathOption... options) {
+        return getNonOtpFolder(bamFile, options).resolve("analysisImport_${bamFile.referenceGenome}")
     }
 
     @Override
-    Path getFinalInsertSizeFile(ExternallyProcessedBamFile bamFile) {
-        return getImportFolder(bamFile).resolve(bamFile.insertSizeFile)
+    Path getFinalInsertSizeFile(ExternallyProcessedBamFile bamFile, PathOption... options) {
+        return getImportFolder(bamFile, options).resolve(bamFile.insertSizeFile)
     }
 
     @Override

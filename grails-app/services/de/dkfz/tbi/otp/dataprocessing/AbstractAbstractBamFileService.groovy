@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,8 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.transactions.Transactional
 
+import de.dkfz.tbi.otp.filestore.PathOption
+
 import java.nio.file.Path
 
 import static AbstractBamFile.QcTrafficLightStatus
@@ -30,7 +32,7 @@ import static AbstractBamFile.QcTrafficLightStatus
 @Transactional
 abstract class AbstractAbstractBamFileService<T extends AbstractBamFile> {
 
-    abstract Path getFinalInsertSizeFile(T bamFile)
+    abstract Path getFinalInsertSizeFile(T bamFile, PathOption... options)
     protected abstract Path getPathForFurtherProcessingNoCheck(T bamFile)
 
     Path getPathForFurtherProcessing(T bamFile) {
