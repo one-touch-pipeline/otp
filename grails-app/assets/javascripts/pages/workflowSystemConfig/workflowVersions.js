@@ -106,7 +106,7 @@ const renderWorkflowVersionTable = (workflowVersionData, workflowId) => {
           date
         }) => {
           let deprecationText = '';
-          if (date && date !== 'na') {
+          if (date && date !== 'N/A') {
             deprecationText += `${author} (${date})`;
           }
           return deprecationText;
@@ -116,7 +116,7 @@ const renderWorkflowVersionTable = (workflowVersionData, workflowId) => {
         data: 'deprecateDate',
         render: (deprecateDate) => {
           let deprecationText = '';
-          if (deprecateDate && deprecateDate !== 'na') {
+          if (deprecateDate && deprecateDate !== 'N/A') {
             deprecationText += `Yes (since ${deprecateDate})`;
           }
           return deprecationText;
@@ -178,7 +178,7 @@ const updateModalWithCurrentWorkflowVersion = (workflowVersion, modal) => {
 
   $('.modal-title', modal).html(`Modify Workflow Version ${workflowVersion.name}`);
   $('#comment', modal).val(workflowVersion.comment);
-  $('#deprecate-state', modal).prop('checked', workflowVersion.deprecateDate !== 'na');
+  $('#deprecate-state', modal).prop('checked', workflowVersion.deprecateDate !== 'N/A');
 };
 
 /**

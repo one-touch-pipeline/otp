@@ -49,12 +49,12 @@ class ClusterJobDetailController {
         ClusterJob clusterJob = clusterJobService.findById(params.id as long)
         Individual individual = clusterJob ? clusterJobService.findProcessParameterObjectByClusterJob(clusterJob)?.individual : null
         Project project = clusterJob.oldSystem ? individual?.project : clusterJob.workflowStep.workflowRun.project
-        String memoryEfficiency = clusterJobDetailService.calculateMemoryEfficiency(clusterJob)?.round(2) ?: 'NA'
-        String cpuAvgUtilised = clusterJobDetailService.calculateCpuAvgUtilised(clusterJob)?.round(2) ?: 'NA'
-        String elapsedWalltimeAsISO = TimeUtils.getFormattedDuration(clusterJobDetailService.calculateElapsedWalltime(clusterJob))
-        String requestedWalltimeAsISO = TimeUtils.getFormattedDuration(clusterJob.requestedWalltime)
-        String walltimeDiffAsISO = TimeUtils.getFormattedDuration(clusterJobDetailService.calculateWalltimeDiff(clusterJob))
-        String cpuTimeAsISO = TimeUtils.getFormattedDuration(clusterJob.cpuTime)
+        String memoryEfficiency = clusterJobDetailService.calculateMemoryEfficiency(clusterJob)?.round(2) ?: 'N/A'
+        String cpuAvgUtilised = clusterJobDetailService.calculateCpuAvgUtilised(clusterJob)?.round(2) ?: 'N/A'
+        String elapsedWalltimeAsISO = TimeUtils.getFormattedDuration(clusterJobDetailService.calculateElapsedWalltime(clusterJob)) ?: 'N/A'
+        String requestedWalltimeAsISO = TimeUtils.getFormattedDuration(clusterJob.requestedWalltime) ?: 'N/A'
+        String walltimeDiffAsISO = TimeUtils.getFormattedDuration(clusterJobDetailService.calculateWalltimeDiff(clusterJob)) ?: 'N/A'
+        String cpuTimeAsISO = TimeUtils.getFormattedDuration(clusterJob.cpuTime) ?: 'N/A'
 
         return [
                 'job'                   : clusterJob,

@@ -103,7 +103,7 @@ const renderWorkflowOverviewTable = (workflowData) => {
       },
       {
         data: 'deprecationDate',
-        render: (date) => (date !== 'na' ? `Yes (since ${date})` : '')
+        render: (date) => (date !== 'N/A' ? `Yes (since ${date})` : '')
       },
       {
         data: '',

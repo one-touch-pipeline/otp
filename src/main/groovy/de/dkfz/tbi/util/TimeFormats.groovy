@@ -53,19 +53,19 @@ enum TimeFormats {
     }
 
     String getFormattedZonedDateTime(ZonedDateTime date, Locale locale = Locale.ENGLISH) {
-        return date ? date.format(DateTimeFormatter.ofPattern(format, locale)) : 'na'
+        return date ? date.format(DateTimeFormatter.ofPattern(format, locale)) : 'N/A'
     }
 
     String getFormattedLocalDate(LocalDate date, Locale locale = Locale.ENGLISH) {
-        return date ? date.format(DateTimeFormatter.ofPattern(format, locale)) : 'na'
+        return date ? date.format(DateTimeFormatter.ofPattern(format, locale)) : 'N/A'
     }
 
     String getFormattedDate(Date date, Locale locale = Locale.ENGLISH) {
-        return date ? TimeUtils.toZonedDateTime(date).format(DateTimeFormatter.ofPattern(format, locale)) : 'na'
+        return date ? TimeUtils.toZonedDateTime(date).format(DateTimeFormatter.ofPattern(format, locale)) : 'N/A'
     }
 
     String getFormattedLocalDateTime(LocalDateTime localDateTime, Locale locale = Locale.ENGLISH) {
-        return localDateTime ? localDateTime.format(DateTimeFormatter.ofPattern(format, locale)) : 'na'
+        return localDateTime ? localDateTime.format(DateTimeFormatter.ofPattern(format, locale)) : 'N/A'
     }
     /**
      * Formats the date in such a way that only relevant changed values are displayed.
