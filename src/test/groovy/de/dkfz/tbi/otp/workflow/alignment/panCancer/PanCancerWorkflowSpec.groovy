@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflow.alignment.panCancer
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
 import de.dkfz.tbi.otp.ngsdata.*
 
@@ -78,7 +79,7 @@ class PanCancerWorkflowSpec extends Specification implements RoddyPancanFactory,
         outputRoddyBamFile != roddyBamFile
         outputRoddyBamFile.mergingWorkPackage == roddyBamFile.mergingWorkPackage
         outputRoddyBamFile.identifier == 1
-        outputRoddyBamFile.workDirectoryName == "${RoddyBamFile.WORK_DIR_PREFIX}_1"
+        outputRoddyBamFile.workDirectoryName == "${RoddyBamFileService.WORK_DIR_PREFIX}_1"
         outputRoddyBamFile.seqTracks == roddyBamFile.seqTracks
         outputRoddyBamFile.config == roddyBamFile.config
         outputRoddyBamFile.numberOfMergedLanes == roddyBamFile.numberOfMergedLanes

@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryInstance
@@ -55,7 +56,8 @@ import java.nio.file.*
 
 @Rollback
 @Integration
-class DeletionServiceIntegrationSpec extends Specification implements EgaSubmissionFactory, IsRoddy, DocumentFactory, WorkflowSystemDomainFactory, UserAndRoles {
+class DeletionServiceIntegrationSpec extends Specification implements EgaSubmissionFactory, IsRoddy, DocumentFactory, FastqcDomainFactory,
+        WorkflowSystemDomainFactory, UserAndRoles {
 
     DeletionService deletionService
     TestConfigService configService
@@ -788,7 +790,7 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
     void "deleteFastQCInformationFromRawSequenceFile"() {
         given:
         RawSequenceFile rawSequenceFile = DomainFactory.createFastqFile()
-        FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(sequenceFile: rawSequenceFile)
+        FastqcProcessedFile fastqcProcessedFile = createFastqcProcessedFile(sequenceFile: rawSequenceFile)
 
         when:
         deletionService.deleteFastQCInformationFromRawSequenceFile(rawSequenceFile)
@@ -872,7 +874,7 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
     void "deleteRawSequenceFile"() {
         given:
         RawSequenceFile rawSequenceFile = DomainFactory.createFastqFile()
-        FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(sequenceFile: rawSequenceFile)
+        FastqcProcessedFile fastqcProcessedFile = createFastqcProcessedFile(sequenceFile: rawSequenceFile)
 
         DomainFactory.createMetaDataEntry(sequenceFile: rawSequenceFile)
 

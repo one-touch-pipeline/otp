@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 import groovy.util.logging.Slf4j
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.job.jobs.alignment.AbstractAlignmentStartJob
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
@@ -39,7 +40,7 @@ abstract class AbstractRoddyAlignmentStartJob extends AbstractAlignmentStartJob 
         return new RoddyBamFile(
                 workPackage: mergingWorkPackage,
                 identifier: identifier,
-                workDirectoryName: "${RoddyBamFile.WORK_DIR_PREFIX}_${identifier}",
+                workDirectoryName: "${RoddyBamFileService.WORK_DIR_PREFIX}_${identifier}",
                 seqTracks: seqTracks,
                 config: config,
         )

@@ -28,6 +28,7 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.ngsdata.*
@@ -184,7 +185,7 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
 
     void "test getFinalInsertSizeDirectory method"() {
         given:
-        File expectedPath = new File("${roddyBamFile.baseDirectory}/${roddyBamFile.QUALITY_CONTROL_DIR}/${roddyBamFile.MERGED_DIR}/${roddyBamFile.INSERT_SIZE_FILE_DIRECTORY}")
+        File expectedPath = new File("${roddyBamFile.baseDirectory}/${RoddyBamFileService.QUALITY_CONTROL_DIR}/${RoddyBamFileService.MERGED_DIR}/${RoddyBamFileService.INSERT_SIZE_FILE_DIRECTORY}")
 
         expect:
         expectedPath == roddyBamFile.finalInsertSizeDirectory
@@ -192,9 +193,9 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
 
     void "test getFinalInsertSizeFile method"() {
         given:
-        File expectedPath = new File("${roddyBamFile.baseDirectory}/${roddyBamFile.QUALITY_CONTROL_DIR}/${roddyBamFile.MERGED_DIR}/" +
-                "${roddyBamFile.INSERT_SIZE_FILE_DIRECTORY}/${roddyBamFile.sampleType.dirName}_${roddyBamFile.individual.pid}_" +
-                "${roddyBamFile.INSERT_SIZE_FILE_SUFFIX}")
+        File expectedPath = new File("${roddyBamFile.baseDirectory}/${RoddyBamFileService.QUALITY_CONTROL_DIR}/${RoddyBamFileService.MERGED_DIR}/" +
+                "${RoddyBamFileService.INSERT_SIZE_FILE_DIRECTORY}/${roddyBamFile.sampleType.dirName}_${roddyBamFile.individual.pid}_" +
+                "${RoddyBamFileService.INSERT_SIZE_FILE_SUFFIX}")
 
         expect:
         expectedPath == roddyBamFile.finalInsertSizeFile

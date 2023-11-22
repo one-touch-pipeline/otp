@@ -42,56 +42,6 @@ import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, ProcessParameterObject, RoddyResult {
 
     /**
-     * @deprecated use {@link RoddyBamFileService#WORK_DIR_PREFIX} instead
-     */
-    @Deprecated
-    static final String WORK_DIR_PREFIX = ".merging"
-
-    /**
-     * @deprecated use {@link RoddyBamFileService#QUALITY_CONTROL_DIR} instead
-     */
-    @Deprecated
-    static final String QUALITY_CONTROL_DIR = "qualitycontrol"
-    /**
-     * @deprecated use {@link RoddyBamFileService#METHYLATION_DIR} instead
-     */
-    @Deprecated
-    static final String METHYLATION_DIR = "methylation"
-
-    /**
-     * @deprecated use {@link RoddyBamFileService#QUALITY_CONTROL_JSON_FILE_NAME} instead
-     */
-    @Deprecated
-    static final String QUALITY_CONTROL_JSON_FILE_NAME = "qualitycontrol.json"
-    /**
-     * @deprecated use {@link RoddyBamFileService#QUALITY_CONTROL_TARGET_EXTRACT_JSON_FILE_NAME} instead
-     */
-    @Deprecated
-    static final String QUALITY_CONTROL_TARGET_EXTRACT_JSON_FILE_NAME = "qualitycontrol_targetExtract.json"
-
-    /**
-     * @deprecated use {@link RoddyBamFileService#MERGED_DIR} instead
-     */
-    @Deprecated
-    static final String MERGED_DIR = "merged"
-
-    /**
-     * @deprecated use {@link RoddyBamFileService#METADATATABLE_FILE} instead
-     */
-    @Deprecated
-    static final String METADATATABLE_FILE = "metadataTable.tsv"
-
-    /**
-     * @deprecated use {@link RoddyBamFileService#INSERT_SIZE_FILE_SUFFIX} instead
-     */
-    static final String INSERT_SIZE_FILE_SUFFIX = 'insertsize_plot.png_qcValues.txt'
-    /**
-     * @deprecated use {@link RoddyBamFileService#INSERT_SIZE_FILE_DIRECTORY} instead
-     */
-    @Deprecated
-    static final String INSERT_SIZE_FILE_DIRECTORY = 'insertsize_distribution'
-
-    /**
      * Contains all seqTracks including the parents
      */
     Set<SeqTrack> seqTracks
@@ -240,7 +190,7 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
      */
     @Deprecated
     File getFinalQADirectory() {
-        return new File(baseDirectory, QUALITY_CONTROL_DIR)
+        return new File(baseDirectory, RoddyBamFileService.QUALITY_CONTROL_DIR)
     }
 
     /**
@@ -248,7 +198,7 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
      */
     @Deprecated
     File getWorkQADirectory() {
-        return new File(workDirectory, QUALITY_CONTROL_DIR)
+        return new File(workDirectory, RoddyBamFileService.QUALITY_CONTROL_DIR)
     }
 
     /**
@@ -256,7 +206,7 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
      */
     @Deprecated
     File getWorkMethylationDirectory() {
-        return new File(workDirectory, METHYLATION_DIR)
+        return new File(workDirectory, RoddyBamFileService.METHYLATION_DIR)
     }
 
     /**
@@ -264,7 +214,7 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
      */
     @Deprecated
     File getFinalMethylationDirectory() {
-        return new File(baseDirectory, METHYLATION_DIR)
+        return new File(baseDirectory, RoddyBamFileService.METHYLATION_DIR)
     }
 
     /**
@@ -272,7 +222,7 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
      */
     @Deprecated
     File getFinalMergedQADirectory() {
-        return new File(this.finalQADirectory, MERGED_DIR)
+        return new File(this.finalQADirectory, RoddyBamFileService.MERGED_DIR)
     }
 
     /**
@@ -280,7 +230,7 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
      */
     @Deprecated
     File getWorkMergedQADirectory() {
-        return new File(this.workQADirectory, MERGED_DIR)
+        return new File(this.workQADirectory, RoddyBamFileService.MERGED_DIR)
     }
 
     /**
@@ -304,7 +254,7 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
      */
     @Deprecated
     File getFinalMergedMethylationDirectory() {
-        return new File(this.finalMethylationDirectory, MERGED_DIR)
+        return new File(this.finalMethylationDirectory, RoddyBamFileService.MERGED_DIR)
     }
 
     /**
@@ -312,7 +262,7 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
      */
     @Deprecated
     File getWorkMergedMethylationDirectory() {
-        return new File(this.workMethylationDirectory, MERGED_DIR)
+        return new File(this.workMethylationDirectory, RoddyBamFileService.MERGED_DIR)
     }
 
     /**
@@ -336,7 +286,7 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
      */
     @Deprecated
     File getFinalMergedQAJsonFile() {
-        return new File(finalMergedQADirectory, QUALITY_CONTROL_JSON_FILE_NAME)
+        return new File(finalMergedQADirectory, RoddyBamFileService.QUALITY_CONTROL_JSON_FILE_NAME)
     }
 
     /**
@@ -344,7 +294,7 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
      */
     @Deprecated
     File getWorkMergedQAJsonFile() {
-        return new File(workMergedQADirectory, QUALITY_CONTROL_JSON_FILE_NAME)
+        return new File(workMergedQADirectory, RoddyBamFileService.QUALITY_CONTROL_JSON_FILE_NAME)
     }
 
     /**
@@ -352,7 +302,7 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
      */
     @Deprecated
     File getWorkMergedQATargetExtractJsonFile() {
-        return new File(workMergedQADirectory, QUALITY_CONTROL_TARGET_EXTRACT_JSON_FILE_NAME)
+        return new File(workMergedQADirectory, RoddyBamFileService.QUALITY_CONTROL_TARGET_EXTRACT_JSON_FILE_NAME)
     }
 
     /**
@@ -403,7 +353,7 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
     @Deprecated
     private Map<SeqTrack, File> getSingleLaneQAJsonFiles(String workOrFinal) {
         return "get${workOrFinal}SingleLaneQADirectories"().collectEntries { SeqTrack seqTrack, File directory ->
-            [(seqTrack): new File(directory, QUALITY_CONTROL_JSON_FILE_NAME)]
+            [(seqTrack): new File(directory, RoddyBamFileService.QUALITY_CONTROL_JSON_FILE_NAME)]
         }
     }
 
@@ -429,7 +379,7 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
     @Deprecated
     private Map<String, File> getLibraryQAJsonFiles(String workOrFinal) {
         return "get${workOrFinal}LibraryQADirectories"().collectEntries { String lib, File directory ->
-            [(lib): new File(directory, QUALITY_CONTROL_JSON_FILE_NAME)]
+            [(lib): new File(directory, RoddyBamFileService.QUALITY_CONTROL_JSON_FILE_NAME)]
         }
     }
 
@@ -518,7 +468,7 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
      */
     @Deprecated
     File getFinalMetadataTableFile() {
-        return new File(baseDirectory, METADATATABLE_FILE)
+        return new File(baseDirectory, RoddyBamFileService.METADATATABLE_FILE)
     }
 
     /**
@@ -526,7 +476,7 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
      */
     @Deprecated
     File getWorkMetadataTableFile() {
-        return new File(workDirectory, METADATATABLE_FILE)
+        return new File(workDirectory, RoddyBamFileService.METADATATABLE_FILE)
     }
 
     /**
@@ -534,7 +484,7 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
      */
     @Deprecated
     File getFinalInsertSizeDirectory() {
-        return new File(finalMergedQADirectory, INSERT_SIZE_FILE_DIRECTORY)
+        return new File(finalMergedQADirectory, RoddyBamFileService.INSERT_SIZE_FILE_DIRECTORY)
     }
 
     /**
@@ -543,7 +493,7 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
     @Deprecated
     @Override
     File getFinalInsertSizeFile() {
-        return new File(finalInsertSizeDirectory, "${this.sampleType.dirName}_${this.individual.pid}_${INSERT_SIZE_FILE_SUFFIX}")
+        return new File(finalInsertSizeDirectory, "${this.sampleType.dirName}_${this.individual.pid}_${RoddyBamFileService.INSERT_SIZE_FILE_SUFFIX}")
     }
 
     /**

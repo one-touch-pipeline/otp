@@ -164,7 +164,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
 
     @Deprecated
     static void logNotAligning(SeqTrack seqTrack, String reason, boolean saveInSeqTrack = true) {
-        seqTrack.log("Not aligning{0}, because ${reason}.", saveInSeqTrack)
+        SeqTrackService.logToSeqTrack(seqTrack, "Not aligning{0}, because ${reason}.", saveInSeqTrack)
     }
 
     @Deprecated

@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.HelperUtils
 
 class BamFilePairAnalysisSpec extends Specification implements DataTest {
 
@@ -161,7 +162,7 @@ class BamFilePairAnalysisSpec extends Specification implements DataTest {
     private <E> AbstractBamFile createBamFile(Class<E> clazz, Map propertiesForMergingWorkPackage = [:]) {
         Map properties = [
                 fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
-                md5sum             : DomainFactory.DEFAULT_MD5_SUM,
+                md5sum             : HelperUtils.randomMd5sum,
                 fileSize           : ++DomainFactory.counter,
         ]
         switch (clazz) {

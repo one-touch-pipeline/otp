@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.domainFactory.pipelines
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
 
@@ -75,7 +76,7 @@ trait IsRoddy implements IsPipeline {
 
         T bamFile = createDomainObject(clazz, bamFileDefaultProperties(properties, seqTracks, workPackage) +
                 [
-                workDirectoryName           : "${RoddyBamFile.WORK_DIR_PREFIX}_${nextId}",
+                workDirectoryName           : "${RoddyBamFileService.WORK_DIR_PREFIX}_${nextId}",
                 identifier                  : RoddyBamFile.nextIdentifier(workPackage),
                 config                      : {
                     findOrCreateConfig(

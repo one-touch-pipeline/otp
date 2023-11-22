@@ -332,14 +332,6 @@ class SeqTrack implements ProcessParameterObject, Entity, Artefact {
         return RawSequenceFile.findAllBySeqTrackAndIndexFile(this, false)
     }
 
-    /**
-     * @deprecated Can't use save in a domain object, use SeqTrackService.logToSeqTrack() instead
-     */
-    @Deprecated
-    void log(String message, boolean saveInSeqTrack = true) {
-        SeqTrackService.logToSeqTrack(this, message, saveInSeqTrack)
-    }
-
     String getReadGroupName() {
         if (seqType.libraryLayout == SequencingReadType.SINGLE) {
             RawSequenceFile rawSequenceFile = exactlyOneElement(sequenceFilesWhereIndexFileIsFalse)

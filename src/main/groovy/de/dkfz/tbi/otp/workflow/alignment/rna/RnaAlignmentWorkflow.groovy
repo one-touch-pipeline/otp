@@ -25,6 +25,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.workflow.alignment.*
 import de.dkfz.tbi.otp.workflow.jobs.*
@@ -71,7 +72,7 @@ class RnaAlignmentWorkflow extends AlignmentWorkflow {
         RnaRoddyBamFile outputRnaRoddyBamFile = new RnaRoddyBamFile([
                 workPackage        : mergingWorkPackage,
                 identifier         : identifier,
-                workDirectoryName  : "${RnaRoddyBamFile.WORK_DIR_PREFIX}_${identifier}",
+                workDirectoryName  : "${RoddyBamFileService.WORK_DIR_PREFIX}_${identifier}",
                 seqTracks          : rnaRoddyBamFile.seqTracks.collect() as Set,
                 config             : rnaRoddyBamFile.config,
                 numberOfMergedLanes: rnaRoddyBamFile.containedSeqTracks.size(),

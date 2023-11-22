@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
 import de.dkfz.tbi.otp.job.jobs.TestAbstractAlignmentStartJob
@@ -206,7 +207,7 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
         assert TestCase.containSame(seqTracks, rbf.seqTracks)
         assert seqTracks.size() == rbf.numberOfMergedLanes
         assert TestCase.containSame(seqTracks, rbf.containedSeqTracks)
-        assert rbf.workDirectoryName && rbf.workDirectoryName.startsWith(RoddyBamFile.WORK_DIR_PREFIX)
+        assert rbf.workDirectoryName && rbf.workDirectoryName.startsWith(RoddyBamFileService.WORK_DIR_PREFIX)
         assert !rbf.oldStructureUsed
 
         return rbf

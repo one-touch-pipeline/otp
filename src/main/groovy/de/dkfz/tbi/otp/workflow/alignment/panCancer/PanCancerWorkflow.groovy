@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.workflow.alignment.*
 import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
 import de.dkfz.tbi.otp.workflowExecution.Artefact
@@ -73,7 +74,7 @@ class PanCancerWorkflow extends AlignmentWorkflow {
         RoddyBamFile outputRoddyBamFile = new RoddyBamFile([
                 workPackage        : mergingWorkPackage,
                 identifier         : identifier,
-                workDirectoryName  : "${RoddyBamFile.WORK_DIR_PREFIX}_${identifier}",
+                workDirectoryName  : "${RoddyBamFileService.WORK_DIR_PREFIX}_${identifier}",
                 seqTracks          : roddyBamFile.seqTracks.collect() as Set,
                 config             : roddyBamFile.config,
                 numberOfMergedLanes: roddyBamFile.containedSeqTracks.size(),

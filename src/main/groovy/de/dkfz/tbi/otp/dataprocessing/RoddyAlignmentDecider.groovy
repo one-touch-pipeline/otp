@@ -45,7 +45,7 @@ abstract class RoddyAlignmentDecider extends AbstractAlignmentDecider {
         def setNeedsProcessing = {
             workPackage.needsProcessing = true
             assert workPackage.save(flush: true)
-            seqTrack.log("Will align{0} for ${workPackage}.")
+            SeqTrackService.logToSeqTrack(seqTrack, "Will align{0} for ${workPackage}.")
         }
 
         if (!latestValidBamFile ||
@@ -54,11 +54,11 @@ abstract class RoddyAlignmentDecider extends AbstractAlignmentDecider {
             setNeedsProcessing()
         } else {
             if (forceRealign) {
-                seqTrack.log("Will not align{0} for ${workPackage} " +
+                SeqTrackService.logToSeqTrack(seqTrack, "Will not align{0} for ${workPackage} " +
                         "because the latest bam file already contains the seqtrack. " +
                         "(You can only realign if you set the latest bam file (ID ${latestValidBamFile.id}) to withdrawn).")
             } else {
-                seqTrack.log("Will not align{0} for ${workPackage} " +
+                SeqTrackService.logToSeqTrack(seqTrack, "Will not align{0} for ${workPackage} " +
                         "because the latest bam file already contains the seqtrack.")
             }
         }

@@ -28,7 +28,6 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
-import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
 import de.dkfz.tbi.otp.workflowExecution.wes.WesRun
 
 @ManagedEntity
@@ -128,16 +127,6 @@ class WorkflowStep implements Commentable, Entity {
 
     ProcessingPriority getPriority() {
         return workflowRun.priority
-    }
-
-    /**
-     * @Deprecated Use {@link WorkflowLogService#findAllByWorkflowStepInCorrectOrder(WorkflowStep)} instead
-     */
-    @Deprecated
-    List<WorkflowLog> getLogs() {
-        return WorkflowLog.findAllByWorkflowStep(this).sort {
-            it.dateCreated
-        }
     }
 
     String displayInfo() {

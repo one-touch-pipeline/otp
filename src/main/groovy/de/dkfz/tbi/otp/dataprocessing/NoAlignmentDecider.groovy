@@ -25,6 +25,7 @@ import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqTrackService
 
 /**
  * An {@link AlignmentDecider} which decides not to align.
@@ -39,7 +40,7 @@ class NoAlignmentDecider implements AlignmentDecider {
     @Override
     @Deprecated
     Collection<MergingWorkPackage> decideAndPrepareForAlignment(SeqTrack seqTrack, boolean forceRealign) {
-        seqTrack.log("Not aligning{0}, because it is configured to use the ${this.class.simpleName}.")
+        SeqTrackService.logToSeqTrack(seqTrack, "Not aligning{0}, because it is configured to use the ${this.class.simpleName}.")
         return Collections.emptyList()
     }
 }

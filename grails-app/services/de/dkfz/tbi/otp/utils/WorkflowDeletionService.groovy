@@ -34,6 +34,8 @@ import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
 @Transactional
 class WorkflowDeletionService {
 
+    WorkflowLogService workflowLogService
+
     void deleteWorkflowRun(WorkflowRun workflowRun) {
         workflowRun.workflowSteps?.reverse()?.each {
             deleteWorkflowStep(it)
@@ -67,7 +69,7 @@ class WorkflowDeletionService {
             throw new IllegalArgumentException()
         }
         workflowStep.workflowRun.workflowSteps.remove(workflowStep)
-        workflowStep.logs.each {
+        workflowLogService.findAllByWorkflowStepInCorrectOrder(workflowStep).each {
             deleteWorkflowLog(it)
         }
         ClusterJob.findAllByWorkflowStep(workflowStep).each {

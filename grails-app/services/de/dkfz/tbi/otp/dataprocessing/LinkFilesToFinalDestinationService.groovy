@@ -25,6 +25,7 @@ import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
@@ -50,6 +51,7 @@ class LinkFilesToFinalDestinationService {
     QcTrafficLightCheckService qcTrafficLightCheckService
     RemoteShellHelper remoteShellHelper
     RoddyConfigService roddyConfigService
+    RoddyBamFileService roddyBamFileService
 
     void prepareRoddyBamFile(RoddyBamFile roddyBamFile) {
         assert roddyBamFile: "roddyBamFile must not be null"
@@ -208,7 +210,7 @@ class LinkFilesToFinalDestinationService {
             List<File> workDirs = roddyBamFiles.findAll { !it.isOldStructureUsed() }*.workDirectory
             filesToDelete.addAll(workDirs)
             filesToDelete.add(roddyBamFile.finalExecutionStoreDirectory)
-            filesToDelete.add(roddyBamFile.finalQADirectory)
+            filesToDelete.add(roddyBamFileService.getFinalQADirectory(roddyBamFile).toFile())
             if (roddyBamFile.seqType.isWgbs()) {
                 filesToDelete.add(roddyBamFile.finalMethylationDirectory)
             }

@@ -40,6 +40,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.LocalShellHelper
 
 import java.nio.file.*
@@ -104,7 +105,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         epmbfWithMd5sum = createBamFile(
                 fileName: bamFileNameWithMd5sum,
                 importedFrom: "${mainDirectory.path}/${bamFileNameWithMd5sum}",
-                md5sum: DomainFactory.DEFAULT_MD5_SUM,
+                md5sum: HelperUtils.randomMd5sum,
                 furtherFiles: [SUB_DIRECTORY]
         )
         epmbfWithMd5sum.individual.project = project
@@ -523,7 +524,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
     void "test validate when everything is not equal"() {
         given:
-        String importedMd5sum = DomainFactory.DEFAULT_MD5_SUM
+        String importedMd5sum = HelperUtils.randomMd5sum
         ImportProcess importProcess = new ImportProcess(
                 externallyProcessedBamFiles: [epmbfWithoutMd5sum]
         ).save(flush: true)

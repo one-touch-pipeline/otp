@@ -29,9 +29,9 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.shared.NoArtefactOfRoleException
 import de.dkfz.tbi.otp.workflow.shared.NoConcreteArtefactException
@@ -41,7 +41,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 @Rollback
 @Integration
-class ConcreteArtefactServiceIntegrationSpec extends Specification implements RoddyPancanFactory, WorkflowSystemDomainFactory {
+class ConcreteArtefactServiceIntegrationSpec extends Specification implements RoddyPancanFactory, WorkflowSystemDomainFactory, FastqcDomainFactory {
 
     @Autowired
     ConcreteArtefactService service
@@ -255,7 +255,7 @@ class ConcreteArtefactServiceIntegrationSpec extends Specification implements Ro
                 role: INPUT_ROLE2,
                 workflowArtefact: artefact2,
         )
-        FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile([
+        FastqcProcessedFile fastqcProcessedFile = createFastqcProcessedFile([
                 workflowArtefact: artefact2,
         ])
         WorkflowArtefact artefact3 = createWorkflowArtefact()
@@ -313,7 +313,7 @@ class ConcreteArtefactServiceIntegrationSpec extends Specification implements Ro
                 role: INPUT_ROLE2_1,
                 workflowArtefact: artefact2_1,
         )
-        FastqcProcessedFile fastqcProcessedFile1 = DomainFactory.createFastqcProcessedFile([
+        FastqcProcessedFile fastqcProcessedFile1 = createFastqcProcessedFile([
                 workflowArtefact: artefact2_1,
         ])
         WorkflowArtefact artefact2_2 = createWorkflowArtefact()
@@ -322,7 +322,7 @@ class ConcreteArtefactServiceIntegrationSpec extends Specification implements Ro
                 role: INPUT_ROLE2_2,
                 workflowArtefact: artefact2_2,
         )
-        FastqcProcessedFile fastqcProcessedFile2 = DomainFactory.createFastqcProcessedFile([
+        FastqcProcessedFile fastqcProcessedFile2 = createFastqcProcessedFile([
                 workflowArtefact: artefact2_2,
         ])
 
@@ -386,14 +386,14 @@ class ConcreteArtefactServiceIntegrationSpec extends Specification implements Ro
                 outputRole: OUTPUT_ROLE2_1,
         ])
 
-        FastqcProcessedFile fastqcProcessedFile1 = DomainFactory.createFastqcProcessedFile([
+        FastqcProcessedFile fastqcProcessedFile1 = createFastqcProcessedFile([
                 workflowArtefact: artefact2_1,
         ])
         WorkflowArtefact artefact2_2 = createWorkflowArtefact([
                 producedBy: run,
                 outputRole: OUTPUT_ROLE2_2,
         ])
-        FastqcProcessedFile fastqcProcessedFile2 = DomainFactory.createFastqcProcessedFile([
+        FastqcProcessedFile fastqcProcessedFile2 = createFastqcProcessedFile([
                 workflowArtefact: artefact2_2,
         ])
 

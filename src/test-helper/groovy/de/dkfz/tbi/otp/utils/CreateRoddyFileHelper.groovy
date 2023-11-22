@@ -26,7 +26,6 @@ import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.IndividualService
 
 import java.nio.file.Files
@@ -59,7 +58,7 @@ class CreateRoddyFileHelper {
         }
         roddyBamFile."get${workOrFinal}BamFile"() << "content"
         roddyBamFile."get${workOrFinal}BaiFile"() << "content"
-        roddyBamFile."get${workOrFinal}Md5sumFile"() << DomainFactory.DEFAULT_MD5_SUM
+        roddyBamFile."get${workOrFinal}Md5sumFile"() << HelperUtils.randomMd5sum
 
         if (roddyBamFile.seqType.isWgbs()) {
             File methylationDir = roddyBamFile."get${workOrFinal}MethylationDirectory"()

@@ -26,6 +26,7 @@ import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.AbstractRoddyAlignmentStartJob
 import de.dkfz.tbi.otp.ngsdata.*
@@ -48,7 +49,7 @@ class RnaAlignmentStartJob extends AbstractRoddyAlignmentStartJob {
         return new RnaRoddyBamFile(
                 workPackage: mergingWorkPackage,
                 identifier: identifier,
-                workDirectoryName: "${RoddyBamFile.WORK_DIR_PREFIX}_${identifier}",
+                workDirectoryName: "${RoddyBamFileService.WORK_DIR_PREFIX}_${identifier}",
                 seqTracks: seqTracks,
                 config: config,
         )

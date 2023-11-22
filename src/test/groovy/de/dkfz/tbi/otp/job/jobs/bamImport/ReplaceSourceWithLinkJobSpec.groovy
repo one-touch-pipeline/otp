@@ -89,7 +89,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
         ExternallyProcessedBamFile epmbf = DomainFactory.createExternallyProcessedBamFile(
                 fileName: bamFileName,
                 importedFrom: importedFile,
-                md5sum: DomainFactory.DEFAULT_MD5_SUM,
+                md5sum: HelperUtils.randomMd5sum,
                 furtherFiles: ["subDirectory"]
         )
 

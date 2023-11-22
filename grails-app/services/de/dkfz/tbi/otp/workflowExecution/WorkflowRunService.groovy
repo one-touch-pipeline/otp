@@ -47,6 +47,8 @@ class WorkflowRunService {
 
     ClusterJobDetailService clusterJobDetailService
 
+    WorkflowLogService workflowLogService
+
     public static final int PESSIMISTIC_WRITE_TIME_OUT = 10000
 
     public final static List<WorkflowRun.State> STATES_COUNTING_AS_RUNNING = [
@@ -340,7 +342,7 @@ class WorkflowRunService {
                     clusterJobs               : collectClusterJobDetails(clusterJobs),
                     cummulatedClusterJobsState: getCumulatedClusterJobsStatus(clusterJobs.collect { new ClusterJobStateDto(it.checkStatus, it.exitStatus) }),
                     wesRuns                   : collectWesRunDetails(wesRuns),
-                    hasLogs                   : !step.logs.empty,
+                    hasLogs                   : !workflowLogService.findAllByWorkflowStepInCorrectOrder(step).empty,
                     obsolete                  : step.obsolete,
                     previousStepId            : workflowStepService.getPreviousRunningWorkflowStep(step)?.id,
             ]

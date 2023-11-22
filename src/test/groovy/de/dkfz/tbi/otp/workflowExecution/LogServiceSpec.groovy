@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
+import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
 
 class LogServiceSpec extends Specification implements ServiceUnitTest<LogService>, DataTest, WorkflowSystemDomainFactory, UserDomainFactory {
@@ -66,9 +67,12 @@ class LogServiceSpec extends Specification implements ServiceUnitTest<LogService
         then:
         2 * service.processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_SYSTEM_USER) >> SYSTEM_USER
 
-        workflowStep.logs.size() == 2
-        (workflowStep.logs[0] as WorkflowMessageLog).message == message1
-        (workflowStep.logs[1] as WorkflowMessageLog).message == message2
+        List<WorkflowLog> logs = WorkflowLog.all
+        logs.size() == 2
+        (logs[0] as WorkflowMessageLog).message == message1
+        (logs[1] as WorkflowMessageLog).message == message2
+        logs[0].workflowStep == workflowStep
+        logs[1].workflowStep == workflowStep
     }
 
     void "addSimpleLogEntry, when the user is not set then log it with the username = SYSTEM"() {
@@ -82,8 +86,10 @@ class LogServiceSpec extends Specification implements ServiceUnitTest<LogService
         then:
         1 * service.processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_SYSTEM_USER) >> SYSTEM_USER
 
-        workflowStep.logs.size() == 1
-        workflowStep.logs[0].createdBy == SYSTEM_USER
+        List<WorkflowLog> logs = WorkflowLog.all
+        logs.size() == 1
+        logs[0].createdBy == SYSTEM_USER
+        logs[0].workflowStep == workflowStep
     }
 
     void "addSimpleLogEntry, when the user is set then log it with the username"() {
@@ -100,8 +106,10 @@ class LogServiceSpec extends Specification implements ServiceUnitTest<LogService
         service.addSimpleLogEntry(workflowStep, message)
 
         then:
-        workflowStep.logs.size() == 1
-        workflowStep.logs[0].createdBy == testUser.username
+        List<WorkflowLog> logs = WorkflowLog.all
+        logs.size() == 1
+        logs[0].createdBy == testUser.username
+        logs[0].workflowStep == workflowStep
     }
 
     void "addSimpleLogEntryWithException, when adding a message with stacktrace, the stacktrace is converted and added together with the message"() {
@@ -117,8 +125,10 @@ class LogServiceSpec extends Specification implements ServiceUnitTest<LogService
         then:
         1 * service.processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_SYSTEM_USER) >> SYSTEM_USER
 
-        workflowStep.logs.size() == 1
-        WorkflowMessageLog log = workflowStep.logs[0] as WorkflowMessageLog
+        List<WorkflowLog> logs = WorkflowLog.all
+        logs.size() == 1
+        WorkflowMessageLog log = logs[0] as WorkflowMessageLog
+        log.workflowStep == workflowStep
         log.message.startsWith(message)
         log.message.contains(exceptionMessage)
     }
@@ -136,8 +146,10 @@ class LogServiceSpec extends Specification implements ServiceUnitTest<LogService
         then:
         1 * service.processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_SYSTEM_USER) >> SYSTEM_USER
 
-        workflowStep.logs.size() == 1
-        workflowStep.logs[0].createdBy == SYSTEM_USER
+        List<WorkflowLog> logs = WorkflowLog.all
+        logs.size() == 1
+        logs[0].createdBy == SYSTEM_USER
+        logs[0].workflowStep == workflowStep
     }
 
     void "addSimpleLogEntryWithException, when the user is set then log it with the username"() {
@@ -156,7 +168,9 @@ class LogServiceSpec extends Specification implements ServiceUnitTest<LogService
         service.addSimpleLogEntryWithException(workflowStep, message, otpRuntimeException)
 
         then:
-        workflowStep.logs.size() == 1
-        workflowStep.logs[0].createdBy == testUser.username
+        List<WorkflowLog> logs = WorkflowLog.all
+        logs.size() == 1
+        logs[0].createdBy == testUser.username
+        logs[0].workflowStep == workflowStep
     }
 }

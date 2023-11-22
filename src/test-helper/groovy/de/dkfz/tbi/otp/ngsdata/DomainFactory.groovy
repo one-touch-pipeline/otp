@@ -33,7 +33,6 @@ import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
-import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
 import de.dkfz.tbi.otp.domainFactory.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
@@ -83,15 +82,9 @@ class DomainFactory {
     static DomainFactoryProxyRoddy proxyRoddy = new DomainFactoryProxyRoddy()
     static DomainFactoryProxyCellRanger proxyCellRanger = new DomainFactoryProxyCellRanger()
 
-    /**
-     * @deprecated Use {@link HelperUtils#getRandomMd5sum()} instead.
-     */
-    @Deprecated
-    static final String DEFAULT_MD5_SUM = HelperUtils.randomMd5sum
     static final String DEFAULT_TAB_FILE_NAME = 'DefaultTabFileName.tab'
     static final String DEFAULT_CHROMOSOME_LENGTH_FILE_NAME = 'DefaultChromosomeLengthFileName.tsv'
     static final String DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY = 'exec_123456_123456789_test_test'
-    static final long DEFAULT_FILE_SIZE = 123456
     static final String TEST_CONFIG_VERSION = 'v1_0'
 
     /**
@@ -151,21 +144,9 @@ class DomainFactory {
         ], properties)
     }
 
-    static Role createRoleOperatorLazy() {
-        return createRoleLazy([
-                authority: Role.ROLE_OPERATOR,
-        ])
-    }
-
     static Role createRoleAdminLazy() {
         return createRoleLazy([
                 authority: Role.ROLE_ADMIN,
-        ])
-    }
-
-    static Role createRoleSwitchUserLazy() {
-        return createRoleLazy([
-                authority: Role.ROLE_SWITCH_USER,
         ])
     }
 
@@ -388,12 +369,6 @@ class DomainFactory {
         )
     }
 
-    static void createProcessingOptionForInitRoddyModule() {
-        createProcessingOptionLazy(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER, '')
-        createProcessingOptionLazy(ProcessingOption.OptionName.COMMAND_ACTIVATION_JAVA, '')
-        createProcessingOptionLazy(ProcessingOption.OptionName.COMMAND_ACTIVATION_GROOVY, '')
-    }
-
     static Map getRandomBamFileProperties() {
         return [
                 fileSize           : ++counter,
@@ -413,37 +388,6 @@ class DomainFactory {
     @Deprecated
     static createIlseSubmission(Map properties = [:], boolean saveAndValidate = true) {
         return proxyCore.createIlseSubmission(properties, saveAndValidate)
-    }
-
-    static MergingWorkPackage findOrSaveMergingWorkPackage(SeqTrack seqTrack, ReferenceGenome referenceGenome = null, Pipeline pipeline = null) {
-        createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
-        if (referenceGenome == null || pipeline == null) {
-            MergingWorkPackage workPackage = atMostOneElement(MergingWorkPackage.findAllWhere(
-                    sample: seqTrack.sample,
-                    seqType: seqTrack.seqType,
-                    seqPlatformGroup: seqTrack.seqPlatformGroup
-            ))
-            if (workPackage != null) {
-                assert workPackage.libraryPreparationKit == seqTrack.libraryPreparationKit
-                return workPackage
-            }
-        }
-
-        MergingWorkPackage mergingWorkPackage
-
-        Map<String, Object> mwpProperties = [
-                sample               : seqTrack.sample,
-                seqType              : seqTrack.seqType,
-                seqPlatformGroup     : seqTrack.seqPlatformGroup,
-                libraryPreparationKit: seqTrack.libraryPreparationKit,
-                referenceGenome      : referenceGenome ?: createReferenceGenomeLazy(),
-                pipeline             : pipeline ?: createDefaultOtpPipeline(),
-        ]
-
-        if (referenceGenome && pipeline) {
-            mergingWorkPackage = atMostOneElement(MergingWorkPackage.findAllWhere(mwpProperties))
-        }
-        return mergingWorkPackage ?: createMergingWorkPackage(mwpProperties)
     }
 
     static ReferenceGenome createReferenceGenomeLazy() {
@@ -999,18 +943,6 @@ class DomainFactory {
         ], [:])
     }
 
-    static SophiaQc createSophiaQc(Map properties = [:], boolean createAndValidate = true) {
-        return createDomainObject(SophiaQc, [
-
-                sophiaInstance                       : { createSophiaInstanceWithRoddyBamFiles() },
-                controlMassiveInvPrefilteringLevel   : 1,
-                tumorMassiveInvFilteringLevel        : 1,
-                rnaContaminatedGenesMoreThanTwoIntron: "arbitraryGeneName",
-                rnaContaminatedGenesCount            : 1,
-                rnaDecontaminationApplied            : true,
-        ], properties, createAndValidate)
-    }
-
     static AceseqInstance createAceseqInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
         Map map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
         SamplePair samplePair = map.samplePair
@@ -1279,17 +1211,6 @@ class DomainFactory {
         ], properties)
     }
 
-    static Map seqTrackProperties(Map properties = [:]) {
-        return [
-                laneId               : 'laneId_' + counter++,
-                sample               : { createSample() },
-                pipelineVersion      : { createSoftwareTool() },
-                run                  : { properties.run ?: createRun() },
-                kitInfoReliability   : properties.libraryPreparationKit ? InformationReliability.KNOWN : InformationReliability.UNKNOWN_UNVERIFIED,
-                normalizedLibraryName: SeqTrack.normalizeLibraryName(properties.libraryName),
-        ]
-    }
-
     @Deprecated
     static SeqTrack createSeqTrack(Map properties = [:]) {
         return proxyCore.createSeqTrack(properties)
@@ -1303,14 +1224,6 @@ class DomainFactory {
     @Deprecated
     static SeqTrack createChipSeqSeqTrack(Map properties = [:]) {
         return proxyCore.createChipSeqSeqTrack(properties)
-    }
-
-    /**
-     * @Deprecated use {@link FastqcDomainFactory#createFastqcProcessedFile()} instead
-     */
-    @Deprecated
-    static FastqcProcessedFile createFastqcProcessedFile(Map properties = [:]) {
-        return FastqcDomainFactoryInstance.INSTANCE.createFastqcProcessedFile(properties)
     }
 
     static Map<String, ?> baseMergingWorkPackageProperties(Map properties) {
@@ -1832,66 +1745,6 @@ class DomainFactory {
         )
     }
 
-    static IndelQualityControl createIndelQualityControl(Map properties = [:]) {
-        return createDomainObject(IndelQualityControl, [
-                indelCallingInstance : { createIndelCallingInstanceWithRoddyBamFiles() },
-                file                 : "file",
-                numIndels            : counter++,
-                numIns               : counter++,
-                numDels              : counter++,
-                numSize1_3           : counter++,
-                numSize4_10          : counter++,
-                numSize11plus        : counter++,
-                numInsSize1_3        : counter++,
-                numInsSize4_10       : counter++,
-                numInsSize11plus     : counter++,
-                numDelsSize1_3       : counter++,
-                numDelsSize4_10      : counter++,
-                numDelsSize11plus    : counter++,
-                percentIns           : counter++ as double,
-                percentDels          : counter++ as double,
-                percentSize1_3       : counter++ as double,
-                percentSize4_10      : counter++ as double,
-                percentSize11plus    : counter++ as double,
-                percentInsSize1_3    : counter++ as double,
-                percentInsSize4_10   : counter++ as double,
-                percentInsSize11plus : counter++ as double,
-                percentDelsSize1_3   : counter++ as double,
-                percentDelsSize4_10  : counter++ as double,
-                percentDelsSize11plus: counter++ as double,
-        ], properties)
-    }
-
-    static IndelSampleSwapDetection createIndelSampleSwapDetection(Map properties = [:]) {
-        IndelCallingInstance indelCallingInstance = properties.get("indelCallingInstance") ?: createIndelCallingInstanceWithRoddyBamFiles()
-        return createDomainObject(IndelSampleSwapDetection, [
-                indelCallingInstance                            : indelCallingInstance,
-                somaticSmallVarsInTumorCommonInGnomADPer        : counter++,
-                somaticSmallVarsInControlCommonInGnomad         : counter++,
-                tindaSomaticAfterRescue                         : counter++,
-                somaticSmallVarsInControlInBiasPer              : counter++,
-                somaticSmallVarsInTumorPass                     : counter++,
-                pid                                             : indelCallingInstance.individual.pid,
-                somaticSmallVarsInControlPass                   : counter++,
-                somaticSmallVarsInControlPassPer                : counter++,
-                tindaSomaticAfterRescueMedianAlleleFreqInControl: counter++ as double,
-                somaticSmallVarsInTumorInBiasPer                : counter++ as double,
-                somaticSmallVarsInControlCommonInGnomadPer      : counter++,
-                somaticSmallVarsInTumorInBias                   : counter++,
-                somaticSmallVarsInControlCommonInGnomasPer      : counter++,
-                germlineSNVsHeterozygousInBothRare              : counter++,
-                germlineSmallVarsHeterozygousInBothRare         : counter++,
-                tindaGermlineRareAfterRescue                    : counter++,
-                somaticSmallVarsInTumorCommonInGnomad           : counter++,
-                somaticSmallVarsInControlInBias                 : counter++,
-                somaticSmallVarsInControl                       : counter++,
-                somaticSmallVarsInTumor                         : counter++,
-                germlineSNVsHeterozygousInBoth                  : counter++,
-                somaticSmallVarsInTumorPassPer                  : counter++ as double,
-                somaticSmallVarsInTumorCommonInGnomadPer        : counter++,
-        ], properties)
-    }
-
     @Deprecated
     static ExternallyProcessedBamFile createExternallyProcessedBamFile(Map properties = [:]) {
         return ExternalBamFactoryInstance.INSTANCE.createBamFile(properties)
@@ -1930,21 +1783,6 @@ class DomainFactory {
 
     static ProcessingThresholds createProcessingThresholdsForBamFile(AbstractBamFile bamFile, Map properties = [:]) {
         return createProcessingThresholdsForMergingWorkPackage(bamFile.mergingWorkPackage, properties)
-    }
-
-    static void changeSeqType(RoddyBamFile bamFile, SeqType seqType, SequencingReadType libraryName = null) {
-        bamFile.mergingWorkPackage.seqType = seqType
-        if (seqType.isWgbs()) {
-            bamFile.mergingWorkPackage.libraryPreparationKit = null
-        }
-        assert bamFile.mergingWorkPackage.save(flush: true)
-
-        bamFile.seqTracks.each {
-            it.seqType = seqType
-            it.libraryName = libraryName
-            it.normalizedLibraryName = SeqTrack.normalizeLibraryName(it.libraryName)
-            assert it.save(flush: true)
-        }
     }
 
     static void createQaFileOnFileSystem(File qaFile, long chromosome8QcBasesMapped) {

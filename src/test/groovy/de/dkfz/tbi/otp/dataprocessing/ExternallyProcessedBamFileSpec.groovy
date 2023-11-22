@@ -26,7 +26,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.utils.HelperUtils
 
 class ExternallyProcessedBamFileSpec extends Specification implements DataTest {
 
@@ -43,7 +43,7 @@ class ExternallyProcessedBamFileSpec extends Specification implements DataTest {
                 importedFrom       : '/tmp/bamfile',
                 insertSizeFile     : null,
                 fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
-                md5sum             : DomainFactory.DEFAULT_MD5_SUM,
+                md5sum             : HelperUtils.randomMd5sum,
                 maximumReadLength  : 5,
                 workPackage        : new ExternalMergingWorkPackage([
                         pipeline: new Pipeline([

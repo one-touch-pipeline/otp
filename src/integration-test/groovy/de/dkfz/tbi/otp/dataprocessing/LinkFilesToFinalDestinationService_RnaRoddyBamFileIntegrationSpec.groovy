@@ -181,7 +181,6 @@ class LinkFilesToFinalDestinationService_RnaRoddyBamFileIntegrationSpec extends 
 
         then:
         roddyBamFile.fileOperationStatus == AbstractBamFile.FileOperationStatus.PROCESSED
-        roddyBamFile.md5sum == DomainFactory.DEFAULT_MD5_SUM
         roddyBamFile.fileSize > 0
         roddyBamFile.dateFromFileSystem instanceof Date
     }

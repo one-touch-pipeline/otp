@@ -25,10 +25,11 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
+import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
-class FastqcUploadServiceSpec extends Specification implements DataTest {
+class FastqcUploadServiceSpec extends Specification implements DataTest, FastqcDomainFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -51,7 +52,7 @@ class FastqcUploadServiceSpec extends Specification implements DataTest {
 
     void setupData() {
         fastqcUploadService = Spy(FastqcUploadService)
-        fastqcProcessedFile = DomainFactory.createFastqcProcessedFile()
+        fastqcProcessedFile = createFastqcProcessedFile()
     }
 
     private void spyGetFastQCFileContent(String returnValue) {
@@ -259,7 +260,7 @@ Sequences flagged as poor quality\t0\t
             parseFastQCFile(_, _) >> { [nReads : parsedNReads as String, sequenceLength : parsedSequenceLength] }
         }
 
-        fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(sequenceFile: DomainFactory.createFastqFile(nReads: parsedNReads))
+        fastqcProcessedFile = createFastqcProcessedFile(sequenceFile: DomainFactory.createFastqFile(nReads: parsedNReads))
 
         fastqcUploadService.uploadFastQCFileContentsToDataBase(fastqcProcessedFile)
 

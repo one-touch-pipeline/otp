@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.alignment.AbstractAlignmentWorkflowTest
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.PanCanAlignmentConfiguration
@@ -63,9 +64,6 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         return null
     }
 
-    // some text to be used to fill in files created on the fly
-    protected final static String TEST_CONTENT = 'dummy file, created by OTP'
-
     // test fastq files grouped by lane
     Map<String, List<File>> testFastqFiles
 
@@ -75,17 +73,13 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     // directory with test reference genome files
     File refGenDir
 
-    // file with name of chromosomes {@link ReferenceGenomeEntry#Classification#CHROMOSOME}
-    // for reference genome in {@link #refGenDir}
-    File chromosomeNamesFile
-
     File fingerPrintingFile
-
-    AbstractBamFileService abstractBamFileService
 
     ProjectService projectService
 
     FileAssertHelper fileAssertHelper
+
+    RoddyBamFileService roddyBamFileService
 
     @Override
     List<String> getWorkflowScripts() {

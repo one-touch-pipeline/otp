@@ -104,6 +104,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     RemoteShellHelper remoteShellHelper
     TestConfigService configService
     WorkflowSystemService workflowSystemService
+    WorkflowLogService workflowLogService
 
     /**
      * Needed to save the place of the database dump afterwards.
@@ -333,7 +334,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                     logEntries << "  - ${key}: ${value}"
                 }
                 workflowSteps.eachWithIndex { WorkflowStep workflowStep, int stepIndex ->
-                    List<WorkflowLog> workflowLogs = workflowStep.logs
+                    List<WorkflowLog> workflowLogs = workflowLogService.findAllByWorkflowStepInCorrectOrder(workflowStep)
                     WorkflowError workflowError = workflowStep.workflowError
                     List<ClusterJob> clusterJobs = workflowStep.clusterJobs.sort { it.id }
 
