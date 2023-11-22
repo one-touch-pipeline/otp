@@ -105,7 +105,6 @@ class IlseNumberValidatorSpec extends Specification implements DataTest {
         then:
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, LogLevel.INFO, "There are multiple ILSe numbers in the metadata file.", "There are multiple ILSe numbers in the metadata file."),
-                new Problem(context.spreadsheet.dataRows[1].cells as Set, LogLevel.WARNING, "The metadata file path '${context.metadataFile}' does not contain the ILSe number '${ILSE_NO_2}'.", "At least one metadata file path does not contain the ILSe number."),
                 ]
         containSame(context.problems, expectedProblems)
     }
@@ -149,26 +148,6 @@ class IlseNumberValidatorSpec extends Specification implements DataTest {
         then:
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, LogLevel.INFO, "The ILSe number '${ILSE_NO}' already exists.", "At least one ILSe number already exists.")
-        ]
-        containSame(context.problems, expectedProblems)
-    }
-
-    void 'validate, when file path does not contain the ILSe number, adds warnings'() {
-        given:
-        int ILSE_NO = 5464
-        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${MetaDataColumn.ILSE_NO}\n" +
-                        "${ILSE_NO}\n" ,
-                ["metadataFile": Paths.get("${TestCase.uniqueNonExistentPath}/run${HelperUtils.uniqueString}/metadata_fastq.tsv")]
-
-        )
-
-        when:
-        new IlseNumberValidator().validate(context)
-
-        then:
-        Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.WARNING, "The metadata file path '${context.metadataFile}' does not contain the ILSe number '${ILSE_NO}'.", "At least one metadata file path does not contain the ILSe number.")
         ]
         containSame(context.problems, expectedProblems)
     }

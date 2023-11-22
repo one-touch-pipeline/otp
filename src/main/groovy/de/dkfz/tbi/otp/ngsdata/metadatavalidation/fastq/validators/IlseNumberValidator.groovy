@@ -73,9 +73,6 @@ class IlseNumberValidator extends AbstractValueTuplesValidator<MetadataValidatio
                     } else if (IlseSubmission.findAllByIlseNumber(ilseNo as int)) {
                         context.addProblem(tuple.cells, LogLevel.INFO, "The ILSe number '${ilseNo}' already exists.", "At least one ILSe number already exists.")
                     }
-                    if (!context.metadataFile.toString().contains(ilseNo)) {
-                        context.addProblem(tuple.cells, LogLevel.WARNING, "The metadata file path '${context.metadataFile}' does not contain the ILSe number '${ilseNo}'.", "At least one metadata file path does not contain the ILSe number.")
-                    }
                 }
             }
         }
