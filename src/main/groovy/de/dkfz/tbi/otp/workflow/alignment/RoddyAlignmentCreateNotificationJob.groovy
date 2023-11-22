@@ -71,8 +71,8 @@ class RoddyAlignmentCreateNotificationJob extends AbstractCreateNotificationJob 
         builder << messageSourceService.createMessage("notification.template.alignment.processing.roddy", [
                 mergingProgram    : getMergingProgramVersion(config),
                 mergingParameter  : getMergingProgramParameter(config),
-                samToolsCommand   : getSAMToolsVersion(config),
-                programversion    : workflowStep.workflowRun.workflowVersion.workflowVersion,
+                samtoolsProgram   : getSAMToolsVersion(config),
+                programVersion    : workflowStep.workflowRun.workflowVersion.workflowVersion,
         ])
 
         return builder.toString()

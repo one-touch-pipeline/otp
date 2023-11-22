@@ -62,7 +62,7 @@ class RoddyAlignmentCreateNotificationJobSpec extends AbstractCreateNotification
             assert arguments[0] == "notification.template.alignment.processing.roddy"
             assert arguments[1]["mergingProgram"] == "Sambamba Version 0.6.5"
             assert arguments[1]["mergingParameter"] == "\" -SOME_OPTS \""
-            assert arguments[1]["samToolsCommand"] == "Version 1.0"
+            assert arguments[1]["samtoolsProgram"] == "Version 1.0"
         }
     }
 }
