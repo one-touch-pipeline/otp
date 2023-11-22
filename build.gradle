@@ -403,7 +403,7 @@ dependencies {
     integrationTestRuntimeOnly sourceSets.testHelper.output
 
     implementation "org.jadira.usertype:usertype.core:7.0.0.CR1"
-    implementation "com.opencsv:opencsv:5.8"
+    implementation "com.opencsv:opencsv:5.9"
 
     implementation "org.grails:grails-async-gpars:4.0.0"
 
