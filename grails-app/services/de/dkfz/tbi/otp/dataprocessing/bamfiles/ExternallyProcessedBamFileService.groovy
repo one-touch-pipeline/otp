@@ -48,6 +48,12 @@ class ExternallyProcessedBamFileService<T extends AbstractBamFile> extends Abstr
         return getImportFolder(bamFile, options).resolve(bamFile.baiFileName)
     }
 
+    List<Path> getFurtherFiles(ExternallyProcessedBamFile bamFile, PathOption... options) {
+        return bamFile.furtherFiles.collect {
+            getImportFolder(bamFile, options).resolve(it)
+        }
+    }
+
     Path getBamMaxReadLengthFile(ExternallyProcessedBamFile bamFile, PathOption... options) {
         return getImportFolder(bamFile, options).resolve("${bamFile.bamFileName}.maxReadLength")
     }
