@@ -101,7 +101,7 @@ class ProjectRequestController implements CheckAndCall {
                 projectNamePattern    : projectNamePattern,
                 projectTypes          : ProjectType.values(),
                 seqTypes              : SeqType.all.sort { it.displayNameWithLibraryLayout },
-                speciesWithStrains    : SpeciesWithStrain.all.sort { it.displayString },
+                speciesWithStrains    : SpeciesWithStrain.all.sort { it.displayName },
                 storagePeriod         : StoragePeriod.values(),
                 availableRoles        : ProjectRole.findAll(),
                 sequencingCenters     : SeqCenter.all.unique().sort(),

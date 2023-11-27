@@ -253,7 +253,7 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
     abstract Workflow getWorkflow()
 
     Set<SeqType> getSeqTypes() {
-        return workflow.supportedSeqTypes
+        return workflow.defaultSeqTypesForWorkflowVersions
     }
 
     /**

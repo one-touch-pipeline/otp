@@ -40,8 +40,8 @@
             <th title="${g.message(code: 'workflowSystemConfig.th.enabled.title')}"><g:message code="workflowSystemConfig.th.enabled"/></th>
             <th title="${g.message(code: 'workflowSystemConfig.th.maxParallel.title')}"><g:message code="workflowSystemConfig.th.maxParallel"/></th>
             <th title="${g.message(code: 'workflowSystemConfig.th.default.version.title')}"><g:message code="workflowSystemConfig.th.default.version"/></th>
-            <th title="${g.message(code: 'workflowSystemConfig.th.supportedSeqTypes.title')}"><g:message code="workflowSystemConfig.th.supportedSeqTypes"/></th>
-            <th title="${g.message(code: 'workflowSystemConfig.th.allowedRefGen.title')}"><g:message code="workflowSystemConfig.th.allowedRefGen"/></th>
+            <th title="${g.message(code: 'workflowSystemConfig.th.defaultSeqTypes.title')}"><g:message code="workflowSystemConfig.th.defaultSeqTypes"/></th>
+            <th title="${g.message(code: 'workflowSystemConfig.th.defaultRefGen.title')}"><g:message code="workflowSystemConfig.th.defaultRefGen"/></th>
             <th title="${g.message(code: 'workflowSystemConfig.th.deprecated.title')}"><g:message code="workflowSystemConfig.th.deprecated"/></th>
             <th></th>
         </tr>
@@ -56,6 +56,12 @@
         <tr>
             <th title="${g.message(code: 'workflowSystemConfig.workflowVersion.th.title.version')}">
                 <g:message code="workflowSystemConfig.workflowVersion.th.version"/>
+            </th>
+            <th title="${g.message(code: 'workflowSystemConfig.workflowVersion.th.title.supportedSeqTypes')}">
+                <g:message code="workflowSystemConfig.workflowVersion.th.supportedSeqTypes"/>
+            </th>
+            <th title="${g.message(code: 'workflowSystemConfig.workflowVersion.th.title.allowedRefGenomes')}">
+                <g:message code="workflowSystemConfig.workflowVersion.th.allowedRefGenomes"/>
             </th>
             <th title="${g.message(code: 'workflowSystemConfig.workflowVersion.th.title.comment')}">
                 <g:message code="workflowSystemConfig.workflowVersion.th.comment"/>
@@ -100,7 +106,7 @@
         </div>
 
         <div class="form-group">
-            <label for="modal-seqTypes"><g:message code="workflowSystemConfig.modal.supportedSeqTypes"/></label>
+            <label for="modal-seqTypes"><g:message code="workflowSystemConfig.th.defaultSeqTypes"/></label>
             <g:select id="modal-seqTypes"
                       name="modal-seqTypes"
                       class="form-control use-select-2"
@@ -109,11 +115,11 @@
                       from="${seqTypes}"
                       optionKey="id"
                       optionValue="displayNameWithLibraryLayout"
-                      data-placeholder="${g.message(code: 'workflowSystemConfig.modal.supportedSeqTypes.placeholder')}"/>
+                      data-placeholder="${g.message(code: 'workflowSystemConfig.modal.defaultSeqTypes.placeholder')}"/>
         </div>
 
         <div class="form-group">
-            <label for="modal-refGenomes"><g:message code="workflowSystemConfig.modal.allowedRefGen"/></label>
+            <label for="modal-refGenomes"><g:message code="workflowSystemConfig.th.defaultRefGen"/></label>
             <g:select id="modal-refGenomes"
                       name="modal-refGenomes"
                       class="form-control use-select-2"
@@ -122,7 +128,7 @@
                       from="${refGenomes}"
                       optionKey="id"
                       optionValue="name"
-                      data-placeholder="${g.message(code: 'workflowSystemConfig.modal.allowedRefGen.placeholder')}"/>
+                      data-placeholder="${g.message(code: 'workflowSystemConfig.modal.defaultRefGen.placeholder')}"/>
         </div>
 
         <div class="form-group form-check custom-control custom-switch">
@@ -136,6 +142,31 @@
               closeText="${g.message(code: 'workflowSystemConfig.modal.cancel')}"
               confirmText="${g.message(code: 'workflowSystemConfig.modal.confirm')}" closable="false">
     <form>
+        <div class="form-group">
+            <label for="modal-seqTypes"><g:message code="workflowSystemConfig.modal.supportedSeqTypes"/></label>
+            <g:select id="modal-seqTypes-version"
+                      name="modal-seqTypes-version"
+                      class="form-control use-select-2"
+                      multiple="true"
+                      value=""
+                      from="${seqTypes}"
+                      optionKey="id"
+                      optionValue="displayNameWithLibraryLayout"
+                      data-placeholder="${g.message(code: 'workflowSystemConfig.modal.supportedSeqTypes.placeholder')}"/>
+        </div>
+        <div class="form-group">
+            <label for="modal-refGenomes"><g:message code="workflowSystemConfig.modal.allowedRefGen"/></label>
+            <g:select id="modal-refGenomes-version"
+                      name="modal-refGenomes-version"
+                      class="form-control use-select-2"
+                      multiple="true"
+                      value=""
+                      from="${refGenomes}"
+                      optionKey="id"
+                      optionValue="name"
+                      data-placeholder="${g.message(code: 'workflowSystemConfig.modal.allowedRefGen.placeholder')}"/>
+        </div>
+
         <div class="form-group">
             <label for="comment"><g:message code="workflowSystemConfig.modal.version.comment"/></label>
             <textarea class="form-control" id="comment" rows="3"></textarea>

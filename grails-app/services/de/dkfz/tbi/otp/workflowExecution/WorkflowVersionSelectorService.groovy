@@ -22,9 +22,7 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
-import grails.validation.ValidationException
 import groovy.transform.CompileDynamic
-import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
@@ -39,25 +37,52 @@ class WorkflowVersionSelectorService {
 
     OtpWorkflowService otpWorkflowService
 
-    Errors createOrUpdate(Project project, SeqType seqType, WorkflowVersion version) {
+    List<WorkflowVersionSelector> findAllByProjectAndWorkflow(Project project, Workflow workflow) {
+        return WorkflowVersionSelector.createCriteria().list {
+            isNull('deprecationDate')
+            eq('project', project)
+            workflowVersion {
+                eq("workflow", workflow)
+            }
+        } as List<WorkflowVersionSelector>
+    }
+
+    WorkflowVersionSelector findByProjectAndWorkflowAndSeqType(Project project, Workflow workflow, SeqType seqType) {
+        return WorkflowVersionSelector.createCriteria().get {
+            isNull('deprecationDate')
+            eq('seqType', seqType)
+            eq('project', project)
+            workflowVersion {
+                eq("workflow", workflow)
+            }
+        } as WorkflowVersionSelector
+    }
+
+    WorkflowVersionSelector createOrUpdate(Project project, SeqType seqType, WorkflowVersion version) {
         WorkflowVersionSelector previous = atMostOneElement(WorkflowVersionSelector.findAllByProjectAndSeqTypeAndDeprecationDateIsNull(project, seqType))
-        try {
-            if (previous) {
-                previous.deprecationDate = LocalDate.now()
-                previous.save(flush: true)
-            }
-            if (version) {
-                new WorkflowVersionSelector(
-                        project: project,
-                        seqType: seqType,
-                        workflowVersion: version,
-                        previous: previous,
-                ).save(flush: true)
-            }
-        } catch (ValidationException e) {
-            return e.errors
+        if (previous) {
+            previous.deprecationDate = LocalDate.now()
+            previous.save(flush: true)
         }
-        return null
+        if (version) {
+            return new WorkflowVersionSelector(
+                    project: project,
+                    seqType: seqType,
+                    workflowVersion: version,
+                    previous: previous,
+            ).save(flush: true)
+        }
+        return previous
+    }
+
+    void deprecateSelectorIfUnused(WorkflowVersionSelector wvSelector) {
+        assert wvSelector
+        List<ReferenceGenomeSelector> existingLinkedRgSelectors = ReferenceGenomeSelector
+                .findAllBySeqTypeAndProjectAndWorkflow(wvSelector.seqType, wvSelector.project, wvSelector.workflowVersion.workflow)
+        if (!existingLinkedRgSelectors) {
+            wvSelector.deprecationDate = LocalDate.now()
+            wvSelector.save(flush: true)
+        }
     }
 
     boolean hasAlignmentConfigForProjectAndSeqType(Project project, SeqType seqType) {

@@ -1,0 +1,13 @@
+{
+  "workflow": "WGBS alignment",
+  "seqType": "WGBS_TAG PAIRED bulk",
+  "version": {
+    "name": "1.2.73-201",
+    "id": "572"
+  },
+  "refGenome": "hs37d5_GRCm38mm",
+  "species": [
+    "Mouse (Mus musculus) [Unknown]",
+    "Human (Homo sapiens) [No strain available]"
+  ]
+}

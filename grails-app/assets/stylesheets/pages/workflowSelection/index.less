@@ -19,28 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-/**
- * A handler to change the shown version to Not configured after one Fastqc workflow is configured
- * This js avoids to reload the backend
- */
-workflowSelectionUpdateSuccessHandler = function (container) {
-  'use strict';
-
-  const rowIdx = container.parent().parent().parent().index('tr') === 2 ? 1 : 2;
-  const row = container.parent().parent().parent().parent()
-    .parent()
-    .find('tr')
-    .eq(rowIdx);
-
-  // just update the text to match the value from backend, otherwise you have to refresh the page
-  $('.edit-switch-label span', row).text('Not configured');
-};
-
-$(document).ready(() => {
-  'use strict';
-
-  $('#fastqc').dataTable({ paging: false });
-  $('#analysis').dataTable({ paging: false });
-  $('#mergingCriteria').dataTable({ paging: false });
-});
+// Should hide disabled select options
+.select2-container .select2-results__option[aria-disabled=true] {
+  display: none;
+}

@@ -53,9 +53,15 @@ class Workflow implements Commentable, Entity {
 
     LocalDate deprecatedDate
 
-    Set<ReferenceGenome> allowedReferenceGenomes
+    /**
+     * Default allowedReferenceGenomes that are defined on new WorkflowVersions
+     */
+    Set<ReferenceGenome> defaultReferenceGenomesForWorkflowVersions
 
-    Set<SeqType> supportedSeqTypes
+    /**
+     * Default supportedSeqTypes that are defined on new WorkflowVersions
+     */
+    Set<SeqType> defaultSeqTypesForWorkflowVersions
 
     WorkflowVersion defaultVersion
 
@@ -85,7 +91,7 @@ class Workflow implements Commentable, Entity {
     }
 
     static hasMany = [
-            allowedReferenceGenomes: ReferenceGenome,
-            supportedSeqTypes      : SeqType,
+            defaultReferenceGenomesForWorkflowVersions: ReferenceGenome,
+            defaultSeqTypesForWorkflowVersions        : SeqType,
     ]
 }

@@ -160,7 +160,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
         log.info("Fetch workflow Fastqc ${workflowFastqc}")
 
         workflowAlignment = CollectionUtils.exactlyOneElement(Workflow.findAllByName(workflowName))
-        workflowAlignment.supportedSeqTypes.add(seqType)
+        workflowAlignment.defaultSeqTypesForWorkflowVersions.add(seqType)
         workflowAlignment.save(flush: true)
         log.info("Fetch workflow Alignment ${workflowAlignment}")
 

@@ -24,6 +24,8 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.gorm.hibernate.annotation.ManagedEntity
 
 import de.dkfz.tbi.otp.Commentable
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.Entity
 
 import java.time.LocalDate
@@ -34,6 +36,8 @@ class WorkflowVersion implements Entity, Commentable, Comparable<WorkflowVersion
     Workflow workflow
     String workflowVersion
     LocalDate deprecatedDate
+    Set<ReferenceGenome> allowedReferenceGenomes
+    Set<SeqType> supportedSeqTypes
 
     String getDisplayName() {
         return "${workflow.name} ${workflowVersion}"
@@ -48,6 +52,11 @@ class WorkflowVersion implements Entity, Commentable, Comparable<WorkflowVersion
     static Closure mapping = {
         workflow index: "workflow_version_workflow_idx"
     }
+
+    static hasMany = [
+            allowedReferenceGenomes: ReferenceGenome,
+            supportedSeqTypes      : SeqType,
+    ]
 
     @Override
     String toString() {

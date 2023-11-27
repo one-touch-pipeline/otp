@@ -46,7 +46,7 @@ class MergingCriteriaSpec extends Specification implements DataTest, WorkflowSys
     void "test that for Exome data LibPrepKit must be true"() {
         expect:
         DomainFactory.createMergingCriteriaLazy([
-                seqType: DomainFactory.createExomeSeqType(),
+                seqType      : DomainFactory.createExomeSeqType(),
                 useLibPrepKit: true,
         ])
     }
@@ -67,7 +67,7 @@ class MergingCriteriaSpec extends Specification implements DataTest, WorkflowSys
     void "test that for WGBS data LibPrepKit must be false"() {
         expect:
         DomainFactory.createMergingCriteriaLazy([
-                seqType   : DomainFactory.createWholeGenomeBisulfiteSeqType(),
+                seqType      : DomainFactory.createWholeGenomeBisulfiteSeqType(),
                 useLibPrepKit: false,
         ])
     }
@@ -75,7 +75,8 @@ class MergingCriteriaSpec extends Specification implements DataTest, WorkflowSys
     void "test that for WGBS data LibPrepKit must be false, should fail when it is true"() {
         given:
         SeqType seqType = DomainFactory.createWholeGenomeBisulfiteSeqType()
-        createWorkflow(name: WgbsWorkflow.WORKFLOW, supportedSeqTypes: [seqType] as Set)
+        Workflow workflow = createWorkflow(name: WgbsWorkflow.WORKFLOW)
+        createWorkflowVersion([workflow: workflow, supportedSeqTypes: [seqType] as Set])
         MergingCriteria mergingCriteria = DomainFactory.createMergingCriteria()
 
         when:

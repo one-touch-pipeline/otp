@@ -87,4 +87,13 @@ class WorkflowServiceIntegrationSpec extends Specification implements WorkflowSy
         where:
         startDirectly << [true, false]
     }
+
+    void "findAllAlignmentWorkflows, should return all the alignment workflows"() {
+        given:
+        Workflow workflow = createWorkflow([beanName: 'rnaAlignmentWorkflow'])
+        createWorkflow()
+
+        expect:
+        workflowService.findAllAlignmentWorkflows() == [workflow]
+    }
 }

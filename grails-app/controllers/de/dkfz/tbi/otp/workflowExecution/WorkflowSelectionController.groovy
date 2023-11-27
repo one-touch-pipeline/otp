@@ -22,6 +22,8 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.converters.JSON
+import grails.databinding.BindUsing
+import grails.databinding.SimpleMapDataBindingSource
 import grails.validation.Validateable
 import groovy.transform.Canonical
 import groovy.transform.Immutable
@@ -33,10 +35,9 @@ import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteriaService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
-import de.dkfz.tbi.otp.workflow.fastqc.WesFastQcWorkflow
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
@@ -44,43 +45,36 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 class WorkflowSelectionController implements CheckAndCall {
 
     static allowedMethods = [
-            index                   : "GET",
-            updateVersion           : "POST",
-            updateReferenceGenome   : "POST",
-            updateMergingCriteriaLPK: "POST",
-            updateMergingCriteriaSPG: "POST",
-    ]
-
-    private static final Set<String> FASTQC_WORKFLOWS = [
-            BashFastQcWorkflow.WORKFLOW,
-            WesFastQcWorkflow.WORKFLOW,
+            index                       : "GET",
+            updateVersion               : "POST",
+            updateReferenceGenome       : "POST",
+            updateMergingCriteriaLPK    : "POST",
+            updateMergingCriteriaSPG    : "POST",
+            possibleAlignmentOptions    : "POST",
+            saveAlignmentConfiguration  : "POST",
+            deleteAlignmentConfiguration: "POST",
     ]
 
     MergingCriteriaService mergingCriteriaService
     ProjectSelectionService projectSelectionService
     ReferenceGenomeSelectorService referenceGenomeSelectorService
     WorkflowVersionSelectorService workflowVersionSelectorService
+    WorkflowSelectionService workflowSelectionService
+    WorkflowService workflowService
+    WorkflowVersionService workflowVersionService
+    ReferenceGenomeService referenceGenomeService
 
     @PreAuthorize('isFullyAuthenticated()')
     def index() {
-        Map<String, OtpWorkflow> workflowBeans = applicationContext.getBeansOfType(OtpWorkflow)
-        List<String> fastqcWorkflowNames = FASTQC_WORKFLOWS.collect { Workflow.findAllByName(it).beanName }.unique()
-        List<Workflow> fastqcWorkflows = Workflow.findAllByBeanNameInListAndDeprecatedDateIsNull(fastqcWorkflowNames).sort { it.beanName }
-        List<String> alignmentWorkflowNames = workflowBeans.findAll { it.value.isAlignment() }*.key
-        List<Workflow> alignmentWorkflows = alignmentWorkflowNames ?
-                Workflow.findAllByBeanNameInListAndDeprecatedDateIsNull(alignmentWorkflowNames).sort { it.name } : []
-        List<String> analysisWorkflowNames = workflowBeans.findAll { it.value.isAnalysis() }*.key
-        List<Workflow> analysisWorkflows = analysisWorkflowNames ?
-                Workflow.findAllByBeanNameInListAndDeprecatedDateIsNull(analysisWorkflowNames).sort { it.name } : []
+        List<Workflow> fastqcWorkflows = workflowService.findAllFastqcWorkflows()
+        List<Workflow> alignmentWorkflows = workflowService.findAllAlignmentWorkflows()
+        List<Workflow> analysisWorkflows = workflowService.findAllAnalysisWorkflows()
 
         Project project = projectSelectionService.selectedProject
 
-        Map<Set<SpeciesWithStrain>, Set<ReferenceGenome>> speciesReferenceGenomeMapping =
-                referenceGenomeSelectorService.getMappingOfSpeciesCombinationsToReferenceGenomes(project)
-
-        List<ConfValue> alignmentConf = []
-        List<ConfValue> analysisConf = []
+        List<WorkflowVersionConfValue> analysisConf = []
         List<FastQcValues> fastqcVersions = []
+
         fastqcWorkflows.each { Workflow workflow ->
             WorkflowVersion version = atMostOneElement(WorkflowVersionSelector.findAllByProjectAndDeprecationDateIsNull(project).findAll {
                 it.workflowVersion.workflow == workflow
@@ -88,62 +82,104 @@ class WorkflowSelectionController implements CheckAndCall {
             List<Version> versions = WorkflowVersion.findAllByWorkflow(workflow).sort { a, b ->
                 new WorkflowVersionComparatorConsideringDefaultAndDeprecated(workflow.defaultVersion).compare(a, b)
             }.collect {
-                new Version(it.id, it.workflowVersion, it == workflow.defaultVersion, it.deprecatedDate as boolean)
+                Version.fromWorkflowVersion(it)
             }
             fastqcVersions.add(new FastQcValues(workflow, versions, version))
         }
 
-        alignmentWorkflows.each { workflow ->
-            workflow.supportedSeqTypes.sort { it.displayNameWithLibraryLayout }.each { seqType ->
-                WorkflowVersion version = atMostOneElement(
-                        WorkflowVersionSelector.findAllByProjectAndSeqTypeAndDeprecationDateIsNull(project, seqType).findAll {
-                            it.workflowVersion.workflow == workflow
-                        })?.workflowVersion
-                List<Version> versions = WorkflowVersion.findAllByWorkflow(workflow).sort { a, b ->
-                    new WorkflowVersionComparatorConsideringDefaultAndDeprecated(workflow.defaultVersion).compare(a, b)
-                }.collect {
-                    new Version(it.id, it.workflowVersion, it == workflow.defaultVersion, it.deprecatedDate as boolean)
+        List<WorkflowVersionConfValue> alignmentConf = alignmentWorkflows.collectMany { workflow ->
+            return workflowVersionSelectorService.findAllByProjectAndWorkflow(project, workflow).collectMany { wvSelector ->
+                SeqType seqType = wvSelector.seqType
+                List<ReferenceGenomeSelector> rgSelectors = referenceGenomeSelectorService.findAllBySeqTypeAndWorkflowAndProject(seqType, workflow, project)
+                return rgSelectors.collect { rgSelector ->
+                    RefGenConfValue refGen = new RefGenConfValue(
+                            rgSelector.id,
+                            rgSelector.species.sort { it.displayName },
+                            rgSelector.referenceGenome,
+                    )
+                    new WorkflowVersionConfValue(wvSelector.id, workflow, seqType, [], wvSelector.workflowVersion, refGen)
                 }
-
-                List<RefGenConfValue> refGens = speciesReferenceGenomeMapping.collect { sp, rs ->
-                    ReferenceGenome r = atMostOneElement(
-                            ReferenceGenomeSelector.findAllByProjectAndSeqTypeAndWorkflow(project, seqType, workflow)
-                                    .findAll { it.species == sp }
-                    )?.referenceGenome
-                    return new RefGenConfValue(sp.sort { it.displayString }, rs.intersect(workflow.allowedReferenceGenomes).sort { it.name }, r)
-                }
-                alignmentConf.add(new ConfValue(workflow, seqType, versions, version, refGens))
             }
         }
 
         analysisWorkflows.each { workflow ->
-            workflow.supportedSeqTypes.sort { it.displayNameWithLibraryLayout }.each { seqType ->
-                WorkflowVersion version = atMostOneElement(
-                        WorkflowVersionSelector.findAllByProjectAndSeqTypeAndDeprecationDateIsNull(project, seqType).findAll {
-                            it.workflowVersion.workflow == workflow
-                        })?.workflowVersion
+            workflowService.getSupportedSeqTypesOfVersions(workflow).sort { it.displayNameWithLibraryLayout }.each { seqType ->
+                WorkflowVersionSelector wvSelector = workflowVersionSelectorService.findByProjectAndWorkflowAndSeqType(project, workflow, seqType)
                 List<Version> versions = WorkflowVersion.findAllByWorkflow(workflow).sort { a, b ->
                     new WorkflowVersionComparatorConsideringDefaultAndDeprecated(workflow.defaultVersion).compare(a, b)
-                }.collect {
-                    new Version(it.id, it.workflowVersion, it == workflow.defaultVersion, it.deprecatedDate as boolean)
-                }
-                analysisConf.add(new ConfValue(workflow, seqType, versions, version, null))
+                }.collect { Version.fromWorkflowVersion(it) }
+                analysisConf.add(new WorkflowVersionConfValue(wvSelector.id, workflow, seqType, versions, wvSelector.workflowVersion, null))
             }
         }
 
-        List<SeqType> seqTypes = alignmentWorkflows.collectMany { it.supportedSeqTypes }.unique()
+        List<SeqType> seqTypes = workflowService.getSupportedSeqTypesOfVersions(alignmentWorkflows)
 
         List<MergingCriteria> mergingCriteria = MergingCriteria.findAllByProject(project)
-        Map<SeqType, MergingCriteria> seqTypeMergingCriteria = seqTypes.collectEntries { SeqType seqType ->
-            [(seqType): mergingCriteria.find { it.seqType == seqType }]
-        }.sort { Map.Entry<SeqType, MergingCriteria> it -> it.key.displayNameWithLibraryLayout }
+        Map<SeqType, MergingCriteria> seqTypeMergingCriteria = seqTypes
+                .sort { it.displayNameWithLibraryLayout }
+                .collectEntries { SeqType seqType -> [(seqType): mergingCriteria.find { it.seqType == seqType }] }
+                .findAll { it.value }
 
+        List<WorkflowVersion> alignmentVersions = workflowVersionService.findAllByWorkflows(alignmentWorkflows)
+
+        Set<ReferenceGenome> refGenomes = alignmentVersions.collectMany { it.allowedReferenceGenomes }
+        Set<SpeciesWithStrain> species = referenceGenomeService.getAllSpeciesWithStrains(refGenomes)
         return [
+                alignmentWorkflows    : alignmentWorkflows,
+                alignmentVersions     : alignmentVersions.collect { Version.fromWorkflowVersion(it) },
+                seqTypes              : seqTypes,
+                species               : species,
+                referenceGenomes      : refGenomes,
                 alignmentConf         : alignmentConf,
                 fastqcVersions        : fastqcVersions,
                 analysisConf          : analysisConf,
                 seqTypeMergingCriteria: seqTypeMergingCriteria,
         ]
+    }
+
+    def possibleAlignmentOptions(AlignmentConfigurationCommand cmd) {
+        checkErrorAndCallMethodReturns(cmd) {
+            WorkflowSelectionOptionsDTO options = workflowSelectionService.getPossibleAlignmentOptions(new WorkflowSelectionOptionDTO([
+                    workflow       : cmd.workflow,
+                    workflowVersion: cmd.workflowVersion,
+                    seqType        : cmd.seqType,
+                    species        : cmd.speciesWithStrains,
+                    refGenome      : cmd.referenceGenome,
+            ]))
+
+            return render([
+                    workflowIds : options.workflows*.id,
+                    versionIds  : options.workflowVersions*.id,
+                    seqTypeIds  : options.seqTypes*.id,
+                    speciesIds  : options.species*.id,
+                    refGenomeIds: options.refGenomes*.id,
+            ] as JSON)
+        }
+    }
+
+    def saveAlignmentConfiguration(CreateAlignmentConfigurationCommand cmd) {
+        checkErrorAndCallMethodReturns(cmd) {
+            Project project = projectSelectionService.requestedProject
+            WorkflowSelectionSelectorDTO selectors = workflowSelectionService.createOrUpdate(
+                    project, cmd.seqType, cmd.workflowVersion, cmd.speciesWithStrains, cmd.workflow, cmd.referenceGenome
+            )
+            return render([
+                    workflow               : [id: selectors.rgSelector.workflow.id, displayName: selectors.rgSelector.workflow.displayName],
+                    seqType                : [id: selectors.wvSelector.seqType.id, displayName: selectors.wvSelector.seqType.displayNameWithLibraryLayout],
+                    version                : [id: selectors.wvSelector.workflowVersion.id, displayName: selectors.wvSelector.workflowVersion.workflowVersion],
+                    species                : cmd.speciesWithStrains.collect { [id: it.id, displayName: it.displayName] },
+                    refGenome              : [id: selectors.rgSelector.referenceGenome.id, displayName: selectors.rgSelector.referenceGenome.name],
+                    workflowVersionSelector: [id: selectors.wvSelector.id, previousId: selectors.wvSelector.previous.id],
+                    refGenSelectorId       : selectors.rgSelector.id,
+            ] as JSON)
+        }
+    }
+
+    def deleteAlignmentConfiguration(DeleteAlignmentConfigurationCommand cmd) {
+        checkErrorAndCallMethodReturns(cmd) {
+            workflowSelectionService.deleteAndDeprecateSelectors(cmd.workflowVersionSelector, cmd.referenceGenomeSelector)
+            render([] as JSON)
+        }
     }
 
     def updateVersion(UpdateWorkflowVersionCommand cmd) {
@@ -180,11 +216,24 @@ class WorkflowSelectionController implements CheckAndCall {
 class Version {
     long id
     String name
+    String workflowName
     boolean isDefault
     boolean isDeprecated
 
     String getNameWithDefault() {
-        return "${name}${isDefault ? " (default)" : ""}${isDeprecated ? " (deprecated)" : ""}"
+        return "${name}${this.defaultAndDeprecatedText}"
+    }
+
+    String getNameWithDefaultAndWorkflow() {
+        return "${workflowName}: ${name}${this.defaultAndDeprecatedText}"
+    }
+
+    private getDefaultAndDeprecatedText() {
+        return "${isDefault ? " (default)" : ""}${isDeprecated ? " (deprecated)" : ""}"
+    }
+
+    static Version fromWorkflowVersion(WorkflowVersion wv) {
+        return new Version(wv.id, wv.workflowVersion, wv.workflow.name, wv == wv.workflow.defaultVersion, wv.deprecatedDate as boolean)
     }
 }
 
@@ -196,18 +245,19 @@ class FastQcValues {
 }
 
 @Canonical
-class ConfValue {
+class WorkflowVersionConfValue {
+    Long workflowVersionSelectorId
     Workflow workflow
     SeqType seqType
     List<Version> versions
     WorkflowVersion version
-    List<RefGenConfValue> refGens
+    RefGenConfValue refGen
 }
 
 @Canonical
 class RefGenConfValue {
+    Long id
     List<SpeciesWithStrain> species
-    List<ReferenceGenome> referenceGenomes
     ReferenceGenome referenceGenome
 }
 
@@ -226,11 +276,47 @@ class UpdateWorkflowVersionCommand implements Validateable {
     }
 }
 
+class DeleteAlignmentConfigurationCommand implements Validateable {
+    WorkflowVersionSelector workflowVersionSelector
+    ReferenceGenomeSelector referenceGenomeSelector
+}
+
+class AlignmentConfigurationCommand implements Validateable {
+    Workflow workflow
+    SeqType seqType
+    WorkflowVersion workflowVersion
+
+    @BindUsing({ AlignmentConfigurationCommand obj, SimpleMapDataBindingSource source ->
+        Object input = source['speciesWithStrains']
+        return input ? SpeciesWithStrain.getAll(input) : null
+    })
+    List<SpeciesWithStrain> speciesWithStrains = []
+    ReferenceGenome referenceGenome
+
+    static constraints = {
+        workflow nullable: true
+        seqType nullable: true
+        workflowVersion nullable: true
+        speciesWithStrains nullable: true
+        referenceGenome nullable: true
+    }
+}
+
+class CreateAlignmentConfigurationCommand extends AlignmentConfigurationCommand {
+    static constraints = {
+        workflow nullable: false
+        seqType nullable: false
+        workflowVersion nullable: false
+        speciesWithStrains nullable: false
+        referenceGenome nullable: false
+    }
+}
+
 class UpdateReferenceGenomeCommand implements Validateable {
     SeqType seqType
     List<String> species
 
-    Set<SpeciesWithStrain> getSpeciesWithStrain() {
+    List<SpeciesWithStrain> getSpeciesWithStrain() {
         return species.collect { SpeciesWithStrain.get(it) } as Set
     }
     Workflow workflow

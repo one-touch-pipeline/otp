@@ -24,5 +24,5 @@ FROM postgres:14.9-bullseye
 
 MAINTAINER OTP Developers <otp-devel@dkfz-heidelberg.de>
 ADD dev_dump/apply-dev-dump.sh /docker-entrypoint-initdb.d/
-ADD https://gitlab.com/one-touch-pipeline/otp/-/wikis/uploads/ci/dev_base_20231017.dump  /docker-entrypoint-initdb.d/dev_base.dump
+ADD https://gitlab.com/one-touch-pipeline/otp/-/wikis/uploads/ci/dev_base_20231106.dump  /docker-entrypoint-initdb.d/dev_base.dump
 RUN chmod 444 /docker-entrypoint-initdb.d/dev_base.dump

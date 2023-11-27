@@ -196,7 +196,7 @@
                         from="speciesWithStrainList">
                     <g:each in="${speciesWithStrains}" var="species">
                         <g:set var="selected" value="${species in cmd?.speciesWithStrains ? "selected" : ""}"/>
-                        <option value="${species.id}" ${selected}>${species.displayString}</option>
+                        <option value="${species.id}" ${selected}>${species.displayName}</option>
                     </g:each>
                     <g:each in="${cmd?.customSpeciesWithStrains}" var="customSpecies">
                         <option value="${customSpecies}" selected>${customSpecies}</option>

@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflowExecution.decider
 
 import grails.gorm.transactions.Transactional
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
@@ -37,6 +38,9 @@ import de.dkfz.tbi.otp.workflowExecution.*
 @Transactional
 @Slf4j
 abstract class AbstractWorkflowDecider<ADL extends ArtefactDataList, G extends BaseDeciderGroup, AD extends AdditionalData> implements Decider {
+
+    @Autowired
+    WorkflowService workflowService
 
     /**
      * returns the workflow the decider created workflow runs for.
@@ -87,7 +91,7 @@ abstract class AbstractWorkflowDecider<ADL extends ArtefactDataList, G extends B
         DeciderResult deciderResult = new DeciderResult()
         Workflow w = workflow
         deciderResult.infos << "start decider for ${w}".toString()
-        Set<SeqType> supportedSeqTypes = w.supportedSeqTypes ?: SeqType.list() as Set
+        Set<SeqType> supportedSeqTypes = (workflowService.getSupportedSeqTypesOfVersions(w) ?: SeqType.list()) as Set
 
         ADL inputArtefactDataList = LogUsedTimeUtils.logUsedTime(log, "        fetch concrete Artefacts") {
             fetchInputArtefacts(inputWorkflowArtefacts, supportedSeqTypes)

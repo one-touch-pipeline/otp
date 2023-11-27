@@ -19,28 +19,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package de.dkfz.tbi.otp.workflowExecution
 
-/**
- * A handler to change the shown version to Not configured after one Fastqc workflow is configured
- * This js avoids to reload the backend
- */
-workflowSelectionUpdateSuccessHandler = function (container) {
-  'use strict';
+import groovy.transform.TupleConstructor
 
-  const rowIdx = container.parent().parent().parent().index('tr') === 2 ? 1 : 2;
-  const row = container.parent().parent().parent().parent()
-    .parent()
-    .find('tr')
-    .eq(rowIdx);
-
-  // just update the text to match the value from backend, otherwise you have to refresh the page
-  $('.edit-switch-label span', row).text('Not configured');
-};
-
-$(document).ready(() => {
-  'use strict';
-
-  $('#fastqc').dataTable({ paging: false });
-  $('#analysis').dataTable({ paging: false });
-  $('#mergingCriteria').dataTable({ paging: false });
-});
+@TupleConstructor
+class UpdateWorkflowVersionDto {
+    Long workflowVersionId
+    String comment
+    boolean deprecate
+    List<Long> allowedRefGenomes
+    List<Long> supportedSeqTypes
+}

@@ -233,7 +233,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         WorkflowVersion workflowVersion = createBashFastqcWorkflowVersion()
         Workflow workflow = workflowVersion.workflow
-        workflow.supportedSeqTypes = SeqType.findAll()
+        workflow.defaultSeqTypesForWorkflowVersions = SeqType.findAll()
 
         String unixGroup = configService.testingGroup
         Path projectPath = configService.rootPath.toPath().resolve(dirName)
@@ -327,7 +327,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         WorkflowVersion workflowVersion = createBashFastqcWorkflowVersion()
         Workflow workflow = workflowVersion.workflow
-        workflow.supportedSeqTypes = SeqType.findAll()
+        workflow.defaultSeqTypesForWorkflowVersions = SeqType.findAll()
 
         String dirName = 'projectDir/projectSubDir'
         Path projectPath = configService.rootPath.toPath().resolve(dirName)
@@ -372,7 +372,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         WorkflowVersion workflowVersion = createBashFastqcWorkflowVersion()
         Workflow workflow = workflowVersion.workflow
-        workflow.supportedSeqTypes = SeqType.findAll()
+        workflow.defaultSeqTypesForWorkflowVersions = SeqType.findAll()
 
         String dirName = 'projectDir/subDir'
         Path projectPath = configService.rootPath.toPath().resolve(dirName)
@@ -420,7 +420,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         WorkflowVersion workflowVersion = createBashFastqcWorkflowVersion()
         Workflow workflow = workflowVersion.workflow
-        workflow.supportedSeqTypes = SeqType.findAll()
+        workflow.defaultSeqTypesForWorkflowVersions = SeqType.findAll()
 
         String exceptionMessage = "message ${nextId}"
         String dirName = 'projectDir'
@@ -587,7 +587,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         WorkflowVersion workflowVersion = createBashFastqcWorkflowVersion()
         Workflow workflow = workflowVersion.workflow
-        workflow.supportedSeqTypes = SeqType.findAll()
+        workflow.defaultSeqTypesForWorkflowVersions = SeqType.findAll()
 
         String dirName = 'projectDir/projectSubDir'
         Path projectPath = configService.rootPath.toPath().resolve(dirName)

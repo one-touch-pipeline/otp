@@ -29,8 +29,8 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.workflowExecution.OtpWorkflow
 import de.dkfz.tbi.otp.workflowExecution.Workflow
+import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
 @CompileDynamic
 @Transactional
@@ -38,6 +38,8 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
 
     @Autowired
     ApplicationContext context
+
+    WorkflowService workflowService
 
     SeqType findById(long id) {
         return SeqType.get(id)
@@ -242,7 +244,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
     }
 
     /**
-     * @deprecated method is part of the old workflow system, use {@link Workflow#supportedSeqTypes} instead
+     * @deprecated method is part of the old workflow system, use {@link Workflow#defaultSeqTypesForWorkflowVersions} instead
      */
     @Deprecated
     static List<SeqType> getDefaultOtpAlignableSeqTypes() {
@@ -253,7 +255,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
     }
 
     /**
-     * @deprecated method is part of the old workflow system, use {@link Workflow#supportedSeqTypes} instead
+     * @deprecated method is part of the old workflow system, use {@link Workflow#defaultSeqTypesForWorkflowVersions} instead
      */
     @Deprecated
     static List<SeqType> getPanCanAlignableSeqTypes() {
@@ -267,7 +269,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
     }
 
     /**
-     * @deprecated method is part of the old workflow system, use {@link Workflow#supportedSeqTypes} instead
+     * @deprecated method is part of the old workflow system, use {@link Workflow#defaultSeqTypesForWorkflowVersions} instead
      */
     @Deprecated
     static List<SeqType> getRnaAlignableSeqTypes() {
@@ -278,7 +280,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
     }
 
     /**
-     * @deprecated method is part of the old workflow system, use {@link Workflow#supportedSeqTypes} instead
+     * @deprecated method is part of the old workflow system, use {@link Workflow#defaultSeqTypesForWorkflowVersions} instead
      */
     @Deprecated
     static List<SeqType> getRoddyAlignableSeqTypes() {
@@ -289,7 +291,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
     }
 
     /**
-     * @deprecated method is part of the old workflow system, use {@link Workflow#supportedSeqTypes} instead
+     * @deprecated method is part of the old workflow system, use {@link Workflow#defaultSeqTypesForWorkflowVersions} instead
      */
     @Deprecated
     static List<SeqType> getCellRangerAlignableSeqTypes() {
@@ -299,7 +301,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
     }
 
     /**
-     * @deprecated method is part of the old workflow system, use {@link Workflow#supportedSeqTypes} instead
+     * @deprecated method is part of the old workflow system, use {@link Workflow#defaultSeqTypesForWorkflowVersions} instead
      */
     @Deprecated
     static List<SeqType> getAllAlignableSeqTypes() {
@@ -324,19 +326,16 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
      * search for seqTypes usable for trigger alignment and return them sorted
      */
     List<SeqType> findAlignAbleSeqTypes() {
-        List<SeqType> seqTypes = SeqTypeService.roddyAlignableSeqTypes
-        Workflow.list().findAll {
-            it.beanName && !it.deprecatedDate && context.getBean(it.beanName, OtpWorkflow)?.isAlignment()
-        }.each {
-            seqTypes.addAll(it.supportedSeqTypes)
-        }
+        List<SeqType> seqTypes = roddyAlignableSeqTypes
+        List<Workflow> alignmentWorkflows = workflowService.findAllAlignmentWorkflows()
+        seqTypes.addAll(workflowService.getSupportedSeqTypesOfVersions(alignmentWorkflows))
         return seqTypes.unique().sort {
             SeqType a, SeqType b -> a.displayNameWithLibraryLayout <=> b.displayNameWithLibraryLayout
         }
     }
 
     /**
-     * @deprecated method is part of the old workflow system, use {@link Workflow#supportedSeqTypes} instead
+     * @deprecated method is part of the old workflow system, use {@link Workflow#defaultSeqTypesForWorkflowVersions} instead
      */
     @Deprecated
     static List<SeqType> getSnvPipelineSeqTypes() {
@@ -347,7 +346,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
     }
 
     /**
-     * @deprecated method is part of the old workflow system, use {@link Workflow#supportedSeqTypes} instead
+     * @deprecated method is part of the old workflow system, use {@link Workflow#defaultSeqTypesForWorkflowVersions} instead
      */
     @Deprecated
     static List<SeqType> getIndelPipelineSeqTypes() {
@@ -358,7 +357,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
     }
 
     /**
-     * @deprecated method is part of the old workflow system, use {@link Workflow#supportedSeqTypes} instead
+     * @deprecated method is part of the old workflow system, use {@link Workflow#defaultSeqTypesForWorkflowVersions} instead
      */
     @Deprecated
     static List<SeqType> getSophiaPipelineSeqTypes() {
@@ -369,7 +368,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
     }
 
     /**
-     * @deprecated method is part of the old workflow system, use {@link Workflow#supportedSeqTypes} instead
+     * @deprecated method is part of the old workflow system, use {@link Workflow#defaultSeqTypesForWorkflowVersions} instead
      */
     @Deprecated
     static List<SeqType> getAceseqPipelineSeqTypes() {
@@ -379,7 +378,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
     }
 
     /**
-     * @deprecated method is part of the old workflow system, use {@link Workflow#supportedSeqTypes} instead
+     * @deprecated method is part of the old workflow system, use {@link Workflow#defaultSeqTypesForWorkflowVersions} instead
      */
     @Deprecated
     static List<SeqType> getRunYapsaPipelineSeqTypes() {
@@ -390,7 +389,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
     }
 
     /**
-     * @deprecated method is part of the old workflow system, use {@link Workflow#supportedSeqTypes} instead
+     * @deprecated method is part of the old workflow system, use {@link Workflow#defaultSeqTypesForWorkflowVersions} instead
      */
     @Deprecated
     static List<SeqType> getAllAnalysableSeqTypes() {
@@ -404,7 +403,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
     }
 
     /**
-     * @deprecated method is part of the old workflow system, use {@link Workflow#supportedSeqTypes} instead
+     * @deprecated method is part of the old workflow system, use {@link Workflow#defaultSeqTypesForWorkflowVersions} instead
      */
     @Deprecated
     static List<SeqType> getAllProcessableSeqTypes() {

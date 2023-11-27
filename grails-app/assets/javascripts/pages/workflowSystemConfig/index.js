@@ -85,17 +85,7 @@ const renderWorkflowOverviewTable = (workflowData) => {
       },
       {
         data: 'supportedSeqTypes',
-        render: (seqTypes) => {
-          if (seqTypes) {
-            return seqTypes.map((seqType) => {
-              if (seqType.singleCell) {
-                return `${seqType.displayName} ${seqType.libraryLayout} single cell`;
-              }
-              return `${seqType.displayName} ${seqType.libraryLayout} bulk`;
-            }).join(', ');
-          }
-          return '';
-        }
+        render: (seqTypes) => (seqTypes ? seqTypes.map((seqType) => seqType.displayName).join(', ') : '')
       },
       {
         data: 'allowedRefGenomes',
@@ -183,8 +173,8 @@ const updateModalWithCurrentWorkflow = (workflow, modal) => {
   defaultVersion.empty();
   defaultVersion.append('<option value=" ">No default version</option>');
   workflow.versions.forEach((version) => {
-    const deprecated = version.deprecatedDate ? ' (deprecated)' : '';
-    defaultVersion.append(`<option value="${version.id}">${version.workflowVersion}${deprecated}</option>`);
+    const deprecated = version.deprecateDate !== 'na' ? ' (deprecated)' : '';
+    defaultVersion.append(`<option value="${version.id}">${version.name}${deprecated}</option>`);
   });
   if (workflow.defaultVersion) {
     defaultVersion.val(workflow.defaultVersion.id);

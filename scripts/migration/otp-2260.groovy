@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,42 +19,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata.taxonomy
+package migration
 
-import grails.gorm.hibernate.annotation.ManagedEntity
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
 
-import de.dkfz.tbi.otp.utils.*
+/**
+ * This Script should set the allowedReferenceGenomes and seqTypes on workflow versions by
+ * using the default values from its workflow.
+ */
 
-@ManagedEntity
-class SpeciesWithStrain implements Entity, Legacy {
-    Species species
-    Strain strain
-
-    Set<String> importAlias
-    static hasMany = [importAlias: String]
-
-    static constraints = {
-        species(nullable: false)
-        strain(nullable: false, unique: ['species'])
-        importAlias validator: { val, obj ->
-            if (val.any { it.contains("+") }) {
-                return "plus"
-            }
-            if (CollectionUtils.atMostOneElement(SpeciesWithStrain.list().findAll { SpeciesWithStrain existingSpecies ->
-                existingSpecies.id != obj.id &&
-                val*.toLowerCase().any { String importAlias -> importAlias in existingSpecies.importAlias*.toLowerCase() }
-            })) {
-                return "duplicate"
+WorkflowVersion.withTransaction {
+    List<WorkflowVersion> workflowVersions = WorkflowVersion.all
+    workflowVersions.each { version ->
+        if (version.allowedReferenceGenomes.size() == 0) {
+            version.allowedReferenceGenomes = version.workflow.defaultReferenceGenomesForWorkflowVersions.collect {
+                ReferenceGenome.get(it.id)
             }
         }
-    }
 
-    String getDisplayName() {
-        return this.toString()
-    }
-
-    @Override
-    String toString() {
-        return "${species} [${strain.name}]"
+        if (version.supportedSeqTypes.size() == 0) {
+            version.supportedSeqTypes = version.workflow.defaultSeqTypesForWorkflowVersions.collect {
+                SeqType.get(it.id)
+            }
+        }
+        version.save(flush: true)
     }
 }
+
+

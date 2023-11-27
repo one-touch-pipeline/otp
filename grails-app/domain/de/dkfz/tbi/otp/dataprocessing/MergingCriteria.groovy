@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.Workflow
+import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
 
 @ToString(includeNames = true, includePackage = false)
 @ManagedEntity
@@ -52,7 +53,9 @@ class MergingCriteria implements Entity {
                 return "exome"
             }
 
-            if (obj.seqType in CollectionUtils.exactlyOneElement(Workflow.findAllByName(WgbsWorkflow.WORKFLOW)).supportedSeqTypes && val) {
+            Workflow wgbsWorkflow = CollectionUtils.exactlyOneElement(Workflow.findAllByName(WgbsWorkflow.WORKFLOW))
+            Set<SeqType> supportedSeqTypes = WorkflowVersion.findAllByWorkflow(wgbsWorkflow).collectMany { wv -> wv.supportedSeqTypes }
+            if (obj.seqType in supportedSeqTypes && val) {
                 return "wgbs"
             }
         }

@@ -276,6 +276,52 @@ class ReferenceGenomeService {
         createReferenceGenomeMetafile(referenceGenome)
     }
 
+    Set<SpeciesWithStrain> getAllSpeciesWithStrains(Set<ReferenceGenome> referenceGenomes) {
+        if (!referenceGenomes) {
+            return [] as Set
+        }
+
+        Set<SpeciesWithStrain> speciesWithStrainFromSpecies = SpeciesWithStrain.createCriteria().listDistinct {
+            'in'('species', referenceGenomes*.species.flatten())
+        } as Set<SpeciesWithStrain>
+        return (speciesWithStrainFromSpecies + referenceGenomes*.speciesWithStrain.flatten() as Set<SpeciesWithStrain>)
+    }
+
+    /**
+     * This method provides a list of lists, each containing SpeciesWithStrain objects associated with a reference genome.
+     * From each inner list, one SpeciesWithStrain can be selected to form a valid combination for the reference genome.
+     * The method is optimized for performance and does not generate all possible combinations, but rather a structured
+     * collection from which valid combinations can be constructed.
+     *
+     * @param referenceGenome to group the speciesWithStrains for
+     * @return a list of lists, where each inner list contains SpeciesWithStrains that are valid to use with the reference genome.
+     */
+    List<List<SpeciesWithStrain>> getSpeciesWithStrainCombinations(ReferenceGenome referenceGenome) {
+        List<List<SpeciesWithStrain>> speciesWithStrains = referenceGenome.speciesWithStrain.collect { [it] }
+        speciesWithStrains.addAll(referenceGenome.species.collect { SpeciesWithStrain.findAllBySpecies(it) })
+        return speciesWithStrains
+    }
+
+    /**
+     * This method returns a list of SpeciesWithStrain options that are compatible with the given reference genome.
+     * It ensures that the options do not include alternative selections for species with strains that have already been selected.
+     * This allows for the preservation of the current selections while providing valid additional options.
+     *
+     * @param referenceGenome to get the compatible species with strain options for
+     * @param selectedSpecies contains a list of species with strains that should not have alternative options presented
+     * @return a list of compatible SpeciesWithStrains for the reference genome, respecting the already selected species with strains.
+     */
+    Set<SpeciesWithStrain> getSpeciesWithStrainOptions(ReferenceGenome referenceGenome, List<SpeciesWithStrain> selectedSpecies) {
+        if (!referenceGenome) {
+            return []
+        }
+
+        return getSpeciesWithStrainCombinations(referenceGenome).collectMany { speciesList ->
+            SpeciesWithStrain containedSpecies = selectedSpecies?.find { speciesList.contains(it) }
+            return containedSpecies ? [containedSpecies] : speciesList
+        } as Set<SpeciesWithStrain>
+    }
+
     /**
      * Method to create a tsv file including the reference genome meta information:
      * reference genome entry names

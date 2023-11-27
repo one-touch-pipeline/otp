@@ -19,13 +19,15 @@
   - OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   - SOFTWARE.
   --}%
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="de.dkfz.tbi.otp.dataprocessing.MergingCriteria" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <title>${g.message(code: "workflowSelection.title")}</title>
     <asset:javascript src="taglib/EditorSwitch.js"/>
     <asset:javascript src="common/CommentBox.js"/>
     <asset:javascript src="pages/workflowSelection/index.js"/>
+    <asset:javascript src="pages/workflowSelection/alignmentTable.js"/>
+    <asset:stylesheet src="pages/workflowSelection/index.less"/>
 </head>
 
 <body>
@@ -34,6 +36,7 @@
         <div class="grid-element">
             <g:render template="/templates/bootstrap/projectSelection"/>
         </div>
+
         <div class="grid-element comment-box">
             <g:render template="/templates/commentBox" model="[
                     commentable     : selectedProject,
@@ -42,6 +45,7 @@
             ]"/>
         </div>
     </div>
+
     <div>
         <g:render template="/projectConfig/tabMenu"/>
     </div>
@@ -51,13 +55,16 @@
 
     <h2>${g.message(code: "workflowSelection.fastqc")}</h2>
     <otp:annotation type="info">
-            ${g.message(code: "workflowSelection.fastqc.info", args: [contactDataSupportEmail, faqLink])}
+        ${g.message(code: "workflowSelection.fastqc.info", args: [contactDataSupportEmail, faqLink])}
     </otp:annotation>
-    <table class="table table-sm table-striped">
+    <table id="fastqc" class="table table-sm table-striped">
+        <thead>
         <tr>
             <th>${g.message(code: "workflowSelection.workflow")}</th>
             <th>${g.message(code: "workflowSelection.version")}</th>
         </tr>
+        </thead>
+        <tbody>
         <g:each in="${fastqcVersions}" var="fastqcVersion">
             <tr>
                 <td>${fastqcVersion.workflow.name}</td>
@@ -74,121 +81,122 @@
                 </td>
             </tr>
         </g:each>
+        </tbody>
     </table>
 
     <h2>${g.message(code: "workflowSelection.alignment")}</h2>
     <table id="alignment" class="table table-sm table-striped">
+        <thead>
         <tr>
             <th>${g.message(code: "workflowSelection.workflow")}</th>
             <th>${g.message(code: "workflowSelection.seqType")}</th>
             <th>${g.message(code: "workflowSelection.version")}</th>
-            <th>${g.message(code: "workflowSelection.species")}</th>
             <th>${g.message(code: "workflowSelection.referenceGenome")}</th>
+            <th>${g.message(code: "workflowSelection.species")}</th>
+            <sec:ifAllGranted roles="ROLE_OPERATOR">
+                <th></th>
+            </sec:ifAllGranted>
         </tr>
-        <g:each in="${alignmentConf}" var="workflow">
+        </thead>
+        <tbody>
+        <g:each in="${alignmentConf}" var="config">
             <tr>
-                <td rowspan="${workflow.refGens.species.size() ?: 1}">${workflow.workflow.name}</td>
-                <td rowspan="${workflow.refGens.species.size() ?: 1}">${workflow.seqType}</td>
-                <td rowspan="${workflow.refGens.species.size() ?: 1}"><otp:editorSwitch
-                        roles="ROLE_OPERATOR"
-                        template="dropDown"
-                        optionKey="id"
-                        optionValue="nameWithDefault"
-                        link="${g.createLink(controller: 'workflowSelection', action: 'updateVersion', params: ['seqType.id' : workflow.seqType.id,
-                                                                                                                'workflow.id': workflow.workflow.id])}"
-                        values="${workflow.versions}"
-                        value="${workflow.version?.id}"
-                        noSelection="${["": g.message(code: "workflowSelection.notConfigured")]}"/>
-                </td>
-
-                <g:each in="${workflow.refGens.take(1)}" var="r">
-                    <td>${r.species.join(" + ")}</td>
-                    <td><otp:editorSwitch
-                            roles="ROLE_OPERATOR"
-                            template="dropDown"
-                            optionKey="id"
-                            optionValue="name"
-                            link="${g.createLink(controller: 'workflowSelection', action: 'updateReferenceGenome', params: [
-                                    'seqType.id' : workflow.seqType.id,
-                                    'species'    : r.species*.id,
-                                    'workflow.id': workflow.workflow.id,
-                            ])}"
-                            values="${r.referenceGenomes}"
-                            value="${r.referenceGenome?.id}"
-                            noSelection="${[(null): g.message(code: "workflowSelection.notConfigured")]}"/>
+                <td>${config.workflow.name}</td>
+                <td>${config.seqType}</td>
+                <td>${config.version.workflowVersion}</td>
+                <td>${config.refGen.referenceGenome.name}</td>
+                <td>${config.refGen.species.join(' + ')}</td>
+                <sec:ifAllGranted roles="ROLE_OPERATOR">
+                    <td>
+                        <button class="btn float-right btn-primary remove-alignment-config-btn" data-ref-genome-selector="${config.refGen.id}"
+                                data-version-selector="${config.workflowVersionSelectorId}">
+                            <g:message code="workflowSelection.removeConfig"/></button>
                     </td>
-                </g:each>
-                <g:if test="${!workflow.refGens}"><td>${g.message(code: "workflowSelection.noSpecies")}</td><td></td></g:if>
+                </sec:ifAllGranted>
             </tr>
-            <g:each in="${workflow.refGens.drop(1)}" var="r">
-                <tr>
-                    <td>${r.species.join(" + ")}</td>
-                    <td><otp:editorSwitch
-                            roles="ROLE_OPERATOR"
-                            template="dropDown"
-                            optionKey="id"
-                            optionValue="name"
-                            link="${g.createLink(controller: 'workflowSelection', action: 'updateReferenceGenome', params: [
-                                    'seqType.id' : workflow.seqType.id,
-                                    'species'    : r.species*.id,
-                                    'workflow.id': workflow.workflow.id,
-                            ])}"
-                            values="${r.referenceGenomes}"
-                            value="${r.referenceGenome?.id}"
-                            noSelection="${[(null): g.message(code: "workflowSelection.notConfigured")]}"/>
-                    </td>
-                </tr>
-            </g:each>
         </g:each>
-        <g:if test="${!alignmentConf}">
-            <tr><td colspan="5">${g.message(code: "workflowSelection.notFound")}</td></tr>
-        </g:if>
+        </tbody>
+        <sec:ifAllGranted roles="ROLE_OPERATOR">
+            <tfoot>
+            <tr>
+                <td>
+                    <g:select required="true" class="use-select-2 w-100" id="alignment-workflow-select" name="workflow-select"
+                              noSelection="${['': 'Unselected']}" from="${alignmentWorkflows}" optionKey="id" optionValue="displayName"/>
+                </td>
+                <td>
+                    <g:select required="true" class="use-select-2 w-100" id="alignment-seq-type-select" name="seq-type-select"
+                              noSelection="${['': 'Unselected']}" from="${seqTypes}" optionKey="id" optionValue="displayNameWithLibraryLayout"/>
+                </td>
+                <td>
+                    <g:select required="true" class="use-select-2 w-100" id="alignment-version-select" name="version-select"
+                              noSelection="${['': 'Unselected']}" from="${alignmentVersions}" optionKey="id" optionValue="nameWithDefaultAndWorkflow"/>
+                </td>
+                <td>
+                    <g:select required="true" class="use-select-2 w-100" id="alignment-ref-genome-select" name="alignment-ref-genome-select"
+                              noSelection="${['': 'Unselected']}" from="${referenceGenomes}" optionKey="id" optionValue="name"/>
+                </td>
+                <td>
+                    <g:select required="true" class="use-select-2 w-100" id="alignment-species-select" name="alignment-species-select" multiple="true"
+                              from="${species}" optionKey="id" optionValue="displayName"/>
+                </td>
+                <td>
+                    <button type="submit" class="btn float-right btn-primary add-alignment-config-btn"><g:message
+                            code="workflowSelection.addOrUpdateConfig"/></button>
+                </td>
+            </tr>
+            </tfoot>
+        </sec:ifAllGranted>
     </table>
 
     <h2>${g.message(code: "workflowSelection.analysis")}</h2>
-    <table class="table table-sm table-striped">
+    <table id="analysis" class="table table-sm table-striped">
+        <thead>
         <tr>
             <th>${g.message(code: "workflowSelection.workflow")}</th>
             <th>${g.message(code: "workflowSelection.seqType")}</th>
             <th>${g.message(code: "workflowSelection.version")}</th>
         </tr>
-        <g:each in="${analysisConf}" var="workflow">
+        </thead>
+        <tbody>
+        <g:each in="${analysisConf}" var="config">
             <tr>
-                <td>${workflow.workflow.name}</td>
-                <td>${workflow.seqType}</td>
+                <td>${config.workflow.name}</td>
+                <td>${config.seqType}</td>
                 <td><otp:editorSwitch
                         roles="ROLE_OPERATOR"
                         template="dropDown"
                         optionKey="id"
                         optionValue="workflowVersion"
-                        link="${g.createLink(controller: 'workflowSelection', action: 'updateVersion', params: ['seqType.id' : workflow.seqType.id,
-                                                                                                                'workflow.id': workflow.workflow.id])}"
-                        values="${workflow.versions}"
-                        value="${workflow.version?.id}"
+                        link="${g.createLink(controller: 'workflowSelection', action: 'updateVersion', params: ['seqType.id' : config.seqType.id,
+                                                                                                                'workflow.id': config.workflow.id])}"
+                        values="${config.versions}"
+                        value="${config.version?.id}"
                         noSelection="${["": g.message(code: "workflowSelection.notConfigured")]}"/>
                 </td>
             </tr>
         </g:each>
-        <g:if test="${!analysisConf}">
-            <tr><td colspan="3">${g.message(code: "workflowSelection.notFound")}</td></tr>
-        </g:if>
+        </tbody>
     </table>
 
     <h2>${g.message(code: 'workflowSelection.mergingCriteria')}</h2>
     <table id="mergingCriteria" class="table table-sm table-striped">
+        <thead>
         <tr>
             <th>${g.message(code: 'workflowSelection.seqType')}</th>
             <th>${g.message(code: 'workflowSelection.libPrepKit')}</th>
             <th>${g.message(code: 'workflowSelection.seqPlatformGroup')}</th>
         </tr>
-        <g:each in="${seqTypeMergingCriteria}" var="m">
+        </thead>
+        <tbody>
+        <g:each in="${seqTypeMergingCriteria}" var="mergingCriteria">
             <tr>
-                <td><g:link controller="projectSeqPlatformGroup" action="index" params='["seqType.id": m.key.id]'>${m.key}</g:link></td>
+                <td><g:link controller="projectSeqPlatformGroup" action="index"
+                            params='["seqType.id": mergingCriteria.key.id]'>${mergingCriteria.key}</g:link></td>
                 <td>
-                    <g:if test="${m.key.needsBedFile}">
+                    <g:if test="${mergingCriteria.key.needsBedFile}">
                         ${g.message(code: 'workflowSelection.yes')}
                     </g:if>
-                    <g:elseif test="${m.key.isWgbs()}">
+                    <g:elseif test="${mergingCriteria.key.isWgbs()}">
                         ${g.message(code: 'workflowSelection.no')}
                     </g:elseif>
                     <g:else>
@@ -197,20 +205,21 @@
                                 template="dropDown"
                                 optionKey="key"
                                 optionValue="value"
-                                link="${g.createLink(controller: 'workflowSelection', action: 'updateMergingCriteriaLPK', params: ['mergingCriteria.id': m.value.id])}"
+                                link="${g.createLink(controller: 'workflowSelection', action: 'updateMergingCriteriaLPK', params: ['mergingCriteria.id': mergingCriteria.value.id])}"
                                 values="${[(true): g.message(code: 'workflowSelection.yes'), (false): g.message(code: 'workflowSelection.no')]}"
-                                value="${m.value?.useLibPrepKit}"/>
+                                value="${mergingCriteria.value?.useLibPrepKit}"/>
                     </g:else>
                 </td>
                 <td><otp:editorSwitch
                         roles="ROLE_OPERATOR"
                         template="dropDown"
-                        link="${g.createLink(controller: 'workflowSelection', action: 'updateMergingCriteriaSPG', params: ['mergingCriteria.id': m.value.id])}"
-                        values="${de.dkfz.tbi.otp.dataprocessing.MergingCriteria.SpecificSeqPlatformGroups.values()}"
-                        value="${m.value?.useSeqPlatformGroup}"/>
+                        link="${g.createLink(controller: 'workflowSelection', action: 'updateMergingCriteriaSPG', params: ['mergingCriteria.id': mergingCriteria.value.id])}"
+                        values="${MergingCriteria.SpecificSeqPlatformGroups.values()}"
+                        value="${mergingCriteria.value?.useSeqPlatformGroup}"/>
                 </td>
             </tr>
         </g:each>
+        </tbody>
     </table>
 </div>
 </body>

@@ -256,7 +256,7 @@
                         <g:select id="speciesWithStrains[${i}].id" name="speciesWithStrains.id" class="use-select-2"
                                   from="${allSpeciesWithStrains}"
                                   value="${specie?.id ?: ""}"
-                                  optionKey="id" optionValue="displayString"
+                                  optionKey="id" optionValue="displayName"
                                   noSelection="${["": 'Please Select']}" />
                         <g:if test="${i == 0}">
                             <button class="add-field">+</button>

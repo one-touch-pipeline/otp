@@ -98,6 +98,14 @@ const renderWorkflowVersionTable = (workflowVersionData, workflowId) => {
     order: [0, 'asc'],
     columns: [
       { data: 'name' },
+      {
+        data: 'supportedSeqTypes',
+        render: (supportedSeqTypes) => supportedSeqTypes.map((seqType) => seqType.displayName).join(', ')
+      },
+      {
+        data: 'allowedRefGenomes',
+        render: (allowedRefGenomes) => allowedRefGenomes.map((refGenome) => refGenome.name).join(', ')
+      },
       { data: 'comment' },
       {
         data: 'commentData',
@@ -126,8 +134,8 @@ const renderWorkflowVersionTable = (workflowVersionData, workflowId) => {
         render: (column, type, row) => `<button class="btn btn-sm btn-primary float-right"
           id="modify-btn-${row.id}" onclick="openAndRenderModificationModal(
           JSON.parse('${JSON.stringify(row).replace(/'/g, '&apos;').replace(/"/g, '&quot;')}'))"
-          data-original-title="Change deprecation state">
-             <i class="bi bi-archive"></i>
+          data-original-title="Edit workflow version">
+             <i class="bi bi-pencil"></i>
            </button>`
       }
     ]
@@ -176,6 +184,20 @@ const openAndRenderModificationModal = (workflowVersion) => {
 const updateModalWithCurrentWorkflowVersion = (workflowVersion, modal) => {
   'use strict';
 
+  if (workflowVersion.supportedSeqTypes) {
+    $('#modal-seqTypes-version', modal).val(workflowVersion.supportedSeqTypes.map((s) => s.id));
+  } else {
+    $('#modal-seqTypes-version', modal).val();
+  }
+  $('#modal-seqTypes-version', modal).trigger('change');
+
+  if (workflowVersion.allowedRefGenomes) {
+    $('#modal-refGenomes-version', modal).val(workflowVersion.allowedRefGenomes.map((rg) => rg.id));
+  } else {
+    $('#modal-refGenomes-version', modal).val();
+  }
+  $('#modal-refGenomes-version', modal).trigger('change');
+
   $('.modal-title', modal).html(`Modify Workflow Version ${workflowVersion.name}`);
   $('#comment', modal).val(workflowVersion.comment);
   $('#deprecate-state', modal).prop('checked', workflowVersion.deprecateDate !== 'N/A');
@@ -192,7 +214,9 @@ const updateDeprecationStateWorkflowVersion = (workflowVersion, modal) => {
   const workflowVersionToModify = {
     workflowVersionId: workflowVersion.id,
     comment: $('#comment', modal).val(),
-    deprecate: $('#deprecate-state', modal).prop('checked')
+    deprecate: $('#deprecate-state', modal).prop('checked'),
+    supportedSeqTypes: $('#modal-seqTypes-version', modal).select2('data').map((s) => s.id),
+    allowedRefGenomes: $('#modal-refGenomes-version', modal).select2('data').map((rg) => rg.id)
   };
 
   fetch($.otp.createLink({

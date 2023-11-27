@@ -32,12 +32,14 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflowExecution.Workflow
+import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
 @CompileDynamic
 @Transactional
 class MergingCriteriaService {
 
     CommentService commentService
+    WorkflowService workflowService
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     MergingCriteria findMergingCriteria(Project project, SeqType seqType) {
@@ -87,7 +89,7 @@ class MergingCriteriaService {
     }
 
     void createDefaultMergingCriteria(Project project, SeqType seqType) {
-        if ((seqType in SeqTypeService.allAlignableSeqTypes || seqType in Workflow.all.collectMany { it.supportedSeqTypes }) &&
+        if ((seqType in SeqTypeService.allAlignableSeqTypes || seqType in workflowService.getSupportedSeqTypesOfVersions(Workflow.all)) &&
                 !MergingCriteria.findAllByProjectAndSeqType(project, seqType)) {
             new MergingCriteria(
                     project: project,
@@ -99,7 +101,7 @@ class MergingCriteriaService {
     }
 
     void createDefaultMergingCriteria(SeqType seqType) {
-        if (!(seqType in Workflow.all.collectMany { it.supportedSeqTypes ?: [] })) {
+        if (!(seqType in workflowService.getSupportedSeqTypesOfVersions(Workflow.all))) {
             return
         }
         List<Project> allProjects = Project.all
@@ -110,7 +112,7 @@ class MergingCriteriaService {
     }
 
     void createDefaultMergingCriteria(Project project) {
-        List<SeqType> allSeqTypes = Workflow.all.collectMany { it.supportedSeqTypes ?: [] }
+        List<SeqType> allSeqTypes = workflowService.getSupportedSeqTypesOfVersions(Workflow.all)
         if (!allSeqTypes) {
             return
         }

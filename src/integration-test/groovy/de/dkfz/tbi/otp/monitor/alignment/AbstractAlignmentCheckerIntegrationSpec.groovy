@@ -49,7 +49,7 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification imp
         DomainFactory.createRoddyAlignableSeqTypes()
         DomainFactory.createCellRangerAlignableSeqTypes()
         if (workflowName) {
-            workflow = createWorkflow(name: workflowName, supportedSeqTypes: supportedSeqTypes as Set)
+            workflow = createWorkflow(name: workflowName, defaultSeqTypesForWorkflowVersions: supportedSeqTypes as Set)
         }
         if (workflowNameForCrosschecking) {
             workflowForCrosschecking = createWorkflow(name: workflowNameForCrosschecking)

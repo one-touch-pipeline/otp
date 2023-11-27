@@ -219,7 +219,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
     void "test createDefaultMergingCriteria for seq. type, creates a MergingCriteria"() {
         given:
         setupData()
-        createWorkflow(supportedSeqTypes: DomainFactory.createAllAlignableSeqTypes())
+        createWorkflowVersion([supportedSeqTypes: DomainFactory.createAllAlignableSeqTypes()])
         Project project = createProject()
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
 
@@ -235,7 +235,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
     void "test createDefaultMergingCriteria for seq. type, MergingCriteria already exists, is not changed"() {
         given:
         setupData()
-        createWorkflow(supportedSeqTypes: DomainFactory.createAllAlignableSeqTypes())
+        createWorkflow(defaultSeqTypesForWorkflowVersions: DomainFactory.createAllAlignableSeqTypes())
         Project project = createProject()
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
 
@@ -252,7 +252,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
 
     void "test createDefaultMergingCriteria for seq. type, sequencing type cannot be aligned"() {
         given:
-        createWorkflow(supportedSeqTypes: DomainFactory.createAllAlignableSeqTypes())
+        createWorkflow(defaultSeqTypesForWorkflowVersions: DomainFactory.createAllAlignableSeqTypes())
         createProject()
         SeqType seqType = createSeqType()
 
@@ -268,7 +268,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         setupData()
         DomainFactory.createAllAlignableSeqTypes()
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
-        createWorkflow(supportedSeqTypes: [seqType])
+        createWorkflowVersion([supportedSeqTypes: [seqType]])
         Project project = createProject()
 
         when:
@@ -284,7 +284,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         given:
         setupData()
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
-        createWorkflow(supportedSeqTypes: [seqType])
+        createWorkflow(defaultSeqTypesForWorkflowVersions: [seqType])
         Project project = createProject()
 
         createMergingCriteria(project: project, seqType: seqType, useLibPrepKit: false, useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING)

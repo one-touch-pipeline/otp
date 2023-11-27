@@ -22,9 +22,7 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
-import grails.validation.ValidationException
 import groovy.transform.CompileDynamic
-import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqType
@@ -40,30 +38,31 @@ class ReferenceGenomeSelectorService {
 
     OtpWorkflowService otpWorkflowService
 
-    Errors createOrUpdate(Project project, SeqType seqType, Set<SpeciesWithStrain> species, Workflow workflow, ReferenceGenome referenceGenome) {
+    List<ReferenceGenomeSelector> findAllBySeqTypeAndWorkflowAndProject(SeqType seqType, Workflow workflow, Project project) {
+        return ReferenceGenomeSelector.findAllBySeqTypeAndWorkflowAndProject(seqType, workflow, project)
+    }
+
+    ReferenceGenomeSelector createOrUpdate(Project project, SeqType seqType, List<SpeciesWithStrain> species, Workflow workflow, ReferenceGenome refGenome) {
+        Set<SpeciesWithStrain> speciesSet = species as Set
         ReferenceGenomeSelector existing = atMostOneElement(ReferenceGenomeSelector.findAllByProjectAndSeqTypeAndWorkflow(project, seqType, workflow)
-                .findAll { it.species == species })
-        try {
-            if (existing) {
-                if (referenceGenome) {
-                    existing.referenceGenome = referenceGenome
-                    existing.save(flush: true)
-                } else {
-                    existing.delete(flush: true)
-                }
-            } else if (referenceGenome) {
-                new ReferenceGenomeSelector(
-                        project: project,
-                        seqType: seqType,
-                        species: species,
-                        workflow: workflow,
-                        referenceGenome: referenceGenome,
-                ).save(flush: true)
+                .findAll { it.species == speciesSet })
+        if (existing) {
+            if (refGenome) {
+                existing.referenceGenome = refGenome
+                existing.save(flush: true)
+            } else {
+                existing.delete(flush: true)
             }
-        } catch (ValidationException e) {
-            return e.errors
+        } else if (refGenome) {
+            return new ReferenceGenomeSelector(
+                    project: project,
+                    seqType: seqType,
+                    species: speciesSet,
+                    workflow: workflow,
+                    referenceGenome: refGenome,
+            ).save(flush: true)
         }
-        return null
+        return existing
     }
 
     Map<Set<SpeciesWithStrain>, List<ReferenceGenome>> getMappingOfSpeciesCombinationsToReferenceGenomes(Project project) {
@@ -103,6 +102,10 @@ class ReferenceGenomeSelectorService {
             result.add(speciesWithStrain)
         }
         return result
+    }
+
+    void deleteSelector(ReferenceGenomeSelector rgSelector) {
+        rgSelector.delete(flush: true)
     }
 
     boolean hasReferenceGenomeConfigForProjectAndSeqTypeAndSpecies(Project project, SeqType seqType, List<SpeciesWithStrain> speciesWithStrains) {

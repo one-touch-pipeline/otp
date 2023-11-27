@@ -24,8 +24,13 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
+import de.dkfz.tbi.otp.workflow.fastqc.WesFastQcWorkflow
 
 import java.time.LocalDate
 
@@ -75,5 +80,99 @@ class WorkflowServiceSpec extends Specification implements ServiceUnitTest<Workf
 
         then:
         thrown(AssertionError)
+    }
+
+    void "findAllSeqTypesContainedInVersions, should return all seq types that are contained in the versions of a workflow"() {
+        given:
+        Workflow workflow = createWorkflow()
+        SeqType seqType1 = createSeqType()
+        SeqType seqType2 = createSeqType()
+        createWorkflowVersion([
+                workflow         : workflow,
+                supportedSeqTypes: [seqType1],
+        ])
+        createWorkflowVersion([
+                workflow         : workflow,
+                supportedSeqTypes: [seqType1, seqType2],
+        ])
+        createWorkflowVersion([
+                workflow         : workflow,
+                supportedSeqTypes: [seqType2],
+        ])
+        createWorkflowVersion()
+
+        expect:
+        CollectionUtils.containSame(service.getSupportedSeqTypesOfVersions(workflow), [seqType1, seqType2])
+    }
+
+    void "findAllSeqTypesContainedInVersions, should return all seq types that are contained in the versions of a list of workflow"() {
+        given:
+        Workflow workflow1 = createWorkflow()
+        SeqType seqType1 = createSeqType()
+        SeqType seqType2 = createSeqType()
+        createWorkflowVersion([
+                workflow         : workflow1,
+                supportedSeqTypes: [seqType1],
+        ])
+        createWorkflowVersion([
+                workflow         : workflow1,
+                supportedSeqTypes: [seqType1, seqType2],
+        ])
+        createWorkflowVersion([
+                workflow         : workflow1,
+                supportedSeqTypes: [seqType2],
+        ])
+        createWorkflowVersion()
+        Workflow workflow2 = createWorkflow()
+        SeqType seqType3 = createSeqType()
+        createWorkflowVersion([
+                workflow         : workflow2,
+                supportedSeqTypes: [seqType3],
+        ])
+        createWorkflowVersion([
+                workflow         : workflow2,
+                supportedSeqTypes: [seqType3, seqType2],
+        ])
+        createWorkflowVersion([
+                workflow         : workflow2,
+                supportedSeqTypes: [seqType2],
+        ])
+        createWorkflowVersion()
+
+        expect:
+        CollectionUtils.containSame(service.getSupportedSeqTypesOfVersions([workflow1, workflow2]), [seqType1, seqType2, seqType3])
+    }
+
+    @Unroll
+    void "findAllSeqTypesContainedInVersions, should return an empty list if its called with #name"() {
+        given:
+        SeqType seqType1 = createSeqType()
+        createWorkflowVersion([
+                supportedSeqTypes: [seqType1],
+        ])
+
+        expect:
+        service.getSupportedSeqTypesOfVersions(input) == []
+
+        where:
+        name            | input
+        "an empty list" | []
+        "null"          | null
+    }
+
+    void "findAllFastqcWorkflows, should return all the fastqc Workflows"() {
+        given:
+        Workflow workflow1 = createWorkflow([
+                beanName: 'bean2',
+                name    : WesFastQcWorkflow.WORKFLOW,
+        ])
+        Workflow workflow2 = createWorkflow([
+                beanName: 'bean1',
+                name    : BashFastQcWorkflow.WORKFLOW,
+        ])
+        createWorkflow()
+
+        expect:
+        service.findAllFastqcWorkflows() == [workflow2, workflow1]
     }
 }

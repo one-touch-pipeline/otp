@@ -385,7 +385,7 @@ trait DomainFactoryCore implements DomainFactoryHelper {
 
     MergingCriteria createMergingCriteriaLazy(Map properties) {
         Workflow wgbsWorkflow = WorkflowSystemDomainFactoryInstance.INSTANCE.findOrCreateWorkflow(WgbsWorkflow.WORKFLOW)
-        if ((properties.get("seqType") as SeqType) in wgbsWorkflow.supportedSeqTypes && !properties.hasProperty("useLibPrepKit")) {
+        if ((properties.get("seqType") as SeqType) in wgbsWorkflow.defaultSeqTypesForWorkflowVersions && !properties.hasProperty("useLibPrepKit")) {
             properties.put("useLibPrepKit", false)
         }
 

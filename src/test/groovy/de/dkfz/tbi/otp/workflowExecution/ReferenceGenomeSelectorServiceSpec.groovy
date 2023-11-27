@@ -50,11 +50,11 @@ class ReferenceGenomeSelectorServiceSpec extends Specification implements Servic
         ]
     }
 
-    void "test createOrUpdate, if no selector exists"() {
+    void "createOrUpdate, should create a new selector when no selector exists"() {
         given:
         Project project = createProject()
         SeqType seqType = createSeqType()
-        Set<SpeciesWithStrain> species = [createSpeciesWithStrain()] as Set
+        List<SpeciesWithStrain> species = [createSpeciesWithStrain()]
         Workflow workflow = createWorkflow()
         ReferenceGenome referenceGenome = createReferenceGenome(species: [] as Set, speciesWithStrain: species)
 
@@ -62,25 +62,29 @@ class ReferenceGenomeSelectorServiceSpec extends Specification implements Servic
         service.createOrUpdate(project, seqType, species, workflow, referenceGenome)
 
         then:
-        ReferenceGenomeSelector selector = exactlyOneElement(ReferenceGenomeSelector.findAllByProjectAndSeqTypeAndWorkflow(project, seqType, workflow)
-                .findAll { it.species == species })
+        ReferenceGenomeSelector selector = exactlyOneElement(ReferenceGenomeSelector.all)
         selector.referenceGenome == referenceGenome
+        selector.seqType == seqType
+        selector.species == species as Set
+        selector.workflow == workflow
     }
 
-    void "test createOrUpdate, if a matching selector exists"() {
+    void "createOrUpdate, should update reference genome when a matching selector exists"() {
         given:
         ReferenceGenomeSelector existing = createReferenceGenomeSelector()
-        ReferenceGenome referenceGenome = createReferenceGenome()
+        ReferenceGenome referenceGenome = createReferenceGenome([species: [], speciesWithStrain: existing.species])
 
         when:
-        service.createOrUpdate(existing.project, existing.seqType, existing.species, existing.workflow, referenceGenome)
+        service.createOrUpdate(existing.project, existing.seqType, existing.species as List, existing.workflow, referenceGenome)
 
         then:
-        ReferenceGenomeSelector selector = exactlyOneElement(
-                ReferenceGenomeSelector.findAllByProjectAndSeqTypeAndWorkflow(existing.project, existing.seqType, existing.workflow)
-                        .findAll { it.species == existing.species })
+        ReferenceGenomeSelector selector = exactlyOneElement(ReferenceGenomeSelector.all)
         selector == existing
         selector.referenceGenome == referenceGenome
+        selector.project == existing.project
+        selector.seqType == existing.seqType
+        selector.species == existing.species
+        selector.workflow == existing.workflow
     }
 
     void "test getMappingOfSpeciesCombinationsToReferenceGenomes"() {

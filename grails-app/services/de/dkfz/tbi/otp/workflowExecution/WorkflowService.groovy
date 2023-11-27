@@ -24,11 +24,12 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
-import de.dkfz.tbi.otp.dataprocessing.MergingCriteriaService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.exceptions.FileAccessForArchivedProjectNotAllowedException
+import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
+import de.dkfz.tbi.otp.workflow.fastqc.WesFastQcWorkflow
 
 @CompileDynamic
 @Transactional
@@ -36,16 +37,19 @@ class WorkflowService {
 
     JobService jobService
 
-    MergingCriteriaService mergingCriteriaService
-
     OtpWorkflowService otpWorkflowService
+
+    private static final Set<String> FASTQC_WORKFLOWS = [
+            BashFastQcWorkflow.WORKFLOW,
+            WesFastQcWorkflow.WORKFLOW,
+    ].toSet().asImmutable()
 
     Workflow getExactlyOneWorkflow(String name) {
         return CollectionUtils.exactlyOneElement(Workflow.findAllByNameAndDeprecatedDateIsNull(name))
     }
 
     Set<SeqType> getSupportedSeqTypes(String name) {
-        return CollectionUtils.exactlyOneElement(Workflow.findAllByName(name)).supportedSeqTypes
+        return getSupportedSeqTypesOfVersions(Workflow.findAllByName(name))
     }
 
     void createRestartedWorkflows(List<WorkflowStep> steps, boolean startDirectly = true) {
@@ -136,6 +140,53 @@ class WorkflowService {
         }
     }
 
+    List<SeqType> getSupportedSeqTypesOfVersions(List<Workflow> workflows) {
+        if (!workflows) {
+            return []
+        }
+        return (WorkflowVersion.createCriteria().list {
+            "in"("workflow", workflows)
+        } as List<WorkflowVersion>).collectMany { workflowVersion ->
+            workflowVersion.supportedSeqTypes
+        }.unique()
+    }
+
+    List<SeqType> getSupportedSeqTypesOfVersions(Workflow workflow) {
+        if (!workflow) {
+            return []
+        }
+
+        return (WorkflowVersion.createCriteria().list {
+            "eq"("workflow", workflow)
+        } as List<WorkflowVersion>).collectMany { workflowVersion ->
+            workflowVersion.supportedSeqTypes
+        }.unique()
+    }
+
+    List<Workflow> findAllFastqcWorkflows() {
+        return Workflow.createCriteria().list {
+            isNull("deprecatedDate")
+            "in"("name", FASTQC_WORKFLOWS)
+            order("beanName", "asc")
+        } as List<Workflow>
+    }
+
+    List<Workflow> findAllAlignmentWorkflows() {
+        List<String> alignmentWorkflowNameList = alignmentWorkflowNames
+        return alignmentWorkflowNameList ? Workflow.findAllByBeanNameInListAndDeprecatedDateIsNull(alignmentWorkflowNameList).sort { it.name } : []
+    }
+
+    private List<String> getAlignmentWorkflowNames() {
+        Map<String, OtpWorkflow> workflowBeans = applicationContext.getBeansOfType(OtpWorkflow)
+        return workflowBeans.findAll { it.value.isAlignment() }*.key
+    }
+
+    List<Workflow> findAllAnalysisWorkflows() {
+        Map<String, OtpWorkflow> workflowBeans = applicationContext.getBeansOfType(OtpWorkflow)
+        List<String> analysisWorkflowNames = workflowBeans.findAll { it.value.isAnalysis() }*.key
+        return analysisWorkflowNames ? Workflow.findAllByBeanNameInListAndDeprecatedDateIsNull(analysisWorkflowNames).sort { it.name } : []
+    }
+
     void enableWorkflow(Workflow workflow) {
         assert workflow
         workflow.enabled = true
@@ -164,24 +215,18 @@ class WorkflowService {
         workflow.defaultVersion = updateWorkflowDto.defaultVersion
 
         if (updateWorkflowDto.supportedSeqTypes) {
-            workflow.supportedSeqTypes = SeqType.getAll(updateWorkflowDto.supportedSeqTypes)
+            workflow.defaultSeqTypesForWorkflowVersions = SeqType.getAll(updateWorkflowDto.supportedSeqTypes)
         } else {
-            workflow.supportedSeqTypes = null
+            workflow.defaultSeqTypesForWorkflowVersions = null
         }
 
         if (updateWorkflowDto.allowedRefGenomes) {
-            workflow.allowedReferenceGenomes = ReferenceGenome.getAll(updateWorkflowDto.allowedRefGenomes)
+            workflow.defaultReferenceGenomesForWorkflowVersions = ReferenceGenome.getAll(updateWorkflowDto.allowedRefGenomes)
         } else {
-            workflow.allowedReferenceGenomes = null
+            workflow.defaultReferenceGenomesForWorkflowVersions = null
         }
 
-        workflow.save(flush: true)
-
-        workflow.supportedSeqTypes.each {
-            mergingCriteriaService.createDefaultMergingCriteria(it)
-        }
-
-        return workflow
+        return workflow.save(flush: true)
     }
 
     /**

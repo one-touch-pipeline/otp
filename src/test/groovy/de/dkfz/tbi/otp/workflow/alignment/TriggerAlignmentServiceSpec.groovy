@@ -77,7 +77,7 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTe
         Individual individual = createIndividual(project: project)
 
         Workflow wf = createWorkflow([
-                supportedSeqTypes: [st1, st2]
+                defaultSeqTypesForWorkflowVersions: [st1, st2]
         ])
         WorkflowRun run = createWorkflowRun([
                 workflow: wf,

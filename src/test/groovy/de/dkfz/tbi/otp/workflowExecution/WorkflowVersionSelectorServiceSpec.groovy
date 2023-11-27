@@ -45,6 +45,7 @@ class WorkflowVersionSelectorServiceSpec extends Specification implements Servic
                 Workflow,
                 WorkflowVersion,
                 WorkflowVersionSelector,
+                ReferenceGenomeSelector,
         ]
     }
 
@@ -116,5 +117,36 @@ class WorkflowVersionSelectorServiceSpec extends Specification implements Servic
         'Project_B' | 'SeqType_A' | false             || false
         'Project_B' | 'SeqType_B' | true              || false
         'Project_B' | 'SeqType_B' | false             || false
+    }
+
+    void "deprecateSelectorIfUnused, should deprecate workflow version selector, if not used by a reference genome selector"() {
+        given:
+        createReferenceGenomeSelector()
+        WorkflowVersionSelector workflowVersionSelector = createWorkflowVersionSelector()
+
+        when:
+        service.deprecateSelectorIfUnused(workflowVersionSelector)
+
+        then:
+        WorkflowVersionSelector.count == 1
+        workflowVersionSelector.deprecationDate != null
+    }
+
+    void "deprecateSelectorIfUnused, should not deprecate workflow version selector, if  used by a reference genome selector"() {
+        given:
+        WorkflowVersion workflowVersion = createWorkflowVersion()
+        ReferenceGenomeSelector rgSelector = createReferenceGenomeSelector([workflow: workflowVersion.workflow])
+        WorkflowVersionSelector wvSelector = createWorkflowVersionSelector([
+                project        : rgSelector.project,
+                seqType        : rgSelector.seqType,
+                workflowVersion: workflowVersion,
+        ])
+
+        when:
+        service.deprecateSelectorIfUnused(wvSelector)
+
+        then:
+        WorkflowVersionSelector.all == [wvSelector]
+        wvSelector.deprecationDate == null
     }
 }

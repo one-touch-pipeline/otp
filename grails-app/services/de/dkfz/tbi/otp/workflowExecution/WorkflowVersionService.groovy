@@ -24,6 +24,10 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.dataprocessing.MergingCriteriaService
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+import de.dkfz.tbi.otp.ngsdata.SeqType
+
 import java.time.LocalDate
 
 @CompileDynamic
@@ -31,6 +35,7 @@ import java.time.LocalDate
 class WorkflowVersionService {
 
     CommentService commentService
+    MergingCriteriaService mergingCriteriaService
 
     List<WorkflowVersion> list() {
         return WorkflowVersion.list()
@@ -38,6 +43,15 @@ class WorkflowVersionService {
 
     List<WorkflowVersion> findAllByWorkflow(Workflow workflow) {
         return WorkflowVersion.findAllByWorkflow(workflow)
+    }
+
+    List<WorkflowVersion> findAllByWorkflows(List<Workflow> workflows) {
+        if (!workflows) {
+            return []
+        }
+        return WorkflowVersion.createCriteria().list {
+            'in'("workflow", workflows)
+        } as List<WorkflowVersion>
     }
 
     List<WorkflowVersion> findAllByWorkflowId(Long workflowId) {
@@ -48,10 +62,34 @@ class WorkflowVersionService {
         } as List<WorkflowVersion>
     }
 
-    WorkflowVersion updateWorkflowVersion(Long workflowVersionId, String comment, boolean deprecate) {
-        WorkflowVersion workflowVersion = WorkflowVersion.get(workflowVersionId)
-        commentService.saveComment(workflowVersion, comment)
-        workflowVersion.deprecatedDate = deprecate ? LocalDate.now() : null
+    List<WorkflowVersion> findAllByWorkflowSeqTypeAndReferenceGenome(Workflow workflow, SeqType seqType, ReferenceGenome referenceGenome) {
+        return WorkflowVersion.createCriteria().list {
+            if (workflow) {
+                eq("workflow", workflow)
+            }
+            if (seqType) {
+                supportedSeqTypes {
+                    eq('id', seqType.id)
+                }
+            }
+            if (referenceGenome) {
+                allowedReferenceGenomes {
+                    eq('id', referenceGenome.id)
+                }
+            }
+        } as List<WorkflowVersion>
+    }
+
+    WorkflowVersion updateWorkflowVersion(UpdateWorkflowVersionDto updateDto) {
+        WorkflowVersion workflowVersion = WorkflowVersion.get(updateDto.workflowVersionId)
+        commentService.saveComment(workflowVersion, updateDto.comment)
+        workflowVersion.allowedReferenceGenomes = updateDto.allowedRefGenomes.collect { id -> ReferenceGenome.get(id) }
+        workflowVersion.supportedSeqTypes = updateDto.supportedSeqTypes.collect { id -> SeqType.get(id) }
+        workflowVersion.deprecatedDate = updateDto.deprecate ? (workflowVersion.deprecatedDate ?: LocalDate.now()) : null
+        workflowVersion.supportedSeqTypes.each {
+            mergingCriteriaService.createDefaultMergingCriteria(it)
+        }
+
         return workflowVersion.save(flush: true)
     }
 }

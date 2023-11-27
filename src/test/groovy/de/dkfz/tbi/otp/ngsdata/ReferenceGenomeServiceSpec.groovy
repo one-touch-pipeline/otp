@@ -26,25 +26,28 @@ import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 import spock.lang.TempDir
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
+import de.dkfz.tbi.otp.ngsdata.taxonomy.Species
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 import java.nio.file.Path
 
-class ReferenceGenomeServiceSpec extends Specification implements DataTest, ServiceUnitTest<ReferenceGenomeService> {
+class ReferenceGenomeServiceSpec extends Specification implements DataTest, ServiceUnitTest<ReferenceGenomeService>, TaxonomyFactory {
 
     ReferenceGenome referenceGenome
     ReferenceGenomeEntry referenceGenomeEntry
     Project project
-    ReferenceGenomeService referenceGenomeService
 
     File directory
     File file
@@ -65,24 +68,23 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
     }
 
     void setupTest() {
-        referenceGenomeService = new ReferenceGenomeService()
-        referenceGenomeService.configService = new TestConfigService()
-        referenceGenomeService.processingOptionService = new ProcessingOptionService()
-        referenceGenomeService.fileSystemService = new TestFileSystemService()
-        referenceGenomeService.fileService = new FileService([
-                configService: referenceGenomeService.configService,
+        service.configService = new TestConfigService()
+        service.processingOptionService = new ProcessingOptionService()
+        service.fileSystemService = new TestFileSystemService()
+        service.fileService = new FileService([
+                configService: service.configService,
         ])
-        referenceGenomeService.configService.processingOptionService = referenceGenomeService.processingOptionService
+        service.configService.processingOptionService = service.processingOptionService
 
         directory = tempDir.resolve("reference_genomes/referenceGenome").toFile()
         DomainFactory.createProcessingOptionBasePathReferenceGenome(directory.parent)
 
         file = CreateFileHelper.createFile(directory.toPath().resolve("prefixName.fa"), "test").toFile()
 
-        project = DomainFactory.createProject()
+        project = createProject()
         project.save(flush: true)
 
-        referenceGenome = DomainFactory.createReferenceGenome(
+        referenceGenome = createReferenceGenome(
                 name: "hg19_1_24",
                 path: "referenceGenome",
                 fileNamePrefix: "prefixName",
@@ -113,7 +115,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         File pathExp = directory
 
         when:
-        File pathAct = referenceGenomeService.referenceGenomeDirectory(referenceGenome) as File
+        File pathAct = service.referenceGenomeDirectory(referenceGenome) as File
 
         then:
         pathExp == pathAct
@@ -125,7 +127,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         referenceGenome = null
 
         when:
-        referenceGenomeService.referenceGenomeDirectory(referenceGenome)
+        service.referenceGenomeDirectory(referenceGenome)
 
         then:
         thrown IllegalArgumentException
@@ -137,7 +139,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         directory.deleteDir()
 
         when:
-        referenceGenomeService.referenceGenomeDirectory(referenceGenome)
+        service.referenceGenomeDirectory(referenceGenome)
 
         then:
         directory.exists() == false
@@ -151,7 +153,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         File pathExp = directory
 
         when:
-        File pathAct = referenceGenomeService.referenceGenomeDirectory(referenceGenome, false)
+        File pathAct = service.referenceGenomeDirectory(referenceGenome, false)
 
         then:
         deletion == true
@@ -164,7 +166,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         File pathExp = directory
 
         when:
-        File pathAct = referenceGenomeService.referenceGenomeDirectory(referenceGenome)
+        File pathAct = service.referenceGenomeDirectory(referenceGenome)
 
         then:
         pathExp == pathAct
@@ -176,7 +178,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         File wrongPath = new File("test")
 
         when:
-        File pathAct = referenceGenomeService.referenceGenomeDirectory(referenceGenome)
+        File pathAct = service.referenceGenomeDirectory(referenceGenome)
 
         then:
         wrongPath != pathAct
@@ -188,7 +190,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         referenceGenome = null
 
         when:
-        referenceGenomeService.referenceGenomeDirectory(referenceGenome)
+        service.referenceGenomeDirectory(referenceGenome)
 
         then:
         thrown IllegalArgumentException
@@ -200,7 +202,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         boolean deletion = directory.deleteDir()
 
         when:
-        referenceGenomeService.referenceGenomeDirectory(referenceGenome)
+        service.referenceGenomeDirectory(referenceGenome)
 
         then:
         deletion == true
@@ -215,7 +217,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         File pathExp = directory
 
         when:
-        File pathAct = referenceGenomeService.referenceGenomeDirectory(referenceGenome, false)
+        File pathAct = service.referenceGenomeDirectory(referenceGenome, false)
 
         then:
         deletion == true
@@ -228,7 +230,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         File pathExp = new File(directory, "prefixName.fa")
 
         when:
-        File pathAct = referenceGenomeService.fastaFilePath(referenceGenome)
+        File pathAct = service.fastaFilePath(referenceGenome)
 
         then:
         pathExp == pathAct
@@ -240,7 +242,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         File pathExp = new File(directory, "fingerPrinting/fingerPrinting.bed")
 
         when:
-        File pathAct = referenceGenomeService.fingerPrintingFile(referenceGenome, false)
+        File pathAct = service.fingerPrintingFile(referenceGenome, false)
 
         then:
         pathExp == pathAct
@@ -252,7 +254,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         referenceGenome = null
 
         when:
-        referenceGenomeService.fingerPrintingFile(referenceGenome, false)
+        service.fingerPrintingFile(referenceGenome, false)
 
         then:
         thrown IllegalArgumentException
@@ -264,7 +266,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         List<ReferenceGenomeEntry> referenceGenomeEntriesExp = [referenceGenomeEntry]
 
         when:
-        List<ReferenceGenomeEntry> referenceGenomeEntriesAct = referenceGenomeService.chromosomesInReferenceGenome(referenceGenome)
+        List<ReferenceGenomeEntry> referenceGenomeEntriesAct = service.chromosomesInReferenceGenome(referenceGenome)
 
         then:
         referenceGenomeEntriesExp == referenceGenomeEntriesAct
@@ -275,7 +277,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         setupTest()
 
         when:
-        referenceGenomeService.pathToChromosomeSizeFilesPerReference(null)
+        service.pathToChromosomeSizeFilesPerReference(null)
 
         then:
         Exception e = thrown IllegalArgumentException
@@ -287,7 +289,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         setupTest()
 
         when:
-        referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenome, true)
+        service.pathToChromosomeSizeFilesPerReference(referenceGenome, true)
 
         then:
         Exception e = thrown RuntimeException
@@ -300,7 +302,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         File pathExp = new File(directory, ReferenceGenomeService.CHROMOSOME_SIZE_FILES_PREFIX)
 
         when:
-        File pathAct = referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenome, false)
+        File pathAct = service.pathToChromosomeSizeFilesPerReference(referenceGenome, false)
 
         then:
         pathExp == pathAct
@@ -313,7 +315,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         CreateFileHelper.createFile(pathExp)
 
         when:
-        File pathAct = referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenome, true)
+        File pathAct = service.pathToChromosomeSizeFilesPerReference(referenceGenome, true)
 
         then:
         pathExp == pathAct
@@ -328,7 +330,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         CreateFileHelper.createFile(pathExp)
 
         then:
-        pathExp == referenceGenomeService.cytosinePositionIndexFilePath(referenceGenome)
+        pathExp == service.cytosinePositionIndexFilePath(referenceGenome)
     }
 
     void test_cytosinePositionIndexFilePath_fileDoesntExist_shouldFail() {
@@ -336,10 +338,127 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         setupTest()
 
         when:
-        referenceGenomeService.cytosinePositionIndexFilePath(referenceGenome)
+        service.cytosinePositionIndexFilePath(referenceGenome)
 
         then:
         Exception e = thrown RuntimeException
         e.message.contains(referenceGenome.cytosinePositionsIndex)
+    }
+
+    void "getAllSpeciesWithStrains, should return all the reference genomes species with strains including the ones from species"() {
+        given:
+        Species species = createSpecies()
+        SpeciesWithStrain speciesWithStrain1 = createSpeciesWithStrain([species: species])
+        SpeciesWithStrain speciesWithStrain2 = createSpeciesWithStrain([species: species])
+        SpeciesWithStrain speciesWithStrain3 = createSpeciesWithStrain([species: species])
+        SpeciesWithStrain speciesWithStrain4 = createSpeciesWithStrain()
+        SpeciesWithStrain speciesWithStrain5 = createSpeciesWithStrain()
+        referenceGenome = createReferenceGenome([
+                species          : [species],
+                speciesWithStrain: [speciesWithStrain4, speciesWithStrain5],
+        ])
+        createSpeciesWithStrain()
+
+        expect:
+        TestCase.assertContainSame(
+                service.getAllSpeciesWithStrains([referenceGenome] as Set),
+                [speciesWithStrain1, speciesWithStrain2, speciesWithStrain3, speciesWithStrain4, speciesWithStrain5]
+        )
+    }
+
+    void "getAllSpeciesWithStrains, should return empty list for null or empty reference genomes list"() {
+        given:
+        Species species = createSpecies()
+        createSpeciesWithStrain([species: species])
+        createSpeciesWithStrain()
+
+        expect:
+        service.getAllSpeciesWithStrains(null) == [] as Set
+        service.getAllSpeciesWithStrains([] as Set) == [] as Set
+    }
+
+    void "getSpeciesWithStrainCombinations, should return the ordered possible speciesWithStrain for a reference Genome including species"() {
+        given:
+        Species species = createSpecies()
+        SpeciesWithStrain speciesWithStrain1 = createSpeciesWithStrain([species: species])
+        SpeciesWithStrain speciesWithStrain2 = createSpeciesWithStrain([species: species])
+        SpeciesWithStrain speciesWithStrain3 = createSpeciesWithStrain([species: species])
+        SpeciesWithStrain speciesWithStrain4 = createSpeciesWithStrain()
+        SpeciesWithStrain speciesWithStrain5 = createSpeciesWithStrain()
+        referenceGenome = createReferenceGenome([
+                species          : [species],
+                speciesWithStrain: [speciesWithStrain4, speciesWithStrain5],
+        ])
+        createSpeciesWithStrain()
+
+        expect:
+        TestCase.assertContainSame(
+                service.getSpeciesWithStrainCombinations(referenceGenome),
+                [[speciesWithStrain1, speciesWithStrain2, speciesWithStrain3], [speciesWithStrain4], [speciesWithStrain5]],
+        )
+    }
+
+    void "getSpeciesWithStrainCombinations, should return the ordered possible speciesWithStrain for a reference Genome even when no species is defined"() {
+        given:
+        Species species = createSpecies()
+        createSpeciesWithStrain([species: species])
+        SpeciesWithStrain speciesWithStrain2 = createSpeciesWithStrain()
+        SpeciesWithStrain speciesWithStrain3 = createSpeciesWithStrain()
+        referenceGenome = createReferenceGenome([
+                species          : [],
+                speciesWithStrain: [speciesWithStrain2, speciesWithStrain3],
+        ])
+        createSpeciesWithStrain()
+
+        expect:
+        TestCase.assertContainSame(
+                service.getSpeciesWithStrainCombinations(referenceGenome),
+                [[speciesWithStrain2], [speciesWithStrain3]],
+        )
+    }
+
+    void "getSpeciesWithStrainCombinations, should return the ordered possible speciesWithStrain for a reference Genome, when only species are defined"() {
+        given:
+        Species species1 = createSpecies()
+        Species species2 = createSpecies()
+        SpeciesWithStrain speciesWithStrain1 = createSpeciesWithStrain([species: species1])
+        SpeciesWithStrain speciesWithStrain2 = createSpeciesWithStrain([species: species1])
+        SpeciesWithStrain speciesWithStrain3 = createSpeciesWithStrain([species: species2])
+        createSpeciesWithStrain()
+        referenceGenome = createReferenceGenome([
+                species          : [species1, species2],
+                speciesWithStrain: [],
+        ])
+        createSpeciesWithStrain()
+
+        expect:
+        TestCase.assertContainSame(
+                service.getSpeciesWithStrainCombinations(referenceGenome),
+                [[speciesWithStrain1, speciesWithStrain2], [speciesWithStrain3]],
+        )
+    }
+
+    void "getRemainingSpeciesWithStrainOptions, should only return the species with strain that are remaining for a ref genome"() {
+        given:
+        Species species1 = createSpecies()
+        Species species2 = createSpecies()
+        SpeciesWithStrain speciesWithStrain1 = createSpeciesWithStrain([species: species1])
+        createSpeciesWithStrain([species: species1])
+        createSpeciesWithStrain([species: species1])
+        SpeciesWithStrain speciesWithStrain2 = createSpeciesWithStrain([species: species2])
+        SpeciesWithStrain speciesWithStrain3 = createSpeciesWithStrain([species: species2])
+        SpeciesWithStrain speciesWithStrain4 = createSpeciesWithStrain()
+        SpeciesWithStrain speciesWithStrain5 = createSpeciesWithStrain()
+        referenceGenome = createReferenceGenome([
+                species          : [species1, species2],
+                speciesWithStrain: [speciesWithStrain4, speciesWithStrain5],
+        ])
+        createSpeciesWithStrain()
+
+        expect:
+        TestCase.assertContainSame(
+                service.getSpeciesWithStrainOptions(referenceGenome, [speciesWithStrain1, speciesWithStrain4]),
+                [speciesWithStrain1, speciesWithStrain2, speciesWithStrain3, speciesWithStrain4, speciesWithStrain5],
+        )
     }
 }

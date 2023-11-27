@@ -81,7 +81,14 @@ class WorkflowSystemConfigController implements CheckAndCall {
 
     def updateWorkflowVersion(WorkflowVersionUpdateCommand cmd) {
         checkDefaultErrorsAndCallMethod(cmd) {
-            WorkflowVersion workflowVersion = workflowVersionService.updateWorkflowVersion(cmd.workflowVersionId, cmd.comment, cmd.deprecate)
+            UpdateWorkflowVersionDto updateWorkflowVersionDto = new UpdateWorkflowVersionDto(
+                    cmd.workflowVersionId,
+                    cmd.comment,
+                    cmd.deprecate,
+                    cmd.allowedRefGenomes,
+                    cmd.supportedSeqTypes,
+            )
+            WorkflowVersion workflowVersion = workflowVersionService.updateWorkflowVersion(updateWorkflowVersionDto)
             render(buildWorkflowVersionOutputObject(workflowVersion) as JSON)
         }
     }
@@ -106,16 +113,36 @@ class WorkflowSystemConfigController implements CheckAndCall {
 
     private Map buildWorkflowVersionOutputObject(WorkflowVersion wv) {
         return [
-                workflowId   : wv.workflow.id,
-                id           : wv.id,
-                name         : wv.workflowVersion,
-                comment      : wv.comment?.comment ?: '',
-                commentData  : [
+                workflowId       : wv.workflow.id,
+                id               : wv.id,
+                name             : wv.workflowVersion,
+                comment          : wv.comment?.comment ?: '',
+                allowedRefGenomes: buildReferenceGenomesOutputObject(wv.allowedReferenceGenomes),
+                supportedSeqTypes: buildSeqTypesOutputObject(wv.supportedSeqTypes),
+                commentData      : [
                         author: wv.comment?.author ?: '',
                         date  : TimeFormats.DATE.getFormattedDate(wv.comment?.modificationDate),
                 ],
-                deprecateDate: TimeFormats.DATE.getFormattedLocalDate(wv.deprecatedDate),
+                deprecateDate    : TimeFormats.DATE.getFormattedLocalDate(wv.deprecatedDate),
         ]
+    }
+
+    private List<Map> buildReferenceGenomesOutputObject(Set<ReferenceGenome> rgList) {
+        return rgList.collect { ReferenceGenome rg ->
+            [
+                    id  : rg.id,
+                    name: rg.name,
+            ]
+        }.sort { it.name } as List<Map>
+    }
+
+    private List<Map> buildSeqTypesOutputObject(Set<SeqType> seqTypeList) {
+        return seqTypeList.collect { SeqType st ->
+            [
+                    id           : st.id,
+                    displayName  : st.displayNameWithLibraryLayout,
+            ]
+        }.sort { it.displayName } as List<Map>
     }
 
     /**
@@ -124,24 +151,9 @@ class WorkflowSystemConfigController implements CheckAndCall {
      * @return map of workflow data
      */
     private Map buildWorkflowOutputObject(Workflow wf) {
-        List<WorkflowVersion> versions = workflowVersionService.findAllByWorkflow(wf)
-                .sort()
-
-        List<Map> supportedSeqTypes = wf.supportedSeqTypes.collect { SeqType st ->
-            [
-                    id           : st.id,
-                    displayName  : st.displayName,
-                    libraryLayout: st.libraryLayout,
-                    singleCell   : st.singleCell,
-            ]
-        }
-
-        List<Map> allowedRefGenomes = wf.allowedReferenceGenomes.collect { ReferenceGenome rg ->
-            [
-                    id  : rg.id,
-                    name: rg.name,
-            ]
-        }
+        List<WorkflowVersion> versions = workflowVersionService.findAllByWorkflow(wf).sort()
+        List<Map> supportedSeqTypes = buildSeqTypesOutputObject(wf.defaultSeqTypesForWorkflowVersions)
+        List<Map> allowedRefGenomes = buildReferenceGenomesOutputObject(wf.defaultReferenceGenomesForWorkflowVersions)
 
         return [
                 id                  : wf.id,
@@ -150,7 +162,7 @@ class WorkflowSystemConfigController implements CheckAndCall {
                 enabled             : wf.enabled,
                 maxParallelWorkflows: wf.maxParallelWorkflows,
                 defaultVersion      : wf.defaultVersion,
-                versions            : versions,
+                versions            : versions.collect { buildWorkflowVersionOutputObject(it) },
                 supportedSeqTypes   : supportedSeqTypes,
                 allowedRefGenomes   : allowedRefGenomes,
                 deprecationDate     : TimeFormats.DATE.getFormattedLocalDate(wf.deprecatedDate),
@@ -164,8 +176,5 @@ class WorkflowUpdateCommand extends UpdateWorkflowDto implements Validateable {
     }
 }
 
-class WorkflowVersionUpdateCommand implements Validateable {
-    Long workflowVersionId
-    String comment
-    boolean deprecate
+class WorkflowVersionUpdateCommand extends UpdateWorkflowVersionDto implements Validateable {
 }

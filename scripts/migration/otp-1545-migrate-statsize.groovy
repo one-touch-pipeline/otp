@@ -84,7 +84,7 @@ ReferenceGenome.withTransaction {
         if (rgpst.statSizeFileName == defaultFileName[rgpst.referenceGenome]) {
             return // don't create config if default is used
         } else {
-            Workflow workflow = workflows.find { rgpst.seqType in it.supportedSeqTypes }
+            Workflow workflow = workflows.find { rgpst.seqType in it.defaultSeqTypesForWorkflowVersions }
             if (!workflow) {
                 return
             }
@@ -133,7 +133,7 @@ ReferenceGenome.withTransaction {
         if (rgpst.statSizeFileName == defaultFileName[rgpst.referenceGenome]) {
             return // don't create config if default is used
         } else {
-            Workflow workflow = workflows.find { rgpst.seqType in it.supportedSeqTypes }
+            Workflow workflow = workflows.find { rgpst.seqType in it.defaultSeqTypesForWorkflowVersions }
             if (!workflow) {
                 return
             }

@@ -38,6 +38,8 @@ List<SeqType> seqTypes = [
         SeqTypeService.wholeGenomeBisulfitePairedSeqType,
         SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
 ]
+/** Run this script w/o modification of database if set to true */
+Boolean dryRun = true
 
 // script
 MergingCriteriaService mergingCriteriaService = ctx.mergingCriteriaService
@@ -115,11 +117,11 @@ WorkflowVersionSelector.withTransaction {
         allUsedReferenceGenomes.add(rgpst.referenceGenome)
     }
 
-    workflow.supportedSeqTypes = seqTypes
-    workflow.allowedReferenceGenomes = allUsedReferenceGenomes as Set
+    workflow.defaultSeqTypesForWorkflowVersions = seqTypes
+    workflow.defaultReferenceGenomesForWorkflowVersions = allUsedReferenceGenomes as Set
     workflow.save(flush: true)
 
-    assert false
+    assert !dryRun: "This is a dry run, w/o modification of database."
 }
 seqTypes.each {
     mergingCriteriaService.createDefaultMergingCriteria(it)

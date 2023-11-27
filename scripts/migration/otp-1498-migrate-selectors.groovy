@@ -38,8 +38,12 @@ List<SeqType> seqTypes = [
         SeqTypeService.rnaSingleSeqType,
 ]
 
+/** Variable to enable or disable a dry run, that will cause no changes except creating default mering criteria **/
+Boolean dryRun = true
+
 // script
 MergingCriteriaService mergingCriteriaService = ctx.mergingCriteriaService
+WorkflowVersionService workflowVersionService = ctx.workflowVersionService
 
 Pipeline pipeline = exactlyOneElement(Pipeline.findAllByName(oldPipelineName))
 Workflow workflow = exactlyOneElement(Workflow.findAllByName(newWorkflowName))
@@ -112,11 +116,17 @@ WorkflowVersionSelector.withTransaction {
         allUsedReferenceGenomes.add(rgpst.referenceGenome)
     }
 
-    workflow.supportedSeqTypes = seqTypes
-    workflow.allowedReferenceGenomes = allUsedReferenceGenomes as Set
+    workflow.defaultSeqTypesForWorkflowVersions = seqTypes as Set
+    workflow.defaultReferenceGenomesForWorkflowVersions = allUsedReferenceGenomes as Set
     workflow.save(flush: true)
 
-    assert false
+    workflowVersionService.findAllByWorkflow(workflow).collect { wv ->
+        wv.supportedSeqTypes = seqTypes as Set
+        wv.allowedReferenceGenomes = allUsedReferenceGenomes as Set
+        wv.save(flush: true)
+    }
+
+    assert !dryRun: "This is a dry run."
 }
 seqTypes.each {
     mergingCriteriaService.createDefaultMergingCriteria(it)
