@@ -197,7 +197,7 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
         AlignmentArtefactDataList allArtefacts = new AlignmentArtefactDataList(
                 givenArtefacts.seqTrackData + additionalArtefacts.seqTrackData,
                 givenArtefacts.fastqcProcessedFileData + additionalArtefacts.fastqcProcessedFileData,
-                additionalArtefacts.bamData,
+                givenArtefacts.bamData + additionalArtefacts.bamData,
         )
 
         RoddyBamFile existingBamFile = allArtefacts.bamData.find()?.artefact
@@ -348,11 +348,11 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
 
         int identifier = RoddyBamFile.nextIdentifier(workPackage)
         RoddyBamFile bamFile = createBamFileWithoutFlush([
-                workflowArtefact: workflowOutputArtefact,
-                workPackage: workPackage,
-                identifier: identifier,
-                workDirectoryName: "${RoddyBamFileService.WORK_DIR_PREFIX}_${identifier}",
-                seqTracks: seqTrackSet,
+                workflowArtefact   : workflowOutputArtefact,
+                workPackage        : workPackage,
+                identifier         : identifier,
+                workDirectoryName  : "${RoddyBamFileService.WORK_DIR_PREFIX}_${identifier}",
+                seqTracks          : seqTrackSet,
                 numberOfMergedLanes: seqTrackSet.size(),
         ])
 
