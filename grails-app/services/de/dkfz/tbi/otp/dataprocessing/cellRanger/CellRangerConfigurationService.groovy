@@ -179,7 +179,7 @@ class CellRangerConfigurationService {
         assert map.size() <= 1: "Can not handle SeqTracks processed over multiple platforms or with different library preparation kits"
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#samples[0].project, 'OTP_READ_ACCESS')")
     void prepareCellRangerExecution(List<Sample> samples, Integer expectedCells, Integer enforcedCells, ReferenceGenomeIndex referenceGenomeIndex) {
         CellRangerMwpParameter parameter = new CellRangerMwpParameter(expectedCells, enforcedCells, referenceGenomeIndex, seqType)
 

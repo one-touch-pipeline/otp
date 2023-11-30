@@ -236,7 +236,7 @@ class CreateMwpCommand extends BaseConfigurePipelineSubmitCommand {
     ReferenceGenomeIndex referenceGenomeIndex
 
     static constraints = {
-        samples nullable: false
+        samples nullable: false, minSize: 1
         expectedCellsValue nullable: true
         enforcedCellsValue nullable: true
         referenceGenomeIndex nullable: false

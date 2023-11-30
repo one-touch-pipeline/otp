@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.security
 
 import grails.compiler.GrailsCompileStatic
+import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.PermissionEvaluator
@@ -36,6 +37,7 @@ import de.dkfz.tbi.otp.project.projectRequest.ProjectRequestPersistentStateServi
 import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+@Transactional
 @Component
 @GrailsCompileStatic
 class ProjectPermissionEvaluator implements PermissionEvaluator {
