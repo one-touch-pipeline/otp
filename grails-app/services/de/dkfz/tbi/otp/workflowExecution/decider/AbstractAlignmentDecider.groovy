@@ -156,21 +156,24 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
             map[createAlignmentDeciderGroup(it, ignoreSeqPlatformGroup, additionalData)].fastqcProcessedFileData << it
         }
         inputArtefactDataList.bamData.each {
-            map[createAlignmentDeciderGroup(it, ignoreSeqPlatformGroup, additionalData)].bamData << it
+            map[createAlignmentDeciderGroup(it, ignoreSeqPlatformGroup, additionalData, true)].bamData << it
         }
         return map
     }
 
     protected AlignmentDeciderGroup createAlignmentDeciderGroup(AlignmentArtefactData<?> data,
                                                                 boolean ignoreSeqPlatformGroup,
-                                                                AlignmentAdditionalData additionalData) {
+                                                                AlignmentAdditionalData additionalData,
+                                                                boolean fromBam = false) {
         ProjectSeqTypeGroup projectSeqTypePair = new ProjectSeqTypeGroup(data.project, data.seqType)
         MergingCriteria mergingCriteria = additionalData.mergingCriteriaMap[projectSeqTypePair]
         assert mergingCriteria
 
         LibraryPreparationKit libraryPreparationKit = mergingCriteria.useLibPrepKit ? data.libraryPreparationKit : null
         SeqPlatformGroup seqPlatformGroup
-        if (ignoreSeqPlatformGroup || mergingCriteria.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING) {
+        if (fromBam) {
+            seqPlatformGroup = ignoreSeqPlatformGroup ? null : data.seqPlatformGroup
+        } else if (ignoreSeqPlatformGroup || mergingCriteria.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING) {
             seqPlatformGroup = null
         } else {
             Map<SeqPlatform, SeqPlatformGroup> seqPlatformGroupMap =
@@ -348,11 +351,11 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
 
         int identifier = RoddyBamFile.nextIdentifier(workPackage)
         RoddyBamFile bamFile = createBamFileWithoutFlush([
-                workflowArtefact   : workflowOutputArtefact,
-                workPackage        : workPackage,
-                identifier         : identifier,
-                workDirectoryName  : "${RoddyBamFileService.WORK_DIR_PREFIX}_${identifier}",
-                seqTracks          : seqTrackSet,
+                workflowArtefact: workflowOutputArtefact,
+                workPackage: workPackage,
+                identifier: identifier,
+                workDirectoryName: "${RoddyBamFileService.WORK_DIR_PREFIX}_${identifier}",
+                seqTracks: seqTrackSet,
                 numberOfMergedLanes: seqTrackSet.size(),
         ])
 

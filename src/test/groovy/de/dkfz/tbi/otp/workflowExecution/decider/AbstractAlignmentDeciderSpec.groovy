@@ -97,6 +97,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         then:
         dataList.seqTrackData == [seqTrackData]
         dataList.fastqcProcessedFileData == (useFastqcCount ? [fastqcProcessedFileData] : [])
+        dataList.bamData == []
     }
 
     void "fetchAdditionalArtefacts"() {
@@ -226,7 +227,8 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         and: 'input objects'
         AlignmentArtefactData<SeqTrack> seqTrackData = createAlignmentArtefactData(seqTrack)
         AlignmentArtefactData<FastqcProcessedFile> fastqcProcessedFileData = createAlignmentArtefactData()
-        AlignmentArtefactDataList dataList = new AlignmentArtefactDataList([seqTrackData], [fastqcProcessedFileData])
+        AlignmentArtefactData<RoddyBamFile> roddyBamFileData = createAlignmentArtefactData()
+        AlignmentArtefactDataList dataList = new AlignmentArtefactDataList([seqTrackData], [fastqcProcessedFileData], [roddyBamFileData])
 
         and: 'mocked services'
         decider.alignmentArtefactService = Mock(AlignmentArtefactService) {
@@ -713,7 +715,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         LibraryPreparationKit libraryPreparationKitExpected = useLibPrepKit ? seqTrack.libraryPreparationKit : null
 
         when:
-        AlignmentDeciderGroup group = decider.createAlignmentDeciderGroup(data, ignoreSeqPlatformGroup, additionalData)
+        AlignmentDeciderGroup group = decider.createAlignmentDeciderGroup(data, ignoreSeqPlatformGroup, additionalData, false)
 
         then:
         group.individual == seqTrack.individual
@@ -913,19 +915,20 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
 
     private Map<String, ?> createDefaultMapForCreateWorkflowRunsAndOutputArtefactsDomains() {
         return [
-                noSeqTrack                : false,
-                existingBamFile           : false,
-                missingFastqc             : false,
-                toManyFastqc              : false,
-                noSpecies                 : false,
-                noReferenceGenome         : false,
-                wrongLibPrepKit           : false,
-                wrongSeqPlatformGroup     : false,
-                wrongReferenceGenome      : false,
+                noSeqTrack                   : false,
+                existingBamFileOtherSeqTracks: false,
+                existingBamFileSameSeqTracks : false,
+                missingFastqc                : false,
+                toManyFastqc                 : false,
+                noSpecies                    : false,
+                noReferenceGenome            : false,
+                wrongLibPrepKit              : false,
+                wrongSeqPlatformGroup        : false,
+                wrongReferenceGenome         : false,
 
-                noSeqPlatformGroupMwp     : false,
-                noSeqPlatformGroupSeqTrack: false,
-                wrongMergingWorkPage      : false,
+                noSeqPlatformGroupMwp        : false,
+                noSeqPlatformGroupSeqTrack   : false,
+                wrongMergingWorkPage         : false,
         ]
     }
 
