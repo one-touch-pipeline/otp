@@ -47,6 +47,7 @@ class DataInstallationWorkflowSpec extends Specification implements DataTest, Do
         expect:
         dataInstallationWorkflow.jobBeanNames == [
                 "dataInstallationFragmentJob",
+                "otpClusterCheckFragmentKeysJob",
                 "dataInstallationConditionalFailJob",
                 "dataInstallationPrepareJob",
                 "copyOrLinkFastqsOfLaneJob",

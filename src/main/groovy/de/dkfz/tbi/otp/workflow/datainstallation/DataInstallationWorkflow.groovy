@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflow.datainstallation
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.workflow.jobs.OtpClusterCheckFragmentKeysJob
 import de.dkfz.tbi.otp.workflowExecution.*
 
 /**
@@ -40,6 +41,7 @@ class DataInstallationWorkflow implements OtpWorkflow {
     List<String> getJobBeanNames() {
         return [
                 DataInstallationFragmentJob.simpleName.uncapitalize(),
+                OtpClusterCheckFragmentKeysJob.simpleName.uncapitalize(),
                 DataInstallationConditionalFailJob.simpleName.uncapitalize(),
                 DataInstallationPrepareJob.simpleName.uncapitalize(),
                 CopyOrLinkFastqsOfLaneJob.simpleName.uncapitalize(),

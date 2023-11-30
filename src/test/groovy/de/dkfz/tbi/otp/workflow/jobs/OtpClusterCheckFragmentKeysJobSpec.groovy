@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,38 +21,59 @@
  */
 package de.dkfz.tbi.otp.workflow.jobs
 
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+abstract class OtpClusterCheckFragmentKeysJobSpec extends AbstractCheckFragmentKeysJobSpec {
 
-/**
- * Base interface for all jobs
- *
- * To implement a job, the existing specialized abstract classes should be extended
- */
-interface Job {
-    void execute(WorkflowStep workflowStep) throws Throwable
+    @Override
+    Set<String> getRequiredKeys() {
+        return [
+                "OTP_CLUSTER/MEMORY",
+                "OTP_CLUSTER/WALLTIME",
+        ] as Set
+    }
 
-    JobStage getJobStage()
+    @Override
+    Set<String> getMissingKeys() {
+        return [
+                "OTP_CLUSTER/WALLTIME",
+        ] as Set
+    }
+
+    @Override
+    protected OtpClusterCheckFragmentKeysJob createJob() {
+        return new OtpClusterCheckFragmentKeysJob()
+    }
+
+    @SuppressWarnings("GetterMethodCouldBeProperty")
+    @Override
+    protected String getCombinedConfig() {
+        return """
+{
+  "OTP_CLUSTER": {
+    "MEMORY": {
+        "value": "20"
+    },
+    "WALLTIME": {
+        "value": "100"
+    }
+  }
 }
+"""
+    }
 
-/**
- * Name of the different steps
- */
-enum JobStage {
-    CONDITIONAL_SKIP,
-    FETCH_FRAGMENTS,
-    CHECK_FRAGMENT_KEYS,
-    CREATE_NOTIFICATION_TEXT,
-    CONDITIONAL_FAIL,
-    ATTACH_UUID,
-    PREPARE,
-    EXECUTE_PIPELINE,
-    VALIDATION,
-    OUTPUT_UNIFICATION,
-    PARSE,
-    CHECK_QC,
-    CLEANUP,
-    LINK,
-    CORRECT_PERMISSION,
-    CALCULATE_SIZE,
-    FINISH,
+    @SuppressWarnings("GetterMethodCouldBeProperty")
+    @Override
+    protected String getCombinedConfigMissingKeys() {
+        return """
+{
+  "OTP_CLUSTER": {
+    "MEMORY": {
+        "value": "20"
+    },
+    "DUMMY": {
+        "value": "dummy"
+    }
+  }
+}
+"""
+    }
 }

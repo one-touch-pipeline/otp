@@ -40,6 +40,7 @@ class WgbsWorkflow extends PanCancerWorkflow {
     List<String> getJobBeanNames() {
         return [
                 RoddyAlignmentFragmentJob.simpleName.uncapitalize(),
+//                RoddyAlignmentCheckFragmentKeysJob.simpleName.uncapitalize(),
                 // will be uncommented after default fragments have been adapted
                 // Keep the order, since it is important
 //                RoddyAlignmentCreateNotificationJob.simpleName.uncapitalize(),

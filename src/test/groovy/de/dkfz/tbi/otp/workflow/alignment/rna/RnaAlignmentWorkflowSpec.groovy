@@ -53,6 +53,7 @@ class RnaAlignmentWorkflowSpec extends Specification implements RoddyRnaFactory,
         expect:
         rnaAlignmentWorkflow.jobBeanNames == [
                 "roddyAlignmentFragmentJob",
+//                "rnaAlignmentCheckFragmentKeysJob",
                 "roddyAlignmentConditionalFailJob",
                 "attachUuidJob",
                 "roddyAlignmentPrepareJob",

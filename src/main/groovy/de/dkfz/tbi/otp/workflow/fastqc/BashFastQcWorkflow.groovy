@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflow.fastqc
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.workflow.jobs.OtpClusterCheckFragmentKeysJob
 import de.dkfz.tbi.otp.workflowExecution.*
 
 /**
@@ -41,6 +42,7 @@ class BashFastQcWorkflow implements OtpWorkflow {
     List<String> getJobBeanNames() {
         return [
                 FastqcFragmentJob.simpleName.uncapitalize(),
+                OtpClusterCheckFragmentKeysJob.simpleName.uncapitalize(),
                 FastqcConditionalFailJob.simpleName.uncapitalize(),
                 FastqcPrepareJob.simpleName.uncapitalize(),
                 FastqcExecuteClusterPipelineJob.simpleName.uncapitalize(),

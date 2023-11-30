@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,38 +21,22 @@
  */
 package de.dkfz.tbi.otp.workflow.jobs
 
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import groovy.util.logging.Slf4j
+import org.springframework.stereotype.Component
 
 /**
- * Base interface for all jobs
- *
- * To implement a job, the existing specialized abstract classes should be extended
+ * Checks the required fragment keys for OTP cluster workflows, which includes
+ * BashFastqc, DataInstallation, BamImport
  */
-interface Job {
-    void execute(WorkflowStep workflowStep) throws Throwable
+@Component
+@Slf4j
+class OtpClusterCheckFragmentKeysJob extends AbstractCheckFragmentKeysJob {
 
-    JobStage getJobStage()
-}
-
-/**
- * Name of the different steps
- */
-enum JobStage {
-    CONDITIONAL_SKIP,
-    FETCH_FRAGMENTS,
-    CHECK_FRAGMENT_KEYS,
-    CREATE_NOTIFICATION_TEXT,
-    CONDITIONAL_FAIL,
-    ATTACH_UUID,
-    PREPARE,
-    EXECUTE_PIPELINE,
-    VALIDATION,
-    OUTPUT_UNIFICATION,
-    PARSE,
-    CHECK_QC,
-    CLEANUP,
-    LINK,
-    CORRECT_PERMISSION,
-    CALCULATE_SIZE,
-    FINISH,
+    @Override
+    Set<String> getKeyPaths() {
+        return [
+                "OTP_CLUSTER/MEMORY",
+                "OTP_CLUSTER/WALLTIME",
+        ] as Set
+    }
 }

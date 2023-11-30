@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,40 +19,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.jobs
+package de.dkfz.tbi.otp.workflow.alignment.rna
 
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import groovy.util.logging.Slf4j
+import org.springframework.stereotype.Component
 
-/**
- * Base interface for all jobs
- *
- * To implement a job, the existing specialized abstract classes should be extended
- */
-interface Job {
-    void execute(WorkflowStep workflowStep) throws Throwable
+import de.dkfz.tbi.otp.workflow.jobs.AbstractCheckFragmentKeysJob
 
-    JobStage getJobStage()
-}
+@Component
+@Slf4j
+class RnaAlignmentCheckFragmentKeysJob extends AbstractCheckFragmentKeysJob {
 
-/**
- * Name of the different steps
- */
-enum JobStage {
-    CONDITIONAL_SKIP,
-    FETCH_FRAGMENTS,
-    CHECK_FRAGMENT_KEYS,
-    CREATE_NOTIFICATION_TEXT,
-    CONDITIONAL_FAIL,
-    ATTACH_UUID,
-    PREPARE,
-    EXECUTE_PIPELINE,
-    VALIDATION,
-    OUTPUT_UNIFICATION,
-    PARSE,
-    CHECK_QC,
-    CLEANUP,
-    LINK,
-    CORRECT_PERMISSION,
-    CALCULATE_SIZE,
-    FINISH,
+    @Override
+    Set<String> getKeyPaths() {
+        return [
+                "RODDY/cvalues/STAR_VERSION",
+                "RODDY/cvalues/SAMBAMBA_VERSION",
+                "RODDY/cvalues/STAR_PARAMS_2PASS",
+                "RODDY/cvalues/STAR_PARAMS_OUT",
+                "RODDY/cvalues/STAR_PARAMS_CHIMERIC",
+                "RODDY/cvalues/STAR_PARAMS_INTRONS",
+        ] as Set
+    }
 }

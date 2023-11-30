@@ -47,6 +47,7 @@ class BashFastqcWorkflowSpec extends Specification implements DataTest, DomainFa
         expect:
         fastqcWorkflow.jobBeanNames == [
                 "fastqcFragmentJob",
+                "otpClusterCheckFragmentKeysJob",
                 "fastqcConditionalFailJob",
                 "fastqcPrepareJob",
                 "fastqcExecuteClusterPipelineJob",

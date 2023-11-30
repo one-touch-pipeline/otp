@@ -25,6 +25,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.workflow.jobs.AttachUuidJob
+import de.dkfz.tbi.otp.workflow.jobs.OtpClusterCheckFragmentKeysJob
 import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
 import de.dkfz.tbi.otp.workflowExecution.*
 
@@ -42,6 +43,7 @@ class BamImportWorkflow implements OtpWorkflow {
     List<String> getJobBeanNames() {
         return [
                 // BamImportFragmentJob.simpleName.uncapitalize(),
+                OtpClusterCheckFragmentKeysJob.simpleName.uncapitalize(),
                 // BamImportConditionalFailJob.simpleName.uncapitalize(),
                 AttachUuidJob.simpleName.uncapitalize(),
                 // BamImportPrepareJob.simpleName.uncapitalize(),

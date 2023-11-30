@@ -54,6 +54,7 @@ class PanCancerWorkflowSpec extends Specification implements RoddyPancanFactory,
         expect:
         panCancerWorkflow.jobBeanNames == [
                 "roddyAlignmentFragmentJob",
+//                "roddyAlignmentCheckFragmentKeysJob",
                 "roddyAlignmentConditionalFailJob",
                 "roddyAlignmentPrepareJob",
                 "panCancerExecuteJob",

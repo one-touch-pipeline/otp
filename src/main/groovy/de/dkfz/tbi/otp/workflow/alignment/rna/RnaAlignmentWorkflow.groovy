@@ -44,6 +44,7 @@ class RnaAlignmentWorkflow extends AlignmentWorkflow {
     List<String> getJobBeanNames() {
         return [
                 RoddyAlignmentFragmentJob.simpleName.uncapitalize(),
+//                RnaAlignmentCheckFragmentKeysJob.simpleName.uncapitalize(),
                 // will be uncommented after default fragments have been adapted
                 // Keep the order, since it is important
 //                RnaAlignmentCreateNotificationJob.simpleName.uncapitalize(),

@@ -38,6 +38,7 @@ class WgbsWorkflowSpec extends Specification implements RoddyPancanFactory, Data
         expect:
         wgbsWorkflow.jobBeanNames == [
                 "roddyAlignmentFragmentJob",
+//                "roddyAlignmentCheckFragmentKeysJob",
                 "roddyAlignmentConditionalFailJob",
                 "wgbsPrepareJob",
                 "wgbsExecuteJob",
