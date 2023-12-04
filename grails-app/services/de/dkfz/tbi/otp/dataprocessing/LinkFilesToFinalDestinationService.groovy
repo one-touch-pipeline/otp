@@ -187,7 +187,7 @@ class LinkFilesToFinalDestinationService {
                 roddyBamFile.workMd5sumFile,
                 roddyBamFile.workQADirectory,
                 roddyBamFile.workExecutionStoreDirectory,
-                roddyConfigService.getConfigDirectory(roddyBamFile.workDirectory.toPath()).toFile(),
+                fileService.toFile(roddyConfigService.getConfigDirectory(roddyBamFile.workDirectory.toPath())),
         ]
         if (roddyBamFile.seqType.isWgbs()) {
             expectedFiles.add(roddyBamFile.workMethylationDirectory)
@@ -203,30 +203,20 @@ class LinkFilesToFinalDestinationService {
         assert roddyBamFile: "Input roddyBamFile must not be null"
         assert !roddyBamFile.isOldStructureUsed()
 
-        List<File> filesToDelete = []
-        List<File> roddyDirsToDelete = []
+        List<Path> filesToDelete = []
         List<RoddyBamFile> roddyBamFiles = RoddyBamFile.findAllByWorkPackageAndIdNotEqual(roddyBamFile.mergingWorkPackage, roddyBamFile.id)
         if (roddyBamFiles) {
-            List<File> workDirs = roddyBamFiles.findAll { !it.isOldStructureUsed() }*.workDirectory
+            List<Path> workDirs = roddyBamFiles.findAll { !it.isOldStructureUsed() }.collect {
+                roddyBamFileService.getWorkDirectory(it)
+            }
             filesToDelete.addAll(workDirs)
-            filesToDelete.add(roddyBamFile.finalExecutionStoreDirectory)
-            filesToDelete.add(roddyBamFileService.getFinalQADirectory(roddyBamFile).toFile())
+            filesToDelete.add(roddyBamFileService.getFinalExecutionStoreDirectory(roddyBamFile))
+            filesToDelete.add(roddyBamFileService.getFinalQADirectory(roddyBamFile))
             if (roddyBamFile.seqType.isWgbs()) {
-                filesToDelete.add(roddyBamFile.finalMethylationDirectory)
-            }
-            roddyDirsToDelete.addAll(workDirs)
-            roddyBamFiles.findAll {
-                it.isOldStructureUsed()
-            }.each {
-                roddyDirsToDelete.addAll(it.finalExecutionDirectories)
-                roddyDirsToDelete.addAll(it.finalSingleLaneQADirectories.values())
-            }
-            if (roddyBamFiles.max { it.identifier }.oldStructureUsed) {
-                roddyDirsToDelete.add(roddyBamFile.finalMergedQADirectory)
+                filesToDelete.add(roddyBamFileService.getFinalMethylationDirectory(roddyBamFile))
             }
         }
-        FileSystem fs = fileSystemService.remoteFileSystem
-        return filesToDelete.collect { fileService.toPath(it, fs) }
+        return filesToDelete
     }
 
     @Deprecated
