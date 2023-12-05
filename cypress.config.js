@@ -39,7 +39,6 @@ module.exports = defineConfig({
   viewportHeight: 900,
   viewportWidth: 1440,
   video: false,
-  videoUploadOnPasses: false,
   videosFolder: 'cypress/videos',
   watchForFileChanges: false
 });

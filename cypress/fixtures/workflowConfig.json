@@ -68,9 +68,6 @@
       "Example project 2",
       "Example project 3"
     ],
-    "types": [
-      "GENERIC",
-      "BED_FILE"
-    ]
+    "type": "GENERIC"
   }
 ]

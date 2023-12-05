@@ -143,6 +143,7 @@ describe('Check workflow config page', () => {
 
         cy.checkedTyping(() => cy.get('div.modal-content input[name="selectorName"]'), config[3].selectorName);
         cy.get('div.modal-content').find('select[name="projects"]').select(config[3].projects, { force: true });
+        cy.get('div.modal-content').find('select[name="type"]').select(config[3].type, { force: true });
 
         cy.get('div.modal-content').find('#save-button').click();
 
@@ -152,25 +153,28 @@ describe('Check workflow config page', () => {
       });
     });
 
-    it('should search for the selectors and delete them', () => {
+    it('should search for the modified selector and delete it', () => {
       cy.intercept('/workflowConfig/data*').as('searchWorkflowConfig');
       cy.intercept('/workflowConfig/fragments/*').as('getWorkflowConfigFragments');
       cy.intercept('/workflowConfig/deprecate*').as('deprecateWorkflowConfig');
 
       cy.fixture('workflowConfig.json').then((config) => {
-        cy.get('div.search-query').find('select[name="projects"]').select(config[3].projects, { force: true });
+        cy.get('div.search-query').find('select[name="projects"]').select(config[2].projects, { force: true });
+        cy.get('div.search-query').find('select[name="workflows"]').select(config[2].workflows, { force: true });
+        cy.get('div.search-query').find('select[name="referenceGenomes"]')
+          .select(config[2].referenceGenomes, { force: true });
         cy.get('div.search-query').find('select[name="type"]').select(config[2].type, { force: true });
 
         cy.get('div.search-query').find('#search-button').click();
 
         cy.wait('@searchWorkflowConfig').then((outerInterception) => {
           expect(outerInterception.response.statusCode).to.eq(200);
-          expect(outerInterception.response.body.data.length).to.eq(2);
+          expect(outerInterception.response.body.data.length).to.eq(1);
         });
 
         cy.get('table#workflowConfigResult td.dataTables_empty').should('not.exist');
         cy.get('table#workflowConfigResult').contains(config[2].selectorName).should('exist');
-        cy.get('table#workflowConfigResult').contains(config[3].selectorName).should('exist');
+        cy.get('table#workflowConfigResult').contains(config[3].selectorName).should('not.exist');
 
         cy.get('table#workflowConfigResult tr').contains(config[2].selectorName).parent()
           .parent()
@@ -186,8 +190,29 @@ describe('Check workflow config page', () => {
           expect(interception.response.statusCode).to.eq(200);
           expect(interception.response.body.name).to.eq(config[2].selectorName);
           cy.get('#workflowConfigModal button.close').click({ force: true });
-          cy.get('div#workflowConfigModal').should('not.be.visible');
         });
+      });
+    });
+
+    it('should search for the selector based on the modified selector and delete it', () => {
+      cy.intercept('/workflowConfig/data*').as('searchWorkflowConfig');
+      cy.intercept('/workflowConfig/fragments/*').as('getWorkflowConfigFragments');
+      cy.intercept('/workflowConfig/deprecate*').as('deprecateWorkflowConfig');
+
+      cy.fixture('workflowConfig.json').then((config) => {
+        cy.get('div.search-query').find('select[name="projects"]').select(config[3].projects, { force: true });
+        cy.get('div.search-query').find('select[name="type"]').select(config[3].type, { force: true });
+
+        cy.get('div.search-query').find('#search-button').click();
+
+        cy.wait('@searchWorkflowConfig').then((outerInterception) => {
+          expect(outerInterception.response.statusCode).to.eq(200);
+          expect(outerInterception.response.body.data.length).to.eq(3);
+        });
+
+        cy.get('table#workflowConfigResult td.dataTables_empty').should('not.exist');
+        cy.get('table#workflowConfigResult').contains(config[2].selectorName).should('not.exist');
+        cy.get('table#workflowConfigResult').contains(config[3].selectorName).should('exist');
 
         cy.get('table#workflowConfigResult tr').contains(config[3].selectorName).parent()
           .parent()
@@ -203,7 +228,6 @@ describe('Check workflow config page', () => {
           expect(interception2.response.statusCode).to.eq(200);
           expect(interception2.response.body.name).to.eq(config[3].selectorName);
           cy.get('#workflowConfigModal button.close').click({ force: true });
-          cy.get('div#workflowConfigModal').should('not.be.visible');
         });
       });
     });
