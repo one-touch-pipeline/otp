@@ -145,7 +145,7 @@ builder.addGroovyCommand("""
 seqTracks.each { seqTrack ->
     Map newValues = adaptValues(seqTrack)
 
-    String swapName = "${seqTrack.individual.pid}__${seqTrack.run.name}__${seqTrack.laneId}__${seqTrack.seqType.name}__to__${newValues.newSeqTypeName}".replace('-', '_')
+    String swapName = "${seqTrack.individual.pid}__${seqTrack.run.name}__${seqTrack.laneId}__${seqTrack.seqType.name}__to__${newValues.newSeqTypeName}".replaceAll(/[^A-Za-z0-9_-]/, "_")
     String swapOrderedName = "swap_${String.valueOf(counter++).padLeft(4, '0')}_${swapName}"
     all_swaps << swapOrderedName
 
