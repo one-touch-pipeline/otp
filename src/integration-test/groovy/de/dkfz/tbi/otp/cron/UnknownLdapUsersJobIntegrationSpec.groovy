@@ -21,9 +21,8 @@
  */
 package de.dkfz.tbi.otp.cron
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
-import spock.lang.Ignore
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -84,25 +83,24 @@ class UnknownLdapUsersJobIntegrationSpec extends Specification implements Domain
         result == usersToNotBeFound
     }
 
-    @Ignore
     void "wrappedExecute, sends a mail containing every unresolvable user"() {
         given:
-        ["A", "B", "C"].collect { String username ->
-            return DomainFactory.createUser(username: username)
+        ["a", "b", "c"].each { String username ->
+            DomainFactory.createUser(username: username)
         }
-        List<User> usersToNotBeFound = ["D", "E"].collect { String username ->
+        List<User> usersToNotBeFound = ["d", "e"].collect { String username ->
             return DomainFactory.createUser(username: username)
         }
         UnknownLdapUsersJob job = new UnknownLdapUsersJob([
                 processingOptionService: new ProcessingOptionService(),
-                identityProvider: Mock(IdentityProvider) {
+                identityProvider       : Mock(IdentityProvider) {
                     5 * exists(_) >> { User user ->
                         return !(user in usersToNotBeFound)
                     }
                     0 * _
                 },
-                mailHelperService: Mock(MailHelperService) {
-                    1 * sendEmailToTicketSystem(_, { usersToNotBeFound.every { User user -> it.contains(user.username) } }) >> { }
+                mailHelperService      : Mock(MailHelperService) {
+                    1 * sendEmailToTicketSystem(_, { usersToNotBeFound.every { User user -> it.contains(user.username) } })
                 },
         ])
 
@@ -110,20 +108,19 @@ class UnknownLdapUsersJobIntegrationSpec extends Specification implements Domain
         job.wrappedExecute()
     }
 
-    @Ignore
     void "wrappedExecute, only writes out a log message when no unresolved users were found"() {
         given:
         DomainFactory.createUser(username: "username", enabled: true)
         UnknownLdapUsersJob job = new UnknownLdapUsersJob([
                 processingOptionService: new ProcessingOptionService(),
-                identityProvider: Mock(IdentityProvider) {
+                identityProvider       : Mock(IdentityProvider) {
                     1 * exists(_) >> { User user ->
                         return true
                     }
                     0 * _
                 },
-                mailHelperService: Mock(MailHelperService) {
-                    0 * sendEmailToTicketSystem(_, _) >> { }
+                mailHelperService      : Mock(MailHelperService) {
+                    0 * sendEmailToTicketSystem(_, _)
                 },
         ])
 
