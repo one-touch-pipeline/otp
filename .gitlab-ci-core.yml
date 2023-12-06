@@ -116,6 +116,7 @@ unit tests:
           - src/integration-test/**/*
           - src/test-helper/**/*
           - build.gradle
+          - settings.gradle
           - gradle.properties
           - .gitlab-ci-core.yml
   artifacts:
@@ -162,6 +163,7 @@ integration tests:
           - src/integration-test/**/*
           - src/test-helper/**/*
           - build.gradle
+          - settings.gradle
           - gradle.properties
           - .gitlab-ci-core.yml
   artifacts:
@@ -216,6 +218,7 @@ test coverage:
           - src/integration-test/**/*
           - src/test-helper/**/*
           - build.gradle
+          - settings.gradle
           - gradle.properties
           - .gitlab-ci-core.yml
   artifacts:
@@ -278,6 +281,7 @@ cypress tests:
         - cypress/**/*
         - docker/**/*
         - build.gradle
+        - settings.gradle
         - gradle.properties
         - cypress.config.js
         - package.json
