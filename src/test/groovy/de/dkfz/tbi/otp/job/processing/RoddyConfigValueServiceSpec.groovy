@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.job.processing
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
@@ -33,6 +34,8 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Paths
 
@@ -58,9 +61,11 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
     }
 
     TestConfigService configService
+    RoddyConfigValueService service
 
     void setup() {
         configService = new TestConfigService()
+        service = new RoddyConfigValueService()
     }
 
     void cleanup() {
@@ -173,6 +178,66 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
 
         expect:
         ["CLIP_INDEX": path] == service.getAdapterTrimmingFile(roddyBamFile, config)
+    }
+
+    void "test getRunArriba returns true, when both RUN_ARRIBA and useSingleEndProcessing are null"() {
+        given:
+        String config = '{"RODDY": {"cvalues": {}}}'
+        WorkflowRun workflowRun = createWorkflowRun(combinedConfig: config)
+        WorkflowStep workflowStep = createWorkflowStep(workflowRun: workflowRun)
+
+        expect:
+        service.getRunArriba(workflowStep)
+    }
+
+    @Unroll
+    void "test getRunArriba returns #result, when RUN_ARRIBA is null and useSingleEndProcessing is #useSingleEndProcessing"() {
+        given:
+        String config = '{"RODDY": {"cvalues": {"useSingleEndProcessing": {"value": "' + useSingleEndProcessing + '"}}}}'
+        WorkflowRun workflowRun = createWorkflowRun(combinedConfig: config)
+        WorkflowStep workflowStep = createWorkflowStep(workflowRun: workflowRun)
+
+        expect:
+        service.getRunArriba(workflowStep) == result
+
+        where:
+        useSingleEndProcessing || result
+        "true"                 || false
+        "false"                || true
+    }
+
+    @Unroll
+    void "test getRunArriba returns #result, when RUN_ARRIBA is #runArriba and useSingleEndProcessing is null"() {
+        given:
+        String config = '{"RODDY": {"cvalues": {"RUN_ARRIBA": {"value": "' + runArriba + '"}}}}'
+        WorkflowRun workflowRun = createWorkflowRun(combinedConfig: config)
+        WorkflowStep workflowStep = createWorkflowStep(workflowRun: workflowRun)
+
+        expect:
+        service.getRunArriba(workflowStep) == result
+
+        where:
+        runArriba || result
+        "true"    || true
+        "false"   || false
+    }
+
+    @Unroll
+    void "test getRunArriba returns #result, when RUN_ARRIBA is #runArriba and useSingleEndProcessing is #useSingleEndProcessing"() {
+        given:
+        String config = '{"RODDY": {"cvalues": {"useSingleEndProcessing": {"value": "' + useSingleEndProcessing + '"}, "RUN_ARRIBA": {"value": "' + runArriba + '"}}}}'
+        WorkflowRun workflowRun = createWorkflowRun(combinedConfig: config)
+        WorkflowStep workflowStep = createWorkflowStep(workflowRun: workflowRun)
+
+        expect:
+        service.getRunArriba(workflowStep) == result
+
+        where:
+        runArriba | useSingleEndProcessing || result
+        "true"    | "true"                 || false
+        "true"    | "false"                || true
+        "false"   | "true"                 || false
+        "false"   | "false"                || false
     }
 
     void "test getFilesToMerge"() {
