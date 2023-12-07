@@ -81,9 +81,9 @@ class RoddyConfigValueService {
 
     boolean getRunArriba(WorkflowStep workflowStep) {
         JsonNode combinedConfigJson = MAPPER.readTree(workflowStep.workflowRun.combinedConfig)
-        boolean value = combinedConfigJson?.RODDY?.cvalues?.fields()?.find { it.key == ProjectService.RUN_ARRIBA }?.value?.value?.asBoolean()
-
-        return value == null || value
+        Boolean runArriba = combinedConfigJson?.RODDY?.cvalues?.fields()?.find { it.key == ProjectService.RUN_ARRIBA }?.value?.value?.asBoolean()
+        Boolean useSingleEndProcessing = combinedConfigJson?.RODDY?.cvalues?.fields()?.find { it.key == 'useSingleEndProcessing' }?.value?.value?.asBoolean()
+        return ((runArriba == null || runArriba == Boolean.TRUE) && (useSingleEndProcessing == null || useSingleEndProcessing == Boolean.FALSE))
     }
 
     private Map<String, String> getAdapterTrimmingFile(RoddyBamFile roddyBamFile, String combinedConfig) {

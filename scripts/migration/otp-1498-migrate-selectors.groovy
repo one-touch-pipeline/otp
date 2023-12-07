@@ -26,13 +26,14 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.Species
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
+import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 // input
 Pipeline.Name oldPipelineName = Pipeline.Name.RODDY_RNA_ALIGNMENT
-String newWorkflowName = de.dkfz.tbi.otp.workflow.rna.RnaAlignmentWorkflow.WORKFLOW
+String newWorkflowName = RnaAlignmentWorkflow.WORKFLOW
 List<SeqType> seqTypes = [
         SeqTypeService.rnaPairedSeqType,
         SeqTypeService.rnaSingleSeqType,

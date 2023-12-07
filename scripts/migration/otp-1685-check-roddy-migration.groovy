@@ -30,9 +30,10 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.util.TimeFormats
 
@@ -65,7 +66,7 @@ Pipeline pipeline = Pipeline.findByName(Pipeline.Name.RODDY_RNA_ALIGNMENT)
 
 // the name of the new workflow in the new system
 @Field
-String nameNewWorkflow = de.dkfz.tbi.otp.workflow.rna.RnaAlignmentWorkflow.WORKFLOW
+String nameNewWorkflow = RnaAlignmentWorkflow.WORKFLOW
 
 // name of the roddy plugin
 @Field

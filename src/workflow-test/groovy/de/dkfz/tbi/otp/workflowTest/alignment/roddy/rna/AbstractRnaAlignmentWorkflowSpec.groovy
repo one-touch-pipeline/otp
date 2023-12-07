@@ -117,26 +117,6 @@ abstract class AbstractRnaAlignmentWorkflowSpec extends AbstractRoddyAlignmentWo
         """
     }
 
-    // TODO: Only temporary until a final solution is available
-    private String getTmpStarConfig() {
-        return """
-            {
-              "RODDY": {
-                "cvalues": {
-                    "STAR_VERSION": {
-                        "type": "string",
-                        "value": "2.5.3a"
-                    },
-                    "SAMBAMBA_VERSION": {
-                        "type": "string",
-                        "value": "0.6.5"
-                    }
-                }
-              }
-            }
-        """
-    }
-
     @Override
     protected AbstractWorkflowDecider getDecider() {
         return rnaAlignmentDecider
@@ -164,10 +144,6 @@ abstract class AbstractRnaAlignmentWorkflowSpec extends AbstractRoddyAlignmentWo
                 workflows       : [workflowAlignment],
                 referenceGenomes: [referenceGenome],
         ])
-        createFragmentAndSelector("Star", tmpStarConfig, [
-                workflows       : [workflowAlignment],
-                referenceGenomes: [referenceGenome],
-        ])
     }
 
     void setupWorkflow4Mouse() {
@@ -178,10 +154,6 @@ abstract class AbstractRnaAlignmentWorkflowSpec extends AbstractRoddyAlignmentWo
                 referenceGenomes: [referenceGenome],
         ])
         createFragmentAndSelector("Mouse2", referenceGenomeConfigMouse, [
-                workflows       : [workflowAlignment],
-                referenceGenomes: [referenceGenome],
-        ])
-        createFragmentAndSelector("Star", tmpStarConfig, [
                 workflows       : [workflowAlignment],
                 referenceGenomes: [referenceGenome],
         ])
