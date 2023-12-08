@@ -471,16 +471,6 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         0 * _
     }
 
-    ProjectRequestCreationCommand createProjectRequestCreationCommand(Map properties = [:]) {
-        return new ProjectRequestCreationCommand([
-                name       : "projectRequest${nextId}",
-                projectType: Project.ProjectType.SEQUENCING,
-                description: "A description, that is long enough to full fill the requirements of the command object.",
-                keywords   : [createKeyword(), createKeyword()],
-                users      : [createProjectRequestUser()],
-        ] + properties)
-    }
-
     @Unroll
     void "saveProjectRequestFromCommand, should save projectRequest and translate all parameters"() {
         given:
@@ -530,20 +520,20 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         result.users == users
         result.project == null
         projectRequestExists ? result.state == projectRequestPersistentState : result.state.beanName == "initial"
-        result.customSpeciesWithStrains == cmd.customSpeciesWithStrains as Set
-        result.keywords*.name as Set == cmd.keywords as Set
-        result.sequencingCenters == cmd.sequencingCenters as Set
+        TestCase.assertContainSame(result.customSpeciesWithStrains, cmd.customSpeciesWithStrains)
+        TestCase.assertContainSame(result.keywords*.name, cmd.keywords)
+        TestCase.assertContainSame(result.sequencingCenters, cmd.sequencingCenters)
         result.approxNoOfSamples == cmd.approxNoOfSamples
-        result.seqTypes == cmd.seqTypes as Set
+        TestCase.assertContainSame(result.seqTypes, cmd.seqTypes)
         result.requesterComment == cmd.requesterComment
         result.storageUntil == resultStorageUntil
         result.projectType == cmd.projectType
 
         where:
-        storagePeriod              | storageUntil               | resultStorageUntil            | projectRequestExists
-        StoragePeriod.TEN_YEARS    | null                       | LocalDate.now().plusYears(10) | true
-        StoragePeriod.USER_DEFINED | LocalDate.of(2000, 12, 1)  | storageUntil                  | true
-        StoragePeriod.INFINITELY   | null                       | null                          | false
+        storagePeriod              | storageUntil              | resultStorageUntil            | projectRequestExists
+        StoragePeriod.TEN_YEARS    | null                      | LocalDate.now().plusYears(10) | true
+        StoragePeriod.USER_DEFINED | LocalDate.of(2000, 12, 1) | storageUntil                  | true
+        StoragePeriod.INFINITELY   | null                      | null                          | false
     }
 
     @Unroll

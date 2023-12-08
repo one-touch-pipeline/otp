@@ -816,7 +816,6 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         Project project = createProject()
 
         expect:
-
         UserProjectRole.withCriteria {
             eq("user", user)
             eq("project", project)
@@ -1526,7 +1525,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         List<User> userManagers = userProjectRoleService.getUserManagers(project)
 
         then:
-        userManagers == expectedUsers
+        TestCase.assertContainSame(userManagers, expectedUsers)
     }
 
     void "getProjectAuthorities, returns all enabled users of project with an authoritative ProjectRole"() {
@@ -1602,7 +1601,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         List<User> projectBioinformaticians = UserProjectRoleService.getBioinformaticianUsers(project)
 
         then:
-        CollectionUtils.containSame(projectBioinformaticians, expectedUsers)
+        TestCase.assertContainSame(projectBioinformaticians, expectedUsers)
     }
 
     void "handleSharedUnixGroupOnProjectCreation, project with shared unix group"() {
@@ -1792,11 +1791,13 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 user        : projectAuthority2,
         ])
 
-        expect:
-        userProjectRoleService.projectsAssociatedToProjectAuthority(user) == [
+        Map expected = [
                 (projectAuthority1): [projects[0], projects[1]],
                 (projectAuthority2): [projects[1], projects[2]],
         ]
+
+        expect:
+        TestCase.assertContainSame(userProjectRoleService.projectsAssociatedToProjectAuthority(user), expected)
     }
 
     MessageSourceService getMessageSourceServiceWithMockedMessageSource() {

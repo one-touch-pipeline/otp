@@ -177,7 +177,7 @@ class SoftwareToolServiceIntegrationSpec extends Specification implements UserAn
 
         then:
         result == null
-        CollectionUtils.atMostOneElement(SoftwareTool.findAllByProgramNameAndProgramVersionAndType("Test", "1.0", SoftwareTool.Type.BASECALLING))
+        SoftwareTool.findAllByProgramNameAndProgramVersionAndType("Test", "1.0", SoftwareTool.Type.BASECALLING).size() == 1
     }
 
     void "test updateSoftwareToolIdentifier custom validator for case insensitive unique"() {

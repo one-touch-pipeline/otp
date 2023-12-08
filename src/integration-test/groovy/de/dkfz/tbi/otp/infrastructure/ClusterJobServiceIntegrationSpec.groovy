@@ -21,8 +21,8 @@
  */
 package de.dkfz.tbi.otp.infrastructure
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.grails.datastore.gorm.events.AutoTimestampEventListener
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -35,7 +35,6 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.time.*
 import java.time.temporal.ChronoUnit
@@ -232,7 +231,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         createClusterJob()
 
         expect:
-        CollectionUtils.containSame([job1, job2], ClusterJobService.findAllClusterJobsToOtpJob(job1))
+        TestCase.assertContainSame([job1, job2], ClusterJobService.findAllClusterJobsToOtpJob(job1))
     }
 
     void testFindAllClusterJobsToOtpJob_WhenDifferentJobClasses_ShouldReturnClusterJobsOfSameProcessingStepAndJobClass() {
@@ -253,7 +252,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         job3.save(flush: true)
 
         expect:
-        CollectionUtils.containSame([job1, job2], ClusterJobService.findAllClusterJobsToOtpJob(job1))
+        TestCase.assertContainSame([job1, job2], ClusterJobService.findAllClusterJobsToOtpJob(job1))
     }
 
     void testGetBasesSum_WhenContainedSeqTracksContainBasesAndSeveralJobsBelongToOtpJob_ShouldReturnNormalizedSumOfBases() {

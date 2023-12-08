@@ -45,6 +45,7 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
 
     private AbstractAlignmentDecider decider
 
+    @Deprecated
     final shouldFail = new GroovyTestCase().&shouldFail
 
     void setupData() {
@@ -90,7 +91,7 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
         decider.findOrSaveWorkPackages(seqTrack2, seqTrack2.configuredReferenceGenomeProjectSeqType, decider.getPipeline(seqTrack2))
 
         then:
-        exactlyOneElement(workPackages).seqTracks == [seqTrack, seqTrack2] as Set<SeqTrack>
+        TestCase.assertContainSame(exactlyOneElement(workPackages).seqTracks, [seqTrack, seqTrack2])
     }
 
     void testDecideAndPrepareForAlignment_noDataFile_shouldReturnEmptyList() {
@@ -300,7 +301,7 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
         )
 
         expect:
-        TestCase.containSame(calledForMergingWorkPackages, decider.decideAndPrepareForAlignment(st, true))
+        TestCase.assertContainSame(calledForMergingWorkPackages, decider.decideAndPrepareForAlignment(st, true))
         calledForMergingWorkPackages.size() > 0
     }
 

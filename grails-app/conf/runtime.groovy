@@ -123,20 +123,25 @@ environments {
         dataSource {
             logSql = false
             jmxExport = true
-            String usePostgresDocker = System.properties['usePostgresDocker']
+            String databaseForIntegrationTest = System.properties['databaseForIntegrationTest']
+            boolean useDockerCi = "DOCKER_CI".equalsIgnoreCase(databaseForIntegrationTest)
+            boolean useDocker = "DOCKER".equalsIgnoreCase(databaseForIntegrationTest) || useDockerCi
 
-            if ("TRUE".equalsIgnoreCase(usePostgresDocker)) {
-                String workerId = System.properties['org.gradle.test.worker']
-                String dockerPorts = System.properties['dockerPorts']
-                String maxParallelForks = System.properties['maxParallelForks']
-                String dockerPort = dockerPorts.split(',')[(workerId as int) % (maxParallelForks as int)]
-
+            if (useDocker) {
                 driverClassName = 'org.postgresql.Driver'
                 dialect = PostgreSQL9Dialect
                 dbCreate = 'update'
                 username = 'postgres'
                 password = ''
-                url = "jdbc:postgresql://localhost:${dockerPort}/postgres"
+                if (useDockerCi) {
+                    url = "jdbc:postgresql://postgres:5432/postgres"
+                } else {
+                    String workerId = System.properties['org.gradle.test.worker']
+                    String dockerPorts = System.properties['dockerPorts']
+                    String maxParallelForks = System.properties['maxParallelForks']
+                    String dockerPort = dockerPorts.split(',')[(workerId as int) % (maxParallelForks as int)]
+                    url = "jdbc:postgresql://localhost:${dockerPort}/postgres"
+                }
             } else {
                 driverClassName = 'org.h2.Driver'
                 dialect = H2Dialect

@@ -78,16 +78,7 @@ class SeqTrackTests {
         setupData()
         SeqTrackService.logToSeqTrack(seqTrack, "Test")
         SeqTrackService.logToSeqTrack(seqTrack, "Test2")
-        TestCase.assertContainSame(seqTrack.logMessages*.message, ["Test", "Test2"])
-    }
-
-    @Test
-    void testLog_WrongOrder() {
-        setupData()
-        SeqTrackService.logToSeqTrack(seqTrack, "Test")
-        SeqTrackService.logToSeqTrack(seqTrack, "Test2")
-        TestCase.assertContainSame(seqTrack.logMessages*.message, ["Test", "Test2"])
-        assert seqTrack.logMessages.message[0] != "Test2"
-        assert seqTrack.logMessages.message[1] != "Test"
+        // fixed order
+        assert seqTrack.logMessages*.message == ["Test", "Test2"]
     }
 }

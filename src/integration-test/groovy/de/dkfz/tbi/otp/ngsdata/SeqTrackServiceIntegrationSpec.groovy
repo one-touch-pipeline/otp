@@ -25,9 +25,9 @@ import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.security.UserAndRoles
-import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback
 @Integration
@@ -57,7 +57,7 @@ class SeqTrackServiceIntegrationSpec extends Specification implements DomainFact
         }
 
         then:
-        CollectionUtils.containSame(result, [seqTrack1, seqTrack2])
+        TestCase.assertContainSame(result, [seqTrack1, seqTrack2])
     }
 
     void "getSeqTrackSet, should return an empty list, when no fitting seqTracks exist"() {
@@ -109,7 +109,7 @@ class SeqTrackServiceIntegrationSpec extends Specification implements DomainFact
         }
 
         then:
-        CollectionUtils.containSame(result, [seqTrack1, seqTrack2, seqTrack3])
+        TestCase.assertContainSame(result, [seqTrack1, seqTrack2, seqTrack3])
     }
 
     void "getSeqTracksByMultiInput, should return an empty list, when no fitting seqTracks exist"() {

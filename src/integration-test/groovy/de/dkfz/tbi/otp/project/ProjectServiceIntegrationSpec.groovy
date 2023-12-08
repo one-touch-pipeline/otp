@@ -1975,7 +1975,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         setupData()
         createProject([storageUntil: LocalDate.of(3000, 1, 1)])
         Project expiredProject = createProject([storageUntil: LocalDate.of(1970, 1, 1)])
-        ProjectRole projectRolePI = CollectionUtils.atMostOneElement(ProjectRole.findAllByName(ProjectRole.Basic.PI.name()))
+        ProjectRole projectRolePI = createProjectRole([name: ProjectRole.Basic.PI.name(),])
         User user = createUser()
         createUserProjectRole([
                 project     : expiredProject,
@@ -1988,9 +1988,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         then:
         projectUsers.each { Project resultProject, List<User> users ->
-            resultProject == expiredProject
-            users.length == 1
-            users[0] = user
+            assert resultProject == expiredProject
+            assert users == [user]
         }
     }
 
@@ -2024,8 +2023,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         then:
         projectUsers.each { Project resultProject, List<User> users ->
-            resultProject == expiredProject
-            users == []
+            assert resultProject == expiredProject
+            assert users == []
         }
     }
 

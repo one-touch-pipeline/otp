@@ -293,16 +293,16 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
 
         then:
         instanceResetA.with {
-            !ticket.finalNotificationSent
-            !ticket.alignmentFinished
+            assert !ticket.finalNotificationSent
+            assert !ticket.alignmentFinished
         }
         instanceResetB.with {
-            !ticket.finalNotificationSent
-            !ticket.alignmentFinished
+            assert !ticket.finalNotificationSent
+            assert !ticket.alignmentFinished
         }
         instanceUntouched.with {
-            ticket.finalNotificationSent
-            ticket.alignmentFinished
+            assert ticket.finalNotificationSent
+            assert ticket.alignmentFinished
         }
     }
 
@@ -336,7 +336,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         then:
         CellRangerMergingWorkPackage mwp = CollectionUtils.exactlyOneElement(CellRangerMergingWorkPackage.all)
         mwp.sample == sampleA
-        mwp.seqTracks == [seqTrackA] as Set
+        TestCase.assertContainSame(mwp.seqTracks, [seqTrackA])
         mwp.project == project
         mwp.individual == individualA
         mwpUsesParameter(mwp, parameter)
@@ -392,12 +392,12 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         setupData()
         CellRangerMwpParameter parameter = createCellRangerMwpParameter()
         List<SeqTrack> seqTracks = setupMultipleSeqTracksOfDifferentSeqPlatformGroupsAndLibPrepKits()
+        assert seqTracks.size() == 8
 
         when:
         cellRangerConfigurationService.findAllMergingWorkPackagesBySamplesAndPipeline(sampleA, parameter, requester)
 
         then:
-        seqTracks.size() == 8
         AssertionError e = thrown(AssertionError)
         e.message =~ "Can not handle SeqTracks processed over multiple platforms or with different library preparation kits."
     }
@@ -430,7 +430,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         then:
         CellRangerMergingWorkPackage mwp = CollectionUtils.exactlyOneElement(CellRangerMergingWorkPackage.all)
         mwp.sample == sampleA
-        CollectionUtils.containSame(mwp.seqTracks, expected)
+        TestCase.assertContainSame(mwp.seqTracks, expected)
     }
 
     void "test selectNoneAsFinal"() {

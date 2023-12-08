@@ -26,12 +26,10 @@ import grails.testing.mixin.integration.Integration
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback
 @Integration
@@ -155,7 +153,7 @@ class ExternalWorkflowConfigSelectorServiceIntegrationSpec extends Specification
         )
 
         then:
-        CollectionUtils.containSame(resultForNoIdsSet.overwritingSelectors*.selectorName, [
+        TestCase.assertContainSame(resultForNoIdsSet.overwritingSelectors*.selectorName, [
                 selectorWithProjectsSpecified,
                 selectorWithWorkflowVersionsSpecified,
                 selectorWithLibraryPreparationKitsSpecified,
@@ -165,32 +163,32 @@ class ExternalWorkflowConfigSelectorServiceIntegrationSpec extends Specification
                 selectorWithAllSpecified,
                 selectorWithProjectsAndWorkflowsSpecified,
         ]*.name)
-        CollectionUtils.containSame(resultForNoIdsSet.substitutedSelectors*.selectorName, [])
-        CollectionUtils.containSame(resultForNoIdsSet.conflictingSelectors*.selectorName, [])
+        TestCase.assertContainSame(resultForNoIdsSet.substitutedSelectors*.selectorName, [])
+        TestCase.assertContainSame(resultForNoIdsSet.conflictingSelectors*.selectorName, [])
 
         and:
-        CollectionUtils.containSame(resultForMultipleWorkflowVersionIdsSet.overwritingSelectors*.selectorName, [
+        TestCase.assertContainSame(resultForMultipleWorkflowVersionIdsSet.overwritingSelectors*.selectorName, [
                 selectorWithProjectsSpecified,
                 selectorWithLibraryPreparationKitsSpecified,
                 selectorWithReferenceGenomeSpecified,
                 selectorWithSeqTypeSpecified,
                 selectorWithAllSpecified,
         ]*.name)
-        CollectionUtils.containSame(resultForMultipleWorkflowVersionIdsSet.substitutedSelectors*.selectorName, [
+        TestCase.assertContainSame(resultForMultipleWorkflowVersionIdsSet.substitutedSelectors*.selectorName, [
                 selectorWithWorkflowSpecified,
         ]*.name)
-        CollectionUtils.containSame(resultForMultipleWorkflowVersionIdsSet.conflictingSelectors*.selectorName, [
+        TestCase.assertContainSame(resultForMultipleWorkflowVersionIdsSet.conflictingSelectors*.selectorName, [
                 selectorWithWorkflowVersionsSpecified,
         ]*.name)
 
         and:
-        CollectionUtils.containSame(resultForAllIdsSet.overwritingSelectors*.selectorName, [])
-        CollectionUtils.containSame(resultForAllIdsSet.substitutedSelectors*.selectorName, [
+        TestCase.assertContainSame(resultForAllIdsSet.overwritingSelectors*.selectorName, [])
+        TestCase.assertContainSame(resultForAllIdsSet.substitutedSelectors*.selectorName, [
                 selectorWithProjectsSpecified,
                 selectorWithReferenceGenomeSpecified,
                 selectorWithSeqTypeSpecified,
                 selectorWithWorkflowSpecified,
         ]*.name)
-        CollectionUtils.containSame(resultForAllIdsSet.conflictingSelectors*.selectorName, [])
+        TestCase.assertContainSame(resultForAllIdsSet.conflictingSelectors*.selectorName, [])
     }
 }

@@ -26,8 +26,8 @@ import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.security.UserAndRoles
-import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback
 @Integration
@@ -49,7 +49,7 @@ class ProjectRoleServiceIntegrationSpec extends Specification implements UserAnd
         }
 
         then:
-        CollectionUtils.containSame(projectRoleList, result())
+        TestCase.assertContainSame(projectRoleList, result())
 
         where:
         role     | result

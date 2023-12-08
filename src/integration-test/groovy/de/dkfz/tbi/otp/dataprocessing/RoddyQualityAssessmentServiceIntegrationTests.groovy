@@ -138,8 +138,8 @@ class RoddyQualityAssessmentServiceIntegrationTests {
         roddyQualityAssessmentService."parseRoddy${mergedBamOrSingleLane}QaStatistics"(roddyBamFile)
 
         Collection<RoddyQualityAssessment> qas = RoddyQualityAssessment.list()
-        assert TestCase.containSame(qas*.class*.simpleName.unique(), ["Roddy${mergedBamOrSingleLane}Qa"])
-        assert TestCase.containSame(qas*.chromosome, ["8", "all", "7"])
+        TestCase.assertContainSame(qas*.class*.simpleName.unique(), ["Roddy${mergedBamOrSingleLane}Qa"])
+        TestCase.assertContainSame(qas*.chromosome, ["8", "all", "7"])
         assert qas.find { it.chromosome == '8' }.qcBasesMapped == qcBasesMappedExpected
         assert qas.find { it.chromosome == '8' }.allBasesMapped == allBasesMappedExpected
         assert qas.find { it.chromosome == '8' }.onTargetMappedBases == onTargetMappedBasesExpected

@@ -25,6 +25,7 @@ import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
@@ -80,7 +81,7 @@ class UnknownLdapUsersJobIntegrationSpec extends Specification implements Domain
         result = job.getUsersThatCanNotBeFoundInLdap(usersToBeFound + usersToNotBeFound)
 
         then:
-        result == usersToNotBeFound
+        TestCase.assertContainSame(result, usersToNotBeFound)
     }
 
     void "wrappedExecute, sends a mail containing every unresolvable user"() {

@@ -107,7 +107,9 @@ class UserProjectRoleService {
     }
 
     Map<User, List<Project>> projectsAssociatedToProjectAuthority(User user) {
-        List<Project> allProjects = UserProjectRole.findAllByUser(user)*.project.unique()
+        List<Project> allProjects = UserProjectRole.findAllByUser(user)*.project.unique().sort {
+            it.name
+        }
         Map<User, List<Project>> projectAuthoritiesWithProjects = [:]
         allProjects.each { project ->
             getProjectAuthorities(project).each { projectAuthority ->

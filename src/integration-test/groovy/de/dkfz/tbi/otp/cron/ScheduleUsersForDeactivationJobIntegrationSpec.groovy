@@ -73,7 +73,7 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
         result = job.usersToCheckForDeactivation
 
         then:
-        [userA, userB].sort() == result.sort()
+        TestCase.assertContainSame([userA, userB], result)
     }
 
     void "getPlannedDeactivationDate, is now + the offset defined in LDAP_ACCOUNT_DEACTIVATION_GRACE_PERIOD"() {
@@ -270,8 +270,8 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
         result = job.buildActionPlan()
 
         then:
-        TestCase.assertContainSame(result.usersToSetDate.sort(), [expiredUserA, expiredUserB].sort())
-        TestCase.assertContainSame(result.usersToResetDate.sort(), [notExpiredAndScheduledUser].sort())
+        TestCase.assertContainSame(result.usersToSetDate, [expiredUserA, expiredUserB])
+        TestCase.assertContainSame(result.usersToResetDate, [notExpiredAndScheduledUser])
         TestCase.assertContainSame(result.notificationMap, [
                 (pi1) : (uprsProjectA[1, 2] + uprsProjectB[2]) as Set,
                 (pi2) : ([uprsProjectB[2]]) as Set,
@@ -332,7 +332,7 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
         createUserProjectRole(project: project, user: createUser(username: null))
 
         expect:
-        [uprB]*.user.sort() == plan.getValidAuthorityUsers(uprA).sort()
+        TestCase.assertContainSame([uprB]*.user, plan.getValidAuthorityUsers(uprA))
     }
 
     void "getValidAuthorityUsers, when the person to be deactivated is the last authority left"() {

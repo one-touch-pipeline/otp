@@ -26,6 +26,7 @@ import grails.testing.mixin.integration.Integration
 import org.springframework.validation.Errors
 import spock.lang.Specification
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
@@ -134,7 +135,7 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
 
         then:
         errors
-        !CollectionUtils.atMostOneElement(MergingCriteria.findAllByProjectAndSeqType(project, seqType))
+        !MergingCriteria.findAllByProjectAndSeqType(project, seqType)
     }
 
     void "test createOrUpdateMergingCriteria, for sequencing platform group"() {
@@ -514,12 +515,12 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         then:
         final List<SeqPlatformGroup> groups = SeqPlatformGroup.findAllByMergingCriteria(mergingCriteria)
         groups.size() == 2
-        groups*.seqPlatforms.flatten() == [
+        TestCase.assertContainSame(groups*.seqPlatforms.flatten(), [
                 firstGroupFirstSeqPlatform,
                 firstGroupSecondSeqPlatform,
                 secondGroupFirstSeqPlatform,
                 secondGroupSecondSeqPlatform,
-        ]
+        ])
     }
 
     void "test findSeqPlatformGroupsForProjectAndSeqType"() {
@@ -547,8 +548,8 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         SeqPlatform platform = createSeqPlatformWithSeqPlatformGroup()
 
         expect:
-        platform.seqPlatformGroups == doWithAuth(OPERATOR) {
+        TestCase.assertContainSame(platform.seqPlatformGroups, doWithAuth(OPERATOR) {
             mergingCriteriaService.findDefaultSeqPlatformGroups()
-        } as Set
+        })
     }
 }

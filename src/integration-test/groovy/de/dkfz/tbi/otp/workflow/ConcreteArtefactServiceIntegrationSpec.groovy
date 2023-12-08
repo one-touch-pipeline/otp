@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
@@ -351,9 +352,9 @@ class ConcreteArtefactServiceIntegrationSpec extends Specification implements Ro
         List<RoddyBamFile> returnedList3 = service.getInputArtefacts(step, INPUT_ROLE3, required)
 
         then:
-        returnedList1 == [seqTrack1, seqTrack2]
-        returnedList2 == [fastqcProcessedFile1, fastqcProcessedFile2]
-        returnedList3 == [roddyBamFile1, roddyBamFile2]
+        TestCase.assertContainSame(returnedList1, [seqTrack1, seqTrack2])
+        TestCase.assertContainSame(returnedList2, [fastqcProcessedFile1, fastqcProcessedFile2])
+        TestCase.assertContainSame(returnedList3, [roddyBamFile1, roddyBamFile2])
 
         where:
         required << [true, false]
@@ -418,9 +419,9 @@ class ConcreteArtefactServiceIntegrationSpec extends Specification implements Ro
         List<RoddyBamFile> returnedList3 = service.getOutputArtefacts(step, OUTPUT_ROLE3, required)
 
         then:
-        returnedList1 == [seqTrack1, seqTrack2]
-        returnedList2 == [fastqcProcessedFile1, fastqcProcessedFile2]
-        returnedList3 == [roddyBamFile1, roddyBamFile2]
+        TestCase.assertContainSame(returnedList1, [seqTrack1, seqTrack2])
+        TestCase.assertContainSame(returnedList2, [fastqcProcessedFile1, fastqcProcessedFile2])
+        TestCase.assertContainSame(returnedList3, [roddyBamFile1, roddyBamFile2])
 
         where:
         required << [true, false]

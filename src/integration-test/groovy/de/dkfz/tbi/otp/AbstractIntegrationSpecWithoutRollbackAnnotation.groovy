@@ -40,9 +40,11 @@ abstract class AbstractIntegrationSpecWithoutRollbackAnnotation extends Specific
     Path tempDir
 
     void cleanup() {
-        boolean usePostgresDocker = "TRUE".equalsIgnoreCase(System.properties['usePostgresDocker'])
+        String usePostgresValue = System.getenv('USE_POSTGRES')
+        boolean usePostgresDockerCI = "DOCKER_CI".equalsIgnoreCase(usePostgresValue)
+        boolean usePostgresDocker = "TRUE".equalsIgnoreCase(usePostgresValue)
         Sql sql = new Sql(dataSource)
-        if (usePostgresDocker) {
+        if (usePostgresDocker || usePostgresDockerCI) {
             String query = """
                 SELECT
                     schemaname,

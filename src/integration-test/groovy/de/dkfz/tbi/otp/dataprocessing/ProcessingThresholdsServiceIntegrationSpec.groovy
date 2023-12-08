@@ -100,8 +100,8 @@ class ProcessingThresholdsServiceIntegrationSpec extends Specification implement
 
         then:
         thresholds.size() == 2
-        thresholds*.project == [seqTrack1.project, seqTrack2.project]
-        thresholds*.seqType == [seqTrack1.seqType, seqTrack2.seqType]
+        TestCase.assertContainSame(thresholds*.project, [seqTrack1.project, seqTrack2.project])
+        TestCase.assertContainSame(thresholds*.seqType, [seqTrack1.seqType, seqTrack2.seqType])
         TestCase.assertContainSame(thresholds*.sampleType, [seqTrack1.sampleType, seqTrack2.sampleType])
     }
 

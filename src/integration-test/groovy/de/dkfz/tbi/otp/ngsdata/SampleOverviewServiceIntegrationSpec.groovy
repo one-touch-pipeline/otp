@@ -26,6 +26,7 @@ import grails.testing.mixin.integration.Integration
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackage
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
@@ -63,7 +64,7 @@ class SampleOverviewServiceIntegrationSpec extends Specification implements User
 
         where:
         abstractBamFile                                                | _
-        ({ createBamFile() })                                                | _
+        ({ createBamFile() })                                          | _
         ({ DomainFactory.createFinishedExternallyProcessedBamFile() }) | _
     }
 
@@ -81,7 +82,7 @@ class SampleOverviewServiceIntegrationSpec extends Specification implements User
 
         where:
         abstractBamFile                                                | _
-        ({ createBamFile() })                                                | _
+        ({ createBamFile() })                                          | _
         ({ DomainFactory.createFinishedExternallyProcessedBamFile() }) | _
     }
 
@@ -101,7 +102,7 @@ class SampleOverviewServiceIntegrationSpec extends Specification implements User
 
         where:
         abstractBamFile                                                | _
-        ({ createBamFile() })                                                | _
+        ({ createBamFile() })                                          | _
         ({ DomainFactory.createFinishedExternallyProcessedBamFile() }) | _
     }
 
@@ -121,7 +122,7 @@ class SampleOverviewServiceIntegrationSpec extends Specification implements User
 
         where:
         finishedAbstractBamFile                                        | unfinishedAbstractBamFile
-        ({ createBamFile() })                                                | ({ createBamFile(workPackage: it) })
+        ({ createBamFile() })                                          | ({ createBamFile(workPackage: it) })
         ({ DomainFactory.createFinishedExternallyProcessedBamFile() }) | ({ DomainFactory.createExternallyProcessedBamFile(workPackage: it) })
     }
 
@@ -162,7 +163,7 @@ class SampleOverviewServiceIntegrationSpec extends Specification implements User
         List<String> results = sampleLaneService.sampleTypeByProject(project)
 
         then:
-        CollectionUtils.containSame(results, [sampleType1.name, sampleType2.name, sampleType3.name])
+        TestCase.assertContainSame(results, [sampleType1.name, sampleType2.name, sampleType3.name])
     }
 
     private void createAggregateSequences(Project project, SampleType sampleType) {

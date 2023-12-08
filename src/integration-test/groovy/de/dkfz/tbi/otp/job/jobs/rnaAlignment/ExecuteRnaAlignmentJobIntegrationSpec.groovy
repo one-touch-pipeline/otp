@@ -79,7 +79,6 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends Specification implements Rod
         executeRnaAlignmentJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
 
         then:
-        true
         AssertionError e = thrown()
         e.message.contains("There is not exactly one reverse complement adapter sequence available for BAM file")
     }

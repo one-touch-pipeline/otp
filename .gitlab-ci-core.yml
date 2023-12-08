@@ -140,6 +140,12 @@ unit tests:
 integration tests:
   extends: .abstract_base_template
   stage: test
+  services:
+    - name: postgres:14.9-bullseye
+      alias: postgres
+  variables:
+    USE_POSTGRES: "DOCKER_CI"
+    POSTGRES_HOST_AUTH_METHOD: "trust"
   script:
     - set -e
     - ./gradlew --build-cache integrationTest

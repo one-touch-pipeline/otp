@@ -73,9 +73,11 @@ ${jsonLiteral(departments[0])}
 ${jsonLiteral(departments[1])}
 ]"""
         UpdateDepartmentHeadsJob job = createJob(validAPIResult)
+
+        when:
         JSONArray departmentInfo = job.departmentInfo
 
-        expect:
+        then:
         departmentInfo.size() == 2
         departmentInfo.eachWithIndex { Map department, int i ->
             assert department[OU] == departments[i].ouNumber

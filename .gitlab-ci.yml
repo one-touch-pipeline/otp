@@ -27,7 +27,7 @@
 
 include:
   - local: '.gitlab-ci-core.yml'
-  - local: '.gitlab-ci-base-image.yml'
+  - local: '.gitlab-ci-create-image.yml'
   - local: '.gitlab-ci-merge-request.yml'
   - template: Jobs/Dependency-Scanning.gitlab-ci.yml
 

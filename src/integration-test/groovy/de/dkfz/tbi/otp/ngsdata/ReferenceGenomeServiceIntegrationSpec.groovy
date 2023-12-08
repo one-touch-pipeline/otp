@@ -26,6 +26,7 @@ import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 import spock.lang.TempDir
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -162,7 +163,7 @@ class ReferenceGenomeServiceIntegrationSpec extends Specification implements Use
         statSizeFileName1.referenceGenome == referenceGenome
 
         ExternalWorkflowConfigSelector selector = CollectionUtils.exactlyOneElement(ExternalWorkflowConfigSelector.all)
-        selector.referenceGenomes == [referenceGenome] as Set
+        TestCase.assertContainSame(selector.referenceGenomes, [referenceGenome])
         selector.fragments.first().configValues.contains(statSizeFileName)
     }
 

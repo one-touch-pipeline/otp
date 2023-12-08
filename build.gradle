@@ -23,8 +23,6 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
 
-import static java.util.concurrent.TimeUnit.SECONDS
-
 buildscript {
     repositories {
         mavenLocal()
@@ -154,7 +152,6 @@ processResources.dependsOn tasks.generateOpenApi
 sourceSets.main.java.srcDir "${generatedSourcesDir}/src/main/java"
 sourceSets.main.resources.srcDir "${generatedSourcesDir}/src/main/resources"
 
-
 Closure filterCoverage = { classDirectories ->
     classDirectories.setFrom(files(classDirectories.files.collect {
         fileTree(dir: it, exclude: [
@@ -251,27 +248,36 @@ integrationTest() {
     useJUnitPlatform()
     shouldRunAfter test
     finalizedBy jacocoIntegrationTestReport // report is always generated after tests run
-    boolean usePostgresDocker = "TRUE".equalsIgnoreCase(System.getenv('USE_POSTGRES'))
-    systemProperty "usePostgresDocker", usePostgresDocker.toString()
+    String databaseForIntegrationTest = System.getenv('USE_POSTGRES')
+    boolean usePostgresDockerCI = "DOCKER_CI".equalsIgnoreCase(databaseForIntegrationTest)
+    boolean usePostgresDocker = "TRUE".equalsIgnoreCase(databaseForIntegrationTest)
+    systemProperty "databaseForIntegrationTest", usePostgresDockerCI ? 'DOCKER_CI' : usePostgresDocker ? 'DOCKER' : 'H2'
 
-    if (usePostgresDocker) {
+    if (usePostgresDockerCI) {
+        doFirst {
+            println "use postgres docker ci"
+        }
+    } else if (usePostgresDocker) {
         List<String> dcs = []
         doFirst {
             println "use postgres docker"
 
             // Where is docker-compose?
-            String dockerCompose = '/usr/bin/which docker-compose'.execute()?.text?.trim()
-            if (!dockerCompose) {
-                throw new IllegalStateException('Unable to find docker-compose. Is it installed and available via PATH?')
+            String docker = '/usr/bin/which docker'.execute()?.text?.trim()
+
+            if (!docker) {
+                throw new IllegalStateException('Unable to find docker. Is it installed and available via PATH?')
             }
+            String dockerCompose = "${docker} compose"
 
             List<String> dockerPorts = (0..maxParallelForks - 1).collect {
 
                 // Setup the project name for use by the Continuous Integration server the prevent race conditions.
-                String projectName = "--project-name otptest-build-${System.getenv('BUILD_NUMBER') ?: 'DEFAULT'}-w-${it}"
+                String projectName = "--project-name otptest-build-${System.getenv('BUILD_NUMBER') ?: 'DEFAULT'}-w-${it}".toLowerCase()
 
                 // Construct command string
-                String dc = "${dockerCompose} ${projectName} --file docker/otp-test/docker-compose.yml"
+                String dc = "${dockerCompose} ${projectName} --file docker/integration-test-database/docker-compose.yml"
+                println "command: ${dc}"
                 dcs << dc
 
                 //cleanup in case the container still exist
@@ -279,24 +285,39 @@ integrationTest() {
                 "${dc} rm -f".execute().waitFor()
 
                 // Start a fresh container
-                if ("${dc} up -d".execute().waitFor() != 0) {
+                Process dockerStart = "${dc} up -d".execute()
+                StringBuffer dockerStartStdout = new StringBuffer()
+                StringBuffer dockerStartStderr = new StringBuffer()
+                dockerStart.waitForProcessOutput(dockerStartStdout, dockerStartStderr)
+                if (dockerStart.exitValue() != 0) {
+                    println "exitCode: ${dockerStart.exitValue()}"
+                    println "stdout: ${dockerStartStdout}"
+                    println "stderr: ${dockerStartStderr}"
                     throw new IllegalStateException('Unable to start new database container.')
                 }
                 // Get the (dynamically assigned local) port
-                def dockerProcess = "${dc} port integration 5432".execute()
+                Process dockerProcess = "${dc} port integration-test 5432".execute()
+                StringBuffer dockerProcessStdout = new StringBuffer()
+                StringBuffer dockerProcessStderr = new StringBuffer()
+                dockerProcess.waitForProcessOutput(dockerProcessStdout, dockerProcessStderr)
                 // If we do not get a reply in time or the return code indicates a failure, fail.
-                if (!dockerProcess.waitFor(5, SECONDS) || dockerProcess.exitValue() != 0) {
+                if (dockerProcess.exitValue() != 0) {
+                    println "exitCode: ${dockerProcess.exitValue()}"
+                    println "stdout: ${dockerProcessStdout}"
+                    println "stderr: ${dockerProcessStderr}"
                     throw new IllegalStateException('Unable to get port information from Docker. Is the test database container running?')
                 }
-                String dockerPort = dockerProcess.text.split(':').last().trim() // should work for IPv6 also
+                String dockerPort = dockerProcessStdout.toString().split(':').last().trim() // should work for IPv6 also
                 return dockerPort
             }
 
             systemProperty "maxParallelForks", maxParallelForks
             systemProperty "dockerPorts", dockerPorts.join(',')
+            println "postgres docker prepared"
         }
 
         doLast {
+            println "shutdown postgres docker"
             // Stop and destroy the container
             dcs.each { dc ->
                 "${dc} stop".execute().waitFor()
@@ -384,7 +405,6 @@ dependencies {
     assets "com.bertramlabs.plugins:less-asset-pipeline:4.4.0"
     //assets "com.bertramlabs.plugins:sass-asset-pipeline:4.4.0" // will fail the assertCompile task
 
-
     // JDBC
     runtimeOnly 'org.postgresql:postgresql:42.7.1'
 
@@ -426,7 +446,7 @@ dependencies {
     implementation "org.grails.plugins:grails-console:2.1.1"
     implementation "org.grails.plugins:mail:3.0.0"
 
-    implementation ("org.grails.plugins:database-migration:4.2.1") {
+    implementation("org.grails.plugins:database-migration:4.2.1") {
         exclude group: "org.grails", module: "grails-shell"
     }
     implementation 'org.liquibase:liquibase-core:4.19.0'

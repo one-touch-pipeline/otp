@@ -21,14 +21,14 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback
 @Integration
@@ -77,7 +77,7 @@ class WorkflowServiceIntegrationSpec extends Specification implements WorkflowSy
         WorkflowRun.count == 3
 
         WorkflowArtefact newWorkflowArtefact = WorkflowArtefact.last()
-        CollectionUtils.containSame(newRun.outputArtefacts.values(), [newWorkflowArtefact])
+        TestCase.assertContainSame(newRun.outputArtefacts.values(), [newWorkflowArtefact])
 
         newWorkflowArtefact.state == WorkflowArtefact.State.PLANNED_OR_RUNNING
         newWorkflowArtefact.producedBy == newRun

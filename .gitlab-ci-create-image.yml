@@ -53,3 +53,33 @@ build-base-image-depend:
   script:
     - echo "On none master, scheduled pipelines should fail. Otherwise, the branch has a successfully pipeline and could be merged."
     - exit 1
+
+
+
+build-database-docker-image:
+  when: manual
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [ "" ]
+  stage: build
+  needs: []
+  variables:
+    IMAGE_NAME: otp-ci-integration-test-database
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      changes:
+        compare_to: 'refs/heads/master'
+        paths:
+          - docker/integration-test-build-database/**/*
+  script:
+    - CURRENT_DATE_TAG=$(date '+%Y-%m-%d')
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+    - >-
+      /kaniko/executor
+      --context "${CI_PROJECT_DIR}/docker/integration-test-build-database/"
+      --dockerfile "./Dockerfile"
+      --destination "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${CURRENT_DATE_TAG}"
+      --destination "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:latest"

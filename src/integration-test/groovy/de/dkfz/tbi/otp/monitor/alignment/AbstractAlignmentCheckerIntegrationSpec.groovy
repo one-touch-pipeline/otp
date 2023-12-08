@@ -460,7 +460,7 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification imp
         0 * output._
 
         then:
-        finishedBamFiles == result
+        TestCase.assertContainSame(finishedBamFiles, result)
     }
 
     void "handle, if no SeqTracks given, then return empty list and do not create output"() {

@@ -73,7 +73,7 @@ class ParseAceseqQcJobSpec extends Specification {
 
         then:
         AceseqQc.findAllByAceseqInstance(instance).size() == 2
-        TestCase.containSame(AceseqQc.findAllByAceseqInstance(instance)*.number, [1, 2])
+        TestCase.assertContainSame(AceseqQc.findAllByAceseqInstance(instance)*.number, [1, 2])
         def qc1 = CollectionUtils.atMostOneElement(AceseqQc.findAllByAceseqInstanceAndNumber(instance, 1))
         qc1.tcc == 0.5d
         qc1.ploidyFactor == "2.27"

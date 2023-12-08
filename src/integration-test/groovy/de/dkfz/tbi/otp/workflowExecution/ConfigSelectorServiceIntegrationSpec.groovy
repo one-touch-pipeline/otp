@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
@@ -178,7 +179,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         ])
 
         expect:
-        CollectionUtils.containSame(result, service.findAllSelectors(selectSelectorExtendedCriteria)*.name)
+        TestCase.assertContainSame(result, service.findAllSelectors(selectSelectorExtendedCriteria)*.name)
 
         where:
         x | projects                                                          | workflowVersions                                                                     | workflows                                                          | seqTypes                                                          | referenceGenomes                                                          | libraryPreparationKits                                                          | result
@@ -221,7 +222,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
                 libraryPreparationKits: libraryPreparationKits(),
         ])
         expect:
-        CollectionUtils.containSame(result, service.findAllRelatedSelectors(selectorExtendedCriteria)*.name)
+        TestCase.assertContainSame(result, service.findAllRelatedSelectors(selectorExtendedCriteria)*.name)
 
         where:
         x | projects                        | workflowVersions                                   | workflows                        | seqTypes                        | referenceGenomes                        | libraryPreparationKits                        | result
@@ -244,7 +245,7 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         createExternalWorkflowConfigSelector([name: "ewcs4"])
 
         expect:
-        CollectionUtils.containSame(result, service.findRelatedSelectorsByName(name())*.name)
+        TestCase.assertContainSame(result, service.findRelatedSelectorsByName(name())*.name)
 
         where:
         x | name        | result

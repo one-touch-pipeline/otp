@@ -200,7 +200,7 @@ class CellRangerDataCleanupJobIntegrationSpec extends Specification implements C
         }
 
         expect: "Finds only old unfinal informed items"
-        CollectionUtils.containSame(cellRangerDataCleanupJob.resultsToDelete, [mwps[0]])
+        TestCase.assertContainSame(cellRangerDataCleanupJob.resultsToDelete, [mwps[0]])
     }
 
     void "getResultsNeedingReminder, only finds undecided mwps older than the deadline"() {
@@ -233,7 +233,7 @@ class CellRangerDataCleanupJobIntegrationSpec extends Specification implements C
         }
 
         expect: "Finds only old unfinal items"
-        CollectionUtils.containSame(cellRangerDataCleanupJob.resultsNeedingReminder, [mwps[0]])
+        TestCase.assertContainSame(cellRangerDataCleanupJob.resultsNeedingReminder, [mwps[0]])
     }
 
     void "buildReminderMessageBody, checking if the service call is correct"() {
