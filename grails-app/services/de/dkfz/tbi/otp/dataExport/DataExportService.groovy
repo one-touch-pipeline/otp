@@ -88,20 +88,22 @@ class DataExportService {
                                                             copyTargetBase ->
         if (dataExportInput.checkFileStatus) {
             consoleBuilder.append("\n************************************ FASTQ ************************************\n")
-            consoleBuilder.append("Found ${dataExportInput.seqTrackList.size()} lanes:\n")
+            if (dataExportInput.copyWithdrawnData) {
+                consoleBuilder.append("Found ${dataExportInput.seqTrackList.size()} lanes:\n")
+            } else {
+                consoleBuilder.append("Found ${dataExportInput.seqTrackList.findAll { it.isWithdrawn() }.size()} lanes:\n")
+            }
         }
-
-        FileSystem fileSystem = fileSystemService.remoteFileSystem
 
         dataExportInput.seqTrackList.each { SeqTrack seqTrack ->
             String seqTrackPid = seqTrack.individual.pid
             String seqType = seqTrack.seqType.dirName
             String sampleType = seqTrack.sampleType.dirName
-            if (dataExportInput.checkFileStatus) {
+            if (dataExportInput.checkFileStatus && !seqTrack.isWithdrawn()) {
                 consoleBuilder.append("\n${seqTrack.individual}\t${seqTrack.seqType}\t${seqTrack.sampleType.name}\n")
             }
             seqTrack.sequenceFiles.findAll { dataExportInput.copyWithdrawnData ? true : !it.fileWithdrawn }.each { RawSequenceFile rawSequenceFile ->
-                Path currentFile = fileSystem.getPath(lsdfFilesService.getFileFinalPath(rawSequenceFile))
+                Path currentFile = lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile)
                 if (Files.exists(currentFile)) {
                     if (!dataExportInput.checkFileStatus) {
                         Path targetFolderWithPid = dataExportInput.targetFolder.resolve(rawSequenceFile.individual.pid)

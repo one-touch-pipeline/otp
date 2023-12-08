@@ -124,12 +124,12 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
     void "exportRawSequenceFiles, combination of different inputs, should return correct scripts"() {
         given:
         final DataExportInput dataExportInput = createDataFileInput(checkFileStatus, getFileList)
-
+        Path finalFile
         GroovyMock([global: true], Files)
         Files.exists(_) >> true
 
         service.lsdfFilesService = Mock(LsdfFilesService) {
-            getFileFinalPathCount * getFileFinalPath(_) >> 'finalFile'
+            getFileFinalPathCount * getFileFinalPathAsPath(_) >> finalFile
             getFilePathInViewByPidCount * getFileViewByPidPathAsPath(_) >> Paths.get('/vbp/path/somePid')
         }
         service.individualService = Mock(IndividualService) {
