@@ -91,7 +91,7 @@ class DataExportService {
             if (dataExportInput.copyWithdrawnData) {
                 consoleBuilder.append("Found ${dataExportInput.seqTrackList.size()} lanes:\n")
             } else {
-                consoleBuilder.append("Found ${dataExportInput.seqTrackList.findAll { it.isWithdrawn() }.size()} lanes:\n")
+                consoleBuilder.append("Found ${dataExportInput.seqTrackList.findAll { !it.isWithdrawn() }.size()} lanes:\n")
             }
         }
 
