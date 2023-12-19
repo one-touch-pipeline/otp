@@ -40,7 +40,7 @@
 
     <div id="collapse-${index}" class="collapse show" aria-labelledby="heading-${index}" data-parent="#accordion2">
         <g:render template="/templates/piUserFormItem"
-                  model="[index: index, piUser: piUser, availableRoles: availableRoles, checkboxes: ['otpAccess', 'fileAccess', 'manageUsers'], accordionItem: true,
+                  model="[index                     : index, piUser: piUser, availableRoles: availableRoles, checkboxes: ['otpAccess', 'fileAccess', 'manageUsers'], accordionItem: true,
                           departmentPiFeatureEnabled: departmentPiFeatureEnabled]"/>
     </div>
 </div>

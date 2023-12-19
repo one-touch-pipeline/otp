@@ -21,10 +21,11 @@
  */
 @import "../../colors";
 
-.helper-icon{
+.helper-icon {
   color: @primary;
   font-size: 1.3em;
 }
+
 .submit-area {
   display: flex;
   flex-direction: column;
@@ -44,7 +45,7 @@
   float: right;
 }
 
-.list-group{
+.list-group {
   max-height: 300px;
   margin-bottom: 10px;
   overflow-y: scroll;
@@ -53,4 +54,13 @@
 
 .wrap-line-breaks {
   white-space: pre-wrap;
+}
+
+// Should hide remove button for pi option in pi selection
+.pi-role-select-row li[title="PI"] {
+  padding-left: 0.75rem !important;
+
+  .select2-selection__choice__remove {
+    display: none;
+  }
 }

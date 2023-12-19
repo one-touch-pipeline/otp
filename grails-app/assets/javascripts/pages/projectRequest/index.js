@@ -226,6 +226,19 @@ $(() => {
     }
   };
 
+  // Should always add pi role, when its deleted or changed, such that it cant be deselected
+  $('.pi-role-select').on('change', (e) => {
+    const target = $(e.target);
+
+    // Search value of PI option
+    const piValue = Object.values(target.find('option')).find((option) => option.label === 'PI').value;
+
+    // Add PI option to selected options
+    const values = target.val();
+    values.push(piValue);
+    target.val(values).trigger('change.select2');
+  });
+
   $('.show-head-checkbox').on('change', (e) => {
     const target = $(e.target);
     const showHead = target.prop('checked');

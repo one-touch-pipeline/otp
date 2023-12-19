@@ -36,7 +36,7 @@
 
 <div class="${accordionItem ? '' : 'card'}">
     <div class="card-body pb-1">
-        <div class="form-group row">
+        <div class="mb-3 row">
             <g:set var="description" value="${listMode ? "piUsers[${index}].username" : "username"}"/>
             <label class="col-sm-2 col-form-label" for="${description}">${g.message(code: "projectUser.addMember.username")}</label>
             <g:if test="${departmentPiFeatureEnabled}">
@@ -51,6 +51,7 @@
                     <label class="col-form-label" for="${description}_checkbox">
                         ${g.message(code: "projectUser.addPI.showHeads")}
                     </label>
+                    <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "projectUser.addPI.showHeads.info")}"></i>
                 </div>
             </g:if>
             <g:else>
@@ -64,7 +65,7 @@
             </g:else>
         </div>
 
-        <div class="form-group row">
+        <div class="mb-3 row pi-role-select-row">
             <g:set var="description" value="${listMode ? "piUsers[${index}].projectRoles" : "projectRoles"}"/>
             <label class="col-sm-2 col-form-label"
                    for="${description}">${g.message(code: "projectUser.addMember.role")}</label>
@@ -87,7 +88,7 @@
             </div>
         </div>
 
-        <div class="form-group row">
+        <div class="mb-3 row">
             <g:if test="${checkboxes.contains('otpAccess')}">
                 <g:set var="description" value="${listMode ? "piUsers[${index}].accessToOtp" : "accessToOtp"}"/>
                 <div class="col-sm-2">
