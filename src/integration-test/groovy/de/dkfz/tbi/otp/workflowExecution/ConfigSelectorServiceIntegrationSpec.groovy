@@ -70,8 +70,8 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         Workflow workflow2 = createWorkflow(name: "w2")
         createWorkflow(name: "w3")
 
-        WorkflowVersion workflowVersion1 = createWorkflowVersion([workflow: workflow1, workflowVersion: "v1"])
-        WorkflowVersion workflowVersion2 = createWorkflowVersion([workflow: workflow2, workflowVersion: "v2"])
+        WorkflowVersion workflowVersion1 = createWorkflowVersion([apiVersion: createWorkflowApiVersion(workflow: workflow1), workflowVersion: "v1"])
+        WorkflowVersion workflowVersion2 = createWorkflowVersion([apiVersion: createWorkflowApiVersion(workflow: workflow2), workflowVersion: "v2"])
 
         SeqType seqType1 = createSeqType(name: "s1")
         SeqType seqType2 = createSeqType(name: "s2")
@@ -139,8 +139,8 @@ class ConfigSelectorServiceIntegrationSpec extends Specification implements Work
         Workflow workflow1 = createWorkflow(name: "w1")
         Workflow workflow2 = createWorkflow(name: "w2")
 
-        WorkflowVersion workflowVersion1 = createWorkflowVersion([workflow: workflow1, workflowVersion: "v1"])
-        WorkflowVersion workflowVersion2 = createWorkflowVersion([workflow: workflow2, workflowVersion: "v2"])
+        WorkflowVersion workflowVersion1 = createWorkflowVersion([apiVersion: createWorkflowApiVersion(workflow: workflow1), workflowVersion: "v1"])
+        WorkflowVersion workflowVersion2 = createWorkflowVersion([apiVersion: createWorkflowApiVersion(workflow: workflow2), workflowVersion: "v2"])
 
         ExternalWorkflowConfigSelector selector = createExternalWorkflowConfigSelector([
                 workflows       : [workflow1, workflow2],

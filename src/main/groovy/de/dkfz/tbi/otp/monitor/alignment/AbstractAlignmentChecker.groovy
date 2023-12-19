@@ -164,7 +164,7 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
                             where
                                 config.project = seqTrack.sample.individual.project
                                 and config.seqType = seqTrack.seqType
-                                and config.workflowVersion.workflow = :workflow
+                                and config.workflowVersion.apiVersion.workflow = :workflow
                                 and config.deprecationDate is null
                         )
                 ''', [

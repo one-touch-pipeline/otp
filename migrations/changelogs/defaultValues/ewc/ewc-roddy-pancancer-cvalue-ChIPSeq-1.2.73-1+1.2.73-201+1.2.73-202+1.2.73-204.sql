@@ -21,7 +21,8 @@
  */
 
 INSERT INTO external_workflow_config_fragment(id, version, date_created, last_updated, object_version, name, config_values)
-VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue values for PanCancer alignment 1.2.73-1, 1.2.73-201, 1.2.73-202, 1.2.73-204 ChIP Seq',
+VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0,
+        'Default cvalue values for PanCancer alignment 1.2.73-1, 1.2.73-201, 1.2.73-202, 1.2.73-204 ChIP Seq',
         '{' ||
         '    "RODDY": {' ||
         '        "cvalues": {' ||
@@ -34,7 +35,8 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue value
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, priority, selector_type, external_workflow_config_fragment_id)
-VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 'Default cvalue values for PanCancer alignment 1.2.73-1, 1.2.73-201, 1.2.73-202, 1.2.73-204 ChIP Seq', 22,
+VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 'Default cvalue values for PanCancer alignment 1.2.73-1, 1.2.73-201, 1.2.73-202, 1.2.73-204 ChIP Seq',
+        22,
         'DEFAULT_VALUES', (SELECT id
                            FROM external_workflow_config_fragment
                            WHERE name = 'Default cvalue values for PanCancer alignment 1.2.73-1, 1.2.73-201, 1.2.73-202, 1.2.73-204 ChIP Seq'
@@ -54,7 +56,8 @@ SELECT (SELECT id
         WHERE name = 'Default cvalue values for PanCancer alignment 1.2.73-1, 1.2.73-201, 1.2.73-202, 1.2.73-204 ChIP Seq'),
        (SELECT id
         FROM workflow_version
-        WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment')
+        WHERE api_version_id =
+              (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment'))
           AND workflow_version.workflow_version = '1.2.73-1')
 ON CONFLICT DO NOTHING;
 
@@ -64,7 +67,8 @@ SELECT (SELECT id
         WHERE name = 'Default cvalue values for PanCancer alignment 1.2.73-1, 1.2.73-201, 1.2.73-202, 1.2.73-204 ChIP Seq'),
        (SELECT id
         FROM workflow_version
-        WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment')
+        WHERE api_version_id =
+              (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment'))
           AND workflow_version.workflow_version = '1.2.73-201')
 ON CONFLICT DO NOTHING;
 
@@ -74,9 +78,10 @@ SELECT (SELECT id
         WHERE name = 'Default cvalue values for PanCancer alignment 1.2.73-1, 1.2.73-201, 1.2.73-202, 1.2.73-204 ChIP Seq'),
        (SELECT id
         FROM workflow_version
-        WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment')
+        WHERE api_version_id =
+              (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment'))
           AND workflow_version.workflow_version = '1.2.73-202')
-    ON CONFLICT DO NOTHING;
+ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
 SELECT (SELECT id
@@ -84,7 +89,8 @@ SELECT (SELECT id
         WHERE name = 'Default cvalue values for PanCancer alignment 1.2.73-1, 1.2.73-201, 1.2.73-202, 1.2.73-204 ChIP Seq'),
        (SELECT id
         FROM workflow_version
-        WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment')
+        WHERE api_version_id =
+              (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment'))
           AND workflow_version.workflow_version = '1.2.73-204')
 ON CONFLICT DO NOTHING;
 

@@ -147,7 +147,9 @@ class WorkflowService {
             return []
         }
         return (WorkflowVersion.createCriteria().list {
-            "in"("workflow", workflows)
+            apiVersion {
+                "in"("workflow", workflows)
+            }
         } as List<WorkflowVersion>).collectMany { workflowVersion ->
             workflowVersion.supportedSeqTypes
         }.unique()
@@ -159,7 +161,9 @@ class WorkflowService {
         }
 
         return (WorkflowVersion.createCriteria().list {
-            "eq"("workflow", workflow)
+            apiVersion {
+                "eq"("workflow", workflow)
+            }
         } as List<WorkflowVersion>).collectMany { workflowVersion ->
             workflowVersion.supportedSeqTypes
         }.unique()

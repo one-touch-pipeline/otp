@@ -79,7 +79,7 @@ class WorkflowSelectionController implements CheckAndCall {
             WorkflowVersion version = atMostOneElement(WorkflowVersionSelector.findAllByProjectAndDeprecationDateIsNull(project).findAll {
                 it.workflowVersion.workflow == workflow
             })?.workflowVersion
-            List<Version> versions = WorkflowVersion.findAllByWorkflow(workflow).sort { a, b ->
+            List<Version> versions = workflowVersionService.findAllByWorkflow(workflow).sort { a, b ->
                 new WorkflowVersionComparatorConsideringDefaultAndDeprecated(workflow.defaultVersion).compare(a, b)
             }.collect {
                 Version.fromWorkflowVersion(it)
@@ -105,7 +105,7 @@ class WorkflowSelectionController implements CheckAndCall {
         analysisWorkflows.each { workflow ->
             workflowService.getSupportedSeqTypesOfVersions(workflow).sort { it.displayNameWithLibraryLayout }.each { seqType ->
                 WorkflowVersionSelector wvSelector = workflowVersionSelectorService.findByProjectAndWorkflowAndSeqType(project, workflow, seqType)
-                List<Version> versions = WorkflowVersion.findAllByWorkflow(workflow).sort { a, b ->
+                List<Version> versions = workflowVersionService.findAllByWorkflow(workflow).sort { a, b ->
                     new WorkflowVersionComparatorConsideringDefaultAndDeprecated(workflow.defaultVersion).compare(a, b)
                 }.collect { Version.fromWorkflowVersion(it) }
                 analysisConf.add(new WorkflowVersionConfValue(wvSelector.id, workflow, seqType, versions, wvSelector.workflowVersion, null))

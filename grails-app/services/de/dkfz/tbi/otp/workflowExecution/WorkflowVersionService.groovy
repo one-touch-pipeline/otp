@@ -42,7 +42,11 @@ class WorkflowVersionService {
     }
 
     List<WorkflowVersion> findAllByWorkflow(Workflow workflow) {
-        return WorkflowVersion.findAllByWorkflow(workflow)
+        return WorkflowVersion.createCriteria().list {
+            apiVersion {
+                eq('workflow', workflow)
+            }
+        }
     }
 
     List<WorkflowVersion> findAllByWorkflows(List<Workflow> workflows) {
@@ -50,14 +54,18 @@ class WorkflowVersionService {
             return []
         }
         return WorkflowVersion.createCriteria().list {
-            'in'("workflow", workflows)
+            apiVersion {
+                'in'("workflow", workflows)
+            }
         } as List<WorkflowVersion>
     }
 
     List<WorkflowVersion> findAllByWorkflowId(Long workflowId) {
         return WorkflowVersion.createCriteria().list {
-            workflow {
-                eq("id", workflowId)
+            apiVersion {
+                workflow {
+                    eq("id", workflowId)
+                }
             }
         } as List<WorkflowVersion>
     }
@@ -65,7 +73,9 @@ class WorkflowVersionService {
     List<WorkflowVersion> findAllByWorkflowSeqTypeAndReferenceGenome(Workflow workflow, SeqType seqType, ReferenceGenome referenceGenome) {
         return WorkflowVersion.createCriteria().list {
             if (workflow) {
-                eq("workflow", workflow)
+                apiVersion {
+                    eq("workflow", workflow)
+                }
             }
             if (seqType) {
                 supportedSeqTypes {

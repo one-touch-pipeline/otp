@@ -37,8 +37,8 @@ class ExternalWorkflowConfigSelectorIntegrationSpec extends Specification implem
         Workflow workflow1 = createWorkflow(name: "w1")
         Workflow workflow2 = createWorkflow(name: "w2")
 
-        createWorkflowVersion([workflow: workflow1, workflowVersion: "v1"])
-        createWorkflowVersion([workflow: workflow2, workflowVersion: "v2"])
+        createWorkflowVersion([apiVersion: createWorkflowApiVersion(workflow: workflow1), workflowVersion: "v1"])
+        createWorkflowVersion([apiVersion: createWorkflowApiVersion(workflow: workflow2), workflowVersion: "v2"])
     }
 
     void "test validation of fragment, keys are unique"() {

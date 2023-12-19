@@ -70,7 +70,7 @@ class WorkflowVersionSelectorServiceSpec extends Specification implements Servic
 
         WorkflowVersionSelector existing = createWorkflowVersionSelector(project: project, seqType: seqType)
 
-        WorkflowVersion workflowVersion = createWorkflowVersion(workflow: existing.workflowVersion.workflow)
+        WorkflowVersion workflowVersion = createWorkflowVersion(apiVersion: createWorkflowApiVersion(workflow: existing.workflowVersion.workflow))
 
         when:
         service.createOrUpdate(project, seqType, workflowVersion)

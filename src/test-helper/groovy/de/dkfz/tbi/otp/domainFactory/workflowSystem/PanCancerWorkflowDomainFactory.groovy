@@ -33,8 +33,8 @@ trait PanCancerWorkflowDomainFactory extends WorkflowSystemDomainFactory {
 
     WorkflowVersion createPanCancerWorkflowVersion(String version = "1.2.73-204") {
         return createWorkflowVersion([
-                workflow       : findOrCreatePanCancerWorkflow(),
-                workflowVersion: version,
+                apiVersion: createWorkflowApiVersion(workflow: findOrCreatePanCancerWorkflow()),
+                workflowVersion   : version,
         ])
     }
 }

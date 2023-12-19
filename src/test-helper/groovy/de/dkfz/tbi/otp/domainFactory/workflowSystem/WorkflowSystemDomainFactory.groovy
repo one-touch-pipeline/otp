@@ -61,12 +61,22 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
         ], properties)
     }
 
+    WorkflowApiVersion createWorkflowApiVersion(Map properties = [:]) {
+        Workflow workflow = properties.workflow ?: createWorkflow()
+        return createDomainObject(WorkflowApiVersion, [
+                workflow  : { workflow },
+                identifier: nextId,
+        ], properties)
+    }
+
     WorkflowRun createWorkflowRun(Map properties = [:]) {
         Workflow workflow = properties.workflow ?: properties.restartedFrom?.workflow ?: properties.workflowVersion?.workflow ?: createWorkflow()
+        WorkflowVersion workflowVersion = properties.workflowVersion ?: properties.restartedFrom?.workflowVersion ?:
+                createWorkflowVersion(apiVersion: createWorkflowApiVersion(workflow: workflow))
         return createDomainObject(WorkflowRun, [
                 state           : WorkflowRun.State.PENDING,
                 workflow        : { workflow },
-                workflowVersion : { properties.restartedFrom?.workflowVersion ?: createWorkflowVersion(workflow: workflow) },
+                workflowVersion : { workflowVersion },
                 priority        : { createProcessingPriority() },
                 project         : { createProject() },
                 workDirectory   : "dir_${nextId}",
@@ -172,8 +182,8 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
 
     WorkflowVersion createWorkflowVersion(Map properties = [:]) {
         return createDomainObject(WorkflowVersion, [
-                workflow       : { createWorkflow() },
-                workflowVersion: "${nextId}.0",
+                apiVersion: { createWorkflowApiVersion() },
+                workflowVersion   : "${nextId}.0",
         ], properties)
     }
 
@@ -181,7 +191,7 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
         Set<Workflow> workflows = properties.workflows ?: properties.workflowVersions ? properties.workflowVersions*.workflow : [createWorkflow()] as Set
         return createDomainObject(ExternalWorkflowConfigSelector, [
                 name                          : "externalWorkflowConfigSelectorName_${nextId}",
-                workflowVersions              : { [createWorkflowVersion(workflow: workflows.first())] },
+                workflowVersions              : { [createWorkflowVersion(apiVersion: createWorkflowApiVersion(workflow: workflows.first()))] },
                 workflows                     : workflows,
                 referenceGenomes              : { [createReferenceGenome()] },
                 libraryPreparationKits        : { [createLibraryPreparationKit()] },

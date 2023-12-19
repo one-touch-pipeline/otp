@@ -90,7 +90,14 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification imp
             return createWorkflowVersionSelector(
                     project: project,
                     seqType: seqType,
-                    workflowVersion: WorkflowVersion.findByWorkflow(workflow) ?: createWorkflowVersion(workflow: workflow, workflowVersion: "-"),
+                    workflowVersion: WorkflowVersion.createCriteria().get {
+                        apiVersion {
+                            eq('workflow', workflow)
+                        }
+                    } ?: createWorkflowVersion([
+                            apiVersion     : createWorkflowApiVersion(workflow: workflow),
+                            workflowVersion: "-",
+                    ]),
             )
         }
     }
@@ -102,7 +109,14 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification imp
                 createWorkflowVersionSelector([
                         project        : it.project,
                         seqType        : it.seqType,
-                        workflowVersion: WorkflowVersion.findByWorkflow(w ?: workflow) ?: createWorkflowVersion(workflow: w ?: workflow, workflowVersion: "-"),
+                        workflowVersion: WorkflowVersion.createCriteria().get {
+                            apiVersion {
+                                eq('workflow', w ?: workflow)
+                            }
+                        } ?: createWorkflowVersion(
+                                apiVersion: createWorkflowApiVersion(workflow: w ?: workflow),
+                                workflowVersion: "-",
+                        ),
                 ] + configProperties)
             } else {
                 DomainFactory.createRoddyWorkflowConfig([

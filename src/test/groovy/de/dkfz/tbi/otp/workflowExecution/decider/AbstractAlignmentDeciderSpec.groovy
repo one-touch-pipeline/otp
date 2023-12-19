@@ -970,7 +970,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         }
 
         workflow = createWorkflow([name: decider.workflowName])
-        workflowVersion = createWorkflowVersion([workflow: workflow])
+        workflowVersion = createWorkflowVersion([apiVersion: createWorkflowApiVersion(workflow: workflow)])
         createMergingCriteria([
                 project: seqTrack1.project,
                 seqType: seqTrack1.seqType,

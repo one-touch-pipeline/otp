@@ -54,7 +54,11 @@ class MergingCriteria implements Entity {
             }
 
             Workflow wgbsWorkflow = CollectionUtils.exactlyOneElement(Workflow.findAllByName(WgbsWorkflow.WORKFLOW))
-            Set<SeqType> supportedSeqTypes = WorkflowVersion.findAllByWorkflow(wgbsWorkflow).collectMany { wv -> wv.supportedSeqTypes }
+            Set<SeqType> supportedSeqTypes = (WorkflowVersion.createCriteria().list {
+                apiVersion {
+                    eq('workflow', wgbsWorkflow)
+                }
+            } as Set<WorkflowVersion>).collectMany { it.supportedSeqTypes }
             if (obj.seqType in supportedSeqTypes && val) {
                 return "wgbs"
             }

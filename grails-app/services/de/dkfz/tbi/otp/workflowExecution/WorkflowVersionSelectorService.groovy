@@ -42,7 +42,9 @@ class WorkflowVersionSelectorService {
             isNull('deprecationDate')
             eq('project', project)
             workflowVersion {
-                eq("workflow", workflow)
+                apiVersion {
+                    eq("workflow", workflow)
+                }
             }
         } as List<WorkflowVersionSelector>
     }
@@ -53,7 +55,9 @@ class WorkflowVersionSelectorService {
             eq('seqType', seqType)
             eq('project', project)
             workflowVersion {
-                eq("workflow", workflow)
+                apiVersion {
+                    eq("workflow", workflow)
+                }
             }
         } as WorkflowVersionSelector
     }

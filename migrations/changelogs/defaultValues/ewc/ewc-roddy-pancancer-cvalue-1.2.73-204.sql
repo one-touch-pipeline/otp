@@ -431,8 +431,10 @@ ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, priority, selector_type, external_workflow_config_fragment_id)
 VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 'Default cvalue values for PanCancer alignment 1.2.73-204', 6, 'DEFAULT_VALUES',
-        (SELECT id FROM external_workflow_config_fragment WHERE name = 'Default cvalue values for PanCancer alignment 1.2.73-204'
-                                                            AND deprecation_date IS NULL))
+        (SELECT id
+         FROM external_workflow_config_fragment
+         WHERE name = 'Default cvalue values for PanCancer alignment 1.2.73-204'
+           AND deprecation_date IS NULL))
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector_workflow (external_workflow_config_selector_workflows_id, workflow_id)
@@ -444,6 +446,7 @@ INSERT INTO external_workflow_config_selector_workflow_version (external_workflo
 SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default cvalue values for PanCancer alignment 1.2.73-204'),
        (SELECT id
         FROM workflow_version
-        WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment')
+        WHERE api_version_id =
+              (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment'))
           AND workflow_version.workflow_version = '1.2.73-204')
 ON CONFLICT DO NOTHING;

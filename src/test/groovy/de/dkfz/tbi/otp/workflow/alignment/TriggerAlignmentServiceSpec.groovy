@@ -174,9 +174,7 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTe
     void "createWarningsForMissingAlignmentConfig, when run, then return the expected warnings"() {
         given:
         WorkflowVersion workflowVersion = createWorkflowVersion([
-                workflow: createWorkflow([
-                        name: PanCancerWorkflow.WORKFLOW,
-                ]),
+                apiVersion: createWorkflowApiVersion(workflow: createWorkflow(name: PanCancerWorkflow.WORKFLOW)),
         ])
 
         SeqTrack seqTrackNewSystemWithoutConfig = createSeqTrackWithProjectName("seqTrackNewSystemWithoutConfig")

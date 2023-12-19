@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.ArtefactType
 import de.dkfz.tbi.otp.workflowExecution.Workflow
+import de.dkfz.tbi.otp.workflowExecution.WorkflowApiVersion
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
@@ -113,8 +114,8 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
         workflow = CollectionUtils.exactlyOneElement(Workflow.findAllByName(BashFastQcWorkflow.WORKFLOW))
         log.info("Fetch workflow Fastqc ${workflow}")
 
-        workflowVersion = CollectionUtils.exactlyOneElement(
-                WorkflowVersion.findAllByWorkflow(workflow, [sort: 'id', order: 'desc', max: 1]))
+        WorkflowApiVersion wav = CollectionUtils.exactlyOneElement(WorkflowApiVersion.findAllByWorkflow(workflow, [sort: 'id', order: 'desc', max: 1]))
+        workflowVersion = CollectionUtils.exactlyOneElement(WorkflowVersion.findAllByApiVersion(wav, [sort: 'id', order: 'desc', max: 1]))
         log.info("Fetch workflow version ${workflowVersion}")
 
         WorkflowVersionSelector workflowVersionSelector = createWorkflowVersionSelector([

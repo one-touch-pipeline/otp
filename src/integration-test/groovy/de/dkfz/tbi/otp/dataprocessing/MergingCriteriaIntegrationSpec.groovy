@@ -21,27 +21,20 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.testing.gorm.DataTest
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 
-class MergingCriteriaSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
-
-    @Override
-    Class[] getDomainClassesToMock() {
-        return [
-                MergingCriteria,
-                Project,
-                SeqType,
-                Workflow,
-        ]
-    }
+@Rollback
+@Integration
+class MergingCriteriaIntegrationSpec extends Specification implements WorkflowSystemDomainFactory {
 
     void "test that for Exome data LibPrepKit must be true"() {
         expect:
@@ -76,7 +69,7 @@ class MergingCriteriaSpec extends Specification implements DataTest, WorkflowSys
         given:
         SeqType seqType = DomainFactory.createWholeGenomeBisulfiteSeqType()
         Workflow workflow = createWorkflow(name: WgbsWorkflow.WORKFLOW)
-        createWorkflowVersion([workflow: workflow, supportedSeqTypes: [seqType] as Set])
+        createWorkflowVersion([apiVersion: createWorkflowApiVersion(workflow: workflow), supportedSeqTypes: [seqType] as Set])
         MergingCriteria mergingCriteria = DomainFactory.createMergingCriteria()
 
         when:

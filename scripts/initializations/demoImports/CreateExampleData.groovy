@@ -279,7 +279,7 @@ class ExampleData {
     IlseSubmission ilseSubmission
     User otpUser
 
-    final static Date FAST_QC_CREATE_DATE = LocalDateTime.of(2000,01,01,0,0,0).toDate()
+    final static Date FAST_QC_CREATE_DATE = LocalDateTime.of(2000, 01, 01, 0, 0, 0).toDate()
 
     Workflow workflowDataInstallation
     Workflow workflowWesFastqc
@@ -308,11 +308,11 @@ class ExampleData {
     List<FastqcProcessedFile> fastqcProcessedFiles = []
 
     List<SeqType> analyseAbleSeqType = []
-    List<SeqType> snvSeqTypes =[]
-    List<SeqType> indelSeqTypes =[]
-    List<SeqType> sophiaSeqTypes =[]
-    List<SeqType> aceseqSeqTypes =[]
-    List<SeqType> runYapsaSeqTypes =[]
+    List<SeqType> snvSeqTypes = []
+    List<SeqType> indelSeqTypes = []
+    List<SeqType> sophiaSeqTypes = []
+    List<SeqType> aceseqSeqTypes = []
+    List<SeqType> runYapsaSeqTypes = []
 
     void init() {
         diseaseSampleTypes = diseaseSampleTypeNames.collectEntries {
@@ -787,9 +787,8 @@ class ExampleData {
 
     void ensureWorkflowConfigured(String workflowName, SeqType seqType) {
         Workflow workflow = CollectionUtils.exactlyOneElement(Workflow.findAllByName(workflowName))
-        WorkflowVersion workflowVersionToUse = CollectionUtils.exactlyOneElement(
-                WorkflowVersion.findAllByWorkflow(workflow, [sort: 'id', order: 'desc', max: 1])
-        )
+        WorkflowApiVersion wav = CollectionUtils.exactlyOneElement(WorkflowApiVersion.findAllByWorkflow(workflow, [sort: 'id', order: 'desc', max: 1]))
+        WorkflowVersion workflowVersionToUse = CollectionUtils.exactlyOneElement(WorkflowVersion.findAllByApiVersion(wav, [sort: 'id', order: 'desc', max: 1]))
 
         List<WorkflowVersionSelector> workflowVersionSelectors = WorkflowVersionSelector.withCriteria {
             eq('project', project)
@@ -799,7 +798,9 @@ class ExampleData {
                 isNull('seqType')
             }
             workflowVersion {
-                eq('workflow', workflow)
+                apiVersion {
+                    eq('workflow', workflow)
+                }
             }
         }
 
@@ -1269,12 +1270,12 @@ class ExampleData {
         ).save(flush: false)
 
         FastqcProcessedFile fastqcProcessedFile = new FastqcProcessedFile([
-                sequenceFile     : rawSequenceFile,
-                workDirectoryName: "wes-1.1.0-2000-01-01-00-00-00",
-                workflowArtefact : workflowArtefact,
-                contentUploaded:true,
-                fileExists:true,
-                fileSize: 100,
+                sequenceFile      : rawSequenceFile,
+                workDirectoryName : "wes-1.1.0-2000-01-01-00-00-00",
+                workflowArtefact  : workflowArtefact,
+                contentUploaded   : true,
+                fileExists        : true,
+                fileSize          : 100,
                 dateFromFileSystem: FAST_QC_CREATE_DATE,
         ]).save(flush: false)
 

@@ -244,13 +244,11 @@ class ProjectSeqPlatformGroupControllerSpec extends Specification implements Con
         final Project project = createProject()
         final SeqType seqType = availableSeqTypes.first()
 
-        final MergingCriteria mergingCriteria = createMergingCriteria(
-                [
-                        project            : project,
-                        seqType            : seqType,
-                        useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING,
-                ]
-        )
+        final MergingCriteria mergingCriteria = createMergingCriteria([
+                project            : project,
+                seqType            : seqType,
+                useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING,
+        ])
 
         when:
         params['seqType.id'] = seqType.id

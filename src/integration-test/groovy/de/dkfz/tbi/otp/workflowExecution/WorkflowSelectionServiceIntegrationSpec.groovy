@@ -83,19 +83,19 @@ class WorkflowSelectionServiceIntegrationSpec extends Specification implements W
         SeqType seqType2b = createSeqType([displayName: 's2b'])
 
         WorkflowVersion version1a = createWorkflowVersion([
-                workflow               : workflow1,
+                apiVersion             : createWorkflowApiVersion(workflow: workflow1),
                 workflowVersion        : 'v1a',
                 allowedReferenceGenomes: [refGenome1a, refGenome1b],
                 supportedSeqTypes      : [seqType1a],
         ])
         createWorkflowVersion([
-                workflow               : workflow1,
+                apiVersion             : createWorkflowApiVersion(workflow: workflow1),
                 workflowVersion        : 'v1b',
                 allowedReferenceGenomes: [refGenome1b, refGenome1c],
                 supportedSeqTypes      : [seqType1a, seqType1b, seqType1c],
         ])
         createWorkflowVersion([
-                workflow               : workflow2,
+                apiVersion             : createWorkflowApiVersion(workflow: workflow2),
                 workflowVersion        : 'v2',
                 allowedReferenceGenomes: [refGenome2a, refGenome2b],
                 supportedSeqTypes      : [seqType2a, seqType2b],
@@ -163,7 +163,7 @@ class WorkflowSelectionServiceIntegrationSpec extends Specification implements W
         SeqType seqType = createSeqType()
         Workflow workflow = createWorkflow()
         createWorkflowVersion([
-                workflow               : workflow,
+                apiVersion             : createWorkflowApiVersion(workflow: workflow),
                 allowedReferenceGenomes: [refGenome1, refGenome2, refGenome3, refGenome4],
                 supportedSeqTypes      : [seqType],
         ])

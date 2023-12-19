@@ -66,7 +66,7 @@ class AlignmentInfoServiceIntegrationSpec extends Specification implements Workf
                 workflow: workflow,
                 combinedConfig: config,
                 workflowVersion: createWorkflowVersion(
-                        workflow: workflow,
+                        apiVersion: createWorkflowApiVersion(workflow: workflow),
                         workflowVersion: roddyPipelineVersion
                 )
         )
@@ -118,7 +118,7 @@ class AlignmentInfoServiceIntegrationSpec extends Specification implements Workf
         SeqType seqType = DomainFactory.createRnaPairedSeqType()
         Workflow workflow = createWorkflow(name: PanCancerWorkflow.WORKFLOW)
         WorkflowRun workflowRun = createWorkflowRun(workflow: workflow,
-                combinedConfig: config, workflowVersion: createWorkflowVersion(workflow: workflow))
+                combinedConfig: config, workflowVersion: createWorkflowVersion(apiVersion: createWorkflowApiVersion(workflow: workflow)))
         RoddyBamFile bam = createBamFile(workflowArtefact: createWorkflowArtefact(producedBy: workflowRun, outputRole: PanCancerWorkflow.OUTPUT_BAM))
         bam.workPackage.seqType = seqType
         alignmentInfoService.otpWorkflowService = Mock(OtpWorkflowService) {
@@ -141,8 +141,11 @@ class AlignmentInfoServiceIntegrationSpec extends Specification implements Workf
         given:
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
         Workflow workflow = createWorkflow(name: PanCancerWorkflow.WORKFLOW)
-        WorkflowRun workflowRun = createWorkflowRun(workflow: workflow,
-                combinedConfig: """{"RODDY": {"cvalues": { ${config}}}}""", workflowVersion: createWorkflowVersion(workflow: workflow))
+        WorkflowRun workflowRun = createWorkflowRun(
+                workflow: workflow,
+                combinedConfig: """{"RODDY": {"cvalues": { ${config}}}}""",
+                workflowVersion: createWorkflowVersion(apiVersion: createWorkflowApiVersion(workflow: workflow)),
+        )
         RoddyBamFile bam = createBamFile(workflowArtefact: createWorkflowArtefact(producedBy: workflowRun, outputRole: PanCancerWorkflow.OUTPUT_BAM))
         bam.workPackage.seqType = seqType
         alignmentInfoService.otpWorkflowService = Mock(OtpWorkflowService) {

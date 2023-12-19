@@ -105,7 +105,7 @@ class FastqcArtefactService {
             st in (:seqTracks)
             and selector.project = st.sample.individual.project
             and selector.seqType is null
-            and selector.workflowVersion.workflow in (:workflows)
+            and selector.workflowVersion.apiVersion.workflow in (:workflows)
             and selector.deprecationDate is null
         """
 

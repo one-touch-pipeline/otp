@@ -261,7 +261,7 @@ class AlignmentArtefactService {
             st in (:seqTracks)
             and selector.project = st.sample.individual.project
             and selector.seqType = st.seqType
-            and selector.workflowVersion.workflow = :workflow
+            and selector.workflowVersion.apiVersion.workflow = :workflow
             and selector.deprecationDate is null
         """
 

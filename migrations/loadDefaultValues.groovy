@@ -37,6 +37,7 @@ databaseChangeLog = {
     List<Path> files = [
             dir.resolve("seq-types.sql"),
             dir.resolve("workflows.sql"),
+            dir.resolve("workflow-api-versions.sql"),
             dir.resolve("workflow-versions.sql"),
             dir.resolve("project-roles.sql"),
             dir.resolve("species-and-strains.sql"),

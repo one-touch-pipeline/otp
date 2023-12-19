@@ -582,6 +582,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         List<Path> files = [
                 dir.resolve("seq-types.sql"),
                 dir.resolve("workflows.sql"),
+                dir.resolve("workflow-api-versions.sql"),
                 dir.resolve("workflow-versions.sql"),
         ]
         files.addAll(Files.newDirectoryStream(dir.resolve('ewc'), "ewc-*.sql").toList().sort())

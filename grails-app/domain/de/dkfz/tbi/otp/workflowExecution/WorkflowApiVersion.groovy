@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,22 +19,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.domainFactory.workflowSystem
+package de.dkfz.tbi.otp.workflowExecution
 
-import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
-import de.dkfz.tbi.otp.workflowExecution.Workflow
-import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
+import grails.gorm.hibernate.annotation.ManagedEntity
 
-trait WgbsAlignmentWorkflowDomainFactory extends WorkflowSystemDomainFactory {
+import de.dkfz.tbi.otp.utils.Entity
 
-    Workflow findOrCreateWgbsAlignmenWorkflow() {
-        return findOrCreateWorkflow(WgbsWorkflow.WORKFLOW, [beanName: WgbsWorkflow.simpleName.uncapitalize()])
+@ManagedEntity
+class WorkflowApiVersion implements Entity {
+
+    Workflow workflow
+    Integer identifier
+    String beanName
+
+    static Closure constraints = {
+        beanName nullable: true
+        identifier unique: 'workflow'
     }
 
-    WorkflowVersion createWgbsAlignmenWorkflowVersion(String version = "1.2.73-204") {
-        return createWorkflowVersion([
-                apiVersion: createWorkflowApiVersion(workflow: findOrCreateWgbsAlignmenWorkflow()),
-                workflowVersion   : version,
-        ])
+    static Closure mapping = {
+        workflow index: "workflow_api_version_workflow_idx"
+    }
+
+    static belongsTo = [
+            workflow: Workflow,
+    ]
+
+    String getDisplayName() {
+        return "${workflow} api version v${identifier}"
+    }
+
+    @Override
+    String toString() {
+        return displayName
     }
 }

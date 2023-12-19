@@ -779,6 +779,6 @@ SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default c
 
 INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
 SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default cvalue values for RNA alignment 1.2.22-6'),
-       (SELECT id
-        FROM workflow_version
-        WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'RNA alignment') AND workflow_version.workflow_version = '1.2.22-6') ON CONFLICT DO NOTHING;
+       (SELECT id FROM workflow_version
+        WHERE api_version_id = (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'RNA alignment'))
+          AND workflow_version.workflow_version = '1.2.22-6') ON CONFLICT DO NOTHING;

@@ -21,115 +21,179 @@
  */
 
 -- fastqc versions
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'Bash FastQC'), '0.11.5', NOW(), NOW())
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'Bash FastQC') AND wav.identifier = 1),
+        '0.11.5', NOW(), NOW())
 ON CONFLICT DO NOTHING;
 
 -- nf-seq-qc
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'nf-seq-qc'), '1.1.0', NOW(), NOW())
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'nf-seq-qc') AND wav.identifier = 1),
+        '1.1.0', NOW(), NOW())
 ON CONFLICT DO NOTHING;
 
 -- pancancer versions
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'PanCancer alignment'), '1.2.182', NOW(), NOW())
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment') AND wav.identifier = 1),
+        '1.2.182', NOW(), NOW())
 ON CONFLICT DO NOTHING;
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'PanCancer alignment'), '1.2.51-1', NOW(), NOW())
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment') AND wav.identifier = 1),
+        '1.2.51-1', NOW(), NOW())
 ON CONFLICT DO NOTHING;
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'PanCancer alignment'), '1.2.51-2', NOW(), NOW())
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment') AND wav.identifier = 1),
+        '1.2.51-2', NOW(), NOW())
 ON CONFLICT DO NOTHING;
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'PanCancer alignment'), '1.2.73-1', NOW(), NOW())
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment') AND wav.identifier = 1),
+        '1.2.73-1', NOW(), NOW())
 ON CONFLICT DO NOTHING;
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'PanCancer alignment'), '1.2.73-201', NOW(), NOW())
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment') AND wav.identifier = 1),
+        '1.2.73-201', NOW(), NOW())
 ON CONFLICT DO NOTHING;
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'PanCancer alignment'), '1.2.73-202', NOW(), NOW())
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment') AND wav.identifier = 1),
+        '1.2.73-202', NOW(), NOW())
 ON CONFLICT DO NOTHING;
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'PanCancer alignment'), '1.2.73-204', NOW(), NOW())
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment') AND wav.identifier = 1),
+        '1.2.73-204', NOW(), NOW())
 ON CONFLICT DO NOTHING;
 
 -- wgbs pancancer versions
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'WGBS alignment'), '1.2.51-1', NOW(), NOW())
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'WGBS alignment') AND wav.identifier = 1),
+        '1.2.51-1', NOW(), NOW())
 ON CONFLICT DO NOTHING;
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'WGBS alignment'), '1.2.73-1', NOW(), NOW())
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'WGBS alignment') AND wav.identifier = 1),
+        '1.2.73-1', NOW(), NOW())
 ON CONFLICT DO NOTHING;
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'WGBS alignment'), '1.2.73-2', NOW(), NOW())
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'WGBS alignment') AND wav.identifier = 1),
+        '1.2.73-2', NOW(), NOW())
 ON CONFLICT DO NOTHING;
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'WGBS alignment'), '1.2.73-201', NOW(), NOW())
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'WGBS alignment') AND wav.identifier = 1),
+        '1.2.73-201', NOW(), NOW())
 ON CONFLICT DO NOTHING;
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'WGBS alignment'), '1.2.73-202', NOW(), NOW())
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'WGBS alignment') AND wav.identifier = 1),
+        '1.2.73-202', NOW(), NOW())
 ON CONFLICT DO NOTHING;
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'WGBS alignment'), '1.2.73-204', NOW(), NOW())
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'WGBS alignment') AND wav.identifier = 1),
+        '1.2.73-204', NOW(), NOW())
 ON CONFLICT DO NOTHING;
 
 -- rna versions
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'RNA alignment'), '1.2.22-6', NOW(), NOW())
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'RNA alignment') AND wav.identifier = 1),
+        '1.2.22-6', NOW(), NOW())
 ON CONFLICT DO NOTHING;
 
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'RNA alignment'), '1.2.22-7', NOW(), NOW())
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'RNA alignment') AND wav.identifier = 1),
+        '1.2.22-7', NOW(), NOW())
 ON CONFLICT DO NOTHING;
 
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'RNA alignment'), '1.3.0', NOW(), NOW())
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'RNA alignment') AND wav.identifier = 1),
+        '1.3.0', NOW(), NOW())
 ON CONFLICT DO NOTHING;
 
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'RNA alignment'), '1.3.0-1', NOW(), NOW())
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'RNA alignment') AND wav.identifier = 1),
+        '1.3.0-1', NOW(), NOW())
 ON CONFLICT DO NOTHING;
 
 --cell ranger versions
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'Cell Ranger'), 'cellranger/7.1.0', NOW(), NOW())
-ON CONFLICT DO NOTHING;
-
---SNV versions
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'Roddy SNV calling'), '1.2.166-3', NOW(), NOW())
-ON CONFLICT DO NOTHING;
-
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'Roddy SNV calling'), '1.2.166-5', NOW(), NOW())
-    ON CONFLICT DO NOTHING;
-
---Indel versions
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'Roddy Indel calling'), '2.4.1', NOW(), NOW())
-ON CONFLICT DO NOTHING;
-
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'Roddy Indel calling'), '2.4.1-1', NOW(), NOW())
-    ON CONFLICT DO NOTHING;
-
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'Roddy Indel calling'), '2.4.1-2', NOW(), NOW())
-    ON CONFLICT DO NOTHING;
-
---sophia versions
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'Roddy Sophia (structural variation calling)'), '2.2.3', NOW(),
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'Cell Ranger') AND wav.identifier = 1),
+        'cellranger/7.1.0', NOW(),
         NOW())
 ON CONFLICT DO NOTHING;
 
+--SNV versions
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy SNV calling') AND wav.identifier = 1),
+        '1.2.166-3', NOW(), NOW())
+ON CONFLICT DO NOTHING;
+
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy SNV calling') AND wav.identifier = 1),
+        '1.2.166-5', NOW(), NOW())
+ON CONFLICT DO NOTHING;
+
+--Indel versions
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy Indel calling') AND wav.identifier = 1),
+        '2.4.1', NOW(), NOW())
+ON CONFLICT DO NOTHING;
+
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy Indel calling') AND wav.identifier = 1),
+        '2.4.1-1', NOW(), NOW())
+ON CONFLICT DO NOTHING;
+
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy Indel calling') AND wav.identifier = 1),
+        '2.4.1-2', NOW(), NOW())
+ON CONFLICT DO NOTHING;
+
+--sophia versions
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id
+         FROM workflow_api_version wav
+         WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy Sophia (structural variation calling)')
+           AND wav.identifier = 1),
+        '2.2.3', NOW(), NOW())
+ON CONFLICT DO NOTHING;
+
 --aceseq versions
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'Roddy ACEseq (CNV calling)'), '1.2.8-4', NOW(), NOW())
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id
+         FROM workflow_api_version wav
+         WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy ACEseq (CNV calling)')
+           AND wav.identifier = 1),
+        '1.2.8-4', NOW(), NOW())
 ON CONFLICT DO NOTHING;
 
 --runYapsa versions
-INSERT INTO workflow_version(id, version, workflow_id, workflow_version, date_created, last_updated)
-VALUES (NEXTVAL('hibernate_sequence'), 0, (SELECT id FROM workflow WHERE name = 'runYapsa (mutational signature analysis)'),
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id
+         FROM workflow_api_version wav
+         WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'runYapsa (mutational signature analysis)')
+           AND wav.identifier = 1),
         'yapsa-devel/b765fa8', NOW(), NOW())
 ON CONFLICT DO NOTHING;

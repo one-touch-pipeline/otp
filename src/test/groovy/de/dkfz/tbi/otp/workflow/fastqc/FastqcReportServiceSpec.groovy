@@ -88,8 +88,8 @@ class FastqcReportServiceSpec extends Specification implements DataTest, FastqcD
                 name: WORKFLOW
         ])
         version = createWorkflowVersion([
-                workflow       : workflow,
-                workflowVersion: '0.1.1',
+                apiVersion: createWorkflowApiVersion(workflow: workflow),
+                workflowVersion   : '0.1.1',
         ])
         run = createWorkflowRun([
                 workflow       : workflow,

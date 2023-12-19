@@ -45,10 +45,16 @@ class AllDeciderIntegrationSpec extends Specification implements ServiceUnitTest
         createWorkflow(name: WgbsWorkflow.WORKFLOW)
         createWorkflow(name: RnaAlignmentWorkflow.WORKFLOW)
         WorkflowStep workflowStep = createWorkflowStep()
-        WorkflowArtefact wa1 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun,
-                artefactType: ArtefactType.RUN_YAPSA)
-        WorkflowArtefact wa2 = createWorkflowArtefact(state: WorkflowArtefact.State.SUCCESS, producedBy: workflowStep.workflowRun,
-                artefactType: ArtefactType.RUN_YAPSA)
+        WorkflowArtefact wa1 = createWorkflowArtefact([
+                state       : WorkflowArtefact.State.SUCCESS,
+                producedBy  : workflowStep.workflowRun,
+                artefactType: ArtefactType.RUN_YAPSA,
+        ])
+        WorkflowArtefact wa2 = createWorkflowArtefact([
+                state       : WorkflowArtefact.State.SUCCESS,
+                producedBy  : workflowStep.workflowRun,
+                artefactType: ArtefactType.RUN_YAPSA,
+        ])
         Collection<WorkflowArtefact> allWorkflowArtefacts = [wa1, wa2]
 
         when:

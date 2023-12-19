@@ -164,8 +164,9 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
         workflowAlignment.save(flush: true)
         log.info("Fetch workflow Alignment ${workflowAlignment}")
 
-        workflowVersionAlignment = CollectionUtils.exactlyOneElement(
-                WorkflowVersion.findAllByWorkflow(workflowAlignment, [sort: 'id', order: 'desc', max: 1]))
+        WorkflowApiVersion wav = CollectionUtils.exactlyOneElement(
+                WorkflowApiVersion.findAllByWorkflow(workflowAlignment, [sort: 'id', order: 'desc', max: 1]))
+        workflowVersionAlignment = CollectionUtils.exactlyOneElement(WorkflowVersion.findAllByApiVersion(wav, [sort: 'id', order: 'desc', max: 1]))
         log.info("Fetch alignment workflow version ${workflowVersionAlignment}")
 
         human = findOrCreateHumanSpecies()
@@ -206,7 +207,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
         ])
         log.info("Create ReferenceGenome ${referenceGenome}")
 
-        List<String> chromosomeNames =  ["21", "22"]
+        List<String> chromosomeNames = ["21", "22"]
         DomainFactory.createReferenceGenomeEntries(referenceGenome, chromosomeNames)
         log.info("Create ReferenceGenomeEntry for ${chromosomeNames}")
 
@@ -377,7 +378,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
                 workflow: workflow,
                 project : sample.project,
                 priority: processingPriority,
-                state: WorkflowRun.State.LEGACY,
+                state   : WorkflowRun.State.LEGACY,
         ])
 
         List<WorkflowArtefact> workflowArtefacts = artefacts.collect { Artefact artefact ->

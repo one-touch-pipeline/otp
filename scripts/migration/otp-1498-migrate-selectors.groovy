@@ -48,7 +48,7 @@ WorkflowVersionService workflowVersionService = ctx.workflowVersionService
 
 Pipeline pipeline = exactlyOneElement(Pipeline.findAllByName(oldPipelineName))
 Workflow workflow = exactlyOneElement(Workflow.findAllByName(newWorkflowName))
-List<WorkflowVersion> workflowVersions = WorkflowVersion.findAllByWorkflow(workflow)
+List<WorkflowVersion> workflowVersions = workflowVersionService.findAllByWorkflow(workflow)
 List<ReferenceGenome> allUsedReferenceGenomes = []
 
 WorkflowVersionSelector.withTransaction {

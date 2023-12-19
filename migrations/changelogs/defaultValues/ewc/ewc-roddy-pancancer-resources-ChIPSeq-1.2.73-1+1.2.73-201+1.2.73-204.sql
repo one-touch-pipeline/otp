@@ -83,7 +83,8 @@ SELECT (SELECT id
         WHERE name = 'Default resources values for PanCancer alignment 1.2.73-1, 1.2.73-201, 1.2.73-204 ChIP Seq'),
        (SELECT id
         FROM workflow_version
-        WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment')
+        WHERE api_version_id =
+              (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment'))
           AND workflow_version.workflow_version = '1.2.73-1')
 ON CONFLICT DO NOTHING;
 
@@ -93,7 +94,8 @@ SELECT (SELECT id
         WHERE name = 'Default resources values for PanCancer alignment 1.2.73-1, 1.2.73-201, 1.2.73-204 ChIP Seq'),
        (SELECT id
         FROM workflow_version
-        WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment')
+        WHERE api_version_id =
+              (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment'))
           AND workflow_version.workflow_version = '1.2.73-201')
 ON CONFLICT DO NOTHING;
 
@@ -103,7 +105,8 @@ SELECT (SELECT id
         WHERE name = 'Default resources values for PanCancer alignment 1.2.73-1, 1.2.73-201, 1.2.73-204 ChIP Seq'),
        (SELECT id
         FROM workflow_version
-        WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment')
+        WHERE api_version_id =
+              (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment'))
           AND workflow_version.workflow_version = '1.2.73-204')
 ON CONFLICT DO NOTHING;
 

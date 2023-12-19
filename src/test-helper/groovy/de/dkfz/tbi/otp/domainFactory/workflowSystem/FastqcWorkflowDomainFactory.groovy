@@ -34,8 +34,8 @@ trait FastqcWorkflowDomainFactory extends WorkflowSystemDomainFactory {
 
     WorkflowVersion createBashFastqcWorkflowVersion(String version = "0.11.15") {
         return createWorkflowVersion([
-                workflow       : findOrCreateBashFastqcWorkflow(),
-                workflowVersion: version,
+                apiVersion: createWorkflowApiVersion(workflow: findOrCreateBashFastqcWorkflow()),
+                workflowVersion   : version,
         ])
     }
 
@@ -45,8 +45,8 @@ trait FastqcWorkflowDomainFactory extends WorkflowSystemDomainFactory {
 
     WorkflowVersion createWesFastqcWorkflowVersion(String version = "0.11.15") {
         return createWorkflowVersion([
-                workflow       : findOrCreateWesFastqcWorkflow(),
-                workflowVersion: version,
+                apiVersion: createWorkflowApiVersion(workflow: findOrCreateWesFastqcWorkflow()),
+                workflowVersion   : version,
         ])
     }
 }

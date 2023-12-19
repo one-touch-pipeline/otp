@@ -134,7 +134,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         given:
         configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         WorkflowStep workflowStep = createWorkflowStep()
-        workflowStep.workflowRun.workflowVersion = createWorkflowVersion(workflow: workflowStep.workflowRun.workflow)
+        workflowStep.workflowRun.workflowVersion = createWorkflowVersion(apiVersion: createWorkflowApiVersion(workflow: workflowStep.workflowRun.workflow))
 
         String configText = "<config/>"
         String cmd = "roddy.sh"
@@ -192,7 +192,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         given:
         configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         WorkflowStep workflowStep = createWorkflowStep()
-        workflowStep.workflowRun.workflowVersion = createWorkflowVersion(workflow: workflowStep.workflowRun.workflow)
+        workflowStep.workflowRun.workflowVersion = createWorkflowVersion(apiVersion: createWorkflowApiVersion(workflow: workflowStep.workflowRun.workflow))
 
         String configText = "<config/>"
         String cmd = "roddy.sh"

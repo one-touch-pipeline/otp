@@ -68,12 +68,10 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest, Workfl
     void "getRoddyAlignmentInformation, when useConfig is #useConvey and mergeTool is #mergeTool, return alignment info with the correct data"() {
         given:
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig(["programVersion": "programVersion:1.1.0"])
-        AlignmentInfoService service = new AlignmentInfoService([
-                executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * roddyGetRuntimeConfigCommand(roddyWorkflowConfig, _, roddyWorkflowConfig.seqType.roddyName) >> ''
-                    0 * roddyGetRuntimeConfigCommand(_, _, _)
-                },
-        ])
+        AlignmentInfoService service = new AlignmentInfoService([executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
+            1 * roddyGetRuntimeConfigCommand(roddyWorkflowConfig, _, roddyWorkflowConfig.seqType.roddyName) >> ''
+            0 * roddyGetRuntimeConfigCommand(_, _, _)
+        },])
 
         service.remoteShellHelper = Mock(RemoteShellHelper) {
             1 * executeCommandReturnProcessOutput(_) >> {
@@ -126,16 +124,12 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest, Workfl
 
     void "getRoddyAlignmentInformation, when rna, return alignment info with the correct data"() {
         given:
-        RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig(
-                seqType: DomainFactory.createRnaPairedSeqType(),
-                adapterTrimmingNeeded: true,
-        )
-        AlignmentInfoService service = new AlignmentInfoService([
-                executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * roddyGetRuntimeConfigCommand(roddyWorkflowConfig, _, roddyWorkflowConfig.seqType.roddyName) >> ''
-                    0 * roddyGetRuntimeConfigCommand(_, _, _)
-                },
-        ])
+        RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig(seqType: DomainFactory.createRnaPairedSeqType(),
+                adapterTrimmingNeeded: true,)
+        AlignmentInfoService service = new AlignmentInfoService([executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
+            1 * roddyGetRuntimeConfigCommand(roddyWorkflowConfig, _, roddyWorkflowConfig.seqType.roddyName) >> ''
+            0 * roddyGetRuntimeConfigCommand(_, _, _)
+        },])
 
         service.remoteShellHelper = Mock(RemoteShellHelper) {
             1 * executeCommandReturnProcessOutput(_) >> {
@@ -144,11 +138,7 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest, Workfl
                     |SAMBAMBA_VERSION=3.0
                     |STAR_VERSION=2.0
 
-                    |${
-                    ['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].collect { name ->
-                        "STAR_PARAMS_${name}=${name}"
-                    }.join('\n')
-                }
+                    |${['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].collect { name -> "STAR_PARAMS_${name}=${name}" }.join('\n')}
                 """.stripMargin(), '', 0)
             }
         }
@@ -171,12 +161,10 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest, Workfl
     void "getRoddyAlignmentInformation, when roddy fail for #name, throw Exception"() {
         given:
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
-        AlignmentInfoService service = new AlignmentInfoService([
-                executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * roddyGetRuntimeConfigCommand(roddyWorkflowConfig, _, roddyWorkflowConfig.seqType.roddyName) >> ''
-                    0 * roddyGetRuntimeConfigCommand(_, _, _)
-                },
-        ])
+        AlignmentInfoService service = new AlignmentInfoService([executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
+            1 * roddyGetRuntimeConfigCommand(roddyWorkflowConfig, _, roddyWorkflowConfig.seqType.roddyName) >> ''
+            0 * roddyGetRuntimeConfigCommand(_, _, _)
+        },])
 
         service.remoteShellHelper = Mock(RemoteShellHelper) {
             1 * executeCommandReturnProcessOutput(_) >> {
@@ -249,12 +237,13 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest, Workfl
             1 * lookupOtpWorkflowBean(_) >> new WgbsWorkflow()
         }
         service.configFragmentService = Mock(ConfigFragmentService) {
-            getSortedFragments(_) >> { }
-            mergeSortedFragments(_) >> { config }
+            1 * getSortedFragments(_) >> _
+            1 * mergeSortedFragments(_) >> config
         }
 
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
-        WorkflowVersion version = createWorkflowVersion(workflow: createWorkflow(name: PanCancerWorkflow.WORKFLOW), workflowVersion: roddyPipelineVersion)
+        WorkflowVersion version = createWorkflowVersion(apiVersion: createWorkflowApiVersion(workflow: createWorkflow(name: PanCancerWorkflow.WORKFLOW)),
+                workflowVersion: roddyPipelineVersion,)
         Project project = createProject()
         createWorkflowVersionSelector(project: project, seqType: seqType, workflowVersion: version)
 
@@ -298,12 +287,12 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest, Workfl
             1 * lookupOtpWorkflowBean(_) >> new WgbsWorkflow()
         }
         service.configFragmentService = Mock(ConfigFragmentService) {
-            getSortedFragments(_) >> { }
+            getSortedFragments(_) >> _
             mergeSortedFragments(_) >> { config }
         }
 
         SeqType seqType = DomainFactory.createRnaPairedSeqType()
-        WorkflowVersion version = createWorkflowVersion(workflow: createWorkflow(name: PanCancerWorkflow.WORKFLOW))
+        WorkflowVersion version = createWorkflowVersion(apiVersion: createWorkflowApiVersion(workflow: createWorkflow(name: PanCancerWorkflow.WORKFLOW)))
         Project project = createProject()
         createWorkflowVersionSelector(project: project, seqType: seqType, workflowVersion: version)
 
@@ -328,12 +317,12 @@ class AlignmentInfoServiceSpec extends Specification implements DataTest, Workfl
             1 * lookupOtpWorkflowBean(_) >> new WgbsWorkflow()
         }
         service.configFragmentService = Mock(ConfigFragmentService) {
-            getSortedFragments(_) >> { }
+            getSortedFragments(_) >> _
             mergeSortedFragments(_) >> { """{"RODDY": {"cvalues": { ${config}}}}""" }
         }
 
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
-        WorkflowVersion version = createWorkflowVersion(workflow: createWorkflow(name: PanCancerWorkflow.WORKFLOW))
+        WorkflowVersion version = createWorkflowVersion(apiVersion: createWorkflowApiVersion(workflow: createWorkflow(name: PanCancerWorkflow.WORKFLOW)))
         Project project = createProject()
         createWorkflowVersionSelector(project: project, seqType: seqType, workflowVersion: version)
 

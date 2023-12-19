@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,7 @@ import java.time.LocalDate
 @ManagedEntity
 class WorkflowVersion implements Entity, Commentable, Comparable<WorkflowVersion> {
 
-    Workflow workflow
+    WorkflowApiVersion apiVersion
     String workflowVersion
     LocalDate deprecatedDate
     Set<ReferenceGenome> allowedReferenceGenomes
@@ -46,16 +46,32 @@ class WorkflowVersion implements Entity, Commentable, Comparable<WorkflowVersion
     static Closure constraints = {
         deprecatedDate nullable: true
         comment nullable: true
-        workflow unique: 'workflowVersion'
+        apiVersion unique: 'workflowVersion'
+        workflowVersion validator: { String val, WorkflowVersion obj ->
+            WorkflowVersion existingWorkflowVersion = createCriteria().get {
+                ne('id', obj.id)
+                'apiVersion' {
+                    eq('workflow', obj.workflow)
+                }
+                eq('workflowVersion', val)
+            } as WorkflowVersion
+            if (existingWorkflowVersion) {
+                obj.errors.rejectValue('workflowVersion', 'invalid.workflowVersion', 'Workflow Version already exists for workflow.')
+            }
+        }
     }
 
     static Closure mapping = {
-        workflow index: "workflow_version_workflow_idx"
+        apiVersion index: "workflow_version_api_version_idx"
     }
 
     static hasMany = [
             allowedReferenceGenomes: ReferenceGenome,
             supportedSeqTypes      : SeqType,
+    ]
+
+    static belongsTo = [
+            apiVersion: WorkflowApiVersion,
     ]
 
     @Override
@@ -86,5 +102,9 @@ class WorkflowVersion implements Entity, Commentable, Comparable<WorkflowVersion
             return s1 as Integer <=> s2 as Integer
         }
         return String.CASE_INSENSITIVE_ORDER.compare(s1, s2)
+    }
+
+    Workflow getWorkflow() {
+        return apiVersion.workflow
     }
 }

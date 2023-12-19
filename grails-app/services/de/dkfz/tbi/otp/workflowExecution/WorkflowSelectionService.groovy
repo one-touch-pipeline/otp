@@ -66,13 +66,13 @@ class WorkflowSelectionService {
 
         if (option.seqType) {
             workflowVersions = workflowVersions.findAll { it.supportedSeqTypes.contains(option.seqType) }
-            workflows = workflows.findAll { workflowVersions*.workflow.contains(it) }
+            workflows = workflows.findAll { workflowVersions*.apiVersion*.workflow.contains(it) }
             refGenomes = refGenomes.findAll { refGenome -> workflowVersions.any { wv -> wv.allowedReferenceGenomes.contains(refGenome) } }
         }
 
         if (option.refGenome) {
             workflowVersions = workflowVersions.findAll { it.allowedReferenceGenomes.contains(option.refGenome) }
-            workflows = workflows.findAll { workflowVersions*.workflow.contains(it) }
+            workflows = workflows.findAll { workflowVersions*.apiVersion*.workflow.contains(it) }
             seqTypes = seqTypes.findAll { seqType -> workflowVersions.any { version -> version.supportedSeqTypes.contains(seqType) } }
         }
 
@@ -97,7 +97,7 @@ class WorkflowSelectionService {
             if (!option.refGenome) {
                 workflowVersions = workflowVersions.findAll { wv -> refGenomes.any { wv.allowedReferenceGenomes.contains(it) } }
                 seqTypes = seqTypes.findAll { seqType -> workflowVersions.any { version -> version.supportedSeqTypes.contains(seqType) } }
-                workflows = workflows.findAll { workflowVersions*.workflow.contains(it) }
+                workflows = workflows.findAll { workflowVersions*.apiVersion*.workflow.contains(it) }
             }
             species = species.findAll { option.species.contains(it) || !option.species*.species.contains(it.species) }
         }

@@ -19,10 +19,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
+package de.dkfz.tbi.otp.workflow
 
-import grails.testing.gorm.DataTest
-import grails.testing.services.ServiceUnitTest
+import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
+import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -31,19 +32,17 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
 import de.dkfz.tbi.otp.workflow.fastqc.WesFastQcWorkflow
+import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.time.LocalDate
 
-class WorkflowServiceSpec extends Specification implements ServiceUnitTest<WorkflowService>, WorkflowSystemDomainFactory, DataTest {
+@Rollback
+@Integration
+class WorkflowServiceIntegrationSpec extends Specification implements WorkflowSystemDomainFactory {
+    @Autowired
+    WorkflowService workflowService
 
     static final String WORKFLOW_NAME = "WORKFLOW"
-
-    @Override
-    Class[] getDomainClassesToMock() {
-        return [
-                Workflow,
-        ]
-    }
 
     void "getExactlyOneWorkflow, when a non deprecated workflow of the name exist, then return that workflow"() {
         given:
@@ -53,7 +52,7 @@ class WorkflowServiceSpec extends Specification implements ServiceUnitTest<Workf
         ])
 
         when:
-        Workflow returnedWorkflow = service.getExactlyOneWorkflow(WORKFLOW_NAME)
+        Workflow returnedWorkflow = workflowService.getExactlyOneWorkflow(WORKFLOW_NAME)
 
         then:
         returnedWorkflow == workflow
@@ -63,7 +62,7 @@ class WorkflowServiceSpec extends Specification implements ServiceUnitTest<Workf
         createWorkflow()
 
         when:
-        service.getExactlyOneWorkflow(WORKFLOW_NAME)
+        workflowService.getExactlyOneWorkflow(WORKFLOW_NAME)
 
         then:
         thrown(AssertionError)
@@ -76,7 +75,7 @@ class WorkflowServiceSpec extends Specification implements ServiceUnitTest<Workf
         ])
 
         when:
-        service.getExactlyOneWorkflow(WORKFLOW_NAME)
+        workflowService.getExactlyOneWorkflow(WORKFLOW_NAME)
 
         then:
         thrown(AssertionError)
@@ -88,21 +87,21 @@ class WorkflowServiceSpec extends Specification implements ServiceUnitTest<Workf
         SeqType seqType1 = createSeqType()
         SeqType seqType2 = createSeqType()
         createWorkflowVersion([
-                workflow         : workflow,
-                supportedSeqTypes: [seqType1],
+                apiVersion: createWorkflowApiVersion(workflow: workflow),
+                supportedSeqTypes : [seqType1],
         ])
         createWorkflowVersion([
-                workflow         : workflow,
-                supportedSeqTypes: [seqType1, seqType2],
+                apiVersion: createWorkflowApiVersion(workflow: workflow),
+                supportedSeqTypes : [seqType1, seqType2],
         ])
         createWorkflowVersion([
-                workflow         : workflow,
-                supportedSeqTypes: [seqType2],
+                apiVersion: createWorkflowApiVersion(workflow: workflow),
+                supportedSeqTypes : [seqType2],
         ])
         createWorkflowVersion()
 
         expect:
-        CollectionUtils.containSame(service.getSupportedSeqTypesOfVersions(workflow), [seqType1, seqType2])
+        CollectionUtils.containSame(workflowService.getSupportedSeqTypesOfVersions(workflow), [seqType1, seqType2])
     }
 
     void "findAllSeqTypesContainedInVersions, should return all seq types that are contained in the versions of a list of workflow"() {
@@ -111,36 +110,36 @@ class WorkflowServiceSpec extends Specification implements ServiceUnitTest<Workf
         SeqType seqType1 = createSeqType()
         SeqType seqType2 = createSeqType()
         createWorkflowVersion([
-                workflow         : workflow1,
-                supportedSeqTypes: [seqType1],
+                apiVersion: createWorkflowApiVersion(workflow: workflow1),
+                supportedSeqTypes : [seqType1],
         ])
         createWorkflowVersion([
-                workflow         : workflow1,
-                supportedSeqTypes: [seqType1, seqType2],
+                apiVersion: createWorkflowApiVersion(workflow: workflow1),
+                supportedSeqTypes : [seqType1, seqType2],
         ])
         createWorkflowVersion([
-                workflow         : workflow1,
-                supportedSeqTypes: [seqType2],
+                apiVersion: createWorkflowApiVersion(workflow: workflow1),
+                supportedSeqTypes : [seqType2],
         ])
         createWorkflowVersion()
         Workflow workflow2 = createWorkflow()
         SeqType seqType3 = createSeqType()
         createWorkflowVersion([
-                workflow         : workflow2,
-                supportedSeqTypes: [seqType3],
+                apiVersion: createWorkflowApiVersion(workflow: workflow2),
+                supportedSeqTypes : [seqType3],
         ])
         createWorkflowVersion([
-                workflow         : workflow2,
-                supportedSeqTypes: [seqType3, seqType2],
+                apiVersion: createWorkflowApiVersion(workflow: workflow2),
+                supportedSeqTypes : [seqType3, seqType2],
         ])
         createWorkflowVersion([
-                workflow         : workflow2,
-                supportedSeqTypes: [seqType2],
+                apiVersion: createWorkflowApiVersion(workflow: workflow2),
+                supportedSeqTypes : [seqType2],
         ])
         createWorkflowVersion()
 
         expect:
-        CollectionUtils.containSame(service.getSupportedSeqTypesOfVersions([workflow1, workflow2]), [seqType1, seqType2, seqType3])
+        CollectionUtils.containSame(workflowService.getSupportedSeqTypesOfVersions([workflow1, workflow2]), [seqType1, seqType2, seqType3])
     }
 
     @Unroll
@@ -152,7 +151,7 @@ class WorkflowServiceSpec extends Specification implements ServiceUnitTest<Workf
         ])
 
         expect:
-        service.getSupportedSeqTypesOfVersions(input) == []
+        workflowService.getSupportedSeqTypesOfVersions(input) == []
 
         where:
         name            | input
@@ -173,6 +172,6 @@ class WorkflowServiceSpec extends Specification implements ServiceUnitTest<Workf
         createWorkflow()
 
         expect:
-        service.findAllFastqcWorkflows() == [workflow2, workflow1]
+        workflowService.findAllFastqcWorkflows() == [workflow2, workflow1]
     }
 }
