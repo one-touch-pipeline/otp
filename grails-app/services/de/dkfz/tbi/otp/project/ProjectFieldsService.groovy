@@ -27,7 +27,7 @@ import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
+import de.dkfz.tbi.otp.utils.exceptions.FieldAlreadyUsedException
 import de.dkfz.tbi.otp.project.additionalField.*
 
 @CompileDynamic
@@ -100,7 +100,7 @@ class ProjectFieldsService {
         assert definition: "definition not given"
         long count = AbstractFieldValue.countByDefinition(definition)
         if (count > 0) {
-            throw new OtpRuntimeException("The field '${definition}' is already used")
+            throw new FieldAlreadyUsedException("The field '${definition}' is already used")
         }
         definition.delete(flush: true)
     }

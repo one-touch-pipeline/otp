@@ -25,10 +25,10 @@ import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.config.PropertiesValidationService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
+import de.dkfz.tbi.otp.workflow.shared.WorkflowTestException
 
 class WorkflowSystemServiceSpec extends Specification implements ServiceUnitTest<WorkflowSystemService>, DataTest, WorkflowSystemDomainFactory {
 
@@ -191,7 +191,7 @@ class WorkflowSystemServiceSpec extends Specification implements ServiceUnitTest
         }
         service.workflowStepService = Mock(WorkflowStepService) {
             _ * runningWorkflowSteps() >> {
-                throw new OtpRuntimeException(FAILED)
+                throw new WorkflowTestException(FAILED)
             }
         }
         service.workflowBeanNameService = Mock(WorkflowBeanNameService) {
@@ -200,7 +200,7 @@ class WorkflowSystemServiceSpec extends Specification implements ServiceUnitTest
 
         try {
             service.startWorkflowSystem()
-        } catch (OtpRuntimeException e) {
+        } catch (WorkflowTestException e) {
             assert e.message == FAILED
         }
     }

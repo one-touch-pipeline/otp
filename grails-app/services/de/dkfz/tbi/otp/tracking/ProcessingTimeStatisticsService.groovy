@@ -25,7 +25,7 @@ import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.tbi.otp.dataprocessing.NotSupportedException
+import de.dkfz.tbi.otp.utils.exceptions.NotSupportedException
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.util.TimeFormats

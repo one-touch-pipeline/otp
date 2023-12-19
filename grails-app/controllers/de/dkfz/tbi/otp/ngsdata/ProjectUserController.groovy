@@ -40,6 +40,7 @@ import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StringUtils
+import de.dkfz.tbi.otp.utils.exceptions.FilePermissionException
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
 @PreAuthorize('isFullyAuthenticated()')
@@ -343,7 +344,7 @@ class UserEntry {
         } else if (!should && is && changeRequested) {
             return PermissionStatus.PENDING_DENIAL
         }
-        throw new OtpRuntimeException("Case should not occur: should: ${should}, is: ${is}, changeRequested: ${changeRequested}")
+        throw new FilePermissionException("Case should not occur: should: ${should}, is: ${is}, changeRequested: ${changeRequested}")
     }
 }
 

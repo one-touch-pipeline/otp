@@ -25,8 +25,8 @@ import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.workflow.shared.JobFailedException
 import de.dkfz.tbi.otp.workflowExecution.*
 
 class AutoRestartActionServiceSpec extends Specification implements ServiceUnitTest<AutoRestartActionService>, DataTest, WorkflowSystemDomainFactory {
@@ -75,7 +75,7 @@ class AutoRestartActionServiceSpec extends Specification implements ServiceUnitT
         service.handleActionAndSendMail(workflowStep, [errorDefinition], action, null)
 
         then:
-        1 * service.workflowService.createRestartedWorkflow(workflowStep, true) >> { throw new OtpRuntimeException('Fail') }
+        1 * service.workflowService.createRestartedWorkflow(workflowStep, true) >> { throw new JobFailedException('Fail') }
         1 * service.errorNotificationService.send(workflowStep, WorkflowJobErrorDefinition.Action.STOP, _, [errorDefinition])
     }
 
@@ -119,7 +119,7 @@ class AutoRestartActionServiceSpec extends Specification implements ServiceUnitT
 
         then:
         1 * service.jobService.searchForJobToRestart(workflowStep, errorDefinition.beanToRestart) >> workflowStepToRestart
-        1 * service.jobService.createRestartedJobAfterJobFailure(workflowStepToRestart) >> { throw new OtpRuntimeException('Fail') }
+        1 * service.jobService.createRestartedJobAfterJobFailure(workflowStepToRestart) >> { throw new JobFailedException('Fail') }
         1 * service.errorNotificationService.send(workflowStep, WorkflowJobErrorDefinition.Action.STOP, _, [errorDefinition])
     }
 

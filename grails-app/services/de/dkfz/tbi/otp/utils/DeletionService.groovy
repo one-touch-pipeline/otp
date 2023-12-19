@@ -45,6 +45,7 @@ import de.dkfz.tbi.otp.project.ProjectRequest
 import de.dkfz.tbi.otp.project.dta.DataTransferAgreement
 import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
 import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
+import de.dkfz.tbi.otp.utils.exceptions.NotSupportedException
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigSelector
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 

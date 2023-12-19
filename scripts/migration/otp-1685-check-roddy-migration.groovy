@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
+import de.dkfz.tbi.otp.utils.exceptions.NotSupportedException
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.util.TimeFormats
 
@@ -66,7 +67,7 @@ Pipeline pipeline = Pipeline.findByName(Pipeline.Name.RODDY_RNA_ALIGNMENT)
 
 // the name of the new workflow in the new system
 @Field
-String nameNewWorkflow = RnaAlignmentWorkflow.WORKFLOW
+String nameNewWorkflow = de.dkfz.tbi.otp.workflow.rna.RnaAlignmentWorkflow.WORKFLOW
 
 // name of the roddy plugin
 @Field

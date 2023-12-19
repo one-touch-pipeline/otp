@@ -36,7 +36,8 @@ import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
+import de.dkfz.tbi.otp.utils.exceptions.UserDisabledException
+import de.dkfz.tbi.otp.utils.exceptions.UserRoleException
 
 @CompileDynamic
 @Transactional
@@ -134,7 +135,7 @@ class UserProjectRoleService {
         User user = userService.findOrCreateUserWithLdapData(username)
 
         if (!user.enabled) {
-            throw new OtpRuntimeException("User is disabled.")
+            throw new UserDisabledException("User is disabled.")
         }
 
         applyToRelatedProjects(project.unixGroup) { Project p ->
@@ -458,7 +459,7 @@ class UserProjectRoleService {
             throw new InsufficientRightsException("You don't have enough rights to execute this operation! Please ask your administrator.")
         }
         if (!userProjectRole.user.enabled && value) {
-            throw new OtpRuntimeException("User is disabled.")
+            throw new UserDisabledException("User is disabled.")
         }
         boolean hadFileAccess = userProjectRole.accessToFiles
         if (checkRelatedUserProjectRolesFor(userProjectRole) { UserProjectRole upr -> upr.enabled == value }) {
@@ -509,10 +510,10 @@ class UserProjectRoleService {
     UserProjectRole deleteProjectUserRole(UserProjectRole userProjectRole, ProjectRole currentProjectRole) {
         assert currentProjectRole in userProjectRole.projectRoles
         if (currentProjectRole.name == ProjectRole.Basic.PI.name() && !securityService.hasCurrentUserAdministrativeRoles()) {
-            throw new OtpRuntimeException("Cannot remove role ${ProjectRole.Basic.PI.name()}. Please ask an administrator!")
+            throw new UserRoleException("Cannot remove role ${ProjectRole.Basic.PI.name()}. Please ask an administrator!")
         }
         if (userProjectRole.projectRoles.size() <= 1) {
-            throw new OtpRuntimeException("A user must have at least one role!")
+            throw new UserRoleException("A user must have at least one role!")
         }
         applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.projectRoles.remove(currentProjectRole)

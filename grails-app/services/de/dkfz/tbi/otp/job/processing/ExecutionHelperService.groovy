@@ -24,10 +24,11 @@ package de.dkfz.tbi.otp.job.processing
 import grails.gorm.transactions.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 
+import de.dkfz.tbi.otp.infrastructure.ChangeFilePermissionException
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.exception.unixGroup.UnixGroupException
 import de.dkfz.tbi.otp.utils.ProcessOutput
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
 import java.nio.file.Path
 
@@ -49,7 +50,7 @@ class ExecutionHelperService {
         assert directory: 'directory may not be null'
         ProcessOutput result = remoteShellHelper.executeCommandReturnProcessOutput("stat -c '%G' ${directory}")
         if (result.exitCode != 0) {
-            throw new OtpRuntimeException("Getting group failed: ${result.stderr}; exit code: ${result.exitCode}")
+            throw new UnixGroupException("Getting group failed: ${result.stderr}; exit code: ${result.exitCode}")
         }
         return result.stdout.trim()
     }
@@ -63,7 +64,7 @@ class ExecutionHelperService {
         assert group: 'group may not be null'
         ProcessOutput result = remoteShellHelper.executeCommandReturnProcessOutput("chgrp -h ${group} ${directory}")
         if (result.exitCode != 0) {
-            throw new OtpRuntimeException("Setting group '${group}' failed: ${result.stderr}; exit code: ${result.exitCode}")
+            throw new UnixGroupException("Setting group '${group}' failed: ${result.stderr}; exit code: ${result.exitCode}")
         }
         return result.stdout
     }
@@ -77,7 +78,7 @@ class ExecutionHelperService {
         assert permission: 'permission may not be null'
         ProcessOutput result = remoteShellHelper.executeCommandReturnProcessOutput("chmod  ${permission} ${directory}")
         if (result.exitCode != 0) {
-            throw new OtpRuntimeException("Setting permission failed: ${result.stderr}; exit code: ${result.exitCode}")
+            throw new ChangeFilePermissionException("Setting permission failed: ${result.stderr}; exit code: ${result.exitCode}")
         }
         return result.stdout
     }

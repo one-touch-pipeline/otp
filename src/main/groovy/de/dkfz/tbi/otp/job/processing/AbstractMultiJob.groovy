@@ -25,10 +25,10 @@ import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.scheduler.*
+import de.dkfz.tbi.otp.workflowExecution.cluster.ClusterJobException
 
 /**
  * Base class for jobs which submit cluster jobs and wait for them to finish and optionally do other
@@ -142,13 +142,13 @@ abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl implements 
         switch (action) {
             case NextAction.WAIT_FOR_CLUSTER_JOBS:
                 if (clusterJobs.empty) {
-                    throw new OtpRuntimeException("The job requested to wait for cluster jobs, but did not submit any.")
+                    throw new ClusterJobException("The job requested to wait for cluster jobs, but did not submit any.")
                 }
                 startMonitoring()
                 break
             case NextAction.SUCCEED:
                 if (!clusterJobs.empty) {
-                    throw new OtpRuntimeException("The job submitted cluster jobs, but requested to succeed instead of waiting for them.")
+                    throw new ClusterJobException("The job submitted cluster jobs, but requested to succeed instead of waiting for them.")
                 }
                 succeed()
                 schedulerService.doEndCheck(this)

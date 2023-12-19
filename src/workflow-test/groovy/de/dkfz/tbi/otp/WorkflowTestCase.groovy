@@ -48,8 +48,8 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import de.dkfz.tbi.otp.workflow.shared.WorkflowTestException
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 import de.dkfz.tbi.otp.workflowTest.AbstractWorkflowSpec
 import de.dkfz.tbi.util.TimeFormats
@@ -368,7 +368,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
             }
         }
         if (!failureProcessingStepUpdates.empty) {
-            throw new OtpRuntimeException("""\
+            throw new WorkflowTestException("""\
                 |There were ${failureProcessingStepUpdates.size()} failures:
                 |${combinedErrorMessage.join("\n")}
                 |Details have been written to standard output. See the test report or run grails test-app -echoOut.

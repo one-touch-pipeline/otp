@@ -27,10 +27,10 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.roddy.execution.jobs.*
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.ClusterJobManagerFactoryService
+import de.dkfz.tbi.otp.workflow.shared.JobInfoException
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -61,7 +61,7 @@ class ClusterStatisticServiceSpec extends Specification implements ServiceUnitTe
                     assert jobIds.size() == 1
                     if (counter < exceptionCount) {
                         counter++
-                        throw new OtpRuntimeException()
+                        throw new JobInfoException()
                     }
                     return [(new BEJobID(clusterId)): new GenericJobInfo(null, null, null, null, null)]
                 }

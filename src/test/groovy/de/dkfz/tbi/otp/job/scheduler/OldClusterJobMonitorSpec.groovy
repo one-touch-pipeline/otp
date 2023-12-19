@@ -35,8 +35,8 @@ import de.dkfz.tbi.otp.job.restarting.RestartCheckerService
 import de.dkfz.tbi.otp.job.restarting.RestartHandlerService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import de.dkfz.tbi.otp.workflowExecution.cluster.ClusterJobException
 import de.dkfz.tbi.otp.workflowExecution.cluster.ClusterStatisticService
 
 import static de.dkfz.tbi.otp.ngsdata.DomainFactory.createAndSaveProcessingStep
@@ -158,7 +158,7 @@ class OldClusterJobMonitorSpec extends Specification implements DataTest {
         clusterJobMonitor.clusterStatisticService = Mock(ClusterStatisticService) {
             1 * retrieveAndSaveJobStatisticsAfterJobFinished(clusterJobChecking1)
             1 * retrieveAndSaveJobStatisticsAfterJobFinished(clusterJobChecking2b) >> { ClusterJob clusterJob ->
-                throw new OtpRuntimeException("")
+                throw new ClusterJobException("")
             }
         }
         clusterJobMonitor.scheduler = Mock(Scheduler) {

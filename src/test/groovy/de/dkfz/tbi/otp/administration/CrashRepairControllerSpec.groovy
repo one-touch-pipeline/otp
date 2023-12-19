@@ -26,10 +26,10 @@ import grails.testing.web.controllers.ControllerUnitTest
 import org.springframework.http.*
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
+import de.dkfz.tbi.otp.workflow.shared.WorkflowTestException
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 
@@ -176,7 +176,7 @@ class CrashRepairControllerSpec extends Specification implements ControllerUnitT
     void "test markWorkflowStepAsFailed_ShouldReturnBadRequest_whenServiceFails"() {
         given:
         controller.workflowStateChangeService = Mock(WorkflowStateChangeService) {
-            _ * changeStateToFailedWithManualChangedError(_) >> { throw new OtpRuntimeException("") }
+            _ * changeStateToFailedWithManualChangedError(_) >> { throw new WorkflowTestException("") }
         }
 
         WorkflowRun run = createWorkflowRun([
@@ -225,7 +225,7 @@ class CrashRepairControllerSpec extends Specification implements ControllerUnitT
     void "test markWorkflowRunAsFinalFailed_ShouldReturnBadRequest_whenServiceFails"() {
         given:
         controller.workflowStateChangeService = Mock(WorkflowStateChangeService) {
-            _ * changeRunToFinalFailed(_) >> { throw new OtpRuntimeException("") }
+            _ * changeRunToFinalFailed(_) >> { throw new WorkflowTestException("") }
         }
 
         WorkflowRun run = createWorkflowRun([

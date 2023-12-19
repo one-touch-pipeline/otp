@@ -31,11 +31,11 @@ import de.dkfz.roddy.config.ResourceSet
 import de.dkfz.roddy.execution.io.ExecutionResult
 import de.dkfz.roddy.execution.jobs.*
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
+import de.dkfz.tbi.otp.workflow.shared.JobFailedException
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 import de.dkfz.tbi.otp.workflowExecution.cluster.logs.ClusterLogDirectoryService
@@ -260,7 +260,7 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
         BatchEuphoriaJobManager jobManager = Mock(BatchEuphoriaJobManager) {
             1 * submitJob(job1) >> jobResult1
             1 * submitJob(job2) >> jobResult2
-            1 * killJobs([job1, job2]) >> { throw new OtpRuntimeException() }
+            1 * killJobs([job1, job2]) >> { throw new JobFailedException() }
             0 * _
         }
 
@@ -300,7 +300,7 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
         setupJobData()
 
         BatchEuphoriaJobManager jobManager = Mock(BatchEuphoriaJobManager) {
-            1 * startHeldJobs(jobs) >> { throw new OtpRuntimeException() }
+            1 * startHeldJobs(jobs) >> { throw new JobFailedException() }
             1 * killJobs([job1, job2])
             0 * _
         }
@@ -319,8 +319,8 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
         setupJobData()
 
         BatchEuphoriaJobManager jobManager = Mock(BatchEuphoriaJobManager) {
-            1 * startHeldJobs(jobs) >> { throw new OtpRuntimeException() }
-            1 * killJobs([job1, job2]) >> { throw new OtpRuntimeException() }
+            1 * startHeldJobs(jobs) >> { throw new JobFailedException() }
+            1 * killJobs([job1, job2]) >> { throw new JobFailedException() }
             0 * _
         }
 

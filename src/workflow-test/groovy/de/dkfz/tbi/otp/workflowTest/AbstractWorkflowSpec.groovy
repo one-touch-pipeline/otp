@@ -48,8 +48,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.workflow.scheduler.WesMonitor
+import de.dkfz.tbi.otp.workflow.shared.WorkflowTestException
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
@@ -166,7 +166,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      * Holds the first exception occurred in a  {@link TestCronJob#execute()}.
      * Putting it here will stop the scheduler, the workflow system is halted and the test fail.
      */
-    protected OtpRuntimeException exceptionInScheduler
+    protected JobSchedulerException exceptionInScheduler
 
     /**
      * The scheduler used for the workflow system.
@@ -606,7 +606,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                 try {
                     testCronJob.execute()
                 } catch (Throwable t) {
-                    exceptionInScheduler = new OtpRuntimeException("Cron job '${testCronJob.name}' failed for: ${t.message}", t)
+                    exceptionInScheduler = new JobSchedulerException("Cron job '${testCronJob.name}' failed for: ${t.message}", t)
                     AbstractWorkflowSpec.log.error(exceptionInScheduler.message, t)
                 }
             } as Runnable, 0, testCronJob.delay, testCronJob.timeUnit)
@@ -631,10 +631,10 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
             int newWorkflowCount = WorkflowRun.countByState(WorkflowRun.State.PENDING)
             int oldWorkflowCount = WorkflowRun.count - newWorkflowCount
             if (oldWorkflowCount != existingRuns) {
-                throw new OtpRuntimeException("The count of existing workfowRuns is incorrect: found ${oldWorkflowCount}, but expected ${existingRuns}")
+                throw new WorkflowTestException("The count of existing workfowRuns is incorrect: found ${oldWorkflowCount}, but expected ${existingRuns}")
             }
             if (newWorkflowCount != requiredWorkflowRunCount) {
-                throw new OtpRuntimeException("The count of new workfowRuns is incorrect: found ${newWorkflowCount}, but expected ${existingRuns}")
+                throw new WorkflowTestException("The count of new workfowRuns is incorrect: found ${newWorkflowCount}, but expected ${existingRuns}")
             }
             updateDomainValuesForTesting()
             workflowSystemService.startWorkflowSystem()
@@ -692,7 +692,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         int counter = 0
         if (!ThreadUtils.waitFor({
             if (exceptionInScheduler) {
-                throw new OtpRuntimeException("Stop, since exception in one of the cron jobs occurred", exceptionInScheduler)
+                throw new JobSchedulerException("Stop, since exception in one of the cron jobs occurred", exceptionInScheduler)
             }
             long milliSeconds = System.currentTimeMillis()
             if (lastLog < milliSeconds - 10000L) {
@@ -724,7 +724,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         int counter = 0
         if (!ThreadUtils.waitFor({
             if (exceptionInScheduler) {
-                throw new OtpRuntimeException("Stop, since exception in one of the cron jobs occurred", exceptionInScheduler)
+                throw new JobSchedulerException("Stop, since exception in one of the cron jobs occurred", exceptionInScheduler)
             }
             long milliSeconds = System.currentTimeMillis()
             if (lastLog < milliSeconds - 60000L) {

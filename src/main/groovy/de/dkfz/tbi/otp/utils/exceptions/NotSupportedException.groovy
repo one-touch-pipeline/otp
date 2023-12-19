@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2021 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,24 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowTest.referenceGenome
+package de.dkfz.tbi.otp.utils.exceptions
 
-import de.dkfz.tbi.otp.utils.exceptions.NotSupportedException
+import groovy.transform.InheritConstructors
 
-trait ReferenceGenomeHs37Conv extends UsingReferenceGenome {
-
-    final String referenceGenomeFileNamePrefix = 'hs37d5_PhiX_Lambda.conv'
-
-    final String referenceGenomeSpecificPath = 'bwa06_methylCtools_hs37d5_PhiX_Lambda'
-
-    final String chromosomeLengthFilePath = null
-
-    final String chromosomeStatFileName = 'hs37d5_PhiX_Lambda.fa.chrLenOnlyACGT.tab'
-
-    final String referenceGenomeCytosinePositionsIndex = 'hs37d5_PhiX_Lambda.pos.gz'
-
-    @Override
-    String getFingerPrintingFileName() {
-        throw new NotSupportedException("No fingerprinting file name exists")
-    }
+@InheritConstructors
+class NotSupportedException extends OtpRuntimeException {
 }

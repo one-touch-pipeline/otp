@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflowTest.referenceGenome
 
-import de.dkfz.tbi.otp.dataprocessing.NotSupportedException
+import de.dkfz.tbi.otp.utils.exceptions.NotSupportedException
 
 trait ReferenceGenomeHg38 extends UsingReferenceGenome {
 

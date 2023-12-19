@@ -19,24 +19,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowTest.referenceGenome
+import groovy.transform.CompileStatic
+import org.codenarc.rule.AbstractAstVisitorRule
+import org.codenarc.rule.AstVisitor
+import org.codenarc.rule.exceptions.CommonThrowAstVisitor
 
-import de.dkfz.tbi.otp.utils.exceptions.NotSupportedException
+@CompileStatic
+class ThrowOtpRuntimeExceptionRule extends AbstractAstVisitorRule {
 
-trait ReferenceGenomeHs37Conv extends UsingReferenceGenome {
-
-    final String referenceGenomeFileNamePrefix = 'hs37d5_PhiX_Lambda.conv'
-
-    final String referenceGenomeSpecificPath = 'bwa06_methylCtools_hs37d5_PhiX_Lambda'
-
-    final String chromosomeLengthFilePath = null
-
-    final String chromosomeStatFileName = 'hs37d5_PhiX_Lambda.fa.chrLenOnlyACGT.tab'
-
-    final String referenceGenomeCytosinePositionsIndex = 'hs37d5_PhiX_Lambda.pos.gz'
+    String name = 'OtpRuntimeException'
+    int priority = 1
+    String description = "Ensures that general OtpRuntimeException is not used"
+    String doNotApplyToFileNames = "*/*otp/jobs*/*"
 
     @Override
-    String getFingerPrintingFileName() {
-        throw new NotSupportedException("No fingerprinting file name exists")
+    AstVisitor getAstVisitor() {
+        return new CommonThrowAstVisitor([name, 'de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException'])
     }
 }

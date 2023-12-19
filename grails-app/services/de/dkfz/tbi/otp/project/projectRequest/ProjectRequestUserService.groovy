@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.ProjectRequestUser
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.user.UserService
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
+import de.dkfz.tbi.otp.utils.exceptions.UserDisabledException
 
 @Transactional
 class ProjectRequestUserService {
@@ -63,7 +63,7 @@ class ProjectRequestUserService {
     Set<ProjectRequestUser> saveProjectRequestUsersFromCommands(List<ProjectRequestUserCommand> users) {
         ProjectRequestUserCommand disabledUser = users.find { it && !userService.findOrCreateUserWithLdapData(it.username).enabled }
         if (disabledUser) {
-            throw new OtpRuntimeException("Project request contains at least one disabled user.")
+            throw new UserDisabledException("Project request contains at least one disabled user.")
         }
 
         // When the user adds/removes user form elements dynamically it creates holes in the indexes, which are converted to null objects upon

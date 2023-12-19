@@ -52,6 +52,7 @@ import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.utils.exceptions.NotSupportedException
 
 import java.nio.file.Files
 import java.nio.file.Path

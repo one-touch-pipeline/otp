@@ -27,7 +27,6 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
@@ -37,6 +36,7 @@ import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
+import de.dkfz.tbi.otp.utils.exceptions.InformationTypeException
 import de.dkfz.tbi.util.TimeFormats
 
 import java.sql.Timestamp
@@ -161,7 +161,7 @@ class CellRangerDataCleanupJob extends AbstractScheduledJob {
                 content = buildReminderMessageBody(project, cellRangerMwps)
                 break
             default:
-                throw new OtpRuntimeException("Invalid state ${informationType} for informationType")
+                throw new InformationTypeException("Invalid state ${informationType} for informationType")
         }
         mailHelperService.sendEmail(subject, content, (userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([project]) +
                 cellRangerMwps*.requester*.email).unique())

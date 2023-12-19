@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.roddy.execution.jobs.JobState
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
+import de.dkfz.tbi.otp.workflowExecution.cluster.ClusterJobException
 import de.dkfz.tbi.otp.workflowExecution.cluster.ClusterStatisticService
 
 /**
@@ -110,7 +110,7 @@ ${schedulerService.running.collect { "    ${it}  ${it.processingStep}" }.join('\
                     log.debug("Cluster Job finished successfully but is still monitoring" +
                             " ${clusterJob.clusterJobId}.")
                 } else {
-                    throw new OtpRuntimeException("${monitoringJob} is still monitoring cluster job" +
+                    throw new ClusterJobException("${monitoringJob} is still monitoring cluster job" +
                             " ${clusterJob.clusterJobId}, although it has" +
                             " already finished with end state ${jobEndState}.")
                 }

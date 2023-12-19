@@ -21,11 +21,11 @@
  */
 package de.dkfz.tbi.otp.domainFactory.pipelines.externalBam
 
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsAlignment
 import de.dkfz.tbi.otp.ngsdata.SequencingReadType
 import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.utils.exceptions.NotSupportedException
 
 trait ExternalBamFactory implements IsAlignment {
 
@@ -84,13 +84,13 @@ trait ExternalBamFactory implements IsAlignment {
 
     @Override
     Map getConfigProperties(Map properties) {
-        throw new OtpRuntimeException('not available')
+        throw new NotSupportedException('not available')
     }
 
     @SuppressWarnings('GetterMethodCouldBeProperty')
     @Override
     Class getConfigPerProjectAndSeqTypeClass() {
-        throw new OtpRuntimeException('not available')
+        throw new NotSupportedException('not available')
     }
 
     @SuppressWarnings('GetterMethodCouldBeProperty')

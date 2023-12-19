@@ -23,8 +23,8 @@ package de.dkfz.tbi.otp.qcTrafficLight
 
 import grails.gorm.transactions.Transactional
 
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.utils.exceptions.QcTrafficLightStatusException
 
 @Transactional
 @Deprecated
@@ -46,7 +46,7 @@ class QcTrafficLightCheckService {
                 // no links creating, so nothing to do
                 break
             case AbstractBamFile.QcTrafficLightStatus.JobLinkCase.SHOULD_NOT_OCCUR:
-                throw new OtpRuntimeException("${bamFile.qcTrafficLightStatus} is not a valid qcTrafficLightStatus " +
+                throw new QcTrafficLightStatusException("${bamFile.qcTrafficLightStatus} is not a valid qcTrafficLightStatus " +
                         "during workflow processing, it should only occur after the workflow has finished")
             default:
                 throw new AssertionError("Unknown value: ${bamFile.qcTrafficLightStatus.jobLinkCase}")
@@ -61,7 +61,7 @@ class QcTrafficLightCheckService {
                 qcTrafficLightNotificationService.informResultsAreWarned(bamFile)
                 break
             case AbstractBamFile.QcTrafficLightStatus.JobLinkCase.SHOULD_NOT_OCCUR:
-                throw new OtpRuntimeException("${bamFile.qcTrafficLightStatus} is not a valid qcTrafficLightStatus " +
+                throw new QcTrafficLightStatusException("${bamFile.qcTrafficLightStatus} is not a valid qcTrafficLightStatus " +
                         "during workflow processing, it should only occur after the workflow has finished")
             default:
                 throw new AssertionError("Unknown value: ${bamFile.qcTrafficLightStatus.jobNotifyCase}")

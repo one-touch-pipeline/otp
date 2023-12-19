@@ -29,7 +29,6 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.DeletionService
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -58,7 +57,7 @@ abstract class AbstractWithdrawBamFileService<E extends AbstractBamFile> impleme
                     stream = Files.list(path)
                     return stream.findAll { it.fileName.toString() != NON_OTP }
                 } catch (IOException e) {
-                    throw new OtpRuntimeException(e)
+                    throw new WithdrawnException(e)
                 } finally {
                     stream?.close()
                 }

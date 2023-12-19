@@ -29,9 +29,9 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetails
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
+import de.dkfz.tbi.otp.security.InsufficientRightsException
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.utils.exceptions.SecurityContextAlreadyExistsException
 
@@ -83,7 +83,7 @@ class SystemUserUtilsSpec extends Specification implements UserDomainFactory {
 
         when:
         SystemUserUtils.useUser(userName) {
-            throw new OtpRuntimeException("should not be reached")
+            throw new InsufficientRightsException("should not be reached")
         }
 
         then:
