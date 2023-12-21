@@ -436,7 +436,7 @@ dependencies {
 
     // libraries for SSH and SFTP
     implementation 'com.github.mwiede:jsch:0.2.15'
-    implementation 'com.github.robtimus:sftp-fs:3.3'
+    implementation 'com.github.robtimus:sftp-fs:3.3.1'
 
     // library for easy HTML editing
     implementation 'org.jsoup:jsoup:1.17.1'
