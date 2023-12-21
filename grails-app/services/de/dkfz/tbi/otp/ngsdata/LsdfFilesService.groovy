@@ -78,8 +78,11 @@ class LsdfFilesService {
         return basePath?.resolve(centerDir)?.resolve(rawSequenceFile.run.dirName)
     }
 
+    // method will be cleaned up in issue otp-2375
+    @SuppressWarnings("UnusedMethodParameter")
     Path getFinalDirPath(RawSequenceFile rawSequenceFile, PathOption... options) {
-        if (options.contains(PathOption.REAL_PATH) && rawSequenceFile.seqTrack.workflowArtefact.producedBy.workFolder) {
+        // FinalDir is already the work directory, therefore the option `PathOption.REAL_PATH` is unnecessary
+        if (rawSequenceFile.seqTrack.workflowArtefact?.producedBy?.workFolder) {
             return filestoreService.getWorkFolderPath(rawSequenceFile.seqTrack.workflowArtefact.producedBy)
         }
         return getSeqCenterRunDirectory(rawSequenceFile)?.resolve(rawSequenceFile.pathName)
