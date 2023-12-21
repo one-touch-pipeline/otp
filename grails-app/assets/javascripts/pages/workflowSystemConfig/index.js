@@ -173,7 +173,7 @@ const updateModalWithCurrentWorkflow = (workflow, modal) => {
   defaultVersion.empty();
   defaultVersion.append('<option value=" ">No default version</option>');
   workflow.versions.forEach((version) => {
-    const deprecated = version.deprecateDate !== 'na' ? ' (deprecated)' : '';
+    const deprecated = version.deprecateDate !== 'N/A' ? ' (deprecated)' : '';
     defaultVersion.append(`<option value="${version.id}">${version.name}${deprecated}</option>`);
   });
   if (workflow.defaultVersion) {
