@@ -109,7 +109,7 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
         String groovyActivation = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_ACTIVATION_GROOVY)
         String samtoolsCommand = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_SAMTOOLS)
         String groovyCommand = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_GROOVY)
-        File otpScriptDir = configService.toolsPath
+        File otpScriptDir = fileService.toFile(configService.toolsPath)
 
         importProcess.externallyProcessedBamFiles.each { ExternallyProcessedBamFile epmbf ->
             File sourceBam = new File(epmbf.importedFrom)

@@ -92,8 +92,8 @@ class ConfigService implements ApplicationContextAware {
         return new File(otpProperties.get(OtpProperty.PATH_PROCESSING_ROOT).toString() ?: "")
     }
 
-    File getToolsPath() {
-        return new File(otpProperties.get(OtpProperty.PATH_TOOLS).toString() ?: "")
+    Path getToolsPath() {
+        return fileSystemService.remoteFileSystem.getPath(otpProperties.get(OtpProperty.PATH_TOOLS).toString() ?: "")
     }
 
     File getLoggingRootPath() {

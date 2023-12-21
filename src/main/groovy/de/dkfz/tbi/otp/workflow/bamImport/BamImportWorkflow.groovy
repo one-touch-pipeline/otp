@@ -45,7 +45,7 @@ class BamImportWorkflow implements OtpWorkflow {
                 // BamImportConditionalFailJob,
                 AttachUuidJob,
                 // BamImportPrepareJob,
-                // BamImportCopyJob,
+                BamImportCopyJob,
                 // BamImportValidationJob,
                 // BamImportLinkSourceJob,
                 BamImportReplaceSourceJob,

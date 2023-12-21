@@ -586,6 +586,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         }
         importExternallyMergedBamJob.fileSystemService = new TestFileSystemService()
         importExternallyMergedBamJob.fileSystemService.processingOptionService = new ProcessingOptionService()
+        importExternallyMergedBamJob.fileService = new FileService()
         importExternallyMergedBamJob.processingOptionService = new ProcessingOptionService()
         importExternallyMergedBamJob.projectService = new ProjectService()
         importExternallyMergedBamJob.projectService.configService = configService

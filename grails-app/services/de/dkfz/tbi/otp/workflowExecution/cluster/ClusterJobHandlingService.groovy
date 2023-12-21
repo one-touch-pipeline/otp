@@ -89,7 +89,7 @@ class ClusterJobHandlingService {
                     [],
                     [:],
                     jobManager,
-                JobLog.toOneFile(new File(clusterLogDirectory, "${jobName}-{JOB_ID}.log")),
+                    JobLog.toOneFile(new File(clusterLogDirectory, "${jobName}-{JOB_ID}.log")),
                     null,
             )
         }
