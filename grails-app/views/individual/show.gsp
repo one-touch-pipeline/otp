@@ -102,7 +102,7 @@
                     </g:each>
                     <tr>
                         <td class="myKey"></td>
-                        <td class="myValue">
+                        <td class="myValue new-sample-type">
                             <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="newValue"
@@ -115,7 +115,7 @@
         </sec:access>
 
         <h2><g:message code="individual.show.laneOverview.header"/></h2>
-        <div class="tableBlock">
+        <div id="lane-overview" class="tableBlock">
             <g:each var="seqType" in="${groupedSeqTrackSets.keySet().sort { it.name }}">
                 <h3>${seqType}</h3>
                 <table>

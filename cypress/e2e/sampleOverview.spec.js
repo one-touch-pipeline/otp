@@ -61,9 +61,30 @@ describe('Check sampleOverview page', () => {
       cy.loginAsUser();
     });
 
-    it('should not be able to select a project on index page', () => {
+    it('should not be able to select a project user is not part of', () => {
       cy.visit('/sampleOverview/index');
       cy.get('select#project option').should('not.have.text', 'Example project 1');
+    });
+
+    it('should load data table on initialization and download csv file, when button is clicked', () => {
+      cy.intercept('/sampleOverview/dataTableSourceLaneOverview*').as('loadDataTable');
+
+      cy.visit('/sampleOverview/index');
+
+      cy.wait('@loadDataTable').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+      });
+
+      cy.get('table#laneOverviewId').find('tbody tr').should('have.length', 8);
+
+      // Download Csv file via Button
+      cy.get('button.buttons-csv').click();
+
+      cy.checkDownloadByContent('Sample_Overview-ExampleProject', '.csv', [
+        'Patient ID', 'Sample Type', 'Registered Lanes', 'cell ranger',
+        '10x_scRNA PAIRED single cell', 'EXAMPLE PAIRED bulk', 'EXOME PAIRED bulk', 'WGS PAIRED bulk',
+        'WGBS PAIRED bulk', 'WGBS_TAG PAIRED bulk'
+      ]);
     });
   });
 });

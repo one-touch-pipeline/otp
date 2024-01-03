@@ -1,0 +1,9 @@
+{
+  "filterProject": "ExampleProject",
+  "filterIdentifier": "example",
+  "filterQuickSearch": "PID",
+  "individualId": 941,
+  "editSampleTableId": "#individualSampleTbl",
+  "UUIDEntrySelector": "#individualDetailTbl td:contains(UUID)",
+  "individualEditTypeButtonSelector": ".typeDropDown button.edit"
+}
