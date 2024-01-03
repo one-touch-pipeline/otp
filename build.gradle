@@ -435,7 +435,7 @@ dependencies {
     implementation('com.github.theroddywms:BatchEuphoria:0.1.4')
 
     // libraries for SSH and SFTP
-    implementation 'com.github.mwiede:jsch:0.2.15'
+    implementation 'com.github.mwiede:jsch:0.2.16'
     implementation 'com.github.robtimus:sftp-fs:3.3.1'
 
     // library for easy HTML editing
