@@ -436,18 +436,6 @@ class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<R
         !service.isOldStructureUsed(roddyBamFile)
     }
 
-    void "test getPathForFurtherProcessing, returns null since qcTrafficLightStatus is #status"() {
-        given:
-        roddyBamFile.qcTrafficLightStatus = status
-        roddyBamFile.comment = DomainFactory.createComment()
-
-        expect:
-        !service.getPathForFurtherProcessing(roddyBamFile)
-
-        where:
-        status << [AbstractBamFile.QcTrafficLightStatus.BLOCKED, AbstractBamFile.QcTrafficLightStatus.REJECTED]
-    }
-
     void "test getPathForFurtherProcessing, when old structure is used, should return final directory"() {
         given:
         roddyBamFile.workDirectoryName = null

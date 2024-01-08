@@ -85,20 +85,6 @@ class AbstractBamFileService {
         return file
     }
 
-    List<AbstractBamFile> getActiveBlockedBamsContainingSeqTracks(List<SeqTrack> sts) {
-        List<MergingWorkPackage> mwps = sts ? MergingWorkPackage.withCriteria {
-            seqTracks {
-                inList("id", sts*.id)
-            }
-        } as List<MergingWorkPackage> : []
-
-        return mwps ? AbstractBamFile.withCriteria {
-            'in'("workPackage", mwps)
-            eq("qcTrafficLightStatus", AbstractBamFile.QcTrafficLightStatus.BLOCKED)
-            eq("withdrawn", false)
-        } as List<AbstractBamFile> : []
-    }
-
     AbstractBamFile findById(long id) {
         return AbstractBamFile.get(id)
     }

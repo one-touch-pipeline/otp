@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.testing.gorm.DataTest
-import grails.validation.ValidationException
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -245,38 +244,5 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
 
         then:
         100 == roddyBamFile.maximalReadLength
-    }
-
-    void "test qcTrafficLightStatus constraint, should fail since bam file is blocked but no comment is provided"() {
-        given:
-        roddyBamFile.qcTrafficLightStatus = AbstractBamFile.QcTrafficLightStatus.BLOCKED
-
-        when:
-        roddyBamFile.save(flush: true)
-
-        then:
-        ValidationException e = thrown()
-        e.message.contains("comment.missing")
-    }
-
-    void "test qcTrafficLightStatus constraint, is valid since bam file is blocked and comment is provided"() {
-        given:
-        roddyBamFile.qcTrafficLightStatus = AbstractBamFile.QcTrafficLightStatus.BLOCKED
-        roddyBamFile.comment = DomainFactory.createComment()
-
-        expect:
-        roddyBamFile.save(flush: true)
-    }
-
-    void "test getPathForFurtherProcessing, returns null since qcTrafficLightStatus is #status"() {
-        given:
-        roddyBamFile.qcTrafficLightStatus = status
-        roddyBamFile.comment = DomainFactory.createComment()
-
-        expect:
-        !roddyBamFile.pathForFurtherProcessing
-
-        where:
-        status << [AbstractBamFile.QcTrafficLightStatus.BLOCKED, AbstractBamFile.QcTrafficLightStatus.REJECTED]
     }
 }

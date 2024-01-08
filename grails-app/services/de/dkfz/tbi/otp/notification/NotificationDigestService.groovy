@@ -49,15 +49,13 @@ class NotificationDigestService {
     List<PreparedNotification> prepareNotifications(NotificationCommand cmd) {
         return ticketService.findAllSeqTracks(cmd.ticket).groupBy { it.project }.collect { Project project, List<SeqTrack> seqTracksOfProject ->
             ProcessingStatus status = notificationCreator.getProcessingStatus(seqTracksOfProject)
-            List<AbstractBamFile> blockedBams = abstractBamFileService.getActiveBlockedBamsContainingSeqTracks(seqTracksOfProject)
             return new PreparedNotification(
                     project                 : project,
                     seqTracks               : seqTracksOfProject,
-                    bams                    : blockedBams,
                     toBeNotifiedProjectUsers: userProjectRoleService.getProjectUsersToBeNotified([project]).sort { it.user.username },
                     processingStatus        : status,
                     subject                 : buildNotificationSubject(cmd.ticket, seqTracksOfProject, project),
-                    notification            : buildNotificationDigest(cmd, status, blockedBams),
+                    notification            : buildNotificationDigest(cmd, status),
             )
         }.sort { it.project.name }
     }
@@ -67,7 +65,7 @@ class NotificationDigestService {
         return "[${ticketService.getPrefixedTicketNumber(ticket)}]${ilseIdentifier} - ${project.name} - OTP processing completed"
     }
 
-    String buildNotificationDigest(NotificationCommand cmd, ProcessingStatus status, List<AbstractBamFile> bams) {
+    String buildNotificationDigest(NotificationCommand cmd, ProcessingStatus status) {
         List<String> content = []
         List<ProcessingStep> processingSteps = cmd.steps.findAll()
         if (processingSteps) {
@@ -76,10 +74,6 @@ class NotificationDigestService {
                 content << stepContent
                 content << createNotificationTextService.buildSeqCenterComment(cmd.ticket)
             }
-        }
-
-        if (cmd.notifyQcThresholds && bams) {
-            content << qcTrafficLightNotificationService.buildContentForMultipleBamsWarningMessage(bams)
         }
 
         if (!content) {

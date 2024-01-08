@@ -159,30 +159,6 @@ class QcTrafficLightServiceIntegrationSpec extends Specification implements Doma
     }
 
     @Unroll
-    void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, once blocked files do not get unblocked (qcBasesMapped = #qcBasesMapped & onTargetMappedBases = #onTargetMappedBases --> #exceedingExpected)"() {
-        given:
-        setupData()
-
-        cellRangerQualityAssessment.qcBasesMapped = qcBasesMapped
-        cellRangerQualityAssessment.onTargetMappedBases = onTargetMappedBases
-
-        when:
-        bamFile.comment = DomainFactory.createComment()
-        bamFile.qcTrafficLightStatus = BLOCKED
-        qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(bamFile, cellRangerQualityAssessment)
-        boolean thresholdExceeded = qcTrafficLightService.qcValuesExceedErrorThreshold(bamFile, cellRangerQualityAssessment)
-
-        then:
-        thresholdExceeded == exceedingExpected
-        bamFile.qcTrafficLightStatus == BLOCKED
-
-        where:
-        qcBasesMapped | onTargetMappedBases || exceedingExpected
-        5             | 5                   || false
-        9             | 9                   || true
-    }
-
-    @Unroll
     void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling"() {
         given:
         setupData()

@@ -105,10 +105,6 @@ class QcTrafficLightService {
     }
 
     void setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(AbstractBamFile bamFile, QcTrafficLightValue qc) {
-        if (bamFile.qcTrafficLightStatus == AbstractBamFile.QcTrafficLightStatus.BLOCKED) {
-            return
-        }
-
         if (qcThresholdService.getThresholds(bamFile.project, bamFile.seqType, qc.class).empty) {
             setQcTrafficLightStatus(bamFile, AbstractBamFile.QcTrafficLightStatus.UNCHECKED)
             return

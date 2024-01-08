@@ -135,24 +135,6 @@ class AbstractBamFileAnalysisServiceIntegrationSpec extends Specification {
     }
 
     @Unroll
-    void "samplePairForProcessing should not return a sample pair when qc of bam file is too bad"() {
-        given:
-        setupDataExtended(processingStatus, pipeline, qc)
-
-        expect:
-        !(service().samplePairForProcessing(ProcessingPriority.NORMAL))
-
-        where:
-        processingStatus         | pipeline                                     | service                 | qc
-        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | { indelCallingService } | AbstractBamFile.QcTrafficLightStatus.REJECTED
-        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | { sophiaService }       | AbstractBamFile.QcTrafficLightStatus.REJECTED
-        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | { aceseqService }       | AbstractBamFile.QcTrafficLightStatus.REJECTED
-        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | { indelCallingService } | AbstractBamFile.QcTrafficLightStatus.BLOCKED
-        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | { sophiaService }       | AbstractBamFile.QcTrafficLightStatus.BLOCKED
-        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | { aceseqService }       | AbstractBamFile.QcTrafficLightStatus.BLOCKED
-    }
-
-    @Unroll
     void "samplePairForProcessing should return a sample pair when qc of bam file is okay"() {
         given:
         setupDataExtended(processingStatus, pipeline, qc)

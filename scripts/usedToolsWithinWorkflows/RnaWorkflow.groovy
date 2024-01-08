@@ -99,12 +99,6 @@ def toolNames = [
 RnaRoddyBamFile.createCriteria().list {
     eq("withdrawn", false)
     eq("fileOperationStatus", RoddyBamFile.FileOperationStatus.PROCESSED)
-    or {
-        not {
-            'in'("qcTrafficLightStatus", [RoddyBamFile.QcTrafficLightStatus.BLOCKED, RoddyBamFile.QcTrafficLightStatus.REJECTED])
-        }
-        isNull("qcTrafficLightStatus")
-    }
     workPackage {
         seqType {
             eq("name", SeqTypeNames.RNA.seqTypeName)

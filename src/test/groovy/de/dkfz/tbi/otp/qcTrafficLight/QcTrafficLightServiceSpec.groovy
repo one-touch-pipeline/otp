@@ -108,13 +108,9 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
         false | AbstractBamFile.QcTrafficLightStatus.NOT_RUN_YET | AbstractBamFile.QcTrafficLightStatus.ACCEPTED | 1 | 0 | 1
         false | AbstractBamFile.QcTrafficLightStatus.NOT_RUN_YET | AbstractBamFile.QcTrafficLightStatus.WARNING  | 1 | 0 | 1
         false | AbstractBamFile.QcTrafficLightStatus.WARNING     | AbstractBamFile.QcTrafficLightStatus.ACCEPTED | 0 | 0 | 0
-        false | AbstractBamFile.QcTrafficLightStatus.BLOCKED     | AbstractBamFile.QcTrafficLightStatus.WARNING  | 1 | 0 | 1
-        false | AbstractBamFile.QcTrafficLightStatus.BLOCKED     | AbstractBamFile.QcTrafficLightStatus.ACCEPTED | 1 | 0 | 1
         true  | AbstractBamFile.QcTrafficLightStatus.NOT_RUN_YET | AbstractBamFile.QcTrafficLightStatus.ACCEPTED | 0 | 1 | 1
         true  | AbstractBamFile.QcTrafficLightStatus.NOT_RUN_YET | AbstractBamFile.QcTrafficLightStatus.WARNING  | 0 | 1 | 1
         true  | AbstractBamFile.QcTrafficLightStatus.WARNING     | AbstractBamFile.QcTrafficLightStatus.ACCEPTED | 0 | 0 | 0
-        true  | AbstractBamFile.QcTrafficLightStatus.BLOCKED     | AbstractBamFile.QcTrafficLightStatus.WARNING  | 0 | 1 | 1
-        true  | AbstractBamFile.QcTrafficLightStatus.BLOCKED     | AbstractBamFile.QcTrafficLightStatus.ACCEPTED | 0 | 1 | 1
     }
 
     void "test setQcTrafficLightStatusWithComment invalid input, fails"() {
@@ -130,17 +126,14 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
 
         where:
         useBamFile | qcStatus                                            | comment
-        true       | AbstractBamFile.QcTrafficLightStatus.REJECTED | null
-        true       | AbstractBamFile.QcTrafficLightStatus.REJECTED | ""
         true       | null                                                | "comment"
-        false      | AbstractBamFile.QcTrafficLightStatus.REJECTED | "comment"
     }
 
     void "test setQcTrafficLightStatusWithComment set analysis of ticket system to not sent"() {
         given:
         DomainFactory.createAllAlignableSeqTypes()
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
-                qcTrafficLightStatus: AbstractBamFile.QcTrafficLightStatus.REJECTED,
+                qcTrafficLightStatus: AbstractBamFile.QcTrafficLightStatus.ACCEPTED,
         ])
         Ticket ticket1 = DomainFactory.createTicketWithEndDatesAndNotificationSent()
         Ticket ticket2 = DomainFactory.createTicketWithEndDatesAndNotificationSent()

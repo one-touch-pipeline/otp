@@ -51,45 +51,19 @@ abstract class AbstractBamFile implements CommentableWithProject, Entity {
     @TupleConstructor
     static enum QcTrafficLightStatus {
         // status is set by OTP when the file is still in processing
-        NOT_RUN_YET(JobLinkCase.SHOULD_NOT_OCCUR, JobNotifyCase.SHOULD_NOT_OCCUR),
+        NOT_RUN_YET(JobNotifyCase.SHOULD_NOT_OCCUR),
         // status is set by OTP when QC thresholds were met
-        QC_PASSED(JobLinkCase.CREATE_LINKS, JobNotifyCase.NO_NOTIFY),
+        QC_PASSED(JobNotifyCase.NO_NOTIFY),
         // status is set by bioinformaticians when they decide to keep the file although QC thresholds were not met
-        ACCEPTED(JobLinkCase.SHOULD_NOT_OCCUR, JobNotifyCase.SHOULD_NOT_OCCUR),
-        // status is set by OTP when QC error thresholds were not met
-        BLOCKED(JobLinkCase.CREATE_NO_LINK, JobNotifyCase.NOTIFY),
-        // status is set by bioinformaticians when they decide not to use a file for further analyses
-        REJECTED(JobLinkCase.SHOULD_NOT_OCCUR, JobNotifyCase.SHOULD_NOT_OCCUR),
+        ACCEPTED(JobNotifyCase.SHOULD_NOT_OCCUR),
         // status is set by OTP when QC thresholds were not met but the project is configured to allow failed files
-        AUTO_ACCEPTED(JobLinkCase.CREATE_LINKS, JobNotifyCase.NOTIFY),
+        AUTO_ACCEPTED(JobNotifyCase.NOTIFY),
         // status is set by OTP when project is configured to not check QC thresholds
-        UNCHECKED(JobLinkCase.CREATE_LINKS, JobNotifyCase.NO_NOTIFY),
+        UNCHECKED(JobNotifyCase.NO_NOTIFY),
         // status is set by OTP when QC error thresholds were not met, replacing BLOCKED
-        WARNING(JobLinkCase.CREATE_LINKS, JobNotifyCase.NOTIFY),
-
-        final JobLinkCase jobLinkCase
+        WARNING(JobNotifyCase.NOTIFY),
 
         final JobNotifyCase jobNotifyCase
-
-        /**
-         * Link category of {@link QcTrafficLightStatus}. It defines, if links should be created or should not be create or the status
-         * should not occur automatically in job system, but only set manually in the gui.
-         */
-        @TupleConstructor
-        static enum JobLinkCase {
-            /**
-             * For that cases, links should be created
-             */
-            CREATE_LINKS,
-            /**
-             * For that cases, no links should be created
-             */
-            CREATE_NO_LINK,
-            /**
-             * Cases set manually and should therefor not occur during workflow
-             */
-            SHOULD_NOT_OCCUR,
-        }
 
         /**
          * Notify category of {@link QcTrafficLightStatus}. It defines, if notify emails should be send or should not be sent or that the status
@@ -208,7 +182,7 @@ abstract class AbstractBamFile implements CommentableWithProject, Entity {
             }
         }
         qcTrafficLightStatus validator: { status, obj ->
-            if (status in [QcTrafficLightStatus.ACCEPTED, QcTrafficLightStatus.REJECTED, QcTrafficLightStatus.BLOCKED] && !obj.comment) {
+            if (status == QcTrafficLightStatus.ACCEPTED && !obj.comment) {
                 return "comment.missing"
             }
         }
@@ -319,9 +293,6 @@ abstract class AbstractBamFile implements CommentableWithProject, Entity {
      */
     @Deprecated
     File getPathForFurtherProcessing() {
-        if (this.qcTrafficLightStatus in [QcTrafficLightStatus.REJECTED, QcTrafficLightStatus.BLOCKED]) {
-            return null
-        }
         mergingWorkPackage.refresh() // Sometimes the mergingWorkPackage.processableBamFileInProjectFolder is empty but should have a value
         AbstractBamFile processableBamFileInProjectFolder = mergingWorkPackage.processableBamFileInProjectFolder
         if (this.id == processableBamFileInProjectFolder?.id) {

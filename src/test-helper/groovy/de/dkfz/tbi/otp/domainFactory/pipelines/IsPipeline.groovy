@@ -82,11 +82,8 @@ trait IsPipeline implements DomainFactoryCore {
                 fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
                 fileSize           : 10000,
                 comment            : {
-                    [
-                            AbstractBamFile.QcTrafficLightStatus.BLOCKED,
-                            AbstractBamFile.QcTrafficLightStatus.ACCEPTED,
-                            AbstractBamFile.QcTrafficLightStatus.REJECTED,
-                    ].contains(properties.qcTrafficLightStatus) ? DomainFactory.createComment() : null
+                    properties.qcTrafficLightStatus ==
+                            AbstractBamFile.QcTrafficLightStatus.ACCEPTED ? DomainFactory.createComment() : null
                 },
         ]
     }

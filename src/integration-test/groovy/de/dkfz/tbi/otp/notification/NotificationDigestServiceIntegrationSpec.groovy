@@ -106,11 +106,8 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
         ]
     }
 
-    NotificationDigestService setupMockedServiceForPrepareNotificationsTests(Integer buildCalls, Integer sendCalls, List<AbstractBamFile> bams = [], List<UserProjectRole> projectUsers = []) {
+    NotificationDigestService setupMockedServiceForPrepareNotificationsTests(Integer buildCalls, Integer sendCalls, List<UserProjectRole> projectUsers = []) {
         return new NotificationDigestService(
-                abstractBamFileService: Mock(AbstractBamFileService) {
-                    buildCalls * getActiveBlockedBamsContainingSeqTracks(_) >> bams
-                },
                 createNotificationTextService: Mock(CreateNotificationTextService),
                 ilseSubmissionService: Mock(IlseSubmissionService),
                 notificationCreator: new NotificationCreator(),
@@ -134,10 +131,9 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
         setupData()
         Map<String, Object> map = setupNotificationCommand()
 
-        RoddyBamFile bam = DomainFactory.createRoddyBamFile()
         UserProjectRole projectUser = DomainFactory.createUserProjectRole()
 
-        NotificationDigestService service = setupMockedServiceForPrepareNotificationsTests(3, 0, [bam], [projectUser])
+        NotificationDigestService service = setupMockedServiceForPrepareNotificationsTests(3, 0, [projectUser])
 
         when:
         List<PreparedNotification> preparedNotifications = service.prepareNotifications(map.cmd as NotificationCommand)
@@ -146,7 +142,6 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
         preparedNotifications.size() == 3
         TestCase.assertContainSame(preparedNotifications*.project, map.projects as List<Project>)
         TestCase.assertContainSame(preparedNotifications*.seqTracks.flatten(), map.seqTracks as List<SeqTrack>)
-        preparedNotifications*.bams.flatten().unique() == [bam]
         preparedNotifications*.toBeNotifiedProjectUsers.flatten().unique() == [projectUser]
     }
 
@@ -155,10 +150,9 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
         setupData()
         Map<String, Object> map = setupNotificationCommand()
 
-        RoddyBamFile bam = DomainFactory.createRoddyBamFile()
         UserProjectRole projectUser = DomainFactory.createUserProjectRole()
 
-        NotificationDigestService service = setupMockedServiceForPrepareNotificationsTests(3, 3, [bam], [projectUser])
+        NotificationDigestService service = setupMockedServiceForPrepareNotificationsTests(3, 3, [projectUser])
 
         when:
         List<PreparedNotification> preparedNotifications = service.prepareAndSendNotifications(map.cmd as NotificationCommand)
@@ -167,7 +161,6 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
         preparedNotifications.size() == 3
         TestCase.assertContainSame(preparedNotifications*.project, map.projects as List<Project>)
         TestCase.assertContainSame(preparedNotifications*.seqTracks.flatten(), map.seqTracks as List<SeqTrack>)
-        preparedNotifications*.bams.flatten().unique() == [bam]
         preparedNotifications*.toBeNotifiedProjectUsers.flatten().unique() == [projectUser]
     }
 
@@ -183,12 +176,7 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
                     _ * buildSeqCenterComment(_) >> { return SEQ_CENTER_COMMENT }
                     _ * getFaq() >> { return FAQ }
                 },
-                qcTrafficLightNotificationService: Mock(QcTrafficLightNotificationService) {
-                    _ * buildContentForMultipleBamsWarningMessage(_) >> { List<AbstractBamFile> bams ->
-                        // some bug (?) causes bams to be a List<List<AbstractBamFile>>, so I flatten it here
-                        return bams.flatten()*.id.join(",")
-                    }
-                },
+                qcTrafficLightNotificationService: Mock(QcTrafficLightNotificationService),
                 messageSourceService             : new MessageSourceService(
                         messageSource: Mock(PluginAwareResourceBundleMessageSource) {
                             _ * getMessageInternal("notification.template.digest", [], _) >> NOTIFICATION_DIGEST_TEMPLATE
@@ -214,20 +202,16 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
                 steps             : notifySteps ? steps : [],
                 notifyQcThresholds: notifyQc,
         )
-        List<RoddyBamFile> bams = [
-                createRoddyBamFile(RoddyBamFile),
-                createRoddyBamFile(RoddyBamFile),
-        ]
 
         expect:
-        service.buildNotificationDigest(cmd, null, provideBams ? bams : []) == ""
+        service.buildNotificationDigest(cmd, null) == ""
 
         where:
-        notifySteps | stepsHaveResult | notifyQc | provideBams | testCase
-        false       | true            | false    | false       | "no steps, no QC"
-        true        | false           | false    | false       | "steps, but no results, no qc"
-        false       | true            | true     | false       | "no steps, QC, but no bams"
-        false       | true            | false    | true        | "no steps, no QC, but bams"
+        notifySteps | stepsHaveResult | notifyQc | testCase
+        false       | true            | false    | "no steps, no QC"
+        true        | false           | false    | "steps, but no results, no qc"
+        false       | true            | true     | "no steps, QC, but no bams"
+        false       | true            | false    | "no steps, no QC, but bams"
     }
 
     @Unroll
@@ -252,7 +236,7 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
         |${FAQ}""".stripMargin() : ""
 
         when:
-        String result = service.buildNotificationDigest(cmd, null, [])
+        String result = service.buildNotificationDigest(cmd, null)
 
         then:
         expected == result
@@ -274,22 +258,15 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
                 fastqImportInstance: fastqImportInstance,
         )
 
-        List<AbstractBamFile> bams = [
-                createRoddyBamFile(RoddyBamFile),
-                createRoddyBamFile(RoddyBamFile),
-        ]
-
         String expected = """\
         |${cmd.steps*.name().sort().join(',')}
         |
         |${SEQ_CENTER_COMMENT}
-        |
-        |${(bams*.id).join(",")}
         |${SALUTATION}
         |${FAQ}""".stripMargin()
 
         when:
-        String result = service.buildNotificationDigest(cmd, null, bams)
+        String result = service.buildNotificationDigest(cmd, null)
 
         then:
         expected == result

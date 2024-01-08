@@ -27,8 +27,6 @@ import de.dkfz.tbi.otp.filestore.PathOption
 
 import java.nio.file.Path
 
-import static AbstractBamFile.QcTrafficLightStatus
-
 @Transactional
 abstract class AbstractAbstractBamFileService<T extends AbstractBamFile> {
 
@@ -36,9 +34,6 @@ abstract class AbstractAbstractBamFileService<T extends AbstractBamFile> {
     protected abstract Path getPathForFurtherProcessingNoCheck(T bamFile)
 
     Path getPathForFurtherProcessing(T bamFile) {
-        if (bamFile.qcTrafficLightStatus in [QcTrafficLightStatus.REJECTED, QcTrafficLightStatus.BLOCKED]) {
-            return null
-        }
         bamFile.mergingWorkPackage.refresh() // Sometimes the mergingWorkPackage.processableBamFileInProjectFolder is empty but should have a value
         AbstractBamFile processableBamFileInProjectFolder = bamFile.mergingWorkPackage.processableBamFileInProjectFolder
         if (bamFile.id == processableBamFileInProjectFolder?.id) {

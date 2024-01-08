@@ -78,8 +78,6 @@ abstract class AbstractBamFileAnalysisService<T extends BamFilePairAnalysis> imp
             // check that transfer workflow is finished
             "       AND ambf${number}.md5sum IS NOT NULL " +
                     pipelineSpecificBamFileChecks(number) +
-                    // checks that qc of the bam file is okay
-            "       AND (ambf${number}.qcTrafficLightStatus is null OR ambf${number}.qcTrafficLightStatus NOT IN (:rejecetedQcTrafficLightStatus))" +
 
             // check that coverage is high enough & number of lanes are enough
             "       AND EXISTS ( FROM ProcessingThresholds pt " +
@@ -136,7 +134,6 @@ abstract class AbstractBamFileAnalysisService<T extends BamFilePairAnalysis> imp
                 analysis: analysisType,
                 seqTypes: seqTypes,
                 threshold: threshold,
-                rejecetedQcTrafficLightStatus: [AbstractBamFile.QcTrafficLightStatus.REJECTED, AbstractBamFile.QcTrafficLightStatus.BLOCKED],
         ]
         if (sp) {
             parameters.sp = sp

@@ -89,13 +89,12 @@ class LinkFilesToFinalDestinationService {
     void linkToFinalDestinationAndCleanupRna(RnaRoddyBamFile roddyBamFile) {
         executeRoddyCommandService.correctPermissionsAndGroups(roddyBamFile)
         cleanupOldRnaResults(roddyBamFile)
-        handleQcCheckAndSetBamFile(roddyBamFile) {
-            linkNewRnaResults(roddyBamFile)
-        }
+        handleQcCheckAndSetBamFile(roddyBamFile)
+        linkNewRnaResults(roddyBamFile)
     }
 
-    private void handleQcCheckAndSetBamFile(RoddyBamFile roddyBamFile, Closure linkCall) {
-        qcTrafficLightCheckService.handleQcCheck(roddyBamFile, linkCall)
+    private void handleQcCheckAndSetBamFile(RoddyBamFile roddyBamFile) {
+        qcTrafficLightCheckService.handleQcCheck(roddyBamFile)
         bamFileValues = roddyBamFile
     }
 

@@ -324,9 +324,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
                     1 * extractMd5Sum(_) >> md5sum
                 },
                 qcTrafficLightCheckService: Mock(QcTrafficLightCheckService) {
-                    1 * handleQcCheck(singleCellBamFile, _) >> { AbstractBamFile bam, Closure closure ->
-                        closure()
-                    }
+                    1 * handleQcCheck(singleCellBamFile)
                 },
                 fileSystemService         : Mock(FileSystemService) {
                     _ * getRemoteFileSystem() >> FileSystems.default

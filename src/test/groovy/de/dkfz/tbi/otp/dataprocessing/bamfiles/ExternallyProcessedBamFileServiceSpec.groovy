@@ -28,7 +28,6 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactory
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.utils.HelperUtils
 
 import java.nio.file.FileSystems
@@ -108,18 +107,6 @@ class ExternallyProcessedBamFileServiceSpec extends Specification implements Ser
     void "test getSourceBaseDirFilePath"() {
         expect:
         service.getSourceBaseDirFilePath(bamFile).toString() == "${importDir}"
-    }
-
-    void "test getPathForFurtherProcessing, returns null since qcTrafficLightStatus is #status"() {
-        given:
-        bamFile.qcTrafficLightStatus = status
-        bamFile.comment = DomainFactory.createComment()
-
-        expect:
-        !service.getPathForFurtherProcessing(bamFile)
-
-        where:
-        status << [AbstractBamFile.QcTrafficLightStatus.BLOCKED, AbstractBamFile.QcTrafficLightStatus.REJECTED]
     }
 
     void "test getPathForFurtherProcessing, should return final directory"() {

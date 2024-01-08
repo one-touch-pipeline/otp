@@ -59,8 +59,6 @@ class QcStatusCellServiceSpec extends Specification implements ServiceUnitTest<Q
         AbstractBamFile.QcTrafficLightStatus.NOT_RUN_YET   | TableCellValue.Icon.OKAY    || 0
         AbstractBamFile.QcTrafficLightStatus.QC_PASSED     | TableCellValue.Icon.OKAY    || 0
         AbstractBamFile.QcTrafficLightStatus.ACCEPTED      | TableCellValue.Icon.OKAY    || 0
-        AbstractBamFile.QcTrafficLightStatus.BLOCKED       | TableCellValue.Icon.WARNING || 0
-        AbstractBamFile.QcTrafficLightStatus.REJECTED      | TableCellValue.Icon.ERROR   || 0
         AbstractBamFile.QcTrafficLightStatus.AUTO_ACCEPTED | TableCellValue.Icon.OKAY    || 0
         AbstractBamFile.QcTrafficLightStatus.WARNING       | TableCellValue.Icon.WARNING || 0
     }

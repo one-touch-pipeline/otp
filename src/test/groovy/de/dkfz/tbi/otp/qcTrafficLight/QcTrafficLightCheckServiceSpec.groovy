@@ -77,30 +77,23 @@ class QcTrafficLightCheckServiceSpec extends Specification implements IsRoddy, D
         ])
 
         QcTrafficLightCheckService service = new QcTrafficLightCheckService([
-                qcTrafficLightNotificationService: Mock(QcTrafficLightNotificationService) {
-                    notifyCount * informResultsAreWarned(_)
-                },
+                qcTrafficLightNotificationService: Mock(QcTrafficLightNotificationService)
         ])
 
-        boolean called = false
-        Closure closure = {
-            called = true
-        }
-
         when:
-        service.handleQcCheck(bamFile, closure)
+        service.handleQcCheck(bamFile)
 
         then:
-        called == callCallback
+        notifyCount * service.qcTrafficLightNotificationService.informResultsAreWarned(_)
 
         where:
-        status                                                   || callCallback | callNotify
-        AbstractBamFile.QcTrafficLightStatus.QC_PASSED     || true | false
-        AbstractBamFile.QcTrafficLightStatus.WARNING       || true | true
-        AbstractBamFile.QcTrafficLightStatus.AUTO_ACCEPTED || true | true
-        AbstractBamFile.QcTrafficLightStatus.UNCHECKED     || true | false
+        status                                             || callNotify
+        AbstractBamFile.QcTrafficLightStatus.QC_PASSED     || false
+        AbstractBamFile.QcTrafficLightStatus.WARNING       || true
+        AbstractBamFile.QcTrafficLightStatus.AUTO_ACCEPTED || true
+        AbstractBamFile.QcTrafficLightStatus.UNCHECKED     || false
 
-        text = "${callCallback ? '' : 'do not '}call the callback and ${callNotify ? '' : 'do not '} call the notify"
+        text = "${callNotify ? '' : 'do not '} call the notify"
     }
 
     @Unroll
@@ -129,7 +122,6 @@ class QcTrafficLightCheckServiceSpec extends Specification implements IsRoddy, D
 
         where:
         status << AbstractBamFile.QcTrafficLightStatus.values().findAll {
-            it.jobLinkCase == AbstractBamFile.QcTrafficLightStatus.JobLinkCase.SHOULD_NOT_OCCUR ||
                     it.jobNotifyCase == AbstractBamFile.QcTrafficLightStatus.JobNotifyCase.SHOULD_NOT_OCCUR
         }
     }

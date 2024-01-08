@@ -144,18 +144,6 @@ class SingleCellBamFileServiceSpec extends Specification implements ServiceUnitT
         thrown(UnsupportedOperationException)
     }
 
-    void "test getPathForFurtherProcessing, returns null since qcTrafficLightStatus is #status"() {
-        given:
-        bamFile.qcTrafficLightStatus = status
-        bamFile.comment = DomainFactory.createComment()
-
-        expect:
-        !service.getPathForFurtherProcessing(bamFile)
-
-        where:
-        status << [AbstractBamFile.QcTrafficLightStatus.BLOCKED, AbstractBamFile.QcTrafficLightStatus.REJECTED]
-    }
-
     void "test getPathForFurtherProcessing, should return final directory"() {
         expect:
         service.getPathForFurtherProcessing(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.bamFileName}"

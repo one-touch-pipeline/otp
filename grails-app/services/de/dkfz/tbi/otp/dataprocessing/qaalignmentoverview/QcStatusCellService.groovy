@@ -43,9 +43,7 @@ class QcStatusCellService {
      */
     TableCellValue generateQcStatusCell(Map<String, ?> qcStatusMap) {
         TableCellValue.Icon icon = [
-                (AbstractBamFile.QcTrafficLightStatus.BLOCKED)  : TableCellValue.Icon.WARNING,
                 (AbstractBamFile.QcTrafficLightStatus.WARNING)  : TableCellValue.Icon.WARNING,
-                (AbstractBamFile.QcTrafficLightStatus.REJECTED) : TableCellValue.Icon.ERROR,
                 (AbstractBamFile.QcTrafficLightStatus.UNCHECKED): TableCellValue.Icon.NA,
         ].getOrDefault(qcStatusMap.qcStatus, TableCellValue.Icon.OKAY)
 

@@ -144,45 +144,6 @@ class AbstractBamFileServiceIntegrationSpec extends Specification implements Rod
         analysisName << PROCESSING_STEPS
     }
 
-    void "getActiveBlockedBamsContainingSeqTracks, only returns not withdrawn blocked bams"() {
-        given:
-        Closure<RoddyBamFile> createRoddyBamFileHelper = { boolean blocked, boolean withdrawn ->
-            Map props = [:]
-            if (blocked) {
-                props << [qcTrafficLightStatus: AbstractBamFile.QcTrafficLightStatus.BLOCKED]
-            }
-            if (withdrawn) {
-                props << [withdrawn: true]
-            }
-            return createRoddyBamFile(props, RoddyBamFile)
-        }
-        createRoddyBamFile(RoddyBamFile)
-        List<SeqTrack> seqTracks =  [
-                createRoddyBamFileHelper(false, false),
-                createRoddyBamFileHelper(false, true),
-                createRoddyBamFileHelper(true, false),
-                createRoddyBamFileHelper(true, true),
-        ].collectMany {
-            it.containedSeqTracks
-        }
-
-        when:
-        List<AbstractBamFile> bams = abstractBamFileService.getActiveBlockedBamsContainingSeqTracks(seqTracks)
-
-        then:
-        bams.size() == 1
-    }
-
-    void "getActiveBlockedBamsContainingSeqTracks, empty merging work package list is properly handled"() {
-        expect:
-        [] == abstractBamFileService.getActiveBlockedBamsContainingSeqTracks([createSeqTrack()])
-    }
-
-    void "getActiveBlockedBamsContainingSeqTracks, empty list is properly handled"() {
-        expect:
-        [] ==  abstractBamFileService.getActiveBlockedBamsContainingSeqTracks([])
-    }
-
     private SamplePair setSamplePairStatusToNeedProcessing_setup(SamplePair.ProcessingStatus processingStatus, String analysisName) {
         SamplePair samplePair = DomainFactory.createDisease(DomainFactory.createRoddyBamFile().workPackage)
         samplePair."${analysisName}ProcessingStatus" = processingStatus

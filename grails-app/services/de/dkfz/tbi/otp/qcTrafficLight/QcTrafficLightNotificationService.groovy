@@ -80,37 +80,6 @@ class QcTrafficLightNotificationService {
         ])
     }
 
-    String buildContentForMultipleBamsWarningMessage(List<AbstractBamFile> bamFiles) {
-        Project project = CollectionUtils.exactlyOneElement(bamFiles*.project.unique())
-
-        String bamListing = bamFiles.groupBy { it.seqType }.collect { SeqType seqType, List<AbstractBamFile> bams ->
-            return buildSeqTypeBlockForNotification(seqType, bams)
-        }.join("\n")
-
-        return messageSourceService.createMessage("notification.template.alignment.qcTrafficWarningMessage.multiple.content", [
-                project      : project,
-                bamListing   : bamListing,
-                thresholdPage: getThresholdPageLink(project),
-        ])
-    }
-
-    private String buildSeqTypeBlockForNotification(SeqType seqType, List<AbstractBamFile> bamFiles) {
-        Project project = CollectionUtils.exactlyOneElement(bamFiles*.project.unique())
-        return """\
-            |${seqType}
-            |Quality overview: ${getAlignmentQualityOverviewLink(project, seqType)}
-            |
-            |${bamFiles.collect { AbstractBamFile bam -> buildBamFileForNotification(bam) }.join("\n\n")}""".stripMargin()
-    }
-
-    private String buildBamFileForNotification(AbstractBamFile bamFile, int indent = 4) {
-        String i = " " * indent
-        return """\
-            |${i}${bamFile.sample}
-            |${i}Quality Overview: ${getAlignmentQualityOverviewLink(bamFile.project, bamFile.seqType, bamFile.sample)}
-            |${i}Filesystem: ${bamFile.workDirectory}""".stripMargin()
-    }
-
     void informResultsAreWarned(AbstractBamFile bamFile) {
         boolean projectNotification = bamFile.project.processingNotification
         boolean ticketNotification = ticketService.findAllTickets(bamFile.containedSeqTracks).find {

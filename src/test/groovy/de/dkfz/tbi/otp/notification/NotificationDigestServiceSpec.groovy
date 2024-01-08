@@ -103,7 +103,6 @@ class NotificationDigestServiceSpec extends Specification implements DomainFacto
         return new PreparedNotification(
                 project                 : createProject(),
                 seqTracks               : [],
-                bams                    : [],
                 toBeNotifiedProjectUsers: [
                         DomainFactory.createUserProjectRole(),
                         DomainFactory.createUserProjectRole(),

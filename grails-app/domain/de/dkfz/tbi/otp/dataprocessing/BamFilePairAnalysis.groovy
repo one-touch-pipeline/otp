@@ -87,7 +87,7 @@ abstract class BamFilePairAnalysis implements CommentableWithProject, ProcessPar
                     val?.pipeline?.type != Pipeline.Type.ALIGNMENT
         }
         qcTrafficLightStatus nullable: true, validator: { status, obj ->
-            if ([QcTrafficLightStatus.ACCEPTED, QcTrafficLightStatus.REJECTED, QcTrafficLightStatus.BLOCKED].contains(status) && !obj.comment) {
+            if (status == QcTrafficLightStatus.ACCEPTED && !obj.comment) {
                 return "comment.missing"
             }
         }

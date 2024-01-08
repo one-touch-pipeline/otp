@@ -36,22 +36,7 @@ class QcTrafficLightCheckService {
 
     QcTrafficLightNotificationService qcTrafficLightNotificationService
 
-    void handleQcCheck(AbstractBamFile bamFile, Closure callbackIfAllFine) {
-        switch (bamFile.qcTrafficLightStatus.jobLinkCase) {
-            case null:
-            case AbstractBamFile.QcTrafficLightStatus.JobLinkCase.CREATE_LINKS:
-                callbackIfAllFine()
-                break
-            case AbstractBamFile.QcTrafficLightStatus.JobLinkCase.CREATE_NO_LINK:
-                // no links creating, so nothing to do
-                break
-            case AbstractBamFile.QcTrafficLightStatus.JobLinkCase.SHOULD_NOT_OCCUR:
-                throw new QcTrafficLightStatusException("${bamFile.qcTrafficLightStatus} is not a valid qcTrafficLightStatus " +
-                        "during workflow processing, it should only occur after the workflow has finished")
-            default:
-                throw new AssertionError("Unknown value: ${bamFile.qcTrafficLightStatus.jobLinkCase}")
-        }
-
+    void handleQcCheck(AbstractBamFile bamFile) {
         switch (bamFile.qcTrafficLightStatus.jobNotifyCase) {
             case null:
             case AbstractBamFile.QcTrafficLightStatus.JobNotifyCase.NO_NOTIFY:
@@ -60,11 +45,11 @@ class QcTrafficLightCheckService {
             case AbstractBamFile.QcTrafficLightStatus.JobNotifyCase.NOTIFY:
                 qcTrafficLightNotificationService.informResultsAreWarned(bamFile)
                 break
-            case AbstractBamFile.QcTrafficLightStatus.JobLinkCase.SHOULD_NOT_OCCUR:
+            case AbstractBamFile.QcTrafficLightStatus.JobNotifyCase.SHOULD_NOT_OCCUR:
                 throw new QcTrafficLightStatusException("${bamFile.qcTrafficLightStatus} is not a valid qcTrafficLightStatus " +
                         "during workflow processing, it should only occur after the workflow has finished")
             default:
-                throw new AssertionError("Unknown value: ${bamFile.qcTrafficLightStatus.jobNotifyCase}")
+                throw new QcTrafficLightStatusException("Unknown value: ${bamFile.qcTrafficLightStatus.jobNotifyCase}")
         }
     }
 }

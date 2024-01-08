@@ -41,7 +41,7 @@ class AlignmentQualityOverviewControllerSpec extends Specification implements Co
     void setupData() {
         bamFile.id                   = 123
         bamFile.version              = 0
-        bamFile.qcTrafficLightStatus = AbstractBamFile.QcTrafficLightStatus.BLOCKED
+        bamFile.qcTrafficLightStatus = AbstractBamFile.QcTrafficLightStatus.WARNING
     }
 
     void "Test changeQcStatus, when save valid input posted, then return HTTP OK"() {
@@ -52,7 +52,7 @@ class AlignmentQualityOverviewControllerSpec extends Specification implements Co
             1 * setQcTrafficLightStatusWithComment(_, _, _) >> { AbstractBamFile bamFile,
                                                                  AbstractBamFile.QcTrafficLightStatus qcTrafficLightStatus,
                                                                  String comment ->
-                assert bamFile.qcTrafficLightStatus == AbstractBamFile.QcTrafficLightStatus.BLOCKED
+                assert bamFile.qcTrafficLightStatus == AbstractBamFile.QcTrafficLightStatus.WARNING
                 assert qcTrafficLightStatus         == AbstractBamFile.QcTrafficLightStatus.ACCEPTED
                 assert comment == commentUsed
             }
