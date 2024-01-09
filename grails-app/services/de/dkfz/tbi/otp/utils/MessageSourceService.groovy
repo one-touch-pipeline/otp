@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.MessageSource
 import org.springframework.context.NoSuchMessageException
 import org.springframework.context.i18n.LocaleContextHolder
+import org.springframework.lang.Nullable
 import org.springframework.validation.ObjectError
 
 @Transactional
@@ -48,6 +49,11 @@ class MessageSourceService {
     String createMessage(String templateName, Map properties) {
         assert templateName
         return new SimpleTemplateEngine().createTemplate(createMessage(templateName)).make(properties).toString()
+    }
+
+    String getMessage(String templateName, @Nullable Object[] args) {
+        assert templateName
+        return messageSource.getMessage(templateName, args, LocaleContextHolder.locale)
     }
 
     String createError(ObjectError error) {

@@ -21,24 +21,22 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import grails.test.hibernate.HibernateSpec
-import grails.testing.services.ServiceUnitTest
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.NotificationCreator
+import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
+import de.dkfz.tbi.otp.workflow.WorkflowCreateState
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 import de.dkfz.tbi.otp.workflowExecution.decider.DeciderResult
 
-class WorkflowCreatorSchedulerSpec extends HibernateSpec implements ServiceUnitTest<WorkflowCreatorScheduler>, RoddyPancanFactory, UserDomainFactory,
-        WorkflowSystemDomainFactory {
+class FastqImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSchedulerSpec implements UserDomainFactory, RoddyPancanFactory {
 
     @Override
     List<Class> getDomainClasses() {
@@ -48,36 +46,26 @@ class WorkflowCreatorSchedulerSpec extends HibernateSpec implements ServiceUnitT
                 MetaDataFile,
                 ProcessingOption,
                 RoddyBamFile,
+                FastqImportInstance,
         ]
     }
 
+    MetaDataFile metaDataFile
+    FastqImportInstance fastqImportInstance
+
     @Override
-    Closure doWithSpring() {
-        return { ->
-            processingOptionService(ProcessingOptionService)
-        }
+    Long getImportId() {
+        return fastqImportInstance.id
     }
 
-    void "scheduleCreateWorkflow, if system doesn't run, don't call createWorkflowRuns"() {
-        given:
-        WorkflowCreatorScheduler scheduler = createWorkflowCreatorSchedulerSpy()
-
-        when:
-        scheduler.scheduleCreateWorkflow()
-
-        then:
-        1 * scheduler.workflowSystemService.isEnabled() >> false
-
-        0 * scheduler.fastqImportInstanceService.waiting()
-        0 * scheduler.metaDataFileService.findByFastqImportInstance(_)
-        0 * scheduler.fastqImportInstanceService.updateState(_, _)
-
-        0 * scheduler.createWorkflowsAsync(_)
+    void setup() {
+        metaDataFile = DomainFactory.createMetaDataFile()
+        fastqImportInstance = metaDataFile.fastqImportInstance
     }
 
     void "scheduleCreateWorkflow, if system runs and waiting return null, then do not call createWorkflowRuns"() {
         given:
-        WorkflowCreatorScheduler scheduler = createWorkflowCreatorSchedulerSpy()
+        FastqImportWorkflowCreatorScheduler scheduler = createWorkflowCreatorScheduler()
 
         when:
         scheduler.scheduleCreateWorkflow()
@@ -92,28 +80,34 @@ class WorkflowCreatorSchedulerSpec extends HibernateSpec implements ServiceUnitT
         0 * scheduler.createWorkflowsAsync(_)
     }
 
-    void "createWorkflowsAsync, if call then call createWorkflowsTask in new thread"() {
+    @Unroll
+    void "scheduleCreateWorkflow, check if createWorkflowAsync is called or nor for the case that #cases"() {
         given:
-        WorkflowCreatorScheduler scheduler = createWorkflowCreatorSchedulerSpy()
-        MetaDataFile metaDataFile = DomainFactory.createMetaDataFile()
+        FastqImportWorkflowCreatorScheduler scheduler = createWorkflowCreatorScheduler()
+        FastqImportInstance fastqImportInstanceWaiting = createFastqImportInstance([state: WorkflowCreateState.WAITING])
+        createFastqImportInstance([state: WorkflowCreateState.PROCESSING])
 
         when:
-        scheduler.createWorkflowsAsync(metaDataFile)?.get()
+        scheduler.scheduleCreateWorkflow()
 
         then:
-        1 * scheduler.createWorkflowsTask(metaDataFile) >> { return Void }
+        1 * scheduler.workflowSystemService.isEnabled() >> true
+        1 * scheduler.fastqImportInstanceService.waiting() >> (n > 0 ? fastqImportInstanceWaiting : null)
+        n * scheduler.fastqImportInstanceService.updateState(_, WorkflowCreateState.PROCESSING)
+
+        where:
+        cases                       | n
+        "One waiting import exists" | 1
+        "No waiting import exists"  | 0
     }
 
     @Unroll
     void "createWorkflowsTask, if all fine and #name, call all methods for success called"() {
         given:
-        WorkflowCreatorScheduler scheduler = createWorkflowCreatorScheduler()
-
+        FastqImportWorkflowCreatorScheduler scheduler = createWorkflowCreatorScheduler()
         findOrCreateProcessingOption(ProcessingOption.OptionName.OTP_SYSTEM_USER, createUser().username)
         List<SeqType> seqTypes = DomainFactory.createAllAnalysableSeqTypes()
 
-        MetaDataFile metaDataFile = DomainFactory.createMetaDataFile()
-        FastqImportInstance fastqImportInstance = metaDataFile.fastqImportInstance
         List<WorkflowRun> runs = [createWorkflowRun()]
         List<WorkflowArtefact> workflowArtefacts = runs.collect {
             createWorkflowArtefact([
@@ -130,7 +124,8 @@ class WorkflowCreatorSchedulerSpec extends HibernateSpec implements ServiceUnitT
                     workflowArtefact: workflowArtefacts.first(),
                     workPackage     : createMergingWorkPackage([
                             seqType: analysableSeqType ? seqTypes.first() : createSeqType([
-                                    name: "OtherName",
+                                    name    : "OtherName",
+                                    dirName : "dummy"
                             ])
                     ]),
             ])
@@ -142,13 +137,14 @@ class WorkflowCreatorSchedulerSpec extends HibernateSpec implements ServiceUnitT
         applicationContext // initialize the applicationContext
 
         when:
-        scheduler.createWorkflowsTask(metaDataFile)
+        scheduler.createWorkflowsTask(importId)
 
         then:
-        1 * scheduler.fastqImportInstanceService.updateState(fastqImportInstance, FastqImportInstance.WorkflowCreateState.SUCCESS)
+        1 * scheduler.fastqImportInstanceService.updateState(fastqImportInstance, WorkflowCreateState.SUCCESS)
         0 * scheduler.fastqImportInstanceService._
 
-        2 * scheduler.fastqImportInstanceService.countInstancesInWaitingState() >> 1
+        1 * scheduler.fastqImportInstanceService.countInstancesInWaitingState() >> 1
+        0 * scheduler.messageSourceService.getMessage('workflow.bamImport.failedLoadingFastqImportInstance', _)
         1 * scheduler.dataInstallationInitializationService.createWorkflowRuns(fastqImportInstance) >> runs
         0 * scheduler.dataInstallationInitializationService._
         1 * scheduler.allDecider.decide(_) >> deciderResult
@@ -166,20 +162,19 @@ class WorkflowCreatorSchedulerSpec extends HibernateSpec implements ServiceUnitT
 
     void "createWorkflowsTask, if decider throws exception, then send error E-Mail to ticketing system"() {
         given:
-        WorkflowCreatorScheduler scheduler = createWorkflowCreatorScheduler()
-        MetaDataFile metaDataFile = DomainFactory.createMetaDataFile()
-        FastqImportInstance fastqImportInstance = metaDataFile.fastqImportInstance
+        FastqImportWorkflowCreatorScheduler scheduler = createWorkflowCreatorScheduler()
         List<WorkflowRun> runs = [createWorkflowRun()]
         OtpRuntimeException otpRuntimeException = new OtpRuntimeException("Decider throws exceptions")
 
         when:
-        scheduler.createWorkflowsTask(metaDataFile)
+        scheduler.createWorkflowsTask(importId)
 
         then:
-        1 * scheduler.fastqImportInstanceService.updateState(fastqImportInstance, FastqImportInstance.WorkflowCreateState.FAILED)
+        1 * scheduler.fastqImportInstanceService.updateState(fastqImportInstance.id, WorkflowCreateState.FAILED)
         0 * scheduler.fastqImportInstanceService._
 
         1 * scheduler.fastqImportInstanceService.countInstancesInWaitingState() >> 1
+        0 * scheduler.messageSourceService.getMessage('workflow.bamImport.failedLoadingFastqImportInstance', _)
         1 * scheduler.dataInstallationInitializationService.createWorkflowRuns(fastqImportInstance) >> runs
         0 * scheduler.dataInstallationInitializationService._
         1 * scheduler.allDecider.decide(_) >> { throw otpRuntimeException }
@@ -187,21 +182,17 @@ class WorkflowCreatorSchedulerSpec extends HibernateSpec implements ServiceUnitT
         1 * scheduler.notificationCreator.sendWorkflowCreateErrorMail(metaDataFile, otpRuntimeException)
     }
 
-    private WorkflowCreatorScheduler createWorkflowCreatorSchedulerSpy() {
-        WorkflowCreatorScheduler workflowCreatorScheduler = Spy(WorkflowCreatorScheduler)
-        workflowCreatorScheduler.workflowSystemService = Mock(WorkflowSystemService)
-        workflowCreatorScheduler.fastqImportInstanceService = Mock(FastqImportInstanceService)
-        return workflowCreatorScheduler
-    }
-
-    private WorkflowCreatorScheduler createWorkflowCreatorScheduler() {
-        return new WorkflowCreatorScheduler([
+    @Override
+    AbstractWorkflowCreatorScheduler createWorkflowCreatorScheduler() {
+        return new FastqImportWorkflowCreatorScheduler([
                 allDecider                           : Mock(AllDecider),
                 dataInstallationInitializationService: Mock(DataInstallationInitializationService),
                 fastqImportInstanceService           : Mock(FastqImportInstanceService),
-                metaDataFileService                  : Mock(MetaDataFileService),
+                messageSourceService                 : Mock(MessageSourceService),
+                metaDataFileService                  : new MetaDataFileService(),
                 notificationCreator                  : Mock(NotificationCreator),
                 samplePairDeciderService             : Mock(SamplePairDeciderService),
+                workflowSystemService                : Mock(WorkflowSystemService),
         ])
     }
 }

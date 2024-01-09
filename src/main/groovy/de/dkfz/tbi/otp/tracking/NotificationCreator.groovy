@@ -40,7 +40,11 @@ import de.dkfz.tbi.otp.tracking.ProcessingStatus.Done
 import de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import de.dkfz.tbi.otp.workflow.WorkflowCreateState
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
+import de.dkfz.tbi.util.TimeFormats
+
+import java.time.Instant
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.BLACKLIST_IMPORT_SOURCE_NOTIFICATION
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.Done.NOTHING
@@ -489,13 +493,47 @@ class NotificationCreator {
                 StackTraceUtils.getStackTrace(throwable),
                 "",
                 "To retry the workflow creation, please use the following command in the groovy web console:",
-                "ctx.fastqImportInstanceService.updateState(${className}.get(${id}), ${className}.${propertyName}.WAITING)",
+                "ctx.fastqImportInstanceService.updateState(${className}.get(${id}), ${propertyName}.WAITING)",
                 "The console won't wait but another email will be sent.",
                 "",
                 "To delete the import, please run the script 'DeleteSeqtracks':",
                 "https://gitlab.com/one-touch-pipeline/otp/-/blob/master/scripts/operations/dataCleanup/DeleteSeqtracks.groovy",
                 "with the following seqTrack ids as input for the variable seqTracksIdList in the script: ",
                 seqTrackIds.join(', '),
+        ].join('\n')
+        mailHelperService.sendEmailToTicketSystem(subject, body)
+    }
+
+    void sendBamImportWorkflowCreateSuccessMail(Long importId, Instant instant, String message) {
+        String subject = "Workflow created successfully at ${TimeFormats.DATE_TIME.getFormattedInstant(instant)} for BamImport with ID: ${importId}"
+
+        String body = [
+                "The workflow creation succeeded:",
+                "Import id: ${importId}",
+                "",
+                message,
+        ].join('\n')
+        mailHelperService.sendEmailToTicketSystem(subject, body)
+    }
+
+    void sendBamImportWorkflowCreateErrorMail(Long importId, Instant instant, Throwable throwable) {
+        String subject = "Failed to create workflows at ${TimeFormats.DATE_TIME.getFormattedInstant(instant)} for BamImport with ID: ${importId}"
+
+        ImportProcess importProcess = ImportProcess.get(importId)
+        List<Long> bamIds = importProcess.externallyProcessedBamFiles*.id
+        String propertyName = WorkflowCreateState.simpleName
+
+        String body = [
+                "The workflow creation failed:",
+                "Import id: ${importId}",
+                "Exception:",
+                StackTraceUtils.getStackTrace(throwable),
+                "To retry the workflow creation, please use the following command in the groovy web console:",
+                "ctx.bamImportService.updateState(${importId}, ${propertyName}.WAITING)",
+                "The console won't wait but another email will be sent.",
+                "",
+                "To delete the import, please ask the OTP Maintainer and provide them the following bam ids:",
+                bamIds.join(', '),
         ].join('\n')
         mailHelperService.sendEmailToTicketSystem(subject, body)
     }

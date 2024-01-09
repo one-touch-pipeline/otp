@@ -67,6 +67,11 @@ enum TimeFormats {
     String getFormattedLocalDateTime(LocalDateTime localDateTime, Locale locale = Locale.ENGLISH) {
         return localDateTime ? localDateTime.format(DateTimeFormatter.ofPattern(format, locale)) : 'N/A'
     }
+
+    String getFormattedInstant(Instant instant, Locale locale = Locale.ENGLISH) {
+        return instant ? ZonedDateTime.ofInstant(instant, ZoneOffset.UTC).format(DateTimeFormatter.ofPattern(format, locale)) : 'N/A'
+    }
+
     /**
      * Formats the date in such a way that only relevant changed values are displayed.
      *

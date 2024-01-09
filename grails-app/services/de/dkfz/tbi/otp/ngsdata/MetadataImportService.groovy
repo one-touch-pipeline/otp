@@ -52,6 +52,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.exceptions.CopyingOfFileFailedException
 import de.dkfz.tbi.otp.utils.exceptions.MetadataFileImportException
+import de.dkfz.tbi.otp.workflow.WorkflowCreateState
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
 import de.dkfz.tbi.util.TimeFormats
 import de.dkfz.tbi.util.TimeUtils
@@ -339,7 +340,7 @@ class MetadataImportService {
         FastqImportInstance fastqImportInstance = new FastqImportInstance(
                 ticket: ticketNumber ? ticketService.createOrResetTicket(ticketNumber, seqCenterComment, automaticNotification) : null,
                 importMode: importMode,
-                state: FastqImportInstance.WorkflowCreateState.WAITING,
+                state: WorkflowCreateState.WAITING,
         ).save(flush: true)
 
         Long timeStarted = System.currentTimeMillis()

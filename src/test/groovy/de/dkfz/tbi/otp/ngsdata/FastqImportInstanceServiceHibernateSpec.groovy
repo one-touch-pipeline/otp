@@ -28,6 +28,7 @@ import spock.lang.Unroll
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflow.WorkflowCreateState
 
 class FastqImportInstanceServiceHibernateSpec extends HibernateSpec implements ServiceUnitTest<FastqImportInstanceService>, DomainFactoryCore {
 
@@ -55,16 +56,16 @@ class FastqImportInstanceServiceHibernateSpec extends HibernateSpec implements S
 
         where:
         states                                                                                                || returnOne
-        [FastqImportInstance.WorkflowCreateState.WAITING]                                                     || true
-        [FastqImportInstance.WorkflowCreateState.PROCESSING]                                                  || false
-        [FastqImportInstance.WorkflowCreateState.SUCCESS]                                                     || false
-        [FastqImportInstance.WorkflowCreateState.FAILED]                                                      || false
-        [FastqImportInstance.WorkflowCreateState.WAITING, FastqImportInstance.WorkflowCreateState.WAITING]    || true
-        [FastqImportInstance.WorkflowCreateState.WAITING, FastqImportInstance.WorkflowCreateState.PROCESSING] || true
-        [FastqImportInstance.WorkflowCreateState.WAITING, FastqImportInstance.WorkflowCreateState.SUCCESS]    || true
-        [FastqImportInstance.WorkflowCreateState.WAITING, FastqImportInstance.WorkflowCreateState.FAILED]     || true
-        [FastqImportInstance.WorkflowCreateState.PROCESSING, FastqImportInstance.WorkflowCreateState.SUCCESS] || false
-        [FastqImportInstance.WorkflowCreateState.PROCESSING, FastqImportInstance.WorkflowCreateState.FAILED]  || false
+        [WorkflowCreateState.WAITING]                                                     || true
+        [WorkflowCreateState.PROCESSING]                                                  || false
+        [WorkflowCreateState.SUCCESS]                                                     || false
+        [WorkflowCreateState.FAILED]                                                      || false
+        [WorkflowCreateState.WAITING, WorkflowCreateState.WAITING]    || true
+        [WorkflowCreateState.WAITING, WorkflowCreateState.PROCESSING] || true
+        [WorkflowCreateState.WAITING, WorkflowCreateState.SUCCESS]    || true
+        [WorkflowCreateState.WAITING, WorkflowCreateState.FAILED]     || true
+        [WorkflowCreateState.PROCESSING, WorkflowCreateState.SUCCESS] || false
+        [WorkflowCreateState.PROCESSING, WorkflowCreateState.FAILED]  || false
 
         name = "instances with states ${states.join(' and ')}"
         result = returnOne ? "return a waiting" : "do not return any"
@@ -73,7 +74,7 @@ class FastqImportInstanceServiceHibernateSpec extends HibernateSpec implements S
     void "waiting, when multiple waiting and no one is in process, then return the oldest"() {
         given:
         FastqImportInstance fastqImportInstanceExpected = (1..3).collect {
-            createFastqImportInstanceHelper(FastqImportInstance.WorkflowCreateState.WAITING)
+            createFastqImportInstanceHelper(WorkflowCreateState.WAITING)
         }.first()
 
         when:
@@ -86,8 +87,8 @@ class FastqImportInstanceServiceHibernateSpec extends HibernateSpec implements S
     @Unroll
     void "waiting, when #name, then  #result"() {
         given:
-        createFastqImportInstanceHelper(FastqImportInstance.WorkflowCreateState.PROCESSING, import1Projects)
-        createFastqImportInstanceHelper(FastqImportInstance.WorkflowCreateState.WAITING, import2Projects)
+        createFastqImportInstanceHelper(WorkflowCreateState.PROCESSING, import1Projects)
+        createFastqImportInstanceHelper(WorkflowCreateState.WAITING, import2Projects)
 
         when:
         FastqImportInstance fastqImportInstance = service.waiting()
@@ -111,7 +112,7 @@ class FastqImportInstanceServiceHibernateSpec extends HibernateSpec implements S
         result = returnAny ? "return the waiting" : "do not return any"
     }
 
-    private FastqImportInstance createFastqImportInstanceHelper(FastqImportInstance.WorkflowCreateState state, List<String> projectNames = ["name_${nextId}"]) {
+    private FastqImportInstance createFastqImportInstanceHelper(WorkflowCreateState state, List<String> projectNames = ["name_${nextId}"]) {
         FastqImportInstance fastqImportInstance = createFastqImportInstance([
                 state: state,
         ])

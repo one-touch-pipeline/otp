@@ -27,6 +27,7 @@ import groovy.transform.TupleConstructor
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.workflow.WorkflowCreateState
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 /**
@@ -42,6 +43,12 @@ class ImportProcess implements Entity, ProcessParameterObject {
     }
 
     State state = State.NOT_STARTED
+
+    // To avoid creating bam import workflows before bamImportWorkflow is activated
+    // workflowCreateState is now set to be WorkflowCreateState.SUCCESS
+    // After finishing the issue otp-2362:
+    // Change the state to WorkflowCreateState.WAITING
+    WorkflowCreateState workflowCreateState = WorkflowCreateState.SUCCESS
 
     @TupleConstructor
     enum LinkOperation {
@@ -82,6 +89,7 @@ class ImportProcess implements Entity, ProcessParameterObject {
 
     static Closure mapping = {
         state index: "import_process_state_idx"
+        workflowCreateState index: "import_process_workflow_create_state_idx"
     }
 
     @SuppressWarnings("GetterMethodCouldBeProperty") // is no property

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,42 +19,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
+databaseChangeLog = {
 
-import grails.gorm.hibernate.annotation.ManagedEntity
-
-import de.dkfz.tbi.otp.tracking.Ticket
-import de.dkfz.tbi.otp.utils.Entity
-import de.dkfz.tbi.otp.workflow.WorkflowCreateState
-
-/**
- * An import of one or more {@linkplain MetaDataFile}s and {@linkplain RawSequenceFile}s.
- */
-@ManagedEntity
-class FastqImportInstance implements Entity {
-
-    Set<RawSequenceFile> sequenceFiles
-    static hasMany = [
-            sequenceFiles: RawSequenceFile,
-    ]
-
-    Ticket ticket
-
-    enum ImportMode {
-        MANUAL,
-        AUTOMATIC
-    }
-    ImportMode importMode
-
-    WorkflowCreateState state = WorkflowCreateState.WAITING
-
-    static constraints = {
-        // the field can be null, since for the old data the information is not needed; only for new incoming fastqImportInstances
-        ticket(nullable: true)
+    changeSet(author: "-", id: "1702037906067-89") {
+        addColumn(tableName: "import_process") {
+            column(name: "workflow_create_state", type: "varchar(255)") {
+                constraints(nullable: "true")
+            }
+        }
     }
 
-    static mapping = {
-        ticket index: "fastq_import_instance_ticket_idx"
-        state index: "fastq_import_instance_state_idx"
+    changeSet(author: "-", id: "1702037906067-89b") {
+        sql("update import_process set workflow_create_state = 'SUCCESS';")
+    }
+
+    changeSet(author: "-", id: "1702037906067-89c") {
+        addNotNullConstraint(columnDataType: "varchar(255)", columnName: "workflow_create_state", tableName: "import_process")
+    }
+
+    changeSet(author: "-", id: "1702384583265-90") {
+        createIndex(indexName: "import_process_workflow_create_state_idx", tableName: "import_process") {
+            column(name: "workflow_create_state")
+        }
     }
 }

@@ -31,30 +31,28 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import de.dkfz.tbi.otp.tracking.NotificationCreator
+import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.otp.utils.SystemUserUtils
-import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
+import de.dkfz.tbi.otp.workflow.WorkflowCreateState
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 import de.dkfz.tbi.otp.workflowExecution.decider.DeciderResult
+
+import java.time.Instant
 
 import static grails.async.Promises.task
 
 @Component
 @Slf4j
-class WorkflowCreatorScheduler {
+abstract class AbstractWorkflowCreatorScheduler {
 
     @Autowired
     AllDecider allDecider
 
     @Autowired
-    DataInstallationInitializationService dataInstallationInitializationService
-
-    @Autowired
-    FastqImportInstanceService fastqImportInstanceService
-
-    @Autowired
-    MetaDataFileService metaDataFileService
+    MessageSourceService messageSourceService
 
     @Autowired
     NotificationCreator notificationCreator
@@ -65,30 +63,32 @@ class WorkflowCreatorScheduler {
     @Autowired
     WorkflowSystemService workflowSystemService
 
+    /**
+     * Create workflows in every minute
+     * Takes each time one single import in the waiting state
+     */
     @Scheduled(fixedDelay = 5000L)
     void scheduleCreateWorkflow() {
         if (!workflowSystemService.enabled) {
             return
         }
 
-        FastqImportInstance fastqImportInstance = fastqImportInstanceService.waiting()
-        if (!fastqImportInstance) {
+        Long importId = nextWaitingImportId
+        if (!importId) {
             return
         }
 
-        MetaDataFile metaDataFile = metaDataFileService.findByFastqImportInstance(fastqImportInstance)
+        updateImportState(importId, WorkflowCreateState.PROCESSING)
 
-        fastqImportInstanceService.updateState(fastqImportInstance, FastqImportInstance.WorkflowCreateState.PROCESSING)
-
-        createWorkflowsAsync(metaDataFile)
+        createWorkflowsAsync(importId)
     }
 
     /**
      * only protected for testing, should not used outside this class
      */
-    protected Promise<Void> createWorkflowsAsync(MetaDataFile metaDataFile) {
+    protected Promise<Void> createWorkflowsAsync(long importId) {
         return task {
-            createWorkflowsTask(metaDataFile)
+            createWorkflowsTask(importId)
         }
     }
 
@@ -96,63 +96,38 @@ class WorkflowCreatorScheduler {
      * only protected for testing, should not used outside this class
      */
     @SuppressWarnings("CatchThrowable")
-    protected void createWorkflowsTask(MetaDataFile metaDataFile) {
+    protected void createWorkflowsTask(long importId) {
+        String importIdentifier = getImportIdentifier(importId)
         try {
-            DeciderResult deciderResult = createWorkflowsTransactional(metaDataFile)
+            DeciderResult deciderResult = createWorkflowsTransactional(importId)
             String message = messageFromDeciderResult(deciderResult)
 
-            notificationCreator.sendWorkflowCreateSuccessMail(metaDataFile, message)
+            sendWorkflowCreateSuccessMail(importId, getExecutionTimestamp(importId), message)
         } catch (Throwable throwable) {
-            log.debug("  failed workflow creation for ${metaDataFile.fileNameSource}", throwable)
+            log.debug("  failed workflow creation for ${importIdentifier}", throwable)
             try {
-                notificationCreator.sendWorkflowCreateErrorMail(metaDataFile, throwable)
+                sendWorkflowCreateErrorMail(importId, getExecutionTimestamp(importId), throwable)
             } catch (Throwable throwable2) {
-                log.debug("  failed error notification for workflow creation of ${metaDataFile.fileNameSource}", throwable2)
+                log.debug("  failed error notification for workflow creation of ${importIdentifier}", throwable2)
                 throw throwable2
             }
             try {
-                fastqImportInstanceService.updateState(metaDataFile.fastqImportInstance, FastqImportInstance.WorkflowCreateState.FAILED)
+                updateImportState(importId, WorkflowCreateState.FAILED)
             } catch (Throwable throwable2) {
-                log.debug("  failed update status for failed workflow creation of ${metaDataFile.fileNameSource}", throwable2)
+                log.debug("  failed update status for failed workflow creation of ${importIdentifier}", throwable2)
                 throw throwable2
             }
         }
     }
 
-    @Transactional
-    private DeciderResult createWorkflowsTransactional(MetaDataFile metaDataFile) {
-        MetaDataFile metaDataFileFromDb = MetaDataFile.get(metaDataFile.id)
-        Long timeCreateWorkflowRuns = System.currentTimeMillis()
-        FastqImportInstance fastqImportInstance = metaDataFileFromDb.fastqImportInstance
-        int count = fastqImportInstance.sequenceFiles.size()
-
-        log.debug("create workflows starts for ${metaDataFileFromDb.fileNameSource} " +
-                "(dataFiles: ${count}, ${fastqImportInstanceService.countInstancesInWaitingState()} in queue)")
-        log.debug("  create workflow runs started")
-        List<WorkflowRun> runs = dataInstallationInitializationService.createWorkflowRuns(fastqImportInstance)
-        log.debug("  create workflow runs finished for ${count} datafiles after: ${System.currentTimeMillis() - timeCreateWorkflowRuns}ms")
-        Long timeDecider = System.currentTimeMillis()
-        log.debug("  decider started")
-        DeciderResult deciderResult = allDecider.decide(runs.collectMany { it.outputArtefacts*.value })
-        log.debug("  decider finished for ${count} datafiles after: ${System.currentTimeMillis() - timeDecider}ms")
-
-        createSamplePairs(deciderResult.newArtefacts, count)
-
-        fastqImportInstanceService.updateState(fastqImportInstance, FastqImportInstance.WorkflowCreateState.SUCCESS)
-        log.debug("create workflows finishs for ${metaDataFileFromDb.fileNameSource} " +
-                "(dataFiles: ${count}, ${fastqImportInstanceService.countInstancesInWaitingState()} in queue)")
-        return deciderResult
-    }
-
     /**
-     * creates the sample pairs for the alignments.
-     *
+     * Creates the sample pairs for the alignments.
      * Needed, as long not all analysis workflows are migrated.
      *
      * @deprecated old workflow system
      */
     @Deprecated
-    private void createSamplePairs(Collection<WorkflowArtefact> workflowArtefacts, int count) {
+    protected void createSamplePairs(Collection<WorkflowArtefact> workflowArtefacts, int count) {
         Long timeSamplePairs = System.currentTimeMillis()
         log.debug("  sample pair creation started")
         List<SeqType> seqTypes = SeqTypeService.allAnalysableSeqTypes
@@ -169,8 +144,8 @@ class WorkflowCreatorScheduler {
         log.debug("  sample pair creation finished for ${count} datafiles after: ${System.currentTimeMillis() - timeSamplePairs}ms")
     }
 
-    @Transactional
-    private String messageFromDeciderResult(DeciderResult deciderResult) {
+    @Transactional(readOnly = true)
+    protected String messageFromDeciderResult(DeciderResult deciderResult) {
         List<String> message = []
         message << "Decider Results"
         if (deciderResult.warnings) {
@@ -197,4 +172,61 @@ class WorkflowCreatorScheduler {
         }
         return message.join('\n')
     }
+
+    /**
+     * Get the next available import process id in waiting state
+     *
+     * @return the id of import process in waiting state
+     */
+    abstract protected Long getNextWaitingImportId()
+
+    /**
+     * Get the import identifier of an import instance
+     * Note: no specific location is stored for Bam import
+     *
+     * @param importId id of FastqImportInstance for Fastq import or BamImportInstance for Bam import
+     * @return source file name for fastq or import id for bam import
+     */
+    abstract protected String getImportIdentifier(Long importId)
+
+    /**
+     * Update the current import process state
+     *
+     * @param importId id of FastqImportInstance for Fastq import or BamImportInstance for Bam import
+     * @param state to be set
+     */
+    abstract protected void updateImportState(Long importId, WorkflowCreateState state)
+
+    /**
+     * Create workflows in one single transaction for the given import process
+     *
+     * @param importId id of FastqImportInstance for Fastq import or BamImportInstance for Bam import
+     * @return deciderResult of newly created workflow
+     */
+    abstract protected DeciderResult createWorkflowsTransactional(Long importId)
+
+    /**
+     * Send success notification after workflows are created
+     *
+     * @param importId id of FastqImportInstance for Fastq import or BamImportInstance for Bam import
+     * @param ts timestamp of execution
+     * @param message success message
+     */
+    abstract protected void sendWorkflowCreateSuccessMail(Long importId, Instant instant, String message)
+
+    /**
+     * Send error notification after workflows creation failed
+     *
+     * @param importId id of FastqImportInstance for Fastq import or BamImportInstance for Bam import
+     * @param ts timestamp of execution
+     * @param throwable which contains the error message and stack trace
+     */
+    abstract protected void sendWorkflowCreateErrorMail(Long importId, Instant instant, Throwable throwable)
+
+    /**
+     * Return the timestamp when the scheduler creates the workflow
+     *
+     * @param importId id of FastqImportInstance for Fastq import or BamImportInstance for Bam import
+     */
+    abstract protected Instant getExecutionTimestamp(Long importId)
 }

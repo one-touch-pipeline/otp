@@ -25,6 +25,7 @@ import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflow.WorkflowCreateState
 
 @CompileDynamic
 @Transactional(readOnly = true)
@@ -65,12 +66,17 @@ class FastqImportInstanceService {
     }
 
     int countInstancesInWaitingState() {
-        return FastqImportInstance.countByState(FastqImportInstance.WorkflowCreateState.WAITING)
+        return FastqImportInstance.countByState(WorkflowCreateState.WAITING)
     }
 
     @Transactional(readOnly = false)
-    void updateState(FastqImportInstance fastqImportInstance, FastqImportInstance.WorkflowCreateState state) {
-        FastqImportInstance fastqImportInstanceReFetch = FastqImportInstance.get(fastqImportInstance.id)
+    void updateState(FastqImportInstance fastqImportInstance, WorkflowCreateState state) {
+        updateState(fastqImportInstance.id, state)
+    }
+
+    @Transactional(readOnly = false)
+    void updateState(long id, WorkflowCreateState state) {
+        FastqImportInstance fastqImportInstanceReFetch = FastqImportInstance.get(id)
         fastqImportInstanceReFetch.state = state
         fastqImportInstanceReFetch.save(flush: true)
     }
@@ -81,10 +87,10 @@ class FastqImportInstanceService {
      */
     @Transactional(readOnly = false)
     void changeProcessToWait() {
-        FastqImportInstance.findAllByState(FastqImportInstance.WorkflowCreateState.PROCESSING).each { FastqImportInstance fastqImportInstance ->
-            log.info("Change import ${fastqImportInstance.ticket.ticketNumber} from ${FastqImportInstance.WorkflowCreateState.PROCESSING} back " +
-                    "to ${FastqImportInstance.WorkflowCreateState.WAITING}")
-            updateState(fastqImportInstance, FastqImportInstance.WorkflowCreateState.WAITING)
+        FastqImportInstance.findAllByState(WorkflowCreateState.PROCESSING).each { FastqImportInstance fastqImportInstance ->
+            log.info("Change import ${fastqImportInstance.ticket.ticketNumber} from ${WorkflowCreateState.PROCESSING} back " +
+                    "to ${WorkflowCreateState.WAITING}")
+            updateState(fastqImportInstance, WorkflowCreateState.WAITING)
         }
     }
 }

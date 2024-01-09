@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2022 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,22 +19,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.workflow.bamImport
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
-import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.workflow.WorkflowCreateState
+import de.dkfz.tbi.otp.workflowExecution.*
 
-class FastqImportInstanceServiceSpec extends Specification implements ServiceUnitTest<FastqImportInstanceService>, DataTest, DomainFactoryCore {
+class BamImportServiceSpec extends Specification implements ServiceUnitTest<BamImportService>,
+        DataTest, WorkflowSystemDomainFactory, ExternalBamFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                FastqImportInstance,
+                ImportProcess,
+                ExternallyProcessedBamFile,
+                ExternalMergingWorkPackage,
+                WorkflowArtefact,
+                WorkflowRun,
+                WorkflowRunInputArtefact,
         ]
     }
 
@@ -47,8 +55,8 @@ class FastqImportInstanceServiceSpec extends Specification implements ServiceUni
                 WorkflowCreateState.WAITING,
                 WorkflowCreateState.WAITING,
         ].each {
-            createFastqImportInstance([
-                    state: it
+            createImportProcess([
+                    workflowCreateState: it
             ])
         }
 
@@ -57,41 +65,5 @@ class FastqImportInstanceServiceSpec extends Specification implements ServiceUni
 
         then:
         count == 2
-    }
-
-    void "changeProcessToWait, should change the state from PROCESSING to WAITING"() {
-        given:
-        FastqImportInstance fastqImportInstance = createFastqImportInstance([
-                state     : WorkflowCreateState.PROCESSING,
-                ticket: createTicket(),
-        ])
-
-        when:
-        service.changeProcessToWait()
-
-        then:
-        fastqImportInstance.state == WorkflowCreateState.WAITING
-    }
-
-    @Unroll
-    void "changeProcessToWait, should not change state #state"() {
-        given:
-        FastqImportInstance fastqImportInstance = createFastqImportInstance([
-                state     : state,
-                ticket: createTicket(),
-        ])
-
-        when:
-        service.changeProcessToWait()
-
-        then:
-        fastqImportInstance.state == state
-
-        where:
-        state << [
-                WorkflowCreateState.FAILED,
-                WorkflowCreateState.SUCCESS,
-                WorkflowCreateState.WAITING,
-        ]
     }
 }
