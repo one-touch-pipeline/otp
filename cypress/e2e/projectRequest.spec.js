@@ -28,7 +28,7 @@ describe('Check projectRequest page', () => {
       cy.loginAsUser();
     });
 
-    it.skip('should add project request as draft', () => {
+    it('should add project request as draft', () => {
       cy.intercept('/projectRequest/index*').as('saveProjectRequest');
       cy.visit('/projectRequest/index');
 
@@ -43,12 +43,14 @@ describe('Check projectRequest page', () => {
         cy.get('select#seqTypesList').select(0, { force: true });
 
         const operatorUsername = Cypress.env('operator_username');
-        cy.get('input.username-input').first().type(operatorUsername);
-        cy.get('select.project-role-select').first().select('BIOINFORMATICIAN', { force: true });
+        cy.get('a#user-tab').click();
+        cy.get('.user-form input.username-input').first().clear().type(operatorUsername);
+        cy.get('.user-form select.project-role-select').first().select('BIOINFORMATICIAN', { force: true });
 
         const username = Cypress.env('user_username');
-        cy.get('select.pi-user-select').eq(1).select(username);
-        cy.get('select.project-role-select').eq(1).select('PI', { force: true });
+        cy.get('a#pi-tab').click();
+        cy.get('.pi-user-form input.username-input').clear().type(username);
+        cy.get('.pi-user-form select.pi-role-select').select('PI', { force: true });
 
         cy.get('input[name=_action_saveIndex]').click();
 
@@ -59,7 +61,7 @@ describe('Check projectRequest page', () => {
       });
     });
 
-    it.skip('should find, edit and save unresolved project request', () => {
+    it('should find, edit and save unresolved project request', () => {
       cy.intercept('/projectRequest/unresolved*').as('routeToUnresolved');
       cy.intercept('/projectRequest/index*').as('projectRequestIndex');
       cy.visit('/projectRequest/index');
@@ -86,7 +88,7 @@ describe('Check projectRequest page', () => {
       });
     });
 
-    it.skip('should submit an unresolved project request', () => {
+    it('should submit an unresolved project request', () => {
       cy.intercept('/projectRequest/index*').as('projectRequestIndex');
       cy.visit('/projectRequest/unresolved');
 
@@ -110,7 +112,7 @@ describe('Check projectRequest page', () => {
       cy.loginAsOperator();
     });
 
-    it.skip('should pass on the project request', () => {
+    it('should pass on the project request', () => {
       cy.intercept('/projectRequest/index*').as('projectRequestIndex');
       cy.visit('/projectRequest/unresolved');
 
@@ -135,7 +137,7 @@ describe('Check projectRequest page', () => {
       cy.loginAsUser();
     });
 
-    it.skip('should edit and save the project request', () => {
+    it('should edit and save the project request', () => {
       cy.intercept('/projectRequest/index*').as('projectRequestIndex');
       cy.visit('/projectRequest/unresolved');
 
@@ -155,7 +157,7 @@ describe('Check projectRequest page', () => {
       cy.get('input#saveIndex-request-btn').click();
     });
 
-    it.skip('should delete a project request being edited', () => {
+    it('should delete a project request being edited', () => {
       cy.intercept('/projectRequest/delete*').as('deleteProjectRequest');
       cy.visit('/projectRequest/unresolved');
       // select the project request in the table
@@ -189,7 +191,7 @@ describe('Check projectRequest page', () => {
       cy.loginAsUser();
     });
 
-    it.skip('should submit a project request', () => {
+    it('should submit a project request', () => {
       cy.intercept('/projectRequest/index*').as('saveProjectRequest');
       cy.visit('/projectRequest/index');
 
@@ -205,8 +207,13 @@ describe('Check projectRequest page', () => {
         cy.get('select#seqTypesList').select(0, { force: true });
 
         const username = Cypress.env('user_username');
-        cy.get('input.username-input').eq(0).type(username);
-        cy.get('select.project-role-select').eq(0).select('PI', { force: true });
+        cy.get('.pi-user-form input.username-input').clear().type(username);
+        cy.get('.pi-user-form select.pi-role-select').select('PI', { force: true });
+
+        const operatorUsername = Cypress.env('operator_username');
+        cy.get('a#user-tab').click();
+        cy.get('.user-form select.project-role-select').select('COORDINATOR', { force: true });
+        cy.get('.user-form input.username-input').clear().type(operatorUsername);
 
         cy.get('input#submitIndex-request-btn').click();
 
@@ -223,7 +230,7 @@ describe('Check projectRequest page', () => {
       cy.loginAsOperator();
     });
 
-    it.skip('should pass on the project request', () => {
+    it('should pass on the project request', () => {
       cy.intercept('/projectRequest/index*').as('projectRequestIndex');
       cy.visit('/projectRequest/unresolved');
 
@@ -249,7 +256,7 @@ describe('Check projectRequest page', () => {
       cy.loginAsUser();
     });
 
-    it.skip('should approve the project request', () => {
+    it('should approve the project request', () => {
       cy.intercept('/projectRequest/index*').as('projectRequestIndex');
       cy.visit('/projectRequest/unresolved');
 
@@ -276,7 +283,7 @@ describe('Check projectRequest page', () => {
       cy.loginAsOperator();
     });
 
-    it.skip('should delete the project request', () => {
+    it('should delete the project request', () => {
       cy.intercept('/projectRequest/delete*').as('deleteProjectRequest');
       cy.visit('/projectRequest/unresolved');
 
