@@ -53,6 +53,25 @@
             </td>
         </tr>
     </g:each>
+    <g:each var="departmentHead" in="${departmentHeads}">
+        <tr>
+            <td style="text-align: start">
+                <strong>${departmentHead}</strong>
+            </td>
+            <td style="padding-left: 0.1em">
+                PI
+            </td>
+            <td>
+                <span class="icon-true"></span>
+            </td>
+            <td>
+                <span class="icon-false"></span>
+            </td>
+            <td>
+                <span class="icon-true"></span>
+            </td>
+        </tr>
+    </g:each>
     </tbody>
 </table>
 

@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.ProjectRole
+import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.project.additionalField.*
@@ -66,8 +67,26 @@ class ProjectRequestService {
 
     boolean piBelongsToDepartment(List<String> piUsernameList, String department) {
         List<String> piUsernames = User.findAllByUsernameInList(piUsernameList)*.username
-        return departmentService.getListOfPIForDepartment(department).any {
-            it.key in piUsernames }
+        return departmentService.getListOfPIForDepartment(department).any { it.key in piUsernames }
+    }
+
+    String getDepartmentIfExists(Map<String, String> additionalFieldValue) {
+        if (processingOptionService.findOptionAsString(ProcessingOption.OptionName.ENABLE_PROJECT_REQUEST_PI).toBoolean()) {
+            Map.Entry<String, String> organizationalUnit = additionalFieldValue.find {
+                CollectionUtils.atMostOneElement(AbstractFieldDefinition.findAllById(it.key as Long)).name == 'Organizational Unit'
+            }
+            return organizationalUnit ? organizationalUnit.value : null
+        }
+        return null
+    }
+
+    List<User> getDepartmentHeads(Map<String, String> additionalFieldsValue) {
+        String department = getDepartmentIfExists(additionalFieldsValue)
+        if (!department) {
+            return []
+        }
+
+        return departmentService.getListOfHeadsForDepartment(department)
     }
 
     ProjectRequest saveProjectRequestFromCommand(ProjectRequestCreationCommand cmd) throws OtpRuntimeException {
@@ -80,14 +99,8 @@ class ProjectRequestService {
         }
         if (cmd.piUsers.findAll()*.username.findAll().size() > 0) {
             // check if the processing Option is enabled then the PI/deputy should belong to the department
-            if (processingOptionService.findOptionAsString(ProcessingOption.OptionName.ENABLE_PROJECT_REQUEST_PI).toBoolean()) {
-                String department = cmd.additionalFieldValue.find {
-                    CollectionUtils.atMostOneElement(AbstractFieldDefinition.findAllById(it.key as Long)).name == 'Organizational Unit'
-                }.value
-                if (piBelongsToDepartment(cmd.piUsers*.username, department)) {
-                    piUsers = projectRequestUserService.saveProjectRequestUsersFromCommands(cmd.piUsers)
-                }
-            } else {
+            String department = getDepartmentIfExists(cmd.additionalFieldValue)
+            if (!department || (department && piBelongsToDepartment(cmd.piUsers*.username, department))) {
                 piUsers = projectRequestUserService.saveProjectRequestUsersFromCommands(cmd.piUsers)
             }
         }
@@ -121,11 +134,11 @@ class ProjectRequestService {
         if (cmd.projectRequest) {
             Set<Keyword> keywordsToDelete = cmd.projectRequest.keywords.findAll { Keyword keyword ->
                 !(keyword in newKeywords) &&
-                !Project.createCriteria().list {
-                    keywords {
-                        'in'('id', [keyword.id])
-                    }
-                } && !ProjectRequest.createCriteria().list {
+                        !Project.createCriteria().list {
+                            keywords {
+                                'in'('id', [keyword.id])
+                            }
+                        } && !ProjectRequest.createCriteria().list {
                     keywords {
                         'in'('id', [keyword.id])
                     }
@@ -256,6 +269,33 @@ class ProjectRequestService {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void addDepartmentHeadsToProject(Map<String, String> additionalFieldsValue, ProjectRequest projectRequest) {
+        List<User> departmentHeads = getDepartmentHeads(additionalFieldsValue)
+        if (!departmentHeads) {
+            return
+        }
+
+        departmentHeads.each { User departmentHead ->
+            // Check if departmentHead is already added
+            List<UserProjectRole> existingUserProjectRole = UserProjectRole.findAllByProjectAndUser(projectRequest.project, departmentHead)
+            if (!existingUserProjectRole) {
+                userProjectRoleService.createUserProjectRole(
+                        departmentHead,
+                        projectRequest.project,
+                        ProjectRole.findAllByName(ProjectRole.Basic.PI.name()) as Set<ProjectRole>,
+                        [
+                                accessToOtp           : true,
+                                accessToFiles         : false,
+                                manageUsers           : true,
+                                manageUsersAndDelegate: true,
+                                receivesNotifications : true,
+                        ]
+                )
+            }
+        }
+    }
+
     void sendOperatorRejectEmail(ProjectRequest projectRequest, String rejectComment) {
         User requester = projectRequest.requester
         List<String> recipient = [requester.email]
@@ -344,6 +384,14 @@ class ProjectRequestService {
                 teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
         mailHelperService.sendEmail(subject, body, recipient, ccs)
+    }
+
+    Set<ProjectRequest> getAllApproved() {
+        return ProjectRequest.createCriteria().listDistinct {
+            state {
+                eq("beanName", ProjectRequestStateProvider.getStateBeanName(Approved))
+            }
+        } as Set<ProjectRequest>
     }
 
     void sendDeleteEmail(ProjectRequest projectRequest) {

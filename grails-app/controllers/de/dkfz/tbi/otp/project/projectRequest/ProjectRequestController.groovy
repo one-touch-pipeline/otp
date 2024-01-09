@@ -97,7 +97,7 @@ class ProjectRequestController implements CheckAndCall {
         // This is required cause sometimes the projectRequest state is not processed right by the command object from flash
         if (cmd && cmd.projectRequest) {
             cmd.projectRequest = CollectionUtils.exactlyOneElement(ProjectRequest.findAllById(flash.cmd.projectRequest.id))
-        } else {
+        } else if (!cmd) {
             cmd = new ProjectRequestCreationCommand()
 
             projectRequestUser.user = securityService.currentUser
@@ -133,7 +133,7 @@ class ProjectRequestController implements CheckAndCall {
                 speciesWithStrains        : SpeciesWithStrain.all.sort { it.displayName },
                 storagePeriod             : StoragePeriod.values(),
                 availableRoles            : ProjectRole.findAll(),
-                userRoles                 : ProjectRole.findAllByNameNotEqual('PI'),
+                userRoles                 : ProjectRole.findAllByNameNotEqual(ProjectRole.Basic.PI.name()),
                 sequencingCenters         : SeqCenter.all.unique().sort(),
                 faqProjectTypeLink        : processingOptionService.findOptionAsString(ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_FAQ_PROJECT_TYPE_LINK),
                 departmentPiFeatureEnabled: processingOptionService.findOptionAsBoolean(ProcessingOption.OptionName.ENABLE_PROJECT_REQUEST_PI),
@@ -175,6 +175,8 @@ class ProjectRequestController implements CheckAndCall {
             it.user == securityService.currentUser
         }?.projectRoles)
 
+        List<User> departmentHeads = projectRequestService.getDepartmentHeads(abstractValues)
+
         return [
                 currentUserIsProjectAuthority: isProjectAuthority,
                 buttonActions                : projectRequestStateProvider.getCurrentState(projectRequest).getViewActions(projectRequest),
@@ -182,6 +184,7 @@ class ProjectRequestController implements CheckAndCall {
                 abstractValues               : abstractValues,
                 projectRequest               : projectRequest,
                 stateDisplayName             : projectRequestStateProvider.getCurrentState(projectRequest).displayName,
+                departmentHeads              : departmentHeads,
                 projectRequestId             : projectRequest.id,
         ]
     }

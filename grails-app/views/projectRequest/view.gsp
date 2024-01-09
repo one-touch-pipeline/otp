@@ -92,12 +92,6 @@
                         <td>${g.message(code: "project.relatedProjects")}</td>
                         <td>${projectRequest.relatedProjects}</td>
                     </tr>
-                    %{--
-                    <tr>
-                        <td>${g.message(code: "project.tumorEntity")}</td>
-                        <td>${projectRequest.tumorEntity}</td>
-                    </tr>
-                    --}%
                     <tr>
                         <td>${g.message(code: "project.speciesWithStrain")}</td>
                         <td>${projectRequest.speciesWithStrains?.join(", ")}</td>
@@ -189,15 +183,9 @@
                     </g:if>
 
                     <tr>
-                        <td>${g.message(code: "projectRequest.piUsers")}</td>
-                        <td>
-                            <g:render template="/projectRequest/templates/projectRequestUserTable" model="[users: projectRequest.piUsers]"/>
-                        </td>
-                    </tr>
-                    <tr>
                         <td>${g.message(code: "projectRequest.users")}</td>
                         <td>
-                            <g:render template="/projectRequest/templates/projectRequestUserTable" model="[users: projectRequest.users]"/>
+                            <g:render template="/projectRequest/templates/projectRequestUserTable" model="[users: projectRequest.piUsers + projectRequest.users, departmentHeads: departmentHeads]"/>
                         </td>
                     </tr>
                     </tbody>

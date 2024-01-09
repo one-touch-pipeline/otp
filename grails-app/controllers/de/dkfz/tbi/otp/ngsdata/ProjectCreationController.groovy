@@ -37,6 +37,7 @@ import de.dkfz.tbi.otp.project.additionalField.AbstractFieldDefinition
 import de.dkfz.tbi.otp.project.additionalField.ProjectPageType
 import de.dkfz.tbi.otp.project.projectRequest.*
 import de.dkfz.tbi.otp.searchability.Keyword
+import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.StaticApplicationContextWrapper
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
@@ -66,11 +67,7 @@ class ProjectCreationController {
     }
 
     def index(ProjectCreationBasisCommand cmd) {
-        List<ProjectRequest> projectRequests = ProjectRequest.createCriteria().listDistinct {
-            state {
-                eq("beanName", ProjectRequestStateProvider.getStateBeanName(Approved))
-            }
-        }
+        Set<ProjectRequest> projectRequests = projectRequestService.allApproved
 
         List<UserProjectRole> usersToCopyFromBaseProject = []
         Map<String, ?> baseProjectOverride = [:]
@@ -119,6 +116,8 @@ class ProjectCreationController {
                 .listAndFetchAbstractFields(multiObjectValueSource.getByFieldName("projectType") as Project.ProjectType,
                         ProjectPageType.PROJECT_CREATION)
 
+        List<User> departmentHeads = projectRequestService.getDepartmentHeads(abstractValues)
+
         return [
                 cmd                            : cmd as ProjectCreationBasisCommand,
                 projectCreationCmd             : projectCreationCmd,
@@ -139,6 +138,7 @@ class ProjectCreationController {
                 showIgnoreUsersFromBaseObjects : showIgnoreUsersFromBaseObjects,
                 source                         : multiObjectValueSource,
                 abstractFields                 : fieldDefinitions,
+                departmentHeads                : departmentHeads,
                 abstractValues                 : abstractValues,
         ]
     }
@@ -360,7 +360,8 @@ class ProjectCreationCommand extends ProjectCreationBasisCommand {
         this.dirName = StringUtils.trimAndShortenWhitespace(directory)
     }
 
-    void setKeywords() { }
+    void setKeywords() {
+    }
 
     void setUnixGroup(String unixGroup) {
         this.unixGroup = StringUtils.trimAndShortenWhitespace(unixGroup)

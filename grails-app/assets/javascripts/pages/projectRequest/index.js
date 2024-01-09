@@ -84,7 +84,7 @@ $(() => {
           abstractFields.forEach((abstractField, index) => {
             const tempAbstractValue = $(`#tempAbstractValue_${abstractField.id}`).val();
             const value = tempAbstractValue || abstractField.value;
-            htmlContent += `<div class="form-group row">
+            htmlContent += `<div class="mb-3 row">
                               <input type="hidden" name="additionalFieldName[${index}]" 
                                      value="${abstractField.name}"
                                      id="additionalFieldName[${index}]"/>

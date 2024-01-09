@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.ProjectFieldsDomainFactory
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
+import de.dkfz.tbi.otp.ngsdata.ProjectRole
 import de.dkfz.tbi.otp.ngsdata.SeqCenter
 import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
@@ -55,7 +56,6 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
     ProjectRequestStateProvider projectRequestStateProvider
     SecurityService securityService
     TestConfigService configService
-    DepartmentService departmentService
 
     final String subject = "subject"
     final String body = "body"
@@ -144,6 +144,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         expect:
         !projectRequestService.piBelongsToDepartment(['u1', 'u2'], 'dept1')
     }
+
     void "sendSubmitEmail"() {
         given:
         final User requester = createUser()
@@ -993,5 +994,83 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
 
         where:
         authority << Role.ADMINISTRATIVE_ROLES
+    }
+
+    void "getAllApproved, should return all approved project requests"() {
+        given:
+        ProjectRequest projectRequest1 = createProjectRequest([:], [beanName: "approved"])
+        ProjectRequest projectRequest2 = createProjectRequest([:], [beanName: "approved"])
+        createProjectRequest([:], [beanName: "created"])
+        createProjectRequest()
+
+        expect:
+        TestCase.assertContainSame(projectRequestService.allApproved, [projectRequest1, projectRequest2])
+    }
+
+    @Unroll
+    void "getDepartmentIfExists, should return #resultText, when processing option is #optionEnabled and additional field is #additionalFieldText created"() {
+        given:
+        projectRequestService.processingOptionService = Mock(ProcessingOptionService) {
+            1 * findOptionAsString(ProcessingOption.OptionName.ENABLE_PROJECT_REQUEST_PI) >> optionEnabled
+        }
+        Department department = createDepartment(result ? [ouNumber: result] : [:])
+        AbstractFieldDefinition additionalField = additionalFieldExists ?
+                createTextFieldDefinition([name: 'Organizational Unit']) :
+                createTextFieldDefinition([name: 'Other Additional Field'])
+
+        Map<String, String> additionFieldValue = [(additionalField.id.toString()): department.ouNumber]
+
+        expect:
+        projectRequestService.getDepartmentIfExists(additionFieldValue) == result
+
+        where:
+        resultText   | result    | optionEnabled | additionalFieldText | additionalFieldExists
+        "department" | "49283kd" | true          | ""                  | true
+        "department" | null      | true          | "not"               | false
+        "null"       | null      | false         | ""                  | true
+        "null"       | null      | false         | "not"               | false
+    }
+
+    @Unroll
+    void "addDepartmentHeadsToProject, should #text add existing department heads, when processing option is #departmentsEnabled"() {
+        given:
+        createAllBasicProjectRoles()
+        projectRequestService.processingOptionService = Mock(ProcessingOptionService)
+        projectRequestService.departmentService = Mock(DepartmentService)
+        ProjectRequest projectRequest = createProjectRequest()
+        User head1 = createUser()
+        User head2 = createUser()
+        Department department = createDepartment(['departmentHeads': [head1, head2]])
+        AbstractFieldDefinition additionalField = createTextFieldDefinition([name: 'Organizational Unit'])
+
+        Map<String, String> additionFieldValue = [(additionalField.id.toString()): department.ouNumber]
+        Set<ProjectRole> pi = ProjectRole.findAllByName(ProjectRole.Basic.PI.name()) as Set<ProjectRole>
+
+        when:
+        projectRequestService.addDepartmentHeadsToProject(additionFieldValue, projectRequest)
+
+        then:
+        (departmentsEnabled ? 1 : 0) * projectRequestService.userProjectRoleService.createUserProjectRole(head1, projectRequest.project, pi, [
+                accessToOtp           : true,
+                accessToFiles         : false,
+                manageUsers           : true,
+                manageUsersAndDelegate: true,
+                receivesNotifications : true,
+        ])
+        (departmentsEnabled ? 1 : 0) * projectRequestService.userProjectRoleService.createUserProjectRole(head2, projectRequest.project, pi, [
+                accessToOtp           : true,
+                accessToFiles         : false,
+                manageUsers           : true,
+                manageUsersAndDelegate: true,
+                receivesNotifications : true,
+        ])
+        (departmentsEnabled ? 1 : 0) * projectRequestService.departmentService.getListOfHeadsForDepartment(department.ouNumber) >> [head1, head2]
+        1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.ENABLE_PROJECT_REQUEST_PI) >> departmentsEnabled
+        0 * _
+
+        where:
+        text  | departmentsEnabled
+        ""    | true
+        "not" | false
     }
 }

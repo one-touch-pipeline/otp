@@ -245,6 +245,7 @@ class ProjectService {
             projectRequestStateProvider.getCurrentState(projectParams.projectRequest).create(projectParams.projectRequest)
             if (!projectParams.ignoreUsersFromBaseObjects) {
                 projectRequestService.addProjectRequestUsersToProject(projectParams.projectRequest)
+                projectRequestService.addDepartmentHeadsToProject(projectParams.additionalFieldValue, projectParams.projectRequest)
             }
         }
 
