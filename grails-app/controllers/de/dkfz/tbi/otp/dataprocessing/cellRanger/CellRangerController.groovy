@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.utils.exceptions.FileAccessForArchivedProjectNotAllowedException
+import de.dkfz.tbi.otp.utils.exceptions.FileAccessForProjectNotAllowedException
 
 @PreAuthorize('isFullyAuthenticated()')
 class CellRangerController {
@@ -81,7 +81,7 @@ class CellRangerController {
             flash.message = new FlashMessage(g.message(code: "cellRanger.selection.success") as String)
         } catch (ValidationException e) {
             flash.message = new FlashMessage(g.message(code: "cellRanger.selection.failure") as String, e.errors)
-        } catch (FileAccessForArchivedProjectNotAllowedException | IOException e) {
+        } catch (FileAccessForProjectNotAllowedException | IOException e) {
             flash.message = new FlashMessage(g.message(code: "cellRanger.selection.failure") as String, e.message)
         }
 
@@ -100,7 +100,7 @@ class CellRangerController {
             flash.message = new FlashMessage(g.message(code: "cellRanger.selection.success") as String)
         } catch (ValidationException e) {
             flash.message = new FlashMessage(g.message(code: "cellRanger.selection.failure") as String, e.errors)
-        } catch (FileAccessForArchivedProjectNotAllowedException | IOException e) {
+        } catch (FileAccessForProjectNotAllowedException | IOException e) {
             flash.message = new FlashMessage(g.message(code: "cellRanger.selection.failure") as String, e.message)
         }
 

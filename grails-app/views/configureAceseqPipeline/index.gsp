@@ -20,7 +20,7 @@
   - SOFTWARE.
   --}%
 
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="de.dkfz.tbi.otp.project.Project" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -30,7 +30,8 @@
 </head>
 <body>
 <div class="body">
-    <g:set var="archived" value="${selectedProject.archived ? 'archived' : ''}"/>
+    <g:set var="archived" value="${selectedProject.state == Project.State.ARCHIVED ? 'archived' : ''}"/>
+    <g:set var="deleted" value="${selectedProject.state == Project.State.DELETED ? 'deleted' : ''}"/>
 
     <g:render template="/templates/messages"/>
 
@@ -43,11 +44,7 @@
         <g:message code="configurePipeline.info.humanOnly"/>
     </otp:annotation>
 
-    <g:if test="${archived}">
-        <otp:annotation type="warning">
-            <g:message code="configurePipeline.info.projectArchived.noChange" args="[selectedProject.name]"/>
-        </otp:annotation>
-    </g:if>
+    <g:render template="/templates/bootstrap/noChange" model="[project: selectedProject]"/>
 
     <g:form action="save" params='["seqType.id": seqType.id]' method="POST">
         <table class="pipelineTable">
@@ -87,7 +84,7 @@
             <tr>
                 <td class="myKey"></td>
                 <td>
-                    <g:submitButton class="${archived}" name="submit" value="Submit"/>
+                    <g:submitButton class="${archived} ${deleted}" name="submit" value="Submit"/>
                     <g:link controller="analysisConfigurationOverview" class="btn">${g.message(code: "default.button.cancel.label")}</g:link>
                 </td>
             </tr>
@@ -97,7 +94,7 @@
         <h2><g:message code="configurePipeline.current.config"/></h2>
         <g:form controller="configurePipeline" action="invalidateConfig" method="POST"
                 params='["seqType.id": seqType.id, "pipeline.id": pipeline.id, "originAction": actionName, overviewController: "analysisConfigurationOverview"]'>
-            <g:submitButton class="${archived}" name="invalidateConfig" value="Invalidate Config"/>
+            <g:submitButton class="${archived} ${deleted}" name="invalidateConfig" value="Invalidate Config"/>
         </g:form>
         <g:if test="${configState.changed}">
             <otp:annotation type="warning"><g:message code="configurePipeline.current.config.changed"/></otp:annotation>

@@ -1,0 +1,8 @@
+{
+  "stateOptions": [
+    "ARCHIVED",
+    "DELETED",
+    "CLOSED",
+    "OPEN"
+  ]
+}

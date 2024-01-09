@@ -24,31 +24,20 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.converters.JSON
 import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaResultsService
-import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
 @PreAuthorize('isFullyAuthenticated()')
 class RunYapsaController extends AbstractAnalysisController {
 
     RunYapsaResultsService runYapsaResultsService
-    ProjectSelectionService projectSelectionService
 
     static allowedMethods = [
             dataTableResults: "POST",
     ]
 
     JSON dataTableResults(DataTableCommand cmd) {
-        Map dataToRender = cmd.dataToRender()
-        Project project = projectSelectionService.requestedProject
-        List data = runYapsaResultsService.getCallingInstancesForProject(project?.name)
-        dataToRender.iTotalRecords = data.size()
-        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        dataToRender.aaData = data
-
-        dataToRender.archived = project.archived
-
+        Map dataToRender = getDataTableResultsFromService(runYapsaResultsService, cmd.dataToRender())
         return render(dataToRender as JSON)
     }
 }

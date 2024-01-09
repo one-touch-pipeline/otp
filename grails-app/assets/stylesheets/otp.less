@@ -1406,13 +1406,14 @@ td div {
     text-decoration: none;
 }
 
-.withdrawn, .deleted, .archivedClickable {
+.withdrawn, .deletedClickable, .archivedClickable {
     color: grey;
     > * {color: grey;}
 }
 
-.archived {
+.archived, .deleted {
     .archivedClickable;
+    .deletedClickable;
     pointer-events: none;
 }
 

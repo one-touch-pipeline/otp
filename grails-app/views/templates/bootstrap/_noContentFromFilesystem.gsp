@@ -1,5 +1,5 @@
 %{--
-  - Copyright 2011-2020 The OTP authors
+  - Copyright 2011-2024 The OTP authors
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
   - of this software and associated documentation files (the "Software"), to deal
@@ -20,11 +20,14 @@
   - SOFTWARE.
   --}%
 
-<%@ page import="de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage.Status" %>
-
-<g:if test="${mwp.status == Status.FINAL}"><b>${g.message(code: "cellRanger.selection.finalRun")}</b></g:if>
-<g:if test="${mwp.status == Status.DELETED}"><span class="deletedClickable">${g.message(code: "cellRanger.selection.deletedRun")}</g:if>
-<g:if test="${mwp.expectedCells}">${g.message(code: "cellRanger.selection.expectedCells", args: [mwp.expectedCells])}</g:if>
-<g:if test="${mwp.enforcedCells}">${g.message(code: "cellRanger.selection.enforcedCells", args: [mwp.enforcedCells])}</g:if>
-<g:if test="${!(mwp.expectedCells || mwp.enforcedCells)}">${g.message(code: "cellRanger.selection.default")}</g:if>
-<g:if test="${mwp.status == Status.DELETED}"></span></g:if>
+<%@ page import="de.dkfz.tbi.otp.project.Project" %>
+<g:if test="${project.state == Project.State.ARCHIVED}">
+    <otp:annotation type="warning">
+        <g:message code="alignment.quality.projectArchived.warning" args="[project.name]"/>
+    </otp:annotation>
+</g:if>
+<g:if test="${project.state == Project.State.DELETED}">
+    <otp:annotation type="warning">
+        <g:message code="alignment.quality.projectDeleted.warning" args="[project.name]"/>
+    </otp:annotation>
+</g:if>

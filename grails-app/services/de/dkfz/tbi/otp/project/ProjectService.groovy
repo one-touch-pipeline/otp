@@ -124,6 +124,9 @@ class ProjectService {
             }
             eq("enabled", true)
             eq("accessToOtp", true)
+            project {
+                ne("state", Project.State.DELETED)
+            }
             projections {
                 property("project")
                 project {
@@ -406,7 +409,6 @@ class ProjectService {
                 "sampleIdentifierParserBeanName",
                 "speciesWithStrains",
                 "publiclyAvailable",
-                "closed",
                 "projectRequestAvailable",
                 "individualPrefix",
                 "projectType",
@@ -1107,8 +1109,8 @@ echo 'OK'
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void updateArchived(Project project, boolean value) {
-        project.archived = value
+    void updateState(Project project, Project.State state) {
+        project.state = state
         assert project.save(flush: true)
     }
 

@@ -24,6 +24,7 @@ $.otp.resultsTable = {
 
   // Global flag for archived project
   projectArchived: false,
+  projectDeleted: false,
 
   registerDataTable(tableElement, source, columnDefs, convertRowData) {
     'use strict';
@@ -52,11 +53,16 @@ $.otp.resultsTable = {
           data: aoData,
           error() {
             // clear the table
-            fnCallback({ aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0 });
+            fnCallback({
+              aaData: [],
+              iTotalRecords: 0,
+              iTotalDisplayRecords: 0
+            });
             oTable.fnSettings().oFeatures.bServerSide = false;
           },
           success(json) {
             $.otp.resultsTable.projectArchived = json.archived;
+            $.otp.resultsTable.projectDeleted = json.deleted;
             const result = json;
             let i;
             for (i = 0; i < json.aaData.length; i += 1) {
@@ -78,10 +84,10 @@ $.otp.resultsTable = {
   },
 
   /**
-     * Get a render function which wraps the data in a div shortened with ellipsis.
-     *
-     * The max width is given in 'em' and the unshortened data is provided in the title.
-     */
+   * Get a render function which wraps the data in a div shortened with ellipsis.
+   *
+   * The max width is given in 'em' and the unshortened data is provided in the title.
+   */
   getEllipsisRenderer(nCharacters) {
     'use strict';
 
@@ -95,21 +101,27 @@ $.otp.resultsTable = {
   },
 
   /**
-     * Helper function to return a link to the plots depending on if an instance exists.
-     *
-     * Returns the link if there is an instance, otherwise an empty string.
-     */
+   * Helper function to return a link to the plots depending on if an instance exists.
+   *
+   * Returns the link if there is an instance, otherwise an empty string.
+   */
   plotLinkHelper(instanceId, controller, plotType) {
     'use strict';
 
     if ($.otp.resultsTable.projectArchived) {
       return 'Plots archived';
     }
+    if ($.otp.resultsTable.projectDeleted) {
+      return 'Plots deleted';
+    }
 
     return instanceId ? $.otp.createLinkMarkup({
       controller,
       action: 'plots',
-      parameters: { 'bamFilePairAnalysis.id': instanceId, plotType },
+      parameters: {
+        'bamFilePairAnalysis.id': instanceId,
+        plotType
+      },
       text: 'Plots'
     }) : '';
   },

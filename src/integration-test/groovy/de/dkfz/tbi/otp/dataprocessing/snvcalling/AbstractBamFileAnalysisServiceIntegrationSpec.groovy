@@ -28,6 +28,7 @@ import spock.lang.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QcTrafficLightStatus
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 import static de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
@@ -156,7 +157,7 @@ class AbstractBamFileAnalysisServiceIntegrationSpec extends Specification {
     void "samplePairForProcessing should not return a sample pair when project is archived"() {
         given:
         setupDataExtended(processingStatus, pipeline, AbstractBamFile.QcTrafficLightStatus.ACCEPTED)
-        samplePair1.project.archived = true
+        samplePair1.project.state = Project.State.ARCHIVED
         samplePair1.project.save(flush: true)
 
         expect:

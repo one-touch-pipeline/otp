@@ -20,29 +20,26 @@
   - SOFTWARE.
   --}%
 
-<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ page import="de.dkfz.tbi.otp.project.Project" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta name="layout" content="main" />
-    <title><g:message code="otp.menu.cnv.results" /></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="layout" content="main"/>
+    <title><g:message code="otp.menu.cnv.results"/></title>
     <asset:javascript src="pages/analysis/results/datatable.js"/>
 </head>
+
 <body>
-    <div class="body">
-        <g:render template="/templates/messages"/>
-        <g:render template="/templates/projectSelection"/>
-        <h1><g:message code="aceseq.results.title"/></h1>
+<div class="body">
+    <g:render template="/templates/messages"/>
+    <g:render template="/templates/projectSelection"/>
+    <h1><g:message code="aceseq.results.title"/></h1>
 
-        <g:if test="${selectedProject.archived}">
-            <otp:annotation type="warning">
-                <g:message code="configurePipeline.info.projectArchived.noPlot" args="[selectedProject.name]"/>
-            </otp:annotation>
-        </g:if>
+    <g:render template="/templates/bootstrap/noPlot" model="[project: selectedProject]"/>
 
-        <div class="table">
-            <div class="otpDataTables">
-                <otp:dataTable
+    <div class="table">
+        <div class="otpDataTables">
+            <otp:dataTable
                     codes="${[
                             'projectOverview.index.PID',
                             'analysis.sampleTypes',
@@ -57,14 +54,14 @@
                             'analysis.processingDate',
                             'analysis.progress',
                     ]}"
-                    id="resultsTable" />
-            </div>
+                    id="resultsTable"/>
         </div>
+    </div>
     <asset:script>
         $(function() {
             $.otp.resultsTable.registerAceseq();
         });
     </asset:script>
-    </div>
+</div>
 </body>
 </html>

@@ -24,9 +24,7 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.converters.JSON
 import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelResultsService
-import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
 import java.nio.file.Path
@@ -35,7 +33,6 @@ import java.nio.file.Path
 class IndelController extends AbstractAnalysisController {
 
     IndelResultsService indelResultsService
-    ProjectSelectionService projectSelectionService
 
     static allowedMethods = [
             plots           : "GET",
@@ -72,15 +69,7 @@ class IndelController extends AbstractAnalysisController {
     }
 
     JSON dataTableResults(DataTableCommand cmd) {
-        Map dataToRender = cmd.dataToRender()
-        Project project = projectSelectionService.requestedProject
-        List data = indelResultsService.getCallingInstancesForProject(project?.name)
-        dataToRender.iTotalRecords = data.size()
-        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        dataToRender.aaData = data
-
-        dataToRender.archived = project.archived
-
+        Map dataToRender = getDataTableResultsFromService(indelResultsService, cmd.dataToRender())
         return render(dataToRender as JSON)
     }
 }

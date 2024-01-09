@@ -288,8 +288,18 @@ class AlignmentQualityOverviewController implements CheckAndCall {
 
     def viewCellRangerSummary(ViewCellRangerSummaryCommand cmd) {
         try {
-            String content = cmd.singleCellBamFile.project.archived ? g.message(code: "alignment.quality.projectArchived.warning") :
-                    cellRangerService.getWebSummaryResultFileContent(cmd.singleCellBamFile)
+            String content
+            switch (cmd.singleCellBamFile.project.state) {
+                case Project.State.ARCHIVED:
+                    content = g.message(code: "alignment.quality.projectArchived.warning")
+                    break
+                case Project.State.DELETED:
+                    content = g.message(code: "alignment.quality.projectDeleted.warning")
+                    break
+                default:
+                    content = cellRangerService.getWebSummaryResultFileContent(cmd.singleCellBamFile)
+                    break
+            }
             render(text: content, contentType: "text/html", encoding: "UTF-8")
         } catch (NoSuchFileException e) {
             flash.message = new FlashMessage(g.message(code: "alignment.quality.exception.noSuchFile") as String, e.message)
@@ -309,8 +319,12 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             return response.sendError(HttpStatus.NOT_FOUND.value())
         }
 
-        if (cmd.abstractBamFile.project.archived) {
+        if (cmd.abstractBamFile.project.state == Project.State.ARCHIVED) {
             return render(g.message(code: "alignment.quality.projectArchived.warning"))
+        }
+
+        if (cmd.abstractBamFile.project.state == Project.State.DELETED) {
+            return render(g.message(code: "alignment.quality.projectDeleted.warning"))
         }
 
         // This page is semi-generic over AbstractBamFile, with lots of SeqType-specific handling sprinkled all over.

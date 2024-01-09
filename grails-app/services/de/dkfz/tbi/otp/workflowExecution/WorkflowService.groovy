@@ -26,8 +26,9 @@ import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.exceptions.FileAccessForArchivedProjectNotAllowedException
+import de.dkfz.tbi.otp.utils.exceptions.FileAccessForProjectNotAllowedException
 import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
 import de.dkfz.tbi.otp.workflow.fastqc.WesFastQcWorkflow
 
@@ -62,9 +63,10 @@ class WorkflowService {
         assert step
         assert step.workflowRun.state == WorkflowRun.State.FAILED
 
-        if (step.workflowRun.project.archived) {
-            throw new FileAccessForArchivedProjectNotAllowedException(
-                    "${step.workflowRun.project} is archived and ${step.workflowRun} cannot be restarted"
+        if (step.workflowRun.project.state == Project.State.ARCHIVED || step.workflowRun.project.state == Project.State.DELETED) {
+            String stateName = step.workflowRun.project.state.name().toLowerCase()
+            throw new FileAccessForProjectNotAllowedException(
+                    "${step.workflowRun.project} is ${stateName} and ${step.workflowRun} cannot be restarted"
             )
         }
 

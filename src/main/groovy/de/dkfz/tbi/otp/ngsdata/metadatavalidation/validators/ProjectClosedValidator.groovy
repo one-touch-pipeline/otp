@@ -65,7 +65,7 @@ class ProjectClosedValidator extends AbstractValueTuplesValidator<ValidationCont
         valueTuples.each { it ->
             Project project = validatorHelperService.getProjectFromMetadata(it)
 
-            if (project && project.closed) {
+            if (project && project.state == Project.State.CLOSED) {
                 context.addProblem(it.cells, LogLevel.ERROR, "The project '${project.name}' is closed.", "At least one project is closed.")
             }
         }

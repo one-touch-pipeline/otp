@@ -20,7 +20,7 @@
   - SOFTWARE.
   --}%
 
-<%@ page import="de.dkfz.tbi.otp.ngsdata.MetaDataColumn" contentType="text/html;charset=UTF-8" %>
+<%@ page import="de.dkfz.tbi.otp.project.Project; de.dkfz.tbi.otp.ngsdata.MetaDataColumn" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -31,11 +31,8 @@
 </head>
 <body>
     <div class="body">
-        <g:if test="${rawSequenceFile.project.archived}">
-            <otp:annotation type="warning">
-                <g:message code="configurePipeline.info.projectArchived.noChange" args="[rawSequenceFile.project.name]"/>
-            </otp:annotation>
-        </g:if>
+        <g:render template="/templates/bootstrap/noChange" model="[project: rawSequenceFile.project]"/>
+
         <div class="two-column-grid-container">
             <div class="grid-element">
                 <h1><g:message code="rawSequenceFiles.showDetails.title"/></h1>

@@ -126,7 +126,8 @@ class CellRangerQaOverviewService extends AbstractQaOverviewService {
         return [
                 createdWithVersion: "${(qaMap.programVersion1 ?: qaMap.workflowVersion) ?: 'NA'}",
                 summary           : new TableCellValue(
-                        archived: project.archived,
+                        archived: project.state == Project.State.ARCHIVED,
+                        deleted: project.state == Project.State.DELETED,
                         value: "Summary",
                         linkTarget: "_blank",
                         link: linkGenerator.link(

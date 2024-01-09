@@ -111,8 +111,13 @@ $(() => {
       const target = tableCellData.linkTarget ? `target="${tableCellData.linkTarget}"` : '';
       const href = `href="${tableCellData.link}"`;
 
-      result = tableCellData.archived ? `&#128451; <a class="archived" ${target} ${href}>${result}</a>` :
-        `<a ${target} ${href}>${result}</a>`;
+      if (tableCellData.archived) {
+        result = `&#128451; <a class="archived" ${target} ${href}>${result}</a>`;
+      } else if (tableCellData.deleted) {
+        result = `<a class="deleted" ${target} ${href}>${result}</a>`;
+      } else {
+        result = `<a ${target} ${href}>${result}</a>`;
+      }
     }
     return result;
   };

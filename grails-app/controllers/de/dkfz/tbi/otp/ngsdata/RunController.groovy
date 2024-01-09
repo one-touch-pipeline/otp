@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.ngsdata
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -46,7 +47,7 @@ class RunController {
     def show() {
         params.id = params.id ?: "0"
         Run run = runService.getRun(params.id)
-        if (!run || run.project?.archived) {
+        if (!run || (run.project?.state && (run.project?.state == Project.State.ARCHIVED || run.project?.state == Project.State.DELETED))) {
             return response.sendError(404)
         }
         // This page requires using SAMPLE_NAME, since the RawSequenceFile has no connection to a SeqTrack. Its only used for legacy objects

@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
 
@@ -64,7 +65,8 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
     @Override
     @Deprecated
     Collection<MergingWorkPackage> decideAndPrepareForAlignment(SeqTrack seqTrack, boolean forceRealign) {
-        assert !seqTrack.project.archived
+        assert seqTrack.project.state != Project.State.ARCHIVED
+        assert seqTrack.project.state != Project.State.DELETED
 
         if (seqTrack.seqType in seqTypeService.seqTypesNewWorkflowSystem) {
             // alignment is done by the new workflow system

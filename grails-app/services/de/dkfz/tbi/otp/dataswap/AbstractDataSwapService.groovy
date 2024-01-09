@@ -587,8 +587,10 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
                 CollectionUtils.exactlyOneElement(Project.findAllByName(parameters.projectNameSwap.new),
                         "new project ${parameters.projectNameSwap.new} not found")
         )
-        assert !swap.old.archived
-        assert !swap.new.archived
+        assert swap.old.state != Project.State.ARCHIVED
+        assert swap.old.state != Project.State.DELETED
+        assert swap.new.state != Project.State.ARCHIVED
+        assert swap.new.state != Project.State.DELETED
 
         return swap
     }

@@ -24,9 +24,12 @@ package de.dkfz.tbi.otp.ngsdata
 import groovy.transform.ToString
 import org.springframework.security.access.prepost.PreAuthorize
 
+import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
+import de.dkfz.tbi.otp.project.Project
 
 abstract class AbstractAnalysisController {
+    ProjectSelectionService projectSelectionService
 
     static allowedMethods = [
             results: "GET",
@@ -35,6 +38,19 @@ abstract class AbstractAnalysisController {
     @PreAuthorize('isFullyAuthenticated()')
     Map results() {
         return [:]
+    }
+
+    protected Map getDataTableResultsFromService(AbstractAnalysisResultsService service, Map dataToRender) {
+        Project project = projectSelectionService.requestedProject
+        List data = service.getCallingInstancesForProject(project?.name)
+
+        dataToRender.iTotalRecords = data.size()
+        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
+        dataToRender.aaData = data
+
+        dataToRender.archived = (project.state == Project.State.ARCHIVED)
+        dataToRender.deleted = (project.state == Project.State.DELETED)
+        return dataToRender
     }
 }
 

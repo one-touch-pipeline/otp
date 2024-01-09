@@ -24,9 +24,7 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.converters.JSON
 import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaResultsService
-import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
 import java.nio.file.Path
@@ -35,7 +33,6 @@ import java.nio.file.Path
 class SophiaController extends AbstractAnalysisController {
 
     SophiaResultsService sophiaResultsService
-    ProjectSelectionService projectSelectionService
 
     static allowedMethods = [
             dataTableResults: "POST",
@@ -44,15 +41,7 @@ class SophiaController extends AbstractAnalysisController {
     ]
 
     JSON dataTableResults(DataTableCommand cmd) {
-        Map dataToRender = cmd.dataToRender()
-        Project project = projectSelectionService.requestedProject
-        List data = sophiaResultsService.getCallingInstancesForProject(project?.name)
-        dataToRender.iTotalRecords = data.size()
-        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        dataToRender.aaData = data
-
-        dataToRender.archived = project.archived
-
+        Map dataToRender = getDataTableResultsFromService(sophiaResultsService, cmd.dataToRender())
         return render(dataToRender as JSON)
     }
 

@@ -68,7 +68,7 @@ class ProjectClosedValidatorSpec extends Specification implements DataTest, Doma
         given:
         ProjectClosedValidator validator = new ProjectClosedValidator()
         validator.validatorHelperService = new ValidatorHelperService()
-        Project project = createProject([closed: true])
+        Project project = createProject([state: Project.State.CLOSED])
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.PROJECT}\n" +
                         "${project.name}\n"
@@ -89,7 +89,7 @@ class ProjectClosedValidatorSpec extends Specification implements DataTest, Doma
         ProjectClosedValidator validator = new ProjectClosedValidator()
         validator.validatorHelperService = new ValidatorHelperService()
         SampleIdentifier sampleIdentifier = DomainFactory.createSampleIdentifier()
-        sampleIdentifier.sample.project.closed = true
+        sampleIdentifier.sample.project.state = Project.State.CLOSED
         sampleIdentifier.sample.project.save(flush: true)
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.SAMPLE_NAME}\n" +

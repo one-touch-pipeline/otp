@@ -20,7 +20,7 @@
   - SOFTWARE.
   --}%
 
-<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ page import="de.dkfz.tbi.otp.project.Project" contentType="text/html;charset=UTF-8"%>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -34,11 +34,7 @@
     <g:render template="/templates/projectSelection"/>
     <h1><g:message code="sophia.results.title"/></h1>
 
-    <g:if test="${selectedProject.archived}">
-        <otp:annotation type="warning">
-            <g:message code="configurePipeline.info.projectArchived.noPlot" args="[selectedProject.name]"/>
-        </otp:annotation>
-    </g:if>
+    <g:render template="/templates/bootstrap/noPlot" model="[project: selectedProject]"/>
 
     <div class="table">
         <div class="otpDataTables">

@@ -72,8 +72,7 @@ class ProjectConfigController implements CheckAndCall {
             updateSampleIdentifierParserBeanName: "POST",
             updateCopyFiles                     : "POST",
             updatePubliclyAvailable             : "POST",
-            updateClosed                        : "POST",
-            updateArchived                      : "POST",
+            updateState                         : "POST",
             updateRequestAvailable              : "POST",
             saveProjectComment                  : "POST",
             updateUnixGroup                     : "POST",
@@ -101,12 +100,13 @@ class ProjectConfigController implements CheckAndCall {
                 sampleIdentifierParserBeanNames: SampleIdentifierParserBeanName.values()*.name(),
                 tumorEntities                  : tumorEntityService.list().sort(),
                 projectTypes                   : Project.ProjectType.values(),
+                states                         : Project.State.values(),
                 processingPriority             : project?.processingPriority,
                 processingPriorities           : processingPriorityService.allSortedByPriority(),
                 allSpeciesWithStrain           : speciesWithStrainService.list().sort { it.toString() } ?: [],
                 allProjectGroups               : projectGroupService.list(),
                 publiclyAvailable              : project?.publiclyAvailable,
-                closed                         : project?.closed,
+                state                          : project?.state,
                 projectRequestAvailable        : project?.projectRequestAvailable,
                 abstractFields                 : fieldDefinitions,
                 abstractValues                 : abstractValues,
@@ -187,12 +187,6 @@ class ProjectConfigController implements CheckAndCall {
         }
     }
 
-    def updateClosed(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
-            projectService.updateProjectField(Boolean.valueOf(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
-        }
-    }
-
     def updateRequestAvailable(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(Boolean.valueOf(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
@@ -231,8 +225,8 @@ class ProjectConfigController implements CheckAndCall {
         render(map as JSON)
     }
 
-    def updateArchived(String value) {
-        projectService.updateArchived(projectSelectionService.requestedProject, value.toBoolean())
+    def updateState(String value) {
+        projectService.updateState(projectSelectionService.requestedProject, value as Project.State)
         Map map = [success: true]
         render(map as JSON)
     }

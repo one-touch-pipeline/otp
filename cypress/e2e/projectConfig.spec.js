@@ -324,22 +324,26 @@ describe('Check projectConfig page', () => {
       cy.wait('@updatePubliclyAvailable').its('response.statusCode').should('eq', 200);
     });
 
-    it('should update the closed flag', () => {
-      const cellKey = 'Closed';
+    it('should update state to closed, then archived, then deleted and back to open', () => {
+      const cellKey = 'State';
 
-      cy.intercept('/projectConfig/updateClosed*').as('updateClosed');
+      cy.intercept('/projectConfig/updateState*').as('updateState');
 
-      cy.get('td').contains(cellKey).siblings().last()
-        .find('button.edit')
-        .click();
-      cy.get('td').contains(cellKey).siblings().last()
-        .find('select')
-        .select(1, { force: true });
-      cy.get('td').contains(cellKey).siblings().last()
-        .find('button.save')
-        .click();
+      cy.fixture('projectConfig').then((fixture) => {
+        fixture.stateOptions.forEach((option) => {
+          cy.get('td').contains(cellKey).siblings().last()
+            .find('button.edit')
+            .click();
+          cy.get('td').contains(cellKey).siblings().last()
+            .find('select')
+            .select(option, { force: true });
+          cy.get('td').contains(cellKey).siblings().last()
+            .find('button.save')
+            .click();
 
-      cy.wait('@updateClosed').its('response.statusCode').should('eq', 200);
+          cy.wait('@updateState').its('response.statusCode').should('eq', 200);
+        });
+      });
     });
 
     it('should update the internal notes', () => {

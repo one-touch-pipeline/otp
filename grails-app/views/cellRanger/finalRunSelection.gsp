@@ -20,7 +20,7 @@
   - SOFTWARE.
   --}%
 
-<%@ page import="de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage.Status" %>
+<%@ page import="de.dkfz.tbi.otp.project.Project; de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage.Status" %>
 <html>
 <head>
     <title>${g.message(code: "otp.menu.cellRanger.finalRunSelection")}</title>
@@ -29,7 +29,8 @@
 
 <body>
 <div class="body">
-    <g:set var="archived" value="${selectedProject.archived ? 'archived' : ''}"/>
+    <g:set var="archived" value="${selectedProject.state == Project.State.ARCHIVED ? 'archived' : ''}"/>
+    <g:set var="deleted" value="${selectedProject.state == Project.State.DELETED ? 'deleted' : ''}"/>
     <g:render template="/templates/bootstrap/projectSelection"/>
 
     <g:render template="/templates/quickNavigationBar" model="[
@@ -42,11 +43,7 @@
 
     <otp:annotation type="info">${g.message(code: "cellRanger.selection.info")}</otp:annotation>
 
-    <g:if test="${selectedProject.archived}">
-        <otp:annotation type="warning">
-            <g:message code="configurePipeline.info.projectArchived.noPlot" args="[selectedProject.name]"/>
-        </otp:annotation>
-    </g:if>
+    <g:render template="/templates/bootstrap/noPlot" model="[project: selectedProject]"/>
 
     <g:set var="labelId" value="${0}"/>
 
@@ -82,7 +79,7 @@
                             <g:else>
                                 &nbsp;● <g:render template="mwp" model="[mwp: mwp]"/>
                             </g:else>
-                            <g:if test="${mwp.bamFileInProjectFolder && mwp.status != Status.DELETED && !archived}">
+                            <g:if test="${mwp.bamFileInProjectFolder && mwp.status != Status.DELETED && !archived && !deleted}">
                                 <g:link controller="alignmentQualityOverview" action="viewCellRangerSummary"
                                         params="['singleCellBamFile.id': mwp.bamFileInProjectFolder.id]"
                                         target="_blank">${g.message(code: "cellRanger.selection.plot")}</g:link>
@@ -117,7 +114,7 @@
                         </g:elseif>
                     </g:form>
                 </td>
-                <td class="${archived}">
+                <td class="${archived} ${deleted}">
                     <g:link controller="cellRangerConfiguration"
                             params="${["individual.id": mwps.sample.individual.id, "sampleType.id": mwps.sample.sampleType.id, "seqType.id": mwps.seqType.id, "reference.id": mwps.reference.id]}">
                         ${g.message(code: "cellRanger.selection.rerun")}

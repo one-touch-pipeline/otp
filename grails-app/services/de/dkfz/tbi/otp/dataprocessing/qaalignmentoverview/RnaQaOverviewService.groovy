@@ -128,7 +128,8 @@ class RnaQaOverviewService extends AbstractRoddyQaOverviewService {
         Map<String, ?> result = [
                 createdWithVersion: "${(qaMap.programVersion2 ?: qaMap.workflowVersion) ?: 'NA'}",
                 arribaPlots       : new TableCellValue(
-                        archived: project.archived,
+                        archived: project.state == Project.State.ARCHIVED,
+                        deleted: project.state == Project.State.DELETED,
                         value: "PDF",
                         linkTarget: "_blank",
                         link: linkGenerator.link([

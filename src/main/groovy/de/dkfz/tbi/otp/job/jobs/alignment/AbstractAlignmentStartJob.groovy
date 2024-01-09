@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
@@ -87,20 +88,23 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
                 'FROM MergingWorkPackage mwp ' +
                         'WHERE needsProcessing = true ' +
                         'AND seqType IN (:seqTypes) ' +
-                        'AND sample.individual.project.archived = false ' +
+                        'AND sample.individual.project.state <> :archivedState ' +
+                        'AND sample.individual.project.state <> :deletedState ' +
                         'AND NOT EXISTS (' +
                         ' FROM AbstractBamFile ' +
-                        'WHERE workPackage = mwp ' +
-                        'AND fileOperationStatus <> :processed ' +
-                        'AND withdrawn = false ' +
+                        ' WHERE workPackage = mwp ' +
+                        ' AND fileOperationStatus <> :processed ' +
+                        ' AND withdrawn = false ' +
                         ')' +
                         ' AND mwp.seqTracks is not empty ' +
                         'AND sample.individual.project.processingPriority.priority >= :minPriority ' +
                         'ORDER BY sample.individual.project.processingPriority.priority DESC, mwp.id ASC',
                 [
-                        processed  : AbstractBamFile.FileOperationStatus.PROCESSED,
-                        minPriority: minPriority,
-                        seqTypes   : seqTypes,
+                        processed    : AbstractBamFile.FileOperationStatus.PROCESSED,
+                        minPriority  : minPriority,
+                        seqTypes     : seqTypes,
+                        archivedState: Project.State.ARCHIVED,
+                        deletedState : Project.State.DELETED,
                 ]
         )
     }

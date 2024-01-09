@@ -27,7 +27,8 @@ import groovy.transform.Synchronized
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 
-import de.dkfz.tbi.otp.utils.exceptions.FileAccessForArchivedProjectNotAllowedException
+import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.exceptions.FileAccessForProjectNotAllowedException
 import de.dkfz.tbi.otp.workflow.restartHandler.BeanToRestartNotFoundInWorkflowRunException
 import de.dkfz.tbi.otp.workflow.shared.WorkflowJobIsNotRestartableException
 
@@ -84,9 +85,9 @@ class JobService {
         workflowRunService.lockAndRefreshWorkflowRunWithSteps(run)
         List<WorkflowStep> workflowSteps = run.workflowSteps
 
-        if (run.project.archived) {
-            throw new FileAccessForArchivedProjectNotAllowedException(
-                    "${run.project} is archived and ${run} cannot be restarted"
+        if (run.project.state == Project.State.ARCHIVED || run.project.state == Project.State.DELETED) {
+            throw new FileAccessForProjectNotAllowedException(
+                    "${run.project} is ${run.project.state.name().toLowerCase()} and ${run} cannot be restarted"
             )
         }
 

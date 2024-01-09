@@ -33,9 +33,10 @@ import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.DeletionService
-import de.dkfz.tbi.otp.utils.exceptions.FileAccessForArchivedProjectNotAllowedException
+import de.dkfz.tbi.otp.utils.exceptions.FileAccessForProjectNotAllowedException
 
 import java.nio.file.*
 
@@ -95,8 +96,11 @@ class WithdrawHelperService {
     }
 
     void checkArchivedProject(WithdrawStateHolder withdrawStateHolder) {
-        if (withdrawStateHolder.seqTracks.any { it.project.archived }) {
-            throw new FileAccessForArchivedProjectNotAllowedException("Project is archived, withdraw is not allowed")
+        if (withdrawStateHolder.seqTracks.any { it.project.state == Project.State.ARCHIVED }) {
+            throw new FileAccessForProjectNotAllowedException("Project is archived, withdraw is not allowed")
+        }
+        if (withdrawStateHolder.seqTracks.any { it.project.state == Project.State.DELETED }) {
+            throw new FileAccessForProjectNotAllowedException("Project is deleted, withdraw is not allowed")
         }
     }
 

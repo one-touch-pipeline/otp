@@ -24,5 +24,5 @@ package de.dkfz.tbi.otp.utils.exceptions
 import groovy.transform.InheritConstructors
 
 @InheritConstructors
-class FileAccessForArchivedProjectNotAllowedException extends OtpRuntimeException {
+class FileAccessForProjectNotAllowedException extends OtpRuntimeException {
 }

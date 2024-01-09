@@ -84,7 +84,8 @@ class FastqcDecider implements Decider {
         Map<Project, WorkflowVersionSelector> workflowVersionSelectorMap =
                 LogUsedTimeUtils.logUsedTime(log, "        fetch workflow selectors") {
                     fastqcArtefactService.fetchWorkflowVersionSelectorForSeqTracks(seqTracks, [workflowWes, workflowBash]).collectEntries {
-                        assert !it.project.archived
+                        assert it.project.state != Project.State.ARCHIVED
+                        assert it.project.state != Project.State.DELETED
                         [(it.project): it]
                     }
                 }

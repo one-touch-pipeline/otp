@@ -29,6 +29,7 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.project.Project
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -198,7 +199,7 @@ class WorkflowRunServiceIntegrationSpec extends Specification implements Workflo
     void "nextWaitingWorkflow, if project of workflow run is archived, then return null"() {
         given:
         WorkflowRun workflowRun = createWorkflowRunHelper()
-        workflowRun.project.archived = true
+        workflowRun.project.state = Project.State.ARCHIVED
         workflowRun.project.save(flush: true)
         WorkflowRunService service = new WorkflowRunService()
 

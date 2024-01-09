@@ -26,6 +26,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 import de.dkfz.tbi.otp.workflowExecution.*
 
@@ -115,7 +116,8 @@ abstract class AbstractWorkflowDecider<ADL extends ArtefactDataList, G extends B
         Map<ProjectSeqTypeGroup, WorkflowVersionSelector> workflowVersionSelectorMap =
                 LogUsedTimeUtils.logUsedTime(log, "        fetch workflow selectors") {
                     fetchWorkflowVersionSelector(inputArtefactDataList, w).collectEntries {
-                        assert !it.project.archived
+                        assert it.project.state != Project.State.ARCHIVED
+                        assert it.project.state != Project.State.DELETED
                         [(new ProjectSeqTypeGroup(it.project, it.seqType)): it]
                     }
                 }

@@ -48,15 +48,16 @@ trait ConfigurePipelineHelper {
         RoddyWorkflowConfig latestConfig = roddyWorkflowConfigService.findLatestConfigByProjectAndSeqTypeAndPipeline(project, seqType, pipeline)
         String nextConfigVersion = workflowConfigService.getNextConfigVersion(latestConfig?.configVersion)
 
-        RoddyWorkflowConfigService.ConfigState configState = project.archived ? new RoddyWorkflowConfigService.ConfigState("Project is archived", false) :
+        RoddyWorkflowConfigService.ConfigState configState = (project.state == Project.State.ARCHIVED || project.state == Project.State.DELETED) ?
+                new RoddyWorkflowConfigService.ConfigState("Project is ${project.state.name().toLowerCase()}", false) :
                 roddyWorkflowConfigService.getCurrentFilesystemState(project, seqType, pipeline)
 
         return [
-                project             : project,
-                seqType             : seqType,
-                pipeline            : pipeline,
-                nextConfigVersion   : nextConfigVersion,
-                configState         : configState,
+                project          : project,
+                seqType          : seqType,
+                pipeline         : pipeline,
+                nextConfigVersion: nextConfigVersion,
+                configState      : configState,
         ]
     }
 }

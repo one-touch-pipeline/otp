@@ -20,7 +20,7 @@
   - SOFTWARE.
   --}%
 
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="de.dkfz.tbi.otp.project.Project" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -31,7 +31,8 @@
 
 <body>
 <div class="container-fluid otp-main-container">
-    <g:set var="archived" value="${selectedProject.archived ? 'archived' : ''}"/>
+    <g:set var="archived" value="${selectedProject.state == Project.State.ARCHIVED ? 'archived' : ''}"/>
+    <g:set var="deleted" value="${selectedProject.state == Project.State.DELETED ? 'deleted' : ''}"/>
 
     <div class="project-selection-header-container">
         <div class="grid-element">
@@ -60,11 +61,7 @@
             tooltip : g.message(code: 'cellRanger.linkTo.runSelectionPage.tooltip')
     ]"/>
 
-    <g:if test="${archived}">
-        <otp:annotation type="warning">
-            <g:message code="configurePipeline.info.projectArchived.noChange" args="[selectedProject.name]"/>
-        </otp:annotation>
-    </g:if>
+    <g:render template="/templates/bootstrap/noChange" model="[project: selectedProject]"/>
 
     <h2><g:message code="configurePipeline.configureVersion.title"/></h2>
     <g:message code="configurePipeline.cellRanger.info"/>
@@ -78,7 +75,7 @@
             <g:select name="programVersion" id="versionSelect" class="use-select-2 col-sm-4" value="${currentVersion}" from="${availableVersions}"
                       noSelection="${["": "Select version"]}"/>
             <div class="col-sm-5">
-                <g:submitButton class="${archived} btn btn-primary" name="submit" value="Submit"/>
+                <g:submitButton class="${archived} ${deleted} btn btn-primary" name="submit" value="Submit"/>
             </div>
         </div>
     </g:form>
@@ -86,7 +83,7 @@
         <sec:ifAllGranted roles="ROLE_OPERATOR">
             <g:form controller="configurePipeline" action="invalidateConfig" method="POST"
                     params='["seqType.id": seqType.id, "pipeline.id": pipeline.id, "originAction": actionName, overviewController: "cellRangerConfiguration"]'>
-                <g:submitButton class="${archived} btn btn-primary" name="invalidateConfig" value="Invalidate Config"/>
+                <g:submitButton class="${archived} ${deleted} btn btn-primary" name="invalidateConfig" value="Invalidate Config"/>
             </g:form>
         </sec:ifAllGranted>
     </g:if>

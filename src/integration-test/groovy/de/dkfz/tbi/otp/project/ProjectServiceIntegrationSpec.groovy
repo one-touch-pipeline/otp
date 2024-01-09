@@ -159,7 +159,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     void "test getAllProjects, user #user can access all projects"() {
         given:
         createUserAndRoles()
-        List<Project> projects = [createProject(), createProject()]
+        List<Project> projects = [createProject(), createProject(), createProject([state: Project.State.CLOSED])]
+
         projects.each {
             addUserWithReadAccessToProject(getUser(TESTUSER), it)
         }
@@ -173,14 +174,15 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         user << [OPERATOR, ADMIN, TESTUSER]
     }
 
-    void "test getAllProjects, user can only access projects to which they have access"() {
+    void "test getAllProjects, user can only access projects to which they have access and are not deleted"() {
         given:
         createUserAndRoles()
         List<Project> projects = [createProject(), createProject()]
         projects.each {
             addUserWithReadAccessToProject(getUser(TESTUSER), it)
         }
-        createProject()
+        Project deletedProject = createProject([state: Project.State.DELETED])
+        addUserWithReadAccessToProject(getUser(TESTUSER), deletedProject)
         createProject()
 
         expect:
@@ -1493,9 +1495,9 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         RoddyConfiguration configuration = "createRoddy${analysisName}Configuration"()
         if (analysisName in ["Sophia", "Aceseq"]) {
             ReferenceGenomeSelector referenceGenomeSelector = createReferenceGenomeSelector([
-                    project: configuration.project,
-                    seqType: configuration.seqType,
-                    species: [findOrCreateHumanSpecies()] as Set,
+                    project        : configuration.project,
+                    seqType        : configuration.seqType,
+                    species        : [findOrCreateHumanSpecies()] as Set,
                     referenceGenome: DomainFactory.createAceseqReferenceGenome(),
             ])
             referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenomeSelector.referenceGenome, false).mkdirs()
@@ -1543,9 +1545,9 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         ])
         if (analysisName in ["Sophia", "Aceseq"]) {
             ReferenceGenomeSelector referenceGenomeSelector = createReferenceGenomeSelector([
-                    project: configuration.project,
-                    seqType: configuration.seqType,
-                    species: [findOrCreateHumanSpecies()] as Set,
+                    project        : configuration.project,
+                    seqType        : configuration.seqType,
+                    species        : [findOrCreateHumanSpecies()] as Set,
                     referenceGenome: DomainFactory.createAceseqReferenceGenome(),
             ])
             referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenomeSelector.referenceGenome, false).mkdirs()
@@ -2014,8 +2016,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         Project expiredProject = createProject([storageUntil: LocalDate.of(1970, 1, 1)])
         User user = createUser()
         createUserProjectRole([
-                project     : expiredProject,
-                user        : user,
+                project: expiredProject,
+                user   : user,
         ])
 
         when:

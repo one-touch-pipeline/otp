@@ -39,7 +39,7 @@ import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
-import de.dkfz.tbi.otp.utils.exceptions.FileAccessForArchivedProjectNotAllowedException
+import de.dkfz.tbi.otp.utils.exceptions.FileAccessForProjectNotAllowedException
 
 @CompileDynamic
 @Transactional
@@ -245,8 +245,10 @@ class CellRangerConfigurationService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#mwpToKeep.project, 'OTP_READ_ACCESS')")
     void selectMwpAsFinal(CellRangerMergingWorkPackage mwpToKeep) {
-        if (mwpToKeep.project.archived) {
-            throw new FileAccessForArchivedProjectNotAllowedException("Cannot set Mwp of archived project ${mwpToKeep.project} to final")
+        if (mwpToKeep.project.state == Project.State.ARCHIVED || mwpToKeep.project.state == Project.State.DELETED) {
+            throw new FileAccessForProjectNotAllowedException(
+                    "Cannot set Mwp of ${mwpToKeep.project.state.name().toLowerCase()} project ${mwpToKeep.project} to final"
+            )
         }
         List<CellRangerMergingWorkPackage> allMwps = getAllMwps(
                 mwpToKeep.sample, mwpToKeep.seqType, mwpToKeep.config.programVersion, mwpToKeep.referenceGenomeIndex,
@@ -260,16 +262,16 @@ class CellRangerConfigurationService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#sample.project, 'OTP_READ_ACCESS')")
     void selectNoneAsFinal(Sample sample, SeqType seqType, String programVersion, ReferenceGenomeIndex reference) {
-        if (sample.project.archived) {
-            throw new FileAccessForArchivedProjectNotAllowedException("Cannot delete Mwp of archived project ${sample.project}")
+        if (sample.project.state == Project.State.ARCHIVED || sample.project.state == Project.State.DELETED) {
+            throw new FileAccessForProjectNotAllowedException("Cannot delete Mwp of ${sample.project.state.name().toLowerCase()} project ${sample.project}")
         }
         deleteMwps(getAllMwps(sample, seqType, programVersion, reference, CellRangerMergingWorkPackage.Status.UNSET))
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#sample.project, 'OTP_READ_ACCESS')")
     void deleteFinalMwp(Sample sample, SeqType seqType, String programVersion, ReferenceGenomeIndex reference) {
-        if (sample.project.archived) {
-            throw new FileAccessForArchivedProjectNotAllowedException("Cannot delete Mwp of archived project ${sample.project}")
+        if (sample.project.state == Project.State.ARCHIVED  || sample.project.state == Project.State.DELETED) {
+            throw new FileAccessForProjectNotAllowedException("Cannot delete Mwp of ${sample.project.state.name().toLowerCase()} project ${sample.project}")
         }
         deleteMwps(getAllMwps(sample, seqType, programVersion, reference, CellRangerMergingWorkPackage.Status.FINAL), false)
     }
@@ -292,8 +294,9 @@ class CellRangerConfigurationService {
             if (checkFinal) {
                 assert it.status != CellRangerMergingWorkPackage.Status.FINAL
             }
-            if (it.project.archived) {
-                throw new FileAccessForArchivedProjectNotAllowedException("Cannot delete Mwp ${it} since project ${it.project} is archived.")
+            if (it.project.state == Project.State.ARCHIVED || it.project.state == Project.State.DELETED) {
+                String projectState = it.project.state.name().toLowerCase()
+                throw new FileAccessForProjectNotAllowedException("Cannot delete Mwp ${it} since project ${it.project} is ${projectState}.")
             }
         }
         mwpToDelete.each {

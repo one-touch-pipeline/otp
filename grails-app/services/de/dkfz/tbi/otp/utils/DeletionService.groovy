@@ -77,7 +77,7 @@ class DeletionService {
     SingleCellBamFileService singleCellBamFileService
 
     void deleteProjectContent(Project project) {
-        assert !project.archived
+        assert project.state != Project.State.ARCHIVED
 
         assert !EgaSubmission.findAllByProject(project): "There are Ega Submissions connected to this Project, thus it can not be deleted"
 
@@ -107,7 +107,7 @@ class DeletionService {
     }
 
     void deleteProject(Project project) {
-        assert !project.archived
+        assert project.state != Project.State.ARCHIVED
 
         deleteProjectContent(project)
         deleteProjectDependencies(project)
@@ -116,7 +116,7 @@ class DeletionService {
 
     @SuppressWarnings('JavaIoPackageAccess')
     String deleteIndividual(Individual individual, boolean check = true) {
-        assert !individual.project.archived
+        assert individual.project.state != Project.State.ARCHIVED
 
         StringBuilder deletionScript = new StringBuilder()
 
@@ -186,7 +186,7 @@ class DeletionService {
                                                   boolean ignoreWithdrawn = false, List<SeqTrack> explicitSeqTracks = []) throws FileNotFoundException {
         Project project = CollectionUtils.atMostOneElement(Project.findAllByName(projectName))
         assert project: "Project does not exist"
-        assert !project.archived
+        assert project.state != Project.State.ARCHIVED
 
         Set<String> dirsToDelete = [] as Set
         Set<String> externalMergedBamFolders = [] as Set
@@ -335,7 +335,7 @@ class DeletionService {
      */
     List<File> deleteAllProcessingInformationAndResultOfOneSeqTrack(SeqTrack seqTrack, boolean enableChecks = true) {
         notNull(seqTrack, "The input seqTrack of the method deleteAllProcessingInformationAndResultOfOneSeqTrack is null")
-        assert !seqTrack.project.archived
+        assert seqTrack.project.state != Project.State.ARCHIVED
         List<File> dirsToDelete = []
 
         if (enableChecks) {
@@ -544,7 +544,7 @@ class DeletionService {
      */
     List<File> deleteSeqTrack(SeqTrack seqTrack, boolean check = true) {
         notNull(seqTrack, "The input seqTrack of the method deleteSeqTrack is null")
-        assert !seqTrack.project.archived
+        assert seqTrack.project.state != Project.State.ARCHIVED
 
         if (check) {
             seqTrackService.throwExceptionInCaseOfExternallyProcessedBamFileIsAttached([seqTrack])

@@ -65,8 +65,9 @@ class ProjectArchivedValidator extends AbstractValueTuplesValidator<ValidationCo
         valueTuples.each { it ->
             Project project = validatorHelperService.getProjectFromMetadata(it)
 
-            if (project && project.archived) {
-                context.addProblem(it.cells, LogLevel.ERROR, "The project '${project.name}' is archived.", "At least one project is archived.")
+            if (project?.state && (project.state == Project.State.ARCHIVED || project.state == Project.State.DELETED)) {
+                String stateName = project.state.name().toLowerCase()
+                context.addProblem(it.cells, LogLevel.ERROR, "The project '${project.name}' is ${stateName}.", "At least one project is ${stateName}.")
             }
         }
     }

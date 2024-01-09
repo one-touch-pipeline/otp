@@ -68,7 +68,7 @@ class ProjectArchivedValidatorSpec extends Specification implements DataTest, Do
         given:
         ProjectArchivedValidator validator = new ProjectArchivedValidator()
         validator.validatorHelperService = new ValidatorHelperService()
-        Project project = createProject([archived: true])
+        Project project = createProject([state: Project.State.ARCHIVED])
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.PROJECT}\n" +
                         "${project.name}\n"
@@ -89,7 +89,7 @@ class ProjectArchivedValidatorSpec extends Specification implements DataTest, Do
         ProjectArchivedValidator validator = new ProjectArchivedValidator()
         validator.validatorHelperService = new ValidatorHelperService()
         SampleIdentifier sampleIdentifier = DomainFactory.createSampleIdentifier()
-        sampleIdentifier.sample.project.archived = true
+        sampleIdentifier.sample.project.state = Project.State.ARCHIVED
         sampleIdentifier.sample.project.save(flush: true)
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.SAMPLE_NAME}\n" +

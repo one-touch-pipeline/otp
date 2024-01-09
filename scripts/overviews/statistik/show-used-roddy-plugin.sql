@@ -19,16 +19,16 @@
 -- SOFTWARE.
 
 /**
- * Show all currently configured roddy plugins inclusive count of using, grouped also by closed flag.
+ * Show all currently configured roddy plugins inclusive count of using, grouped also by state.
  * Plugins not used anymore are not shown.
  */
 SELECT c.program_version,
-       p.closed,
+       p.state,
        COUNT(c.id)
 FROM config_per_project_and_seq_type c
          JOIN project p ON c.project_id = p.id
 WHERE c.obsolete_date IS NULL
   AND c.individual_id IS NULL
-GROUP BY c.program_version, p.closed
+GROUP BY c.program_version, p.state
 ORDER BY c.program_version,
-         p.closed;
+         p.state;

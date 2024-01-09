@@ -141,7 +141,7 @@ class CellRangerQaOverviewServiceHibernateSpec extends HibernateSpec implements 
         String link = "link_${nextId}"
 
         Project project = createProject([
-                archived: archived,
+                state: archived ? Project.State.ARCHIVED : Project.State.OPEN,
         ])
         Long bamId = nextId
 

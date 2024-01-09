@@ -71,69 +71,74 @@ abstract class AbstractBamFileAnalysisService<T extends BamFilePairAnalysis> imp
 
         def testIfBamFileFulfillCriteria = { String number ->
             return "AND EXISTS (FROM AbstractBamFile ambf${number} " +
-            // check that the file is not withdrawn
-            "       WHERE ambf${number}.withdrawn = false " +
-            // check that the bam file belongs to the SamplePair
-            "       AND ambf${number}.${workPackage} = sp.mergingWorkPackage${number} " +
-            // check that transfer workflow is finished
-            "       AND ambf${number}.md5sum IS NOT NULL " +
+                    // check that the file is not withdrawn
+                    "   WHERE ambf${number}.withdrawn = false " +
+                    // check that the bam file belongs to the SamplePair
+                    "   AND ambf${number}.${workPackage} = sp.mergingWorkPackage${number} " +
+                    // check that transfer workflow is finished
+                    "   AND ambf${number}.md5sum IS NOT NULL " +
                     pipelineSpecificBamFileChecks(number) +
 
-            // check that coverage is high enough & number of lanes are enough
-            "       AND EXISTS ( FROM ProcessingThresholds pt " +
-            "           WHERE pt.project = ambf${number}.${individual}.project " +
-            "           AND pt.seqType = ambf${number}.${seqType} " +
-            "           AND pt.sampleType = ambf${number}.${sampleType} " +
-            "           AND (pt.coverage is null OR ambf${number}.coverage IS NULL OR pt.coverage <= ambf${number}.coverage) " +
-            "           AND (:threshold <= ambf${number}.coverage OR ambf${number}.coverage IS NULL) " +
-            "           AND (pt.numberOfLanes is null OR ambf${number}.numberOfMergedLanes IS NULL OR pt.numberOfLanes <= ambf${number}.numberOfMergedLanes) " +
-            "           ) " +
-            // check that the file is in the workpackage
-            "       AND ambf${number}.${workPackage}.bamFileInProjectFolder = ambf${number} " +
-            // check that the file file operation status ist processed
-            "       AND ambf${number}.fileOperationStatus = '${AbstractBamFile.FileOperationStatus.PROCESSED}' " +
-            // check that the id is the last for that MergingWorkPackage
-            "       AND ambf${number} = (select max(bamFile.id) from AbstractBamFile bamFile where bamFile.workPackage = ambf${number}.workPackage)" +
-            "       ) "
+                    // check that coverage is high enough & number of lanes are enough
+                    "   AND EXISTS ( FROM ProcessingThresholds pt " +
+                    "      WHERE pt.project = ambf${number}.${individual}.project " +
+                    "      AND pt.seqType = ambf${number}.${seqType} " +
+                    "      AND pt.sampleType = ambf${number}.${sampleType} " +
+                    "      AND (pt.coverage is null OR ambf${number}.coverage IS NULL OR pt.coverage <= ambf${number}.coverage) " +
+                    "      AND (:threshold <= ambf${number}.coverage OR ambf${number}.coverage IS NULL) " +
+                    "      AND (" +
+                    "         pt.numberOfLanes is null " +
+                    "         OR ambf${number}.numberOfMergedLanes IS NULL " +
+                    "         OR pt.numberOfLanes <= ambf${number}.numberOfMergedLanes" +
+                    "      ) " +
+                    "   ) " +
+                    // check that the file is in the workpackage
+                    "   AND ambf${number}.${workPackage}.bamFileInProjectFolder = ambf${number} " +
+                    // check that the file file operation status ist processed
+                    "   AND ambf${number}.fileOperationStatus = '${AbstractBamFile.FileOperationStatus.PROCESSED}' " +
+                    // check that the id is the last for that MergingWorkPackage
+                    "   AND ambf${number} = (select max(bamFile.id) from AbstractBamFile bamFile where bamFile.workPackage = ambf${number}.workPackage)" +
+                    " ) "
         }
 
         String samplePairForProcessing =
                 "FROM SamplePair sp " +
-                // check that sample pair shall be processed
-                "WHERE " + processingStateCheck +
+                        // check that sample pair shall be processed
+                        "WHERE " + processingStateCheck +
 
-                (sp ? "AND sp = :sp " : '') +
-                // check that processing priority of the corresponding project is high enough
-                'AND sp.mergingWorkPackage1.sample.individual.project.processingPriority.priority >= :minPriority ' +
-                'AND sp.mergingWorkPackage1.seqType in (:seqTypes) ' +
-                'AND sp.mergingWorkPackage1.sample.individual.project.archived = false ' +
-                checkReferenceGenome() +
+                        (sp ? "AND sp = :sp " : '') +
+                        // check that processing priority of the corresponding project is high enough
+                        'AND sp.mergingWorkPackage1.sample.individual.project.processingPriority.priority >= :minPriority ' +
+                        'AND sp.mergingWorkPackage1.seqType in (:seqTypes) ' +
+                        "AND sp.mergingWorkPackage1.sample.individual.project.state != 'ARCHIVED' " +
+                        "AND sp.mergingWorkPackage1.sample.individual.project.state != 'DELETED' " +
+                        checkReferenceGenome() +
 
-                // check that the config file is available with at least one script with same version
-                checkConfig() +
+                        // check that the config file is available with at least one script with same version
+                        checkConfig() +
 
-                // check that this sample pair is not in process
-                "AND NOT EXISTS (FROM ${analysisClass.name} sci " +
-                "   WHERE sci.samplePair = sp " +
-                "   AND sci.processingState IN (:processingStates) " +
-                "   AND sci.withdrawn = false " +
-                ") " +
+                        // check that this sample pair is not in process
+                        "AND NOT EXISTS (FROM ${analysisClass.name} sci " +
+                        "   WHERE sci.samplePair = sp " +
+                        "   AND sci.processingState IN (:processingStates) " +
+                        "   AND sci.withdrawn = false " +
+                        ") " +
 
-                // check that the first bam file fulfill the criteria
-                testIfBamFileFulfillCriteria("1") +
+                        // check that the first bam file fulfill the criteria
+                        testIfBamFileFulfillCriteria("1") +
 
-                // check that the second bam file fulfill the criteria
-                testIfBamFileFulfillCriteria("2") +
+                        // check that the second bam file fulfill the criteria
+                        testIfBamFileFulfillCriteria("2") +
 
-                "ORDER BY sp.mergingWorkPackage1.sample.individual.project.processingPriority.priority DESC, sp.dateCreated"
+                        "ORDER BY sp.mergingWorkPackage1.sample.individual.project.processingPriority.priority DESC, sp.dateCreated"
 
         Map parameters = [
-                needsProcessing: ProcessingStatus.NEEDS_PROCESSING,
-                processingStates: PROCESSING_STATES_NOT_PROCESSABLE,
-                minPriority: minPriority,
-                analysis: analysisType,
-                seqTypes: seqTypes,
-                threshold: threshold,
+                needsProcessing              : ProcessingStatus.NEEDS_PROCESSING,
+                processingStates             : PROCESSING_STATES_NOT_PROCESSABLE,
+                minPriority                  : minPriority,
+                analysis                     : analysisType,
+                seqTypes                     : seqTypes,
+                threshold                    : threshold,
         ]
         if (sp) {
             parameters.sp = sp
@@ -173,8 +178,11 @@ abstract class AbstractBamFileAnalysisService<T extends BamFilePairAnalysis> imp
     }
 
     abstract protected String getProcessingStateCheck()
+
     abstract Class<BamFilePairAnalysis> getAnalysisClass()
+
     abstract protected Pipeline.Type getAnalysisType()
+
     abstract Pipeline.Name getPipelineName()
 
     String checkConfig() {

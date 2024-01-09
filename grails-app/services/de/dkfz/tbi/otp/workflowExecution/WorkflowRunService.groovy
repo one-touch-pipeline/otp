@@ -62,7 +62,8 @@ class WorkflowRunService {
         where
             wr.state = '${WorkflowRun.State.PENDING}'
             and wr.workflow.enabled = true
-            and wr.project.archived = false
+            and wr.project.state != '${Project.State.ARCHIVED}'
+            and wr.project.state != '${Project.State.DELETED}'
             and wr.priority in (
                 select
                     pp

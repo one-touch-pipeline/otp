@@ -47,6 +47,13 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
         USER_MANAGEMENT,
     }
 
+    enum State {
+        OPEN,
+        CLOSED,
+        ARCHIVED, /** Data in archived project cannot be accessed. */
+        DELETED,
+    }
+
     /** This attribute is used externally. Please discuss a change in the team */
     String individualPrefix
     String internalNotes
@@ -77,8 +84,6 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
      */
     boolean processingNotification = true
 
-    boolean closed = false
-
     Set<ProjectInfo> projectInfos
 
     Set<DataTransferAgreement> dataTransferAgreements
@@ -91,12 +96,8 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
 
     boolean projectRequestAvailable = false
 
-    /**
-     * flag for archived project.
-     *
-     * Data in archived project cannot be accessed.
-     */
-    boolean archived = false
+    /** Contains the current state of the project. */
+    State state = State.OPEN
 
     /**
      * @deprecated field is part of the old workflow system, use {@link WorkflowVersionSelector} instead
@@ -120,7 +121,7 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
     ]
 
     static mappedBy = [
-            projectInfos: "project",
+            projectInfos          : "project",
             dataTransferAgreements: "project",
     ]
 
@@ -170,7 +171,7 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
         relatedProjects nullable: true
         internalNotes nullable: true
         storageUntil nullable: true
-        archived nullable: false
+        state nullable: false
     }
 
     @Override
@@ -192,7 +193,7 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
     }
 
     String getDisplayName() {
-        return "${name}${closed ? " (closed)" : ""}${archived ? " (archived)" : ""}"
+        return "${name}${state == State.OPEN ? "" : " (${state.toString().toLowerCase()})"}"
     }
 
     /**

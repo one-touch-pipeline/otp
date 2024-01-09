@@ -66,7 +66,7 @@ SELECT st.id                                                                    
        i.pid,
        p.name                                                                                                     AS project_name,
        p.dir_name                                                                                                 AS project_dir_name,
-       p.archived                                                                                                 AS file_archived,
+       p.state = 'ARCHIVED'                                                                                       AS file_archived,
        sc.name                                                                                                    AS seq_center_name,
        sc.dir_name                                                                                                AS seq_center_dir_name,
        COALESCE((SELECT BOOL_AND(file_exists) FROM raw_sequence_file sf WHERE sf.seq_track_id = st.id), FALSE)    AS file_exists,

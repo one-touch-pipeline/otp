@@ -20,7 +20,7 @@
   - SOFTWARE.
   --}%
 
-<%@ page import="de.dkfz.tbi.otp.utils.CollectionUtils; de.dkfz.tbi.otp.ngsdata.MetaDataEntry; de.dkfz.tbi.util.TimeFormats" contentType="text/html;charset=UTF-8" %>
+<%@ page import="de.dkfz.tbi.otp.project.Project; de.dkfz.tbi.otp.utils.CollectionUtils; de.dkfz.tbi.otp.ngsdata.MetaDataEntry; de.dkfz.tbi.util.TimeFormats" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -109,15 +109,19 @@
                 </tr>
                 </thead>
                 <tbody>
+                <g:set var="archived" value="${track.key.project.state == Project.State.ARCHIVED ? 'archived' : ''}"/>
+                <g:set var="deleted" value="${track.key.project.state == Project.State.DELETED ? 'deleted' : ''}"/>
                 <g:each var="file" in="${track.value.files}">
-                    <g:set var="archivedClickable" value="${track.key.project.archived ? 'archived' : ''}"/>
-
                     <tr>
                         <td>-</td>
                         <td>s</td>
-                        <td><g:link controller="rawSequenceFile" action="showDetails" id="${file.id}" class="${archivedClickable}">${file.fileName}
-                            <g:if test="${archivedClickable}">
+                        <td><g:link controller="rawSequenceFile" action="showDetails" id="${file.id}" class="${archived} ${deleted}">
+                            ${file.fileName}
+                            <g:if test="${archived}">
                                 <span title="${track.key.project} is archived">&#128451;</span>
+                            </g:if>
+                            <g:if test="${deleted}">
+                                <span title="${track.key.project} is deleted">&#128465;</span>
                             </g:if>
                         </g:link></td>
                         <td><b><g:link controller="projectOverview" action="index" params="[(projectParameter): file.project.name]">${file.project}</g:link></b>
