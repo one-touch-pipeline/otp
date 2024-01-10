@@ -48,17 +48,17 @@ $(() => {
   }).trigger('change');
 
   let backendCall;
+  // Flag to control if all samples are selected
+  let selectAllRows = true;
   initialNewBackendCall();
 
   // Initializing Data Tables
   const sampleTable = $('table#sampleTable').DataTable({
     columns: [
       {
-        data(row, type) {
-          if (type === 'sort') {
-            return null;
-          }
-          return `<input type="checkbox" name="samples" value="${row.sampleId}" checked="checked">`;
+        data() {
+          // all checkboxes are checked initially, which means all samples are selected
+          return selectAllRows;
         },
         orderable: false
       },
@@ -73,6 +73,18 @@ $(() => {
       {
         data: 'seqType',
         orderable: true
+      }
+    ],
+    columnDefs: [
+      {
+        target: 0,
+        render: (data, type, row) => {
+          if (type === 'sort') {
+            return null;
+          }
+          const isChecked = data ? 'checked' : '';
+          return `<input class="tableCheckbox" type="checkbox" name="samples" value="${row.sampleId}" ${isChecked}>`;
+        }
       }
     ],
     processing: true,
@@ -177,6 +189,14 @@ $(() => {
     const updatedUrl = url.href;
     window.history.pushState({ path: updatedUrl }, '', updatedUrl);
   }
+
+  $('#selectAll').on('click', (e) => {
+    const { checked } = e.target;
+
+    // rerender the whole table
+    selectAllRows = checked;
+    sampleTable.rows().invalidate();
+  });
 
   $('#executeButton').on('click', (e) => {
     const formData = new FormData($('#sampleForm')[0]);

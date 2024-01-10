@@ -237,7 +237,7 @@
         <h3>${g.message(code: "cellRanger.header.create")}:</h3>
         <table id="sampleTable" class="table table-sm table-striped table-hover table-bordered w-100 fixed-table-header">
             <thead><tr>
-                <th></th>
+                <th><input type='checkbox' name='selectAll' id="selectAll" value="${g.message(code: "cellRanger.selectAll")}" checked></th>
                 <th>${g.message(code: "cellRanger.create.selectedIndividuals")}</th>
                 <th>${g.message(code: "cellRanger.create.selectedSampleTypes")}</th>
                 <th>${g.message(code: "cellRanger.create.selectedSeqType")}</th>
