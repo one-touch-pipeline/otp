@@ -159,15 +159,14 @@
 
     <div class="otpDataTables projectUserTable fixed-table-header">
         <h5><strong><g:message code="projectUser.activeUsers" args="[selectedProject.displayName]"/></strong></h5>
-        <table class="table table-sm table-striped table-hover">
-            <g:render template="userListingTableHeaderRow" model="[mode: 'enabled', project: selectedProject]"/>
-            <g:if test="${!enabledProjectUsers}">
-                <g:render template="noUsersTableRow"/>
-            </g:if>
+        <g:if test="${enabledProjectUsers}">
+        <table class="table table-sm table-striped table-hover" id="projectMemberTable">
+            <g:render template="userListingTableHeaderRow" model="[mode: 'enabled', project: selectedProject, showProjectAccess: currentUser.id in enabledProjectUsers*.user*.id]"/>
+            <tbody>
             <g:each in="${enabledProjectUsers}" var="userEntry">
                 <tr>
                     <td><g:render template="securedLinkedThumbnail" model="[user: userEntry.user, base64Data: userEntry.thumbnailPhoto]"/></td>
-                    <td class="${userEntry.deactivated ? "userDisabled" : ""}">
+                    <td class="csv_export ${userEntry.deactivated ? "userDisabled" : ""}">
                         <g:if test="${userEntry.inLdap}">
                             ${userEntry.realName}
                         </g:if>
@@ -176,8 +175,8 @@
                                               link="${g.createLink(controller: 'projectUser', action: 'updateName', params: ["user.id": userEntry.user.id])}"/>
                         </g:else>
                     </td>
-                    <td><g:render template="securedLinkedUsername" model="[user: userEntry.user]"/></td>
-                    <td>${userEntry.department}</td>
+                    <td class="csv_export"><g:render template="securedLinkedUsername" model="[user: userEntry.user]"/></td>
+                    <td class="csv_export">${userEntry.department}</td>
                     <td>
                         <otp:editorSwitch roles="ROLE_OPERATOR" value="${userEntry.user.email}"
                                           link="${g.createLink(controller: 'projectUser', action: 'updateEmail', params: ["user.id": userEntry.user.id])}"/>
@@ -213,6 +212,10 @@
                                 ${projectRoleName} <br/>
                             </g:each>
                         </sec:noAccess>
+                    </td>
+                    <td class="csv_export">${userEntry.user.email}</td>
+                    <td class="csv_export">
+                        ${userEntry.projectRoleNames.join(',')}
                     </td>
                     <td class="accessToOtp">
                         <g:if test="${userEntry.inLdap}">
@@ -311,6 +314,11 @@
                             <span class="icon-${userEntry.receivesNotifications}"></span>
                         </sec:noAccess>
                     </td>
+                    <td class="csv_export">${userEntry.otpAccess}</td>
+                    <td class="csv_export">${userEntry.fileAccess}</td>
+                    <td class="csv_export">${userEntry.manageUsers}</td>
+                    <td class="csv_export">${userEntry.manageUsersAndDelegate}</td>
+                    <td class="csv_export">${userEntry.receivesNotifications}</td>
                     <td>
                         <g:set var="disabled" value="disabled"/>
                         <sec:access
@@ -328,9 +336,14 @@
                     </td>
                 </tr>
             </g:each>
+            </tbody>
         </table>
 
         <p><span class="icon-asterisk"></span>${g.message(code: 'projectUser.table.fileAccess.legend')}</p>
+        </g:if>
+        <g:else>
+            <g:message code="projectUser.noUsers"/>
+        </g:else>
     </div>
     <sec:access expression="hasRole('ROLE_OPERATOR')">
         <button class="btn btn-primary listEmails" title="${g.message(code: 'projectUser.table.tooltip.copyEmail')}"
@@ -345,11 +358,9 @@
     <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
         <div class="otpDataTables projectUserTable">
             <h5><strong><g:message code="projectUser.formerUsers"/></strong></h5>
+            <g:if test="${disabledProjectUsers}">
             <table class="table table-sm table-striped table-hover fixed-table-header">
                 <g:render template="userListingTableHeaderRow" model="[mode: 'disabled', project: selectedProject]"/>
-                <g:if test="${!disabledProjectUsers}">
-                    <g:render template="noUsersTableRow"/>
-                </g:if>
                 <g:each in="${disabledProjectUsers}" var="userEntry">
                     <tr>
                         <td><g:render template="securedLinkedThumbnail" model="[user: userEntry.user, base64Data: userEntry.thumbnailPhoto]"/></td>
@@ -391,6 +402,10 @@
                     </tr>
                 </g:each>
             </table>
+            </g:if>
+            <g:else>
+                <g:message code="projectUser.noUsers"/>
+            </g:else>
         </div>
     </sec:access>
 </div>

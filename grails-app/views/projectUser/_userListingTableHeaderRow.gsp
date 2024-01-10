@@ -1,5 +1,5 @@
 %{--
-  - Copyright 2011-2019 The OTP authors
+  - Copyright 2011-2024 The OTP authors
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
   - of this software and associated documentation files (the "Software"), to deal
@@ -20,21 +20,30 @@
   - SOFTWARE.
   --}%
 
+<thead>
 <tr>
     <th></th>
-    <th><g:message code="projectUser.table.name"/></th>
-    <th><g:message code="projectUser.table.username"/></th>
-    <th><g:message code="projectUser.table.department"/></th>
+    <th class="csv_export"><g:message code="projectUser.table.name"/></th>
+    <th class="csv_export"><g:message code="projectUser.table.username"/></th>
+    <th class="csv_export"><g:message code="projectUser.table.department"/></th>
     <th><g:message code="projectUser.table.mail"/></th>
     <th><g:message code="projectUser.table.role"/></th>
     <g:if test="${mode == 'enabled'}">
+        <th class="csv_export"><g:message code="projectUser.table.mail"/></th>
+        <th class="csv_export"><g:message code="projectUser.table.role"/></th>
         <th title="${g.message(code: 'projectUser.table.otpAccess.tooltip')}"><g:message code="projectUser.table.otpAccess"/></th>
         <th title="${g.message(code: 'projectUser.table.fileAccess.tooltip')}"><g:message code="projectUser.table.fileAccess"/></th>
         <th title="${g.message(code: 'projectUser.table.manageUsers.tooltip')}"><g:message code="projectUser.table.manageUsers"/></th>
         <th title="${g.message(code: 'projectUser.table.manageUsersAndDelegate.tooltip')}"><g:message code="projectUser.table.manageUsersAndDelegate"/></th>
         <th title="${g.message(code: 'projectUser.table.receivesNotifications.tooltip')}"><g:message code="projectUser.table.receivesNotifications"/></th>
+        <th class="csv_export" title="${g.message(code: 'projectUser.table.otpAccess.tooltip')}"><g:message code="projectUser.table.otpAccess"/></th>
+        <th class="csv_export" title="${g.message(code: 'projectUser.table.fileAccess.tooltip')}"><g:message code="projectUser.table.fileAccess"/></th>
+        <th class="csv_export" title="${g.message(code: 'projectUser.table.manageUsers.tooltip')}"><g:message code="projectUser.table.manageUsers"/></th>
+        <th class="csv_export" title="${g.message(code: 'projectUser.table.manageUsersAndDelegate.tooltip')}"><g:message code="projectUser.table.manageUsersAndDelegate"/></th>
+        <th class="csv_export" title="${g.message(code: 'projectUser.table.receivesNotifications.tooltip')}"><g:message code="projectUser.table.receivesNotifications"/></th>
     </g:if>
-    <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
+    <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS') or ${showProjectAccess}">
         <th><g:message code="projectUser.table.projectAccess"/></th>
     </sec:access>
 </tr>
+</thead>

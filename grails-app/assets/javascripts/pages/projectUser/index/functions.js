@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -220,7 +220,7 @@ function submitChangeProjectAccess(postUrl) {
   });
 }
 
-$(document).ready(() => {
+$(() => {
   'use strict';
 
   $('.loaded-content').show();
@@ -229,5 +229,18 @@ $(document).ready(() => {
   $('select.use-select-2').select2({
     allowClear: true,
     theme: 'bootstrap4'
+  });
+
+  $('#projectMemberTable').DataTable({
+    info: false,
+    paging: false,
+    dom: 'B t',
+    buttons: $.otp.getDownloadButton('.csv_export'),
+    columnDefs: [
+      {
+        targets: [6, 7, 13, 14, 15, 16, 17],
+        visible: false
+      }
+    ]
   });
 });
