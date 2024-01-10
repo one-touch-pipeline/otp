@@ -133,7 +133,7 @@ const renderWorkflowVersionTable = (workflowVersionData, workflowId) => {
       {
         render: (column, type, row) => `<button class="btn btn-sm btn-primary float-right"
           id="modify-btn-${row.id}" onclick="openAndRenderModificationModal(
-          JSON.parse('${JSON.stringify(row).replace(/'/g, '&apos;').replace(/"/g, '&quot;')}'))"
+          JSON.parse('${$.otp.stringHelper.escapeSpecialChars(JSON.stringify(row))}'))"
           data-original-title="Edit workflow version">
              <i class="bi bi-pencil"></i>
            </button>`

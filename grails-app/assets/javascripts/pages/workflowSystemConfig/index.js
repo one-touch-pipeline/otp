@@ -99,7 +99,7 @@ const renderWorkflowOverviewTable = (workflowData) => {
         data: '',
         render: (column, type, row) => `<button class="btn btn-sm btn-primary float-right"
           onclick="openAndRenderEditModal(
-            JSON.parse('${JSON.stringify(row).replace(/'/g, '&apos;').replace(/"/g, '&quot;')}'))">
+            JSON.parse('${$.otp.stringHelper.escapeSpecialChars(JSON.stringify(row))}'))">
             <i class="bi bi-pencil"></i>
           </button>`
       }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,14 +20,21 @@
  * SOFTWARE.
  */
 
-//= require /webjars/datatables-fixedcolumns/3.2.2/js/dataTables.fixedColumns.js
-//= require /webjars/datatables-fixedheader/3.2.4/js/dataTables.fixedHeader.js
-//= require /webjars/select2/4.0.13/js/select2.full.js
-//= require /webjars/corejs-typeahead/1.3.1/dist/typeahead.jquery.js
+/**
+ * Helper functions to enhance the string related operations
+ */
 
-//= require otp.js
-//= require banner.js
-//= require common/toaster.js
-//= require common/globalInitializer.js
-//= require common/chartHelper.js
-//= require common/stringHelper.js
+/**
+ * Escape special characters (e.g. in JSON values)
+ * Add other chars to be escaped if needed
+ * @returns {string} escaped string
+ */
+$.otp.stringHelper = {
+  escapeSpecialChars(inputStr) {
+    'use strict';
+
+    return inputStr.replace(/\\/g, '\\\\')
+      .replace(/"/g, '\\&quot;')
+      .replace(/'/g, '\\&apos;');
+  }
+};
