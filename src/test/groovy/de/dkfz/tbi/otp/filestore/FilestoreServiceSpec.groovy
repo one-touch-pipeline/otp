@@ -25,6 +25,7 @@ import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
@@ -152,5 +153,25 @@ class FilestoreServiceSpec extends Specification implements ServiceUnitTest<File
         then:
         AssertionError e = thrown()
         e.message.contains('work folder already attached and may not be changed')
+    }
+
+    void "test getWorkFolders with multiple WorkflowRuns, return the correct ones"() {
+        given:
+        WorkFolder anotherWorkFolder = createWorkFolder(
+                baseFolder: baseFolder
+        )
+        List<WorkFolder> workFolders
+        and: 'different project -> ignored'
+        createWorkflowRun()
+        and: 'no workFolder, old system -> ignored'
+        createWorkflowRun(project: run.project, workFolder: null)
+        and: 'different workfolder -> added'
+        createWorkflowRun(project: run.project, workFolder: anotherWorkFolder)
+
+        when:
+        workFolders = service.getWorkFolders(run.project)
+
+        then:
+        TestCase.assertContainSame(workFolders, [workFolder, anotherWorkFolder])
     }
 }

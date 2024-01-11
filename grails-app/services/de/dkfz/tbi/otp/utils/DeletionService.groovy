@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataswap.AbstractDataSwapService
 import de.dkfz.tbi.otp.egaSubmission.EgaSubmission
+import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
@@ -75,6 +76,7 @@ class DeletionService {
     SeqTrackService seqTrackService
     WorkflowDeletionService workflowDeletionService
     SingleCellBamFileService singleCellBamFileService
+    FilestoreService filestoreService
 
     void deleteProjectContent(Project project) {
         assert project.state != Project.State.ARCHIVED
@@ -100,7 +102,7 @@ class DeletionService {
 
         workflowDeletionService.deleteReferenceGenomeSelector(project)
 
-        assert WorkflowRun.findAllByProject(project).empty : "There are workflow runs connected to this Project, thus it can not be deleted"
+        assert WorkflowRun.findAllByProject(project).empty: "There are workflow runs connected to this Project, thus it can not be deleted"
 
         // remove project from ExternalWorkflowConfigSelector or delete selector completely
         deleteProjectsExternalWorkflowConfigSelector(project)
@@ -112,6 +114,10 @@ class DeletionService {
         deleteProjectContent(project)
         deleteProjectDependencies(project)
         project.delete(flush: true)
+    }
+
+    List<String> formatRemoveUUIDFolders(Project project) {
+        return filestoreService.getWorkFolders(project).collect { "|rm -rf ${filestoreService.getWorkFolderPath(it)}" } as List<String>
     }
 
     @SuppressWarnings('JavaIoPackageAccess')

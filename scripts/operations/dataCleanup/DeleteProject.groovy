@@ -101,6 +101,7 @@ try {
     Project.withTransaction {
         Project project = CollectionUtils.exactlyOneElement(Project.findAllByName(projectName), "No project with the provided name could be found")
         String absoluteProjectDirectory = projectService.getProjectDirectory(project)
+        String uUIDFolders = deletionService.formatRemoveUUIDFolders(project).join("\n")
 
         if (assertProjectEmpty) {
             assert !projectHasDataDependencies(project): "The project contains data, disable `assertProjectEmpty` to override this check"
@@ -120,13 +121,19 @@ try {
                 |rm -rf ${absoluteProjectDirectory}/*
                 |
                 |## Directory:
-                |${getDeletePotentialLinkAndTargetCommand(absoluteProjectDirectory)}""".stripMargin()
+                |${getDeletePotentialLinkAndTargetCommand(absoluteProjectDirectory)}
+                |
+                |## UUID Directories:
+                ${uUIDFolders}""".stripMargin()
                 deletionService.deleteProject(project)
                 break
             case ProjectDeletionMode.DELETE_SEQUENCING_ONLY:
                 output << """\
                 |# Sequence Directory:"
-                |rm -rf ${absoluteProjectDirectory}/sequencing/""".stripMargin()
+                |rm -rf ${absoluteProjectDirectory}/sequencing/
+                |
+                |## UUID Directories:
+                ${uUIDFolders}""".stripMargin()
                 deletionService.deleteProjectContent(project)
                 break
             default:

@@ -21,9 +21,11 @@
  */
 package de.dkfz.tbi.otp.filestore
 
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
@@ -132,5 +134,19 @@ class FilestoreService {
             throw new WorkFolderNotAttachedException("WorkflowRun ${run} has no workFolder attached and no path can be found")
         }
         return getWorkFolderPath(run.workFolder)
+    }
+
+    /**
+     * Returns a list of all WorkFolders for a given Project
+     */
+    @CompileDynamic
+    List<WorkFolder> getWorkFolders(Project project) {
+        return WorkflowRun.createCriteria().list {
+            eq('project', project)
+            isNotNull('workFolder')
+            projections {
+                property('workFolder')
+            }
+        } as List<WorkFolder>
     }
 }
