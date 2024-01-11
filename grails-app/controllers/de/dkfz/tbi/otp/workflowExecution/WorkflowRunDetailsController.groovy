@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.converters.JSON
+import org.grails.web.json.JSONObject
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.CommentService
@@ -60,12 +61,17 @@ class WorkflowRunDetailsController extends AbstractWorkflowRunController {
         WorkflowRun previous = (index <= 0) ? null : workflowRuns[index - 1]
         WorkflowRun next = (index in [-1, workflowRuns.size() - 1]) ? null : workflowRuns[index + 1]
 
+        String unFormattedJson = cmd.id.combinedConfig ?: '{}'
+        JSONObject jsonObject = JSON.parse(unFormattedJson) as JSONObject
+        String formattedJson = jsonObject.toString(4)
+
         return [
-                workflowRun: cmd.id,
-                restartedAs: restartedAs,
-                previous   : previous,
-                next       : next,
-                cmd        : cmd,
+                workflowRun   : cmd.id,
+                restartedAs   : restartedAs,
+                previous      : previous,
+                next          : next,
+                cmd           : cmd,
+                combinedConfig: formattedJson,
         ]
     }
 

@@ -33,7 +33,8 @@
 <div class="container-fluid otp-main-container">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><g:link controller="workflowRunList" action="index" params="['workflow.id': cmd.workflow?.id, state: cmd.states?.join(','), name: cmd.name]">${g.message(code: "workflow.navigation.list")}</g:link></li>
+            <li class="breadcrumb-item"><g:link controller="workflowRunList" action="index"
+                                                params="['workflow.id': cmd.workflow?.id, state: cmd.states?.join(','), name: cmd.name]">${g.message(code: "workflow.navigation.list")}</g:link></li>
             <li class="breadcrumb-item active" aria-current="page">${g.message(code: "workflow.navigation.details")} (${workflowRun.id})</li>
         </ol>
     </nav>
@@ -45,9 +46,11 @@
                 ${g.message(code: "workflowRun.details.title")} (${workflowRun.id}) ${g.message(code: "workflowRun.details.of")} ${workflowRun.workflow.name}
             </span>
         </div>
+
         <div class="btn-group">
             <g:if test="${previous}">
-                <g:link class="btn btn-primary" action="index" id="${previous.id}" params="['workflow.id': cmd.workflow?.id, state: cmd.states?.join(','), name: cmd.name]">
+                <g:link class="btn btn-primary" action="index" id="${previous.id}"
+                        params="['workflow.id': cmd.workflow?.id, state: cmd.states?.join(','), name: cmd.name]">
                     <i title="${g.message(code: "workflowRun.details.previous")}" class='bi-caret-left'></i>
                 </g:link>
             </g:if>
@@ -55,7 +58,8 @@
                 <button class="btn btn-primary" disabled><i title="${g.message(code: "workflowRun.details.previous")}" class='bi-caret-left'></i></button>
             </g:else>
             <g:if test="${next}">
-                <g:link class="btn btn-primary" action="index" id="${next.id}" params="['workflow.id': cmd.workflow?.id, state: cmd.states?.join(','), name: cmd.name]">
+                <g:link class="btn btn-primary" action="index" id="${next.id}"
+                        params="['workflow.id': cmd.workflow?.id, state: cmd.states?.join(','), name: cmd.name]">
                     <i title="${g.message(code: "workflowRun.details.next")}" class='bi-caret-right'></i>
                 </g:link>
             </g:if>
@@ -74,6 +78,7 @@
             <g:form method="POST">
                 <input type="hidden" name="step" value="${workflowRun.workflowSteps ? workflowRun.workflowSteps.last().id : null}">
                 <input type="hidden" name="redirect" value="${uriWithParams}"/>
+
                 <div class="btn-group">
                     <button class="btn btn-sm btn-primary failed-final-btn" ${workflowRun.state != WorkflowRun.State.FAILED ? "disabled" : ""}
                             formaction="${g.createLink(action: "setFailedFinal")}" title="${g.message(code: "workflowRun.details.setFailed")}">
@@ -91,9 +96,10 @@
                     ${workflowRun.restartedFrom.id}</g:link>.</p>
             </g:if>
             <g:elseif test="${workflowRun.restartCount > 1}">
-                <p>${g.message(code: "workflowRun.details.restartedFromMultiple", args: [workflowRun.restartCount])} <g:link id="${workflowRun.restartedFrom.id}">
+                <p>${g.message(code: "workflowRun.details.restartedFromMultiple", args: [workflowRun.restartCount])} <g:link
+                        id="${workflowRun.restartedFrom.id}">
                     ${workflowRun.restartedFrom.id}</g:link>${g.message(code: "workflowRun.details.restartedFromMultipleOriginally")}
-                    <g:link id="${workflowRun.originalRestartedFrom.id}">${workflowRun.originalRestartedFrom.id}</g:link>.</p>
+                <g:link id="${workflowRun.originalRestartedFrom.id}">${workflowRun.originalRestartedFrom.id}</g:link>.</p>
             </g:elseif>
 
             <g:if test="${restartedAs}">
@@ -120,68 +126,123 @@
         </div>
     </div>
 
-    <h2>${g.message(code: "workflowRun.details.steps")}</h2>
+    <div class="accordion pt-3" id="workflowRunDetailsAccordion">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="stepsHeader">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#stepsBody" aria-expanded="true"
+                        aria-controls="stepsBody">
+                    <h2>${g.message(code: "workflowRun.details.steps")}</h2>
+                </button>
+            </h2>
 
-    <g:if test="${workflowRun.state == WorkflowRun.State.RUNNING_WES}">
-        <div class="alert alert-primary" role="alert">
-            Workflow is running in WorkflowExecutionSystem.
+            <div id="stepsBody" class="accordion-collapse collapse show" aria-labelledby="stepsHeader">
+                <div class="accordion-body">
+
+                    <g:if test="${workflowRun.state == WorkflowRun.State.RUNNING_WES}">
+                        <div class="alert alert-primary" role="alert">
+                            Workflow is running in WorkflowExecutionSystem.
+                        </div>
+                    </g:if>
+
+                    <table id="steps" class="table table-sm table-striped table-bordered w-100"
+                           data-wf-run-state="${workflowRun.state}"
+                           data-id="${workflowRun.id}"
+                           data-wf-id="${cmd.workflow?.id}"
+                           data-state="${cmd.states?.join(',')}"
+                           data-name="${cmd.name}"
+                           data-wf-run-id="${workflowRun.id}">
+                        <thead>
+                        <tr class="table-secondary">
+                            <th></th>
+                            <th></th>
+                            <th>${g.message(code: "workflowRun.details.step")}</th>
+                            <th>${g.message(code: "workflowRun.details.dateCreated")}</th>
+                            <th>${g.message(code: "workflowRun.details.lastUpdated")}</th>
+                            <th>${g.message(code: "workflowRun.details.duration")}</th>
+                            <th>${g.message(code: "workflowRun.details.id")}</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-    </g:if>
 
-    <table id="steps" class="table table-sm table-striped table-bordered w-100"
-           data-wf-run-state="${workflowRun.state}"
-           data-id="${workflowRun.id}"
-           data-wf-id="${cmd.workflow?.id}"
-           data-state="${cmd.states?.join(',')}"
-           data-name="${cmd.name}"
-           data-wf-run-id="${workflowRun.id}">
-        <thead>
-        <tr class="table-secondary">
-            <th></th>
-            <th></th>
-            <th>${g.message(code: "workflowRun.details.step")}</th>
-            <th>${g.message(code: "workflowRun.details.dateCreated")}</th>
-            <th>${g.message(code: "workflowRun.details.lastUpdated")}</th>
-            <th>${g.message(code: "workflowRun.details.duration")}</th>
-            <th>${g.message(code: "workflowRun.details.id")}</th>
-            <th></th>
-        </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="inputHeader">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#inputBody" aria-expanded="false"
+                        aria-controls="inputBody">
+                    <h2>${g.message(code: "workflowRun.details.input")} (${workflowRun.inputArtefacts.size()})</h2>
+                </button>
+            </h2>
 
-    <br>
-
-    <h2>${g.message(code: "workflowRun.details.input")}</h2>
-    <g:each in="${workflowRun.inputArtefacts}" var="artefact" status="index">
-        <div class="alert alert-secondary">
-            <b>${artefact.key} (workflow artefact ID ${artefact.value.id}, object ID ${artefact.value.artefact.map { it.id.toString() }.orElse('N/A')}):</b><br>
-            <g:link controller="workflowArtefact" action="index" id="${artefact.value.id}">
-                ${raw(artefact.value.displayName.replace("\n", "<br>"))}</g:link>
+            <div id="inputBody" class="accordion-collapse collapse" aria-labelledby="inputHeader">
+                <div class="accordion-body alert alert-secondary">
+                    <ul>
+                        <g:each in="${workflowRun.inputArtefacts}" var="artefact" status="index">
+                            <li>
+                                <b>${artefact.key} (workflow artefact ID ${artefact.value.id}, object ID ${artefact.value.artefact.map { it.id.toString() }.orElse('N/A')}):</b><br>
+                                <g:link controller="workflowArtefact" action="index" id="${artefact.value.id}">
+                                    ${raw(artefact.value.displayName.replace("\n", "<br>"))}</g:link>
+                            </li>
+                        </g:each>
+                    </ul>
+                    <g:if test="${!workflowRun.inputArtefacts}">
+                        ${g.message(code: "workflowRun.details.no.input")}
+                    </g:if>
+                </div>
+            </div>
         </div>
-    </g:each>
-    <g:if test="${!workflowRun.inputArtefacts}">
-        ${g.message(code: "workflowRun.details.no.input")}
-    </g:if>
 
-    <h2>${g.message(code: "workflowRun.details.output")}</h2>
-    <g:each in="${workflowRun.outputArtefacts}" var="artefact" status="index">
-        <div class="alert alert-secondary">
-            <b>${artefact.key} (workflow artefact ID ${artefact.value.id}, object ID ${artefact.value.artefact.map { it.id.toString() }.orElse('N/A')}):</b><br>
-            <g:link controller="workflowArtefact" action="index" id="${artefact.value.id}">
-                ${raw(artefact.value.displayName.replace("\n", "<br>"))}</g:link>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="outputHeader">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#outputBody" aria-expanded="false"
+                        aria-controls="outputBody">
+                    <h2>${g.message(code: "workflowRun.details.output")} (${workflowRun.outputArtefacts.size()})</h2>
+                </button>
+            </h2>
+
+            <div id="outputBody" class="accordion-collapse collapse" aria-labelledby="outputHeader">
+                <div class="accordion-body alert alert-secondary">
+                    <ul>
+                        <g:each in="${workflowRun.outputArtefacts}" var="artefact" status="index">
+                            <li>
+                                <b>${artefact.key} (workflow artefact ID ${artefact.value.id}, object ID ${artefact.value.artefact.map { it.id.toString() }.orElse('N/A')}):</b><br>
+                                <g:link controller="workflowArtefact" action="index" id="${artefact.value.id}">
+                                    ${raw(artefact.value.displayName.replace("\n", "<br>"))}</g:link>
+                            </li>
+                        </g:each>
+                    </ul>
+                    <g:if test="${!workflowRun.outputArtefacts}">
+                        ${g.message(code: "workflowRun.details.no.output")}
+                    </g:if>
+                </div>
+            </div>
         </div>
-    </g:each>
-    <g:if test="${!workflowRun.outputArtefacts}">
-        ${g.message(code: "workflowRun.details.no.output")}
-    </g:if>
-    <h2>${g.message(code: "workflowRun.details.config")}</h2>
-    <g:if test="${workflowRun.combinedConfig != "{}"}">
-        <textarea id="configurationHolder" class="configurationHolder" disabled>${workflowRun.combinedConfig}</textarea>
-    </g:if>
-    <g:else>
-        ${g.message(code: "workflowRun.details.no.config")}
-    </g:else>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="configurationHeader">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#configurationBody" aria-expanded="false"
+                        aria-controls="configurationBody">
+                    <h2>${g.message(code: "workflowRun.details.config")}</h2>
+                </button>
+            </h2>
+
+            <div id="configurationBody" class="accordion-collapse collapse" aria-labelledby="configurationHeader">
+                <div class="accordion-body">
+                    <g:if test="${workflowRun.combinedConfig != "{}"}">
+                        <span id="configurationHolder" class="configurationHolder" readonly>${combinedConfig}</span>
+                    </g:if>
+                    <g:else>
+                        ${g.message(code: "workflowRun.details.no.config")}
+                    </g:else>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
 </div>
 </body>
 </html>
