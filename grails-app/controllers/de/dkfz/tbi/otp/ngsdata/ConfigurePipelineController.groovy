@@ -384,7 +384,7 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
 }
 
 @ToString(includeNames = true, includeSuper = true)
-class ConfigureAlignmentPipelineSubmitCommand extends ConfigurePipelineSubmitCommand implements Serializable {
+class ConfigureAlignmentPipelineSubmitCommand extends ConfigurePipelineSubmitCommand {
     String referenceGenome
     String statSizeFileName
     String mergeTool
@@ -404,7 +404,7 @@ class ConfigureAlignmentPipelineSubmitCommand extends ConfigurePipelineSubmitCom
 }
 
 @ToString(includeNames = true, includeSuper = true)
-class CopyAlignmentPipelineSubmitCommand extends BaseConfigurePipelineSubmitCommand implements Serializable {
+class CopyAlignmentPipelineSubmitCommand extends BaseConfigurePipelineSubmitCommand {
     Project basedProject
 }
 
@@ -476,7 +476,7 @@ class InvalidateConfigurationCommand extends BaseConfigurePipelineSubmitCommand 
 }
 
 @ToString(includeNames = true)
-class BaseConfigurePipelineSubmitCommand implements Serializable, Validateable {
+class BaseConfigurePipelineSubmitCommand implements Validateable {
     SeqType seqType
 
     static constraints = {

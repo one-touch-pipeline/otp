@@ -215,7 +215,7 @@ class QcThresholdService {
 }
 
 @Canonical
-class TableCellValue implements Serializable {
+class TableCellValue {
     String value
     WarnColor warnColor
     String link

@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.job.plan
 /**
  * Representation for a Parameter.
  */
-class ParameterInformation implements Serializable {
+class ParameterInformation {
     Long id
     String value
     ParameterTypeInformation type

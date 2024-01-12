@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.utils.Entity
 
 /** This table is used externally. Please discuss a change in the team */
 @ManagedEntity
-class UserProjectRole implements Serializable, Entity {
+class UserProjectRole implements Entity {
 
     /** This attribute is used externally. Please discuss a change in the team */
     Project project

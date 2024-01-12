@@ -31,7 +31,7 @@ import grails.gorm.hibernate.annotation.ManagedEntity
  */
 @Deprecated
 @ManagedEntity
-class StartJobDefinition extends JobDefinition implements Serializable {
+class StartJobDefinition extends JobDefinition {
 
     static constraints = {
     }

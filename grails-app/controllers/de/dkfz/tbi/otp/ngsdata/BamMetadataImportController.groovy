@@ -86,7 +86,7 @@ class BamMetadataImportController {
     }
 }
 
-class BamMetadataControllerSubmitCommand implements Serializable {
+class BamMetadataControllerSubmitCommand {
     String path
     String submit
     String md5

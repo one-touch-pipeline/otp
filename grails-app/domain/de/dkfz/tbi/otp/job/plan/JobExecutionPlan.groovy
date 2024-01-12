@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.utils.Entity
  */
 @Deprecated
 @ManagedEntity
-class JobExecutionPlan implements Serializable, Entity {
+class JobExecutionPlan implements Entity {
     /**
      * A descriptive name for this Job Execution Plan
      */

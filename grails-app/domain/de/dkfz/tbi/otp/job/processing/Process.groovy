@@ -51,7 +51,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
  */
 @Deprecated
 @ManagedEntity
-class Process implements CommentableWithProject, Serializable, Entity {
+class Process implements CommentableWithProject, Entity {
     /**
      * The Date when this process was started.
      */

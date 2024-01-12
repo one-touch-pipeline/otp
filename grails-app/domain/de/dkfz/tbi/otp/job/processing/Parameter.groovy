@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.utils.Entity
  */
 @Deprecated
 @ManagedEntity
-class Parameter implements Serializable, Entity {
+class Parameter implements Entity {
     ParameterType type
 
     // suppressing because changing this would involve refactoring the code as well as the database columns

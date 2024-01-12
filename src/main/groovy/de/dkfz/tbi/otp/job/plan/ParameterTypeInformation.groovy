@@ -27,7 +27,7 @@ import de.dkfz.tbi.otp.job.processing.ParameterType
 /**
  * Representation for a ParameterType.
  */
-class ParameterTypeInformation implements Serializable {
+class ParameterTypeInformation {
     Long id
     String name
     String description

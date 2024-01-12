@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  * ProcessingStep for the JobDefinition.
  */
 @CompileDynamic
-class JobInformation implements Serializable {
+class JobInformation {
     Long id
     String name
     String bean

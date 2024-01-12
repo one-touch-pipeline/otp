@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.utils.Entity
  */
 @Deprecated
 @ManagedEntity
-class ProcessingStepUpdate implements Serializable, Entity {
+class ProcessingStepUpdate implements Entity {
 
     /**
      * Link to the ProcessingStepUpdate before this one, may be null.

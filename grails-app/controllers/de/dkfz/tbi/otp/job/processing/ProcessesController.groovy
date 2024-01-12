@@ -486,7 +486,7 @@ class ProcessesController {
     }
 }
 
-class OperatorIsAwareOfFailureSubmitCommand implements Serializable {
+class OperatorIsAwareOfFailureSubmitCommand {
     Process process
     boolean operatorIsAwareOfFailure
 }

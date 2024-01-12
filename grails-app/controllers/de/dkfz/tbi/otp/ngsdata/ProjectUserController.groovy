@@ -419,7 +419,7 @@ class DeleteProjectRoleCommand implements Validateable {
     }
 }
 
-class AddUserToProjectCommand implements Serializable {
+class AddUserToProjectCommand {
     boolean addViaLdap = true
 
     String username

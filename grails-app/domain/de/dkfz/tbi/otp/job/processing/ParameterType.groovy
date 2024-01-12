@@ -43,7 +43,7 @@ import de.dkfz.tbi.otp.utils.Entity
  */
 @Deprecated
 @ManagedEntity
-class ParameterType implements Serializable, Entity {
+class ParameterType implements Entity {
     /**
      * The name for this parameter
      */

@@ -53,7 +53,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
  */
 @Deprecated
 @ManagedEntity
-class ProcessingStep implements Serializable, Entity {
+class ProcessingStep implements Entity {
     /**
      * Input Parameters added to this ProcessingStep.
      */

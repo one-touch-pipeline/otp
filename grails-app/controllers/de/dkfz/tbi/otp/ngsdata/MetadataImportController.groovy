@@ -528,7 +528,7 @@ class SeqTrackWithDataFiles {
     List<RawSequenceFile> dataFiles
 }
 
-class MetadataImportControllerSubmitCommand implements Serializable, Validateable {
+class MetadataImportControllerSubmitCommand implements Validateable {
     ProcessingOptionService processingOptionService
     List<String> paths
     List<MultipartFile> contentList

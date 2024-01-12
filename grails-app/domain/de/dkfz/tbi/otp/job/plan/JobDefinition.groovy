@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.utils.Entity
  */
 @Deprecated
 @ManagedEntity
-class JobDefinition implements Serializable, Entity {
+class JobDefinition implements Entity {
     /**
      * Mapping of parameters.
      */

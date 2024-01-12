@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.utils.Entity
  */
 @Deprecated
 @ManagedEntity
-class ParameterMapping implements Serializable, Entity {
+class ParameterMapping implements Entity {
     /**
      * The ParameterType of the output Parameter of the previous Job
      */

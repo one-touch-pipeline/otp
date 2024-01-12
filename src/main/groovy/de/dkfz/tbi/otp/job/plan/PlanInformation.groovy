@@ -26,7 +26,7 @@ package de.dkfz.tbi.otp.job.plan
  * including information about all JobDefinitions, all Parameters,
  * Mappings and so on.
  */
-class PlanInformation implements Serializable {
+class PlanInformation {
 
     /**
      * The name of the JobExecutionPlan

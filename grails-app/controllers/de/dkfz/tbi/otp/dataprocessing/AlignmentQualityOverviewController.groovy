@@ -378,7 +378,6 @@ class ViewCellRangerSummaryCommand {
     SingleCellBamFile singleCellBamFile
 }
 
-@SuppressWarnings('SerializableClassMustDefineSerialVersionUID')
 class QcStatusCommand implements Validateable {
     String comment
     AbstractBamFile abstractBamFile
