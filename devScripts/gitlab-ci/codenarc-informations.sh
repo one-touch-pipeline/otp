@@ -28,7 +28,7 @@ then
     echo ''
     echo "file build/reports/codenarc/all.txt does not exist"
     echo ''
-    exit -1
+    exit 1
 fi
 
 LEVEL="1 2 3"

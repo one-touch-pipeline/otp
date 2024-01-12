@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2011-2019 The OTP authors
+# Copyright 2011-2024 The OTP authors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-source `dirname $0`/initMergeRequest.sh
+# This script based on output of initMergeRequest.sh, which is used also in other scripts and should therefore executed outside of this script
+
+set -e
+
+if [ -v NO_MERGE_REQUEST_EXIST ]
+then
+    echo "variable 'NO_MERGE_REQUEST_EXIST' is not defined, please run initMergeRequest.sh"
+    exit 1
+fi
 
 if [ "$NO_MERGE_REQUEST_EXIST" == "true" ]
 then
@@ -55,5 +63,6 @@ do
   curl -X PUT --header "PRIVATE-TOKEN: $PROJECT_TOKEN" \
     --data-urlencode "add_labels=$LABEL" \
     "$PROJECT_URL/merge_requests/$MR_ID" > response.json
+  echo "Response of add label '$LABEL' to MR"
   jq -C -e '.' response.json
 done

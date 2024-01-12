@@ -43,4 +43,4 @@ jq -C '.' responseCheck.json
 #does already a merge request exist?
 NO_MERGE_REQUEST_EXIST="$(jq '. | length==0' responseCheck.json)"
 
-echo "NO_MERGE_REQUEST_EXIST: $NO_MERGE_REQUEST_EXIST"
+echo "Are there no merge request found for this branch: $NO_MERGE_REQUEST_EXIST"

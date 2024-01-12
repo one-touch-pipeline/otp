@@ -1,5 +1,6 @@
----
-# Copyright 2011-2019 The OTP authors
+#!/bin/bash
+
+# Copyright 2011-2024 The OTP authors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,27 +20,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# This file contains gitlab ci jobs for automize merge request.
-# Therefore, the both environment variables PROJECT_TOKEN and PROJECT_URL have to be provided
+set -e
 
+source `dirname $0`/initMergeRequest.sh
 
-add author for failed pipeline:
-  stage: update merge request
-  dependencies: [ ]
-  rules:
-    - !reference [.only-branch, rules]
-  script:
-    - devScripts/gitlab-ci/mergeRequest/addAuthorForFailedCi.sh
-  when: on_failure
+if [ "$NO_MERGE_REQUEST_EXIST" == "true" ]
+then
+    echo "Exiting, because no merge request exists."
+    exit 0
+fi
 
-
-update labels:
-  stage: update merge request
-  dependencies: [ ]
-  needs: [ ]
-  variables:
-    GIT_DEPTH: "0"
-  rules:
-    - !reference [.only-branch, rules]
-  script:
-    - devScripts/gitlab-ci/mergeRequest/handleLabels.sh
+bash `dirname $0`/addLabelsFromYoutrack.sh
+bash `dirname $0`/updateReviewer.sh

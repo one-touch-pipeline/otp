@@ -36,15 +36,6 @@ variables:
   DS_JAVA_VERSION: 17
   DS_MAX_DEPTH: -1
 
-stages:
-  - scanning
-  - test
-  - codestyle
-  - build
-  - war
-  - doc
-  - public doc
-  - update merge request
 
 # ------------------------------------------------------
 # jobs stage scanning

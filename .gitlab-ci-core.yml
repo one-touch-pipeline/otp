@@ -1,5 +1,4 @@
----
-# Copyright 2011-2019 The OTP authors
+# Copyright 2011-2023 The OTP authors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -41,36 +40,107 @@ variables:
   RESTORE_CACHE_ATTEMPTS: "3"
   ENABLE_CYPRESS: "true"  #indicate, if cypress should run or not
 
+
 #----------------------------
-# templates
+# shared
 #----------------------------
 
+stages:
+  - test
+  - war
+  - codestyle
+  - scanning
+  - doc
+  - public doc
+  - build
+  - update merge request
+  - trigger deployment
+
+.shared:
+  cache:
+    gradle-wrapper:
+      #cache of gradle itself
+      key:
+        prefix: gradle-wrapper
+        files:
+          - $CI_PROJECT_DIR/gradle/wrapper/gradle-wrapper.properties
+      paths:
+        - $GRADLE_USER_HOME/wrapper/
+    gradle-cache:
+      #caches created by gradle
+      key:
+        prefix: gradle-cache-$CI_JOB_NAME
+        files:
+          - $CI_PROJECT_DIR/gradle/wrapper/gradle-wrapper.properties
+          - $CI_PROJECT_DIR/gradle.properties
+      paths:
+        - $GRADLE_USER_HOME/caches/
+    npm:
+      #cache of npm libraries
+      key:
+        prefix: node
+        files:
+          - $CI_PROJECT_DIR/package-lock.json
+      paths:
+        - node_modules/
+        - $NPM_CACHE
+        - $CYPRESS_CACHE
+  rules-test:
+    - if: $CI_COMMIT_TAG
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
+      changes:
+        compare_to: 'refs/heads/master'
+        paths:
+          #common paths, shared with cypress
+          - gradle/**/*
+          - src/main/**/*
+          - build.gradle
+          - settings.gradle
+          - gradle.properties
+          - .gitlab-ci-core.yml
+          - grails-app/conf/**/*
+          - grails-app/controllers/**/*
+          - grails-app/domain/**/*
+          - grails-app/i18n/**/*
+          - grails-app/init/**/*
+          - grails-app/services/**/*
+          #test specific parts
+          - src/test/**/*
+          - src/integration-test/**/*
+          - src/test-helper/**/*
+
+
 .abstract_base_template:
-  stage: test
   dependencies: [ ]
   needs: [ ]
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
   cache:
-    - key:
-        files:
-          - $CI_PROJECT_DIR/gradle/wrapper/gradle-wrapper.properties
-        prefix: gradle-$CI_JOB_NAME
-      paths:
-        - $GRADLE_USER_HOME
-    - key:
-        files:
-          - $CI_PROJECT_DIR/package-lock.json
-        prefix: node
-      paths:
-        - node_modules/
-        - $NPM_CACHE
-        - $CYPRESS_CACHE
+    - !reference [ .shared, cache, gradle-wrapper]
+    - !reference [ .shared, cache, gradle-cache]
   artifacts: &artifacts_template
     expire_in: 4 week
   before_script:
     - set -e
     - devScripts/gitlab-ci/init.sh
+
+
+.abstract_test_template:
+  extends: .abstract_base_template
+  stage: test
+  rules:
+    - !reference [ .shared, rules-test ]
+  artifacts:
+    <<: *artifacts_template
+    paths:
+      - build/test-results/*/*.xml
+      - build/reports/tests
+      - build/reports/jacoco
+      - build/jacoco
+    reports:
+      junit: build/test-results/*/*.xml
+    when: always
 
 # ------------------------------------------------------
 # jobs stage scanning
@@ -81,65 +151,25 @@ license check:
   stage: scanning
   dependencies: [ ]
   needs: [ ]
+  cache: [ ]
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
   script:
     - groovy devScripts/gitlab-ci/license-checker/licensecheck.groovy
+
 
 # ------------------------------------------------------
 # jobs stage tests
 # ------------------------------------------------------
 
 unit tests:
-  extends: .abstract_base_template
-  stage: test
+  extends: .abstract_test_template
   script:
     - set -e
     - ./gradlew --build-cache test
-  rules:
-    - if: $CI_COMMIT_TAG
-    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
-      changes:
-        compare_to: 'refs/heads/master'
-        ##have to be the same list as in integration tests & test coverage
-        paths:
-          - gradle/**/*
-          - grails-app/conf/**/*
-          - grails-app/controllers/**/*
-          - grails-app/domain/**/*
-          - grails-app/i18n/**/*
-          - grails-app/init/**/*
-          - grails-app/services/**/*
-          - src/main/**/*
-          - src/test/**/*
-          - src/integration-test/**/*
-          - src/test-helper/**/*
-          - build.gradle
-          - settings.gradle
-          - gradle.properties
-          - .gitlab-ci-core.yml
-  artifacts:
-    <<: *artifacts_template
-    paths:
-      - build/test-results/test/*.xml
-      - build/reports/tests
-      - build/reports/jacoco
-      - build/jacoco
-    reports:
-      junit: build/test-results/test/*.xml
-    when: always
-  cache:
-    - key:
-        files:
-          - $CI_PROJECT_DIR/gradle/wrapper/gradle-wrapper.properties
-        prefix: gradle-$CI_JOB_NAME
-      paths:
-        - $GRADLE_USER_HOME
 
 integration tests:
-  extends: .abstract_base_template
-  stage: test
+  extends: .abstract_test_template
   services:
     - name: postgres:14.9-bullseye
       alias: postgres
@@ -149,46 +179,7 @@ integration tests:
   script:
     - set -e
     - ./gradlew --build-cache integrationTest
-  rules:
-    - if: $CI_COMMIT_TAG
-    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
-      changes:
-        compare_to: 'refs/heads/master'
-        ##have to be the same list as in unit tests & test coverage
-        paths:
-          - gradle/**/*
-          - grails-app/conf/**/*
-          - grails-app/controllers/**/*
-          - grails-app/domain/**/*
-          - grails-app/i18n/**/*
-          - grails-app/init/**/*
-          - grails-app/services/**/*
-          - src/main/**/*
-          - src/test/**/*
-          - src/integration-test/**/*
-          - src/test-helper/**/*
-          - build.gradle
-          - settings.gradle
-          - gradle.properties
-          - .gitlab-ci-core.yml
-  artifacts:
-    <<: *artifacts_template
-    paths:
-      - build/test-results/integrationTest/*.xml
-      - build/reports/tests
-      - build/reports/jacoco
-      - build/jacoco
-    reports:
-      junit: build/test-results/integrationTest/*.xml
-    when: always
-  cache:
-    - key:
-        files:
-          - $CI_PROJECT_DIR/gradle/wrapper/gradle-wrapper.properties
-        prefix: gradle-$CI_JOB_NAME
-      paths:
-        - $GRADLE_USER_HOME
+
 
 test coverage:
   extends: .abstract_base_template
@@ -205,28 +196,7 @@ test coverage:
     - ./gradlew --build-cache --exclude-task test --exclude-task integrationTest --rerun-tasks classes jacocoAllTestReport jacocoToCobertura
   when: always
   rules:
-    - if: $CI_COMMIT_TAG
-    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
-      changes:
-        compare_to: 'refs/heads/master'
-        ##have to be the same list as in unit tests & integration test
-        paths:
-          - gradle/**/*
-          - grails-app/conf/**/*
-          - grails-app/controllers/**/*
-          - grails-app/domain/**/*
-          - grails-app/i18n/**/*
-          - grails-app/init/**/*
-          - grails-app/services/**/*
-          - src/main/**/*
-          - src/test/**/*
-          - src/integration-test/**/*
-          - src/test-helper/**/*
-          - build.gradle
-          - settings.gradle
-          - gradle.properties
-          - .gitlab-ci-core.yml
+    - !reference [ .shared, rules-test ]
   artifacts:
     <<: *artifacts_template
     paths:
@@ -237,13 +207,7 @@ test coverage:
         coverage_format: cobertura
         path: build/reports/jacocoToCobertura/*.xml
     when: always
-  cache:
-    - key:
-        files:
-          - $CI_PROJECT_DIR/gradle/wrapper/gradle-wrapper.properties
-        prefix: gradle-$CI_JOB_NAME
-      paths:
-        - $GRADLE_USER_HOME
+
 
 test migration:
   extends: .abstract_base_template
@@ -272,6 +236,7 @@ test migration:
 
 cypress tests:
   extends: .abstract_base_template
+  stage: test
   rules:
     - if: $ENABLE_CYPRESS == "false"
       when: never
@@ -281,19 +246,30 @@ cypress tests:
       changes:
         compare_to: 'refs/heads/master'
         paths:
-        - gradle/**/*
-        - grails-app/**/*
-        - src/main/**/*
-        - cypress/**/*
-        - docker/**/*
-        - build.gradle
-        - settings.gradle
-        - gradle.properties
-        - cypress.config.js
-        - package.json
-        - package-lock.json
-        - .gitlab-ci-core.yml
-        - devScripts/gitlab-ci/cypress/**/*
+          #common paths, shared with unit/integration
+          - gradle/**/*
+          - src/main/**/*
+          - build.gradle
+          - settings.gradle
+          - gradle.properties
+          - .gitlab-ci-core.yml
+          - grails-app/conf/**/*
+          - grails-app/controllers/**/*
+          - grails-app/domain/**/*
+          - grails-app/i18n/**/*
+          - grails-app/init/**/*
+          - grails-app/services/**/*
+          #test specific parts
+          - grails-app/assets/**/*
+          - grails-app/taglib/**/*
+          - grails-app/views/**/*
+          - cypress/**/*
+          - docker/**/*
+          - cypress.config.js
+          - package.json
+          - package-lock.json
+          - .gitlab-ci-core.yml
+          - devScripts/gitlab-ci/cypress/**/*
   stage: test
   variables:
     DOCKER_HOST: tcp://docker:2375
@@ -306,12 +282,16 @@ cypress tests:
     - set -e
     - devScripts/gitlab-ci/cypress/cypress.sh
   artifacts:
-    expire_in: 4 week
+    <<: *artifacts_template
     paths:
       - cypress/screenshots
       - cypressReport.txt
       - logs/
     when: always
+  cache:
+    - !reference [ .shared,  cache, gradle-wrapper]
+    - !reference [ .shared,  cache, gradle-cache]
+    - !reference [ .shared,  cache, npm]
 
 # ------------------------------------------------------
 # jobs stage codestyle
@@ -345,6 +325,11 @@ eslint:
     paths:
       - build/reports/eslint
     when: always
+  cache:
+    - !reference [ .shared,  cache, gradle-wrapper]
+    - !reference [ .shared,  cache, gradle-cache]
+    - !reference [ .shared,  cache, npm]
+
 
 # ------------------------------------------------------
 # jobs stage war

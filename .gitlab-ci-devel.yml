@@ -26,12 +26,3 @@
 include:
   - local: '.gitlab-ci-core.yml'
 
-stages:
-  - create merge request
-  - scanning
-  - test
-  - codestyle
-  - war
-  - doc
-  - public doc
-  - update merge request
