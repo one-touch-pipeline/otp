@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -123,7 +123,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
      */
     abstract Duration getTimeout()
 
-    @SuppressWarnings("GetterMethodCouldBeProperty")
+    @SuppressWarnings(["GetterMethodCouldBeProperty", 'EmptyMethodInAbstractClass']) // old wf
     String getJobName() {
         return null
     }

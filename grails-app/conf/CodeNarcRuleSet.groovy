@@ -448,7 +448,7 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     EmptyMethodInAbstractClass {
-        priority = LOW
+        priority = DEFAULT
     }
     FinalClassWithProtectedMember {
         priority = DEFAULT

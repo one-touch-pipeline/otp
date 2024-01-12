@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 @Rollback
 abstract class AbstractBamFilePairAnalysisStartJobWithDependenciesIntegrationSpec extends AbstractBamFilePairAnalysisStartJobIntegrationSpec {
 
+    @SuppressWarnings('EmptyMethodInAbstractClass') // old wf
     void setupData() { }
 
     void "don't findSamplePairToProcess when prereq not yet done"() {

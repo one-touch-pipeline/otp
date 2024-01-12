@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -58,7 +58,7 @@ class AbstractValidationJobSpec extends Specification implements DataTest, Workf
         1 * job.logService.addSimpleLogEntry(workflowStep, "Do further checks.")
         1 * job.getExpectedFiles(workflowStep) >> []
         1 * job.getExpectedDirectories(workflowStep) >> []
-        1 * job.doFurtherValidation(workflowStep)
+        1 * job.doFurtherValidation(workflowStep) >> null
 
         then:
         1 * job.saveResult(workflowStep) >> null
