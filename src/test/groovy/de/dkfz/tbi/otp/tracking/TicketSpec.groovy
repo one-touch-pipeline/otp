@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,7 +42,7 @@ class TicketSpec extends Specification implements DataTest {
         ]
     }
 
-    def 'test creation, correct String'() {
+    void 'test creation, correct String'() {
         given:
         Ticket ticket
 
@@ -53,7 +53,7 @@ class TicketSpec extends Specification implements DataTest {
         ticket.ticketNumber == '2000010112345678'
     }
 
-    def 'test creation, incorrect String'() {
+    void 'test creation, incorrect String'() {
         when:
         DomainFactory.createTicket([ticketNumber: '20000101a2345678'])
 
@@ -62,7 +62,7 @@ class TicketSpec extends Specification implements DataTest {
         ex.message.contains("does not match the required pattern")
     }
 
-    def 'test creation, duplicate String'() {
+    void 'test creation, duplicate String'() {
         when:
         DomainFactory.createTicket([ticketNumber: '2000010112345678'])
         DomainFactory.createTicket([ticketNumber: '2000010112345678'])

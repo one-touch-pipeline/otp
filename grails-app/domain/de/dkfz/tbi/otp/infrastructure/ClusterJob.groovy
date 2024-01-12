@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -295,7 +295,7 @@ class ClusterJob implements Entity {
      * The calculation should be done automatically when nBases are not given and the results should be stored
      * immediately in the database, because of the use of sql queries in ClusterJobService.
      */
-    def beforeValidate() {
+    void beforeValidate() {
         if (fileSize && !nBases) {
             basesPerBytesFastq = ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, null, null) as float
             nBases = fileSize * basesPerBytesFastq

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -75,7 +75,7 @@ class AbstractBamFileServiceIntegrationSpec extends Specification implements Rod
             "runYapsa",
     ].asImmutable()
 
-    def 'checkThatProcessingStepListIsComplete'() {
+    void 'checkThatProcessingStepListIsComplete'() {
         given:
         List<Pipeline> analysisPipelines = Pipeline.Name.values().findAll {
             it.type != Pipeline.Type.ALIGNMENT && it != Pipeline.Name.OTP_SNV

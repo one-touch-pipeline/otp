@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -128,7 +128,7 @@ class MailHelperService {
         return processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_REPLY_TO)
     }
 
-    private logEmail(List<String> recipients, List<String> ccs, String subject, String content) {
+    private void logEmail(List<String> recipients, List<String> ccs, String subject, String content) {
         String status = configService.otpSendsMails() ? "enabled" : "disabled"
 
         log.info("Email system is ${status}.")

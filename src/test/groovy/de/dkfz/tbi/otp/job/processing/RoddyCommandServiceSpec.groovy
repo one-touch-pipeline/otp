@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,7 +43,7 @@ class RoddyCommandServiceSpec extends Specification implements ServiceUnitTest<R
         ]
     }
 
-    def setup() {
+    void setup() {
         service.processingOptionService = new ProcessingOptionService()
     }
 

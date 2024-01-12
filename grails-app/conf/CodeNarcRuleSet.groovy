@@ -386,7 +386,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     MethodReturnTypeRequired {
-        priority = MIDDLE
+        priority = CRITICAL
         doNotApplyToFileNames = CONTROLLER
 
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -79,7 +79,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
     @TempDir
     Path tempDir
 
-    def setup() {
+    void setup() {
         String bamFileName = "epmbfWithMd5sum.bam"
         File importedFile = new File(tempDir.toString(), bamFileName)
         step = DomainFactory.createProcessingStep(id: PROCESSING_STEP_ID)
@@ -100,7 +100,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
         ).save(flush: true)
     }
 
-    def cleanup() {
+    void cleanup() {
         configService.clean()
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -378,7 +378,7 @@ class DomainFactory {
         ]
     }
 
-    static createComment(Map properties = [:]) {
+    static Comment createComment(Map properties = [:]) {
         return createDomainObject(Comment, [
                 comment         : "comment ${counter++}",
                 author          : "author ${counter++}",
@@ -387,7 +387,7 @@ class DomainFactory {
     }
 
     @Deprecated
-    static createIlseSubmission(Map properties = [:], boolean saveAndValidate = true) {
+    static IlseSubmission createIlseSubmission(Map properties = [:], boolean saveAndValidate = true) {
         return proxyCore.createIlseSubmission(properties, saveAndValidate)
     }
 
@@ -406,14 +406,14 @@ class DomainFactory {
     /**
      * Because RoddyMergedBamQa defines a unique constraint with 'class', the instance can only be created in integration tests.
      */
-    static createRoddyMergedBamQa(Map properties = [:]) {
+    static RoddyMergedBamQa createRoddyMergedBamQa(Map properties = [:]) {
         return createDomainObject(RoddyMergedBamQa, defaultValuesForAbstractQualityAssessment + roddyQualityAssessmentProperties, properties)
     }
 
     /**
      * Because RoddyMergedBamQa defines a unique constraint with 'class', the instance can only be created in integration tests.
      */
-    static createRoddyMergedBamQa(RoddyBamFile roddyBamFile, Map properties = [:]) {
+    static RoddyMergedBamQa createRoddyMergedBamQa(RoddyBamFile roddyBamFile, Map properties = [:]) {
         return createRoddyMergedBamQa([
                 abstractBamFile: roddyBamFile,
                 referenceLength: 1,
@@ -562,9 +562,8 @@ class DomainFactory {
         ], properties)
     }
 
-    static
-    def createProcessableSamplePair(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
-        def map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, [coverage: 30] + bamFile1Properties, [coverage: 30] + bamFile2Properties)
+    static Map createProcessableSamplePair(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
+        Map map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, [coverage: 30] + bamFile1Properties, [coverage: 30] + bamFile2Properties)
 
         SamplePair samplePair = map.samplePair
         AbstractBamFile bamFile1 = map.sampleType1BamFile
@@ -1276,7 +1275,7 @@ class DomainFactory {
     }
 
     @Deprecated
-    static createFileType(Map properties = [:]) {
+    static FileType createFileType(Map properties = [:]) {
         return proxyCore.createFileType(properties)
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,17 +41,18 @@ trait CheckAndCall {
      * @param method closure method with the main logic
      * @return http error message in case of an error
      */
-    def checkDefaultErrorsAndCallMethod(Validateable cmd, Closure method) {
+    void checkDefaultErrorsAndCallMethod(Validateable cmd, Closure method) {
         if (cmd.hasErrors()) {
             String errorMessage = createErrorMessageStringFromErrors(cmd.errors) ?: g.message(code: "default.message.error.notAcceptable")
-            return response.sendError(HttpStatus.NOT_ACCEPTABLE.value(), errorMessage)
+            response.sendError(HttpStatus.NOT_ACCEPTABLE.value(), errorMessage)
+            return
         }
 
         try {
             method()
         } catch (OtpRuntimeException | ValidationException | AssertionError e) {
             log.error(e.localizedMessage)
-            return response.sendError(HttpStatus.BAD_REQUEST.value(), g.message(code: "default.message.error.unknown"))
+            response.sendError(HttpStatus.BAD_REQUEST.value(), g.message(code: "default.message.error.unknown"))
         }
     }
 
@@ -62,7 +63,7 @@ trait CheckAndCall {
      * @param method closure method with the main logic
      * @return object returned by the method or http error message in case of an error
      */
-    @SuppressWarnings("CatchRuntimeException") // ignored: will be removed with the old workflow system
+    @SuppressWarnings(["CatchRuntimeException", "MethodReturnTypeRequired"]) // ignored: will be removed with the old workflow system
     def checkErrorAndCallMethodReturns(Validateable cmd, Closure method) {
         if (cmd.hasErrors()) {
             String errorMessage = createErrorMessageHtmlFromErrors(cmd.errors) ?: g.message(code: "default.message.error.notAcceptable")

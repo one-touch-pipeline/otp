@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,7 +38,7 @@ class SeqTypeServiceSpec extends AbstractMetadataFieldsServiceSpec<SeqType> impl
 
     final static String SEQ_TYPE_DISPLAY_NAME = "SeqTypeDisplayName"
 
-    def setup() {
+    void setup() {
         properties = [
                 dirName      : SEQ_TYPE_DIR,
                 displayName  : SEQ_TYPE_DISPLAY_NAME,

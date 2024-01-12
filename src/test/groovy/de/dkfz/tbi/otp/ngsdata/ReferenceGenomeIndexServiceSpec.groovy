@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,7 +44,7 @@ class ReferenceGenomeIndexServiceSpec extends Specification implements DataTest,
 
     ReferenceGenomeIndex referenceGenomeIndex
 
-    def setup() {
+    void setup() {
         service.referenceGenomeService = new ReferenceGenomeService()
         service.referenceGenomeService.processingOptionService = new ProcessingOptionService()
         ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome(path: "1KGRef")

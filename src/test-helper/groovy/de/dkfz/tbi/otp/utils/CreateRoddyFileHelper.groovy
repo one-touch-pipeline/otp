@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,7 @@ import java.nio.file.Path
 
 class CreateRoddyFileHelper {
 
-    static private createRoddyAlignmentWorkOrFinalResultFiles(RoddyBamFile roddyBamFile, String workOrFinal) {
+    static private void createRoddyAlignmentWorkOrFinalResultFiles(RoddyBamFile roddyBamFile, String workOrFinal) {
         assert CreateFileHelper.createFile(roddyBamFile."get${workOrFinal}MergedQAJsonFile"())
 
         roddyBamFile."get${workOrFinal}SingleLaneQAJsonFiles"().values().each {
@@ -127,7 +127,7 @@ class CreateRoddyFileHelper {
         }
     }
 
-    static createSophiaResultFiles(SophiaInstance sophiaInstance, IndividualService individualService) {
+    static void createSophiaResultFiles(SophiaInstance sophiaInstance, IndividualService individualService) {
         SophiaService service = new SophiaService(individualService: individualService)
         CreateFileHelper.createFile(new File(sophiaInstance.workExecutionStoreDirectory, 'someFile'))
         sophiaInstance.workExecutionDirectories.each {

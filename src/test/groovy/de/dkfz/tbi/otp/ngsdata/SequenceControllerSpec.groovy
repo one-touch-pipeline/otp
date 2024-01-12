@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,7 +44,7 @@ class SequenceControllerSpec extends Specification implements ControllerUnitTest
         ]
     }
 
-    def "test exportAll to ensure that both header and content have the correct number of columns"() {
+    void "test exportAll to ensure that both header and content have the correct number of columns"() {
         given:
         Sequence sequence = DomainFactory.createSequence()
         createSeqTrack(id: sequence.seqTrackId)

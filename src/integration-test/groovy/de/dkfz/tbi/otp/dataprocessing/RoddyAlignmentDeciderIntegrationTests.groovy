@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -62,7 +62,7 @@ class RoddyAlignmentDeciderIntegrationTests {
         assert pipeline.type == Pipeline.Type.ALIGNMENT
     }
 
-    private createAndRunPrepare(boolean bamFileContainsSeqTrack, boolean withdrawn, FileOperationStatus fileOperationStatus, boolean forceAlign) {
+    private AbstractMergingWorkPackage createAndRunPrepare(boolean bamFileContainsSeqTrack, boolean withdrawn, FileOperationStatus fileOperationStatus, boolean forceAlign) {
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
                 withdrawn: withdrawn,
                 md5sum: fileOperationStatus == FileOperationStatus.PROCESSED ? HelperUtils.randomMd5sum : null,

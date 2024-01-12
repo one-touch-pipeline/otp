@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -52,7 +52,7 @@ class LibraryPreparationKitServiceSpec extends AbstractMetadataFieldsServiceSpec
     final static String ADAPTER_FILE = "/file.fa"
     final static String ADAPTER_SEQUENCE = "ATGC"
 
-    def setup() {
+    void setup() {
         properties = [
                 adapterFile                     : ADAPTER_FILE,
                 reverseComplementAdapterSequence: ADAPTER_SEQUENCE,

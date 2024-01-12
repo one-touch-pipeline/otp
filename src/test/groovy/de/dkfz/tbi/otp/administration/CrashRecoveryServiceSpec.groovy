@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -844,6 +844,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         e.message == "The system is not in Crash Recovery"
     }
 
+    @SuppressWarnings("MethodReturnTypeRequired") // ignored: will be removed with the old workflow system
     private assertExecutionState(ProcessingStep step, List<ExecutionState> states, String errorMessage = null) {
         List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step).sort { it.id }
         Process process = Process.get(step.process.id)
