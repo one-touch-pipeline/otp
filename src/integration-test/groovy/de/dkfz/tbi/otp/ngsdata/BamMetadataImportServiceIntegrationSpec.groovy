@@ -202,16 +202,12 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
     void assertResultNoError(Map results, DataBamImportRow dataBamImportRow, Path metadataFile) {
         assert results.context.metadataFile == metadataFile
         assert results.context.problemsObject.maximumProblemLevel.intValue() < LogLevel.ERROR.intValue()
-        assert results.importProcess
-        assert results.importProcess.externallyProcessedBamFiles.size() == 1
-        dataBamImportRow.assertBamFile(results.importProcess.externallyProcessedBamFiles[0])
         assert results.project?.name == dataBamImportRow.project.name
     }
 
     void assertResultError(Map results, Path metadataFile, List<String> expectedErrorMessages) {
         assert results.context.metadataFile == metadataFile
         assert results.context.problemsObject.maximumProblemLevel.intValue() == LogLevel.ERROR.intValue()
-        assert results.importProcess == null
         assert results.project == null
 
         Collection<String> foundErrorMessages = results.context.problemsObject.problems.findAll {
@@ -229,24 +225,15 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
         when:
         results = doWithAuth(OPERATOR) {
             bamMetadataImportService.validateAndImport(dataBamImportMetaData.metadataFile.toString(), true,
-                    dataBamImportMetaData.md5sum, ImportProcess.LinkOperation.COPY_AND_KEEP, false, [])
+                    dataBamImportMetaData.md5sum, BamImportInstance.LinkOperation.COPY_AND_KEEP, false, [])
         }
 
         then:
         assertResultNoError(results, dataBamImportRow, dataBamImportMetaData.metadataFile)
-
-        and:
-        ExternallyProcessedBamFile bamFile = results.importProcess.externallyProcessedBamFiles[0]
-        bamFile.md5sum
-        bamFile.coverage
-        bamFile.maximumReadLength
-        bamFile.insertSizeFile
-        bamFile.qualityAssessment
-        bamFile.mergingWorkPackage.libraryPreparationKit
     }
 
     @Unroll
-    void "validateAndImport, case #name with operation #linkOperation, then create importProcess without any errors"() {
+    void "validateAndImport, case #name with operation #linkOperation, then create import instance without any errors"() {
         given:
         DataBamImportRow dataBamImportRow = new DataBamImportRow(tempDir, updateMap)
         DataBamImportMetaData dataBamImportMetaData = new DataBamImportMetaData(tempDir, [dataBamImportRow])
@@ -262,33 +249,33 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
         assertResultNoError(results, dataBamImportRow, dataBamImportMetaData.metadataFile)
 
         where:
-        name                         | linkOperation                             | updateMap
+        name                         | linkOperation                                 | updateMap
         // copy and keep
-        'all given'                  | ImportProcess.LinkOperation.COPY_AND_KEEP | [:]
-        'no md5sum'                  | ImportProcess.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.MD5): null]
-        'no coverage'                | ImportProcess.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.COVERAGE): null]
-        'no maximal read length'     | ImportProcess.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.MAXIMAL_READ_LENGTH): null]
-        'no insert size file'        | ImportProcess.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.INSERT_SIZE_FILE): null]
-        'no quality control file'    | ImportProcess.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.QUALITY_CONTROL_FILE): null]
-        'no library preperation kit' | ImportProcess.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.LIBRARY_PREPARATION_KIT): null]
+        'all given'                  | BamImportInstance.LinkOperation.COPY_AND_KEEP | [:]
+        'no md5sum'                  | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.MD5): null]
+        'no coverage'                | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.COVERAGE): null]
+        'no maximal read length'     | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.MAXIMAL_READ_LENGTH): null]
+        'no insert size file'        | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.INSERT_SIZE_FILE): null]
+        'no quality control file'    | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.QUALITY_CONTROL_FILE): null]
+        'no library preperation kit' | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.LIBRARY_PREPARATION_KIT): null]
         // copy and link
-        'all given'                  | ImportProcess.LinkOperation.COPY_AND_LINK | [:]
-        'no md5sum'                  | ImportProcess.LinkOperation.COPY_AND_LINK | [(BamMetadataColumn.MD5): null]
-        'no coverage'                | ImportProcess.LinkOperation.COPY_AND_LINK | [(BamMetadataColumn.COVERAGE): null]
-        'no maximal read length'     | ImportProcess.LinkOperation.COPY_AND_LINK | [(BamMetadataColumn.MAXIMAL_READ_LENGTH): null]
-        'no insert size file'        | ImportProcess.LinkOperation.COPY_AND_LINK | [(BamMetadataColumn.INSERT_SIZE_FILE): null]
-        'no quality control file'    | ImportProcess.LinkOperation.COPY_AND_LINK | [(BamMetadataColumn.QUALITY_CONTROL_FILE): null]
-        'no library preperation kit' | ImportProcess.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.LIBRARY_PREPARATION_KIT): null]
+        'all given'                  | BamImportInstance.LinkOperation.COPY_AND_LINK | [:]
+        'no md5sum'                  | BamImportInstance.LinkOperation.COPY_AND_LINK | [(BamMetadataColumn.MD5): null]
+        'no coverage'                | BamImportInstance.LinkOperation.COPY_AND_LINK | [(BamMetadataColumn.COVERAGE): null]
+        'no maximal read length'     | BamImportInstance.LinkOperation.COPY_AND_LINK | [(BamMetadataColumn.MAXIMAL_READ_LENGTH): null]
+        'no insert size file'        | BamImportInstance.LinkOperation.COPY_AND_LINK | [(BamMetadataColumn.INSERT_SIZE_FILE): null]
+        'no quality control file'    | BamImportInstance.LinkOperation.COPY_AND_LINK | [(BamMetadataColumn.QUALITY_CONTROL_FILE): null]
+        'no library preperation kit' | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.LIBRARY_PREPARATION_KIT): null]
         // link source
-        'all given'                  | ImportProcess.LinkOperation.LINK_SOURCE   | [:]
-        'no coverage'                | ImportProcess.LinkOperation.LINK_SOURCE   | [(BamMetadataColumn.COVERAGE): null]
-        'no insert size file'        | ImportProcess.LinkOperation.LINK_SOURCE   | [(BamMetadataColumn.INSERT_SIZE_FILE): null]
-        'no quality control file'    | ImportProcess.LinkOperation.LINK_SOURCE   | [(BamMetadataColumn.QUALITY_CONTROL_FILE): null]
-        'no library preperation kit' | ImportProcess.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.LIBRARY_PREPARATION_KIT): null]
+        'all given'                  | BamImportInstance.LinkOperation.LINK_SOURCE   | [:]
+        'no coverage'                | BamImportInstance.LinkOperation.LINK_SOURCE   | [(BamMetadataColumn.COVERAGE): null]
+        'no insert size file'        | BamImportInstance.LinkOperation.LINK_SOURCE   | [(BamMetadataColumn.INSERT_SIZE_FILE): null]
+        'no quality control file'    | BamImportInstance.LinkOperation.LINK_SOURCE   | [(BamMetadataColumn.QUALITY_CONTROL_FILE): null]
+        'no library preperation kit' | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.LIBRARY_PREPARATION_KIT): null]
     }
 
     @Unroll
-    void "validateAndImport, case #name with operation #linkOperation, then create no importProcess and return errors"() {
+    void "validateAndImport, case #name with operation #linkOperation, then create no import instances and return errors"() {
         given:
         DataBamImportRow dataBamImportRow = new DataBamImportRow(tempDir, updateMap)
         DataBamImportMetaData dataBamImportMetaData = new DataBamImportMetaData(tempDir, [dataBamImportRow])
@@ -303,20 +290,20 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
         assertResultError(results, dataBamImportMetaData.metadataFile, errorText)
 
         where:
-        name                                    | linkOperation                             | updateMap                                                                                                                                         || errorText
-        'no md5sum given'                       | ImportProcess.LinkOperation.LINK_SOURCE   | [(BamMetadataColumn.MD5): null,]                                                                                                                  || ["The md5sum is required, if the files should only be linked"]
-        'no maximal read length given'          | ImportProcess.LinkOperation.LINK_SOURCE   | [(BamMetadataColumn.MAXIMAL_READ_LENGTH): null,]                                                                                                  || ["The maximalReadLength is required, if the files should only be linked"]
-        'bam file does not ends with bam'       | ImportProcess.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.BAM_FILE_PATH): 'test', (BamMetadataColumn.INSERT_SIZE_FILE): null, (BamMetadataColumn.QUALITY_CONTROL_FILE): null,]          || ["Filename 'test' does not end with '.bam'.", "The path 'test' is no absolute path."]
-        'bam file path is no absolute path'     | ImportProcess.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.BAM_FILE_PATH): 'test.bam', (BamMetadataColumn.INSERT_SIZE_FILE): null, (BamMetadataColumn.QUALITY_CONTROL_FILE): null,]      || ["The path 'test.bam' is no absolute path."]
-        'bam file does not exist'               | ImportProcess.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.BAM_FILE_PATH): '/tmp/test.bam', (BamMetadataColumn.INSERT_SIZE_FILE): null, (BamMetadataColumn.QUALITY_CONTROL_FILE): null,] || ["'/tmp/test.bam' does not exist or cannot be accessed by OTP."]
-        'no project given'                      | ImportProcess.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.PROJECT): null,]                                                                                                              || ["The project '' is not registered in OTP."]
-        'no individual and sample type  given'  | ImportProcess.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.INDIVIDUAL): null, (BamMetadataColumn.SAMPLE_TYPE): null,]                                                                    || ["The individual '' is not registered in OTP.", "The sample as combination of the individual '' and the sample type '' is not registered in OTP.", "The sample type '' is not registered in OTP."]
-        'no sequencing type given'              | ImportProcess.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.SEQUENCING_TYPE): null,]                                                                                                      || ["No seqType is given."]
-        'sequencing type is unknown'            | ImportProcess.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.SEQUENCING_TYPE): 'unknownSeqType',]                                                                                          || ["The sequencing type 'unknownSeqType' is not registered in OTP."]
-        'no sequencing read type given'         | ImportProcess.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.SEQUENCING_READ_TYPE): null,]                                                                                                 || ["sequencing read type '' is not registered in OTP."]
-        'sequencing read type is unknown'       | ImportProcess.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.SEQUENCING_READ_TYPE): 'unknownSequencingRead',]                                                                              || ["sequencing read type 'unknownSequencingRead' is not registered in OTP."]
-        'no reference genome given'             | ImportProcess.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.REFERENCE_GENOME): null,]                                                                                                     || ["The reference genome '' is not registered in OTP."]
-        'unknown reference genome'              | ImportProcess.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.REFERENCE_GENOME): 'unknownReferenceGenome',]                                                                                 || ["The reference genome 'unknownReferenceGenome' is not registered in OTP."]
+        name                                    | linkOperation                                 | updateMap                                                                                                                                         || errorText
+        'no md5sum given'                       | BamImportInstance.LinkOperation.LINK_SOURCE   | [(BamMetadataColumn.MD5): null,]                                                                                                                  || ["The md5sum is required, if the files should only be linked"]
+        'no maximal read length given'          | BamImportInstance.LinkOperation.LINK_SOURCE   | [(BamMetadataColumn.MAXIMAL_READ_LENGTH): null,]                                                                                                  || ["The maximalReadLength is required, if the files should only be linked"]
+        'bam file does not ends with bam'       | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.BAM_FILE_PATH): 'test', (BamMetadataColumn.INSERT_SIZE_FILE): null, (BamMetadataColumn.QUALITY_CONTROL_FILE): null,]          || ["Filename 'test' does not end with '.bam'.", "The path 'test' is no absolute path."]
+        'bam file path is no absolute path'     | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.BAM_FILE_PATH): 'test.bam', (BamMetadataColumn.INSERT_SIZE_FILE): null, (BamMetadataColumn.QUALITY_CONTROL_FILE): null,]      || ["The path 'test.bam' is no absolute path."]
+        'bam file does not exist'               | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.BAM_FILE_PATH): '/tmp/test.bam', (BamMetadataColumn.INSERT_SIZE_FILE): null, (BamMetadataColumn.QUALITY_CONTROL_FILE): null,] || ["'/tmp/test.bam' does not exist or cannot be accessed by OTP."]
+        'no project given'                      | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.PROJECT): null,]                                                                                                              || ["The project '' is not registered in OTP."]
+        'no individual and sample type  given'  | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.INDIVIDUAL): null, (BamMetadataColumn.SAMPLE_TYPE): null,]                                                                    || ["The individual '' is not registered in OTP.", "The sample as combination of the individual '' and the sample type '' is not registered in OTP.", "The sample type '' is not registered in OTP."]
+        'no sequencing type given'              | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.SEQUENCING_TYPE): null,]                                                                                                      || ["No seqType is given."]
+        'sequencing type is unknown'            | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.SEQUENCING_TYPE): 'unknownSeqType',]                                                                                          || ["The sequencing type 'unknownSeqType' is not registered in OTP."]
+        'no sequencing read type given'         | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.SEQUENCING_READ_TYPE): null,]                                                                                                 || ["sequencing read type '' is not registered in OTP."]
+        'sequencing read type is unknown'       | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.SEQUENCING_READ_TYPE): 'unknownSequencingRead',]                                                                              || ["sequencing read type 'unknownSequencingRead' is not registered in OTP."]
+        'no reference genome given'             | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.REFERENCE_GENOME): null,]                                                                                                     || ["The reference genome '' is not registered in OTP."]
+        'unknown reference genome'              | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.REFERENCE_GENOME): 'unknownReferenceGenome',]                                                                                 || ["The reference genome 'unknownReferenceGenome' is not registered in OTP."]
     }
 
     @Unroll
@@ -361,12 +348,11 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
         when:
         results = doWithAuth(OPERATOR) {
             bamMetadataImportService.validateAndImport(dataBamImportMetaData.metadataFile.toString(), true,
-                    dataBamImportMetaData.md5sum, ImportProcess.LinkOperation.COPY_AND_KEEP, false, furtherFiles, addDefaultFiles)
+                    dataBamImportMetaData.md5sum, BamImportInstance.LinkOperation.COPY_AND_KEEP, false, furtherFiles, addDefaultFiles)
         }
 
         then:
         assertResultNoError(results, dataBamImportRow, dataBamImportMetaData.metadataFile)
-        TestCase.assertContainSame(results.importProcess.externallyProcessedBamFiles[0].furtherFiles, expected)
         ExternallyProcessedBamFileQualityAssessment.findAll().size() == 1
         ExternallyProcessedBamFileQualityAssessment.findAll().get(0).insertSizeCV == 23
 

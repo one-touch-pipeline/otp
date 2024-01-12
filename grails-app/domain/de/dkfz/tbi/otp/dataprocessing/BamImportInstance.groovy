@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,10 +31,10 @@ import de.dkfz.tbi.otp.workflow.WorkflowCreateState
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 /**
- * Represents the state of the import process of the externally processed BAM files
+ * Represents the state of the import instance of the externally processed BAM files
  */
 @ManagedEntity
-class ImportProcess implements Entity, ProcessParameterObject {
+class BamImportInstance implements Entity, ProcessParameterObject {
 
     enum State {
         NOT_STARTED,
@@ -73,13 +73,13 @@ class ImportProcess implements Entity, ProcessParameterObject {
 
     static constraints = {
         externallyProcessedBamFiles validator: { val, obj ->
-            List<ImportProcess> importProcesses = ImportProcess.createCriteria().listDistinct {
+            List<BamImportInstance> importInstances = BamImportInstance.createCriteria().listDistinct {
                 externallyProcessedBamFiles {
                     'in'('id', val*.id)
                 }
             }
-            for (ImportProcess importProcess : importProcesses) {
-                if (importProcess && importProcess.id != obj.id) {
+            for (BamImportInstance importInstance : importInstances) {
+                if (importInstance && importInstance.id != obj.id) {
                     return "already.imported"
                 }
             }
@@ -88,8 +88,8 @@ class ImportProcess implements Entity, ProcessParameterObject {
     }
 
     static Closure mapping = {
-        state index: "import_process_state_idx"
-        workflowCreateState index: "import_process_workflow_create_state_idx"
+        state index: "bam_import_instance_state_idx"
+        workflowCreateState index: "bam_import_instance_workflow_create_state_idx"
     }
 
     @SuppressWarnings("GetterMethodCouldBeProperty") // is no property

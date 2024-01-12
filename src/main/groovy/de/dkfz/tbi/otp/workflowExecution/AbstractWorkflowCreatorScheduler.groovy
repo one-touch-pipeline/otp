@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -174,9 +174,9 @@ abstract class AbstractWorkflowCreatorScheduler {
     }
 
     /**
-     * Get the next available import process id in waiting state
+     * Get the next available import instance id in waiting state
      *
-     * @return the id of import process in waiting state
+     * @return the id of import instance in waiting state
      */
     abstract protected Long getNextWaitingImportId()
 
@@ -190,7 +190,7 @@ abstract class AbstractWorkflowCreatorScheduler {
     abstract protected String getImportIdentifier(Long importId)
 
     /**
-     * Update the current import process state
+     * Update the current import instance state
      *
      * @param importId id of FastqImportInstance for Fastq import or BamImportInstance for Bam import
      * @param state to be set
@@ -198,7 +198,7 @@ abstract class AbstractWorkflowCreatorScheduler {
     abstract protected void updateImportState(Long importId, WorkflowCreateState state)
 
     /**
-     * Create workflows in one single transaction for the given import process
+     * Create workflows in one single transaction for the given import instance
      *
      * @param importId id of FastqImportInstance for Fastq import or BamImportInstance for Bam import
      * @return deciderResult of newly created workflow

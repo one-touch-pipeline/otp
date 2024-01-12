@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -109,16 +109,15 @@ trait ExternalBamFactory implements IsAlignment {
         ]
     }
 
-    ImportProcess createImportProcess(Map properties) {
-        return createDomainObject(ImportProcess, [
+    BamImportInstance createImportInstance(Map properties) {
+        return createDomainObject(BamImportInstance, [
                 externallyProcessedBamFiles: { [createBamFile()] as Set },
-                state                            : ImportProcess.State.NOT_STARTED,
-                linkOperation                    : ImportProcess.LinkOperation.COPY_AND_KEEP,
+                state                            : BamImportInstance.State.NOT_STARTED,
+                linkOperation                    : BamImportInstance.LinkOperation.COPY_AND_KEEP,
         ], properties)
     }
 }
 
 class ExternalBamFactoryInstance implements ExternalBamFactory {
-
     static final ExternalBamFactoryInstance INSTANCE = new ExternalBamFactoryInstance()
 }

@@ -119,22 +119,22 @@
                 <td>
                     <label title="${g.message(code: 'bamMetadataImport.linkOperation.copyAndKeep.title')}">
                         <g:radio name="linkOperation"
-                                 checked="${cmd?.linkOperation == null || cmd?.linkOperation == de.dkfz.tbi.otp.dataprocessing.ImportProcess.LinkOperation.COPY_AND_KEEP}"
-                                 value="${de.dkfz.tbi.otp.dataprocessing.ImportProcess.LinkOperation.COPY_AND_KEEP}"/>
+                                 checked="${cmd?.linkOperation == null || cmd?.linkOperation == de.dkfz.tbi.otp.dataprocessing.BamImportInstance.LinkOperation.COPY_AND_KEEP}"
+                                 value="${de.dkfz.tbi.otp.dataprocessing.BamImportInstance.LinkOperation.COPY_AND_KEEP}"/>
                         <g:message code="bamMetadataImport.linkOperation.copyAndKeep"/>
                     </label>
                     <br/>
                     <label title="${g.message(code: 'bamMetadataImport.linkOperation.copyAndLink.title')}">
                         <g:radio name="linkOperation"
-                                 checked="${cmd?.linkOperation == de.dkfz.tbi.otp.dataprocessing.ImportProcess.LinkOperation.COPY_AND_LINK}"
-                                 value="${de.dkfz.tbi.otp.dataprocessing.ImportProcess.LinkOperation.COPY_AND_LINK}"/>
+                                 checked="${cmd?.linkOperation == de.dkfz.tbi.otp.dataprocessing.BamImportInstance.LinkOperation.COPY_AND_LINK}"
+                                 value="${de.dkfz.tbi.otp.dataprocessing.BamImportInstance.LinkOperation.COPY_AND_LINK}"/>
                         <g:message code="bamMetadataImport.linkOperation.copyAndLink"/>
                     </label>
                     <br/>
                     <label title="${g.message(code: 'bamMetadataImport.linkOperation.linkSource.title')}">
                         <g:radio name="linkOperation"
-                                 checked="${cmd?.linkOperation == de.dkfz.tbi.otp.dataprocessing.ImportProcess.LinkOperation.LINK_SOURCE}"
-                                 value="${de.dkfz.tbi.otp.dataprocessing.ImportProcess.LinkOperation.LINK_SOURCE}"/>
+                                 checked="${cmd?.linkOperation == de.dkfz.tbi.otp.dataprocessing.BamImportInstance.LinkOperation.LINK_SOURCE}"
+                                 value="${de.dkfz.tbi.otp.dataprocessing.BamImportInstance.LinkOperation.LINK_SOURCE}"/>
                         <g:message code="bamMetadataImport.linkOperation.linkSource"/>
                     </label>
                 </td>

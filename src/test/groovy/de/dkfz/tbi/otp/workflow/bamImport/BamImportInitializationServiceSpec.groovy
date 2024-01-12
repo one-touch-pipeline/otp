@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,7 @@ class BamImportInitializationServiceSpec extends Specification
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                ImportProcess,
+                BamImportInstance,
                 ExternallyProcessedBamFile,
                 ExternalMergingWorkPackage,
                 WorkflowArtefact,
@@ -48,7 +48,7 @@ class BamImportInitializationServiceSpec extends Specification
         ]
     }
 
-    void "createWorkflowRuns, when called, then return a WorkflowRun for each bam file of the import process"() {
+    void "createWorkflowRuns, when called, then return a WorkflowRun for each bam file of the import instance"() {
         given:
         Workflow workflow = createWorkflow([
                 name: BamImportWorkflow.WORKFLOW,
@@ -59,7 +59,7 @@ class BamImportInitializationServiceSpec extends Specification
                 DomainFactory.createExternallyProcessedBamFile(),
         ]
 
-        ImportProcess importProcess = createImportProcess([
+        BamImportInstance importInstance = createImportInstance([
                 externallyProcessedBamFiles: bamFiles,
                 workflowCreateState: WorkflowCreateState.WAITING,
         ])
@@ -74,7 +74,7 @@ class BamImportInitializationServiceSpec extends Specification
         }
 
         when:
-        List<WorkflowRun> runs = service.createWorkflowRuns(importProcess)
+        List<WorkflowRun> runs = service.createWorkflowRuns(importInstance)
 
         then:
         runs

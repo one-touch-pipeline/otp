@@ -41,7 +41,7 @@ class BamImportLinkSourceJobSpec extends Specification implements DataTest, BamI
         return [
                 ExternalMergingWorkPackage,
                 ExternallyProcessedBamFile,
-                ImportProcess,
+                BamImportInstance,
                 WorkflowStep,
         ]
     }
@@ -66,7 +66,7 @@ class BamImportLinkSourceJobSpec extends Specification implements DataTest, BamI
     }
     void "test getLinkMap should return list with entries when link source is true"() {
         given:
-        createImportProcess(externallyProcessedBamFiles: [bamFile], linkOperation: ImportProcess.LinkOperation.LINK_SOURCE)
+        createImportInstance(externallyProcessedBamFiles: [bamFile], linkOperation: BamImportInstance.LinkOperation.LINK_SOURCE)
         Path targetBaseDirFilePath = Paths.get("/source")
         Path sourceBamFilePath = targetBaseDirFilePath.resolve(Paths.get(bamFile.bamFileName))
         Path sourceBaiFilePath = targetBaseDirFilePath.resolve(Paths.get(bamFile.baiFileName))
@@ -88,7 +88,7 @@ class BamImportLinkSourceJobSpec extends Specification implements DataTest, BamI
 
     void "test getLinkMap should return empty list when link source is false"() {
         given:
-        createImportProcess(externallyProcessedBamFiles: [bamFile])
+        createImportInstance(externallyProcessedBamFiles: [bamFile])
         job.externallyProcessedBamFileService = Mock(ExternallyProcessedBamFileService)
 
         expect:

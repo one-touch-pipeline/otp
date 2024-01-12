@@ -1,5 +1,5 @@
 #
-# Copyright 2011-2023 The OTP authors
+# Copyright 2011-2024 The OTP authors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -53,6 +53,7 @@ suffix="${suffixChangeSet}//g"
 joinTables="\
 (aceseq_instance_roddy_execution_directory_names)|\
 (antibody_target_import_alias)|\
+(bam_import_instance_externally_processed_bam_file)|\
 (cluster_job_cluster_job)|\
 (date_field_definition_allowed_date_values)|\
 (decimal_number_field_definition_allowed_decimal_number_values)|\
@@ -64,7 +65,6 @@ joinTables="\
 (ega_submission_raw_sequence_file_submission_object)|\
 (ega_submission_sample_submission_object)|\
 (externally_processed_bam_file_further_files)|\
-(import_process_externally_processed_bam_file)|\
 (indel_calling_instance_roddy_execution_directory_names)|\
 (integer_field_definition_allowed_integer_values)|\
 (job_error_definition_job_definition)|\

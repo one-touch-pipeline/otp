@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
-import de.dkfz.tbi.otp.dataprocessing.ImportProcess
+import de.dkfz.tbi.otp.dataprocessing.BamImportInstance
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.utils.LinkFileUtils
@@ -63,9 +63,9 @@ class ReplaceSourceWithLinkJob extends AbstractEndStateAwareJobImpl {
     @Override
     void execute() throws Exception {
         SessionUtils.withNewSession {
-            final ImportProcess importProcess = processParameterObject
-            if (importProcess.linkOperation.replaceSourceWithLink) {
-                importProcess.externallyProcessedBamFiles.each { ExternallyProcessedBamFile epmbf ->
+            final BamImportInstance importInstance = processParameterObject
+            if (importInstance.linkOperation.replaceSourceWithLink) {
+                importInstance.externallyProcessedBamFiles.each { ExternallyProcessedBamFile epmbf ->
                     File sourceBam = new File(epmbf.importedFrom)
                     File sourceBaseDir = sourceBam.parentFile
                     File sourceBai = new File(sourceBaseDir, epmbf.baiFileName)
@@ -96,9 +96,9 @@ class ReplaceSourceWithLinkJob extends AbstractEndStateAwareJobImpl {
                 }
             }
 
-            ImportProcess.withTransaction {
-                importProcess.state = ImportProcess.State.FINISHED
-                importProcess.save(flush: true)
+            BamImportInstance.withTransaction {
+                importInstance.state = BamImportInstance.State.FINISHED
+                importInstance.save(flush: true)
             }
             succeed()
         }

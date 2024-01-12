@@ -20,26 +20,14 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.dataprocessing.ExternalMergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
-import de.dkfz.tbi.otp.dataprocessing.BamImportInstance
-
-int importId = 0// set it to delete the import instance and related wrong metadata
-
-BamImportInstance importInstance = BamImportInstance.get(importId)
-
-if (importInstance) {
-    ExternallyProcessedBamFile.withTransaction {
-        Set<ExternallyProcessedBamFile> bamFiles = importInstance.externallyProcessedBamFiles
-        println "BamImportInstance ${importInstance.id} deleted"
-        importInstance.delete(flush: true)
-        bamFiles.each {
-            ExternalMergingWorkPackage workPackage = it.workPackage
-            println "${it} deleted"
-            it.delete(flush: true)
-            workPackage.delete(flush: true)
-        }
-        it.flush()
-        assert false
+databaseChangeLog = {
+    changeSet(author: "-", id: "1680020480475-123") {
+        sql("""
+            ALTER TABLE import_process RENAME TO bam_import_instance;
+            ALTER TABLE import_process_externally_processed_bam_file RENAME TO bam_import_instance_externally_processed_bam_file;
+            ALTER TABLE bam_import_instance_externally_processed_bam_file RENAME COLUMN import_process_externally_processed_bam_files_id TO bam_import_instance_externally_processed_bam_files_id;
+            ALTER INDEX import_process_state_idx RENAME TO bam_import_instance_state_idx;
+            ALTER INDEX import_process_workflow_create_state_idx RENAME TO bam_import_instance_workflow_create_state_idx;
+        """)
     }
 }

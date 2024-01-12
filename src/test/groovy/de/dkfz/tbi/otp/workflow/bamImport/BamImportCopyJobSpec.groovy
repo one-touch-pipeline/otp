@@ -47,7 +47,7 @@ class BamImportCopyJobSpec extends Specification implements DataTest, DomainFact
     Class[] getDomainClassesToMock() {
         return [
                 ExternalMergingWorkPackage,
-                ImportProcess,
+                BamImportInstance,
                 ProcessingOption,
         ]
     }
@@ -72,7 +72,7 @@ class BamImportCopyJobSpec extends Specification implements DataTest, DomainFact
     Path importedBaiPath
     Path importedMRLPath
 
-    void setupData(boolean hasMd5, ImportProcess.LinkOperation linkOperation) {
+    void setupData(boolean hasMd5, BamImportInstance.LinkOperation linkOperation) {
         sourcePath = tempDir.resolve("source")
         importDir = tempDir.resolve("import")
 
@@ -87,7 +87,7 @@ class BamImportCopyJobSpec extends Specification implements DataTest, DomainFact
                 furtherFiles: [SUB_DIRECTORY]
         )
 
-        createImportProcess(
+        createImportInstance(
                 externallyProcessedBamFiles: [epmbfWithMd5sum],
                 linkOperation: linkOperation,
         )
@@ -157,7 +157,7 @@ class BamImportCopyJobSpec extends Specification implements DataTest, DomainFact
 
     void "test createScripts, when files have to be copied, have a md5Sum and not exist already, then create copy script using given md5sum"() {
         given:
-        setupData(true, ImportProcess.LinkOperation.COPY_AND_KEEP)
+        setupData(true, BamImportInstance.LinkOperation.COPY_AND_KEEP)
 
         expect:
         job.createScripts(workflowStep).first() ==~ generateCopyScriptTemplate("echo [0-9a-f]{32}  \\S+.bam > \\S+.bam.md5sum")
@@ -165,7 +165,7 @@ class BamImportCopyJobSpec extends Specification implements DataTest, DomainFact
 
     void "test createScripts, when files have to be copied, not have a md5Sum and not exist already, then create copy script using calculate md5sum"() {
         given:
-        setupData(false, ImportProcess.LinkOperation.COPY_AND_KEEP)
+        setupData(false, BamImportInstance.LinkOperation.COPY_AND_KEEP)
 
         expect:
         job.createScripts(workflowStep).first() ==~ generateCopyScriptTemplate("md5sum .* \\| sed -e 's#.*#.*#' > .*")
@@ -173,7 +173,7 @@ class BamImportCopyJobSpec extends Specification implements DataTest, DomainFact
 
     void "test createScripts, when files have to be linked, then don't create copy script"() {
         given:
-        setupData(true, ImportProcess.LinkOperation.LINK_SOURCE)
+        setupData(true, BamImportInstance.LinkOperation.LINK_SOURCE)
 
         expect:
         job.createScripts(workflowStep) == []

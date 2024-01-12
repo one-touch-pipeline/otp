@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -56,7 +56,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         return [
                 ExternalMergingWorkPackage,
                 ExternallyProcessedBamFile,
-                ImportProcess,
+                BamImportInstance,
                 Individual,
                 JobDefinition,
                 JobExecutionPlan,
@@ -152,11 +152,11 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
     void "test maybe submit, when files have to be link and not yet linked, then create links"() {
         given:
-        ImportProcess importProcess = createImportProcess(
+        BamImportInstance importInstance = createImportInstance(
                 externallyProcessedBamFiles: [epmbfWithMd5sum],
-                linkOperation: ImportProcess.LinkOperation.LINK_SOURCE,
+                linkOperation: BamImportInstance.LinkOperation.LINK_SOURCE,
         )
-        createHelperObjects(importProcess)
+        createHelperObjects(importInstance)
 
         Path source = Paths.get(epmbfWithMd5sum.importedFrom).parent
         Path target = Paths.get(epmbfWithMd5sum.importFolder.absolutePath)
@@ -186,11 +186,11 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
     void "test maybe submit, when files have to be link and already linked, then do not create links again"() {
         given:
-        ImportProcess importProcess = createImportProcess(
+        BamImportInstance importInstance = createImportInstance(
                 externallyProcessedBamFiles: [epmbfWithMd5sum],
-                linkOperation: ImportProcess.LinkOperation.LINK_SOURCE,
+                linkOperation: BamImportInstance.LinkOperation.LINK_SOURCE,
         )
-        createHelperObjects(importProcess)
+        createHelperObjects(importInstance)
 
         CreateFileHelper.createSymbolicLinkFile(epmbfWithMd5sum.bamFile, new File(mainDirectory, epmbfWithMd5sum.bamFileName))
         CreateFileHelper.createSymbolicLinkFile(epmbfWithMd5sum.baiFile, new File(mainDirectory, epmbfWithMd5sum.baiFileName))
@@ -208,11 +208,11 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
     void "test maybe submit, when files have to be copied, have a md5Sum and not exist already, then create copy job using given md5sum and wait for job"() {
         given:
-        ImportProcess importProcess = new ImportProcess(
+        BamImportInstance importInstance = new BamImportInstance(
                 externallyProcessedBamFiles: [epmbfWithMd5sum]
         ).save(flush: true)
 
-        createHelperObjects(importProcess)
+        createHelperObjects(importInstance)
         CreateFileHelper.createFile(epmbfWithMd5sum.bamFile)
         importExternallyMergedBamJob.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
             1 * executeJob(_) >> { String command ->
@@ -226,10 +226,10 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
     void "test maybe submit, when files have to be copied, not have a md5Sum and not exist already, then create copy job using calculate md5sum and wait for job"() {
         given:
-        ImportProcess importProcess = new ImportProcess(
+        BamImportInstance importInstance = new BamImportInstance(
                 externallyProcessedBamFiles: [epmbfWithoutMd5sum]
         ).save(flush: true)
-        createHelperObjects(importProcess)
+        createHelperObjects(importInstance)
         CreateFileHelper.createFile(epmbfWithoutMd5sum.bamFile)
         importExternallyMergedBamJob.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
             1 * executeJob(_) >> { String command ->
@@ -243,11 +243,11 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
     void "test maybe submit, when files have to be copied and exist already but no checkpoint file exist, then create normal copy job and wait for job"() {
         given:
-        ImportProcess importProcess = new ImportProcess(
+        BamImportInstance importInstance = new BamImportInstance(
                 externallyProcessedBamFiles: [epmbfWithoutMd5sum]
         ).save(flush: true)
 
-        createHelperObjects(importProcess)
+        createHelperObjects(importInstance)
         CreateFileHelper.createFile(new File(epmbfWithoutMd5sum.importedFrom))
         CreateFileHelper.createFile(epmbfWithoutMd5sum.bamFile)
         importExternallyMergedBamJob.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
@@ -262,11 +262,11 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
     void "test maybe submit, when files already copied and a checkpoint file exists already, then create no copy job and return success"() {
         given:
-        ImportProcess importProcess = new ImportProcess(
+        BamImportInstance importInstance = new BamImportInstance(
                 externallyProcessedBamFiles: [epmbfWithMd5sum]
         ).save(flush: true)
 
-        createHelperObjects(importProcess)
+        createHelperObjects(importInstance)
         File targetBamFile = epmbfWithMd5sum.bamFile
         CreateFileHelper.createFile(new File(targetBamFile.parent, ".${targetBamFile.name}.checkpoint"))
         CreateFileHelper.createFile(epmbfWithMd5sum.bamMaxReadLengthFile, "123")
@@ -283,11 +283,11 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
     void "test maybe submit, when files have to be copied and a checkpoint file exists already but not the files, then fail"() {
         given:
-        ImportProcess importProcess = new ImportProcess(
+        BamImportInstance importInstance = new BamImportInstance(
                 externallyProcessedBamFiles: [epmbfWithoutMd5sum]
         ).save(flush: true)
 
-        createHelperObjects(importProcess)
+        createHelperObjects(importInstance)
         File targetBamFile = epmbfWithoutMd5sum.bamFile
         CreateFileHelper.createFile(new File(targetBamFile.parent, ".${targetBamFile.name}.checkpoint"))
         CreateFileHelper.createFile(epmbfWithoutMd5sum.bamMaxReadLengthFile, "123")
@@ -302,7 +302,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
     @Unroll
     void "test maybe submit, check that pattern '#furtherFilePattern' with link on '#linkFileName' and final file '#realFurtherFileName' works correctly"() {
         given:
-        ImportProcess importProcess = new ImportProcess(
+        BamImportInstance importInstance = new BamImportInstance(
                 externallyProcessedBamFiles: [epmbfWithoutMd5sum]
         ).save(flush: true)
 
@@ -310,7 +310,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
                 furtherFilePattern,
         ]
 
-        createHelperObjects(importProcess)
+        createHelperObjects(importInstance)
 
         assert Files.createDirectories(importExternallyMergedBamJob.projectService.getProjectDirectory(epmbfWithoutMd5sum.project))
         CreateFileHelper.createFile(new File(mainDirectory, epmbfWithoutMd5sum.bamFileName))
@@ -356,7 +356,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
     @Unroll
     void "test maybe submit, check that pattern '#furtherFilePattern' with link on '#linkFileName1' and second link on '#linkFileName2' and final file '#realFurtherFileName' works correctly"() {
         given:
-        ImportProcess importProcess = new ImportProcess(
+        BamImportInstance importInstance = new BamImportInstance(
                 externallyProcessedBamFiles: [epmbfWithoutMd5sum]
         ).save(flush: true)
 
@@ -364,7 +364,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
                 furtherFilePattern,
         ]
 
-        createHelperObjects(importProcess)
+        createHelperObjects(importInstance)
 
         assert Files.createDirectories(importExternallyMergedBamJob.projectService.getProjectDirectory(epmbfWithoutMd5sum.project))
         CreateFileHelper.createFile(new File(mainDirectory, epmbfWithoutMd5sum.bamFileName))
@@ -411,12 +411,12 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
     void "test validate when everything is valid and bam file already has a md5sum"() {
         given:
-        ImportProcess importProcess = createImportProcess([
+        BamImportInstance importInstance = createImportInstance([
                 externallyProcessedBamFiles: [epmbfWithMd5sum],
-                linkOperation                    : ImportProcess.LinkOperation.COPY_AND_KEEP,
+                linkOperation                    : BamImportInstance.LinkOperation.COPY_AND_KEEP,
         ])
 
-        createHelperObjects(importProcess)
+        createHelperObjects(importInstance)
         CreateFileHelper.createFile(epmbfWithMd5sum.bamFile)
         CreateFileHelper.createFile(epmbfWithMd5sum.baiFile)
         CreateFileHelper.createFile(epmbfWithMd5sum.bamMaxReadLengthFile, "123")
@@ -435,12 +435,12 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
     void "test validate when everything is valid and bam file has no md5sum yet"() {
         given:
-        ImportProcess importProcess = createImportProcess([
+        BamImportInstance importInstance = createImportInstance([
                 externallyProcessedBamFiles: [epmbfWithoutMd5sum],
-                linkOperation                    : ImportProcess.LinkOperation.COPY_AND_KEEP,
+                linkOperation                    : BamImportInstance.LinkOperation.COPY_AND_KEEP,
         ])
 
-        createHelperObjects(importProcess)
+        createHelperObjects(importInstance)
         File targetBamFile = epmbfWithoutMd5sum.bamFile
         CreateFileHelper.createFile(targetBamFile)
         CreateFileHelper.createFile(epmbfWithoutMd5sum.baiFile)
@@ -462,12 +462,12 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
     void "test validate when everything is valid and bam file was only linked"() {
         given:
-        ImportProcess importProcess = createImportProcess(
+        BamImportInstance importInstance = createImportInstance(
                 externallyProcessedBamFiles: [epmbfWithMd5sum],
-                linkOperation: ImportProcess.LinkOperation.LINK_SOURCE,
+                linkOperation: BamImportInstance.LinkOperation.LINK_SOURCE,
         )
 
-        createHelperObjects(importProcess)
+        createHelperObjects(importInstance)
         CreateFileHelper.createSymbolicLinkFile(epmbfWithMd5sum.bamFile, new File(epmbfWithMd5sum.importedFrom))
         CreateFileHelper.createSymbolicLinkFile(epmbfWithMd5sum.baiFile, Paths.get(epmbfWithMd5sum.importedFrom).resolveSibling(epmbfWithMd5sum.baiFileName).toFile())
         CreateFileHelper.createSymbolicLinkFile(new File(epmbfWithMd5sum.importFolder, SUB_DIRECTORY), subDirectory)
@@ -486,11 +486,11 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
     void "test validate when maxReadLength file doesn't exist and read length is already set"() {
         given:
-        ImportProcess importProcess = new ImportProcess(
+        BamImportInstance importInstance = new BamImportInstance(
                 externallyProcessedBamFiles: [epmbfWithMd5sum]
         ).save(flush: true)
 
-        createHelperObjects(importProcess)
+        createHelperObjects(importInstance)
         CreateFileHelper.createFile(epmbfWithMd5sum.bamFile)
         CreateFileHelper.createFile(epmbfWithMd5sum.baiFile)
 
@@ -506,11 +506,11 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
     void "test validate when maxReadLength file doesn't exist and read length is not set"() {
         given:
-        ImportProcess importProcess = new ImportProcess(
+        BamImportInstance importInstance = new BamImportInstance(
                 externallyProcessedBamFiles: [epmbfWithMd5sum]
         ).save(flush: true)
 
-        createHelperObjects(importProcess)
+        createHelperObjects(importInstance)
         CreateFileHelper.createFile(epmbfWithMd5sum.bamFile)
         CreateFileHelper.createFile(epmbfWithMd5sum.baiFile)
 
@@ -525,11 +525,11 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
     void "test validate when everything is not equal"() {
         given:
         String importedMd5sum = HelperUtils.randomMd5sum
-        ImportProcess importProcess = new ImportProcess(
+        BamImportInstance importInstance = new BamImportInstance(
                 externallyProcessedBamFiles: [epmbfWithoutMd5sum]
         ).save(flush: true)
 
-        createHelperObjects(importProcess)
+        createHelperObjects(importInstance)
         File targetBamFile = epmbfWithoutMd5sum.bamFile
         CreateFileHelper.createFile(targetBamFile)
         CreateFileHelper.createFile(epmbfWithoutMd5sum.baiFile)
@@ -546,11 +546,11 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
     void "test validate when copying did not work"() {
         given:
-        ImportProcess importProcess = new ImportProcess(
+        BamImportInstance importInstance = new BamImportInstance(
                 externallyProcessedBamFiles: [epmbfWithMd5sum]
         ).save(flush: true)
 
-        createHelperObjects(importProcess)
+        createHelperObjects(importInstance)
         CreateFileHelper.createFile(new File("${epmbfWithMd5sum.importedFrom}.md5sum"),
                 "${epmbfWithMd5sum.md5sum} epmbfName")
         CreateFileHelper.createFile(epmbfWithMd5sum.bamMaxReadLengthFile, "123")
@@ -564,9 +564,9 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         processingException.message.contains("on local filesystem is not accessible or does not exist.")
     }
 
-    private void createHelperObjects(ImportProcess importProcess) {
+    private void createHelperObjects(BamImportInstance importInstance) {
         importExternallyMergedBamJob = Spy(ImportExternallyMergedBamJob) {
-            _ * getProcessParameterObject() >> importProcess
+            _ * getProcessParameterObject() >> importInstance
             _ * getProcessingStep() >> step
         }
 
@@ -592,7 +592,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         importExternallyMergedBamJob.projectService.configService = configService
         importExternallyMergedBamJob.projectService.fileSystemService = new TestFileSystemService()
 
-        ExternallyProcessedBamFile externallyProcessedBamFile = importProcess.externallyProcessedBamFiles[0]
+        ExternallyProcessedBamFile externallyProcessedBamFile = importInstance.externallyProcessedBamFiles[0]
         File bamFile = new File(mainDirectory, externallyProcessedBamFile.bamFileName)
         File baiFile = new File(mainDirectory, externallyProcessedBamFile.baiFileName)
 
@@ -601,8 +601,8 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
         DomainFactory.createProcessParameter([
                 process  : step.process,
-                value    : importProcess.id.toString(),
-                className: ImportProcess.name,
+                value    : importInstance.id.toString(),
+                className: BamImportInstance.name,
         ])
     }
 

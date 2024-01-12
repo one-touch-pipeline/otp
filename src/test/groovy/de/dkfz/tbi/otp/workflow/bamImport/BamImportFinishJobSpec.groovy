@@ -53,7 +53,7 @@ class BamImportFinishJobSpec extends Specification implements DataTest, BamImpor
                 ExternalMergingWorkPackage,
                 ExternallyProcessedBamFile,
                 WorkflowStep,
-                ImportProcess,
+                BamImportInstance,
         ]
     }
 

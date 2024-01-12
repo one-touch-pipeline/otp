@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.ngsdata
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.FlashMessage
-import de.dkfz.tbi.otp.dataprocessing.ImportProcess
+import de.dkfz.tbi.otp.dataprocessing.BamImportInstance
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -43,7 +43,7 @@ class BamMetadataImportController {
             bamMetadataValidationContext = flash.mvc
         } else if (cmd.path) {
             bamMetadataValidationContext = bamMetadataImportService.validate(cmd.path, cmd.furtherFilePaths,
-                    cmd.linkOperation == ImportProcess.LinkOperation.LINK_SOURCE)
+                    cmd.linkOperation == BamImportInstance.LinkOperation.LINK_SOURCE)
         }
 
         return [
@@ -91,7 +91,7 @@ class BamMetadataControllerSubmitCommand implements Serializable {
     String submit
     String md5
     List<String> furtherFilePaths
-    ImportProcess.LinkOperation linkOperation
+    BamImportInstance.LinkOperation linkOperation
     boolean triggerAnalysis
     boolean ignoreWarnings
     boolean addDefaultRoddyBamFilePaths

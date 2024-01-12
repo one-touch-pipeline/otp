@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.workflow.bamImport
 
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
-import de.dkfz.tbi.otp.dataprocessing.ImportProcess
+import de.dkfz.tbi.otp.dataprocessing.BamImportInstance
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
 import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.utils.LinkEntry
@@ -47,7 +47,7 @@ class BamImportLinkSourceJob extends AbstractLinkJob implements BamImportShared 
 
         ExternallyProcessedBamFile bamFile = getBamFile(workflowStep)
 
-        ImportProcess importProcess = getImportProcess(bamFile)
+        BamImportInstance importInstance = getImportInstance(bamFile)
 
         List<String> fileNames = [
                 bamFile.fileName,
@@ -58,7 +58,7 @@ class BamImportLinkSourceJob extends AbstractLinkJob implements BamImportShared 
         Path importFolder = externallyProcessedBamFileService.getImportFolder(bamFile, PathOption.REAL_PATH)
         Path sourceFolder = externallyProcessedBamFileService.getSourceBaseDirFilePath(bamFile)
 
-        return importProcess.linkOperation.linkSource ? fileNames.collect {
+        return importInstance.linkOperation.linkSource ? fileNames.collect {
             new LinkEntry(
                     link: importFolder.resolve(it),
                     target: sourceFolder.resolve(it),

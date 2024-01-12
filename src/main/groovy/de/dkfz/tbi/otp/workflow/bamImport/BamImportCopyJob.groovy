@@ -41,9 +41,9 @@ class BamImportCopyJob extends AbstractExecuteClusterPipelineJob implements BamI
     @Override
     protected List<String> createScripts(WorkflowStep workflowStep) {
         ExternallyProcessedBamFile bamFile = getBamFile(workflowStep)
-        ImportProcess importProcess = getImportProcess(bamFile)
+        BamImportInstance importInstance = getImportInstance(bamFile)
 
-        if (importProcess.linkOperation.linkSource) {
+        if (importInstance.linkOperation.linkSource) {
             return []
         }
 

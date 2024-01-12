@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -70,13 +70,13 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
 
     @Override
     protected final NextAction maybeSubmit() throws Throwable {
-        final ImportProcess importProcess = processParameterObject
-        return importProcess.linkOperation.linkSource ? linkSource(importProcess) : copyFiles(importProcess)
+        final BamImportInstance importInstance = processParameterObject
+        return importInstance.linkOperation.linkSource ? linkSource(importInstance) : copyFiles(importInstance)
     }
 
-    private NextAction linkSource(ImportProcess importProcess) throws Throwable {
+    private NextAction linkSource(BamImportInstance importInstance) throws Throwable {
         FileSystem fileSystem = fileSystemService.remoteFileSystem
-        importProcess.externallyProcessedBamFiles.each { ExternallyProcessedBamFile epmbf ->
+        importInstance.externallyProcessedBamFiles.each { ExternallyProcessedBamFile epmbf ->
             Path targetBaseDir = fileSystem.getPath(epmbf.importedFrom).parent
             Path linkBaseDir = fileSystem.getPath(epmbf.importFolder.absolutePath)
 
@@ -101,7 +101,7 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
 
     @SuppressWarnings("LineLength") // suppressed because breaking the line would break the commands
     @SuppressWarnings('JavaIoPackageAccess') // method is about files
-    private NextAction copyFiles(ImportProcess importProcess) throws Throwable {
+    private NextAction copyFiles(BamImportInstance importInstance) throws Throwable {
         NextAction action = NextAction.SUCCEED
 
         String moduleLoader = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER)
@@ -111,7 +111,7 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
         String groovyCommand = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_GROOVY)
         File otpScriptDir = fileService.toFile(configService.toolsPath)
 
-        importProcess.externallyProcessedBamFiles.each { ExternallyProcessedBamFile epmbf ->
+        importInstance.externallyProcessedBamFiles.each { ExternallyProcessedBamFile epmbf ->
             File sourceBam = new File(epmbf.importedFrom)
             File sourceBaseDir = sourceBam.parentFile
             File sourceBai = new File(sourceBaseDir, epmbf.baiFileName)
@@ -202,13 +202,13 @@ touch ${checkpoint}
     @Override
     @Transactional
     protected void validate() throws Throwable {
-        final ImportProcess importProcess = processParameterObject
-        importProcess.linkOperation.linkSource ? validateLink(importProcess) : validateCopy(importProcess)
+        final BamImportInstance importInstance = processParameterObject
+        importInstance.linkOperation.linkSource ? validateLink(importInstance) : validateCopy(importInstance)
     }
 
-    private void validateLink(ImportProcess importProcess) throws Throwable {
+    private void validateLink(BamImportInstance importInstance) throws Throwable {
         FileSystem fileSystem = fileSystemService.remoteFileSystem
-        importProcess.externallyProcessedBamFiles.each { ExternallyProcessedBamFile bamFile ->
+        importInstance.externallyProcessedBamFiles.each { ExternallyProcessedBamFile bamFile ->
             Path sourceBaseDir = fileSystem.getPath(bamFile.importedFrom).parent
             Path targetBaseDir = fileSystem.getPath(bamFile.importFolder.absolutePath)
 
@@ -231,10 +231,10 @@ touch ${checkpoint}
         assert target.toRealPath() == source.toRealPath()
     }
 
-    private void validateCopy(ImportProcess importProcess) throws Throwable {
+    private void validateCopy(BamImportInstance importInstance) throws Throwable {
         FileSystem fs = fileSystemService.remoteFileSystem
 
-        final Collection<String> problems = importProcess.externallyProcessedBamFiles.collect {
+        final Collection<String> problems = importInstance.externallyProcessedBamFiles.collect {
             String path = it.bamFile.path
             Path target = fs.getPath(path)
             Path targetBai = fs.getPath(it.baiFile.path)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -99,11 +99,11 @@ class BamMetadataImportService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Map validateAndImport(String metadataFile, boolean ignoreWarnings, String previousValidationMd5sum, ImportProcess.LinkOperation linkOperation,
+    Map validateAndImport(String metadataFile, boolean ignoreWarnings, String previousValidationMd5sum, BamImportInstance.LinkOperation linkOperation,
                           boolean triggerAnalysis, List<String> furtherFiles, boolean addDefaultFiles = false) {
         FileSystem fileSystem = fileSystemService.remoteFileSystem
         Project outputProject
-        ImportProcess importProcess
+        BamImportInstance importInstance
 
         if (addDefaultFiles) {
             furtherFiles.addAll(DEFAULT_RODDY_FILE_PATHS)
@@ -112,9 +112,9 @@ class BamMetadataImportService {
         BamMetadataValidationContext context = validate(metadataFile, furtherFiles, linkOperation.linkSource)
         try {
             MetadataImportService.mayImport(context, ignoreWarnings, previousValidationMd5sum)
-            importProcess = new ImportProcess([
+            importInstance = new BamImportInstance([
                     externallyProcessedBamFiles: [],
-                    state                      : ImportProcess.State.NOT_STARTED,
+                    state                      : BamImportInstance.State.NOT_STARTED,
                     linkOperation              : linkOperation,
                     triggerAnalysis            : triggerAnalysis,
             ])
@@ -212,23 +212,24 @@ class BamMetadataImportService {
 
                 emwp.bamFileInProjectFolder = null
                 assert epmbf.save(flush: true)
-                importProcess.externallyProcessedBamFiles.add(epmbf)
+                importInstance.externallyProcessedBamFiles.add(epmbf)
             }
 
-            assert importProcess.save(flush: true)
+            assert importInstance.save(flush: true)
 
-            if (importProcess.triggerAnalysis) {
-                samplePairDeciderService.findOrCreateSamplePairs(importProcess.externallyProcessedBamFiles*.workPackage)
+            if (importInstance.triggerAnalysis) {
+                samplePairDeciderService.findOrCreateSamplePairs(importInstance.externallyProcessedBamFiles*.workPackage)
             }
 
-            outputProject = importProcess.externallyProcessedBamFiles.first().project
+            outputProject = importInstance.externallyProcessedBamFiles.first().project
         } catch (MetadataFileImportException e) {
             context.addProblem(Collections.emptySet(), LogLevel.INFO, e.message)
         }
 
-        return [context      : context,
-                importProcess: importProcess,
-                project      : outputProject,]
+        return [
+                context      : context,
+                project      : outputProject,
+        ]
     }
 
     private static String getNameFromPath(String path) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -134,17 +134,17 @@ ExternallyProcessedBamFile.withTransaction {
             qualityAssessment.delete(flush: true)
         }
 
-        ImportProcess.withCriteria {
+        BamImportInstance.withCriteria {
             externallyProcessedBamFiles {
                 eq('id', epmbf.id)
             }
-        }.each { ImportProcess importProcess->
-            println "  --> remove from: ${importProcess}"
-            importProcess.externallyProcessedBamFiles.remove(epmbf)
-            importProcess.save(flush: true)
-            if (importProcess.externallyProcessedBamFiles.empty) {
+        }.each { BamImportInstance importInstance->
+            println "  --> remove from: ${importInstance}"
+            importInstance.externallyProcessedBamFiles.remove(epmbf)
+            importInstance.save(flush: true)
+            if (importInstance.externallyProcessedBamFiles.empty) {
                 println "    --> is now empty --> delete it"
-                importProcess.delete(flush: true)
+                importInstance.delete(flush: true)
             }
         }
 

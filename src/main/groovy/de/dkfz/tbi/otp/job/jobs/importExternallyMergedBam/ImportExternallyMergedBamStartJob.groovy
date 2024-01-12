@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Scope
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.ImportProcess
+import de.dkfz.tbi.otp.dataprocessing.BamImportInstance
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
@@ -48,12 +48,12 @@ class ImportExternallyMergedBamStartJob extends AbstractStartJobImpl {
                 return
             }
 
-            ImportProcess importProcess = CollectionUtils.atMostOneElement(ImportProcess.findAllByState(ImportProcess.State.NOT_STARTED, [max: 1]))
-            if (importProcess) {
-                importProcess.state = ImportProcess.State.STARTED
-                assert importProcess.save(flush: true)
-                createProcess(importProcess)
-                log.debug "Creating process for import ${importProcess}"
+            BamImportInstance importInstance = CollectionUtils.atMostOneElement(BamImportInstance.findAllByState(BamImportInstance.State.NOT_STARTED, [max: 1]))
+            if (importInstance) {
+                importInstance.state = BamImportInstance.State.STARTED
+                assert importInstance.save(flush: true)
+                createProcess(importInstance)
+                log.debug "Creating process for import ${importInstance}"
             }
         }
     }

@@ -51,7 +51,7 @@ class BamMetadataImportServiceSpec extends Specification implements DomainFactor
                 ExternalMergingWorkPackage,
                 ExternallyProcessedBamFile,
                 ExternallyProcessedBamFileQualityAssessment,
-                ImportProcess,
+                BamImportInstance,
                 Individual,
                 Project,
                 Pipeline,

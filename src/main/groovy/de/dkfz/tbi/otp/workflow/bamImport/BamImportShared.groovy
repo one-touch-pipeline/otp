@@ -25,7 +25,7 @@ import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
-import de.dkfz.tbi.otp.dataprocessing.ImportProcess
+import de.dkfz.tbi.otp.dataprocessing.BamImportInstance
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
@@ -52,11 +52,11 @@ trait BamImportShared extends WorkflowShared {
     }
 
     @CompileDynamic
-    ImportProcess getImportProcess(ExternallyProcessedBamFile externallyProcessedBamFile) {
-        return ImportProcess.createCriteria().get {
+    BamImportInstance getImportInstance(ExternallyProcessedBamFile externallyProcessedBamFile) {
+        return BamImportInstance.createCriteria().get {
             externallyProcessedBamFiles {
                 eq('id', externallyProcessedBamFile.id)
             }
-        } as ImportProcess
+        } as BamImportInstance
     }
 }

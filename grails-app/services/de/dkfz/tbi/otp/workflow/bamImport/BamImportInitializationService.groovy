@@ -26,7 +26,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.transaction.TransactionStatus
 
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
-import de.dkfz.tbi.otp.dataprocessing.ImportProcess
+import de.dkfz.tbi.otp.dataprocessing.BamImportInstance
 import de.dkfz.tbi.otp.workflowExecution.*
 
 @Slf4j
@@ -37,7 +37,7 @@ class BamImportInitializationService {
     WorkflowRunService workflowRunService
     WorkflowService workflowService
 
-    List<WorkflowRun> createWorkflowRuns(ImportProcess instance, ProcessingPriority priority = null) {
+    List<WorkflowRun> createWorkflowRuns(BamImportInstance instance, ProcessingPriority priority = null) {
         Workflow workflow = workflowService.getExactlyOneWorkflow(BamImportWorkflow.WORKFLOW)
         List<WorkflowRun> workflowRuns = instance.externallyProcessedBamFiles.collect { ExternallyProcessedBamFile bamFile ->
             createRunForBamFile(workflow, bamFile, priority)

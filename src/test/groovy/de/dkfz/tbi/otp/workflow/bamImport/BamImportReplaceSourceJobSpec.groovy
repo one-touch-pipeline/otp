@@ -42,7 +42,7 @@ class BamImportReplaceSourceJobSpec extends Specification implements DataTest, B
         return [
                 ExternalMergingWorkPackage,
                 ExternallyProcessedBamFile,
-                ImportProcess,
+                BamImportInstance,
                 WorkflowStep,
         ]
     }
@@ -71,7 +71,7 @@ class BamImportReplaceSourceJobSpec extends Specification implements DataTest, B
 
     void "test BamImportReplaceSourceJob.getLinkMap when replaceSourceWithLink is true"() {
         given:
-        createImportProcess(externallyProcessedBamFiles: [bamFile], linkOperation: ImportProcess.LinkOperation.COPY_AND_LINK)
+        createImportInstance(externallyProcessedBamFiles: [bamFile], linkOperation: BamImportInstance.LinkOperation.COPY_AND_LINK)
         Path sourceBaseDirFilePath = Paths.get("/source")
         Path sourceBamFilePath = sourceBaseDirFilePath.resolve(Paths.get("bamFile.bam"))
         Path sourceBaiFilePath = sourceBaseDirFilePath.resolve(Paths.get("bamFile.bai"))
@@ -99,7 +99,7 @@ class BamImportReplaceSourceJobSpec extends Specification implements DataTest, B
 
     void "test getLinkMap, when furtherFiles contains directory, delete it"() {
         given:
-        createImportProcess(externallyProcessedBamFiles: [bamFile], linkOperation: ImportProcess.LinkOperation.COPY_AND_LINK)
+        createImportInstance(externallyProcessedBamFiles: [bamFile], linkOperation: BamImportInstance.LinkOperation.COPY_AND_LINK)
         Path sourceBaseDirFilePath = tempDir
         Path targetBaseDirFilePath = Paths.get("/target")
 
@@ -123,7 +123,7 @@ class BamImportReplaceSourceJobSpec extends Specification implements DataTest, B
 
     void "test BamImportReplaceSourceJob.getLinkMap when replaceSourceWithLink is false"() {
         given:
-        createImportProcess(externallyProcessedBamFiles: [bamFile])
+        createImportInstance(externallyProcessedBamFiles: [bamFile])
 
         expect:
         job.getLinkMap(workflowStep) == []

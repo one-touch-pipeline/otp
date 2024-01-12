@@ -49,7 +49,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
         return [
                 ExternalMergingWorkPackage,
                 ExternallyProcessedBamFile,
-                ImportProcess,
+                BamImportInstance,
                 Individual,
                 JobDefinition,
                 JobExecutionPlan,
@@ -70,7 +70,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
     ReplaceSourceWithLinkJob linkingJob
     ProcessingStep step
 
-    ImportProcess importProcess
+    BamImportInstance importInstance
 
     TestConfigService configService
 
@@ -93,9 +93,9 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
                 furtherFiles: ["subDirectory"]
         )
 
-        importProcess = new ImportProcess(
+        importInstance = new BamImportInstance(
                 externallyProcessedBamFiles: [epmbf],
-                linkOperation: ImportProcess.LinkOperation.COPY_AND_LINK,
+                linkOperation: BamImportInstance.LinkOperation.COPY_AND_LINK,
                 triggerAnalysis: true,
         ).save(flush: true)
     }
@@ -107,7 +107,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
     void "test execute when everything is fine"() {
         given:
         createHelperObjects()
-        ExternallyProcessedBamFile bamFile = importProcess.externallyProcessedBamFiles[0]
+        ExternallyProcessedBamFile bamFile = importInstance.externallyProcessedBamFiles[0]
         File sourceBam = new File(bamFile.importedFrom)
         File sourceBai = new File(sourceBam.parentFile, bamFile.baiFileName)
         File sourceFurtherFile = new File(new File(new File(bamFile.importedFrom).parentFile, bamFile.furtherFiles.first()), 'file.txt')
@@ -130,39 +130,39 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
         sourceBam.toPath().toRealPath() == bamFile.bamFile.toPath()
         sourceBai.toPath().toRealPath() == bamFile.baiFile.toPath()
         sourceFurtherFile.toPath().toRealPath() == targetFurtherFile.toPath()
-        importProcess.state == ImportProcess.State.FINISHED
+        importInstance.state == BamImportInstance.State.FINISHED
     }
 
     void "test execute when no linking needs"() {
         given:
-        importProcess.linkOperation = ImportProcess.LinkOperation.COPY_AND_KEEP
-        importProcess.save(flush: true)
+        importInstance.linkOperation = BamImportInstance.LinkOperation.COPY_AND_KEEP
+        importInstance.save(flush: true)
         createHelperObjects()
 
         when:
         linkingJob.execute()
 
         then:
-        importProcess.externallyProcessedBamFiles.each {
+        importInstance.externallyProcessedBamFiles.each {
             assert !Files.isSymbolicLink(new File(it.importedFrom).toPath())
         }
-        importProcess.state == ImportProcess.State.FINISHED
+        importInstance.state == BamImportInstance.State.FINISHED
     }
 
     private void createHelperObjects() {
         linkingJob = [
-                getProcessParameterObject: { -> importProcess },
+                getProcessParameterObject: { -> importInstance },
                 getProcessingStep        : { -> step },
         ] as ReplaceSourceWithLinkJob
 
-        CreateFileHelper.createFile(new File("${importProcess.externallyProcessedBamFiles[0].importedFrom}"))
+        CreateFileHelper.createFile(new File("${importInstance.externallyProcessedBamFiles[0].importedFrom}"))
 
         configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.resolve("root")])
 
         DomainFactory.createProcessParameter([
                 process  : step.process,
-                value    : importProcess.id.toString(),
-                className: ImportProcess.name,
+                value    : importInstance.id.toString(),
+                className: BamImportInstance.name,
         ])
 
         linkingJob.configService = configService
@@ -180,7 +180,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
     void "check that linking works correctly for pattern '#furtherFilePattern' with link on '#linkFileName1' and second link on '#linkFileName2' and final file '#realFurtherFileName'"() {
         given:
         createHelperObjects()
-        ExternallyProcessedBamFile bamFile = importProcess.externallyProcessedBamFiles[0]
+        ExternallyProcessedBamFile bamFile = importInstance.externallyProcessedBamFiles[0]
         bamFile.furtherFiles = [
                 furtherFilePattern,
         ]
@@ -219,7 +219,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
         linkingJob.execute()
 
         then:
-        importProcess.state == ImportProcess.State.FINISHED
+        importInstance.state == BamImportInstance.State.FINISHED
         real.toPath().toRealPath() == copiedFile.toPath()
 
         where:
@@ -240,7 +240,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
             0 * _
         }
 
-        ExternallyProcessedBamFile bamFile = importProcess.externallyProcessedBamFiles[0]
+        ExternallyProcessedBamFile bamFile = importInstance.externallyProcessedBamFiles[0]
         [
                 bamFile.bamFileName,
                 bamFile.baiFileName,
@@ -257,6 +257,6 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
         linkingJob.execute()
 
         then:
-        importProcess.state == ImportProcess.State.FINISHED
+        importInstance.state == BamImportInstance.State.FINISHED
     }
 }

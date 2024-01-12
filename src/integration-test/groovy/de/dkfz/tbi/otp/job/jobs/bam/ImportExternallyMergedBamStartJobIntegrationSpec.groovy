@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@ import grails.gorm.transactions.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.ImportProcess
+import de.dkfz.tbi.otp.dataprocessing.BamImportInstance
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.jobs.importExternallyMergedBam.ImportExternallyMergedBamStartJob
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
@@ -38,17 +38,17 @@ import de.dkfz.tbi.otp.utils.SessionUtils
 @Integration
 class ImportExternallyMergedBamStartJobIntegrationSpec extends Specification {
 
-    void "execute sets state of importProcess on STARTED"() {
+    void "execute sets state of importInstance on STARTED"() {
         given:
         SessionUtils.metaClass.static.withNewSession = { Closure c -> c() }
         JobExecutionPlan plan = DomainFactory.createJobExecutionPlan(enabled: true)
-        ImportProcess importProcess = new ImportProcess(
+        BamImportInstance importInstance = new BamImportInstance(
                 externallyProcessedBamFiles: [
                         DomainFactory.createExternallyProcessedBamFile(),
                         DomainFactory.createExternallyProcessedBamFile()
                 ]
         )
-        importProcess.save(flush: true)
+        importInstance.save(flush: true)
         ImportExternallyMergedBamStartJob importExternallyMergedBamStartJob = new ImportExternallyMergedBamStartJob()
         importExternallyMergedBamStartJob.schedulerService = Mock(SchedulerService) {
             1 * createProcess(_, _, _) >> null
@@ -60,10 +60,10 @@ class ImportExternallyMergedBamStartJobIntegrationSpec extends Specification {
 
         when:
         importExternallyMergedBamStartJob.execute()
-        ImportProcess refreshedImportProcess = ImportProcess.get(importProcess.id)
+        BamImportInstance refreshedImportInstance = BamImportInstance.get(importInstance.id)
 
         then:
-        refreshedImportProcess.state == ImportProcess.State.STARTED
+        refreshedImportInstance.state == BamImportInstance.State.STARTED
 
         cleanup:
         TestCase.removeMetaClass(SessionUtils)

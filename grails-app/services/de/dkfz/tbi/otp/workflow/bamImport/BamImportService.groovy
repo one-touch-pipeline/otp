@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@ import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.ImportProcess
+import de.dkfz.tbi.otp.dataprocessing.BamImportInstance
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.WorkflowCreateState
@@ -40,18 +40,18 @@ class BamImportService {
     LsdfFilesService lsdfFilesService
     WorkflowService workflowService
 
-    final static String QUERY_WAITING_AND_ALLOWED_IMPORT_PROCESS = """
+    final static String QUERY_WAITING_AND_ALLOWED_IMPORT_INSTANCE = """
         select
             imp
         from
-            ImportProcess imp
+            BamImportInstance imp
         where
             imp.workflowCreateState = 'WAITING'
             and not exists (
                 select
                     imp2.id
                 from
-                    ImportProcess imp2
+                    BamImportInstance imp2
                     join imp2.externallyProcessedBamFiles bf2
                 where
                     imp2.workflowCreateState = 'PROCESSING'
@@ -59,7 +59,7 @@ class BamImportService {
                         select
                             bf3.workPackage.sample.individual.project
                         from
-                            ImportProcess imp3
+                            BamImportInstance imp3
                             join imp3.externallyProcessedBamFiles bf3
                         where
                             imp3 = imp
@@ -68,20 +68,20 @@ class BamImportService {
         order by imp.id asc
         """
 
-    ImportProcess waiting() {
+    BamImportInstance waiting() {
         return CollectionUtils.atMostOneElement(
-                ImportProcess.executeQuery(QUERY_WAITING_AND_ALLOWED_IMPORT_PROCESS, [:], [max: 1])
+                BamImportInstance.executeQuery(QUERY_WAITING_AND_ALLOWED_IMPORT_INSTANCE, [:], [max: 1])
         )
     }
 
     @CompileDynamic
     int countInstancesInWaitingState() {
-        return ImportProcess.countByWorkflowCreateState(WorkflowCreateState.WAITING)
+        return BamImportInstance.countByWorkflowCreateState(WorkflowCreateState.WAITING)
     }
 
     @Transactional(readOnly = false)
     void updateState(long id, WorkflowCreateState state) {
-        ImportProcess bamImportDb = ImportProcess.get(id)
+        BamImportInstance bamImportDb = BamImportInstance.get(id)
         bamImportDb.workflowCreateState = state
         bamImportDb.save(flush: true)
     }

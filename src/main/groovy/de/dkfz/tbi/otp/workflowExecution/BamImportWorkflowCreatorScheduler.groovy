@@ -26,7 +26,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.ImportProcess
+import de.dkfz.tbi.otp.dataprocessing.BamImportInstance
 import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 import de.dkfz.tbi.otp.workflow.WorkflowCreateState
 import de.dkfz.tbi.otp.workflow.bamImport.BamImportInitializationService
@@ -48,8 +48,8 @@ class BamImportWorkflowCreatorScheduler extends AbstractWorkflowCreatorScheduler
 
     @Override
     Long getNextWaitingImportId() {
-        ImportProcess importProcess = bamImportService.waiting()
-        return importProcess ? importProcess.id : 0L
+        BamImportInstance importInstance = bamImportService.waiting()
+        return importInstance ? importInstance.id : 0L
     }
 
     @Override
@@ -65,13 +65,13 @@ class BamImportWorkflowCreatorScheduler extends AbstractWorkflowCreatorScheduler
     @Override
     @Transactional
     protected DeciderResult createWorkflowsTransactional(Long importId) {
-        ImportProcess importProcessDb = getImportProcess(importId)
-        int count = importProcessDb.externallyProcessedBamFiles.size()
+        BamImportInstance importInstanceDb = getImportInstance(importId)
+        int count = importInstanceDb.externallyProcessedBamFiles.size()
 
-        return LogUsedTimeUtils.logUsedTimeStartEnd(log, "create workflows for ${importProcessDb} " +
+        return LogUsedTimeUtils.logUsedTimeStartEnd(log, "create workflows for ${importInstanceDb} " +
                 "(bamFiles: ${count}, ${bamImportService.countInstancesInWaitingState()} in queue)") {
             List<WorkflowRun> runs = LogUsedTimeUtils.logUsedTimeStartEnd(log, "  create workflow runs for ${count} bamFiles") {
-                bamImportInitializationService.createWorkflowRuns(importProcessDb)
+                bamImportInitializationService.createWorkflowRuns(importInstanceDb)
             }
 
             Collection<WorkflowArtefact> workflowArtefacts = runs.collectMany { it.outputArtefacts*.value }
@@ -100,17 +100,17 @@ class BamImportWorkflowCreatorScheduler extends AbstractWorkflowCreatorScheduler
     @Override
     @Transactional(readOnly = true)
     protected Instant getExecutionTimestamp(Long importId) {
-        ImportProcess importProcessDb = ImportProcess.get(importId)
-        return importProcessDb ? importProcessDb.dateCreated.toInstant() : null
+        BamImportInstance importInstanceDb = BamImportInstance.get(importId)
+        return importInstanceDb ? importInstanceDb.dateCreated.toInstant() : null
     }
 
-    private ImportProcess getImportProcess(Long importId) {
-        ImportProcess importProcessDb = ImportProcess.get(importId)
-        if (!importProcessDb) {
-            String message = messageSourceService.getMessage("workflow.bamImport.failedLoadingImportProcess", [importId].toArray())
+    private BamImportInstance getImportInstance(Long importId) {
+        BamImportInstance importInstanceDb = BamImportInstance.get(importId)
+        if (!importInstanceDb) {
+            String message = messageSourceService.getMessage("workflow.bamImport.failedLoadingBamImportInstance", [importId].toArray())
             log.error(message)
             throw new FailedLoadingDbObjectException(message)
         }
-        return importProcessDb
+        return importInstanceDb
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -519,8 +519,8 @@ class NotificationCreator {
     void sendBamImportWorkflowCreateErrorMail(Long importId, Instant instant, Throwable throwable) {
         String subject = "Failed to create workflows at ${TimeFormats.DATE_TIME.getFormattedInstant(instant)} for BamImport with ID: ${importId}"
 
-        ImportProcess importProcess = ImportProcess.get(importId)
-        List<Long> bamIds = importProcess.externallyProcessedBamFiles*.id
+        BamImportInstance importInstance = BamImportInstance.get(importId)
+        List<Long> bamIds = importInstance.externallyProcessedBamFiles*.id
         String propertyName = WorkflowCreateState.simpleName
 
         String body = [

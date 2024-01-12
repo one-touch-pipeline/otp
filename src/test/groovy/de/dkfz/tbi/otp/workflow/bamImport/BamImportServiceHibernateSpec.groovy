@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,24 +35,24 @@ class BamImportServiceHibernateSpec extends HibernateSpec implements ServiceUnit
     @Override
     List<Class> getDomainClasses() {
         return [
-                ImportProcess,
+                BamImportInstance,
                 ExternallyProcessedBamFile,
                 ExternalMergingWorkPackage,
         ]
     }
 
     @Unroll
-    void "waiting, should return a valid ImportProcess or null object depending on the available ImportProcesses"() {
+    void "waiting, should return a valid BamImportInstance or null object depending on the available BamImportInstances"() {
         given:
         states.each {
-            createImportProcessHelper(it)
+            createImportInstanceHelper(it)
         }
 
         when:
-        ImportProcess importProcess = service.waiting()
+        BamImportInstance importInstance = service.waiting()
 
         then:
-        (importProcess != null) == returnOne
+        (importInstance != null) == returnOne
 
         where:
         states                                                        || returnOne
@@ -73,19 +73,19 @@ class BamImportServiceHibernateSpec extends HibernateSpec implements ServiceUnit
 
     void "waiting, when multiple waiting and no one is in process, then return the oldest"() {
         given:
-        ImportProcess importProcessExpected = (1..3).collect {
-            createImportProcessHelper(WorkflowCreateState.WAITING)
+        BamImportInstance importInstanceExpected = (1..3).collect {
+            createImportInstanceHelper(WorkflowCreateState.WAITING)
         }.first()
 
         when:
-        ImportProcess importProcess = service.waiting()
+        BamImportInstance importInstance = service.waiting()
 
         then:
-        importProcess == importProcessExpected
+        importInstance == importInstanceExpected
     }
 
-    private ImportProcess createImportProcessHelper(WorkflowCreateState state) {
-        return createImportProcess([
+    private BamImportInstance createImportInstanceHelper(WorkflowCreateState state) {
+        return createImportInstance([
                 externallyProcessedBamFiles: [
                         DomainFactory.createExternallyProcessedBamFile(),
                         DomainFactory.createExternallyProcessedBamFile(),

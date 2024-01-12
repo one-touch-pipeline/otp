@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,7 +38,7 @@ import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
 class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements DomainFactoryCore {
 
-    protected ImportProcess importProcess
+    protected BamImportInstance importInstance
 
     protected final static String FURTHER_FILE_NAME = "furtherFile.txt"
 
@@ -155,34 +155,34 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
             ExternallyProcessedBamFile epmbf01 = createFile(project, '1', furtherFiles, false)
             ExternallyProcessedBamFile epmbf02 = createFile(project, '2', furtherFiles, true)
 
-            importProcess = new ImportProcess(
+            importInstance = new BamImportInstance(
                     externallyProcessedBamFiles: [epmbf01, epmbf02],
-                    state: ImportProcess.State.NOT_STARTED,
-                    linkOperation: ImportProcess.LinkOperation.COPY_AND_LINK,
+                    state: BamImportInstance.State.NOT_STARTED,
+                    linkOperation: BamImportInstance.LinkOperation.COPY_AND_LINK,
             ).save(flush: true)
         }
     }
 
     @Unroll
-    void "testImportProcess_FilesHaveToBeCopied"() {
+    void "testImportInstance_FilesHaveToBeCopied"() {
         given:
         setupFiles(furtherFiles)
         SessionUtils.withTransaction {
-            importProcess.refresh()
-            importProcess.linkOperation = ImportProcess.LinkOperation.COPY_AND_KEEP
-            importProcess.save(flush: true)
+            importInstance.refresh()
+            importInstance.linkOperation = BamImportInstance.LinkOperation.COPY_AND_KEEP
+            importInstance.save(flush: true)
         }
 
         when:
         execute()
 
         then:
-        checkThatFileCopyingWasSuccessful(importProcess, furtherFiles)
+        checkThatFileCopyingWasSuccessful(importInstance, furtherFiles)
 
         Thread.sleep(1000) // needs a sleep, otherwise the file system cache has not yet the new value
         SessionUtils.withTransaction {
             FileSystem fs = fileSystemService.remoteFileSystem
-            importProcess.externallyProcessedBamFiles.each {
+            importInstance.externallyProcessedBamFiles.each {
                 it.refresh()
                 Path baseDirSource = fs.getPath(it.importedFrom).parent
                 Path baseDirTarget = fs.getPath(it.importFolder.path)
@@ -207,25 +207,25 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
     }
 
     @Unroll
-    void "testImportProcess_FilesHaveToBeCopiedLinkedAndDeleted"() {
+    void "testImportInstance_FilesHaveToBeCopiedLinkedAndDeleted"() {
         given:
         setupFiles(furtherFiles)
         SessionUtils.withTransaction {
-            importProcess.refresh()
-            importProcess.linkOperation = ImportProcess.LinkOperation.COPY_AND_LINK
-            importProcess.save(flush: true)
+            importInstance.refresh()
+            importInstance.linkOperation = BamImportInstance.LinkOperation.COPY_AND_LINK
+            importInstance.save(flush: true)
         }
 
         when:
         execute()
 
         then:
-        checkThatFileCopyingWasSuccessful(importProcess, furtherFiles)
+        checkThatFileCopyingWasSuccessful(importInstance, furtherFiles)
 
         Thread.sleep(1000) // needs a sleep, otherwise the file system cache has not yet the new value
 
         SessionUtils.withTransaction {
-            importProcess.externallyProcessedBamFiles.each {
+            importInstance.externallyProcessedBamFiles.each {
                 it.refresh()
                 Path baseDirSource = Paths.get(it.importedFrom).parent
                 Path baseDirTarget = Paths.get(it.importFolder.path)
@@ -252,14 +252,14 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
     }
 
     @Unroll
-    void "testImportProcess_FilesHaveToBeLink"() {
+    void "testImportInstance_FilesHaveToBeLink"() {
         given:
         setupFiles(furtherFiles)
         SessionUtils.withTransaction {
-            importProcess.refresh()
-            importProcess.linkOperation = ImportProcess.LinkOperation.LINK_SOURCE
-            importProcess.save(flush: true)
-            importProcess.externallyProcessedBamFiles.each { ExternallyProcessedBamFile bamFile ->
+            importInstance.refresh()
+            importInstance.linkOperation = BamImportInstance.LinkOperation.LINK_SOURCE
+            importInstance.save(flush: true)
+            importInstance.externallyProcessedBamFiles.each { ExternallyProcessedBamFile bamFile ->
                 bamFile.maximumReadLength = 100
                 bamFile.md5sum = HelperUtils.randomMd5sum
                 bamFile.save(flush: true)
@@ -274,7 +274,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
 
         SessionUtils.withTransaction {
             FileSystem fs = fileSystemService.remoteFileSystem
-            importProcess.externallyProcessedBamFiles.each {
+            importInstance.externallyProcessedBamFiles.each {
                 it.refresh()
                 assert it.fileSize > 0
                 assert it.fileOperationStatus == AbstractBamFile.FileOperationStatus.PROCESSED
@@ -302,14 +302,14 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase implements
         false        | _
     }
 
-    protected void checkThatFileCopyingWasSuccessful(ImportProcess impPro, boolean furtherFiles) {
+    protected void checkThatFileCopyingWasSuccessful(BamImportInstance impPro, boolean furtherFiles) {
         SessionUtils.withTransaction {
             FileSystem fs = fileSystemService.remoteFileSystem
-            importProcess = ImportProcess.get(impPro.id)
-            assert importProcess.state == ImportProcess.State.FINISHED
-            assert importProcess.externallyProcessedBamFiles.size() == 2
+            importInstance = BamImportInstance.get(impPro.id)
+            assert importInstance.state == BamImportInstance.State.FINISHED
+            assert importInstance.externallyProcessedBamFiles.size() == 2
 
-            importProcess.externallyProcessedBamFiles.each {
+            importInstance.externallyProcessedBamFiles.each {
                 it.refresh()
                 assert it.fileSize > 0
                 File baseDirectory = it.importFolder

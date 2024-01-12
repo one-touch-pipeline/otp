@@ -30,11 +30,11 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 @Rollback
 @Integration
-class ImportProcessIntegrationSpec extends Specification {
+class BamImportInstanceIntegrationSpec extends Specification {
 
-    ImportProcess importProcess01
-    ImportProcess importProcess02
-    ImportProcess importProcess03
+    BamImportInstance importInstance01
+    BamImportInstance importInstance02
+    BamImportInstance importInstance03
     ExternallyProcessedBamFile epmbf01
     ExternallyProcessedBamFile epmbf02
     ExternallyProcessedBamFile epmbf03
@@ -42,9 +42,9 @@ class ImportProcessIntegrationSpec extends Specification {
     ExternallyProcessedBamFile epmbf05
 
     void setupData() {
-        importProcess01 = new ImportProcess()
-        importProcess02 = new ImportProcess()
-        importProcess03 = new ImportProcess()
+        importInstance01 = new BamImportInstance()
+        importInstance02 = new BamImportInstance()
+        importInstance03 = new BamImportInstance()
         epmbf01 = DomainFactory.createExternallyProcessedBamFile(fileName: 'epmbf01')
         epmbf02 = DomainFactory.createExternallyProcessedBamFile(fileName: 'epmbf02')
         epmbf03 = DomainFactory.createExternallyProcessedBamFile(fileName: 'epmbf03')
@@ -57,12 +57,12 @@ class ImportProcessIntegrationSpec extends Specification {
         setupData()
 
         Set<ExternallyProcessedBamFile> externallyProcessedBamFiles = [epmbf01, epmbf02, epmbf03]
-        importProcess01.externallyProcessedBamFiles = externallyProcessedBamFiles
-        assert importProcess01.save(flush: true)
+        importInstance01.externallyProcessedBamFiles = externallyProcessedBamFiles
+        assert importInstance01.save(flush: true)
 
         when:
-        importProcess02.externallyProcessedBamFiles = externallyProcessedBamFiles
-        importProcess02.save(flush: true)
+        importInstance02.externallyProcessedBamFiles = externallyProcessedBamFiles
+        importInstance02.save(flush: true)
 
         then:
         ValidationException e = thrown()
@@ -75,12 +75,12 @@ class ImportProcessIntegrationSpec extends Specification {
 
         Set<ExternallyProcessedBamFile> externallyProcessedBamFiles01 = [epmbf01, epmbf02]
         Set<ExternallyProcessedBamFile> externallyProcessedBamFiles02 = [epmbf01, epmbf03]
-        importProcess01.externallyProcessedBamFiles = externallyProcessedBamFiles01
-        assert importProcess01.save(flush: true)
+        importInstance01.externallyProcessedBamFiles = externallyProcessedBamFiles01
+        assert importInstance01.save(flush: true)
 
         when:
-        importProcess02.externallyProcessedBamFiles = externallyProcessedBamFiles02
-        importProcess02.save(flush: true)
+        importInstance02.externallyProcessedBamFiles = externallyProcessedBamFiles02
+        importInstance02.save(flush: true)
 
         then:
         ValidationException e = thrown()
@@ -94,14 +94,14 @@ class ImportProcessIntegrationSpec extends Specification {
         Set<ExternallyProcessedBamFile> externallyProcessedBamFiles01 = [epmbf01, epmbf02]
         Set<ExternallyProcessedBamFile> externallyProcessedBamFiles02 = [epmbf03, epmbf04]
         Set<ExternallyProcessedBamFile> externallyProcessedBamFiles03 = [epmbf02, epmbf04, epmbf05]
-        importProcess01.externallyProcessedBamFiles = externallyProcessedBamFiles01
-        assert importProcess01.save(flush: true)
-        importProcess02.externallyProcessedBamFiles = externallyProcessedBamFiles02
-        importProcess02.save(flush: true)
+        importInstance01.externallyProcessedBamFiles = externallyProcessedBamFiles01
+        assert importInstance01.save(flush: true)
+        importInstance02.externallyProcessedBamFiles = externallyProcessedBamFiles02
+        importInstance02.save(flush: true)
 
         when:
-        importProcess03.externallyProcessedBamFiles = externallyProcessedBamFiles03
-        importProcess03.save(flush: true)
+        importInstance03.externallyProcessedBamFiles = externallyProcessedBamFiles03
+        importInstance03.save(flush: true)
 
         then:
         ValidationException e = thrown()

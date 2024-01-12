@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,20 +45,20 @@ class BamImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSched
         return [
                 ExternalMergingWorkPackage,
                 ExternallyProcessedBamFile,
-                ImportProcess,
+                BamImportInstance,
                 ProcessingOption,
         ]
     }
 
-    ImportProcess importProcess
+    BamImportInstance importInstance
 
     @Override
     Long getImportId() {
-        return importProcess.id
+        return importInstance.id
     }
 
     void setup() {
-        importProcess = createImportProcess([
+        importInstance = createImportInstance([
                 externallyProcessedBamFiles: [
                         DomainFactory.createExternallyProcessedBamFile(),
                         DomainFactory.createExternallyProcessedBamFile()
@@ -86,15 +86,15 @@ class BamImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSched
     void "scheduleCreateWorkflow, check if createWorkflowAsync is called or nor for the case that #cases"() {
         given:
         BamImportWorkflowCreatorScheduler scheduler = createWorkflowCreatorScheduler()
-        ImportProcess importProcessWaiting = createImportProcess([workflowCreateState: WorkflowCreateState.WAITING])
-        createImportProcess([workflowCreateState: WorkflowCreateState.PROCESSING])
+        BamImportInstance importInstanceWaiting = createImportInstance([workflowCreateState: WorkflowCreateState.WAITING])
+        createImportInstance([workflowCreateState: WorkflowCreateState.PROCESSING])
 
         when:
         scheduler.scheduleCreateWorkflow()
 
         then:
         1 * scheduler.workflowSystemService.isEnabled() >> true
-        1 * scheduler.bamImportService.waiting() >> (n > 0 ? importProcessWaiting : null)
+        1 * scheduler.bamImportService.waiting() >> (n > 0 ? importInstanceWaiting : null)
         n * scheduler.bamImportService.updateState(_, WorkflowCreateState.PROCESSING)
 
         where:
@@ -122,7 +122,7 @@ class BamImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSched
 
         List<AbstractBamFile> expectedListForSnv = []
 
-        ExternallyProcessedBamFile bamFile = importProcess.externallyProcessedBamFiles[0]
+        ExternallyProcessedBamFile bamFile = importInstance.externallyProcessedBamFiles[0]
         bamFile.workflowArtefact = workflowArtefacts.first()
         bamFile.workPackage = createMergingWorkPackage([
                 seqType: analysableSeqType ? seqTypes.first() : createSeqType([
@@ -143,8 +143,8 @@ class BamImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSched
         0 * scheduler.bamImportService._
 
         1 * scheduler.bamImportService.countInstancesInWaitingState() >> 1
-        0 * scheduler.messageSourceService.getMessage('workflow.bamImport.failedLoadingImportProcess', _)
-        1 * scheduler.bamImportInitializationService.createWorkflowRuns(importProcess) >> runs
+        0 * scheduler.messageSourceService.getMessage('workflow.bamImport.failedLoadingBamImportInstance', _)
+        1 * scheduler.bamImportInitializationService.createWorkflowRuns(importInstance) >> runs
         0 * scheduler.bamImportInitializationService._
         1 * scheduler.allDecider.decide(_) >> deciderResult
         1 * scheduler.samplePairDeciderService.findOrCreateSamplePairs(expectedListForSnv)
@@ -171,8 +171,8 @@ class BamImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSched
         0 * scheduler.bamImportService._
 
         1 * scheduler.bamImportService.countInstancesInWaitingState() >> 1
-        0 * scheduler.messageSourceService.getMessage('workflow.bamImport.failedLoadingImportProcess', _)
-        1 * scheduler.bamImportInitializationService.createWorkflowRuns(importProcess) >> runs
+        0 * scheduler.messageSourceService.getMessage('workflow.bamImport.failedLoadingBamImportInstance', _)
+        1 * scheduler.bamImportInitializationService.createWorkflowRuns(importInstance) >> runs
         0 * scheduler.bamImportInitializationService._
         1 * scheduler.allDecider.decide(_) >> { throw otpRuntimeException }
         0 * scheduler.samplePairDeciderService.findOrCreateSamplePairs(_)
