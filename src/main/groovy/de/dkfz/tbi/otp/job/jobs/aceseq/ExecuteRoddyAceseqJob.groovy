@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -57,6 +57,7 @@ class ExecuteRoddyAceseqJob extends AbstractExecutePanCanJob<AceseqInstance> imp
     SophiaService sophiaService
 
     @Override
+    @SuppressWarnings('UnnecessaryObjectReferences') // old wf
     protected List<String> prepareAndReturnWorkflowSpecificCValues(AceseqInstance aceseqInstance) {
         assert aceseqInstance
 

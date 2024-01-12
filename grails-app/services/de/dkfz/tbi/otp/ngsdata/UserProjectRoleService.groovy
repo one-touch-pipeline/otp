@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -481,14 +481,16 @@ class UserProjectRoleService {
 
     void doSetEnabled(UserProjectRole userProjectRole, boolean value) {
         applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
-            upr.enabled = value
-            // users should be reactivated without any further permissions
-            upr.accessToOtp = false
-            upr.accessToFiles = false
-            upr.manageUsers = false
-            upr.manageUsersAndDelegate = false
-            upr.receivesNotifications = false
-            assert upr.save(flush: true)
+            upr.with {
+                enabled = value
+                // users should be reactivated without any further permissions
+                accessToOtp = false
+                accessToFiles = false
+                manageUsers = false
+                manageUsersAndDelegate = false
+                receivesNotifications = false
+                assert save(flush: true)
+            }
         }
     }
 

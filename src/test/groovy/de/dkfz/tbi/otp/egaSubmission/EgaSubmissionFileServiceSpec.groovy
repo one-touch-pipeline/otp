@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -352,7 +352,6 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         noExceptionThrown()
     }
 
-    @SuppressWarnings('UnnecessaryObjectReferences')
     void "sendEmail, when submission is given, then send email"() {
         given:
         TestConfigService configService = new TestConfigService()
@@ -391,7 +390,6 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         noExceptionThrown()
     }
 
-    @SuppressWarnings('UnnecessaryObjectReferences')
     void "prepareSubmissionForUpload, when submission is given, then files are created, email is send state is changed to FILE_UPLOAD_STARTED"() {
         given:
         TestConfigService configService = new TestConfigService()

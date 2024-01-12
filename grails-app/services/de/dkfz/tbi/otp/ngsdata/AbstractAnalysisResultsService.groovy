@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -121,13 +121,15 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
             } else {
                 libPrepKitNames = [(String) properties.libPrepKit1, (String) properties.libPrepKit2]
             }
-            properties.libPrepKits = libPrepKitNames.unique().collect { it ?: 'unknown' }.join(", <br>")
-            properties.remove('libPrepKit1')
-            properties.remove('libPrepKit2')
-            properties.sampleTypes = "${properties.sampleType1} \u2013 ${properties.sampleType2}"
-            properties.remove('sampleType1')
-            properties.remove('sampleType2')
-            properties.dateCreated = TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(properties.dateCreated)
+            properties.with {
+                libPrepKits = libPrepKitNames.unique().collect { it ?: 'unknown' }.join(", <br>")
+                remove('libPrepKit1')
+                remove('libPrepKit2')
+                sampleTypes = "${properties.sampleType1} \u2013 ${properties.sampleType2}"
+                remove('sampleType1')
+                remove('sampleType2')
+                dateCreated = TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(dateCreated)
+            }
             if (properties.processingState != AnalysisProcessingStates.FINISHED) {
                 properties.remove('instanceId')
             }

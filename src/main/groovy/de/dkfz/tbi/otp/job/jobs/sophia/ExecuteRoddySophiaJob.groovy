@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,6 +48,7 @@ class ExecuteRoddySophiaJob extends AbstractExecutePanCanJob<SophiaInstance> imp
 
     @SuppressWarnings('JavaIoPackageAccess')
     @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
+    @SuppressWarnings('UnnecessaryObjectReferences') // old wf
     @Override
     protected List<String> prepareAndReturnWorkflowSpecificCValues(SophiaInstance sophiaInstance) {
         assert sophiaInstance

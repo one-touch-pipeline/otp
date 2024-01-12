@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -183,17 +183,19 @@ class QcThresholdService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#qcThreshold?.project, 'OTP_READ_ACCESS')")
     Errors updateThreshold(QcThreshold qcThreshold, QcThreshold.ThresholdStrategy condition,
-                           Double errorThresholdLower, Double warningThresholdLower,
-                           Double warningThresholdUpper, Double errorThresholdUpper, String property2) {
+                           Double errorThresholdLower1, Double warningThresholdLower1,
+                           Double warningThresholdUpper1, Double errorThresholdUpper1, String property2) {
         assert qcThreshold
         try {
-            qcThreshold.compare = condition
-            qcThreshold.errorThresholdLower = errorThresholdLower
-            qcThreshold.warningThresholdLower = warningThresholdLower
-            qcThreshold.warningThresholdUpper = warningThresholdUpper
-            qcThreshold.errorThresholdUpper = errorThresholdUpper
-            qcThreshold.qcProperty2 = property2
-            qcThreshold.save(flush: true)
+            qcThreshold.with {
+                compare = condition
+                errorThresholdLower = errorThresholdLower1
+                warningThresholdLower = warningThresholdLower1
+                warningThresholdUpper = warningThresholdUpper1
+                errorThresholdUpper = errorThresholdUpper1
+                qcProperty2 = property2
+                save(flush: true)
+            }
         } catch (ValidationException e) {
             return e.errors
         }

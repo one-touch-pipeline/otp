@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,6 +43,7 @@ class OptionsInterceptor {
     boolean before() { return true }
 
     @Override
+    @SuppressWarnings('UnnecessaryObjectReferences') // doesn't work with service references
     boolean after() {
         if (model != null) {
             model.contactDataOperatedBy = processingOptionService.findOptionAsString(ProcessingOption.OptionName.GUI_CONTACT_DATA_OPERATED_BY)

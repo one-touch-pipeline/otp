@@ -1213,7 +1213,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     UnnecessaryObjectReferences {
-        priority = LOW
+        priority = DEFAULT
         doNotApplyToFileNames = TEST // conditions in `then` block don't work inside `with()`
     }
     UnnecessaryOverridingMethod {

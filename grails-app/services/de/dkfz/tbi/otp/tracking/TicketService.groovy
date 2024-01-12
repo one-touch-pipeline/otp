@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -123,13 +123,15 @@ class TicketService {
     }
 
     void resetAnalysisNotification(Ticket ticket) {
-        ticket.snvFinished = null
-        ticket.indelFinished = null
-        ticket.sophiaFinished = null
-        ticket.aceseqFinished = null
-        ticket.runYapsaFinished = null
-        ticket.finalNotificationSent = false
-        assert ticket.save(flush: true)
+        ticket.with {
+            snvFinished = null
+            indelFinished = null
+            sophiaFinished = null
+            aceseqFinished = null
+            runYapsaFinished = null
+            finalNotificationSent = false
+            assert save(flush: true)
+        }
     }
 
     Set<Ticket> findAllTickets(Collection<SeqTrack> seqTracks) {
