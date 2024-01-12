@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflow.jobs
 
 import grails.testing.gorm.DataTest
+import groovy.transform.TupleConstructor
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
@@ -41,12 +42,29 @@ class AbstractCleanUpJobSpec extends Specification implements DataTest, Workflow
         ]
     }
 
+    @TupleConstructor
+    class TestAbstractCleanUpJob extends AbstractCleanUpJob {
+        List<Path> files
+        List<Path> dirs
+
+        @Override
+        List<Path> getFilesToDelete(WorkflowStep workflowStep) {
+            return files
+        }
+
+        @Override
+        List<Path> getDirectoriesToDelete(WorkflowStep workflowStep) {
+            return dirs
+        }
+    }
+
     void "test execute"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
         Path file = Paths.get("file")
+        Path file2 = Paths.get("file2")
         Path dir = Paths.get("dir")
-        AbstractCleanUpJob job = Spy(AbstractCleanUpJob)
+        AbstractCleanUpJob job = new TestAbstractCleanUpJob([file, file2], [dir])
         job.fileService = Mock(FileService)
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
 
@@ -54,10 +72,10 @@ class AbstractCleanUpJobSpec extends Specification implements DataTest, Workflow
         job.execute(workflowStep)
 
         then:
-        1 * job.getFilesToDelete(workflowStep) >> { [file] }
-        1 * job.getDirectoriesToDelete(workflowStep) >> { [dir] }
         1 * job.fileService.deleteDirectoryRecursively(file)
+        1 * job.fileService.deleteDirectoryRecursively(file2)
         1 * job.fileService.deleteDirectoryRecursively(dir)
         1 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
+        0 * _
     }
 }

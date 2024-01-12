@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,17 +31,20 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.RnaAlignmentWorkflowDomainFactory
 import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class RnaAlignmentExecuteJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, RoddyRnaFactory {
+class RnaAlignmentExecuteJobSpec extends Specification implements DataTest, RnaAlignmentWorkflowDomainFactory, RoddyRnaFactory {
 
     @TempDir
     Path tempDir
@@ -91,13 +94,21 @@ class RnaAlignmentExecuteJobSpec extends Specification implements DataTest, Work
                         ])
                 ])],
         ])
-        workflowStep = createWorkflowStep()
+        workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateRnaAlignmentWorkflow(),
+                        workDirectory  : tempDir.toString(),
+                ]),
+        ])
 
-        job = Spy(RnaAlignmentExecuteJob) {
-            getRoddyBamFile(workflowStep) >> roddyBamFile
-            getWorkDirectory(workflowStep) >> tempDir
+        job = new RnaAlignmentExecuteJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, RnaAlignmentWorkflow.OUTPUT_BAM) >> roddyBamFile
+            0 * _
         }
 
+        job.fileSystemService = new TestFileSystemService()
         job.processingOptionService = new ProcessingOptionService()
         job.roddyConfigValueService = new RoddyConfigValueService()
 
@@ -125,9 +136,17 @@ class RnaAlignmentExecuteJobSpec extends Specification implements DataTest, Work
 
     void "test getRoddyResult"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
-        RnaAlignmentExecuteJob job = Spy(RnaAlignmentExecuteJob) {
-            1 * getRoddyBamFile(workflowStep) >> roddyBamFile
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateRnaAlignmentWorkflow(),
+                ]),
+        ])
+
+        RnaAlignmentExecuteJob job = new RnaAlignmentExecuteJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, PanCancerWorkflow.OUTPUT_BAM) >> roddyBamFile
+            0 * _
         }
 
         expect:

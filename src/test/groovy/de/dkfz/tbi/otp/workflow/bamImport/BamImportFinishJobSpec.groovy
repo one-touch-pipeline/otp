@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,9 @@
 package de.dkfz.tbi.otp.workflow.bamImport
 
 import grails.testing.gorm.DataTest
-import spock.lang.*
+import spock.lang.Specification
+import spock.lang.TempDir
+
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
@@ -36,7 +38,9 @@ import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
-import java.nio.file.*
+
+import java.nio.file.Files
+import java.nio.file.Path
 
 class BamImportFinishJobSpec extends Specification implements DataTest, BamImportWorkflowDomainFactory {
 
@@ -68,8 +72,7 @@ class BamImportFinishJobSpec extends Specification implements DataTest, BamImpor
         BamImportFinishJob job = new BamImportFinishJob()
 
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            _ * getOutputArtefact(workflowStep,
-                    BamImportFragmentJob.de_dkfz_tbi_otp_workflow_bamImport_BamImportShared__OUTPUT_ROLE) >> bamFile
+            _ * getOutputArtefact(workflowStep, BamImportFinishJob.de_dkfz_tbi_otp_workflow_bamImport_BamImportShared__OUTPUT_ROLE) >> bamFile
             0 * _
         }
         job.fileSystemService = new TestFileSystemService()
@@ -124,8 +127,7 @@ class BamImportFinishJobSpec extends Specification implements DataTest, BamImpor
         BamImportFinishJob job = new BamImportFinishJob()
 
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            _ * getOutputArtefact(workflowStep,
-                    BamImportFragmentJob.de_dkfz_tbi_otp_workflow_bamImport_BamImportShared__OUTPUT_ROLE) >> bamFile
+            _ * getOutputArtefact(workflowStep, BamImportFinishJob.de_dkfz_tbi_otp_workflow_bamImport_BamImportShared__OUTPUT_ROLE) >> bamFile
             0 * _
         }
         job.fileSystemService = new TestFileSystemService()

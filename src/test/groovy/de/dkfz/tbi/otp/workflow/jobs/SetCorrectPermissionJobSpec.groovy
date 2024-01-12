@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,11 +26,12 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.*
+import java.nio.file.Path
+import java.nio.file.Paths
 
 class SetCorrectPermissionJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
@@ -54,16 +55,15 @@ class SetCorrectPermissionJobSpec extends Specification implements DataTest, Wor
                         )
                 )
         )
-        SetCorrectPermissionJob job = Spy(SetCorrectPermissionJob)
+        SetCorrectPermissionJob job = new SetCorrectPermissionJob()
         job.fileService = Mock(FileService)
-        job.fileSystemService = Mock(FileSystemService)
+        job.fileSystemService = new TestFileSystemService()
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
 
         when:
         job.execute(workflowStep)
 
         then:
-        1 * job.fileSystemService.remoteFileSystem >> FileSystems.default
         1 * job.fileService.correctPathPermissionAndGroupRecursive(workflowDirectoryPath, unixGroup) >> _
         1 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
     }

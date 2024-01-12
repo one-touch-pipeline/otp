@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,20 +27,21 @@ import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.FastqcWorkflowDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.LocalShellHelper
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.FileSystems
 import java.nio.file.Path
 
-class FastqcConditionalFailJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
+class FastqcConditionalFailJobSpec extends Specification implements DataTest, FastqcWorkflowDomainFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -56,14 +57,21 @@ class FastqcConditionalFailJobSpec extends Specification implements DataTest, Wo
 
     void "test check, succeeds"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateWesFastqcWorkflow(),
+                ]),
+        ])
         SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
 
         Path path = CreateFileHelper.createFile(tempDir.resolve("test.txt"))
         path.text = "non-empty"
 
-        FastqcConditionalFailJob job = Spy(FastqcConditionalFailJob) {
-            getSeqTrack(workflowStep) >> seqTrack
+        FastqcConditionalFailJob job = new FastqcConditionalFailJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getInputArtefact(workflowStep, WesFastQcWorkflow.INPUT_FASTQ) >> seqTrack
+            0 * _
         }
         job.fileSystemService = Mock(FileSystemService) {
             getRemoteFileSystem() >> FileSystems.default
@@ -86,11 +94,18 @@ class FastqcConditionalFailJobSpec extends Specification implements DataTest, Wo
 
     void "test check, fails because seqTrack has no dataFiles"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateWesFastqcWorkflow(),
+                ]),
+        ])
         SeqTrack seqTrack = createSeqTrack()
 
-        FastqcConditionalFailJob job = Spy(FastqcConditionalFailJob) {
-            getSeqTrack(workflowStep) >> seqTrack
+        FastqcConditionalFailJob job = new FastqcConditionalFailJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getInputArtefact(workflowStep, WesFastQcWorkflow.INPUT_FASTQ) >> seqTrack
+            0 * _
         }
 
         when:
@@ -103,11 +118,18 @@ class FastqcConditionalFailJobSpec extends Specification implements DataTest, Wo
 
     void "test check, fails because physical files are missing"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateWesFastqcWorkflow(),
+                ]),
+        ])
         SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
 
-        FastqcConditionalFailJob job = Spy(FastqcConditionalFailJob) {
-            getSeqTrack(workflowStep) >> seqTrack
+        FastqcConditionalFailJob job = new FastqcConditionalFailJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getInputArtefact(workflowStep, WesFastQcWorkflow.INPUT_FASTQ) >> seqTrack
+            0 * _
         }
         job.fileSystemService = Mock(FileSystemService) {
             getRemoteFileSystem() >> FileSystems.default

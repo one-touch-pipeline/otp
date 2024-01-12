@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,13 +22,11 @@
 package de.dkfz.tbi.otp.workflow.alignment
 
 import grails.testing.gorm.DataTest
-import spock.lang.Specification
-import spock.lang.TempDir
-import spock.lang.Unroll
+import spock.lang.*
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.PanCancerWorkflowDomainFactory
 import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -36,13 +34,15 @@ import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.LocalShellHelper
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.FileSystems
 import java.nio.file.Path
 
-class RoddyAlignmentConditionalFailJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
+class RoddyAlignmentConditionalFailJobSpec extends Specification implements DataTest, PanCancerWorkflowDomainFactory {
 
     @TempDir
     Path tempDir
@@ -59,14 +59,21 @@ class RoddyAlignmentConditionalFailJobSpec extends Specification implements Data
     @Unroll
     void "test check #name, succeeds"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreatePanCancerWorkflow(),
+                ]),
+        ])
         List<SeqTrack> seqTracks = [
                 createSeqTrackWithTwoFastqFile([:], [mateNumber: mateFile1, fileName: file1], [mateNumber: mateFile2, fileName: file2]),
                 createSeqTrackWithTwoFastqFile([:], [fileName: "SecondSeqTrack_123_R1.gz"], [fileName: "SecondSeqTrack_123_R2.gz"]),
         ]
 
-        RoddyAlignmentConditionalFailJob job = Spy(RoddyAlignmentConditionalFailJob) {
-            getSeqTracks(workflowStep) >> seqTracks
+        RoddyAlignmentConditionalFailJob job = new RoddyAlignmentConditionalFailJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getInputArtefacts(workflowStep, PanCancerWorkflow.INPUT_FASTQ) >> seqTracks
+            0 * _
         }
 
         job.fileSystemService = Mock(FileSystemService) {
@@ -98,11 +105,18 @@ class RoddyAlignmentConditionalFailJobSpec extends Specification implements Data
 
     void "test check, fails because seqTrack has no dataFiles"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreatePanCancerWorkflow(),
+                ]),
+        ])
         List<SeqTrack> seqTracks = [createSeqTrack()]
 
-        RoddyAlignmentConditionalFailJob job = Spy(RoddyAlignmentConditionalFailJob) {
-            getSeqTracks(workflowStep) >> seqTracks
+        RoddyAlignmentConditionalFailJob job = new RoddyAlignmentConditionalFailJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getInputArtefacts(workflowStep, PanCancerWorkflow.INPUT_FASTQ) >> seqTracks
+            0 * _
         }
 
         job.fileSystemService = Mock(FileSystemService) {
@@ -119,11 +133,18 @@ class RoddyAlignmentConditionalFailJobSpec extends Specification implements Data
 
     void "test check, succeeds when a seqTrack with single seqType has only one dataFile"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreatePanCancerWorkflow(),
+                ]),
+        ])
         List<SeqTrack> seqTracks = [createSeqTrackWithOneFastqFile([seqType: createSeqTypeSingle()])]
 
-        RoddyAlignmentConditionalFailJob job = Spy(RoddyAlignmentConditionalFailJob) {
-            getSeqTracks(workflowStep) >> seqTracks
+        RoddyAlignmentConditionalFailJob job = new RoddyAlignmentConditionalFailJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getInputArtefacts(workflowStep, PanCancerWorkflow.INPUT_FASTQ) >> seqTracks
+            0 * _
         }
 
         job.fileSystemService = Mock(FileSystemService) {
@@ -150,14 +171,21 @@ class RoddyAlignmentConditionalFailJobSpec extends Specification implements Data
 
     void "test check, fails because physical files are missing for a seqTrack"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreatePanCancerWorkflow(),
+                ]),
+        ])
         List<SeqTrack> seqTracks = [
                 createSeqTrackWithTwoFastqFile([:], [fileName: "DataFileFileName_123_R1.gz"], [fileName: "DataFileFileName_123_R2.gz"]),
                 createSeqTrackWithTwoFastqFile(),
         ]
 
-        RoddyAlignmentConditionalFailJob job = Spy(RoddyAlignmentConditionalFailJob) {
-            getSeqTracks(workflowStep) >> seqTracks
+        RoddyAlignmentConditionalFailJob job = new RoddyAlignmentConditionalFailJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getInputArtefacts(workflowStep, PanCancerWorkflow.INPUT_FASTQ) >> seqTracks
+            0 * _
         }
 
         job.fileSystemService = Mock(FileSystemService) {
@@ -183,14 +211,21 @@ class RoddyAlignmentConditionalFailJobSpec extends Specification implements Data
 
     void "test check, fails when file names are not consistent for a seqTrack"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreatePanCancerWorkflow(),
+                ]),
+        ])
         List<SeqTrack> seqTracks = [
                 createSeqTrackWithTwoFastqFile([:], [fileName: "A_R1.gz"], [fileName: "B_R2.gz"]),
                 createSeqTrackWithTwoFastqFile([:], [fileName: "DataFileFileName_123_R1.gz"], [fileName: "DataFileFileName_123_R2.gz"]),
         ]
 
-        RoddyAlignmentConditionalFailJob job = Spy(RoddyAlignmentConditionalFailJob) {
-            getSeqTracks(workflowStep) >> seqTracks
+        RoddyAlignmentConditionalFailJob job = new RoddyAlignmentConditionalFailJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getInputArtefacts(workflowStep, PanCancerWorkflow.INPUT_FASTQ) >> seqTracks
+            0 * _
         }
 
         job.fileSystemService = Mock(FileSystemService) {
@@ -218,7 +253,12 @@ class RoddyAlignmentConditionalFailJobSpec extends Specification implements Data
 
     void "test check, fails with multiple errors in one exception"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreatePanCancerWorkflow(),
+                ]),
+        ])
         SeqTrack seqTrack = createSeqTrack([seqType: createSeqTypeSingle()])
         List<SeqTrack> seqTracks = [
                 seqTrack,
@@ -229,8 +269,10 @@ class RoddyAlignmentConditionalFailJobSpec extends Specification implements Data
         ]
         createFastqFile([seqTrack: seqTrack])
         createFastqFile([seqTrack: seqTrack])
-        RoddyAlignmentConditionalFailJob job = Spy(RoddyAlignmentConditionalFailJob) {
-            getSeqTracks(workflowStep) >> seqTracks
+        RoddyAlignmentConditionalFailJob job = new RoddyAlignmentConditionalFailJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getInputArtefacts(workflowStep, PanCancerWorkflow.INPUT_FASTQ) >> seqTracks
+            0 * _
         }
 
         job.fileSystemService = Mock(FileSystemService) {

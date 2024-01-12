@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,16 +25,17 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellMappingFileService
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.DataInstallationWorkflowDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.LinkEntry
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class DataInstallationSingleCellLinkJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
+class DataInstallationSingleCellLinkJobSpec extends Specification implements DataTest, DataInstallationWorkflowDomainFactory {
 
     WorkflowStep workflowStep
     SeqTrack seqTrack
@@ -51,7 +52,12 @@ class DataInstallationSingleCellLinkJobSpec extends Specification implements Dat
     }
 
     void setupData(boolean isSingleCell) {
-        workflowStep = createWorkflowStep()
+        workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateDataInstallationWorkflowWorkflow(),
+                ]),
+        ])
         seqTrack = createSeqTrackWithTwoFastqFile()
         if (isSingleCell) {
             seqTrack.seqType = DomainFactory.createCellRangerAlignableSeqTypes().first()
@@ -69,8 +75,10 @@ class DataInstallationSingleCellLinkJobSpec extends Specification implements Dat
         Path link1 = Paths.get("link1")
         Path link2 = Paths.get("link2")
 
-        DataInstallationSingleCellLinkJob job = Spy(DataInstallationSingleCellLinkJob) {
-            1 * getSeqTrack(workflowStep) >> seqTrack
+        DataInstallationSingleCellLinkJob job = new DataInstallationSingleCellLinkJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> seqTrack
+            0 * _
         }
         job.lsdfFilesService = Mock(LsdfFilesService) {
             (isSingleCell ? 2 : 0) * getFileFinalPathAsPath(_) >>> [target1, target2]
@@ -88,8 +96,10 @@ class DataInstallationSingleCellLinkJobSpec extends Specification implements Dat
         given:
         setupData(isSingleCell)
 
-        DataInstallationSingleCellLinkJob job = Spy(DataInstallationSingleCellLinkJob) {
-            1 * getSeqTrack(workflowStep) >> seqTrack
+        DataInstallationSingleCellLinkJob job = new DataInstallationSingleCellLinkJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> seqTrack
+            0 * _
         }
         job.singleCellMappingFileService = Mock(SingleCellMappingFileService)
         job.logService = Mock(LogService)

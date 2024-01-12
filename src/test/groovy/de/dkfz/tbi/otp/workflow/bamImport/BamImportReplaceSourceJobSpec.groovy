@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -64,8 +64,7 @@ class BamImportReplaceSourceJobSpec extends Specification implements DataTest, B
         bamFile = createBamFile(furtherFiles: ["file1", "file2"])
         job = new BamImportReplaceSourceJob()
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            _ * getOutputArtefact(workflowStep,
-                    BamImportReplaceSourceJob.de_dkfz_tbi_otp_workflow_bamImport_BamImportShared__OUTPUT_ROLE) >> bamFile
+            _ * getOutputArtefact(workflowStep, BamImportReplaceSourceJob.de_dkfz_tbi_otp_workflow_bamImport_BamImportShared__OUTPUT_ROLE) >> bamFile
             0 * _
         }
     }

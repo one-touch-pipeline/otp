@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -58,9 +58,7 @@ class DataInstallationInitializationServiceSpec extends Specification
         FastqImportInstance instance = createFastqImportInstance([
                 sequenceFiles: seqTracks*.sequenceFiles.flatten(),
         ])
-        DataInstallationInitializationService service = Spy(DataInstallationInitializationService) {
-            getConfigFragments(_, _) >> []
-        }
+        DataInstallationInitializationService service = new DataInstallationInitializationService()
 
         service.lsdfFilesService = Mock(LsdfFilesService) {
             3 * getFileViewByPidPath(_) >> TestCase.uniqueNonExistentPath

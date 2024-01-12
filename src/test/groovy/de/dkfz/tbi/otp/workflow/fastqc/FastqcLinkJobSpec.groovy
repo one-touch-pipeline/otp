@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -63,7 +63,7 @@ class FastqcLinkJobSpec extends Specification implements DataTest, FastqcWorkflo
 
         FastqcLinkJob job = new FastqcLinkJob()
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            _ * getOutputArtefacts(workflowStep, FastqcLinkJob.de_dkfz_tbi_otp_workflow_fastqc_FastqcShared__OUTPUT_ROLE) >> [file1, file2]
+            _ * getOutputArtefacts(workflowStep, WesFastQcWorkflow.OUTPUT_FASTQC) >> [file1, file2]
             0 * _
         }
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
@@ -107,8 +107,7 @@ class FastqcLinkJobSpec extends Specification implements DataTest, FastqcWorkflo
 
         FastqcLinkJob job = new FastqcLinkJob()
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            _ * getOutputArtefacts(workflowStep,
-                    FastqcLinkJob.de_dkfz_tbi_otp_workflow_fastqc_FastqcShared__OUTPUT_ROLE) >> [file1]
+            _ * getOutputArtefacts(workflowStep, WesFastQcWorkflow.OUTPUT_FASTQC) >> [file1]
             0 * _
         }
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {

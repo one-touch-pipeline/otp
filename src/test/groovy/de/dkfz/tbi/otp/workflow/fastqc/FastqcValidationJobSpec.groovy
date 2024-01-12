@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -75,7 +75,8 @@ class FastqcValidationJobSpec extends Specification implements DataTest, Workflo
             1 * fastqcOutputPath(fastqcProcessedFiles.last()) >> file2
         }
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            1 * getOutputArtefacts(workflowStep, BashFastQcWorkflow.OUTPUT_FASTQC) >> fastqcProcessedFiles
+            _ * getOutputArtefacts(workflowStep, BashFastQcWorkflow.OUTPUT_FASTQC) >> fastqcProcessedFiles
+            0 * _
         }
 
         when:

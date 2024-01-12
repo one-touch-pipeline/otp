@@ -28,18 +28,19 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WgbsAlignmentWorkflowDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.LinkEntry
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class WgbsLinkJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, RoddyPanCancerFactory {
+class WgbsLinkJobSpec extends Specification implements DataTest, WgbsAlignmentWorkflowDomainFactory, RoddyPanCancerFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -66,10 +67,17 @@ class WgbsLinkJobSpec extends Specification implements DataTest, WorkflowSystemD
 
     void setupData() {
         roddyBamFile = createBamFile(roddyExecutionDirectoryNames: ["exec_123456_123456789_test_test"])
-        workflowStep = createWorkflowStep()
+        workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateWgbsAlignmenWorkflow(),
+                ]),
+        ])
 
-        job = Spy(WgbsLinkJob) {
-            getRoddyBamFile(workflowStep) >> roddyBamFile
+        job = new WgbsLinkJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, WgbsWorkflow.OUTPUT_BAM) >> roddyBamFile
+            0 * _
         }
         job.fileSystemService = new TestFileSystemService()
         job.fileService = new FileService()

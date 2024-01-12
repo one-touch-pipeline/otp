@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,15 +29,16 @@ import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.RnaAlignmentWorkflowDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Files
 import java.nio.file.Path
 
-class RnaAlignmentCleanUpJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, RoddyRnaFactory {
+class RnaAlignmentCleanUpJobSpec extends Specification implements DataTest, RnaAlignmentWorkflowDomainFactory, RoddyRnaFactory {
     @TempDir
     Path tempDir
 
@@ -56,11 +57,18 @@ class RnaAlignmentCleanUpJobSpec extends Specification implements DataTest, Work
 
     void "test getFilesToDelete"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateRnaAlignmentWorkflow(),
+                ]),
+        ])
         RnaRoddyBamFile bamFile = createRoddyBamFile(RnaRoddyBamFile)
 
-        RnaAlignmentCleanUpJob job = Spy(RnaAlignmentCleanUpJob) {
-            getRoddyBamFile(workflowStep) >> bamFile
+        RnaAlignmentCleanUpJob job = new RnaAlignmentCleanUpJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, RnaAlignmentWorkflow.OUTPUT_BAM) >> bamFile
+            0 * _
         }
         job.fileService = Mock(FileService) {
             fileIsReadable(_) >> true

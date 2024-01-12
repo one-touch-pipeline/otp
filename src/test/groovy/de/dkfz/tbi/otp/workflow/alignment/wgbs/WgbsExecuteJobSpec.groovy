@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,17 +31,18 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WgbsAlignmentWorkflowDomainFactory
 import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class WgbsExecuteJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, IsRoddy {
+class WgbsExecuteJobSpec extends Specification implements DataTest, WgbsAlignmentWorkflowDomainFactory, IsRoddy {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -83,10 +84,17 @@ class WgbsExecuteJobSpec extends Specification implements DataTest, WorkflowSyst
                 fileOperationStatus         : AbstractBamFile.FileOperationStatus.DECLARED,
                 roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
         ])
-        workflowStep = createWorkflowStep()
+        workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateWgbsAlignmenWorkflow(),
+                ]),
+        ])
 
-        job = Spy(WgbsExecuteJob) {
-            getRoddyBamFile(workflowStep) >> roddyBamFile
+        job = new WgbsExecuteJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, WgbsWorkflow.OUTPUT_BAM) >> roddyBamFile
+            0 * _
         }
 
         job.processingOptionService = new ProcessingOptionService()
@@ -115,9 +123,17 @@ class WgbsExecuteJobSpec extends Specification implements DataTest, WorkflowSyst
     void "test getRoddyResult"() {
         given:
         RoddyBamFile bamFile = createBamFile()
-        WorkflowStep workflowStep = createWorkflowStep()
-        WgbsExecuteJob job = Spy(WgbsExecuteJob) {
-            1 * getRoddyBamFile(workflowStep) >> bamFile
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateWgbsAlignmenWorkflow(),
+                ]),
+        ])
+
+        WgbsExecuteJob job = new WgbsExecuteJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, WgbsWorkflow.OUTPUT_BAM) >> bamFile
+            0 * _
         }
 
         expect:

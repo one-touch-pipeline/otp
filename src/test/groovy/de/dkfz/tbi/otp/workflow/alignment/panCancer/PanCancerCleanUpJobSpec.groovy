@@ -28,15 +28,16 @@ import spock.lang.TempDir
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.PanCancerWorkflowDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Files
 import java.nio.file.Path
 
-class PanCancerCleanUpJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, RoddyPanCancerFactory {
+class PanCancerCleanUpJobSpec extends Specification implements DataTest, PanCancerWorkflowDomainFactory, RoddyPanCancerFactory {
 
     @TempDir
     Path tempDir
@@ -61,7 +62,12 @@ class PanCancerCleanUpJobSpec extends Specification implements DataTest, Workflo
 
     void "test getFilesToDelete"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreatePanCancerWorkflow(),
+                ]),
+        ])
         RoddyBamFile bamFile = createRoddyBamFile(RoddyBamFile)
         Path file1 = tempDir.resolve("file1")
         Files.createFile(file1)
@@ -71,8 +77,11 @@ class PanCancerCleanUpJobSpec extends Specification implements DataTest, Workflo
         Files.createDirectory(dir1)
         Path dir2 = tempDir.resolve("dir2")
         Files.createDirectory(dir2)
-        PanCancerCleanUpJob job = Spy(PanCancerCleanUpJob) {
-            getRoddyBamFile(workflowStep) >> bamFile
+
+        PanCancerCleanUpJob job = new PanCancerCleanUpJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, PanCancerWorkflow.OUTPUT_BAM) >> bamFile
+            0 * _
         }
         job.linkFilesToFinalDestinationService = Mock(LinkFilesToFinalDestinationService) {
             1 * getFilesToCleanup(_) >> [dir1, file1]
@@ -85,7 +94,12 @@ class PanCancerCleanUpJobSpec extends Specification implements DataTest, Workflo
     }
 
     void "test getDirectoriesToDelete"() {
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreatePanCancerWorkflow(),
+                ]),
+        ])
         RoddyBamFile bamFile = createRoddyBamFile(RoddyBamFile)
         Path file1 = tempDir.resolve("file1")
         Files.createFile(file1)
@@ -95,8 +109,11 @@ class PanCancerCleanUpJobSpec extends Specification implements DataTest, Workflo
         Files.createDirectory(dir1)
         Path dir2 = tempDir.resolve("dir2")
         Files.createDirectory(dir2)
-        PanCancerCleanUpJob job = Spy(PanCancerCleanUpJob) {
-            getRoddyBamFile(workflowStep) >> bamFile
+
+        PanCancerCleanUpJob job = new PanCancerCleanUpJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, PanCancerWorkflow.OUTPUT_BAM) >> bamFile
+            0 * _
         }
         job.linkFilesToFinalDestinationService = Mock(LinkFilesToFinalDestinationService) {
             1 * getFilesToCleanup(_) >> [dir1, file1]

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,9 +31,7 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsqc.FastqcUploadService
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
-import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.workflowExecution.*
 
 class FastqcParseJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, FastqcDomainFactory {
 
@@ -64,11 +62,14 @@ class FastqcParseJobSpec extends Specification implements DataTest, WorkflowSyst
         WorkflowStep workflowStep = createWorkflowStep([workflowRun: run])
 
         FastqcParseJob job = new FastqcParseJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefacts(workflowStep, WesFastQcWorkflow.OUTPUT_FASTQC) >> fastqcProcessedFiles
+            0 * _
+        }
 
         job.fastqcDataFilesService = Mock(FastqcDataFilesService)
         job.fastqcUploadService = Mock(FastqcUploadService)
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
-        job.concreteArtefactService = Mock(ConcreteArtefactService)
 
         job.seqTrackService = new SeqTrackService()
         job.seqTrackService.fileTypeService = new FileTypeService()
@@ -77,8 +78,6 @@ class FastqcParseJobSpec extends Specification implements DataTest, WorkflowSyst
         job.execute(workflowStep)
 
         then:
-        1 * job.concreteArtefactService.getOutputArtefacts(workflowStep, BashFastQcWorkflow.OUTPUT_FASTQC) >> fastqcProcessedFiles
-        0 * job.concreteArtefactService._
         1 * job.fastqcUploadService.uploadFastQCFileContentsToDataBase(fastqcProcessedFiles.first())
         1 * job.fastqcUploadService.uploadFastQCFileContentsToDataBase(fastqcProcessedFiles.last())
         0 * job.fastqcUploadService._

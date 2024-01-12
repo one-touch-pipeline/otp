@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,14 +30,16 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.PanCancerWorkflowDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Files
 import java.nio.file.Path
 
-class RoddyAlignmentCleanUpJobSpec  extends Specification implements DataTest, WorkflowSystemDomainFactory, RoddyRnaFactory {
+class RoddyAlignmentCleanUpJobSpec  extends Specification implements DataTest, PanCancerWorkflowDomainFactory, RoddyRnaFactory {
     @TempDir
     Path tempDir
 
@@ -53,23 +55,37 @@ class RoddyAlignmentCleanUpJobSpec  extends Specification implements DataTest, W
         ]
     }
 
+    class TestAbstractRoddyAlignmentCleanUpJob extends AbstractRoddyAlignmentCleanUpJob { }
+
     void "test getFilesToDelete"() {
-        WorkflowStep workflowStep = createWorkflowStep()
-        AbstractRoddyAlignmentCleanUpJob job = Spy(AbstractRoddyAlignmentCleanUpJob) {
-        }
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreatePanCancerWorkflow(),
+                ]),
+        ])
+        AbstractRoddyAlignmentCleanUpJob job = new TestAbstractRoddyAlignmentCleanUpJob()
 
         expect:
         [] == job.getFilesToDelete(workflowStep)
     }
 
     void "test getDirectoriesToDelete"() {
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreatePanCancerWorkflow(),
+                ]),
+        ])
         RoddyBamFile bamFile1 = createRoddyBamFile(RoddyBamFile)
         RoddyBamFile bamFile2 = createRoddyBamFile([workPackage: bamFile1.mergingWorkPackage, config: bamFile1.config], RoddyBamFile)
 
-        AbstractRoddyAlignmentCleanUpJob job = Spy(AbstractRoddyAlignmentCleanUpJob) {
-            getRoddyBamFile(workflowStep) >> bamFile1
+        AbstractRoddyAlignmentCleanUpJob job = new TestAbstractRoddyAlignmentCleanUpJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, PanCancerWorkflow.OUTPUT_BAM) >> bamFile1
+            0 * _
         }
+
         Path dir1 = tempDir.resolve("dir1")
         Files.createDirectory(dir1)
         Path dir2 = tempDir.resolve("dir2")

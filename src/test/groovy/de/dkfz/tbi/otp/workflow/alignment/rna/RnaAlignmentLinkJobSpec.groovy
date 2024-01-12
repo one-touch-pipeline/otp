@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,23 +31,18 @@ import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.RnaAlignmentWorkflowDomainFactory
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
-import de.dkfz.tbi.otp.ngsdata.FastqFile
-import de.dkfz.tbi.otp.ngsdata.FastqImportInstance
-import de.dkfz.tbi.otp.ngsdata.FileType
-import de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType
-import de.dkfz.tbi.otp.ngsdata.Sample
-import de.dkfz.tbi.otp.ngsdata.SampleType
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.LinkEntry
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
 
-class RnaAlignmentLinkJobSpec extends Specification implements WorkflowSystemDomainFactory, DataTest, RoddyRnaFactory {
+class RnaAlignmentLinkJobSpec extends Specification implements RnaAlignmentWorkflowDomainFactory, DataTest, RoddyRnaFactory {
 
     @TempDir
     Path tempWorkDir
@@ -78,10 +73,6 @@ class RnaAlignmentLinkJobSpec extends Specification implements WorkflowSystemDom
 
     void "getLinkMap, should return a list of all created files except the hidden one from work directory to base directory"() {
         given:
-        job = Spy(RnaAlignmentLinkJob)
-        job.rnaRoddyBamFileService = Mock(RnaRoddyBamFileService)
-        job.fileSystemService = new TestFileSystemService()
-
         String fileName1 = "file1"
         String fileName2 = "file2"
         String fileName3 = ".file3"
@@ -92,7 +83,11 @@ class RnaAlignmentLinkJobSpec extends Specification implements WorkflowSystemDom
 
         RnaRoddyBamFile bamFile = createBamFile()
         WorkflowStep workflowStep = createWorkflowStep([
-                workflowRun: createWorkflowRun([workDirectory: tempWorkDir.toString()]),
+                workflowRun: createWorkflowRun([
+                        workDirectory  : tempWorkDir.toString(),
+                        workflowVersion: null,
+                        workflow       : findOrCreateRnaAlignmentWorkflow(),
+                ]),
         ])
 
         List<LinkEntry> expectedLinkEntries = [
@@ -100,14 +95,20 @@ class RnaAlignmentLinkJobSpec extends Specification implements WorkflowSystemDom
                 new LinkEntry(target: tempWorkDir.resolve(fileName2), link: tempBaseDir.resolve(fileName2)),
         ]
 
+        job = new RnaAlignmentLinkJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, RnaAlignmentWorkflow.OUTPUT_BAM) >> bamFile
+            0 * _
+        }
+        job.rnaRoddyBamFileService = Mock(RnaRoddyBamFileService) {
+            getBaseDirectory(_) >> tempBaseDir
+        }
+        job.fileSystemService = new TestFileSystemService()
+
         when:
         List<LinkEntry> resultLinkEntries = job.getLinkMap(workflowStep)
 
         then:
-        1 * job.rnaRoddyBamFileService.getBaseDirectory(_) >> tempBaseDir
-        1 * job.getRoddyBamFile(_) >> bamFile
-
-        and:
         CollectionUtils.containSame(resultLinkEntries,  expectedLinkEntries)
     }
 }

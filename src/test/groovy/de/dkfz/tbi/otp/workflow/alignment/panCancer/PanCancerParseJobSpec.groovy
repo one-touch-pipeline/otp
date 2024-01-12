@@ -29,17 +29,18 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.PanCancerWorkflowDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
 
-class PanCancerParseJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, RoddyPanCancerFactory {
+class PanCancerParseJobSpec extends Specification implements DataTest, PanCancerWorkflowDomainFactory, RoddyPanCancerFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -67,13 +68,22 @@ class PanCancerParseJobSpec extends Specification implements DataTest, WorkflowS
 
     void "test execution"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreatePanCancerWorkflow(),
+                ]),
+        ])
         RoddyBamFile roddyBamFile = createRoddyBamFile(RoddyBamFile)
 
         Path mergedQAJsonFile = tempDir.resolve("qa.json")
         mergedQAJsonFile.text = qaFileContent
 
-        PanCancerParseJob job = Spy(PanCancerParseJob)
+        PanCancerParseJob job = new PanCancerParseJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, PanCancerWorkflow.OUTPUT_BAM) >> roddyBamFile
+            0 * _
+        }
         job.roddyQualityAssessmentService = new RoddyQualityAssessmentService()
         job.roddyQualityAssessmentService.roddyBamFileService = Mock(RoddyBamFileService) {
             getWorkSingleLaneQAJsonFiles(_) >> [(roddyBamFile.seqTracks.first()): mergedQAJsonFile]
@@ -113,7 +123,12 @@ class PanCancerParseJobSpec extends Specification implements DataTest, WorkflowS
 
     void "test execute, when QA exists, objects should be reused"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreatePanCancerWorkflow(),
+                ]),
+        ])
         RoddyBamFile roddyBamFile = createRoddyBamFile(RoddyBamFile)
         List<RoddyMergedBamQa> existingMergedQa = qaValuesPropertiesMultipleChromosomes.collect { k, v ->
             new RoddyMergedBamQa(v + [
@@ -134,7 +149,11 @@ class PanCancerParseJobSpec extends Specification implements DataTest, WorkflowS
         Path mergedQAJsonFile = tempDir.resolve("qa.json")
         mergedQAJsonFile.text = qaFileContent
 
-        PanCancerParseJob job = Spy(PanCancerParseJob)
+        PanCancerParseJob job = new PanCancerParseJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, PanCancerWorkflow.OUTPUT_BAM) >> roddyBamFile
+            0 * _
+        }
         job.roddyQualityAssessmentService = new RoddyQualityAssessmentService()
         job.roddyQualityAssessmentService.roddyBamFileService = Mock(RoddyBamFileService) {
             getWorkSingleLaneQAJsonFiles(_) >> [(roddyBamFile.seqTracks.first()): mergedQAJsonFile]

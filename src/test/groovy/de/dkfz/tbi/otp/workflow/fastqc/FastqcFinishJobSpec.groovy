@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,12 +26,13 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.FastqcWorkflowDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.jobs.JobStage
 import de.dkfz.tbi.otp.workflowExecution.*
 
-class FastqcFinishJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
+class FastqcFinishJobSpec extends Specification implements DataTest, FastqcWorkflowDomainFactory {
 
     RawSequenceFile rawSequenceFile1
     RawSequenceFile rawSequenceFile2
@@ -59,12 +60,19 @@ class FastqcFinishJobSpec extends Specification implements DataTest, WorkflowSys
 
     void "test updateDomain method"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateWesFastqcWorkflow(),
+                ]),
+        ])
         SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
 
-        FastqcFinishJob job = Spy(FastqcFinishJob) {
-            getSeqTrack(workflowStep) >> seqTrack
-            getFastqcProcessedFiles(_) >> fastqcProcessedFileList
+        FastqcFinishJob job = new FastqcFinishJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getInputArtefact(workflowStep, WesFastQcWorkflow.INPUT_FASTQ) >> seqTrack
+            _ * getOutputArtefacts(workflowStep, WesFastQcWorkflow.OUTPUT_FASTQC) >> fastqcProcessedFileList
+            0 * _
         }
 
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
@@ -87,12 +95,19 @@ class FastqcFinishJobSpec extends Specification implements DataTest, WorkflowSys
 
     void "test inherited method execute(), JobStage is in finished state"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateWesFastqcWorkflow(),
+                ]),
+        ])
         SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
 
-        FastqcFinishJob job = Spy(FastqcFinishJob) {
-            getSeqTrack(workflowStep) >> seqTrack
-            getFastqcProcessedFiles(workflowStep) >> fastqcProcessedFileList
+        FastqcFinishJob job = new FastqcFinishJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getInputArtefact(workflowStep, WesFastQcWorkflow.INPUT_FASTQ) >> seqTrack
+            _ * getOutputArtefacts(workflowStep, WesFastQcWorkflow.OUTPUT_FASTQC) >> fastqcProcessedFileList
+            0 * _
         }
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
             1 * updateFastqcProcessedFiles(_) >> { param ->

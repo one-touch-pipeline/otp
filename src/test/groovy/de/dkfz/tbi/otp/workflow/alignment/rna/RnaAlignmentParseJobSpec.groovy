@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,16 +30,17 @@ import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.RnaAlignmentWorkflowDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.jobs.JobStage
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.Path
 
-class RnaAlignmentParseJobSpec extends Specification implements WorkflowSystemDomainFactory, DataTest, RoddyRnaFactory {
+class RnaAlignmentParseJobSpec extends Specification implements RnaAlignmentWorkflowDomainFactory, DataTest, RoddyRnaFactory {
 
     private RnaAlignmentParseJob job
 
@@ -72,19 +73,27 @@ class RnaAlignmentParseJobSpec extends Specification implements WorkflowSystemDo
 
     void "test execute"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateRnaAlignmentWorkflow(),
+                ]),
+        ])
         RnaRoddyBamFile bamFile = createBamFile()
 
         Path mergedQAJsonFile = tempDir.resolve("qa.json")
         mergedQAJsonFile.text = qaFileContent
 
-        job = Spy(RnaAlignmentParseJob)
+        job = new RnaAlignmentParseJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, RnaAlignmentWorkflow.OUTPUT_BAM) >> bamFile
+            0 * _
+        }
         job.abstractQualityAssessmentService = new RoddyQualityAssessmentService()
         job.abstractQualityAssessmentService.rnaRoddyBamFileService = Mock(RnaRoddyBamFileService) {
             getWorkMergedQAJsonFile(_) >> mergedQAJsonFile
         }
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
-        job.getRoddyBamFile(workflowStep) >> bamFile
 
         when:
         job.execute(workflowStep)
@@ -101,7 +110,12 @@ class RnaAlignmentParseJobSpec extends Specification implements WorkflowSystemDo
 
     void "test execute, when QA exists"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateRnaAlignmentWorkflow(),
+                ]),
+        ])
         RnaRoddyBamFile bamFile = createBamFile()
         RnaQualityAssessment existingQa = createQa(bamFile, [
                 insertSizeMean                   : 999,
@@ -111,13 +125,16 @@ class RnaAlignmentParseJobSpec extends Specification implements WorkflowSystemDo
         Path mergedQAJsonFile = tempDir.resolve("qa.json")
         mergedQAJsonFile.text = qaFileContent
 
-        job = Spy(RnaAlignmentParseJob)
+        job = new RnaAlignmentParseJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, RnaAlignmentWorkflow.OUTPUT_BAM) >> bamFile
+            0 * _
+        }
         job.abstractQualityAssessmentService = new RoddyQualityAssessmentService()
         job.abstractQualityAssessmentService.rnaRoddyBamFileService = Mock(RnaRoddyBamFileService) {
             getWorkMergedQAJsonFile(_) >> mergedQAJsonFile
         }
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
-        job.getRoddyBamFile(workflowStep) >> bamFile
 
         when:
         job.execute(workflowStep)

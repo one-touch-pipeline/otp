@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflow.alignment
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.alignment.alignment.AbstractCreateNotificationJobSpec
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 
@@ -35,9 +36,12 @@ class RoddyAlignmentCreateNotificationJobSpec extends AbstractCreateNotification
 
     @Override
     protected RoddyAlignmentCreateNotificationJob createJob() {
-        return Spy(RoddyAlignmentCreateNotificationJob) {
-            1 * getRoddyBamFile(workflowStep) >> abstractBamFile
+        RoddyAlignmentCreateNotificationJob job = new RoddyAlignmentCreateNotificationJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, PanCancerWorkflow.OUTPUT_BAM) >> abstractBamFile
+            0 * _
         }
+        return job
     }
 
     @Override

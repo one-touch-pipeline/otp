@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,19 +29,21 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.PanCancerWorkflowDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.Md5SumService
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Files
 import java.nio.file.Path
 
-class RoddyAlignmentFinishJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, IsRoddy {
+class RoddyAlignmentFinishJobSpec extends Specification implements DataTest, PanCancerWorkflowDomainFactory, IsRoddy {
 
     @TempDir
     Path tempDir
@@ -62,7 +64,12 @@ class RoddyAlignmentFinishJobSpec extends Specification implements DataTest, Wor
     void "test updateDomain method should update roddyBamFile"() {
         given:
         TestConfigService testConfigService = new TestConfigService(tempDir)
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreatePanCancerWorkflow(),
+                ]),
+        ])
         MergingWorkPackage workPackage = createMergingWorkPackage(bamFileInProjectFolder: null)
         RoddyBamFile roddyBamFile = createBamFile([
                 fileOperationStatus: AbstractBamFile.FileOperationStatus.INPROGRESS,
@@ -72,8 +79,10 @@ class RoddyAlignmentFinishJobSpec extends Specification implements DataTest, Wor
         Path testWorkBamFile = CreateFileHelper.createFile(roddyBamFile.workBamFile.toPath())
         String md5Sum = "098f6bcd4621d373cade4e832627b4f6"
 
-        RoddyAlignmentFinishJob job = Spy(RoddyAlignmentFinishJob) {
-            1 * getRoddyBamFile(workflowStep) >> roddyBamFile
+        RoddyAlignmentFinishJob job = new RoddyAlignmentFinishJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, PanCancerWorkflow.OUTPUT_BAM) >> roddyBamFile
+            0 * _
         }
 
         job.md5SumService = Mock(Md5SumService) {

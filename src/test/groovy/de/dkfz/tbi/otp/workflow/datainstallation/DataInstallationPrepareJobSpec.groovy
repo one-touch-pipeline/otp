@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,18 +24,19 @@ package de.dkfz.tbi.otp.workflow.datainstallation
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.DataInstallationWorkflowDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.tracking.Ticket
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class DataInstallationPrepareJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
+class DataInstallationPrepareJobSpec extends Specification implements DataTest, DataInstallationWorkflowDomainFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -50,14 +51,22 @@ class DataInstallationPrepareJobSpec extends Specification implements DataTest, 
 
     void "test doFurtherPreparation"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateDataInstallationWorkflowWorkflow(),
+                ]),
+        ])
         SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
         Path path = Paths.get("/tmp/somePath${nextId}")
         Path file = path.resolve("file${nextId}")
 
-        DataInstallationPrepareJob job = Spy(DataInstallationPrepareJob) {
-            1 * getSeqTrack(workflowStep) >> seqTrack
+        DataInstallationPrepareJob job = new DataInstallationPrepareJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> seqTrack
+            0 * _
         }
+
         job.notificationCreator = Mock(NotificationCreator)
         job.lsdfFilesService = Mock(LsdfFilesService) {
             1 * getFileFinalPathAsPath(_ as RawSequenceFile) >> file
@@ -79,11 +88,18 @@ class DataInstallationPrepareJobSpec extends Specification implements DataTest, 
 
     void "test buildWorkDirectoryPath"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateDataInstallationWorkflowWorkflow(),
+                ]),
+        ])
         SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
         Path workDirectory = Paths.get('/workDirectory')
-        DataInstallationPrepareJob job = Spy(DataInstallationPrepareJob) {
-            1 * getSeqTrack(workflowStep) >> seqTrack
+        DataInstallationPrepareJob job = new DataInstallationPrepareJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> seqTrack
+            0 * _
         }
         job.lsdfFilesService = Mock(LsdfFilesService) {
             1 * getFileViewByPidPathAsPath(_) >> workDirectory.resolve('file')

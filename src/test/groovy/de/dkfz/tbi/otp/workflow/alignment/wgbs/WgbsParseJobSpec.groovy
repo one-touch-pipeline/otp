@@ -27,13 +27,14 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WgbsAlignmentWorkflowDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-class WgbsParseJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, RoddyPanCancerFactory {
+class WgbsParseJobSpec extends Specification implements DataTest, WgbsAlignmentWorkflowDomainFactory, RoddyPanCancerFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -55,7 +56,12 @@ class WgbsParseJobSpec extends Specification implements DataTest, WorkflowSystem
 
     void "test execution"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateWgbsAlignmenWorkflow(),
+                ]),
+        ])
         RoddyBamFile roddyBamFile = createRoddyBamFile(RoddyBamFile)
         if (multipleLibraries) {
             roddyBamFile.seqTracks.first().libraryName = "2"
@@ -65,8 +71,10 @@ class WgbsParseJobSpec extends Specification implements DataTest, WorkflowSystem
             roddyBamFile.save(flush: true)
         }
 
-        WgbsParseJob job = Spy(WgbsParseJob) {
-            2 * getRoddyBamFile(workflowStep) >> roddyBamFile
+        WgbsParseJob job = new WgbsParseJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, WgbsWorkflow.OUTPUT_BAM) >> roddyBamFile
+            0 * _
         }
         job.roddyQualityAssessmentService = Mock(RoddyQualityAssessmentService)
         job.qcTrafficLightService = Mock(QcTrafficLightService)

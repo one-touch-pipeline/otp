@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,19 +27,20 @@ import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.DataInstallationWorkflowDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.LocalShellHelper
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
 
-class DataInstallationConditionalFailJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
+class DataInstallationConditionalFailJobSpec extends Specification implements DataTest, DataInstallationWorkflowDomainFactory {
 
     @TempDir
     Path tempDir
@@ -57,11 +58,18 @@ class DataInstallationConditionalFailJobSpec extends Specification implements Da
 
     void "test check, succeeds"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateDataInstallationWorkflowWorkflow(),
+                ]),
+        ])
         SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
 
-        DataInstallationConditionalFailJob job = Spy(DataInstallationConditionalFailJob) {
-            getSeqTrack(workflowStep) >> seqTrack
+        DataInstallationConditionalFailJob job = new DataInstallationConditionalFailJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> seqTrack
+            0 * _
         }
         job.fileSystemService = new TestFileSystemService()
         job.lsdfFilesService = Mock(LsdfFilesService) {
@@ -82,11 +90,18 @@ class DataInstallationConditionalFailJobSpec extends Specification implements Da
 
     void "test check, fails because seqTrack has no dataFiles"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateDataInstallationWorkflowWorkflow(),
+                ]),
+        ])
         SeqTrack seqTrack = createSeqTrack()
 
-        DataInstallationConditionalFailJob job = Spy(DataInstallationConditionalFailJob) {
-            getSeqTrack(workflowStep) >> seqTrack
+        DataInstallationConditionalFailJob job = new DataInstallationConditionalFailJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> seqTrack
+            0 * _
         }
 
         when:
@@ -99,11 +114,18 @@ class DataInstallationConditionalFailJobSpec extends Specification implements Da
 
     void "test check, fails because physical files are missing"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateDataInstallationWorkflowWorkflow(),
+                ]),
+        ])
         SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
 
-        DataInstallationConditionalFailJob job = Spy(DataInstallationConditionalFailJob) {
-            getSeqTrack(workflowStep) >> seqTrack
+        DataInstallationConditionalFailJob job = new DataInstallationConditionalFailJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> seqTrack
+            0 * _
         }
         job.fileSystemService = new TestFileSystemService()
         job.lsdfFilesService = Mock(LsdfFilesService) {

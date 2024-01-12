@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,9 +26,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.FastqcWorkflowDomainFactory
-import de.dkfz.tbi.otp.ngsdata.FastqFile
-import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.SingleSelectSelectorExtendedCriteria
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -58,7 +56,7 @@ class FastqcFragmentJobSpec extends Specification implements DataTest, FastqcWor
 
         FastqcFragmentJob job = new FastqcFragmentJob()
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            _ * getInputArtefact(workflowStep, FastqcFragmentJob.de_dkfz_tbi_otp_workflow_fastqc_FastqcShared__INPUT_ROLE) >> seqTrack
+            _ * getInputArtefact(workflowStep, WesFastQcWorkflow.INPUT_FASTQ) >> seqTrack
             0 * _
         }
 

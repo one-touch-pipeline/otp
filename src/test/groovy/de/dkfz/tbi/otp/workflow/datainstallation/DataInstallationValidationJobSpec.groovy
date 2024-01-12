@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,9 +25,10 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.DataInstallationWorkflowDomainFactory
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -35,7 +36,7 @@ import java.nio.file.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
-class DataInstallationValidationJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
+class DataInstallationValidationJobSpec extends Specification implements DataTest, DataInstallationWorkflowDomainFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -51,9 +52,16 @@ class DataInstallationValidationJobSpec extends Specification implements DataTes
     void "test getExpectedFiles"() {
         given:
         SeqTrack seqTrack = createSeqTrackWithOneFastqFile()
-        WorkflowStep workflowStep = createWorkflowStep()
-        DataInstallationValidationJob job = Spy(DataInstallationValidationJob) {
-            _ * getSeqTrack(workflowStep) >> seqTrack
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateDataInstallationWorkflowWorkflow(),
+                ]),
+        ])
+        DataInstallationValidationJob job = new DataInstallationValidationJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> seqTrack
+            0 * _
         }
         job.lsdfFilesService = Mock(LsdfFilesService) {
             1 * getFileFinalPath(_) >> { RawSequenceFile rawSequenceFile -> rawSequenceFile.fileName }
@@ -72,7 +80,12 @@ class DataInstallationValidationJobSpec extends Specification implements DataTes
     void "test getExpectedDirectories"() {
         given:
         DataInstallationValidationJob job = new DataInstallationValidationJob()
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateDataInstallationWorkflowWorkflow(),
+                ]),
+        ])
 
         expect:
         [] == job.getExpectedDirectories(workflowStep)
@@ -82,9 +95,16 @@ class DataInstallationValidationJobSpec extends Specification implements DataTes
     void "test doFurtherValidation, when md5Sum is correct, then return empty list"() {
         given:
         SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
-        WorkflowStep workflowStep = createWorkflowStep()
-        DataInstallationValidationJob job = Spy(DataInstallationValidationJob) {
-            _ * getSeqTrack(workflowStep) >> seqTrack
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateDataInstallationWorkflowWorkflow(),
+                ]),
+        ])
+        DataInstallationValidationJob job = new DataInstallationValidationJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> seqTrack
+            0 * _
         }
         job.checksumFileService = Mock(ChecksumFileService)
 
@@ -101,9 +121,16 @@ class DataInstallationValidationJobSpec extends Specification implements DataTes
     void "test doFurtherValidation, when md5Sum is incorrect, then return list with problems"() {
         given:
         SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
-        WorkflowStep workflowStep = createWorkflowStep()
-        DataInstallationValidationJob job = Spy(DataInstallationValidationJob) {
-            _ * getSeqTrack(workflowStep) >> seqTrack
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateDataInstallationWorkflowWorkflow(),
+                ]),
+        ])
+        DataInstallationValidationJob job = new DataInstallationValidationJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> seqTrack
+            0 * _
         }
         job.checksumFileService = Mock(ChecksumFileService)
 
@@ -125,10 +152,17 @@ class DataInstallationValidationJobSpec extends Specification implements DataTes
     void "test saveResult"() {
         given:
         SeqTrack seqTrack = createSeqTrackWithOneFastqFile()
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateDataInstallationWorkflowWorkflow(),
+                ]),
+        ])
 
-        DataInstallationValidationJob job = Spy(DataInstallationValidationJob) {
-            _ * getSeqTrack(workflowStep) >> seqTrack
+        DataInstallationValidationJob job = new DataInstallationValidationJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> seqTrack
+            0 * _
         }
         job.fileSystemService = Mock(FileSystemService) {
             getRemoteFileSystem() >> FileSystems.default

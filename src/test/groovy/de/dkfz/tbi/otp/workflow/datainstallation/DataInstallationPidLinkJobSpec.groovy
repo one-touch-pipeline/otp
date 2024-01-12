@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,15 +24,16 @@ package de.dkfz.tbi.otp.workflow.datainstallation
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.DataInstallationWorkflowDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.LinkEntry
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class DataInstallationPidLinkJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
+class DataInstallationPidLinkJobSpec extends Specification implements DataTest, DataInstallationWorkflowDomainFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -47,15 +48,22 @@ class DataInstallationPidLinkJobSpec extends Specification implements DataTest, 
 
     void "test getLinkMap"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateDataInstallationWorkflowWorkflow(),
+                ]),
+        ])
         SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
         Path target1 = Paths.get("target1")
         Path target2 = Paths.get("target2")
         Path link1 = Paths.get("link1")
         Path link2 = Paths.get("link2")
 
-        DataInstallationPidLinkJob job = Spy(DataInstallationPidLinkJob) {
-            1 * getSeqTrack(workflowStep) >> seqTrack
+        DataInstallationPidLinkJob job = new DataInstallationPidLinkJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> seqTrack
+            0 * _
         }
         job.lsdfFilesService = Mock(LsdfFilesService) {
             2 * getFileFinalPathAsPath(_) >>> [target1, target2]
@@ -68,11 +76,18 @@ class DataInstallationPidLinkJobSpec extends Specification implements DataTest, 
 
     void "test saveResult"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateDataInstallationWorkflowWorkflow(),
+                ]),
+        ])
         SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
 
-        DataInstallationPidLinkJob job = Spy(DataInstallationPidLinkJob) {
-            1 * getSeqTrack(workflowStep) >> seqTrack
+        DataInstallationPidLinkJob job = new DataInstallationPidLinkJob()
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> seqTrack
+            0 * _
         }
 
         when:

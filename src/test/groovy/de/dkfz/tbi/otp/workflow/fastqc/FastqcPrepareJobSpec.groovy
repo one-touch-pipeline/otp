@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,9 +26,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
-import de.dkfz.tbi.otp.ngsdata.FastqFile
-import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
@@ -62,7 +60,8 @@ class FastqcPrepareJobSpec extends Specification implements DataTest, WorkflowSy
 
         FastqcPrepareJob job = new FastqcPrepareJob()
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            1 * getInputArtefact(workflowStep, BashFastQcWorkflow.INPUT_FASTQ) >> seqTrack
+            _ * getInputArtefact(workflowStep, BashFastQcWorkflow.INPUT_FASTQ) >> seqTrack
+            0 * _
         }
         job.notificationCreator = Mock(NotificationCreator)
 
