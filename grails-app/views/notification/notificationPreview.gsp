@@ -59,7 +59,6 @@
                     <li><a href="#project-anchor-${preparedNotification.project.id}"><g:message
                             code="notification.notificationPreview.import.summary.view"/></a></li>
                     <li><g:message code="notification.notificationPreview.import.summary.lanes" args="[preparedNotification.seqTracks.size()]"/></li>
-                    <li><g:message code="notification.notificationPreview.import.summary.bams" args="[preparedNotification.bams.size()]"/></li>
                     <li><g:message code="notification.notificationPreview.import.summary.users"
                                    args="[preparedNotification.toBeNotifiedProjectUsers.size()]"/></li>
                 </ul>
