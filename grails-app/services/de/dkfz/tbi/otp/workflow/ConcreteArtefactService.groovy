@@ -37,8 +37,15 @@ class ConcreteArtefactService {
         return CollectionUtils.atMostOneElement(getOutputArtefacts(workflowStep, outputRoleName, required))
     }
 
+    def <T> T getOutputArtefact(WorkflowRun workflowRun, String outputRoleName, boolean required = true) {
+        return CollectionUtils.atMostOneElement(getOutputArtefacts(workflowRun, outputRoleName, required))
+    }
+
     def <T> List<T> getOutputArtefacts(WorkflowStep workflowStep, String outputRoleName, boolean required = true) {
-        WorkflowRun workflowRun = workflowStep.workflowRun
+        return getOutputArtefacts(workflowStep.workflowRun, outputRoleName, required)
+    }
+
+    def <T> List<T> getOutputArtefacts(WorkflowRun workflowRun, String outputRoleName, boolean required = true) {
         List<WorkflowArtefact> workflowArtefacts = workflowRun.outputArtefacts.findAll {
             it.key ==~ /^${outputRoleName}(_\d+)?$/
         }*.value
