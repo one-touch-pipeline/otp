@@ -48,15 +48,21 @@ if [[ ! -d ${LATEST_DUMP_LOCATION} ]] || [[ ! -r ${LATEST_DUMP_LOCATION} ]]; the
     exit
 fi
 
+if [[ ! -v PRODUCTION_POSTGRES_JOB_COUNT ]]; then
+  PRODUCTION_POSTGRES_JOB_COUNT=4
+fi
+
 # Wait a few seconds for the server to come up. Just in case.
 sleep 10
 
+# get port from docker
+PORT=$(docker inspect --format='{{range $p, $conf := .NetworkSettings.Ports}}{{(index $conf 0).HostPort}} {{end}}' database_postgres_1)
 
 # see if an override parameter is present
 if [ $# -gt 0 ]; then
     echo "looking for dump matching '$1' .."
     DUMP_TO_LOAD=$( ls -dt "${LATEST_DUMP_LOCATION}/"*"$1"*.dump | head -n1 )
-    # aborts here (thanks to set+e) if `ls` doesn't find a matching expansion: "ls: cannot access /ibios/dmdc/otp/postgres/dumps/production/*XXXXXX*.dump: No such file or directory"
+    # aborts here (thanks to set+e) if `ls` doesn't find a matching expansion: "ls: cannot access ${LATEST_DUMP_LOCATION}/*XXXXXX*.dump: No such file or directory"
 else
     echo "looking for most recent dump .."
     DUMP_TO_LOAD=$( ls -dt "${LATEST_DUMP_LOCATION}"/*.dump | head -n1 )
@@ -66,7 +72,7 @@ du -hs "${DUMP_TO_LOAD}"
 
 # Work around pg_restore failing due to an option set automatically by Postgres clients >= 9.3
 echo "Loading dump..."
-time pg_restore --username=postgres --host=localhost --dbname=otp --jobs=4 --no-privileges "${DUMP_TO_LOAD}" || true
+time pg_restore --username=postgres --host=localhost --port=$PORT --dbname=otp --jobs=$PRODUCTION_POSTGRES_JOB_COUNT --no-privileges "${DUMP_TO_LOAD}" || true
 
 echo "Dump loaded"
 

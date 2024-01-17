@@ -18,9 +18,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-postgres:
-  build: .
-  ports:
-    - "127.0.0.1:5432:5432"
-  environment:
-    POSTGRES_HOST_AUTH_METHOD: "trust"
+version: '3.0'
+services:
+  postgres:
+    build: .
+    ports:
+      - "127.0.0.1:${PRODUCTION_POSTGRES_PORT:-5432}:5432"
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: "trust"
