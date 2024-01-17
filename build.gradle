@@ -31,7 +31,7 @@ buildscript {
     }
     dependencies {
         classpath "org.grails:grails-gradle-plugin:$grailsGradlePluginVersion"
-        classpath "org.grails.plugins:hibernate5:8.0.2"
+        classpath "org.grails.plugins:hibernate5:8.0.3"
 
         classpath 'org.grails.plugins:database-migration:4.2.1'
     }
@@ -380,7 +380,7 @@ dependencies {
     implementation "org.grails.plugins:async"
     implementation "org.grails.plugins:scaffolding"
     implementation "org.grails.plugins:events"
-    implementation "org.grails.plugins:hibernate5:8.0.2"
+    implementation "org.grails.plugins:hibernate5:8.0.3"
     implementation "org.hibernate:hibernate-core:5.4.33.Final"
     implementation "org.grails.plugins:gsp"
     implementation "javax.mail:javax.mail-api:1.6.2"
