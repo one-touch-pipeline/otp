@@ -293,6 +293,7 @@ cypress tests:
         - package.json
         - package-lock.json
         - .gitlab-ci-core.yml
+        - devScripts/gitlab-ci/cypress/**/*
   stage: test
   variables:
     DOCKER_HOST: tcp://docker:2375

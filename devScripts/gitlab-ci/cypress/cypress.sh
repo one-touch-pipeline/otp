@@ -32,8 +32,11 @@ docker compose -f docker-compose.yml up --build postgres > logs/postgres.log &
 docker compose -f docker-compose.yml up --build open-ldap > logs/open-ldap.log &
 docker compose -f docker-compose.yml up --build openssh-server > logs/openssh-server.log &
 
+# precompile classes, so npm_run_cy-wait don't need to wait for building, since wait time is limited
+# apply all database changes before start of OTP, since bootrun already response to request before the database migration run through and
+# if there are changes to tables used by 'http-get://localhost:8080' much of logs are created
 echo "===================================="
-./gradlew --build-cache classes npm_install_cypress
+./gradlew --build-cache classes npm_install_cypress dbmUpdate
 
 echo "===================================="
 ./gradlew --build-cache npm_run_cy-wait | tee cypressReport.txt
