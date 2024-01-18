@@ -192,8 +192,7 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         deletionService.deleteProjectContent(project)
 
         then:
-        AssertionError e = thrown(AssertionError)
-        e.message.contains("There are workflow runs connected to this Project, thus it can not be deleted")
+        WorkflowRun.count == 0
     }
 
     void "deleteSeqTrack, delete an empty run"() {

@@ -26,6 +26,7 @@ import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.exceptions.OtpAssertRuntimeException
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
@@ -60,7 +61,9 @@ class WorkflowDeletionService {
         WorkflowRunInputArtefact.findAllByWorkflowArtefact(workflowArtefact).each {
             deleteWorkflowRun(it.workflowRun)
         }
-        workflowArtefact.artefact.ifPresent { it.delete(flush: true) }
+        if (!workflowArtefact.artefact.isEmpty()) {
+            throw new OtpAssertRuntimeException("artefact for workflowArtefact ${workflowArtefact} still exist: ${workflowArtefact.artefact.get()}")
+        }
         workflowArtefact.delete(flush: true)
     }
 
@@ -72,7 +75,7 @@ class WorkflowDeletionService {
         workflowLogService.findAllByWorkflowStepInCorrectOrder(workflowStep).each {
             deleteWorkflowLog(it)
         }
-        ClusterJob.findAllByWorkflowStep(workflowStep).each {
+        ClusterJob.findAllByWorkflowStep(workflowStep, [sort: 'id', order: 'desc']).each {
             it.delete(flush: true)
         }
         WorkflowError error = workflowStep.workflowError
@@ -101,20 +104,17 @@ class WorkflowDeletionService {
     }
 
     void deleteWorkflowVersionSelector(Project project) {
-        WorkflowVersionSelector.findAllByProject(project)
-                .sort { -it.id }
+        WorkflowVersionSelector.findAllByProject(project, [sort: 'id', order: 'desc'])
                 .each { it.delete(flush: true) }
     }
 
     void deleteReferenceGenomeSelector(Project project) {
-        ReferenceGenomeSelector.findAllByProject(project)
-                .sort { -it.id }
+        ReferenceGenomeSelector.findAllByProject(project, [sort: 'id', order: 'desc'])
                 .each { it.delete(flush: true) }
     }
 
     void deleteWorkflowRun(Project project) {
-        WorkflowRun.findAllByProject(project)
-                .sort { -it.id }
+        WorkflowRun.findAllByProject(project, [sort: 'id', order: 'desc'])
                 .each { deleteWorkflowRun(it) }
     }
 }

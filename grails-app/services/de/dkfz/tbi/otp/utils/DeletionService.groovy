@@ -48,7 +48,6 @@ import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
 import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
 import de.dkfz.tbi.otp.utils.exceptions.NotSupportedException
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigSelector
-import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -102,7 +101,7 @@ class DeletionService {
 
         workflowDeletionService.deleteReferenceGenomeSelector(project)
 
-        assert WorkflowRun.findAllByProject(project).empty: "There are workflow runs connected to this Project, thus it can not be deleted"
+        workflowDeletionService.deleteWorkflowRun(project)
 
         // remove project from ExternalWorkflowConfigSelector or delete selector completely
         deleteProjectsExternalWorkflowConfigSelector(project)
