@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@ import spock.lang.Unroll
 import de.dkfz.tbi.otp.dataprocessing.RnaQualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.RoddyQualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
-import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
@@ -37,7 +37,7 @@ import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
 import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
-class RnaQaOverviewServiceHibernateSpec extends HibernateSpec implements RoddyPancanFactory {
+class RnaQaOverviewServiceHibernateSpec extends HibernateSpec implements RoddyPanCancerFactory {
 
     private RnaQaOverviewService service
 

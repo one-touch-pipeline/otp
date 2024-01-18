@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.domainFactory.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
+import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryInstance
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactoryInstance
@@ -396,7 +397,7 @@ class DomainFactory {
     }
 
     /**
-     * @deprecated Use the {@link de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory#createBamFile} method from the {@link de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory} trait instead.
+     * @deprecated Use the {@link RoddyPanCancerFactory#createBamFile} method from the {@link RoddyPanCancerFactory} trait instead.
      */
     @Deprecated
     static <T> T createRoddyBamFile(Map properties = [:]) {
@@ -594,10 +595,10 @@ class DomainFactory {
                 pipeline: createPanCanPipeline(),
                 referenceGenome: createReferenceGenome(name: 'hs37d5')
         )
-        AbstractBamFile bamFileTumor = AlignmentPipelineFactory.RoddyPancanFactoryInstance.INSTANCE.createRoddyBamFile(
+        AbstractBamFile bamFileTumor = AlignmentPipelineFactory.RoddyPanCancerFactoryInstance.INSTANCE.createRoddyBamFile(
                 randomBamFileProperties + [coverage: 30.0], tumorMwp, RoddyBamFile)
 
-        AbstractBamFile bamFileControl = AlignmentPipelineFactory.RoddyPancanFactoryInstance.INSTANCE.createRoddyBamFile(
+        AbstractBamFile bamFileControl = AlignmentPipelineFactory.RoddyPanCancerFactoryInstance.INSTANCE.createRoddyBamFile(
                 randomBamFileProperties + [coverage: 30.0], createMergingWorkPackage(bamFileTumor.mergingWorkPackage), RoddyBamFile)
 
         bamFileTumor.mergingWorkPackage.bamFileInProjectFolder = bamFileTumor

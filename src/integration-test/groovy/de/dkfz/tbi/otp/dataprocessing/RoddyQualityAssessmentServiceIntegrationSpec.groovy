@@ -30,7 +30,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
-import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
@@ -39,7 +39,7 @@ import java.nio.file.Path
 
 @Rollback
 @Integration
-class RoddyQualityAssessmentServiceIntegrationSpec extends Specification implements DomainFactoryCore, IsRoddy, RoddyPancanFactory {
+class RoddyQualityAssessmentServiceIntegrationSpec extends Specification implements DomainFactoryCore, IsRoddy, RoddyPanCancerFactory {
 
     RoddyQualityAssessmentService roddyQualityAssessmentService
 

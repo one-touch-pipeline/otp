@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,9 +32,9 @@ trait AlignmentPipelineFactory {
         static final CellRangerFactoryInstance INSTANCE = new CellRangerFactoryInstance()
     }
 
-    static class RoddyPancanFactoryInstance implements RoddyPancanFactory {
+    static class RoddyPanCancerFactoryInstance implements RoddyPanCancerFactory {
 
-        static final RoddyPancanFactoryInstance INSTANCE = new RoddyPancanFactoryInstance()
+        static final RoddyPanCancerFactoryInstance INSTANCE = new RoddyPanCancerFactoryInstance()
     }
 
     static class RoddyRnaFactoryInstance implements RoddyRnaFactory {
@@ -44,8 +44,8 @@ trait AlignmentPipelineFactory {
 
     private static final Map<Pipeline.Name, Map<String, Closure<?>>> ALIGNMENT_CREATION = [
             (Pipeline.Name.PANCAN_ALIGNMENT)   : [
-                    (AbstractBamFile)           : { RoddyPancanFactoryInstance.INSTANCE.createBamFile() },
-                    (AbstractMergingWorkPackage): { RoddyPancanFactoryInstance.INSTANCE.createMergingWorkPackage() },
+                    (AbstractBamFile)           : { RoddyPanCancerFactoryInstance.INSTANCE.createBamFile() },
+                    (AbstractMergingWorkPackage): { RoddyPanCancerFactoryInstance.INSTANCE.createMergingWorkPackage() },
             ],
             (Pipeline.Name.RODDY_RNA_ALIGNMENT): [
                     (AbstractBamFile)           : { RoddyRnaFactoryInstance.INSTANCE.createBamFile() },

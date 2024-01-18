@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
-import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.job.processing.RoddyConfigService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
@@ -52,7 +52,7 @@ import java.time.Duration
 /**
  * Base class for roddy alignment workflows
  */
-abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkflowSpec implements UsingReferenceGenome, RoddyReferences, RoddyPancanFactory,
+abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkflowSpec implements UsingReferenceGenome, RoddyReferences, RoddyPanCancerFactory,
         FastqcDomainFactory {
 
     // @Slf4j does not work with Spock containing tests and produces problems in closures

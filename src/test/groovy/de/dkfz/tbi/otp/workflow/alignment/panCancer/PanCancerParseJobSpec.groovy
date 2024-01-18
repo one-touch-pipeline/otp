@@ -28,7 +28,7 @@ import spock.lang.TempDir
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
@@ -39,7 +39,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
 
-class PanCancerParseJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, RoddyPancanFactory {
+class PanCancerParseJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, RoddyPanCancerFactory {
 
     @Override
     Class[] getDomainClassesToMock() {

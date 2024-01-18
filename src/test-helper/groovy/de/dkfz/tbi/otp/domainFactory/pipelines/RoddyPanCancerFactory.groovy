@@ -25,7 +25,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
 
-trait RoddyPancanFactory implements IsAlignment, IsRoddy {
+trait RoddyPanCancerFactory implements IsAlignment, IsRoddy {
 
     @Override
     RoddyBamFile createBamFile(Map properties = [:]) {

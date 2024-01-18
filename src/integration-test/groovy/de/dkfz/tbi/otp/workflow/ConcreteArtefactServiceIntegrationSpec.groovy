@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
-import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.shared.NoArtefactOfRoleException
@@ -42,7 +42,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 @Rollback
 @Integration
-class ConcreteArtefactServiceIntegrationSpec extends Specification implements RoddyPancanFactory, WorkflowSystemDomainFactory, FastqcDomainFactory {
+class ConcreteArtefactServiceIntegrationSpec extends Specification implements RoddyPanCancerFactory, WorkflowSystemDomainFactory, FastqcDomainFactory {
 
     @Autowired
     ConcreteArtefactService service

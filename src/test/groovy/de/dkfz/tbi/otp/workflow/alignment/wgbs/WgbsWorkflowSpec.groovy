@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,9 +24,9 @@ package de.dkfz.tbi.otp.workflow.alignment.wgbs
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 
-class WgbsWorkflowSpec extends Specification implements RoddyPancanFactory, DataTest {
+class WgbsWorkflowSpec extends Specification implements RoddyPanCancerFactory, DataTest {
 
     WgbsWorkflow wgbsWorkflow
 

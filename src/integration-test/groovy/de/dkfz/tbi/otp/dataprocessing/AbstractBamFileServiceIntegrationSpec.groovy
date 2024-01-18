@@ -28,7 +28,7 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
-import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
@@ -36,7 +36,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback
 @Integration
-class AbstractBamFileServiceIntegrationSpec extends Specification implements RoddyPancanFactory, IsRoddy {
+class AbstractBamFileServiceIntegrationSpec extends Specification implements RoddyPanCancerFactory, IsRoddy {
 
     AbstractBamFileService abstractBamFileService
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@ import spock.lang.*
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators.BamFilePathValidator
@@ -50,7 +50,7 @@ import static de.dkfz.tbi.otp.utils.HelperUtils.byteArrayToHexString
 @Rollback
 @Integration
 @DirtiesContext
-class BamMetadataImportServiceIntegrationSpec extends Specification implements RoddyPancanFactory, UserAndRoles {
+class BamMetadataImportServiceIntegrationSpec extends Specification implements RoddyPanCancerFactory, UserAndRoles {
 
     @Autowired
     BamMetadataImportService bamMetadataImportService

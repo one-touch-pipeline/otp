@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -427,7 +427,7 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
                 sequenceFile: singleCellFastqFile,
                 workflowArtefact: createWorkflowArtefact(producedBy: fastqcSingleCellRun),
         ])
-        MergingWorkPackage mergingWorkPackage = AlignmentPipelineFactory.RoddyPancanFactoryInstance.INSTANCE.createMergingWorkPackage([
+        MergingWorkPackage mergingWorkPackage = AlignmentPipelineFactory.RoddyPanCancerFactoryInstance.INSTANCE.createMergingWorkPackage([
                 seqTracks: [fastqFile.seqTrack] as Set,
                 seqType  : fastqFile.seqTrack.seqType,
         ])

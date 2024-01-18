@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@ import grails.test.hibernate.HibernateSpec
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
-import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflowExecution.decider.alignment.AlignmentArtefactData
@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.workflowExecution.decider.fastqc.FastqcArtefactData
 
 import java.time.LocalDate
 
-class FastqcArtefactServiceSpec extends HibernateSpec implements WorkflowSystemDomainFactory, RoddyPancanFactory, FastqcDomainFactory {
+class FastqcArtefactServiceSpec extends HibernateSpec implements WorkflowSystemDomainFactory, RoddyPanCancerFactory, FastqcDomainFactory {
 
     private FastqcArtefactService fastqcArtefactService
 
