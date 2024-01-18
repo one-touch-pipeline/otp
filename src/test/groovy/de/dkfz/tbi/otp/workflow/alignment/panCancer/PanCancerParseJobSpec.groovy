@@ -71,7 +71,7 @@ class PanCancerParseJobSpec extends Specification implements DataTest, WorkflowS
         RoddyBamFile roddyBamFile = createRoddyBamFile(RoddyBamFile)
 
         Path mergedQAJsonFile = tempDir.resolve("qa.json")
-        mergedQAJsonFile.text = DomainFactory.qaFileContent
+        mergedQAJsonFile.text = qaFileContent
 
         PanCancerParseJob job = Spy(PanCancerParseJob)
         job.roddyQualityAssessmentService = new RoddyQualityAssessmentService()
@@ -92,13 +92,13 @@ class PanCancerParseJobSpec extends Specification implements DataTest, WorkflowS
         then:
         List<RoddySingleLaneQa> singleLaneQa = RoddySingleLaneQa.findAllByAbstractBamFile(roddyBamFile)
         singleLaneQa.each { qa ->
-            DomainFactory.qaValuesProperties[qa.chromosome].each { k, v ->
+            qaValuesPropertiesMultipleChromosomes[qa.chromosome].each { k, v ->
                 assert qa."${k}" == v
             }
         }
         List<RoddyMergedBamQa> mergedQa = RoddyMergedBamQa.findAllByAbstractBamFile(roddyBamFile)
         mergedQa.each { qa ->
-            DomainFactory.qaValuesProperties[qa.chromosome].each { k, v ->
+            qaValuesPropertiesMultipleChromosomes[qa.chromosome].each { k, v ->
                 assert qa."${k}" == v
             }
         }
@@ -115,14 +115,14 @@ class PanCancerParseJobSpec extends Specification implements DataTest, WorkflowS
         given:
         WorkflowStep workflowStep = createWorkflowStep()
         RoddyBamFile roddyBamFile = createRoddyBamFile(RoddyBamFile)
-        List<RoddyMergedBamQa> existingMergedQa = DomainFactory.qaValuesProperties.collect { k, v ->
+        List<RoddyMergedBamQa> existingMergedQa = qaValuesPropertiesMultipleChromosomes.collect { k, v ->
             new RoddyMergedBamQa(v + [
                     abstractBamFile              : roddyBamFile,
                     chromosome8QcBasesMapped     : 999,
                     percentageMatesOnDifferentChr: 777.123,
             ]).save(flush: true)
         }
-        List<RoddySingleLaneQa> existingSingleLaneQa = DomainFactory.qaValuesProperties.collect { k, v ->
+        List<RoddySingleLaneQa> existingSingleLaneQa = qaValuesPropertiesMultipleChromosomes.collect { k, v ->
             new RoddySingleLaneQa(v + [
                     abstractBamFile              : roddyBamFile,
                     seqTrack                     : roddyBamFile.seqTracks.first(),
@@ -132,7 +132,7 @@ class PanCancerParseJobSpec extends Specification implements DataTest, WorkflowS
         }
 
         Path mergedQAJsonFile = tempDir.resolve("qa.json")
-        mergedQAJsonFile.text = DomainFactory.qaFileContent
+        mergedQAJsonFile.text = qaFileContent
 
         PanCancerParseJob job = Spy(PanCancerParseJob)
         job.roddyQualityAssessmentService = new RoddyQualityAssessmentService()
@@ -153,7 +153,7 @@ class PanCancerParseJobSpec extends Specification implements DataTest, WorkflowS
         then:
         List<RoddySingleLaneQa> singleLaneQa = RoddySingleLaneQa.findAllByAbstractBamFile(roddyBamFile)
         singleLaneQa.each { qa ->
-            DomainFactory.qaValuesProperties[qa.chromosome].each { k, v ->
+            qaValuesPropertiesMultipleChromosomes[qa.chromosome].each { k, v ->
                 assert qa."${k}" == v
             }
         }
@@ -161,7 +161,7 @@ class PanCancerParseJobSpec extends Specification implements DataTest, WorkflowS
 
         List<RoddyMergedBamQa> mergedQa = RoddyMergedBamQa.findAllByAbstractBamFile(roddyBamFile)
         mergedQa.each { qa ->
-            DomainFactory.qaValuesProperties[qa.chromosome].each { k, v ->
+            qaValuesPropertiesMultipleChromosomes[qa.chromosome].each { k, v ->
                 assert qa."${k}" == v
             }
         }

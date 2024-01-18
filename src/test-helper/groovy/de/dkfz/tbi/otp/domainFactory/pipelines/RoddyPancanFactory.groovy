@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -63,11 +63,95 @@ trait RoddyPancanFactory implements IsAlignment, IsRoddy {
 
     @Override
     Map getQaValuesProperties() {
+        return qaValuesPropertiesMultipleChromosomes[RoddyQualityAssessment.ALL]
+    }
+
+    Map<String, Map<String, Number>> getQaValuesPropertiesMultipleChromosomes(Map properties = [:]) {
+        Map map = [
+                chromosome8QcBasesMapped     : 1866013,
+                percentageMatesOnDifferentChr: 1.551,
+        ] + properties
         return [
-                chromosome                   : RoddyQualityAssessment.ALL,
-                insertSizeCV                 : 0,
-                percentageMatesOnDifferentChr: 0,
-                genomeWithoutNCoverageQcBases: 0,
+                "8"  : [
+                        "genomeWithoutNCoverageQcBases": 0.011,
+                        "referenceLength"              : 14636402211,
+                        "chromosome"                   : '8',
+                        "qcBasesMapped"                : map.chromosome8QcBasesMapped,
+                ],
+                (RoddyQualityAssessment.ALL): [
+                        "pairedRead1"                    : 2091461,
+                        "pairedInSequencing"             : 4213091,
+                        "withMateMappedToDifferentChr"   : 336351,
+                        "qcFailedReads"                  : 10,
+                        "totalReadCounter"               : 4213091,
+                        "totalMappedReadCounter"         : 4203691,
+                        "genomeWithoutNCoverageQcBases"  : 0.011,
+                        "singletons"                     : 10801,
+                        "withMateMappedToDifferentChrMaq": 61611,
+                        "insertSizeMedian"               : 3991,
+                        "insertSizeSD"                   : 931,
+                        "pairedRead2"                    : 2121631,
+                        "percentageMatesOnDifferentChr"  : map.percentageMatesOnDifferentChr,
+                        "chromosome"                     : RoddyQualityAssessment.ALL,
+                        "withItselfAndMateMapped"        : 4192891,
+                        "qcBasesMapped"                  : map.chromosome8QcBasesMapped,
+                        "duplicates"                     : 8051,
+                        "insertSizeCV"                   : 231,
+                        "referenceLength"                : 30956774121,
+                        "properlyPaired"                 : 3847661,
+                ],
+                "7"  : [
+                        "referenceLength"              : 1591386631,
+                        "genomeWithoutNCoverageQcBases": 0.011,
+                        "qcBasesMapped"                : map.chromosome8QcBasesMapped,
+                        "chromosome"                   : '7',
+                ],
         ]
+    }
+
+    String getQaFileContent(Map properties = [:]) {
+        Map map = [
+                chromosome8QcBasesMapped     : '1866013',
+                percentageMatesOnDifferentChr: '1.551',
+        ] + properties
+
+        return """\
+{
+  "8": {
+    "genomeWithoutNCoverageQcBases": 0.011,
+    "referenceLength": 14636402211,
+    "chromosome": 8,
+    "qcBasesMapped": ${map.chromosome8QcBasesMapped}
+  },
+  "all": {
+    "pairedRead1": 2091461,
+    "pairedInSequencing": 4213091,
+    "withMateMappedToDifferentChr": 336351,
+    "qcFailedReads": 10,
+    "totalReadCounter": 4213091,
+    "totalMappedReadCounter": 4203691,
+    "genomeWithoutNCoverageQcBases": 0.011,
+    "singletons": 10801,
+    "withMateMappedToDifferentChrMaq": 61611,
+    "insertSizeMedian": 3991,
+    "insertSizeSD": 931,
+    "pairedRead2": 2121631,
+    "percentageMatesOnDifferentChr": ${map.percentageMatesOnDifferentChr},
+    "chromosome": "all",
+    "withItselfAndMateMapped": 4192891,
+    "qcBasesMapped": ${map.chromosome8QcBasesMapped},
+    "duplicates": 8051,
+    "insertSizeCV": 231,
+    "referenceLength": 30956774121,
+    "properlyPaired": 3847661
+  },
+  "7": {
+    "referenceLength": 1591386631,
+    "genomeWithoutNCoverageQcBases": 0.011,
+    "qcBasesMapped": ${map.chromosome8QcBasesMapped},
+    "chromosome": 7
+  }
+}
+"""
     }
 }

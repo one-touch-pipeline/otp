@@ -30,6 +30,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
+import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPancanFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
@@ -38,7 +39,7 @@ import java.nio.file.Path
 
 @Rollback
 @Integration
-class RoddyQualityAssessmentServiceIntegrationSpec extends Specification implements DomainFactoryCore, IsRoddy {
+class RoddyQualityAssessmentServiceIntegrationSpec extends Specification implements DomainFactoryCore, IsRoddy, RoddyPancanFactory {
 
     RoddyQualityAssessmentService roddyQualityAssessmentService
 
@@ -80,10 +81,10 @@ class RoddyQualityAssessmentServiceIntegrationSpec extends Specification impleme
         Path workMergedQATargetExtractJson = temporaryFolder.resolve("workMergedQATargetExtract.json")
         Path workSingleLaneQAJson = temporaryFolder.resolve("workSingleLaneQA.json")
         Path workLibraryQAJson = temporaryFolder.resolve("workLibraryQA.json")
-        workMergedQAJson.text = DomainFactory.getQaFileContent([chromosome8QcBasesMapped: SOME_VALUE_1])
-        workMergedQATargetExtractJson.text = DomainFactory.getQaFileContent([chromosome8QcBasesMapped: SOME_VALUE_2])
-        workSingleLaneQAJson.text = DomainFactory.getQaFileContent([chromosome8QcBasesMapped: SOME_VALUE_3])
-        workLibraryQAJson.text = DomainFactory.getQaFileContent([chromosome8QcBasesMapped: SOME_VALUE_4])
+        workMergedQAJson.text = getQaFileContent([chromosome8QcBasesMapped: SOME_VALUE_1])
+        workMergedQATargetExtractJson.text = getQaFileContent([chromosome8QcBasesMapped: SOME_VALUE_2])
+        workSingleLaneQAJson.text = getQaFileContent([chromosome8QcBasesMapped: SOME_VALUE_3])
+        workLibraryQAJson.text = getQaFileContent([chromosome8QcBasesMapped: SOME_VALUE_4])
 
         roddyQualityAssessmentService = new RoddyQualityAssessmentService()
         roddyQualityAssessmentService.referenceGenomeService = new ReferenceGenomeService()
