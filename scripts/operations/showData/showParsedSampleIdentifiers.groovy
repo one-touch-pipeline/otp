@@ -47,16 +47,16 @@ String input = """
 
 // uncomment the parser to use
 SampleIdentifierParser parser
-// parser = new DeepSampleIdentifierParser()
-// parser = new InformSampleIdentifierParser()
-// parser = new HipoSampleIdentifierParser()
-// parser = new Hipo2SampleIdentifierParser()
-// parser = new Hipo2SamplePreparationLabSampleIdentifierParser()
-// parser = new ITCC_4P_Parser()
-// parser = new OE0290_EORTC_SampleIdentifierParser()
-// parser = new SimpleProjectIndividualSampleTypeParser()
-// parser = new PedionParser()
-// parser = new Covid19SampleIdentifierParser()
+// parser = ctx.deepSampleIdentifierParser
+// parser = ctx.informSampleIdentifierParser
+// parser = ctx.hipoSampleIdentifierParser
+// parser = ctx.hipo2SampleIdentifierParser
+// parser = ctx.hipo2SamplePreparationLabSampleIdentifierParser
+// parser = ctx.iTCC_4P_Parser
+// parser = ctx.OE0290_EORTC_SampleIdentifierParser
+// parser = ctx.simpleProjectIndividualSampleTypeParser
+// parser = ctx.pedionParser
+// parser = ctx.covid19SampleIdentifierParser
 
 // ----------------------------------------
 // work area
