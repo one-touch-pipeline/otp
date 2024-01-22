@@ -88,7 +88,7 @@ class SecurityService {
     User getUserSwitchInitiator() {
         if (switched) {
             SwitchUserGrantedAuthority authority = authentication.authorities
-                    .find({ it instanceof SwitchUserGrantedAuthority }) as SwitchUserGrantedAuthority
+                    .find { it instanceof SwitchUserGrantedAuthority } as SwitchUserGrantedAuthority
             String name = configService.oidcEnabled ? ((DefaultOidcUser) authority?.source?.principal)?.userInfo?.preferredUsername : authority?.source?.name
             return CollectionUtils.exactlyOneElement(User.findAllByUsername(name))
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -74,16 +74,16 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
         }
 
         if (seqTrackMap[false]) {
-            output.showUniqueNotSupportedSeqTypes(seqTrackMap[false], { SeqTrack seqTrack ->
+            output.showUniqueNotSupportedSeqTypes(seqTrackMap[false]) { SeqTrack seqTrack ->
                 "${seqTrack.seqType.displayNameWithLibraryLayout}"
-            })
+            }
         }
 
         if (seqTrackMap[true]) {
             List<SeqTrack> alignableSeqTracks = seqTrackMap[true] ?: []
 
             List<SeqTrack> noConfig = getSeqTracksWithoutCorrespondingAlignmentConfig(alignableSeqTracks)
-            output.showUniqueList(HEADER_NO_CONFIG, noConfig, { "${it.project}  ${it.seqType}" })
+            output.showUniqueList(HEADER_NO_CONFIG, noConfig) { "${it.project}  ${it.seqType}" }
 
             List<SeqTrack> seqTracksWithConfig = alignableSeqTracks - noConfig
 

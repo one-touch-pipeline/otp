@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,9 +48,9 @@ class CellRangerController {
 
         List<CellRangerMergingWorkPackage> mwps = cellRangerConfigurationService.findCellRangerMergingWorkPackageByProject(project)
 
-        Map<GroupedMwp, List<CellRangerMergingWorkPackage>> grouped = mwps.groupBy({
+        Map<GroupedMwp, List<CellRangerMergingWorkPackage>> grouped = mwps.groupBy {
             new GroupedMwp(it.sample, it.seqType, it.config.programVersion, it.referenceGenomeIndex)
-        })
+        }
 
         List<GroupedMwp> groupedMwps = grouped.collect { k, v ->
             k.mwps = v

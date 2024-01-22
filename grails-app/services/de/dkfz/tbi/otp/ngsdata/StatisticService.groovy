@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -185,9 +185,9 @@ class StatisticService {
         List<Map<String, String>> result = data
                 .collect { [x: TimeFormats.MONTH_YEAR.getFormattedLocalDate(LocalDate.parse(it[0])), y: it[1] ?: 0] }
                 .inject(initialLabels) { List<Map<String, String>> acc, Map<String, String> element ->
-                    Map<String, String> duplicateEntry = acc.find({ el -> el?.x == element.x })
+                    Map<String, String> duplicateEntry = acc.find { el -> el?.x == element.x }
                     if (duplicateEntry) {
-                    duplicateEntry.y += element.y
+                        duplicateEntry.y += element.y
                     }
                     return acc
                 }

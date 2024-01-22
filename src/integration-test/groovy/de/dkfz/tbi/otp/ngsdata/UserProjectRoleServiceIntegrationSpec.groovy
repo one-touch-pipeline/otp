@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -191,7 +191,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 manageUsersAndDelegate: delegateUsers,
                 receivesNotifications : true,
         ]
-        Set<ProjectRole> projectRoles = projectRoleNames.collect({ roleName -> ProjectRole.findByName(roleName.name()) })
+        Set<ProjectRole> projectRoles = projectRoleNames.collect { roleName -> ProjectRole.findByName(roleName.name()) }
 
         when:
         doWithAuth(OPERATOR) {
@@ -353,7 +353,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        1 * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(_, { it.contains(projectList) })
+        1 * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(_) { it.contains(projectList) }
     }
 
     @Unroll
@@ -460,7 +460,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         !userProjectRole.receivesNotifications
 
         and: "notification for unix group administration was sent"
-        removeMailCount * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(_ as String, { it.contains("REMOVE") })
+        removeMailCount * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(_ as String) { it.contains("REMOVE") }
 
         and: "notification for user managers that a user has been enabled was sent"
         notifyEnableUser * userProjectRoleService.mailHelperService.sendEmail({
@@ -1148,7 +1148,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         then:
         userProjectRoles[0]."${flag}" == true
-        fileAccessMail * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(_ as String, { it.contains("ADD") })
+        fileAccessMail * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(_ as String) { it.contains("ADD") }
 
         when:
         doWithAuth(OPERATOR) {
@@ -1158,7 +1158,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         then:
         userProjectRoles[0]."${flag}" == false
 
-        fileAccessMail * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(_ as String, { it.contains("REMOVE") })
+        fileAccessMail * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(_ as String) { it.contains("REMOVE") }
         _ * userProjectRoleService.mailHelperService.sendEmail(*_)
 
         where:
@@ -1268,7 +1268,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         then:
         userProjectRoles.accessToFiles.each { it == true }
-        1 * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(_ as String, { it.contains("ADD") })
+        1 * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(_ as String) { it.contains("ADD") }
         1 * userProjectRoleService.mailHelperService.sendEmail({ it.contains("fileAccessChange") }, _ as String, _ as String, _ as List<String>)
 
         when:
@@ -1278,7 +1278,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         then:
         userProjectRoles.accessToFiles.each { it == false }
-        1 * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(_ as String, { it.contains("REMOVE") })
+        1 * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(_ as String) { it.contains("REMOVE") }
     }
 
     @Unroll

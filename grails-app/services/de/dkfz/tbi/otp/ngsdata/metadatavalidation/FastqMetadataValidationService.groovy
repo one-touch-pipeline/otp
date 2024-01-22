@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,13 +38,13 @@ class FastqMetadataValidationService extends MetadataValidationService {
     @CompileDynamic
     MetadataValidationContext createFromFile(Path metadataFile, DirectoryStructure directoryStructure, String directoryStructureDescription,
                                              boolean ignoreAlreadyKnownMd5sum = false) {
-        Map parametersForFile = readAndCheckFile(metadataFile, { String s ->
+        Map parametersForFile = readAndCheckFile(metadataFile) { String s ->
             MetaDataColumn.getColumnForName(s)?.name() ?: s
-        }, { Row row ->
+        } { Row row ->
             !row.getCellByColumnTitle(FASTQ_FILE.name())?.text?.startsWith('Undetermined') &&
                     // Add additional filter to skip rows containing known md5sum in database
                     (!ignoreAlreadyKnownMd5sum || RawSequenceFile.findAllByFastqMd5sum(row.getCellByColumnTitle(MD5.name())?.text).empty)
-        })
+        }
 
         return new MetadataValidationContext(metadataFile, parametersForFile.metadataFileMd5sum,
                 parametersForFile.spreadsheet, parametersForFile.problems, directoryStructure,
@@ -56,13 +56,13 @@ class FastqMetadataValidationService extends MetadataValidationService {
                                                 DirectoryStructure directoryStructure,
                                                 String directoryStructureDescription,
                                                 boolean ignoreAlreadyKnownMd5sum = false) {
-        Map parametersForFile = checkContent(contentWithPathAndProblems.content, { String s ->
+        Map parametersForFile = checkContent(contentWithPathAndProblems.content) { String s ->
             MetaDataColumn.getColumnForName(s)?.name() ?: s
-        }, { Row row ->
+        } { Row row ->
             !row.getCellByColumnTitle(FASTQ_FILE.name())?.text?.startsWith('Undetermined') &&
                     // Add additional filter to skip rows containing known md5sum in database
                     (!ignoreAlreadyKnownMd5sum || RawSequenceFile.findAllByFastqMd5sum(row.getCellByColumnTitle(MD5.name())?.text).empty)
-        })
+        }
 
         return new MetadataValidationContext(contentWithPathAndProblems.path, parametersForFile.metadataFileMd5sum,
                 parametersForFile.spreadsheet, parametersForFile.problems.addProblems(contentWithPathAndProblems.problems),

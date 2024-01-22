@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,9 +43,9 @@ class ProjectInfoService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<ProjectInfo> getAllProjectInfosSortedByDateDesc(Project project) {
-        return project.projectInfos.sort({ a, b ->
+        return project.projectInfos.sort { a, b ->
             b.dateCreated <=> a.dateCreated
-        })
+        }
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -61,17 +61,17 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
         }
 
         if (samplePairSupportedSeqType[false]) {
-            output.showUniqueNotSupportedSeqTypes(samplePairSupportedSeqType[false], { SamplePair samplePair ->
+            output.showUniqueNotSupportedSeqTypes(samplePairSupportedSeqType[false]) { SamplePair samplePair ->
                 "${samplePair.seqType.displayNameWithLibraryLayout}"
-            })
+            }
         }
 
         List<SamplePair> samplePairsWithSupportedSeqTypes = samplePairSupportedSeqType[true] ?: []
 
         List<SamplePair> noConfig = samplePairWithoutCorrespondingConfigForPipelineAndSeqTypeAndProject(samplePairsWithSupportedSeqTypes)
-        output.showUniqueList(HEADER_NO_CONFIG, noConfig, { SamplePair samplePair ->
+        output.showUniqueList(HEADER_NO_CONFIG, noConfig) { SamplePair samplePair ->
             "${samplePair.project} ${samplePair.seqType.name} ${samplePair.seqType.libraryLayout}"
-        })
+        }
 
         List<SamplePair> samplePairsWithConfig = samplePairsWithSupportedSeqTypes - noConfig
 

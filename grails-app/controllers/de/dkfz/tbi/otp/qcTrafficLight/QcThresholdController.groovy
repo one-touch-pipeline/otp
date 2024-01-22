@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -72,7 +72,7 @@ class QcThresholdController {
 
     @PreAuthorize("isFullyAuthenticated()")
     def create(CreateCommand cmd) {
-        checkErrorAndCallMethod(cmd, {
+        checkErrorAndCallMethod(cmd) {
             qcThresholdService.createThreshold(
                     cmd.forProject ? projectSelectionService.requestedProject : null,
                     cmd.className, cmd.property, cmd.seqType, cmd.condition,
@@ -80,23 +80,23 @@ class QcThresholdController {
                     cmd.actualWarningThresholdUpper, cmd.actualErrorThresholdUpper,
                     cmd.property2 ?: null,
             )
-        })
+        }
     }
 
     @PreAuthorize("isFullyAuthenticated()")
     def update(UpdateCommand cmd) {
-        checkErrorAndCallMethod(cmd, {
+        checkErrorAndCallMethod(cmd) {
             qcThresholdService.updateThreshold(cmd.qcThreshold, cmd.condition,
                     cmd.actualErrorThresholdLower, cmd.actualWarningThresholdLower,
                     cmd.actualWarningThresholdUpper, cmd.actualErrorThresholdUpper,
                     cmd.property2 ?: null,
             )
-        })
+        }
     }
 
     @PreAuthorize("isFullyAuthenticated()")
     def delete(DeleteCommand cmd) {
-        checkErrorAndCallMethod(cmd, { qcThresholdService.deleteThreshold(cmd.qcThreshold) })
+        checkErrorAndCallMethod(cmd) { qcThresholdService.deleteThreshold(cmd.qcThreshold) }
     }
 
     private void checkErrorAndCallMethod(Object cmd, Closure<Errors> method) {

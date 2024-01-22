@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -84,10 +84,10 @@ class Scheduler {
     void executeJob(final Job job) {
         notNull job
         doCreateCheck(job)
-        doWithErrorHandling(job, {
-            doInJobContext(job, { job.execute() })
+        doWithErrorHandling(job) {
+            doInJobContext(job) { job.execute() }
             doEndCheck(job)
-        })
+        }
     }
 
     /**

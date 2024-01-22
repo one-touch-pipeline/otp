@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -54,7 +54,7 @@ class MonitorOutputCollectorIntegrationSpec extends Specification implements Dom
         String expected = ''
 
         when:
-        collector.addInfoAboutProcessErrors(workflowName, [seqTrack], { it.id }, { it })
+        collector.addInfoAboutProcessErrors(workflowName, [seqTrack]) { it.id } { it }
         String output = collector.output
 
         then:
@@ -102,7 +102,7 @@ class MonitorOutputCollectorIntegrationSpec extends Specification implements Dom
         )
 
         when:
-        collector.addInfoAboutProcessErrors(workflowName, [seqTrack], { it.id }, { it })
+        collector.addInfoAboutProcessErrors(workflowName, [seqTrack]) { it.id } { it }
         String output = collector.output.split('\n')*.trim().join('\n')
 
         then:
@@ -192,7 +192,7 @@ class MonitorOutputCollectorIntegrationSpec extends Specification implements Dom
         MonitorOutputCollector collector = Spy(MonitorOutputCollector)
 
         when:
-        collector.addInfoAboutProcessErrors(workflowRun.workflow.name, [seqTrack1, seqTrack2], { it.id }, { it })
+        collector.addInfoAboutProcessErrors(workflowRun.workflow.name, [seqTrack1, seqTrack2]) { it.id } { it }
         String output = collector.output.split('\n')*.trim().join('\n')
 
         then:
@@ -231,7 +231,7 @@ class MonitorOutputCollectorIntegrationSpec extends Specification implements Dom
         MonitorOutputCollector collector = Spy(MonitorOutputCollector)
 
         when:
-        collector.addInfoAboutProcessErrors(workflowRun.workflow.name, [seqTrack], { it.id }, { it })
+        collector.addInfoAboutProcessErrors(workflowRun.workflow.name, [seqTrack]) { it.id } { it }
         String output = collector.output.split('\n')*.trim().join('\n')
 
         then:

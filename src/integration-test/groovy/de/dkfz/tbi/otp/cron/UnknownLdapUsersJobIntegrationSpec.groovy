@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -101,7 +101,7 @@ class UnknownLdapUsersJobIntegrationSpec extends Specification implements Domain
                     0 * _
                 },
                 mailHelperService      : Mock(MailHelperService) {
-                    1 * sendEmailToTicketSystem(_, { usersToNotBeFound.every { User user -> it.contains(user.username) } })
+                    1 * sendEmailToTicketSystem(_) { usersToNotBeFound.every { User user -> it.contains(user.username) } }
                 },
         ])
 

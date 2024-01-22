@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -75,22 +75,22 @@ class FastqImportWorkflowCreatorScheduler extends AbstractWorkflowCreatorSchedul
         int count = fastqImportInstanceDb.sequenceFiles.size()
 
         return LogUsedTimeUtils.logUsedTimeStartEnd(log, "create workflows for ${metaDataFile.fileNameSource} " +
-                "(dataFiles: ${count}, ${fastqImportInstanceService.countInstancesInWaitingState()} in queue)", {
-            List<WorkflowRun> runs = LogUsedTimeUtils.logUsedTimeStartEnd(log, "  create workflow runs for ${count} datafiles", {
+                "(dataFiles: ${count}, ${fastqImportInstanceService.countInstancesInWaitingState()} in queue)") {
+            List<WorkflowRun> runs = LogUsedTimeUtils.logUsedTimeStartEnd(log, "  create workflow runs for ${count} datafiles") {
                 dataInstallationInitializationService.createWorkflowRuns(fastqImportInstanceDb)
-            })
+            }
 
             Collection<WorkflowArtefact> workflowArtefacts = runs.collectMany { it.outputArtefacts*.value }
-            DeciderResult deciderResult = LogUsedTimeUtils.logUsedTimeStartEnd(log, "  decider for ${count} datafiles", {
+            DeciderResult deciderResult = LogUsedTimeUtils.logUsedTimeStartEnd(log, "  decider for ${count} datafiles") {
                 allDecider.decide(workflowArtefacts)
-            })
+            }
 
             createSamplePairs(deciderResult.newArtefacts, count)
 
             fastqImportInstanceService.updateState(fastqImportInstanceDb, WorkflowCreateState.SUCCESS)
 
             return deciderResult
-        })
+        }
     }
 
     @Override

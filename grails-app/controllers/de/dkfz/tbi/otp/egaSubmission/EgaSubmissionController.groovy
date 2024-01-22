@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -275,7 +275,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     }
 
     JSON selectSamplesCsvUpload(UploadCsvFileCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd, {
+        checkDefaultErrorsAndCallMethod(cmd) {
             Spreadsheet spreadsheet = checkAndReadCsvFile(cmd)
             if (spreadsheet) {
                 List<EgaSubmissionFileService.EgaColumnName> headers = [
@@ -296,7 +296,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                 } as Closure<Map<String, String>>))
                 return render(data as JSON)
             }
-        })
+        }
         return render([:] as JSON)
     }
 

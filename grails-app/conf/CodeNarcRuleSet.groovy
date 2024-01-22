@@ -769,7 +769,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     ClosureAsLastMethodParameter {
-        priority = MIDDLE
+        priority = DEFAULT
     }
     CollectAllIsDeprecated {
         priority = DEFAULT

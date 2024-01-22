@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -73,7 +73,7 @@ class BootStrap {
             log.info("JobSystem is disabled")
         }
 
-        JSON.registerObjectMarshaller(Enum, { Enum e -> e.name() })
+        JSON.registerObjectMarshaller(Enum) { Enum e -> e.name() }
     }
 
     def destroy = {

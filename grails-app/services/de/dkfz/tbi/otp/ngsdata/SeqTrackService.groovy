@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -352,8 +352,8 @@ class SeqTrackService {
      */
     Map<SeqType, Map<SampleType, SeqTrackSet>> groupSeqTracksBySeqTypeAndSampleType(List<SeqTrack> inputSeqTracks) {
         Map<SeqType, Map<SampleType, SeqTrackSet>> fullyGroupedAsSets = [:]
-        inputSeqTracks.groupBy({ it.seqType }, { it.sampleType }).collectEntries(fullyGroupedAsSets) { SeqType seqType,
-                                                                                                       Map<SampleType, List<SeqTrack>> seqTracksPerSampleType ->
+        inputSeqTracks.groupBy { it.seqType } { it.sampleType }.collectEntries(fullyGroupedAsSets) { SeqType seqType,
+                                                                                                     Map<SampleType, List<SeqTrack>> seqTracksPerSampleType ->
             Map<SampleType, SeqTrackSet> setsPerSampleType = [:]
             seqTracksPerSampleType.collectEntries(setsPerSampleType) { SampleType sampleType, List<SeqTrack> seqTracks ->
                 return [(sampleType): new SeqTrackSet(seqTracks)]

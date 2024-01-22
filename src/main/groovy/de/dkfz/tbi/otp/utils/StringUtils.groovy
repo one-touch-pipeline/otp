@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -107,7 +107,7 @@ class StringUtils {
      * Code has been fine tuned.
      */
     static String toCamelCase(String text, boolean capitalized = false) {
-        String camelCasedText = text.toLowerCase().replaceAll("(_)([A-Za-z0-9])", { List<String> it -> it[2].toUpperCase() })
+        String camelCasedText = text.toLowerCase().replaceAll("(_)([A-Za-z0-9])") { List<String> it -> it[2].toUpperCase() }
         return capitalized ? camelCasedText.capitalize() : camelCasedText
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -199,7 +199,7 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
         String expected = "${MonitorOutputCollector.HEADER_NOT_TRIGGERED} (4):\n2\n6\n8\n8\n"
 
         when:
-        collector.showNotTriggered([4, 3, 4, 1], { 2 * it })
+        collector.showNotTriggered([4, 3, 4, 1]) { 2 * it }
         String output = collector.output.split('\n')*.trim().join('\n')
 
         then:
@@ -212,7 +212,7 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
         String expected = "${MonitorOutputCollector.HEADER_SHOULD_START} (4):\n2\n6\n8\n8\n"
 
         when:
-        collector.showShouldStart([4, 3, 4, 1], { 2 * it })
+        collector.showShouldStart([4, 3, 4, 1]) { 2 * it }
         String output = collector.output.split('\n')*.trim().join('\n')
 
         then:
@@ -225,7 +225,7 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
         String expected = "${MonitorOutputCollector.HEADER_WAITING} (4):\n2\n6\n8\n8\n"
 
         when:
-        collector.showWaiting([4, 3, 4, 1], { 2 * it })
+        collector.showWaiting([4, 3, 4, 1]) { 2 * it }
         String output = collector.output.split('\n')*.trim().join('\n')
 
         then:
@@ -238,7 +238,7 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
         MonitorOutputCollector collector = new MonitorOutputCollector(showFinished)
 
         when:
-        collector.showFinished([4, 3, 4, 1], { 2 * it })
+        collector.showFinished([4, 3, 4, 1]) { 2 * it }
         String output = collector.output.split('\n')*.trim().join('\n')
 
         then:
@@ -259,7 +259,7 @@ class MonitorOutputCollectorSpec extends Specification implements DataTest {
         String expected = "${MonitorOutputCollector.HEADER_RUNNING} (1):\n1\n\n${errorText}"
 
         when:
-        collector.showRunning(workflowName, [domainObject], { it.id }, { it })
+        collector.showRunning(workflowName, [domainObject]) { it.id } { it }
         String output = collector.output.split('\n')*.trim().join('\n')
 
         then:

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -69,22 +69,22 @@ class BamImportWorkflowCreatorScheduler extends AbstractWorkflowCreatorScheduler
         int count = importProcessDb.externallyProcessedBamFiles.size()
 
         return LogUsedTimeUtils.logUsedTimeStartEnd(log, "create workflows for ${importProcessDb} " +
-                "(bamFiles: ${count}, ${bamImportService.countInstancesInWaitingState()} in queue)", {
-            List<WorkflowRun> runs = LogUsedTimeUtils.logUsedTimeStartEnd(log, "  create workflow runs for ${count} bamFiles", {
+                "(bamFiles: ${count}, ${bamImportService.countInstancesInWaitingState()} in queue)") {
+            List<WorkflowRun> runs = LogUsedTimeUtils.logUsedTimeStartEnd(log, "  create workflow runs for ${count} bamFiles") {
                 bamImportInitializationService.createWorkflowRuns(importProcessDb)
-            })
+            }
 
             Collection<WorkflowArtefact> workflowArtefacts = runs.collectMany { it.outputArtefacts*.value }
-            DeciderResult deciderResult = LogUsedTimeUtils.logUsedTimeStartEnd(log, "  decider for ${count} bamfiles", {
+            DeciderResult deciderResult = LogUsedTimeUtils.logUsedTimeStartEnd(log, "  decider for ${count} bamfiles") {
                 allDecider.decide(workflowArtefacts)
-            })
+            }
 
             createSamplePairs(workflowArtefacts, count)
 
             bamImportService.updateState(importId, WorkflowCreateState.SUCCESS)
 
             return deciderResult
-        })
+        }
     }
 
     @Override

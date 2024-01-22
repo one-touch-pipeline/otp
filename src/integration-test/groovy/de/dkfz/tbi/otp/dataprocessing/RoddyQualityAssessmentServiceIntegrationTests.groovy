@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -167,9 +167,9 @@ class RoddyQualityAssessmentServiceIntegrationTests {
                 name: '9',
                 alias: '9',
         )
-        TestCase.shouldFailWithMessage(AssertionError, /^Missed chromosomes: .+ \(expected: .*; found .*\).*/, {
+        TestCase.shouldFailWithMessage(AssertionError, /^Missed chromosomes: .+ \(expected: .*; found .*\).*/) {
             roddyQualityAssessmentService.parseRoddyMergedBamQaStatistics(roddyBamFile)
-        })
+        }
     }
 
     @Test
@@ -220,9 +220,9 @@ class RoddyQualityAssessmentServiceIntegrationTests {
         ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome()
         DomainFactory.createReferenceGenomeEntries(referenceGenome, chromosomeNamesFromOtp)
 
-        TestCase.shouldFailWithMessage(AssertionError, /^Missed chromosomes: .+ \(expected: .*; found .*\).*/, {
+        TestCase.shouldFailWithMessage(AssertionError, /^Missed chromosomes: .+ \(expected: .*; found .*\).*/) {
             roddyQualityAssessmentService.assertListContainsAllChromosomeNamesInReferenceGenome(chromosomeNamesFromRoddyJson, referenceGenome)
-        })
+        }
     }
 
     static void createReferenceGenomeEntries(ReferenceGenome referenceGenome) {

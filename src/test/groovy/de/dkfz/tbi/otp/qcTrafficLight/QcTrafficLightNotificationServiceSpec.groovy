@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -154,8 +154,8 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
         }
 
         service.linkGenerator = Mock(LinkGenerator) {
-            1 * link({ it.controller == 'qcThreshold' }) >> LINK
-            1 * link({ it.controller == 'alignmentQualityOverview' }) >> LINK
+            1 * link { it.controller == 'qcThreshold' } >> LINK
+            1 * link { it.controller == 'alignmentQualityOverview' } >> LINK
         }
 
         expect:

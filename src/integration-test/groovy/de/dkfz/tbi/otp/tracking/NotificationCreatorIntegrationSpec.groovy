@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -1685,7 +1685,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             ].collect { "rm -f ${it}" }.join("\n")
 
             notificationCreator.mailHelperService = Mock(MailHelperService) {
-                1 * sendEmailToTicketSystem(expectedHeader, { it.endsWith(expectedEnd) })
+                1 * sendEmailToTicketSystem(expectedHeader) { it.endsWith(expectedEnd) }
             }
         }
 

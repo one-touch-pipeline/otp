@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,9 +30,9 @@ class LogThreadLocalUnitTests {
         String message = 'Test log message'
         StringBuilder out = new StringBuilder()
 
-        LogThreadLocal.withThreadLog(out, {
+        LogThreadLocal.withThreadLog(out) {
             LogThreadLocal.threadLog.info(message)
-        })
+        }
 
         assert out.toString() == "${message}\n"
         assert LogThreadLocal.threadLog == null

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -68,36 +68,36 @@ class SamplePairChecker extends PipelinesChecker<AbstractBamFile> {
         }
 
         if (bamFileOfSupportedSeqType[false]) {
-            output.showUniqueNotSupportedSeqTypes(bamFileOfSupportedSeqType[false], { AbstractBamFile abstractBamFile ->
+            output.showUniqueNotSupportedSeqTypes(bamFileOfSupportedSeqType[false]) { AbstractBamFile abstractBamFile ->
                 "${abstractBamFile.seqType.displayNameWithLibraryLayout}"
-            })
+            }
         }
 
         List<AbstractBamFile> bamFiles = bamFileOfSupportedSeqType[true] ?: []
 
         List<AbstractBamFile> unknownDiseaseStatus = bamFilesWithoutCategory(bamFiles)
-        output.showUniqueList(HEADER_UNKNOWN_DISEASE_STATUS, unknownDiseaseStatus, {
+        output.showUniqueList(HEADER_UNKNOWN_DISEASE_STATUS, unknownDiseaseStatus) {
             "${it.project.name} ${it.sampleType.name}"
-        })
+        }
 
         bamFiles = bamFiles - unknownDiseaseStatus
 
         List<AbstractBamFile> undefinedDiseaseStatus = bamFilesWithCategory(bamFiles, SampleTypePerProject.Category.UNDEFINED)
-        output.showUniqueList(HEADER_DISEASE_STATE_UNDEFINED, undefinedDiseaseStatus, {
+        output.showUniqueList(HEADER_DISEASE_STATE_UNDEFINED, undefinedDiseaseStatus) {
             "${it.project.name} ${it.sampleType.name}"
-        })
+        }
         bamFiles = bamFiles - undefinedDiseaseStatus
 
         List<AbstractBamFile> ignoredDiseaseStatus = bamFilesWithCategory(bamFiles, SampleTypePerProject.Category.IGNORED)
-        output.showUniqueList(HEADER_DISEASE_STATE_IGNORED, ignoredDiseaseStatus, {
+        output.showUniqueList(HEADER_DISEASE_STATE_IGNORED, ignoredDiseaseStatus) {
             "${it.project.name} ${it.sampleType.name}"
-        })
+        }
         bamFiles = bamFiles - ignoredDiseaseStatus
 
         List<AbstractBamFile> unknownThreshold = bamFilesWithoutThreshold(bamFiles)
-        output.showUniqueList(HEADER_UNKNOWN_THRESHOLD, unknownThreshold, {
+        output.showUniqueList(HEADER_UNKNOWN_THRESHOLD, unknownThreshold) {
             "${it.project.name} ${it.sampleType.name} ${it.seqType.name}"
-        })
+        }
         bamFiles = bamFiles - unknownThreshold
 
         List<AbstractBamFile> noPairFound = bamFilesWithoutSamplePair(bamFiles)
