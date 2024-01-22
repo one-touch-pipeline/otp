@@ -76,7 +76,7 @@ time pg_restore --username=postgres --host=localhost --port=$PORT --dbname=otp -
 
 echo "Dump loaded"
 
-PSQL="psql --username=otp --host=localhost --dbname=otp"
+PSQL="psql --username=otp --host=localhost --port=$PORT --dbname=otp"
 echo "Disabling workflows plans"
 ${PSQL} --command "update job_execution_plan set enabled='f' where enabled='t';"
 echo "Marking all not finished workflows as finished"
