@@ -120,13 +120,19 @@ class WorkflowSelectionController implements CheckAndCall {
                 .collectEntries { SeqType seqType -> [(seqType): mergingCriteria.find { it.seqType == seqType }] }
                 .findAll { it.value }
 
-        List<WorkflowVersion> alignmentVersions = workflowVersionService.findAllByWorkflows(alignmentWorkflows)
+        List<Version> alignmentVersions = alignmentWorkflows.collectMany { Workflow workflow ->
+            workflowVersionService.findAllByWorkflow(workflow).sort { a, b ->
+                new WorkflowVersionComparatorConsideringDefaultAndDeprecated(workflow.defaultVersion).compare(a, b)
+            }.collect { Version.fromWorkflowVersion(it) }
+        }
 
-        Set<ReferenceGenome> refGenomes = alignmentVersions.collectMany { it.allowedReferenceGenomes }
+        Set<ReferenceGenome> refGenomes = workflowVersionService.findAllByWorkflows(alignmentWorkflows).collectMany {
+            it.allowedReferenceGenomes
+        } as Set<ReferenceGenome>
         Set<SpeciesWithStrain> species = referenceGenomeService.getAllSpeciesWithStrains(refGenomes)
         return [
                 alignmentWorkflows    : alignmentWorkflows,
-                alignmentVersions     : alignmentVersions.collect { Version.fromWorkflowVersion(it) },
+                alignmentVersions     : alignmentVersions,
                 seqTypes              : seqTypes,
                 species               : species,
                 referenceGenomes      : refGenomes,
@@ -167,7 +173,7 @@ class WorkflowSelectionController implements CheckAndCall {
                     workflow               : [id: selectors.rgSelector.workflow.id, displayName: selectors.rgSelector.workflow.displayName],
                     seqType                : [id: selectors.wvSelector.seqType.id, displayName: selectors.wvSelector.seqType.displayNameWithLibraryLayout],
                     version                : [id: selectors.wvSelector.workflowVersion.id, displayName: selectors.wvSelector.workflowVersion.workflowVersion],
-                    species                : cmd.speciesWithStrains.collect { [id: it.id, displayName: it.displayName] },
+                    species                : selectors.rgSelector.species.collect { [id: it.id, displayName: it.displayName] },
                     refGenome              : [id: selectors.rgSelector.referenceGenome.id, displayName: selectors.rgSelector.referenceGenome.name],
                     workflowVersionSelector: [id: selectors.wvSelector.id, previousId: selectors.wvSelector.previous.id],
                     refGenSelectorId       : selectors.rgSelector.id,
