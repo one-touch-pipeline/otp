@@ -683,12 +683,17 @@ task esLintAutoFix(type: NpmTask) {
 }
 
 task runCypressTests(type: NpmTask) {
+    def specProperty = project.hasProperty('spec') ? project.spec : System.getProperty('spec')
     doFirst {
         println "Make sure that OTP is running, the connection is configured via environment variable CYPRESS_BASE_URL and credentials are set in cypress.env.json"
     }
     dependsOn npmInstall
     environment = ['CI': 'true']
     args = ['run', 'cy-run']
+    if (specProperty) {
+        args.add("--")
+        args.add("--spec=${specProperty}")
+    }
 }
 
 task runCypressTestsInWindow(type: NpmTask) {
