@@ -23,47 +23,123 @@ package de.dkfz.tbi.otp.workflow.bamImport
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
+import spock.lang.TempDir
 
+import de.dkfz.tbi.otp.dataprocessing.ExternalMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
-import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.ngsdata.FastqFile
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.BamImportWorkflowDomainFactory
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
+import java.nio.file.Files
 import java.nio.file.Path
 
-class BamImportConditionalFailJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, BamImportShared {
+class BamImportConditionalFailJobSpec extends Specification implements DataTest, BamImportWorkflowDomainFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
         return [
-                FastqFile,
+                ExternalMergingWorkPackage,
+                ExternallyProcessedBamFile,
                 WorkflowStep,
         ]
     }
 
+    WorkflowStep workflowStep
+
+    BamImportConditionalFailJob job
+
+    @TempDir
+    Path tempDir
+
+    Path sourceDir
+    Path bamFilePath
+    Path baiFilePath
+
+    static final List<String> FURTHER_FILE_NAMES = [
+            'test.txt1',
+            'directory',
+            'directory/test2.txt',
+            'directory/directory',
+            'directory/directory/test3.txt',
+    ].asImmutable()
+
+    static final List<String> FURTHER_FILES_EXIST_IN_SOURCE_DIR = [
+            'test1.txt',
+            'directory',
+            'directory/directory/test3.txt',
+    ].asImmutable()
+
+    void setup() {
+        workflowStep = createWorkflowStep([
+                workflowRun: createWorkflowRun([
+                        workflowVersion: null,
+                        workflow       : findOrCreateBamImportWorkflowWorkflow(),
+                ]),
+        ])
+        ExternallyProcessedBamFile bamFile = createBamFile(furtherFiles: FURTHER_FILE_NAMES)
+
+        sourceDir = tempDir.resolve("source")
+        Files.createDirectory(sourceDir)
+
+        bamFilePath = sourceDir.resolve(bamFile.fileName)
+        Files.createFile(bamFilePath)
+        bamFilePath.text = "bam file"
+
+        baiFilePath = sourceDir.resolve("${bamFile.fileName}.bai")
+        Files.createFile(baiFilePath)
+        baiFilePath.text = "bai file"
+
+        job = new BamImportConditionalFailJob()
+        job.fileService = Mock(FileService) {
+            _ * isFileReadableAndNotEmpty(_) >> { Path path ->
+                return Files.isReadable(path) && path.size() > 0
+            }
+        }
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(workflowStep, BamImportConditionalFailJob.de_dkfz_tbi_otp_workflow_bamImport_BamImportShared__OUTPUT_ROLE) >> bamFile
+            0 * _
+        }
+        job.externallyProcessedBamFileService = Mock(ExternallyProcessedBamFileService) {
+            getSourceBamFilePath(bamFile) >> bamFilePath
+            getSourceBaiFilePath(bamFile) >> baiFilePath
+            getSourceBaseDirFilePath(bamFile) >> sourceDir
+        }
+    }
+
     void "test check method with all files present"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
-        ExternallyProcessedBamFile bamFile = getBamFile(workflowStep)
-        Path sourceBaseDir = externallyProcessedBamFileService.getSourceBaseDirFilePath(bamFile)
-
-        BamImportConditionalFailJob job = Spy(BamImportConditionalFailJob) {
-            getBamFile(workflowStep) >> bamFile
+        FURTHER_FILE_NAMES.collect {
+            Path furtherFilesSourcePath = sourceDir.resolve(it)
+            if (it.endsWith("directory")) {
+                Files.createDirectory(furtherFilesSourcePath)
+            } else {
+                createFile(furtherFilesSourcePath)
+            }
         }
 
-        List<Path> sourcePath = [
-                externallyProcessedBamFileService.getSourceBamFilePath(bamFile),
-                externallyProcessedBamFileService.getSourceBaiFilePath(bamFile),
-        ]
-        List<Path> pathFurtherFiles = bamFile.furtherFiles.collect { String relativePath ->
-            sourceBaseDir.resolve(relativePath)
-        }
-        sourcePath.addAll(pathFurtherFiles)
+        when:
+        job.check(workflowStep)
 
-        externallyProcessedBamFileService.getSourceBaseDirFilePath(bamFile) >> sourcePath
-        externallyProcessedBamFileService.getSourceBamFilePath(bamFile) >> sourcePath
-        externallyProcessedBamFileService.getSourceBaiFilePath(bamFile) >> sourcePath
+        then:
+        noExceptionThrown()
+    }
+
+    void "test check method with some further files missing"() {
+        given:
+
+        FURTHER_FILES_EXIST_IN_SOURCE_DIR.collect {
+            Path furtherFilesSourcePath = sourceDir.resolve(it)
+            if (it.endsWith("directory")) {
+                Files.createDirectories(furtherFilesSourcePath)
+            } else {
+                createFile(furtherFilesSourcePath)
+            }
+            return furtherFilesSourcePath
+        }
 
         when:
         job.check(workflowStep)
@@ -71,5 +147,15 @@ class BamImportConditionalFailJobSpec extends Specification implements DataTest,
         then:
         WorkflowException e = thrown(WorkflowException)
         e.message.contains("files are missing")
+        e.message.contains("directory/test2.txt")
+    }
+
+    private void createFile(Path path) {
+        if (path.parent && !Files.exists(path.parent)) {
+            Files.createDirectories(path.parent)
+        }
+
+        Files.createFile(path)
+        path.text = "not empty"
     }
 }
