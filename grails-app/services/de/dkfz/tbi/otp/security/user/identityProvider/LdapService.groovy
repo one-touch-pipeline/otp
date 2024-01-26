@@ -139,7 +139,7 @@ class LdapService implements InitializingBean, IdentityProvider {
                                 LdapKey.SURNAME, LdapKey.DEPARTMENT, LdapKey.USER_ACCOUNT_CONTROL)
                         .where(LdapKey.OBJECT_CATEGORY).is(LdapKey.PERSON)
                         .and(LdapKey.MAIL).isPresent()
-                        .and(dynamicQuery),
+                        .and(dynamicQuery as ContainerCriteria),
                 new LdapUserDetailsAttributesMapper(ldapService: this))
     }
 
