@@ -44,7 +44,7 @@ $.otp.toaster = {
    */
   // eslint-disable-next-line strict
   showInfoToast(title = 'Info', message = '') {
-    this.showToast(title, $.otp.toaster.convertMessageArray(message), 'info');
+    this.showToast(title, $.otp.toaster.convertMessageArray(message), 30000, 'info');
   },
   /**
    * Fires a success toast message.
@@ -54,7 +54,7 @@ $.otp.toaster = {
    */
   // eslint-disable-next-line strict
   showSuccessToast(title = 'Success', message = 'Operation has been successful.') {
-    this.showToast(title, $.otp.toaster.convertMessageArray(message), 'success');
+    this.showToast(title, $.otp.toaster.convertMessageArray(message), 15000, 'success');
   },
   /**
    * Fires a warning toast message.
@@ -64,7 +64,7 @@ $.otp.toaster = {
    */
   // eslint-disable-next-line strict
   showWarningToast(title = 'Warning', message = 'A warning occurred during the operation.') {
-    this.showToast(title, $.otp.toaster.convertMessageArray(message), 'warning');
+    this.showToast(title, $.otp.toaster.convertMessageArray(message), 30000, 'warning');
   },
   /**
    * Fires an error toast message.
@@ -74,17 +74,18 @@ $.otp.toaster = {
    */
   // eslint-disable-next-line strict
   showErrorToast(title = 'Error', error = 'Unknown error. Please try again.') {
-    this.showToast(title, $.otp.toaster.convertMessageArray(error), 'danger');
+    this.showToast(title, $.otp.toaster.convertMessageArray(error), 60000, 'danger');
   },
   /**
    * Fires a toast message.
    *
    * @param title: title of the toast
    * @param message: the toasts message
+   * @param displayTime: time in ms to show the toast
    * @param state: allowed states: info, success, warning, danger. default is info
    */
   // eslint-disable-next-line strict
-  showToast(title, message, state = 'info') {
+  showToast(title, message, displayTime, state = 'info') {
     const stateProps = this.getStateProps(state);
     const date = new Date().toLocaleTimeString('en-US', {
       hour12: false,
@@ -92,7 +93,7 @@ $.otp.toaster = {
       minute: 'numeric'
     });
 
-    const otpToast = `<div class="toast ${stateProps.toastClass}"\
+    const otpToast = `<div class="toast ${stateProps.toastClass}" data-bs-delay="${displayTime}"
                            role="alert" aria-live="assertive" aria-atomic="true" data-autohide="false">
                         <div class="toast-header justify-content-between">
                           <span class="title-wrapper">
