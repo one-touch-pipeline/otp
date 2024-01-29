@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.BamImportWorkflowDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -60,17 +61,17 @@ class BamImportConditionalFailJobSpec extends Specification implements DataTest,
     Path baiFilePath
 
     static final List<String> FURTHER_FILE_NAMES = [
-            'test.txt1',
+            'test1.txt',
             'directory',
             'directory/test2.txt',
-            'directory/directory',
-            'directory/directory/test3.txt',
+            'directory/directory2',
+            'directory/directory2/test3.txt',
     ].asImmutable()
 
     static final List<String> FURTHER_FILES_EXIST_IN_SOURCE_DIR = [
             'test1.txt',
             'directory',
-            'directory/directory/test3.txt',
+            'directory/directory2/test3.txt',
     ].asImmutable()
 
     void setup() {
@@ -86,17 +87,15 @@ class BamImportConditionalFailJobSpec extends Specification implements DataTest,
         Files.createDirectory(sourceDir)
 
         bamFilePath = sourceDir.resolve(bamFile.fileName)
-        Files.createFile(bamFilePath)
-        bamFilePath.text = "bam file"
+        CreateFileHelper.createFile(bamFilePath, "bam file")
 
         baiFilePath = sourceDir.resolve("${bamFile.fileName}.bai")
-        Files.createFile(baiFilePath)
-        baiFilePath.text = "bai file"
+        CreateFileHelper.createFile(baiFilePath, "bai file")
 
         job = new BamImportConditionalFailJob()
         job.fileService = Mock(FileService) {
-            _ * isFileReadableAndNotEmpty(_) >> { Path path ->
-                return Files.isReadable(path) && path.size() > 0
+            _ * fileIsReadable(_) >> { Path path ->
+                return Files.isReadable(path)
             }
         }
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
@@ -114,10 +113,10 @@ class BamImportConditionalFailJobSpec extends Specification implements DataTest,
         given:
         FURTHER_FILE_NAMES.collect {
             Path furtherFilesSourcePath = sourceDir.resolve(it)
-            if (it.endsWith("directory")) {
+            if (it.endsWith("directory") || it.endsWith("directory2")) {
                 Files.createDirectory(furtherFilesSourcePath)
             } else {
-                createFile(furtherFilesSourcePath)
+                CreateFileHelper.createFile(furtherFilesSourcePath, "dummy")
             }
         }
 
@@ -133,10 +132,10 @@ class BamImportConditionalFailJobSpec extends Specification implements DataTest,
 
         FURTHER_FILES_EXIST_IN_SOURCE_DIR.collect {
             Path furtherFilesSourcePath = sourceDir.resolve(it)
-            if (it.endsWith("directory")) {
+            if (it.endsWith("directory") || it.endsWith("directory2")) {
                 Files.createDirectories(furtherFilesSourcePath)
             } else {
-                createFile(furtherFilesSourcePath)
+                CreateFileHelper.createFile(furtherFilesSourcePath, "dummy")
             }
             return furtherFilesSourcePath
         }
@@ -148,14 +147,5 @@ class BamImportConditionalFailJobSpec extends Specification implements DataTest,
         WorkflowException e = thrown(WorkflowException)
         e.message.contains("files are missing")
         e.message.contains("directory/test2.txt")
-    }
-
-    private void createFile(Path path) {
-        if (path.parent && !Files.exists(path.parent)) {
-            Files.createDirectories(path.parent)
-        }
-
-        Files.createFile(path)
-        path.text = "not empty"
     }
 }

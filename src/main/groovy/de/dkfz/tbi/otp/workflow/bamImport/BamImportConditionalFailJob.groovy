@@ -55,7 +55,7 @@ class BamImportConditionalFailJob extends AbstractConditionalFailJob implements 
         sourcePath.addAll(pathFurtherFiles)
 
         final Collection<Path> missingPaths = sourcePath.findAll { Path path ->
-            !fileService.isFileReadableAndNotEmpty(path)
+            !fileService.fileIsReadable(path)
         }
 
         if (missingPaths) {
