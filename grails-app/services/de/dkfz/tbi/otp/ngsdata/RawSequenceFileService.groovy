@@ -28,6 +28,8 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.project.Project
 
+import static java.lang.ClassLoader.*
+
 @CompileDynamic
 @Transactional
 class RawSequenceFileService {

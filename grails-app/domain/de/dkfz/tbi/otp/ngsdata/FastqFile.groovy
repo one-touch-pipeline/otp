@@ -25,4 +25,9 @@ import grails.gorm.hibernate.annotation.ManagedEntity
 
 @ManagedEntity
 class FastqFile extends RawSequenceFile {
+    @Override
+    @SuppressWarnings('GetterMethodCouldBeProperty') // Otherwise the database has to be adapted
+    String getDataFormat() {
+        return 'fastq'
+    }
 }

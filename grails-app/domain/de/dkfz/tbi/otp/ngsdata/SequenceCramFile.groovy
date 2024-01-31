@@ -32,7 +32,13 @@ class SequenceCramFile extends RawSequenceFile {
     ReferenceGenome referenceGenome
 
     static constraints = {
-        cramMd5sum nullable: true,  matches: /^[0-9a-f]{32}$/
+        cramMd5sum nullable: true, matches: /^[0-9a-f]{32}$/
         referenceGenome nullable: true
+    }
+
+    @Override
+    @SuppressWarnings('GetterMethodCouldBeProperty') // Otherwise the database has to be adapted
+    String getDataFormat() {
+        return 'cram'
     }
 }

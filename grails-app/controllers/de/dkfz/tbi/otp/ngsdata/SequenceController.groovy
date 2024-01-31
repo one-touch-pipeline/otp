@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.taxonomy.*
 import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.SecurityService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.DataTableCommand
 import de.dkfz.tbi.util.TimeFormats
 
@@ -38,6 +39,7 @@ class SequenceController {
     SeqTrackService seqTrackService
     ProjectService projectService
     FastqcResultsService fastqcResultsService
+    RawSequenceFileService rawSequenceFileService
     SecurityService securityService
 
     static allowedMethods = [
@@ -49,51 +51,51 @@ class SequenceController {
     def index() {
         List<SeqType> seqTypes = SeqType.list(sort: "name", order: "asc")
         return [
-            tableHeader: (SequenceColumn.values() - SequenceColumn.WITHDRAWN)*.message,
-            sampleTypes: SampleType.list(sort: "name", order: "asc"),
-            seqTypes: seqTypes*.displayName.unique(),
-            libraryLayouts: seqTypes*.libraryLayout.unique(),
-            seqCenters: SeqCenter.list(sort: "name", order: "asc"),
-            libraryPreparationKits: LibraryPreparationKit.list(sort: "name", order: "asc").name,
-            antibodyTargets: AntibodyTarget.list(sort: "name", order: "asc"),
-            showRunLinks: securityService.hasCurrentUserAdministrativeRoles(),
-            filterTree : [
-                    [name : 'projectSelection', msgcode: 'sequence.search.project',
-                     type : 'LIST', from: projectService.allProjects,
-                     value: 'displayName', key: 'id'],
-                    [name: 'individualSearch', msgcode: 'sequence.search.individual',
-                     type: 'TEXT'],
-                    [name : 'sampleTypeSelection', msgcode: 'sequence.search.sample',
-                     type : 'LIST', from: SampleType.list(sort: "name", order: "asc"),
-                     value: 'name', key: 'id'],
-                    [name: 'seqTypeSelection', msgcode: 'sequence.search.seqType',
-                     type: 'LIST', from: seqTypes*.displayName.unique()],
-                    [name: 'ilseIdSearch', msgcode: 'sequence.search.ilse',
-                     type: 'TEXT'],
-                    [name: 'libraryLayoutSelection', msgcode: 'sequence.search.sequencingReadType',
-                     type: 'LIST', from: seqTypes*.libraryLayout .unique()],
-                    [name: 'singleCell', msgcode: 'sequence.search.singleCell',
-                     type: 'LIST', from: [true, false]],
-                    [name: 'libraryPreparationKitSelection', msgcode: 'sequence.search.libPrepKit',
-                     type: 'LIST', from: LibraryPreparationKit.list(sort: "name", order: "asc")],
-                    [name : 'antibodyTargetSelection', msgcode: 'sequence.search.antibodyTarget',
-                     type : 'LIST', from: AntibodyTarget.list(sort: "name", order: "asc"),
-                     value: 'name', key: 'name'],
-                    [name : 'seqCenterSelection', msgcode: 'sequence.search.seqCenter',
-                     type : 'LIST', from: SeqCenter.list(sort: "name", order: "asc"),
-                     value: 'name', key: 'id'],
-                    [name: 'runSearch', msgcode: 'sequence.search.run',
-                     type: 'TEXT'],
-                    [name: 'speciesCommonNameSearch', msgcode: 'sequence.search.speciesCommonName',
-                     type : 'LIST', from: SpeciesCommonName.list().sort { it.name },
-                     value: 'name', key: 'name'],
-                    [name: 'scientificNameSearch', msgcode: 'sequence.search.scientificName',
-                     type : 'LIST', from: Species.list().sort { it.scientificName },
-                     value: 'scientificName', key: 'scientificName'],
-                    [name: 'strainSearch', msgcode: 'sequence.search.strain',
-                     type : 'LIST', from: Strain.list().sort { it.name },
-                     value: 'name', key: 'name'],
-            ],
+                tableHeader           : (SequenceColumn.values() - SequenceColumn.WITHDRAWN)*.message,
+                sampleTypes           : SampleType.list(sort: "name", order: "asc"),
+                seqTypes              : seqTypes*.displayName.unique(),
+                libraryLayouts        : seqTypes*.libraryLayout.unique(),
+                seqCenters            : SeqCenter.list(sort: "name", order: "asc"),
+                libraryPreparationKits: LibraryPreparationKit.list(sort: "name", order: "asc").name,
+                antibodyTargets       : AntibodyTarget.list(sort: "name", order: "asc"),
+                showRunLinks          : securityService.hasCurrentUserAdministrativeRoles(),
+                filterTree            : [
+                        [name : 'projectSelection', msgcode: 'sequence.search.project',
+                         type : 'LIST', from: projectService.allProjects,
+                         value: 'displayName', key: 'id'],
+                        [name: 'individualSearch', msgcode: 'sequence.search.individual',
+                         type: 'TEXT'],
+                        [name : 'sampleTypeSelection', msgcode: 'sequence.search.sample',
+                         type : 'LIST', from: SampleType.list(sort: "name", order: "asc"),
+                         value: 'name', key: 'id'],
+                        [name: 'seqTypeSelection', msgcode: 'sequence.search.seqType',
+                         type: 'LIST', from: seqTypes*.displayName.unique()],
+                        [name: 'ilseIdSearch', msgcode: 'sequence.search.ilse',
+                         type: 'TEXT'],
+                        [name: 'libraryLayoutSelection', msgcode: 'sequence.search.sequencingReadType',
+                         type: 'LIST', from: seqTypes*.libraryLayout.unique()],
+                        [name: 'singleCell', msgcode: 'sequence.search.singleCell',
+                         type: 'LIST', from: [true, false]],
+                        [name: 'libraryPreparationKitSelection', msgcode: 'sequence.search.libPrepKit',
+                         type: 'LIST', from: LibraryPreparationKit.list(sort: "name", order: "asc")],
+                        [name : 'antibodyTargetSelection', msgcode: 'sequence.search.antibodyTarget',
+                         type : 'LIST', from: AntibodyTarget.list(sort: "name", order: "asc"),
+                         value: 'name', key: 'name'],
+                        [name : 'seqCenterSelection', msgcode: 'sequence.search.seqCenter',
+                         type : 'LIST', from: SeqCenter.list(sort: "name", order: "asc"),
+                         value: 'name', key: 'id'],
+                        [name: 'runSearch', msgcode: 'sequence.search.run',
+                         type: 'TEXT'],
+                        [name : 'speciesCommonNameSearch', msgcode: 'sequence.search.speciesCommonName',
+                         type : 'LIST', from: SpeciesCommonName.list().sort { it.name },
+                         value: 'name', key: 'name'],
+                        [name : 'scientificNameSearch', msgcode: 'sequence.search.scientificName',
+                         type : 'LIST', from: Species.list().sort { it.scientificName },
+                         value: 'scientificName', key: 'scientificName'],
+                        [name : 'strainSearch', msgcode: 'sequence.search.strain',
+                         type : 'LIST', from: Strain.list().sort { it.name },
+                         value: 'name', key: 'name'],
+                ],
         ]
     }
 
@@ -120,6 +122,7 @@ class SequenceController {
             seq.properties.each {
                 data.put(it.key, it.value)
             }
+
             // format date
             data.dateCreated = TimeFormats.DATE.getFormattedDate(data.dateCreated as Date)
 
@@ -135,6 +138,8 @@ class SequenceController {
                         fastqId : it.id,
                 ]
             } ?: []
+            List<String> dataFormats = seqTrackIdRawSequenceFileMap[seq.seqTrackId]?.dataFormat
+            data.dataFormat = dataFormats ? CollectionUtils.exactlyOneElement(dataFormats.unique()) : ' - '
             dataToRender.aaData << data
         }
         render(dataToRender as JSON)
@@ -173,7 +178,8 @@ class SequenceController {
                     row.mixedInSpecies,
             ].collect { it ?: "" }.join(",")
         }.join("\n")
-        String contentHeader = (SequenceColumn.values() - SequenceColumn.FASTQC)
+        String contentHeader = SequenceColumn.values()
+                .findAll { column -> !column.hideInCsv }
                 .collect { g.message(code: it.message) }
                 .join(',').replaceAll("<br/?>", " ")
         String content = "${contentHeader}\n${contentBody}\n"
@@ -193,12 +199,12 @@ enum SequenceColumn {
     SINGLE_CELL("sequence.list.headers.singleCell", "singleCell"),
     SEQ_CENTER("sequence.list.headers.seqCenter", "seqCenterName"),
     LIBRARY_PREPARATION_KIT("sequence.list.headers.libPrepKit", "libraryPreparationKit"),
-    ANTIBODY_TARGET("sequence.list.headers.antibodyTarget","antibodyTarget"),
+    ANTIBODY_TARGET("sequence.list.headers.antibodyTarget", "antibodyTarget"),
     RUN("sequence.list.headers.run", "name"),
     LANE("sequence.list.headers.lane", "laneId"),
     LIBRARY("sequence.list.headers.library", "libraryName"),
     SINGLE_CELL_WELL_LABEL('sequence.list.headers.singleCellWellLabel', 'singleCellWellLabel'),
-    FASTQC("sequence.list.headers.fastqc", "fastqcState"),
+    FASTQC("sequence.list.headers.fastqc", "fastqcState", true),
     ILSEID("sequence.list.headers.ilseId", "ilseId"),
     KNOWN_ISSUES("sequence.list.headers.warning", "problem"),
     FILE_EXISTS("sequence.list.headers.fileExists", "fileExists"),
@@ -209,9 +215,11 @@ enum SequenceColumn {
     SCIENTIFIC_NAME("sequence.list.headers.scientificName", "scientificName"),
     STRAIN("sequence.list.headers.strain", "strain"),
     MIXED_IN_SPECIES("sequence.list.headers.mixedInSpecies", "strain"),
+    DATA_FORMAT("sequence.list.headers.dataFormat", "dataFormat", true),
 
     final String message
     final String columnName
+    final Boolean hideInCsv
 
     static SequenceColumn fromDataTable(int column) {
         if (column >= values().size() || column < 0) {

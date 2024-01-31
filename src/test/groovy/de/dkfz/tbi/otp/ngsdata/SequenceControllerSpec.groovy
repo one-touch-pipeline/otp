@@ -51,7 +51,7 @@ class SequenceControllerSpec extends Specification implements ControllerUnitTest
         controller.seqTrackService = Mock(SeqTrackService) {
             1 * listSequences(*_) >> [sequence]
         }
-        int expectedNumberOfColumns = (SequenceColumn.values() - SequenceColumn.FASTQC).size()
+        int expectedNumberOfColumns = 23
 
         when:
         controller.exportAll()

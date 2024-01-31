@@ -55,7 +55,7 @@ $.otp.sequence = {
       bDeferRender: true,
       scroller: true,
       columnDefs: [{
-        targets: -1,
+        targets: 22,
         visible: false
       }],
       fnServerData(sSource, aoData, fnCallback) {
@@ -147,7 +147,8 @@ $.otp.sequence = {
                 row.speciesCommonName,
                 row.scientificName,
                 row.strain,
-                row.mixedInSpecies
+                row.mixedInSpecies,
+                row.dataFormat
               ];
 
               if (row.withdrawn) {

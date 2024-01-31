@@ -122,6 +122,7 @@ class Sequence implements Serializable {
     /** fields from {@link Project} */
     String projectName
     String projectDirName
+    boolean fileArchived
 
     /** fields from {@link SeqCenter} */
     String seqCenterName
@@ -136,7 +137,6 @@ class Sequence implements Serializable {
     /** fields from {@link RawSequenceFile} */
     boolean fileExists
     boolean fileWithdrawn
-    boolean fileArchived
 
     // derived property for calculating the creation date without time
     Date dayCreated

@@ -24,7 +24,7 @@ DROP VIEW IF EXISTS sequences;
 
 CREATE VIEW sequences AS
 
-SELECT st.id                                                                                              AS seq_track_id,
+SELECT st.id                                                                                                      AS seq_track_id,
        st.seq_type_id,
        r.seq_platform_id,
        sp.seq_platform_model_label_id,
@@ -32,11 +32,11 @@ SELECT st.id                                                                    
        st.sample_id,
        st.run_id,
        st.pipeline_version_id,
-       ilse.ilse_number                                                                                   AS ilse_id,
+       ilse.ilse_number                                                                                           AS ilse_id,
        r.seq_center_id,
        s.sample_type_id,
        s.individual_id,
-       p.id                                                                                               AS project_id,
+       p.id                                                                                                       AS project_id,
 
        st.quality_encoding,
        st.fastqc_state,
@@ -47,21 +47,21 @@ SELECT st.id                                                                    
        st.has_original_bam,
        st.problem,
        st.single_cell_well_label,
-       lpk.name                                                                                           AS library_preparation_kit,
-       at.name                                                                                            AS antibody_target,
+       lpk.name                                                                                                   AS library_preparation_kit,
+       at.name                                                                                                    AS antibody_target,
        r.name,
        r.date_executed,
        r.date_created,
        r.blacklisted,
-       sp.name                                                                                            AS seq_platform_name,
-       spml.name                                                                                          AS seq_platform_model_label_name,
-       skl.name                                                                                           AS sequencing_kit_label_name,
-       seqType.name                                                                                       AS seq_type_name,
-       seqType.display_name                                                                               AS seq_type_display_name,
+       sp.name                                                                                                    AS seq_platform_name,
+       spml.name                                                                                                  AS seq_platform_model_label_name,
+       skl.name                                                                                                   AS sequencing_kit_label_name,
+       seqType.name                                                                                               AS seq_type_name,
+       seqType.display_name                                                                                       AS seq_type_display_name,
        seqType.library_layout,
        seqType.dir_name,
        seqType.single_cell,
-       sampleType.name                                                                                    AS sample_type_name,
+       sampleType.name                                                                                            AS sample_type_name,
        i.type,
        i.pid,
        p.name                                                                                                     AS project_name,
@@ -85,7 +85,7 @@ SELECT st.id                                                                    
                         WHERE ssws.species_with_strain_id = sws.id), ' | ')
         FROM sample_species_with_strain ssws
         WHERE ssws.sample_mixed_in_species_id = s.id
-        GROUP BY ssws.sample_mixed_in_species_id)                                                         AS mixed_in_species
+        GROUP BY ssws.sample_mixed_in_species_id)                                                                 AS mixed_in_species
 FROM seq_track AS st
          INNER JOIN run AS r
                     ON r.id = st.run_id

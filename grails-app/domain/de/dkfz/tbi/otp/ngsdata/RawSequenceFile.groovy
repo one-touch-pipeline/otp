@@ -248,4 +248,6 @@ abstract class RawSequenceFile implements CommentableWithProject, Entity {
     Project getProject() {
         return this.project
     }
+
+    abstract String getDataFormat()
 }
