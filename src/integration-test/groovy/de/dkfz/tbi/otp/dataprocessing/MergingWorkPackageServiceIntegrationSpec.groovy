@@ -89,4 +89,29 @@ class MergingWorkPackageServiceIntegrationSpec extends Specification implements 
 
         name = "hasAntibodyTarget: ${hasAntibodyTarget}, pipeline is ${pipeline}"
     }
+
+    @Unroll
+    void "getStatusWithProcessingDate, should return #result, when MergingWorkPackage contains BamFile is #containsBamFile"() {
+        given:
+        MergingWorkPackageService service = new MergingWorkPackageService()
+        AbstractMergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage()
+        if (containsBamFile) {
+            AbstractBamFile bamFile = DomainFactory.proxyRoddy.createBamFile([
+                    fileOperationStatus: AbstractBamFile.FileOperationStatus.INPROGRESS,
+                    workPackage        : mergingWorkPackage,
+            ])
+            bamFile.dateCreated = new Date(dateCreated)
+            bamFile.save(flush: true)
+            mergingWorkPackage.bamFileInProjectFolder = bamFile
+            mergingWorkPackage.save(flush: true)
+        }
+
+        expect:
+        service.getStatusWithProcessingDate(mergingWorkPackage) == result
+
+        where:
+        containsBamFile | dateCreated   | result
+        true            | 1700000162849 | "INPROGRESS (2023-11-14)"
+        false           | null          | "N/A"
+    }
 }

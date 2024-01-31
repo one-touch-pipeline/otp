@@ -29,6 +29,7 @@ import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.FlashMessage
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackageService
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
@@ -41,6 +42,7 @@ class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelin
 
     CellRangerConfigurationService cellRangerConfigurationService
     ReferenceGenomeIndexService referenceGenomeIndexService
+    MergingWorkPackageService mergingWorkPackageService
     SeqTypeService seqTypeService
     ToolNameService toolNameService
 
@@ -103,15 +105,15 @@ class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelin
                 },
                 mwps   : mwps.collect { mwp ->
                     [
-                            individual            : mwp.individual.toString(),
-                            sampleType            : mwp.sampleType.toString(),
-                            seqType               : mwp.seqType.displayNameWithLibraryLayout,
-                            config                : mwp.config.programVersion,
-                            referenceGenome       : mwp.referenceGenome.toString(),
-                            referenceGenomeIndex  : mwp.referenceGenomeIndex.toolWithVersion,
-                            expectedCells         : mwp.expectedCells,
-                            enforcedCells         : mwp.enforcedCells,
-                            bamFileInProjectFolder: mwp.bamFileInProjectFolder?.fileOperationStatus?.toString() ?: "N/A",
+                            individual          : mwp.individual.toString(),
+                            sampleType          : mwp.sampleType.toString(),
+                            seqType             : mwp.seqType.displayNameWithLibraryLayout,
+                            config              : mwp.config.programVersion,
+                            referenceGenome     : mwp.referenceGenome.toString(),
+                            referenceGenomeIndex: mwp.referenceGenomeIndex.toolWithVersion,
+                            expectedCells       : mwp.expectedCells,
+                            enforcedCells       : mwp.enforcedCells,
+                            bamFileStatus       : mergingWorkPackageService.getStatusWithProcessingDate(mwp),
                     ]
                 },
         ] as JSON)

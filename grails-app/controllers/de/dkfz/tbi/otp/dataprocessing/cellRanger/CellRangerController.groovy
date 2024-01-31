@@ -48,17 +48,12 @@ class CellRangerController {
 
         List<CellRangerMergingWorkPackage> mwps = cellRangerConfigurationService.findCellRangerMergingWorkPackageByProject(project)
 
-        Map<GroupedMwp, List<CellRangerMergingWorkPackage>> grouped = mwps.groupBy {
+        List<GroupedMwp> groupedMwps = mwps.groupBy {
             new GroupedMwp(it.sample, it.seqType, it.config.programVersion, it.referenceGenomeIndex)
-        }
-
-        List<GroupedMwp> groupedMwps = grouped.collect { k, v ->
+        }.collect { k, v ->
             k.mwps = v
             return k
-        }
-
-        groupedMwps.sort()
-        groupedMwps.each { it.mwps.sort() }
+        }.sort().each { it.mwps.sort() }
 
         return [
                 groupedMwps: groupedMwps,
@@ -73,10 +68,12 @@ class CellRangerController {
         }
 
         try {
-            if (cmd.mwp?.isLong()) {
-                cellRangerConfigurationService.selectMwpAsFinal(CellRangerMergingWorkPackage.get(cmd.mwp.toLong()))
-            } else if (cmd.mwp == "delete") {
-                cellRangerConfigurationService.selectNoneAsFinal(cmd.sample, cmd.seqType, cmd.programVersion, cmd.reference)
+            cmd.mwpList.each { mwp ->
+                if (mwp.id?.isLong()) {
+                    cellRangerConfigurationService.selectMwpAsFinal(CellRangerMergingWorkPackage.get(mwp.id.toLong()))
+                } else if (mwp.id == "delete") {
+                    cellRangerConfigurationService.selectNoneAsFinal(mwp.sample, mwp.seqType, mwp.programVersion, mwp.reference)
+                }
             }
             flash.message = new FlashMessage(g.message(code: "cellRanger.selection.success") as String)
         } catch (ValidationException e) {
@@ -157,13 +154,14 @@ class FinalMwpDeletionCommand {
     }
 }
 
-class MwpSelectionCommand {
+class MwpSelectionInstance {
+    String id
     Sample sample
     SeqType seqType
     String programVersion
     ReferenceGenomeIndex reference
+}
 
-    // we can't use a CellRangerMergingWorkPackage object here because we need to distinguish
-    // between "delete all" and no radio button selected
-    String mwp
+class MwpSelectionCommand {
+    List<MwpSelectionInstance> mwpList
 }

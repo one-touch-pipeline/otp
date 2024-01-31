@@ -134,7 +134,7 @@ $(() => {
         orderable: true
       },
       {
-        data: 'bamFileInProjectFolder',
+        data: 'bamFileStatus',
         orderable: true
       }
     ],

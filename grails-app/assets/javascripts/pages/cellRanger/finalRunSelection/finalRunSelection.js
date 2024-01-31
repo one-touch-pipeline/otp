@@ -23,34 +23,6 @@
 $(() => {
   'use strict';
 
-  $('form').on('submit', (e) => {
-    $(e.target).find('input:submit').addClass('submitting');
-  });
-
-  const removeSubmitted = function (target) {
-    $(target).find('input:submit').removeClass('submitting');
-  };
-  removeSubmitted(document);
-
-  $('.js-confirm').on('submit', (e) => {
-    let submit;
-    const radios = $(e.target).find(':input:checked');
-    if (radios.size() !== 1) {
-      alert('Please select a run.');
-      submit = false;
-    } else if (radios.filter('[value=delete]').size() === 1) {
-      submit = window.confirm(`All runs of this individual/sample type/seq.
-       type/version/reference combination will be deleted on the filesystem. Continue?`);
-    } else {
-      submit = window.confirm(`If existing, all other runs of this individual/sample type/seq.
-       type/version/reference combination will be deleted on the filesystem. Continue?`);
-    }
-    if (submit === false) {
-      e.preventDefault();
-      removeSubmitted(e.target);
-    }
-  });
-
   $('#confirmDeleteModal').on('show.bs.modal', function (event) {
     const button = $(event.relatedTarget);
     const sample = button.data('sample');

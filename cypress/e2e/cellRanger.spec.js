@@ -31,5 +31,40 @@ describe('Check cell ranger page', () => {
     it('should visit the final run selection page', () => {
       cy.visit('/cellRanger/finalRunSelection');
     });
+
+    it('should select multiple run configuration and save these', () => {
+      cy.visit('/cellRanger/finalRunSelection');
+      cy.intercept('/cellRanger/saveFinalRunSelection*').as('saveRunSelection');
+
+      // Select second run selection to use default
+      cy.get('input#input-3').click();
+
+      // Select third run selection to not keep any runs
+      cy.get('input#input-6').click();
+
+      // Save run configurations
+      cy.get('input#save').click();
+
+      cy.wait('@saveRunSelection').then((interception) => {
+        expect(interception.response.statusCode).to.eq(302);
+      });
+
+      cy.get('#cell-ranger-run-table tbody tr').eq(2).contains('Final run');
+      cy.get('#cell-ranger-run-table tbody tr').eq(3).contains('Deleted run');
+    });
+
+    it('should delete the created final run', () => {
+      cy.visit('/cellRanger/finalRunSelection');
+      cy.intercept('/cellRanger/deleteFinalSelectedRun*').as('deleteFinalRun');
+
+      cy.get('#cell-ranger-run-table tbody tr').eq(2).find('button.delete-btn').click();
+      cy.get('#confirmDeleteModal').should('be.visible').find('button.confirm').click();
+
+      cy.wait('@deleteFinalRun').then((interception) => {
+        expect(interception.response.statusCode).to.eq(302);
+      });
+
+      cy.get('#cell-ranger-run-table tbody tr').eq(2).contains('Deleted run');
+    });
   });
 });

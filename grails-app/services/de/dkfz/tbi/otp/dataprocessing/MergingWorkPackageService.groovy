@@ -25,6 +25,7 @@ import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.util.TimeFormats
 
 @Transactional
 class MergingWorkPackageService {
@@ -36,5 +37,14 @@ class MergingWorkPackageService {
                 seqType: seqType,
                 antibodyTarget: antibodyTarget,
         )
+    }
+
+    String getStatusWithProcessingDate(MergingWorkPackage mwp) {
+        if (!mwp?.bamFileInProjectFolder) {
+            return "N/A"
+        }
+        String status = mwp.bamFileInProjectFolder?.fileOperationStatus
+        String processingDate = TimeFormats.DATE.getFormattedDate(mwp.bamFileInProjectFolder?.dateCreated)
+        return "${status} (${processingDate})"
     }
 }
