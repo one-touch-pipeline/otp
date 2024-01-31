@@ -193,7 +193,9 @@ Cypress.Commands.add('checkNotFound', (url) => {
   });
 });
 
-/** Command to check the input for correctness, to prevent flaky inputs **/
+/**
+ * Command to check the input for correctness, to prevent flaky inputs
+ */
 Cypress.Commands.add('checkedTyping', (commandFn, input) => {
   'use strict';
 
@@ -213,8 +215,15 @@ const validateSession = () => {
       const loginTimeDiff = new Date() - new Date(cookie.value);
       if (loginTimeDiff > 900000) {
         reject();
+      } else {
+        cy.getCookie('JSESSIONID').then((jSessionCookie) => {
+          if (jSessionCookie) {
+            resolve();
+          } else {
+            reject();
+          }
+        });
       }
-      resolve();
     });
   });
 };

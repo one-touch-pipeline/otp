@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -51,9 +51,10 @@ describe('test for individual page', () => {
           .wait('@loadDataTable')
           .then((interception) => {
             expect(interception.response.statusCode).to.equal(200);
+            expect(interception.response.body.aaData).to.have.length(2);
           });
 
-        cy.get('table#individualTable tbody').find('tr').each((tableRow) => {
+        cy.get('table#individualTable tbody').find('tr').should('have.length', 2).each((tableRow) => {
           cy.wrap(tableRow).find('td').eq(0).should('contain', fixture.filterIdentifier);
           cy.wrap(tableRow).find('td').eq(1).contains(fixture.filterProject)
             .should('exist');

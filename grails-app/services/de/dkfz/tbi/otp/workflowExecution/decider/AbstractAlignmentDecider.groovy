@@ -144,6 +144,7 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
     protected Map<AlignmentDeciderGroup, AlignmentArtefactDataList> groupData(AlignmentArtefactDataList inputArtefactDataList,
                                                                               AlignmentAdditionalData additionalData,
                                                                               Map<String, String> userParams) {
+
         boolean ignoreSeqPlatformGroup = "TRUE".equalsIgnoreCase(userParams['ignoreSeqPlatformGroup']?.toString())
 
         Map<AlignmentDeciderGroup, AlignmentArtefactDataList> map = [:].withDefault {
@@ -182,6 +183,8 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
                             mergingCriteria.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_OTP_DEFAULT ?
                                     additionalData.defaultSeqPlatformGroupMap :
                                     [:]
+
+            assert seqPlatformGroupMap: "No seqPlatformGroup defined for '${data.seqPlatform}'"
             seqPlatformGroup = seqPlatformGroupMap[data.seqPlatform]
             assert seqPlatformGroup: "No seqPlatformGroup defined for '${data.seqPlatform}'"
         }

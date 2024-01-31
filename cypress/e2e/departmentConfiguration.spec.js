@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,11 +42,11 @@ describe('test for department configuration page', () => {
 
         cy.wait('@loadIndex').then((interception2) => {
           expect(interception2.response.statusCode).to.be.eq(200);
-
-          cy.get('#otpToastBox').contains('can not be resolved');
-          cy.get('table#deputyTable tbody tr').should('have.length', 1);
-          cy.checkPage('/departmentConfiguration/index');
         });
+
+        cy.get('#otpToastBox').should('exist').contains('can not be resolved');
+        cy.get('table#deputyTable tbody tr').should('have.length', 1);
+        cy.checkPage('/departmentConfiguration/index');
       });
     });
 
@@ -61,14 +61,14 @@ describe('test for department configuration page', () => {
 
       cy.wait('@addDeputy').then((interception) => {
         expect(interception.response.statusCode).to.be.eq(302);
-
-        cy.wait('@loadIndex').then((interception2) => {
-          expect(interception2.response.statusCode).to.be.eq(200);
-
-          cy.get('table#deputyTable tbody tr').should('have.length', 2);
-          cy.checkPage('/departmentConfiguration/index');
-        });
       });
+
+      cy.wait('@loadIndex').then((interception2) => {
+        expect(interception2.response.statusCode).to.be.eq(200);
+      });
+
+      cy.get('table#deputyTable tbody tr').should('have.length', 2);
+      cy.checkPage('/departmentConfiguration/index');
 
       cy.get('button.deputy-remove-btn').first().click();
 
@@ -77,10 +77,10 @@ describe('test for department configuration page', () => {
 
         cy.wait('@loadIndex').then((interception2) => {
           expect(interception2.response.statusCode).to.be.eq(200);
-
-          cy.get('table#deputyTable tbody tr').should('have.length', 1);
-          cy.checkPage('/departmentConfiguration/index');
         });
+
+        cy.get('table#deputyTable tbody tr').should('have.length', 1);
+        cy.checkPage('/departmentConfiguration/index');
       });
     });
   });
