@@ -40,17 +40,17 @@ class BamImportWorkflow implements OtpWorkflow {
     @Override
     List<String> getJobBeanNames() {
         return [
-                // BamImportFragmentJob,
+                BamImportFragmentJob,
                 OtpClusterCheckFragmentKeysJob,
-                // BamImportConditionalFailJob,
+                BamImportConditionalFailJob,
                 AttachUuidJob,
-                // BamImportPrepareJob,
+                BamImportPrepareJob,
+                BamImportLinkSourceJob,
                 BamImportCopyJob,
-                // BamImportValidationJob,
-                // BamImportLinkSourceJob,
+                BamImportValidationJob,
                 BamImportReplaceSourceJob,
                 SetCorrectPermissionJob,
-                // CalculateFileSizeJob,
+                CalculateSizeJob,
                 BamImportLinkJob,
                 BamImportFinishJob,
         ]*.simpleName*.uncapitalize()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,14 +25,17 @@ import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
+import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.ChecksumFileService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractFinishJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+
 import java.nio.file.*
 
 @Component
@@ -56,10 +59,10 @@ class BamImportFinishJob extends AbstractFinishJob implements BamImportShared {
     void updateDomains(WorkflowStep workflowStep) {
         ExternallyProcessedBamFile bamFile = getBamFile(workflowStep)
         FileSystem fileSystem = fileSystemService.remoteFileSystem
-        Path bamFilePath = externallyProcessedBamFileService.getBamFile(bamFile)
+        Path bamFilePath = externallyProcessedBamFileService.getBamFile(bamFile, PathOption.REAL_PATH)
 
         if (!bamFile.maximumReadLength) {
-            Path bamMaxReadLengthFile = externallyProcessedBamFileService.getBamMaxReadLengthFile(bamFile)
+            Path bamMaxReadLengthFile = externallyProcessedBamFileService.getBamMaxReadLengthFile(bamFile, PathOption.REAL_PATH)
             fileService.ensureFileIsReadableAndNotEmpty(bamMaxReadLengthFile)
             bamFile.maximumReadLength = bamMaxReadLengthFile.text as Integer
         }

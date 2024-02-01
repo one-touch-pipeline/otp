@@ -27,10 +27,12 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
+import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.workflow.jobs.AbstractOtpClusterValidationJob
 import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
+import java.nio.file.Files
 import java.nio.file.Path
 
 @Component
@@ -43,16 +45,22 @@ class BamImportValidationJob extends AbstractOtpClusterValidationJob implements 
     @Override
     protected List<Path> getExpectedFiles(WorkflowStep workflowStep) {
         ExternallyProcessedBamFile bamFile = getBamFile(workflowStep)
-
+        Path sourceBaseDir = externallyProcessedBamFileService.getSourceBaseDirFilePath(bamFile)
         return [
-                externallyProcessedBamFileService.getBamFile(bamFile),
-                externallyProcessedBamFileService.getBaiFile(bamFile),
-        ] + externallyProcessedBamFileService.getFurtherFiles(bamFile)
+                externallyProcessedBamFileService.getBamFile(bamFile, PathOption.REAL_PATH),
+                externallyProcessedBamFileService.getBaiFile(bamFile, PathOption.REAL_PATH),
+        ] + externallyProcessedBamFileService.getFurtherFiles(bamFile, PathOption.REAL_PATH).findAll {
+            Files.isRegularFile(sourceBaseDir.resolve(it))
+        }
     }
 
     @Override
     protected List<Path> getExpectedDirectories(WorkflowStep workflowStep) {
-        return []
+        ExternallyProcessedBamFile bamFile = getBamFile(workflowStep)
+        Path sourceBaseDir = externallyProcessedBamFileService.getSourceBaseDirFilePath(bamFile)
+        return externallyProcessedBamFileService.getFurtherFiles(bamFile, PathOption.REAL_PATH).findAll {
+            Files.isDirectory(sourceBaseDir.resolve(it))
+        }
     }
 
     @Override

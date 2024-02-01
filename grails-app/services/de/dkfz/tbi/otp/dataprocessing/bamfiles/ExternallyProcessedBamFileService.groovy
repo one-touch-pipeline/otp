@@ -66,6 +66,9 @@ class ExternallyProcessedBamFileService<T extends AbstractBamFile> extends Abstr
     }
 
     Path getImportFolder(ExternallyProcessedBamFile bamFile, PathOption... options) {
+        if (options.contains(PathOption.REAL_PATH) && bamFile.workflowArtefact.producedBy.workFolder) {
+            return filestoreService.getWorkFolderPath(bamFile.workflowArtefact.producedBy)
+        }
         return getNonOtpFolder(bamFile, options).resolve("analysisImport_${bamFile.referenceGenome}")
     }
 

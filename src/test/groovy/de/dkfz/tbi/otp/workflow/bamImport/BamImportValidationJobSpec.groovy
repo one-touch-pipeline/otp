@@ -23,17 +23,19 @@ package de.dkfz.tbi.otp.workflow.bamImport
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.ExternalMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.BamImportWorkflowDomainFactory
+import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
+import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.Paths
 
 class BamImportValidationJobSpec extends Specification implements DataTest, BamImportWorkflowDomainFactory {
 
@@ -47,23 +49,55 @@ class BamImportValidationJobSpec extends Specification implements DataTest, BamI
     }
 
     WorkflowStep workflowStep
-    ExternallyProcessedBamFile bamFile
+
     BamImportValidationJob job
 
-    void "test getExpectedFiles"() {
-        given:
+    @TempDir
+    Path tempDir
+
+    Path targetDir
+
+    Path bamFilePath
+    Path baiFilePath
+
+    static final List<String> FURTHER_FILE_NAMES = [
+            'test.txt',
+            'directory',
+            'directory/test1.txt',
+            'directory/directory2',
+            'directory/directory2/test2.txt',
+    ]
+
+    void setup() {
         workflowStep = createWorkflowStep([
                 workflowRun: createWorkflowRun([
                         workflowVersion: null,
                         workflow       : findOrCreateBamImportWorkflowWorkflow(),
                 ]),
         ])
-        bamFile = createBamFile(furtherFiles: ['test.txt', 'asdf.genes'])
 
-        Path bamFilePath = Paths.get("/bamFile")
-        Path baiFilePath = Paths.get("/baiFile")
-        Path furtherFiles1 = Paths.get("/furtherFiles1")
-        Path furtherFiles2 = Paths.get("/furtherFiles2")
+        ExternallyProcessedBamFile bamFile = createBamFile(furtherFiles: FURTHER_FILE_NAMES)
+
+        Path sourceDir = tempDir.resolve("source")
+        Files.createDirectories(sourceDir)
+
+        targetDir = tempDir.resolve("target")
+        Files.createDirectories(targetDir)
+
+        bamFilePath = targetDir.resolve(bamFile.fileName)
+        baiFilePath = targetDir.resolve("${bamFile.fileName}.bai")
+        List<Path> furtherFiles = bamFile.furtherFiles.collect {
+            Path furtherFilesPath = targetDir.resolve(it)
+            Path furtherFilesSourcePath = sourceDir.resolve(it)
+            if (it.endsWith("directory") || it.endsWith("directory2")) {
+                Files.createDirectories(furtherFilesPath)
+                Files.createDirectories(furtherFilesSourcePath)
+            } else {
+                Files.createFile(furtherFilesPath)
+                Files.createFile(furtherFilesSourcePath)
+            }
+            return furtherFilesPath
+        }
 
         job = new BamImportValidationJob()
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
@@ -71,21 +105,35 @@ class BamImportValidationJobSpec extends Specification implements DataTest, BamI
             0 * _
         }
         job.externallyProcessedBamFileService = Mock(ExternallyProcessedBamFileService) {
-            getBamFile(bamFile) >> bamFilePath
-            getBaiFile(bamFile) >> baiFilePath
-            getFurtherFiles(bamFile) >> [furtherFiles1, furtherFiles2]
+            getBamFile(bamFile, PathOption.REAL_PATH) >> bamFilePath
+            getBaiFile(bamFile, PathOption.REAL_PATH) >> baiFilePath
+            getFurtherFiles(bamFile, PathOption.REAL_PATH) >> furtherFiles
+            getSourceBaseDirFilePath(bamFile) >> sourceDir
         }
+    }
 
-        when:
+    void "test getExpectedFiles"() {
+        given:
         List<Path> result = job.getExpectedFiles(workflowStep)
 
-        then:
+        expect:
         TestCase.assertContainSame(result, [
                 bamFilePath,
                 baiFilePath,
-                furtherFiles1,
-                furtherFiles2,
+                targetDir.resolve('test.txt'),
+                targetDir.resolve('directory/test1.txt'),
+                targetDir.resolve('directory/directory2/test2.txt'),
+        ])
+    }
 
+    void "test getExpectedFolders"() {
+        given:
+        List<Path> result = job.getExpectedDirectories(workflowStep)
+
+        expect:
+        TestCase.assertContainSame(result, [
+                targetDir.resolve('directory'),
+                targetDir.resolve('directory/directory2'),
         ])
     }
 }

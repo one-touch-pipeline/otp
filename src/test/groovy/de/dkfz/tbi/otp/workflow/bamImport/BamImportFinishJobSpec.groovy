@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2024 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,8 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.BamImportWorkflowDomainFactory
+import de.dkfz.tbi.otp.filestore.FilestoreService
+import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
@@ -37,15 +39,11 @@ import de.dkfz.tbi.otp.ngsdata.IndividualService
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.workflowExecution.*
 
-import java.nio.file.Files
-import java.nio.file.Path
+import java.nio.file.*
 
 class BamImportFinishJobSpec extends Specification implements DataTest, BamImportWorkflowDomainFactory {
-
-    @TempDir
-    Path tempDir
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -57,25 +55,37 @@ class BamImportFinishJobSpec extends Specification implements DataTest, BamImpor
         ]
     }
 
-    void "updateDomains should update roddyBamFile with correct values when md5Sum and maximumReadLength are not given"() {
-        given:
-        TestConfigService testConfigService = new TestConfigService(tempDir)
-        WorkflowStep workflowStep = createWorkflowStep([
+    @TempDir
+    Path tempDir
+
+    WorkflowStep workflowStep
+    ExternallyProcessedBamFile bamFile
+    BamImportFinishJob job
+
+    void setup() {
+        workflowStep = createWorkflowStep([
                 workflowRun: createWorkflowRun([
                         workflowVersion: null,
                         workflow       : findOrCreateBamImportWorkflowWorkflow(),
                 ]),
         ])
-
-        ExternallyProcessedBamFile bamFile = createBamFile()
-
-        BamImportFinishJob job = new BamImportFinishJob()
-
+        bamFile = createBamFile()
+        job = new BamImportFinishJob()
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
             _ * getOutputArtefact(workflowStep, BamImportFinishJob.de_dkfz_tbi_otp_workflow_bamImport_BamImportShared__OUTPUT_ROLE) >> bamFile
             0 * _
         }
         job.fileSystemService = new TestFileSystemService()
+    }
+
+    void "updateDomains should update roddyBamFile with correct values when md5Sum and maximumReadLength are not given"() {
+        given:
+        TestConfigService testConfigService = new TestConfigService(tempDir)
+        WorkflowArtefactService workflowArtefactService = new WorkflowArtefactService()
+        bamFile.workflowArtefact = workflowArtefactService.buildWorkflowArtefact(new WorkflowArtefactValues(
+                workflowStep.workflowRun, BamImportWorkflow.OUTPUT_BAM, ArtefactType.BAM, ["Dummy"]
+        ))
+
         job.externallyProcessedBamFileService = new ExternallyProcessedBamFileService([
                 abstractBamFileService: new AbstractBamFileService([
                         individualService: new IndividualService([
@@ -84,6 +94,9 @@ class BamImportFinishJobSpec extends Specification implements DataTest, BamImpor
                                         configService    : testConfigService,
                                 ]),
                         ]),
+                ]),
+                filestoreService: new FilestoreService([
+                        fileSystemService: new TestFileSystemService(),
                 ]),
         ])
         job.checksumFileService = new ChecksumFileService()
@@ -114,35 +127,16 @@ class BamImportFinishJobSpec extends Specification implements DataTest, BamImpor
 
     void "updateDomains should update roddyBamFile with correct values when md5Sum and maximumReadLength are given"() {
         given:
-        TestConfigService testConfigService = new TestConfigService(tempDir)
-        WorkflowStep workflowStep = createWorkflowStep([
-                workflowRun: createWorkflowRun([
-                        workflowVersion: null,
-                        workflow       : findOrCreateBamImportWorkflowWorkflow(),
-                ]),
-        ])
+        bamFile.md5sum = HelperUtils.randomMd5sum
+        bamFile.maximumReadLength = 123
+        bamFile.importedFrom = tempDir.resolve("bamFiles")
 
-        ExternallyProcessedBamFile bamFile = createBamFile([md5sum: HelperUtils.randomMd5sum, maximumReadLength: 123])
-
-        BamImportFinishJob job = new BamImportFinishJob()
-
-        job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            _ * getOutputArtefact(workflowStep, BamImportFinishJob.de_dkfz_tbi_otp_workflow_bamImport_BamImportShared__OUTPUT_ROLE) >> bamFile
-            0 * _
+        job.externallyProcessedBamFileService = Mock(ExternallyProcessedBamFileService) {
+            _ * getBamFile(bamFile, PathOption.REAL_PATH) >> Paths.get(bamFile.importedFrom).resolve(bamFile.bamFileName)
         }
-        job.fileSystemService = new TestFileSystemService()
-        job.externallyProcessedBamFileService = new ExternallyProcessedBamFileService([
-                abstractBamFileService: new AbstractBamFileService([
-                        individualService: new IndividualService([
-                                projectService: new ProjectService([
-                                        fileSystemService: new TestFileSystemService(),
-                                        configService    : testConfigService,
-                                ]),
-                        ]),
-                ]),
-        ])
 
-        Path testWorkBamFile = CreateFileHelper.createFile(job.externallyProcessedBamFileService.getBamFile(bamFile))
+        Path bamFilePath = job.externallyProcessedBamFileService.getBamFile(bamFile, PathOption.REAL_PATH)
+        Path testWorkBamFile = CreateFileHelper.createFile(bamFilePath)
 
         when:
         job.updateDomains(workflowStep)

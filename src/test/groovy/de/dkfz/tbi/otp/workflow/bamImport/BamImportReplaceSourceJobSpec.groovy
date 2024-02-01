@@ -28,6 +28,7 @@ import spock.lang.TempDir
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.BamImportWorkflowDomainFactory
+import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
@@ -83,9 +84,9 @@ class BamImportReplaceSourceJobSpec extends Specification implements DataTest, B
             1 * getSourceBamFilePath(bamFile) >> sourceBamFilePath
             1 * getSourceBaiFilePath(bamFile) >> sourceBaiFilePath
             1 * getSourceBaseDirFilePath(bamFile) >> sourceBaseDirFilePath
-            1 * getBamFile(bamFile) >> targetBamFilePath
-            1 * getBaiFile(bamFile) >> targetBaiFilePath
-            1 * getImportFolder(bamFile) >> targetBaseDirFilePath
+            1 * getBamFile(bamFile, PathOption.REAL_PATH) >> targetBamFilePath
+            1 * getBaiFile(bamFile, PathOption.REAL_PATH) >> targetBaiFilePath
+            1 * getImportFolder(bamFile, PathOption.REAL_PATH) >> targetBaseDirFilePath
         }
 
         expect:
@@ -110,7 +111,7 @@ class BamImportReplaceSourceJobSpec extends Specification implements DataTest, B
 
         job.externallyProcessedBamFileService = Mock(ExternallyProcessedBamFileService) {
             1 * getSourceBaseDirFilePath(bamFile) >> sourceBaseDirFilePath
-            1 * getImportFolder(bamFile) >> targetBaseDirFilePath
+            1 * getImportFolder(bamFile, PathOption.REAL_PATH) >> targetBaseDirFilePath
         }
         job.fileService = Mock(FileService)
 

@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.workflow.jobs.AbstractExecuteClusterPipelineJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -59,11 +60,11 @@ class BamImportCopyJob extends AbstractExecuteClusterPipelineJob implements BamI
         Path sourceBai = externallyProcessedBamFileService.getSourceBaiFilePath(bamFile)
         Path sourceBaseDir = externallyProcessedBamFileService.getSourceBaseDirFilePath(bamFile)
 
-        Path targetBam = externallyProcessedBamFileService.getBamFile(bamFile)
-        Path targetBai = externallyProcessedBamFileService.getBaiFile(bamFile)
-        Path targetBaseDir = externallyProcessedBamFileService.getImportFolder(bamFile)
+        Path targetBam = externallyProcessedBamFileService.getBamFile(bamFile, PathOption.REAL_PATH)
+        Path targetBai = externallyProcessedBamFileService.getBaiFile(bamFile, PathOption.REAL_PATH)
+        Path targetBaseDir = externallyProcessedBamFileService.getImportFolder(bamFile, PathOption.REAL_PATH)
 
-        Path bamMaxReadLengthFile = externallyProcessedBamFileService.getBamMaxReadLengthFile(bamFile)
+        Path bamMaxReadLengthFile = externallyProcessedBamFileService.getBamMaxReadLengthFile(bamFile, PathOption.REAL_PATH)
 
         String updateBaseDir = "sed -e 's#${sourceBaseDir}#${targetBaseDir}#'"
 

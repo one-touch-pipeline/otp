@@ -25,6 +25,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
+import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.dataprocessing.BamImportInstance
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.jobs.AbstractLinkJob
@@ -48,9 +49,9 @@ class BamImportReplaceSourceJob extends AbstractLinkJob implements BamImportShar
             Path linkBai = externallyProcessedBamFileService.getSourceBaiFilePath(bamFile)
             Path linkBaseDir = externallyProcessedBamFileService.getSourceBaseDirFilePath(bamFile)
 
-            Path targetBamFile = externallyProcessedBamFileService.getBamFile(bamFile)
-            Path targetBaiFile = externallyProcessedBamFileService.getBaiFile(bamFile)
-            Path targetBaseDir = externallyProcessedBamFileService.getImportFolder(bamFile)
+            Path targetBamFile = externallyProcessedBamFileService.getBamFile(bamFile, PathOption.REAL_PATH)
+            Path targetBaiFile = externallyProcessedBamFileService.getBaiFile(bamFile, PathOption.REAL_PATH)
+            Path targetBaseDir = externallyProcessedBamFileService.getImportFolder(bamFile, PathOption.REAL_PATH)
 
             linkEntries.add(new LinkEntry(link: linkBam, target: targetBamFile))
             linkEntries.add(new LinkEntry(link: linkBai, target: targetBaiFile))

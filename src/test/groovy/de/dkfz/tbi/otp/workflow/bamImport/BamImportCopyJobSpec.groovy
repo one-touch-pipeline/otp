@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.filestore.PathOption
 
 import java.nio.file.Path
 
@@ -121,11 +122,11 @@ class BamImportCopyJobSpec extends Specification implements DataTest, DomainFact
             getSourceBaiFilePath(epmbfWithMd5sum) >> sourceBaiFile
             getSourceBaseDirFilePath(epmbfWithMd5sum) >> sourcePath
 
-            getBamFile(epmbfWithMd5sum) >> importedBamPath
-            getBaiFile(epmbfWithMd5sum) >> importedBaiPath
-            getImportFolder(epmbfWithMd5sum) >> importDir
+            getBamFile(epmbfWithMd5sum, PathOption.REAL_PATH) >> importedBamPath
+            getBaiFile(epmbfWithMd5sum, PathOption.REAL_PATH) >> importedBaiPath
+            getImportFolder(epmbfWithMd5sum, PathOption.REAL_PATH) >> importDir
 
-            getBamMaxReadLengthFile(epmbfWithMd5sum) >> importedMRLPath
+            getBamMaxReadLengthFile(epmbfWithMd5sum, PathOption.REAL_PATH) >> importedMRLPath
         }
 
         findOrCreateProcessingOption(
