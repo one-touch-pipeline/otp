@@ -106,12 +106,10 @@ function uploadCsvOfSelectedSamples() {
       const header = ['Individual', 'Patient UUID', 'Sequence Type Name', 'Sequencing Read Type', 'Single Cell',
         'Sample Type'];
       const foundSamples = new Set([]);
-
       table.rows().eq(0).each((rowIdx) => {
         table.cell(rowIdx, 0).node().children[0].checked = false; // always new selection
         json.forEach((sample) => {
           if (table.cell(rowIdx, 1).data() === sample[header[0]] &&
-            table.cell(rowIdx, 2).data() === sample[header[1]] &&
             table.cell(rowIdx, 3).data() === sample[header[2]] &&
             table.cell(rowIdx, 4).data() === sample[header[3]] &&
             table.cell(rowIdx, 5).data() === sample[header[4]] &&
@@ -121,7 +119,6 @@ function uploadCsvOfSelectedSamples() {
           }
         });
       });
-
       if (json.length !== foundSamples.size) {
         const difference = json.map((sample, index) => {
           if (![...foundSamples].includes(sample)) {
