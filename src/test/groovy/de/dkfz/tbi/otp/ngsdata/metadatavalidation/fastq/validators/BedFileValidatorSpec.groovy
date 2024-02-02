@@ -33,12 +33,12 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContex
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.parser.TestSampleIdentifierParser
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
+import de.dkfz.tbi.otp.workflowExecution.WorkflowVersionSelectorService
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.TestCase.assertContainSame
-import static de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName.NO_ALIGNMENT
-import static de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName.OTP_ALIGNMENT
 
 class BedFileValidatorSpec extends Specification implements DataTest, DomainFactoryCore {
 
@@ -88,7 +88,6 @@ class BedFileValidatorSpec extends Specification implements DataTest, DomainFact
             project = createProject(name: PARSE_PROJECT)
             createSampleType(name: PARSE_SAMPLE_TYPE)
         }
-        project.alignmentDeciderBeanName = alignmentDeciderBeanName
         project.sampleIdentifierParserBeanName = SampleIdentifierParserBeanName.DEEP
         project.save(flush: true)
 
@@ -126,37 +125,40 @@ class BedFileValidatorSpec extends Specification implements DataTest, DomainFact
                             new TestSampleIdentifierParser()
                         }
                 ] as SampleIdentifierService,
+                workflowVersionSelectorService: Mock(WorkflowVersionSelectorService) {
+                    hasAlignmentConfigForProjectAndSeqType(_, _) >> (doesAlign ? [new WorkflowVersion()] : [])
+                },
         ).validate(context)
 
         then:
         assertContainSame(context.problems, expectedProblems)
 
         where:
-        seqTypeName                    | libraryLayout             | libPrepKitName    | sampleName                        | createSample | alignmentDeciderBeanName | connectProjectToReferenceGenome | createBedFile || expectError
-        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | true                            | true          || false
-        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | true                            | false         || true
-        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | false                           | false         || false
-        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | NO_ALIGNMENT             | true                            | false         || false
-        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | ''                | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | true                            | false         || false
-        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | 'unknown'         | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | true                            | false         || false
-        SeqTypeNames.EXOME.seqTypeName | ''                        | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | true                            | false         || false
-        SeqTypeNames.EXOME.seqTypeName | 'nonPaired'               | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | true                            | false         || false
-        ''                             | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | true                            | false         || false
-        'nonExome'                     | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | OTP_ALIGNMENT            | true                            | false         || false
-        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | ''                                | false        | OTP_ALIGNMENT            | true                            | false         || false
-        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | 'unknown'                         | false        | OTP_ALIGNMENT            | true                            | false         || false
-        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | OTP_ALIGNMENT            | true                            | true          || false
-        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | OTP_ALIGNMENT            | true                            | false         || true
-        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | OTP_ALIGNMENT            | false                           | false         || false
-        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | NO_ALIGNMENT             | true                            | false         || false
-        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | ''                | PARSE_SAMPLE_NAME                 | false        | OTP_ALIGNMENT            | true                            | false         || false
-        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | 'unknown'         | PARSE_SAMPLE_NAME                 | false        | OTP_ALIGNMENT            | true                            | false         || false
-        SeqTypeNames.EXOME.seqTypeName | ''                        | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | OTP_ALIGNMENT            | true                            | false         || false
-        SeqTypeNames.EXOME.seqTypeName | 'nonPaired'               | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | OTP_ALIGNMENT            | true                            | false         || false
-        ''                             | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | OTP_ALIGNMENT            | true                            | false         || false
-        'nonExome'                     | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | OTP_ALIGNMENT            | true                            | false         || false
-        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME_NEW_PROJECT     | false        | OTP_ALIGNMENT            | true                            | false         || false
-        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME_NEW_SAMPLE_TYPE | false        | OTP_ALIGNMENT            | true                            | false         || false
+        seqTypeName                    | libraryLayout             | libPrepKitName    | sampleName                        | createSample | doesAlign | connectProjectToReferenceGenome | createBedFile || expectError
+        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | true      | true                            | true          || false
+        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | true      | true                            | false         || true
+        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | true      | false                           | false         || false
+        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | false     | true                            | false         || false
+        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | ''                | SAMPLE_NAME                       | true         | true      | true                            | false         || false
+        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | 'unknown'         | SAMPLE_NAME                       | true         | true      | true                            | false         || false
+        SeqTypeNames.EXOME.seqTypeName | ''                        | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | true      | true                            | false         || false
+        SeqTypeNames.EXOME.seqTypeName | 'nonPaired'               | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | true      | true                            | false         || false
+        ''                             | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | true      | true                            | false         || false
+        'nonExome'                     | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_NAME                       | true         | true      | true                            | false         || false
+        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | ''                                | false        | true      | true                            | false         || false
+        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | 'unknown'                         | false        | true      | true                            | false         || false
+        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | true      | true                            | true          || false
+        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | true      | true                            | false         || true
+        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | true      | false                           | false         || false
+        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | false     | true                            | false         || false
+        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | ''                | PARSE_SAMPLE_NAME                 | false        | true      | true                            | false         || false
+        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | 'unknown'         | PARSE_SAMPLE_NAME                 | false        | true      | true                            | false         || false
+        SeqTypeNames.EXOME.seqTypeName | ''                        | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | true      | true                            | false         || false
+        SeqTypeNames.EXOME.seqTypeName | 'nonPaired'               | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | true      | true                            | false         || false
+        ''                             | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | true      | true                            | false         || false
+        'nonExome'                     | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME                 | false        | true      | true                            | false         || false
+        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME_NEW_PROJECT     | false        | true      | true                            | false         || false
+        SeqTypeNames.EXOME.seqTypeName | SequencingReadType.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_NAME_NEW_SAMPLE_TYPE | false        | true      | true                            | false         || false
     }
 
     @Unroll

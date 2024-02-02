@@ -24,14 +24,13 @@ package de.dkfz.tbi.otp.dataprocessing
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.RoddyConfigService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightCheckService
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.LinkFileUtils
 
 import java.nio.file.FileSystem
 import java.nio.file.Path
@@ -40,76 +39,11 @@ import java.nio.file.Path
 @Transactional
 class LinkFilesToFinalDestinationService {
 
-    AbstractBamFileService abstractBamFileService
-    ExecuteRoddyCommandService executeRoddyCommandService
     FileService fileService
     FileSystemService fileSystemService
     LinkFileUtils linkFileUtils
-    Md5SumService md5SumService
-    QcTrafficLightCheckService qcTrafficLightCheckService
-    RemoteShellHelper remoteShellHelper
     RoddyConfigService roddyConfigService
     RoddyBamFileService roddyBamFileService
-
-    void prepareRoddyBamFile(RoddyBamFile roddyBamFile) {
-        assert roddyBamFile: "roddyBamFile must not be null"
-        if (!roddyBamFile.withdrawn) {
-            RoddyBamFile.withTransaction {
-                roddyBamFile.refresh()
-                assert roddyBamFile.isMostRecentBamFile(): "The BamFile ${roddyBamFile} is not the most recent one. This must not happen!"
-                if (!roddyBamFile.config.adapterTrimmingNeeded) {
-                    assert roddyBamFile.numberOfReadsFromQa >= roddyBamFile.numberOfReadsFromFastQc: "bam file (${roddyBamFile.numberOfReadsFromQa}) " +
-                            "has less number of reads than the sum of all fastqc (${roddyBamFile.numberOfReadsFromFastQc})"
-                }
-                assert [FileOperationStatus.NEEDS_PROCESSING, FileOperationStatus.INPROGRESS].contains(roddyBamFile.fileOperationStatus)
-                roddyBamFile.fileOperationStatus = FileOperationStatus.INPROGRESS
-                assert roddyBamFile.save(flush: true)
-                validateAndSetBamFileInProjectFolder(roddyBamFile)
-            }
-        }
-    }
-
-    void validateAndSetBamFileInProjectFolder(AbstractBamFile bamFile) {
-        RoddyBamFile.withTransaction {
-            assert bamFile.fileOperationStatus == FileOperationStatus.INPROGRESS
-            assert !bamFile.withdrawn
-            assert CollectionUtils.exactlyOneElement(AbstractBamFile.findAllWhere(
-                    workPackage        : bamFile.workPackage,
-                    withdrawn          : false,
-                    fileOperationStatus: FileOperationStatus.INPROGRESS
-            )) == bamFile
-            bamFile.workPackage.bamFileInProjectFolder = bamFile
-            assert bamFile.workPackage.save(flush: true)
-        }
-    }
-
-    @Deprecated
-    void linkToFinalDestinationAndCleanupRna(RnaRoddyBamFile roddyBamFile) {
-        executeRoddyCommandService.correctPermissionsAndGroups(roddyBamFile)
-        cleanupOldRnaResults(roddyBamFile)
-        handleQcCheckAndSetBamFile(roddyBamFile)
-        linkNewRnaResults(roddyBamFile)
-    }
-
-    private void handleQcCheckAndSetBamFile(RoddyBamFile roddyBamFile) {
-        qcTrafficLightCheckService.handleQcCheck(roddyBamFile)
-        bamFileValues = roddyBamFile
-    }
-
-    void setBamFileValues(RoddyBamFile roddyBamFile) {
-        Path md5sumFile = roddyBamFile.workMd5sumFile.toPath()
-        String md5sum = md5SumService.extractMd5Sum(md5sumFile)
-
-        RoddyBamFile.withTransaction {
-            roddyBamFile.fileOperationStatus = FileOperationStatus.PROCESSED
-            roddyBamFile.fileSize = roddyBamFile.workBamFile.size()
-            roddyBamFile.md5sum = md5sum
-            roddyBamFile.dateFromFileSystem = new Date(roddyBamFile.workBamFile.lastModified())
-
-            assert roddyBamFile.save(flush: true)
-            abstractBamFileService.updateSamplePairStatusToNeedProcessing(roddyBamFile)
-        }
-    }
 
     /**
      * Link files (replaces existing files)
@@ -214,16 +148,5 @@ class LinkFilesToFinalDestinationService {
             }
         }
         return filesToDelete
-    }
-
-    @Deprecated
-    void cleanupOldRnaResults(RnaRoddyBamFile roddyBamFile) {
-        List<RoddyBamFile> roddyBamFiles = RoddyBamFile.findAllByWorkPackageAndIdNotEqual(roddyBamFile.mergingWorkPackage, roddyBamFile.id)
-        List<File> workDirs = roddyBamFiles*.workDirectory
-        workDirs.each {
-            fileService.deleteDirectoryRecursively(it.toPath())
-        }
-        String cmd = "find ${roddyBamFile.baseDirectory} -maxdepth 1 -lname '.merging*/*' -delete;"
-        remoteShellHelper.executeCommandReturnProcessOutput(cmd)
     }
 }

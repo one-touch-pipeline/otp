@@ -106,7 +106,6 @@ class RoddyAlignmentExecuteJobSpec extends Specification implements DataTest, Pa
 
         job.roddyConfigValueService.referenceGenomeService = Mock(ReferenceGenomeService) {
             fastaFilePath(roddyBamFile.referenceGenome) >> { new File("/fasta-path") }
-            chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage) >> { new File("/chrom-size-path") }
         }
 
         DomainFactory.createRoddyAlignableSeqTypes()

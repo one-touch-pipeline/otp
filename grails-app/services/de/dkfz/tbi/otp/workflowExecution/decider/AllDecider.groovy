@@ -76,7 +76,7 @@ class AllDecider implements Decider {
         return deciderResultAll
     }
 
-    Collection<SeqTrack> findAllSeqTracksInNewWorkflowSystem(Collection<SeqTrack> seqTracks) {
+    Collection<SeqTrack> findAlignableSeqTracks(Collection<SeqTrack> seqTracks) {
         Set<SeqType> supportedSeqTypes = workflowService.getSupportedSeqTypesOfVersions([
                 PanCancerWorkflow.WORKFLOW,
                 WgbsWorkflow.WORKFLOW,

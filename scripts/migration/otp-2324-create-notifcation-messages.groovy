@@ -116,7 +116,6 @@ WorkflowRun.withTransaction {
         StringBuilder builder = new StringBuilder()
         builder << messageSourceService.createMessage("notification.template.alignment.processing", [
                 seqType           : roddyBamFile.seqType.displayNameWithLibraryLayout,
-                individuals       : "",
                 referenceGenome   : roddyBamFile.referenceGenome,
                 alignmentProgram  : alignmentInfo.alignmentProgram,
                 alignmentParameter: alignmentInfo.alignmentParameter,

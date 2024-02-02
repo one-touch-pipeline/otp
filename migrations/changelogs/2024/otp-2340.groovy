@@ -19,25 +19,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataprocessing
-
-import grails.gorm.transactions.Transactional
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationContext
-
-import de.dkfz.tbi.otp.project.Project
-
-@Transactional
-class AlignmentDeciderService {
-
-    @Autowired
-    ApplicationContext applicationContext
-
-    AlignmentDecider getAlignmentDecider(Project project) {
-        return getAlignmentDecider(project.alignmentDeciderBeanName)
-    }
-
-    AlignmentDecider getAlignmentDecider(AlignmentDeciderBeanName alignmentDeciderBeanName) {
-        return applicationContext.getBean(alignmentDeciderBeanName.beanName, AlignmentDecider)
+databaseChangeLog = {
+    changeSet(author: "-", id: "1706889826000-124") {
+        dropColumn(columnName: "alignment_decider_bean_name", tableName: "project")
     }
 }

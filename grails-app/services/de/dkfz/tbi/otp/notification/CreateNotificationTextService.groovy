@@ -30,7 +30,6 @@ import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
@@ -41,10 +40,10 @@ import de.dkfz.tbi.otp.tracking.Ticket.ProcessingStep
 import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.otp.workflowExecution.*
 
-import static de.dkfz.tbi.otp.tracking.Ticket.ProcessingStep.*
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.ALL_DONE
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
+import static de.dkfz.tbi.otp.tracking.Ticket.ProcessingStep.*
 
 @CompileDynamic
 @Transactional
@@ -289,6 +288,7 @@ class CreateNotificationTextService {
         return message
     }
 
+    @Deprecated
     private String alignmentInformationProcessingValuesOldSystem(List<AbstractBamFile> bamFiles,
                                                                  Map<AlignmentConfig, AlignmentInfo> alignmentInfoByConfig) {
         Map<Project, List<AbstractBamFile>> bamFilesByProject = bamFiles.groupBy { it.project }
@@ -310,13 +310,10 @@ class CreateNotificationTextService {
                 Map<AlignmentConfig, List<AbstractBamFile>> bamFilePerConfig = seqTypeBamFiles.groupBy {
                     it.alignmentConfig
                 }
-                boolean multipleConfigs = bamFilePerConfig.size() > 1 && project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
                 bamFilePerConfig.each { AlignmentConfig config, List<AbstractBamFile> configBamFiles ->
                     AlignmentInfo alignmentInfo = alignmentInfoByConfig.get(config)
-                    String individuals = multipleConfigs && config instanceof RoddyWorkflowConfig ? (config.individual ?: "default") : ""
                     builder << messageSourceService.createMessage("notification.template.alignment.processing", [
                             seqType           : seqType.displayNameWithLibraryLayout,
-                            individuals       : individuals,
                             referenceGenome   : configBamFiles*.referenceGenome.unique().join(', '),
                             alignmentProgram  : alignmentInfo.alignmentProgram,
                             alignmentParameter: alignmentInfo.alignmentParameter,
@@ -352,7 +349,6 @@ class CreateNotificationTextService {
                 bamFilePerConfig.each { AlignmentInfo alignmentInfo, List<AbstractBamFile> configBamFiles ->
                     builder << messageSourceService.createMessage("notification.template.alignment.processing", [
                             seqType           : seqType.displayNameWithLibraryLayout,
-                            individuals       : "",
                             referenceGenome   : configBamFiles*.referenceGenome.unique().join(', '),
                             alignmentProgram  : alignmentInfo.alignmentProgram,
                             alignmentParameter: alignmentInfo.alignmentParameter,
@@ -365,6 +361,7 @@ class CreateNotificationTextService {
         return builder.toString()
     }
 
+    @Deprecated
     private String getUserDocumentationOldSystem(Map<AlignmentConfig, AlignmentInfo> alignmentInfoByConfig) {
         String message = ""
         alignmentInfoByConfig.keySet()*.pipeline*.name.sort().unique().each {

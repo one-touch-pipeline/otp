@@ -309,7 +309,7 @@ class NotificationCreator {
 
     private List<SeqTrackProcessingStatus> findAlignableSeqtracks(Collection<SeqTrackProcessingStatus> seqTrackProcessingStatuses) {
         Collection<SeqTrackProcessingStatus> alignableSeqTrackProcessingStatuses = seqTrackProcessingStatuses.findAll {
-            SeqTrackService.mayAlign(it.seqTrack, false)
+            SeqTrackService.mayAlign(it.seqTrack)
         }
         return alignableSeqTrackProcessingStatuses
     }

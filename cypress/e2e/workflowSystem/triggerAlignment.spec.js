@@ -72,7 +72,6 @@ describe('Check trigger alignment page', () => {
             cy.wrap(row).contains('skip').contains('since fastqc already exist');
           });
         cy.get('#resultWorkPackageList li').should('have.length', 6);
-
       });
     });
 
@@ -210,7 +209,7 @@ describe('Check trigger alignment page', () => {
           expect(interception.response.statusCode).to.eq(200);
         });
 
-        cy.get('#warnAreaAccordion').should('be.visible');
+        cy.get('#warnAreaAccordion').should('not.be.visible');
         cy.get('div.otpWarningToast').should('be.visible').contains('No alignment workflow has been started');
         cy.get('#infos li').should('not.be.empty');
         cy.get('#resultWarning li').should('have.length', 1).should('have.text', 'none');

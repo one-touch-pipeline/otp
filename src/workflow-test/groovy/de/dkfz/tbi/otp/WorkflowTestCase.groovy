@@ -78,7 +78,6 @@ import static de.dkfz.tbi.otp.utils.LocalShellHelper.executeAndAssertExitCodeAnd
 abstract class WorkflowTestCase extends Specification implements UserAndRoles, GroovyScriptAwareTestCase, DomainFactoryCore, UserDomainFactory, TaxonomyFactory {
 
     ErrorLogService errorLogService
-    CreateClusterScriptService createClusterScriptService
     RemoteShellHelper remoteShellHelper
     ExecutionHelperService executionHelperService
     DataSource dataSource

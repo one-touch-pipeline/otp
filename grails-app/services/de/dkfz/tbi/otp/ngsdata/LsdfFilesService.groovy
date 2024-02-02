@@ -22,26 +22,20 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
-import org.springframework.beans.factory.annotation.Autowired
 
-import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
-import java.nio.file.*
+import java.nio.file.Path
 import java.util.regex.Pattern
 
 @Transactional
 class LsdfFilesService {
-    @Autowired
-    RemoteShellHelper remoteShellHelper
-
-    ProjectService projectService
 
     FileSystemService fileSystemService
-    FilestoreService filestoreService
+    ProjectService projectService
 
     /**
      * This function return path to the initial location
@@ -125,13 +119,5 @@ class LsdfFilesService {
     @Deprecated
     static void ensureDirIsReadableAndNotEmpty(final File dir) {
         FileService.ensureDirIsReadableAndNotEmptyStatic(dir.toPath())
-    }
-
-    /**
-     * @deprecated use {@link FileService#ensureDirIsReadable}
-     */
-    @Deprecated
-    static void ensureDirIsReadable(final File dir) {
-        FileService.ensureDirIsReadableStatic(dir.toPath())
     }
 }

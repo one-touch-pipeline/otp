@@ -24,12 +24,15 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
@@ -76,11 +79,22 @@ class LibPrepKitAdapterValidatorSpec extends Specification implements DataTest {
         LibraryPreparationKit kitWithoutAdapterFile = DomainFactory.createLibraryPreparationKit(name: 'lib_prep_kit_without_adapter_file', reverseComplementAdapterSequence: "ACGTC")
         LibraryPreparationKit kitWithoutAdapterSequence = DomainFactory.createLibraryPreparationKit(name: 'lib_prep_kit_without_adapter_sequence', adapterFile: "/asdf")
 
-        Project project1 = DomainFactory.createProject(alignmentDeciderBeanName: AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT)
-        Project project2 = DomainFactory.createProject(alignmentDeciderBeanName: AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT)
-        Project project3 = DomainFactory.createProject(alignmentDeciderBeanName: AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT)
-        Project project4 = DomainFactory.createProject(alignmentDeciderBeanName: AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT)
-        Project project5 = DomainFactory.createProject(alignmentDeciderBeanName: AlignmentDeciderBeanName.OTP_ALIGNMENT)
+        Project project1 = DomainFactory.createProject()
+        Project project2 = DomainFactory.createProject()
+        Project project3 = DomainFactory.createProject()
+        Project project4 = DomainFactory.createProject()
+        Project project5 = DomainFactory.createProject()
+
+        validator.workflowVersionSelectorService = Mock(WorkflowVersionSelectorService) {
+            findAllByProjectAndWorkflow(project1, _) >> [new WorkflowVersion()]
+            findAllByProjectAndWorkflow(project2, _) >> [new WorkflowVersion()]
+            findAllByProjectAndWorkflow(project3, _) >> [new WorkflowVersion()]
+            findAllByProjectAndWorkflow(project4, _) >> [new WorkflowVersion()]
+            findAllByProjectAndWorkflow(project5, _) >> []
+        }
+        validator.workflowService = Mock(WorkflowService) {
+            getExactlyOneWorkflow(PanCancerWorkflow.WORKFLOW) >> new Workflow()
+        }
 
         DomainFactory.createRoddyWorkflowConfig([
                 individual: DomainFactory.createIndividual(project: project2),
@@ -104,7 +118,7 @@ class LibPrepKitAdapterValidatorSpec extends Specification implements DataTest {
         ])
 
         DomainFactory.createRoddyWorkflowConfig([
-                project: DomainFactory.createProject(alignmentDeciderBeanName: AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT),
+                project: DomainFactory.createProject(),
                 seqType: DomainFactory.createWholeGenomeBisulfiteSeqType(),
                 pipeline: DomainFactory.createPanCanPipeline(),
                 adapterTrimmingNeeded: true,

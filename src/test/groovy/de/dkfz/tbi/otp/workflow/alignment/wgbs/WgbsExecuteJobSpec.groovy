@@ -102,7 +102,6 @@ class WgbsExecuteJobSpec extends Specification implements DataTest, WgbsAlignmen
         job.roddyConfigValueService = new RoddyConfigValueService()
         job.referenceGenomeService = Mock(ReferenceGenomeService) {
             fastaFilePath(roddyBamFile.referenceGenome) >> { new File("/fasta-path") }
-            chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage) >> { new File("/chrom-size-path") }
             cytosinePositionIndexFilePath(roddyBamFile.referenceGenome) >> { new File("/cytosine-position-index-path") }
         }
         job.roddyConfigValueService.referenceGenomeService = job.referenceGenomeService

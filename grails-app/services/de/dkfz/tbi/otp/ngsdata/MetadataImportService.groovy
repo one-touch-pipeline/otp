@@ -33,7 +33,6 @@ import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
@@ -95,10 +94,8 @@ class MetadataImportService {
     TicketService ticketService
     ProcessingThresholdsService processingThresholdsService
     SampleIdentifierService sampleIdentifierService
-    SamplePairDeciderService samplePairDeciderService
     SampleTypeService sampleTypeService
     SeqPlatformService seqPlatformService
-    SeqTrackService seqTrackService
     SeqTypeService seqTypeService
     SpeciesWithStrainService speciesWithStrainService
     FastqMetadataValidationService fastqMetadataValidationService
@@ -575,11 +572,9 @@ class MetadataImportService {
             log.debug("      dataFiles of seqtrack ${seqTrack.laneId} started ${index}/${amountOfRows}")
             importDataFiles(context, fastqImportInstance, seqTrack, rows)
             log.debug("      dataFiles of seqtrack ${seqTrack.laneId} stopped took: ${System.currentTimeMillis() - timeStarted}")
-            seqTrack.save(flush: true) // needs to flush the session, so seqTrackService.decideAndPrepareForAlignment can work
+            seqTrack.save(flush: true)
 
             mergingCriteriaService.createDefaultMergingCriteria(sampleIdentifier.project, seqType)
-            Collection<MergingWorkPackage> mergingWorkPackages = seqTrackService.decideAndPrepareForAlignment(seqTrack)
-            samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages)
             samples.add(sampleIdentifier.sample)
         }
         samples.each {

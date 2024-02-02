@@ -67,7 +67,7 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTe
         ]
     }
 
-    void "run triggerAlignment, which should trigger 1 new workflow and 1 old workflow"() {
+    void "run triggerAlignment, which should trigger one workflow"() {
         given:
         final SeqType st1 = createSeqTypePaired()
         final SeqType st2 = createSeqTypePaired()
@@ -115,28 +115,16 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTe
         deciderResultToReturn.newArtefacts << outputArtefact
 
         MergingWorkPackage mergingWorkPackage1 = createMergingWorkPackage()
-        MergingWorkPackage mergingWorkPackage2 = createMergingWorkPackage()
         RoddyBamFile bamFile1 = createRoddyBamFile([
                 workflowArtefact: outputArtefact,
                 workPackage     : mergingWorkPackage1,
                 seqTracks       : [seqTrack1, seqTrack2],
         ], RoddyBamFile)
 
-        RoddyBamFile bamFile2 = createRoddyBamFile([
-                workPackage: mergingWorkPackage2,
-                seqTracks  : [seqTrack3],
-        ], RoddyBamFile)
-
-        // Mock service for new workflow system
+        // Mock service for workflow system
         service.allDecider = Mock(AllDecider) {
             1 * decide(_, _) >> deciderResultToReturn
-            1 * findAllSeqTracksInNewWorkflowSystem(_) >> [seqTrack1, seqTrack2]
-            0 * _
-        }
-
-        // Mock service for old workflow system and check if workflow is triggered
-        service.seqTrackService = Mock(SeqTrackService) {
-            1 * decideAndPrepareForAlignment(_) >> [mergingWorkPackage2]
+            1 * findAlignableSeqTracks(_) >> [seqTrack1, seqTrack2]
             0 * _
         }
 
@@ -148,12 +136,12 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTe
 
         // Make sure sample pairs are created
         service.samplePairDeciderService = Mock(SamplePairDeciderService) {
-            1 * findOrCreateSamplePairs([mergingWorkPackage1, mergingWorkPackage2])
+            1 * findOrCreateSamplePairs([mergingWorkPackage1])
         }
 
         service.roddyBamFileWithdrawService = Mock(RoddyBamFileWithdrawService) {
             _ * collectObjects(_) >> {
-                return [bamFile1, bamFile2]
+                return [bamFile1]
             }
         }
 
@@ -162,13 +150,9 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTe
 
         then:
         triggerAlignmentResult.newArtefacts.size() == 1
-        TestCase.assertContainSame(triggerAlignmentResult.mergingWorkPackages, [mergingWorkPackage1, mergingWorkPackage2])
-
-        triggerAlignmentResult.infos.contains("Create 1 alignments with old system")
-        triggerAlignmentResult.infos.contains(mergingWorkPackage2.toString())
+        TestCase.assertContainSame(triggerAlignmentResult.mergingWorkPackages, [mergingWorkPackage1])
 
         bamFile1.withdrawn
-        bamFile2.withdrawn
     }
 
     void "createWarningsForMissingAlignmentConfig, when run, then return the expected warnings"() {
@@ -177,88 +161,51 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTe
                 apiVersion: createWorkflowApiVersion(workflow: createWorkflow(name: PanCancerWorkflow.WORKFLOW)),
         ])
 
-        SeqTrack seqTrackNewSystemWithoutConfig = createSeqTrackWithProjectName("seqTrackNewSystemWithoutConfig")
+        SeqTrack seqTrackWithoutConfig = createSeqTrackWithProjectName("seqTrackWithoutConfig")
 
-        SeqTrack seqTrackNewSystemWithConfig = createSeqTrackWithProjectName("seqTrackNewSystemWithConfig")
+        SeqTrack seqTrackWithConfig = createSeqTrackWithProjectName("seqTrackWithConfig")
         createWorkflowVersionSelector([
-                project        : seqTrackNewSystemWithConfig.project,
-                seqType        : seqTrackNewSystemWithConfig.seqType,
+                project        : seqTrackWithConfig.project,
+                seqType        : seqTrackWithConfig.seqType,
                 workflowVersion: workflowVersion,
         ])
 
-        SeqTrack seqTrackNewSystemWithDeprecatedConfig = createSeqTrackWithProjectName("seqTrackNewSystemWithDeprecatedConfig")
+        SeqTrack seqTrackWithDeprecatedConfig = createSeqTrackWithProjectName("seqTrackWithDeprecatedConfig")
         createWorkflowVersionSelector([
-                project        : seqTrackNewSystemWithDeprecatedConfig.project,
-                seqType        : seqTrackNewSystemWithDeprecatedConfig.seqType,
+                project        : seqTrackWithDeprecatedConfig.project,
+                seqType        : seqTrackWithDeprecatedConfig.seqType,
                 deprecationDate: LocalDate.now(),
                 workflowVersion: workflowVersion,
         ])
 
-        SeqTrack seqTrackNewSystemWithDeprecatedAndValidConfig = createSeqTrackWithProjectName("seqTrackNewSystemWithDeprecatedAndValidConfig")
+        SeqTrack seqTrackWithDeprecatedAndValidConfig = createSeqTrackWithProjectName("seqTrackWithDeprecatedAndValidConfig")
         createWorkflowVersionSelector([
-                project        : seqTrackNewSystemWithDeprecatedAndValidConfig.project,
-                seqType        : seqTrackNewSystemWithDeprecatedAndValidConfig.seqType,
+                project        : seqTrackWithDeprecatedAndValidConfig.project,
+                seqType        : seqTrackWithDeprecatedAndValidConfig.seqType,
                 deprecationDate: LocalDate.now(),
                 workflowVersion: workflowVersion,
         ])
         createWorkflowVersionSelector([
-                project        : seqTrackNewSystemWithDeprecatedAndValidConfig.project,
-                seqType        : seqTrackNewSystemWithDeprecatedAndValidConfig.seqType,
+                project        : seqTrackWithDeprecatedAndValidConfig.project,
+                seqType        : seqTrackWithDeprecatedAndValidConfig.seqType,
                 workflowVersion: workflowVersion,
-        ])
-
-        Pipeline pipeline = findOrCreatePipeline(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT)
-
-        SeqTrack seqTrackOldSystemWithoutConfig = createSeqTrackWithProjectName("seqTrackOldSystemWithoutConfig")
-
-        SeqTrack seqTrackOldSystemWithConfig = createSeqTrackWithProjectName("seqTrackOldSystemWithConfig")
-        DomainFactory.createRoddyWorkflowConfig([
-                project : seqTrackOldSystemWithConfig.project,
-                seqType : seqTrackOldSystemWithConfig.seqType,
-                pipeline: pipeline,
-        ])
-
-        SeqTrack seqTrackOldSystemWithObsoleteConfig = createSeqTrackWithProjectName("seqTrackOldSystemWithObsoleteConfig")
-        DomainFactory.createRoddyWorkflowConfig([
-                project     : seqTrackOldSystemWithObsoleteConfig.project,
-                seqType     : seqTrackOldSystemWithObsoleteConfig.seqType,
-                pipeline    : pipeline,
-                obsoleteDate: new Date(),
-        ])
-
-        SeqTrack seqTrackOldSystemWithObsoleteAndValidConfig = createSeqTrackWithProjectName("seqTrackOldSystemWithObsoleteAndValidConfig")
-        DomainFactory.createRoddyWorkflowConfig([
-                project     : seqTrackOldSystemWithObsoleteAndValidConfig.project,
-                seqType     : seqTrackOldSystemWithObsoleteAndValidConfig.seqType,
-                pipeline    : pipeline,
-                obsoleteDate: new Date(),
-        ])
-        DomainFactory.createRoddyWorkflowConfig([
-                project : seqTrackOldSystemWithObsoleteAndValidConfig.project,
-                seqType : seqTrackOldSystemWithObsoleteAndValidConfig.seqType,
-                pipeline: pipeline,
         ])
 
         List<SeqTrack> seqTracks = [
-                seqTrackNewSystemWithoutConfig,
-                seqTrackNewSystemWithConfig,
-                seqTrackNewSystemWithDeprecatedConfig,
-                seqTrackNewSystemWithDeprecatedAndValidConfig,
-
-                seqTrackOldSystemWithoutConfig,
-                seqTrackOldSystemWithConfig,
-                seqTrackOldSystemWithObsoleteConfig,
-                seqTrackOldSystemWithObsoleteAndValidConfig,
+                seqTrackWithoutConfig,
+                seqTrackWithConfig,
+                seqTrackWithDeprecatedConfig,
+                seqTrackWithDeprecatedAndValidConfig,
         ]
 
         assert seqTracks.size() == SeqTrack.count(): "Not all created seqTracks are in the list"
 
         service.allDecider = Mock(AllDecider) {
-            1 * findAllSeqTracksInNewWorkflowSystem(_) >> [
-                    seqTrackNewSystemWithoutConfig,
-                    seqTrackNewSystemWithConfig,
-                    seqTrackNewSystemWithDeprecatedConfig,
-                    seqTrackNewSystemWithDeprecatedAndValidConfig,
+            1 * findAlignableSeqTracks(_) >> [
+                    seqTrackWithoutConfig,
+                    seqTrackWithConfig,
+                    seqTrackWithDeprecatedConfig,
+                    seqTrackWithDeprecatedAndValidConfig,
             ]
             0 * _
         }
@@ -268,23 +215,13 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTe
 
         List<Map<String, String>> expected = [
                 [
-                        project: seqTrackNewSystemWithoutConfig.project.name,
-                        seqType: seqTrackNewSystemWithoutConfig.seqType.displayNameWithLibraryLayout,
+                        project: seqTrackWithoutConfig.project.name,
+                        seqType: seqTrackWithoutConfig.seqType.displayNameWithLibraryLayout,
                         count  : "1",
                 ],
                 [
-                        project: seqTrackNewSystemWithDeprecatedConfig.project.name,
-                        seqType: seqTrackNewSystemWithDeprecatedConfig.seqType.displayNameWithLibraryLayout,
-                        count  : "1",
-                ],
-                [
-                        project: seqTrackOldSystemWithoutConfig.project.name,
-                        seqType: seqTrackOldSystemWithoutConfig.seqType.displayNameWithLibraryLayout,
-                        count  : "1",
-                ],
-                [
-                        project: seqTrackOldSystemWithObsoleteConfig.project.name,
-                        seqType: seqTrackOldSystemWithObsoleteConfig.seqType.displayNameWithLibraryLayout,
+                        project: seqTrackWithDeprecatedConfig.project.name,
+                        seqType: seqTrackWithDeprecatedConfig.seqType.displayNameWithLibraryLayout,
                         count  : "1",
                 ],
         ]
@@ -353,7 +290,7 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTe
         }
 
         service.allDecider = Mock(AllDecider) {
-            1 * findAllSeqTracksInNewWorkflowSystem(_) >> seqTracks
+            1 * findAlignableSeqTracks(_) >> seqTracks
             0 * _
         }
 

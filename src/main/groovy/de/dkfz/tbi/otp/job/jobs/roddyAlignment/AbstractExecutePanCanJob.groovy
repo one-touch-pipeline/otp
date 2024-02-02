@@ -121,18 +121,6 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
         return "--cvalues=\"${cValues.join(',').replace('$', '\\$')}\""
     }
 
-    String getChromosomeIndexParameterWithMitochondrium(ReferenceGenome referenceGenome) {
-        assert referenceGenome
-
-        List<String> chromosomeNames = ReferenceGenomeEntry.findAllByReferenceGenomeAndClassificationInList(referenceGenome,
-                [ReferenceGenomeEntry.Classification.CHROMOSOME, ReferenceGenomeEntry.Classification.MITOCHONDRIAL])*.name
-        assert chromosomeNames: "No chromosome names could be found for reference genome ${referenceGenome}"
-
-        List<String> sortedList = chromosomeIdentifierSortingService.sortIdentifiers(chromosomeNames)
-
-        return "CHROMOSOME_INDICES:( ${sortedList.join(' ')} )"
-    }
-
     String getChromosomeIndexParameterWithoutMitochondrium(ReferenceGenome referenceGenome) {
         assert referenceGenome
 

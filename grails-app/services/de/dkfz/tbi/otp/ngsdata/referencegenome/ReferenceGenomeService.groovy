@@ -35,7 +35,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import de.dkfz.tbi.otp.ngsdata.taxonomy.Species
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
@@ -66,10 +65,6 @@ class ReferenceGenomeService {
      */
     ReferenceGenome referenceGenome(long id) {
         return ReferenceGenome.get(id)
-    }
-
-    ReferenceGenome findByName(String name) {
-        return CollectionUtils.atMostOneElement(ReferenceGenome.findAllByName(name))
     }
 
     List<ReferenceGenome> list() {
@@ -133,17 +128,6 @@ class ReferenceGenomeService {
     File pathToChromosomeSizeFilesPerReference(ReferenceGenome referenceGenome, boolean checkExistence = true) {
         notNull(referenceGenome, "The reference genome is not specified")
         File file = new File(referenceGenomeDirectory(referenceGenome, checkExistence), CHROMOSOME_SIZE_FILES_PREFIX)
-        return checkFileExistence(file, checkExistence)
-    }
-
-    /**
-     * @Deprecated old workflow system, the new use {@link ExternalWorkflowConfigFragment}
-     */
-    @Deprecated
-    File chromosomeStatSizeFile(MergingWorkPackage mergingWorkPackage, boolean checkExistence = true) {
-        assert mergingWorkPackage, "The mergingWorkPackage is not specified"
-        assert mergingWorkPackage.statSizeFileName: "No stat file size name is defined for ${mergingWorkPackage}"
-        File file = new File(pathToChromosomeSizeFilesPerReference(mergingWorkPackage.referenceGenome, checkExistence), mergingWorkPackage.statSizeFileName)
         return checkFileExistence(file, checkExistence)
     }
 
@@ -364,10 +348,6 @@ class ReferenceGenomeService {
         ].each {
             LsdfFilesService.ensureDirIsReadableAndNotEmpty(it)
         }
-    }
-
-    static List<StatSizeFileName> getStatSizeFileNames(ReferenceGenome referenceGenome) {
-        return StatSizeFileName.findAllByReferenceGenome(referenceGenome, [sort: "name", order: "asc"])
     }
 }
 

@@ -21,27 +21,21 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.converters.JSON
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.utils.DataTableCommand
 
 @PreAuthorize('isFullyAuthenticated()')
 class AlignmentConfigurationOverviewController {
 
     static allowedMethods = [
             index                         : "GET",
-            getAlignmentInfo              : "GET",
-            dataTableSourceReferenceGenome: "GET",
     ]
 
     AlignmentInfoService alignmentInfoService
     MergingCriteriaService mergingCriteriaService
-    PipelineService pipelineService
     ProjectSelectionService projectSelectionService
     SeqTypeService seqTypeService
 
@@ -52,13 +46,11 @@ class AlignmentConfigurationOverviewController {
             Map<SeqType, AlignmentInfo> alignmentInfo = alignmentInfoService.getAlignmentInformationForProject(project)
             return [
                     seqTypeMergingCriteria: getSeqTypeMergingCriteria(project),
-                    roddySeqTypes         : roddySeqTypes,
                     alignmentInfo         : alignmentInfo,
             ]
         } catch (ParsingException exp) {
             return [
                     seqTypeMergingCriteria: getSeqTypeMergingCriteria(project),
-                    roddySeqTypes         : roddySeqTypes,
                     errorMessage          : exp.message,
             ]
         }
@@ -73,69 +65,5 @@ class AlignmentConfigurationOverviewController {
         return SeqTypeService.allAlignableSeqTypes.findAll { !(it in seqTypeService.seqTypesNewWorkflowSystem) }.collectEntries { SeqType seqType ->
             [(seqType): mergingCriteria.find { it.seqType == seqType }]
         }.sort { Map.Entry<SeqType, MergingCriteria> it -> it.key.displayNameWithLibraryLayout }
-    }
-
-    /**
-     * @deprecated method is part of the old workflow system
-     */
-    @Deprecated
-    private List<SeqType> getRoddySeqTypes() {
-        return SeqTypeService.roddyAlignableSeqTypes.findAll { !(it in seqTypeService.seqTypesNewWorkflowSystem) }.sort {
-            it.displayNameWithLibraryLayout
-        }
-    }
-
-    /**
-     * @deprecated method is part of the old workflow system
-     */
-    @SuppressWarnings('CatchThrowable')
-    @Deprecated
-    JSON getAlignmentInfo() {
-        Project project = projectSelectionService.requestedProject
-        Map<String, AlignmentInfo> alignmentInfo = null
-        String alignmentError = null
-        try {
-            alignmentInfo = alignmentInfoService.getAlignmentInformation(project)
-        } catch (Throwable e) {
-            alignmentError = e.message
-            log.error(e.message, e)
-        }
-
-        Map map = [alignmentInfo: alignmentInfo, alignmentError: alignmentError]
-        return render(map as JSON)
-    }
-
-    /**
-     * @deprecated method is part of the old workflow system
-     */
-    @SuppressWarnings('Indentation')
-    @Deprecated
-    JSON dataTableSourceReferenceGenome(DataTableCommand cmd) {
-        Project project = projectSelectionService.requestedProject
-        Map dataToRender = cmd.dataToRender()
-        List data = alignmentInfoService.listReferenceGenome(project)
-                .findAll { !(it.seqType in seqTypeService.seqTypesNewWorkflowSystem) }
-                .collect { ReferenceGenomeProjectSeqType it ->
-                    String adapterTrimming = ""
-                    if (!it.sampleType) {
-                        adapterTrimming = it.seqType.wgbs ?:
-                                RoddyWorkflowConfig.getLatestForProject(
-                                        project,
-                                        it.seqType,
-                                        pipelineService.findByPipelineName(Pipeline.Name.PANCAN_ALIGNMENT)
-                                )?.adapterTrimmingNeeded
-                    }
-                    return [
-                            it.seqType.displayNameWithLibraryLayout,
-                            it.sampleType?.name,
-                            it.referenceGenome.name,
-                            it.statSizeFileName ?: "",
-                            adapterTrimming,
-                    ]
-                }
-        dataToRender.iTotalRecords = data.size()
-        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        dataToRender.aaData = data
-        return render(dataToRender as JSON)
     }
 }

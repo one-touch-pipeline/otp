@@ -34,7 +34,6 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
 import de.dkfz.tbi.otp.infrastructure.CreateFileException
@@ -434,9 +433,6 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
         service.sampleIdentifierService = Mock(SampleIdentifierService) {
             0 * _
         }
-        service.seqTrackService = Mock(SeqTrackService) {
-            2 * decideAndPrepareForAlignment(_) >> []
-        }
         service.seqPlatformService = Mock(SeqPlatformService) {
             2 * findSeqPlatform(seqPlatform.name, seqPlatform.seqPlatformModelLabel.name, null) >> seqPlatform
             0 * _
@@ -459,10 +455,6 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
         }
         service.antibodyTargetService = Mock(AntibodyTargetService) {
             2 * findByNameOrImportAlias(_) >> antibodyTarget
-        }
-        service.samplePairDeciderService = Mock(SamplePairDeciderService) {
-            2 * findOrCreateSamplePairs([]) >> []
-            0 * _
         }
         service.mergingCriteriaService = Mock(MergingCriteriaService) {
             2 * createDefaultMergingCriteria(_, _)
@@ -758,7 +750,6 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
             parseSingleCellWellLabel(scParse, _) >> { return scParse }
         }
 
-        service.seqTrackService = Mock(SeqTrackService)
         service.speciesWithStrainService = Mock(SpeciesWithStrainService) {
             getByAlias(human) >> humanSpecies
             getByAlias(mouse) >> mouseSpecies
@@ -1097,8 +1088,6 @@ ${ILSE_NO}                      -                           1234          1234  
             ]))
         }
 
-        seqTrackCount * service.seqTrackService.decideAndPrepareForAlignment(!null) >> []
-
         cleanup:
         GroovySystem.metaClassRegistry.removeMetaClass(SamplePair)
 
@@ -1163,9 +1152,6 @@ ${ILSE_NO}                      -                           1234          1234  
         }
         service.sampleIdentifierService = Mock(SampleIdentifierService) {
             0 * _
-        }
-        service.seqTrackService = Mock(SeqTrackService) {
-            1 * decideAndPrepareForAlignment(!null) >> []
         }
         service.seqPlatformService = Mock(SeqPlatformService) {
             1 * findSeqPlatform(seqPlatform.name, seqPlatform.seqPlatformModelLabel.name, null) >> seqPlatform
@@ -1346,9 +1332,6 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         }
         service.sampleIdentifierService = Mock(SampleIdentifierService) {
             0 * _
-        }
-        service.seqTrackService = Mock(SeqTrackService) {
-            1 * decideAndPrepareForAlignment(!null) >> []
         }
         service.seqPlatformService = Mock(SeqPlatformService) {
             1 * findSeqPlatform(seqPlatform.name, seqPlatform.seqPlatformModelLabel.name, null) >> seqPlatform
@@ -1978,10 +1961,6 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
     }
 
     private void mockAdditionalServices(MetadataImportService service, int count = 1) {
-        service.samplePairDeciderService = Mock(SamplePairDeciderService) {
-            count * findOrCreateSamplePairs([]) >> []
-            0 * _
-        }
         service.mergingCriteriaService = Mock(MergingCriteriaService) {
             count * createDefaultMergingCriteria(_, _)
         }

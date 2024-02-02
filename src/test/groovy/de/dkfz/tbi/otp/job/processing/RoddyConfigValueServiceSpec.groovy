@@ -91,7 +91,6 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
 
         service.referenceGenomeService = Mock(ReferenceGenomeService) {
             _ * fastaFilePath(roddyBamFile.referenceGenome) >> { new File("/fasta-path") }
-            _ * chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage) >> { new File("/chrom-size-path") }
             _ * fingerPrintingFile(roddyBamFile.referenceGenome) >> { new File("/fingerprint-path") }
         }
 
@@ -117,7 +116,6 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
 
         service.referenceGenomeService = Mock(ReferenceGenomeService) {
             fastaFilePath(roddyBamFile.referenceGenome) >> { new File("/fasta-path") }
-            chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage) >> { new File("/chrom-size-path") }
         }
 
         Map<String, String> expectedCommand = [

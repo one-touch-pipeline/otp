@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.project
 import grails.gorm.hibernate.annotation.ManagedEntity
 
 import de.dkfz.tbi.otp.CommentableWithProject
-import de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName
+
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
@@ -34,7 +34,6 @@ import de.dkfz.tbi.otp.project.dta.DataTransferAgreement
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
-import de.dkfz.tbi.otp.workflowExecution.WorkflowVersionSelector
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
@@ -98,12 +97,6 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
 
     /** Contains the current state of the project. */
     State state = State.OPEN
-
-    /**
-     * @deprecated field is part of the old workflow system, use {@link WorkflowVersionSelector} instead
-     */
-    @Deprecated
-    AlignmentDeciderBeanName alignmentDeciderBeanName = AlignmentDeciderBeanName.NO_ALIGNMENT
 
     /** This attribute is used externally. Please discuss a change in the team */
     SampleIdentifierParserBeanName sampleIdentifierParserBeanName = SampleIdentifierParserBeanName.NO_PARSER

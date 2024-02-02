@@ -27,7 +27,6 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.job.jobs.importExternallyMergedBam.ReplaceSourceWithLinkJob
-import de.dkfz.tbi.otp.job.jobs.roddyAlignment.ExecutePanCanJob
 
 @Rollback
 @Integration
@@ -43,8 +42,6 @@ class TypeValidatorsIntegrationSpec extends Specification {
         'empty'                    | { '' }                                             || false
         'null'                     | { null }                                           || false
         'OtherName'                | { 'OtherJobName' }                                 || false
-        // example for roddy job
-        'ExecutePanCanJob'         | { ExecutePanCanJob.simpleName }                    || false
         // example for no cluster job
         'ReplaceSourceWithLinkJob' | { ReplaceSourceWithLinkJob.simpleName }            || false
     }

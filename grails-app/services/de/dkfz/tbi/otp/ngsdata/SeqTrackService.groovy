@@ -29,7 +29,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.LogMessage
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -43,7 +43,6 @@ import static org.springframework.util.Assert.notNull
 @Transactional
 class SeqTrackService {
 
-    AlignmentDeciderService alignmentDeciderService
     FileTypeService fileTypeService
     ProjectService projectService
     SeqTypeService seqTypeService
@@ -160,25 +159,9 @@ class SeqTrackService {
         }
     }
 
-    /**
-     * Calls the {@link AlignmentDecider#decideAndPrepareForAlignment(SeqTrack, boolean)} method of the
-     * {@link AlignmentDecider} specified by the {@link Project#alignmentDeciderBeanName} property of the specified
-     * {@link SeqTrack}'s {@link Project}.
-     */
-    Collection<MergingWorkPackage> decideAndPrepareForAlignment(SeqTrack seqTrack, boolean forceRealign = false) {
-        AlignmentDecider decider = alignmentDeciderService.getAlignmentDecider(seqTrack.project)
-        return decider.decideAndPrepareForAlignment(seqTrack, forceRealign)
-    }
-
-    static boolean mayAlign(SeqTrack seqTrack, boolean log = true) {
-        Closure notAligning = { String reason ->
-            if (log) {
-                AbstractAlignmentDecider.logNotAligning(seqTrack, reason)
-            }
-        }
-
+    @Deprecated
+    static boolean mayAlign(SeqTrack seqTrack) {
         if (seqTrack.withdrawn) {
-            notAligning('it is withdrawn')
             return false
         }
 
@@ -189,23 +172,16 @@ class SeqTrackService {
             }
             eq 'fileWithdrawn', false
         }) {
-            notAligning('it has no sequence files')
             return false
         }
 
         if (seqTrack.seqType.exome &&
                 seqTrack.libraryPreparationKit == null &&
                 seqTrack.kitInfoReliability == InformationReliability.UNKNOWN_VERIFIED) {
-            notAligning('kitInfoReliability is UNKNOWN_VERIFIED')
             return false
         }
 
-        if (seqTrack.seqPlatformGroup == null) {
-            notAligning("seqPlatformGroup is null for ${seqTrack.seqPlatform}")
-            return false
-        }
-
-        return true
+        return seqTrack.seqPlatformGroup != null
     }
 
     void markFastqcFinished(SeqTrack seqTrack) {

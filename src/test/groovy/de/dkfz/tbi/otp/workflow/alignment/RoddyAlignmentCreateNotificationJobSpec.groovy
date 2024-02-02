@@ -58,7 +58,6 @@ class RoddyAlignmentCreateNotificationJobSpec extends AbstractCreateNotification
             assert arguments[0] == "notification.template.alignment.processing"
             assert arguments[1]["seqType"] == abstractBamFile.seqType.displayNameWithLibraryLayout
             assert arguments[1]["referenceGenome"] == abstractBamFile.referenceGenome
-            assert arguments[1]["individuals"] == ""
             assert arguments[1]["alignmentProgram"] == "BWA Version 0.7.15"
             assert arguments[1]["alignmentParameter"] == "\" -T 0 \""
         }

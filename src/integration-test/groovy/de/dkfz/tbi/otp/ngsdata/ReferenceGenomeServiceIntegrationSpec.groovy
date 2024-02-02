@@ -167,67 +167,6 @@ class ReferenceGenomeServiceIntegrationSpec extends Specification implements Use
         selector.fragments.first().configValues.contains(statSizeFileName)
     }
 
-    void testChromosomeStatSizeFile_AllFine() {
-        given:
-        MergingWorkPackage mergingWorkPackage = createDataForChromosomeSizeInformationFiles()
-        File pathExp = statFile.toFile()
-
-        when:
-        File pathAct = referenceGenomeService.chromosomeStatSizeFile(mergingWorkPackage, false)
-
-        then:
-        pathExp == pathAct
-    }
-
-    void testChromosomeStatSizeFile_WithFileCheck_AllFine() {
-        given:
-        MergingWorkPackage mergingWorkPackage = createDataForChromosomeSizeInformationFiles()
-        File pathExp = statFile.toFile()
-        CreateFileHelper.createFile(pathExp)
-
-        when:
-        File pathAct = referenceGenomeService.chromosomeStatSizeFile(mergingWorkPackage, true)
-
-        then:
-        pathExp == pathAct
-    }
-
-    void testChromosomeStatSizeFile_MergingWorkPackageIsNull_ShouldFail() {
-        when:
-        referenceGenomeService.chromosomeStatSizeFile(null)
-
-        then:
-        AssertionError e = thrown(AssertionError)
-        e.message.contains('mergingWorkPackage')
-    }
-
-    void testChromosomeStatSizeFile_NoStatSizeFileIsDefined_ShouldFail() {
-        given:
-        MergingWorkPackage mergingWorkPackage = createDataForChromosomeSizeInformationFiles()
-        mergingWorkPackage.pipeline = DomainFactory.createDefaultOtpPipeline()
-        mergingWorkPackage.statSizeFileName = null
-        mergingWorkPackage.save(flush: true)
-
-        when:
-        referenceGenomeService.chromosomeStatSizeFile(mergingWorkPackage, false)
-
-        then:
-        AssertionError e = thrown(AssertionError)
-        e.message.contains('No stat file size name is defined')
-    }
-
-    void testChromosomeStatSizeFile_StateSizeFileDoesNotExistAndExistenceIsChecked_ShouldFail() {
-        given:
-        MergingWorkPackage mergingWorkPackage = createDataForChromosomeSizeInformationFiles()
-
-        when:
-        referenceGenomeService.chromosomeStatSizeFile(mergingWorkPackage, true)
-
-        then:
-        FileNotReadableException e = thrown(FileNotReadableException)
-        e.message.contains(DomainFactory.DEFAULT_TAB_FILE_NAME)
-    }
-
     void testChromosomeLengthFile_AllFine() {
         given:
         MergingWorkPackage mergingWorkPackage = createDataForChromosomeSizeInformationFiles()

@@ -24,19 +24,16 @@ package de.dkfz.tbi.otp.dataprocessing
 import grails.testing.gorm.DomainUnitTest
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 
-import static de.dkfz.tbi.otp.ngsdata.TestData.createReferenceGenome
-
-class ReferenceGenomeTests extends Specification implements DomainUnitTest<ReferenceGenome> {
-
-    final static Long ARBITRARY_REFERENCE_GENOME_LENGTH = 100
+class ReferenceGenomeTests extends Specification implements DomainUnitTest<ReferenceGenome>, DomainFactoryCore {
 
     void testValidationMethodOfReferenceGenomeNameNotUnique() {
         when:
         final String REFERENCE_GENOME_NAME = 'hg19_1_24'
-        ReferenceGenome referenceGenome = createReferenceGenome([name: REFERENCE_GENOME_NAME])
-        ReferenceGenome referenceGenomeInvalid = createReferenceGenome([name: REFERENCE_GENOME_NAME])
+        ReferenceGenome referenceGenome = createReferenceGenome([name: REFERENCE_GENOME_NAME], false)
+        ReferenceGenome referenceGenomeInvalid = createReferenceGenome([name: REFERENCE_GENOME_NAME], false)
 
         then:
         referenceGenome.save(flush: true)
@@ -45,7 +42,7 @@ class ReferenceGenomeTests extends Specification implements DomainUnitTest<Refer
 
     void testValidationMethodOfReferenceGenomeNameIsEmpty() {
         when:
-        ReferenceGenome referenceGenome = createReferenceGenome([name: ''])
+        ReferenceGenome referenceGenome = createReferenceGenome([name: ''], false)
 
         then:
         !referenceGenome.validate()
@@ -54,8 +51,8 @@ class ReferenceGenomeTests extends Specification implements DomainUnitTest<Refer
     void testValidationMethodOfReferenceGenomePathNotUnique() {
         when:
         final String REFERENCE_GENOME_PATH = 'referenceGenome'
-        ReferenceGenome referenceGenome = createReferenceGenome([path: REFERENCE_GENOME_PATH])
-        ReferenceGenome referenceGenomeInvalid = createReferenceGenome([path: REFERENCE_GENOME_PATH])
+        ReferenceGenome referenceGenome = createReferenceGenome([path: REFERENCE_GENOME_PATH], false)
+        ReferenceGenome referenceGenomeInvalid = createReferenceGenome([path: REFERENCE_GENOME_PATH], false)
 
         then:
         referenceGenome.save(flush: true)
@@ -64,7 +61,7 @@ class ReferenceGenomeTests extends Specification implements DomainUnitTest<Refer
 
     void testValidationMethodOfReferenceGenomePathIsEmpty() {
         when:
-        ReferenceGenome referenceGenome = createReferenceGenome([path: ''])
+        ReferenceGenome referenceGenome = createReferenceGenome([path: ''], false)
 
         then:
         !referenceGenome.validate()
@@ -72,7 +69,7 @@ class ReferenceGenomeTests extends Specification implements DomainUnitTest<Refer
 
     void testValidationMethodOfReferenceGenomePrefixIsEmpty() {
         when:
-        ReferenceGenome referenceGenome = createReferenceGenome([fileNamePrefix: ''])
+        ReferenceGenome referenceGenome = createReferenceGenome([fileNamePrefix: ''], false)
 
         then:
         !referenceGenome.validate()
@@ -82,7 +79,7 @@ class ReferenceGenomeTests extends Specification implements DomainUnitTest<Refer
 
     void test_ConstraintOnLength_WhenNegative_ShouldFail() {
         when:
-        ReferenceGenome referenceGenome = createReferenceGenome([length: -5])
+        ReferenceGenome referenceGenome = createReferenceGenome([length: -5], false)
 
         then:
         !referenceGenome.validate()
@@ -90,7 +87,7 @@ class ReferenceGenomeTests extends Specification implements DomainUnitTest<Refer
 
     void test_ConstraintOnLength_WhenZero_ShouldFail() {
         when:
-        ReferenceGenome referenceGenome = createReferenceGenome([length: 0])
+        ReferenceGenome referenceGenome = createReferenceGenome([length: 0], false)
 
         then:
         !referenceGenome.validate()
@@ -98,7 +95,7 @@ class ReferenceGenomeTests extends Specification implements DomainUnitTest<Refer
 
     void test_ConstraintOnLength_WhenPositive_ShouldSucceed() {
         when:
-        ReferenceGenome referenceGenome = createReferenceGenome([length: 42])
+        ReferenceGenome referenceGenome = createReferenceGenome([length: 42], false)
 
         then:
         referenceGenome.validate()
@@ -108,7 +105,7 @@ class ReferenceGenomeTests extends Specification implements DomainUnitTest<Refer
 
     void test_ConstraintOnLengthWithoutN_WhenNegative_ShouldFail() {
         when:
-        ReferenceGenome referenceGenome = createReferenceGenome([lengthWithoutN: -5])
+        ReferenceGenome referenceGenome = createReferenceGenome([lengthWithoutN: -5], false)
 
         then:
         !referenceGenome.validate()
@@ -116,7 +113,7 @@ class ReferenceGenomeTests extends Specification implements DomainUnitTest<Refer
 
     void test_ConstraintOnLengthWithoutN_WhenZero_ShouldFail() {
         when:
-        ReferenceGenome referenceGenome = createReferenceGenome([lengthWithoutN: 0])
+        ReferenceGenome referenceGenome = createReferenceGenome([lengthWithoutN: 0], false)
 
         then:
         !referenceGenome.validate()
@@ -124,7 +121,7 @@ class ReferenceGenomeTests extends Specification implements DomainUnitTest<Refer
 
     void test_ConstraintOnLengthWithoutN_WhenPositive_ShouldSucceed() {
         when:
-        ReferenceGenome referenceGenome = createReferenceGenome([lengthWithoutN: 42])
+        ReferenceGenome referenceGenome = createReferenceGenome([lengthWithoutN: 42], false)
 
         then:
         referenceGenome.validate()
@@ -134,7 +131,7 @@ class ReferenceGenomeTests extends Specification implements DomainUnitTest<Refer
 
     void test_ConstraintOnLengthRefChromosomes_WhenNegative_ShouldFail() {
         when:
-        ReferenceGenome referenceGenome = createReferenceGenome([lengthRefChromosomes: -5])
+        ReferenceGenome referenceGenome = createReferenceGenome([lengthRefChromosomes: -5], false)
 
         then:
         !referenceGenome.validate()
@@ -142,7 +139,7 @@ class ReferenceGenomeTests extends Specification implements DomainUnitTest<Refer
 
     void test_ConstraintOnLengthRefChromosomes_WhenZero_ShouldFail() {
         when:
-        ReferenceGenome referenceGenome = createReferenceGenome([lengthRefChromosomes: 0])
+        ReferenceGenome referenceGenome = createReferenceGenome([lengthRefChromosomes: 0], false)
 
         then:
         !referenceGenome.validate()
@@ -150,7 +147,7 @@ class ReferenceGenomeTests extends Specification implements DomainUnitTest<Refer
 
     void test_ConstraintOnLengthRefChromosomes_WhenPositive_ShouldSucceed() {
         when:
-        ReferenceGenome referenceGenome = createReferenceGenome([lengthRefChromosomes: 42])
+        ReferenceGenome referenceGenome = createReferenceGenome([lengthRefChromosomes: 42], false)
 
         then:
         referenceGenome.validate()
@@ -160,7 +157,7 @@ class ReferenceGenomeTests extends Specification implements DomainUnitTest<Refer
 
     void test_ConstraintOnLengthRefChromosomesWithoutN_WhenNegative_ShouldFail() {
         when:
-        ReferenceGenome referenceGenome = createReferenceGenome([lengthRefChromosomesWithoutN: -5])
+        ReferenceGenome referenceGenome = createReferenceGenome([lengthRefChromosomesWithoutN: -5], false)
 
         then:
         !referenceGenome.validate()
@@ -168,7 +165,7 @@ class ReferenceGenomeTests extends Specification implements DomainUnitTest<Refer
 
     void test_ConstraintOnLengthRefChromosomesWithoutN_WhenZero_ShouldFail() {
         when:
-        ReferenceGenome referenceGenome = createReferenceGenome([lengthRefChromosomesWithoutN: 0])
+        ReferenceGenome referenceGenome = createReferenceGenome([lengthRefChromosomesWithoutN: 0], false)
 
         then:
         !referenceGenome.validate()
@@ -176,7 +173,7 @@ class ReferenceGenomeTests extends Specification implements DomainUnitTest<Refer
 
     void test_ConstraintOnLengthRefChromosomesWithoutN_WhenPositive_ShouldSucceed() {
         when:
-        ReferenceGenome referenceGenome = createReferenceGenome([lengthRefChromosomesWithoutN: 42])
+        ReferenceGenome referenceGenome = createReferenceGenome([lengthRefChromosomesWithoutN: 42], false)
 
         then:
         referenceGenome.validate()

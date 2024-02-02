@@ -25,22 +25,11 @@ import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.ngsdata.ToolName
-import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @CompileDynamic
 @Transactional
 class ToolNameService {
-
-    List<ToolName> findAllToolNamesByType(ToolName.Type type) {
-        return ToolName.findAllByType(type)
-    }
-
-    List<String> findAllToolNamesForRNA() {
-        List<String> toolNames = ToolName.findAllByTypeAndNameNotIlike(ToolName.Type.RNA, "GENOME_STAR_INDEX%")*.name
-        toolNames.add(ProjectService.GENOME_STAR_INDEX)
-        return toolNames.sort()
-    }
 
     ToolName findToolNameByNameAndType(String name, ToolName.Type type) {
         return CollectionUtils.atMostOneElement(ToolName.findAllByNameAndType(name, type))

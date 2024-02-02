@@ -26,7 +26,6 @@ import org.codehaus.groovy.transform.trait.Traits
 import org.codenarc.rule.AbstractAstVisitor
 import org.codenarc.rule.AbstractAstVisitorRule
 
-import de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructureBeanName
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 
@@ -46,7 +45,6 @@ class EnumForBeanNameVisitor extends AbstractAstVisitor {
     // [InterfaceName: AllAvailableBeanNames]
     Map<String, List<String>> properties = [
             'SampleIdentifierParser': SampleIdentifierParserBeanName.values()*.beanName as List,
-            'AlignmentDecider'      : AlignmentDeciderBeanName.values()*.beanName as List,
             'DirectoryStructure'    : DirectoryStructureBeanName.values()*.beanName as List,
     ]
 

@@ -25,7 +25,6 @@ import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
@@ -34,6 +33,9 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflowExecution.WorkflowService
+import de.dkfz.tbi.otp.workflowExecution.WorkflowVersionSelectorService
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
@@ -52,6 +54,12 @@ class LibPrepKitAdapterValidator extends AbstractValueTuplesValidator<MetadataVa
 
     @Autowired
     ValidatorHelperService validatorHelperService
+
+    @Autowired
+    WorkflowVersionSelectorService workflowVersionSelectorService
+
+    @Autowired
+    WorkflowService workflowService
 
     @CompileDynamic
     @Override
@@ -103,7 +111,7 @@ class LibPrepKitAdapterValidator extends AbstractValueTuplesValidator<MetadataVa
             RoddyWorkflowConfig config = RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)
 
             if (seqType in SeqTypeService.roddyAlignableSeqTypes &&
-                    project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT &&
+                    workflowVersionSelectorService.findAllByProjectAndWorkflow(project, workflowService.getExactlyOneWorkflow(PanCancerWorkflow.WORKFLOW)) &&
                     config?.adapterTrimmingNeeded) {
                 if (!seqType.isRna() && !kit.adapterFile) {
                     context.addProblem(valueTuple.cells, LogLevel.WARNING, "Adapter trimming is requested but adapter file for library preparation kit '${kit}' is missing.", "Adapter trimming is requested but the adapter file for at least one library preparation kit is missing.")

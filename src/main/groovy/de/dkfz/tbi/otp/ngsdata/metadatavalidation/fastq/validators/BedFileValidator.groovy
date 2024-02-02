@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.extractData.ExtractProjectSampleType
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.extractData.ProjectSampleType
@@ -33,6 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeProjectSeqTypeService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflowExecution.WorkflowVersionSelectorService
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
@@ -48,6 +48,9 @@ class BedFileValidator extends AbstractValueTuplesValidator<MetadataValidationCo
 
     @Autowired
     ValidatorHelperService validatorHelperService
+
+    @Autowired
+    WorkflowVersionSelectorService workflowVersionSelectorService
 
     @Override
     Collection<String> getDescriptions() {
@@ -103,7 +106,7 @@ class BedFileValidator extends AbstractValueTuplesValidator<MetadataValidationCo
         Project project = projectSampleType.project
         SampleType sampleType = projectSampleType.sampleType
 
-        if (project.alignmentDeciderBeanName == AlignmentDeciderBeanName.NO_ALIGNMENT) {
+        if (!workflowVersionSelectorService.hasAlignmentConfigForProjectAndSeqType(project, seqType)) {
             return
         }
 

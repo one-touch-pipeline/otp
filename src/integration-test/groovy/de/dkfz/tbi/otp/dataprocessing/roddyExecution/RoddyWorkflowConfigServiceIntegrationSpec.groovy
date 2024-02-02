@@ -21,94 +21,24 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
-import org.codehaus.groovy.control.io.NullWriter
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.OtpException
 import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.WorkflowConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 @Rollback
 @Integration
 class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
-
-    void "test method loadPanCanConfigAndTriggerAlignment, valid"() {
-        given:
-        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
-        RoddyWorkflowConfigService service = [
-                importProjectConfigFile: { Project a, SeqType b, String c, Pipeline d, String e, String f, String g, boolean h, Individual i -> },
-                getMd5sum: { String s -> HelperUtils.randomMd5sum },
-        ] as RoddyWorkflowConfigService
-
-        when:
-        LogThreadLocal.withThreadLog(NullWriter.DEFAULT) {
-            service.loadPanCanConfigAndTriggerAlignment(roddyBamFile.project, roddyBamFile.seqType, HelperUtils.uniqueString, roddyBamFile.pipeline, HelperUtils.uniqueString, HelperUtils.uniqueString, false, roddyBamFile.individual)
-        }
-
-        then:
-        roddyBamFile.mergingWorkPackage.needsProcessing == true
-        roddyBamFile.withdrawn == true
-    }
-
-    void "test method loadPanCanConfigAndTriggerAlignment no individual should throw exception"() {
-        given:
-        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
-
-        when:
-        new RoddyWorkflowConfigService().loadPanCanConfigAndTriggerAlignment(roddyBamFile.project, roddyBamFile.seqType, HelperUtils.uniqueString, roddyBamFile.pipeline, HelperUtils.uniqueString, HelperUtils.uniqueString, false, null)
-
-        then:
-        AssertionError e = thrown()
-        e.message.contains("The individual is not allowed to be null")
-    }
-
-    void "test method loadPanCanConfigAndTriggerAlignment importProjectConfigFile throws exception"() {
-        given:
-        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
-        RoddyWorkflowConfigService service = [
-                importProjectConfigFile: { Project a, SeqType b, String c, Pipeline d, String e, String f, String g, boolean h, Individual i ->
-                    throw new OtpException("importProjectConfigFile failed")
-                },
-                getMd5sum: { String s -> HelperUtils.randomMd5sum },
-        ] as RoddyWorkflowConfigService
-
-        when:
-        service.loadPanCanConfigAndTriggerAlignment(roddyBamFile.project, roddyBamFile.seqType, HelperUtils.uniqueString, roddyBamFile.pipeline, HelperUtils.uniqueString, HelperUtils.uniqueString, false, roddyBamFile.individual)
-
-        then:
-        OtpException e = thrown()
-        e.message.contains("importProjectConfigFile failed")
-        roddyBamFile.mergingWorkPackage.needsProcessing == false
-        roddyBamFile.withdrawn == false
-    }
-
-    void "test method loadPanCanConfigAndTriggerAlignment no merging work package found"() {
-        given:
-        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
-        RoddyWorkflowConfigService service = [
-                importProjectConfigFile: { Project a, SeqType b, String c, Pipeline d, String e, String f, String g, boolean h, Individual i -> },
-                getMd5sum: { String s -> HelperUtils.randomMd5sum },
-        ] as RoddyWorkflowConfigService
-
-        when:
-        service.loadPanCanConfigAndTriggerAlignment(roddyBamFile.project, DomainFactory.createSeqType(), HelperUtils.uniqueString, roddyBamFile.pipeline, HelperUtils.uniqueString, HelperUtils.uniqueString, false, roddyBamFile.individual)
-
-        then:
-        AssertionError e = thrown()
-        e.message.contains("no MWP found")
-        roddyBamFile.mergingWorkPackage.needsProcessing == false
-        roddyBamFile.withdrawn == false
-    }
 
     static final String TEST_RODDY_SEQ_TYPE_RODDY_NAME = 'roddyName'
     static final String TEST_RODDY_PLUGIN_VERSION_PLUGIN_PART = 'plugin'

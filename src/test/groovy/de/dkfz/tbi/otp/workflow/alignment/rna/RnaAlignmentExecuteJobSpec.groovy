@@ -112,7 +112,6 @@ class RnaAlignmentExecuteJobSpec extends Specification implements DataTest, RnaA
 
         job.roddyConfigValueService.referenceGenomeService = Mock(ReferenceGenomeService) {
             fastaFilePath(roddyBamFile.referenceGenome) >> { new File("/fasta-path") }
-            chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage) >> { new File("/chrom-size-path") }
         }
 
         DomainFactory.createRnaAlignableSeqTypes()

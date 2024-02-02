@@ -26,7 +26,6 @@ import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
@@ -68,33 +67,15 @@ class TriggerAlignmentService {
         }
 
         // Start alignment workflows
-        Collection<SeqTrack> seqTracksInNewWorkflowSystem = LogUsedTimeUtils.logUsedTime(log, "search seqTracks new system") {
-            allDecider.findAllSeqTracksInNewWorkflowSystem(seqTracks)
+        Collection<SeqTrack> alignableSeqTracks = LogUsedTimeUtils.logUsedTime(log, "search seqTracks") {
+            allDecider.findAlignableSeqTracks(seqTracks)
         }
-        Collection<SeqTrack> seqTracksInOldWorkflowSystem = LogUsedTimeUtils.logUsedTime(log, "search seqTracks old system") {
-            seqTracks - seqTracksInNewWorkflowSystem
-        }
-        DeciderResult deciderResult = allDecider.decide(seqTracksInNewWorkflowSystem*.workflowArtefact, [
+        DeciderResult deciderResult = allDecider.decide(alignableSeqTracks*.workflowArtefact, [
                 ignoreSeqPlatformGroup: ignoreSeqPlatformGroup.toString()
         ])
-        Collection<MergingWorkPackage> mergingWorkPackagesNew = deciderResult.newArtefacts.findAll {
+        Collection<MergingWorkPackage> mergingWorkPackages = deciderResult.newArtefacts.findAll {
             it.artefactType == ArtefactType.BAM
         }*.artefact*.get()*.workPackage
-
-        Collection<MergingWorkPackage> mergingWorkPackagesOld = LogUsedTimeUtils.logUsedTimeStartEnd(log, "trigger alignment old system") {
-            seqTracksInOldWorkflowSystem.collectMany {
-                seqTrackService.decideAndPrepareForAlignment(it)
-            }.unique()
-        }
-
-        if (mergingWorkPackagesOld) {
-            deciderResult.infos << "Create ${mergingWorkPackagesOld.size()} alignments with old system".toString()
-            mergingWorkPackagesOld.each {
-                deciderResult.infos << it.toString()
-            }
-        }
-
-        Collection<MergingWorkPackage> mergingWorkPackages = mergingWorkPackagesNew + mergingWorkPackagesOld
 
         if (mergingWorkPackages) {
             LogUsedTimeUtils.logUsedTimeStartEnd(log, "create analyses") {
@@ -112,10 +93,9 @@ class TriggerAlignmentService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<Map<String, String>> createWarningsForMissingAlignmentConfig(Collection<SeqTrack> seqTracks) {
-        Collection<SeqTrack> seqTracksNew = allDecider.findAllSeqTracksInNewWorkflowSystem(seqTracks)
+        Collection<SeqTrack> alignableSeqTracks = allDecider.findAlignableSeqTracks(seqTracks)
 
-        // new system
-        List<Map<String, String>> entries = seqTracksNew.countBy {
+        List<Map<String, String>> entries = alignableSeqTracks.countBy {
             [
                     it.project,
                     it.seqType,
@@ -131,24 +111,6 @@ class TriggerAlignmentService {
                     count  : it.value as String,
             ]
         }
-
-        // old system
-        entries.addAll((seqTracks - seqTracksNew).countBy {
-            [
-                    it.project,
-                    it.seqType,
-            ]
-        }.findAll {
-            !RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(it.key[0], it.key[1]).findAll {
-                it.pipeline.type == Pipeline.Type.ALIGNMENT
-            }
-        }.collect {
-            [
-                    project: ((Project) it.key[0]).name,
-                    seqType: ((SeqType) it.key[1]).displayNameWithLibraryLayout,
-                    count  : it.value as String,
-            ]
-        })
 
         return entries.sort {
             [
@@ -287,14 +249,13 @@ class TriggerAlignmentService {
 
     /**
      * check that for all project seqType speciesWithStrain combination of the seqTracks an ReferenceGenome is configured.
-     * Note: this is only checked for the new workflow system
      */
     @SuppressWarnings("DuplicateNumberLiteral")
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<Map<String, String>> createWarningsForMissingReferenceGenomeConfiguration(Collection<SeqTrack> seqTracks) {
-        Collection<SeqTrack> seqTracksNew = allDecider.findAllSeqTracksInNewWorkflowSystem(seqTracks)
+        Collection<SeqTrack> alignableSeqTracks = allDecider.findAlignableSeqTracks(seqTracks)
 
-        return seqTracksNew.countBy {
+        return alignableSeqTracks.countBy {
             [
                     it.project,
                     it.seqType,

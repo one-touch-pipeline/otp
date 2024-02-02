@@ -27,7 +27,6 @@
     <meta name="layout" content="main"/>
     <title>${g.message(code: 'projectOverview.alignmentInformation.title', args: [selectedProject?.name])}</title>
     <asset:javascript src="common/CommentBox.js"/>
-    <asset:javascript src="pages/alignmentConfigurationOverview/index/functions.js"/>
     <asset:javascript src="taglib/EditorSwitch.js"/>
 </head>
 <body>
@@ -56,32 +55,6 @@
             </otp:annotation>
         </g:if>
         <div>
-            <sec:ifAllGranted roles="ROLE_OPERATOR">
-                <h2><g:message code="projectOverview.alignmentInformation.configureRoddy"/></h2>
-                <otp:annotation type="info">The configuration for the new system moved to the <g:link controller="workflowSelection">workflow selection page</g:link>.</otp:annotation>
-
-                <div class="show_button">
-                    <ul>
-                        <g:each in="${roddySeqTypes}" var="seqType">
-                            <li>
-                                <g:if test="${seqType.isRna()}">
-                                    <g:link controller='configurePipeline' action='rnaAlignment' params='["seqType.id": seqType.id]'
-                                            class="configure">
-                                        ${seqType.displayNameWithLibraryLayout}
-                                    </g:link>
-                                </g:if>
-                                <g:else>
-                                    <g:link controller='configurePipeline' action='alignment' params='["seqType.id": seqType.id]'
-                                            class="configure">
-                                        ${seqType.displayNameWithLibraryLayout}
-                                    </g:link>
-                                </g:else>
-                            </li>
-                        </g:each>
-                    </ul>
-                </div>
-            </sec:ifAllGranted>
-
             <g:if test="${alignmentInfo}">
                 <h2>${g.message(code: 'projectOverview.alignmentInformation.tool.configuration')}</h2>
                 <div class="fixed-table-header">
@@ -101,18 +74,6 @@
                     </table>
                 </div>
             </g:if>
-
-            <h2>${g.message(code: 'projectOverview.alignmentInformation.tool.configuration.old')}</h2>
-            <div id="alignment_info" class="fixed-table-header">
-                <table style="visibility: hidden" id="alignment_info_table">
-                    <tr>
-                        <th>${g.message(code: 'projectOverview.alignmentInformation.tool')}</th>
-                        <th>${g.message(code: 'projectOverview.alignmentInformation.version')}</th>
-                        <th>${g.message(code: 'projectOverview.alignmentInformation.arguments')}</th>
-                    </tr>
-
-                </table>
-            </div>
         </div>
 
         <div class="fixed-table-header">
@@ -142,21 +103,6 @@
                 </g:each>
             </table>
         </div>
-
-        <div class="otpDataTables fixed-table-header">
-            <h2>${g.message(code: 'projectOverview.listReferenceGenome.title')}</h2>
-            <otp:annotation type="info">The configuration for the new system moved to the <g:link controller="workflowSelection">workflow selection page</g:link>.</otp:annotation>
-            <otp:dataTable
-                    codes="${[
-                            'projectOverview.index.referenceGenome.sequenceTypeName',
-                            'projectOverview.index.referenceGenome.sampleTypeName',
-                            'projectOverview.index.referenceGenome',
-                            'projectOverview.index.statSizeFile',
-                            'projectOverview.index.adapterTrimming',
-                    ]}"
-                    id="listReferenceGenome"/>
-        </div>
-        <br>
     </div>
 </body>
 </html>

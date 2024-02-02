@@ -48,38 +48,6 @@ class RoddyWorkflowConfigService {
     WorkflowConfigService workflowConfigService
     ConfigService configService
 
-    @SuppressWarnings('Println') // The method is written for scripts, so it needs the output in stdout
-    void loadPanCanConfigAndTriggerAlignment(Project project, SeqType seqType, String programVersionToUse, Pipeline pipeline, String configFilePath,
-                                             String configVersion, boolean adapterTrimmingNeeded, Individual individual) {
-        assert individual : "The individual is not allowed to be null"
-
-        RoddyBamFile.withTransaction {
-            importProjectConfigFile(project, seqType, programVersionToUse, pipeline, configFilePath, configVersion, getMd5sum(configFilePath),
-                    adapterTrimmingNeeded, individual)
-
-            List<MergingWorkPackage> mergingWorkPackages = MergingWorkPackage.createCriteria().list {
-                eq('seqType', seqType)
-                eq('pipeline', pipeline)
-                sample {
-                    eq('individual', individual)
-                }
-            }
-
-            assert mergingWorkPackages : "no MWP found"
-
-            println "Old roddyBamFiles are marked as withdrawn"
-            RoddyBamFile.findAllByWorkPackageInList(mergingWorkPackages)*.withdraw()
-
-            println "Realignment will be triggered for bam files of ${individual}"
-            mergingWorkPackages*.needsProcessing = true
-            mergingWorkPackages*.save(flush: true)
-        }
-    }
-
-    protected String getMd5sum(String configFilePath) {
-        return new File(configFilePath).text.encodeAsMD5() as String
-    }
-
     RoddyWorkflowConfig importProjectConfigFile(Project project, SeqType seqType, String programVersionToUse, Pipeline pipeline, String configFilePath,
                                                 String configVersion, String md5sum, boolean adapterTrimmingNeeded = false, Individual individual = null) {
         assert project : "The project is not allowed to be null"

@@ -22,11 +22,9 @@
 package de.dkfz.tbi.otp.ngsdata.referencegenome
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileDynamic
 
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeIndex
 
-@CompileDynamic
 @Transactional
 class ReferenceGenomeIndexService {
     ReferenceGenomeService referenceGenomeService
@@ -41,17 +39,5 @@ class ReferenceGenomeIndexService {
     private File getBasePath(ReferenceGenomeIndex referenceGenomeIndex) {
         return new File(new File(referenceGenomeService.referenceGenomeDirectory(referenceGenomeIndex.referenceGenome, false),
                 REFERENCE_GENOME_INDEX_PATH_COMPONENT), referenceGenomeIndex.toolName.path)
-    }
-
-    ReferenceGenomeIndex findById(long id) {
-        return ReferenceGenomeIndex.get(id)
-    }
-
-    List<ReferenceGenomeIndex> findAllByReferenceGenome(ReferenceGenome referenceGenome) {
-        return ReferenceGenomeIndex.findAllByReferenceGenome(referenceGenome)
-    }
-
-    List<ReferenceGenomeIndex> findAllByReferenceGenomeAndToolName(ReferenceGenome refGenome, ToolName toolName) {
-        return ReferenceGenomeIndex.findAllByReferenceGenomeAndToolName(refGenome, toolName)
     }
 }

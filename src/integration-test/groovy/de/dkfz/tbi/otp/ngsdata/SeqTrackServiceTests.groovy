@@ -21,14 +21,13 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
-import org.junit.After
+import grails.testing.mixin.integration.Integration
 import org.junit.Test
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.dataprocessing.ExternalMergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 
 @Rollback
 @Integration
@@ -36,38 +35,8 @@ class SeqTrackServiceTests {
 
     SeqTrackService seqTrackService
 
-    TestData testData
-
-    File dataPath
-    File mdPath
-    SeqType alignableSeqType
-
-    void setupData() {
-        dataPath = TestCase.uniqueNonExistentPath
-        mdPath = TestCase.uniqueNonExistentPath
-        testData = new TestData()
-        alignableSeqType = DomainFactory.createDefaultOtpAlignableSeqTypes().first()
-    }
-
-    @After
-    void tearDown() {
-        TestCase.cleanTestDirectory()
-        testData = null
-    }
-
-    @Test
-    void testDecideAndPrepareForAlignment_noAlignmentDecider_shouldReturnEmptyList() {
-        setupData()
-        SeqTrack seqTrack = setupSeqTrackProjectAndRawSequenceFile()
-
-        Collection<MergingWorkPackage> workPackages = seqTrackService.decideAndPrepareForAlignment(seqTrack)
-
-        assert workPackages.empty
-    }
-
     @Test
     void testReturnExternallyProcessedBamFiles_InputIsNull_ShouldFail() {
-        setupData()
         TestCase.shouldFail(IllegalArgumentException) {
             seqTrackService.returnExternallyProcessedBamFiles(null)
         }
@@ -75,7 +44,6 @@ class SeqTrackServiceTests {
 
     @Test
     void testReturnExternallyProcessedBamFiles_InputIsEmpty_ShouldFail() {
-        setupData()
         TestCase.shouldFail(AssertionError) {
             seqTrackService.returnExternallyProcessedBamFiles([])
         }
@@ -83,14 +51,12 @@ class SeqTrackServiceTests {
 
     @Test
     void testReturnExternallyProcessedBamFiles_NoExternalBamFileAttached_AllFine() {
-        setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         assert seqTrackService.returnExternallyProcessedBamFiles([seqTrack]).isEmpty()
     }
 
     @Test
     void testReturnExternallyProcessedBamFiles_ExternalBamFileAttached_AllFine() {
-        setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         ExternalMergingWorkPackage externalMergingWorkPackage = DomainFactory.createExternalMergingWorkPackage(
                 seqType: seqTrack.seqType,
@@ -100,35 +66,5 @@ class SeqTrackServiceTests {
                 workPackage: externalMergingWorkPackage,
         ).save(flush: true)
         assert [bamFile] == seqTrackService.returnExternallyProcessedBamFiles([seqTrack])
-    }
-
-    private static SeqTrack setupSeqTrackProjectAndRawSequenceFile() {
-        SeqTrack seqTrack = DomainFactory.createSeqTrack(
-                seqType: DomainFactory.createDefaultOtpAlignableSeqTypes().first(),
-        )
-
-        SeqPlatform sp = seqTrack.seqPlatform
-        sp.save(flush: true)
-
-        DomainFactory.createMergingCriteriaLazy(
-                project: seqTrack.project,
-                seqType: seqTrack.seqType,
-        )
-
-        DomainFactory.createReferenceGenomeProjectSeqType(
-                project: seqTrack.project,
-                seqType: seqTrack.seqType,
-        ).save(flush: true)
-
-        DomainFactory.createSequenceDataFile(
-                seqTrack: seqTrack,
-                fileWithdrawn: false,
-                fileExists: true,
-                fileSize: 1L,
-        ).save(flush: true)
-
-        Project project = seqTrack.project
-        project.save(flush: true)
-        return seqTrack
     }
 }

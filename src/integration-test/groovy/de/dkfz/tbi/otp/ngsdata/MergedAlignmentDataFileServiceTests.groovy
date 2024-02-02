@@ -21,26 +21,26 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.Test
+
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 
 import static org.junit.Assert.assertEquals
 
 @Rollback
 @Integration
-class MergedAlignmentDataFileServiceTests {
+class MergedAlignmentDataFileServiceTests implements DomainFactoryCore {
 
     MergedAlignmentDataFileService mergedAlignmentDataFileService
 
     @Test
     void testBuildRelativePath() {
-        TestData testData = new TestData()
-        testData.createObjects()
-        SeqType seqType = testData.seqType
-        Sample sample = testData.sample
+        SeqType seqType = DomainFactory.createRnaPairedSeqType()
+        Sample sample = createSample()
 
-        String expectedPath = "${testData.project.dirName}/sequencing/rna_sequencing/view-by-pid/654321/tumor/paired/merged-alignment/"
+        String expectedPath = "${sample.project.dirName}/sequencing/rna_sequencing/view-by-pid/${sample.individual.pid}/${sample.sampleType.dirName}/paired/merged-alignment/"
         String actualPath = mergedAlignmentDataFileService.buildRelativePath(seqType, sample)
 
         assertEquals(expectedPath, actualPath)

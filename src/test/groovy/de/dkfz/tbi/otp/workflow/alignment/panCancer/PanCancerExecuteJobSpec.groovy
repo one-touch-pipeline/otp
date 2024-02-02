@@ -101,7 +101,6 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, PanCanc
         job.roddyConfigValueService = new RoddyConfigValueService()
         job.roddyConfigValueService.referenceGenomeService = Mock(ReferenceGenomeService) {
             fastaFilePath(roddyBamFile.referenceGenome) >> { new File("/fasta-path") }
-            chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage) >> { new File("/chrom-size-path") }
         }
         job.roddyConfigValueService.rawSequenceDataViewFileService = new RawSequenceDataViewFileService()
         job.roddyConfigValueService.rawSequenceDataViewFileService.individualService = Mock(IndividualService) {
