@@ -46,13 +46,13 @@ variables:
 #----------------------------
 
 stages:
+  - build
   - test
   - war
   - codestyle
   - scanning
   - doc
   - public doc
-  - build
   - update merge request
   - trigger deployment
 
@@ -66,6 +66,7 @@ stages:
           - $CI_PROJECT_DIR/gradle/wrapper/gradle-wrapper.properties
       paths:
         - $GRADLE_USER_HOME/wrapper/
+      policy: pull
     gradle-cache:
       #caches created by gradle
       key:
@@ -75,6 +76,15 @@ stages:
           - $CI_PROJECT_DIR/gradle.properties
       paths:
         - $GRADLE_USER_HOME/caches/
+    gradle-pipeline-cache:
+      #cache of gradle build cache
+      key:
+        prefix: gradle-build-cache-$CI_PIPELINE_ID
+        files:
+          - $CI_PROJECT_DIR/gradle/wrapper/gradle-wrapper.properties
+      paths:
+        - $GRADLE_USER_HOME/caches/build-cache-1/
+      policy: pull
     npm:
       #cache of npm libraries
       key:
@@ -114,11 +124,28 @@ stages:
 .abstract_base_template:
   dependencies: [ ]
   needs: [ ]
+  cache: [ ]
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+  artifacts: &artifacts_template
+    expire_in: 4 week
+  before_script:
+    - set -e
+    - devScripts/gitlab-ci/init.sh
+
+
+.abstract_base_template_with_cache:
+  extends: .abstract_base_template
+  dependencies:
+    - build gradle
+  needs:
+    - build gradle
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
   cache:
     - !reference [ .shared, cache, gradle-wrapper]
     - !reference [ .shared, cache, gradle-cache]
+    - !reference [ .shared, cache, gradle-pipeline-cache]
   artifacts: &artifacts_template
     expire_in: 4 week
   before_script:
@@ -127,7 +154,7 @@ stages:
 
 
 .abstract_test_template:
-  extends: .abstract_base_template
+  extends: .abstract_base_template_with_cache
   stage: test
   rules:
     - !reference [ .shared, rules-test ]
@@ -141,6 +168,28 @@ stages:
     reports:
       junit: build/test-results/*/*.xml
     when: always
+
+
+# ------------------------------------------------------
+# jobs stage build
+# ------------------------------------------------------
+
+build gradle:
+  extends: .abstract_base_template
+  stage: build
+  cache:
+    - key: !reference [ .shared, cache, gradle-wrapper, key]
+      paths: !reference [ .shared, cache, gradle-wrapper, paths]
+      policy: pull-push
+    - !reference [ .shared, cache, gradle-cache]
+    - key: !reference [ .shared, cache, gradle-pipeline-cache, key]
+      paths: !reference [ .shared, cache, gradle-pipeline-cache, paths]
+      policy: pull-push
+  script:
+    - set -e
+    # compile also all tests
+    - ./gradlew --build-cache classes testHelperClasses testClasses integrationTestClasses workflowTestClasses
+
 
 # ------------------------------------------------------
 # jobs stage scanning
@@ -182,12 +231,14 @@ integration tests:
 
 
 test coverage:
-  extends: .abstract_base_template
+  extends: .abstract_base_template_with_cache
   stage: test
   needs:
+    - build gradle
     - unit tests
     - integration tests
   dependencies:
+    - build gradle
     - unit tests
     - integration tests
   coverage: '/Instruction Coverage: (\d+(?:\.\d+)?)%/'
@@ -210,7 +261,7 @@ test coverage:
 
 
 test migration:
-  extends: .abstract_base_template
+  extends: .abstract_base_template_with_cache
   stage: test
   services:
     - postgres:14.9-bullseye
@@ -234,8 +285,9 @@ test migration:
       - migrations/changelogs/*/testing.groovy
     when: on_failure
 
+
 cypress tests:
-  extends: .abstract_base_template
+  extends: .abstract_base_template_with_cache
   stage: test
   rules:
     - if: $ENABLE_CYPRESS == "false"
@@ -270,7 +322,6 @@ cypress tests:
           - package-lock.json
           - .gitlab-ci-core.yml
           - devScripts/gitlab-ci/cypress/**/*
-  stage: test
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
@@ -289,16 +340,17 @@ cypress tests:
       - logs/
     when: always
   cache:
-    - !reference [ .shared,  cache, gradle-wrapper]
-    - !reference [ .shared,  cache, gradle-cache]
-    - !reference [ .shared,  cache, npm]
+    - !reference [ .shared, cache, gradle-wrapper]
+    - !reference [ .shared, cache, gradle-cache]
+    - !reference [ .shared, cache, gradle-pipeline-cache]
+    - !reference [ .shared, cache, npm]
 
 # ------------------------------------------------------
 # jobs stage codestyle
 # ------------------------------------------------------
 
 codenarc:
-  extends: .abstract_base_template
+  extends: .abstract_base_template_with_cache
   stage: codestyle
   script:
     - set -e
@@ -336,7 +388,7 @@ eslint:
 # ------------------------------------------------------
 
 create war:
-  extends: .abstract_base_template
+  extends: .abstract_base_template_with_cache
   stage: war
   script:
     - devScripts/gitlab-ci/createWar.sh
