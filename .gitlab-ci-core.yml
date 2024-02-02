@@ -327,6 +327,7 @@ cypress tests:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
     HOST_IP: "0.0.0.0"
+    GRADLE_OPTS: '-Xms1g -Xmx4g -Dorg.gradle.daemon=true'
   services:
     - name: docker:dind
       alias: openssh-server
@@ -345,6 +346,27 @@ cypress tests:
     - !reference [ .shared, cache, gradle-cache]
     - !reference [ .shared, cache, gradle-pipeline-cache]
     - !reference [ .shared, cache, npm]
+  parallel:
+    matrix:
+      - SUITE:
+          - "overview"
+          - "project"
+          - "operatorAndAdminPages"
+          - "workflowSystem"
+          - "others"
+
+
+# This job checks, that all cypress suites (directories in cypress/e2e/) are defined in the ci job 'cypress tests'
+check cypress suite configured for ci:
+  dependencies: [ ]
+  needs: [ ]
+  stage: test
+  rules:
+    - !reference [ cypress tests,  rules]
+  script:
+    - set -e
+    - devScripts/gitlab-ci/cypress/check-suite-configured-for-ci.sh
+
 
 # ------------------------------------------------------
 # jobs stage codestyle

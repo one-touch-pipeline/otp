@@ -5,7 +5,7 @@
     "lint-export": "npm run lint -- -f html -o ./build/reports/eslint/lint.html",
     "cy-run": "cypress run",
     "cy-open": "npx cypress open",
-    "cy-wait": "start-server-and-test './gradlew --build-cache bootRun' 'http-get://localhost:8080/health' cy-run"
+    "cy-wait": "start-server-and-test './gradlew --build-cache bootRun' 'http-get://localhost:8080/health' './gradlew --build-cache runCypressTests' "
   },
   "devDependencies": {
     "cypress": "~13.6.4",
