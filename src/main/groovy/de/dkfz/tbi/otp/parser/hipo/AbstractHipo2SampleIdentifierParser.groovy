@@ -100,13 +100,13 @@ abstract class AbstractHipo2SampleIdentifierParser implements SampleIdentifierPa
             } else {
                 assert false: 'may not occur'
             }
-
             return new DefaultParsedSampleIdentifier(
                     projectName,
                     matcher.group('pid'),
                     realSampleTypeName,
                     sampleIdentifier,
-                    hipoTissueType.specificReferenceGenome
+                    hipoTissueType.specificReferenceGenome,
+                    null,
             )
         }
         return null

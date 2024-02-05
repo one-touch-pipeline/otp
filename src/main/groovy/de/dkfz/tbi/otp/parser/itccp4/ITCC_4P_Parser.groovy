@@ -104,6 +104,7 @@ class ITCC_4P_Parser implements SampleIdentifierParser {
                     sampleType,
                     sampleIdentifier,
                     specificReferenceGenome,
+                    null,
             )
         }
         return null

@@ -28,7 +28,7 @@ class TestSampleIdentifierParser implements SampleIdentifierParser {
     ParsedSampleIdentifier tryParse(String sampleIdentifier) {
         Matcher match = sampleIdentifier =~ /(.*)#(.*)#(.*)/
         if (match.matches()) {
-            return new DefaultParsedSampleIdentifier(match.group(1), match.group(2), match.group(3), sampleIdentifier, null)
+            return new DefaultParsedSampleIdentifier(match.group(1), match.group(2), match.group(3), sampleIdentifier, null, null)
         }
         return null
     }

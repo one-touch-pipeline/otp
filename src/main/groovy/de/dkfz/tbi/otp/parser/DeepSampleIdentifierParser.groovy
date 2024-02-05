@@ -41,6 +41,7 @@ class DeepSampleIdentifierParser implements SampleIdentifierParser {
                     "Replicate${replicateNumber}",
                     sampleIdentifier,
                     SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT,
+                    null
             )
         }
         return null

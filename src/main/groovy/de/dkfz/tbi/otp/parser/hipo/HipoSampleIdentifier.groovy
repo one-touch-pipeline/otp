@@ -25,6 +25,7 @@ import groovy.transform.TupleConstructor
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome
+import de.dkfz.tbi.otp.ngsdata.SampleTypePerProject
 import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
 import de.dkfz.tbi.otp.parser.SampleIdentifierParser
 
@@ -149,7 +150,12 @@ class HipoSampleIdentifier implements ParsedSampleIdentifier {
         return "${pid}-${tissueType.key}${sampleNumber}-${analyteTypeAndNumber}"
     }
 
-    /**
+    @Override
+    @SuppressWarnings("GetterMethodCouldBeProperty")
+    SampleTypePerProject.Category getSampleTypeCategory() {
+        return null
+    }
+/**
      * The sample type name as it appears in the database, i.e. the tissue type name, followed by
      * the {@link #sampleNumber} if different from 1 or for project 35.
      * Example: TUMOR03

@@ -46,6 +46,7 @@ class Covid19SampleIdentifierParser implements SampleIdentifierParser {
                     buildSampleTypeDbName(matcher),
                     sampleIdentifier,
                     SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT,
+                    null,
             )
         }
         return null

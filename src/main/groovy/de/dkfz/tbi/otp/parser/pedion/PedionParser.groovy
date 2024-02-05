@@ -108,6 +108,7 @@ class PedionParser implements SampleIdentifierParser {
                     sampleType,
                     fullIdentifier,
                     specificReferenceGenome,
+                    null,
             )
         }
         return null

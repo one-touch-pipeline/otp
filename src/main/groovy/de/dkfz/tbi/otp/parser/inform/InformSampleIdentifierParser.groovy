@@ -46,6 +46,7 @@ class InformSampleIdentifierParser implements SampleIdentifierParser {
                     buildSampleTypeDbName(matcher),
                     sampleIdentifier,
                     InformTissueType.fromKey(matcher.group('tissueTypeKey')).specificReferenceGenome,
+                    null,
             )
         }
         return null

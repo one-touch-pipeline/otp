@@ -43,6 +43,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
 
     private static final Delimiter DEFAULT_DELIMITER = Delimiter.COMMA
     private static final SampleType.SpecificReferenceGenome DEFAULT_SPECIFIC_REF_GEN = SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+    private static final SampleTypePerProject.Category DEFAULT_CATEGORY = SampleTypePerProject.Category.DISEASE
     private static final String HEADER = SampleIdentifierService.BulkSampleCreationHeader.getHeaders(DEFAULT_DELIMITER)
     private static final String SAMPLE_IDENTIFIER_NAME = "New name"
 
@@ -55,6 +56,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
                 Sample,
                 SampleIdentifier,
                 SampleType,
+                SampleTypePerProject,
         ]
     }
 
@@ -63,7 +65,10 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
             return properties[key] ?: HelperUtils.uniqueString.toLowerCase()
         }
         return new DefaultParsedSampleIdentifier(get('projectName'), get('pid'), get('sampleTypeDbName'), get('fullSampleName'),
-                properties.containsKey('useSpecificReferenceGenome') ? properties.useSpecificReferenceGenome : DEFAULT_SPECIFIC_REF_GEN)
+                (properties.containsKey('useSpecificReferenceGenome') ?
+                        properties.useSpecificReferenceGenome : DEFAULT_SPECIFIC_REF_GEN) as SampleType.SpecificReferenceGenome,
+                (properties.containsKey('useSampleTypeCategory') ?
+                properties.useSampleTypeCategory : DEFAULT_CATEGORY) as SampleTypePerProject.Category)
     }
 
     void "test findProject, when project exists, should return it"() {

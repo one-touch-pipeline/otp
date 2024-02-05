@@ -141,7 +141,7 @@ class MultipleImportValidatorIntegrationSpec extends Specification implements Do
                     _ * parseSampleIdentifier(_, _) >> { String sampleIdentifier, Project project ->
                         String[] split = sampleIdentifier.split(';')
                         if (split.length == 4) {
-                            return new DefaultParsedSampleIdentifier(split[0], split[1], split[2], split[3], SampleType.SpecificReferenceGenome.UNKNOWN)
+                            return new DefaultParsedSampleIdentifier(split[0], split[1], split[2], split[3], SampleType.SpecificReferenceGenome.UNKNOWN, null)
                         }
                         return null
                     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -173,7 +173,16 @@ class SampleIdentifierService {
     Sample findOrSaveSample(ParsedSampleIdentifier identifier) {
         Individual individual = findOrSaveIndividual(identifier)
         SampleType sampleType = findOrSaveSampleType(identifier)
-
+        SampleTypePerProject.Category category = identifier.sampleTypeCategory
+        if (category) {
+            if (SampleTypePerProject.findAllByProjectAndSampleType(individual.project, sampleType).empty) {
+                new SampleTypePerProject(
+                        project: individual.project,
+                        sampleType: sampleType,
+                        category: category
+                ).save(flush: true)
+            }
+        }
         Sample sample = CollectionUtils.atMostOneElement(Sample.findAllByIndividualAndSampleType(individual, sampleType))
         if (sample) {
             return sample

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.parser
 import groovy.transform.Immutable
 
 import de.dkfz.tbi.otp.ngsdata.SampleType
+import de.dkfz.tbi.otp.ngsdata.SampleTypePerProject
 
 @Immutable
 class DefaultParsedSampleIdentifier implements ParsedSampleIdentifier {
@@ -34,4 +35,5 @@ class DefaultParsedSampleIdentifier implements ParsedSampleIdentifier {
     String fullSampleName
 
     SampleType.SpecificReferenceGenome useSpecificReferenceGenome
+    SampleTypePerProject.Category sampleTypeCategory
 }

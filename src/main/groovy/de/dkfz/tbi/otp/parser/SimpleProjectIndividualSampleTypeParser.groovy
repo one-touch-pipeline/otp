@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.parser
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.SampleType
+import de.dkfz.tbi.otp.ngsdata.SampleTypePerProject
 
 import java.util.regex.Matcher
 
@@ -45,6 +46,7 @@ class SimpleProjectIndividualSampleTypeParser implements SampleIdentifierParser 
                 sampleType,
                 matcher.group('displayedSampleIdentifier'),
                 getSpecificReferenceGenomeFromSampleType(sampleType),
+                matcher.group('sampleTypeCategory') as SampleTypePerProject.Category,
         )
     }
 
@@ -64,6 +66,7 @@ class SimpleProjectIndividualSampleTypeParser implements SampleIdentifierParser 
                 "\\[(?<pid>${pidRegex})\\]" +
                 "\\[(?<sampleType>${sampleType})\\]" +
                 "\\[(?<displayedSampleIdentifier>${displayedSampleIdentifier})\\]" +
+                "(\\[(?<sampleTypeCategory>${displayedSampleTypeCategory})\\])?" +
                 /$/
     }
 
@@ -77,6 +80,10 @@ class SimpleProjectIndividualSampleTypeParser implements SampleIdentifierParser 
 
     private static String getSampleType() {
         return "[+A-Za-z0-9-]+"
+    }
+
+    private static String getDisplayedSampleTypeCategory() {
+        return "(UNDEFINED|DISEASE|CONTROL|IGNORED)?"
     }
 
     private static SampleType.SpecificReferenceGenome getSpecificReferenceGenomeFromSampleType(String sampleType) {
