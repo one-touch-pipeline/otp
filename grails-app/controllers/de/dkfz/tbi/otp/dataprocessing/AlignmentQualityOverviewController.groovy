@@ -165,6 +165,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
             'alignment.quality.date',
     ].asImmutable()
 
+    AlignmentQualityOverviewService alignmentQualityOverviewService
     CellRangerConfigurationService cellRangerConfigurationService
     CellRangerService cellRangerService
     FileService fileService
@@ -339,14 +340,12 @@ class AlignmentQualityOverviewController implements CheckAndCall {
         }
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#roddyResult.project, 'OTP_READ_ACCESS')")
     def viewConfigFile(RoddyBamFile roddyResult, String to) {
-        Path workDir = roddyResultServiceFactoryService.getService(roddyResult).getWorkDirectory(roddyResult)
-        Path configFile = roddyConfigService.getConfigFile(workDir)
+        byte[] content = alignmentQualityOverviewService.fetchConfigFileContent(roddyResult)
 
-        if (fileService.fileIsReadable(configFile)) {
+        if (content) {
             render(
-                    file: configFile.bytes,
+                    file: content,
                     contentType: "text/plain",
                     fileName: (to == 'DOWNLOAD') ? "config.txt" : null,
             )
