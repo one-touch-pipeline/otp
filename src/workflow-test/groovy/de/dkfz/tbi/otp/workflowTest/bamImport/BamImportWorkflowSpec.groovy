@@ -133,7 +133,7 @@ class BamImportWorkflowSpec extends AbstractWorkflowSpec implements ExternalBamF
         SessionUtils.withTransaction {
             bamFile = createBamFile([
                     importedFrom: bamFilePath,
-                    fileName: bamFilePath.fileName,
+                    fileName    : bamFilePath.fileName,
                     furtherFiles: FURTHER_FILES_LINKED,
             ])
             bamImportInstance = createImportInstance([
@@ -150,28 +150,39 @@ class BamImportWorkflowSpec extends AbstractWorkflowSpec implements ExternalBamF
         Path realDir = additionalDataDirectory.resolve("real")
         Path linkDir = additionalDataDirectory.resolve("link")
 
-        // step 1; copy bam and bai files
+        Path bamPath = prepareFileSystemCopyBamBai(orgName, realDir)
+
+        String bamFileName = prepareFileSystemLinkBamBai(bamPath, linkDir, realDir)
+
+        prepareFileSystemCreateAndLinkFurtherFiles(realDir, linkDir)
+
+        realBamFilePath = realDir.resolve(bamFileName)
+        linkBamFilePath = linkDir.resolve(bamFileName)
+    }
+
+    private Path prepareFileSystemCopyBamBai(String orgName, Path realDir) {
         Path bamPath = referenceDataDirectory.resolve(orgName)
         Path baiPath = referenceDataDirectory.resolve(orgName + ".bai")
         fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(realDir)
         remoteShellHelper.executeCommandReturnProcessOutput("cp ${bamPath} ${baiPath} ${realDir}").assertExitCodeZeroAndStderrEmpty()
+        return bamPath
+    }
 
-        // step 2; link bam and bai files
+    private String prepareFileSystemLinkBamBai(Path bamPath, Path linkDir, Path realDir) {
         String bamFileName = bamPath.fileName
         String baiFileName = "${bamFileName}.bai"
-        [ bamFileName, baiFileName ].each { String filePath ->
+        [bamFileName, baiFileName].each { String filePath ->
             fileService.createLink(linkDir.resolve(filePath), realDir.resolve(filePath))
         }
+        return bamFileName
+    }
 
-        // step 3: further files
+    private void prepareFileSystemCreateAndLinkFurtherFiles(Path realDir, Path linkDir) {
         ALL_FILES.each { String filePath ->
             fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(realDir.resolve(filePath))
             fileService.createFileWithContent(realDir.resolve(filePath), "dummy", FileService.DEFAULT_FILE_PERMISSION, true)
             fileService.createLink(linkDir.resolve(filePath), realDir.resolve(filePath))
         }
-
-        realBamFilePath = realDir.resolve(bamFileName)
-        linkBamFilePath = linkDir.resolve(bamFileName)
     }
 
     protected void setupWorkflow(int expectedWorkflows = 1) {
@@ -189,7 +200,7 @@ class BamImportWorkflowSpec extends AbstractWorkflowSpec implements ExternalBamF
     }
 
     @Unroll
-    void "testImportProcess_FilesHaveToBeCopied"() {
+    void "test BamImport, when COPY_AND_KEEP and #name, then copy files and do not adapt source"() {
         given:
         bamFilePath = bamImportPath()
         initBamImportInstance(BamImportInstance.LinkOperation.COPY_AND_KEEP)
@@ -205,10 +216,12 @@ class BamImportWorkflowSpec extends AbstractWorkflowSpec implements ExternalBamF
         sourceLinked | bamImportPath
         false        | { realBamFilePath }
         true         | { linkBamFilePath }
+
+        name = (sourceLinked ? "source is linked" : "source is real file")
     }
 
     @Unroll
-    void "testImportProcess_FilesHaveToBeCopiedLinkedAndDeleted"() {
+    void "test BamImport, when COPY_AND_LINK and #name, then copy files and link source to copied files"() {
         given:
         bamFilePath = bamImportPath()
         initBamImportInstance(BamImportInstance.LinkOperation.COPY_AND_LINK)
@@ -224,10 +237,12 @@ class BamImportWorkflowSpec extends AbstractWorkflowSpec implements ExternalBamF
         sourceLinked | bamImportPath
         false        | { realBamFilePath }
         true         | { linkBamFilePath }
+
+        name = (sourceLinked ? "source is linked" : "source is real file")
     }
 
     @Unroll
-    void "testImportProcess_FilesHaveToBeLink"() {
+    void "test BamImport, when LINK_SOURCE and #name, then link source into uuid"() {
         given:
         bamFilePath = bamImportPath()
         initBamImportInstance(BamImportInstance.LinkOperation.LINK_SOURCE)
@@ -251,6 +266,8 @@ class BamImportWorkflowSpec extends AbstractWorkflowSpec implements ExternalBamF
         sourceLinked | bamImportPath
         false        | { realBamFilePath }
         true         | { linkBamFilePath }
+
+        name = (sourceLinked ? "source is linked" : "source is real file")
     }
 
     @SuppressWarnings("InvertedIfElse")
@@ -260,50 +277,70 @@ class BamImportWorkflowSpec extends AbstractWorkflowSpec implements ExternalBamF
             assert bamImportInstance.externallyProcessedBamFiles.size() == 1
 
             bamImportInstance.externallyProcessedBamFiles.each { ExternallyProcessedBamFile bamFile ->
-                assert bamFile.maximumReadLength == 100
-                assert bamFile.fileSize > 0
-                assert bamFile.fileOperationStatus == AbstractBamFile.FileOperationStatus.PROCESSED
+                assertBamProperties(bamFile)
 
-                // Check the UUID files which are all real files except in the 3. testcase
-                // In 3. testcase some files are not directly linked since its directory is linked
                 Path uuidDir = externallyProcessedBamFileService.getImportFolder(bamFile, PathOption.REAL_PATH)
-                ([
-                        bamFile.bamFileName,
-                        bamFile.baiFileName,
-                ] + ALL_FILES).each {
-                    Path path = uuidDir.resolve(it)
-                    fileService.ensureFileIsReadableAndNotEmpty(path)
-                    if (bamImportInstance.linkOperation == BamImportInstance.LinkOperation.LINK_SOURCE) {
-                        if (isSourceLinked) { // x == 2: all files are symbolic links since source of import dir is linked
-                            assert Files.isSymbolicLink(path)
-                        } else { // x == 1: some files are not linked since its directory in real is linked
-                            if (!(it in FURTHER_FILES_LINKED + [bamFile.bamFileName, bamFile.baiFileName])) {
-                                assert !Files.isSymbolicLink(path)
-                            } else {
-                                assert Files.isSymbolicLink(path)
-                            }
-                        }
-                    } else {
-                        assert !Files.isSymbolicLink(path)
-                    }
-                }
+
+                assertUuidPaths(bamFile, uuidDir, isSourceLinked)
 
                 // Check ViewByPid directory in which all files are links to the uuid folder
-                Path viewByPidDir = externallyProcessedBamFileService.getImportFolder(bamFile)
-                ([
-                    bamFile.bamFileName,
-                    bamFile.baiFileName,
-                ] + FURTHER_FILES_LINKED).each {
-                    Path path = viewByPidDir.resolve(it)
-                    if (it.endsWithAny("directory1", "directory2")) {
-                        fileService.ensureDirIsReadable(path)
-                    } else {
-                        fileService.ensureFileIsReadableAndNotEmpty(path)
-                    }
-                    assert Files.isSymbolicLink(path)
-                    assert uuidDir.resolve(it).toRealPath() == path.toRealPath()
-                }
+                assertViewByPidStructure(bamFile, uuidDir)
             }
+        }
+    }
+
+    private void assertBamProperties(ExternallyProcessedBamFile bamFile) {
+        assert bamFile.maximumReadLength == 100
+        assert bamFile.fileSize > 0
+        assert bamFile.fileOperationStatus == AbstractBamFile.FileOperationStatus.PROCESSED
+    }
+
+    /**
+     * check the uuid structure
+     * - if all paths exist
+     * - depending on case: if they are links or real files/dirs
+     */
+    private void assertUuidPaths(ExternallyProcessedBamFile bamFile, Path uuidDir, boolean isSourceLinked) {
+        ([
+                bamFile.bamFileName,
+                bamFile.baiFileName,
+        ] + ALL_FILES).each {
+            Path path = uuidDir.resolve(it)
+            fileService.ensureFileIsReadableAndNotEmpty(path)
+            if (shouldBeLinkInUuid(isSourceLinked, it)) {
+                assert Files.isSymbolicLink(path)
+            } else {
+                assert !Files.isSymbolicLink(path)
+            }
+        }
+    }
+
+    /**
+     * check, if a path should be a link in the uuid
+     */
+    private boolean shouldBeLinkInUuid(boolean isSourceLinked, String pathName) {
+        return bamImportInstance.linkOperation == BamImportInstance.LinkOperation.LINK_SOURCE && (
+                isSourceLinked || (pathName in FURTHER_FILES_LINKED) || pathName.endsWithAny('.bam', '.bai')
+        )
+    }
+
+    /**
+     * check the viewByPid structure
+     */
+    private void assertViewByPidStructure(ExternallyProcessedBamFile bamFile, Path uuidDir) {
+        Path viewByPidDir = externallyProcessedBamFileService.getImportFolder(bamFile)
+        ([
+                bamFile.bamFileName,
+                bamFile.baiFileName,
+        ] + FURTHER_FILES_LINKED).each {
+            Path path = viewByPidDir.resolve(it)
+            if (it.endsWithAny("directory1", "directory2")) {
+                fileService.ensureDirIsReadable(path)
+            } else {
+                fileService.ensureFileIsReadableAndNotEmpty(path)
+            }
+            assert Files.isSymbolicLink(path)
+            assert uuidDir.resolve(it).toRealPath() == path.toRealPath()
         }
     }
 
