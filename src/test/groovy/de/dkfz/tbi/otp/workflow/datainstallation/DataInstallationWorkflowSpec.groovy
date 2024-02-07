@@ -26,6 +26,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.workflow.jobs.OtpClusterCheckFragmentKeysJob
 import de.dkfz.tbi.otp.workflowExecution.Artefact
 
 class DataInstallationWorkflowSpec extends Specification implements DataTest, DomainFactoryCore {
@@ -43,17 +44,17 @@ class DataInstallationWorkflowSpec extends Specification implements DataTest, Do
         dataInstallationWorkflow = new DataInstallationWorkflow()
     }
 
-    void "getJobBeanNames, should return all dataInstallationJob bean names in correct order"() {
+    void "getJobList, should return all dataInstallationJob bean names in correct order"() {
         expect:
-        dataInstallationWorkflow.jobBeanNames == [
-                "dataInstallationFragmentJob",
-                "otpClusterCheckFragmentKeysJob",
-                "dataInstallationConditionalFailJob",
-                "dataInstallationPrepareJob",
-                "copyOrLinkFastqsOfLaneJob",
-                "dataInstallationValidationJob",
-                "dataInstallationSingleCellLinkJob",
-                "dataInstallationPidLinkJob",
+        dataInstallationWorkflow.jobList == [
+                DataInstallationFragmentJob,
+                OtpClusterCheckFragmentKeysJob,
+                DataInstallationConditionalFailJob,
+                DataInstallationPrepareJob,
+                CopyOrLinkFastqsOfLaneJob,
+                DataInstallationValidationJob,
+                DataInstallationSingleCellLinkJob,
+                DataInstallationPidLinkJob,
         ]
     }
 

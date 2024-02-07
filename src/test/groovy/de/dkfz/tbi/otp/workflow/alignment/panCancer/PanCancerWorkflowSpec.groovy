@@ -23,10 +23,13 @@ package de.dkfz.tbi.otp.workflow.alignment.panCancer
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
+
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.workflow.alignment.*
+import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
 
 class PanCancerWorkflowSpec extends Specification implements RoddyPanCancerFactory, DataTest {
 
@@ -50,21 +53,21 @@ class PanCancerWorkflowSpec extends Specification implements RoddyPanCancerFacto
         panCancerWorkflow = new PanCancerWorkflow()
     }
 
-    void "getJobBeanNames, should return all PanCancerJob bean names in correct order"() {
+    void "getJobList, should return all PanCancerJob bean names in correct order"() {
         expect:
-        panCancerWorkflow.jobBeanNames == [
-                "roddyAlignmentFragmentJob",
-//                "roddyAlignmentCheckFragmentKeysJob",
-                "roddyAlignmentConditionalFailJob",
-                "roddyAlignmentPrepareJob",
-                "panCancerExecuteJob",
-                "panCancerValidationJob",
-                "panCancerParseJob",
-                "roddyAlignmentCheckQcJob",
-                "panCancerCleanUpJob",
-                "setCorrectPermissionJob",
-                "panCancerLinkJob",
-                "roddyAlignmentFinishJob",
+        panCancerWorkflow.jobList == [
+                RoddyAlignmentFragmentJob,
+//                RoddyAlignmentCheckFragmentKeysJob,
+                RoddyAlignmentConditionalFailJob,
+                RoddyAlignmentPrepareJob,
+                PanCancerExecuteJob,
+                PanCancerValidationJob,
+                PanCancerParseJob,
+                RoddyAlignmentCheckQcJob,
+                PanCancerCleanUpJob,
+                SetCorrectPermissionJob,
+                PanCancerLinkJob,
+                RoddyAlignmentFinishJob,
         ]
     }
 

@@ -145,7 +145,8 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
         workflowStep.workflowRun.workflow.save(flush: true)
         service.otpWorkflowService = Mock(OtpWorkflowService) {
             1 * lookupOtpWorkflowBean(workflowStep.workflowRun) >> Mock(OtpWorkflow) {
-                1 * getJobBeanNames() >> ["1st job bean", "2nd job bean"]
+                _ * getFirstJobBeanName(workflowStep.workflowRun) >> "1st job bean"
+                _ * getNextJobBeanName(workflowStep) >> "2nd job bean"
             }
         }
 
@@ -168,7 +169,7 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
         workflowStep.workflowRun.workflow.save(flush: true)
         service.otpWorkflowService = Mock(OtpWorkflowService) {
             1 * lookupOtpWorkflowBean(workflowStep.workflowRun) >> Mock(OtpWorkflow) {
-                1 * getJobBeanNames() >> ["1st job bean", "2nd job bean"]
+                _ * getNextJobBeanName(workflowStep) >> null
             }
         }
 

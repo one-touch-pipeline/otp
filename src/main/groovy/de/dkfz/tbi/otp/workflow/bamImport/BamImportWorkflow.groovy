@@ -32,13 +32,13 @@ import de.dkfz.tbi.otp.workflowExecution.*
  */
 @Component
 @Slf4j
-class BamImportWorkflow implements OtpWorkflow {
+class BamImportWorkflow implements LinearWorkflow {
 
     public static final String WORKFLOW = "Externally merged BAM files installation"
     public static final String OUTPUT_BAM = "Bam"
 
     @Override
-    List<String> getJobBeanNames() {
+    List<Class<? extends Job>> getJobList() {
         return [
                 BamImportFragmentJob,
                 OtpClusterCheckFragmentKeysJob,
@@ -53,7 +53,7 @@ class BamImportWorkflow implements OtpWorkflow {
                 CalculateSizeJob,
                 BamImportLinkJob,
                 BamImportFinishJob,
-        ]*.simpleName*.uncapitalize()
+        ]
     }
 
     /**

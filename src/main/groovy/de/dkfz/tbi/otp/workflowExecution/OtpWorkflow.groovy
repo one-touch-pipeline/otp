@@ -27,9 +27,14 @@ package de.dkfz.tbi.otp.workflowExecution
 trait OtpWorkflow {
 
     /**
-     * returns the list of all jobs of the workflow in the correct order.
+     * @return the bean name of the first job of the workflow
      */
-    abstract List<String> getJobBeanNames()
+    abstract String getFirstJobBeanName(WorkflowRun workflowRun)
+
+    /**
+     * @return the bean name of the next job based on the given workflow step, or null if the given step is the last step
+     */
+    abstract String getNextJobBeanName(WorkflowStep workflowStep)
 
     /**
      * Create new concrete artefact for the restarted workflow based on a given artefact.

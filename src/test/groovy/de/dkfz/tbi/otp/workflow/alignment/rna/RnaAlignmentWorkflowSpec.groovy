@@ -31,6 +31,8 @@ import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.FastqFile
+import de.dkfz.tbi.otp.workflow.alignment.*
+import de.dkfz.tbi.otp.workflow.jobs.*
 
 class RnaAlignmentWorkflowSpec extends Specification implements RoddyRnaFactory, WorkflowSystemDomainFactory, DataTest {
 
@@ -49,23 +51,23 @@ class RnaAlignmentWorkflowSpec extends Specification implements RoddyRnaFactory,
         rnaAlignmentWorkflow = new RnaAlignmentWorkflow()
     }
 
-    void "getJobBeanNames, should return all RnaAlignmentJob bean names in correct order"() {
+    void "getJobList, should return all RnaAlignmentJob bean names in correct order"() {
         expect:
-        rnaAlignmentWorkflow.jobBeanNames == [
-                "roddyAlignmentFragmentJob",
-//                "rnaAlignmentCheckFragmentKeysJob",
-                "roddyAlignmentConditionalFailJob",
-                "attachUuidJob",
-                "roddyAlignmentPrepareJob",
-                "rnaAlignmentExecuteJob",
-                "rnaAlignmentValidationJob",
-                "rnaAlignmentParseJob",
-                "roddyAlignmentCheckQcJob",
-                "rnaAlignmentCleanUpJob",
-                "setCorrectPermissionJob",
-                "calculateSizeJob",
-                "rnaAlignmentLinkJob",
-                "roddyAlignmentFinishJob",
+        rnaAlignmentWorkflow.jobList == [
+                RoddyAlignmentFragmentJob,
+//                RnaAlignmentCheckFragmentKeysJob,
+                RoddyAlignmentConditionalFailJob,
+                AttachUuidJob,
+                RoddyAlignmentPrepareJob,
+                RnaAlignmentExecuteJob,
+                RnaAlignmentValidationJob,
+                RnaAlignmentParseJob,
+                RoddyAlignmentCheckQcJob,
+                RnaAlignmentCleanUpJob,
+                SetCorrectPermissionJob,
+                CalculateSizeJob,
+                RnaAlignmentLinkJob,
+                RoddyAlignmentFinishJob,
         ]
     }
 

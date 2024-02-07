@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflow.datainstallation
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.workflow.jobs.Job
 import de.dkfz.tbi.otp.workflow.jobs.OtpClusterCheckFragmentKeysJob
 import de.dkfz.tbi.otp.workflowExecution.*
 
@@ -32,22 +33,22 @@ import de.dkfz.tbi.otp.workflowExecution.*
  */
 @Component
 @Slf4j
-class DataInstallationWorkflow implements OtpWorkflow {
+class DataInstallationWorkflow implements LinearWorkflow {
 
     public static final String WORKFLOW = "FASTQ installation"
     public static final String OUTPUT_FASTQ = "FASTQ"
 
     @Override
-    List<String> getJobBeanNames() {
+    List<Class<? extends Job>> getJobList() {
         return [
-                DataInstallationFragmentJob.simpleName.uncapitalize(),
-                OtpClusterCheckFragmentKeysJob.simpleName.uncapitalize(),
-                DataInstallationConditionalFailJob.simpleName.uncapitalize(),
-                DataInstallationPrepareJob.simpleName.uncapitalize(),
-                CopyOrLinkFastqsOfLaneJob.simpleName.uncapitalize(),
-                DataInstallationValidationJob.simpleName.uncapitalize(),
-                DataInstallationSingleCellLinkJob.simpleName.uncapitalize(),
-                DataInstallationPidLinkJob.simpleName.uncapitalize(),
+                DataInstallationFragmentJob,
+                OtpClusterCheckFragmentKeysJob,
+                DataInstallationConditionalFailJob,
+                DataInstallationPrepareJob,
+                CopyOrLinkFastqsOfLaneJob,
+                DataInstallationValidationJob,
+                DataInstallationSingleCellLinkJob,
+                DataInstallationPidLinkJob,
         ]
     }
 

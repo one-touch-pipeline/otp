@@ -63,10 +63,9 @@ class JobService {
                 "Can not create next job, since last was not successfully, but ${lastWorkflowStep.state}"
 
         OtpWorkflow otpWorkflow = otpWorkflowService.lookupOtpWorkflowBean(workflowRun)
-        List<String> jobBeanNames = otpWorkflow.jobBeanNames
         String beanName = lastWorkflowStep ?
-                jobBeanNames[jobBeanNames.indexOf(lastWorkflowStep.beanName) + 1] :
-                jobBeanNames.first()
+                otpWorkflow.getNextJobBeanName(lastWorkflowStep) :
+                otpWorkflow.getFirstJobBeanName(workflowRun)
 
         WorkflowStep newWorkflowStep = new WorkflowStep(
                 workflowRun: workflowRun,

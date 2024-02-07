@@ -26,6 +26,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.workflow.jobs.OtpClusterCheckFragmentKeysJob
 import de.dkfz.tbi.otp.workflowExecution.Artefact
 
 class BashFastqcWorkflowSpec extends Specification implements DataTest, DomainFactoryCore {
@@ -43,17 +44,17 @@ class BashFastqcWorkflowSpec extends Specification implements DataTest, DomainFa
         fastqcWorkflow = new BashFastQcWorkflow()
     }
 
-    void "getJobBeanNames, should return all FastqcJob bean names in correct order"() {
+    void "getJobList, should return all FastqcJob bean names in correct order"() {
         expect:
-        fastqcWorkflow.jobBeanNames == [
-                "fastqcFragmentJob",
-                "otpClusterCheckFragmentKeysJob",
-                "fastqcConditionalFailJob",
-                "fastqcPrepareJob",
-                "fastqcExecuteClusterPipelineJob",
-                "fastqcClusterValidationJob",
-                "fastqcParseJob",
-                "fastqcFinishJob",
+        fastqcWorkflow.jobList == [
+                FastqcFragmentJob,
+                OtpClusterCheckFragmentKeysJob,
+                FastqcConditionalFailJob,
+                FastqcPrepareJob,
+                FastqcExecuteClusterPipelineJob,
+                FastqcClusterValidationJob,
+                FastqcParseJob,
+                FastqcFinishJob,
         ]
     }
 

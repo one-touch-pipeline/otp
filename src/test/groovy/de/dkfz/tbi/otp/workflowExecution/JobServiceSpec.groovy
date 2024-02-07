@@ -64,7 +64,7 @@ class JobServiceSpec extends Specification implements DataTest, WorkflowSystemDo
         WorkflowRun workflowRun = createWorkflowRun()
         service.otpWorkflowService = Mock(OtpWorkflowService) {
             1 * lookupOtpWorkflowBean(workflowRun) >> Mock(OtpWorkflow) {
-                1 * getJobBeanNames() >> ["1st job bean", "2nd job bean"]
+                _ * getFirstJobBeanName(workflowRun) >> "1st job bean"
             }
         }
 
@@ -89,7 +89,8 @@ class JobServiceSpec extends Specification implements DataTest, WorkflowSystemDo
         WorkflowStep existingStep = createWorkflowStep(workflowRun: workflowRun, beanName: "1st job bean", state: WorkflowStep.State.SUCCESS)
         service.otpWorkflowService = Mock(OtpWorkflowService) {
             1 * lookupOtpWorkflowBean(workflowRun) >> Mock(OtpWorkflow) {
-                1 * getJobBeanNames() >> ["1st job bean", "2nd job bean"]
+                _ * getFirstJobBeanName(workflowRun) >> "1st job bean"
+                _ * getNextJobBeanName(existingStep) >> "2nd job bean"
             }
         }
 

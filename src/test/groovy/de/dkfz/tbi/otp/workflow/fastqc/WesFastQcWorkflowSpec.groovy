@@ -26,6 +26,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.workflow.jobs.*
 import de.dkfz.tbi.otp.workflowExecution.Artefact
 
 class WesFastQcWorkflowSpec extends Specification implements DataTest, DomainFactoryCore {
@@ -43,20 +44,20 @@ class WesFastQcWorkflowSpec extends Specification implements DataTest, DomainFac
         wesFastQcWorkflow = new WesFastQcWorkflow()
     }
 
-    void "getJobBeanNames, should return all WesFastQcJob bean names in correct order"() {
+    void "getJobList, should return all WesFastQcJob bean names in correct order"() {
         expect:
-        wesFastQcWorkflow.jobBeanNames == [
-                "fastqcFragmentJob",
-                "fastqcConditionalFailJob",
-                "attachUuidJob",
-                "fastqcWesPrepareJob",
-                "fastqcExecuteWesPipelineJob",
-                "fastqcWesValidationJob",
-                "setCorrectPermissionJob",
-                "fastqcParseJob",
-                "fastqcLinkJob",
-                "calculateSizeJob",
-                "fastqcFinishJob",
+        wesFastQcWorkflow.jobList == [
+                FastqcFragmentJob,
+                FastqcConditionalFailJob,
+                AttachUuidJob,
+                FastqcWesPrepareJob,
+                FastqcExecuteWesPipelineJob,
+                FastqcWesValidationJob,
+                SetCorrectPermissionJob,
+                FastqcParseJob,
+                FastqcLinkJob,
+                CalculateSizeJob,
+                FastqcFinishJob,
         ]
     }
 

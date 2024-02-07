@@ -32,27 +32,27 @@ import de.dkfz.tbi.otp.workflowExecution.*
  */
 @Component
 @Slf4j
-class WesFastQcWorkflow implements OtpWorkflow {
+class WesFastQcWorkflow implements LinearWorkflow {
 
     public static final String WORKFLOW = "nf-seq-qc"
     public static final String INPUT_FASTQ = "FASTQ"
     public static final String OUTPUT_FASTQC = "FASTQC"
 
     @Override
-    List<String> getJobBeanNames() {
+    List<Class<? extends Job>> getJobList() {
         return [
-                FastqcFragmentJob.simpleName.uncapitalize(),
-                FastqcConditionalFailJob.simpleName.uncapitalize(),
-                AttachUuidJob.simpleName.uncapitalize(),
-                FastqcWesPrepareJob.simpleName.uncapitalize(),
-                FastqcExecuteWesPipelineJob.simpleName.uncapitalize(),
-                FastqcWesValidationJob.simpleName.uncapitalize(),
+                FastqcFragmentJob,
+                FastqcConditionalFailJob,
+                AttachUuidJob,
+                FastqcWesPrepareJob,
+                FastqcExecuteWesPipelineJob,
+                FastqcWesValidationJob,
                 // permission needs to be changed, since accessing of the zip content is only possible on local file system
-                SetCorrectPermissionJob.simpleName.uncapitalize(),
-                FastqcParseJob.simpleName.uncapitalize(),
-                FastqcLinkJob.simpleName.uncapitalize(),
-                CalculateSizeJob.simpleName.uncapitalize(),
-                FastqcFinishJob.simpleName.uncapitalize(),
+                SetCorrectPermissionJob,
+                FastqcParseJob,
+                FastqcLinkJob,
+                CalculateSizeJob,
+                FastqcFinishJob,
         ]
     }
 

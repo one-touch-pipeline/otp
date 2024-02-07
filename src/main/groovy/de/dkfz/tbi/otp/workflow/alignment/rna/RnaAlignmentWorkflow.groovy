@@ -29,37 +29,36 @@ import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.workflow.alignment.*
 import de.dkfz.tbi.otp.workflow.jobs.*
-import de.dkfz.tbi.otp.workflowExecution.Artefact
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
+import de.dkfz.tbi.otp.workflowExecution.*
 
 @Component
 @Slf4j
-class RnaAlignmentWorkflow extends AlignmentWorkflow {
+class RnaAlignmentWorkflow extends AlignmentWorkflow implements LinearWorkflow {
 
     public static final String WORKFLOW = "RNA alignment"
 
     final String userDocumentation = null
 
     @Override
-    List<String> getJobBeanNames() {
+    List<Class<? extends Job>> getJobList() {
         return [
-                RoddyAlignmentFragmentJob.simpleName.uncapitalize(),
-//                RnaAlignmentCheckFragmentKeysJob.simpleName.uncapitalize(),
+                RoddyAlignmentFragmentJob,
+//                RnaAlignmentCheckFragmentKeysJob,
                 // will be uncommented after default fragments have been adapted
                 // Keep the order, since it is important
-//                RnaAlignmentCreateNotificationJob.simpleName.uncapitalize(),
-                RoddyAlignmentConditionalFailJob.simpleName.uncapitalize(),
-                AttachUuidJob.simpleName.uncapitalize(),
-                RoddyAlignmentPrepareJob.simpleName.uncapitalize(),
-                RnaAlignmentExecuteJob.simpleName.uncapitalize(),
-                RnaAlignmentValidationJob.simpleName.uncapitalize(),
-                RnaAlignmentParseJob.simpleName.uncapitalize(),
-                RoddyAlignmentCheckQcJob.simpleName.uncapitalize(),
-                RnaAlignmentCleanUpJob.simpleName.uncapitalize(),
-                SetCorrectPermissionJob.simpleName.uncapitalize(),
-                CalculateSizeJob.simpleName.uncapitalize(),
-                RnaAlignmentLinkJob.simpleName.uncapitalize(),
-                RoddyAlignmentFinishJob.simpleName.uncapitalize(),
+//                RnaAlignmentCreateNotificationJob,
+                RoddyAlignmentConditionalFailJob,
+                AttachUuidJob,
+                RoddyAlignmentPrepareJob,
+                RnaAlignmentExecuteJob,
+                RnaAlignmentValidationJob,
+                RnaAlignmentParseJob,
+                RoddyAlignmentCheckQcJob,
+                RnaAlignmentCleanUpJob,
+                SetCorrectPermissionJob,
+                CalculateSizeJob,
+                RnaAlignmentLinkJob,
+                RoddyAlignmentFinishJob,
         ]
     }
 

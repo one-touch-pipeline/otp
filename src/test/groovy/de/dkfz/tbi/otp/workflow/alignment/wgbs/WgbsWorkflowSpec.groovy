@@ -25,6 +25,9 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
+import de.dkfz.tbi.otp.workflow.alignment.*
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerCleanUpJob
+import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
 
 class WgbsWorkflowSpec extends Specification implements RoddyPanCancerFactory, DataTest {
 
@@ -34,21 +37,21 @@ class WgbsWorkflowSpec extends Specification implements RoddyPanCancerFactory, D
         wgbsWorkflow = new WgbsWorkflow()
     }
 
-    void "getJobBeanNames, should return all WGBS Workflow bean names in correct order"() {
+    void "getJobList, should return all WGBS Workflow bean names in correct order"() {
         expect:
-        wgbsWorkflow.jobBeanNames == [
-                "roddyAlignmentFragmentJob",
-//                "roddyAlignmentCheckFragmentKeysJob",
-                "roddyAlignmentConditionalFailJob",
-                "wgbsPrepareJob",
-                "wgbsExecuteJob",
-                "wgbsValidationJob",
-                "wgbsParseJob",
-                "roddyAlignmentCheckQcJob",
-                "panCancerCleanUpJob",
-                "wgbsLinkJob",
-                "setCorrectPermissionJob",
-                "roddyAlignmentFinishJob",
+        wgbsWorkflow.jobList == [
+                RoddyAlignmentFragmentJob,
+//                RoddyAlignmentCheckFragmentKeysJob,
+                RoddyAlignmentConditionalFailJob,
+                WgbsPrepareJob,
+                WgbsExecuteJob,
+                WgbsValidationJob,
+                WgbsParseJob,
+                RoddyAlignmentCheckQcJob,
+                PanCancerCleanUpJob,
+                WgbsLinkJob,
+                SetCorrectPermissionJob,
+                RoddyAlignmentFinishJob,
         ]
     }
 }

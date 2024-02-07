@@ -159,13 +159,13 @@ class WorkflowStateChangeService {
         step.state = WorkflowStep.State.SUCCESS
         step.save(flush: true)
 
-        String lastBeanName = null
+        String nextJob = null
         if (step.workflowRun.workflow.beanName) {
             OtpWorkflow otpWorkflow = otpWorkflowService.lookupOtpWorkflowBean(step.workflowRun)
-            lastBeanName = otpWorkflow.jobBeanNames.last()
+            nextJob = otpWorkflow.getNextJobBeanName(step)
         }
 
-        if (step.beanName == lastBeanName) {
+        if (!nextJob) {
             step.workflowRun.state = WorkflowRun.State.SUCCESS
             step.workflowRun.save(flush: true)
             step.workflowRun.outputArtefacts.each { String role, WorkflowArtefact workflowArtefact ->

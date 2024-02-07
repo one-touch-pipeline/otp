@@ -28,37 +28,37 @@ import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.workflow.alignment.*
+import de.dkfz.tbi.otp.workflow.jobs.Job
 import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
-import de.dkfz.tbi.otp.workflowExecution.Artefact
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
+import de.dkfz.tbi.otp.workflowExecution.*
 
 /**
  * represents the PanCancer Workflow
  */
 @Component
 @Slf4j
-class PanCancerWorkflow extends AlignmentWorkflow {
+class PanCancerWorkflow extends AlignmentWorkflow implements LinearWorkflow {
 
     public static final String WORKFLOW = "PanCancer alignment"
 
     @Override
-    List<String> getJobBeanNames() {
+    List<Class<? extends Job>> getJobList() {
         return [
-                RoddyAlignmentFragmentJob.simpleName.uncapitalize(),
-//                RoddyAlignmentCheckFragmentKeysJob.simpleName.uncapitalize(),
+                RoddyAlignmentFragmentJob,
+//                RoddyAlignmentCheckFragmentKeysJob,
                 // will be uncommented after default fragments have been adapted
                 // Keep the order, since it is important
-//                RoddyAlignmentCreateNotificationJob.simpleName.uncapitalize(),
-                RoddyAlignmentConditionalFailJob.simpleName.uncapitalize(),
-                RoddyAlignmentPrepareJob.simpleName.uncapitalize(),
-                PanCancerExecuteJob.simpleName.uncapitalize(),
-                PanCancerValidationJob.simpleName.uncapitalize(),
-                PanCancerParseJob.simpleName.uncapitalize(),
-                RoddyAlignmentCheckQcJob.simpleName.uncapitalize(),
-                PanCancerCleanUpJob.simpleName.uncapitalize(),
-                SetCorrectPermissionJob.simpleName.uncapitalize(),
-                PanCancerLinkJob.simpleName.uncapitalize(),
-                RoddyAlignmentFinishJob.simpleName.uncapitalize(),
+//                RoddyAlignmentCreateNotificationJob,
+                RoddyAlignmentConditionalFailJob,
+                RoddyAlignmentPrepareJob,
+                PanCancerExecuteJob,
+                PanCancerValidationJob,
+                PanCancerParseJob,
+                RoddyAlignmentCheckQcJob,
+                PanCancerCleanUpJob,
+                SetCorrectPermissionJob,
+                PanCancerLinkJob,
+                RoddyAlignmentFinishJob,
         ]
     }
 

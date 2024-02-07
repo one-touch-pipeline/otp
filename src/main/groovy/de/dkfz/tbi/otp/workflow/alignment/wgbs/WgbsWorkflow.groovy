@@ -25,10 +25,11 @@ import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.workflow.alignment.*
-import de.dkfz.tbi.otp.workflow.alignment.panCancer.*
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerCleanUpJob
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.jobs.Job
 import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
-import de.dkfz.tbi.otp.workflowExecution.Artefact
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
+import de.dkfz.tbi.otp.workflowExecution.*
 
 @Component
 @Slf4j
@@ -37,23 +38,23 @@ class WgbsWorkflow extends PanCancerWorkflow {
     public static final String WORKFLOW = "WGBS alignment"
 
     @Override
-    List<String> getJobBeanNames() {
+    List<Class<? extends Job>> getJobList() {
         return [
-                RoddyAlignmentFragmentJob.simpleName.uncapitalize(),
-//                RoddyAlignmentCheckFragmentKeysJob.simpleName.uncapitalize(),
+                RoddyAlignmentFragmentJob,
+//                RoddyAlignmentCheckFragmentKeysJob,
                 // will be uncommented after default fragments have been adapted
                 // Keep the order, since it is important
-//                RoddyAlignmentCreateNotificationJob.simpleName.uncapitalize(),
-                RoddyAlignmentConditionalFailJob.simpleName.uncapitalize(),
-                WgbsPrepareJob.simpleName.uncapitalize(),
-                WgbsExecuteJob.simpleName.uncapitalize(),
-                WgbsValidationJob.simpleName.uncapitalize(),
-                WgbsParseJob.simpleName.uncapitalize(),
-                RoddyAlignmentCheckQcJob.simpleName.uncapitalize(),
-                PanCancerCleanUpJob.simpleName.uncapitalize(),
-                WgbsLinkJob.simpleName.uncapitalize(),
-                SetCorrectPermissionJob.simpleName.uncapitalize(),
-                RoddyAlignmentFinishJob.simpleName.uncapitalize(),
+//                RoddyAlignmentCreateNotificationJob,
+                RoddyAlignmentConditionalFailJob,
+                WgbsPrepareJob,
+                WgbsExecuteJob,
+                WgbsValidationJob,
+                WgbsParseJob,
+                RoddyAlignmentCheckQcJob,
+                PanCancerCleanUpJob,
+                WgbsLinkJob,
+                SetCorrectPermissionJob,
+                RoddyAlignmentFinishJob,
         ]
     }
 
