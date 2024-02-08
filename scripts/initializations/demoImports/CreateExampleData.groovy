@@ -1368,12 +1368,12 @@ class ExampleData {
         return singleCellBamFile
     }
 
-    WorkflowArtefact createRoddyWorkflowArtefactWithDependencies(MergingWorkPackage mergingWorkPackage) {
+    WorkflowArtefact createRoddyWorkflowArtefactWithDependencies(MergingWorkPackage mergingWorkPackage, Workflow workflow) {
         String name = "${mergingWorkPackage.sample} ${mergingWorkPackage.seqType} ${mergingWorkPackage.antibodyTarget ?: ''} ${mergingWorkPackage.libraryPreparationKit ?: ''} ${mergingWorkPackage.referenceGenome}"
 
         WorkflowRun workflowRun = createWorkflowRun(
                 "/tmp/roddy",
-                workflowPanCancer,
+                workflow,
                 name,
         ).save(flush: false)
 
@@ -1390,8 +1390,9 @@ class ExampleData {
 
     RoddyBamFile createRoddyBamFile(MergingWorkPackage mergingWorkPackage) {
         RoddyWorkflowConfig config = findOrCreateRoddyWorkflowConfig(mergingWorkPackage)
+        Workflow workflow = mergingWorkPackage.seqType.isWgbs() ? workflowWgbsAlignment : workflowPanCancer
 
-        WorkflowArtefact workflowArtefact = createRoddyWorkflowArtefactWithDependencies(mergingWorkPackage)
+        WorkflowArtefact workflowArtefact = createRoddyWorkflowArtefactWithDependencies(mergingWorkPackage, workflow)
 
         RoddyBamFile roddyBamFile = new RoddyBamFile([
                 workPackage            : mergingWorkPackage,
@@ -1426,7 +1427,7 @@ class ExampleData {
     RnaRoddyBamFile createRnaRoddyBamFile(MergingWorkPackage mergingWorkPackage) {
         RoddyWorkflowConfig config = findOrCreateRoddyWorkflowConfig(mergingWorkPackage)
 
-        WorkflowArtefact workflowArtefact = createRoddyWorkflowArtefactWithDependencies(mergingWorkPackage)
+        WorkflowArtefact workflowArtefact = createRoddyWorkflowArtefactWithDependencies(mergingWorkPackage, workflowRnaAlignment)
 
         RoddyBamFile roddyBamFile = new RnaRoddyBamFile([
                 workPackage            : mergingWorkPackage,
