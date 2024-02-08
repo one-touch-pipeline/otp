@@ -322,6 +322,7 @@ cypress tests:
           - package-lock.json
           - .gitlab-ci-core.yml
           - devScripts/gitlab-ci/cypress/**/*
+          - migrations/**/*
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
