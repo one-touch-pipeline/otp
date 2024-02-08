@@ -40,16 +40,21 @@ trait IsPipeline implements DomainFactoryCore {
 
     abstract Map getSeqTypeProperties()
 
+    @Deprecated
     abstract Map getConfigProperties(Map properties)
 
+    @Deprecated
     abstract Class getConfigPerProjectAndSeqTypeClass()
 
+    @Deprecated
     abstract Pipeline findOrCreatePipeline()
 
+    @Deprecated
     ConfigPerProjectAndSeqType createConfig(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(configPerProjectAndSeqTypeClass, getConfigProperties(properties), properties, saveAndValidate)
     }
 
+    @Deprecated
     ConfigPerProjectAndSeqType findOrCreateConfig(Map properties = [:], boolean saveAndValidate = true) {
         return findOrCreateDomainObject(configPerProjectAndSeqTypeClass, getConfigProperties(properties), properties, saveAndValidate)
     }
@@ -59,6 +64,7 @@ trait IsPipeline implements DomainFactoryCore {
         return findOrCreateDomainObject(SeqType, seqTypeProperties, properties ?: seqTypeProperties, saveAndValidate).refresh()
     }
 
+    @Deprecated
     Pipeline findOrCreatePipeline(Pipeline.Name name, Pipeline.Type type) {
         return findOrCreateDomainObject(Pipeline, [:], [
                 name: name,

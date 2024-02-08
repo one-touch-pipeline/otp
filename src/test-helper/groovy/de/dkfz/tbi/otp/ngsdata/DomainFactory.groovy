@@ -39,6 +39,7 @@ import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactoryInstance
 import de.dkfz.tbi.otp.domainFactory.pipelines.*
+import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryInstance
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactoryInstance
@@ -223,7 +224,7 @@ class DomainFactory {
     }
 
     @Deprecated
-    static Map<String, ?> getDefaultValuesForAbstractQualityAssessment() {
+    private static Map<String, ?> getDefaultValuesForAbstractQualityAssessment() {
         return proxyCellRanger.defaultValuesForAbstractQualityAssessment
     }
 
@@ -394,10 +395,6 @@ class DomainFactory {
         return proxyCore.createIlseSubmission(properties, saveAndValidate)
     }
 
-    static ReferenceGenome createReferenceGenomeLazy() {
-        return ReferenceGenome.find { true } ?: createReferenceGenome()
-    }
-
     /**
      * @deprecated Use the {@link RoddyPanCancerFactory#createBamFile} method from the {@link RoddyPanCancerFactory} trait instead.
      */
@@ -410,7 +407,7 @@ class DomainFactory {
      * Because RoddyMergedBamQa defines a unique constraint with 'class', the instance can only be created in integration tests.
      */
     static RoddyMergedBamQa createRoddyMergedBamQa(Map properties = [:]) {
-        return createDomainObject(RoddyMergedBamQa, defaultValuesForAbstractQualityAssessment + roddyQualityAssessmentProperties, properties)
+        return createDomainObject(RoddyMergedBamQa, defaultValuesForAbstractQualityAssessment + RODDY_QUALITY_ASSESSMENT_PROPERTIES, properties)
     }
 
     /**
@@ -423,7 +420,7 @@ class DomainFactory {
         ] + properties)
     }
 
-    static Map roddyQualityAssessmentProperties = [
+    private static final Map RODDY_QUALITY_ASSESSMENT_PROPERTIES = [
             abstractBamFile              : { createRoddyBamFile() },
             chromosome                   : RoddyQualityAssessment.ALL,
             insertSizeCV                 : 0,
@@ -432,18 +429,20 @@ class DomainFactory {
     ]
 
     static RoddyLibraryQa createRoddyLibraryQa(Map properties = [:]) {
-        return createDomainObject(RoddyLibraryQa, defaultValuesForAbstractQualityAssessment + roddyQualityAssessmentProperties + [
+        return createDomainObject(RoddyLibraryQa, defaultValuesForAbstractQualityAssessment + RODDY_QUALITY_ASSESSMENT_PROPERTIES + [
                 libraryDirectoryName: "libraryDirectoryName_${counter++}",
         ], properties)
     }
 
     static RoddySingleLaneQa createRoddySingleLaneQa(Map properties = [:]) {
-        return createDomainObject(RoddySingleLaneQa, defaultValuesForAbstractQualityAssessment + roddyQualityAssessmentProperties + [
+        return createDomainObject(RoddySingleLaneQa, defaultValuesForAbstractQualityAssessment + RODDY_QUALITY_ASSESSMENT_PROPERTIES + [
                 seqTrack: { createSeqTrack() },
         ], properties)
     }
 
     /**
+     * @deprecated use {@link IsPipeline#createMergingWorkPackage}
+     *
      * Creates a {@link MergingWorkPackage} with the same properties as the specified one but a different
      * {@link SampleType}.
      */
@@ -452,6 +451,8 @@ class DomainFactory {
     }
 
     /**
+     * @deprecated use {@link IsPipeline#createMergingWorkPackage}
+     *
      * Creates a {@link MergingWorkPackage} with the same properties as the specified one but a different
      * {@link SampleType}.
      */
@@ -460,26 +461,7 @@ class DomainFactory {
                 individual: base.individual,
                 sampleType: sampleType,
         )
-        return createMergingWorkPackage(base, [
-                sample               : sample,
-                referenceGenome      : base.referenceGenome,
-                libraryPreparationKit: base.libraryPreparationKit,
-        ])
-    }
 
-    /**
-     * Creates a {@link MergingWorkPackage} with the same properties as the specified one but a different
-     * {@link Sample}.
-     */
-    static MergingWorkPackage createMergingWorkPackage(MergingWorkPackage base, Sample sample) {
-        return createMergingWorkPackage(base, [sample: sample])
-    }
-
-    /**
-     * Creates a {@link MergingWorkPackage} with the properties of the base MergingWorkPackage,
-     * but properties can be overwritten in the properties map.
-     */
-    static MergingWorkPackage createMergingWorkPackage(MergingWorkPackage base, Map properties) {
         List<String> mergingProperties = [
                 "sample",
                 "seqType",
@@ -497,11 +479,18 @@ class DomainFactory {
 
         MergingWorkPackage mwp = new MergingWorkPackage((mergingProperties + []).collectEntries {
             [it, base."${it}"]
-        } + properties)
+        } + [
+                sample               : sample,
+                referenceGenome      : base.referenceGenome,
+                libraryPreparationKit: base.libraryPreparationKit,
+        ])
         assert mwp.save(flush: true)
         return mwp
     }
 
+    /**
+     * @deprecated use {@link AbstractAnalysisDomainFactory#createSamplePair}
+     */
     static SamplePair createSamplePair(Map properties = [:]) {
         AbstractMergingWorkPackage mergingWorkPackage1 = properties.mergingWorkPackage1 ?:
                 properties.mergingWorkPackage2 ? createMergingWorkPackage(properties.mergingWorkPackage2) :
@@ -511,9 +500,15 @@ class DomainFactory {
                 project: mergingWorkPackage1.project,
                 category: SampleTypePerProject.Category.DISEASE,
         )
-        return createSamplePair(mergingWorkPackage1, properties)
+        return createSamplePair(
+                mergingWorkPackage1,
+                properties.mergingWorkPackage2 ?: createMergingWorkPackage(mergingWorkPackage1),
+                properties)
     }
 
+    /**
+     * @deprecated use {@link AbstractAnalysisDomainFactory#createSamplePair}
+     */
     static SamplePair createSamplePairPanCan(Map properties = [:]) {
         properties.mergingWorkPackage1 = properties.mergingWorkPackage1 ?:
                 properties.mergingWorkPackage2 ? createMergingWorkPackage(properties.mergingWorkPackage2) :
@@ -523,6 +518,9 @@ class DomainFactory {
         return createSamplePair(properties)
     }
 
+    /**
+     * @deprecated use {@link AbstractAnalysisDomainFactory#createSamplePair}
+     */
     static SamplePair createSamplePair(AbstractMergingWorkPackage mergingWorkPackage1, Map properties = [:]) {
         return createSamplePair(
                 mergingWorkPackage1,
@@ -530,20 +528,30 @@ class DomainFactory {
                 properties)
     }
 
+    @Deprecated
     private static final Map SAMPLE_TYPE_MAP = [
             project   : { createProject() },
             sampleType: { createSampleType() },
             category  : SampleTypePerProject.Category.DISEASE,
     ].asImmutable()
 
+    /**
+     * @deprecated use {@link AbstractAnalysisDomainFactory#createSampleTypePerProject}
+     */
     static SampleTypePerProject createSampleTypePerProject(Map properties = [:]) {
         return createDomainObject(SampleTypePerProject, SAMPLE_TYPE_MAP, properties)
     }
 
+    /**
+     * @deprecated use {@link AbstractAnalysisDomainFactory#findOrCreateSampleTypePerProject}
+     */
     static SampleTypePerProject createSampleTypePerProjectLazy(Map properties = [:]) {
         return findOrCreateDomainObject(SampleTypePerProject, SAMPLE_TYPE_MAP, properties)
     }
 
+    /**
+     * @deprecated use {@link AbstractAnalysisDomainFactory#findOrCreateSampleTypePerProjectForMergingWorkPackage}
+     */
     static SampleTypePerProject createSampleTypePerProjectForMergingWorkPackage(
             AbstractMergingWorkPackage mergingWorkPackage, SampleTypePerProject.Category category = SampleTypePerProject.Category.DISEASE) {
         return createSampleTypePerProject([
@@ -553,11 +561,17 @@ class DomainFactory {
         ])
     }
 
+    /**
+     * @deprecated use {@link AbstractAnalysisDomainFactory#findOrCreateSampleTypePerProjectForBamFile}
+     */
     static SampleTypePerProject createSampleTypePerProjectForBamFile(
             AbstractBamFile bamFile, SampleTypePerProject.Category category = SampleTypePerProject.Category.DISEASE) {
         return createSampleTypePerProjectForMergingWorkPackage(bamFile.mergingWorkPackage, category)
     }
 
+    /**
+     * @deprecated use {@link AbstractAnalysisDomainFactory#createSamplePair}
+     */
     static SamplePair createSamplePair(AbstractMergingWorkPackage mergingWorkPackage1, AbstractMergingWorkPackage mergingWorkPackage2, Map properties = [:]) {
         return createDomainObject(SamplePair, [
                 mergingWorkPackage1: mergingWorkPackage1,
@@ -565,6 +579,9 @@ class DomainFactory {
         ], properties)
     }
 
+    /**
+     * @deprecated use {@link AbstractAnalysisDomainFactory#createProcessableSamplePair}
+     */
     static Map createProcessableSamplePair(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
         Map map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, [coverage: 30] + bamFile1Properties, [coverage: 30] + bamFile2Properties)
 
@@ -591,6 +608,9 @@ class DomainFactory {
         ]
     }
 
+    /**
+     * @deprecated use {@link AbstractAnalysisDomainFactory#createSamplePairWithBamFiles}
+     */
     static SamplePair createSamplePairWithBamFiles() {
         MergingWorkPackage tumorMwp = createMergingWorkPackage(
                 seqType: createWholeGenomeSeqType(),
@@ -642,6 +662,9 @@ class DomainFactory {
         return samplePair
     }
 
+    /**
+     * @deprecated use {@link AbstractAnalysisDomainFactory#createSamplePairWithExternallyProcessedBamFiles}
+     */
     static SamplePair createSamplePairWithExternallyProcessedBamFiles(boolean initPipelines = false, Map bamFileProperties = [:]) {
         ExternalMergingWorkPackage tumorMwp = createExternalMergingWorkPackage(
                 seqType: createWholeGenomeSeqType(),
@@ -700,6 +723,8 @@ class DomainFactory {
     }
 
     /**
+     * @deprecated use {@link AbstractAnalysisDomainFactory#findOrCreateProcessingThresholdsForMergingWorkPackage()}, {@link DomainFactoryCore#findOrCreateProcessingOption}
+     *
      * create necessary initialising for the analysis pipelines for the sample Pair.
      *
      * This contains <ul>
@@ -732,6 +757,9 @@ class DomainFactory {
         createReferenceGenomeAndAnalysisProcessingOptions("${samplePair.mergingWorkPackage1.referenceGenome.name}, ${samplePair.mergingWorkPackage2.referenceGenome.name}")
     }
 
+    /**
+     * @deprecated use {@link DomainFactoryCore#findOrCreateProcessingOption}
+     */
     static List<ProcessingOption> createReferenceGenomeAndAnalysisProcessingOptions(String value = null) {
         return [
                 OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
@@ -747,6 +775,9 @@ class DomainFactory {
         }
     }
 
+    /**
+     * @deprecated use {@link AbstractAnalysisDomainFactory#createSampleTypePerProject}
+     */
     static SamplePair createDisease(AbstractMergingWorkPackage controlMwp) {
         MergingWorkPackage diseaseMwp = createMergingWorkPackage(controlMwp)
         createSampleTypePerProject(project: controlMwp.project, sampleType: diseaseMwp.sampleType, category: SampleTypePerProject.Category.DISEASE)
@@ -765,8 +796,7 @@ class DomainFactory {
         ], properties)
     }
 
-    private
-    static Map createAnalysisInstanceWithRoddyBamFilesMapHelper(Map properties, Map bamFile1Properties, Map bamFile2Properties) {
+    private static Map createAnalysisInstanceWithRoddyBamFilesMapHelper(Map properties, Map bamFile1Properties, Map bamFile2Properties) {
         Pipeline pipeline = createPanCanPipeline()
 
         SamplePair samplePair = properties.samplePair
@@ -871,6 +901,9 @@ class DomainFactory {
         return createDomainObject(SnvCallingInstance, map, properties)
     }
 
+    /**
+     * @deprecated use {@link SnvDomainFactory#createInstanceWithRoddyBamFiles()}
+     */
     static RoddySnvCallingInstance createRoddySnvInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
         Map map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
         SamplePair samplePair = map.samplePair
@@ -885,6 +918,9 @@ class DomainFactory {
         return createDomainObject(RoddySnvCallingInstance, map, properties)
     }
 
+    /**
+     * @deprecated use {@link IndelDomainFactory#createInstanceWithSameSamplePair()}
+     */
     static IndelCallingInstance createIndelCallingInstanceWithSameSamplePair(BamFilePairAnalysis instance) {
         return createDomainObject(IndelCallingInstance, [
                 processingState   : AnalysisProcessingStates.FINISHED,
@@ -896,6 +932,9 @@ class DomainFactory {
         ], [:])
     }
 
+    /**
+     * @deprecated use {@link IndelDomainFactory#createInstanceWithRoddyBamFiles()}
+     */
     static IndelCallingInstance createIndelCallingInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
         Map map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
         SamplePair samplePair = map.samplePair
@@ -910,6 +949,9 @@ class DomainFactory {
         return createDomainObject(IndelCallingInstance, map, properties)
     }
 
+    /**
+     * @deprecated use {@link SophiaDomainFactory#createInstanceWithRoddyBamFiles()}
+     */
     static SophiaInstance createSophiaInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
         Map map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
         SamplePair samplePair = map.samplePair
@@ -924,6 +966,9 @@ class DomainFactory {
         return createDomainObject(SophiaInstance, map, properties)
     }
 
+    /**
+     * @deprecated use {@link SophiaDomainFactory#createInstance()}
+     */
     static SophiaInstance createSophiaInstance(SamplePair samplePair, Map properties = [:]) {
         return createDomainObject(SophiaInstance, [
                 samplePair        : samplePair,
@@ -935,6 +980,9 @@ class DomainFactory {
         ], properties)
     }
 
+    /**
+     * @deprecated use {@link SophiaDomainFactory#createInstanceWithSameSamplePair()}
+     */
     static SophiaInstance createSophiaInstanceWithSameSamplePair(BamFilePairAnalysis instance) {
         return createDomainObject(SophiaInstance, [
                 processingState   : AnalysisProcessingStates.FINISHED,
@@ -946,6 +994,9 @@ class DomainFactory {
         ], [:])
     }
 
+    /**
+     * @deprecated use {@link AceseqDomainFactory#createInstanceWithRoddyBamFiles()}
+     */
     static AceseqInstance createAceseqInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
         Map map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
         SamplePair samplePair = map.samplePair
@@ -960,6 +1011,9 @@ class DomainFactory {
         return createDomainObject(AceseqInstance, map, properties)
     }
 
+    /**
+     * @deprecated use {@link AceseqDomainFactory#createInstanceWithSameSamplePair()}
+     */
     static AceseqInstance createAceseqInstanceWithSameSamplePair(BamFilePairAnalysis instance, Map properties = [:]) {
         return createDomainObject(AceseqInstance, [
                 processingState   : AnalysisProcessingStates.FINISHED,
@@ -971,10 +1025,16 @@ class DomainFactory {
         ], properties)
     }
 
+    /**
+     * @deprecated use {@link AceseqDomainFactory#getQcClass()}
+     */
     static AceseqQc createAceseqQcWithExistingAceseqInstance(AceseqInstance aceseqInstance) {
         return createAceseqQc([:], [:], [:], aceseqInstance)
     }
 
+    /**
+     * @deprecated use {@link AceseqDomainFactory#getQcClass()}
+     */
     static AceseqQc createAceseqQc(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:], AceseqInstance aceseqInstance = null) {
         return createDomainObject(AceseqQc, [
                 aceseqInstance  : aceseqInstance ?: createAceseqInstanceWithRoddyBamFiles(properties, bamFile1Properties, bamFile2Properties),
@@ -988,6 +1048,9 @@ class DomainFactory {
         ], properties)
     }
 
+    /**
+     * @deprecated use {@link RunYapsaDomainFactory#createInstanceWithRoddyBamFiles()}
+     */
     static RunYapsaInstance createRunYapsaInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
         Map map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
         SamplePair samplePair = map.samplePair
@@ -1000,6 +1063,9 @@ class DomainFactory {
         return createDomainObject(RunYapsaInstance, map, properties)
     }
 
+    /**
+     * @deprecated use {@link RunYapsaDomainFactory#createInstanceWithSameSamplePair()}
+     */
     static RunYapsaInstance createRunYapsaInstanceWithSameSamplePair(BamFilePairAnalysis instance, Map properties = [:]) {
         return createDomainObject(RunYapsaInstance, [
                 processingState   : AnalysisProcessingStates.FINISHED,
@@ -1108,6 +1174,7 @@ class DomainFactory {
         return proxyCore.createSeqType(seqTypeProperties, saveAndValidate)
     }
 
+    @Deprecated
     static SeqType createSeqTypePaired(Map seqTypeProperties = [:], boolean saveAndValidate = true) {
         return createSeqType([libraryLayout: SequencingReadType.PAIRED] + seqTypeProperties, saveAndValidate)
     }
@@ -1411,6 +1478,9 @@ class DomainFactory {
         return proxyCore.createSequenceDataFile(properties)
     }
 
+    /**
+     * @deprecated use {@link SnvDomainFactory#createInstance()}
+     */
     static RoddySnvCallingInstance createRoddySnvCallingInstance(Map properties = [:]) {
         return createDomainObject(RoddySnvCallingInstance, [
                 processingState: AnalysisProcessingStates.IN_PROGRESS,
@@ -1425,6 +1495,9 @@ class DomainFactory {
         ], properties)
     }
 
+    /**
+     * @deprecated use {@link SnvDomainFactory#createInstance()}
+     */
     static RoddySnvCallingInstance createRoddySnvCallingInstance(SamplePair samplePair, Map properties = [:]) {
         return createDomainObject(RoddySnvCallingInstance, [
                 samplePair        : samplePair,
@@ -1758,6 +1831,9 @@ class DomainFactory {
         return ExternalBamFactoryInstance.INSTANCE.createFinishedBamFile(properties)
     }
 
+    /**
+     * @deprecated use {@link AbstractAnalysisDomainFactory#createProcessingThresholds()}
+     */
     static ProcessingThresholds createProcessingThresholds(Map properties = [:]) {
         return createDomainObject(ProcessingThresholds, [
                 project      : { createProject() },
@@ -1768,6 +1844,9 @@ class DomainFactory {
         ], properties)
     }
 
+    /**
+     * @deprecated use {@link AbstractAnalysisDomainFactory#findOrCreateProcessingThresholdsForMergingWorkPackage()}
+     */
     static ProcessingThresholds createProcessingThresholdsForMergingWorkPackage(AbstractMergingWorkPackage mergingWorkPackage, Map properties = [:]) {
         return createProcessingThresholds([
                 project   : mergingWorkPackage.project,
@@ -1776,6 +1855,9 @@ class DomainFactory {
         ] + properties)
     }
 
+    /**
+     * @deprecated use {@link AbstractAnalysisDomainFactory#findOrCreateProcessingThresholdsForSeqTrack()}
+     */
     static ProcessingThresholds createProcessingThresholdsForSeqTrack(SeqTrack seqTrack, Map properties = [:]) {
         return createProcessingThresholds([
                 project   : seqTrack.project,
@@ -1784,10 +1866,16 @@ class DomainFactory {
         ] + properties)
     }
 
+    /**
+     * @deprecated use {@link AbstractAnalysisDomainFactory#findOrCreateProcessingThresholdsForBamFile()}
+     */
     static ProcessingThresholds createProcessingThresholdsForBamFile(AbstractBamFile bamFile, Map properties = [:]) {
         return createProcessingThresholdsForMergingWorkPackage(bamFile.mergingWorkPackage, properties)
     }
 
+    /**
+     * @deprecated use {@link AceseqDomainFactory#getQcFileContent()}
+     */
     static void createAceseqQaFileOnFileSystem(Path qaFile) {
         Files.createDirectories(qaFile.parent)
         qaFile << """\
@@ -1812,6 +1900,9 @@ class DomainFactory {
 """
     }
 
+    /**
+     * @deprecated use {@link SophiaDomainFactory#getQcFileContent()}
+     */
     static void createSophiaQcFileOnFileSystem(Path qcFile) {
         Files.createDirectories(qcFile.parent)
         qcFile << """\
@@ -1827,6 +1918,9 @@ class DomainFactory {
 """
     }
 
+    /**
+     * @deprecated use {@link IndelDomainFactory#getSampleSwapDetectionFileContent()}}
+     */
     static void createIndelQcFileOnFileSystem(Path qcFile) {
         Files.createDirectories(qcFile.parent)
         qcFile << """
@@ -1861,6 +1955,9 @@ class DomainFactory {
 """
     }
 
+    /**
+     * @deprecated use {@link IndelDomainFactory#getQcFileContent()}
+     */
     static void createIndelSampleSwapDetectionFileOnFileSystem(Path qcFile, Individual individual) {
         Files.createDirectories(qcFile.parent)
         qcFile << """

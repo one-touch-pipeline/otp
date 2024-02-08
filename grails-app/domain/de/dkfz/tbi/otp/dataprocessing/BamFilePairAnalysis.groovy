@@ -83,8 +83,8 @@ abstract class BamFilePairAnalysis implements Artefact, CommentableWithProject, 
                     val.mergingWorkPackage.id == obj.samplePair.mergingWorkPackage2.id
         }
         instanceName blank: false, unique: 'samplePair', shared: "pathComponent"
-        config validator: { val ->
-            ([SnvConfig, RoddyWorkflowConfig, RunYapsaConfig].any { it.isAssignableFrom(Hibernate.getClass(val)) }) &&
+        config nullable: true, validator: { val ->
+            !val || ([SnvConfig, RoddyWorkflowConfig, RunYapsaConfig].any { it.isAssignableFrom(Hibernate.getClass(val)) }) &&
                     val?.pipeline?.type != Pipeline.Type.ALIGNMENT
         }
         qcTrafficLightStatus nullable: true, validator: { status, obj ->

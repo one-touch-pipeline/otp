@@ -104,7 +104,6 @@ class BamFilePairAnalysisSpec extends Specification implements DataTest {
 
         where:
         property << [
-                "config",
                 "samplePair",
                 "instanceName",
                 "sampleType1BamFile",

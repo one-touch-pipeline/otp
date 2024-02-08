@@ -19,18 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.domainFactory.pipelines
+package de.dkfz.tbi.otp.domainFactory.pipelines.analysis
 
-import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 
-trait IsBamFilePairAnalysis implements IsPipeline {
+class RunYapsaDomainFactory extends AbstractAnalysisDomainFactory<RunYapsaInstance> {
 
-    abstract BamFilePairAnalysis createBamFilePairAnalysis(SamplePair samplePair, Map properties = [:])
+    static final RunYapsaDomainFactory INSTANCE = new RunYapsaDomainFactory()
 
-    abstract BamFilePairAnalysis createBamFilePairAnalysisWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:])
-
-    BamFilePairAnalysis createBamFilePairAnalysisWithSameSamplePair(BamFilePairAnalysis instance) {
-        return createBamFilePairAnalysis(instance.samplePair)
+    @Override
+    protected Class<RunYapsaInstance> getInstanceClass() {
+        return RunYapsaInstance
     }
 }
