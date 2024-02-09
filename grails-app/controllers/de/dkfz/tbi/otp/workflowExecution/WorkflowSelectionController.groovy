@@ -356,15 +356,39 @@ class WorkflowVersionComparatorConsideringDefaultAndDeprecated implements Compar
 
     @Override
     int compare(WorkflowVersion a, WorkflowVersion b) {
-        if (a == defaultVersion) {
+        if (defaultVersion && a.workflowVersion == defaultVersion.workflowVersion) {
             return -1
-        } else if (b == defaultVersion) {
+        } else if (defaultVersion && b.workflowVersion == defaultVersion.workflowVersion) {
             return 1
         } else if (a.deprecatedDate && !b.deprecatedDate) {
             return 1
         } else if (b.deprecatedDate && !a.deprecatedDate) {
             return -1
         }
-        return a <=> b
+        return compareVersion(a, b)
+    }
+
+    private int compareVersion(WorkflowVersion wv1, WorkflowVersion wv2) {
+        String[] s1 = splitBySeparator(wv1.workflowVersion)
+        String[] s2 = splitBySeparator(wv2.workflowVersion)
+
+        for (int i = 0; i < Math.min(s1.length, s2.length); i++) {
+            int result = compareToken(s1[i], s2[i])
+            if (result != 0) {
+                return -result
+            }
+        }
+        return s2.length <=> s1.length
+    }
+
+    private String[] splitBySeparator(String s) {
+        return s.split(/[-\/.]/)
+    }
+
+    private int compareToken(String s1, String s2) {
+        if (s1.isInteger() && s2.isInteger()) {
+            return s1 as Integer <=> s2 as Integer
+        }
+        return String.CASE_INSENSITIVE_ORDER.compare(s1, s2)
     }
 }

@@ -41,17 +41,31 @@ class WorkflowVersionComparatorConsideringDefaultAndDeprecatedSpec extends Speci
 
     void "compare should sort Workflow Versions by default version, normal version and deprecated versions last"() {
         given:
-        WorkflowVersion defaultVersion = createWorkflowVersion()
+        WorkflowApiVersion apiVersion = createWorkflowApiVersion()
+        WorkflowVersion defaultVersion = createWorkflowVersion([apiVersion: apiVersion,])
         WorkflowVersionComparatorConsideringDefaultAndDeprecated comparator = new WorkflowVersionComparatorConsideringDefaultAndDeprecated(defaultVersion)
-        WorkflowVersion deprecatedVersion1 = createWorkflowVersion([deprecatedDate: LocalDate.of(2020, Month.APRIL, 8), workflowVersion: "1.0.1"])
-        WorkflowVersion deprecatedVersion2 = createWorkflowVersion([deprecatedDate: LocalDate.of(2020, Month.MARCH, 7), workflowVersion: "2.0.13"])
-        WorkflowVersion deprecatedVersion3 = createWorkflowVersion([deprecatedDate: LocalDate.of(2022, Month.JANUARY, 20), workflowVersion: "1.3.2"])
-        WorkflowVersion workflowVersion1 = createWorkflowVersion([workflowVersion: "1.0.0"])
-        WorkflowVersion workflowVersion2 = createWorkflowVersion([workflowVersion: "3.4.2"])
-        WorkflowVersion workflowVersion3 = createWorkflowVersion([workflowVersion: "1.2.3"])
+        WorkflowVersion deprecatedVersion1 = createWorkflowVersion([apiVersion: apiVersion, deprecatedDate: LocalDate.of(2020, Month.APRIL, 8), workflowVersion: "1.0.1"])
+        WorkflowVersion deprecatedVersion2 = createWorkflowVersion([apiVersion: apiVersion, deprecatedDate: LocalDate.of(2020, Month.MARCH, 7), workflowVersion: "2.0.13"])
+        WorkflowVersion deprecatedVersion3 = createWorkflowVersion([apiVersion: apiVersion, deprecatedDate: LocalDate.of(2022, Month.JANUARY, 20), workflowVersion: "1.3.2.4"])
+        WorkflowVersion deprecatedVersion4 = createWorkflowVersion([apiVersion: apiVersion, deprecatedDate: LocalDate.of(2022, Month.JANUARY, 20), workflowVersion: "1.3"])
+        WorkflowVersion deprecatedVersion5 = createWorkflowVersion([apiVersion: apiVersion, deprecatedDate: LocalDate.of(2022, Month.JANUARY, 20), workflowVersion: "1.3.2"])
+        WorkflowVersion workflowVersion1 = createWorkflowVersion([apiVersion: apiVersion, workflowVersion: "1.0.0"])
+        WorkflowVersion workflowVersion2 = createWorkflowVersion([apiVersion: apiVersion, workflowVersion: "3.4.2"])
+        WorkflowVersion workflowVersion3 = createWorkflowVersion([apiVersion: apiVersion, workflowVersion: "1.2.3"])
+        WorkflowVersion workflowVersion4 = createWorkflowVersion([apiVersion: apiVersion, workflowVersion: "1.2.3.4"])
+        WorkflowVersion workflowVersion5 = createWorkflowVersion([apiVersion: apiVersion, workflowVersion: "1.2"])
         List<WorkflowVersion> listToSort = [
-                workflowVersion2, deprecatedVersion2, deprecatedVersion1, defaultVersion,
-                workflowVersion1, deprecatedVersion3, workflowVersion3,
+                defaultVersion,
+                deprecatedVersion1,
+                deprecatedVersion2,
+                deprecatedVersion3,
+                deprecatedVersion4,
+                deprecatedVersion5,
+                workflowVersion1,
+                workflowVersion2,
+                workflowVersion3,
+                workflowVersion4,
+                workflowVersion5,
         ]
 
         when:
@@ -59,8 +73,44 @@ class WorkflowVersionComparatorConsideringDefaultAndDeprecatedSpec extends Speci
 
         then:
         listToSort == [
-                defaultVersion, workflowVersion2, workflowVersion3, workflowVersion1,
-                deprecatedVersion2, deprecatedVersion3, deprecatedVersion1,
+                defaultVersion,
+                workflowVersion2,
+                workflowVersion4,
+                workflowVersion3,
+                workflowVersion5,
+                workflowVersion1,
+                deprecatedVersion2,
+                deprecatedVersion3,
+                deprecatedVersion5,
+                deprecatedVersion4,
+                deprecatedVersion1,
+        ]
+    }
+
+    void "compare should sort Workflow Versions also if no default is configured"() {
+        given:
+        WorkflowApiVersion apiVersion = createWorkflowApiVersion()
+        WorkflowVersionComparatorConsideringDefaultAndDeprecated comparator = new WorkflowVersionComparatorConsideringDefaultAndDeprecated()
+        WorkflowVersion deprecatedVersion1 = createWorkflowVersion([apiVersion: apiVersion, deprecatedDate: LocalDate.of(2020, Month.APRIL, 8), workflowVersion: "1.0.1"])
+        WorkflowVersion deprecatedVersion2 = createWorkflowVersion([apiVersion: apiVersion, deprecatedDate: LocalDate.of(2020, Month.MARCH, 7), workflowVersion: "2.0.13"])
+        WorkflowVersion workflowVersion1 = createWorkflowVersion([apiVersion: apiVersion, workflowVersion: "1.0.0"])
+        WorkflowVersion workflowVersion2 = createWorkflowVersion([apiVersion: apiVersion, workflowVersion: "3.4.2"])
+        List<WorkflowVersion> listToSort = [
+                deprecatedVersion1,
+                deprecatedVersion2,
+                workflowVersion1,
+                workflowVersion2,
+        ]
+
+        when:
+        listToSort.sort { a, b -> comparator.compare(a, b) }
+
+        then:
+        listToSort == [
+                workflowVersion2,
+                workflowVersion1,
+                deprecatedVersion2,
+                deprecatedVersion1,
         ]
     }
 }
