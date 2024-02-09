@@ -107,33 +107,28 @@ try {
             assert !projectHasDataDependencies(project): "The project contains data, disable `assertProjectEmpty` to override this check"
         }
 
-        if (deleteAnalysisDirectory) {
-            output << """\
-            |# Analysis Directory
-            |${getDeletePotentialLinkAndTargetCommand(project.dirAnalysis)}""".stripMargin()
-        }
-
         switch (mode) {
             case ProjectDeletionMode.DELETE_ALL:
                 output << """\
-                |# Project Directory:"
-                |## Content:
+                |# Deletion of Project Directory:
                 |rm -rf ${absoluteProjectDirectory}/*
                 |
-                |## Directory:
-                |${getDeletePotentialLinkAndTargetCommand(absoluteProjectDirectory)}
+                |## In the rare case that the project directory is linked:
+                |rm -rf "`readlink -f ${absoluteProjectDirectory}`"
                 |
                 |## UUID Directories:
                 ${uUIDFolders}""".stripMargin()
+                output << deleteDirectoryIfFlagSet(deleteAnalysisDirectory, project.dirAnalysis)
                 deletionService.deleteProject(project)
                 break
             case ProjectDeletionMode.DELETE_SEQUENCING_ONLY:
                 output << """\
-                |# Sequence Directory:"
+                |# Sequence Directory:
                 |rm -rf ${absoluteProjectDirectory}/sequencing/
                 |
                 |## UUID Directories:
                 ${uUIDFolders}""".stripMargin()
+                output << deleteDirectoryIfFlagSet(deleteAnalysisDirectory, project.dirAnalysis)
                 deletionService.deleteProjectContent(project)
                 break
             default:
@@ -157,13 +152,17 @@ try {
     throw t
 }
 
-String getDeletePotentialLinkAndTargetCommand(String path) {
-    Closure<String> rtrim = { String input ->
-        input.replaceAll(/\/*$/, '')
+String deleteDirectoryIfFlagSet(boolean deleteAnalysisDirectory, String directoryPath) {
+    if (deleteAnalysisDirectory && directoryPath) {
+        return """\
+                    |# Deletion of Analysis Directory:
+                    |rm -rf ${directoryPath}/*
+                    |
+                    |## In the rare case that the project directory is linked:
+                    |rm -rf "`readlink -f ${directoryPath}`"
+                    """.stripMargin()
     }
-    return """\
-        |rm -rf "`readlink -f ${path}`"
-        |rm -rf ${rtrim(path)}""".stripMargin()
+    return ""
 }
 
 boolean projectHasDataDependencies(Project project) {
