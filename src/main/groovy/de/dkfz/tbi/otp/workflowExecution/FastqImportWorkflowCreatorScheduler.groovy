@@ -94,6 +94,7 @@ class FastqImportWorkflowCreatorScheduler extends AbstractWorkflowCreatorSchedul
     }
 
     @Override
+    @Transactional(readOnly = true)
     protected void sendWorkflowCreateSuccessMail(Long importId, Instant instant, String message) {
         FastqImportInstance fastqImportInstance = FastqImportInstance.get(importId)
         MetaDataFile metaDataFile = metaDataFileService.findByFastqImportInstance(fastqImportInstance)
@@ -101,6 +102,7 @@ class FastqImportWorkflowCreatorScheduler extends AbstractWorkflowCreatorSchedul
     }
 
     @Override
+    @Transactional(readOnly = true)
     protected void sendWorkflowCreateErrorMail(Long importId, Instant instant, Throwable throwable) {
         FastqImportInstance fastqImportInstance = FastqImportInstance.get(importId)
         MetaDataFile metaDataFile = metaDataFileService.findByFastqImportInstance(fastqImportInstance)
