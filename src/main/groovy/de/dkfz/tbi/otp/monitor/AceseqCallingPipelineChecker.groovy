@@ -23,7 +23,9 @@ package de.dkfz.tbi.otp.monitor
 
 import groovy.transform.CompileDynamic
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class AceseqCallingPipelineChecker extends AbstractVariantCallingPipelineChecker {

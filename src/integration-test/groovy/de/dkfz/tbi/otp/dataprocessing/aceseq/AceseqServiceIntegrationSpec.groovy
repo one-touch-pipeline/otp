@@ -19,19 +19,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataprocessing.snvcalling
+package de.dkfz.tbi.otp.dataprocessing.aceseq
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 @Rollback
 @Integration
-class AceSeqServiceIntegrationSpec extends Specification {
+class AceseqServiceIntegrationSpec extends Specification {
 
     SamplePair samplePair1
     ConfigPerProjectAndSeqType roddyConfig1

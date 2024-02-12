@@ -23,9 +23,7 @@ package de.dkfz.tbi.otp.analysis.pair.roddy.sophia
 
 import de.dkfz.tbi.otp.analysis.pair.roddy.AbstractRoddyBamFilePairAnalysisWorkflowTests
 import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
-import de.dkfz.tbi.otp.dataprocessing.SophiaService
-import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
-import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
+import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.ProjectService

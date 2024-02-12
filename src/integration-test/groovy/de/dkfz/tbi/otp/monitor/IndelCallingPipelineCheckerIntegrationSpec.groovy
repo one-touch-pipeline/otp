@@ -23,7 +23,9 @@ package de.dkfz.tbi.otp.monitor
 
 import grails.gorm.transactions.Rollback
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 @Rollback

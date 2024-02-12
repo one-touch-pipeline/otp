@@ -19,41 +19,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataprocessing
+package de.dkfz.tbi.otp.dataprocessing.indelcalling
 
-import grails.gorm.hibernate.annotation.ManagedEntity
+import grails.testing.services.ServiceUnitTest
 
-import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileAnalysisServiceSpec
+import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
-@ManagedEntity
-class AceseqQc implements Entity {
+class IndelServiceSpec extends AbstractBamFileAnalysisServiceSpec implements ServiceUnitTest<IndelCallingService> {
+    String pathPart = 'indel_results'
 
-    AceseqInstance aceseqInstance
-
-    int number
-
-    // tumor cell content
-    double tcc
-
-    String ploidyFactor
-
-    double ploidy
-
-    double goodnessOfFit
-
-    String gender
-
-    int solutionPossible
-
-    static belongsTo = [
-            aceseqInstance: AceseqInstance,
-    ]
-
-    static constraints = {
-        number unique: 'aceseqInstance'
-    }
-
-    static Closure mapping = {
-        aceseqInstance index: "aceseq_qc_aceseq_instance_idx"
+    @Override
+    BamFilePairAnalysis getNewInstance() {
+        return DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
     }
 }

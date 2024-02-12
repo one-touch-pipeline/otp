@@ -22,10 +22,11 @@
 package operations.startWorkflow
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.job.jobs.indelCalling.*
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.job.jobs.indelCalling.RoddyIndelCallingStartJob
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 // sample pair defined by:
 // PID SAMPLETYPE1 SAMPLETYPE2 SEQTYPE_NAME

@@ -23,8 +23,8 @@ package de.dkfz.tbi.otp.tracking
 
 import groovy.transform.TupleConstructor
 
-import de.dkfz.tbi.otp.dataprocessing.AceseqInstance
-import de.dkfz.tbi.otp.dataprocessing.IndelCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AbstractSnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair

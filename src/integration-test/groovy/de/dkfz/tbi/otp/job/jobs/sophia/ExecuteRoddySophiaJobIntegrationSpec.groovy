@@ -21,19 +21,19 @@
  */
 package de.dkfz.tbi.otp.job.jobs.sophia
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
-import spock.lang.Specification
-import spock.lang.TempDir
-import spock.lang.Unroll
+import grails.testing.mixin.integration.Integration
+import spock.lang.*
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.IndividualService
 import de.dkfz.tbi.otp.utils.*
 
 import java.nio.file.FileSystems

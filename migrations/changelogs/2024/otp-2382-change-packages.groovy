@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2011-2024 The OTP authors
  *
@@ -19,17 +20,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataprocessing
 
-import grails.testing.services.ServiceUnitTest
-
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-
-class RunYapsaServiceSpec extends AbstractBamFileAnalysisServiceSpec implements ServiceUnitTest<RunYapsaService> {
-    String pathPart = 'mutational_signatures_results'
-
-    @Override
-    BamFilePairAnalysis getNewInstance() {
-        return DomainFactory.createRunYapsaInstanceWithRoddyBamFiles()
+databaseChangeLog = {
+    changeSet(author: "-", id: "1707749323172-92") {
+        sql("""
+UPDATE bam_file_pair_analysis SET class = 'de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance' WHERE class = 'de.dkfz.tbi.otp.dataprocessing.AceseqInstance';
+UPDATE bam_file_pair_analysis SET class = 'de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance' WHERE class = 'de.dkfz.tbi.otp.dataprocessing.IndelCallingInstance';
+        """)
     }
 }

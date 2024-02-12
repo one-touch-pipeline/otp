@@ -19,15 +19,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataprocessing
+package de.dkfz.tbi.otp.dataprocessing.aceseq
 
 import grails.testing.services.ServiceUnitTest
 import spock.lang.TempDir
 import spock.lang.Unroll
-import java.nio.file.Path
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileAnalysisServiceSpec
+import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
+
+import java.nio.file.Path
 
 class AceseqServiceSpec extends AbstractBamFileAnalysisServiceSpec implements ServiceUnitTest<AceseqService> {
 

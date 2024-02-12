@@ -27,6 +27,10 @@ import spock.lang.*
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QcTrafficLightStatus
+import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqService
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingService
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaService
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority

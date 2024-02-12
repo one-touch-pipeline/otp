@@ -19,38 +19,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp
+package de.dkfz.tbi.otp.dataprocessing.runYapsa
 
-import grails.converters.JSON
-import grails.gorm.transactions.Rollback
-import grails.testing.mixin.integration.Integration
-import org.grails.web.json.JSONElement
-import spock.lang.Specification
+import grails.testing.services.ServiceUnitTest
 
-import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqQc
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileAnalysisServiceSpec
+import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
-@Rollback
-@Integration
-class NumberConverterBeanSpec extends Specification {
+class RunYapsaServiceSpec extends AbstractBamFileAnalysisServiceSpec implements ServiceUnitTest<RunYapsaService> {
+    String pathPart = 'mutational_signatures_results'
 
-    void "test conversion of double"() {
-        given:
-        String jsonString = """
-{
-"gender":"male",
-"solutionPossible":"3",
-"tcc":"0.5",
-"goodnessOfFit":"0.904231625835189",
-"ploidyFactor":"2.27",
-"ploidy":"2",
-}"""
-
-        JSONElement json = JSON.parse(jsonString)
-
-        when:
-        AceseqQc qc = new AceseqQc(json)
-
-        then:
-        qc.tcc == 0.5d
+    @Override
+    BamFilePairAnalysis getNewInstance() {
+        return DomainFactory.createRunYapsaInstanceWithRoddyBamFiles()
     }
 }

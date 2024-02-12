@@ -160,4 +160,6 @@ databaseChangeLog = {
     include file: 'changelogs/2024/otp-2385-set-bean-name-analysis.groovy'
 
     include file: 'changelogs/2024/otp-2385-add-artefact-to-bamFilePairAnalysis.groovy'
+
+    include file: 'changelogs/2024/otp-2382-change-packages.groovy'
 }

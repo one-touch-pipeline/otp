@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 
 /**
  * Show the used plugin version per cluster, project and pipeline.

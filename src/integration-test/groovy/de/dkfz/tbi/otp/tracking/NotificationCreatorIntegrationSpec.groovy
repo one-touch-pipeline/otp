@@ -30,8 +30,12 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.AbstractIntegrationSpecWithoutRollbackAnnotation
 import de.dkfz.tbi.otp.TestMessageSourceService
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqService
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingService
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.ngsdata.*

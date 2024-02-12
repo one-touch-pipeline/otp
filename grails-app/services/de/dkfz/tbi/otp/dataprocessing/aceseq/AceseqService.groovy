@@ -19,11 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataprocessing
+package de.dkfz.tbi.otp.dataprocessing.aceseq
 
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.PlotType
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
