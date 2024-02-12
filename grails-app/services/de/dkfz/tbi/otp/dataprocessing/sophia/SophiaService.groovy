@@ -30,9 +30,16 @@ import java.nio.file.Path
 @Transactional
 class SophiaService extends AbstractBamFileAnalysisService<SophiaInstance> implements RoddyBamFileAnalysis, WithReferenceGenomeRestriction {
 
+    @Deprecated
     private final static String SOPHIA_RESULTS_PATH_PART = 'sv_results'
+
+    @Deprecated
     private final static String SOPHIA_OUTPUT_FILE_SUFFIX = "filtered_somatic_minEventScore3.tsv"
+
+    @Deprecated
     private final static String QUALITY_CONTROL_JSON_FILE_NAME = "qualitycontrol.json"
+
+    @Deprecated
     private final static String COMBINED_PLOT_FILE_SUFFIX = "filtered.tsv_score_3_scaled_merged.pdf"
 
     @Override
@@ -76,22 +83,33 @@ class SophiaService extends AbstractBamFileAnalysisService<SophiaInstance> imple
     }
 
     @Override
+    @Deprecated
     protected String getResultsPathPart() {
         return SOPHIA_RESULTS_PATH_PART
     }
 
+    /**
+     * @deprecated use {@link SophiaLinkFileService#getFinalAceseqInputFile()} or {@link SophiaWorkFileService#getFinalAceseqInputFile()}
+     */
     Path getFinalAceseqInputFile(SophiaInstance instance) {
         return getWorkDirectory(instance).resolve("svs_${instance.individual.pid}_${SOPHIA_OUTPUT_FILE_SUFFIX}")
     }
 
+    /**
+     * @deprecated use {@link SophiaLinkFileService#getCombinedPlotPath()} or {@link SophiaWorkFileService#getCombinedPlotPath()}
+     */
     Path getCombinedPlotPath(SophiaInstance instance) {
         return getWorkDirectory(instance).resolve("${getFileNamePrefix(instance)}_${COMBINED_PLOT_FILE_SUFFIX}")
     }
 
+    /**
+     * @deprecated use {@link SophiaLinkFileService#getQcJsonFile()} or {@link SophiaWorkFileService#getQcJsonFile()}
+     */
     Path getQcJsonFile(SophiaInstance instance) {
         return getWorkDirectory(instance).resolve(QUALITY_CONTROL_JSON_FILE_NAME)
     }
 
+    @Deprecated
     private String getFileNamePrefix(SophiaInstance instance) {
         return "svs_${instance.individual.pid}_${instance.samplePair.sampleType1.name.toLowerCase()}-${instance.samplePair.sampleType2.name.toLowerCase()}"
     }

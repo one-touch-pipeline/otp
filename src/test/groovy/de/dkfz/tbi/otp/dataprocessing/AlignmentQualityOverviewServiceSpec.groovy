@@ -44,6 +44,7 @@ class AlignmentQualityOverviewServiceSpec extends Specification implements Servi
     @Override
     Class[] getDomainClassesToMock() {
         return [
+                MergingWorkPackage,
                 RoddyBamFile,
         ]
     }
@@ -60,7 +61,7 @@ class AlignmentQualityOverviewServiceSpec extends Specification implements Servi
         service.roddyResultServiceFactoryService = Mock(RoddyResultServiceFactoryService) {
             1 * getService(roddyBamFile) >> {
                 return Mock(RoddyResultServiceTrait) {
-                    1 * getWorkDirectory(roddyBamFile) >> workDir
+                    1 * getDirectoryPath(roddyBamFile) >> workDir
                     0 * _
                 }
             }

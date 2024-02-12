@@ -19,33 +19,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataprocessing.snvcalling
+package de.dkfz.tbi.otp.dataprocessing
 
-import grails.gorm.hibernate.annotation.ManagedEntity
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.ngsdata.IndividualService
 
-import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import java.nio.file.Path
 
-/**
- * For each tumor-control pair the snv pipeline will be called.
- * The AbstractSnvCallingInstance symbolizes one call of the pipeline.
- */
-@ManagedEntity
-abstract class AbstractSnvCallingInstance extends BamFilePairAnalysis {
+abstract class AbstractAnalysisLinkFileService<T extends BamFilePairAnalysis> implements ArtefactFileService<T> {
 
-    /**
-     * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/snv_results/paired/tumor_control/2014-08-25_15h32
-     *
-     * @deprecated use {@link SnvLinkFileService#getDirectoryPath()} or {@link SnvWorkFileService#getDirectoryPath()}}
-     */
-    @Override
-    @Deprecated
-    OtpPath getInstancePath() {
-        return new OtpPath(samplePair.snvSamplePairPath, instanceName)
+    IndividualService individualService
+
+    Path getDirectoryPath(T instance) {
+        return getSamplePairPath(instance.samplePair).resolve(instance.instanceName)
     }
 
-    @Override
-    String toString() {
-        return "SCI ${id} ${withdrawn ? ' (withdrawn)' : ''}: ${instanceName} ${samplePair.toStringWithoutId()}"
+    Path getSamplePairPath(SamplePair samplePair) {
+        return individualService.getViewByPidPath(samplePair.individual, samplePair.seqType)
+                .resolve(resultsDirectoryName)
+                .resolve(samplePair.seqType.libraryLayoutDirName)
+                .resolve("${samplePair.sampleType1.dirName}_${samplePair.sampleType2.dirName}")
     }
+
+    abstract String getResultsDirectoryName()
 }

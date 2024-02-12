@@ -31,7 +31,10 @@ import java.nio.file.Path
 @Transactional
 class SnvCallingService extends AbstractBamFileAnalysisService<AbstractSnvCallingInstance> implements RoddyBamFileAnalysis {
 
+    @Deprecated
     private final static String SNV_RESULTS_PATH_PART = 'snv_results'
+
+    @Deprecated
     private final static String SNV_RESULTS_PREFIX = 'snvs_'
 
     FileService fileService
@@ -53,6 +56,10 @@ class SnvCallingService extends AbstractBamFileAnalysisService<AbstractSnvCallin
         return Pipeline.Name.RODDY_SNV
     }
 
+    /**
+     * @deprecated use {@link SnvLinkFileService#getResultRequiredForRunYapsa()} or {@link SnvWorkFileService#getResultRequiredForRunYapsa()}
+     */
+    @Deprecated
     Path getResultRequiredForRunYapsaAndEnsureIsReadableAndNotEmpty(BamFilePairAnalysis bamFilePairAnalysis) {
         final Path workDirectory = getWorkDirectory(bamFilePairAnalysis.samplePair.findLatestSnvCallingInstance())
         final String minConfScore = /[0-9]/
@@ -62,18 +69,28 @@ class SnvCallingService extends AbstractBamFileAnalysisService<AbstractSnvCallin
     }
 
     @Override
+    @Deprecated
     protected String getResultsPathPart() {
         return SNV_RESULTS_PATH_PART
     }
 
+    /**
+     * @deprecated use {@link SnvLinkFileService#getSnvCallingResult()} or {@link SnvWorkFileService#getSnvCallingResult()}
+     */
     Path getSnvCallingResult(AbstractSnvCallingInstance instance) {
         return getWorkDirectory(instance).resolve("${SNV_RESULTS_PREFIX}${instance.individual.pid}_raw.vcf.gz")
     }
 
+    /**
+     * @deprecated use {@link SnvLinkFileService#getSnvDeepAnnotationResult()} or {@link SnvWorkFileService#getSnvDeepAnnotationResult()}
+     */
     Path getSnvDeepAnnotationResult(AbstractSnvCallingInstance instance) {
         return getWorkDirectory(instance).resolve("${SNV_RESULTS_PREFIX}${instance.individual.pid}.vcf.gz")
     }
 
+    /**
+     * @deprecated use {@link SnvLinkFileService#getCombinedPlotPath()} or {@link SnvWorkFileService#getCombinedPlotPath()}
+     */
     Path getCombinedPlotPath(AbstractSnvCallingInstance instance) {
         return getWorkDirectory(instance).resolve("${SNV_RESULTS_PREFIX}${instance.individual.pid}_allSNVdiagnosticsPlots.pdf")
     }

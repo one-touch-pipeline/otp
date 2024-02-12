@@ -59,12 +59,15 @@ class RoddyBamFileService extends AbstractAbstractBamFileService<RoddyBamFile> i
         return "${bamFile.bamFileName}.md5"
     }
 
-    @Override
     Path getBaseDirectory(RoddyBamFile bamFile) {
         return abstractBamFileService.getBaseDirectory(bamFile)
     }
 
     @Override
+    Path getDirectoryPath(RoddyBamFile bamFile) {
+        return getWorkDirectory(bamFile)
+    }
+
     Path getWorkDirectory(RoddyBamFile bamFile) {
         if (bamFile.workflowArtefact?.producedBy?.workFolder) {
             return filestoreService.getWorkFolderPath(bamFile.workflowArtefact.producedBy)

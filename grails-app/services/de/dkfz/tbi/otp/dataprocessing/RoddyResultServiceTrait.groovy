@@ -27,17 +27,13 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import java.nio.file.Files
 import java.nio.file.Path
 
-trait RoddyResultServiceTrait<T extends RoddyResult> {
+trait RoddyResultServiceTrait<T extends RoddyResult> implements ArtefactFileService<T> {
 
     static final String RODDY_EXECUTION_STORE_DIR = "roddyExecutionStore"
     static final String RODDY_EXECUTION_DIR_PATTERN = /exec_\d{6}_\d{8,9}_.+_.+/
 
-    abstract Path getWorkDirectory(T rr)
-
-    abstract Path getBaseDirectory(T rr)
-
     Path getWorkExecutionStoreDirectory(T rr) {
-        return getWorkDirectory(rr).resolve(RODDY_EXECUTION_STORE_DIR)
+        return getDirectoryPath(rr).resolve(RODDY_EXECUTION_STORE_DIR)
     }
 
     List<Path> getWorkExecutionDirectories(T rr) {
@@ -45,12 +41,13 @@ trait RoddyResultServiceTrait<T extends RoddyResult> {
             getWorkExecutionStoreDirectory(rr).resolve(it)
         }
     }
+
     /**
-     @returns subdirectory of {@link #getWorkExecutionStoreDirectory} corresponding to the latest roddy call
+     * @returns subdirectory of {@link #getWorkExecutionStoreDirectory} corresponding to the latest roddy call
+     * Example:
+     * exec_150625_102449388_SOMEUSER_WGS
+     * exec_yyMMdd_HHmmssSSS_user_analysis
      */
-    // Example:
-    // exec_150625_102449388_SOMEUSER_WGS
-    // exec_yyMMdd_HHmmssSSS_user_analysis
     Path getLatestWorkExecutionDirectory(T rr) {
         assert rr.roddyExecutionDirectoryNames: "No roddyExecutionDirectoryNames have been stored in the database for ${this}."
 

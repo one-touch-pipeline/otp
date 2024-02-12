@@ -24,14 +24,10 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 import grails.gorm.hibernate.annotation.ManagedEntity
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
-import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqService
-import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingService
-import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
-import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaService
-import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
-import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaService
+import de.dkfz.tbi.otp.dataprocessing.aceseq.*
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.*
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
+import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
@@ -154,7 +150,7 @@ class SamplePair implements Entity {
     /**
      * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/snv_results/paired/tumor_control
      *
-     * @deprecated use {@link SnvCallingService#getSamplePairPath(SamplePair)}
+     * @deprecated use {@link SnvLinkFileService#getDirectoryPath()} or {@link SnvWorkFileService#getDirectoryPath()}
      */
     @Deprecated
     OtpPath getSnvSamplePairPath() {
@@ -162,7 +158,7 @@ class SamplePair implements Entity {
     }
 
     /**
-     * @deprecated use {@link IndelCallingService#getSamplePairPath(SamplePair)}
+     * @deprecated use {@link IndelLinkFileService#getDirectoryPath()} or {@link IndelWorkFileService#getDirectoryPath()}
      */
     @Deprecated
     OtpPath getIndelSamplePairPath() {
@@ -170,7 +166,7 @@ class SamplePair implements Entity {
     }
 
     /**
-     * @deprecated use {@link SophiaService#getSamplePairPath(SamplePair)}
+     * @deprecated use {@link SophiaLinkFileService#getDirectoryPath()} or {@link SophiaWorkFileService#getDirectoryPath()}
      */
     @Deprecated
     OtpPath getSophiaSamplePairPath() {
@@ -178,7 +174,7 @@ class SamplePair implements Entity {
     }
 
     /**
-     * @deprecated use {@link AceseqService#getSamplePairPath(SamplePair)}
+     * @deprecated use {@link AceseqLinkFileService#getDirectoryPath()} or {@link AceseqWorkFileService#getDirectoryPath()}
      */
     @Deprecated
     OtpPath getAceseqSamplePairPath() {
@@ -186,7 +182,7 @@ class SamplePair implements Entity {
     }
 
     /**
-     * @deprecated use {@link RunYapsaService#getSamplePairPath(SamplePair)}
+     * @deprecated use {@link RunYapsaLinkFileService#getDirectoryPath()} or {@link RunYapsaWorkFileService#getDirectoryPath()}
      */
     @Deprecated
     OtpPath getRunYapsaSamplePairPath() {

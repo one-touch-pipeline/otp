@@ -25,11 +25,12 @@ import grails.gorm.hibernate.annotation.ManagedEntity
 import org.hibernate.Hibernate
 
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 
 @ManagedEntity
-class RoddySnvCallingInstance extends AbstractSnvCallingInstance implements RoddyAnalysisResult, RoddyResult {
+class RoddySnvCallingInstance extends AbstractSnvCallingInstance implements RoddyResult {
 
     static hasMany = [
             roddyExecutionDirectoryNames: String,
@@ -44,6 +45,18 @@ class RoddySnvCallingInstance extends AbstractSnvCallingInstance implements Rodd
     @Override
     RoddyWorkflowConfig getConfig() {
         return RoddyWorkflowConfig.get(super.config.id)
+    }
+
+    @Deprecated
+    @Override
+    Pipeline getPipeline() {
+        return config.pipeline
+    }
+
+    @Deprecated
+    @Override
+    File getBaseDirectory() {
+        return workDirectory.parentFile
     }
 
     @Override

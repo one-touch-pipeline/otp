@@ -42,16 +42,13 @@ class BamFileAnalysisServiceFactoryService {
     SnvCallingService snvCallingService
     SophiaService sophiaService
 
-    AbstractBamFileAnalysisService<? extends BamFilePairAnalysis> getService(Class<? extends BamFilePairAnalysis> clazz) {
-        Map<Class<? extends BamFilePairAnalysis>, AbstractBamFileAnalysisService<? extends BamFilePairAnalysis>> map = [
-                (AceseqInstance)         : aceseqService,
-                (IndelCallingInstance)   : indelCallingService,
-                (RoddySnvCallingInstance): snvCallingService,
-                (RunYapsaInstance)       : runYapsaService,
-                (SnvCallingInstance)     : snvCallingService,
-                (SophiaInstance)         : sophiaService,
-        ]
+    private Map<Class<? extends BamFilePairAnalysis>, AbstractBamFileAnalysisService<? extends BamFilePairAnalysis>> serviceMap
 
+    /**
+     * @deprecated use {@link AnalysisLinkFileServiceFactoryService#getService()} or {@link AnalysisWorkFileServiceFactoryService#getService()}
+     */
+    @Deprecated
+    AbstractBamFileAnalysisService<? extends BamFilePairAnalysis> getService(Class<? extends BamFilePairAnalysis> clazz) {
         AbstractBamFileAnalysisService<? extends BamFilePairAnalysis> result = map[clazz]
         if (!result) {
             throw new IllegalArgumentException("No service exists for ${clazz.simpleName}")
@@ -59,7 +56,23 @@ class BamFileAnalysisServiceFactoryService {
         return result
     }
 
+    /**
+     * @deprecated use {@link AnalysisLinkFileServiceFactoryService#getService()} or {@link AnalysisWorkFileServiceFactoryService#getService()}
+     */
+    @Deprecated
     AbstractBamFileAnalysisService<? extends BamFilePairAnalysis> getService(BamFilePairAnalysis bfpa) {
         return getService(bfpa.class)
+    }
+
+    private Map<Class<? extends BamFilePairAnalysis>, AbstractBamFileAnalysisService<? extends BamFilePairAnalysis>> getMap() {
+        serviceMap = serviceMap ?: Collections.unmodifiableMap([
+                (AceseqInstance)         : aceseqService,
+                (IndelCallingInstance)   : indelCallingService,
+                (RoddySnvCallingInstance): snvCallingService,
+                (RunYapsaInstance)       : runYapsaService,
+                (SnvCallingInstance)     : snvCallingService,
+                (SophiaInstance)         : sophiaService,
+        ])
+        return serviceMap
     }
 }

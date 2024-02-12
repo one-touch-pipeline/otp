@@ -23,13 +23,13 @@ package de.dkfz.tbi.otp.dataprocessing.aceseq
 
 import grails.gorm.hibernate.annotation.ManagedEntity
 
-import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 
 @ManagedEntity
-class AceseqInstance extends BamFilePairAnalysis implements RoddyAnalysisResult, RoddyResult {
+class AceseqInstance extends BamFilePairAnalysis implements RoddyResult {
 
     static hasMany = [
             roddyExecutionDirectoryNames: String,
@@ -39,12 +39,24 @@ class AceseqInstance extends BamFilePairAnalysis implements RoddyAnalysisResult,
      * Example:
      * ${OtpProperty#PATH_PROJECT_ROOT}/${project}/sequencing/$whole_genome_sequencing/view-by-pid/$PID/cnv_results/paired/tumor_control/2014-08-25_15h32
      *
-     * @deprecated use {@link AceseqService#getWorkDirectory()}
+     * @deprecated use {@link AceseqLinkFileService#getDirectoryPath()} or {@link AceseqWorkFileService#getDirectoryPath()}}
      */
     @Override
     @Deprecated
     OtpPath getInstancePath() {
         return new OtpPath(samplePair.aceseqSamplePairPath, instanceName)
+    }
+
+    @Deprecated
+    @Override
+    Pipeline getPipeline() {
+        return config.pipeline
+    }
+
+    @Deprecated
+    @Override
+    File getBaseDirectory() {
+        return workDirectory.parentFile
     }
 
     @Override

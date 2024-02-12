@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 @Transactional
 class RunYapsaService extends AbstractBamFileAnalysisService<RunYapsaInstance> implements WithReferenceGenomeRestriction {
 
+    @Deprecated
     private final static String RUN_YAPSA_RESULTS_PATH_PART = 'mutational_signatures_results'
 
     @Override
@@ -69,6 +70,7 @@ class RunYapsaService extends AbstractBamFileAnalysisService<RunYapsaInstance> i
     }
 
     @Override
+    @Deprecated
     protected String getResultsPathPart() {
         return RUN_YAPSA_RESULTS_PATH_PART
     }

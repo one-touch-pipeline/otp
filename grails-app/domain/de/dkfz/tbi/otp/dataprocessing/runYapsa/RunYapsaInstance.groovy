@@ -23,7 +23,8 @@ package de.dkfz.tbi.otp.dataprocessing.runYapsa
 
 import grails.gorm.hibernate.annotation.ManagedEntity
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 
@@ -34,7 +35,7 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 class RunYapsaInstance extends BamFilePairAnalysis {
 
     /**
-     * @deprecated use {@link RunYapsaService#getWorkDirectory()}
+     * @deprecated use {@link RunYapsaLinkFileService#getDirectoryPath()} or {@link RunYapsaWorkFileService#getDirectoryPath()}}
      */
     @Override
     @Deprecated

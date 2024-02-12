@@ -23,13 +23,13 @@ package de.dkfz.tbi.otp.dataprocessing.indelcalling
 
 import grails.gorm.hibernate.annotation.ManagedEntity
 
-import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 
 @ManagedEntity
-class IndelCallingInstance extends BamFilePairAnalysis implements RoddyAnalysisResult, RoddyResult {
+class IndelCallingInstance extends BamFilePairAnalysis implements RoddyResult {
 
     static hasMany = [
             roddyExecutionDirectoryNames: String,
@@ -38,12 +38,24 @@ class IndelCallingInstance extends BamFilePairAnalysis implements RoddyAnalysisR
     /**
      * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/indel_results/paired/tumor_control/2014-08-25_15h32
      *
-     * @deprecated use {@link IndelCallingService#getWorkDirectory()}
+     * @deprecated use {@link IndelLinkFileService#getDirectoryPath()} or {@link IndelWorkFileService#getDirectoryPath()}}
      */
     @Override
     @Deprecated
     OtpPath getInstancePath() {
         return new OtpPath(samplePair.indelSamplePairPath, instanceName)
+    }
+
+    @Deprecated
+    @Override
+    Pipeline getPipeline() {
+        return config.pipeline
+    }
+
+    @Deprecated
+    @Override
+    File getBaseDirectory() {
+        return workDirectory.parentFile
     }
 
     @Override

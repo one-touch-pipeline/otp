@@ -26,13 +26,14 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyResultServiceTrait
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
+import de.dkfz.tbi.otp.workflowExecution.Artefact
 
 /**
  * This interface must be implemented by all result objects which are created with a Roddy workflow.
  * With this interface it is ensured that all information, needed to call Roddy out of OTP, are provided.
  */
 @SuppressWarnings('JavaIoPackageAccess')
-trait RoddyResult {
+trait RoddyResult implements Artefact {
 
     /**
      * @deprecated use {@link RoddyResultServiceTrait#RODDY_EXECUTION_STORE_DIR} instead
@@ -61,14 +62,11 @@ trait RoddyResult {
     abstract RoddyWorkflowConfig getConfig()
 
     /**
-     * @deprecated use {@link RoddyResultServiceTrait#getWorkDirectory} instead
+     * @deprecated use {@link RoddyResultServiceTrait#getDirectoryPath} instead
      */
     @Deprecated
     abstract File getWorkDirectory()
 
-    /**
-     * @deprecated use {@link RoddyResultServiceTrait#getBaseDirectory} instead
-     */
     @Deprecated
     abstract File getBaseDirectory()
 

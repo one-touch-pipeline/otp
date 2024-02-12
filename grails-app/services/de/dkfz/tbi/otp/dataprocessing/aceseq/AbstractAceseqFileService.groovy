@@ -21,10 +21,10 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.aceseq
 
-import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ArtefactFileService
+import de.dkfz.tbi.otp.dataprocessing.RoddyResultServiceTrait
 import de.dkfz.tbi.otp.ngsdata.PlotType
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -34,74 +34,26 @@ import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.util.stream.Collectors
 
-@CompileDynamic
-@Transactional
-class AceseqService extends AbstractBamFileAnalysisService<AceseqInstance> implements RoddyBamFileAnalysis, WithReferenceGenomeRestriction {
-
-    @Deprecated
-    private final static String ACESEQ_RESULTS_PATH_PART = 'cnv_results'
-
-    @Override
-    protected String getProcessingStateCheck() {
-        return "sp.aceseqProcessingStatus = :needsProcessing AND " +
-                "sp.sophiaProcessingStatus = 'NO_PROCESSING_NEEDED' AND " +
-                "EXISTS (FROM SophiaInstance si " +
-                "  WHERE si.samplePair = sp AND " +
-                "  si.processingState = 'FINISHED' AND " +
-                "  si.withdrawn = false " +
-                ") AND " +
-                "NOT EXISTS (FROM SophiaInstance si " +
-                "  WHERE si.samplePair = sp AND " +
-                "  si.processingState = 'IN_PROGRESS' AND " +
-                "  si.withdrawn = false " +
-                ") "
-    }
-
-    final Class<AceseqInstance> analysisClass = AceseqInstance
-
-    @Override
-    protected Pipeline.Type getAnalysisType() {
-        return Pipeline.Type.ACESEQ
-    }
-
-    @Override
-    Pipeline.Name getPipelineName() {
-        return Pipeline.Name.RODDY_ACESEQ
-    }
-
-    @Override
-    List<String> getReferenceGenomes() {
-        return processingOptionService.findOptionAsList(ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME)
-    }
-
-    @Override
-    @Deprecated
-    protected String getResultsPathPart() {
-        return ACESEQ_RESULTS_PATH_PART
-    }
+@SuppressWarnings('AbstractClassWithoutAbstractMethod')
+abstract trait AbstractAceseqFileService implements ArtefactFileService<AceseqInstance>, RoddyResultServiceTrait<AceseqInstance> {
 
     /**
-     * @deprecated use {@link AceseqLinkFileService#getPlotPath()} or {@link AceseqWorkFileService#getPlotPath()}
+     * Example
+     * ${OtpProperty#PATH_PROJECT_ROOT}/${project}/sequencing/$whole_genome_sequencing/view-by-pid/$PID/cnv_results/paired/tumor_control/2014-08-25_15h32/plots
      */
     private Path getPlotPath(AceseqInstance instance) {
-        return getWorkDirectory(instance).resolve("plots")
+        return getDirectoryPath(instance).resolve("plots")
     }
 
-    /**
-     * @deprecated use {@link AceseqLinkFileService#getQcJsonFile()} or {@link AceseqWorkFileService#getQcJsonFile()}
-     */
     Path getQcJsonFile(AceseqInstance instance) {
-        return getWorkDirectory(instance).resolve("cnv_${instance.individual.pid}_parameter.json")
+        return getDirectoryPath(instance).resolve("cnv_${instance.individual.pid}_parameter.json")
     }
 
-    /**
-     * @deprecated use {@link AceseqLinkFileService#getPlot()} or {@link AceseqWorkFileService#getPlot()}
-     */
     Path getPlot(AceseqInstance instance, PlotType plot) {
         switch (plot) {
             case PlotType.ACESEQ_GC_CORRECTED: return getPlotPath(instance).resolve("${instance.individual.pid}_gc_corrected.png")
             case PlotType.ACESEQ_QC_GC_CORRECTED: return getPlotPath(instance).resolve("${instance.individual.pid}_qc_rep_corrected.png")
-            case PlotType.ACESEQ_TCN_DISTANCE_COMBINED_STAR: return getWorkDirectory(instance)
+            case PlotType.ACESEQ_TCN_DISTANCE_COMBINED_STAR: return getDirectoryPath(instance)
                     .resolve("${instance.individual.pid}_tcn_distances_combined_star.png")
             case PlotType.ACESEQ_WG_COVERAGE: return getPlotPath(instance).resolve("control_${instance.individual.pid}_wholeGenome_coverage.png")
             default: throw new IllegalArgumentException("Unknown AceSeq PlotType \"${plot}\"")
@@ -111,10 +63,10 @@ class AceseqService extends AbstractBamFileAnalysisService<AceseqInstance> imple
     /**
      * Search for Files that is equal to the pattern for plot Extra/ALL in the instance absolute Path
      * @return List with Files that matches with the Pattern
-     * @deprecated use {@link AceseqLinkFileService#getPlots()} or {@link AceseqWorkFileService#getPlots()}
      */
+    @CompileDynamic
     List<Path> getPlots(AceseqInstance instance, PlotType plot) {
-        Path workDirectory = getWorkDirectory(instance)
+        Path workDirectory = getDirectoryPath(instance)
         String pattern
 
         if (!Files.exists(workDirectory)) {
@@ -140,18 +92,13 @@ class AceseqService extends AbstractBamFileAnalysisService<AceseqInstance> imple
         return Files.list(workDirectory).collect(Collectors.toList()).findAll { it.fileName ==~ pattern }.sort()
     }
 
-    /**
-     * @deprecated use {@link AceseqLinkFileService#getAllFiles()} or {@link AceseqWorkFileService#getAllFiles()}
-     */
     List<Path> getAllFiles(AceseqInstance instance) {
-        return [
+        return getPlots(instance, PlotType.ACESEQ_ALL) + getPlots(instance, PlotType.ACESEQ_EXTRA) + [
                 getPlot(instance, PlotType.ACESEQ_GC_CORRECTED),
                 getPlot(instance, PlotType.ACESEQ_QC_GC_CORRECTED),
                 getPlot(instance, PlotType.ACESEQ_TCN_DISTANCE_COMBINED_STAR),
                 getPlot(instance, PlotType.ACESEQ_WG_COVERAGE),
-                getPlots(instance, PlotType.ACESEQ_ALL),
-                getPlots(instance, PlotType.ACESEQ_EXTRA),
                 getQcJsonFile(instance),
-        ].flatten()
+        ]
     }
 }

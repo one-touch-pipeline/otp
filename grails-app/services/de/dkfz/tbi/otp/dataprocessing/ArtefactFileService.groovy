@@ -19,20 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataprocessing.roddyExecution
+package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.workflowExecution.Artefact
 
-trait RoddyAnalysisResult extends RoddyResult {
+import java.nio.file.Path
 
-    @Override
-    Pipeline getPipeline() {
-        return config.pipeline
-    }
-
-    @Deprecated
-    @Override
-    File getBaseDirectory() {
-        return workDirectory.parentFile
-    }
+interface ArtefactFileService<T extends Artefact> {
+    Path getDirectoryPath(T artefact)
 }

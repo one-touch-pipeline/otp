@@ -24,12 +24,12 @@ package de.dkfz.tbi.otp.dataprocessing
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
-import de.dkfz.tbi.otp.utils.exceptions.FileInconsistencyException
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.IndividualService
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.exceptions.FileInconsistencyException
 
 import java.nio.file.Path
 
@@ -194,6 +194,10 @@ abstract class AbstractBamFileAnalysisService<T extends BamFilePairAnalysis> imp
                 ") "
     }
 
+    /**
+     * @deprecated use {@link AbstractAnalysisLinkFileService#getSamplePairPath()}
+     */
+    @Deprecated
     Path getSamplePairPath(SamplePair samplePair) {
         return individualService.getViewByPidPath(samplePair.individual, samplePair.seqType)
                 .resolve(resultsPathPart)
@@ -201,9 +205,14 @@ abstract class AbstractBamFileAnalysisService<T extends BamFilePairAnalysis> imp
                 .resolve("${samplePair.sampleType1.dirName}_${samplePair.sampleType2.dirName}")
     }
 
+    /**
+     * @deprecated use {@link AbstractAnalysisLinkFileService#getDirectoryPath()} or {@link AbstractAnalysisWorkFileService#getDirectoryPath()}
+     */
+    @Deprecated
     Path getWorkDirectory(T instance) {
         return getSamplePairPath(instance.samplePair).resolve(instance.instanceName)
     }
 
+    @Deprecated
     protected abstract String getResultsPathPart()
 }

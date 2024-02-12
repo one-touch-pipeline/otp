@@ -41,7 +41,7 @@ class AlignmentQualityOverviewService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#roddyResult.project, 'OTP_READ_ACCESS')")
     byte[] fetchConfigFileContent(RoddyResult roddyResult) {
-        Path workDir = roddyResultServiceFactoryService.getService(roddyResult).getWorkDirectory(roddyResult)
+        Path workDir = roddyResultServiceFactoryService.getService(roddyResult).getDirectoryPath(roddyResult)
         Path configFile = roddyConfigService.getConfigFile(workDir)
 
         return fileService.fileIsReadable(configFile) ? configFile.bytes : new byte[0]

@@ -127,8 +127,9 @@ abstract class BamFilePairAnalysis implements Artefact, CommentableWithProject, 
     }
 
     /**
-     * @deprecated use {@link AbstractBamFileAnalysisService#getWorkDirectory()}
-     * (use {@link BamFileAnalysisServiceFactoryService#getService()} to get the correct service if necessary)
+     * @deprecated use {@link AbstractAnalysisLinkFileService#getDirectoryPath()} or {@link AbstractAnalysisWorkFileService#getDirectoryPath()}
+     * (use {@link AnalysisLinkFileServiceFactoryService#getService()} or {@link AnalysisWorkFileServiceFactoryService#getService()}
+     * to get the correct service if necessary)
      */
     @Deprecated
     File getWorkDirectory() {
@@ -136,8 +137,9 @@ abstract class BamFilePairAnalysis implements Artefact, CommentableWithProject, 
     }
 
     /**
-     * @deprecated use {@link AbstractBamFileAnalysisService#getWorkDirectory()}
-     * (use {@link BamFileAnalysisServiceFactoryService#getService()} to get the correct service if necessary)
+     * @deprecated use {@link AbstractAnalysisLinkFileService#getDirectoryPath()} or {@link AbstractAnalysisWorkFileService#getDirectoryPath()}
+     * (use {@link AnalysisLinkFileServiceFactoryService#getService()} or {@link AnalysisWorkFileServiceFactoryService#getService()}
+     * to get the correct service if necessary)
      */
     @Deprecated
     abstract OtpPath getInstancePath()

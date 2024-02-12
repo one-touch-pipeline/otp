@@ -21,31 +21,9 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import grails.gorm.hibernate.annotation.ManagedEntity
+import de.dkfz.tbi.otp.dataprocessing.AbstractAnalysisLinkFileService
 
-import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
+class SnvLinkFileService extends AbstractAnalysisLinkFileService<RoddySnvCallingInstance> implements AbstractSnvFileService {
 
-/**
- * For each tumor-control pair the snv pipeline will be called.
- * The AbstractSnvCallingInstance symbolizes one call of the pipeline.
- */
-@ManagedEntity
-abstract class AbstractSnvCallingInstance extends BamFilePairAnalysis {
-
-    /**
-     * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/snv_results/paired/tumor_control/2014-08-25_15h32
-     *
-     * @deprecated use {@link SnvLinkFileService#getDirectoryPath()} or {@link SnvWorkFileService#getDirectoryPath()}}
-     */
-    @Override
-    @Deprecated
-    OtpPath getInstancePath() {
-        return new OtpPath(samplePair.snvSamplePairPath, instanceName)
-    }
-
-    @Override
-    String toString() {
-        return "SCI ${id} ${withdrawn ? ' (withdrawn)' : ''}: ${instanceName} ${samplePair.toStringWithoutId()}"
-    }
+    final String resultsDirectoryName = 'snv_results'
 }
