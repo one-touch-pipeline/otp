@@ -34,11 +34,15 @@ variables:
   GRADLE_USER_HOME: $CI_PROJECT_DIR/cache/gradle # overrides GRADLE_USER_HOME default for caching
   NPM_CACHE: $CI_PROJECT_DIR/cache/npm
   CYPRESS_CACHE: $CI_PROJECT_DIR/cache/cypress
+  GRADLE_WRAPPER_CACHE: $GRADLE_USER_HOME/wrapper
+  GRADLE_CACHES_CACHE: $GRADLE_USER_HOME/caches
+  GRADLE_BUILD_CACHE: $CI_PROJECT_DIR/cache/gradle-build-cache
   BUILD_DIR: 'build'
   ARTIFACT_DOWNLOAD_ATTEMPTS: "3"
   GET_SOURCES_ATTEMPTS: "3"
   RESTORE_CACHE_ATTEMPTS: "3"
   ENABLE_CYPRESS: "true"  #indicate, if cypress should run or not
+  CACHE_COUNTER: "2" # a counter to change cache names
 
 
 #----------------------------
@@ -61,34 +65,34 @@ stages:
     gradle-wrapper:
       #cache of gradle itself
       key:
-        prefix: gradle-wrapper
+        prefix: gradle-wrapper-$CACHE_COUNTER
         files:
           - $CI_PROJECT_DIR/gradle/wrapper/gradle-wrapper.properties
       paths:
-        - $GRADLE_USER_HOME/wrapper/
+        - $GRADLE_WRAPPER_CACHE
       policy: pull
     gradle-cache:
       #caches created by gradle
       key:
-        prefix: gradle-cache-$CI_JOB_NAME
+        prefix: gradle-cache-$CACHE_COUNTER-$CI_JOB_NAME
         files:
           - $CI_PROJECT_DIR/gradle/wrapper/gradle-wrapper.properties
           - $CI_PROJECT_DIR/gradle.properties
       paths:
-        - $GRADLE_USER_HOME/caches/
+        - $GRADLE_CACHES_CACHE
     gradle-pipeline-cache:
       #cache of gradle build cache
       key:
-        prefix: gradle-build-cache-$CI_PIPELINE_ID
+        prefix: gradle-build-cache-$CACHE_COUNTER-$CI_COMMIT_REF_NAME
         files:
           - $CI_PROJECT_DIR/gradle/wrapper/gradle-wrapper.properties
       paths:
-        - $GRADLE_USER_HOME/caches/build-cache-1/
+        - $GRADLE_BUILD_CACHE
       policy: pull
     npm:
       #cache of npm libraries
       key:
-        prefix: node
+        prefix: npm-$CACHE_COUNTER
         files:
           - $CI_PROJECT_DIR/package-lock.json
       paths:
@@ -115,6 +119,7 @@ stages:
           - grails-app/i18n/**/*
           - grails-app/init/**/*
           - grails-app/services/**/*
+          - devScripts/gitlab-ci/init.sh
           #test specific parts
           - src/test/**/*
           - src/integration-test/**/*
@@ -144,8 +149,8 @@ stages:
     - if: $CI_PIPELINE_SOURCE == "push"
   cache:
     - !reference [ .shared, cache, gradle-wrapper]
-    - !reference [ .shared, cache, gradle-cache]
     - !reference [ .shared, cache, gradle-pipeline-cache]
+    - !reference [ .shared, cache, gradle-cache]
   artifacts: &artifacts_template
     expire_in: 4 week
   before_script:
@@ -181,10 +186,10 @@ build gradle:
     - key: !reference [ .shared, cache, gradle-wrapper, key]
       paths: !reference [ .shared, cache, gradle-wrapper, paths]
       policy: pull-push
-    - !reference [ .shared, cache, gradle-cache]
     - key: !reference [ .shared, cache, gradle-pipeline-cache, key]
       paths: !reference [ .shared, cache, gradle-pipeline-cache, paths]
       policy: pull-push
+    - !reference [ .shared, cache, gradle-cache]
   script:
     - set -e
     # compile also all tests
@@ -311,6 +316,7 @@ cypress tests:
           - grails-app/i18n/**/*
           - grails-app/init/**/*
           - grails-app/services/**/*
+          - devScripts/gitlab-ci/init.sh
           #test specific parts
           - grails-app/assets/**/*
           - grails-app/taglib/**/*
@@ -343,8 +349,8 @@ cypress tests:
     when: always
   cache:
     - !reference [ .shared, cache, gradle-wrapper]
-    - !reference [ .shared, cache, gradle-cache]
     - !reference [ .shared, cache, gradle-pipeline-cache]
+    - !reference [ .shared, cache, gradle-cache]
     - !reference [ .shared, cache, npm]
   parallel:
     matrix:

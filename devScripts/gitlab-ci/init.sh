@@ -22,17 +22,25 @@
 
 set -ev
 
-#needed log dir
+# needed log dir
 mkdir -p logs/jobs
 
-#add required otp properties
+# add required otp properties
 cp $OTP_PROPERTIES_BASE ~/.otp.properties
 
-#npm cache redirect
+# npm cache redirect
 mkdir -p $NPM_CACHE
 ln -s $NPM_CACHE $HOME/.npm
 
-#cypress cache redirect
+# cypress cache redirect
 mkdir -p $CYPRESS_CACHE
 mkdir -p $HOME/.cache
 ln -s $CYPRESS_CACHE $HOME/.cache/Cypress
+
+# create gradle build cache dir redirect
+# having the build dir cache within the cache directory make permission problems during restoring caches,
+# since directories for restoring caches are created as root with 777, but gradle requires the permission 700 for the cache directory
+mkdir -p $GRADLE_BUILD_CACHE
+mkdir -p $GRADLE_USER_HOME/caches
+rm -rf $GRADLE_USER_HOME/caches/build-cache-1
+ln -s $GRADLE_BUILD_CACHE $GRADLE_USER_HOME/caches/build-cache-1
