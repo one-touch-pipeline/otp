@@ -122,6 +122,7 @@ class UpdateDomainPropertyService {
         return clazz.get(entityId)
     }
 
+    @SuppressWarnings('DoNotUseMetaClass')
     private MetaProperty getMetaProperty(GormEntityApi definition, String property) {
         return definition.metaClass.getMetaProperty(property)
     }

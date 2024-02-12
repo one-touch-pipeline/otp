@@ -65,9 +65,6 @@ class JobStateLogFileSpec extends Specification implements DataTest {
     }
 
     void testValidateFile_WhenFileDoesNotExist_ShouldThrowException() {
-        given:
-        JobStateLogFile.metaClass.parseJobStateLogFile = { -> [:] }
-
         when:
         JobStateLogFile.getInstance(TestCase.uniqueNonExistentPath)
 
@@ -77,7 +74,6 @@ class JobStateLogFileSpec extends Specification implements DataTest {
 
     void testValidateFile_WhenFileExistsButIsNotReadable_ShouldThrowException() {
         given:
-        JobStateLogFile.metaClass.parseJobStateLogFile = { -> [:] }
         File file = tempDir.resolve(JOB_STATE_LOG_FILE_NAME).toFile()
         file.createNewFile()
         file.readable = false

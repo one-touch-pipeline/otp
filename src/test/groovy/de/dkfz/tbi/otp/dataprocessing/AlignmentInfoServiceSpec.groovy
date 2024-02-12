@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
+@SuppressWarnings('DoNotUseMetaClass')
 class AlignmentInfoServiceSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, IsRoddy {
 
     @Override

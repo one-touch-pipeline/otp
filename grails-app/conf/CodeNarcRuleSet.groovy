@@ -64,6 +64,7 @@ All the Rules that will be used for OTP
     rule("file:grails-app/codenarcRules/ChildControllersNotAuthorizeAnnotatedRule.groovy")
     rule("file:grails-app/codenarcRules/AuthorizeAnnotationForControllersRule.groovy")
     rule("file:grails-app/codenarcRules/ThrowOtpRuntimeExceptionRule.groovy")
+    rule("file:grails-app/codenarcRules/DoNotUseMetaClassRule.groovy")
 
     // rulesets/basic.xml
     AssertWithinFinallyBlock {

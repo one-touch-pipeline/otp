@@ -30,22 +30,11 @@ import org.springframework.validation.FieldError
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 @Rollback
 @Integration
 class RoddyBamFileIntegrationTests implements RoddyPanCancerFactory {
-
-    @Before
-    void setup() {
-        SessionUtils.metaClass.static.withNewSession = { Closure c -> c() }
-    }
-
-    @After
-    void cleanup() {
-        TestCase.removeMetaClass(SessionUtils)
-    }
 
     @Test
     void testConstraints_allFine() {

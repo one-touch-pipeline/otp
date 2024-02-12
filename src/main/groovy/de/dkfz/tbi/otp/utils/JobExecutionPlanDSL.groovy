@@ -35,6 +35,7 @@ class Helper {
 }
 
 @CompileDynamic
+@SuppressWarnings('DoNotUseMetaClass')
 @SuppressWarnings("UnusedPrivateField")
 @Slf4j
 class JobExecutionPlanDSL {

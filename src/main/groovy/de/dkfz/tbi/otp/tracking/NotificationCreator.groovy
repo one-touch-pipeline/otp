@@ -485,7 +485,7 @@ class NotificationCreator {
 
         // Retrieve the names for the code generated in the body
         String className = metaDataFile.fastqImportInstance.class.simpleName
-        String propertyName = metaDataFile.fastqImportInstance.state.metaClass.theClass.simpleName
+        String propertyName = metaDataFile.fastqImportInstance.state.class.simpleName
 
         String body = [
                 "The workflow creation failed:",

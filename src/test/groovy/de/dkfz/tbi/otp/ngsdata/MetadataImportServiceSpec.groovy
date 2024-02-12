@@ -34,7 +34,6 @@ import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
 import de.dkfz.tbi.otp.infrastructure.CreateFileException
@@ -1088,9 +1087,6 @@ ${ILSE_NO}                      -                           1234          1234  
                     seqTrack   : seqTrack7,
             ]))
         }
-
-        cleanup:
-        GroovySystem.metaClassRegistry.removeMetaClass(SamplePair)
 
         where:
         runExists | includeOptional | importMode

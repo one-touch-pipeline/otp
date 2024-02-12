@@ -114,6 +114,7 @@ class TestCase {
     }
 
     @Deprecated
+    @SuppressWarnings('DoNotUseMetaClass')
     static void removeMetaClass(final Class clazz, final Object object = null) {
         // Both of the following statements are necessary. See http://stackoverflow.com/a/15953102
         // But their order does not matter.

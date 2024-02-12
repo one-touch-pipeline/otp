@@ -323,13 +323,15 @@ class TicketServiceIntegrationSpec extends Specification implements DomainFactor
                 snvFinished: null
         )
 
-        ticketService.notificationCreator.metaClass.getProcessingStatus = { Set<SeqTrack> set ->
-            return [
-                    getInstallationProcessingStatus: { -> ALL_DONE },
-                    getFastqcProcessingStatus      : { -> ALL_DONE },
-                    getAlignmentProcessingStatus   : { -> PARTLY_DONE_MIGHT_DO_MORE },
-                    getSnvProcessingStatus         : { -> NOTHING_DONE_MIGHT_DO },
-            ] as ProcessingStatus
+        ticketService.notificationCreator = Mock(NotificationCreator) {
+            getProcessingStatus(_) >> { Set<SeqTrack> set ->
+                return [
+                        getInstallationProcessingStatus: { -> ALL_DONE },
+                        getFastqcProcessingStatus      : { -> ALL_DONE },
+                        getAlignmentProcessingStatus   : { -> PARTLY_DONE_MIGHT_DO_MORE },
+                        getSnvProcessingStatus         : { -> NOTHING_DONE_MIGHT_DO },
+                ] as ProcessingStatus
+            }
         }
 
         when:

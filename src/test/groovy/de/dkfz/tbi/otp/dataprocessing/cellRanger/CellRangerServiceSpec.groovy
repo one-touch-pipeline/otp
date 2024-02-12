@@ -309,7 +309,6 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         SingleCellBamFile singleCellBamFile = createBamFile([
                 fileOperationStatus: state,
         ])
-        singleCellBamFile.metaClass.isMostRecentBamFile = { -> true } // use criteria which do not work in unit tests
 
         createResultFiles(singleCellBamFile)
 
@@ -360,7 +359,6 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         SingleCellBamFile singleCellBamFile = createBamFile([
                 fileOperationStatus: AbstractBamFile.FileOperationStatus.DECLARED,
         ])
-        singleCellBamFile.metaClass.isMostRecentBamFile = { -> true } // use criteria which do not work in unit tests
 
         createResultFiles(singleCellBamFile)
 

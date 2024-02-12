@@ -455,8 +455,9 @@ ${expectedAlign}"""
         given:
         DomainFactory.createAllAlignableSeqTypes()
         CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService()
-        ProcessingStatus status = new ProcessingStatus([new SeqTrackProcessingStatus(DomainFactory.createSeqTrack())])
-        status.metaClass.getSamplePairProcessingStatuses = { return [] }
+        ProcessingStatus status = Mock(ProcessingStatus) {
+            getSamplePairProcessingStatuses >> { return [] }
+        }
         String message
 
         when:

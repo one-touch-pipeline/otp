@@ -280,8 +280,10 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
         setupData()
         setUpWorkDirAndMockProcessOutput()
 
-        roddyBamFile.metaClass.getWorkExecutionStoreDirectory = {
-            return tempDir.resolve("Folder").toFile()
+        roddyBamFile = Mock(RoddyBamFile) {
+            getWorkExecutionStoreDirectory >> {
+                return tempDir.resolve("Folder").toFile()
+            }
         }
 
         when:

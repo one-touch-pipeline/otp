@@ -27,6 +27,7 @@ import groovy.transform.TupleConstructor
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.SingleCellBamFileService
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
@@ -78,6 +79,8 @@ class CellRangerService {
     QcTrafficLightCheckService qcTrafficLightCheckService
     Md5SumService md5SumService
     CellRangerWorkflowService cellRangerWorkflowService
+
+    SingleCellBamFileService singleCellBamFileService
 
     void createInputDirectoryStructure(SingleCellBamFile singleCellBamFile) {
         String sampleName = singleCellBamFile.singleCellSampleName
@@ -159,12 +162,12 @@ class CellRangerService {
     }
 
     CellRangerQualityAssessment parseCellRangerQaStatistics(SingleCellBamFile singleCellBamFile) {
-        Path path = fileSystemService.remoteFileSystem.getPath(singleCellBamFile.qualityAssessmentCsvFile.absolutePath)
+        Path path = singleCellBamFileService.getQualityAssessmentCsvFile(singleCellBamFile)
         Spreadsheet spreadsheet = new Spreadsheet(path.text, Delimiter.COMMA)
         CellRangerQualityAssessment qa = new CellRangerQualityAssessment()
         MetricsSummaryCsvColumn.values().each {
             Cell cell = spreadsheet.dataRows.first().getCellByColumnTitle(it.columnName)
-            assert cell: "${it.columnName} can not be found in ${singleCellBamFile.qualityAssessmentCsvFile.absolutePath}"
+            assert cell: "${it.columnName} can not be found in ${path}"
             try {
                 qa."${it.attributeName}" = cell.text.replaceAll("%\$", "").replaceAll(/,/, "") as Double
             } catch (NumberFormatException e) {
@@ -223,9 +226,7 @@ class CellRangerService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#singleCellBamFile.project, 'OTP_READ_ACCESS')")
     String getWebSummaryResultFileContent(SingleCellBamFile singleCellBamFile) throws NoSuchFileException, AccessDeniedException {
-        FileSystem fileSystem = fileSystemService.remoteFileSystem
-
-        Path file = fileSystem.getPath(singleCellBamFile.webSummaryResultFile.path)
+        Path file = singleCellBamFileService.getWebSummaryResultFile(singleCellBamFile)
         if (!Files.exists(file)) {
             throw new NoSuchFileException(file.toAbsolutePath().toString())
         }

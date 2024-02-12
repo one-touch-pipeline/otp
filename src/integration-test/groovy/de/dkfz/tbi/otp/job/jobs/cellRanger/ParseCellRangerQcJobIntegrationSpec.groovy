@@ -29,6 +29,7 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.SingleCellBamFileService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerService
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
@@ -49,20 +50,22 @@ class ParseCellRangerQcJobIntegrationSpec extends Specification implements CellR
     @TempDir
     Path tempDir
 
-    File qaFile
+    Path qaFile
     SingleCellBamFile singleCellBamFile
     ParseCellRangerQcJob job
 
     void setupData() {
-        qaFile = CreateFileHelper.createFile(tempDir.resolve(SingleCellBamFile.METRICS_SUMMARY_CSV_FILE_NAME)).toFile()
-        createQaFileOnFileSystem(qaFile)
+        qaFile = CreateFileHelper.createFile(tempDir.resolve(SingleCellBamFile.METRICS_SUMMARY_CSV_FILE_NAME))
+        createQaFileOnFileSystem(qaFile.toFile())
         singleCellBamFile = createBamFile()
-        singleCellBamFile.metaClass.getQualityAssessmentCsvFile = { -> qaFile }
         job = [
                 getProcessParameterObject: { -> singleCellBamFile },
         ] as ParseCellRangerQcJob
         job.cellRangerService = new CellRangerService()
         job.cellRangerService.fileSystemService = new TestFileSystemService()
+        job.cellRangerService.singleCellBamFileService = Mock(SingleCellBamFileService) {
+            getQualityAssessmentCsvFile(_) >> { return qaFile }
+        }
         job.qcTrafficLightService = new QcTrafficLightService()
         job.qcTrafficLightService.commentService = new CommentService()
         job.qcTrafficLightService.qcThresholdService = new QcThresholdService()
@@ -73,7 +76,7 @@ class ParseCellRangerQcJobIntegrationSpec extends Specification implements CellR
         given:
         setupData()
 
-        createQaFileOnFileSystem(qaFile, ["Estimated Number of Cells": estimatedNumberOfCells])
+        createQaFileOnFileSystem(qaFile.toFile(), ["Estimated Number of Cells": estimatedNumberOfCells])
         DomainFactory.createQcThreshold([
                 qcProperty1          : "estimatedNumberOfCells",
                 errorThresholdLower  : 0.0,

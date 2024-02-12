@@ -300,22 +300,6 @@ class SingleCellBamFile extends AbstractBamFile implements HasIdentifier, Proces
         return new File(workDirectory, bamFileName)
     }
 
-    /**
-     * @deprecated use {@link SingleCellBamFileService#getQualityAssessmentCsvFile} instead
-     */
-    @Deprecated
-    File getQualityAssessmentCsvFile() {
-        return new File(resultDirectory, METRICS_SUMMARY_CSV_FILE_NAME)
-    }
-
-    /**
-     * @deprecated use {@link SingleCellBamFileService#getWebSummaryResultFile} instead
-     */
-    @Deprecated
-    File getWebSummaryResultFile() {
-        return new File(resultDirectory, WEB_SUMMARY_HTML_FILE_NAME)
-    }
-
     @Override
     CellRangerMergingWorkPackage getMergingWorkPackage() {
         return CellRangerMergingWorkPackage.get(workPackage?.id)

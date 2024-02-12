@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import grails.validation.ValidationException
-import org.junit.After
 import org.junit.Test
 
 import de.dkfz.tbi.TestCase
@@ -38,11 +37,6 @@ import de.dkfz.tbi.otp.ngsdata.SampleTypePerProject
 @Rollback
 @Integration
 class SamplePairIntegrationTests {
-
-    @After
-    void tearDown() {
-        SamplePair.metaClass = null
-    }
 
     @Test
     void testSetProcessingStatusNeedsProcessing() {
@@ -91,8 +85,6 @@ class SamplePairIntegrationTests {
         mergingWorkPackage1.sample.individual = DomainFactory.createIndividual()
         assert mergingWorkPackage1.sample.save(flush: true)
 
-        samplePair.metaClass.getIndividual = { -> return mergingWorkPackage1.individual }
-
         TestCase.shouldFailWithMessageContaining(ValidationException, "individual") {
             samplePair.save(flush: true)
         }
@@ -104,8 +96,6 @@ class SamplePairIntegrationTests {
         MergingWorkPackage mergingWorkPackage1 = samplePair.mergingWorkPackage1
         mergingWorkPackage1.seqType = DomainFactory.createSeqType()
         assert mergingWorkPackage1.save(flush: true)
-
-        samplePair.metaClass.getSeqType = { -> return mergingWorkPackage1.seqType }
 
         TestCase.shouldFailWithMessageContaining(ValidationException, "seqType") {
             samplePair.save(flush: true)
