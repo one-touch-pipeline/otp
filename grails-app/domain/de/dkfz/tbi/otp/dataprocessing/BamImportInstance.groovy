@@ -44,11 +44,7 @@ class BamImportInstance implements Entity, ProcessParameterObject {
 
     State state = State.NOT_STARTED
 
-    // To avoid creating bam import workflows before bamImportWorkflow is activated
-    // workflowCreateState is now set to be WorkflowCreateState.SUCCESS
-    // After finishing the issue otp-2362:
-    // Change the state to WorkflowCreateState.WAITING
-    WorkflowCreateState workflowCreateState = WorkflowCreateState.SUCCESS
+    WorkflowCreateState workflowCreateState = WorkflowCreateState.WAITING
 
     @TupleConstructor
     enum LinkOperation {

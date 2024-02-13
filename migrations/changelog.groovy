@@ -151,5 +151,7 @@ databaseChangeLog = {
 
     include file: 'changelogs/2024/otp-2413.groovy'
 
+    include file: 'changelogs/2024/otp-2362.groovy'
+
     include file: 'changelogs/2024/otp-2452-rename-ImportProcess-to-BamImportInstance-in-database.groovy'
 }
