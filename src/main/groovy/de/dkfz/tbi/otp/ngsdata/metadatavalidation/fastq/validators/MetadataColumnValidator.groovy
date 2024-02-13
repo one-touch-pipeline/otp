@@ -22,6 +22,8 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.MetaDataKey
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
@@ -40,7 +42,7 @@ class MetadataColumnValidator implements MetadataValidator {
     @Override
     void validate(MetadataValidationContext context) {
         Row row = context.spreadsheet.header
-        List<String> metadataColumnList = MetaDataKey.list()*.name
+        List<String> metadataColumnList = MetaDataKey.list()*.name + MetaDataColumn.values()*.toString() + MetaDataColumn.values().collectMany { it.importAliases }
 
         Map<String, Set<Cell>> cellsByValue = row.cells.collectEntries { Cell cell ->
             [(cell.text): [cell] as Set]
