@@ -169,7 +169,6 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
         log.debug("selector creating: ${cmd.selectorName}")
         return checkErrorAndCallMethodReturns(cmd) {
             ExternalWorkflowConfigSelector selector = configSelectorService.create(cmd)
-
             return render(transformToMap(selector) as JSON)
         } as JSON
     }
@@ -290,6 +289,14 @@ class CreateCommand extends SelectorCommand {
     String value
 
     Set<ExternalWorkflowConfigSelector> matchingSelectors
+
+    static constraints = {
+        type(blank: false, validator: { val, obj ->
+            if (val == SelectorType.DEFAULT_VALUES) {
+                return 'workflowConfig.validation.check'
+            }
+        })
+    }
 }
 
 class CheckCommand extends SelectorCommand {
