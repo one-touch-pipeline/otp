@@ -182,8 +182,8 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
 
     WorkflowVersion createWorkflowVersion(Map properties = [:]) {
         return createDomainObject(WorkflowVersion, [
-                apiVersion: { createWorkflowApiVersion() },
-                workflowVersion   : "${nextId}.0",
+                apiVersion     : { createWorkflowApiVersion() },
+                workflowVersion: "${nextId}.0",
         ], properties)
     }
 
@@ -255,7 +255,7 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
                 project        : { createProject() },
                 referenceGenome: referenceGenome,
                 seqType        : { createSeqType() },
-                species        : { new HashSet<SpeciesWithStrain>(referenceGenome.speciesWithStrain + speciesWithStrain) },
+                species        : { new HashSet<SpeciesWithStrain>((referenceGenome.speciesWithStrain ?: []) + speciesWithStrain) },
                 workflow       : { createWorkflow() },
         ], properties, saveAndValidate)
     }

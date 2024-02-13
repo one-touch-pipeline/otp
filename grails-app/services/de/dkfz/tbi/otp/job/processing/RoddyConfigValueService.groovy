@@ -70,7 +70,7 @@ class RoddyConfigValueService {
         cValues.put("possibleControlSampleNamePrefixes", "${roddyBamFile.sampleType.dirName}")
         cValues.put("possibleTumorSampleNamePrefixes", "")
 
-        cValues.putAll(getAdapterTrimmingFile(roddyBamFile, combinedConfig))
+        cValues.putAll(getAdapterTrimmingFileForPanCan(roddyBamFile, combinedConfig))
 
         if (roddyBamFile.project.fingerPrinting && roddyBamFile.referenceGenome.fingerPrintingFileName) {
             cValues.put("runFingerprinting", "true")
@@ -89,9 +89,19 @@ class RoddyConfigValueService {
         return ((runArriba == null || runArriba == Boolean.TRUE) && (useSingleEndProcessing == null || useSingleEndProcessing == Boolean.FALSE))
     }
 
-    private Map<String, String> getAdapterTrimmingFile(RoddyBamFile roddyBamFile, String combinedConfig) {
+    /**
+     * This Method returns whether adapter trimming should be used for the PanCan or WGBS Workflow.
+     **/
+    boolean isAdapterTrimmingUsedForPanCan(String combinedConfig) {
         JsonNode combinedConfigJson = MAPPER.readTree(combinedConfig)
-        boolean adapterTrimming = combinedConfigJson?.RODDY?.cvalues?.fields()?.find { it.key == "useAdaptorTrimming" }?.value?.value?.asBoolean()
+        return combinedConfigJson?.RODDY?.cvalues?.fields()?.find { it.key == "useAdaptorTrimming" }?.value?.value?.asBoolean()
+    }
+
+    /**
+     * This Method is used to get the Adapter trimming File for the PanCan and WGBS Workflow.
+     **/
+    private Map<String, String> getAdapterTrimmingFileForPanCan(RoddyBamFile roddyBamFile, String combinedConfig) {
+        boolean adapterTrimming = isAdapterTrimmingUsedForPanCan(combinedConfig)
 
         if (!roddyBamFile.seqType.isRna() && adapterTrimming) {
             String adapterFile = exactlyOneElement(

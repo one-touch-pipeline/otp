@@ -157,15 +157,15 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
         TestCase.assertContainSame(expectedCommand, actualCommand)
     }
 
-    void "test getAdapterTrimmingFile, adapter trimming disabled"() {
+    void "test getAdapterTrimmingFileForPanCan, adapter trimming disabled"() {
         given:
         RoddyBamFile roddyBamFile = createBamFile()
 
         expect:
-        [:] == service.getAdapterTrimmingFile(roddyBamFile, "{}")
+        [:] == service.getAdapterTrimmingFileForPanCan(roddyBamFile, "{}")
     }
 
-    void "test getAdapterTrimmingFile, adapter trimming enabled"() {
+    void "test getAdapterTrimmingFileForPanCan, adapter trimming enabled"() {
         given:
         RoddyBamFile roddyBamFile = createBamFile()
 
@@ -176,7 +176,7 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
         String config = '{"RODDY": {"cvalues": {"useAdaptorTrimming": {"value": "true"}}}}'
 
         expect:
-        ["CLIP_INDEX": path] == service.getAdapterTrimmingFile(roddyBamFile, config)
+        ["CLIP_INDEX": path] == service.getAdapterTrimmingFileForPanCan(roddyBamFile, config)
     }
 
     void "test getRunArriba returns true, when both RUN_ARRIBA and useSingleEndProcessing are null"() {

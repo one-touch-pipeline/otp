@@ -28,7 +28,9 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqType
 
 @Rollback
 @Integration
@@ -95,5 +97,21 @@ class WorkflowServiceIntegrationSpec extends Specification implements WorkflowSy
 
         expect:
         workflowService.findAllAlignmentWorkflows() == [workflow]
+    }
+
+    void "findAllAlignmentWorkflowsForSeqType, should return all the alignment workflows for a given seqtype"() {
+        given: "alignment workflow for given seqtype"
+        SeqType seqType = DomainFactory.createRnaPairedSeqType()
+        Workflow workflow = createWorkflow(beanName: "rnaAlignmentWorkflow")
+        createWorkflowVersion(supportedSeqTypes: [seqType], apiVersion: createWorkflowApiVersion(workflow: workflow))
+
+        and: "other workflows that are not alignment workflows"
+        createWorkflowVersion(supportedSeqTypes: [seqType], apiVersion: createWorkflowApiVersion(workflow: createWorkflow()))
+
+        and: "other alignment workflows that do not have a connection to the seqtype"
+        createWorkflowVersion(supportedSeqTypes: [DomainFactory.createWholeGenomeSeqType()], apiVersion: createWorkflowApiVersion(workflow: createWorkflow(beanName: "panCancerWorkflow")))
+
+        expect:
+        workflowService.findAlignmentWorkflowsForSeqType(seqType) == workflow
     }
 }

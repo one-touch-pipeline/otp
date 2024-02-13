@@ -67,27 +67,29 @@ trait TaxonomyFactory implements DomainFactoryCore {
         ], [:], [:], saveAndValidate)
     }
 
-    SpeciesWithStrain findOrCreateSpeciesWithStrain(Species species, Strain strain, boolean saveAndValidate = true) {
+    SpeciesWithStrain findOrCreateSpeciesWithStrain(Species species, Strain strain, Set<String> importAlias, boolean saveAndValidate = true) {
         return findOrCreateDomainObject(SpeciesWithStrain, [
                 species: species,
                 strain : strain,
-        ], [:], [:], saveAndValidate)
+        ], [:], [importAlias: importAlias,], saveAndValidate)
     }
 
     SpeciesWithStrain findOrCreateHumanSpecies() {
         SpeciesCommonName human = findOrCreateSpeciesCommonName("Human")
         Species homoSapiens = findOrCreateSpecies(human, "homo sapiens")
         Strain strain = findOrCreateStrain("No strain available")
+        Set<String> importAlias = ["human"]
 
-        return findOrCreateSpeciesWithStrain(homoSapiens, strain)
+        return findOrCreateSpeciesWithStrain(homoSapiens, strain, importAlias)
     }
 
     SpeciesWithStrain findOrCreateMouseSpecies() {
         SpeciesCommonName mouse = findOrCreateSpeciesCommonName("Mouse")
         Species musMusculus = findOrCreateSpecies(mouse, "mus musculus")
         Strain strain = findOrCreateStrain("unknown")
+        Set<String> importAlias = ["mouse"]
 
-        return findOrCreateSpeciesWithStrain(musMusculus, strain)
+        return findOrCreateSpeciesWithStrain(musMusculus, strain, importAlias)
     }
 }
 

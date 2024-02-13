@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.domainFactory.workflowSystem
 
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
@@ -33,8 +34,9 @@ trait RnaAlignmentWorkflowDomainFactory extends WorkflowSystemDomainFactory {
 
     WorkflowVersion createRnaAlignmentVersion(String version = "1.3.0-1") {
         return createWorkflowVersion([
-                apiVersion     : createWorkflowApiVersion(workflow: findOrCreateRnaAlignmentWorkflow()),
-                workflowVersion: version,
+                apiVersion       : createWorkflowApiVersion(workflow: findOrCreateRnaAlignmentWorkflow()),
+                workflowVersion  : version,
+                supportedSeqTypes: DomainFactory.createRnaAlignableSeqTypes(),
         ])
     }
 }

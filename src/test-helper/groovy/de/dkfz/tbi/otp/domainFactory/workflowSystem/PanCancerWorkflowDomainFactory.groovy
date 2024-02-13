@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.domainFactory.workflowSystem
 
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
@@ -33,8 +34,10 @@ trait PanCancerWorkflowDomainFactory extends WorkflowSystemDomainFactory {
 
     WorkflowVersion createPanCancerWorkflowVersion(String version = "1.2.73-204") {
         return createWorkflowVersion([
-                apiVersion: createWorkflowApiVersion(workflow: findOrCreatePanCancerWorkflow()),
-                workflowVersion   : version,
+                apiVersion       : createWorkflowApiVersion(workflow: findOrCreatePanCancerWorkflow()),
+                workflowVersion  : version,
+                supportedSeqTypes: DomainFactory.createDefaultOtpAlignableSeqTypes() +
+                        DomainFactory.createChipSeqType(),
         ])
     }
 }

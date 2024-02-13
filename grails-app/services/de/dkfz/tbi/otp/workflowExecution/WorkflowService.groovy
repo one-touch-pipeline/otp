@@ -40,6 +40,8 @@ class WorkflowService {
 
     OtpWorkflowService otpWorkflowService
 
+    WorkflowVersionService workflowVersionService
+
     private static final Set<String> FASTQC_WORKFLOWS = [
             BashFastQcWorkflow.WORKFLOW,
             WesFastQcWorkflow.WORKFLOW,
@@ -180,6 +182,15 @@ class WorkflowService {
     List<Workflow> findAllAlignmentWorkflows() {
         List<String> alignmentWorkflowNameList = alignmentWorkflowNames
         return alignmentWorkflowNameList ? Workflow.findAllByBeanNameInListAndDeprecatedDateIsNull(alignmentWorkflowNameList).sort { it.name } : []
+    }
+
+    Workflow findAlignmentWorkflowsForSeqType(SeqType seqType) {
+        List<String> alignmentWorkflowNameList = alignmentWorkflowNames
+        return seqType ? CollectionUtils.atMostOneElement(
+                workflowVersionService.findAllByWorkflowSeqTypeAndReferenceGenome(null, seqType, null)*.workflow.findAll {
+                    it.deprecatedDate == null && it.beanName in alignmentWorkflowNameList
+                }.unique()
+        ) : null
     }
 
     private List<String> getAlignmentWorkflowNames() {

@@ -24,18 +24,15 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-
-import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrainService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
-import de.dkfz.tbi.otp.workflowExecution.WorkflowService
-import de.dkfz.tbi.otp.workflowExecution.WorkflowVersionSelectorService
+import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
@@ -45,9 +42,6 @@ class LibPrepKitAdapterValidator extends AbstractValueTuplesValidator<MetadataVa
 
     @Autowired
     LibraryPreparationKitService libraryPreparationKitService
-
-    @Autowired
-    SampleIdentifierService sampleIdentifierService
 
     @Autowired
     SeqTypeService seqTypeService
@@ -61,6 +55,21 @@ class LibPrepKitAdapterValidator extends AbstractValueTuplesValidator<MetadataVa
     @Autowired
     WorkflowService workflowService
 
+    @Autowired
+    ConfigSelectorService configSelectorService
+
+    @Autowired
+    ConfigFragmentService configFragmentService
+
+    @Autowired
+    RoddyConfigValueService roddyConfigValueService
+
+    @Autowired
+    ReferenceGenomeSelectorService referenceGenomeSelectorService
+
+    @Autowired
+    SpeciesWithStrainService speciesWithStrainService
+
     @CompileDynamic
     @Override
     Collection<String> getDescriptions() {
@@ -69,7 +78,7 @@ class LibPrepKitAdapterValidator extends AbstractValueTuplesValidator<MetadataVa
 
     @Override
     List<String> getRequiredColumnTitles(MetadataValidationContext context) {
-        return [SEQUENCING_TYPE, PROJECT, SEQUENCING_READ_TYPE]*.name()
+        return [SEQUENCING_TYPE, PROJECT, SEQUENCING_READ_TYPE, SPECIES]*.name()
     }
 
     @Override
@@ -95,29 +104,59 @@ class LibPrepKitAdapterValidator extends AbstractValueTuplesValidator<MetadataVa
                 return
             }
             SeqType seqType = seqTypeService.findByNameOrImportAlias(seqTypeName, [libraryLayout: libraryLayout, singleCell: singleCell])
-            LibraryPreparationKit kit
-            if (valueTuple.getValue(LIB_PREP_KIT.name())) {
-                kit = libraryPreparationKitService.findByNameOrImportAlias(valueTuple.getValue(LIB_PREP_KIT.name()))
-            }
-            if (!seqType || !kit) {
+            String libPrepKit = valueTuple.getValue(LIB_PREP_KIT.name())
+            if (!libPrepKit) {
                 return
             }
-            Pipeline pipeline = seqType.isRna() ? CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.RODDY_RNA_ALIGNMENT)) : CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.PANCAN_ALIGNMENT))
+            LibraryPreparationKit kit = libraryPreparationKitService.findByNameOrImportAlias(libPrepKit)
+            Workflow workflow = workflowService.findAlignmentWorkflowsForSeqType(seqType)
+            if (!seqType || !kit || !workflow) {
+                return
+            }
+
             String projectName = valueTuple.getValue(PROJECT.name())
             Project project = ProjectService.findByNameOrNameInMetadataFiles(projectName)
             if (!project) {
                 return
             }
-            RoddyWorkflowConfig config = RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)
 
-            if (seqType in SeqTypeService.roddyAlignableSeqTypes &&
-                    workflowVersionSelectorService.findAllByProjectAndWorkflow(project, workflowService.getExactlyOneWorkflow(PanCancerWorkflow.WORKFLOW)) &&
-                    config?.adapterTrimmingNeeded) {
-                if (!seqType.isRna() && !kit.adapterFile) {
-                    context.addProblem(valueTuple.cells, LogLevel.WARNING, "Adapter trimming is requested but adapter file for library preparation kit '${kit}' is missing.", "Adapter trimming is requested but the adapter file for at least one library preparation kit is missing.")
-                }
-                if (seqType.isRna() && !kit.reverseComplementAdapterSequence) {
+            WorkflowVersionSelector workflowVersionSelector = workflowVersionSelectorService.findByProjectAndWorkflowAndSeqType(project, workflow, seqType)
+            if (!workflowVersionSelector) {
+                return
+            }
+            List<String> speciesNames = valueTuple.getValue(SPECIES.name()).trim().split(/\+/) as List
+            if (!speciesNames) {
+                return
+            }
+            Set<SpeciesWithStrain> species = speciesNames.collect { speciesWithStrainService.getByAlias(it.trim()) } as Set
+            if (species.contains(null)) {
+                return
+            }
+            ReferenceGenome referenceGenome = referenceGenomeSelectorService.findAllBySeqTypeAndWorkflowAndProject(seqType, workflow, project).find {
+                species == it.species
+            }?.referenceGenome
+            if (!referenceGenome) {
+                return
+            }
+
+            SingleSelectSelectorExtendedCriteria extendedCriteria = new SingleSelectSelectorExtendedCriteria(
+                    workflow,
+                    workflowVersionSelector.workflowVersion,
+                    project,
+                    seqType,
+                    referenceGenome,
+                    kit,
+            )
+            List<ExternalWorkflowConfigFragment> fragments = configSelectorService.findAllSelectorsSortedByPriority(extendedCriteria)*.externalWorkflowConfigFragment
+            String mergedFragments = configFragmentService.mergeSortedFragments(fragments)
+
+            if (seqType.isRna()) {
+                if (!kit.reverseComplementAdapterSequence) {
                     context.addProblem(valueTuple.cells, LogLevel.WARNING, "Adapter trimming is requested but reverse complement adapter sequence for library preparation kit '${kit}' is missing.", "Adapter trimming is requested but the reverse complement adapter sequence for at least one library preparation kit is missing.")
+                }
+            } else {
+                if (roddyConfigValueService.isAdapterTrimmingUsedForPanCan(mergedFragments) && !kit.adapterFile) {
+                    context.addProblem(valueTuple.cells, LogLevel.WARNING, "Adapter trimming is requested but adapter file for library preparation kit '${kit}' is missing.", "Adapter trimming is requested but the adapter file for at least one library preparation kit is missing.")
                 }
             }
         }
