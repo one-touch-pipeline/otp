@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.analysis.pair.roddy.indel
 import de.dkfz.tbi.otp.analysis.pair.roddy.AbstractRoddyBamFilePairAnalysisWorkflowTests
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.project.RoddyConfiguration
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -37,7 +36,6 @@ import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<IndelCallingInstance> {
 
     IndelCallingService indelCallingService
-    LsdfFilesService lsdfFilesService
 
     ProjectService projectService
 

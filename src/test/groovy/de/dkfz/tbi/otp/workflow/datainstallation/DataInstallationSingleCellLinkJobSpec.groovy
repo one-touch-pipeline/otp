@@ -26,6 +26,8 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellMappingFileService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.DataInstallationWorkflowDomainFactory
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataAllWellFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
@@ -80,9 +82,11 @@ class DataInstallationSingleCellLinkJobSpec extends Specification implements Dat
             _ * getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> seqTrack
             0 * _
         }
-        job.lsdfFilesService = Mock(LsdfFilesService) {
-            (isSingleCell ? 2 : 0) * getFileFinalPathAsPath(_) >>> [target1, target2]
-            (isSingleCell ? 2 : 0) * getFileViewByPidPathAsPath(_, WellDirectory.ALL_WELL) >>> [link1, link2]
+        job.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService) {
+            (isSingleCell ? 2 : 0) * getFilePath(_) >>> [target1, target2]
+        }
+        job.rawSequenceDataAllWellFileService = Mock(RawSequenceDataAllWellFileService) {
+            (isSingleCell ? 2 : 0) * getFilePath(_) >>> [link1, link2]
         }
 
         expect:

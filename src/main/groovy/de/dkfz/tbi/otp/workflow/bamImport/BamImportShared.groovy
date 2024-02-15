@@ -27,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.dataprocessing.BamImportInstance
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.WorkflowShared
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -36,9 +35,6 @@ trait BamImportShared extends WorkflowShared {
 
     private static final String WORKFLOW = BamImportWorkflow.WORKFLOW
     public static final String OUTPUT_ROLE = BamImportWorkflow.OUTPUT_BAM
-
-    @Autowired
-    LsdfFilesService lsdfFilesService
 
     @Autowired
     ExternallyProcessedBamFileService externallyProcessedBamFileService

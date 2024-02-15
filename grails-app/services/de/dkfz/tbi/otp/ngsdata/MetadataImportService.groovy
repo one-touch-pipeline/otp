@@ -90,7 +90,6 @@ class MetadataImportService {
     FileService fileService
     FileSystemService fileSystemService
     LibraryPreparationKitService libraryPreparationKitService
-    LsdfFilesService lsdfFilesService
     MailHelperService mailHelperService
     MergingCriteriaService mergingCriteriaService
     TicketService ticketService
@@ -602,15 +601,15 @@ class MetadataImportService {
             assert matcher
             Row row = exactlyOneElement(rows)
 
-            Path file = context.directoryStructure.getDataFilePath(context, row)
+            Path filePath = context.directoryStructure.getDataFilePath(context, row)
             String mate = matcher.group('number')
             boolean indexFile = matcher.group('index')
 
             RawSequenceFile dataFile = new FastqFile(
                     pathName: '',
-                    fileName: file.fileName.toString(),
-                    initialDirectory: file.parent.toString(),
-                    vbpFileName: file.fileName.toString(),
+                    fileName: filePath.fileName.toString(),
+                    initialDirectory: filePath.parent.toString(),
+                    vbpFileName: filePath.fileName.toString(),
                     fastqMd5sum: row.getCellByColumnTitle(MD5.name()).text.toLowerCase(Locale.ENGLISH),
                     project: seqTrack.project,
                     dateExecuted: seqTrack.run.dateExecuted,
@@ -620,11 +619,11 @@ class MetadataImportService {
                     run: seqTrack.run,
                     fastqImportInstance: fastqImportInstance,
                     seqTrack: seqTrack,
-                    fileType: FileTypeService.getFileType(file.fileName.toString(), FileType.Type.SEQUENCE),
+                    fileType: FileTypeService.getFileType(filePath.fileName.toString(), FileType.Type.SEQUENCE),
             )
             dataFile.save(flush: false)
 
-            assert new File(LsdfFilesService.getFileInitialPath(dataFile)) == new File(file.toString())
+            assert LsdfFilesService.getFileInitialPath(dataFile) == filePath.toString()
 
             importMetadataEntries(context, dataFile, row)
         }

@@ -24,7 +24,8 @@ package de.dkfz.tbi.otp.workflow.fastqc
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.WorkflowShared
@@ -41,7 +42,10 @@ trait FastqcShared extends WorkflowShared {
     public static final String OUTPUT_ROLE = BashFastQcWorkflow.OUTPUT_FASTQC
 
     @Autowired
-    LsdfFilesService lsdfFilesService
+    RawSequenceDataWorkFileService rawSequenceDataWorkFileService
+
+    @Autowired
+    RawSequenceDataViewFileService rawSequenceDataViewFileService
 
     @Autowired
     ConcreteArtefactService concreteArtefactService

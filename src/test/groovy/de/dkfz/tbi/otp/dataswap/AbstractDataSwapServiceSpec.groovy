@@ -33,8 +33,10 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 import de.dkfz.tbi.otp.dataswap.data.DataSwapData
 import de.dkfz.tbi.otp.dataswap.parameters.DataSwapParameters
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
-import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataAllWellFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
@@ -214,10 +216,16 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                 ]),
         )
 
-        service.lsdfFilesService = Mock(LsdfFilesService) {
-            1 * getFileFinalPathAsPath(rawSequenceFile) >> Paths.get('finalFile')
-            1 * getFileViewByPidPathAsPath(rawSequenceFile) >> Paths.get('viewByPidFile')
-            wellCount * getFileViewByPidPathAsPath(rawSequenceFile, WellDirectory.ALL_WELL) >> Paths.get('wellFile')
+        service.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService) {
+            1 * getFilePath(rawSequenceFile) >> Paths.get('finalFile')
+            0 * _
+        }
+        service.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
+            1 * getFilePath(rawSequenceFile) >> Paths.get('viewByPidFile')
+            0 * _
+        }
+        service.rawSequenceDataAllWellFileService = Mock(RawSequenceDataAllWellFileService) {
+            wellCount * getFilePath(rawSequenceFile) >> Paths.get('wellFile')
             0 * _
         }
         service.singleCellService = Mock(SingleCellService) {
@@ -300,9 +308,12 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                 ]),
         )
 
-        service.lsdfFilesService = Mock(LsdfFilesService) {
-            1 * getFileFinalPathAsPath(rawSequenceFile) >> NEW_FINAL_PATH
-            1 * getFileViewByPidPathAsPath(rawSequenceFile, WellDirectory.ALL_WELL) >> NEW_WELL_PATH
+        service.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService) {
+            1 * getFilePath(rawSequenceFile) >> NEW_FINAL_PATH
+            0 * _
+        }
+        service.rawSequenceDataAllWellFileService = Mock(RawSequenceDataAllWellFileService) {
+            1 * getFilePath(rawSequenceFile) >> NEW_WELL_PATH
             0 * _
         }
 
@@ -657,9 +668,11 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         final Path newFileViewByPid = Paths.get('linking').resolve(Paths.get('newViewByPidFile'))
 
         // service
-        service.lsdfFilesService = Mock(LsdfFilesService) {
-            _ * getFileFinalPath(_) >> newFile.toString()
-            _ * getFileViewByPidPath(_) >> newFileViewByPid.toString()
+        service.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService) {
+            _ * getFilePath(_) >> newFile
+        }
+        service.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
+            _ * getFilePath(_) >> newFileViewByPid
         }
 
         // DTO
@@ -708,9 +721,13 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         final Path newFileViewByPid = Paths.get('linking').resolve(Paths.get('newViewByPidFile'))
 
         // service
-        service.lsdfFilesService = Mock(LsdfFilesService) {
-            _ * getFileFinalPathAsPath(_) >> newFile
-            _ * getFileViewByPidPathAsPath(_) >> newFileViewByPid
+        service.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService) {
+            1 * getFilePath(rawSequenceFile) >> newFile
+            0 * _
+        }
+        service.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
+            1 * getFilePath(rawSequenceFile) >> newFileViewByPid
+            0 * _
         }
         service.fileSystemService = Mock(FileSystemService) {
             getRemoteFileSystem() >> FileSystems.default
@@ -768,11 +785,13 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         final Map<RawSequenceFile, Map<String, ?>> rawSequenceFilePaths = createPathsForRawSequenceFiles(rawSequenceFiles, true, false)
 
         // service
-        service.lsdfFilesService = Mock(LsdfFilesService) {
-            _ * getFileFinalPathAsPath(_) >> { RawSequenceFile rawSequenceFile, PathOption... options ->
-                Paths.get(rawSequenceFilePaths[rawSequenceFile].newPath.toString()) }
-            _ * getFileViewByPidPathAsPath(_) >> { RawSequenceFile rawSequenceFile, PathOption... options ->
-                Paths.get(rawSequenceFilePaths[rawSequenceFile].newVbpPath.toString()) }
+        service.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService) {
+            _ * getFilePath(_) >> { RawSequenceFile rawSequenceFile -> Paths.get(rawSequenceFilePaths[rawSequenceFile].newPath.toString()) }
+            0 * _
+        }
+        service.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
+            _ * getFilePath(_) >> { RawSequenceFile rawSequenceFile -> Paths.get(rawSequenceFilePaths[rawSequenceFile].newVbpPath.toString()) }
+            0 * _
         }
         service.fileSystemService = Mock(FileSystemService) {
             _ * getRemoteFileSystem() >> FileSystems.default
@@ -905,11 +924,13 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         final Map<RawSequenceFile, Map<String, ?>> rawSequenceFilePaths = createPathsForRawSequenceFiles(rawSequenceFileList)
 
         // service
-        service.lsdfFilesService = Mock(LsdfFilesService) {
-            _ * getFileFinalPathAsPath(_) >> { RawSequenceFile rawSequenceFile, PathOption... options ->
-                Paths.get(rawSequenceFilePaths[rawSequenceFile].newPath.toString()) }
-            _ * getFileViewByPidPathAsPath(_) >> { RawSequenceFile rawSequenceFile, PathOption... options ->
-                Paths.get(rawSequenceFilePaths[rawSequenceFile].newVbpPath.toString()) }
+        service.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService) {
+            _ * getFilePath(_) >> { RawSequenceFile rawSequenceFile -> Paths.get(rawSequenceFilePaths[rawSequenceFile].newPath.toString()) }
+            0 * _
+        }
+        service.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
+            _ * getFilePath(_) >> { RawSequenceFile rawSequenceFile -> Paths.get(rawSequenceFilePaths[rawSequenceFile].newVbpPath.toString()) }
+            0 * _
         }
         service.fileSystemService = Mock(FileSystemService) {
             _ * getRemoteFileSystem() >> FileSystems.default
@@ -997,13 +1018,16 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         }
 
         // service
-        service.lsdfFilesService = Mock(LsdfFilesService) {
-            _ * getFileFinalPathAsPath(_) >> { RawSequenceFile rawSequenceFile, PathOption... options ->
-                Paths.get(rawSequenceFilePaths[rawSequenceFile].newPath.toString()) }
-            _ * getFileViewByPidPathAsPath(_) >> { RawSequenceFile rawSequenceFile, PathOption... options ->
-                Paths.get(rawSequenceFilePaths[rawSequenceFile].newVbpPath.toString()) }
-            _ * getFileViewByPidPathAsPath(_, WellDirectory.ALL_WELL) >> { RawSequenceFile rawSequenceFile, _, PathOption... options ->
-                Paths.get(rawSequenceFilePaths[rawSequenceFile].newVbpPath.toString()) }
+        service.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService) {
+            _ * getFilePath(_) >> { RawSequenceFile rawSequenceFile -> Paths.get(rawSequenceFilePaths[rawSequenceFile].newPath.toString()) }
+            0 * _
+        }
+        service.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
+            _ * getFilePath(_) >> { RawSequenceFile rawSequenceFile -> Paths.get(rawSequenceFilePaths[rawSequenceFile].newVbpPath.toString()) }
+            0 * _
+        }
+        service.rawSequenceDataAllWellFileService = Mock(RawSequenceDataAllWellFileService) {
+            _ * getFilePath(_) >> { RawSequenceFile rawSequenceFile -> Paths.get(rawSequenceFilePaths[rawSequenceFile].newVbpPath.toString()) }
         }
 
         service.singleCellService = Mock(SingleCellService) {
@@ -1099,9 +1123,13 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         final RawSequenceFile rawSequenceFile = CollectionUtils.exactlyOneElement(RawSequenceFile.findAllBySeqTrack(seqTrack))
 
         // service
-        service.lsdfFilesService = Mock(LsdfFilesService) {
-            _ * getFileFinalPathAsPath(_) >> Paths.get(rawSequenceFile.pathName).resolve(newRawSequenceFileName)
-            _ * getFileViewByPidPathAsPath(_) >> Paths.get(rawSequenceFile.pathName).resolve(newRawSequenceFileName)
+        service.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService) {
+            1 * getFilePath(_) >> Paths.get(rawSequenceFile.pathName).resolve(newRawSequenceFileName)
+            0 * _
+        }
+        service.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
+            1 * getFilePath(_) >> Paths.get(rawSequenceFile.pathName).resolve(newRawSequenceFileName)
+            0 * _
         }
         service.fileSystemService = Mock(FileSystemService) {
             _ * getRemoteFileSystem() >> FileSystems.default

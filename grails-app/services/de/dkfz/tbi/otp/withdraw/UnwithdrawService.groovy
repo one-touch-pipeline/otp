@@ -28,6 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -43,8 +45,9 @@ class UnwithdrawService {
     FastqcDataFilesService fastqcDataFilesService
     FileService fileService
     FileSystemService fileSystemService
-    LsdfFilesService lsdfFilesService
     WithdrawAnalysisService withdrawAnalysisService
+    RawSequenceDataWorkFileService rawSequenceDataWorkFileService
+    RawSequenceDataViewFileService rawSequenceDataViewFileService
 
     @Autowired
     List<AbstractWithdrawBamFileService<?>> withdrawBamFileServices
@@ -60,13 +63,13 @@ class UnwithdrawService {
 
     private void unwithdrawRawSequenceFiles(final RawSequenceFile rawSequenceFile, String comment, UnwithdrawStateHolder unwithdrawStateHolder) {
         unwithdrawStateHolder.summary << "Unwithdrawing RawSequenceFile: ${rawSequenceFile}: ${rawSequenceFile.withdrawnComment}"
-        unwithdrawStateHolder.linksToCreate.put(lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile),
-                lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile))
-        unwithdrawStateHolder.pathsToChangeGroup.put(lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile).toString(), rawSequenceFile.project.unixGroup)
+        unwithdrawStateHolder.linksToCreate.put(rawSequenceDataWorkFileService.getFilePath(rawSequenceFile),
+                rawSequenceDataViewFileService.getFilePath(rawSequenceFile))
+        unwithdrawStateHolder.pathsToChangeGroup.put(rawSequenceDataViewFileService.getFilePath(rawSequenceFile).toString(), rawSequenceFile.project.unixGroup)
         FastqcProcessedFile fastqcProcessedFile = CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllBySequenceFile(rawSequenceFile))
         List<Path> files = [
-                lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile),
-                lsdfFilesService.getFileMd5sumFinalPathAsPath(rawSequenceFile),
+                rawSequenceDataWorkFileService.getFilePath(rawSequenceFile),
+                rawSequenceDataWorkFileService.getMd5sumPath(rawSequenceFile),
         ]
         if (fastqcProcessedFile) {
             files.addAll([

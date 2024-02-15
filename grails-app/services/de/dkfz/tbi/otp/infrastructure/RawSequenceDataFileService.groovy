@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2024 The OTP authors
+ * Copyright 2011-2023 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,21 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.alignment.panCancer
+package de.dkfz.tbi.otp.infrastructure
 
-import org.springframework.beans.factory.annotation.Autowired
+import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 
-import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
-import de.dkfz.tbi.otp.workflow.alignment.AlignmentWorkflowShared
-import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import java.nio.file.Path
 
-trait PanCancerShared extends AlignmentWorkflowShared {
+interface RawSequenceDataFileService {
+    Path getDirectoryPath(RawSequenceFile rawSequenceFile)
 
-    private static final List<String> WORKFLOWS = [PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WORKFLOW]
-
-    List<FastqcProcessedFile> getFastqcProcessedFiles(WorkflowStep workflowStep) {
-        checkWorkflowName(workflowStep, WORKFLOWS)
-        return concreteArtefactService.<FastqcProcessedFile> getInputArtefacts(workflowStep, PanCancerWorkflow.INPUT_FASTQC)
-    }
+    Path getFilePath(RawSequenceFile rawSequenceFile)
 }

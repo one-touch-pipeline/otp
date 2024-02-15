@@ -60,7 +60,6 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
 
     FastqcDataFilesService fastqcDataFilesService
     FastqcDecider fastqcDecider
-    LsdfFilesService lsdfFilesService
 
     private Path expectedFastqc
     private RawSequenceFile rawSequenceFile
@@ -107,8 +106,8 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
         )
         log.info("Domain data created")
 
-        fileService.createLink(lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile), sourceFastq)
-        fileService.createLink(lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile), lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile))
+        fileService.createLink(rawSequenceDataWorkFileService.getFilePath(rawSequenceFile), sourceFastq)
+        fileService.createLink(rawSequenceDataViewFileService.getFilePath(rawSequenceFile), rawSequenceDataWorkFileService.getFilePath(rawSequenceFile))
         log.info("File system prepared")
 
         workflow = CollectionUtils.exactlyOneElement(Workflow.findAllByName(BashFastQcWorkflow.WORKFLOW))

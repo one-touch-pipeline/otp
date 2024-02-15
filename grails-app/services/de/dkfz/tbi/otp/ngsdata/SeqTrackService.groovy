@@ -45,7 +45,6 @@ class SeqTrackService {
 
     AlignmentDeciderService alignmentDeciderService
     FileTypeService fileTypeService
-    LsdfFilesService lsdfFilesService
     ProjectService projectService
     SeqTypeService seqTypeService
 

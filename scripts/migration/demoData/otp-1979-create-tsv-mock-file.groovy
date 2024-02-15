@@ -33,7 +33,6 @@ import java.nio.file.Path
  * on the example database
  */
 
-LsdfFilesService lsdfFilesService = ctx.lsdfFilesService
 FilestoreService filestoreService = ctx.filestoreService
 FileService fileService = ctx.fileService
 FileSystemService fileSystemService = ctx.fileSystemService

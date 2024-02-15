@@ -90,7 +90,7 @@ class FilestoreService {
     Path getWorkFolderPath(WorkFolder workFolder) {
         String uuidString = workFolder.uuid
 
-        // UUID is splitted into 3 parts
+        // UUID is split into 3 parts
         String[] uuidFragments = new String[3]
         uuidFragments[INDEX_0] = uuidString.substring(OFFSET_0, OFFSET_2)
         uuidFragments[INDEX_1] = uuidString.substring(OFFSET_2, OFFSET_4)

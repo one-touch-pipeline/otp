@@ -31,6 +31,9 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataAllWellFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
@@ -59,9 +62,11 @@ class WithdrawHelperService {
     FastqcDataFilesService fastqcDataFilesService
     FileService fileService
     FileSystemService fileSystemService
-    LsdfFilesService lsdfFilesService
     ProcessingOptionService processingOptionService
     FilestoreService filestoreService
+    RawSequenceDataWorkFileService rawSequenceDataWorkFileService
+    RawSequenceDataViewFileService rawSequenceDataViewFileService
+    RawSequenceDataAllWellFileService rawSequenceDataAllWellFileService
 
     @Autowired
     List<AbstractWithdrawBamFileService<?>> withdrawBamFileServices
@@ -179,8 +184,8 @@ class WithdrawHelperService {
             rawSequenceFile.save(flush: true)
 
             List<Path> filePaths = []
-            filePaths.add(lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile))
-            filePaths.add(lsdfFilesService.getFileMd5sumFinalPathAsPath(rawSequenceFile))
+            filePaths.add(rawSequenceDataWorkFileService.getFilePath(rawSequenceFile))
+            filePaths.add(rawSequenceDataWorkFileService.getMd5sumPath(rawSequenceFile))
             if (fastqcProcessedFile) {
                 // add the symbolic link
                 filePaths.add(fastqcDataFilesService.fastqcOutputDirectory(fastqcProcessedFile))
@@ -194,9 +199,9 @@ class WithdrawHelperService {
                 withdrawStateHolder.pathsToChangeGroup << existingPath.toString()
             }
 
-            withdrawStateHolder.pathsToDelete << lsdfFilesService.getFileViewByPidPath(rawSequenceFile)
+            withdrawStateHolder.pathsToDelete << rawSequenceDataViewFileService.getFilePath(rawSequenceFile).toString()
             if (rawSequenceFile.seqType.singleCell && rawSequenceFile.seqTrack.singleCellWellLabel) {
-                withdrawStateHolder.pathsToDelete << lsdfFilesService.getWellAllFileViewByPidPath(rawSequenceFile)
+                withdrawStateHolder.pathsToDelete << rawSequenceDataAllWellFileService.getFilePath(rawSequenceFile).toString()
             }
 
             MergingWorkPackage.withCriteria {

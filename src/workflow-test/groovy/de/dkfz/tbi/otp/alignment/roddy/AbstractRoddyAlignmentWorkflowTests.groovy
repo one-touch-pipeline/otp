@@ -416,8 +416,8 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     void checkInputIsNotDeleted() {
         List<RawSequenceFile> fastqFiles = RawSequenceFile.findAll()
         fastqFiles.each { RawSequenceFile rawSequenceFile ->
-            fileService.ensureFileIsReadableAndNotEmpty((lsdfFilesService.getFileFinalPath(rawSequenceFile) as File).toPath())
-            fileService.ensureFileIsReadableAndNotEmpty((lsdfFilesService.getFileViewByPidPath(rawSequenceFile) as File).toPath())
+            fileService.ensureFileIsReadableAndNotEmpty(rawSequenceDataWorkFileService.getFilePath(rawSequenceFile))
+            fileService.ensureFileIsReadableAndNotEmpty(rawSequenceDataViewFileService.getFilePath(rawSequenceFile))
         }
     }
 }

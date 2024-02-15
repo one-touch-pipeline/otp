@@ -28,6 +28,7 @@ import spock.lang.Unroll
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
@@ -90,6 +91,7 @@ class WesFastqcWorkflowSpec extends AbstractDecidedWorkflowSpec {
     FastqcDataFilesService fastqcDataFilesService
     FastqcDecider fastqcDecider
     LsdfFilesService lsdfFilesService
+    RawSequenceDataWorkFileService rawSequenceDataWorkFileService
 
     private Path expectedFastqc
     private final List<RawSequenceFile> allRawSequenceFiles = []
@@ -141,8 +143,8 @@ class WesFastqcWorkflowSpec extends AbstractDecidedWorkflowSpec {
         log.info("Domain data created")
 
         allRawSequenceFiles.each {
-            fileService.createLink(lsdfFilesService.getFileFinalPathAsPath(it), sourceFastq)
-            fileService.createLink(lsdfFilesService.getFileViewByPidPathAsPath(it), lsdfFilesService.getFileFinalPathAsPath(it))
+            fileService.createLink(rawSequenceDataWorkFileService.getFilePath(it), sourceFastq)
+            fileService.createLink(rawSequenceDataViewFileService.getFilePath(it), rawSequenceDataWorkFileService.getFilePath(it))
         }
         log.info("File system prepared")
 

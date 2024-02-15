@@ -26,10 +26,10 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataAllWellFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.ngsdata.FastqFile
 import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.ngsdata.WellDirectory
 
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -87,10 +87,9 @@ class SingleCellServiceSpec extends Specification implements DataTest, DomainFac
         RawSequenceFile rawSequenceFile = createRawSequenceFileHelper()
 
         SingleCellService service = new SingleCellService([
-                lsdfFilesService: Mock(LsdfFilesService) {
-                    1 * getSingleCellWellDirectory(rawSequenceFile, WellDirectory.ALL_WELL) >> allWellDir
-                    0 * _
-                },
+                rawSequenceDataAllWellFileService: Mock(RawSequenceDataAllWellFileService) {
+                    1 * getAllWellDirectoryPath(rawSequenceFile) >> allWellDir
+                }
         ])
 
         Path expected = allWellDir.resolve(service.buildMappingFileName(rawSequenceFile))
@@ -110,8 +109,8 @@ class SingleCellServiceSpec extends Specification implements DataTest, DomainFac
         String rawSequenceFilePath = "pathToFastq/fastq.fastq"
 
         SingleCellService service = new SingleCellService(
-                lsdfFilesService: Mock(LsdfFilesService) {
-                    1 * getFileViewByPidPath(_) >> rawSequenceFilePath
+                rawSequenceDataViewFileService: Mock(RawSequenceDataViewFileService) {
+                    1 * getFilePath(_) >> Paths.get(rawSequenceFilePath)
                 }
         )
 

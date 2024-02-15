@@ -40,6 +40,9 @@ import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
 import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataAllWellFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RoddyConfigService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -234,8 +237,6 @@ class ExampleData {
 
     FileSystemService fileSystemService
 
-    LsdfFilesService lsdfFilesService
-
     SnvCallingService snvCallingService
 
     IndelCallingService indelCallingService
@@ -255,6 +256,10 @@ class ExampleData {
     SingleCellMappingFileService singleCellMappingFileService
 
     DocumentService documentService
+
+    RawSequenceDataWorkFileService rawSequenceDataWorkFileService
+    RawSequenceDataViewFileService rawSequenceDataViewFileService
+    RawSequenceDataAllWellFileService rawSequenceDataAllWellFileService
 
     SeqTypeService seqTypeService
     RoddyConfigService roddyConfigService
@@ -461,9 +466,9 @@ class ExampleData {
     void createRawSequenceFilesFilesOnFilesystem() {
         println "creating dummy datafiles on file system"
         rawSequenceFiles.each { RawSequenceFile rawSequenceFile ->
-            Path directPath = lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile)
+            Path directPath = rawSequenceDataWorkFileService.getFilePath(rawSequenceFile)
             Path directPathMd5sum = directPath.resolveSibling("${rawSequenceFile.fileName}.md5sum")
-            Path vbpPath = lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile)
+            Path vbpPath = rawSequenceDataViewFileService.getFilePath(rawSequenceFile)
             [
                     directPath,
                     directPathMd5sum,
@@ -492,8 +497,8 @@ class ExampleData {
         println "creating additional files or links for well labeled lanes on file system"
         rawSequenceFiles.each { RawSequenceFile rawSequenceFile ->
             if (rawSequenceFile.seqTrack.singleCellWellLabel) {
-                Path target = lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile)
-                Path link = lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile, WellDirectory.ALL_WELL)
+                Path target = rawSequenceDataWorkFileService.getFilePath(rawSequenceFile)
+                Path link = rawSequenceDataAllWellFileService.getFilePath(rawSequenceFile)
 
                 fileService.createLink(link, target, CreateLinkOption.DELETE_EXISTING_FILE)
 
@@ -1909,25 +1914,27 @@ enum MixedInSpecies {
 
 Project.withTransaction {
     ExampleData exampleData = new ExampleData([
-            abstractBamFileService        : ctx.abstractBamFileService,
-            fastqcDataFilesService        : ctx.fastqcDataFilesService,
-            fileService                   : ctx.fileService,
-            fileSystemService             : ctx.fileSystemService,
-            lsdfFilesService              : ctx.lsdfFilesService,
-            snvCallingService             : ctx.snvCallingService,
-            indelCallingService           : ctx.indelCallingService,
-            sophiaService                 : ctx.sophiaService,
-            aceseqService                 : ctx.aceseqService,
-            cellRangerConfigurationService: ctx.cellRangerConfigurationService,
-            singleCellBamFileService      : ctx.singleCellBamFileService,
-            cellRangerWorkflowService     : ctx.cellRangerWorkflowService,
-            singleCellMappingFileService  : ctx.singleCellMappingFileService,
-            documentService               : ctx.documentService,
-            roddyBamFileService           : ctx.roddyBamFileService,
-            rnaRoddyBamFileService        : ctx.rnaRoddyBamFileService,
-            runYapsaService               : ctx.runYapsaService,
-            seqTypeService                : ctx.seqTypeService,
-            roddyConfigService            : ctx.roddyConfigService,
+            abstractBamFileService           : ctx.abstractBamFileService,
+            fastqcDataFilesService           : ctx.fastqcDataFilesService,
+            fileService                      : ctx.fileService,
+            fileSystemService                : ctx.fileSystemService,
+            snvCallingService                : ctx.snvCallingService,
+            indelCallingService              : ctx.indelCallingService,
+            sophiaService                    : ctx.sophiaService,
+            aceseqService                    : ctx.aceseqService,
+            cellRangerConfigurationService   : ctx.cellRangerConfigurationService,
+            singleCellBamFileService         : ctx.singleCellBamFileService,
+            cellRangerWorkflowService        : ctx.cellRangerWorkflowService,
+            singleCellMappingFileService     : ctx.singleCellMappingFileService,
+            documentService                  : ctx.documentService,
+            roddyBamFileService              : ctx.roddyBamFileService,
+            rnaRoddyBamFileService           : ctx.rnaRoddyBamFileService,
+            runYapsaService                  : ctx.runYapsaService,
+            seqTypeService                   : ctx.seqTypeService,
+            roddyConfigService               : ctx.roddyConfigService,
+            rawSequenceDataWorkFileService   : ctx.rawSequenceDataWorkFileService,
+            rawSequenceDataViewFileService   : ctx.rawSequenceDataViewFileService,
+            rawSequenceDataAllWellFileService: ctx.rawSequenceDataAllWellFileService,
     ])
 
     exampleData.init()

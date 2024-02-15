@@ -28,6 +28,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 
+import java.nio.file.Paths
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 /**
@@ -187,13 +189,12 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
 
     @Deprecated
     static File getStandardConfigDirectory(Project project, Pipeline.Name pipelineName) {
-        assert project
-        assert pipelineName
-        return LsdfFilesService.getPath(
+        assert project && pipelineName
+        return Paths.get(
                 project.projectDirectory.path,
                 CONFIG_PATH_ELEMENT,
                 pipelineName.name(),
-        )
+        ).toFile()
     }
 
     @Deprecated

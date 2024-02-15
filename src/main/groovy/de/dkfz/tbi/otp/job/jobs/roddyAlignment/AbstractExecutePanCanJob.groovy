@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
@@ -45,7 +46,7 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
     ReferenceGenomeService referenceGenomeService
 
     @Autowired
-    LsdfFilesService lsdfFilesService
+    RawSequenceDataViewFileService rawSequenceDataViewFileService
 
     @Autowired
     ExecuteRoddyCommandService executeRoddyCommandService

@@ -41,8 +41,6 @@ import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
 abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<SophiaInstance> implements WorkflowSystemDomainFactory {
 
-    LsdfFilesService lsdfFilesService
-
     ProjectService projectService
     SophiaService sophiaService
 

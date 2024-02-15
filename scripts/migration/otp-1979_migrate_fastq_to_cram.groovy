@@ -28,6 +28,8 @@ import de.dkfz.tbi.otp.dataswap.ScriptBuilder
 import de.dkfz.tbi.otp.filestore.BaseFolder
 import de.dkfz.tbi.otp.filestore.WorkFolder
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 
@@ -43,8 +45,9 @@ String fastqToCramFile = '/home/otp/filesystem/scripts/cram/otp-1979-demo-migrat
 FileService fileService = ctx.fileService
 FileSystemService fileSystemService = ctx.fileSystemService
 DataSource dataSource = ctx.dataSource
-LsdfFilesService lsdfFilesService = ctx.lsdfFilesService
 ConfigService configService = ctx.configService
+RawSequenceDataWorkFileService rawSequenceDataWorkFileService = ctx.rawSequenceDataWorkFileService
+RawSequenceDataViewFileService rawSequenceDataViewFileService = ctx.rawSequenceDataViewFileService
 
 Path path = fileService.toPath(new File(fastqToCramFile), fileSystemService.remoteFileSystem)
 ScriptBuilder scriptBuilder = new ScriptBuilder(configService, fileService, fileSystemService, path.parent)
@@ -68,8 +71,8 @@ RawSequenceFile.withTransaction {
         sql.execute(sqlQuery, [id: id, sequenceCramFilePackage: sequenceCramFilePackage])
         SequenceCramFile sequenceCramFile = SequenceCramFile.findById(id)
         if (sequenceCramFile.fileExists) {
-            pathsToDelete += lsdfFilesService.getFileFinalPathAsPath(sequenceCramFile).toString()
-            pathsToDelete += lsdfFilesService.getFileViewByPidPathAsPath(sequenceCramFile).toString()
+            pathsToDelete += rawSequenceDataWorkFileService.getFilePath(sequenceCramFile).toString()
+            pathsToDelete += rawSequenceDataViewFileService.getFilePath(sequenceCramFile).toString()
         }
         sequenceCramFile.cramMd5sum = cramMd5Sum
 

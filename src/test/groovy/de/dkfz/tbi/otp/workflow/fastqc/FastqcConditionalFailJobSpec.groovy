@@ -29,6 +29,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.FastqcWorkflowDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
@@ -76,8 +77,8 @@ class FastqcConditionalFailJobSpec extends Specification implements DataTest, Fa
         job.fileSystemService = Mock(FileSystemService) {
             getRemoteFileSystem() >> FileSystems.default
         }
-        job.lsdfFilesService = Mock(LsdfFilesService) {
-            getFileViewByPidPathAsPath(_) >> path
+        job.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
+            getFilePath(_) >> path
         }
         job.configService = Mock(ConfigService)
         job.fileService = new FileService()
@@ -134,8 +135,8 @@ class FastqcConditionalFailJobSpec extends Specification implements DataTest, Fa
         job.fileSystemService = Mock(FileSystemService) {
             getRemoteFileSystem() >> FileSystems.default
         }
-        job.lsdfFilesService = Mock(LsdfFilesService) {
-            getFileViewByPidPathAsPath(_) >> TestCase.uniqueNonExistentPath.toPath()
+        job.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
+            getFilePath(_) >> TestCase.uniqueNonExistentPath.toPath()
         }
         job.configService = Mock(ConfigService)
         job.fileService = new FileService()

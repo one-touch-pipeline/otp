@@ -21,8 +21,12 @@
  */
 
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataAllWellFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
+
+import java.nio.file.Path
 
 List<DataFile> datafiles = DataFile.createCriteria().list {
     seqTrack {
@@ -30,23 +34,25 @@ List<DataFile> datafiles = DataFile.createCriteria().list {
     }
 }
 
-LsdfFilesService lsdfFilesService = ctx.lsdfFilesService
 SingleCellService singleCellService = ctx.singleCellService
+RawSequenceDataWorkFileService rawSequenceDataWorkFileService = ctx.rawSequenceDataWorkFileService
+RawSequenceDataViewFileService rawSequenceDataViewFileService = ctx.rawSequenceDataViewFileService
+RawSequenceDataAllWellFileService rawSequenceDataAllWellFileService = ctx.rawSequenceDataAllWellFileService
 
 println "Datafiles with well label: ${datafiles.size()}"
 
 println datafiles.collect { DataFile dataFile ->
-    String newPath = lsdfFilesService.getFileViewByPidPath(dataFile)
-    String oldPath = newPath.replace(dataFile.seqTrack.singleCellWellLabel, '').replace('//', '/')
-    String wellPath = lsdfFilesService.getWellAllFileViewByPidPath(dataFile)
-    String source = lsdfFilesService.getFileFinalPath(dataFile)
-    String mappingFile = singleCellService.singleCellMappingFile(dataFile).toString()
+    Path newPath = rawSequenceDataViewFileService.getFilePath(dataFile)
+    String oldPath = newPath.toString().replace(dataFile.seqTrack.singleCellWellLabel, '').replace('//', '/')
+    Path wellPath = rawSequenceDataAllWellFileService.getFilePath(dataFile)
+    Path source = rawSequenceDataWorkFileService.getFilePath(dataFile)
+    Path mappingFile = singleCellService.singleCellMappingFile(dataFile)
 
     [
             '-------------------------------',
             "#${dataFile} of ${dataFile.seqTrack.toString().replace('<br>', ' ')}",
-            "mkdir -m 2750 -p ${new File(newPath).parent}",
-            "mkdir -m 2750 -p ${new File(wellPath).parent}",
+            "mkdir -m 2750 -p ${newPath.parent}",
+            "mkdir -m 2750 -p ${wellPath.parent}",
             "rm ${oldPath} ",
             "ln -s ${source} ${newPath}",
             "ln -s ${source} ${wellPath}",

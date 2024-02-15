@@ -47,8 +47,8 @@ abstract class AbstractAlignmentWorkflowSpec extends AbstractDecidedWorkflowSpec
             assert Files.isReadable(sourceFastqFile)
             rawSequenceFile.fileSize = Files.size(sourceFastqFile)
             rawSequenceFile.save(flush: true)
-            Path linkFastqFile = lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile)
-            Path linkViewByPid = lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile)
+            Path linkFastqFile = rawSequenceDataWorkFileService.getFilePath(rawSequenceFile)
+            Path linkViewByPid = rawSequenceDataViewFileService.getFilePath(rawSequenceFile)
             fileService.createLink(linkFastqFile, sourceFastqFile)
             fileService.createLink(linkViewByPid, linkFastqFile)
         }

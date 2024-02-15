@@ -46,8 +46,8 @@ class DataInstallationSingleCellLinkJob extends AbstractLinkJob implements DataI
 
         if (seqTrack.seqType.singleCell && seqTrack.singleCellWellLabel) {
             return seqTrack.sequenceFiles.collect { RawSequenceFile rawSequenceFile ->
-                Path target = lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile)
-                Path link = lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile, WellDirectory.ALL_WELL)
+                Path target = rawSequenceDataWorkFileService.getFilePath(rawSequenceFile)
+                Path link = rawSequenceDataAllWellFileService.getFilePath(rawSequenceFile)
                 return new LinkEntry(target: target, link: link)
             }
         }

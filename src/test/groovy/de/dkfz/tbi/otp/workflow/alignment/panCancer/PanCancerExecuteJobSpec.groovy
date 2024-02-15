@@ -32,13 +32,13 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.PanCancerWorkflowDomainFactory
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.*
-
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -103,8 +103,8 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, PanCanc
             fastaFilePath(roddyBamFile.referenceGenome) >> { new File("/fasta-path") }
             chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage) >> { new File("/chrom-size-path") }
         }
-        job.roddyConfigValueService.lsdfFilesService = new LsdfFilesService()
-        job.roddyConfigValueService.lsdfFilesService.individualService = Mock(IndividualService) {
+        job.roddyConfigValueService.rawSequenceDataViewFileService = new RawSequenceDataViewFileService()
+        job.roddyConfigValueService.rawSequenceDataViewFileService.individualService = Mock(IndividualService) {
             getViewByPidPath(_, _) >> { Paths.get("/viewbypidpath") }
         }
 
@@ -254,7 +254,7 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, PanCanc
     private String fastqFilesAsString(RoddyBamFile roddyBamFileToUse = roddyBamFile) {
         return roddyBamFileToUse.seqTracks.collectMany { SeqTrack seqTrack ->
             RawSequenceFile.findAllBySeqTrack(seqTrack).collect { RawSequenceFile rawSequenceFile ->
-                job.roddyConfigValueService.lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile).toString()
+                job.roddyConfigValueService.rawSequenceDataViewFileService.getFilePath(rawSequenceFile).toString()
             }
         }.join(';')
     }

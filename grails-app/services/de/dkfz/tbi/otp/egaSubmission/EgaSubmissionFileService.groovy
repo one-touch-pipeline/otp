@@ -25,7 +25,6 @@ import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.SecurityService
@@ -48,7 +47,6 @@ class EgaSubmissionFileService {
     EgaFileContentService egaFileContentService
     FileService fileService
     FileSystemService fileSystemService
-    LsdfFilesService lsdfFilesService
     MailHelperService mailHelperService
     MessageSourceService messageSourceService
     ProjectService projectService

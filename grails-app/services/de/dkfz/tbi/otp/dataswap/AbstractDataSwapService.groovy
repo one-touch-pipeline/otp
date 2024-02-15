@@ -26,6 +26,9 @@ import grails.validation.Validateable
 import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataAllWellFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -75,7 +78,6 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
 
     CommentService commentService
     FastqcDataFilesService fastqcDataFilesService
-    LsdfFilesService lsdfFilesService
     ConfigService configService
     SeqTrackService seqTrackService
     FileService fileService
@@ -85,6 +87,9 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
     AnalysisDeletionService analysisDeletionService
     FileSystemService fileSystemService
     SampleService sampleService
+    RawSequenceDataWorkFileService rawSequenceDataWorkFileService
+    RawSequenceDataViewFileService rawSequenceDataViewFileService
+    RawSequenceDataAllWellFileService rawSequenceDataAllWellFileService
 
     /**
      * Logs various arguments of DataSwapParameters in DataSwapParameters.log that can be examined later in the script output.
@@ -274,11 +279,11 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
     Map<RawSequenceFile, Map<String, String>> collectFileNamesOfRawSequenceFiles(List<RawSequenceFile> rawSequenceFiles) {
         Map<RawSequenceFile, Map<String, String>> map = [:]
         rawSequenceFiles.each { RawSequenceFile rawSequenceFile ->
-            String directFileName = lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile)
-            String vbpFileName = lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile)
+            String directFileName = rawSequenceDataWorkFileService.getFilePath(rawSequenceFile)
+            String vbpFileName = rawSequenceDataViewFileService.getFilePath(rawSequenceFile)
             map[rawSequenceFile] = [(DIRECT_FILE_NAME): directFileName, (VBP_FILE_NAME): vbpFileName]
             if (rawSequenceFile.seqType.singleCell && rawSequenceFile.seqTrack.singleCellWellLabel) {
-                map[rawSequenceFile][WELL_FILE_NAME] = lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile, WellDirectory.ALL_WELL).toString()
+                map[rawSequenceFile][WELL_FILE_NAME] = rawSequenceDataAllWellFileService.getFilePath(rawSequenceFile).toString()
                 map[rawSequenceFile][WELL_MAPPING_FILE_NAME] = singleCellService.singleCellMappingFile(rawSequenceFile).toString()
                 map[rawSequenceFile][WELL_MAPPING_FILE_ENTRY_NAME] = singleCellService.mappingEntry(rawSequenceFile)
             }
@@ -290,8 +295,8 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
         if (!rawSequenceFile.seqType.singleCell || !rawSequenceFile.seqTrack.singleCellWellLabel) {
             return ''
         }
-        String newDirectFileName = lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile)
-        String newWellFileName = lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile, WellDirectory.ALL_WELL)
+        String newDirectFileName = rawSequenceDataWorkFileService.getFilePath(rawSequenceFile)
+        String newWellFileName = rawSequenceDataAllWellFileService.getFilePath(rawSequenceFile)
         File wellFile = new File(newWellFileName)
 
         Path mappingFile = singleCellService.singleCellMappingFile(rawSequenceFile)
@@ -517,8 +522,8 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
         String bashMoveVbpFile = "rm -f '${oldVbpFileName}';\n"
         String bashMoveDirectFile
 
-        Path newDirectPath = lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile)
-        Path newVbpPath = lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile)
+        Path newDirectPath = rawSequenceDataWorkFileService.getFilePath(rawSequenceFile)
+        Path newVbpPath = rawSequenceDataViewFileService.getFilePath(rawSequenceFile)
 
         if (Files.exists(newDirectPath)) {
             if (!filesAlreadyMoved && (oldDirectFilePath != newDirectPath)) {

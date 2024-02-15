@@ -64,7 +64,7 @@ class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, Sa
             individualService.getViewByPidPath(individualSwap.old, it)
         }
         List<Path> sampleDirs = rawSequenceFiles.collect {
-            lsdfFilesService.getSampleTypeDirectory(it)
+            rawSequenceDataViewFileService.getSampleTypeDirectoryPath(it)
         }
 
         return new SampleSwapData(

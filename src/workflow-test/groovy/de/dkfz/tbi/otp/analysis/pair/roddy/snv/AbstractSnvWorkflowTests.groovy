@@ -35,7 +35,6 @@ import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
 abstract class AbstractSnvWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<RoddySnvCallingInstance> {
 
-    LsdfFilesService lsdfFilesService
     ProjectService projectService
     SnvCallingService snvCallingService
 

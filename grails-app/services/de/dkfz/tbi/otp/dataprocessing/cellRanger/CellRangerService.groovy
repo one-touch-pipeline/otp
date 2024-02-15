@@ -29,6 +29,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeIndexService
@@ -69,21 +70,13 @@ class CellRangerService {
     }
 
     FileSystemService fileSystemService
-
     FileService fileService
-
-    LsdfFilesService lsdfFilesService
-
+    RawSequenceDataViewFileService rawSequenceDataViewFileService
     AbstractBamFileService abstractBamFileService
-
     ReferenceGenomeIndexService referenceGenomeIndexService
-
     ProcessingOptionService processingOptionService
-
     QcTrafficLightCheckService qcTrafficLightCheckService
-
     Md5SumService md5SumService
-
     CellRangerWorkflowService cellRangerWorkflowService
 
     void createInputDirectoryStructure(SingleCellBamFile singleCellBamFile) {
@@ -106,7 +99,7 @@ class CellRangerService {
                     String formattedLaneNumber = String.valueOf(laneCounter).padLeft(3, '0')
                     String fileName = "${sampleName}_S1_L${formattedLaneNumber}_R${rawSequenceFile.mateNumber}_${formattedLaneNumber}.fastq.gz"
                     Path link = sampleIdentifierDirectory.resolve(fileName)
-                    Path target = fileSystem.getPath(lsdfFilesService.getFileViewByPidPath(rawSequenceFile))
+                    Path target = rawSequenceDataViewFileService.getFilePath(rawSequenceFile)
                     fileService.createLink(link, target, unixGroup)
                 }
             }

@@ -24,6 +24,7 @@ import org.hibernate.sql.JoinType
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 
@@ -79,6 +80,7 @@ List<RawSequenceFile> fastq_to_export = RawSequenceFile.createCriteria().listDis
 ConfigService configService = ctx.configService
 FileSystemService fileSystemService = ctx.fileSystemService
 FileService fileService = ctx.fileService
+RawSequenceDataViewFileService rawSequenceDataViewFileService = ctx.rawSequenceDataViewFileService
 
 FileSystem fileSystem = fileSystemService.remoteFileSystem
 
@@ -121,7 +123,7 @@ output.withPrintWriter { w ->
             // .. record on first line, which ruins the alignment otherwise.
 
             // write everything for the old one to file.
-            writeln(line_buffer, previous_fastq, w, wanted_columns)
+            writeln(line_buffer, previous_fastq, w, wanted_columns, rawSequenceDataViewFileService)
             // don't keep any values, in case they are not overwritten by the next fastq
             line_buffer.clear()
         }
@@ -134,10 +136,10 @@ output.withPrintWriter { w ->
     // write the final buffer. The final file doesn't have a "different" one following it to trigger it otherwise.
     //   (This line was absolutely, honestly part of the first iteration of this script, and wasn't accidentally
     //   forgotten before someone else pointed it out! Honest!)
-    writeln(line_buffer, previous_fastq, w, wanted_columns)
+    writeln(line_buffer, previous_fastq, w, wanted_columns, rawSequenceDataViewFileService)
 } // END printwriter
 
-private void writeln(Map<String, String> line_buffer, RawSequenceFile the_file, PrintWriter w, List<MetaDataColumn> wanted_columns) {
+private void writeln(Map<String, String> line_buffer, RawSequenceFile the_file, PrintWriter w, List<MetaDataColumn> wanted_columns, RawSequenceDataViewFileService service) {
     line = []
 
     // emit the column values in header-order
@@ -145,7 +147,7 @@ private void writeln(Map<String, String> line_buffer, RawSequenceFile the_file, 
         // full path instead of filename for FastQ; other properties as-is
         if (header == MetaDataColumn.FASTQ_FILE) {
             // view-by-pid path probably won't exist anymore if data was withdrawn. This is good because you'll notice it missing.
-            line << ctx.lsdfFilesService.getFileViewByPidPath(the_file)
+            line << service.getFilePath(the_file).toString()
         } else {
             line << line_buffer.getOrDefault(header.toString(), "")
         }

@@ -26,6 +26,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.DataInstallationWorkflowDomainFactory
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
@@ -63,8 +64,8 @@ class DataInstallationValidationJobSpec extends Specification implements DataTes
             _ * getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> seqTrack
             0 * _
         }
-        job.lsdfFilesService = Mock(LsdfFilesService) {
-            1 * getFileFinalPath(_) >> { RawSequenceFile rawSequenceFile -> rawSequenceFile.fileName }
+        job.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService) {
+            1 * getFilePath(_) >> { RawSequenceFile rawSequenceFile -> Paths.get(rawSequenceFile.fileName) }
         }
         job.fileSystemService = Mock(FileSystemService) {
             getRemoteFileSystem() >> FileSystems.default
@@ -167,8 +168,8 @@ class DataInstallationValidationJobSpec extends Specification implements DataTes
         job.fileSystemService = Mock(FileSystemService) {
             getRemoteFileSystem() >> FileSystems.default
         }
-        job.lsdfFilesService = Mock(LsdfFilesService) {
-            getFileFinalPath(_) >> Paths.get("")
+        job.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService) {
+            getFilePath(_) >> Paths.get("")
         }
 
         when:

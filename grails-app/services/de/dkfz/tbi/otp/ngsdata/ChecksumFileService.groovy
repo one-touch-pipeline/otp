@@ -25,6 +25,7 @@ import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.dataprocessing.ParsingException
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.utils.exceptions.FileIsEmptyException
 
@@ -35,12 +36,12 @@ import static org.springframework.util.Assert.notNull
 @Transactional
 class ChecksumFileService {
 
-    LsdfFilesService lsdfFilesService
     FileSystemService fileSystemService
     FileService fileService
+    RawSequenceDataWorkFileService rawSequenceDataWorkFileService
 
     String pathToMd5File(RawSequenceFile file) {
-        String path = lsdfFilesService.getFileFinalPath(file)
+        String path = rawSequenceDataWorkFileService.getFilePath(file)
         return "${path}.md5sum"
     }
 

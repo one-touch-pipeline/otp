@@ -26,7 +26,6 @@ import grails.gorm.transactions.Transactional
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.Individual
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 
 import java.nio.file.Path
 
@@ -35,7 +34,6 @@ import java.nio.file.Path
 class DataProcessingFilesService {
 
     ConfigService configService
-    LsdfFilesService lsdfFilesService
     FileSystemService fileSystemService
 
     @Deprecated // legacy data

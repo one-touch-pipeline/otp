@@ -31,20 +31,22 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.SessionUtils
 
+import java.nio.file.Files
 import java.nio.file.Path
 
 @Rollback
 @Integration
 class ExecuteRnaAlignmentJobIntegrationSpec extends Specification implements RoddyRnaFactory {
 
-    LsdfFilesService lsdfFilesService
     ReferenceGenomeService referenceGenomeService
+    RawSequenceDataViewFileService rawSequenceDataViewFileService
 
     final static String ADAPTER_SEQUENCE1 = "ATGCCCTTGAATC"
 
@@ -70,8 +72,8 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends Specification implements Rod
         setupData()
         ExecuteRnaAlignmentJob executeRnaAlignmentJob = new ExecuteRnaAlignmentJob()
         executeRnaAlignmentJob.fileSystemService = new TestFileSystemService()
-        executeRnaAlignmentJob.lsdfFilesService = lsdfFilesService
         executeRnaAlignmentJob.referenceGenomeService = referenceGenomeService
+        executeRnaAlignmentJob.rawSequenceDataViewFileService = rawSequenceDataViewFileService
 
         RnaRoddyBamFile roddyBamFile = setUpForPrepareAndReturnWorkflowSpecificCValues()
 
@@ -87,7 +89,7 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends Specification implements Rod
         given:
         setupData()
         ExecuteRnaAlignmentJob executeRnaAlignmentJob = new ExecuteRnaAlignmentJob()
-        executeRnaAlignmentJob.lsdfFilesService = lsdfFilesService
+        executeRnaAlignmentJob.rawSequenceDataViewFileService = rawSequenceDataViewFileService
         executeRnaAlignmentJob.referenceGenomeService = referenceGenomeService
 
         RnaRoddyBamFile roddyBamFile = setUpForPrepareAndReturnWorkflowSpecificCValues()
@@ -117,18 +119,20 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends Specification implements Rod
 
     private RnaRoddyBamFile setUpForPrepareAndReturnWorkflowSpecificCValues() {
         ExecuteRnaAlignmentJob executeRnaAlignmentJob = new ExecuteRnaAlignmentJob()
-        executeRnaAlignmentJob.lsdfFilesService = lsdfFilesService
         executeRnaAlignmentJob.referenceGenomeService = new ReferenceGenomeService()
         executeRnaAlignmentJob.referenceGenomeService.configService = configService
         executeRnaAlignmentJob.referenceGenomeService.processingOptionService = new ProcessingOptionService()
+        executeRnaAlignmentJob.rawSequenceDataViewFileService = rawSequenceDataViewFileService
 
         DomainFactory.createProcessingOptionBasePathReferenceGenome(tempDir.toString())
         RnaRoddyBamFile roddyBamFile = createBamFile()
         roddyBamFile.containedSeqTracks.each { SeqTrack s ->
             s.sequenceFiles.each { RawSequenceFile rawSequenceFile ->
-                File file = new File(executeRnaAlignmentJob.lsdfFilesService.getFileViewByPidPath(rawSequenceFile))
-                CreateFileHelper.createFile(file)
-                rawSequenceFile.fileSize = file.length()
+                Path filePath = executeRnaAlignmentJob.rawSequenceDataViewFileService.getFilePath(rawSequenceFile)
+                Files.createDirectories(filePath.parent)
+                Files.createFile(filePath)
+                Files.write(filePath, ['some content'])
+                rawSequenceFile.fileSize = filePath.size()
                 assert rawSequenceFile.save(flush: true)
             }
         }

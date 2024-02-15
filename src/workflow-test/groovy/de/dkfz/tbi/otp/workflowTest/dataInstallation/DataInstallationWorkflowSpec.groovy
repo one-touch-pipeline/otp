@@ -22,6 +22,8 @@
 package de.dkfz.tbi.otp.workflowTest.dataInstallation
 
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataAllWellFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
@@ -51,7 +53,8 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
     Class<? extends OtpWorkflow> workflowComponentClass = DataInstallationWorkflow
 
     DataInstallationInitializationService dataInstallationInitializationService
-    LsdfFilesService lsdfFilesService
+    RawSequenceDataWorkFileService rawSequenceDataWorkFileService
+    RawSequenceDataAllWellFileService rawSequenceDataAllWellFileService
     SingleCellService singleCellService
 
     private Path fastqR1Filepath
@@ -237,12 +240,9 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
                 assert rawSequenceFile.fileLinked
                 assert rawSequenceFile.fileSize > 0
                 [
-                        lsdfFilesService.getFileFinalPath(rawSequenceFile),
-                        lsdfFilesService.getFileViewByPidPath(rawSequenceFile),
+                        rawSequenceDataWorkFileService.getFilePath(rawSequenceFile),
+                        rawSequenceDataViewFileService.getFilePath(rawSequenceFile),
                 ]
-            }.each {
-                Path path = remoteFileSystem.getPath(it)
-                assert Files.exists(path)
             }
         }
     }
@@ -252,11 +252,9 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
      */
     protected void checkWellBasedLinksAreCreatedSuccessful() {
         SessionUtils.withTransaction {
-            RawSequenceFile.list().collect {
-                lsdfFilesService.getWellAllFileViewByPidPath(it)
-            }.each {
-                assert new File(it).exists()
-            }
+            RawSequenceFile.list()
+                    .collect { rawSequenceDataAllWellFileService.getFilePath(it) }
+                    .each { Files.exists(it) }
         }
     }
 

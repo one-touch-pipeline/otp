@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.ProjectService
@@ -75,12 +76,12 @@ class FastqcDataFilesServiceSpec extends Specification implements ServiceUnitTes
 
     void setup() {
         configService = new TestConfigService(tempDir)
-        service.lsdfFilesService = new LsdfFilesService()
-        service.lsdfFilesService.individualService = new IndividualService()
-        service.lsdfFilesService.individualService.projectService = new ProjectService()
-        service.lsdfFilesService.individualService.projectService.fileSystemService = new TestFileSystemService()
-        service.lsdfFilesService.individualService.projectService.configService = configService
         service.fileSystemService = new TestFileSystemService()
+        service.rawSequenceDataViewFileService = new RawSequenceDataViewFileService()
+        service.rawSequenceDataViewFileService.individualService = new IndividualService()
+        service.rawSequenceDataViewFileService.individualService.projectService = new ProjectService()
+        service.rawSequenceDataViewFileService.individualService.projectService.fileSystemService = new TestFileSystemService()
+        service.rawSequenceDataViewFileService.individualService.projectService.configService = configService
 
         seqTrack = createSeqTrack()
 

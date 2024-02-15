@@ -24,10 +24,9 @@ package de.dkfz.tbi.otp.workflow.datainstallation
 import grails.gorm.transactions.Transactional
 import org.springframework.transaction.TransactionStatus
 
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflowExecution.*
-
-import java.nio.file.Paths
 
 /**
  * A service providing functionality needed by the different jobs for the data installation workflow.
@@ -35,7 +34,7 @@ import java.nio.file.Paths
 @Transactional
 class DataInstallationInitializationService {
 
-    LsdfFilesService lsdfFilesService
+    RawSequenceDataViewFileService rawSequenceDataViewFileService
     WorkflowArtefactService workflowArtefactService
     WorkflowRunService workflowRunService
     WorkflowService workflowService
@@ -74,7 +73,7 @@ class DataInstallationInitializationService {
 
         String shortName = "DI: ${seqTrack.individual.pid} ${seqTrack.sampleType.displayName} ${seqTrack.seqType.displayNameWithLibraryLayout}"
 
-        String directory = Paths.get(lsdfFilesService.getFileViewByPidPath(rawSequenceFiles.first())).parent
+        String directory = rawSequenceDataViewFileService.getDirectoryPath(rawSequenceFiles.first())
 
         WorkflowRun run = workflowRunService.buildWorkflowRun(workflow, priority, directory, seqTrack.project, runDisplayName, shortName)
         WorkflowArtefact artefact = workflowArtefactService.buildWorkflowArtefact(new WorkflowArtefactValues(

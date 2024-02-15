@@ -35,6 +35,9 @@ import de.dkfz.tbi.otp.dataswap.parameters.LaneSwapParameters
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactoryInstance
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataAllWellFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -101,8 +104,11 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
                 configService : service.configService,
                 projectService: service.projectService,
         ])
-        service.lsdfFilesService = new LsdfFilesService([
-                projectService   : service.projectService,
+        service.rawSequenceDataAllWellFileService = new RawSequenceDataAllWellFileService()
+        service.rawSequenceDataWorkFileService = new RawSequenceDataWorkFileService([
+                lsdfFilesService: new LsdfFilesService([projectService: service.projectService]),
+        ])
+        service.rawSequenceDataViewFileService = new RawSequenceDataViewFileService([
                 individualService: service.individualService,
         ])
 
@@ -147,10 +153,10 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
 
         // prepare input
         RawSequenceFile seqTrack1File = RawSequenceFile.findAllBySeqTrack(seqTrackWithFalsySample1).first()
-        Files.createDirectories(service.lsdfFilesService.getFileFinalPathAsPath(seqTrack1File).parent)
-        Files.createFile(service.lsdfFilesService.getFileFinalPathAsPath(seqTrack1File))
+        Files.createDirectories(service.rawSequenceDataWorkFileService.getFilePath(seqTrack1File).parent)
+        Files.createFile(service.rawSequenceDataWorkFileService.getFilePath(seqTrack1File))
         RawSequenceFile seqTrack2File = RawSequenceFile.findAllBySeqTrack(seqTrackWithFalsySample2).first()
-        Files.createFile(service.lsdfFilesService.getFileFinalPathAsPath(seqTrack2File))
+        Files.createFile(service.rawSequenceDataWorkFileService.getFilePath(seqTrack2File))
 
         LaneSwapParameters parameters = new LaneSwapParameters(
                 projectNameSwap: new Swap(falsyLabeledSample.individual.project.name, newIndividual.project.name),

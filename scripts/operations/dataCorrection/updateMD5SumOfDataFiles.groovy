@@ -21,6 +21,7 @@
  */
 package operations.dataInstallation
 
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.util.TimeFormats
 
@@ -36,6 +37,8 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 String executingUser = ""
 List<String> runNames = [""]
 Map<String, String> rawSequenceFileMap = [:]
+
+RawSequenceDataViewFileService rawSequenceDataViewFileService = ctx.rawSequenceDataViewFileService
 
 assert executingUser: "Your username is used to set a comment that informs of the changes to the RawSequenceFile"
 assert runNames: "Define the Runs"
@@ -53,7 +56,7 @@ RawSequenceFile.withTransaction {
         String fromMd5 = rawSequenceFile.fastqMd5sum
         String toMd5 = newMd5sum
         Long fromFileSize = rawSequenceFile.fileSize
-        Long toFileSize = new File(ctx.lsdfFilesService.getFileViewByPidPath(rawSequenceFile)).size()
+        Long toFileSize = rawSequenceDataViewFileService.getFilePath(rawSequenceFile).size()
 
         if (fromMd5 != toMd5) {
             rawSequenceFile.fastqMd5sum = newMd5sum

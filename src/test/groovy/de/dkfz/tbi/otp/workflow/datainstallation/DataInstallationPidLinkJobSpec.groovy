@@ -25,6 +25,8 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.DataInstallationWorkflowDomainFactory
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
@@ -65,9 +67,11 @@ class DataInstallationPidLinkJobSpec extends Specification implements DataTest, 
             _ * getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> seqTrack
             0 * _
         }
-        job.lsdfFilesService = Mock(LsdfFilesService) {
-            2 * getFileFinalPathAsPath(_) >>> [target1, target2]
-            2 * getFileViewByPidPathAsPath(_) >>> [link1, link2]
+        job.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
+            2 * getFilePath(_) >>> [link1, link2]
+        }
+        job.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService) {
+            2 * getFilePath(_) >>> [target1, target2]
         }
 
         expect:

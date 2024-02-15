@@ -41,8 +41,8 @@ class DataInstallationPidLinkJob extends AbstractLinkJob implements DataInstalla
         SeqTrack seqTrack = getSeqTrack(workflowStep)
 
         return seqTrack.sequenceFiles.collect { RawSequenceFile rawSequenceFile ->
-            Path target = lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile)
-            Path link = lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile)
+            Path target = rawSequenceDataWorkFileService.getFilePath(rawSequenceFile)
+            Path link = rawSequenceDataViewFileService.getFilePath(rawSequenceFile)
             return new LinkEntry(target: target, link: link)
         }
     }

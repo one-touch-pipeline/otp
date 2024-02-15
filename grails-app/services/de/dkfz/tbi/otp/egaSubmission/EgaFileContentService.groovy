@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.egaSubmission
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -42,7 +43,7 @@ class EgaFileContentService {
     /** EGA-specified header for bam tables. */
     static final String HEADER_BAM_FILE = 'Sample alias,BAM File,Checksum,Unencrypted checksum'
 
-    LsdfFilesService lsdfFilesService
+    RawSequenceDataWorkFileService rawSequenceDataWorkFileService
 
     /**
      * Creates the mapping file of internal path to EGA name, as needed for ega-cluster-cryptor encryption.
@@ -58,7 +59,7 @@ class EgaFileContentService {
         StringBuilder out = new StringBuilder()
 
         submission.rawSequenceFilesToSubmit.each {
-            out << lsdfFilesService.getFileFinalPath(it.sequenceFile) << '\t' << it.egaAliasName << '\n'
+            out << rawSequenceDataWorkFileService.getFilePath(it.sequenceFile) << '\t' << it.egaAliasName << '\n'
         }
 
         submission.bamFilesToSubmit.each {

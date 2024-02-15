@@ -36,6 +36,9 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataAllWellFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
@@ -435,8 +438,10 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         WithdrawHelperService service = new WithdrawHelperService()
 
         service.filestoreService = Mock(FilestoreService)
-        service.lsdfFilesService = Mock(LsdfFilesService)
         service.fastqcDataFilesService = Mock(FastqcDataFilesService)
+        service.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService)
+        service.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService)
+        service.rawSequenceDataAllWellFileService = Mock(RawSequenceDataAllWellFileService)
         WithdrawStateHolder holder = new WithdrawStateHolder([
                 withdrawParameters: new WithdrawParameters([
                         seqTracksWithComments: [
@@ -464,14 +469,13 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         service.handleRawSequenceFiles(holder)
 
         then:
-        1 * service.lsdfFilesService.getFileFinalPathAsPath(fastqFile) >> finalPathNormal
-        1 * service.lsdfFilesService.getFileMd5sumFinalPathAsPath(fastqFile) >> finalMd5sumNormal
-        1 * service.lsdfFilesService.getFileViewByPidPath(fastqFile) >> viewByPidPathNormal
-        1 * service.lsdfFilesService.getFileFinalPathAsPath(singleCellFastqFile) >> finalPathSingleCell
-        1 * service.lsdfFilesService.getFileMd5sumFinalPathAsPath(singleCellFastqFile) >> finalMd5sumSingleCell
-        1 * service.lsdfFilesService.getFileViewByPidPath(singleCellFastqFile) >> viewByPidPathSingleCell
-        1 * service.lsdfFilesService.getWellAllFileViewByPidPath(singleCellFastqFile) >> wellPathSingleCell
-        0 * service.lsdfFilesService._
+        1 * service.rawSequenceDataWorkFileService.getFilePath(fastqFile) >> finalPathNormal
+        1 * service.rawSequenceDataWorkFileService.getMd5sumPath(fastqFile) >> finalMd5sumNormal
+        1 * service.rawSequenceDataViewFileService.getFilePath(fastqFile) >> Paths.get(viewByPidPathNormal)
+        1 * service.rawSequenceDataWorkFileService.getFilePath(singleCellFastqFile) >> finalPathSingleCell
+        1 * service.rawSequenceDataWorkFileService.getMd5sumPath(singleCellFastqFile) >> finalMd5sumSingleCell
+        1 * service.rawSequenceDataViewFileService.getFilePath(singleCellFastqFile) >> Paths.get(viewByPidPathSingleCell)
+        1 * service.rawSequenceDataAllWellFileService.getFilePath(singleCellFastqFile) >> Paths.get(wellPathSingleCell)
 
         1 * service.fastqcDataFilesService.fastqcOutputDirectory(fastqcProcessedFile) >> fastqcPath
         1 * service.fastqcDataFilesService.fastqcOutputDirectory(fastqcProcessedFile, PathOption.REAL_PATH) >> uuidPath
@@ -484,20 +488,20 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         TestCase.assertContainSame(holder.pathsToDelete, pathsToDelete)
 
         with(fastqFile) {
-            fileWithdrawn == true
-            withdrawnDate != null
-            withdrawnComment == withdrawnCommentNormal
+            assert fileWithdrawn
+            assert withdrawnDate != null
+            assert withdrawnComment == withdrawnCommentNormal
         }
 
         with(singleCellFastqFile) {
-            fileWithdrawn == true
-            withdrawnDate != null
-            withdrawnComment == withdrawnCommentSingleCell
+            assert fileWithdrawn
+            assert withdrawnDate != null
+            assert withdrawnComment == withdrawnCommentSingleCell
         }
 
         with(withdrawnFastqFile) {
-            fileWithdrawn == true
-            withdrawnComment != withdrawnCommentWithdrawn
+            assert fileWithdrawn
+            assert withdrawnComment != withdrawnCommentWithdrawn
         }
 
         mergingWorkPackage.seqTracks.empty

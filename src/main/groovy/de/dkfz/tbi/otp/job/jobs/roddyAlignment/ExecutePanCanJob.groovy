@@ -84,14 +84,10 @@ class ExecutePanCanJob extends AbstractRoddyAlignmentJob implements AutoRestarta
             List<RawSequenceFile> rawSequenceFiles = RawSequenceFile.findAllBySeqTrackAndIndexFile(seqTrack, false)
             assert seqTrack.seqType.libraryLayout.mateCount == rawSequenceFiles.size()
             rawSequenceFiles.sort { it.mateNumber }.each { RawSequenceFile rawSequenceFile ->
-                String pathName = lsdfFilesService.getFileViewByPidPath(rawSequenceFile)
-                FileSystem fs = rawSequenceFile.fileLinked ?
-                        fileSystemService.remoteFileSystem :
-                        fileSystemService.remoteFileSystem
-                Path path = fs.getPath(pathName)
-                FileService.ensureFileIsReadableAndNotEmptyStatic(path)
-                assert rawSequenceFile.fileSize == Files.size(path)
-                vbpDataFiles.add(new File(pathName))
+                Path filePath = rawSequenceDataViewFileService.getFilePath(rawSequenceFile)
+                FileService.ensureFileIsReadableAndNotEmptyStatic(filePath)
+                assert rawSequenceFile.fileSize == Files.size(filePath)
+                vbpDataFiles.add(filePath.toFile())
             }
         }
 

@@ -21,6 +21,7 @@
  */
 
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -44,6 +45,7 @@ script part
  */
 LsdfFilesService lsdfFilesService = ctx.lsdfFilesService
 FileService fileService = ctx.fileService
+RawSequenceDataWorkFileService rawSequenceDataWorkFileService = ctx.rawSequenceDataWorkFileService
 
 static def transferDataAndCorrectDB(Path finalPath, Path originalPathResolved, RawSequenceFile df, def script, boolean validateMd5, def md5Check, FileService fileService) {
     Path md5sumPath = finalPath.parent.resolve("${finalPath.fileName}.md5sum")
@@ -93,7 +95,7 @@ SeqTrack.withTransaction {
     submissions.each { IlseSubmission submission ->
         SeqTrack.findAllByIlseSubmission(submission).each { SeqTrack seqTrack ->
             seqTrack.sequenceFiles.each { RawSequenceFile df ->
-                Path finalPath = lsdfFilesService.getFileFinalPathAsPath(df)
+                Path finalPath = rawSequenceDataWorkFileService.getFilePath(df)
                 Path initialPath = lsdfFilesService.getFileInitialPathAsPath(df)
 
                 if (!Files.exists(initialPath)) {

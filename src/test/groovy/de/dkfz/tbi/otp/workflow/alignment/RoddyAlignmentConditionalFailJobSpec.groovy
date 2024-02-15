@@ -27,8 +27,8 @@ import spock.lang.*
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.PanCancerWorkflowDomainFactory
-import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
@@ -80,10 +80,8 @@ class RoddyAlignmentConditionalFailJobSpec extends Specification implements Data
             getRemoteFileSystem() >> FileSystems.default
         }
 
-        job.lsdfFilesService = Mock(LsdfFilesService) {
-            getFileViewByPidPathAsPath(_) >> { RawSequenceFile file, PathOption... options ->
-                return CreateFileHelper.createFile(tempDir.resolve(file.fileName))
-            }
+        job.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
+            getFilePath(_) >> { RawSequenceFile file -> return CreateFileHelper.createFile(tempDir.resolve(file.fileName)) }
         }
         job.configService = Mock(ConfigService)
         job.fileService = new FileService()
@@ -151,10 +149,8 @@ class RoddyAlignmentConditionalFailJobSpec extends Specification implements Data
             getRemoteFileSystem() >> FileSystems.default
         }
 
-        job.lsdfFilesService = Mock(LsdfFilesService) {
-            getFileViewByPidPathAsPath(_) >> { RawSequenceFile file, PathOption... options ->
-                return CreateFileHelper.createFile(tempDir.resolve(file.fileName))
-            }
+        job.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
+            getFilePath(_) >> { RawSequenceFile file -> return CreateFileHelper.createFile(tempDir.resolve(file.fileName)) }
         }
         job.configService = Mock(ConfigService)
         job.fileService = new FileService()
@@ -192,8 +188,8 @@ class RoddyAlignmentConditionalFailJobSpec extends Specification implements Data
             getRemoteFileSystem() >> FileSystems.default
         }
 
-        job.lsdfFilesService = Mock(LsdfFilesService) {
-            getFileViewByPidPathAsPath(_) >> TestCase.uniqueNonExistentPath.toPath()
+        job.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
+            getFilePath(_) >> TestCase.uniqueNonExistentPath.toPath()
         }
         job.configService = Mock(ConfigService)
         job.fileService = new FileService()
@@ -232,8 +228,8 @@ class RoddyAlignmentConditionalFailJobSpec extends Specification implements Data
             getRemoteFileSystem() >> FileSystems.default
         }
 
-        job.lsdfFilesService = Mock(LsdfFilesService) {
-            getFileViewByPidPathAsPath(_) >> { RawSequenceFile file, PathOption... options ->
+        job.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
+            getFilePath(_) >> { RawSequenceFile file ->
                 return CreateFileHelper.createFile(tempDir.resolve(file.fileName))
             }
         }
@@ -279,10 +275,8 @@ class RoddyAlignmentConditionalFailJobSpec extends Specification implements Data
             getRemoteFileSystem() >> FileSystems.default
         }
 
-        job.lsdfFilesService = Mock(LsdfFilesService) {
-            getFileViewByPidPathAsPath(_) >> { RawSequenceFile file, PathOption... options ->
-                return CreateFileHelper.createFile(tempDir.resolve(file.fileName), "")
-            }
+        job.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
+            getFilePath(_) >> { RawSequenceFile file -> return CreateFileHelper.createFile(tempDir.resolve(file.fileName), "") }
         }
         job.configService = Mock(ConfigService)
         job.fileService = new FileService()

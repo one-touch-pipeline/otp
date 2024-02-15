@@ -28,6 +28,7 @@ import groovy.transform.TupleConstructor
 import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -52,7 +53,7 @@ class FastqcDataFilesService {
     static final String HTML_FILE_EXTENSION = ".html"
     static final String MD5SUM_FILE_EXTENSION = ".md5sum"
 
-    LsdfFilesService lsdfFilesService
+    RawSequenceDataViewFileService rawSequenceDataViewFileService
     FileService fileService
     FileSystemService fileSystemService
     FilestoreService filestoreService
@@ -65,7 +66,7 @@ class FastqcDataFilesService {
         if (options.contains(PathOption.REAL_PATH) && fastqcProcessedFile.workflowArtefact.producedBy.workFolder) {
             return fastqcUUidFolder(fastqcProcessedFile)
         }
-        Path baseString = lsdfFilesService.getRunDirectory(fastqcProcessedFile.sequenceFile)
+        Path baseString = rawSequenceDataViewFileService.getRunDirectoryPath(fastqcProcessedFile.sequenceFile)
         return baseString.resolve(FAST_QC_DIRECTORY_PART).resolve(fastqcProcessedFile.workDirectoryName)
     }
 

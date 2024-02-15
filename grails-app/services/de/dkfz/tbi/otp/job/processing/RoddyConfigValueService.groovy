@@ -27,10 +27,13 @@ import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+
+import java.nio.file.Path
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
@@ -39,7 +42,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 class RoddyConfigValueService {
 
     ChromosomeIdentifierSortingService chromosomeIdentifierSortingService
-    LsdfFilesService lsdfFilesService
+    RawSequenceDataViewFileService rawSequenceDataViewFileService
     ProcessingOptionService processingOptionService
     ReferenceGenomeService referenceGenomeService
 
@@ -104,14 +107,10 @@ class RoddyConfigValueService {
     Map<String, String> getFilesToMerge(RoddyBamFile roddyBamFile) {
         assert roddyBamFile
 
-        List vbpSequenceFiles = []
-
-        roddyBamFile.seqTracks.each { SeqTrack seqTrack ->
-            List<RawSequenceFile> rawSequenceFiles = seqTrack.sequenceFilesWhereIndexFileIsFalse
-            rawSequenceFiles.sort { it.mateNumber }.each { RawSequenceFile rawSequenceFile ->
-                vbpSequenceFiles.add(lsdfFilesService.getFileViewByPidPath(rawSequenceFile))
-            }
-        }
+        List<Path> vbpSequenceFiles = roddyBamFile.seqTracks
+                .collectMany { SeqTrack seqTrack -> seqTrack.sequenceFilesWhereIndexFileIsFalse }
+                .sort { RawSequenceFile rawSequenceFile -> rawSequenceFile.mateNumber }
+                .collect { RawSequenceFile rawSequenceFile -> rawSequenceDataViewFileService.getFilePath(rawSequenceFile) }
         return ["fastq_list": vbpSequenceFiles.join(";")]
     }
 
@@ -138,7 +137,7 @@ class RoddyConfigValueService {
                     rawSequenceFile.seqType.libraryLayoutDirName,
                     rawSequenceFile.run.dirName,
                     rawSequenceFile.mateNumber,
-                    lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile),
+                    rawSequenceDataViewFileService.getFilePath(rawSequenceFile),
             ].join("\t")
         }.join("\n")
         return builder.toString()

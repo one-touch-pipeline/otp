@@ -43,6 +43,8 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.filestore.BaseFolder
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
@@ -105,6 +107,8 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     TestConfigService configService
     WorkflowSystemService workflowSystemService
     WorkflowLogService workflowLogService
+    RawSequenceDataWorkFileService rawSequenceDataWorkFileService
+    RawSequenceDataViewFileService rawSequenceDataViewFileService
 
     /**
      * Needed to save the place of the database dump afterwards.

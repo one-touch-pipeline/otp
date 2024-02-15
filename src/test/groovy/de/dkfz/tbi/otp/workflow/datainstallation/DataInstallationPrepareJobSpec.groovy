@@ -26,6 +26,8 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.DataInstallationWorkflowDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.tracking.Ticket
@@ -68,8 +70,8 @@ class DataInstallationPrepareJobSpec extends Specification implements DataTest, 
         }
 
         job.notificationCreator = Mock(NotificationCreator)
-        job.lsdfFilesService = Mock(LsdfFilesService) {
-            1 * getFileFinalPathAsPath(_ as RawSequenceFile) >> file
+        job.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService) {
+            1 * getFilePath(_ as RawSequenceFile) >> file
             0 * _
         }
         job.fileService = Mock(FileService) {
@@ -101,8 +103,8 @@ class DataInstallationPrepareJobSpec extends Specification implements DataTest, 
             _ * getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> seqTrack
             0 * _
         }
-        job.lsdfFilesService = Mock(LsdfFilesService) {
-            1 * getFileViewByPidPathAsPath(_) >> workDirectory.resolve('file')
+        job.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
+            1 * getDirectoryPath(_) >> workDirectory
         }
 
         expect:

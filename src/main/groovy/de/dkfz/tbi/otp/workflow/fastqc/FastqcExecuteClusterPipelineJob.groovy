@@ -81,7 +81,7 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
         String permission = fileService.convertPermissionsToOctalString(FileService.DEFAULT_FILE_PERMISSION)
 
         return fastqcProcessedFiles.collect { FastqcProcessedFile fastqcProcessedFile ->
-            String inputFileName = lsdfFilesService.getFileFinalPath(fastqcProcessedFile.sequenceFile)
+            String inputFileName = rawSequenceDataWorkFileService.getFilePath(fastqcProcessedFile.sequenceFile)
 
             String decompressFileCommand = ""
             String deleteDecompressedFileCommand = ""

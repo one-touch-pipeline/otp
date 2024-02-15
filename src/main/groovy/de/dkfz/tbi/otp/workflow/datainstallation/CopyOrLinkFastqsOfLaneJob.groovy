@@ -25,6 +25,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.jobs.AbstractExecuteClusterPipelineJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -38,6 +39,9 @@ class CopyOrLinkFastqsOfLaneJob extends AbstractExecuteClusterPipelineJob implem
     @Autowired
     ChecksumFileService checksumFileService
 
+    @Autowired
+    RawSequenceDataWorkFileService rawSequenceDataWorkFileService
+
     @Override
     protected List<String> createScripts(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
@@ -47,7 +51,7 @@ class CopyOrLinkFastqsOfLaneJob extends AbstractExecuteClusterPipelineJob implem
     private List<String> createCopyJob(SeqTrack seqTrack) {
         return seqTrack.sequenceFiles.collect { RawSequenceFile rawSequenceFile ->
             Path source = lsdfFilesService.getFileInitialPathAsPath(rawSequenceFile)
-            Path destination = lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile)
+            Path destination = rawSequenceDataWorkFileService.getFilePath(rawSequenceFile)
 
             String md5SumFileName = checksumFileService.md5FileName(rawSequenceFile)
             return """

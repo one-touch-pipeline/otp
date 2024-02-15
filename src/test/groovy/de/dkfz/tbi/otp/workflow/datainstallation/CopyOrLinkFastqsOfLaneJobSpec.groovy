@@ -27,6 +27,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
@@ -100,8 +101,11 @@ class CopyOrLinkFastqsOfLaneJobSpec extends Specification implements DataTest, W
         job.lsdfFilesService = Mock(LsdfFilesService) {
             1 * getFileInitialPathAsPath(rawSequenceFile1) >> source1
             1 * getFileInitialPathAsPath(rawSequenceFile2) >> source2
-            1 * getFileFinalPathAsPath(rawSequenceFile1) >> target1
-            1 * getFileFinalPathAsPath(rawSequenceFile2) >> target2
+            0 * _
+        }
+        job.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService) {
+            1 * getFilePath(rawSequenceFile1) >> target1
+            1 * getFilePath(rawSequenceFile2) >> target2
             0 * _
         }
     }

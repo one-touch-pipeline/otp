@@ -60,10 +60,8 @@ class LinkFilesToFinalDestinationService_RnaRoddyBamFileIntegrationSpec extends 
         service = new LinkFilesToFinalDestinationService()
         service.remoteShellHelper = remoteShellHelper
         service.linkFileUtils = new LinkFileUtils()
-        service.lsdfFilesService = new LsdfFilesService()
-        service.lsdfFilesService.createClusterScriptService = new CreateClusterScriptService()
-        service.lsdfFilesService.remoteShellHelper = remoteShellHelper
-        service.linkFileUtils.fileService = new FileService()
+        service.fileService = new FileService()
+        service.linkFileUtils.fileService = service.fileService
         service.linkFileUtils.fileSystemService = Mock(FileSystemService) {
             _ * getRemoteFileSystem() >> FileSystems.default
             0 * _
@@ -124,7 +122,6 @@ class LinkFilesToFinalDestinationService_RnaRoddyBamFileIntegrationSpec extends 
             }
         }
         service.remoteShellHelper = remoteShellHelper
-        service.lsdfFilesService.remoteShellHelper = remoteShellHelper
 
         when:
         service.cleanupOldRnaResults(roddyBamFile)

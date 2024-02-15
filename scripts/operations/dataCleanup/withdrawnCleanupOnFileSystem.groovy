@@ -22,9 +22,9 @@
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.*
@@ -45,7 +45,7 @@ String file = ""
 // work
 AbstractBamFileService abstractBamFileService = ctx.abstractBamFileService
 ProcessingOptionService processingOptionService = ctx.processingOptionService
-LsdfFilesService lsdfFilesService = ctx.lsdfFilesService
+RawSequenceDataViewFileService rawSequenceDataViewFileService = ctx.rawSequenceDataViewFileService
 FileService fileService = ctx.fileService
 FileSystemService fileSystemService = ctx.fileSystemService
 FastqcDataFilesService fastqcDataFilesService = ctx.fastqcDataFilesService
@@ -77,7 +77,7 @@ String analysis = BamFilePairAnalysis.findAllByWithdrawn(true).collect {
 }.sort().join('\n')
 
 String rawSequenceFiles = RawSequenceFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).collect {
-    lsdfFilesService.getFileFinalPathAsPath(it)
+    rawSequenceDataWorkFileService.getFilePath(it)
 }.findAll { path ->
     path && Files.exists(path)
 }.collect {
@@ -85,7 +85,7 @@ String rawSequenceFiles = RawSequenceFile.findAllBySeqTrackIsNotNullAndFileWithd
 }.sort().join('\n')
 
 String md5sumRawSequenceFile = RawSequenceFile.findAllByFileWithdrawn(true).collect {
-    lsdfFilesService.getFileMd5sumFinalPathAsPath(it)
+    rawSequenceDataWorkFileService.getMd5sumPath(it)
 }.findAll { path ->
     path && Files.exists(path)
 }.collect {
@@ -123,7 +123,7 @@ String md5sumFiles = RawSequenceFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(
 }.sort().join('\n')
 
 String rawSequenceFilesViewByPid = RawSequenceFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).collect {
-    lsdfFilesService.getFileViewByPidPathAsPath(it)
+    rawSequenceDataViewFileService.getFilePath(it)
 }.findAll { path ->
     path && Files.exists(path)
 }.collect {

@@ -32,6 +32,8 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataswap.parameters.SampleSwapParameters
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactoryInstance
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -45,8 +47,9 @@ import java.nio.file.Files
 class SampleSwapServiceIntegrationSpec extends Specification implements UserAndRoles, IsRoddy {
 
     SampleSwapService sampleSwapService
-    LsdfFilesService lsdfFilesService
     TestConfigService configService
+    RawSequenceDataWorkFileService rawSequenceDataWorkFileService
+    RawSequenceDataViewFileService rawSequenceDataViewFileService
 
     @TempDir
     Path tempDir
@@ -81,11 +84,10 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
                 TaxonomyFactoryInstance.INSTANCE.createSpeciesWithStrain(),
         ]
 
-        List<String> fastqFileLinks = []
-        RawSequenceFile.findAllBySeqTrack(seqTrack).each {
-            new File(lsdfFilesService.getFileFinalPath(it)).parentFile.mkdirs()
-            assert new File(lsdfFilesService.getFileFinalPath(it)).createNewFile()
-            fastqFileLinks.add(lsdfFilesService.getFileViewByPidPath(it))
+        List<String> fastqFileLinks = RawSequenceFile.findAllBySeqTrack(seqTrack).collect {
+            Files.createDirectories(rawSequenceDataWorkFileService.getFilePath(it).parent)
+            assert Files.createFile(rawSequenceDataWorkFileService.getFilePath(it))
+            return rawSequenceDataViewFileService.getFilePath(it).toString()
         }
 
         String rawSequenceFileName1 = 'DataFileFileName_R1.gz'
@@ -137,8 +139,8 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
         copyScriptContent.contains("rm -rf ${destinationDirectory}")
         RawSequenceFile.findAllBySeqTrack(seqTrack).eachWithIndex { RawSequenceFile it, int i ->
             assert copyScriptContent.contains("rm -f '${fastqFileLinks[i]}'")
-            assert copyScriptContent.contains("mkdir -p -m 2750 '${new File(lsdfFilesService.getFileViewByPidPath(it)).parent}'")
-            assert copyScriptContent.contains("ln -sr '${lsdfFilesService.getFileFinalPath(it)}' \\\n      '${lsdfFilesService.getFileViewByPidPath(it)}'")
+            assert copyScriptContent.contains("mkdir -p -m 2750 '${rawSequenceDataViewFileService.getDirectoryPath(it)}'")
+            assert copyScriptContent.contains("ln -sr '${rawSequenceDataWorkFileService.getFilePath(it)}' \\\n      '${rawSequenceDataViewFileService.getFilePath(it)}'")
             assert it.comment.comment == "Attention: Datafile swapped!"
         }
         copyScriptContent.contains("rm -rf ${cleanupPath}")

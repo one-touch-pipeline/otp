@@ -32,6 +32,8 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataswap.parameters.IndividualSwapParameters
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactoryInstance
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
@@ -46,8 +48,9 @@ import java.nio.file.Files
 class IndividualSwapServiceIntegrationSpec extends Specification implements UserAndRoles, IsRoddy {
 
     IndividualSwapService individualSwapService
-    LsdfFilesService lsdfFilesService
     TestConfigService configService
+    RawSequenceDataWorkFileService rawSequenceDataWorkFileService
+    RawSequenceDataViewFileService rawSequenceDataViewFileService
 
     @TempDir
     Path tempDir
@@ -79,11 +82,11 @@ class IndividualSwapServiceIntegrationSpec extends Specification implements User
         Map<String,String> fastqFileLinks = [:]
         Map<String,String> fastqFilePaths = [:]
         RawSequenceFile.findAllBySeqTrack(seqTrack).each {
-            Path path = lsdfFilesService.getFileFinalPathAsPath(it)
+            Path path = rawSequenceDataWorkFileService.getFilePath(it)
             Files.createDirectories(path.parent)
             Files.createFile(path)
-            fastqFileLinks[it] = lsdfFilesService.getFileViewByPidPathAsPath(it)
-            fastqFilePaths[it] = lsdfFilesService.getFileFinalPathAsPath(it)
+            fastqFileLinks[it] = rawSequenceDataViewFileService.getFilePath(it)
+            fastqFilePaths[it] = rawSequenceDataWorkFileService.getFilePath(it)
         }
         File missedFile = bamFile.finalMd5sumFile
         File unexpectedFile = new File(bamFile.baseDirectory, 'notExpectedFile.txt')
@@ -138,12 +141,12 @@ class IndividualSwapServiceIntegrationSpec extends Specification implements User
         copyScriptContent.contains("rm -rf ${destinationDirectory}")
         copyScriptContent.startsWith(AbstractDataSwapService.BASH_HEADER)
         RawSequenceFile.findAllBySeqTrack(seqTrack).each { RawSequenceFile it ->
-            assert copyScriptContent.contains("mkdir -p -m 2750 '${lsdfFilesService.getFileFinalPathAsPath(it).parent}'")
-            assert copyScriptContent.contains("mv '${fastqFilePaths[it]}' \\\n   '${lsdfFilesService.getFileFinalPathAsPath(it)}'")
-            assert copyScriptContent.contains("mv '${fastqFilePaths[it]}.md5sum' \\\n     '${lsdfFilesService.getFileMd5sumFinalPathAsPath(it)}'")
+            assert copyScriptContent.contains("mkdir -p -m 2750 '${rawSequenceDataWorkFileService.getFilePath(it).parent}'")
+            assert copyScriptContent.contains("mv '${fastqFilePaths[it]}' \\\n   '${rawSequenceDataWorkFileService.getFilePath(it)}'")
+            assert copyScriptContent.contains("mv '${fastqFilePaths[it]}.md5sum' \\\n     '${rawSequenceDataWorkFileService.getMd5sumPath(it)}'")
             assert copyScriptContent.contains("rm -f '${fastqFileLinks[it]}'")
-            assert copyScriptContent.contains("mkdir -p -m 2750 '${lsdfFilesService.getFileViewByPidPathAsPath(it).parent}'")
-            assert copyScriptContent.contains("ln -sr '${lsdfFilesService.getFileFinalPathAsPath(it)}' \\\n      '${lsdfFilesService.getFileViewByPidPathAsPath(it)}'")
+            assert copyScriptContent.contains("mkdir -p -m 2750 '${rawSequenceDataViewFileService.getDirectoryPath(it)}'")
+            assert copyScriptContent.contains("ln -sr '${rawSequenceDataWorkFileService.getFilePath(it)}' \\\n      '${rawSequenceDataViewFileService.getFilePath(it)}'")
             assert it.comment.comment == "Attention: Datafile swapped!"
         }
         copyScriptContent.contains("rm -rf ${cleanupPath}")

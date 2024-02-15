@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.jobs.AbstractConditionalFailJob
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
@@ -45,7 +46,7 @@ class RoddyAlignmentConditionalFailJob extends AbstractConditionalFailJob implem
     ConfigService configService
 
     @Autowired
-    LsdfFilesService lsdfFilesService
+    RawSequenceDataViewFileService rawSequenceDataViewFileService
 
     /**
      * Check that:
@@ -82,7 +83,7 @@ class RoddyAlignmentConditionalFailJob extends AbstractConditionalFailJob implem
             }
 
             final Collection<Path> paths = nonIndexRawSequenceFiles.collect { RawSequenceFile rawSequenceFile ->
-                lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile)
+                rawSequenceDataViewFileService.getFilePath(rawSequenceFile)
             }
 
             final Collection<Path> missingPaths = paths.findAll { Path path ->

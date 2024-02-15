@@ -35,7 +35,6 @@ class FastqcResultsController {
     FastqcDataFilesService fastqcDataFilesService
     FastQcProcessedFileService fastQcProcessedFileService
     FastqcResultsService fastqcResultsService
-    LsdfFilesService lsdfFilesService
     MetaDataService metaDataService
 
     static allowedMethods = [

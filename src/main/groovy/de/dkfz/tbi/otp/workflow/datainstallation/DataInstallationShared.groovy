@@ -23,6 +23,9 @@ package de.dkfz.tbi.otp.workflow.datainstallation
 
 import org.springframework.beans.factory.annotation.Autowired
 
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataAllWellFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
@@ -36,6 +39,15 @@ trait DataInstallationShared extends WorkflowShared {
 
     @Autowired
     LsdfFilesService lsdfFilesService
+
+    @Autowired
+    RawSequenceDataWorkFileService rawSequenceDataWorkFileService
+
+    @Autowired
+    RawSequenceDataViewFileService rawSequenceDataViewFileService
+
+    @Autowired
+    RawSequenceDataAllWellFileService rawSequenceDataAllWellFileService
 
     @Autowired
     ConcreteArtefactService concreteArtefactService

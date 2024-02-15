@@ -67,7 +67,7 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
 
         Path individualPath = individualService.getViewByPidPath(individualSwap.old, seqTypeSwap.old)
         List<Path> sampleDirs = rawSequenceFiles.collect {
-            lsdfFilesService.getSampleTypeDirectory(it)
+            rawSequenceDataViewFileService.getSampleTypeDirectoryPath(it)
         }
 
         return new LaneSwapData(

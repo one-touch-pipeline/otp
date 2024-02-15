@@ -40,9 +40,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
-
 import java.nio.file.Path
-import java.nio.file.Paths
 
 class RnaAlignmentExecuteJobSpec extends Specification implements DataTest, RnaAlignmentWorkflowDomainFactory, RoddyRnaFactory {
 
@@ -115,10 +113,6 @@ class RnaAlignmentExecuteJobSpec extends Specification implements DataTest, RnaA
         job.roddyConfigValueService.referenceGenomeService = Mock(ReferenceGenomeService) {
             fastaFilePath(roddyBamFile.referenceGenome) >> { new File("/fasta-path") }
             chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage) >> { new File("/chrom-size-path") }
-        }
-        job.roddyConfigValueService.lsdfFilesService = new LsdfFilesService()
-        job.roddyConfigValueService.lsdfFilesService.individualService = Mock(IndividualService) {
-            getViewByPidPath(_, _) >> { Paths.get("/viewbypidpath") }
         }
 
         DomainFactory.createRnaAlignableSeqTypes()
@@ -210,7 +204,7 @@ class RnaAlignmentExecuteJobSpec extends Specification implements DataTest, RnaA
     private String fastqFilesAsString(RoddyBamFile roddyBamFileToUse = roddyBamFile) {
         return roddyBamFileToUse.seqTracks.collectMany { SeqTrack seqTrack ->
             RawSequenceFile.findAllBySeqTrack(seqTrack).collect { RawSequenceFile rawSequenceFile ->
-                job.roddyConfigValueService.lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile).toString()
+                job.roddyConfigValueService.rawSequenceDataViewFileService.getFilePath(rawSequenceFile).toString()
             }
         }.join(';')
     }

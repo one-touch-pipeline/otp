@@ -33,6 +33,8 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -128,9 +130,11 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
         GroovyMock([global: true], Files)
         Files.exists(_) >> true
 
-        service.lsdfFilesService = Mock(LsdfFilesService) {
-            getFileFinalPathCount * getFileFinalPathAsPath(_) >> finalFile
-            getFilePathInViewByPidCount * getFileViewByPidPathAsPath(_) >> Paths.get('/vbp/path/somePid')
+        service.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService) {
+            getFileFinalPathCount * getFilePath(_) >> finalFile
+        }
+        service.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
+            getFilePathInViewByPidCount * getDirectoryPath(_) >> Paths.get('/vbp/path')
         }
         service.individualService = Mock(IndividualService) {
             getFilePathInViewByPidCount * getViewByPidPath(_, _) >> Paths.get('/vbp/')

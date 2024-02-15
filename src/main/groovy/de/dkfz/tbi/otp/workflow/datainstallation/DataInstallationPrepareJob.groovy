@@ -53,7 +53,7 @@ class DataInstallationPrepareJob extends AbstractPrepareJob implements DataInsta
         seqTrack.dataInstallationState = SeqTrack.DataProcessingState.IN_PROGRESS
         assert seqTrack.save(flush: true)
 
-        Path runDirectory = lsdfFilesService.getFileFinalPathAsPath(seqTrack.sequenceFiles.first()).parent
+        Path runDirectory = rawSequenceDataWorkFileService.getFilePath(seqTrack.sequenceFiles.first()).parent
         logService.addSimpleLogEntry(workflowStep, "Creating work directory ${runDirectory}")
         fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(
                 runDirectory,
@@ -64,7 +64,7 @@ class DataInstallationPrepareJob extends AbstractPrepareJob implements DataInsta
     @Override
     protected Path buildWorkDirectoryPath(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
-        return lsdfFilesService.getFileViewByPidPathAsPath(seqTrack.sequenceFiles.first()).parent
+        return rawSequenceDataViewFileService.getDirectoryPath(seqTrack.sequenceFiles.first())
     }
 
     @Override

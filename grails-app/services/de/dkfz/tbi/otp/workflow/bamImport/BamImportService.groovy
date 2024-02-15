@@ -27,7 +27,6 @@ import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.BamImportInstance
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.WorkflowCreateState
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
@@ -37,7 +36,6 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 @Slf4j
 class BamImportService {
 
-    LsdfFilesService lsdfFilesService
     WorkflowService workflowService
 
     final static String QUERY_WAITING_AND_ALLOWED_IMPORT_INSTANCE = """

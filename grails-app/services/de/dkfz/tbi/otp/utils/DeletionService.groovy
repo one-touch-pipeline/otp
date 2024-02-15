@@ -38,6 +38,8 @@ import de.dkfz.tbi.otp.egaSubmission.EgaSubmission
 import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
@@ -76,6 +78,8 @@ class DeletionService {
     WorkflowDeletionService workflowDeletionService
     SingleCellBamFileService singleCellBamFileService
     FilestoreService filestoreService
+    RawSequenceDataWorkFileService rawSequenceDataWorkFileService
+    RawSequenceDataViewFileService rawSequenceDataViewFileService
 
     void deleteProjectContent(Project project) {
         assert project.state != Project.State.ARCHIVED
@@ -134,7 +138,7 @@ class DeletionService {
 
             seqTracks.each { SeqTrack seqTrack ->
                 seqTrack.sequenceFiles.each { RawSequenceFile rawSequenceFile ->
-                    String filePath = lsdfFilesService.getFileFinalPath(rawSequenceFile)
+                    String filePath = rawSequenceDataWorkFileService.getFilePath(rawSequenceFile)
                     if (filePath) {
                         deletionScript << "rm -rf ${new File(filePath).absolutePath}\n"
                     }
@@ -225,9 +229,9 @@ class DeletionService {
         boolean throwException = false
 
         rawSequenceFiles.each {
-            if (new File(lsdfFilesService.getFileViewByPidPath(it)).exists()) {
+            if (Files.exists(rawSequenceDataViewFileService.getFilePath(it))) {
                 if (it.seqTrack.linkedExternally && !everythingVerified) {
-                    filesToClarify << lsdfFilesService.getFileInitialPath(it)
+                    filesToClarify << lsdfFilesService.getFileInitialPathAsPath(it).toString()
                     throwException = true
                 }
             } else {
@@ -593,7 +597,7 @@ class DeletionService {
 
         if (!leftOverSeqTracks && !leftOverBamFiles) {
             rawSequenceFiles.collect {
-                dirsToDelete.add(fileService.toFile(lsdfFilesService.getSampleTypeDirectory(it)))
+                dirsToDelete.add(fileService.toFile(rawSequenceDataViewFileService.getSampleTypeDirectoryPath(it)))
             }
             if (!SeqTrack.findAllBySample(sample1)) {
                 deleteSample(sample1)
@@ -608,7 +612,7 @@ class DeletionService {
             } as List<SeqTrack>
             if (seqTrackSampleList.empty) {
                 rawSequenceFiles.collect {
-                    dirsToDelete.add(fileService.toFile(lsdfFilesService.getSampleTypeDirectory(it)))
+                    dirsToDelete.add(fileService.toFile(rawSequenceDataViewFileService.getSampleTypeDirectoryPath(it)))
                 }
             }
         }
@@ -686,11 +690,11 @@ class DeletionService {
     private List<File> deleteRawSequenceFile(RawSequenceFile rawSequenceFile) {
         notNull(rawSequenceFile, "The dataFile input of method deleteDataFile is null")
 
-        String fileFinalPath = lsdfFilesService.getFileFinalPath(rawSequenceFile)
+        String fileFinalPath = rawSequenceDataWorkFileService.getFilePath(rawSequenceFile)
         List<File> dirs = [
                 fileFinalPath,
                 "${fileFinalPath}.md5sum",
-                lsdfFilesService.getFileViewByPidPath(rawSequenceFile),
+                rawSequenceDataViewFileService.getFilePath(rawSequenceFile).toString(),
         ].collect { new File(it) }
 
         dirs.addAll(deleteFastQCInformationFromRawSequenceFile(rawSequenceFile))

@@ -53,11 +53,9 @@ class FastqcConditionalFailJob extends AbstractConditionalFailJob implements Fas
             throw new WorkflowException("SeqTrack '${seqTrack}' has no dataFiles")
         }
 
-        final Collection<Path> missingPaths = rawSequenceFiles.collect { RawSequenceFile file ->
-            lsdfFilesService.getFileViewByPidPathAsPath(file)
-        }.findAll { Path path ->
-            !fileService.isFileReadableAndNotEmpty(path)
-        }
+        final Collection<Path> missingPaths = rawSequenceFiles
+                .collect { RawSequenceFile file -> rawSequenceDataViewFileService.getFilePath(file) }
+                .findAll { Path path -> !fileService.isFileReadableAndNotEmpty(path) }
         if (missingPaths) {
             throw new WorkflowException("The following ${missingPaths.size()} files are missing:\n${missingPaths.join("\n")}")
         }

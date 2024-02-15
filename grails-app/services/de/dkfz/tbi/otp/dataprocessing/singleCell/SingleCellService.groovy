@@ -23,6 +23,8 @@ package de.dkfz.tbi.otp.dataprocessing.singleCell
 
 import grails.gorm.transactions.Transactional
 
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataAllWellFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.ngsdata.*
 
 import java.nio.file.Path
@@ -32,7 +34,8 @@ class SingleCellService {
 
     static final String MAPPING_FILE_SUFFIX = 'mapping.tsv'
 
-    LsdfFilesService lsdfFilesService
+    RawSequenceDataViewFileService rawSequenceDataViewFileService
+    RawSequenceDataAllWellFileService rawSequenceDataAllWellFileService
 
     String buildMappingFileName(Individual individual, SampleType sampleType) {
         return "${individual.pid}_${sampleType.name}_${MAPPING_FILE_SUFFIX}"
@@ -44,7 +47,7 @@ class SingleCellService {
     }
 
     Path singleCellMappingFile(RawSequenceFile rawSequenceFile) {
-        return lsdfFilesService.getSingleCellWellDirectory(rawSequenceFile, WellDirectory.ALL_WELL).resolve(buildMappingFileName(rawSequenceFile))
+        return rawSequenceDataAllWellFileService.getAllWellDirectoryPath(rawSequenceFile).resolve(buildMappingFileName(rawSequenceFile))
     }
 
     /**
@@ -56,6 +59,6 @@ class SingleCellService {
      * @return an entry in the expected format for the mapping file
      */
     String mappingEntry(RawSequenceFile rawSequenceFile) {
-        return "${lsdfFilesService.getFileViewByPidPath(rawSequenceFile)}\t${rawSequenceFile.seqTrack.singleCellWellLabel}"
+        return "${rawSequenceDataViewFileService.getFilePath(rawSequenceFile)}\t${rawSequenceFile.seqTrack.singleCellWellLabel}"
     }
 }

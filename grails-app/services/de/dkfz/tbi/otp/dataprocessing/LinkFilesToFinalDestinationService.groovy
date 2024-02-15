@@ -29,7 +29,6 @@ import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightCheckService
 import de.dkfz.tbi.otp.utils.*
@@ -46,7 +45,6 @@ class LinkFilesToFinalDestinationService {
     FileService fileService
     FileSystemService fileSystemService
     LinkFileUtils linkFileUtils
-    LsdfFilesService lsdfFilesService
     Md5SumService md5SumService
     QcTrafficLightCheckService qcTrafficLightCheckService
     RemoteShellHelper remoteShellHelper
@@ -222,8 +220,8 @@ class LinkFilesToFinalDestinationService {
     void cleanupOldRnaResults(RnaRoddyBamFile roddyBamFile) {
         List<RoddyBamFile> roddyBamFiles = RoddyBamFile.findAllByWorkPackageAndIdNotEqual(roddyBamFile.mergingWorkPackage, roddyBamFile.id)
         List<File> workDirs = roddyBamFiles*.workDirectory
-        if (workDirs) {
-            lsdfFilesService.deleteFilesRecursive(workDirs)
+        workDirs.each {
+            fileService.deleteDirectoryRecursively(it.toPath())
         }
         String cmd = "find ${roddyBamFile.baseDirectory} -maxdepth 1 -lname '.merging*/*' -delete;"
         remoteShellHelper.executeCommandReturnProcessOutput(cmd)

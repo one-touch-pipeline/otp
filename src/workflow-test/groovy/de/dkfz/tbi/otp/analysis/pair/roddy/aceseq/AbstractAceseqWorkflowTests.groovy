@@ -40,7 +40,6 @@ import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<AceseqInstance> implements WorkflowSystemDomainFactory {
 
     AceseqService aceseqService
-    LsdfFilesService lsdfFilesService
     ProjectService projectService
     SophiaService sophiaService
 

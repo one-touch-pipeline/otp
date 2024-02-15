@@ -23,10 +23,13 @@ package de.dkfz.tbi.otp.alignment
 
 import de.dkfz.tbi.otp.WorkflowTestCase
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 
 abstract class AbstractAlignmentWorkflowTest extends WorkflowTestCase {
-    LsdfFilesService lsdfFilesService
+    RawSequenceDataWorkFileService rawSequenceDataWorkFileService
+    RawSequenceDataViewFileService rawSequenceDataViewFileService
 
     void linkFastqFiles(SeqTrack seqTrack, List<File> testFastqFiles) {
         List<RawSequenceFile> rawSequenceFiles = RawSequenceFile.findAllBySeqTrack(seqTrack)
@@ -38,9 +41,9 @@ abstract class AbstractAlignmentWorkflowTest extends WorkflowTestCase {
             assert sourceFastqFile.exists()
             rawSequenceFile.fileSize = sourceFastqFile.length()
             rawSequenceFile.save(flush: true)
-            File linkFastqFile = new File(lsdfFilesService.getFileFinalPath(rawSequenceFile))
+            File linkFastqFile = new File(rawSequenceDataWorkFileService.getFilePath(rawSequenceFile).toString())
             sourceLinkMap.put(sourceFastqFile, linkFastqFile)
-            File linkViewByPidFastqFile = new File(lsdfFilesService.getFileViewByPidPath(rawSequenceFile))
+            File linkViewByPidFastqFile = new File(rawSequenceDataViewFileService.getFilePath(rawSequenceFile).toString())
             sourceLinkMap.put(linkFastqFile, linkViewByPidFastqFile)
         }
         createDirectories(sourceLinkMap.values()*.parentFile.unique())

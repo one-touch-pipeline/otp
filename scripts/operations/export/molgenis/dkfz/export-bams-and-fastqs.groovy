@@ -25,6 +25,7 @@ import org.springframework.context.ApplicationContext
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
@@ -98,7 +99,7 @@ enum RawSequenceFileColumns {
         return rawSequenceFile.seqTrack.sample.sampleType.name
     }),
     FASTQ_PATH("FastQ Path", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
-        return (properties["lsdfFilesService"] as LsdfFilesService).getFileFinalPath(rawSequenceFile)
+        return (properties["rawSequenceDataWorkFileService"] as RawSequenceDataWorkFileService).getFilePath(rawSequenceFile)?.toString()
     }),
     MD5SUM("md5sum", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
         return rawSequenceFile.fastqMd5sum
@@ -302,7 +303,7 @@ class MolgenisExporter {
     ApplicationContext ctx
 
     String exportRawSequenceFiles(List<RawSequenceFile> rawSequenceFiles) {
-        MolgenisRawSequenceFile.properties["lsdfFilesService"] = ctx.lsdfFilesService
+        MolgenisRawSequenceFile.properties["rawSequenceDataWorkFileService"] = ctx.rawSequenceDataWorkFileService
         MolgenisRawSequenceFile.properties["fastqcDataFilesService"] = ctx.fastqcDataFilesService
         return ([new MolgenisRawSequenceFile().headerAsCsv] + rawSequenceFiles.collect { RawSequenceFile df -> MolgenisRawSequenceFile.export(df).toCsvLine() }).join("\n")
     }

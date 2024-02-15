@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
@@ -215,9 +216,9 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
             1 * canFastqcReportsBeCopied([fastqcProcessedFile1, fastqcProcessedFile2]) >> false
             0 * _
         }
-        job.lsdfFilesService = Mock(LsdfFilesService) {
-            1 * getFileFinalPath(rawSequenceFile1) >> Paths.get('fastq1')
-            1 * getFileFinalPath(rawSequenceFile2) >> Paths.get('fastq2')
+        job.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService) {
+            1 * getFilePath(rawSequenceFile1) >> Paths.get('fastq1')
+            1 * getFilePath(rawSequenceFile2) >> Paths.get('fastq2')
             0 * _
         }
 

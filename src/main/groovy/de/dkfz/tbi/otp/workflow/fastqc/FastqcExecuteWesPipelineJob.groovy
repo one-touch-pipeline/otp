@@ -63,9 +63,7 @@ class FastqcExecuteWesPipelineJob extends AbstractExecuteWesPipelineJob implemen
         List<FastqcProcessedFile> fastqcProcessedFiles = getFastqcProcessedFiles(workflowStep)
         return [
                 (basePath): [
-                        input    : fastqcProcessedFiles.collect {
-                            lsdfFilesService.getFileViewByPidPathAsPath(it.sequenceFile)
-                        }.join(','),
+                        input    : fastqcProcessedFiles.collect { rawSequenceDataViewFileService.getFilePath(it.sequenceFile) }.join(','),
                         outputDir: basePath.toString(),
                 ],
         ] as Map<Path, Map<String, String>>

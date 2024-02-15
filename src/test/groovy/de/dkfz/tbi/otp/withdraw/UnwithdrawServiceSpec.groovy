@@ -35,6 +35,8 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -93,20 +95,26 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
 
         FileSystemService fileSystemService = new TestFileSystemService()
         ProjectService projectService = new ProjectService(configService: configService, fileSystemService: fileSystemService)
-        LsdfFilesService lsdfFilesService = new LsdfFilesService(projectService: projectService,
-                individualService: new IndividualService(projectService: projectService))
-        FastqcDataFilesService fastqcDataFilesService = new FastqcDataFilesService(lsdfFilesService: lsdfFilesService)
+        RawSequenceDataViewFileService rawSequenceDataViewFileService = new RawSequenceDataViewFileService(individualService: new IndividualService(projectService: projectService))
+        LsdfFilesService lsdfFilesService = new LsdfFilesService([
+                projectService                : projectService,
+        ])
+        FastqcDataFilesService fastqcDataFilesService = new FastqcDataFilesService([
+                rawSequenceDataViewFileService: rawSequenceDataViewFileService,
+        ])
+        RawSequenceDataWorkFileService rawSequenceDataWorkFileService = new RawSequenceDataWorkFileService(lsdfFilesService: lsdfFilesService)
 
         RoddyBamFileWithdrawService roddyBamFileWithdrawService = new RoddyBamFileWithdrawService(fileSystemService: fileSystemService)
         CellRangerBamFileWithdrawService cellRangerBamFileWithdrawService = new CellRangerBamFileWithdrawService(fileSystemService: fileSystemService)
         UnwithdrawService service = new UnwithdrawService([
-                fileSystemService      : fileSystemService,
-                withdrawBamFileServices: [
+                fileSystemService             : fileSystemService,
+                withdrawBamFileServices       : [
                         roddyBamFileWithdrawService,
                         cellRangerBamFileWithdrawService,
                 ],
-                lsdfFilesService       : lsdfFilesService,
-                fastqcDataFilesService : fastqcDataFilesService,
+                fastqcDataFilesService        : fastqcDataFilesService,
+                rawSequenceDataWorkFileService: rawSequenceDataWorkFileService,
+                rawSequenceDataViewFileService: rawSequenceDataViewFileService,
         ])
 
         SeqTrack seqTrack = createSeqTrackWithTwoFastqFile([:], [fileWithdrawn: true])
@@ -121,8 +129,8 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
         List<Path> files = []
         seqTrack.sequenceFiles.each {
             files.addAll([
-                    lsdfFilesService.getFileFinalPathAsPath(it),
-                    lsdfFilesService.getFileMd5sumFinalPathAsPath(it),
+                    rawSequenceDataWorkFileService.getFilePath(it),
+                    rawSequenceDataWorkFileService.getMd5sumPath(it),
             ])
         }
         fastqcProcessedFiles.each {
@@ -142,8 +150,8 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
 
         then:
         state.linksToCreate == [
-                (lsdfFilesService.getFileFinalPathAsPath(seqTrack.sequenceFiles.first())): lsdfFilesService.getFileViewByPidPathAsPath(seqTrack.sequenceFiles.first()),
-                (lsdfFilesService.getFileFinalPathAsPath(seqTrack.sequenceFiles.last())) : lsdfFilesService.getFileViewByPidPathAsPath(seqTrack.sequenceFiles.last()),
+                (rawSequenceDataWorkFileService.getFilePath(seqTrack.sequenceFiles.first())): rawSequenceDataViewFileService.getFilePath(seqTrack.sequenceFiles.first()),
+                (rawSequenceDataWorkFileService.getFilePath(seqTrack.sequenceFiles.last())) : rawSequenceDataViewFileService.getFilePath(seqTrack.sequenceFiles.last()),
         ]
         state.pathsToChangeGroup.size() == pathsToChangeGroup
         state.bamFiles == []
@@ -168,9 +176,9 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
         CellRangerBamFileWithdrawService cellRangerBamFileWithdrawService = new CellRangerBamFileWithdrawService(
                 fileSystemService: fileSystemService, abstractBamFileService: abstractBamFileService)
         UnwithdrawService service = new UnwithdrawService([
-                abstractBamFileService: abstractBamFileService,
-                fileSystemService           : fileSystemService,
-                withdrawBamFileServices     : [
+                abstractBamFileService : abstractBamFileService,
+                fileSystemService      : fileSystemService,
+                withdrawBamFileServices: [
                         roddyBamFileWithdrawService,
                         cellRangerBamFileWithdrawService,
                 ],
@@ -209,9 +217,9 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
         CellRangerBamFileWithdrawService cellRangerBamFileWithdrawService = new CellRangerBamFileWithdrawService(
                 fileSystemService: fileSystemService, abstractBamFileService: abstractBamFileService)
         UnwithdrawService service = new UnwithdrawService([
-                abstractBamFileService: abstractBamFileService,
-                fileSystemService           : fileSystemService,
-                withdrawBamFileServices     : [
+                abstractBamFileService : abstractBamFileService,
+                fileSystemService      : fileSystemService,
+                withdrawBamFileServices: [
                         roddyBamFileWithdrawService,
                         cellRangerBamFileWithdrawService,
                 ],

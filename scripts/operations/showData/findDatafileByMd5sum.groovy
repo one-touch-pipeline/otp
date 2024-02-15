@@ -20,6 +20,7 @@
  * SOFTWARE.
  */
 
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 
 /**
@@ -36,6 +37,7 @@ String md5sums = """
 """
 
 // Code
+RawSequenceDataWorkFileService rawSequenceDataWorkFileService = ctx.rawSequenceDataWorkFileService
 
 Closure<List<String>> nameStringToList = { String nameString ->
     List<String> list = []
@@ -59,7 +61,7 @@ md5sumList.each { String md5sum ->
         SeqTrack dfSeqTrack = rawSequenceFile.seqTrack
         println """\
         ---> ${rawSequenceFile.fileName}
-             ${ctx.lsdfFilesService.getFileFinalPath(rawSequenceFile)}
+             ${rawSequenceDataWorkFileService.getFilePath(rawSequenceFile).toString()}
              Project:     ${dfSeqTrack.project}
              PID:         ${dfSeqTrack.individual.pid}
              SeqType:     ${dfSeqTrack.seqType}

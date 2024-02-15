@@ -27,6 +27,8 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 
@@ -38,11 +40,12 @@ import java.nio.file.*
 @Transactional
 class DataExportService {
 
-    LsdfFilesService lsdfFilesService
     FileService fileService
     FileSystemService fileSystemService
     BamFileAnalysisServiceFactoryService bamFileAnalysisServiceFactoryService
     IndividualService individualService
+    RawSequenceDataWorkFileService rawSequenceDataWorkFileService
+    RawSequenceDataViewFileService rawSequenceDataViewFileService
 
     DataExportOutput exportHeaderInfo(DataExportInput dataExportInput) {
         return exportFilesWrapper(dataExportInput, exportHeaderInfoClosure,)
@@ -103,13 +106,13 @@ class DataExportService {
                 consoleBuilder.append("\n${seqTrack.individual}\t${seqTrack.seqType}\t${seqTrack.sampleType.name}\n")
             }
             seqTrack.sequenceFiles.findAll { dataExportInput.copyWithdrawnData ? true : !it.fileWithdrawn }.each { RawSequenceFile rawSequenceFile ->
-                Path currentFile = lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile)
+                Path currentFile = rawSequenceDataWorkFileService.getFilePath(rawSequenceFile)
                 if (Files.exists(currentFile)) {
                     if (!dataExportInput.checkFileStatus) {
                         Path targetFolderWithPid = dataExportInput.targetFolder.resolve(rawSequenceFile.individual.pid)
                         Path targetFastqFolder = targetFolderWithPid.resolve(seqTrack.seqType.dirName).
                                 resolve(individualService.getViewByPidPath(rawSequenceFile.individual, rawSequenceFile.seqType)
-                                        .relativize(lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile)).parent)
+                                        .relativize(rawSequenceDataViewFileService.getDirectoryPath(rawSequenceFile)))
                         scriptFileBuilder.append("[[ -n \"\${ECHO_LOG}\" ]] && echo ${currentFile}\n")
                         scriptFileBuilder.append("mkdir -p ${copyTargetBase}${targetFastqFolder}\n")
                         String search = "${currentFile.toString().replaceAll("(_|.)R([1,2])(_|.)", "\$1*\$2\$3")}*"

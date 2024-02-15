@@ -27,6 +27,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflowExecution.*
 
@@ -60,8 +61,8 @@ class DataInstallationInitializationServiceSpec extends Specification
         ])
         DataInstallationInitializationService service = new DataInstallationInitializationService()
 
-        service.lsdfFilesService = Mock(LsdfFilesService) {
-            3 * getFileViewByPidPath(_) >> TestCase.uniqueNonExistentPath
+        service.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
+            3 * getDirectoryPath(_) >> TestCase.uniqueNonExistentPath.toPath()
         }
         service.workflowRunService = new WorkflowRunService()
         service.workflowRunService.configFragmentService = Mock(ConfigFragmentService) {

@@ -23,7 +23,7 @@ package migration
 
 import groovy.transform.Field
 
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.TransactionUtils
@@ -65,7 +65,7 @@ assert batchSize > 1
 @Field final String OUTPUT_ROLE = 'FASTQ'
 @Field final String WORKFLOW_NAME = 'FASTQ installation'
 
-@Field final LsdfFilesService lsdfFilesService = ctx.lsdfFilesService
+@Field final RawSequenceDataViewFileService rawSequenceDataViewFileService = ctx.rawSequenceDataViewFileService
 
 @Field final List errorlist = [].asSynchronized()
 
@@ -75,7 +75,7 @@ WorkflowService workflowService = ctx.workflowService
  *main function to create WF runs and artefacts
  */
 
-void migrateToNewWorkflow(List<SeqTrack> seqTracks, Workflow workflow, ProcessingPriority priority, String outputRole, LsdfFilesService lsdfFilesService) {
+void migrateToNewWorkflow(List<SeqTrack> seqTracks, Workflow workflow, ProcessingPriority priority, String outputRole, RawSequenceDataViewFileService rawSequenceDataViewFileService) {
     seqTracks.each { SeqTrack seqTrack ->
         if (!seqTrack.workflowArtefact) { // only process if the workflowArtefact is null
             if (!seqTrack.validate()) {
@@ -84,7 +84,7 @@ void migrateToNewWorkflow(List<SeqTrack> seqTracks, Workflow workflow, Processin
             }
 
             // prepare attributes needed for the WF runs
-            String directory = lsdfFilesService.getFileViewByPidPathAsPath(seqTrack.sequenceFiles.first()).parent
+            String directory = rawSequenceDataViewFileService.getDirectoryPath(seqTrack.sequenceFiles.first())
             String shortName = "DI: ${seqTrack.individual.pid} ${seqTrack.sampleType.displayName} ${seqTrack.seqType.displayNameWithLibraryLayout}"
             List<String> runDisplayName = []
             runDisplayName.with {
@@ -178,7 +178,7 @@ if (numSeqTracks != 0) {
                 int start = batchSize * it
                 int adjustedSize = Math.min((numSeqTracks - start), batchSize) - 1
                 List<SeqTrack> seqTracks = SeqTrack.findAllByIdInList(seqTrackIds[start..start + adjustedSize])
-                migrateToNewWorkflow(seqTracks, workflow, priority, OUTPUT_ROLE, lsdfFilesService)
+                migrateToNewWorkflow(seqTracks, workflow, priority, OUTPUT_ROLE, rawSequenceDataViewFileService)
 
                 // flush changes to the database
                 if (!dryRun) {

@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.AbstractIntegrationSpecWithoutRollbackAnnotation
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.SessionUtils
@@ -30,6 +31,7 @@ import de.dkfz.tbi.otp.utils.CreateFileHelper
 
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 
 class RawSequenceFileConsistencyCheckerIntegrationSpec extends AbstractIntegrationSpecWithoutRollbackAnnotation {
 
@@ -79,11 +81,11 @@ class RawSequenceFileConsistencyCheckerIntegrationSpec extends AbstractIntegrati
             Files.createSymbolicLink(copiedOrLinkedDir.resolve("fileName3"), initialFile3)
             Files.createSymbolicLink(copiedOrLinkedDir.resolve("fileName4"), initialFile4)
 
-            consistencyChecker.lsdfFilesService = Mock(LsdfFilesService) {
-                1 * getFileFinalPath(rawSequenceFile1) >> "${copiedOrLinkedDir}/fileName1"
-                1 * getFileFinalPath(rawSequenceFile2) >> "${copiedOrLinkedDir}/fileName2"
-                1 * getFileFinalPath(rawSequenceFile3) >> "${copiedOrLinkedDir}/fileName3"
-                1 * getFileFinalPath(rawSequenceFile4) >> "${copiedOrLinkedDir}/fileName4"
+            consistencyChecker.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService) {
+                1 * getFilePath(rawSequenceFile1) >> Paths.get("${copiedOrLinkedDir}/fileName1")
+                1 * getFilePath(rawSequenceFile2) >> Paths.get("${copiedOrLinkedDir}/fileName2")
+                1 * getFilePath(rawSequenceFile3) >> Paths.get("${copiedOrLinkedDir}/fileName3")
+                1 * getFilePath(rawSequenceFile4) >> Paths.get("${copiedOrLinkedDir}/fileName4")
             }
             consistencyChecker.schedulerService = Mock(SchedulerService) {
                 1 * isActive() >> true
@@ -135,8 +137,8 @@ class RawSequenceFileConsistencyCheckerIntegrationSpec extends AbstractIntegrati
                 assert content.contains("on field 'mateNumber': rejected value [null]")
             }
         }
-        consistencyChecker.lsdfFilesService = Mock(LsdfFilesService) {
-            1 * getFileFinalPath(rawSequenceFile) >> "path"
+        consistencyChecker.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService) {
+            1 * getFilePath(rawSequenceFile) >> Paths.get("path")
         }
         consistencyChecker.processingOptionService = new ProcessingOptionService()
 

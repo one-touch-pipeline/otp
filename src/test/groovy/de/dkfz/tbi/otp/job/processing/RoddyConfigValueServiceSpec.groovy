@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
@@ -242,21 +243,13 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
 
     void "test getFilesToMerge"() {
         given:
-        service.lsdfFilesService = new LsdfFilesService()
-        service.lsdfFilesService.individualService = Mock(IndividualService) {
-            getViewByPidPath(_, _) >> { Paths.get("/viewbypidpath") }
+        service.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
+            2 * getFilePath(_) >> { RawSequenceFile rawSequenceFile -> Paths.get("/completePath/${rawSequenceFile.fileName}") }
         }
         RoddyBamFile roddyBamFile = createBamFile()
+        createBamFile()
 
         expect:
-        ["fastq_list": fastqFilesAsString(roddyBamFile)] == service.getFilesToMerge(roddyBamFile)
-    }
-
-    private String fastqFilesAsString(RoddyBamFile roddyBamFileToUse) {
-        return roddyBamFileToUse.seqTracks.collectMany { SeqTrack seqTrack ->
-            RawSequenceFile.findAllBySeqTrack(seqTrack).collect { RawSequenceFile rawSequenceFile ->
-                service.lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile).toString()
-            }
-        }.join(';')
+        service.getFilesToMerge(roddyBamFile) == ["fastq_list": '/completePath/DataFileFileName_R1.gz;/completePath/DataFileFileName_R2.gz']
     }
 }

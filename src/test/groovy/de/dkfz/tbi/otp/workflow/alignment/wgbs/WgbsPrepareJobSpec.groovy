@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WgbsAlignmentWorkflowDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.NotificationCreator
@@ -168,7 +169,7 @@ class WgbsPrepareJobSpec extends Specification implements DataTest, WgbsAlignmen
 
         job.roddyAlignmentPrepareService = Mock(RoddyAlignmentPrepareService)
         job.roddyConfigValueService = new RoddyConfigValueService()
-        job.roddyConfigValueService.lsdfFilesService = Mock(LsdfFilesService)
+        job.roddyConfigValueService.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService)
         job.fileService = new FileService()
         job.roddyBamFileService = Mock(RoddyBamFileService) {
             getWorkMetadataTableFile(_) >> metadataFile

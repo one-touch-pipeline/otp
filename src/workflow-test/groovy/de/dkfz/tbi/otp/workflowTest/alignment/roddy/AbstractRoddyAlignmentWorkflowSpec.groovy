@@ -534,8 +534,8 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
 
     protected void verifyInputIsNotDeleted() {
         RawSequenceFile.list().each { RawSequenceFile rawSequenceFile ->
-            fileAssertHelper.assertFileIsReadableAndNotEmpty(lsdfFilesService.getFileFinalPathAsPath(rawSequenceFile))
-            fileAssertHelper.assertFileIsReadableAndNotEmpty(lsdfFilesService.getFileViewByPidPathAsPath(rawSequenceFile))
+            fileAssertHelper.assertFileIsReadableAndNotEmpty(rawSequenceDataWorkFileService.getFilePath(rawSequenceFile))
+            fileAssertHelper.assertFileIsReadableAndNotEmpty(rawSequenceDataViewFileService.getFilePath(rawSequenceFile))
         }
     }
 

@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
@@ -121,12 +122,12 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         singleCellBamFile.save(flush: true)
 
         CellRangerService cellRangerService = new CellRangerService([
-                fileSystemService: Mock(FileSystemService) {
+                fileSystemService             : Mock(FileSystemService) {
                     1 * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
-                lsdfFilesService : Mock(LsdfFilesService),
-                fileService      : Mock(FileService),
+                rawSequenceDataViewFileService: Mock(RawSequenceDataViewFileService),
+                fileService                   : Mock(FileService),
         ])
 
         when:
@@ -141,9 +142,9 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         then:
         1 * cellRangerService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(sampleIdentifierPath, _)
 
-        2 * cellRangerService.lsdfFilesService.getFileViewByPidPath(_) >>> [
-                file1,
-                file2,
+        2 * cellRangerService.rawSequenceDataViewFileService.getFilePath(_) >>> [
+                Paths.get(file1),
+                Paths.get(file2),
         ]
         1 * cellRangerService.fileService.createLink(mate1, filePath1, _, _)
         1 * cellRangerService.fileService.createLink(mate2, filePath2, _, _)
@@ -151,9 +152,9 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         then:
         1 * cellRangerService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(sampleDirectory.resolve(sampleIdentifier2DirName), _)
 
-        2 * cellRangerService.lsdfFilesService.getFileViewByPidPath(_) >>> [
-                file3,
-                file4,
+        2 * cellRangerService.rawSequenceDataViewFileService.getFilePath(_) >>> [
+                Paths.get(file3),
+                Paths.get(file4),
         ]
         1 * cellRangerService.fileService.createLink(mate3, filePath3, _, _)
         1 * cellRangerService.fileService.createLink(mate4, filePath4, _, _)

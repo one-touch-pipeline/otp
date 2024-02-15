@@ -42,6 +42,8 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.egaSubmission.EgaSubmission
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
@@ -61,12 +63,13 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
 
     DeletionService deletionService
     TestConfigService configService
-    LsdfFilesService lsdfFilesService
     SnvCallingService snvCallingService
     FileService fileService
     RoddyBamFileService roddyBamFileService
     SingleCellBamFileService singleCellBamFileService
     ExternallyProcessedBamFileService externallyProcessedBamFileService
+    RawSequenceDataWorkFileService rawSequenceDataWorkFileService
+    RawSequenceDataViewFileService rawSequenceDataViewFileService
 
     String seqDir = "/seq-dir"
 
@@ -88,7 +91,6 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         deletionService.lsdfFilesService.projectService = Mock(ProjectService) {
             getSequencingDirectory(_) >> Paths.get(seqDir)
         }
-        deletionService.lsdfFilesService.individualService = individualService
         deletionService.commentService = Mock(CommentService)
         deletionService.fastqcDataFilesService = Mock(FastqcDataFilesService)
         deletionService.dataProcessingFilesService = Mock(DataProcessingFilesService)
@@ -97,6 +99,10 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         deletionService.fileService = new FileService()
         deletionService.runService = new RunService()
         deletionService.workflowDeletionService = new WorkflowDeletionService()
+        deletionService.rawSequenceDataWorkFileService = new RawSequenceDataWorkFileService()
+        deletionService.rawSequenceDataWorkFileService.lsdfFilesService = deletionService.lsdfFilesService
+        deletionService.rawSequenceDataViewFileService = new RawSequenceDataViewFileService()
+        deletionService.rawSequenceDataViewFileService.individualService = individualService
     }
 
     void setupDataForProcessingFiles() {
@@ -877,11 +883,11 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
 
         DomainFactory.createMetaDataEntry(sequenceFile: rawSequenceFile)
 
-        String fileFinalPath = lsdfFilesService.getFileFinalPath(rawSequenceFile)
+        String fileFinalPath = rawSequenceDataWorkFileService.getFilePath(rawSequenceFile)
         List<File> expected = [
                 fileFinalPath,
                 "${fileFinalPath}.md5sum",
-                lsdfFilesService.getFileViewByPidPath(rawSequenceFile),
+                rawSequenceDataViewFileService.getFilePath(rawSequenceFile).toString(),
         ].collect { new File(it) }
 
         when:
@@ -1164,7 +1170,10 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
         RawSequenceFile.findAllBySeqTrackInList(seqTracks).each {
             it.fastqImportInstance = fastqImportInstance
             assert it.save(flush: true)
-            CreateFileHelper.createFile(new File(lsdfFilesService.getFileViewByPidPath(it)))
+            Path filePath = rawSequenceDataViewFileService.getFilePath(it)
+            Files.createDirectories(filePath.parent)
+            Files.createFile(filePath)
+            Files.write(filePath, ['some content'])
         }
     }
 

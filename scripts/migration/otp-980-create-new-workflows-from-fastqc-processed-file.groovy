@@ -24,6 +24,7 @@ package migration
 import groovy.transform.Field
 
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
@@ -31,6 +32,7 @@ import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import static groovyx.gpars.GParsPool.withPool
+
 /**
  * Creates new WorkflowRuns and WorkflowArtefacts based on the current FastqcProcessedFile data
  * @param BATCH_SIZE to process of fastqcProcessedFiles in trunks
@@ -68,7 +70,7 @@ assert batchSize > 1
 @Field final String OUTPUT_ROLE = 'FastQC'
 @Field final String WORKFLOW_NAME = BashFastQcWorkflow.WORKFLOW
 
-@Field final LsdfFilesService lsdfFilesService = ctx.lsdfFilesService
+@Field final RawSequenceDataViewFileService rawSequenceDataViewFileService = ctx.rawSequenceDataViewFileService
 
 WorkflowService workflowService = ctx.workflowService
 
@@ -81,11 +83,11 @@ void migrateToNewWorkflow(
         Workflow workflow,
         ProcessingPriority priority,
         String outputRole,
-        LsdfFilesService lsdfFilesService
+        RawSequenceDataViewFileService rawSequenceDataViewFileService
 ) {
     seqTracks.each { SeqTrack seqTrack ->
         // getting and prepare information
-        String directory = lsdfFilesService.getFileViewByPidPathAsPath(seqTrack.sequenceFiles.first()).parent
+        String directory = rawSequenceDataViewFileService.getDirectoryPath(seqTrack.sequenceFiles.first()).parent
         WorkflowArtefact inputArtefact = seqTrack.workflowArtefact
 
         assert inputArtefact: "input artefact of ${seqTrack} can't be null. Was migration script otp-592 called before to create missing input artifacts?"
@@ -190,7 +192,7 @@ if (seqTrackIdsWithRawSequenceFileCount) {
                 int start = batchSize * it
                 int adjustedSize = Math.min((numSeqTracks - start), batchSize) - 1
                 List<SeqTrack> seqTracks = SeqTrack.findAllByIdInList(seqTrackIds[start..start + adjustedSize])
-                migrateToNewWorkflow(seqTracks, workflow, priority, OUTPUT_ROLE, lsdfFilesService)
+                migrateToNewWorkflow(seqTracks, workflow, priority, OUTPUT_ROLE, rawSequenceDataViewFileService)
                 // flush changes to the database
                 if (!dryRun) {
                     session.flush()

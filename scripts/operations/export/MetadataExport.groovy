@@ -58,6 +58,7 @@
  * or all data (false).
  */
 
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -373,7 +374,7 @@ if (rawSequenceFiles) {
 
 class MetaDataExport {
 
-    LsdfFilesService lsdfFilesService
+    RawSequenceDataWorkFileService rawSequenceDataWorkFileService
     FileService fileService
     FileSystemService fileSystemService
     ProcessingOptionService processingOptionService
@@ -425,7 +426,7 @@ class MetaDataExport {
             }
         }
 
-        put(FASTQ_FILE, lsdfFilesService.getFileFinalPath(rawSequenceFile).replaceAll('//+', '/'))
+        put(FASTQ_FILE, rawSequenceDataWorkFileService.getFilePath(rawSequenceFile)?.toString()?.replaceAll('//+', '/'))
         put(MD5, rawSequenceFile.fastqMd5sum)
         put(READ, (rawSequenceFile.indexFile ? 'I' : '') + rawSequenceFile.mateNumber?.toString())
         put(WITHDRAWN, rawSequenceFile.fileWithdrawn ? '1' : null)
@@ -525,10 +526,10 @@ class MetaDataExport {
 }
 
 MetaDataExport metaDataExport = new MetaDataExport([
-        lsdfFilesService       : ctx.lsdfFilesService,
-        fileService            : ctx.fileService,
-        fileSystemService      : ctx.fileSystemService,
-        processingOptionService: ctx.processingOptionService,
+        rawSequenceDataWorkFileService: ctx.rawSequenceDataWorkFileService,
+        fileService                   : ctx.fileService,
+        fileSystemService             : ctx.fileSystemService,
+        processingOptionService       : ctx.processingOptionService,
 ])
 
 Path file = metaDataExport.handleCreationOfMetadataFile(rawSequenceFiles, fileName, overwriteExisting, exportOnlyWhiteListedColumns)

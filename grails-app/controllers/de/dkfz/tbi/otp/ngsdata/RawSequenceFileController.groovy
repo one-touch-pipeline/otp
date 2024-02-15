@@ -25,6 +25,8 @@ import grails.converters.JSON
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 import de.dkfz.tbi.otp.utils.CommentCommand
 import de.dkfz.tbi.util.TimeFormats
@@ -32,10 +34,11 @@ import de.dkfz.tbi.util.TimeFormats
 @PreAuthorize('isFullyAuthenticated()')
 class RawSequenceFileController {
 
-    LsdfFilesService lsdfFilesService
     MetaDataService metaDataService
     CommentService commentService
     FastqcResultsService fastqcResultsService
+    RawSequenceDataWorkFileService rawSequenceDataWorkFileService
+    RawSequenceDataViewFileService rawSequenceDataViewFileService
 
     static allowedMethods = [
             showDetails        : "GET",
@@ -60,8 +63,8 @@ class RawSequenceFileController {
                 dateCreated    : TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(rawSequenceFile.dateCreated),
                 withdrawnDate  : TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(rawSequenceFile.withdrawnDate),
                 entries        : MetaDataEntry.findAllBySequenceFile(rawSequenceFile, [sort: "key.id"]),
-                fullPath       : lsdfFilesService.getFileFinalPath(rawSequenceFile),
-                vbpPath        : lsdfFilesService.getFileViewByPidPath(rawSequenceFile),
+                fullPath       : rawSequenceDataWorkFileService.getFilePath(rawSequenceFile).toString(),
+                vbpPath        : rawSequenceDataViewFileService.getFilePath(rawSequenceFile).toString(),
                 fastqcAvailable: fastqcResultsService.isFastqcAvailable(rawSequenceFile),
         ]
     }

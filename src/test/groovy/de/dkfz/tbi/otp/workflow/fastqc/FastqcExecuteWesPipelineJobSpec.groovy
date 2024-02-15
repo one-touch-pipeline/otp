@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.*
@@ -140,9 +141,9 @@ class FastqcExecuteWesPipelineJobSpec extends Specification implements DataTest,
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
             1 * getOutputArtefacts(step, OUTPUT_ROLE) >> [fastqcProcessedFile1, fastqcProcessedFile2]
         }
-        job.lsdfFilesService = Mock(LsdfFilesService) {
-            1 * getFileViewByPidPathAsPath(rawSequenceFile1) >> inputPaths[0]
-            1 * getFileViewByPidPathAsPath(rawSequenceFile2) >> inputPaths[1]
+        job.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
+            1 * getFilePath(rawSequenceFile1) >> inputPaths[0]
+            1 * getFilePath(rawSequenceFile2) >> inputPaths[1]
             0 * _
         }
 

@@ -29,6 +29,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.ngsdata.SeqTrack.DataProcessingState
@@ -44,7 +45,7 @@ class RawSequenceFileConsistencyChecker {
     static final int MAX_RESULTS = 1000
 
     @Autowired
-    LsdfFilesService lsdfFilesService
+    RawSequenceDataWorkFileService rawSequenceDataWorkFileService
 
     @Autowired
     MailHelperService mailHelperService
@@ -65,7 +66,7 @@ class RawSequenceFileConsistencyChecker {
                     SessionUtils.withNewSession {
                         RawSequenceFile.withTransaction {
                             rawSequenceFiles.each {
-                                String path = lsdfFilesService.getFileFinalPath(it)
+                                String path = rawSequenceDataWorkFileService.getFilePath(it)
                                 if (path) {
                                     File file = new File(path)
                                     it.fileExists = file.exists()
