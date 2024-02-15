@@ -19,38 +19,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataprocessing.bamfiles
+package de.dkfz.tbi.otp.infrastructure.alignment
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 
-class AbstractBamFileServiceFactoryServiceSpec extends Specification implements ServiceUnitTest<AbstractBamFileServiceFactoryService>, DataTest {
+class AlignmentLinkFileServiceFactoryServiceSpec extends Specification implements ServiceUnitTest<AlignmentLinkFileServiceFactoryService>, DataTest {
 
-    static ExternallyProcessedBamFileService externallyProcessedBamFileService = new ExternallyProcessedBamFileService()
-    static RnaRoddyBamFileService rnaRoddyBamFileService = new RnaRoddyBamFileService()
-    static RoddyBamFileService roddyBamFileService = new RoddyBamFileService()
-    static SingleCellBamFileService singleCellBamFileService = new SingleCellBamFileService()
+    static ExternalAlignmentLinkFileService externalAlignmentLinkFileService = new ExternalAlignmentLinkFileService()
+    static PanCancerLinkFileService panCancerLinkFileService = new PanCancerLinkFileService()
+    static RnaAlignmentLinkFileService rnaAlignmentLinkFileService = new RnaAlignmentLinkFileService()
+    static CellRangerLinkFileService cellRangerLinkFileService = new CellRangerLinkFileService()
 
     void "test getService"() {
         given:
-        service.externallyProcessedBamFileService = externallyProcessedBamFileService
-        service.rnaRoddyBamFileService = rnaRoddyBamFileService
-        service.roddyBamFileService = roddyBamFileService
-        service.singleCellBamFileService = singleCellBamFileService
+        service.externalAlignmentLinkFileService = externalAlignmentLinkFileService
+        service.panCancerLinkFileService = panCancerLinkFileService
+        service.rnaAlignmentLinkFileService = rnaAlignmentLinkFileService
+        service.cellRangerLinkFileService = cellRangerLinkFileService
 
         expect:
         service.getService(bamFile) == result
 
         where:
-        bamFile                                || result
-        new ExternallyProcessedBamFile() || externallyProcessedBamFileService
-        new RnaRoddyBamFile()                  || rnaRoddyBamFileService
-        new RoddyBamFile()                     || roddyBamFileService
-        new SingleCellBamFile()                || singleCellBamFileService
+        bamFile                          || result
+        new ExternallyProcessedBamFile() || externalAlignmentLinkFileService
+        new RnaRoddyBamFile()            || rnaAlignmentLinkFileService
+        new RoddyBamFile()               || panCancerLinkFileService
+        new SingleCellBamFile()          || cellRangerLinkFileService
     }
 }

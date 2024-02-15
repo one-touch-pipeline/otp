@@ -27,12 +27,13 @@ import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WgbsAlignmentWorkflowDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.WgbsAlignmentWorkFileService
 import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.NotificationCreator
@@ -75,11 +76,11 @@ class WgbsPrepareJobSpec extends Specification implements DataTest, WgbsAlignmen
         given:
         setupData()
         WgbsPrepareJob job = new WgbsPrepareJob([
-                concreteArtefactService: Mock(ConcreteArtefactService) {
+                concreteArtefactService : Mock(ConcreteArtefactService) {
                     1 * getOutputArtefact(workflowStep, WgbsWorkflow.OUTPUT_BAM) >> roddyBamFile
                 },
-                roddyBamFileService    : Mock(RoddyBamFileService) {
-                    1 * getWorkDirectory(roddyBamFile) >> Paths.get(DIRECTORY)
+                panCancerWorkFileService: Mock(PanCancerWorkFileService) {
+                    1 * getDirectoryPath(roddyBamFile) >> Paths.get(DIRECTORY)
                 },
         ])
 
@@ -115,8 +116,8 @@ class WgbsPrepareJobSpec extends Specification implements DataTest, WgbsAlignmen
         job.roddyAlignmentPrepareService.notificationCreator = Mock(NotificationCreator)
         job.roddyConfigValueService = Mock(RoddyConfigValueService)
         job.fileService = Mock(FileService)
-        job.roddyBamFileService = Mock(RoddyBamFileService) {
-            getWorkMetadataTableFile(_) >> Paths.get("/tmp/non-existent-dir")
+        job.wgbsAlignmentWorkFileService = Mock(WgbsAlignmentWorkFileService) {
+            getMetadataTableFile(_) >> Paths.get("/tmp/non-existent-dir")
         }
 
         when:
@@ -142,8 +143,8 @@ class WgbsPrepareJobSpec extends Specification implements DataTest, WgbsAlignmen
         job.roddyAlignmentPrepareService.notificationCreator = Mock(NotificationCreator)
         job.roddyConfigValueService = Mock(RoddyConfigValueService)
         job.fileService = Mock(FileService)
-        job.roddyBamFileService = Mock(RoddyBamFileService) {
-            getWorkMetadataTableFile(_) >> Paths.get("/tmp/non-existent-dir")
+        job.wgbsAlignmentWorkFileService = Mock(WgbsAlignmentWorkFileService) {
+            getMetadataTableFile(_) >> Paths.get("/tmp/non-existent-dir")
         }
 
         when:
@@ -171,8 +172,8 @@ class WgbsPrepareJobSpec extends Specification implements DataTest, WgbsAlignmen
         job.roddyConfigValueService = new RoddyConfigValueService()
         job.roddyConfigValueService.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService)
         job.fileService = new FileService()
-        job.roddyBamFileService = Mock(RoddyBamFileService) {
-            getWorkMetadataTableFile(_) >> metadataFile
+        job.wgbsAlignmentWorkFileService = Mock(WgbsAlignmentWorkFileService) {
+            getMetadataTableFile(_) >> metadataFile
         }
 
         when:

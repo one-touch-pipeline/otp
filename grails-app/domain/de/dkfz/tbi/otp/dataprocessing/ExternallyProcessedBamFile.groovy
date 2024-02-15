@@ -24,7 +24,9 @@ package de.dkfz.tbi.otp.dataprocessing
 import grails.gorm.hibernate.annotation.ManagedEntity
 import org.hibernate.Hibernate
 
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.AbstractExternalAlignmentFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.ExternalAlignmentLinkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.ExternalAlignmentWorkFileService
 import de.dkfz.tbi.otp.ngsdata.MergedAlignmentDataFileService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -98,7 +100,7 @@ class ExternallyProcessedBamFile extends AbstractBamFile {
     }
 
     /**
-     * @deprecated use {@link ExternallyProcessedBamFileService#getPathForFurtherProcessingNoCheck}
+     * @deprecated use {@link ExternalAlignmentLinkFileService#getPathForFurtherProcessingNoCheck}
      */
     @Deprecated
     @Override
@@ -130,7 +132,7 @@ class ExternallyProcessedBamFile extends AbstractBamFile {
     }
 
     /**
-     * @deprecated use {@link ExternallyProcessedBamFileService#getBamFile}
+     * @deprecated use {@link AbstractExternalAlignmentFileService#getBamFile}
      */
     @Deprecated
     File getBamFile() {
@@ -138,7 +140,7 @@ class ExternallyProcessedBamFile extends AbstractBamFile {
     }
 
     /**
-     * @deprecated use {@link ExternallyProcessedBamFileService#getBaiFile}
+     * @deprecated use {@link AbstractExternalAlignmentFileService#getBaiFile}
      */
     @Deprecated
     File getBaiFile() {
@@ -146,7 +148,7 @@ class ExternallyProcessedBamFile extends AbstractBamFile {
     }
 
     /**
-     * @deprecated use {@link ExternallyProcessedBamFileService#getBamMaxReadLengthFile}
+     * @deprecated use {@link AbstractExternalAlignmentFileService#getBamMaxReadLengthFile}
      */
     @Deprecated
     File getBamMaxReadLengthFile() {
@@ -154,7 +156,7 @@ class ExternallyProcessedBamFile extends AbstractBamFile {
     }
 
     /**
-     * @deprecated use {@link ExternallyProcessedBamFileService#getNonOtpFolder}
+     * @deprecated use {@link ExternalAlignmentWorkFileService#getNonOtpFolder}
      */
     @Deprecated
     File getNonOtpFolder() {
@@ -163,7 +165,7 @@ class ExternallyProcessedBamFile extends AbstractBamFile {
     }
 
     /**
-     * @deprecated use {@link ExternallyProcessedBamFileService#getImportFolder}
+     * @deprecated use {@link ExternalAlignmentWorkFileService#getDirectoryPath}
      */
     @Deprecated
     File getImportFolder() {
@@ -171,7 +173,7 @@ class ExternallyProcessedBamFile extends AbstractBamFile {
     }
 
     /**
-     * @deprecated use {@link ExternallyProcessedBamFileService#getFinalInsertSizeFile}
+     * @deprecated use {@link ExternalAlignmentLinkFileService#getInsertSizeFile}
      */
     @Override
     @Deprecated

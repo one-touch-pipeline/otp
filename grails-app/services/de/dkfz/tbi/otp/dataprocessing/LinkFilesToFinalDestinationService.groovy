@@ -24,15 +24,15 @@ package de.dkfz.tbi.otp.dataprocessing
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.alignment.*
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RoddyConfigService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.utils.LinkFileUtils
+import de.dkfz.tbi.otp.utils.LinkEntry
 
-import java.nio.file.FileSystem
+import java.nio.file.Files
 import java.nio.file.Path
 
 @Transactional
@@ -40,9 +40,13 @@ class LinkFilesToFinalDestinationService {
 
     FileService fileService
     FileSystemService fileSystemService
-    LinkFileUtils linkFileUtils
     RoddyConfigService roddyConfigService
-    RoddyBamFileService roddyBamFileService
+    PanCancerWorkFileService panCancerWorkFileService
+    PanCancerLinkFileService panCancerLinkFileService
+    RnaAlignmentWorkFileService rnaAlignmentWorkFileService
+    RnaAlignmentLinkFileService rnaAlignmentLinkFileService
+    WgbsAlignmentWorkFileService wgbsAlignmentWorkFileService
+    WgbsAlignmentLinkFileService wgbsAlignmentLinkFileService
 
     /**
      * Link files (replaces existing files)
@@ -53,81 +57,90 @@ class LinkFilesToFinalDestinationService {
         assert roddyBamFile: "Input roddyBamFile must not be null"
         assert !roddyBamFile.isOldStructureUsed()
 
-        Map<File, File> linkMapSourceLink = [:]
+        List<LinkEntry> links = []
 
         // collect links for files and qa merge directory
-        ['Bam', 'Bai', 'Md5sum'].each {
-            linkMapSourceLink.put(roddyBamFile."work${it}File", roddyBamFile."final${it}File")
-        }
-        linkMapSourceLink.put(roddyBamFile.workMergedQADirectory, roddyBamFile.finalMergedQADirectory)
+        links.add(new LinkEntry(link: panCancerLinkFileService.getBamFile(roddyBamFile),
+                target: panCancerWorkFileService.getBamFile(roddyBamFile)))
+        links.add(new LinkEntry(link: panCancerLinkFileService.getBaiFile(roddyBamFile),
+                target: panCancerWorkFileService.getBaiFile(roddyBamFile)))
+        links.add(new LinkEntry(link: panCancerLinkFileService.getMd5sumFile(roddyBamFile),
+                target: panCancerWorkFileService.getMd5sumFile(roddyBamFile)))
+        links.add(new LinkEntry(link: panCancerLinkFileService.getMergedQADirectory(roddyBamFile),
+                target: panCancerWorkFileService.getMergedQADirectory(roddyBamFile)))
 
         if (roddyBamFile.seqType.isWgbs()) {
-            linkMapSourceLink.put(roddyBamFile.workMergedMethylationDirectory, roddyBamFile.finalMergedMethylationDirectory)
+            links.add(new LinkEntry(link: wgbsAlignmentLinkFileService.getMergedMethylationDirectory(roddyBamFile),
+                    target: wgbsAlignmentWorkFileService.getMergedMethylationDirectory(roddyBamFile)))
             if (roddyBamFile.containedSeqTracks*.libraryDirectoryName.unique().size() > 1) {
                 [
-                        roddyBamFile.workLibraryQADirectories.values().asList().sort(),
-                        roddyBamFile.finalLibraryQADirectories.values().asList().sort(),
+                        wgbsAlignmentLinkFileService.getLibraryQADirectories(roddyBamFile).values().asList().sort(),
+                        wgbsAlignmentWorkFileService.getLibraryQADirectories(roddyBamFile).values().asList().sort(),
                 ].transpose().each {
-                    linkMapSourceLink.put(it[0], it[1])
+                    links.add(new LinkEntry(link: it[0], target: it[1]))
                 }
                 [
-                        roddyBamFile.workLibraryMethylationDirectories.values().asList().sort(),
-                        roddyBamFile.finalLibraryMethylationDirectories.values().asList().sort(),
+                        wgbsAlignmentLinkFileService.getLibraryMethylationDirectories(roddyBamFile).values().asList().sort(),
+                        wgbsAlignmentWorkFileService.getLibraryMethylationDirectories(roddyBamFile).values().asList().sort(),
                 ].transpose().each {
-                    linkMapSourceLink.put(it[0], it[1])
+                    links.add(new LinkEntry(link: it[0], target: it[1]))
                 }
             }
-            linkMapSourceLink.put(roddyBamFile.workMetadataTableFile, roddyBamFile.finalMetadataTableFile)
+            links.add(new LinkEntry(link: wgbsAlignmentLinkFileService.getMetadataTableFile(roddyBamFile),
+                    target: wgbsAlignmentWorkFileService.getMetadataTableFile(roddyBamFile)))
         }
 
         // collect links for every execution store
-        [roddyBamFile.workExecutionDirectories, roddyBamFile.finalExecutionDirectories].transpose().each {
-            linkMapSourceLink.put(it[0], it[1])
+        [panCancerLinkFileService.getExecutionDirectories(roddyBamFile), panCancerWorkFileService.getExecutionDirectories(roddyBamFile)].transpose().each {
+            links.add(new LinkEntry(link: it[0], target: it[1]))
         }
 
         // collect links for the single lane qa
-        Map<SeqTrack, File> workSingleLaneQADirectories = roddyBamFile.workSingleLaneQADirectories
-        Map<SeqTrack, File> finalSingleLaneQADirectories = roddyBamFile.finalSingleLaneQADirectories
+        Map<SeqTrack, Path> workSingleLaneQADirectories = panCancerWorkFileService.getSingleLaneQADirectories(roddyBamFile)
+        Map<SeqTrack, Path> finalSingleLaneQADirectories = panCancerLinkFileService.getSingleLaneQADirectories(roddyBamFile)
         workSingleLaneQADirectories.each { seqTrack, singleLaneQaWorkDir ->
-            File singleLaneQcDirFinal = finalSingleLaneQADirectories.get(seqTrack)
-            linkMapSourceLink.put(singleLaneQaWorkDir, singleLaneQcDirFinal)
+            Path singleLaneQcDirFinal = finalSingleLaneQADirectories.get(seqTrack)
+            links.add(new LinkEntry(link: singleLaneQcDirFinal, target: singleLaneQaWorkDir))
         }
 
         // create the collected links
-        linkFileUtils.createAndValidateLinks(linkMapSourceLink, roddyBamFile.project.unixGroup)
+        links.each {
+            fileService.createLink(it.link, it.target, roddyBamFile.project.unixGroup)
+        }
     }
 
     @Deprecated
     void linkNewRnaResults(RnaRoddyBamFile roddyBamFile) {
-        File baseDirectory = roddyBamFile.baseDirectory
-        Map<File, File> links = roddyBamFile.workDirectory.listFiles().findAll {
-            !it.name.startsWith(".")
-        }.collectEntries { File source ->
-            [(source): new File(baseDirectory, source.name)]
+        Path baseDirectory = rnaAlignmentLinkFileService.getDirectoryPath(roddyBamFile)
+        List<LinkEntry> links = Files.list(rnaAlignmentWorkFileService.getDirectoryPath(roddyBamFile)).toList().findAll { Path it ->
+            !it.fileName.toString().startsWith(".")
+        }.collect { Path source ->
+            new LinkEntry(link: baseDirectory.resolve(source.fileName), target: source)
         }
-        linkFileUtils.createAndValidateLinks(links, roddyBamFile.project.unixGroup)
+        links.each {
+            fileService.createLink(it.link, it.target, roddyBamFile.project.unixGroup)
+        }
     }
 
     List<Path> getUnusedResultFiles(RoddyBamFile roddyBamFile) {
         assert roddyBamFile: "Input roddyBamFile must not be null"
         assert !roddyBamFile.isOldStructureUsed()
 
-        List<File> expectedFiles = [
-                roddyBamFile.workBamFile,
-                roddyBamFile.workBaiFile,
-                roddyBamFile.workMd5sumFile,
-                roddyBamFile.workQADirectory,
-                roddyBamFile.workExecutionStoreDirectory,
-                fileService.toFile(roddyConfigService.getConfigDirectory(roddyBamFile.workDirectory.toPath())),
+        List<Path> expectedFiles = [
+                panCancerWorkFileService.getBamFile(roddyBamFile),
+                panCancerWorkFileService.getBaiFile(roddyBamFile),
+                panCancerWorkFileService.getMd5sumFile(roddyBamFile),
+                panCancerWorkFileService.getQADirectory(roddyBamFile),
+                panCancerWorkFileService.getExecutionStoreDirectory(roddyBamFile),
+                panCancerWorkFileService.getConfigDirectory(roddyBamFile),
         ]
         if (roddyBamFile.seqType.isWgbs()) {
-            expectedFiles.add(roddyBamFile.workMethylationDirectory)
-            expectedFiles.add(roddyBamFile.workMetadataTableFile)
+            expectedFiles.add(wgbsAlignmentWorkFileService.getMethylationDirectory(roddyBamFile))
+            expectedFiles.add(wgbsAlignmentWorkFileService.getMetadataTableFile(roddyBamFile))
         }
-        List<File> foundFiles = roddyBamFile.workDirectory.listFiles() as List<File> ?: []
-        List<File> unexpectedFiles = foundFiles - expectedFiles
-        FileSystem fs = fileSystemService.remoteFileSystem
-        return unexpectedFiles.collect { fileService.toPath(it, fs) }
+        List<Path> foundFiles = Files.list(panCancerWorkFileService.getDirectoryPath(roddyBamFile)).toList() ?: []
+        List<Path> unexpectedFiles = foundFiles - expectedFiles
+        return unexpectedFiles
     }
 
     @CompileDynamic
@@ -139,13 +152,13 @@ class LinkFilesToFinalDestinationService {
         List<RoddyBamFile> roddyBamFiles = RoddyBamFile.findAllByWorkPackageAndIdNotEqual(roddyBamFile.mergingWorkPackage, roddyBamFile.id)
         if (roddyBamFiles) {
             List<Path> workDirs = roddyBamFiles.findAll { !it.isOldStructureUsed() }.collect {
-                roddyBamFileService.getWorkDirectory(it)
+                panCancerWorkFileService.getDirectoryPath(it)
             }
             filesToDelete.addAll(workDirs)
-            filesToDelete.add(roddyBamFileService.getFinalExecutionStoreDirectory(roddyBamFile))
-            filesToDelete.add(roddyBamFileService.getFinalQADirectory(roddyBamFile))
+            filesToDelete.add(panCancerLinkFileService.getExecutionStoreDirectory(roddyBamFile))
+            filesToDelete.add(panCancerLinkFileService.getQADirectory(roddyBamFile))
             if (roddyBamFile.seqType.isWgbs()) {
-                filesToDelete.add(roddyBamFileService.getFinalMethylationDirectory(roddyBamFile))
+                filesToDelete.add(wgbsAlignmentLinkFileService.getMethylationDirectory(roddyBamFile))
             }
         }
         return filesToDelete

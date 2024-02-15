@@ -26,10 +26,10 @@ import spock.lang.Specification
 import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.PanCancerWorkflowDomainFactory
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
@@ -85,10 +85,10 @@ class PanCancerParseJobSpec extends Specification implements DataTest, PanCancer
             0 * _
         }
         job.roddyQualityAssessmentService = new RoddyQualityAssessmentService()
-        job.roddyQualityAssessmentService.roddyBamFileService = Mock(RoddyBamFileService) {
-            getWorkSingleLaneQAJsonFiles(_) >> [(roddyBamFile.seqTracks.first()): mergedQAJsonFile]
-            getWorkMergedQAJsonFile(_) >> mergedQAJsonFile
-            getWorkMergedQATargetExtractJsonFile(_) >> mergedQAJsonFile
+        job.roddyQualityAssessmentService.panCancerWorkFileService = Mock(PanCancerWorkFileService) {
+            getSingleLaneQAJsonFiles(_) >> [(roddyBamFile.seqTracks.first()): mergedQAJsonFile]
+            getMergedQAJsonFile(_) >> mergedQAJsonFile
+            getMergedQATargetExtractJsonFile(_) >> mergedQAJsonFile
         }
         job.roddyQualityAssessmentService.referenceGenomeService = new ReferenceGenomeService()
         job.roddyQualityAssessmentService.abstractBamFileService = new AbstractBamFileService()
@@ -155,10 +155,10 @@ class PanCancerParseJobSpec extends Specification implements DataTest, PanCancer
             0 * _
         }
         job.roddyQualityAssessmentService = new RoddyQualityAssessmentService()
-        job.roddyQualityAssessmentService.roddyBamFileService = Mock(RoddyBamFileService) {
-            getWorkSingleLaneQAJsonFiles(_) >> [(roddyBamFile.seqTracks.first()): mergedQAJsonFile]
-            getWorkMergedQAJsonFile(_) >> mergedQAJsonFile
-            getWorkMergedQATargetExtractJsonFile(_) >> mergedQAJsonFile
+        job.roddyQualityAssessmentService.panCancerWorkFileService = Mock(PanCancerWorkFileService) {
+            getSingleLaneQAJsonFiles(_) >> [(roddyBamFile.seqTracks.first()): mergedQAJsonFile]
+            getMergedQAJsonFile(_) >> mergedQAJsonFile
+            getMergedQATargetExtractJsonFile(_) >> mergedQAJsonFile
         }
         job.roddyQualityAssessmentService.referenceGenomeService = new ReferenceGenomeService()
         job.roddyQualityAssessmentService.abstractBamFileService = new AbstractBamFileService()

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataprocessing.bamfiles
+package de.dkfz.tbi.otp.infrastructure.alignment
 
 import grails.gorm.transactions.Transactional
 
@@ -28,24 +28,34 @@ import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 
 @Transactional
-class AbstractBamFileServiceFactoryService {
+class AlignmentLinkFileServiceFactoryService {
 
-    ExternallyProcessedBamFileService externallyProcessedBamFileService
-    RnaRoddyBamFileService rnaRoddyBamFileService
-    RoddyBamFileService roddyBamFileService
-    SingleCellBamFileService singleCellBamFileService
+    ExternalAlignmentLinkFileService externalAlignmentLinkFileService
+    PanCancerLinkFileService panCancerLinkFileService
+    RnaAlignmentLinkFileService rnaAlignmentLinkFileService
+    CellRangerLinkFileService cellRangerLinkFileService
 
-    AbstractAbstractBamFileService<? extends AbstractBamFile> getService(AbstractBamFile bamFile) {
-        Map<Class<? extends AbstractBamFile>, AbstractAbstractBamFileService<? extends AbstractBamFile>> map = [
-                (ExternallyProcessedBamFile): externallyProcessedBamFileService,
-                (RnaRoddyBamFile)           : rnaRoddyBamFileService,
-                (RoddyBamFile)              : roddyBamFileService,
-                (SingleCellBamFile)         : singleCellBamFileService,
-        ]
-        AbstractAbstractBamFileService<? extends AbstractBamFile> result = map[bamFile.class]
+    private Map serviceMap
+
+    def <T extends AbstractBamFile> AbstractAlignmentLinkFileService<T> getService(Class<T> clazz) {
+        AbstractAlignmentLinkFileService<? extends AbstractBamFile> result = map[clazz]
         if (!result) {
-            throw new IllegalArgumentException("No service exists for ${bamFile.class.simpleName}")
+            throw new IllegalArgumentException("No service exists for ${clazz.simpleName}")
         }
         return result
+    }
+
+    def <T extends AbstractBamFile> AbstractAlignmentLinkFileService<T> getService(T instance) {
+        return getService(instance.class)
+    }
+
+    private Map getMap() {
+        serviceMap = serviceMap ?: Collections.unmodifiableMap([
+                (ExternallyProcessedBamFile): externalAlignmentLinkFileService,
+                (RoddyBamFile)              : panCancerLinkFileService,
+                (RnaRoddyBamFile)           : rnaAlignmentLinkFileService,
+                (SingleCellBamFile)         : cellRangerLinkFileService,
+        ])
+        return serviceMap
     }
 }

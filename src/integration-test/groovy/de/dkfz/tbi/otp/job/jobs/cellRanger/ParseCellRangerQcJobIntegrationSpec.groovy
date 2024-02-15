@@ -21,24 +21,20 @@
  */
 package de.dkfz.tbi.otp.job.jobs.cellRanger
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
-import spock.lang.Specification
-import spock.lang.TempDir
-import spock.lang.Unroll
+import grails.testing.mixin.integration.Integration
+import spock.lang.*
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.SingleCellBamFileService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerService
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
+import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerWorkFileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
-import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdService
-import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
+import de.dkfz.tbi.otp.qcTrafficLight.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 
 import java.nio.file.Path
@@ -63,7 +59,7 @@ class ParseCellRangerQcJobIntegrationSpec extends Specification implements CellR
         ] as ParseCellRangerQcJob
         job.cellRangerService = new CellRangerService()
         job.cellRangerService.fileSystemService = new TestFileSystemService()
-        job.cellRangerService.singleCellBamFileService = Mock(SingleCellBamFileService) {
+        job.cellRangerService.cellRangerWorkFileService = Mock(CellRangerWorkFileService) {
             getQualityAssessmentCsvFile(_) >> { return qaFile }
         }
         job.qcTrafficLightService = new QcTrafficLightService()

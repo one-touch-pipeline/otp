@@ -27,7 +27,6 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqWorkFileService
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
@@ -52,7 +51,6 @@ class AceseqPrepareJobSpec extends Specification implements DataTest, WorkflowSy
     SophiaInstance sophiaInstance
     WorkflowStep workflowStep
 
-    RoddyBamFileService roddyBamFileService
     AceseqPrepareJob job
 
     String analysisOutput = AbstractAnalysisWorkflow.ANALYSIS_OUTPUT
@@ -92,7 +90,6 @@ class AceseqPrepareJobSpec extends Specification implements DataTest, WorkflowSy
                 sophiaWorkFileService  : Mock(SophiaWorkFileService),
                 concreteArtefactService: Mock(ConcreteArtefactService),
         ])
-        roddyBamFileService = Mock(RoddyBamFileService)
     }
 
     void "buildWorkDirectoryPath, should return work directory"() {

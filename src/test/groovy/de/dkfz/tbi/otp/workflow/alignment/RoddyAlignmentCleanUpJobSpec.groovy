@@ -27,10 +27,10 @@ import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.PanCancerWorkflowDomainFactory
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
@@ -78,8 +78,8 @@ class RoddyAlignmentCleanUpJobSpec extends Specification implements DataTest, Pa
         Files.createDirectory(dir1)
         Path dir2 = tempDir.resolve("dir2")
         Files.createDirectory(dir2)
-        job.roddyBamFileService = Mock(RoddyBamFileService) {
-            1 * getWorkDirectory(bamFile2) >> dir2
+        job.panCancerWorkFileService = Mock(PanCancerWorkFileService) {
+            1 * getDirectoryPath(bamFile2) >> dir2
         }
 
         expect:

@@ -36,13 +36,13 @@ import de.dkfz.tbi.otp.workflowExecution.Artefact
 trait RoddyResult implements Artefact {
 
     /**
-     * @deprecated use {@link RoddyResultServiceTrait#RODDY_EXECUTION_STORE_DIR} instead
+     * @deprecated use {@link RoddyResultServiceTrait#executionStoreDirectory} instead
      */
     @Deprecated
     static final String RODDY_EXECUTION_STORE_DIR = "roddyExecutionStore"
 
     /**
-     * @deprecated use {@link RoddyResultServiceTrait#RODDY_EXECUTION_DIR_PATTERN} instead
+     * @deprecated use {@link RoddyResultServiceTrait#executionDirectoryPattern} instead
      */
     @Deprecated
     static final String RODDY_EXECUTION_DIR_PATTERN = /exec_\d{6}_\d{8,9}_.+_.+/

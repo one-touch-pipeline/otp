@@ -166,8 +166,8 @@ class SnvValidationJobSpec extends Specification implements DataTest, WorkflowSy
 
         and:
         1 * job.concreteArtefactService.getOutputArtefact(workflowStep, analysisOutput) >> instance
-        1 * job.snvWorkFileService.getWorkExecutionStoreDirectory(instance) >> storeDirectory
-        1 * job.snvWorkFileService.getWorkExecutionDirectories(instance) >> [dir1, dir2]
+        1 * job.snvWorkFileService.getExecutionStoreDirectory(instance) >> storeDirectory
+        1 * job.snvWorkFileService.getExecutionDirectories(instance) >> [dir1, dir2]
     }
 
     void "saveResult, should do nothing"() {

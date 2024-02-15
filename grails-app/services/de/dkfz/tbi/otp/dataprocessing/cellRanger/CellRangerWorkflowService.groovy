@@ -22,11 +22,10 @@
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
 import grails.gorm.transactions.Transactional
-import org.springframework.beans.factory.annotation.Autowired
 
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.SingleCellBamFileService
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerWorkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 
 import java.nio.file.*
@@ -36,18 +35,16 @@ import java.util.stream.Stream
 @Transactional
 class CellRangerWorkflowService {
 
+    CellRangerWorkFileService cellRangerWorkFileService
+    FileService fileService
     FileSystemService fileSystemService
 
-    FileService fileService
-
-    SingleCellBamFileService singleCellBamFileService
-
     void linkResultFiles(SingleCellBamFile singleCellBamFile) {
-        Path workDirectory = singleCellBamFileService.getWorkDirectory(singleCellBamFile)
-        Path resultDirectory = singleCellBamFileService.getResultDirectory(singleCellBamFile)
+        Path workDirectory = cellRangerWorkFileService.getDirectoryPath(singleCellBamFile)
+        Path resultDirectory = cellRangerWorkFileService.getResultDirectory(singleCellBamFile)
         String unixGroup = singleCellBamFile.project.unixGroup
 
-        singleCellBamFileService.getFileMappingForLinks(singleCellBamFile).each { String linkName, String resultPathName ->
+        cellRangerWorkFileService.getFileMappingForLinks(singleCellBamFile).each { String linkName, String resultPathName ->
             Path link = workDirectory.resolve(linkName)
             Path target = resultDirectory.resolve(resultPathName)
             if (!Files.exists(link, LinkOption.NOFOLLOW_LINKS)) {
@@ -57,8 +54,8 @@ class CellRangerWorkflowService {
     }
 
     void cleanupOutputDirectory(SingleCellBamFile singleCellBamFile) {
-        Path outputDirectory = singleCellBamFileService.getOutputDirectory(singleCellBamFile)
-        Path resultDirectory = singleCellBamFileService.getResultDirectory(singleCellBamFile)
+        Path outputDirectory = cellRangerWorkFileService.getOutputDirectory(singleCellBamFile)
+        Path resultDirectory = cellRangerWorkFileService.getResultDirectory(singleCellBamFile)
 
         Stream<Path> stream = null
         try {
@@ -75,12 +72,12 @@ class CellRangerWorkflowService {
     }
 
     void deleteOutputDirectory(SingleCellBamFile singleCellBamFile) {
-        Path workDirectory = singleCellBamFileService.getWorkDirectory(singleCellBamFile)
+        Path workDirectory = cellRangerWorkFileService.getDirectoryPath(singleCellBamFile)
         fileService.deleteDirectoryRecursively(workDirectory)
     }
 
     void correctFilePermissions(SingleCellBamFile singleCellBamFile) {
-        Path workDirectory = singleCellBamFileService.getWorkDirectory(singleCellBamFile)
+        Path workDirectory = cellRangerWorkFileService.getDirectoryPath(singleCellBamFile)
         fileService.correctPathPermissionAndGroupRecursive(workDirectory, singleCellBamFile.project.unixGroup)
     }
 }

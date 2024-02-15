@@ -27,11 +27,10 @@ import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.BamImportWorkflowDomainFactory
 import de.dkfz.tbi.otp.filestore.FilestoreService
-import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.alignment.ExternalAlignmentWorkFileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.ChecksumFileService
@@ -86,7 +85,7 @@ class BamImportFinishJobSpec extends Specification implements DataTest, BamImpor
                 workflowStep.workflowRun, BamImportWorkflow.OUTPUT_BAM, ArtefactType.BAM, ["Dummy"]
         ))
 
-        job.externallyProcessedBamFileService = new ExternallyProcessedBamFileService([
+        job.externalAlignmentWorkFileService = new ExternalAlignmentWorkFileService([
                 abstractBamFileService: new AbstractBamFileService([
                         individualService: new IndividualService([
                                 projectService: new ProjectService([
@@ -107,11 +106,11 @@ class BamImportFinishJobSpec extends Specification implements DataTest, BamImpor
         job.fileService = Mock(FileService) {
             _ * ensureFileIsReadableAndNotEmpty(_)
         }
-        Path testWorkBamFile = CreateFileHelper.createFile(job.externallyProcessedBamFileService.getBamFile(bamFile))
-        String path = job.externallyProcessedBamFileService.getBamFile(bamFile)
+        Path testWorkBamFile = CreateFileHelper.createFile(job.externalAlignmentWorkFileService.getBamFile(bamFile))
+        String path = job.externalAlignmentWorkFileService.getBamFile(bamFile)
         Path md5Path = job.fileSystemService.remoteFileSystem.getPath(job.checksumFileService.md5FileName(path))
         CreateFileHelper.createFile(md5Path, "${HelperUtils.randomMd5sum} epmbfName")
-        CreateFileHelper.createFile(job.externallyProcessedBamFileService.getBamMaxReadLengthFile(bamFile), "123")
+        CreateFileHelper.createFile(job.externalAlignmentWorkFileService.getBamMaxReadLengthFile(bamFile), "123")
 
         when:
         job.updateDomains(workflowStep)
@@ -131,11 +130,11 @@ class BamImportFinishJobSpec extends Specification implements DataTest, BamImpor
         bamFile.maximumReadLength = 123
         bamFile.importedFrom = tempDir.resolve("bamFiles")
 
-        job.externallyProcessedBamFileService = Mock(ExternallyProcessedBamFileService) {
-            _ * getBamFile(bamFile, PathOption.REAL_PATH) >> Paths.get(bamFile.importedFrom).resolve(bamFile.bamFileName)
+        job.externalAlignmentWorkFileService = Mock(ExternalAlignmentWorkFileService) {
+            _ * getBamFile(bamFile) >> Paths.get(bamFile.importedFrom).resolve(bamFile.bamFileName)
         }
 
-        Path bamFilePath = job.externallyProcessedBamFileService.getBamFile(bamFile, PathOption.REAL_PATH)
+        Path bamFilePath = job.externalAlignmentWorkFileService.getBamFile(bamFile)
         Path testWorkBamFile = CreateFileHelper.createFile(bamFilePath)
 
         when:

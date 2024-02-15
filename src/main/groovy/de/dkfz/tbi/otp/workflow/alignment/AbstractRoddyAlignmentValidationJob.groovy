@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractRoddyClusterValidationJob
 import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -38,7 +38,7 @@ import java.nio.file.Path
 abstract class AbstractRoddyAlignmentValidationJob extends AbstractRoddyClusterValidationJob implements AlignmentWorkflowShared {
 
     @Autowired
-    RoddyBamFileService roddyBamFileService
+    PanCancerWorkFileService panCancerWorkFileService
 
     /**
      * Returns the expected files for validation
@@ -55,9 +55,9 @@ abstract class AbstractRoddyAlignmentValidationJob extends AbstractRoddyClusterV
         RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
 
         List<Path> expectedFiles = [
-                roddyBamFileService.getWorkBamFile(roddyBamFile),
-                roddyBamFileService.getWorkBaiFile(roddyBamFile),
-                roddyBamFileService.getWorkMd5sumFile(roddyBamFile),
+                panCancerWorkFileService.getBamFile(roddyBamFile),
+                panCancerWorkFileService.getBaiFile(roddyBamFile),
+                panCancerWorkFileService.getMd5sumFile(roddyBamFile),
         ]
 
         return expectedFiles
@@ -68,8 +68,8 @@ abstract class AbstractRoddyAlignmentValidationJob extends AbstractRoddyClusterV
         RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
 
         return [
-                roddyBamFileService.getWorkDirectory(roddyBamFile),
-                roddyBamFileService.getWorkExecutionStoreDirectory(roddyBamFile),
+                panCancerWorkFileService.getDirectoryPath(roddyBamFile),
+                panCancerWorkFileService.getExecutionStoreDirectory(roddyBamFile),
         ]
     }
 
@@ -85,7 +85,7 @@ abstract class AbstractRoddyAlignmentValidationJob extends AbstractRoddyClusterV
         if (readGroupsInBam != expectedReadGroups) {
             throw new ValidationJobFailedException("""
                 |Read groups in BAM file are not as expected.
-                |Read groups in ${roddyBamFileService.getWorkBamFile(roddyBamFile)}:
+                |Read groups in ${panCancerWorkFileService.getBamFile(roddyBamFile)}:
                 |${readGroupsInBam.join('\n')}
                 |Expected read groups:
                 |${expectedReadGroups.join('\n')}

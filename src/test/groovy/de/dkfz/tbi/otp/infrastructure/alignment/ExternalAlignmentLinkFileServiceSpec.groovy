@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataprocessing.bamfiles
+package de.dkfz.tbi.otp.infrastructure.alignment
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
@@ -27,13 +27,12 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactory
-import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.utils.HelperUtils
 
-import java.nio.file.FileSystems
+import java.nio.file.Path
 import java.nio.file.Paths
 
-class ExternallyProcessedBamFileServiceSpec extends Specification implements ServiceUnitTest<ExternallyProcessedBamFileService>, DataTest, ExternalBamFactory {
+class ExternalAlignmentLinkFileServiceSpec extends Specification implements ServiceUnitTest<ExternalAlignmentLinkFileService>, DataTest, ExternalBamFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -55,9 +54,6 @@ class ExternallyProcessedBamFileServiceSpec extends Specification implements Ser
         service.abstractBamFileService = Mock(AbstractBamFileService) {
             getBaseDirectory(_) >> Paths.get("/base-dir")
         }
-        service.fileSystemService = Mock(FileSystemService) {
-            remoteFileSystem >> FileSystems.default
-        }
     }
 
     void "test getBamFile"() {
@@ -68,6 +64,22 @@ class ExternallyProcessedBamFileServiceSpec extends Specification implements Ser
     void "test getBaiFile"() {
         expect:
         service.getBaiFile(bamFile).toString() == "/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}/${bamFile.baiFileName}"
+    }
+
+    void "test getFurtherFiles"() {
+        given:
+        List<String> files = [
+                'file1',
+                'file2',
+        ]
+        bamFile.furtherFiles = files as Set
+
+        List<Path> expected = files.collect {
+            Paths.get("/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}/${it}")
+        }
+
+        expect:
+        service.getFurtherFiles(bamFile) == expected
     }
 
     void "test getBamMaxReadLengthFile"() {
@@ -83,30 +95,15 @@ class ExternallyProcessedBamFileServiceSpec extends Specification implements Ser
 
     void "test getImportFolder"() {
         expect:
-        service.getImportFolder(bamFile).toString() == "/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}"
+        service.getDirectoryPath(bamFile).toString() == "/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}"
     }
 
-    void "test getFinalInsertSizeFile"() {
+    void "test getInsertSizeFile"() {
         given:
         bamFile.insertSizeFile = "insert-size-file"
 
         expect:
-        service.getFinalInsertSizeFile(bamFile).toString() == "/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}/insert-size-file"
-    }
-
-    void "test getSourceBamFilePath"() {
-        expect:
-        service.getSourceBamFilePath(bamFile).toString() == "${importDir}/${bamFile.bamFileName}"
-    }
-
-    void "test getSourceBaiFilePath"() {
-        expect:
-        service.getSourceBaiFilePath(bamFile).toString() == "${importDir}/${bamFile.baiFileName}"
-    }
-
-    void "test getSourceBaseDirFilePath"() {
-        expect:
-        service.getSourceBaseDirFilePath(bamFile).toString() == "${importDir}"
+        service.getInsertSizeFile(bamFile).toString() == "/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}/insert-size-file"
     }
 
     void "test getPathForFurtherProcessing, should return final directory"() {

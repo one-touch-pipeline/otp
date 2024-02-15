@@ -27,9 +27,9 @@ import spock.lang.Specification
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.ExternalMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.BamImportWorkflowDomainFactory
-import de.dkfz.tbi.otp.filestore.PathOption
+import de.dkfz.tbi.otp.infrastructure.alignment.ExternalAlignmentLinkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.ExternalAlignmentWorkFileService
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -66,9 +66,11 @@ class BamImportLinkJobSpec extends Specification implements DataTest, BamImportW
             _ * getOutputArtefact(workflowStep, BamImportLinkJob.de_dkfz_tbi_otp_workflow_bamImport_BamImportShared__OUTPUT_ROLE) >> bamFile
             0 * _
         }
-        job.externallyProcessedBamFileService = Mock(ExternallyProcessedBamFileService) {
-            getImportFolder(bamFile) >> importFolder
-            getImportFolder(bamFile, PathOption.REAL_PATH) >> workFolder
+        job.externalAlignmentLinkFileService = Mock(ExternalAlignmentLinkFileService) {
+            getDirectoryPath(bamFile) >> importFolder
+        }
+        job.externalAlignmentWorkFileService = Mock(ExternalAlignmentWorkFileService) {
+            getDirectoryPath(bamFile) >> workFolder
         }
 
         when:

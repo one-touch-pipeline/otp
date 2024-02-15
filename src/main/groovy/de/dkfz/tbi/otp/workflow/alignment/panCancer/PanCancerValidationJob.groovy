@@ -40,7 +40,7 @@ class PanCancerValidationJob extends AbstractRoddyAlignmentValidationJob impleme
         List<Path> directories = super.getExpectedDirectories(workflowStep)
 
         RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
-        directories.add(roddyBamFileService.getWorkMergedQADirectory(roddyBamFile))
+        directories.add(panCancerWorkFileService.getMergedQADirectory(roddyBamFile))
 
         return directories
     }
@@ -61,11 +61,11 @@ class PanCancerValidationJob extends AbstractRoddyAlignmentValidationJob impleme
 
         RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
 
-        expectedFiles.add(roddyBamFileService.getWorkMergedQAJsonFile(roddyBamFile))
+        expectedFiles.add(panCancerWorkFileService.getMergedQAJsonFile(roddyBamFile))
         if (roddyBamFile.seqType.needsBedFile) {
-            expectedFiles.add(roddyBamFileService.getWorkMergedQATargetExtractJsonFile(roddyBamFile))
+            expectedFiles.add(panCancerWorkFileService.getMergedQATargetExtractJsonFile(roddyBamFile))
         }
-        expectedFiles.addAll(roddyBamFileService.getWorkSingleLaneQAJsonFiles(roddyBamFile).values())
+        expectedFiles.addAll(panCancerWorkFileService.getSingleLaneQAJsonFiles(roddyBamFile).values())
 
         return expectedFiles
     }

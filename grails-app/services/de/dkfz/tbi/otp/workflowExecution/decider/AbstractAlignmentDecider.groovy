@@ -25,12 +25,13 @@ import grails.gorm.transactions.Transactional
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.RoddyBamFileNames
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.Entity
-import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.decider.alignment.*
 
@@ -48,7 +49,7 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
     PipelineService pipelineService
 
     @Autowired
-    RoddyBamFileService roddyBamFileService
+    PanCancerWorkFileService panCancerWorkFileService
 
     @Autowired
     UnalignableSeqTrackEmailCreator unalignableSeqTrackEmailCreator
@@ -352,12 +353,12 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
                 workflowArtefact: workflowOutputArtefact,
                 workPackage: workPackage,
                 identifier: identifier,
-                workDirectoryName: "${RoddyBamFileService.WORK_DIR_PREFIX}_${identifier}",
+                workDirectoryName: "${RoddyBamFileNames.WORK_DIR_PREFIX}_${identifier}",
                 seqTracks: seqTrackSet,
                 numberOfMergedLanes: seqTrackSet.size(),
         ])
 
-        run.workDirectory = roddyBamFileService.getWorkDirectory(bamFile)
+        run.workDirectory = panCancerWorkFileService.getDirectoryPath(bamFile)
         run.save(flush: true, deepValidate: false)
 
         deciderResult.infos << "--> create bam file ${bamFile}".toString()

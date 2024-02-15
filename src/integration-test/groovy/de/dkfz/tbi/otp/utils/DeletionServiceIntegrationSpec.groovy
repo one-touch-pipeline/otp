@@ -28,7 +28,6 @@ import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
@@ -40,10 +39,8 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryIns
 import de.dkfz.tbi.otp.domainFactory.submissions.ega.EgaSubmissionFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.egaSubmission.EgaSubmission
-import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
+import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.infrastructure.alignment.*
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
@@ -65,11 +62,12 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
     TestConfigService configService
     SnvCallingService snvCallingService
     FileService fileService
-    RoddyBamFileService roddyBamFileService
-    SingleCellBamFileService singleCellBamFileService
-    ExternallyProcessedBamFileService externallyProcessedBamFileService
+    AbstractBamFileService abstractBamFileService
+    CellRangerWorkFileService cellRangerWorkFileService
     RawSequenceDataWorkFileService rawSequenceDataWorkFileService
     RawSequenceDataViewFileService rawSequenceDataViewFileService
+    PanCancerLinkFileService panCancerLinkFileService
+    ExternalAlignmentLinkFileService externalAlignmentLinkFileService
 
     String seqDir = "/seq-dir"
 
@@ -1129,7 +1127,7 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
         createExternallyProcessedBamFile([st])
         SingleCellBamFile singleCellBamFile = createSingleCellBamFileHelper([st])
         Path file = outputFolder.resolve("Delete_${st.project.name}.sh")
-        Path cellRangerPath = singleCellBamFileService.abstractBamFileService.getBaseDirectory(singleCellBamFile)
+        Path cellRangerPath = abstractBamFileService.getBaseDirectory(singleCellBamFile)
 
         when:
         deletionService.deleteProcessingFilesOfProject(st.project.name, outputFolder, true, true, [st])
@@ -1190,7 +1188,7 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
                 ]),
                 seqTracks  : seqTracks,
         ])
-        CreateFileHelper.createFile(roddyBamFileService.getFinalBamFile(roddyBamFile))
+        CreateFileHelper.createFile(panCancerLinkFileService.getBamFile(roddyBamFile))
         return roddyBamFile
     }
 
@@ -1203,7 +1201,7 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
                 ]),
                 seqTracks  : seqTracks,
         ])
-        CreateFileHelper.createFile(singleCellBamFileService.getWorkDirectory(singleCellBamFile).resolve(singleCellBamFile.bamFileName))
+        CreateFileHelper.createFile(cellRangerWorkFileService.getDirectoryPath(singleCellBamFile).resolve(singleCellBamFile.bamFileName))
         return singleCellBamFile
     }
 
@@ -1214,7 +1212,7 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
                         seqType: seqTracks.first().seqType,
                 ]),
         ])
-        CreateFileHelper.createFile(externallyProcessedBamFileService.getBamFile(externallyProcessedBamFile))
+        CreateFileHelper.createFile(externalAlignmentLinkFileService.getBamFile(externallyProcessedBamFile))
     }
 
     private void dataBaseSetupForBamFiles(AbstractBamFile bamFile) {
@@ -1321,7 +1319,7 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
         SamplePair.list().empty
     }
 
-    private ExternallyProcessedBamFile deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup() {
+    private ExternallyProcessedBamFile deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup(Path externalBamPath = null) {
         Project project = deleteProcessingFilesOfProject_NoProcessedData_SetupWithFiles()
         SeqTrack seqTrack = SeqTrack.createCriteria().get {
             sample {
@@ -1337,7 +1335,9 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
                         seqType: seqTrack.seqType,
                 )
         )
-        CreateFileHelper.createFile(bamFile.nonOtpFolder)
+        deletionService.externalAlignmentWorkFileService = Mock(ExternalAlignmentWorkFileService) {
+            getDirectoryPath(bamFile) >> externalBamPath
+        }
 
         return bamFile
     }
@@ -1358,22 +1358,23 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
     void "testDeleteProcessingFilesOfProject_ExternalBamFilesAttached_Verified"() {
         given:
         setupDataForProcessingFiles()
-        ExternallyProcessedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup()
+        Path externalBamPath = Paths.get('/externalBamPath')
+        ExternallyProcessedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup(externalBamPath)
 
         when:
         deletionService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder, true)
 
         then:
-        File nonOtpFolder = bamFile.nonOtpFolder
         Path outputFile = outputFolder.resolve("Delete_${bamFile.project.name}.sh")
-        !outputFile.text.contains(nonOtpFolder.path)
+        !outputFile.text.contains(externalBamPath.toString())
         ExternallyProcessedBamFile.list().contains(bamFile)
     }
 
     void "testDeleteProcessingFilesOfProject_ExternalBamFilesAttached_nonMergedSeqTrackExists_Verified"() {
         given:
         setupDataForProcessingFiles()
-        ExternallyProcessedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup()
+        Path externalBamPath = Paths.get('/externalBamPath')
+        ExternallyProcessedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup(externalBamPath)
 
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoFastqFiles([sample: bamFile.sample, seqType: bamFile.seqType])
         createFastqFiles([seqTrack])
@@ -1382,9 +1383,8 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
         deletionService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder, true)
 
         then:
-        File nonOtpFolder = bamFile.nonOtpFolder
         Path outputFile = outputFolder.resolve("Delete_${bamFile.project.name}.sh")
-        !outputFile.text.contains(nonOtpFolder.path)
+        !outputFile.text.contains(externalBamPath.toString())
         ExternallyProcessedBamFile.list().contains(bamFile)
     }
 }

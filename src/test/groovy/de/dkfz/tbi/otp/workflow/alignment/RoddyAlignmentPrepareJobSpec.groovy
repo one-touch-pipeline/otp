@@ -26,10 +26,10 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.PanCancerWorkflowDomainFactory
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.tracking.Ticket
@@ -66,11 +66,11 @@ class RoddyAlignmentPrepareJobSpec extends Specification implements DataTest, Pa
         given:
         setupData()
         RoddyAlignmentPrepareJob job = new RoddyAlignmentPrepareJob([
-                concreteArtefactService: Mock(ConcreteArtefactService) {
+                concreteArtefactService : Mock(ConcreteArtefactService) {
                     1 * getOutputArtefact(workflowStep, AlignmentWorkflow.OUTPUT_BAM) >> roddyBamFile
                 },
-                roddyBamFileService    : Mock(RoddyBamFileService) {
-                    1 * getWorkDirectory(roddyBamFile) >> Paths.get(DIRECTORY)
+                panCancerWorkFileService: Mock(PanCancerWorkFileService) {
+                    1 * getDirectoryPath(roddyBamFile) >> Paths.get(DIRECTORY)
                 },
         ])
 

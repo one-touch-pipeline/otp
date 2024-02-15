@@ -26,8 +26,8 @@ import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.infrastructure.alignment.RoddyBamFileNames
 import de.dkfz.tbi.otp.job.jobs.alignment.AbstractAlignmentStartJob
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.ngsdata.*
@@ -54,7 +54,7 @@ class TestAbstractAlignmentStartJob extends AbstractAlignmentStartJob {
         return new RoddyBamFile(
                 workPackage: mergingWorkPackage,
                 identifier: identifier,
-                workDirectoryName: "${RoddyBamFileService.WORK_DIR_PREFIX}_${identifier}",
+                workDirectoryName: "${RoddyBamFileNames.WORK_DIR_PREFIX}_${identifier}",
                 seqTracks: seqTracks,
                 config: config,
         )

@@ -26,6 +26,7 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default test-resourc
         '    "RODDY": {' ||
         '        "resources": {' ||
         '            "alignAndPairSlim": {' ||
+        '                "memory": "20",' ||
         '                "value": "bwaMemSortSlim.sh",' ||
         '                "walltime": "00:15:00",' ||
         '                "basepath": "qcPipeline"' ||

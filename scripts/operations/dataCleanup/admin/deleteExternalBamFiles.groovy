@@ -23,6 +23,7 @@
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.infrastructure.alignment.ExternalAlignmentWorkFileService
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -93,6 +94,7 @@ List<ExternallyProcessedBamFile> bamFiles = multiColumnInput.split('\n')*.trim()
 List<String> dirsToDelete = []
 
 AnalysisDeletionService analysisDeletionService = ctx.analysisDeletionService
+ExternalAlignmentWorkFileService externalAlignmentWorkFileService = ctx.externalAlignmentWorkFileService
 
 ExternallyProcessedBamFile.withTransaction {
     bamFiles.each { ExternallyProcessedBamFile epmbf ->
@@ -102,7 +104,7 @@ ExternallyProcessedBamFile.withTransaction {
         workPackage.bamFileInProjectFolder = null
         workPackage.save(flush: true)
 
-        dirsToDelete << epmbf.importFolder
+        dirsToDelete << externalAlignmentWorkFileService.getDirectoryPath(epmbf)
         BamFilePairAnalysis.findAllBySampleType1BamFileOrSampleType2BamFile(epmbf, epmbf).each {
             println "  --> delete analysis: ${it}"
             dirsToDelete << analysisDeletionService.deleteInstance(it)

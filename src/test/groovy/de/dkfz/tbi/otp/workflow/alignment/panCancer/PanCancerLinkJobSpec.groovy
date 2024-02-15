@@ -25,11 +25,12 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.PanCancerWorkflowDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerLinkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.LinkEntry
@@ -45,7 +46,7 @@ class PanCancerLinkJobSpec extends Specification implements DataTest, PanCancerW
     PanCancerLinkJob job
     RoddyBamFile roddyBamFile
     WorkflowStep workflowStep
-    RoddyBamFileService roddyBamFileService
+    PanCancerLinkFileService panCancerLinkFileService
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -82,11 +83,14 @@ class PanCancerLinkJobSpec extends Specification implements DataTest, PanCancerW
         job.fileSystemService = new TestFileSystemService()
         job.fileService = new FileService()
         job.logService = Mock(LogService)
-        roddyBamFileService = new RoddyBamFileService()
-        roddyBamFileService.abstractBamFileService = Mock(AbstractBamFileService) {
+
+        panCancerLinkFileService = new PanCancerLinkFileService()
+        panCancerLinkFileService.abstractBamFileService = Mock(AbstractBamFileService) {
             getBaseDirectory(_) >> Paths.get("/")
         }
-        job.roddyBamFileService = roddyBamFileService
+        job.panCancerLinkFileService = panCancerLinkFileService
+        job.panCancerWorkFileService = new PanCancerWorkFileService()
+        job.panCancerWorkFileService.abstractBamFileService = panCancerLinkFileService.abstractBamFileService
     }
 
     void "test getLinkMap"() {
@@ -105,12 +109,12 @@ class PanCancerLinkJobSpec extends Specification implements DataTest, PanCancerW
 
     private List<Path> createLinkedFilesList(RoddyBamFile roddyBamFile) {
         return [
-                roddyBamFileService.getFinalBamFile(roddyBamFile),
-                roddyBamFileService.getFinalBaiFile(roddyBamFile),
-                roddyBamFileService.getFinalMd5sumFile(roddyBamFile),
-                roddyBamFileService.getFinalMergedQADirectory(roddyBamFile),
-                roddyBamFileService.getFinalExecutionDirectories(roddyBamFile),
-                roddyBamFileService.getFinalSingleLaneQADirectories(roddyBamFile).values(),
+                panCancerLinkFileService.getBamFile(roddyBamFile),
+                panCancerLinkFileService.getBaiFile(roddyBamFile),
+                panCancerLinkFileService.getMd5sumFile(roddyBamFile),
+                panCancerLinkFileService.getMergedQADirectory(roddyBamFile),
+                panCancerLinkFileService.getExecutionDirectories(roddyBamFile),
+                panCancerLinkFileService.getSingleLaneQADirectories(roddyBamFile).values(),
         ].flatten()
     }
 }

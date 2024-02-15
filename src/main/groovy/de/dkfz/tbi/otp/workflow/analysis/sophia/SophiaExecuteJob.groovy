@@ -26,11 +26,11 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.SophiaWorkflowQualityAssessment
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.AbstractBamFileServiceFactoryService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaWorkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.AlignmentLinkFileServiceFactoryService
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractExecuteRoddyPipelineJob
@@ -42,7 +42,7 @@ import java.nio.file.Path
 @Slf4j
 class SophiaExecuteJob extends AbstractExecuteRoddyPipelineJob implements SophiaWorkflowShared {
 
-    AbstractBamFileServiceFactoryService abstractBamFileServiceFactoryService
+    AlignmentLinkFileServiceFactoryService alignmentLinkFileServiceFactoryService
     ReferenceGenomeService referenceGenomeService
     SnvCallingService snvCallingService
     SophiaWorkFileService sophiaWorkFileService
@@ -76,8 +76,8 @@ class SophiaExecuteJob extends AbstractExecuteRoddyPipelineJob implements Sophia
         AbstractBamFile bamFileDisease = sophiaInstance.sampleType1BamFile
         AbstractBamFile bamFileControl = sophiaInstance.sampleType2BamFile
 
-        Path diseaseInsertSizeFile = abstractBamFileServiceFactoryService.getService(bamFileDisease).getFinalInsertSizeFile(bamFileDisease)
-        Path controlInsertSizeFile = abstractBamFileServiceFactoryService.getService(bamFileControl).getFinalInsertSizeFile(bamFileControl)
+        Path diseaseInsertSizeFile = alignmentLinkFileServiceFactoryService.getService(bamFileDisease).getInsertSizeFile(bamFileDisease)
+        Path controlInsertSizeFile = alignmentLinkFileServiceFactoryService.getService(bamFileControl).getInsertSizeFile(bamFileControl)
 
         Integer tumorDefaultReadLength = bamFileDisease.maximalReadLength
         Integer controlDefaultReadLength = bamFileControl.maximalReadLength

@@ -43,11 +43,11 @@ class BamImportConditionalFailJob extends AbstractConditionalFailJob implements 
     @Override
     protected void check(WorkflowStep workflowStep) {
         ExternallyProcessedBamFile bamFile = getBamFile(workflowStep)
-        Path sourceBaseDir = externallyProcessedBamFileService.getSourceBaseDirFilePath(bamFile)
+        Path sourceBaseDir = externalAlignmentSourceFileService.getDirectoryPath(bamFile)
 
         List<Path> sourcePath = [
-                externallyProcessedBamFileService.getSourceBamFilePath(bamFile),
-                externallyProcessedBamFileService.getSourceBaiFilePath(bamFile),
+                externalAlignmentSourceFileService.getBamFile(bamFile),
+                externalAlignmentSourceFileService.getBaiFile(bamFile),
         ]
         List<Path> pathFurtherFiles = bamFile.furtherFiles.collect { String relativePath ->
             sourceBaseDir.resolve(relativePath)

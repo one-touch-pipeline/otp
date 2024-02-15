@@ -136,8 +136,8 @@ class SophiaValidationJobSpec extends Specification implements DataTest, Workflo
 
         and:
         1 * job.concreteArtefactService.getOutputArtefact(workflowStep, analysisOutput) >> instance
-        1 * job.sophiaWorkFileService.getWorkExecutionStoreDirectory(instance) >> storeDirectory
-        1 * job.sophiaWorkFileService.getWorkExecutionDirectories(instance) >> [dir1, dir2]
+        1 * job.sophiaWorkFileService.getExecutionStoreDirectory(instance) >> storeDirectory
+        1 * job.sophiaWorkFileService.getExecutionDirectories(instance) >> [dir1, dir2]
     }
 
     void "saveResult, should do nothing"() {

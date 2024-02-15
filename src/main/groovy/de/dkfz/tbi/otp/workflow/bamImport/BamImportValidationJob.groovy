@@ -22,12 +22,9 @@
 package de.dkfz.tbi.otp.workflow.bamImport
 
 import groovy.util.logging.Slf4j
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
-import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.workflow.jobs.AbstractOtpClusterValidationJob
 import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -39,27 +36,31 @@ import java.nio.file.Path
 @Slf4j
 class BamImportValidationJob extends AbstractOtpClusterValidationJob implements BamImportShared {
 
-    @Autowired
-    ExternallyProcessedBamFileService externallyProcessedBamFileService
-
     @Override
     protected List<Path> getExpectedFiles(WorkflowStep workflowStep) {
         ExternallyProcessedBamFile bamFile = getBamFile(workflowStep)
-        Path sourceBaseDir = externallyProcessedBamFileService.getSourceBaseDirFilePath(bamFile)
+        Path sourceBaseDir = externalAlignmentSourceFileService.getDirectoryPath(bamFile)
+        Path targetBaseDir = externalAlignmentWorkFileService.getDirectoryPath(bamFile)
         return [
-                externallyProcessedBamFileService.getBamFile(bamFile, PathOption.REAL_PATH),
-                externallyProcessedBamFileService.getBaiFile(bamFile, PathOption.REAL_PATH),
-        ] + externallyProcessedBamFileService.getFurtherFiles(bamFile, PathOption.REAL_PATH).findAll {
+                externalAlignmentWorkFileService.getBamFile(bamFile),
+                externalAlignmentWorkFileService.getBaiFile(bamFile),
+
+        ] + bamFile.furtherFiles.findAll {
             Files.isRegularFile(sourceBaseDir.resolve(it))
+        }.collect {
+            targetBaseDir.resolve(it)
         }
     }
 
     @Override
     protected List<Path> getExpectedDirectories(WorkflowStep workflowStep) {
         ExternallyProcessedBamFile bamFile = getBamFile(workflowStep)
-        Path sourceBaseDir = externallyProcessedBamFileService.getSourceBaseDirFilePath(bamFile)
-        return externallyProcessedBamFileService.getFurtherFiles(bamFile, PathOption.REAL_PATH).findAll {
+        Path sourceBaseDir = externalAlignmentSourceFileService.getDirectoryPath(bamFile)
+        Path targetBaseDir = externalAlignmentWorkFileService.getDirectoryPath(bamFile)
+        return bamFile.furtherFiles.findAll {
             Files.isDirectory(sourceBaseDir.resolve(it))
+        }.collect {
+            targetBaseDir.resolve(it)
         }
     }
 

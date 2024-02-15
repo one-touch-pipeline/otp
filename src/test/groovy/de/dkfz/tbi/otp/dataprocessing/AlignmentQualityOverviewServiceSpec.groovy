@@ -28,7 +28,6 @@ import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.RoddyConfigService
 import de.dkfz.tbi.otp.workflow.alignment.AlignmentQualityOverviewService
 
 import java.nio.file.Path
@@ -59,17 +58,13 @@ class AlignmentQualityOverviewServiceSpec extends Specification implements Servi
             expectedContent = new byte[0]
         }
         roddyBamFile = new RoddyBamFile()
-        service.roddyResultServiceFactoryService = Mock(RoddyResultServiceFactoryService) {
+        service.roddyResultWorkFileServiceFactoryService = Mock(RoddyResultWorkFileServiceFactoryService) {
             1 * getService(roddyBamFile) >> {
                 return Mock(RoddyResultServiceTrait) {
-                    1 * getDirectoryPath(roddyBamFile) >> workDir
+                    1 * getConfigFile(roddyBamFile) >> configFile
                     0 * _
                 }
             }
-            0 * _
-        }
-        service.roddyConfigService = Mock(RoddyConfigService) {
-            1 * getConfigPath(workDir) >> configFile
             0 * _
         }
         service.fileService = Mock(FileService) {

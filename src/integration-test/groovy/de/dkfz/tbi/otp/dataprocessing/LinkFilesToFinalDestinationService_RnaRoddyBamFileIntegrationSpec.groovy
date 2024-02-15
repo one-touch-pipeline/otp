@@ -23,20 +23,16 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
-import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 import spock.lang.TempDir
 
-import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+import de.dkfz.tbi.otp.infrastructure.alignment.RnaAlignmentLinkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.RnaAlignmentWorkFileService
 import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
-import de.dkfz.tbi.otp.utils.LinkFileUtils
 
-import java.nio.file.FileSystems
 import java.nio.file.Path
 
 @Rollback
@@ -45,51 +41,45 @@ class LinkFilesToFinalDestinationService_RnaRoddyBamFileIntegrationSpec extends 
 
     LinkFilesToFinalDestinationService service
 
-    @Autowired
-    RemoteShellHelper remoteShellHelper
-
     @TempDir
     Path tempDir
     RnaRoddyBamFile roddyBamFile
-    TestConfigService configService
 
     void setupData() {
         service = new LinkFilesToFinalDestinationService()
-        service.linkFileUtils = new LinkFileUtils()
-        service.linkFileUtils.fileService = service.fileService
-        service.linkFileUtils.fileService = new FileService()
-        service.linkFileUtils.fileSystemService = Mock(FileSystemService) {
-            _ * getRemoteFileSystem() >> FileSystems.default
-            0 * _
+        service.rnaAlignmentLinkFileService = new RnaAlignmentLinkFileService()
+        service.rnaAlignmentLinkFileService.abstractBamFileService = Mock(AbstractBamFileService) {
+            getBaseDirectory(_) >> tempDir.resolve('link')
         }
+        service.rnaAlignmentWorkFileService = new RnaAlignmentWorkFileService()
+        service.rnaAlignmentWorkFileService.abstractBamFileService = Mock(AbstractBamFileService) {
+            getBaseDirectory(_) >> tempDir.resolve('work')
+        }
+        service.fileService = Mock(FileService)
 
         roddyBamFile = createBamFile()
-
-        configService.addOtpProperties(tempDir)
-    }
-
-    void cleanup() {
-        configService.clean()
     }
 
     void "test linkNewRnaResults"() {
         given:
         setupData()
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+        CreateRoddyFileHelper.createRoddyAlignmentResultFiles(service.rnaAlignmentWorkFileService, roddyBamFile)
+        List<Path> linkedFiles = [
+                service.rnaAlignmentLinkFileService.getBamFile(roddyBamFile),
+                service.rnaAlignmentLinkFileService.getBaiFile(roddyBamFile),
+                service.rnaAlignmentLinkFileService.getMd5sumFile(roddyBamFile),
+                service.rnaAlignmentLinkFileService.getExecutionStoreDirectory(roddyBamFile),
+                service.rnaAlignmentLinkFileService.getQADirectory(roddyBamFile),
+                service.rnaAlignmentLinkFileService.getCorrespondingChimericBamFile(roddyBamFile),
+                service.rnaAlignmentLinkFileService.getDirectoryPath(roddyBamFile).resolve("additionalArbitraryFile"),
+        ]
 
         when:
         service.linkNewRnaResults(roddyBamFile)
 
         then:
-        [
-                roddyBamFile.finalBamFile,
-                roddyBamFile.finalBaiFile,
-                roddyBamFile.finalMd5sumFile,
-                roddyBamFile.finalExecutionStoreDirectory,
-                roddyBamFile.finalQADirectory,
-                new File(roddyBamFile.baseDirectory, "additionalArbitraryFile"),
-        ].each {
-            assert it.exists()
+        linkedFiles.each {
+            1 * service.fileService.createLink(it, _, _, _) >> { Path link, x, y, z -> }
         }
     }
 }

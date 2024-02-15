@@ -25,25 +25,16 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.dataprocessing.ExternalMergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholds
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.AbstractBamFileServiceFactoryService
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelWorkFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.IndelDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.ngsdata.FastqFile
-import de.dkfz.tbi.otp.ngsdata.FastqImportInstance
-import de.dkfz.tbi.otp.ngsdata.FileType
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType
-import de.dkfz.tbi.otp.ngsdata.SampleTypePerProject
+import de.dkfz.tbi.otp.infrastructure.alignment.AlignmentLinkFileServiceFactoryService
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerLinkFileService
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.analysis.snv.SnvPrepareJob
@@ -57,7 +48,7 @@ class IndelPrepareJobSpec extends Specification implements DataTest, WorkflowSys
 
     IndelCallingInstance indelCallingInstance
 
-    RoddyBamFileService roddyBamFileService
+    PanCancerLinkFileService panCancerLinkFileService
 
     WorkflowStep workflowStep
 
@@ -92,11 +83,11 @@ class IndelPrepareJobSpec extends Specification implements DataTest, WorkflowSys
         indelCallingInstance = indelDomainFactory.createInstance(indelDomainFactory.createSamplePairWithExternallyProcessedBamFiles())
         workflowStep = createWorkflowStep([workflowRun: createWorkflowRun([workflow: findOrCreateWorkflow(IndelWorkflow.WORKFLOW)])])
         job = new IndelPrepareJob([
-                indelWorkFileService                : Mock(IndelWorkFileService),
-                concreteArtefactService             : Mock(ConcreteArtefactService),
-                abstractBamFileServiceFactoryService: Mock(AbstractBamFileServiceFactoryService),
+                indelWorkFileService                  : Mock(IndelWorkFileService),
+                concreteArtefactService               : Mock(ConcreteArtefactService),
+                alignmentLinkFileServiceFactoryService: Mock(AlignmentLinkFileServiceFactoryService),
         ])
-        roddyBamFileService = Mock(RoddyBamFileService)
+        panCancerLinkFileService = Mock(PanCancerLinkFileService)
     }
 
     void "buildWorkDirectoryPath, should return work directory"() {
@@ -139,10 +130,10 @@ class IndelPrepareJobSpec extends Specification implements DataTest, WorkflowSys
         1 * job.concreteArtefactService.getOutputArtefact(workflowStep, _) >> indelCallingInstance
         1 * job.concreteArtefactService.getInputArtefact(workflowStep, inputControlBam) >> controlBamFile
         1 * job.concreteArtefactService.getInputArtefact(workflowStep, inputTumorBam) >> tumorBamFile
-        1 * job.abstractBamFileServiceFactoryService.getService(tumorBamFile) >> roddyBamFileService
-        1 * job.abstractBamFileServiceFactoryService.getService(controlBamFile) >> roddyBamFileService
-        1 * roddyBamFileService.getPathForFurtherProcessing(tumorBamFile) >> furtherProcessingTumorPath
-        1 * roddyBamFileService.getPathForFurtherProcessing(controlBamFile) >> furtherProcessingControlPath
+        1 * job.alignmentLinkFileServiceFactoryService.getService(tumorBamFile) >> panCancerLinkFileService
+        1 * job.alignmentLinkFileServiceFactoryService.getService(controlBamFile) >> panCancerLinkFileService
+        1 * panCancerLinkFileService.getPathForFurtherProcessing(tumorBamFile) >> furtherProcessingTumorPath
+        1 * panCancerLinkFileService.getPathForFurtherProcessing(controlBamFile) >> furtherProcessingControlPath
     }
 
     void "doFurtherPreparation, should do nothing"() {

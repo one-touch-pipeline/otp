@@ -19,30 +19,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowTest.roddy
+package de.dkfz.tbi.otp.infrastructure.alignment
 
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
+final class RoddyBamFileNames {
 
-import java.nio.file.Path
+    static final String WORK_DIR_PREFIX = '.merging'
 
-trait RoddyFileAssertTrait {
+    static final String QUALITY_CONTROL_DIR = 'qualitycontrol'
+    static final String QUALITY_CONTROL_JSON_FILE_NAME = 'qualitycontrol.json'
+    static final String QUALITY_CONTROL_TARGET_EXTRACT_JSON_FILE_NAME = 'qualitycontrol_targetExtract.json'
 
-    Path getWorkDirectory(RoddyBamFile bamFile, RoddyBamFileService roddyBamFileService) {
-        return roddyBamFileService.getWorkDirectory(bamFile)
-    }
+    static final String MERGED_DIR = 'merged'
 
-    Path getWorkQADirectory(RoddyBamFile bamFile, RoddyBamFileService roddyBamFileService) {
-        return roddyBamFileService.getWorkQADirectory(bamFile)
-    }
+    static final String INSERT_SIZE_FILE_SUFFIX = 'insertsize_plot.png_qcValues.txt'
+    static final String INSERT_SIZE_FILE_DIRECTORY = 'insertsize_distribution'
 
-    @SuppressWarnings("UnusedMethodParameter")
-    List<Path> getAdditionalDirectories(RoddyBamFile bamFile, RoddyBamFileService roddyBamFileService) {
-        return []
-    }
-
-    @SuppressWarnings("UnusedMethodParameter")
-    List<Path> getAdditionalFiles(RoddyBamFile bamFile, RoddyBamFileService roddyBamFileService) {
-        return []
-    }
+    private RoddyBamFileNames() { }
 }

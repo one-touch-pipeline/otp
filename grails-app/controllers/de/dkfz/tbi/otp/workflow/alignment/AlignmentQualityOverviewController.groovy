@@ -29,23 +29,15 @@ import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.RoddyResultServiceFactoryService
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
-import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerService
 import de.dkfz.tbi.otp.dataprocessing.qaalignmentoverview.QaOverviewService
 import de.dkfz.tbi.otp.dataprocessing.qaalignmentoverview.QcStatusCellService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.job.processing.RoddyConfigService
+import de.dkfz.tbi.otp.infrastructure.alignment.RnaAlignmentWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.utils.*
@@ -176,21 +168,16 @@ class AlignmentQualityOverviewController implements CheckAndCall {
     ].asImmutable()
 
     AlignmentQualityOverviewService alignmentQualityOverviewService
-    CellRangerConfigurationService cellRangerConfigurationService
     CellRangerService cellRangerService
     FileService fileService
-    FileSystemService fileSystemService
     ProcessingOptionService processingOptionService
     ProjectSelectionService projectSelectionService
     QaOverviewService qaOverviewService
     QcStatusCellService qcStatusCellService
     QcTrafficLightService qcTrafficLightService
-    ReferenceGenomeService referenceGenomeService
-    RoddyConfigService roddyConfigService
-    RoddyResultServiceFactoryService roddyResultServiceFactoryService
     SeqTypeService seqTypeService
     WorkflowService workflowService
-    RnaRoddyBamFileService rnaRoddyBamFileService
+    RnaAlignmentWorkFileService rnaAlignmentWorkFileService
 
     def index(AlignmentQcCommand cmd) {
         Project project = projectSelectionService.selectedProject
@@ -345,7 +332,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
         // This page is semi-generic over AbstractBamFile, with lots of SeqType-specific handling sprinkled all over.
         // This link is only generated for seqType RNA, so this cast is probably safe.
         RnaRoddyBamFile rrbf = cmd.abstractBamFile as RnaRoddyBamFile
-        Path file = rnaRoddyBamFileService.getWorkArribaFusionPlotPdf(rrbf)
+        Path file = rnaAlignmentWorkFileService.getArribaFusionPlotPdf(rrbf)
 
         if (fileService.fileIsReadable(file)) {
             render(file: file.bytes, contentType: PDF.mimeType)

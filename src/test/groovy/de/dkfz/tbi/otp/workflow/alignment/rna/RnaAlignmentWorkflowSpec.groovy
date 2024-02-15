@@ -26,10 +26,10 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.infrastructure.alignment.RoddyBamFileNames
 import de.dkfz.tbi.otp.ngsdata.FastqFile
 import de.dkfz.tbi.otp.workflow.alignment.*
 import de.dkfz.tbi.otp.workflow.jobs.*
@@ -85,7 +85,7 @@ class RnaAlignmentWorkflowSpec extends Specification implements RoddyRnaFactory,
         outputRoddyBamFile != roddyBamFile
         outputRoddyBamFile.mergingWorkPackage == roddyBamFile.mergingWorkPackage
         outputRoddyBamFile.identifier == 1
-        outputRoddyBamFile.workDirectoryName == "${RoddyBamFileService.WORK_DIR_PREFIX}_1"
+        outputRoddyBamFile.workDirectoryName == "${RoddyBamFileNames.WORK_DIR_PREFIX}_1"
         outputRoddyBamFile.seqTracks == roddyBamFile.seqTracks
         outputRoddyBamFile.config == roddyBamFile.config
         outputRoddyBamFile.numberOfMergedLanes == roddyBamFile.numberOfMergedLanes

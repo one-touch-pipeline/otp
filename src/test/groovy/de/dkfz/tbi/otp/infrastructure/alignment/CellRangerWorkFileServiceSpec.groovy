@@ -19,23 +19,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataprocessing.bamfiles
+package de.dkfz.tbi.otp.infrastructure.alignment
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
+import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfig
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
 import java.nio.file.Paths
 
-class SingleCellBamFileServiceSpec extends Specification implements ServiceUnitTest<SingleCellBamFileService>, DataTest, CellRangerFactory {
+class CellRangerWorkFileServiceSpec extends Specification implements ServiceUnitTest<CellRangerWorkFileService>, DataTest, CellRangerFactory, WorkflowSystemDomainFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -50,27 +53,55 @@ class SingleCellBamFileServiceSpec extends Specification implements ServiceUnitT
                 Sample,
                 SampleType,
                 SingleCellBamFile,
+                WorkflowArtefact,
         ]
     }
 
     SingleCellBamFile bamFile
-    String testDir
 
-    void setup() {
+    void setupNonUuid() {
         bamFile = createBamFile()
-        testDir = "/base-dir"
         service.abstractBamFileService = Mock(AbstractBamFileService) {
             getBaseDirectory(_) >> Paths.get("/base-dir")
         }
     }
 
-    void "test getWorkDirectory"() {
+    void setupUuid() {
+        bamFile = createBamFile([
+                workflowArtefact: createWorkflowArtefact([
+                        producedBy: createWorkflowRun([
+                                workFolder: createWorkFolder(),
+                        ]),
+                ]),
+        ])
+        service.filestoreService = Mock(FilestoreService) {
+            1 * getWorkFolderPath(_) >> Paths.get("/base-dir-uuid")
+        }
+    }
+
+    void "test getInsertSizeFile"() {
+        given:
+        setupNonUuid()
+
+        when:
+        service.getInsertSizeFile(bamFile)
+
+        then:
+        thrown(UnsupportedOperationException)
+    }
+
+    void "test getDirectoryPath"() {
+        given:
+        setupNonUuid()
+
         expect:
-        service.getWorkDirectory(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}"
+        service.getDirectoryPath(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}"
     }
 
     void "test buildWorkDirectoryName"() {
         given:
+        setupNonUuid()
+
         CellRangerMergingWorkPackage mwp = createMergingWorkPackage(expectedCells: expectecCells, enforcedCells: enforcedCells)
 
         expect:
@@ -86,21 +117,33 @@ class SingleCellBamFileServiceSpec extends Specification implements ServiceUnitT
     }
 
     void "test getSampleDirectory"() {
+        given:
+        setupNonUuid()
+
         expect:
         service.getSampleDirectory(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/cell-ranger-input/${bamFile.id}"
     }
 
     void "test getOutputDirectory"() {
+        given:
+        setupNonUuid()
+
         expect:
         service.getOutputDirectory(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.id}"
     }
 
     void "test getResultDirectory"() {
+        given:
+        setupNonUuid()
+
         expect:
         service.getResultDirectory(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.id}/outs"
     }
 
     void "test getFileMappingForLinks"() {
+        given:
+        setupNonUuid()
+
         expect:
         service.getFileMappingForLinks(bamFile) == [
                 "web_summary.html"             : "web_summary.html",
@@ -119,6 +162,9 @@ class SingleCellBamFileServiceSpec extends Specification implements ServiceUnitT
     }
 
     void "test getLinkedResultFiles"() {
+        given:
+        setupNonUuid()
+
         expect:
         service.getLinkedResultFiles(bamFile)*.toString() == [
                 "/base-dir/${bamFile.workDirectoryName}/web_summary.html",
@@ -136,47 +182,107 @@ class SingleCellBamFileServiceSpec extends Specification implements ServiceUnitT
         ]
     }
 
-    void "test getFinalInsertSizeFile"() {
-        when:
-        service.getFinalInsertSizeFile(bamFile)
-
-        then:
-        thrown(UnsupportedOperationException)
-    }
-
-    void "test getPathForFurtherProcessing, should return final directory"() {
-        expect:
-        service.getPathForFurtherProcessing(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.bamFileName}"
-    }
-
-    void "test getPathForFurtherProcessing, when not set in mergingWorkPackage, should throw exception"() {
-        given:
-        bamFile.fileOperationStatus = AbstractBamFile.FileOperationStatus.DECLARED
-        bamFile.md5sum = null
-        bamFile.save(flush: true)
-        bamFile.mergingWorkPackage.bamFileInProjectFolder = null
-        bamFile.mergingWorkPackage.save(flush: true)
-
-        when:
-        service.getPathForFurtherProcessing(bamFile)
-
-        then:
-        thrown(IllegalStateException)
-    }
-
     void "test getQualityAssessmentCsvFile"() {
+        given:
+        setupNonUuid()
+
         expect:
         service.getQualityAssessmentCsvFile(bamFile).toString() ==
                 "/base-dir/${bamFile.workDirectoryName}/${bamFile.id}/outs/metrics_summary.csv"
     }
 
     void "test getWebSummaryResultFile"() {
+        given:
+        setupNonUuid()
+
         expect:
         service.getWebSummaryResultFile(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.id}/outs/web_summary.html"
     }
 
-    void "test getLinkedWebSummaryResultFile"() {
+    void "test getDirectoryPath for uuid structure"() {
+        given:
+        setupUuid()
+
         expect:
-        service.getLinkedWebSummaryResultFile(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/web_summary.html"
+        service.getDirectoryPath(bamFile).toString() == "/base-dir-uuid"
+    }
+
+    @Unroll
+    void "test buildWorkDirectoryName, check that returned name is correct"() {
+        given:
+        CellRangerMergingWorkPackage mwp = createMergingWorkPackage(expectedCells: expectecCells, enforcedCells: enforcedCells)
+
+        expect:
+        service.buildWorkDirectoryName(mwp, 1234) ==
+                "RG_${mwp.referenceGenome.name}_TV_${mwp.referenceGenomeIndex.toolWithVersion.replace(" ", "-")}_" +
+                "EC_${expectecCells ?: "-"}_FC_${enforcedCells ?: "-"}_PV_${mwp.config.programVersion}_ID_1234"
+
+        where:
+        expectecCells | enforcedCells || _
+        12            | null          || _
+        null          | 34            || _
+        null          | null          || _
+    }
+
+    void "test getSampleDirectory for uuid structure"() {
+        given:
+        setupUuid()
+
+        expect:
+        service.getSampleDirectory(bamFile).toString() == "/base-dir-uuid/cell-ranger-input/${bamFile.id}"
+    }
+
+    void "test getOutputDirectory for uuid structure"() {
+        given:
+        setupUuid()
+
+        expect:
+        service.getOutputDirectory(bamFile).toString() == "/base-dir-uuid/${bamFile.id}"
+    }
+
+    void "test getResultDirectory for uuid structure"() {
+        given:
+        setupUuid()
+
+        expect:
+        service.getResultDirectory(bamFile).toString() == "/base-dir-uuid/${bamFile.id}/outs"
+    }
+
+    void "test getLinkedResultFiles for uuid structure"() {
+        given:
+        setupUuid()
+
+        expect:
+        service.getLinkedResultFiles(bamFile)*.toString() == [
+                "/base-dir-uuid/web_summary.html",
+                "/base-dir-uuid/metrics_summary.csv",
+                "/base-dir-uuid/${bamFile.bamFileName}",
+                "/base-dir-uuid/${bamFile.baiFileName}",
+                "/base-dir-uuid/${bamFile.md5SumFileName}",
+                "/base-dir-uuid/filtered_feature_bc_matrix.h5",
+                "/base-dir-uuid/raw_feature_bc_matrix.h5",
+                "/base-dir-uuid/molecule_info.h5",
+                "/base-dir-uuid/cloupe.cloupe",
+                "/base-dir-uuid/filtered_feature_bc_matrix",
+                "/base-dir-uuid/raw_feature_bc_matrix",
+                "/base-dir-uuid/analysis",
+        ]
+    }
+
+    void "test getQualityAssessmentCsvFile for uuid structure"() {
+        given:
+        setupUuid()
+
+        expect:
+        service.getQualityAssessmentCsvFile(bamFile).toString() ==
+                "/base-dir-uuid/${bamFile.id}/outs/metrics_summary.csv"
+    }
+
+    void "test getWebSummaryResultFile for uuid structure"() {
+        given:
+        setupUuid()
+
+        expect:
+        service.getWebSummaryResultFile(bamFile).toString() == "/base-dir-uuid/${bamFile.id}/outs/web_summary.html"
     }
 }

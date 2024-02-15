@@ -28,8 +28,8 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.LinkFilesToFinalDestinationService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.filestore.WorkFolder
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractCleanUpJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -43,7 +43,7 @@ class PanCancerCleanUpJob extends AbstractCleanUpJob implements PanCancerShared 
     LinkFilesToFinalDestinationService linkFilesToFinalDestinationService
 
     @Autowired
-    RoddyBamFileService roddyBamFileService
+    PanCancerWorkFileService panCancerWorkFileService
 
     @Override
     List<Path> getAdditionalPathsToDelete(WorkflowStep workflowStep) {
@@ -60,7 +60,7 @@ class PanCancerCleanUpJob extends AbstractCleanUpJob implements PanCancerShared 
         assert !roddyBamFile.isOldStructureUsed()
 
         List<RoddyBamFile> roddyBamFiles = RoddyBamFile.findAllByWorkPackageAndIdNotEqual(roddyBamFile.mergingWorkPackage, roddyBamFile.id)
-        return roddyBamFiles.collect { it.isOldStructureUsed() ? null : roddyBamFileService.getWorkFolder(it) }
+        return roddyBamFiles.collect { it.isOldStructureUsed() ? null : panCancerWorkFileService.getWorkFolder(it) }
                 .findAll()
     }
 }

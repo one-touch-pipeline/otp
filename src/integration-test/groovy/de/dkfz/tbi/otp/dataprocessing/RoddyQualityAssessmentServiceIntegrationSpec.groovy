@@ -27,10 +27,11 @@ import spock.lang.Specification
 import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.WgbsAlignmentWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
@@ -88,11 +89,13 @@ class RoddyQualityAssessmentServiceIntegrationSpec extends Specification impleme
 
         roddyQualityAssessmentService = new RoddyQualityAssessmentService()
         roddyQualityAssessmentService.referenceGenomeService = new ReferenceGenomeService()
-        roddyQualityAssessmentService.roddyBamFileService = Mock(RoddyBamFileService) {
-            getWorkMergedQAJsonFile(_) >> workMergedQAJson
-            getWorkMergedQATargetExtractJsonFile(_) >> workMergedQATargetExtractJson
-            getWorkSingleLaneQAJsonFiles(_) >> { RoddyBamFile bamFile -> [(bamFile.seqTracks.first()): workSingleLaneQAJson] }
-            getWorkLibraryQAJsonFiles(_) >> { RoddyBamFile bamFile -> [(bamFile.seqTracks.first().libraryDirectoryName): workLibraryQAJson] }
+        roddyQualityAssessmentService.panCancerWorkFileService = Mock(PanCancerWorkFileService) {
+            getMergedQAJsonFile(_) >> workMergedQAJson
+            getMergedQATargetExtractJsonFile(_) >> workMergedQATargetExtractJson
+            getSingleLaneQAJsonFiles(_) >> { RoddyBamFile bamFile -> [(bamFile.seqTracks.first()): workSingleLaneQAJson] }
+        }
+        roddyQualityAssessmentService.wgbsAlignmentWorkFileService = Mock(WgbsAlignmentWorkFileService) {
+            getLibraryQAJsonFiles(_) >> { RoddyBamFile bamFile -> [(bamFile.seqTracks.first().libraryDirectoryName): workLibraryQAJson] }
         }
 
         assert RoddyMergedBamQa.list().empty

@@ -19,14 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileService
+
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerLinkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
 import java.nio.file.*
 
@@ -116,10 +116,9 @@ class BamExportImport {
         Map<String, String> metadata
     }
 
-    AbstractBamFileService abstractBamFileService
     FileService fileService
     FileSystemService fileSystemService
-    RoddyBamFileService roddyBamFileService
+    PanCancerLinkFileService panCancerLinkFileService
 
     String inputFieldDelimiter
     String outputFieldDelimiter
@@ -178,8 +177,8 @@ class BamExportImport {
     }
 
     private String finalInsertSizeFile(RoddyBamFile bamFile) {
-        Path absoluteInsertSizePath = roddyBamFileService.getFinalInsertSizeFile(bamFile)
-        Path bamFileDirectory = abstractBamFileService.getBaseDirectory(bamFile)
+        Path absoluteInsertSizePath = panCancerLinkFileService.getInsertSizeFile(bamFile)
+        Path bamFileDirectory = panCancerLinkFileService.getDirectoryPath(bamFile)
         Path relativeInsertSizePath = bamFileDirectory.relativize(absoluteInsertSizePath)
         return relativeInsertSizePath.toString()
     }
@@ -360,10 +359,9 @@ class DisplaySamples {
 
 class HandleInputTypes {
 
-    AbstractBamFileService abstractBamFileService
     FileService fileService
     FileSystemService fileSystemService
-    RoddyBamFileService roddyBamFileService
+    PanCancerLinkFileService panCancerLinkFileService
 
     String inputFieldDelimiter
     String outputFieldDelimiter
@@ -391,12 +389,11 @@ class HandleInputTypes {
 
     private void handleExport(List<String> input, String fileName, boolean overwriteExisting) {
         BamExportImport export = new BamExportImport([
-                abstractBamFileService: abstractBamFileService,
-                fileService                 : fileService,
-                fileSystemService           : fileSystemService,
-                roddyBamFileService         : roddyBamFileService,
-                inputFieldDelimiter         : inputFieldDelimiter,
-                outputFieldDelimiter        : outputFieldDelimiter,
+                fileService             : fileService,
+                fileSystemService       : fileSystemService,
+                inputFieldDelimiter     : inputFieldDelimiter,
+                outputFieldDelimiter    : outputFieldDelimiter,
+                panCancerLinkFileService: panCancerLinkFileService,
         ])
         Path file = export.handleInput(input, fileName, overwriteExisting)
         println "Metadata exported to ${file}\n"
@@ -424,12 +421,11 @@ class HandleInputTypes {
 }
 
 HandleInputTypes export = new HandleInputTypes([
-        abstractBamFileService: ctx.abstractBamFileService,
-        fileService                 : ctx.fileService,
-        fileSystemService           : ctx.fileSystemService,
-        roddyBamFileService         : ctx.roddyBamFileService,
-        inputFieldDelimiter         : inputFieldDelimiter,
-        outputFieldDelimiter        : outputFieldDelimiter,
+        fileService             : ctx.fileService,
+        fileSystemService       : ctx.fileSystemService,
+        panCancerLinkFileService: ctx.panCancerLinkFileService,
+        inputFieldDelimiter     : inputFieldDelimiter,
+        outputFieldDelimiter    : outputFieldDelimiter,
 ]).handleInput(input, fileName, overwriteExisting)
 
 println ''

@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.workflow.alignment
 import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.tbi.otp.dataprocessing.RoddyResultServiceFactoryService
+import de.dkfz.tbi.otp.dataprocessing.RoddyResultWorkFileServiceFactoryService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RoddyConfigService
@@ -38,12 +38,11 @@ class AlignmentQualityOverviewService {
 
     RoddyConfigService roddyConfigService
 
-    RoddyResultServiceFactoryService roddyResultServiceFactoryService
+    RoddyResultWorkFileServiceFactoryService roddyResultWorkFileServiceFactoryService
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#roddyResult.project, 'OTP_READ_ACCESS')")
     byte[] fetchConfigFileContent(RoddyResult roddyResult) {
-        Path workDir = roddyResultServiceFactoryService.getService(roddyResult).getDirectoryPath(roddyResult)
-        Path configFile = roddyConfigService.getConfigPath(workDir)
+        Path configFile = roddyResultWorkFileServiceFactoryService.getService(roddyResult).getConfigFile(roddyResult)
 
         return fileService.fileIsReadable(configFile) ? configFile.bytes : new byte[0]
     }

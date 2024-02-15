@@ -27,7 +27,6 @@ import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.aceseq.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.*
 import de.dkfz.tbi.otp.dataprocessing.qaalignmentoverview.PanCancerNoBedFileQaOverviewService
@@ -41,6 +40,7 @@ import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.filestore.BaseFolder
 import de.dkfz.tbi.otp.filestore.WorkFolder
 import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.infrastructure.alignment.*
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RoddyConfigService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -229,9 +229,13 @@ class ExampleData {
 
     AbstractBamFileService abstractBamFileService
 
-    RoddyBamFileService roddyBamFileService
+    PanCancerLinkFileService panCancerLinkFileService
 
-    RnaRoddyBamFileService rnaRoddyBamFileService
+    PanCancerWorkFileService panCancerWorkFileService
+
+    RnaAlignmentLinkFileService rnaAlignmentLinkFileService
+
+    RnaAlignmentWorkFileService rnaAlignmentWorkFileService
 
     FastqcDataFilesService fastqcDataFilesService
 
@@ -251,13 +255,13 @@ class ExampleData {
 
     CellRangerConfigurationService cellRangerConfigurationService
 
-    SingleCellBamFileService singleCellBamFileService
-
     CellRangerWorkflowService cellRangerWorkflowService
 
     SingleCellMappingFileService singleCellMappingFileService
 
     DocumentService documentService
+
+    CellRangerWorkFileService cellRangerWorkFileService
 
     RawSequenceDataWorkFileService rawSequenceDataWorkFileService
     RawSequenceDataViewFileService rawSequenceDataViewFileService
@@ -515,25 +519,25 @@ class ExampleData {
         println "creating dummy pancaner bam files on file system"
 
         roddyBamFiles.each { RoddyBamFile bam ->
-            Path workDir = roddyBamFileService.getWorkDirectory(bam)
+            Path workDir = panCancerWorkFileService.getDirectoryPath(bam)
             Map<Path, Path> filesMap = [
-                    (roddyBamFileService.getFinalBamFile(bam))   : roddyBamFileService.getWorkBamFile(bam),
-                    (roddyBamFileService.getFinalBaiFile(bam))   : roddyBamFileService.getWorkBaiFile(bam),
-                    (roddyBamFileService.getFinalMd5sumFile(bam)): roddyBamFileService.getWorkMd5sumFile(bam),
+                    (panCancerLinkFileService.getBamFile(bam))   : panCancerWorkFileService.getBamFile(bam),
+                    (panCancerLinkFileService.getBaiFile(bam))   : panCancerWorkFileService.getBaiFile(bam),
+                    (panCancerLinkFileService.getMd5sumFile(bam)): panCancerWorkFileService.getMd5sumFile(bam),
             ]
 
             Map<Path, Path> dirsMap = [
-                    (roddyBamFileService.getFinalMergedQADirectory(bam))      : roddyBamFileService.getWorkMergedQADirectory(bam),
-                    (roddyBamFileService.getFinalExecutionStoreDirectory(bam)): roddyBamFileService.getWorkExecutionStoreDirectory(bam),
+                    (panCancerLinkFileService.getMergedQADirectory(bam))      : panCancerWorkFileService.getMergedQADirectory(bam),
+                    (panCancerLinkFileService.getExecutionStoreDirectory(bam)): panCancerWorkFileService.getExecutionStoreDirectory(bam),
             ]
             List<Path> dirs = [workDir]
-            dirs.addAll(roddyBamFileService.getWorkSingleLaneQADirectories(bam).values())
+            dirs.addAll(panCancerWorkFileService.getSingleLaneQADirectories(bam).values())
 
             if (bam.seqType.isWgbs()) {
-                filesMap[roddyBamFileService.getFinalMetadataTableFile(bam)] = roddyBamFileService.getWorkMetadataTableFile(bam)
+                filesMap[panCancerLinkFileService.getMetadataTableFile(bam)] = panCancerWorkFileService.getMetadataTableFile(bam)
                 if (bam.containedSeqTracks*.libraryDirectoryName.unique().size() > 1) {
-                    dirs.addAll(roddyBamFileService.getWorkLibraryQADirectories(bam).values())
-                    dirs.addAll(roddyBamFileService.getWorkLibraryMethylationDirectories(bam).values())
+                    dirs.addAll(panCancerWorkFileService.getLibraryQADirectories(bam).values())
+                    dirs.addAll(panCancerWorkFileService.getLibraryMethylationDirectories(bam).values())
                 }
             }
 
@@ -550,7 +554,7 @@ class ExampleData {
                 fileService.createFileWithContent(pathWork, pathWork.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
                 fileService.createLink(pathFinal, pathWork, CreateLinkOption.DELETE_EXISTING_FILE)
             }
-            Path config = roddyConfigService.getConfigPath(workDir)
+            Path config = panCancerWorkFileService.getConfigFile(bam)
             fileService.createFileWithContent(config, config.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
         }
     }
@@ -561,12 +565,12 @@ class ExampleData {
 
         rnaRoddyBamFiles.each { RoddyBamFile bam ->
             Path baseDir = abstractBamFileService.getBaseDirectory(bam)
-            Path workDir = roddyBamFileService.getWorkDirectory(bam)
+            Path workDir = rnaAlignmentWorkFileService.getDirectoryPath(bam)
 
             Map<Path, Path> filesMap = [
-                    (rnaRoddyBamFileService.getFinalBamFile(bam))   : rnaRoddyBamFileService.getWorkBamFile(bam),
-                    (rnaRoddyBamFileService.getFinalBaiFile(bam))   : rnaRoddyBamFileService.getWorkBaiFile(bam),
-                    (rnaRoddyBamFileService.getFinalMd5sumFile(bam)): rnaRoddyBamFileService.getWorkMd5sumFile(bam),
+                    (rnaAlignmentLinkFileService.getBamFile(bam))   : rnaAlignmentWorkFileService.getBamFile(bam),
+                    (rnaAlignmentLinkFileService.getBaiFile(bam))   : rnaAlignmentWorkFileService.getBaiFile(bam),
+                    (rnaAlignmentLinkFileService.getMd5sumFile(bam)): rnaAlignmentWorkFileService.getMd5sumFile(bam),
             ]
 
             [
@@ -584,13 +588,13 @@ class ExampleData {
             }
 
             Map<File, File> dirsMap = [
-                    (roddyBamFileService.getFinalExecutionStoreDirectory(bam)): roddyBamFileService.getWorkExecutionStoreDirectory(bam),
-                    (roddyBamFileService.getFinalQADirectory(bam))            : roddyBamFileService.getWorkQADirectory(bam),
+                    (rnaAlignmentLinkFileService.getExecutionStoreDirectory(bam)): rnaAlignmentWorkFileService.getExecutionStoreDirectory(bam),
+                    (rnaAlignmentLinkFileService.getQADirectory(bam))            : rnaAlignmentWorkFileService.getQADirectory(bam),
             ]
             [
                     "featureCounts",
                     "featureCounts_dexseq",
-                    RnaRoddyBamFileService.ARRIBA_FOLDER,
+                    RnaAlignmentLinkFileService.ARRIBA_FOLDER,
                     "${bam.sampleType.name}_${bam.individual.pid}_star_logs_and_files",
             ].each {
                 dirsMap[baseDir.resolve(it)] = workDir.resolve(it)
@@ -611,9 +615,9 @@ class ExampleData {
                 fileService.createFileWithContent(pathWork, pathWork.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
                 fileService.createLink(pathFinal, pathWork, CreateLinkOption.DELETE_EXISTING_FILE)
             }
-            Path plot = rnaRoddyBamFileService.getWorkArribaFusionPlotPdf(bam)
+            Path plot = rnaAlignmentWorkFileService.getArribaFusionPlotPdf(bam)
             fileService.createFileWithContent(plot, plot.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
-            Path config = roddyConfigService.getConfigPath(workDir)
+            Path config = rnaAlignmentWorkFileService.getConfigFile(bam)
             fileService.createFileWithContent(config, config.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
         }
     }
@@ -715,25 +719,25 @@ class ExampleData {
         println "creating dummy cell ranger files on file system"
 
         singleCellBamFiles.each { SingleCellBamFile bam ->
-            Path workdir = singleCellBamFileService.getWorkDirectory(bam)
+            Path workdir = cellRangerWorkFileService.getDirectoryPath(bam)
             fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workdir)
 
-            Path resultsPath = singleCellBamFileService.getResultDirectory(bam)
+            Path resultsPath = cellRangerWorkFileService.getResultDirectory(bam)
 
             [
-                    singleCellBamFileService.getSampleDirectory(bam),
-                    singleCellBamFileService.getOutputDirectory(bam),
+                    cellRangerWorkFileService.getSampleDirectory(bam),
+                    cellRangerWorkFileService.getOutputDirectory(bam),
                     resultsPath,
             ].each {
                 fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(it)
             }
 
-            SingleCellBamFileService.CREATED_RESULT_DIRS.each {
+            CellRangerFileNames.CREATED_RESULT_DIRS.each {
                 Path path = resultsPath.resolve(it)
                 fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path)
             }
 
-            SingleCellBamFileService.CREATED_RESULT_FILES.each {
+            CellRangerFileNames.CREATED_RESULT_FILES.each {
                 Path path = resultsPath.resolve(it)
                 fileService.createFileWithContent(path, path.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
             }
@@ -1352,7 +1356,7 @@ class ExampleData {
                 coverage               : 35,
                 coverageWithN          : 35,
                 dateFromFileSystem     : new Date(),
-                workDirectoryName      : singleCellBamFileService.buildWorkDirectoryName(cellRangerMergingWorkPackage, 0),
+                workDirectoryName      : cellRangerWorkFileService.buildWorkDirectoryName(cellRangerMergingWorkPackage, 0),
                 md5sum                 : "0" * 32,
                 fileExists             : true,
                 fileSize               : 100,
@@ -1944,12 +1948,10 @@ Project.withTransaction {
             sophiaService                    : ctx.sophiaService,
             aceseqService                    : ctx.aceseqService,
             cellRangerConfigurationService   : ctx.cellRangerConfigurationService,
-            singleCellBamFileService         : ctx.singleCellBamFileService,
+            cellRangerWorkFileService        : ctx.cellRangerWorkFileService,
             cellRangerWorkflowService        : ctx.cellRangerWorkflowService,
             singleCellMappingFileService     : ctx.singleCellMappingFileService,
             documentService                  : ctx.documentService,
-            roddyBamFileService              : ctx.roddyBamFileService,
-            rnaRoddyBamFileService           : ctx.rnaRoddyBamFileService,
             runYapsaService                  : ctx.runYapsaService,
             seqTypeService                   : ctx.seqTypeService,
             roddyConfigService               : ctx.roddyConfigService,

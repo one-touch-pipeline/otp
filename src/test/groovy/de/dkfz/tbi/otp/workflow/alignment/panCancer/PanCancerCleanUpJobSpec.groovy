@@ -27,12 +27,12 @@ import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.PanCancerWorkflowDomainFactory
 import de.dkfz.tbi.otp.filestore.WorkFolder
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -109,7 +109,7 @@ class PanCancerCleanUpJobSpec extends Specification implements DataTest, PanCanc
         WorkFolder workFolder = createWorkFolder()
 
         PanCancerCleanUpJob job = new PanCancerCleanUpJob()
-        job.roddyBamFileService = Mock(RoddyBamFileService) {
+        job.panCancerWorkFileService = Mock(PanCancerWorkFileService) {
             1 * getWorkFolder(bamFile2) >> workFolder
             1 * getWorkFolder(bamFile3) >> null
             0 * _

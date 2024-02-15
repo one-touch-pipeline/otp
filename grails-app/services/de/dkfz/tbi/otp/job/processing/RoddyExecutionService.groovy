@@ -26,8 +26,7 @@ import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.infrastructure.*
@@ -54,6 +53,9 @@ class RoddyExecutionService {
     @Autowired
     RemoteShellHelper remoteShellHelper
 
+    @Autowired
+    RoddyResultWorkFileServiceFactoryService roddyResultWorkFileServiceFactoryService
+
     static final String NO_STARTED_JOBS_MESSAGE = '\nThere were no started jobs, the execution directory will be removed.\n'
 
     // suppressed because breaking the line would break the pattern
@@ -68,7 +70,8 @@ class RoddyExecutionService {
 
     @CompileDynamic
     void clearRoddyExecutionStoreDirectory(RoddyResult roddyResult) {
-        if (roddyResult.roddyExecutionDirectoryNames && !roddyResult.workDirectory.exists()) {
+        if (roddyResult.roddyExecutionDirectoryNames &&
+                !Files.exists(roddyResultWorkFileServiceFactoryService.getService(roddyResult).getDirectoryPath(roddyResult))) {
             roddyResult.roddyExecutionDirectoryNames.clear()
             roddyResult.save(flush: true)
         }
@@ -136,7 +139,12 @@ class RoddyExecutionService {
         assert roddyResult
 
         Path directory = parseRoddyExecutionStoreDirectoryFromRoddyOutput(roddyOutput, fileSystem)
-        assert directory.parent == fileSystem.getPath(roddyResult.workExecutionStoreDirectory.absolutePath)
+        if (roddyResult.workflowArtefact?.producedBy?.workFolder) {
+            assert directory.parent == roddyResultWorkFileServiceFactoryService.getService(roddyResult).getExecutionStoreDirectory(roddyResult)
+        } else {
+            // TODO remove, when all data were moved to UUID structure
+            assert directory.parent == fileSystem.getPath(roddyResult.workExecutionStoreDirectory.absolutePath)
+        }
         FileService.waitUntilExists(directory)
         assert Files.isDirectory(directory)
 

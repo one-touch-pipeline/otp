@@ -29,36 +29,46 @@ import java.nio.file.Path
 
 trait RoddyResultServiceTrait<T extends RoddyResult> implements ArtefactFileService<T> {
 
-    static final String RODDY_EXECUTION_STORE_DIR = "roddyExecutionStore"
-    static final String RODDY_EXECUTION_DIR_PATTERN = /exec_\d{6}_\d{8,9}_.+_.+/
+    final String executionStoreDirectory = 'roddyExecutionStore'
+    final String executionDirectoryPattern = /exec_\d{6}_\d{8,9}_.+_.+/
+    final String configurationDirectory = "config"
+    final String configurationFile = "config.xml"
 
-    Path getWorkExecutionStoreDirectory(T rr) {
-        return getDirectoryPath(rr).resolve(RODDY_EXECUTION_STORE_DIR)
+    Path getExecutionStoreDirectory(T rr) {
+        return getDirectoryPath(rr).resolve(executionStoreDirectory)
     }
 
-    List<Path> getWorkExecutionDirectories(T rr) {
+    List<Path> getExecutionDirectories(T rr) {
         return rr.roddyExecutionDirectoryNames.collect {
-            getWorkExecutionStoreDirectory(rr).resolve(it)
+            getExecutionStoreDirectory(rr).resolve(it)
         }
     }
 
     /**
-     * @returns subdirectory of {@link #getWorkExecutionStoreDirectory} corresponding to the latest roddy call
+     * @returns subdirectory of {@link #getExecutionStoreDirectory} corresponding to the latest roddy call
      * Example:
      * exec_150625_102449388_SOMEUSER_WGS
      * exec_yyMMdd_HHmmssSSS_user_analysis
      */
-    Path getLatestWorkExecutionDirectory(T rr) {
+    Path getLatestExecutionDirectory(T rr) {
         assert rr.roddyExecutionDirectoryNames: "No roddyExecutionDirectoryNames have been stored in the database for ${this}."
 
         String latestDirectoryName = rr.roddyExecutionDirectoryNames.last()
         assert latestDirectoryName == rr.roddyExecutionDirectoryNames.max()
-        assert latestDirectoryName ==~ RODDY_EXECUTION_DIR_PATTERN
+        assert latestDirectoryName ==~ executionDirectoryPattern
 
-        Path latestWorkDirectory = getWorkExecutionStoreDirectory(rr).resolve(latestDirectoryName)
-        FileService.waitUntilExists(latestWorkDirectory)
-        assert Files.isDirectory(latestWorkDirectory)
+        Path latestDirectory = getExecutionStoreDirectory(rr).resolve(latestDirectoryName)
+        FileService.waitUntilExists(latestDirectory)
+        assert Files.isDirectory(latestDirectory)
 
-        return latestWorkDirectory
+        return latestDirectory
+    }
+
+    Path getConfigDirectory(T rr) {
+        return getDirectoryPath(rr).resolve(configurationDirectory)
+    }
+
+    Path getConfigFile(T rr) {
+        return getConfigDirectory(rr).resolve(configurationFile)
     }
 }

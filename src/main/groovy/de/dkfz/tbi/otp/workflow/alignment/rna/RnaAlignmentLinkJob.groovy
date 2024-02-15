@@ -25,20 +25,19 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.RnaAlignmentLinkFileService
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.jobs.AbstractLinkJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.DirectoryStream
-import java.nio.file.Files
-import java.nio.file.Path
+import java.nio.file.*
 
 @Component
 @Slf4j
 class RnaAlignmentLinkJob extends AbstractLinkJob implements RnaAlignmentShared {
+
     @Autowired
-    RnaRoddyBamFileService rnaRoddyBamFileService
+    RnaAlignmentLinkFileService rnaAlignmentLinkFileService
 
     /**
      * Produce a linking for all contained Files, except the hidden ones starting with '.'
@@ -50,7 +49,7 @@ class RnaAlignmentLinkJob extends AbstractLinkJob implements RnaAlignmentShared 
         List<LinkEntry> links = []
 
         Path outputDir = getWorkDirectory(workflowStep)
-        Path linkDir = rnaRoddyBamFileService.getBaseDirectory(getRoddyBamFile(workflowStep))
+        Path linkDir = rnaAlignmentLinkFileService.getDirectoryPath(getRoddyBamFile(workflowStep))
 
         // Filter out all hidden files indicated by .
         DirectoryStream<Path> visibleFiles = Files.newDirectoryStream(outputDir) { path ->

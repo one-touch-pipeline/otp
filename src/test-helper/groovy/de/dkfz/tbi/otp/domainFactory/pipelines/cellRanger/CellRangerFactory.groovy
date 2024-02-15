@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.SingleCellBamFileService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsAlignment
@@ -33,8 +32,6 @@ import de.dkfz.tbi.otp.utils.CreateFileHelper
 import java.nio.file.Path
 
 trait CellRangerFactory implements IsAlignment {
-
-    SingleCellBamFileService singleCellBamFileService
 
     @Override
     Pipeline findOrCreatePipeline() {

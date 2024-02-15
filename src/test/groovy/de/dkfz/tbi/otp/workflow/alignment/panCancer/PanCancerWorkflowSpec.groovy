@@ -25,13 +25,11 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
+import de.dkfz.tbi.otp.infrastructure.alignment.RoddyBamFileNames
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.alignment.*
-import de.dkfz.tbi.otp.workflow.jobs.AttachUuidJob
-import de.dkfz.tbi.otp.workflow.jobs.CalculateSizeJob
-import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
+import de.dkfz.tbi.otp.workflow.jobs.*
 
 class PanCancerWorkflowSpec extends Specification implements RoddyPanCancerFactory, DataTest {
 
@@ -87,7 +85,7 @@ class PanCancerWorkflowSpec extends Specification implements RoddyPanCancerFacto
         outputRoddyBamFile != roddyBamFile
         outputRoddyBamFile.mergingWorkPackage == roddyBamFile.mergingWorkPackage
         outputRoddyBamFile.identifier == 1
-        outputRoddyBamFile.workDirectoryName == "${RoddyBamFileService.WORK_DIR_PREFIX}_1"
+        outputRoddyBamFile.workDirectoryName == "${RoddyBamFileNames.WORK_DIR_PREFIX}_1"
         outputRoddyBamFile.seqTracks == roddyBamFile.seqTracks
         outputRoddyBamFile.config == roddyBamFile.config
         outputRoddyBamFile.numberOfMergedLanes == roddyBamFile.numberOfMergedLanes

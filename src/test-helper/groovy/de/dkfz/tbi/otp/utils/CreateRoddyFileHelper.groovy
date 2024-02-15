@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.utils
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqService
@@ -31,6 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaService
+import de.dkfz.tbi.otp.infrastructure.alignment.*
 import de.dkfz.tbi.otp.ngsdata.IndividualService
 
 import java.nio.file.Files
@@ -38,57 +40,66 @@ import java.nio.file.Path
 
 class CreateRoddyFileHelper {
 
-    static private void createRoddyAlignmentWorkOrFinalResultFiles(RoddyBamFile roddyBamFile, String workOrFinal) {
-        assert CreateFileHelper.createFile(roddyBamFile."get${workOrFinal}MergedQAJsonFile"())
+    static void createRoddyAlignmentResultFiles(AbstractPanCancerFileService service, RoddyBamFile roddyBamFile) {
+        Files.createDirectories(service.getDirectoryPath(roddyBamFile))
+        assert CreateFileHelper.createFile(service.getMergedQAJsonFile(roddyBamFile))
 
-        roddyBamFile."get${workOrFinal}SingleLaneQAJsonFiles"().values().each {
+        service.getSingleLaneQAJsonFiles(roddyBamFile).values().each {
             assert CreateFileHelper.createFile(it)
         }
 
         if (roddyBamFile.seqType.isWgbs()) {
-            assert roddyBamFile."get${workOrFinal}MergedMethylationDirectory"().mkdirs()
-            roddyBamFile."get${workOrFinal}LibraryQADirectories"().values().each {
-                assert it.mkdirs()
+            Files.createDirectories(service.getMergedMethylationDirectory(roddyBamFile))
+            service.getLibraryQADirectories(roddyBamFile).values().each {
+                Files.createDirectories(it)
             }
-            roddyBamFile."get${workOrFinal}LibraryMethylationDirectories"().values().each {
-                assert it.mkdirs()
+            service.getLibraryMethylationDirectories(roddyBamFile).values().each {
+                Files.createDirectories(it)
             }
-            assert roddyBamFile."get${workOrFinal}MetadataTableFile"().createNewFile()
+            Files.createFile(service.getMetadataTableFile(roddyBamFile))
         }
 
-        assert roddyBamFile."get${workOrFinal}ExecutionStoreDirectory"().mkdirs()
-        roddyBamFile."get${workOrFinal}ExecutionDirectories"().each {
-            assert it.mkdirs()
-            assert new File(it, 'file').createNewFile()
+        Files.createDirectories(service.getExecutionStoreDirectory(roddyBamFile))
+        service.getExecutionDirectories(roddyBamFile).each {
+            Files.createDirectories(it)
+            Files.createFile(it.resolve('file'))
         }
-        roddyBamFile."get${workOrFinal}BamFile"() << "content"
-        roddyBamFile."get${workOrFinal}BaiFile"() << "content"
-        roddyBamFile."get${workOrFinal}Md5sumFile"() << HelperUtils.randomMd5sum
+        service.getBamFile(roddyBamFile) << "content"
+        service.getBaiFile(roddyBamFile) << "content"
+        service.getMd5sumFile(roddyBamFile) << HelperUtils.randomMd5sum
 
         if (roddyBamFile.seqType.isWgbs()) {
-            File methylationDir = roddyBamFile."get${workOrFinal}MethylationDirectory"()
-            File methylationMergedDir = new File(methylationDir, "merged")
-            assert new File(methylationMergedDir, "results").mkdirs()
+            Path methylationDir = service.getMethylationDirectory(roddyBamFile)
+            Path methylationMergedDir = methylationDir.resolve("merged")
+            Files.createDirectories(methylationMergedDir.resolve("results"))
             roddyBamFile.seqTracks.each {
                 String libraryName = it.libraryDirectoryName
-                File methylationLibraryDir = new File(methylationDir, libraryName)
-                assert new File(methylationLibraryDir, "results").mkdirs()
+                Path methylationLibraryDir = methylationDir.resolve(libraryName)
+                Files.createDirectories(methylationLibraryDir.resolve("results"))
             }
         }
         if (roddyBamFile.seqType.isRna()) {
-            new File(roddyBamFile.workDirectory, "additionalArbitraryFile") << "content"
-            (roddyBamFile as RnaRoddyBamFile).correspondingWorkChimericBamFile << "content"
+            service.getDirectoryPath(roddyBamFile).resolve("additionalArbitraryFile") << "content"
+            (service as RnaAlignmentWorkFileService).getCorrespondingChimericBamFile(roddyBamFile as RnaRoddyBamFile) << "content"
         }
     }
 
+    @Deprecated
     static void createRoddyAlignmentWorkResultFiles(RoddyBamFile roddyBamFile) {
-        assert roddyBamFile.workDirectory.mkdirs()
-        createRoddyAlignmentWorkOrFinalResultFiles(roddyBamFile, "Work")
+        AbstractAlignmentWorkFileService service = roddyBamFile.seqType.isRna() ? new RnaAlignmentWorkFileService() : new PanCancerWorkFileService()
+        service.abstractBamFileService = [
+                getBaseDirectory: { RoddyBamFile ignored -> roddyBamFile.baseDirectory.toPath() }
+        ] as AbstractBamFileService
+        createRoddyAlignmentResultFiles(service, roddyBamFile)
     }
 
+    @Deprecated
     static void createRoddyAlignmentFinalResultFiles(RoddyBamFile roddyBamFile) {
-        assert roddyBamFile.baseDirectory.mkdirs()
-        createRoddyAlignmentWorkOrFinalResultFiles(roddyBamFile, "Final")
+        AbstractAlignmentLinkFileService service = roddyBamFile.seqType.isRna() ? new RnaAlignmentLinkFileService() : new PanCancerLinkFileService()
+        service.abstractBamFileService = [
+                getBaseDirectory: { RoddyBamFile ignored -> roddyBamFile.baseDirectory.toPath() }
+        ] as AbstractBamFileService
+        createRoddyAlignmentResultFiles(service, roddyBamFile)
     }
 
     static void createRoddySnvResultFiles(RoddySnvCallingInstance roddySnvCallingInstance, IndividualService individualService, int minConfidenceScore = 8) {

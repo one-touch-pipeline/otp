@@ -25,9 +25,9 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.BamImportWorkflowDomainFactory
-import de.dkfz.tbi.otp.filestore.PathOption
+import de.dkfz.tbi.otp.infrastructure.alignment.ExternalAlignmentSourceFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.ExternalAlignmentWorkFileService
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -73,9 +73,11 @@ class BamImportLinkSourceJobSpec extends Specification implements DataTest, BamI
         Path realTargetBamImportFolder = Paths.get("/target")
         Path targetBamFilePath = realTargetBamImportFolder.resolve(Paths.get(bamFile.bamFileName))
         Path targetBaiFilePath = realTargetBamImportFolder.resolve(Paths.get(bamFile.baiFileName))
-        job.externallyProcessedBamFileService = Mock(ExternallyProcessedBamFileService) {
-            1 * getImportFolder(bamFile, PathOption.REAL_PATH) >> targetBaseDirFilePath
-            1 * getSourceBaseDirFilePath(bamFile) >> realTargetBamImportFolder
+        job.externalAlignmentWorkFileService = Mock(ExternalAlignmentWorkFileService) {
+            1 * getDirectoryPath(bamFile) >> targetBaseDirFilePath
+        }
+        job.externalAlignmentSourceFileService = Mock(ExternalAlignmentSourceFileService) {
+            1 * getDirectoryPath(bamFile) >> realTargetBamImportFolder
         }
         expect:
         job.getLinkMap(workflowStep) == [
@@ -89,7 +91,6 @@ class BamImportLinkSourceJobSpec extends Specification implements DataTest, BamI
     void "test getLinkMap should return empty list when link source is false"() {
         given:
         createBamImportInstance(externallyProcessedBamFiles: [bamFile])
-        job.externallyProcessedBamFileService = Mock(ExternallyProcessedBamFileService)
 
         expect:
         job.getLinkMap(workflowStep) == []

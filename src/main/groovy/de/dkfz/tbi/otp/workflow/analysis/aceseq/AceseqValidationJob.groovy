@@ -25,11 +25,8 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
-import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqService
-import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqWorkFileService
+import de.dkfz.tbi.otp.dataprocessing.aceseq.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
-import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractRoddyClusterValidationJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -41,9 +38,6 @@ class AceseqValidationJob extends AbstractRoddyClusterValidationJob implements A
 
     @Autowired
     AceseqWorkFileService aceseqWorkFileService
-
-    @Autowired
-    ExecuteRoddyCommandService executeRoddyCommandService
 
     @Autowired
     AceseqService aceseqService
@@ -62,7 +56,7 @@ class AceseqValidationJob extends AbstractRoddyClusterValidationJob implements A
     @Override
     protected List<Path> getExpectedDirectories(WorkflowStep workflowStep) {
         AceseqInstance instance = getAceseqInstance(workflowStep)
-        return [aceseqWorkFileService.getWorkExecutionStoreDirectory(instance)] + aceseqWorkFileService.getWorkExecutionDirectories(instance)
+        return [aceseqWorkFileService.getExecutionStoreDirectory(instance)] + aceseqWorkFileService.getExecutionDirectories(instance)
     }
 
     @Override

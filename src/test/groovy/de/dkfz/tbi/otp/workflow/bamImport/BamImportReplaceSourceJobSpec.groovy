@@ -26,10 +26,10 @@ import spock.lang.Specification
 import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.BamImportWorkflowDomainFactory
-import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.alignment.ExternalAlignmentSourceFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.ExternalAlignmentWorkFileService
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -80,13 +80,15 @@ class BamImportReplaceSourceJobSpec extends Specification implements DataTest, B
         Path targetBamFilePath = targetBaseDirFilePath.resolve(Paths.get("bamFile.bam"))
         Path targetBaiFilePath = targetBaseDirFilePath.resolve(Paths.get("bamFile.bai"))
 
-        job.externallyProcessedBamFileService = Mock(ExternallyProcessedBamFileService) {
-            1 * getSourceBamFilePath(bamFile) >> sourceBamFilePath
-            1 * getSourceBaiFilePath(bamFile) >> sourceBaiFilePath
-            1 * getSourceBaseDirFilePath(bamFile) >> sourceBaseDirFilePath
-            1 * getBamFile(bamFile, PathOption.REAL_PATH) >> targetBamFilePath
-            1 * getBaiFile(bamFile, PathOption.REAL_PATH) >> targetBaiFilePath
-            1 * getImportFolder(bamFile, PathOption.REAL_PATH) >> targetBaseDirFilePath
+        job.externalAlignmentSourceFileService = Mock(ExternalAlignmentSourceFileService) {
+            1 * getBamFile(bamFile) >> sourceBamFilePath
+            1 * getBaiFile(bamFile) >> sourceBaiFilePath
+            1 * getDirectoryPath(bamFile) >> sourceBaseDirFilePath
+        }
+        job.externalAlignmentWorkFileService = Mock(ExternalAlignmentWorkFileService) {
+            1 * getBamFile(bamFile) >> targetBamFilePath
+            1 * getBaiFile(bamFile) >> targetBaiFilePath
+            1 * getDirectoryPath(bamFile) >> targetBaseDirFilePath
         }
 
         expect:
@@ -109,9 +111,11 @@ class BamImportReplaceSourceJobSpec extends Specification implements DataTest, B
         bamFile.furtherFiles = [dir.fileName.toString()]
         bamFile.save(flush: true)
 
-        job.externallyProcessedBamFileService = Mock(ExternallyProcessedBamFileService) {
-            1 * getSourceBaseDirFilePath(bamFile) >> sourceBaseDirFilePath
-            1 * getImportFolder(bamFile, PathOption.REAL_PATH) >> targetBaseDirFilePath
+        job.externalAlignmentSourceFileService = Mock(ExternalAlignmentSourceFileService) {
+            1 * getDirectoryPath(bamFile) >> sourceBaseDirFilePath
+        }
+        job.externalAlignmentWorkFileService = Mock(ExternalAlignmentWorkFileService) {
+            1 * getDirectoryPath(bamFile) >> targetBaseDirFilePath
         }
         job.fileService = Mock(FileService)
 

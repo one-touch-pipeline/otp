@@ -143,8 +143,8 @@ class IndelValidationJobSpec extends Specification implements DataTest, Workflow
 
         and:
         1 * job.concreteArtefactService.getOutputArtefact(workflowStep, analysisOutput) >> instance
-        1 * job.indelWorkFileService.getWorkExecutionStoreDirectory(instance) >> storeDirectory
-        1 * job.indelWorkFileService.getWorkExecutionDirectories(instance) >> [dir1, dir2]
+        1 * job.indelWorkFileService.getExecutionStoreDirectory(instance) >> storeDirectory
+        1 * job.indelWorkFileService.getExecutionDirectories(instance) >> [dir1, dir2]
     }
 
     void "saveResult, should do nothing"() {

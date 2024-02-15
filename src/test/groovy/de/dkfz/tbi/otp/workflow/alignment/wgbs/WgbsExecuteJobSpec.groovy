@@ -28,10 +28,10 @@ import spock.lang.TempDir
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WgbsAlignmentWorkflowDomainFactory
+import de.dkfz.tbi.otp.infrastructure.alignment.WgbsAlignmentWorkFileService
 import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
@@ -219,8 +219,8 @@ class WgbsExecuteJobSpec extends Specification implements DataTest, WgbsAlignmen
     void "test getAdditionalParameters"() {
         given:
         setupDataForGetConfigurationValues()
-        job.roddyBamFileService = Mock(RoddyBamFileService) {
-            getWorkMetadataTableFile(_) >> Paths.get("/asdf")
+        job.wgbsAlignmentWorkFileService = Mock(WgbsAlignmentWorkFileService) {
+            getMetadataTableFile(_) >> Paths.get("/asdf")
         }
 
         expect:

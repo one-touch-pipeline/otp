@@ -21,17 +21,17 @@
  */
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.After
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
+import de.dkfz.tbi.otp.infrastructure.alignment.RoddyBamFileNames
 import de.dkfz.tbi.otp.job.jobs.TestAbstractAlignmentStartJob
 import de.dkfz.tbi.otp.job.jobs.alignment.AbstractAlignmentStartJob
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
@@ -208,7 +208,7 @@ class AbstractAlignmentStartJobIntegrationTests implements DomainFactoryProcessi
         assert TestCase.containSame(seqTracks, rbf.seqTracks)
         assert seqTracks.size() == rbf.numberOfMergedLanes
         assert TestCase.containSame(seqTracks, rbf.containedSeqTracks)
-        assert rbf.workDirectoryName && rbf.workDirectoryName.startsWith(RoddyBamFileService.WORK_DIR_PREFIX)
+        assert rbf.workDirectoryName && rbf.workDirectoryName.startsWith(RoddyBamFileNames.WORK_DIR_PREFIX)
         assert !rbf.oldStructureUsed
 
         return rbf

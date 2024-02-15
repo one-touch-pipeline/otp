@@ -24,9 +24,9 @@ package de.dkfz.tbi.otp.workflow.bamImport
 import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 
-import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.dataprocessing.BamImportInstance
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
+import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
+import de.dkfz.tbi.otp.infrastructure.alignment.*
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.WorkflowShared
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -37,7 +37,13 @@ trait BamImportShared extends WorkflowShared {
     public static final String OUTPUT_ROLE = BamImportWorkflow.OUTPUT_BAM
 
     @Autowired
-    ExternallyProcessedBamFileService externallyProcessedBamFileService
+    ExternalAlignmentLinkFileService externalAlignmentLinkFileService
+
+    @Autowired
+    ExternalAlignmentSourceFileService externalAlignmentSourceFileService
+
+    @Autowired
+    ExternalAlignmentWorkFileService externalAlignmentWorkFileService
 
     @Autowired
     ConcreteArtefactService concreteArtefactService

@@ -1,0 +1,218 @@
+/*
+ * Copyright 2011-2024 The OTP authors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package de.dkfz.tbi.otp.infrastructure.alignment
+
+import grails.testing.gorm.DataTest
+import grails.testing.services.ServiceUnitTest
+import spock.lang.Specification
+
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.filestore.FilestoreService
+import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
+
+import java.nio.file.Path
+import java.nio.file.Paths
+
+class ExternalAlignmentWorkFileServiceSpec extends Specification
+        implements ServiceUnitTest<ExternalAlignmentWorkFileService>, DataTest, ExternalBamFactory, WorkflowSystemDomainFactory {
+
+    @Override
+    Class[] getDomainClassesToMock() {
+        return [
+                ExternalMergingWorkPackage,
+                ExternallyProcessedBamFile,
+                WorkflowArtefact,
+        ]
+    }
+
+    private ExternallyProcessedBamFile bamFile
+    private String testDir
+    private String importDir
+
+    void setup() {
+        importDir = "/path/to/bam/file"
+        testDir = "/base-dir"
+    }
+
+    void setupNonUuid(int count = 1) {
+        String bamName = "bamFile.bam"
+        bamFile = createBamFile(fileName: bamName, importedFrom: "${importDir}/${bamName}")
+        service.abstractBamFileService = Mock(AbstractBamFileService) {
+            count * getBaseDirectory(_) >> Paths.get("/base-dir")
+        }
+    }
+
+    void setupUuid(int count = 1) {
+        String bamName = "bamFileUuid.bam"
+        bamFile = createBamFile([
+                fileName        : bamName,
+                importedFrom    : "${importDir}/${bamName}",
+                workflowArtefact: createWorkflowArtefact([
+                        producedBy: createWorkflowRun([
+                                workFolder: createWorkFolder(),
+                        ]),
+                ]),
+        ])
+        service.filestoreService = Mock(FilestoreService) {
+            count * getWorkFolderPath(_) >> Paths.get("/base-dir-uuid")
+        }
+    }
+
+    void "test getBamFile"() {
+        given:
+        setupNonUuid()
+
+        expect:
+        service.getBamFile(bamFile).toString() == "/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}/${bamFile.bamFileName}"
+    }
+
+    void "test getBaiFile"() {
+        given:
+        setupNonUuid()
+
+        expect:
+        service.getBaiFile(bamFile).toString() == "/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}/${bamFile.baiFileName}"
+    }
+
+    void "test getFurtherFiles"() {
+        given:
+        setupNonUuid(2)
+
+        List<String> files = [
+                'file1',
+                'file2',
+        ]
+        bamFile.furtherFiles = files as Set
+
+        List<Path> expected = files.collect {
+            Paths.get("/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}/${it}")
+        }
+
+        expect:
+        service.getFurtherFiles(bamFile) == expected
+    }
+
+    void "test getBamMaxReadLengthFile"() {
+        given:
+        setupNonUuid()
+
+        expect:
+        service.getBamMaxReadLengthFile(bamFile).toString() ==
+                "/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}/${bamFile.bamFileName}.maxReadLength"
+    }
+
+    void "test getNonOtpFolder"() {
+        given:
+        setupNonUuid()
+
+        expect:
+        service.getNonOtpFolder(bamFile).toString() == "/base-dir/nonOTP"
+    }
+
+    void "test getImportFolder"() {
+        given:
+        setupNonUuid()
+
+        expect:
+        service.getDirectoryPath(bamFile).toString() == "/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}"
+    }
+
+    void "test getInsertSizeFile"() {
+        given:
+        setupNonUuid()
+        bamFile.insertSizeFile = "insert-size-file"
+
+        expect:
+        service.getInsertSizeFile(bamFile).toString() == "/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}/insert-size-file"
+    }
+
+    void "test getBamFile for uuid structure"() {
+        given:
+        setupUuid()
+
+        expect:
+        service.getBamFile(bamFile).toString() == "/base-dir-uuid/${bamFile.bamFileName}"
+    }
+
+    void "test getBaiFile for uuid structure"() {
+        given:
+        setupUuid()
+
+        expect:
+        service.getBaiFile(bamFile).toString() == "/base-dir-uuid/${bamFile.baiFileName}"
+    }
+
+    void "test getFurtherFiles for uuid structure"() {
+        given:
+        setupUuid(2)
+
+        List<String> files = [
+                'file1',
+                'file2',
+        ]
+        bamFile.furtherFiles = files as Set
+
+        List<Path> expected = files.collect {
+            Paths.get("/base-dir-uuid/${it}")
+        }
+
+        expect:
+        service.getFurtherFiles(bamFile) == expected
+    }
+
+    void "test getBamMaxReadLengthFile for uuid structure"() {
+        given:
+        setupUuid()
+
+        expect:
+        service.getBamMaxReadLengthFile(bamFile).toString() ==
+                "/base-dir-uuid/${bamFile.bamFileName}.maxReadLength"
+    }
+
+    void "test getNonOtpFolder for uuid structure"() {
+        given:
+        setupUuid()
+
+        expect:
+        service.getNonOtpFolder(bamFile).toString() == "/base-dir-uuid"
+    }
+
+    void "test getImportFolder for uuid structure"() {
+        given:
+        setupUuid()
+
+        expect:
+        service.getDirectoryPath(bamFile).toString() == "/base-dir-uuid"
+    }
+
+    void "test getInsertSizeFile for uuid structure"() {
+        given:
+        setupUuid()
+
+        bamFile.insertSizeFile = "insert-size-file"
+
+        expect:
+        service.getInsertSizeFile(bamFile).toString() == "/base-dir-uuid/insert-size-file"
+    }
+}

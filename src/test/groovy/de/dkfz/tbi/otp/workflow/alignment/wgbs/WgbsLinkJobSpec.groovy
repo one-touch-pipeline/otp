@@ -25,11 +25,11 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WgbsAlignmentWorkflowDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.alignment.*
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.LinkEntry
@@ -63,7 +63,8 @@ class WgbsLinkJobSpec extends Specification implements DataTest, WgbsAlignmentWo
     WgbsLinkJob job
     RoddyBamFile roddyBamFile
     WorkflowStep workflowStep
-    RoddyBamFileService roddyBamFileService
+    PanCancerLinkFileService panCancerLinkFileService
+    WgbsAlignmentLinkFileService wgbsAlignmentLinkFileService
 
     void setupData() {
         roddyBamFile = createBamFile(roddyExecutionDirectoryNames: ["exec_123456_123456789_test_test"])
@@ -82,11 +83,18 @@ class WgbsLinkJobSpec extends Specification implements DataTest, WgbsAlignmentWo
         job.fileSystemService = new TestFileSystemService()
         job.fileService = new FileService()
         job.logService = Mock(LogService)
-        roddyBamFileService = new RoddyBamFileService()
-        roddyBamFileService.abstractBamFileService = Mock(AbstractBamFileService) {
+
+        AbstractBamFileService abstractBamFileService = Mock(AbstractBamFileService) {
             getBaseDirectory(_) >> Paths.get("/")
         }
-        job.roddyBamFileService = roddyBamFileService
+
+        panCancerLinkFileService = new PanCancerLinkFileService(abstractBamFileService : abstractBamFileService)
+        job.panCancerLinkFileService = panCancerLinkFileService
+        job.panCancerWorkFileService = new PanCancerWorkFileService(abstractBamFileService : abstractBamFileService)
+
+        wgbsAlignmentLinkFileService = new WgbsAlignmentLinkFileService(abstractBamFileService : abstractBamFileService)
+        job.wgbsAlignmentLinkFileService = wgbsAlignmentLinkFileService
+        job.wgbsAlignmentWorkFileService = new WgbsAlignmentWorkFileService(abstractBamFileService : abstractBamFileService)
     }
 
     void "test getLinkMap"() {
@@ -116,18 +124,18 @@ class WgbsLinkJobSpec extends Specification implements DataTest, WgbsAlignmentWo
 
     private List<Path> createLinkedFilesList(RoddyBamFile roddyBamFile, boolean multipleLibraries) {
         List list = [
-                roddyBamFileService.getFinalBamFile(roddyBamFile),
-                roddyBamFileService.getFinalBaiFile(roddyBamFile),
-                roddyBamFileService.getFinalMd5sumFile(roddyBamFile),
-                roddyBamFileService.getFinalMergedQADirectory(roddyBamFile),
-                roddyBamFileService.getFinalExecutionDirectories(roddyBamFile),
-                roddyBamFileService.getFinalSingleLaneQADirectories(roddyBamFile).values(),
-                roddyBamFileService.getFinalMergedMethylationDirectory(roddyBamFile),
-                roddyBamFileService.getFinalMetadataTableFile(roddyBamFile),
+                panCancerLinkFileService.getBamFile(roddyBamFile),
+                panCancerLinkFileService.getBaiFile(roddyBamFile),
+                panCancerLinkFileService.getMd5sumFile(roddyBamFile),
+                panCancerLinkFileService.getMergedQADirectory(roddyBamFile),
+                panCancerLinkFileService.getExecutionDirectories(roddyBamFile),
+                panCancerLinkFileService.getSingleLaneQADirectories(roddyBamFile).values(),
+                wgbsAlignmentLinkFileService.getMergedMethylationDirectory(roddyBamFile),
+                wgbsAlignmentLinkFileService.getMetadataTableFile(roddyBamFile),
         ]
         if (multipleLibraries) {
-            list.addAll(roddyBamFileService.getFinalLibraryQADirectories(roddyBamFile).values())
-            list.addAll(roddyBamFileService.getFinalLibraryMethylationDirectories(roddyBamFile).values())
+            list.addAll(wgbsAlignmentLinkFileService.getLibraryQADirectories(roddyBamFile).values())
+            list.addAll(wgbsAlignmentLinkFileService.getLibraryMethylationDirectories(roddyBamFile).values())
         }
         return list.flatten()
     }

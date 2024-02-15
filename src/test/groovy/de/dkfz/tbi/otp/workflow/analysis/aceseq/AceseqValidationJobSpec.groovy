@@ -137,8 +137,8 @@ class AceseqValidationJobSpec extends Specification implements DataTest, Workflo
 
         and:
         1 * job.concreteArtefactService.getOutputArtefact(workflowStep, analysisOutput) >> instance
-        1 * job.aceseqWorkFileService.getWorkExecutionStoreDirectory(instance) >> storeDirectory
-        1 * job.aceseqWorkFileService.getWorkExecutionDirectories(instance) >> [dir1, dir2]
+        1 * job.aceseqWorkFileService.getExecutionStoreDirectory(instance) >> storeDirectory
+        1 * job.aceseqWorkFileService.getExecutionDirectories(instance) >> [dir1, dir2]
     }
 
     void "saveResult, should do nothing"() {

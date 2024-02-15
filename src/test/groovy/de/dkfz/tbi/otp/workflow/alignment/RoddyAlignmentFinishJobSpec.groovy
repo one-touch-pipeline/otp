@@ -27,10 +27,10 @@ import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.PanCancerWorkflowDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.ProjectService
@@ -93,7 +93,7 @@ class RoddyAlignmentFinishJobSpec extends Specification implements DataTest, Pan
             1 * updateSamplePairStatusToNeedProcessing(roddyBamFile)
         }
 
-        job.roddyBamFileService = new RoddyBamFileService([
+        job.panCancerWorkFileService = new PanCancerWorkFileService([
                 abstractBamFileService: new AbstractBamFileService([
                         individualService: new IndividualService([
                                 projectService: new ProjectService([

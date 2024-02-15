@@ -25,7 +25,8 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.WgbsAlignmentWorkFileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.alignment.alignment.AbstractRoddyAlignmentValidationJobSpec
@@ -60,8 +61,13 @@ class WgbsValidationJobSpec extends AbstractRoddyAlignmentValidationJobSpec {
     @Unroll
     void "test getExpectedFiles() and getExpectedDirectories, when called the correct paths (files or directories) should be returned"() {
         given:
-        RoddyBamFileService roddyBamFileService = new RoddyBamFileService()
-        roddyBamFileService.abstractBamFileService = Mock(AbstractBamFileService) {
+        PanCancerWorkFileService panCancerWorkFileService = new PanCancerWorkFileService()
+        WgbsAlignmentWorkFileService wgbsAlignmentWorkFileService = new WgbsAlignmentWorkFileService()
+
+        panCancerWorkFileService.abstractBamFileService = Mock(AbstractBamFileService) {
+            getBaseDirectory(_) >> Paths.get("/")
+        }
+        wgbsAlignmentWorkFileService.abstractBamFileService = Mock(AbstractBamFileService) {
             getBaseDirectory(_) >> Paths.get("/")
         }
 
@@ -74,29 +80,30 @@ class WgbsValidationJobSpec extends AbstractRoddyAlignmentValidationJobSpec {
         }
 
         List<Path> expectedFiles = [
-                roddyBamFileService.getWorkBamFile(abstractBamFile),
-                roddyBamFileService.getWorkBaiFile(abstractBamFile),
-                roddyBamFileService.getWorkMd5sumFile(abstractBamFile),
-                roddyBamFileService.getWorkMergedQAJsonFile(abstractBamFile),
-        ] + roddyBamFileService.getWorkSingleLaneQAJsonFiles(abstractBamFile).values()
+                panCancerWorkFileService.getBamFile(abstractBamFile),
+                panCancerWorkFileService.getBaiFile(abstractBamFile),
+                panCancerWorkFileService.getMd5sumFile(abstractBamFile),
+                panCancerWorkFileService.getMergedQAJsonFile(abstractBamFile),
+        ] + panCancerWorkFileService.getSingleLaneQAJsonFiles(abstractBamFile).values()
 
         List<Path> expectedDirectories = [
-                roddyBamFileService.getWorkDirectory(abstractBamFile),
-                roddyBamFileService.getWorkMergedQADirectory(abstractBamFile),
-                roddyBamFileService.getWorkExecutionStoreDirectory(abstractBamFile),
-                roddyBamFileService.getWorkMergedMethylationDirectory(abstractBamFile),
+                panCancerWorkFileService.getDirectoryPath(abstractBamFile),
+                panCancerWorkFileService.getMergedQADirectory(abstractBamFile),
+                panCancerWorkFileService.getExecutionStoreDirectory(abstractBamFile),
+                wgbsAlignmentWorkFileService.getMergedMethylationDirectory(abstractBamFile),
         ]
 
         if (multipleLibraries) {
-            expectedFiles.addAll(roddyBamFileService.getWorkLibraryQAJsonFiles(abstractBamFile).values())
-            expectedDirectories.addAll(roddyBamFileService.getWorkLibraryMethylationDirectories(abstractBamFile).values().unique(false))
+            expectedFiles.addAll(wgbsAlignmentWorkFileService.getLibraryQAJsonFiles(abstractBamFile).values())
+            expectedDirectories.addAll(wgbsAlignmentWorkFileService.getLibraryMethylationDirectories(abstractBamFile).values().unique(false))
         }
 
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
             _ * getOutputArtefact(_, _) >> abstractBamFile
         }
         job.fileSystemService = new TestFileSystemService()
-        job.roddyBamFileService = roddyBamFileService
+        job.panCancerWorkFileService = panCancerWorkFileService
+        job.wgbsAlignmentWorkFileService = wgbsAlignmentWorkFileService
 
         when:
         List<Path> files = job.getExpectedFiles(workflowStep)

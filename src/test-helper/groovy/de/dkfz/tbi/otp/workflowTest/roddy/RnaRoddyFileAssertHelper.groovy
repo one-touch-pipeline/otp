@@ -21,38 +21,65 @@
  */
 package de.dkfz.tbi.otp.workflowTest.roddy
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.RnaAlignmentLinkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.RnaAlignmentWorkFileService
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 import java.nio.file.Path
 
 @Component
-class RnaRoddyFileAssertHelper extends RoddyFileAssertHelper implements RoddyFileAssertTrait {
+class RnaRoddyFileAssertHelper extends RoddyFileAssertHelper {
+
+    @Autowired
+    RnaAlignmentWorkFileService rnaAlignmentWorkFileService
+
+    @Autowired
+    RnaAlignmentLinkFileService rnaAlignmentLinkFileService
 
     @Override
-    Path getWorkDirectory(RoddyBamFile bamFile, RoddyBamFileService rnaRoddyBamFileService) {
-        return rnaRoddyBamFileService.getWorkDirectory(bamFile)
+    Path getWorkDirectory(RoddyBamFile bamFile) {
+        return rnaAlignmentWorkFileService.getDirectoryPath(bamFile)
     }
 
     @Override
-    Path getWorkQADirectory(RoddyBamFile bamFile, RoddyBamFileService rnaRoddyBamFileService) {
-        return rnaRoddyBamFileService.getWorkQADirectory(bamFile)
+    Path getLinkMergedQADirectory(RoddyBamFile bamFile) {
+        return rnaAlignmentLinkFileService.getMergedQADirectory(bamFile)
     }
 
     @Override
-    List<Path> getAdditionalDirectories(RoddyBamFile bamFile, RoddyBamFileService rnaRoddyBamFileService) {
+    Path getWorkMergedQADirectory(RoddyBamFile bamFile) {
+        return rnaAlignmentWorkFileService.getMergedQADirectory(bamFile)
+    }
+
+    @Override
+    Path getWorkQADirectory(RoddyBamFile bamFile) {
+        return rnaAlignmentWorkFileService.getQADirectory(bamFile)
+    }
+
+    @Override
+    Map<SeqTrack, Path> getLinkSingleLaneQADirectories(RoddyBamFile bamFile) {
+        return rnaAlignmentLinkFileService.getSingleLaneQADirectories(bamFile)
+    }
+
+    @Override
+    Map<SeqTrack, Path> getWorkSingleLaneQADirectories(RoddyBamFile bamFile) {
+        return rnaAlignmentWorkFileService.getSingleLaneQADirectories(bamFile)
+    }
+
+    @Override
+    Map<SeqTrack, Path> getWorkSingleLaneQAJsonFiles(RoddyBamFile bamFile) {
+        return rnaAlignmentWorkFileService.getSingleLaneQAJsonFiles(bamFile)
+    }
+
+    @Override
+    List<Path> getAdditionalWorkFiles(RoddyBamFile bamFile) {
         return [
-        ]
-    }
-
-    @Override
-    List<Path> getAdditionalFiles(RoddyBamFile bamFile, RoddyBamFileService rnaRoddyBamFileService) {
-        return [
-                rnaRoddyBamFileService.getWorkMergedQAJsonFile(bamFile),
-                (rnaRoddyBamFileService as RnaRoddyBamFileService).getCorrespondingWorkChimericBamFile(bamFile),
+                rnaAlignmentWorkFileService.getMergedQAJsonFile(bamFile),
+                rnaAlignmentWorkFileService.getCorrespondingChimericBamFile(bamFile),
         ]
     }
 }

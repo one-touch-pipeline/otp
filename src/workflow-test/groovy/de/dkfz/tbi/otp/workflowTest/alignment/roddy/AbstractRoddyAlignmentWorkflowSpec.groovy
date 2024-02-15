@@ -28,9 +28,10 @@ import org.slf4j.LoggerFactory
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerLinkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
 import de.dkfz.tbi.otp.job.processing.RoddyConfigService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
@@ -81,7 +82,9 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
 
     RoddyConfigService roddyConfigService
 
-    RoddyBamFileService roddyBamFileService
+    PanCancerWorkFileService panCancerWorkFileService
+
+    PanCancerLinkFileService panCancerLinkFileService
 
     FileAssertHelper fileAssertHelper
 
@@ -404,7 +407,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
             }
         }
 
-        roddyBamFileService.getFinalSingleLaneQAJsonFiles(bamFile).each { SeqTrack seqTrack, Path qaFile ->
+        panCancerLinkFileService.getSingleLaneQAJsonFiles(bamFile).each { SeqTrack seqTrack, Path qaFile ->
             JSONObject json = (JSONObject) JSON.parse(qaFile.text)
             Iterator chromosomes = json.keys()
             chromosomes.each { String chromosome ->
@@ -413,7 +416,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
         }
         RoddyMergedBamQa mergedQa = CollectionUtils.exactlyOneElement(
                 RoddyMergedBamQa.findAllByAbstractBamFileAndChromosome(bamFile, RoddyQualityAssessment.ALL))
-        JSONObject json = (JSONObject) JSON.parse(roddyBamFileService.getFinalMergedQAJsonFile(bamFile).text)
+        JSONObject json = (JSONObject) JSON.parse(panCancerLinkFileService.getMergedQAJsonFile(bamFile).text)
         json.keys().each { String chromosome ->
             assert RoddyMergedBamQa.findAllByChromosomeAndAbstractBamFile(chromosome, bamFile)
         }
@@ -496,10 +499,10 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
 
     protected void assertWorkDirectoryFileSystemState(RoddyBamFile bamFile) {
         //  content of the work dir: executionStoreDirectory
-        fileAssertHelper.assertDirectoryContentReadable(roddyBamFileService.getWorkExecutionDirectories(bamFile))
+        fileAssertHelper.assertDirectoryContentReadable(panCancerWorkFileService.getExecutionDirectories(bamFile))
 
         // check that given files exist in the execution store:
-        roddyBamFileService.getWorkExecutionDirectories(bamFile).each { executionStore ->
+        panCancerWorkFileService.getExecutionDirectories(bamFile).each { executionStore ->
             filesInRoddyExecutionDir.each { String fileName ->
                 fileAssertHelper.assertFileIsReadableAndNotEmpty(executionStore.resolve(fileName))
             }
@@ -514,22 +517,22 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
     }
 
     private void assertRoddyExecutionDirectories(RoddyBamFile bamFile) {
-        List<Path> expectedRoddyExecutionDirs = roddyBamFileService.getFinalExecutionDirectories(bamFile)
+        List<Path> expectedRoddyExecutionDirs = panCancerLinkFileService.getExecutionDirectories(bamFile)
         fileAssertHelper.assertDirectoryContentReadable(expectedRoddyExecutionDirs)
     }
 
     private void assertBamFileFileOnFileSystem(RoddyBamFile bamFile) {
         // check md5sum content
-        assert bamFile.md5sum == roddyBamFileService.getFinalMd5sumFile(bamFile).text.replaceAll("\n", "")
+        assert bamFile.md5sum == panCancerLinkFileService.getMd5sumFile(bamFile).text.replaceAll("\n", "")
 
         // content of the bam file
         LogThreadLocal.withThreadLog(System.out) {
-            LocalShellHelper.executeAndWait(" zcat  ${roddyBamFileService.getFinalBamFile(bamFile)} 1> /dev/null").assertExitCodeZeroAndStderrEmpty()
+            LocalShellHelper.executeAndWait(" zcat  ${panCancerLinkFileService.getBamFile(bamFile)} 1> /dev/null").assertExitCodeZeroAndStderrEmpty()
         }
-        assert Files.size(roddyBamFileService.getFinalBamFile(bamFile)) == bamFile.fileSize
+        assert Files.size(panCancerLinkFileService.getBamFile(bamFile)) == bamFile.fileSize
 
         // samtools may under some circumstances produce small bam files of size larger than zero that however do not contain any reads.
-        assert Files.size(roddyBamFileService.getFinalBamFile(bamFile)) > 1024L
+        assert Files.size(panCancerLinkFileService.getBamFile(bamFile)) > 1024L
     }
 
     protected void verifyInputIsNotDeleted() {

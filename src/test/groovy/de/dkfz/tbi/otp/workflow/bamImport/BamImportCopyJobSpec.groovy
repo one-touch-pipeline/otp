@@ -28,15 +28,15 @@ import spock.lang.TempDir
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.BamImportWorkflowDomainFactory
+import de.dkfz.tbi.otp.infrastructure.alignment.ExternalAlignmentSourceFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.ExternalAlignmentWorkFileService
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
-import de.dkfz.tbi.otp.filestore.PathOption
 
 import java.nio.file.Path
 
@@ -117,16 +117,17 @@ class BamImportCopyJobSpec extends Specification implements DataTest, DomainFact
         job.processingOptionService = new ProcessingOptionService()
         job.logService = Mock(LogService)
 
-        job.externallyProcessedBamFileService = Mock(ExternallyProcessedBamFileService) {
-            getSourceBamFilePath(epmbfWithMd5sum) >> sourceBamFile
-            getSourceBaiFilePath(epmbfWithMd5sum) >> sourceBaiFile
-            getSourceBaseDirFilePath(epmbfWithMd5sum) >> sourcePath
+        job.externalAlignmentSourceFileService = Mock(ExternalAlignmentSourceFileService) {
+            getBamFile(epmbfWithMd5sum) >> sourceBamFile
+            getBaiFile(epmbfWithMd5sum) >> sourceBaiFile
+            getDirectoryPath(epmbfWithMd5sum) >> sourcePath
+        }
+        job.externalAlignmentWorkFileService = Mock(ExternalAlignmentWorkFileService) {
+            getBamFile(epmbfWithMd5sum) >> importedBamPath
+            getBaiFile(epmbfWithMd5sum) >> importedBaiPath
+            getDirectoryPath(epmbfWithMd5sum) >> importDir
 
-            getBamFile(epmbfWithMd5sum, PathOption.REAL_PATH) >> importedBamPath
-            getBaiFile(epmbfWithMd5sum, PathOption.REAL_PATH) >> importedBaiPath
-            getImportFolder(epmbfWithMd5sum, PathOption.REAL_PATH) >> importDir
-
-            getBamMaxReadLengthFile(epmbfWithMd5sum, PathOption.REAL_PATH) >> importedMRLPath
+            getBamMaxReadLengthFile(epmbfWithMd5sum) >> importedMRLPath
         }
 
         findOrCreateProcessingOption(

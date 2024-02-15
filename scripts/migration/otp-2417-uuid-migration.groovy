@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2023 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,15 +21,16 @@
  */
 
 import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
-import de.dkfz.tbi.otp.filestore.BaseFolder
-import de.dkfz.tbi.otp.filestore.FilestoreService
-import de.dkfz.tbi.otp.filestore.WorkFolder
+import de.dkfz.tbi.otp.filestore.*
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.alignment.RnaAlignmentLinkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.RnaAlignmentWorkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
@@ -37,10 +38,9 @@ import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflow.bamImport.BamImportWorkflow
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationWorkflow
 import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
-import de.dkfz.tbi.otp.workflowExecution.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflowExecution.Workflow
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.utils.TimeFormats
-
 import java.nio.file.FileSystem
 import java.nio.file.Path
 
@@ -74,7 +74,8 @@ boolean dryRun = true
 // script
 FilestoreService filestoreService = ctx.filestoreService
 ConcreteArtefactService concreteArtefactService = ctx.concreteArtefactService
-RnaRoddyBamFileService rnaRoddyBamFileService = ctx.rnaRoddyBamFileService
+RnaAlignmentWorkFileService rnaAlignmentWorkFileService = ctx.rnaAlignmentWorkFileService
+RnaAlignmentLinkFileService rnaAlignmentLinkFileService = ctx.rnaAlignmentLinkFileService
 FileSystemService fileSystemService = ctx.fileSystemService
 FileService fileService = ctx.fileService
 ConfigService configService = ctx.configService
@@ -121,8 +122,8 @@ WorkflowRun.withTransaction {
                     return
                 }
 
-                Path oldBaseDir = rnaRoddyBamFileService.getBaseDirectory(rnaRoddyBamFile)
-                Path oldWorkDir = rnaRoddyBamFileService.getWorkDirectory(rnaRoddyBamFile)
+                Path oldBaseDir = rnaAlignmentLinkFileService.getDirectoryPath(rnaRoddyBamFile)
+                Path oldWorkDir = rnaAlignmentWorkFileService.getDirectoryPath(rnaRoddyBamFile)
                 WorkFolder workFolder = filestoreService.createWorkFolder(baseFolder)
                 Path workFolderPath = filestoreService.getWorkFolderPath(workFolder)
                 filestoreService.attachWorkFolder(workflowRun, workFolder)

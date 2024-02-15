@@ -22,9 +22,12 @@
 package de.dkfz.tbi.otp.workflow.alignment.wgbs
 
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.infrastructure.alignment.WgbsAlignmentLinkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.WgbsAlignmentWorkFileService
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerLinkJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -35,28 +38,34 @@ import java.nio.file.Path
 @Slf4j
 class WgbsLinkJob extends PanCancerLinkJob {
 
+    @Autowired
+    WgbsAlignmentLinkFileService wgbsAlignmentLinkFileService
+
+    @Autowired
+    WgbsAlignmentWorkFileService wgbsAlignmentWorkFileService
+
     @Override
     protected List<LinkEntry> getLinkMap(WorkflowStep workflowStep) {
         List<LinkEntry> links = super.getLinkMap(workflowStep)
 
         RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
 
-        links.add(new LinkEntry(link: roddyBamFileService.getFinalMetadataTableFile(roddyBamFile),
-                target: roddyBamFileService.getWorkMetadataTableFile(roddyBamFile)))
-        links.add(new LinkEntry(link: roddyBamFileService.getFinalMergedMethylationDirectory(roddyBamFile),
-                target: roddyBamFileService.getWorkMergedMethylationDirectory(roddyBamFile)))
+        links.add(new LinkEntry(link: wgbsAlignmentLinkFileService.getMetadataTableFile(roddyBamFile),
+                target: wgbsAlignmentWorkFileService.getMetadataTableFile(roddyBamFile)))
+        links.add(new LinkEntry(link: wgbsAlignmentLinkFileService.getMergedMethylationDirectory(roddyBamFile),
+                target: wgbsAlignmentWorkFileService.getMergedMethylationDirectory(roddyBamFile)))
 
         if (roddyBamFile.hasMultipleLibraries()) {
             ([
-                    roddyBamFileService.getFinalLibraryQADirectories(roddyBamFile).values().asList().sort(),
-                    roddyBamFileService.getWorkLibraryQADirectories(roddyBamFile).values().asList().sort(),
+                    wgbsAlignmentLinkFileService.getLibraryQADirectories(roddyBamFile).values().asList().sort(),
+                    wgbsAlignmentWorkFileService.getLibraryQADirectories(roddyBamFile).values().asList().sort(),
             ].transpose() as List<List<Path>>).each {
                 links.add(new LinkEntry(link: it[0], target: it[1]))
             }
 
             ([
-                    roddyBamFileService.getFinalLibraryMethylationDirectories(roddyBamFile).values().asList().sort(),
-                    roddyBamFileService.getWorkLibraryMethylationDirectories(roddyBamFile).values().asList().sort(),
+                    wgbsAlignmentLinkFileService.getLibraryMethylationDirectories(roddyBamFile).values().asList().sort(),
+                    wgbsAlignmentWorkFileService.getLibraryMethylationDirectories(roddyBamFile).values().asList().sort(),
             ].transpose() as List<List<Path>>).each {
                 links.add(new LinkEntry(link: it[0], target: it[1]))
             }

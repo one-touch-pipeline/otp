@@ -24,9 +24,8 @@ package de.dkfz.tbi.otp.workflow.bamImport
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
-import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.dataprocessing.BamImportInstance
+import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.jobs.AbstractLinkJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -45,13 +44,13 @@ class BamImportReplaceSourceJob extends AbstractLinkJob implements BamImportShar
         BamImportInstance importInstance = getImportInstance(bamFile)
 
         if (importInstance.linkOperation.replaceSourceWithLink) {
-            Path linkBam = externallyProcessedBamFileService.getSourceBamFilePath(bamFile)
-            Path linkBai = externallyProcessedBamFileService.getSourceBaiFilePath(bamFile)
-            Path linkBaseDir = externallyProcessedBamFileService.getSourceBaseDirFilePath(bamFile)
+            Path linkBam = externalAlignmentSourceFileService.getBamFile(bamFile)
+            Path linkBai = externalAlignmentSourceFileService.getBaiFile(bamFile)
+            Path linkBaseDir = externalAlignmentSourceFileService.getDirectoryPath(bamFile)
 
-            Path targetBamFile = externallyProcessedBamFileService.getBamFile(bamFile, PathOption.REAL_PATH)
-            Path targetBaiFile = externallyProcessedBamFileService.getBaiFile(bamFile, PathOption.REAL_PATH)
-            Path targetBaseDir = externallyProcessedBamFileService.getImportFolder(bamFile, PathOption.REAL_PATH)
+            Path targetBamFile = externalAlignmentWorkFileService.getBamFile(bamFile)
+            Path targetBaiFile = externalAlignmentWorkFileService.getBaiFile(bamFile)
+            Path targetBaseDir = externalAlignmentWorkFileService.getDirectoryPath(bamFile)
 
             linkEntries.add(new LinkEntry(link: linkBam, target: targetBamFile))
             linkEntries.add(new LinkEntry(link: linkBai, target: targetBaiFile))

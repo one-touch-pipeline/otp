@@ -24,8 +24,8 @@ package de.dkfz.tbi.otp.workflow.analysis
 import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.tbi.otp.dataprocessing.AnalysisWorkFileServiceFactoryService
-import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
+import de.dkfz.tbi.otp.dataprocessing.RoddyResultWorkFileServiceFactoryService
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RoddyConfigService
 
@@ -35,13 +35,12 @@ import java.nio.file.Path
 class AbstractAnalysisService {
 
     RoddyConfigService roddyConfigService
-    AnalysisWorkFileServiceFactoryService analysisWorkFileServiceFactoryService
+    RoddyResultWorkFileServiceFactoryService roddyResultWorkFileServiceFactoryService
     FileService fileService
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#analysis.project, 'OTP_READ_ACCESS')")
-    Path fetchConfigPath(BamFilePairAnalysis analysis) {
-        Path workDir = analysisWorkFileServiceFactoryService.getService(analysis).getDirectoryPath(analysis)
-        Path configFile = roddyConfigService.getConfigPath(workDir)
+    Path fetchConfigPath(RoddyResult roddyResult) {
+        Path configFile = roddyResultWorkFileServiceFactoryService.getService(roddyResult).getConfigFile(roddyResult)
 
         return fileService.fileIsReadable(configFile) ? configFile : null
     }

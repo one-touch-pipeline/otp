@@ -27,15 +27,15 @@ import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 import spock.lang.TempDir
 
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.RoddyConfigService
-import de.dkfz.tbi.otp.job.processing.TestFileSystemService
+import de.dkfz.tbi.otp.infrastructure.alignment.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
+import de.dkfz.tbi.otp.utils.HelperUtils
 
+import java.nio.file.Files
 import java.nio.file.Path
 
 @Rollback
@@ -47,6 +47,11 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
 
     RoddyBamFile roddyBamFile
     TestConfigService configService
+
+    PanCancerLinkFileService panCancerLinkFileService
+    PanCancerWorkFileService panCancerWorkFileService
+    WgbsAlignmentLinkFileService wgbsAlignmentLinkFileService
+    WgbsAlignmentWorkFileService wgbsAlignmentWorkFileService
 
     @TempDir
     Path tempDir
@@ -77,62 +82,73 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         DomainFactory.createRoddyProcessingOptions(tempDir.toFile())
 
         roddyBamFile.project.unixGroup = configService.workflowProjectUnixGroup
+
+        linkFilesToFinalDestinationService = new LinkFilesToFinalDestinationService()
+        panCancerLinkFileService = new PanCancerLinkFileService()
+        panCancerLinkFileService.abstractBamFileService = Mock(AbstractBamFileService) {
+            getBaseDirectory(_) >> tempDir.resolve('link')
+        }
+        panCancerWorkFileService = new PanCancerWorkFileService()
+        panCancerWorkFileService.abstractBamFileService = Mock(AbstractBamFileService) {
+            getBaseDirectory(_) >> tempDir.resolve('work')
+        }
+        linkFilesToFinalDestinationService.panCancerLinkFileService = panCancerLinkFileService
+        linkFilesToFinalDestinationService.panCancerWorkFileService = panCancerWorkFileService
+
+        wgbsAlignmentLinkFileService = new WgbsAlignmentLinkFileService(abstractBamFileService: panCancerLinkFileService.abstractBamFileService)
+        linkFilesToFinalDestinationService.wgbsAlignmentLinkFileService = wgbsAlignmentLinkFileService
+        wgbsAlignmentWorkFileService = new WgbsAlignmentWorkFileService(abstractBamFileService: panCancerWorkFileService.abstractBamFileService)
+        linkFilesToFinalDestinationService.wgbsAlignmentWorkFileService = wgbsAlignmentWorkFileService
     }
 
     void cleanup() {
         configService.clean()
     }
 
-    void "test getFilesToCleanup"(int countTmpFiles, int countTmpDir, boolean wgbs) {
+    void "test getUnusedResultFiles"(int countTmpFiles, int countTmpDir, boolean wgbs) {
         given:
         setupData()
         if (wgbs) {
-            SeqType seqType = roddyBamFile.mergingWorkPackage.seqType
-            seqType.name = SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName
-            seqType.save(flush: true)
+            linkNewResults_methylation_setup()
+        } else {
+            CreateRoddyFileHelper.createRoddyAlignmentResultFiles(panCancerWorkFileService, roddyBamFile)
         }
 
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-        List<File> filesNotToBeCalledFor = [
-                roddyBamFile.workBamFile,
-                roddyBamFile.workBaiFile,
-                roddyBamFile.workMd5sumFile,
-                roddyBamFile.workQADirectory,
-                roddyBamFile.workExecutionStoreDirectory,
+        List<Path> filesNotToBeCalledFor = [
+                panCancerWorkFileService.getBamFile(roddyBamFile),
+                panCancerWorkFileService.getBaiFile(roddyBamFile),
+                panCancerWorkFileService.getMd5sumFile(roddyBamFile),
+                panCancerWorkFileService.getQADirectory(roddyBamFile),
+                panCancerWorkFileService.getExecutionStoreDirectory(roddyBamFile),
         ]
 
         if (wgbs) {
-            filesNotToBeCalledFor += [roddyBamFile.workMethylationDirectory,
-                                      roddyBamFile.workMetadataTableFile,
+            filesNotToBeCalledFor += [wgbsAlignmentWorkFileService.getMethylationDirectory(roddyBamFile),
+                                      wgbsAlignmentWorkFileService.getMetadataTableFile(roddyBamFile),
             ]
         }
 
-        List<File> tmpFiles = []
+        List<Path> tmpFiles = []
         countTmpFiles.times {
-            tmpFiles << File.createTempFile("tmp", ".tmp", roddyBamFile.workDirectory)
+            tmpFiles << Files.createTempFile(panCancerWorkFileService.getDirectoryPath(roddyBamFile), "tmp", ".tmp")
         }
         assert countTmpFiles == tmpFiles.size()
 
-        List<File> tmpDirectories = []
+        List<Path> tmpDirectories = []
         countTmpDir.times {
-            File file = new File(roddyBamFile.workDirectory, HelperUtils.uniqueString)
-            assert file.mkdir()
+            Path file = panCancerWorkFileService.getDirectoryPath(roddyBamFile).resolve(HelperUtils.uniqueString)
+            Files.createDirectories(file)
             tmpDirectories << file
         }
         assert countTmpDir == tmpDirectories.size()
-
-        linkFilesToFinalDestinationService = new LinkFilesToFinalDestinationService()
-        linkFilesToFinalDestinationService.roddyConfigService = new RoddyConfigService()
-        linkFilesToFinalDestinationService.fileSystemService = new TestFileSystemService()
-        linkFilesToFinalDestinationService.fileService = new FileService()
-        assert (filesNotToBeCalledFor + tmpFiles + tmpDirectories) as Set == roddyBamFile.workDirectory.listFiles() as Set
+        assert (filesNotToBeCalledFor + tmpFiles + tmpDirectories) as Set == Files.list(panCancerWorkFileService.getDirectoryPath(roddyBamFile)).toList() as Set
 
         when:
         List<Path> files = linkFilesToFinalDestinationService.getUnusedResultFiles(roddyBamFile)
 
         then:
         filesNotToBeCalledFor.every {
-            !files.contains(it.path)
+            !files.contains(it)
         }
         tmpDirectories.every {
             files*.toString().contains(it.toString())
@@ -155,18 +171,18 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         given:
         setupData()
 
-        List<File> linkedFiles = createLinkedFilesList()
+        List<Path> linkedFiles = createLinkedFilesList()
 
-        linkFilesToFinalDestinationService = new LinkFilesToFinalDestinationService()
-        linkFilesToFinalDestinationService.linkFileUtils = Mock(LinkFileUtils)
+        linkFilesToFinalDestinationService.fileService = Mock(FileService)
 
         when:
         linkFilesToFinalDestinationService.linkNewResults(roddyBamFile)
 
         then:
-        1 * linkFilesToFinalDestinationService.linkFileUtils.createAndValidateLinks(_, _) >> { Map<File, File> targetLinkMap, String group ->
-            TestCase.assertContainSame(targetLinkMap.values(), linkedFiles)
+        linkedFiles.each {
+            1 * linkFilesToFinalDestinationService.fileService.createLink(it, _, _, _) >> { Path link, x, y, z -> }
         }
+        0 * linkFilesToFinalDestinationService.fileService._
     }
 
     void "test linkNewResults, methylation one library, all fine"() {
@@ -174,20 +190,20 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         setupData()
         linkNewResults_methylation_setup()
 
-        List<File> linkedFiles = createLinkedFilesList()
-        linkedFiles.addAll(roddyBamFile.finalMergedMethylationDirectory)
-        linkedFiles.addAll(roddyBamFile.finalMetadataTableFile)
+        List<Path> linkedFiles = createLinkedFilesList()
+        linkedFiles.add(wgbsAlignmentLinkFileService.getMergedMethylationDirectory(roddyBamFile))
+        linkedFiles.add(wgbsAlignmentLinkFileService.getMetadataTableFile(roddyBamFile))
 
-        linkFilesToFinalDestinationService = new LinkFilesToFinalDestinationService()
-        linkFilesToFinalDestinationService.linkFileUtils = Mock(LinkFileUtils)
+        linkFilesToFinalDestinationService.fileService = Mock(FileService)
 
         when:
         linkFilesToFinalDestinationService.linkNewResults(roddyBamFile)
 
         then:
-        1 * linkFilesToFinalDestinationService.linkFileUtils.createAndValidateLinks(_, _) >> { Map<File, File> targetLinkMap, String group ->
-            TestCase.assertContainSame(targetLinkMap.values(), linkedFiles)
+        linkedFiles.each {
+            1 * linkFilesToFinalDestinationService.fileService.createLink(it, _, _, _) >> { Path link, x, y, z -> }
         }
+        0 * linkFilesToFinalDestinationService.fileService._
     }
 
     void "test linkNewResults_methylation_TwoLibraries_AllFine"() {
@@ -204,22 +220,22 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
 
         linkNewResults_methylation_setup()
 
-        List<File> linkedFiles = createLinkedFilesList()
-        linkedFiles.addAll(roddyBamFile.finalMergedMethylationDirectory)
-        linkedFiles.addAll(roddyBamFile.finalMetadataTableFile)
-        linkedFiles.addAll(roddyBamFile.finalLibraryMethylationDirectories.values())
-        linkedFiles.addAll(roddyBamFile.finalLibraryQADirectories.values())
+        List<Path> linkedFiles = createLinkedFilesList()
+        linkedFiles.add(wgbsAlignmentLinkFileService.getMergedMethylationDirectory(roddyBamFile))
+        linkedFiles.add(wgbsAlignmentLinkFileService.getMetadataTableFile(roddyBamFile))
+        linkedFiles.addAll(wgbsAlignmentLinkFileService.getLibraryMethylationDirectories(roddyBamFile).values())
+        linkedFiles.addAll(wgbsAlignmentLinkFileService.getLibraryQADirectories(roddyBamFile).values())
 
-        linkFilesToFinalDestinationService = new LinkFilesToFinalDestinationService()
-        linkFilesToFinalDestinationService.linkFileUtils = Mock(LinkFileUtils)
+        linkFilesToFinalDestinationService.fileService = Mock(FileService)
 
         when:
         linkFilesToFinalDestinationService.linkNewResults(roddyBamFile)
 
         then:
-        1 * linkFilesToFinalDestinationService.linkFileUtils.createAndValidateLinks(_, _) >> { Map<File, File> targetLinkMap, String group ->
-            TestCase.assertContainSame(targetLinkMap.values(), linkedFiles)
+        linkedFiles.each {
+            1 * linkFilesToFinalDestinationService.fileService.createLink(it, _, _, _) >> { Path link, x, y, z -> }
         }
+        0 * linkFilesToFinalDestinationService.fileService._
     }
 
     void "test linkNewResults_bamFileIsNull_shouldFail"() {
@@ -253,17 +269,17 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         seqType.name = SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName
         seqType.save(flush: true)
 
-        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+        CreateRoddyFileHelper.createRoddyAlignmentResultFiles(wgbsAlignmentWorkFileService, roddyBamFile)
     }
 
-    private List<File> createLinkedFilesList() {
+    private List<Path> createLinkedFilesList() {
         return [
-                roddyBamFile.finalBamFile,
-                roddyBamFile.finalBaiFile,
-                roddyBamFile.finalMd5sumFile,
-                roddyBamFile.finalMergedQADirectory,
-                roddyBamFile.finalExecutionDirectories,
-                roddyBamFile.finalSingleLaneQADirectories.values(),
+                panCancerLinkFileService.getBamFile(roddyBamFile),
+                panCancerLinkFileService.getBaiFile(roddyBamFile),
+                panCancerLinkFileService.getMd5sumFile(roddyBamFile),
+                panCancerLinkFileService.getMergedQADirectory(roddyBamFile),
+                panCancerLinkFileService.getExecutionDirectories(roddyBamFile),
+                panCancerLinkFileService.getSingleLaneQADirectories(roddyBamFile).values(),
         ].flatten()
     }
 
@@ -281,10 +297,10 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         List<Path> files = linkFilesToFinalDestinationService.getOldAdditionalResults(roddyBamFile2)
 
         then:
-        files*.toString().contains(roddyBamFile.workDirectory.toString())
+        files*.toString().contains(panCancerWorkFileService.getDirectoryPath(roddyBamFile).toString())
         !files*.toString().contains(roddyBamFile2.workDirectory.toString())
-        files*.toString().contains(roddyBamFile.finalExecutionStoreDirectory.toString())
-        files*.toString().contains(roddyBamFile.finalQADirectory.toString())
+        files*.toString().contains(panCancerLinkFileService.getExecutionStoreDirectory(roddyBamFile).toString())
+        files*.toString().contains(panCancerLinkFileService.getQADirectory(roddyBamFile).toString())
     }
 
     void 'getOldAdditionalResults, should return all bam files paths, when work packages exist in old structure and latest is old is #latestIsOld'() {
@@ -307,10 +323,10 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
 
         then:
         !files*.toString().contains(roddyBamFile2.workDirectory.toString())
-        roddyBamFile.finalExecutionDirectories.every {
+        panCancerLinkFileService.getExecutionDirectories(roddyBamFile).every {
             it.toString().startsWithAny(*(files*.toString()))
         }
-        roddyBamFile.finalSingleLaneQADirectories.values().every {
+        panCancerLinkFileService.getSingleLaneQADirectories(roddyBamFile).values().every {
             it.toString().startsWithAny(*(files*.toString()))
         }
 

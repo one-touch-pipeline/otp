@@ -26,10 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvWorkFileService
-import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.workflow.jobs.AbstractRoddyClusterValidationJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -41,9 +38,6 @@ class SnvValidationJob extends AbstractRoddyClusterValidationJob implements SnvW
 
     @Autowired
     SnvWorkFileService snvWorkFileService
-
-    @Autowired
-    ExecuteRoddyCommandService executeRoddyCommandService
 
     @Autowired
     SnvCallingService snvCallingService
@@ -62,7 +56,7 @@ class SnvValidationJob extends AbstractRoddyClusterValidationJob implements SnvW
     protected List<Path> getExpectedDirectories(WorkflowStep workflowStep) {
         RoddySnvCallingInstance instance = getSnvInstance(workflowStep)
 
-        return [snvWorkFileService.getWorkExecutionStoreDirectory(instance)] + snvWorkFileService.getWorkExecutionDirectories(instance)
+        return [snvWorkFileService.getExecutionStoreDirectory(instance)] + snvWorkFileService.getExecutionDirectories(instance)
     }
 
     @Override

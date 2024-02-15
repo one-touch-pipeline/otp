@@ -27,7 +27,6 @@ import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.AbstractBamFileServiceFactoryService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaWorkFileService
@@ -35,6 +34,8 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.SophiaDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.infrastructure.alignment.AbstractAlignmentLinkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.AlignmentLinkFileServiceFactoryService
 import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
@@ -84,13 +85,19 @@ class SophiaExecuteJobSpec extends Specification implements DataTest, WorkflowSy
         job.sophiaWorkFileService = Mock(SophiaWorkFileService) {
             getDirectoryPath(instance) >> tempDir
         }
-        job.abstractBamFileServiceFactoryService = Mock(AbstractBamFileServiceFactoryService) {
-            getService(_) >> Mock(AbstractAbstractBamFileService) {
-                getFinalInsertSizeFile(instance.sampleType1BamFile) >> tempDir.resolve('insert-size-1')
-                getFinalInsertSizeFile(instance.sampleType2BamFile) >> tempDir.resolve('insert-size-2')
+        job.roddyConfigValueService = new RoddyConfigValueService()
+        job.roddyConfigValueService.alignmentLinkFileServiceFactoryService = Mock(AlignmentLinkFileServiceFactoryService) {
+            getService(_) >> Mock(AbstractAlignmentLinkFileService) {
+                getPathForFurtherProcessing(instance.sampleType1BamFile) >> tempDir.resolve('bam1')
+                getPathForFurtherProcessing(instance.sampleType2BamFile) >> tempDir.resolve('bam2')
             }
         }
-        job.roddyConfigValueService = new RoddyConfigValueService()
+        job.alignmentLinkFileServiceFactoryService = Mock(AlignmentLinkFileServiceFactoryService) {
+            getService(_) >> Mock(AbstractAlignmentLinkFileService) {
+                getInsertSizeFile(instance.sampleType1BamFile) >> tempDir.resolve('insert-size-1')
+                getInsertSizeFile(instance.sampleType2BamFile) >> tempDir.resolve('insert-size-2')
+            }
+        }
     }
 
     void "test getRoddyResult"() {

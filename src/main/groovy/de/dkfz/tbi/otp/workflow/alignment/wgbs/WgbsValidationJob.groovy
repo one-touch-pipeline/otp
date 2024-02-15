@@ -22,9 +22,11 @@
 package de.dkfz.tbi.otp.workflow.alignment.wgbs
 
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.infrastructure.alignment.WgbsAlignmentWorkFileService
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerValidationJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -34,15 +36,18 @@ import java.nio.file.Path
 @Slf4j
 class WgbsValidationJob extends PanCancerValidationJob {
 
+    @Autowired
+    WgbsAlignmentWorkFileService wgbsAlignmentWorkFileService
+
     @Override
     protected List<Path> getExpectedDirectories(WorkflowStep workflowStep) {
         List<Path> directories = super.getExpectedDirectories(workflowStep)
 
         RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
 
-        directories.add(roddyBamFileService.getWorkMergedMethylationDirectory(roddyBamFile))
+        directories.add(wgbsAlignmentWorkFileService.getMergedMethylationDirectory(roddyBamFile))
         if (roddyBamFile.hasMultipleLibraries()) {
-            directories.addAll(roddyBamFileService.getWorkLibraryMethylationDirectories(roddyBamFile).values().unique(false))
+            directories.addAll(wgbsAlignmentWorkFileService.getLibraryMethylationDirectories(roddyBamFile).values().unique(false))
         }
 
         return directories
@@ -55,7 +60,7 @@ class WgbsValidationJob extends PanCancerValidationJob {
         RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
 
         if (roddyBamFile.hasMultipleLibraries()) {
-            expectedFiles.addAll(roddyBamFileService.getWorkLibraryQAJsonFiles(roddyBamFile).values())
+            expectedFiles.addAll(wgbsAlignmentWorkFileService.getLibraryQAJsonFiles(roddyBamFile).values())
         }
         return expectedFiles
     }

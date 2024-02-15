@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflowTest.alignment.roddy.wgbs
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.infrastructure.alignment.WgbsAlignmentWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
@@ -39,6 +40,8 @@ import java.nio.file.Path
 class WgbsAlignmentWorkflowSpec extends AbstractRoddyAlignmentWorkflowSpec implements ReferenceGenomeHs37Conv {
 
     WgbsDecider wgbsDecider
+
+    WgbsAlignmentWorkFileService wgbsAlignmentWorkFileService
 
     WgbsRoddyFileAssertHelper wgbsRoddyFileAssertHelper
 
@@ -134,16 +137,16 @@ class WgbsAlignmentWorkflowSpec extends AbstractRoddyAlignmentWorkflowSpec imple
 
     @Override
     protected Path getWorkMergedQAJsonFile(RoddyBamFile bamFile) {
-        return roddyBamFileService.getWorkMergedQAJsonFile(bamFile)
+        return wgbsAlignmentWorkFileService.getMergedQAJsonFile(bamFile)
     }
 
     @Override
     protected void assertWorkflowFileSystemState(RoddyBamFile bamFile) {
-        wgbsRoddyFileAssertHelper.assertFileSystemState(bamFile, roddyBamFileService)
+        wgbsRoddyFileAssertHelper.assertFileSystemState(bamFile)
     }
 
     @Override
     protected void assertWorkflowWorkDirectoryFileSystemState(RoddyBamFile bamFile) {
-        wgbsRoddyFileAssertHelper.assertWorkDirectoryFileSystemState(bamFile, roddyBamFileService, roddyConfigService)
+        wgbsRoddyFileAssertHelper.assertWorkDirectoryFileSystemState(bamFile)
     }
 }

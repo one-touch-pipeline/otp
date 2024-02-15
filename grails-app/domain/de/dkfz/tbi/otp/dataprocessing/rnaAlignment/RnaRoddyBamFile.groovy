@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.dataprocessing.rnaAlignment
 import grails.gorm.hibernate.annotation.ManagedEntity
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.Paths
@@ -33,23 +33,23 @@ import java.nio.file.Paths
 class RnaRoddyBamFile extends RoddyBamFile {
 
     /**
-     * @deprecated use {@link RnaRoddyBamFileService#CHIMERIC_BAM_SUFFIX} instead
+     * @deprecated use {@link AbstractRnaAlignmentFileService#CHIMERIC_BAM_SUFFIX} instead
      */
     @Deprecated
     static final String CHIMERIC_BAM_SUFFIX = "chimeric_merged.mdup.bam"
     /**
-     * @deprecated use {@link RnaRoddyBamFileService#ARRIBA_FOLDER} instead
+     * @deprecated use {@link AbstractRnaAlignmentFileService#ARRIBA_FOLDER} instead
      */
     @Deprecated
     static final String ARRIBA_FOLDER = "fusions_arriba"
     /**
-     * @deprecated use {@link RnaRoddyBamFileService#ARRIBA_PLOT_SUFFIX} instead
+     * @deprecated use {@link AbstractRnaAlignmentFileService#ARRIBA_PLOT_SUFFIX} instead
      */
     @Deprecated
     static final String ARRIBA_PLOT_SUFFIX = ".fusions.pdf"
 
     /**
-     * @deprecated use {@link RnaRoddyBamFileService#getWorkMergedQADirectory} instead
+     * @deprecated use {@link RnaAlignmentWorkFileService#getMergedQADirectory} instead
      */
     @Deprecated
     @Override
@@ -58,7 +58,7 @@ class RnaRoddyBamFile extends RoddyBamFile {
     }
 
     /**
-     * @deprecated use {@link RnaRoddyBamFileService#getFinalMergedQADirectory} instead
+     * @deprecated use {@link RnaAlignmentLinkFileService#getMergedQADirectory} instead
      */
     @Deprecated
     @Override
@@ -67,7 +67,7 @@ class RnaRoddyBamFile extends RoddyBamFile {
     }
 
     /**
-     * @deprecated use {@link RnaRoddyBamFileService#getCorrespondingWorkChimericBamFile} instead
+     * @deprecated use {@link AbstractRnaAlignmentFileService#getCorrespondingChimericBamFile} instead
      */
     @Deprecated
     File getCorrespondingWorkChimericBamFile() {
@@ -75,7 +75,7 @@ class RnaRoddyBamFile extends RoddyBamFile {
     }
 
     /**
-     * @deprecated use {@link RnaRoddyBamFileService#getWorkArribaFusionPlotPdf} instead
+     * @deprecated use {@link RnaAlignmentWorkFileService#getArribaFusionPlotPdf} instead
      */
     @Deprecated
     String getWorkArribaFusionPlotPdf() {

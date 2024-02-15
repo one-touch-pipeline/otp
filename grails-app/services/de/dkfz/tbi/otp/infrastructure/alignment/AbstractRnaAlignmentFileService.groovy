@@ -19,48 +19,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataprocessing.bamfiles
+package de.dkfz.tbi.otp.infrastructure.alignment
 
-import grails.gorm.transactions.Transactional
-
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 import java.nio.file.Path
 
-@Transactional
-class RnaRoddyBamFileService extends RoddyBamFileService {
+@SuppressWarnings('AbstractClassWithoutAbstractMethod')
+abstract trait AbstractRnaAlignmentFileService extends AbstractPanCancerFileService<RnaRoddyBamFile> {
 
-    static final String CHIMERIC_BAM_SUFFIX = "chimeric_merged.mdup.bam"
-    static final String ARRIBA_FOLDER = "fusions_arriba"
-    static final String ARRIBA_PLOT_SUFFIX = ".fusions.pdf"
+    static final String CHIMERIC_BAM_SUFFIX = 'chimeric_merged.mdup.bam'
+    static final String ARRIBA_FOLDER = 'fusions_arriba'
+    static final String ARRIBA_PLOT_SUFFIX = '.fusions.pdf'
 
     @Override
-    Path getFinalMergedQADirectory(RoddyBamFile bamFile) {
-        return getFinalQADirectory(bamFile)
+    Path getMergedQADirectory(RnaRoddyBamFile bamFile) {
+        return getQADirectory(bamFile)
     }
 
     @Override
-    Path getWorkMergedQADirectory(RoddyBamFile bamFile) {
-        return getWorkQADirectory(bamFile)
-    }
-
-    @Override
-    Map<SeqTrack, Path> getWorkSingleLaneQADirectories(RoddyBamFile bamFile) {
+    Map<SeqTrack, Path> getSingleLaneQADirectories(RnaRoddyBamFile bamFile) {
         return [:]
     }
 
-    @Override
-    Map<SeqTrack, Path> getFinalSingleLaneQADirectories(RoddyBamFile bamFile) {
-        return [:]
+    Path getCorrespondingChimericBamFile(RnaRoddyBamFile bamFile) {
+        return getDirectoryPath(bamFile).resolve("${bamFile.sampleType.dirName}_${bamFile.individual.pid}_${CHIMERIC_BAM_SUFFIX}")
     }
 
-    Path getCorrespondingWorkChimericBamFile(RnaRoddyBamFile bamFile) {
-        return getWorkDirectory(bamFile).resolve("${bamFile.sampleType.dirName}_${bamFile.individual.pid}_${CHIMERIC_BAM_SUFFIX}")
-    }
-
-    Path getWorkArribaFusionPlotPdf(RnaRoddyBamFile bamFile) {
-        return getWorkDirectory(bamFile).resolve(ARRIBA_FOLDER).resolve("${bamFile.sampleType.dirName}_${bamFile.individual.pid}${ARRIBA_PLOT_SUFFIX}")
+    Path getArribaFusionPlotPdf(RnaRoddyBamFile bamFile) {
+        return getDirectoryPath(bamFile).resolve(ARRIBA_FOLDER).resolve("${bamFile.sampleType.dirName}_${bamFile.individual.pid}${ARRIBA_PLOT_SUFFIX}")
     }
 }

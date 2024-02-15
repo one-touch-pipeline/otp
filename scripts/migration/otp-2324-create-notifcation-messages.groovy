@@ -21,7 +21,7 @@
  */
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerLinkFileService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.otp.workflow.alignment.AlignmentWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
@@ -44,7 +44,7 @@ Date date = Date.from(Instant.parse('2007-12-03T10:15:30.00Z'))
 // script
 AlignmentInfoService alignmentInfoService = ctx.alignmentInfoService
 MessageSourceService messageSourceService = ctx.messageSourceService
-RoddyBamFileService roddyBamFileService = ctx.roddyBamFileService
+PanCancerLinkFileService panCancerLinkFileService = ctx.panCancerLinkFileService
 
 Pattern pattern = Pattern.compile(/declare -x    (?<key>\w+)=(?<value>.*)/)
 
@@ -76,15 +76,15 @@ WorkflowRun.withTransaction {
             println "BAM file doesn't have execution dirs: WR ${workflowRun.id} BF ${roddyBamFile.id} 😓"
             return
         }
-        if ((!Files.isReadable(roddyBamFileService.getFinalExecutionDirectories(roddyBamFile).last())) ||
-                (!Files.isReadable(roddyBamFileService.getBaseDirectory(roddyBamFile)))) {
+        if ((!Files.isReadable(panCancerLinkFileService.getExecutionDirectories(roddyBamFile).last())) ||
+                (!Files.isReadable(panCancerLinkFileService.getDirectoryPath(roddyBamFile)))) {
             println "BAM file dir is not readable: WR ${workflowRun.id} BF ${roddyBamFile.id} 😓"
             return
         }
-        Stream<Path> dir = Files.list(roddyBamFileService.getFinalExecutionDirectories(roddyBamFile).last())
+        Stream<Path> dir = Files.list(panCancerLinkFileService.getExecutionDirectories(roddyBamFile).last())
         Path parameterFile = dir.find { it.fileName.toString().endsWith('.parameters') }
         dir.close()
-        Path runtimeConfigFile = roddyBamFileService.getBaseDirectory(roddyBamFile).resolve('runtimeConfig.sh')
+        Path runtimeConfigFile = panCancerLinkFileService.getDirectoryPath(roddyBamFile).resolve('runtimeConfig.sh')
 
         Path file
         if (parameterFile) {

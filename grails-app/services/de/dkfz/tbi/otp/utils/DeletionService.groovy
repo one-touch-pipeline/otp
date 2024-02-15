@@ -27,7 +27,6 @@ import groovy.transform.CompileDynamic
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.SingleCellBamFileService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
@@ -36,15 +35,12 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataswap.AbstractDataSwapService
 import de.dkfz.tbi.otp.egaSubmission.EgaSubmission
 import de.dkfz.tbi.otp.filestore.FilestoreService
-import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
+import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerWorkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.ExternalAlignmentWorkFileService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.project.ProjectInfo
-import de.dkfz.tbi.otp.project.ProjectRequest
+import de.dkfz.tbi.otp.project.*
 import de.dkfz.tbi.otp.project.dta.DataTransferAgreement
 import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
 import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
@@ -75,10 +71,11 @@ class DeletionService {
     RunService runService
     SeqTrackService seqTrackService
     WorkflowDeletionService workflowDeletionService
-    SingleCellBamFileService singleCellBamFileService
+    CellRangerWorkFileService cellRangerWorkFileService
     FilestoreService filestoreService
     RawSequenceDataWorkFileService rawSequenceDataWorkFileService
     RawSequenceDataViewFileService rawSequenceDataViewFileService
+    ExternalAlignmentWorkFileService externalAlignmentWorkFileService
 
     @CompileDynamic
     void deleteProjectContent(Project project) {
@@ -309,7 +306,10 @@ class DeletionService {
                     if (Files.exists(mergingDir)) {
                         List<ExternallyProcessedBamFile> files = seqTrackService.returnExternallyProcessedBamFiles([seqTrack])
                         files.each {
-                            externalMergedBamFolders.add(it.nonOtpFolder.absolutePath)
+                            externalMergedBamFolders.add(externalAlignmentWorkFileService.getNonOtpFolder(it).toString())
+                            if (it.workflowArtefact?.producedBy?.workFolder) {
+                                externalMergedBamFolders.add(filestoreService.getWorkFolderPath(it.workflowArtefact.producedBy))
+                            }
                         }
                         Files.list(mergingDir).each {
                             dirsToDelete.add(it.toString())
@@ -395,8 +395,14 @@ class DeletionService {
                     dirsToDelete << new File(it.toString())
                 }
             }
+            if (bamFile.workflowArtefact?.producedBy?.workFolder) {
+                Path workFolder = filestoreService.getWorkFolderPath(bamFile.workflowArtefact.producedBy)
+                if (Files.exists(workFolder)) {
+                    dirsToDelete << new File(workFolder.toString())
+                }
+            }
             bamFile.delete(flush: true)
-            // The MerginWorkPackage can only be deleted if all corresponding RoddyBamFiles are removed already
+            // The MergingWorkPackage can only be deleted if all corresponding RoddyBamFiles are removed already
             if (!RoddyBamFile.findAllByWorkPackage(mergingWorkPackage)) {
                 mergingWorkPackage.delete(flush: true)
             }
@@ -417,12 +423,18 @@ class DeletionService {
             crmwp.save(flush: true, validate: false)
             deleteQualityAssessmentInfoForAbstractBamFile(bamFile)
             deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(bamFile.id.toString(), bamFile.class.name))
-            Path workDirectory = singleCellBamFileService.getWorkDirectory(bamFile)
-            if (Files.exists(workDirectory)) {
-                Files.list(workDirectory).findAll {
+            Path baseDirectory = abstractBamFileService.getBaseDirectory(bamFile)
+            if (Files.exists(baseDirectory)) {
+                Files.list(baseDirectory).findAll {
                     it.fileName != ExternallyProcessedBamFile.NON_OTP
                 }.each {
                     dirsToDelete << new File(it.toString())
+                }
+            }
+            if (bamFile.workflowArtefact?.producedBy?.workFolder) {
+                Path workFolder = filestoreService.getWorkFolderPath(bamFile.workflowArtefact.producedBy)
+                if (Files.exists(workFolder)) {
+                    dirsToDelete << new File(workFolder.toString())
                 }
             }
             bamFile.delete(flush: true)

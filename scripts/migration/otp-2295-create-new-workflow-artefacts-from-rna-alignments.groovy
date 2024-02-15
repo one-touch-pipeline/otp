@@ -24,7 +24,8 @@ package migration
 import groovy.transform.Field
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.RnaAlignmentLinkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.RnaAlignmentWorkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
@@ -69,7 +70,8 @@ assert batchSize > 1
 
 @Field final String WORKFLOW_NAME = RnaAlignmentWorkflow.WORKFLOW
 
-@Field final RoddyBamFileService roddyBamFileService = ctx.roddyBamFileService
+@Field final RnaAlignmentLinkFileService rnaAlignmentLinkFileService = ctx.rnaAlignmentLinkFileService
+@Field final RnaAlignmentWorkFileService rnaAlignmentWorkFileService = ctx.rnaAlignmentWorkFileService
 @Field final WorkflowService workflowService = ctx.workflowService
 
 FileSystemService fileSystemService = ctx.fileSystemService
@@ -121,7 +123,7 @@ void migrateToNewWorkflow(
 
     roddyBamFiles.each { RoddyBamFile roddyBamFile ->
         // getting and prepare information
-        String directory = roddyBamFile.oldStructureUsed ? roddyBamFileService.getBaseDirectory(roddyBamFile) : roddyBamFileService.getWorkDirectory(roddyBamFile)
+        String directory = roddyBamFile.oldStructureUsed ? rnaAlignmentLinkFileService.getDirectoryPath(roddyBamFile) : rnaAlignmentWorkFileService.getDirectoryPath(roddyBamFile)
         List<SeqTrack> seqTracks = roddyBamFile.seqTracks.sort {
             it.id
         }

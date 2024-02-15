@@ -24,7 +24,7 @@ package migration
 import groovy.transform.Field
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
@@ -70,7 +70,7 @@ assert batchSize > 1
 
 @Field final String WORKFLOW_NAME = WgbsWorkflow.WORKFLOW
 
-@Field final RoddyBamFileService roddyBamFileService = ctx.roddyBamFileService
+@Field final PanCancerWorkFileService panCancerWorkFileService = ctx.panCancerWorkFileService
 @Field final WorkflowService workflowService = ctx.workflowService
 
 FileSystemService fileSystemService = ctx.fileSystemService
@@ -122,7 +122,7 @@ void migrateToNewWorkflow(
 
     roddyBamFiles.each { RoddyBamFile roddyBamFile ->
         // getting and prepare information
-        String directory = roddyBamFileService.getWorkDirectory(roddyBamFile)
+        String directory = panCancerWorkFileService.getDirectoryPath(roddyBamFile)
         List<SeqTrack> seqTracks = roddyBamFile.seqTracks.sort {
             it.id
         }

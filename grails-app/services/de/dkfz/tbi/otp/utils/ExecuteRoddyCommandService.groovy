@@ -232,6 +232,7 @@ class ExecuteRoddyCommandService {
      * chgrp resets setgid and setuid on the affected files so you need to apply the group first and then
      * apply the permissions.
      */
+    @Deprecated
     void correctPermissionsAndGroups(RoddyResult roddyResult) {
         String group = executionHelperService.getGroup(roddyResult.baseDirectory)
         executionHelperService.setGroup(roddyResult.workDirectory, group)
@@ -242,6 +243,7 @@ class ExecuteRoddyCommandService {
     }
 
     @SuppressWarnings('LineLength')
+    @Deprecated
     void correctPermissions(RoddyResult roddyResult) {
         assert roddyResult: "roddyResult should not be null"
         String cmd = """\
@@ -268,6 +270,7 @@ class ExecuteRoddyCommandService {
     /**
      * When using this be aware that chgrp resets the setgid and setuid of the affected files.
      */
+    @Deprecated
     void correctGroups(RoddyResult roddyResult) {
         assert roddyResult: "roddyResult should not be null"
         String cmd = """\

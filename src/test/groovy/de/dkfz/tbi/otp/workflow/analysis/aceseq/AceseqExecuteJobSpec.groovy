@@ -29,11 +29,12 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqWorkFileService
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.AbstractBamFileServiceFactoryService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.AceseqDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.infrastructure.alignment.AbstractAlignmentLinkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.AlignmentLinkFileServiceFactoryService
 import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
@@ -85,8 +86,14 @@ class AceseqExecuteJobSpec extends Specification implements DataTest, WorkflowSy
             getDirectoryPath(instance) >> tempDir
         }
         job.roddyConfigValueService = new RoddyConfigValueService()
-        job.roddyConfigValueService.abstractBamFileServiceFactoryService = Mock(AbstractBamFileServiceFactoryService) {
-            getService(_) >> Mock(AbstractAbstractBamFileService) {
+        job.roddyConfigValueService.alignmentLinkFileServiceFactoryService = Mock(AlignmentLinkFileServiceFactoryService) {
+            getService(_) >> Mock(AbstractAlignmentLinkFileService) {
+                getPathForFurtherProcessing(instance.sampleType1BamFile) >> tempDir.resolve('bam1')
+                getPathForFurtherProcessing(instance.sampleType2BamFile) >> tempDir.resolve('bam2')
+            }
+        }
+        job.roddyResultWorkFileServiceFactoryService = Mock(RoddyResultWorkFileServiceFactoryService) {
+            getService(_) >> Mock(AbstractAlignmentLinkFileService) {
                 getPathForFurtherProcessing(instance.sampleType1BamFile) >> tempDir.resolve('bam1')
                 getPathForFurtherProcessing(instance.sampleType2BamFile) >> tempDir.resolve('bam2')
             }

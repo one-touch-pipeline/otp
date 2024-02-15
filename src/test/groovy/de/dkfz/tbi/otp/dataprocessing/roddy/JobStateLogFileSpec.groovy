@@ -26,15 +26,14 @@ import spock.lang.Specification
 import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.FileNotReadableException
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.CreateJobStateLogFileHelper
+import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
 
 import java.nio.file.Path
 
-import static de.dkfz.tbi.TestCase.shouldFailWithMessage
 import static de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFile.JOB_STATE_LOG_FILE_NAME
 
 class JobStateLogFileSpec extends Specification implements DataTest {
@@ -61,7 +60,7 @@ class JobStateLogFileSpec extends Specification implements DataTest {
         JobStateLogFile jobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(tempDir.toFile(), [])
 
         expect:
-        new File(tempDir.toFile(), JOB_STATE_LOG_FILE_NAME) == jobStateLogFile.file
+        tempDir.resolve(JOB_STATE_LOG_FILE_NAME) == jobStateLogFile.file
     }
 
     void testValidateFile_WhenFileDoesNotExist_ShouldThrowException() {
@@ -129,13 +128,14 @@ class JobStateLogFileSpec extends Specification implements DataTest {
             ${CreateJobStateLogFileHelper.convertLogFileEntryToString(logFileEntry)}
             ${modifiedLogFileEntry}""".stripIndent()
 
-        when:
         File file = CreateFileHelper.createFile(tempDir.resolve(JOB_STATE_LOG_FILE_NAME), content).toFile()
 
+        when:
+        JobStateLogFile.getInstance(tempDir.toFile())
+
         then:
-        shouldFailWithMessage(RuntimeException, "${file} contains non-matching entry: ${modifiedLogFileEntry}") {
-            JobStateLogFile.getInstance(tempDir.toFile())
-        }
+        RuntimeException e = thrown(RuntimeException)
+        e.message =~ "${file} contains non-matching entry: ${modifiedLogFileEntry}"
     }
 
     void testParseJobStateLogFile_WhenEntriesAreUnordered_ShouldUseEntryWithTheLaterTimeStamp() {
@@ -251,25 +251,5 @@ class JobStateLogFileSpec extends Specification implements DataTest {
 
         expect:
         STATUS_CODE_FINISHED == JobStateLogFile.getPropertyFromLatestLogFileEntry(clusterJobIdentifier.clusterJobId, "statusCode")
-    }
-
-    void testIsEmpty_WhenFileIsEmpty_ShouldReturnTrue() {
-        given:
-        JobStateLogFile jobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(tempDir.toFile(), [])
-
-        expect:
-        jobStateLogFile.file.length() == 0
-    }
-
-    void testIsEmpty_WhenFileIsNotEmpty_ShouldReturnFalse() {
-        given:
-        JobStateLogFile jobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(
-                tempDir.toFile(), [
-                CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId])
-        ]
-        )
-
-        expect:
-        jobStateLogFile.file.length() != 0
     }
 }

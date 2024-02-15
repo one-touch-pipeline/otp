@@ -26,9 +26,10 @@ import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 import org.grails.web.json.JSONObject
 
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.RnaAlignmentWorkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.WgbsAlignmentWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -42,12 +43,14 @@ import static de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification.UNDEFI
 class RoddyQualityAssessmentService {
 
     AbstractBamFileService abstractBamFileService
-    RoddyBamFileService roddyBamFileService
-    RnaRoddyBamFileService rnaRoddyBamFileService
+
+    PanCancerWorkFileService panCancerWorkFileService
+    RnaAlignmentWorkFileService rnaAlignmentWorkFileService
     ReferenceGenomeService referenceGenomeService
+    WgbsAlignmentWorkFileService wgbsAlignmentWorkFileService
 
     void parseRoddySingleLaneQaStatistics(RoddyBamFile roddyBamFile) {
-        Map<SeqTrack, Path> qaFilesPerSeqTrack = roddyBamFileService.getWorkSingleLaneQAJsonFiles(roddyBamFile)
+        Map<SeqTrack, Path> qaFilesPerSeqTrack = panCancerWorkFileService.getSingleLaneQAJsonFiles(roddyBamFile)
         qaFilesPerSeqTrack.each { seqTrack, qaFile ->
             Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(roddyBamFile, qaFile)
             chromosomeInformation.each { chromosome, chromosomeValues ->
@@ -57,9 +60,9 @@ class RoddyQualityAssessmentService {
     }
 
     RoddyMergedBamQa parseRoddyMergedBamQaStatistics(RoddyBamFile roddyBamFile) {
-        Path qaFile = roddyBamFileService.getWorkMergedQAJsonFile(roddyBamFile)
+        Path qaFile = panCancerWorkFileService.getMergedQAJsonFile(roddyBamFile)
         Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(roddyBamFile, qaFile,
-                roddyBamFileService.getWorkMergedQATargetExtractJsonFile(roddyBamFile))
+                panCancerWorkFileService.getMergedQATargetExtractJsonFile(roddyBamFile))
 
         List<RoddyMergedBamQa> chromosomeInformationQa = chromosomeInformation.collect { chromosome, chromosomeValues ->
             return storeValues(RoddyMergedBamQa, handleNaValue(chromosomeValues), roddyBamFile, chromosome)
@@ -77,7 +80,7 @@ class RoddyQualityAssessmentService {
     }
 
     void parseRoddyLibraryQaStatistics(RoddyBamFile roddyBamFile) {
-        Map<String, Path> qaFilesPerLibrary = roddyBamFileService.getWorkLibraryQAJsonFiles(roddyBamFile)
+        Map<String, Path> qaFilesPerLibrary = wgbsAlignmentWorkFileService.getLibraryQAJsonFiles(roddyBamFile)
 
         qaFilesPerLibrary.each { lib, qaFile ->
             Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(roddyBamFile, qaFile)
@@ -88,7 +91,7 @@ class RoddyQualityAssessmentService {
     }
 
     RnaQualityAssessment parseRnaRoddyBamFileQaStatistics(RnaRoddyBamFile rnaRoddyBamFile) {
-        Path qaFile = rnaRoddyBamFileService.getWorkMergedQAJsonFile(rnaRoddyBamFile)
+        Path qaFile = rnaAlignmentWorkFileService.getMergedQAJsonFile(rnaRoddyBamFile)
         Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(rnaRoddyBamFile, qaFile)
         return storeValues(RnaQualityAssessment, chromosomeInformation.get(RnaQualityAssessment.ALL), rnaRoddyBamFile, RnaQualityAssessment.ALL)
     }

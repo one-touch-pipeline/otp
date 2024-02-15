@@ -27,7 +27,6 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
-import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractRoddyClusterValidationJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -41,9 +40,6 @@ class SophiaValidationJob extends AbstractRoddyClusterValidationJob implements S
     SophiaWorkFileService sophiaWorkFileService
 
     @Autowired
-    ExecuteRoddyCommandService executeRoddyCommandService
-
-    @Autowired
     SophiaService sophiaService
 
     @Override
@@ -55,7 +51,7 @@ class SophiaValidationJob extends AbstractRoddyClusterValidationJob implements S
     @Override
     protected List<Path> getExpectedDirectories(WorkflowStep workflowStep) {
         SophiaInstance instance = getSophiaInstance(workflowStep)
-        return [sophiaWorkFileService.getWorkExecutionStoreDirectory(instance)] + sophiaWorkFileService.getWorkExecutionDirectories(instance)
+        return [sophiaWorkFileService.getExecutionStoreDirectory(instance)] + sophiaWorkFileService.getExecutionDirectories(instance)
     }
 
     @Override

@@ -24,9 +24,13 @@ package usedToolsWithinWorkflows
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerLinkFileService
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
 import de.dkfz.tbi.otp.utils.CollectionUtils
+
+import java.nio.file.Files
+import java.nio.file.Path
 
 /*
 Input area
@@ -40,9 +44,9 @@ def pids = []
 /*
 Input checks
  */
-assert (projectName || !pids.empty) : "Please provide either a project name or pids"
+assert (projectName || !pids.empty): "Please provide either a project name or pids"
 if (projectName) {
-    assert CollectionUtils.atMostOneElement(Project.findAllByName(projectName)) : "No project with name ${projectName} could be found"
+    assert CollectionUtils.atMostOneElement(Project.findAllByName(projectName)): "No project with name ${projectName} could be found"
 }
 
 if (pids) {
@@ -61,19 +65,7 @@ if (pids) {
 /*
 Script area
  */
-def fnf = new FilenameFilter(){
-    boolean accept(File dir,
-                   String name) {
-        return name.endsWith(".parameters")
-    }
-}
-
-def fnfOld = new FilenameFilter(){
-    boolean accept(File dir,
-                   String name) {
-        return name.equals("runtimeConfig.sh")
-    }
-}
+PanCancerLinkFileService panCancerLinkFileService = ctx.panCancerLinkFileService
 
 def toolNames = [
         "PYTHON_VERSION",
@@ -123,28 +115,28 @@ RnaRoddyBamFile.createCriteria().list {
     boolean correctEnvironment = false
     List versions = []
     versions << bam.config.programVersion
-    List<File> finalExecutionDirectories = bam.finalExecutionDirectories
+    List<Path> finalExecutionDirectories = panCancerLinkFileService.getExecutionDirectories(bam)
     if (!finalExecutionDirectories) {
         println "!!!! No execution directory known for '${bam} !!!!"
         return
     }
-    File dir = finalExecutionDirectories.first()
+    Path dir = finalExecutionDirectories.first()
     if (bam.config.programVersion == "RNAseqWorkflow:1.0.22-1") {
         correctEnvironment = true
-        def parameterFiles = dir.list(fnfOld)
+        def parameterFiles = Files.list(dir).findAll { it.fileName.toString() == "runtimeConfig.sh" }
         if (parameterFiles) {
-            def file = new File(dir, parameterFiles.first())
-            file.each { line ->
+            def file = dir.resolve(parameterFiles.first())
+            file.eachLine { line ->
                 if (toolNames.any { line.contains(it) }) {
                     versions << line
                 }
             }
         }
     } else {
-        def parameterFiles = dir.list(fnf)
+        def parameterFiles = Files.list(dir).findAll { it.fileName.toString().endsWith(".parameters") }
         if (parameterFiles) {
-            def file = new File(dir, parameterFiles.first())
-            file.each { line ->
+            def file = dir.resolve(parameterFiles.first())
+            file.eachLine { line ->
                 if (toolNames.any { line.contains(it) }) {
                     versions << line
                 }

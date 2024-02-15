@@ -21,28 +21,71 @@
  */
 package de.dkfz.tbi.otp.workflowTest.roddy
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.WgbsAlignmentLinkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.WgbsAlignmentWorkFileService
 
 import java.nio.file.Path
 
 @Component
-class WgbsRoddyFileAssertHelper extends RoddyFileAssertHelper implements RoddyFileAssertTrait {
+class WgbsRoddyFileAssertHelper extends RoddyFileAssertHelper {
+
+    @Autowired
+    WgbsAlignmentLinkFileService wgbsAlignmentLinkFileService
+
+    @Autowired
+    WgbsAlignmentWorkFileService wgbsAlignmentWorkFileService
 
     @Override
-    List<Path> getAdditionalDirectories(RoddyBamFile bamFile, RoddyBamFileService roddyBamFileService) {
+    List<Path> getAdditionalDirectories(RoddyBamFile bamFile) {
         return [
-                roddyBamFileService.getWorkMethylationDirectory(bamFile),
-                roddyBamFileService.getWorkMergedMethylationDirectory(bamFile),
-        ] + (bamFile.hasMultipleLibraries() ? (
-                roddyBamFileService.getWorkLibraryMethylationDirectories(bamFile).values() +
-                roddyBamFileService.getWorkLibraryQADirectories(bamFile).values()) : [])
+                wgbsAlignmentLinkFileService.getMethylationDirectory(bamFile),
+                wgbsAlignmentLinkFileService.getMergedMethylationDirectory(bamFile),
+        ]
     }
 
     @Override
-    List<Path> getAdditionalFiles(RoddyBamFile bamFile, RoddyBamFileService roddyBamFileService) {
-        return [ roddyBamFileService.getWorkMetadataTableFile(bamFile) ]
+    List<Path> getAdditionalLinks(RoddyBamFile bamFile) {
+        return [
+                wgbsAlignmentLinkFileService.getMetadataTableFile(bamFile)
+        ] + (bamFile.hasMultipleLibraries() ?
+                (wgbsAlignmentLinkFileService.getLibraryMethylationDirectories(bamFile).values() +
+                        wgbsAlignmentLinkFileService.getLibraryQADirectories(bamFile).values()) : [])
+    }
+
+    @Override
+    List<Path> getAdditionalQaDirectories(RoddyBamFile bamFile) {
+        return bamFile.hasMultipleLibraries() ?
+                wgbsAlignmentLinkFileService.getLibraryQADirectories(bamFile).values().toList() : []
+    }
+
+    @Override
+    List<Path> getAdditionalWorkDirectories(RoddyBamFile bamFile) {
+        return [
+                wgbsAlignmentWorkFileService.getMethylationDirectory(bamFile),
+                wgbsAlignmentWorkFileService.getMergedMethylationDirectory(bamFile),
+        ] + (bamFile.hasMultipleLibraries() ? (
+                wgbsAlignmentWorkFileService.getLibraryMethylationDirectories(bamFile).values() +
+                        wgbsAlignmentWorkFileService.getLibraryQADirectories(bamFile).values()) : [])
+    }
+
+    @Override
+    List<Path> getAdditionalWorkFiles(RoddyBamFile bamFile) {
+        return [wgbsAlignmentWorkFileService.getMetadataTableFile(bamFile)]
+    }
+
+    @Override
+    List<Path> getAdditionalQaWorkDirectories(RoddyBamFile bamFile) {
+        return bamFile.hasMultipleLibraries() ?
+                wgbsAlignmentWorkFileService.getLibraryQADirectories(bamFile).values().toList() : []
+    }
+
+    @Override
+    List<Path> getAdditionalQaWorkFiles(RoddyBamFile bamFile) {
+        return bamFile.hasMultipleLibraries() ?
+                wgbsAlignmentWorkFileService.getLibraryQAJsonFiles(bamFile).values().toList() : []
     }
 }

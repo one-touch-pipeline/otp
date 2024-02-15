@@ -27,10 +27,10 @@ import spock.lang.*
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
@@ -109,7 +109,7 @@ abstract class AbstractRoddyAlignmentValidationJobSpec extends Specification imp
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
             _ * getOutputArtefact(_, _) >> abstractBamFile
         }
-        job.roddyBamFileService = Mock(RoddyBamFileService)
+        job.panCancerWorkFileService = Mock(PanCancerWorkFileService)
 
         when:
         job.doFurtherValidation(workflowStep)
@@ -136,7 +136,7 @@ abstract class AbstractRoddyAlignmentValidationJobSpec extends Specification imp
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
             _ * getOutputArtefact(_, _) >> bamFile
         }
-        job.roddyBamFileService = Mock(RoddyBamFileService)
+        job.panCancerWorkFileService = Mock(PanCancerWorkFileService)
 
         when:
         job.doFurtherValidation(workflowStep)
@@ -172,7 +172,7 @@ abstract class AbstractRoddyAlignmentValidationJobSpec extends Specification imp
         job.workflowStepService = Mock(WorkflowStepService) {
             1 * getPreviousRunningWorkflowStep(workflowStepCurrent) >> workflowStep
         }
-        job.roddyBamFileService = Mock(RoddyBamFileService)
+        job.panCancerWorkFileService = Mock(PanCancerWorkFileService)
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
             1 * getOutputArtefact(workflowStepCurrent, _) >> abstractBamFile
         }
@@ -205,7 +205,7 @@ abstract class AbstractRoddyAlignmentValidationJobSpec extends Specification imp
         job.workflowStepService = Mock(WorkflowStepService) {
             1 * getPreviousRunningWorkflowStep(workflowStepCurrent) >> workflowStep
         }
-        job.roddyBamFileService = Mock(RoddyBamFileService)
+        job.panCancerWorkFileService = Mock(PanCancerWorkFileService)
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
             1 * getOutputArtefact(workflowStepCurrent, _) >> abstractBamFile
         }

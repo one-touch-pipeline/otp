@@ -21,6 +21,7 @@
  */
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
 
 // -----------
 // input
@@ -31,6 +32,7 @@ int day = 17
 
 // ---------------------------
 // work area
+PanCancerWorkFileService panCancerWorkFileService = ctx.panCancerWorkFileService
 
 Date dateStart = new Date(year - 1900, month - 1, day)
 Date dateEnd = dateStart.plus(1)
@@ -80,7 +82,7 @@ output << bamFile.collect {
             it.referenceGenome,
             it.processingPriority.name,
             it.dateCreated,
-            it.workDirectory,
+            panCancerWorkFileService.getDirectoryPath(it),
     ].join('|')
 }.join('\n')
 

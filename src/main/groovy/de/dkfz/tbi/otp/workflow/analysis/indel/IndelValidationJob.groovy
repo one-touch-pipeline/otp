@@ -25,11 +25,8 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingService
-import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelWorkFileService
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
-import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractRoddyClusterValidationJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -41,9 +38,6 @@ class IndelValidationJob extends AbstractRoddyClusterValidationJob implements In
 
     @Autowired
     IndelWorkFileService indelWorkFileService
-
-    @Autowired
-    ExecuteRoddyCommandService executeRoddyCommandService
 
     @Autowired
     IndelCallingService indelCallingService
@@ -60,7 +54,7 @@ class IndelValidationJob extends AbstractRoddyClusterValidationJob implements In
     protected List<Path> getExpectedDirectories(WorkflowStep workflowStep) {
         IndelCallingInstance instance = getIndelInstance(workflowStep)
 
-        return [indelWorkFileService.getWorkExecutionStoreDirectory(instance)] + indelWorkFileService.getWorkExecutionDirectories(instance)
+        return [indelWorkFileService.getExecutionStoreDirectory(instance)] + indelWorkFileService.getExecutionDirectories(instance)
     }
 
     @Override

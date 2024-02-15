@@ -27,8 +27,8 @@ import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.AbstractBamFileServiceFactoryService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.AlignmentLinkFileServiceFactoryService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.ProjectService
@@ -41,7 +41,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 @Transactional
 class RoddyConfigValueService {
 
-    AbstractBamFileServiceFactoryService abstractBamFileServiceFactoryService
+    AlignmentLinkFileServiceFactoryService alignmentLinkFileServiceFactoryService
     ChromosomeIdentifierSortingService chromosomeIdentifierSortingService
     RawSequenceDataViewFileService rawSequenceDataViewFileService
     ProcessingOptionService processingOptionService
@@ -157,8 +157,8 @@ class RoddyConfigValueService {
         AbstractBamFile bamFileDisease = analysis.sampleType1BamFile
         AbstractBamFile bamFileControl = analysis.sampleType2BamFile
 
-        Path bamFileDiseasePath = abstractBamFileServiceFactoryService.getService(bamFileDisease).getPathForFurtherProcessing(bamFileDisease)
-        Path bamFileControlPath = abstractBamFileServiceFactoryService.getService(bamFileControl).getPathForFurtherProcessing(bamFileControl)
+        Path bamFileDiseasePath = alignmentLinkFileServiceFactoryService.getService(bamFileDisease).getPathForFurtherProcessing(bamFileDisease)
+        Path bamFileControlPath = alignmentLinkFileServiceFactoryService.getService(bamFileControl).getPathForFurtherProcessing(bamFileControl)
 
         return [
                 bamfile_list                     : "${bamFileControlPath};${bamFileDiseasePath}" as String,

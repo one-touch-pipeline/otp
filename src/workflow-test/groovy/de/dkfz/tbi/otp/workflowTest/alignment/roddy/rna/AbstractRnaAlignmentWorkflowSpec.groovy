@@ -24,8 +24,9 @@ package de.dkfz.tbi.otp.workflowTest.alignment.roddy.rna
 import grails.converters.JSON
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
+import de.dkfz.tbi.otp.infrastructure.alignment.RnaAlignmentLinkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.RnaAlignmentWorkFileService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
@@ -45,7 +46,9 @@ abstract class AbstractRnaAlignmentWorkflowSpec extends AbstractRoddyAlignmentWo
 
     RnaAlignmentDecider rnaAlignmentDecider
 
-    RnaRoddyBamFileService rnaRoddyBamFileService
+    RnaAlignmentLinkFileService rnaAlignmentLinkFileService
+
+    RnaAlignmentWorkFileService rnaAlignmentWorkFileService
 
     RnaRoddyFileAssertHelper rnaRoddyFileAssertHelper
 
@@ -191,25 +194,25 @@ abstract class AbstractRnaAlignmentWorkflowSpec extends AbstractRoddyAlignmentWo
 
     @Override
     protected Path getWorkMergedQAJsonFile(RoddyBamFile bamFile) {
-        return rnaRoddyBamFileService.getWorkMergedQAJsonFile(bamFile)
+        return rnaAlignmentWorkFileService.getMergedQAJsonFile(bamFile)
     }
 
     @Override
     protected void assertWorkflowFileSystemState(RoddyBamFile bamFile) {
-        rnaRoddyFileAssertHelper.assertFileSystemState(bamFile, rnaRoddyBamFileService)
+        rnaRoddyFileAssertHelper.assertFileSystemState(bamFile)
     }
 
     @Override
     protected void assertWorkflowWorkDirectoryFileSystemState(RoddyBamFile bamFile) {
-        rnaRoddyFileAssertHelper.assertWorkDirectoryFileSystemState(bamFile, rnaRoddyBamFileService, roddyConfigService)
+        rnaRoddyFileAssertHelper.assertWorkDirectoryFileSystemState(bamFile)
     }
 
     @Override
     protected void checkQC(RoddyBamFile bamFile) {
         CollectionUtils.exactlyOneElement(RnaQualityAssessment.findAllByAbstractBamFile(bamFile))
 
-        JSON.parse(bamFile.finalMergedQAJsonFile.text)
-        assert bamFile.finalMergedQAJsonFile.text.trim() != ""
+        JSON.parse(rnaAlignmentLinkFileService.getMergedQAJsonFile(bamFile).text)
+        assert rnaAlignmentLinkFileService.getMergedQAJsonFile(bamFile).text.trim() != ""
 
         assert bamFile.coverage == null
 

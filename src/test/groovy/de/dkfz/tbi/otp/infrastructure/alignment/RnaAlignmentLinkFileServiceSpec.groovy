@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataprocessing.bamfiles
+package de.dkfz.tbi.otp.infrastructure.alignment
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
@@ -32,9 +32,10 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
+import java.nio.file.Path
 import java.nio.file.Paths
 
-class RnaRoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<RnaRoddyBamFileService>, DataTest, RoddyRnaFactory {
+class RnaAlignmentLinkFileServiceSpec extends Specification implements ServiceUnitTest<RnaAlignmentLinkFileService>, DataTest, RoddyRnaFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -78,25 +79,36 @@ class RnaRoddyBamFileServiceSpec extends Specification implements ServiceUnitTes
         }
     }
 
-    void "test getWorkMergedQADirectory"() {
+    void "test getMergedQADirectory"() {
         expect:
-        service.getWorkMergedQADirectory(bamFile).toString() == "${testDir}/${bamFile.workDirectoryName}/qualitycontrol"
+        service.getMergedQADirectory(bamFile).toString() == "${testDir}/qualitycontrol"
     }
 
-    void "test getFinalMergedQADirectory"() {
+    void "test getSingleLaneQADirectories"() {
         expect:
-        service.getFinalMergedQADirectory(bamFile).toString() == "${testDir}/qualitycontrol"
+        service.getSingleLaneQADirectories(bamFile) == [:]
     }
 
     void "test getCorrespondingWorkChimericBamFile"() {
         expect:
-        service.getCorrespondingWorkChimericBamFile(bamFile).toString() ==
-                "${testDir}/${bamFile.workDirectoryName}/${bamFile.sampleType.dirName}_${bamFile.individual.pid}_chimeric_merged.mdup.bam"
+        service.getCorrespondingChimericBamFile(bamFile).toString() ==
+                "/base-dir/${bamFile.sampleType.dirName}_${bamFile.individual.pid}_chimeric_merged.mdup.bam"
     }
 
-    void "test getWorkArribaFusionPlotPdf"() {
+    void "test getArribaFusionPlotPdf"() {
         expect:
-        service.getWorkArribaFusionPlotPdf(bamFile).toString() ==
-                "${testDir}/${bamFile.workDirectoryName}/fusions_arriba/${bamFile.sampleType.dirName}_${bamFile.individual.pid}.fusions.pdf"
+        service.getArribaFusionPlotPdf(bamFile).toString() ==
+                "/base-dir/fusions_arriba/${bamFile.sampleType.dirName}_${bamFile.individual.pid}.fusions.pdf"
+    }
+
+    void "test getPathForFurtherProcessingNoCheck, should call rnaAlignmentWorkFileService.getBamFile"() {
+        given:
+        Path path = Paths.get("/some/path")
+        service.rnaAlignmentWorkFileService = Mock(RnaAlignmentWorkFileService) {
+            1 * getBamFile(_) >> path
+        }
+
+        expect:
+        service.getPathForFurtherProcessingNoCheck(bamFile) == path
     }
 }

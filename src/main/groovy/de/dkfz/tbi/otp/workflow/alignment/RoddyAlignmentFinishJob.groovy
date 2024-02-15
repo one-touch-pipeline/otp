@@ -26,8 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
 import de.dkfz.tbi.otp.utils.Md5SumService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractFinishJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -49,14 +49,14 @@ class RoddyAlignmentFinishJob extends AbstractFinishJob implements AlignmentWork
     AbstractBamFileService abstractBamFileService
 
     @Autowired
-    RoddyBamFileService roddyBamFileService
+    PanCancerWorkFileService panCancerWorkFileService
 
     @Override
     void updateDomains(WorkflowStep workflowStep) {
         RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
 
-        Path bamFilePath = roddyBamFileService.getWorkBamFile(roddyBamFile)
-        Path md5sumPath = roddyBamFileService.getWorkMd5sumFile(roddyBamFile)
+        Path bamFilePath = panCancerWorkFileService.getBamFile(roddyBamFile)
+        Path md5sumPath = panCancerWorkFileService.getMd5sumFile(roddyBamFile)
 
         String md5sumValue = md5SumService.extractMd5Sum(md5sumPath)
 

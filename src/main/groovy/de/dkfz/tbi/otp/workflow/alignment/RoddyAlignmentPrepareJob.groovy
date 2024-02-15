@@ -25,7 +25,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.jobs.AbstractPrepareJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -40,11 +40,11 @@ class RoddyAlignmentPrepareJob extends AbstractPrepareJob implements AlignmentWo
     RoddyAlignmentPrepareService roddyAlignmentPrepareService
 
     @Autowired
-    RoddyBamFileService roddyBamFileService
+    PanCancerWorkFileService panCancerWorkFileService
 
     @Override
     protected Path buildWorkDirectoryPath(WorkflowStep workflowStep) {
-        return roddyBamFileService.getWorkDirectory(getRoddyBamFile(workflowStep))
+        return panCancerWorkFileService.getDirectoryPath(getRoddyBamFile(workflowStep))
     }
 
     @Override

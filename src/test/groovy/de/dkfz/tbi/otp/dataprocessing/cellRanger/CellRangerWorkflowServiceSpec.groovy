@@ -26,18 +26,16 @@ import spock.lang.*
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.SingleCellBamFileService
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerWorkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 
-import java.nio.file.FileSystems
-import java.nio.file.Files
-import java.nio.file.Path
+import java.nio.file.*
 
 class CellRangerWorkflowServiceSpec extends Specification implements CellRangerFactory, DataTest {
 
@@ -88,17 +86,17 @@ class CellRangerWorkflowServiceSpec extends Specification implements CellRangerF
         ]
 
         CellRangerWorkflowService service = new CellRangerWorkflowService([
-                singleCellBamFileService: Mock(SingleCellBamFileService) {
-                    1 * getWorkDirectory(singleCellBamFile) >> tempDir.resolve('work')
+                cellRangerWorkFileService: Mock(CellRangerWorkFileService) {
+                    1 * getDirectoryPath(singleCellBamFile) >> tempDir.resolve('work')
                     1 * getResultDirectory(singleCellBamFile) >> tempDir.resolve('result')
                     1 * getFileMappingForLinks(singleCellBamFile) >> map
                     0 * _
                 },
-                fileSystemService       : Mock(FileSystemService) {
+                fileSystemService        : Mock(FileSystemService) {
                     _ * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
-                fileService             : Mock(FileService) {
+                fileService              : Mock(FileService) {
                     1 * createLink(tempDir.resolve('work').resolve('link1'), tempDir.resolve('result').resolve('resultPathName'), singleCellBamFile.project.unixGroup)
                     1 * createLink(tempDir.resolve('work').resolve('link2'), tempDir.resolve('result').resolve('resultPathName2'), singleCellBamFile.project.unixGroup)
                     0 * _
@@ -127,17 +125,17 @@ class CellRangerWorkflowServiceSpec extends Specification implements CellRangerF
 
         new FileService().deleteDirectoryRecursively(resultDirectory.resolve(missingFile))
         CellRangerWorkflowService service = new CellRangerWorkflowService([
-                singleCellBamFileService: Mock(SingleCellBamFileService) {
-                    1 * getWorkDirectory(singleCellBamFile) >> workDirectory
+                cellRangerWorkFileService: Mock(CellRangerWorkFileService) {
+                    1 * getDirectoryPath(singleCellBamFile) >> workDirectory
                     1 * getResultDirectory(singleCellBamFile) >> resultDirectory
                     1 * getFileMappingForLinks(singleCellBamFile) >> map
                     0 * _
                 },
-                fileSystemService       : Mock(FileSystemService) {
+                fileSystemService        : Mock(FileSystemService) {
                     _ * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
-                fileService             : new FileService(),
+                fileService              : new FileService(),
         ])
 
         when:
@@ -162,16 +160,16 @@ class CellRangerWorkflowServiceSpec extends Specification implements CellRangerF
         SingleCellBamFile singleCellBamFile = createBamFile()
 
         CellRangerWorkflowService service = new CellRangerWorkflowService([
-                singleCellBamFileService: Mock(SingleCellBamFileService) {
+                cellRangerWorkFileService: Mock(CellRangerWorkFileService) {
                     1 * getOutputDirectory(singleCellBamFile) >> outputDirectory
                     1 * getResultDirectory(singleCellBamFile) >> resultDirectory
                     0 * _
                 },
-                fileSystemService       : Mock(FileSystemService) {
+                fileSystemService        : Mock(FileSystemService) {
                     _ * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
-                fileService             : new FileService(),
+                fileService              : new FileService(),
         ])
 
         and: 'create result files/directories'
@@ -204,15 +202,15 @@ class CellRangerWorkflowServiceSpec extends Specification implements CellRangerF
         SingleCellBamFile singleCellBamFile = createBamFile()
 
         CellRangerWorkflowService service = new CellRangerWorkflowService([
-                singleCellBamFileService: Mock(SingleCellBamFileService) {
-                    1 * getWorkDirectory(_) >> workDirectory
+                cellRangerWorkFileService: Mock(CellRangerWorkFileService) {
+                    1 * getDirectoryPath(_) >> workDirectory
                     0 * _
                 },
-                fileSystemService       : Mock(FileSystemService) {
+                fileSystemService        : Mock(FileSystemService) {
                     _ * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
-                fileService             : Mock(FileService) {
+                fileService              : Mock(FileService) {
                     1 * deleteDirectoryRecursively(workDirectory)
                     0 * _
                 },
@@ -232,15 +230,15 @@ class CellRangerWorkflowServiceSpec extends Specification implements CellRangerF
         SingleCellBamFile singleCellBamFile = createBamFile()
 
         CellRangerWorkflowService service = new CellRangerWorkflowService([
-                singleCellBamFileService: Mock(SingleCellBamFileService) {
-                    1 * getWorkDirectory(_) >> null
+                cellRangerWorkFileService: Mock(CellRangerWorkFileService) {
+                    1 * getDirectoryPath(_) >> null
                     0 * _
                 },
-                fileSystemService       : Mock(FileSystemService) {
+                fileSystemService        : Mock(FileSystemService) {
                     _ * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
-                fileService             : Mock(FileService) {
+                fileService              : Mock(FileService) {
                     1 * correctPathPermissionAndGroupRecursive(null, _)
                     0 * _
                 },

@@ -80,8 +80,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         String configText = "<config/>"
         String cmd = "roddy.sh"
         RoddyBamFile bamFile = createBamFile()
-        Path base = Paths.get(bamFile.workDirectory.absolutePath)
-        Path configDir = base.resolve(RoddyConfigService.CONFIGURATION_DIRECTORY)
+        Path configDir = Paths.get("/conf-dir")
         Path configFile = configDir.resolve("config.xml")
         ProcessOutput processOutput = new ProcessOutput("out", "err", 0)
         List<ClusterJob> clusterJobs = [createClusterJob(), createClusterJob()]
@@ -106,6 +105,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
         job.workflowRunService = Mock(WorkflowRunService)
         job.logService = Mock(LogService)
+        job.roddyResultWorkFileServiceFactoryService = Mock(RoddyResultWorkFileServiceFactoryService)
 
         when:
         job.execute(workflowStep)
@@ -115,8 +115,10 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         1 * job.individualService.getViewByPidPathBase(bamFile.individual, bamFile.seqType) >> { Paths.get("/input-dir") }
         1 * job.roddyConfigService.createRoddyXmlConfig(_, [e: "f", a: "b"], "workflow-name", workflowStep.workflowRun.workflowVersion, "analysis-id", _, _, _,
                 true) >> { configText }
-        1 * job.roddyConfigService.getConfigDirectory(base) >> configDir
-        1 * job.roddyConfigService.getConfigPath(base) >> configFile
+        1 * job.roddyResultWorkFileServiceFactoryService.getService(bamFile) >> Mock(RoddyResultServiceTrait) {
+            getConfigDirectory(bamFile) >> configDir
+            getConfigFile(bamFile) >> configFile
+        }
         0 * job.roddyConfigService._
         1 * job.fileService.createFileWithContent(configFile, configText, _, true)
         1 * job.roddyCommandService.createRoddyCommand(_, _, ["c", "d"]) >> { cmd }
@@ -139,8 +141,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         String configText = "<config/>"
         String cmd = "roddy.sh"
         RoddyBamFile bamFile = createBamFile()
-        Path base = Paths.get(bamFile.workDirectory.absolutePath)
-        Path configDir = base.resolve(RoddyConfigService.CONFIGURATION_DIRECTORY)
+        Path configDir = Paths.get("/conf-dir")
         Path configFile = configDir.resolve("config.xml")
         ProcessOutput processOutput = new ProcessOutput("out", "err", 0)
 
@@ -164,6 +165,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
         job.workflowRunService = Mock(WorkflowRunService)
         job.logService = Mock(LogService)
+        job.roddyResultWorkFileServiceFactoryService = Mock(RoddyResultWorkFileServiceFactoryService)
 
         when:
         job.execute(workflowStep)
@@ -173,8 +175,10 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         1 * job.individualService.getViewByPidPathBase(bamFile.individual, bamFile.seqType) >> { Paths.get("/input-dir") }
         1 * job.roddyConfigService.createRoddyXmlConfig(_, [e: "f", a: "b"], "workflow-name", workflowStep.workflowRun.workflowVersion, "analysis-id", _, _, _,
                 true) >> { configText }
-        1 * job.roddyConfigService.getConfigDirectory(base) >> configDir
-        1 * job.roddyConfigService.getConfigPath(base) >> configFile
+        1 * job.roddyResultWorkFileServiceFactoryService.getService(bamFile) >> Mock(RoddyResultServiceTrait) {
+            1 * getConfigDirectory(bamFile) >> configDir
+            1 * getConfigFile(bamFile) >> configFile
+        }
         0 * job.roddyConfigService._
         1 * job.fileService.createFileWithContent(configFile, configText, _, true)
         1 * job.roddyCommandService.createRoddyCommand(_, _, ["c", "d"]) >> { cmd }
@@ -197,8 +201,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         String configText = "<config/>"
         String cmd = "roddy.sh"
         RoddyBamFile bamFile = createBamFile()
-        Path base = Paths.get(bamFile.workDirectory.absolutePath)
-        Path configDir = base.resolve(RoddyConfigService.CONFIGURATION_DIRECTORY)
+        Path configDir = Paths.get("/conf-dir")
         Path configFile = configDir.resolve("config.xml")
         ProcessOutput processOutput = new ProcessOutput("out", "err", 0)
         List<ClusterJob> clusterJobs = [createClusterJob(), createClusterJob()]
@@ -223,6 +226,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
         job.workflowRunService = Mock(WorkflowRunService)
         job.logService = Mock(LogService)
+        job.roddyResultWorkFileServiceFactoryService = Mock(RoddyResultWorkFileServiceFactoryService)
 
         when:
         job.execute(workflowStep)
@@ -232,8 +236,10 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         1 * job.individualService.getViewByPidPathBase(bamFile.individual, bamFile.seqType) >> { Paths.get("/input-dir") }
         1 * job.roddyConfigService.createRoddyXmlConfig(_, [e: "f", a: "b"], "workflow-name", workflowStep.workflowRun.workflowVersion, "analysis-id", _, _, _,
                 true) >> { configText }
-        1 * job.roddyConfigService.getConfigDirectory(base) >> configDir
-        1 * job.roddyConfigService.getConfigPath(base) >> configFile
+        1 * job.roddyResultWorkFileServiceFactoryService.getService(bamFile) >> Mock(RoddyResultServiceTrait) {
+            1 * getConfigDirectory(bamFile) >> configDir
+            1 * getConfigFile(bamFile) >> configFile
+        }
         0 * job.roddyConfigService._
         1 * job.fileService.createFileWithContent(configFile, configText, _, true)
         1 * job.roddyCommandService.createRoddyCommand(_, _, ["c", "d"]) >> { cmd }

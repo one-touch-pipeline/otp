@@ -26,8 +26,8 @@ import spock.lang.Specification
 import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.infrastructure.alignment.RoddyBamFileNames
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CreateFileHelper
@@ -111,14 +111,6 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         "${sampleType.dirName}_${individual.pid}_merged.mdup.bam.bai" == roddyBamFile.baiFileName
     }
 
-    void testGetRoddyMd5sumFileName() {
-        given:
-        setupTest()
-
-        expect:
-        "${sampleType.dirName}_${individual.pid}_merged.mdup.bam.md5" == roddyBamFile.md5sumFileName
-    }
-
     void testGetWorkDirectory_AllFine() {
         given:
         setupTest()
@@ -132,7 +124,7 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         setupTest()
 
         expect:
-        "${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFileService.QUALITY_CONTROL_DIR}" ==
+        "${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}" ==
                 roddyBamFile.workQADirectory.path
     }
 
@@ -141,7 +133,7 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         setupTest()
 
         expect:
-        "${testDir}/${RoddyBamFileService.QUALITY_CONTROL_DIR}" ==
+        "${testDir}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}" ==
                 roddyBamFile.finalQADirectory.path
     }
 
@@ -152,15 +144,6 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         expect:
         "${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFile.RODDY_EXECUTION_STORE_DIR}" ==
                 roddyBamFile.workExecutionStoreDirectory.path
-    }
-
-    void testGetFinalRoddyExecutionStoreDirectory_AllFine() {
-        given:
-        setupTest()
-
-        expect:
-        "${testDir}/${RoddyBamFile.RODDY_EXECUTION_STORE_DIR}" ==
-                roddyBamFile.finalExecutionStoreDirectory.path
     }
 
     void testGetWorkBamFile_AllFine() {
@@ -181,15 +164,6 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
                 roddyBamFile.workBaiFile.path
     }
 
-    void testGetWorkMd5sumFile_AllFine() {
-        given:
-        setupTest()
-
-        expect:
-        "${testDir}/${roddyBamFile.workDirectoryName}/${roddyBamFile.md5sumFileName}" ==
-                roddyBamFile.workMd5sumFile.path
-    }
-
     void testGetFinalBamFile_AllFine() {
         given:
         setupTest()
@@ -199,30 +173,12 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
                 roddyBamFile.finalBamFile.path
     }
 
-    void testGetFinalBaiFile_AllFine() {
-        given:
-        setupTest()
-
-        expect:
-        "${testDir}/${roddyBamFile.baiFileName}" ==
-                roddyBamFile.finalBaiFile.path
-    }
-
-    void testGetFinalMd5sumFile_AllFine() {
-        given:
-        setupTest()
-
-        expect:
-        "${testDir}/${roddyBamFile.md5sumFileName}" ==
-                roddyBamFile.finalMd5sumFile.path
-    }
-
     void testGetWorkMergedQADirectory_AllFine() {
         given:
         setupTest()
 
         expect:
-        "${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFileService.QUALITY_CONTROL_DIR}/${RoddyBamFileService.MERGED_DIR}" ==
+        "${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/${RoddyBamFileNames.MERGED_DIR}" ==
                 roddyBamFile.workMergedQADirectory.path
     }
 
@@ -231,7 +187,7 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         setupTest()
 
         expect:
-        "${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFileService.QUALITY_CONTROL_DIR}/${RoddyBamFileService.MERGED_DIR}/${RoddyBamFileService.QUALITY_CONTROL_JSON_FILE_NAME}" ==
+        "${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/${RoddyBamFileNames.MERGED_DIR}/${RoddyBamFileNames.QUALITY_CONTROL_JSON_FILE_NAME}" ==
                 roddyBamFile.workMergedQAJsonFile.path
     }
 
@@ -240,139 +196,8 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         setupTest()
 
         expect:
-        "${testDir}/${RoddyBamFileService.QUALITY_CONTROL_DIR}/${RoddyBamFileService.MERGED_DIR}" ==
+        "${testDir}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/${RoddyBamFileNames.MERGED_DIR}" ==
                 roddyBamFile.finalMergedQADirectory.path
-    }
-
-    void testGetFinalRoddyMergedQAJsonFile_AllFine() {
-        given:
-        setupTest()
-
-        expect:
-        "${testDir}/${RoddyBamFileService.QUALITY_CONTROL_DIR}/${RoddyBamFileService.MERGED_DIR}/${RoddyBamFileService.QUALITY_CONTROL_JSON_FILE_NAME}" ==
-                roddyBamFile.finalMergedQAJsonFile.path
-    }
-
-    void testGetWorkSingleLaneQADirectories_NoSeqTracks() {
-        given:
-        setupTest()
-        roddyBamFile.seqTracks = null
-
-        expect:
-        roddyBamFile.workSingleLaneQADirectories.isEmpty()
-    }
-
-    void testGetWorkSingleLaneQADirectories_OneSeqTrack() {
-        given:
-        setupTest()
-        SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
-        updateRawSequenceFileNames(seqTrack)
-        File dir = new File("${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFileService.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}")
-
-        expect:
-        [(seqTrack): dir] == roddyBamFile.workSingleLaneQADirectories
-    }
-
-    void testGetWorkSingleLaneQADirectories_TwoSeqTracks() {
-        given:
-        setupTest()
-        updateRawSequenceFileNames(roddyBamFile.seqTracks.iterator()[0])
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithFastqFiles(roddyBamFile.workPackage)
-        updateRawSequenceFileNames(seqTrack)
-        roddyBamFile.seqTracks.add(seqTrack)
-        Map<SeqTrack, File> expected = [:]
-        roddyBamFile.seqTracks.each {
-            File dir = new File("${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFileService.QUALITY_CONTROL_DIR}/run${it.run.name}_${COMMON_PREFIX}")
-            expected.put((it), dir)
-        }
-
-        Map<SeqTrack, File> actual = roddyBamFile.workSingleLaneQADirectories
-
-        expect:
-        expected == actual
-    }
-
-    void testGetWorkSingleLaneQAJsonFiles_OneSeqTrack() {
-        given:
-        setupTest()
-        SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
-        updateRawSequenceFileNames(seqTrack)
-        File file = new File("${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFileService.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}/${RoddyBamFileService.QUALITY_CONTROL_JSON_FILE_NAME}")
-
-        expect:
-        [(seqTrack): file] == roddyBamFile.workSingleLaneQAJsonFiles
-    }
-
-    void testGetFinalRoddySingleLaneQADirectories_NoSeqTracks() {
-        given:
-        setupTest()
-        roddyBamFile.seqTracks = null
-
-        expect:
-        roddyBamFile.finalSingleLaneQADirectories.isEmpty()
-    }
-
-    void testGetFinalRoddySingleLaneQADirectories_OneSeqTrack() {
-        given:
-        setupTest()
-        SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
-        updateRawSequenceFileNames(seqTrack)
-        File dir = new File("${testDir}/${RoddyBamFileService.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}")
-
-        expect:
-        [(seqTrack): dir] == roddyBamFile.finalSingleLaneQADirectories
-    }
-
-    void testGetFinalRoddySingleLaneQADirectories_TwoSeqTracks() {
-        given:
-        setupTest()
-        updateRawSequenceFileNames(roddyBamFile.seqTracks.iterator()[0])
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithFastqFiles(roddyBamFile.workPackage)
-        updateRawSequenceFileNames(seqTrack)
-        roddyBamFile.seqTracks.add(seqTrack)
-        Map<SeqTrack, File> expected = [:]
-        roddyBamFile.seqTracks.each {
-            File dir = new File("${testDir}/${RoddyBamFileService.QUALITY_CONTROL_DIR}/run${it.run.name}_${COMMON_PREFIX}")
-            expected.put((it), dir)
-        }
-
-        Map<SeqTrack, File> actual = roddyBamFile.finalSingleLaneQADirectories
-
-        expect:
-        expected == actual
-    }
-
-    void testGetFinalRoddySingleLaneQAJsonFiles_OneSeqTrack() {
-        given:
-        setupTest()
-        SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
-        updateRawSequenceFileNames(seqTrack)
-        File file = new File("${testDir}/${RoddyBamFileService.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}/${RoddyBamFileService.QUALITY_CONTROL_JSON_FILE_NAME}")
-
-        expect:
-        [(seqTrack): file] == roddyBamFile.finalSingleLaneQAJsonFiles
-    }
-
-    void testGetRoddySingleLaneQADirectoriesHelper_FinalFolder_OneSeqTrack() {
-        given:
-        setupTest()
-        SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
-        updateRawSequenceFileNames(seqTrack)
-        File dir = new File("${testDir}/${RoddyBamFileService.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}")
-
-        expect:
-        [(seqTrack): dir] == roddyBamFile.getSingleLaneQADirectoriesHelper(roddyBamFile.finalQADirectory)
-    }
-
-    void testGetRoddySingleLaneQADirectoriesHelper_WorkFolder_OneSeqTrack() {
-        given:
-        setupTest()
-        SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
-        updateRawSequenceFileNames(seqTrack)
-        File dir = new File("${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFileService.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}")
-
-        expect:
-        [(seqTrack): dir] == roddyBamFile.getSingleLaneQADirectoriesHelper(roddyBamFile.workQADirectory)
     }
 
     void testGetLatestWorkExecutionDirectory_WhenRoddyExecutionDirectoryNamesEmpty_ShouldFail() {
@@ -463,25 +288,6 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         return file == roddyBamFile.latestWorkExecutionDirectory
     }
 
-    void testFinalRoddyExecutionDirectories_noRoddyExecutionDirsExist() {
-        given:
-        setupTest()
-
-        expect:
-        helperTestFinalRoddyExecutionDirectories([])
-    }
-
-    void testFinalRoddyExecutionDirectories_allFine() {
-        given:
-        setupTest()
-
-        expect:
-        helperTestFinalRoddyExecutionDirectories([
-                'exec_123456_123456789_bla_bla',
-                'exec_654321_987654321_bla_bla',
-        ])
-    }
-
     void testIsOldStructureUsed_useOldStructure_shouldReturnTrue() {
         given:
         setupTest()
@@ -539,21 +345,5 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
 
         then:
         thrown IllegalStateException
-    }
-
-    private boolean helperTestFinalRoddyExecutionDirectories(List<String> roddyExecutionDirectoryNames) {
-        roddyBamFile.roddyExecutionDirectoryNames.addAll(roddyExecutionDirectoryNames)
-        List<String> expectedResult = roddyExecutionDirectoryNames.collect {
-            "${testDir}/${RoddyBamFile.RODDY_EXECUTION_STORE_DIR}/${it}"
-        }
-
-        return expectedResult == roddyBamFile.finalExecutionDirectories*.path
-    }
-
-    private void updateRawSequenceFileNames(SeqTrack seqTrack) {
-        List<RawSequenceFile> rawSequenceFiles = FastqFile.findAllBySeqTrack(seqTrack)
-        rawSequenceFiles[0].vbpFileName = FIRST_DATAFILE_NAME
-        rawSequenceFiles[1].vbpFileName = SECOND_DATAFILE_NAME
-        rawSequenceFiles*.save(flush: true)
     }
 }

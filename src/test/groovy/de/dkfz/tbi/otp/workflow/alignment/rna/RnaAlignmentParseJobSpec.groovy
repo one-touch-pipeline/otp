@@ -26,11 +26,11 @@ import spock.lang.Specification
 import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.RnaAlignmentWorkflowDomainFactory
+import de.dkfz.tbi.otp.infrastructure.alignment.RnaAlignmentWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -90,8 +90,8 @@ class RnaAlignmentParseJobSpec extends Specification implements RnaAlignmentWork
             0 * _
         }
         job.abstractQualityAssessmentService = new RoddyQualityAssessmentService()
-        job.abstractQualityAssessmentService.rnaRoddyBamFileService = Mock(RnaRoddyBamFileService) {
-            getWorkMergedQAJsonFile(_) >> mergedQAJsonFile
+        job.abstractQualityAssessmentService.rnaAlignmentWorkFileService = Mock(RnaAlignmentWorkFileService) {
+            getMergedQAJsonFile(_) >> mergedQAJsonFile
         }
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
 
@@ -131,8 +131,8 @@ class RnaAlignmentParseJobSpec extends Specification implements RnaAlignmentWork
             0 * _
         }
         job.abstractQualityAssessmentService = new RoddyQualityAssessmentService()
-        job.abstractQualityAssessmentService.rnaRoddyBamFileService = Mock(RnaRoddyBamFileService) {
-            getWorkMergedQAJsonFile(_) >> mergedQAJsonFile
+        job.abstractQualityAssessmentService.rnaAlignmentWorkFileService = Mock(RnaAlignmentWorkFileService) {
+            getMergedQAJsonFile(_) >> mergedQAJsonFile
         }
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
 

@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.workflow.jobs.AbstractExecuteClusterPipelineJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -56,15 +55,15 @@ class BamImportCopyJob extends AbstractExecuteClusterPipelineJob implements BamI
 
         Path maxReadLengthScript = configService.toolsPath.resolve('bamMaxReadLength.groovy')
 
-        Path sourceBam = externallyProcessedBamFileService.getSourceBamFilePath(bamFile)
-        Path sourceBai = externallyProcessedBamFileService.getSourceBaiFilePath(bamFile)
-        Path sourceBaseDir = externallyProcessedBamFileService.getSourceBaseDirFilePath(bamFile)
+        Path sourceBam = externalAlignmentSourceFileService.getBamFile(bamFile)
+        Path sourceBai = externalAlignmentSourceFileService.getBaiFile(bamFile)
+        Path sourceBaseDir = externalAlignmentSourceFileService.getDirectoryPath(bamFile)
 
-        Path targetBam = externallyProcessedBamFileService.getBamFile(bamFile, PathOption.REAL_PATH)
-        Path targetBai = externallyProcessedBamFileService.getBaiFile(bamFile, PathOption.REAL_PATH)
-        Path targetBaseDir = externallyProcessedBamFileService.getImportFolder(bamFile, PathOption.REAL_PATH)
+        Path targetBam = externalAlignmentWorkFileService.getBamFile(bamFile)
+        Path targetBai = externalAlignmentWorkFileService.getBaiFile(bamFile)
+        Path targetBaseDir = externalAlignmentWorkFileService.getDirectoryPath(bamFile)
 
-        Path bamMaxReadLengthFile = externallyProcessedBamFileService.getBamMaxReadLengthFile(bamFile, PathOption.REAL_PATH)
+        Path bamMaxReadLengthFile = externalAlignmentWorkFileService.getBamMaxReadLengthFile(bamFile)
 
         String updateBaseDir = "sed -e 's#${sourceBaseDir}#${targetBaseDir}#'"
 

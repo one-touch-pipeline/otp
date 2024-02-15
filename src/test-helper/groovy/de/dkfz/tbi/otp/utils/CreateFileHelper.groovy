@@ -42,7 +42,7 @@ class CreateFileHelper {
 
     static Path createFile(Path file, String content = "some content") {
         if (!Files.exists(file.parent)) {
-            assert Files.createDirectories(file.parent)
+            Files.createDirectories(file.parent)
         }
         file.text = content
         return file

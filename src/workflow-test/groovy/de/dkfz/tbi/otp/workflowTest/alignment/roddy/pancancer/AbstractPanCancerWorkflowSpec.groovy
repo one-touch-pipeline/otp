@@ -84,16 +84,16 @@ abstract class AbstractPanCancerWorkflowSpec extends AbstractRoddyAlignmentWorkf
 
     @Override
     protected Path getWorkMergedQAJsonFile(RoddyBamFile bamFile) {
-        return roddyBamFileService.getWorkMergedQAJsonFile(bamFile)
+        return panCancerWorkFileService.getMergedQAJsonFile(bamFile)
     }
 
     @Override
     protected void assertWorkflowFileSystemState(RoddyBamFile bamFile) {
-        roddyFileAssertHelper.assertFileSystemState(bamFile, roddyBamFileService)
+        roddyFileAssertHelper.assertFileSystemState(bamFile)
     }
 
     @Override
     protected void assertWorkflowWorkDirectoryFileSystemState(RoddyBamFile bamFile) {
-        roddyFileAssertHelper.assertWorkDirectoryFileSystemState(bamFile, roddyBamFileService, roddyConfigService)
+        roddyFileAssertHelper.assertWorkDirectoryFileSystemState(bamFile)
     }
 }

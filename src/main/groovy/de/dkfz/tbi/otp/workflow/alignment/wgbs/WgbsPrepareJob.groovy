@@ -26,13 +26,14 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.WgbsAlignmentWorkFileService
 import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.LinkEntry
-import de.dkfz.tbi.otp.workflow.jobs.AbstractPrepareJob
 import de.dkfz.tbi.otp.workflow.alignment.RoddyAlignmentPrepareService
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerShared
+import de.dkfz.tbi.otp.workflow.jobs.AbstractPrepareJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Files
@@ -43,17 +44,20 @@ import java.nio.file.Path
 class WgbsPrepareJob extends AbstractPrepareJob implements PanCancerShared {
 
     @Autowired
-    RoddyBamFileService roddyBamFileService
-
-    @Autowired
     RoddyConfigValueService roddyConfigValueService
 
     @Autowired
     RoddyAlignmentPrepareService roddyAlignmentPrepareService
 
+    @Autowired
+    PanCancerWorkFileService panCancerWorkFileService
+
+    @Autowired
+    WgbsAlignmentWorkFileService wgbsAlignmentWorkFileService
+
     @Override
     protected Path buildWorkDirectoryPath(WorkflowStep workflowStep) {
-        return roddyBamFileService.getWorkDirectory(getRoddyBamFile(workflowStep))
+        return panCancerWorkFileService.getDirectoryPath(getRoddyBamFile(workflowStep))
     }
 
     @Override
@@ -68,7 +72,7 @@ class WgbsPrepareJob extends AbstractPrepareJob implements PanCancerShared {
 
         roddyAlignmentPrepareService.prepare(roddyBamFile, seqTracks)
 
-        Path metadataFile = roddyBamFileService.getWorkMetadataTableFile(roddyBamFile)
+        Path metadataFile = wgbsAlignmentWorkFileService.getMetadataTableFile(roddyBamFile)
         String content = roddyConfigValueService.createMetadataTable(seqTracks)
         Files.deleteIfExists(metadataFile)
         fileService.createFileWithContent(metadataFile, content, fileService.DEFAULT_BAM_FILE_PERMISSION)

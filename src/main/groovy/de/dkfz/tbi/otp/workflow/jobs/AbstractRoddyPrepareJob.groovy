@@ -25,7 +25,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.AbstractBamFileServiceFactoryService
+import de.dkfz.tbi.otp.infrastructure.alignment.AlignmentLinkFileServiceFactoryService
 import de.dkfz.tbi.otp.utils.LinkEntry
 
 import java.nio.file.Path
@@ -33,7 +33,7 @@ import java.nio.file.Path
 @Slf4j
 abstract class AbstractRoddyPrepareJob extends AbstractPrepareJob {
     @Autowired
-    AbstractBamFileServiceFactoryService abstractBamFileServiceFactoryService
+    AlignmentLinkFileServiceFactoryService alignmentLinkFileServiceFactoryService
 
     Collection<LinkEntry> createBamAndBaiLinkEntries(AbstractBamFile bamFile, Path workDirectory) {
         /**
@@ -43,7 +43,7 @@ abstract class AbstractRoddyPrepareJob extends AbstractPrepareJob {
         String bamFileName = "${bamFile.sampleType.dirName}_${bamFile.individual.pid}_merged.mdup.bam"
         String baiFileName = "${bamFileName}.bai"
 
-        Path targetFileBam = abstractBamFileServiceFactoryService.getService(bamFile).getPathForFurtherProcessing(bamFile)
+        Path targetFileBam = alignmentLinkFileServiceFactoryService.getService(bamFile).getPathForFurtherProcessing(bamFile)
         Path targetFileBai = targetFileBam.resolveSibling(bamFile.baiFileName)
 
         return [

@@ -25,28 +25,16 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.dataprocessing.ExternalMergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholds
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.AbstractBamFileServiceFactoryService
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaWorkFileService
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.SophiaDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.ngsdata.FastqFile
-import de.dkfz.tbi.otp.ngsdata.FastqImportInstance
-import de.dkfz.tbi.otp.ngsdata.FileType
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType
-import de.dkfz.tbi.otp.ngsdata.Sample
-import de.dkfz.tbi.otp.ngsdata.SampleType
-import de.dkfz.tbi.otp.ngsdata.SampleTypePerProject
+import de.dkfz.tbi.otp.infrastructure.alignment.AlignmentLinkFileServiceFactoryService
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerLinkFileService
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
@@ -58,7 +46,7 @@ import java.nio.file.Paths
 
 class SophiaPrepareJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, IsRoddy {
 
-    RoddyBamFileService roddyBamFileService
+    PanCancerLinkFileService panCancerLinkFileService
     SophiaPrepareJob job
 
     SophiaInstance sophiaInstance
@@ -96,11 +84,11 @@ class SophiaPrepareJobSpec extends Specification implements DataTest, WorkflowSy
         sophiaInstance = sophiaDomainFactory.createInstance(sophiaDomainFactory.createSamplePairWithExternallyProcessedBamFiles())
         workflowStep = createWorkflowStep([workflowRun: createWorkflowRun([workflow: findOrCreateWorkflow(SophiaWorkflow.WORKFLOW)])])
         job = new SophiaPrepareJob([
-                sophiaWorkFileService               : Mock(SophiaWorkFileService),
-                concreteArtefactService             : Mock(ConcreteArtefactService),
-                abstractBamFileServiceFactoryService: Mock(AbstractBamFileServiceFactoryService),
+                sophiaWorkFileService                 : Mock(SophiaWorkFileService),
+                concreteArtefactService               : Mock(ConcreteArtefactService),
+                alignmentLinkFileServiceFactoryService: Mock(AlignmentLinkFileServiceFactoryService),
         ])
-        roddyBamFileService = Mock(RoddyBamFileService)
+        panCancerLinkFileService = Mock(PanCancerLinkFileService)
     }
 
     void "buildWorkDirectoryPath, should return work directory"() {
@@ -143,10 +131,10 @@ class SophiaPrepareJobSpec extends Specification implements DataTest, WorkflowSy
         1 * job.concreteArtefactService.getOutputArtefact(workflowStep, analysisOutput) >> sophiaInstance
         1 * job.concreteArtefactService.getInputArtefact(workflowStep, inputControlBam) >> controlBamFile
         1 * job.concreteArtefactService.getInputArtefact(workflowStep, inputTumorBam) >> tumorBamFile
-        1 * job.abstractBamFileServiceFactoryService.getService(tumorBamFile) >> roddyBamFileService
-        1 * job.abstractBamFileServiceFactoryService.getService(controlBamFile) >> roddyBamFileService
-        1 * roddyBamFileService.getPathForFurtherProcessing(tumorBamFile) >> furtherProcessingTumorPath
-        1 * roddyBamFileService.getPathForFurtherProcessing(controlBamFile) >> furtherProcessingControlPath
+        1 * job.alignmentLinkFileServiceFactoryService.getService(tumorBamFile) >> panCancerLinkFileService
+        1 * job.alignmentLinkFileServiceFactoryService.getService(controlBamFile) >> panCancerLinkFileService
+        1 * panCancerLinkFileService.getPathForFurtherProcessing(tumorBamFile) >> furtherProcessingTumorPath
+        1 * panCancerLinkFileService.getPathForFurtherProcessing(controlBamFile) >> furtherProcessingControlPath
     }
 
     void "doFurtherPreparation, should do nothing"() {

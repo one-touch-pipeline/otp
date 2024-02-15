@@ -26,12 +26,9 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.RoddyBamFileNames
 import de.dkfz.tbi.otp.workflow.alignment.*
-import de.dkfz.tbi.otp.workflow.jobs.AttachUuidJob
-import de.dkfz.tbi.otp.workflow.jobs.CalculateSizeJob
-import de.dkfz.tbi.otp.workflow.jobs.Job
-import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
+import de.dkfz.tbi.otp.workflow.jobs.*
 import de.dkfz.tbi.otp.workflowExecution.*
 
 /**
@@ -79,7 +76,7 @@ class PanCancerWorkflow extends AlignmentWorkflow implements LinearWorkflow {
         RoddyBamFile outputRoddyBamFile = new RoddyBamFile([
                 workPackage        : mergingWorkPackage,
                 identifier         : identifier,
-                workDirectoryName  : "${RoddyBamFileService.WORK_DIR_PREFIX}_${identifier}",
+                workDirectoryName  : "${RoddyBamFileNames.WORK_DIR_PREFIX}_${identifier}",
                 seqTracks          : roddyBamFile.seqTracks.collect() as Set,
                 config             : roddyBamFile.config,
                 numberOfMergedLanes: roddyBamFile.containedSeqTracks.size(),

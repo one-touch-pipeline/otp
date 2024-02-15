@@ -22,22 +22,18 @@
 package de.dkfz.tbi.otp.workflow.bamImport
 
 import groovy.util.logging.Slf4j
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
-import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.jobs.AbstractLinkJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
+import java.nio.file.Path
+
 @Component
 @Slf4j
 class BamImportLinkJob extends AbstractLinkJob implements BamImportShared {
-
-    @Autowired
-    ExternallyProcessedBamFileService externallyProcessedBamFileService
 
     @Override
     protected List<LinkEntry> getLinkMap(WorkflowStep workflowStep) {
@@ -49,10 +45,13 @@ class BamImportLinkJob extends AbstractLinkJob implements BamImportShared {
         ]
         fileNames.addAll(bamFile.furtherFiles)
 
+        Path linkDir = externalAlignmentLinkFileService.getDirectoryPath(bamFile)
+        Path workDir = externalAlignmentWorkFileService.getDirectoryPath(bamFile)
+
         return fileNames.collect {
             new LinkEntry(
-                    link: externallyProcessedBamFileService.getImportFolder(bamFile).resolve(it),
-                    target: externallyProcessedBamFileService.getImportFolder(bamFile, PathOption.REAL_PATH).resolve(it),
+                    link: linkDir.resolve(it),
+                    target: workDir.resolve(it),
             )
         }
     }

@@ -27,11 +27,11 @@ import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.SingleCellBamFileService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerWorkFileService
 import de.dkfz.tbi.otp.job.processing.ClusterJobSchedulerService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -103,10 +103,9 @@ class ExecuteCellRangerJobSpec extends Specification implements CellRangerFactor
                 fileSystemService         : Mock(FileSystemService) {
                     0 * _
                 },
-                singleCellBamFileService   : Mock(SingleCellBamFileService) {
-                    _ * getWorkDirectory(singleCellBamFile) >> workDirectory
-                    _ * getResultDirectory(singleCellBamFile) >> resultDirectory
-                    0 * _
+                cellRangerWorkFileService : Mock(CellRangerWorkFileService) {
+                    2 * getDirectoryPath(_) >> workDirectory
+                    3 * getResultDirectory(_) >> resultDirectory
                 },
         ])
         job.metaClass.getProcessParameterObject = { ->

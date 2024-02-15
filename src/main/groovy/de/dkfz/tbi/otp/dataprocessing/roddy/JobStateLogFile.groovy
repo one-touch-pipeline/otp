@@ -23,11 +23,13 @@ package de.dkfz.tbi.otp.dataprocessing.roddy
 
 import groovy.transform.*
 
-import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
 import de.dkfz.tbi.otp.dataprocessing.ParsingException
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.FileNotReadableException
-import de.dkfz.tbi.otp.utils.WaitingFileUtils
+import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
 
+import java.nio.file.Files
+import java.nio.file.Path
 import java.util.regex.Matcher
 
 /**
@@ -55,29 +57,35 @@ class JobStateLogFile {
     /**
      * represents JobStateLogFile on the file-system
      */
-    private final File file
+    private final Path file
 
     /**
      * @param roddyExecutionDirectory subdirectory of
      * {@link de.dkfz.tbi.otp.dataprocessing.RoddyBamFile#getWorkExecutionStoreDirectory} corresponding to a roddy call
      */
-    private JobStateLogFile(File roddyExecutionDirectory) {
-        file = new File(roddyExecutionDirectory, JOB_STATE_LOG_FILE_NAME)
+    private JobStateLogFile(Path roddyExecutionDirectory) {
+        file = roddyExecutionDirectory.resolve(JOB_STATE_LOG_FILE_NAME)
         validateFile()
         logFileEntries = parseJobStateLogFile().asImmutable()
     }
 
+    @Deprecated
     static JobStateLogFile getInstance(File roddyExecutionDirectory) {
+        return new JobStateLogFile(roddyExecutionDirectory.toPath())
+    }
+
+    static JobStateLogFile getInstance(Path roddyExecutionDirectory) {
         return new JobStateLogFile(roddyExecutionDirectory)
     }
 
+    @SuppressWarnings('NoFilesReadableRule')
     private void validateFile() {
         try {
-            WaitingFileUtils.waitUntilExists(file)
+            FileService.waitUntilExists(file)
         } catch (AssertionError ignored) {
-            throw new FileNotFoundException("${JOB_STATE_LOG_FILE_NAME} is not found in ${file.parentFile}")
+            throw new FileNotFoundException("${JOB_STATE_LOG_FILE_NAME} is not found in ${file.parent}")
         }
-        if (!file.canRead()) {
+        if (!Files.isReadable(file)) {
             throw new FileNotReadableException("$file")
         }
     }

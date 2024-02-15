@@ -28,7 +28,6 @@ import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
@@ -36,14 +35,14 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobService
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.ProcessOutput
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.FileSystems
-import java.nio.file.Path
+import java.nio.file.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
@@ -113,7 +112,7 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
         executeCommandCounter = 0
         validateCounter = 0
 
-        roddyBamFile = createBamFile()
+        roddyBamFile = createBamFile(workflowArtefact: createWorkflowArtefact(producedBy: createWorkflowRun(workFolder: createWorkFolder())))
 
         configService = new TestConfigService()
 
@@ -121,6 +120,7 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
         roddyExecutionService.configService = configService
         roddyExecutionService.clusterJobService = new ClusterJobService()
         roddyExecutionService.processingOptionService = new ProcessingOptionService()
+        roddyExecutionService.roddyResultWorkFileServiceFactoryService = new RoddyResultWorkFileServiceFactoryService()
     }
 
     void cleanup() {
@@ -167,10 +167,10 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
     void "test createClusterJobObjects"() {
         given:
         setupData()
-        File workRoddyExecutionDir = setUpWorkDirAndMockProcessOutput()
+        Path workRoddyExecutionDir = setUpWorkDirAndMockProcessOutput()
         WorkflowStep workflowStep = createWorkflowStep()
 
-        roddyBamFile.roddyExecutionDirectoryNames.add(workRoddyExecutionDir.name)
+        roddyBamFile.roddyExecutionDirectoryNames.add(workRoddyExecutionDir.fileName.toString())
 
         when:
         Collection<ClusterJob> result = roddyExecutionService.createClusterJobObjects(roddyBamFile, OUTPUT_CLUSTER_JOBS_SUBMITTED, workflowStep)
@@ -298,11 +298,11 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
     void "test saveRoddyExecutionStoreDirectory, execution store directory doesn't exist on filesystem, should fail"() {
         given:
         setupData()
-        File workRoddyExecutionDir = setUpWorkDirAndMockProcessOutput()
+        Path workRoddyExecutionDir = setUpWorkDirAndMockProcessOutput()
 
         roddyBamFile.roddyExecutionDirectoryNames.add(RODDY_EXECUTION_STORE_DIRECTORY_NAME)
 
-        workRoddyExecutionDir.delete()
+        Files.delete(workRoddyExecutionDir)
 
         when:
         roddyExecutionService.saveRoddyExecutionStoreDirectory(roddyBamFile as RoddyResult, stderr, FileSystems.default)
@@ -316,11 +316,11 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
     void "test saveRoddyExecutionStoreDirectory, execution store directory isn't a directory, should fail"() {
         given:
         setupData()
-        File workRoddyExecutionDir = setUpWorkDirAndMockProcessOutput()
+        Path workRoddyExecutionDir = setUpWorkDirAndMockProcessOutput()
 
         roddyBamFile.roddyExecutionDirectoryNames.add(RODDY_EXECUTION_STORE_DIRECTORY_NAME)
 
-        workRoddyExecutionDir.delete()
+        Files.delete(workRoddyExecutionDir)
         tempDir.resolve(RODDY_EXECUTION_STORE_DIRECTORY_NAME)
 
         when:
@@ -403,20 +403,23 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
         thrown(AssertionError)
     }
 
-    private File setRootPathAndCreateWorkExecutionStoreDirectory() {
-        configService.addOtpProperty((OtpProperty.PATH_PROJECT_ROOT), tempDir.toString())
-        File workRoddyExecutionDir = new File(roddyBamFile.workExecutionStoreDirectory, RODDY_EXECUTION_STORE_DIRECTORY_NAME)
-        assert workRoddyExecutionDir.mkdirs()
+    private Path setRootPathAndCreateWorkExecutionStoreDirectory() {
+        roddyExecutionService.roddyResultWorkFileServiceFactoryService.panCancerWorkFileService = Mock(PanCancerWorkFileService) {
+            getExecutionStoreDirectory(_) >> tempDir
+        }
+
+        Path workRoddyExecutionDir = tempDir.resolve(RODDY_EXECUTION_STORE_DIRECTORY_NAME)
+        Files.createDirectories(workRoddyExecutionDir)
         return workRoddyExecutionDir
     }
 
-    private File setUpWorkDirAndMockProcessOutput() {
-        File workExecutionDir = setRootPathAndCreateWorkExecutionStoreDirectory()
+    private Path setUpWorkDirAndMockProcessOutput() {
+        Path workExecutionDir = setRootPathAndCreateWorkExecutionStoreDirectory()
 
         String stdout = "Running job abc_def => 3504988"
         stderr = """newLine
 Creating the following execution directory to store information about this process:
-${workExecutionDir.absolutePath}
+${workExecutionDir}
 newLine"""
 
         mockProcessOutput(stdout, stderr)

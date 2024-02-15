@@ -27,11 +27,11 @@ import spock.lang.*
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.SingleCellBamFileService
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerWorkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
@@ -168,12 +168,12 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         SingleCellBamFile singleCellBamFile = createBamFile()
 
         CellRangerService cellRangerService = new CellRangerService([
-                fileSystemService       : Mock(FileSystemService) {
+                fileSystemService        : Mock(FileSystemService) {
                     _ * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
-                fileService             : Mock(FileService),
-                singleCellBamFileService: Mock(SingleCellBamFileService) {
+                fileService              : Mock(FileService),
+                cellRangerWorkFileService: Mock(CellRangerWorkFileService) {
                     _ * getOutputDirectory(singleCellBamFile) >> null
                     0 * _
                 },
@@ -194,11 +194,11 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         Path resultDirectory = tempDir.resolve('result')
 
         CellRangerService cellRangerService = new CellRangerService([
-                fileSystemService       : Mock(FileSystemService) {
+                fileSystemService        : Mock(FileSystemService) {
                     0 * _
                 },
-                fileService             : new FileService(),
-                singleCellBamFileService: Mock(SingleCellBamFileService) {
+                fileService              : new FileService(),
+                cellRangerWorkFileService: Mock(CellRangerWorkFileService) {
                     _ * getResultDirectory(singleCellBamFile) >> resultDirectory
                     0 * _
                 },
@@ -225,11 +225,11 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         SingleCellBamFile singleCellBamFile = createBamFile()
         Path resultDirectory = tempDir.resolve('result')
         CellRangerService cellRangerService = new CellRangerService([
-                fileSystemService       : Mock(FileSystemService) {
+                fileSystemService        : Mock(FileSystemService) {
                     0 * _
                 },
-                fileService             : new FileService(),
-                singleCellBamFileService: Mock(SingleCellBamFileService) {
+                fileService              : new FileService(),
+                cellRangerWorkFileService: Mock(CellRangerWorkFileService) {
                     _ * getResultDirectory(singleCellBamFile) >> resultDirectory
                     0 * _
                 },
@@ -332,7 +332,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
                     _ * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
-                singleCellBamFileService  : Mock(SingleCellBamFileService) {
+                cellRangerWorkFileService : Mock(CellRangerWorkFileService) {
                     _ * getResultDirectory(singleCellBamFile) >> resultDirectory
                     0 * _
                 },
@@ -387,7 +387,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
                     _ * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
-                singleCellBamFileService  : Mock(SingleCellBamFileService) {
+                cellRangerWorkFileService : Mock(CellRangerWorkFileService) {
                     _ * getResultDirectory(singleCellBamFile) >> resultDirectory
                     0 * _
                 },

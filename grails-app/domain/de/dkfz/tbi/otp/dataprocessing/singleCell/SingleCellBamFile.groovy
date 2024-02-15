@@ -24,9 +24,9 @@ package de.dkfz.tbi.otp.dataprocessing.singleCell
 import grails.gorm.hibernate.annotation.ManagedEntity
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.SingleCellBamFileService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
+import de.dkfz.tbi.otp.infrastructure.alignment.*
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.HasIdentifier
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
@@ -39,56 +39,56 @@ import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 class SingleCellBamFile extends AbstractBamFile implements HasIdentifier, ProcessParameterObject {
 
     /**
-     * @deprecated use {@link SingleCellBamFileService#INPUT_DIRECTORY_NAME} instead
+     * @deprecated use {@link CellRangerFileNames#INPUT_DIRECTORY_NAME} instead
      */
     @Deprecated
     static final String INPUT_DIRECTORY_NAME = 'cell-ranger-input'
 
     /**
-     * @deprecated use {@link SingleCellBamFileService#OUTPUT_DIRECTORY_NAME} instead
+     * @deprecated use {@link CellRangerFileNames#OUTPUT_DIRECTORY_NAME} instead
      */
     @Deprecated
     static final String OUTPUT_DIRECTORY_NAME = 'outs'
 
     /**
-     * @deprecated use {@link SingleCellBamFileService#ORIGINAL_BAM_FILE_NAME} instead
+     * @deprecated use {@link CellRangerFileNames#ORIGINAL_BAM_FILE_NAME} instead
      */
     @Deprecated
     static final String ORIGINAL_BAM_FILE_NAME = 'possorted_genome_bam.bam'
 
     /**
-     * @deprecated use {@link SingleCellBamFileService#ORIGINAL_BAI_FILE_NAME} instead
+     * @deprecated use {@link CellRangerFileNames#ORIGINAL_BAI_FILE_NAME} instead
      */
     @Deprecated
     static final String ORIGINAL_BAI_FILE_NAME = 'possorted_genome_bam.bam.bai'
 
     // is created manually
     /**
-     * @deprecated use {@link SingleCellBamFileService#ORIGINAL_BAM_MD5SUM_FILE_NAME} instead
+     * @deprecated use {@link CellRangerFileNames#ORIGINAL_BAM_MD5SUM_FILE_NAME} instead
      */
     @Deprecated
     static final String ORIGINAL_BAM_MD5SUM_FILE_NAME = 'possorted_genome_bam.md5sum'
 
     /**
-     * @deprecated use {@link SingleCellBamFileService#METRICS_SUMMARY_CSV_FILE_NAME} instead
+     * @deprecated use {@link CellRangerFileNames#METRICS_SUMMARY_CSV_FILE_NAME} instead
      */
     @Deprecated
     static final String METRICS_SUMMARY_CSV_FILE_NAME = "metrics_summary.csv"
 
     /**
-     * @deprecated use {@link SingleCellBamFileService#WEB_SUMMARY_HTML_FILE_NAME} instead
+     * @deprecated use {@link CellRangerFileNames#WEB_SUMMARY_HTML_FILE_NAME} instead
      */
     @Deprecated
     static final String WEB_SUMMARY_HTML_FILE_NAME = "web_summary.html"
 
     /**
-     * @deprecated use {@link SingleCellBamFileService#CELL_RANGER_COMMAND_FILE_NAME} instead
+     * @deprecated use {@link CellRangerFileNames#CELL_RANGER_COMMAND_FILE_NAME} instead
      */
     @Deprecated
     static final String CELL_RANGER_COMMAND_FILE_NAME = "cell_ranger_command.txt"
 
     /**
-     * @deprecated use {@link SingleCellBamFileService#CREATED_RESULT_FILES} instead
+     * @deprecated use {@link CellRangerFileNames#CREATED_RESULT_FILES} instead
      */
     @Deprecated
     static final List<String> CREATED_RESULT_FILES = [
@@ -104,7 +104,7 @@ class SingleCellBamFile extends AbstractBamFile implements HasIdentifier, Proces
     ].asImmutable()
 
     /**
-     * @deprecated use {@link SingleCellBamFileService#CREATED_RESULT_DIRS} instead
+     * @deprecated use {@link CellRangerFileNames#CREATED_RESULT_DIRS} instead
      */
     @Deprecated
     static final List<String> CREATED_RESULT_DIRS = [
@@ -114,7 +114,7 @@ class SingleCellBamFile extends AbstractBamFile implements HasIdentifier, Proces
     ].asImmutable()
 
     /**
-     * @deprecated use {@link SingleCellBamFileService#CREATED_RESULT_FILES_AND_DIRS} instead
+     * @deprecated use {@link CellRangerFileNames#CREATED_RESULT_FILES_AND_DIRS} instead
      */
     @Deprecated
     static final List<String> CREATED_RESULT_FILES_AND_DIRS = [
@@ -149,6 +149,7 @@ class SingleCellBamFile extends AbstractBamFile implements HasIdentifier, Proces
      * as hibernate seems to have problems applying the constraints when a property with the same name also
      * exists in a sister class, see RoddyBamFile.workDirectoryName.
      */
+
     private static boolean uniquePerWorkPackageAndProperties(SingleCellBamFile bam, Map properties) {
         List<SingleCellBamFile> result = findAllWhere([workPackage: bam.workPackage] + properties)
         return [] == result || [bam] == result
@@ -184,7 +185,7 @@ class SingleCellBamFile extends AbstractBamFile implements HasIdentifier, Proces
     }
 
     /**
-     * @deprecated use {@link SingleCellBamFileService#getWorkDirectory} instead
+     * @deprecated use {@link CellRangerWorkFileService#getDirectoryPath} instead
      */
     @Deprecated
     File getWorkDirectory() {
@@ -192,7 +193,7 @@ class SingleCellBamFile extends AbstractBamFile implements HasIdentifier, Proces
     }
 
     /**
-     * @deprecated use {@link SingleCellBamFileService#buildWorkDirectoryName} instead
+     * @deprecated use {@link CellRangerWorkFileService#buildWorkDirectoryName} instead
      */
     @Deprecated
     static String buildWorkDirectoryName(CellRangerMergingWorkPackage workPackage, int identifier) {
@@ -211,7 +212,7 @@ class SingleCellBamFile extends AbstractBamFile implements HasIdentifier, Proces
     }
 
     /**
-     * @deprecated use {@link SingleCellBamFileService#getSampleDirectory} instead
+     * @deprecated use {@link CellRangerWorkFileService#getSampleDirectory} instead
      */
     @Deprecated
     File getSampleDirectory() {
@@ -219,64 +220,7 @@ class SingleCellBamFile extends AbstractBamFile implements HasIdentifier, Proces
     }
 
     /**
-     * @deprecated use {@link SingleCellBamFileService#getOutputDirectory} instead
-     */
-    @Deprecated
-    File getOutputDirectory() {
-        return new File(workDirectory, singleCellSampleName)
-    }
-
-    /**
-     * @deprecated use {@link SingleCellBamFileService#getResultDirectory} instead
-     */
-    @Deprecated
-    File getResultDirectory() {
-        return new File(outputDirectory, OUTPUT_DIRECTORY_NAME)
-    }
-
-    /**
-     * Map of names to use for link and name used by CellRanger
-     * @deprecated use {@link SingleCellBamFileService#getFileMappingForLinks} instead
-     */
-    @Deprecated
-    Map<String, String> getFileMappingForLinks() {
-        return CREATED_RESULT_FILES_AND_DIRS.collectEntries {
-            [(getLinkNameForFile(it)): it]
-        }
-    }
-
-    /**
-     * list of linked files
-     * @deprecated use {@link SingleCellBamFileService#getLinkedResultFiles} instead
-     */
-    @Deprecated
-    List<File> getLinkedResultFiles() {
-        File result = workDirectory
-        return CREATED_RESULT_FILES_AND_DIRS.collect {
-            new File(result, getLinkNameForFile(it))
-        }
-    }
-
-    /**
-     * return the name to use for the links of the result file, because the bam file should be named differently
-     * @deprecated use {@link SingleCellBamFileService#getLinkNameForFile} instead
-     */
-    @Deprecated
-    private String getLinkNameForFile(String name) {
-        switch (name) {
-            case ORIGINAL_BAM_FILE_NAME:
-                return bamFileName
-            case ORIGINAL_BAI_FILE_NAME:
-                return baiFileName
-            case ORIGINAL_BAM_MD5SUM_FILE_NAME:
-                return md5SumFileName
-            default:
-                return name
-        }
-    }
-
-    /**
-     * @deprecated use {@link SingleCellBamFileService#getFinalInsertSizeFile} instead
+     * @deprecated use {@link CellRangerLinkFileService#getInsertSizeFile} instead
      */
     @Deprecated
     @Override
@@ -290,7 +234,7 @@ class SingleCellBamFile extends AbstractBamFile implements HasIdentifier, Proces
     }
 
     /**
-     * @deprecated use {@link SingleCellBamFileService#getPathForFurtherProcessingNoCheck} instead
+     * @deprecated use {@link CellRangerLinkFileService#getPathForFurtherProcessingNoCheck} instead
      */
     @Deprecated
     @Override
@@ -321,6 +265,6 @@ class SingleCellBamFile extends AbstractBamFile implements HasIdentifier, Proces
     String toString() {
         String latest = mergingWorkPackage ? (mostRecentBamFile ? ' (latest)' : '') : '?'
         String withdrawn = withdrawn ? ' (withdrawn)' : ''
-        return "SCBF ${id}: ${identifier}${latest}${withdrawn} ${qcTrafficLightStatus} ${mergingWorkPackage.toStringWithoutIdAndPipeline()}"
+        return "SCBF ${id}: ${identifier}${latest}${withdrawn} ${qcTrafficLightStatus} ${mergingWorkPackage?.toStringWithoutIdAndPipeline()}"
     }
 }

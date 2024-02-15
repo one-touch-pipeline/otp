@@ -27,10 +27,10 @@ import spock.lang.Shared
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
 import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactory
-import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.alignment.ExternalAlignmentLinkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.ExternalAlignmentWorkFileService
 import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
@@ -100,7 +100,8 @@ class BamImportWorkflowSpec extends AbstractWorkflowSpec implements ExternalBamF
     Class<BamImportWorkflow> workflowComponentClass = BamImportWorkflow
 
     BamImportInitializationService bamImportInitializationService
-    ExternallyProcessedBamFileService externallyProcessedBamFileService
+    ExternalAlignmentLinkFileService externalAlignmentLinkFileService
+    ExternalAlignmentWorkFileService externalAlignmentWorkFileService
 
     private ExternallyProcessedBamFile bamFile
 
@@ -279,7 +280,7 @@ class BamImportWorkflowSpec extends AbstractWorkflowSpec implements ExternalBamF
             bamImportInstance.externallyProcessedBamFiles.each { ExternallyProcessedBamFile bamFile ->
                 assertBamProperties(bamFile)
 
-                Path uuidDir = externallyProcessedBamFileService.getImportFolder(bamFile, PathOption.REAL_PATH)
+                Path uuidDir = externalAlignmentWorkFileService.getDirectoryPath(bamFile)
 
                 assertUuidPaths(bamFile, uuidDir, isSourceLinked)
 
@@ -328,7 +329,7 @@ class BamImportWorkflowSpec extends AbstractWorkflowSpec implements ExternalBamF
      * check the viewByPid structure
      */
     private void assertViewByPidStructure(ExternallyProcessedBamFile bamFile, Path uuidDir) {
-        Path viewByPidDir = externallyProcessedBamFileService.getImportFolder(bamFile)
+        Path viewByPidDir = externalAlignmentLinkFileService.getDirectoryPath(bamFile)
         ([
                 bamFile.bamFileName,
                 bamFile.baiFileName,

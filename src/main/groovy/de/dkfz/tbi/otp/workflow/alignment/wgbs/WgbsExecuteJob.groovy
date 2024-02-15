@@ -26,8 +26,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.infrastructure.alignment.WgbsAlignmentWorkFileService
+import de.dkfz.tbi.otp.ngsdata.BedFileService
+import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.workflow.alignment.RoddyAlignmentExecuteJob
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerShared
@@ -48,7 +49,7 @@ class WgbsExecuteJob extends RoddyAlignmentExecuteJob implements PanCancerShared
     ReferenceGenomeService referenceGenomeService
 
     @Autowired
-    RoddyBamFileService roddyBamFileService
+    WgbsAlignmentWorkFileService wgbsAlignmentWorkFileService
 
     @Override
     protected final String getAnalysisConfiguration(SeqType seqType) {
@@ -80,7 +81,7 @@ class WgbsExecuteJob extends RoddyAlignmentExecuteJob implements PanCancerShared
     @Override
     protected final List<String> getAdditionalParameters(WorkflowStep workflowStep) {
         RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
-        return ["--usemetadatatable=${roddyBamFileService.getWorkMetadataTableFile(roddyBamFile)}" as String]
+        return ["--usemetadatatable=${wgbsAlignmentWorkFileService.getMetadataTableFile(roddyBamFile)}" as String]
     }
 
     @Override

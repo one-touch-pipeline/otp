@@ -26,7 +26,7 @@ import groovy.transform.TupleConstructor
 import org.hibernate.Hibernate
 
 import de.dkfz.tbi.otp.CommentableWithProject
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.AbstractBamFileServiceFactoryService
+import de.dkfz.tbi.otp.infrastructure.alignment.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
@@ -254,7 +254,7 @@ abstract class AbstractBamFile implements Artefact, CommentableWithProject, Enti
     abstract AlignmentConfig getAlignmentConfig()
 
     /**
-     * @deprecated use {@link AbstractAbstractBamFileService#getFinalInsertSizeFile()} and {@link AbstractBamFileServiceFactoryService#getService()}
+     * @deprecated use {@link AbstractAlignmentFileService#getInsertSizeFile()} and {@link AlignmentLinkFileServiceFactoryService#getService()}
      */
     @Deprecated
     abstract File getFinalInsertSizeFile()
@@ -296,8 +296,8 @@ abstract class AbstractBamFile implements Artefact, CommentableWithProject, Enti
     }
 
     /**
-     * @deprecated use {@link AbstractAbstractBamFileService#getPathForFurtherProcessing} and
-     * {@link AbstractBamFileServiceFactoryService#getService()}
+     * @deprecated use {@link AbstractAlignmentLinkFileService#getPathForFurtherProcessing} and
+     * {@link AlignmentLinkFileServiceFactoryService#getService()}
      */
     @Deprecated
     File getPathForFurtherProcessing() {
@@ -311,8 +311,8 @@ abstract class AbstractBamFile implements Artefact, CommentableWithProject, Enti
     }
 
     /**
-     * @deprecated use {@link AbstractAbstractBamFileService#getPathForFurtherProcessingNoCheck} and
-     * {@link AbstractBamFileServiceFactoryService#getService()}
+     * @deprecated use {@link AbstractAlignmentLinkFileService#getPathForFurtherProcessingNoCheck} and
+     * {@link AlignmentLinkFileServiceFactoryService#getService()}
      */
     @Deprecated
     protected abstract File getPathForFurtherProcessingNoCheck()

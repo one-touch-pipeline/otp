@@ -26,9 +26,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
+import de.dkfz.tbi.otp.infrastructure.alignment.RnaAlignmentWorkFileService
 import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
 import de.dkfz.tbi.otp.workflow.alignment.AbstractRoddyAlignmentValidationJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -40,7 +40,7 @@ import java.nio.file.Path
 class RnaAlignmentValidationJob extends AbstractRoddyAlignmentValidationJob implements RnaAlignmentShared {
 
     @Autowired
-    RnaRoddyBamFileService rnaRoddyBamFileService
+    RnaAlignmentWorkFileService rnaAlignmentWorkFileService
 
     @Autowired
     RoddyConfigValueService roddyConfigValueService
@@ -50,7 +50,7 @@ class RnaAlignmentValidationJob extends AbstractRoddyAlignmentValidationJob impl
         List<Path> directories = super.getExpectedDirectories(workflowStep)
 
         RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
-        directories.add(rnaRoddyBamFileService.getWorkMergedQADirectory(roddyBamFile))
+        directories.add(rnaAlignmentWorkFileService.getMergedQADirectory(roddyBamFile))
 
         return directories
     }
@@ -60,10 +60,10 @@ class RnaAlignmentValidationJob extends AbstractRoddyAlignmentValidationJob impl
         List<Path> expectedFiles = super.getExpectedFiles(workflowStep)
 
         RnaRoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
-        expectedFiles.add(rnaRoddyBamFileService.getWorkMergedQAJsonFile(roddyBamFile))
-        expectedFiles.add(rnaRoddyBamFileService.getCorrespondingWorkChimericBamFile(roddyBamFile))
+        expectedFiles.add(rnaAlignmentWorkFileService.getMergedQAJsonFile(roddyBamFile))
+        expectedFiles.add(rnaAlignmentWorkFileService.getCorrespondingChimericBamFile(roddyBamFile))
         if (roddyConfigValueService.getRunArriba(workflowStep)) {
-            expectedFiles.add(rnaRoddyBamFileService.getWorkArribaFusionPlotPdf(roddyBamFile))
+            expectedFiles.add(rnaAlignmentWorkFileService.getArribaFusionPlotPdf(roddyBamFile))
         }
 
         return expectedFiles

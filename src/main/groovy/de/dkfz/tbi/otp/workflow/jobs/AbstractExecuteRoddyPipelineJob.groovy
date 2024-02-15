@@ -24,11 +24,14 @@ package de.dkfz.tbi.otp.workflow.jobs
 import groovy.json.JsonOutput
 import org.springframework.beans.factory.annotation.Autowired
 
+import de.dkfz.tbi.otp.dataprocessing.RoddyResultServiceTrait
+import de.dkfz.tbi.otp.dataprocessing.RoddyResultWorkFileServiceFactoryService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.IndividualService
+import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.ProcessOutput
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRunService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -58,6 +61,9 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
     RoddyExecutionService roddyExecutionService
 
     @Autowired
+    RoddyResultWorkFileServiceFactoryService roddyResultWorkFileServiceFactoryService
+
+    @Autowired
     WorkflowRunService workflowRunService
 
     @Override
@@ -65,9 +71,10 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
         assert workflowStep.workflowRun.combinedConfig
         RoddyResult roddyResult = getRoddyResult(workflowStep)
         FileSystem fs = fileSystemService.remoteFileSystem
-        Path outputDir = fs.getPath(roddyResult.workDirectory.absolutePath)
-        Path confDir = roddyConfigService.getConfigDirectory(outputDir)
-        Path confFile = roddyConfigService.getConfigPath(outputDir)
+        RoddyResultServiceTrait roddyResultService = roddyResultWorkFileServiceFactoryService.getService(roddyResult)
+        Path outputDir = roddyResultService.getDirectoryPath(roddyResult)
+        Path confDir = roddyResultService.getConfigDirectory(roddyResult)
+        Path confFile = roddyResultService.getConfigFile(roddyResult)
 
         logService.addSimpleLogEntry(workflowStep,
                 "The json config (without run specific values):\n${JsonOutput.prettyPrint(workflowStep.workflowRun.combinedConfig)}")

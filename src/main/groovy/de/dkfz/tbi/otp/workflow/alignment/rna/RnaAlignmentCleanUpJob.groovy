@@ -26,8 +26,8 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
+import de.dkfz.tbi.otp.infrastructure.alignment.RnaAlignmentWorkFileService
 import de.dkfz.tbi.otp.workflow.alignment.AbstractRoddyAlignmentCleanUpJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -40,14 +40,14 @@ import java.nio.file.Path
 class RnaAlignmentCleanUpJob extends AbstractRoddyAlignmentCleanUpJob implements RnaAlignmentShared {
 
     @Autowired
-    RoddyBamFileService roddyBamFileService
+    RnaAlignmentWorkFileService rnaAlignmentWorkFileService
 
     @Override
     List<Path> getAdditionalPathsToDelete(WorkflowStep workflowStep) {
         List<Path> files = super.getAdditionalPathsToDelete(workflowStep)
 
         RnaRoddyBamFile rnaRoddyBamFile = getRoddyBamFile(workflowStep)
-        Path baseDir = roddyBamFileService.getBaseDirectory(rnaRoddyBamFile)
+        Path baseDir = rnaAlignmentWorkFileService.getDirectoryPath(rnaRoddyBamFile)
 
         if (fileService.fileIsReadable(baseDir)) {
             baseDir.eachFile { Path path ->

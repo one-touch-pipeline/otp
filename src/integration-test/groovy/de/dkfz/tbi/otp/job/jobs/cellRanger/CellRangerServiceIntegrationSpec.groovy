@@ -26,10 +26,11 @@ import grails.testing.mixin.integration.Integration
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.*
 
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.SingleCellBamFileService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
+import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerLinkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerWorkFileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.security.User
@@ -61,10 +62,13 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
         metricsSummaryFile = tempDir.resolve("${HelperUtils.uniqueString}_metrics_summary.csv")
         webSummaryFile = tempDir.resolve("${HelperUtils.uniqueString}_web_summary.csv")
         linkedWebSummaryFile = tempDir.resolve("${HelperUtils.uniqueString}_linked_web_summary.csv")
-        cellRangerService.singleCellBamFileService = Mock(SingleCellBamFileService) {
+        cellRangerService.cellRangerLinkFileService = Mock(CellRangerLinkFileService) {
+            getWebSummaryResultFile(_) >> { return linkedWebSummaryFile }
             getQualityAssessmentCsvFile(_) >> { return metricsSummaryFile }
+        }
+        cellRangerService.cellRangerWorkFileService = Mock(CellRangerWorkFileService) {
             getWebSummaryResultFile(_) >> { return webSummaryFile }
-            getLinkedWebSummaryResultFile(_) >> { return linkedWebSummaryFile }
+            getQualityAssessmentCsvFile(_) >> { return metricsSummaryFile }
         }
     }
 
@@ -124,7 +128,7 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
         cellRangerService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
-        webSummaryFile = CreateFileHelper.createFile(cellRangerService.singleCellBamFileService.getWebSummaryResultFile(singleCellBamFile), "content")
+        webSummaryFile = CreateFileHelper.createFile(cellRangerService.cellRangerLinkFileService.getWebSummaryResultFile(singleCellBamFile), "content")
         if (username == USERNAME) {
             User user = DomainFactory.createUser(username: username)
             addUserWithReadAccessToProject(user, singleCellBamFile.project)
@@ -151,7 +155,7 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
         cellRangerService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
-        webSummaryFile = CreateFileHelper.createFile(cellRangerService.singleCellBamFileService.getLinkedWebSummaryResultFile(singleCellBamFile), "content")
+        webSummaryFile = CreateFileHelper.createFile(cellRangerService.cellRangerLinkFileService.getWebSummaryResultFile(singleCellBamFile), "content")
 
         when:
         byte[] content = doWithAuth(OPERATOR) {
@@ -168,7 +172,7 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
         cellRangerService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
-        webSummaryFile = CreateFileHelper.createFile(cellRangerService.singleCellBamFileService.getWebSummaryResultFile(singleCellBamFile), "content")
+        webSummaryFile = CreateFileHelper.createFile(cellRangerService.cellRangerLinkFileService.getWebSummaryResultFile(singleCellBamFile), "content")
         webSummaryFile.toFile().readable = false
 
         when:
@@ -196,7 +200,7 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
     void "getWebSummaryResultFileContent, access denied for non project user"() {
         given:
         setupData()
-        webSummaryFile = CreateFileHelper.createFile(cellRangerService.singleCellBamFileService.getWebSummaryResultFile(singleCellBamFile), "content")
+        webSummaryFile = CreateFileHelper.createFile(cellRangerService.cellRangerLinkFileService.getWebSummaryResultFile(singleCellBamFile), "content")
 
         when:
         doWithAuth(TESTUSER) {

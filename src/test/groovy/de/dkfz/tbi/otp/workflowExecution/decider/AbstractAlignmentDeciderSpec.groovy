@@ -26,16 +26,16 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.decider.alignment.*
 
@@ -1087,8 +1087,8 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
             0 * _
         }
 
-        decider.roddyBamFileService = Mock(RoddyBamFileService) {
-            1 * getWorkDirectory(_) >> { RoddyBamFile roddyBamFile ->
+        decider.panCancerWorkFileService = Mock(PanCancerWorkFileService) {
+            1 * getDirectoryPath(_) >> { RoddyBamFile roddyBamFile ->
                 Paths.get('/tmp')
             }
             0 * _
@@ -1100,9 +1100,6 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
             0 * _
         }
         decider.workflowArtefactService = Mock(WorkflowArtefactService) {
-            0 * _
-        }
-        decider.roddyBamFileService = Mock(RoddyBamFileService) {
             0 * _
         }
         decider.unalignableSeqTrackEmailCreator = Mock(UnalignableSeqTrackEmailCreator) {

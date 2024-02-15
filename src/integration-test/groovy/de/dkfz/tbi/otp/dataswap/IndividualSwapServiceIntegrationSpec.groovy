@@ -34,6 +34,8 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactoryInstance
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerLinkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
@@ -51,6 +53,8 @@ class IndividualSwapServiceIntegrationSpec extends Specification implements User
     TestConfigService configService
     RawSequenceDataWorkFileService rawSequenceDataWorkFileService
     RawSequenceDataViewFileService rawSequenceDataViewFileService
+    PanCancerLinkFileService panCancerLinkFileService
+    PanCancerWorkFileService panCancerWorkFileService
 
     @TempDir
     Path tempDir
@@ -88,15 +92,15 @@ class IndividualSwapServiceIntegrationSpec extends Specification implements User
             fastqFileLinks[it] = rawSequenceDataViewFileService.getFilePath(it)
             fastqFilePaths[it] = rawSequenceDataWorkFileService.getFilePath(it)
         }
-        File missedFile = bamFile.finalMd5sumFile
-        File unexpectedFile = new File(bamFile.baseDirectory, 'notExpectedFile.txt')
+        Path missedFile = panCancerLinkFileService.getMd5sumFile(bamFile)
+        Path unexpectedFile = panCancerLinkFileService.getDirectoryPath(bamFile).resolve('notExpectedFile.txt')
 
         CreateRoddyFileHelper.createRoddyAlignmentFinalResultFiles(bamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(bamFile)
-        assert missedFile.delete()
-        assert unexpectedFile.createNewFile()
+        Files.delete(missedFile)
+        Files.createFile(unexpectedFile)
 
-        File destinationDirectory = bamFile.baseDirectory
+        Path destinationDirectory = panCancerLinkFileService.getDirectoryPath(bamFile)
 
         Path scriptFolder = Files.createDirectory(tempDir.resolve("files"))
 

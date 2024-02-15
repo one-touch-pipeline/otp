@@ -28,8 +28,6 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
-import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.ChecksumFileService
@@ -41,9 +39,6 @@ import java.nio.file.*
 @Component
 @Slf4j
 class BamImportFinishJob extends AbstractFinishJob implements BamImportShared {
-
-    @Autowired
-    ExternallyProcessedBamFileService externallyProcessedBamFileService
 
     @Autowired
     FileService fileService
@@ -59,10 +54,10 @@ class BamImportFinishJob extends AbstractFinishJob implements BamImportShared {
     void updateDomains(WorkflowStep workflowStep) {
         ExternallyProcessedBamFile bamFile = getBamFile(workflowStep)
         FileSystem fileSystem = fileSystemService.remoteFileSystem
-        Path bamFilePath = externallyProcessedBamFileService.getBamFile(bamFile, PathOption.REAL_PATH)
+        Path bamFilePath = externalAlignmentWorkFileService.getBamFile(bamFile)
 
         if (!bamFile.maximumReadLength) {
-            Path bamMaxReadLengthFile = externallyProcessedBamFileService.getBamMaxReadLengthFile(bamFile, PathOption.REAL_PATH)
+            Path bamMaxReadLengthFile = externalAlignmentWorkFileService.getBamMaxReadLengthFile(bamFile)
             fileService.ensureFileIsReadableAndNotEmpty(bamMaxReadLengthFile)
             bamFile.maximumReadLength = bamMaxReadLengthFile.text as Integer
         }

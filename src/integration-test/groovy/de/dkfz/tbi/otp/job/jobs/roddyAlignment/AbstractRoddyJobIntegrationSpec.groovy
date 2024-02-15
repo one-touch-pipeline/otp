@@ -21,8 +21,8 @@
  */
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.codehaus.groovy.control.io.NullWriter
 import org.springframework.beans.factory.annotation.Qualifier
 import spock.lang.Specification
@@ -32,8 +32,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.TestConstants
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
@@ -109,6 +108,11 @@ class AbstractRoddyJobIntegrationSpec extends Specification {
         given:
         setupData()
         File workExecutionDir = setRootPathAndCreateWorkExecutionStoreDirectory()
+        roddyJob.roddyExecutionService.roddyResultWorkFileServiceFactoryService = Mock(RoddyResultWorkFileServiceFactoryService) {
+            getService(_) >> Mock(RoddyResultServiceTrait) {
+                getExecutionStoreDirectory(_) >> workExecutionDir.parentFile.toPath()
+            }
+        }
 
         String stdout = "Running job abc_def => 3504988"
         String stderr = """newLine
@@ -190,6 +194,11 @@ newLine"""
         given:
         setupData()
         File workExecutionDir = setRootPathAndCreateWorkExecutionStoreDirectory()
+        roddyJob.roddyExecutionService.roddyResultWorkFileServiceFactoryService = Mock(RoddyResultWorkFileServiceFactoryService) {
+            getService(_) >> Mock(RoddyResultServiceTrait) {
+                getExecutionStoreDirectory(_) >> workExecutionDir.parentFile.toPath()
+            }
+        }
 
         String stdout = "Running job abc_def => 3504988"
         String stderr = """newLine

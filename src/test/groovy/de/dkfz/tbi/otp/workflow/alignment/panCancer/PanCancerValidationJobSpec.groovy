@@ -25,7 +25,7 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.alignment.alignment.AbstractRoddyAlignmentValidationJobSpec
@@ -60,8 +60,8 @@ class PanCancerValidationJobSpec extends AbstractRoddyAlignmentValidationJobSpec
     @Unroll
     void "test getExpectedFiles() and getExpectedDirectories, when called the correct paths (files or directories) should be returned"() {
         given:
-        RoddyBamFileService roddyBamFileService = new RoddyBamFileService()
-        roddyBamFileService.abstractBamFileService = Mock(AbstractBamFileService) {
+        PanCancerWorkFileService panCancerWorkFileService = new PanCancerWorkFileService()
+        panCancerWorkFileService.abstractBamFileService = Mock(AbstractBamFileService) {
             getBaseDirectory(_) >> Paths.get("/")
         }
 
@@ -69,27 +69,27 @@ class PanCancerValidationJobSpec extends AbstractRoddyAlignmentValidationJobSpec
         abstractBamFile.seqType.needsBedFile = needsBedFile
 
         List<Path> expectedFiles = [
-                roddyBamFileService.getWorkBamFile(abstractBamFile),
-                roddyBamFileService.getWorkBaiFile(abstractBamFile),
-                roddyBamFileService.getWorkMd5sumFile(abstractBamFile),
-                roddyBamFileService.getWorkMergedQAJsonFile(abstractBamFile),
-        ] + roddyBamFileService.getWorkSingleLaneQAJsonFiles(abstractBamFile).values()
+                panCancerWorkFileService.getBamFile(abstractBamFile),
+                panCancerWorkFileService.getBaiFile(abstractBamFile),
+                panCancerWorkFileService.getMd5sumFile(abstractBamFile),
+                panCancerWorkFileService.getMergedQAJsonFile(abstractBamFile),
+        ] + panCancerWorkFileService.getSingleLaneQAJsonFiles(abstractBamFile).values()
 
         if (needsBedFile) {
-            expectedFiles.add(roddyBamFileService.getWorkMergedQATargetExtractJsonFile(abstractBamFile))
+            expectedFiles.add(panCancerWorkFileService.getMergedQATargetExtractJsonFile(abstractBamFile))
         }
 
         List<Path> expectedDirectories = [
-                roddyBamFileService.getWorkDirectory(abstractBamFile),
-                roddyBamFileService.getWorkExecutionStoreDirectory(abstractBamFile),
-                roddyBamFileService.getWorkMergedQADirectory(abstractBamFile),
+                panCancerWorkFileService.getDirectoryPath(abstractBamFile),
+                panCancerWorkFileService.getExecutionStoreDirectory(abstractBamFile),
+                panCancerWorkFileService.getMergedQADirectory(abstractBamFile),
         ]
 
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
             _ * getOutputArtefact(_, _) >> abstractBamFile
         }
         job.fileSystemService = new TestFileSystemService()
-        job.roddyBamFileService = roddyBamFileService
+        job.panCancerWorkFileService = panCancerWorkFileService
 
         when:
         List<Path> files = job.getExpectedFiles(workflowStep)

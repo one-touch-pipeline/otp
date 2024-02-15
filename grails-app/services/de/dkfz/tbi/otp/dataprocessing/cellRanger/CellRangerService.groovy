@@ -27,10 +27,11 @@ import groovy.transform.TupleConstructor
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.SingleCellBamFileService
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerLinkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerWorkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeIndexService
@@ -69,17 +70,17 @@ class CellRangerService {
         final String columnName
     }
 
-    FileSystemService fileSystemService
-    FileService fileService
-    RawSequenceDataViewFileService rawSequenceDataViewFileService
     AbstractBamFileService abstractBamFileService
-    ReferenceGenomeIndexService referenceGenomeIndexService
+    CellRangerLinkFileService cellRangerLinkFileService
+    CellRangerWorkFileService cellRangerWorkFileService
+    CellRangerWorkflowService cellRangerWorkflowService
+    FileService fileService
+    FileSystemService fileSystemService
+    Md5SumService md5SumService
     ProcessingOptionService processingOptionService
     QcTrafficLightCheckService qcTrafficLightCheckService
-    Md5SumService md5SumService
-    CellRangerWorkflowService cellRangerWorkflowService
-
-    SingleCellBamFileService singleCellBamFileService
+    RawSequenceDataViewFileService rawSequenceDataViewFileService
+    ReferenceGenomeIndexService referenceGenomeIndexService
 
     void createInputDirectoryStructure(SingleCellBamFile singleCellBamFile) {
         String sampleName = singleCellBamFile.singleCellSampleName
@@ -109,12 +110,12 @@ class CellRangerService {
     }
 
     void deleteOutputDirectoryStructureIfExists(SingleCellBamFile singleCellBamFile) {
-        Path outputDirectory = singleCellBamFileService.getOutputDirectory(singleCellBamFile)
+        Path outputDirectory = cellRangerWorkFileService.getOutputDirectory(singleCellBamFile)
         fileService.deleteDirectoryRecursively(outputDirectory)
     }
 
     void validateFilesExistsInResultDirectory(SingleCellBamFile singleCellBamFile) {
-        Path resultDir = singleCellBamFileService.getResultDirectory(singleCellBamFile)
+        Path resultDir = cellRangerWorkFileService.getResultDirectory(singleCellBamFile)
 
         SingleCellBamFile.CREATED_RESULT_FILES.each {
             fileService.ensureFileIsReadableAndNotEmpty(resultDir.resolve(it))
@@ -160,7 +161,7 @@ class CellRangerService {
 
     @CompileDynamic
     CellRangerQualityAssessment parseCellRangerQaStatistics(SingleCellBamFile singleCellBamFile) {
-        Path path = singleCellBamFileService.getQualityAssessmentCsvFile(singleCellBamFile)
+        Path path = cellRangerWorkFileService.getQualityAssessmentCsvFile(singleCellBamFile)
         Spreadsheet spreadsheet = new Spreadsheet(path.text, Delimiter.COMMA)
         CellRangerQualityAssessment qa = new CellRangerQualityAssessment()
         MetricsSummaryCsvColumn.values().each {
@@ -186,7 +187,6 @@ class CellRangerService {
         cellRangerWorkflowService.linkResultFiles(singleCellBamFile)
     }
 
-    @CompileDynamic
     private void completeBamFile(SingleCellBamFile singleCellBamFile) {
         assert singleCellBamFile.isMostRecentBamFile(): "The BamFile ${singleCellBamFile} is not the most recent one. This must not happen!"
         assert [
@@ -198,14 +198,13 @@ class CellRangerService {
         updateBamFile(singleCellBamFile)
 
         singleCellBamFile.workPackage.bamFileInProjectFolder = singleCellBamFile
-        assert singleCellBamFile.workPackage.save(flush: true)
+        singleCellBamFile.workPackage.save(flush: true)
 
         abstractBamFileService.updateSamplePairStatusToNeedProcessing(singleCellBamFile)
     }
 
-    @CompileDynamic
     private void updateBamFile(SingleCellBamFile singleCellBamFile) {
-        Path resultDirectory = singleCellBamFileService.getResultDirectory(singleCellBamFile)
+        Path resultDirectory = cellRangerWorkFileService.getResultDirectory(singleCellBamFile)
 
         Path bamFile = resultDirectory.resolve(SingleCellBamFile.ORIGINAL_BAM_FILE_NAME)
         Path md5SumFileName = resultDirectory.resolve(SingleCellBamFile.ORIGINAL_BAM_MD5SUM_FILE_NAME)
@@ -226,8 +225,8 @@ class CellRangerService {
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#singleCellBamFile.project, 'OTP_READ_ACCESS')")
     byte[] getWebSummaryResultFileContent(SingleCellBamFile singleCellBamFile) throws NoSuchFileException, AccessDeniedException {
         Path file = singleCellBamFile.mergingWorkPackage.status == CellRangerMergingWorkPackage.Status.FINAL ?
-                singleCellBamFileService.getLinkedWebSummaryResultFile(singleCellBamFile) :
-                singleCellBamFileService.getWebSummaryResultFile(singleCellBamFile)
+                cellRangerLinkFileService.getWebSummaryResultFile(singleCellBamFile) :
+                cellRangerWorkFileService.getWebSummaryResultFile(singleCellBamFile)
         if (!Files.exists(file)) {
             throw new NoSuchFileException(file.toAbsolutePath().toString())
         }

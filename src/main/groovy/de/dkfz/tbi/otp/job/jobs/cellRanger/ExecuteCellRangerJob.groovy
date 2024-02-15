@@ -29,10 +29,11 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.SingleCellBamFileService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerService
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerFileNames
+import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerWorkFileService
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.processing.*
 
@@ -60,7 +61,7 @@ class ExecuteCellRangerJob extends AbstractOtpJob implements AutoRestartableJob 
     ProcessingOptionService processingOptionService
 
     @Autowired
-    SingleCellBamFileService singleCellBamFileService
+    CellRangerWorkFileService cellRangerWorkFileService
 
     @Override
     protected NextAction maybeSubmit() throws Throwable {
@@ -77,7 +78,7 @@ class ExecuteCellRangerJob extends AbstractOtpJob implements AutoRestartableJob 
 
     private void prepareInputStructure(SingleCellBamFile singleCellBamFile) {
         String unixGroup = singleCellBamFile.project.unixGroup
-        Path workDirectory = singleCellBamFileService.getWorkDirectory(singleCellBamFile)
+        Path workDirectory = cellRangerWorkFileService.getDirectoryPath(singleCellBamFile)
         fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workDirectory, unixGroup)
         fileService.setPermissionViaBash(workDirectory, FileService.OWNER_DIRECTORY_PERMISSION_STRING)
 
@@ -97,14 +98,14 @@ class ExecuteCellRangerJob extends AbstractOtpJob implements AutoRestartableJob 
         String moduleLoadPrefix = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_ENABLE_MODULE)
         String command = createCommand(singleCellBamFile)
 
-        Path path = singleCellBamFileService.getResultDirectory(singleCellBamFile)
+        Path path = cellRangerWorkFileService.getResultDirectory(singleCellBamFile)
                 .resolve("${singleCellBamFile.singleCellSampleName}_${SingleCellBamFile.CELL_RANGER_COMMAND_FILE_NAME}")
 
         String script = """\
             ${moduleLoader}
             ${moduleLoadPrefix} ${singleCellBamFile.mergingWorkPackage.config.programVersion}
 
-            cd ${singleCellBamFileService.getWorkDirectory(singleCellBamFile)}
+            cd ${cellRangerWorkFileService.getDirectoryPath(singleCellBamFile)}
             ${command}
 
             echo \"${command}\" > ${path}
@@ -124,13 +125,13 @@ class ExecuteCellRangerJob extends AbstractOtpJob implements AutoRestartableJob 
      */
     private String fixCellRangerChgrpProblem(SingleCellBamFile singleCellBamFile) {
         return """\
-        cd ${singleCellBamFileService.getResultDirectory(singleCellBamFile)}
+        cd ${cellRangerWorkFileService.getResultDirectory(singleCellBamFile)}
 
-        mv ${SingleCellBamFileService.ANALYSIS_DIRECTORY_NAME} _${SingleCellBamFileService.ANALYSIS_DIRECTORY_NAME}
+        mv ${CellRangerFileNames.ANALYSIS_DIRECTORY_NAME} _${CellRangerFileNames.ANALYSIS_DIRECTORY_NAME}
 
-        cp -r _${SingleCellBamFileService.ANALYSIS_DIRECTORY_NAME} ${SingleCellBamFileService.ANALYSIS_DIRECTORY_NAME}
+        cp -r _${CellRangerFileNames.ANALYSIS_DIRECTORY_NAME} ${CellRangerFileNames.ANALYSIS_DIRECTORY_NAME}
 
-        rm -rf _${SingleCellBamFileService.ANALYSIS_DIRECTORY_NAME}"""
+        rm -rf _${CellRangerFileNames.ANALYSIS_DIRECTORY_NAME}"""
     }
 
     private String createCommand(SingleCellBamFile singleCellBamFile) {
@@ -146,7 +147,7 @@ class ExecuteCellRangerJob extends AbstractOtpJob implements AutoRestartableJob 
     }
 
     private String createMd5SumCommand(SingleCellBamFile singleCellBamFile) {
-        Path resultDirectory = singleCellBamFileService.getResultDirectory(singleCellBamFile)
+        Path resultDirectory = cellRangerWorkFileService.getResultDirectory(singleCellBamFile)
         Path bamFile = resultDirectory.resolve(SingleCellBamFile.ORIGINAL_BAM_FILE_NAME)
         Path md5sum = resultDirectory.resolve(SingleCellBamFile.ORIGINAL_BAM_MD5SUM_FILE_NAME)
 

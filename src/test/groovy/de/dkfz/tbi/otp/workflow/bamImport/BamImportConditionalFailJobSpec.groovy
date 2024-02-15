@@ -27,9 +27,9 @@ import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.dataprocessing.ExternalMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.BamImportWorkflowDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.alignment.ExternalAlignmentSourceFileService
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
@@ -102,10 +102,10 @@ class BamImportConditionalFailJobSpec extends Specification implements DataTest,
             _ * getOutputArtefact(workflowStep, BamImportConditionalFailJob.de_dkfz_tbi_otp_workflow_bamImport_BamImportShared__OUTPUT_ROLE) >> bamFile
             0 * _
         }
-        job.externallyProcessedBamFileService = Mock(ExternallyProcessedBamFileService) {
-            getSourceBamFilePath(bamFile) >> bamFilePath
-            getSourceBaiFilePath(bamFile) >> baiFilePath
-            getSourceBaseDirFilePath(bamFile) >> sourceDir
+        job.externalAlignmentSourceFileService = Mock(ExternalAlignmentSourceFileService) {
+            getBamFile(bamFile) >> bamFilePath
+            getBaiFile(bamFile) >> baiFilePath
+            getDirectoryPath(bamFile) >> sourceDir
         }
     }
 

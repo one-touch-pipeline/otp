@@ -28,9 +28,9 @@ import spock.lang.TempDir
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.ExternalMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.BamImportWorkflowDomainFactory
-import de.dkfz.tbi.otp.filestore.PathOption
+import de.dkfz.tbi.otp.infrastructure.alignment.ExternalAlignmentSourceFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.ExternalAlignmentWorkFileService
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -78,25 +78,22 @@ class BamImportValidationJobSpec extends Specification implements DataTest, BamI
 
         ExternallyProcessedBamFile bamFile = createBamFile(furtherFiles: FURTHER_FILE_NAMES)
 
-        Path sourceDir = tempDir.resolve("source")
-        Files.createDirectories(sourceDir)
-
         targetDir = tempDir.resolve("target")
         Files.createDirectories(targetDir)
 
         bamFilePath = targetDir.resolve(bamFile.fileName)
         baiFilePath = targetDir.resolve("${bamFile.fileName}.bai")
-        List<Path> furtherFiles = bamFile.furtherFiles.collect {
-            Path furtherFilesPath = targetDir.resolve(it)
-            Path furtherFilesSourcePath = sourceDir.resolve(it)
+
+        Path sourceDir = tempDir.resolve("source")
+        Files.createDirectories(sourceDir)
+
+        bamFile.furtherFiles.each {
+            Path furtherFilesPath = sourceDir.resolve(it)
             if (it.endsWith("directory") || it.endsWith("directory2")) {
                 Files.createDirectories(furtherFilesPath)
-                Files.createDirectories(furtherFilesSourcePath)
             } else {
                 Files.createFile(furtherFilesPath)
-                Files.createFile(furtherFilesSourcePath)
             }
-            return furtherFilesPath
         }
 
         job = new BamImportValidationJob()
@@ -104,11 +101,13 @@ class BamImportValidationJobSpec extends Specification implements DataTest, BamI
             _ * getOutputArtefact(workflowStep, BamImportValidationJob.de_dkfz_tbi_otp_workflow_bamImport_BamImportShared__OUTPUT_ROLE) >> bamFile
             0 * _
         }
-        job.externallyProcessedBamFileService = Mock(ExternallyProcessedBamFileService) {
-            getBamFile(bamFile, PathOption.REAL_PATH) >> bamFilePath
-            getBaiFile(bamFile, PathOption.REAL_PATH) >> baiFilePath
-            getFurtherFiles(bamFile, PathOption.REAL_PATH) >> furtherFiles
-            getSourceBaseDirFilePath(bamFile) >> sourceDir
+        job.externalAlignmentWorkFileService = Mock(ExternalAlignmentWorkFileService) {
+            getDirectoryPath(bamFile) >> targetDir
+            getBamFile(bamFile) >> bamFilePath
+            getBaiFile(bamFile) >> baiFilePath
+        }
+        job.externalAlignmentSourceFileService = Mock(ExternalAlignmentSourceFileService) {
+            getDirectoryPath(bamFile) >> sourceDir
         }
     }
 

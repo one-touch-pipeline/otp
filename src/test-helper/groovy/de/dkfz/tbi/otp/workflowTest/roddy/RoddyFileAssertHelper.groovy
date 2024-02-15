@@ -26,8 +26,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
-import de.dkfz.tbi.otp.job.processing.RoddyConfigService
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerLinkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflowTest.FileAssertHelper
 
 import java.nio.file.Files
@@ -35,46 +36,44 @@ import java.nio.file.Path
 import java.util.stream.Stream
 
 @Component
-class RoddyFileAssertHelper implements RoddyFileAssertTrait {
+class RoddyFileAssertHelper {
 
     @Autowired
     FileAssertHelper fileAssertHelper
 
-    void assertFileSystemState(RoddyBamFile bamFile, RoddyBamFileService roddyBamFileService) {
+    @Autowired
+    PanCancerWorkFileService panCancerWorkFileService
+
+    @Autowired
+    PanCancerLinkFileService panCancerLinkFileService
+
+    void assertFileSystemState(RoddyBamFile bamFile) {
         // content of the final dir: root
         List<Path> rootDirs = [
-                roddyBamFileService.getFinalQADirectory(bamFile),
-                roddyBamFileService.getFinalExecutionStoreDirectory(bamFile),
-                roddyBamFileService.getWorkDirectory(bamFile),
+                panCancerLinkFileService.getQADirectory(bamFile),
+                panCancerLinkFileService.getExecutionStoreDirectory(bamFile),
+                panCancerWorkFileService.getDirectoryPath(bamFile),
         ]
 
         List<Path> rootLinks = [
-                roddyBamFileService.getFinalBamFile(bamFile),
-                roddyBamFileService.getFinalBaiFile(bamFile),
-                roddyBamFileService.getFinalMd5sumFile(bamFile),
-                roddyBamFileService.getFinalMergedQADirectory(bamFile),
+                panCancerLinkFileService.getBamFile(bamFile),
+                panCancerLinkFileService.getBaiFile(bamFile),
+                panCancerLinkFileService.getMd5sumFile(bamFile),
+                getLinkMergedQADirectory(bamFile),
         ]
-        if (bamFile.seqType.wgbs) {
-            rootDirs << roddyBamFileService.getFinalMethylationDirectory(bamFile)
-            rootLinks << roddyBamFileService.getFinalMetadataTableFile(bamFile)
-            rootLinks << roddyBamFileService.getFinalMergedMethylationDirectory(bamFile)
 
-            if (bamFile.hasMultipleLibraries()) {
-                rootLinks.addAll(roddyBamFileService.getFinalLibraryMethylationDirectories(bamFile).values())
-                rootLinks.addAll(roddyBamFileService.getFinalLibraryQADirectories(bamFile).values())
-            }
-        }
+        rootDirs.addAll(getAdditionalDirectories(bamFile))
+        rootLinks.addAll(getAdditionalLinks(bamFile))
+
         fileAssertHelper.assertDirectoryContentReadable(rootDirs, [], rootLinks)
 
-        assertQaFileSystemState(bamFile, roddyBamFileService)
+        assertQaFileSystemState(bamFile)
     }
 
-    private void assertQaFileSystemState(RoddyBamFile bamFile, RoddyBamFileService roddyBamFileService) {
+    private void assertQaFileSystemState(RoddyBamFile bamFile) {
         // content of the final qa dir
-        List<Path> qaDirs = roddyBamFileService.getFinalSingleLaneQADirectories(bamFile).values() + [roddyBamFileService.getFinalMergedQADirectory(bamFile)]
-        if (bamFile.seqType.wgbs && bamFile.hasMultipleLibraries()) {
-            qaDirs.addAll(roddyBamFileService.getFinalLibraryQADirectories(bamFile).values())
-        }
+        List<Path> qaDirs = getLinkSingleLaneQADirectories(bamFile).values() + [getLinkMergedQADirectory(bamFile)]
+        qaDirs.addAll(getAdditionalQaDirectories(bamFile))
         fileAssertHelper.assertDirectoryContentReadable([], [], qaDirs)
 
         // qa for merged and one for each read group and for each library (if available)
@@ -84,57 +83,119 @@ class RoddyFileAssertHelper implements RoddyFileAssertTrait {
         }
         Stream<Path> paths = null
         try {
-            paths = Files.list(roddyBamFileService.getFinalQADirectory(bamFile))
+            paths = Files.list(panCancerLinkFileService.getQADirectory(bamFile))
             assert numberOfFilesInFinalQaDir == paths.count()
         } finally {
             paths?.close()
         }
     }
 
-    void assertWorkDirectoryFileSystemState(RoddyBamFile bamFile, RoddyBamFileService roddyBamFileService, RoddyConfigService roddyConfigService) {
+    void assertWorkDirectoryFileSystemState(RoddyBamFile bamFile) {
         List<Path> rootDirs = [
-                roddyBamFileService.getWorkQADirectory(bamFile),
-                roddyBamFileService.getWorkExecutionStoreDirectory(bamFile),
-                roddyBamFileService.getWorkMergedQADirectory(bamFile),
-                roddyConfigService.getConfigDirectory(roddyBamFileService.getWorkDirectory(bamFile)),
+                panCancerWorkFileService.getQADirectory(bamFile),
+                panCancerWorkFileService.getExecutionStoreDirectory(bamFile),
+                getWorkMergedQADirectory(bamFile),
+                panCancerWorkFileService.getConfigDirectory(bamFile),
         ]
-        List<Path> rootFiles = []
-        rootFiles << roddyBamFileService.getWorkBamFile(bamFile)
-        rootFiles << roddyBamFileService.getWorkBaiFile(bamFile)
-        rootFiles << roddyBamFileService.getWorkMd5sumFile(bamFile)
 
-        rootDirs.addAll(getAdditionalDirectories(bamFile, roddyBamFileService))
-        rootFiles.addAll(getAdditionalFiles(bamFile, roddyBamFileService))
+        List<Path> rootFiles = []
+        rootFiles << panCancerWorkFileService.getBamFile(bamFile)
+        rootFiles << panCancerWorkFileService.getBaiFile(bamFile)
+        rootFiles << panCancerWorkFileService.getMd5sumFile(bamFile)
+
+        rootDirs.addAll(getAdditionalWorkDirectories(bamFile))
+        rootFiles.addAll(getAdditionalWorkFiles(bamFile))
 
         fileAssertHelper.assertDirectoryContentReadable(rootDirs, rootFiles)
         if (!bamFile.seqType.rna) {
-            fileAssertHelper.assertDirectorySameContent(getWorkDirectory(bamFile, roddyBamFileService), rootDirs, rootFiles)
+            fileAssertHelper.assertDirectorySameContent(getWorkDirectory(bamFile), rootDirs, rootFiles)
         }
 
-        assertQaWorkDirectoryFileSystemState(bamFile, roddyBamFileService)
+        assertQaWorkDirectoryFileSystemState(bamFile)
     }
 
-    private void assertQaWorkDirectoryFileSystemState(RoddyBamFile bamFile, RoddyBamFileService roddyBamFileService) {
+    private void assertQaWorkDirectoryFileSystemState(RoddyBamFile bamFile) {
         // the default json is checked in the base class, here only additional json are checked
         List<Path> qaJson = []
-        List<Path> qaDirs = [roddyBamFileService.getWorkMergedQADirectory(bamFile)]
+        List<Path> qaDirs = [getWorkMergedQADirectory(bamFile)]
 
-        qaDirs.addAll(roddyBamFileService.getWorkSingleLaneQADirectories(bamFile).values())
-        qaJson.addAll(roddyBamFileService.getWorkSingleLaneQAJsonFiles(bamFile).values())
+        qaDirs.addAll(getWorkSingleLaneQADirectories(bamFile).values())
+        qaJson.addAll(getWorkSingleLaneQAJsonFiles(bamFile).values())
 
-        if (bamFile.seqType.wgbs && bamFile.hasMultipleLibraries()) {
-            qaDirs.addAll(roddyBamFileService.getWorkLibraryQADirectories(bamFile).values())
-            qaJson.addAll(roddyBamFileService.getWorkLibraryQAJsonFiles(bamFile).values())
-        }
+        qaDirs.addAll(getAdditionalQaWorkDirectories(bamFile))
+        qaJson.addAll(getAdditionalQaWorkFiles(bamFile))
 
         fileAssertHelper.assertDirectoryContentReadable(qaDirs)
         if (!bamFile.seqType.rna) {
-            fileAssertHelper.assertDirectorySameContent(getWorkQADirectory(bamFile, roddyBamFileService), qaDirs)
+            fileAssertHelper.assertDirectorySameContent(getWorkQADirectory(bamFile), qaDirs)
         }
 
         qaJson.each {
             fileAssertHelper.assertFileIsReadableAndNotEmpty(it)
             JSON.parse(it.text) // throws ConverterException when the JSON content is not valid
         }
+    }
+
+    Path getWorkDirectory(RoddyBamFile bamFile) {
+        return panCancerWorkFileService.getDirectoryPath(bamFile)
+    }
+
+    Path getLinkMergedQADirectory(RoddyBamFile bamFile) {
+        return panCancerLinkFileService.getMergedQADirectory(bamFile)
+    }
+
+    Path getWorkMergedQADirectory(RoddyBamFile bamFile) {
+        return panCancerWorkFileService.getMergedQADirectory(bamFile)
+    }
+
+    Path getWorkQADirectory(RoddyBamFile bamFile) {
+        return panCancerWorkFileService.getQADirectory(bamFile)
+    }
+
+    Map<SeqTrack, Path> getLinkSingleLaneQADirectories(RoddyBamFile bamFile) {
+        return panCancerLinkFileService.getSingleLaneQADirectories(bamFile)
+    }
+
+    Map<SeqTrack, Path> getWorkSingleLaneQADirectories(RoddyBamFile bamFile) {
+        return panCancerWorkFileService.getSingleLaneQADirectories(bamFile)
+    }
+
+    Map<SeqTrack, Path> getWorkSingleLaneQAJsonFiles(RoddyBamFile bamFile) {
+        return panCancerWorkFileService.getSingleLaneQAJsonFiles(bamFile)
+    }
+
+    @SuppressWarnings("UnusedMethodParameter")
+    List<Path> getAdditionalDirectories(RoddyBamFile bamFile) {
+        return []
+    }
+
+    @SuppressWarnings("UnusedMethodParameter")
+    List<Path> getAdditionalLinks(RoddyBamFile bamFile) {
+        return []
+    }
+
+    @SuppressWarnings("UnusedMethodParameter")
+    List<Path> getAdditionalQaDirectories(RoddyBamFile bamFile) {
+        return []
+    }
+
+    @SuppressWarnings("UnusedMethodParameter")
+    List<Path> getAdditionalWorkDirectories(RoddyBamFile bamFile) {
+        return []
+    }
+
+    @SuppressWarnings("UnusedMethodParameter")
+    List<Path> getAdditionalWorkFiles(RoddyBamFile bamFile) {
+        return []
+    }
+
+    @SuppressWarnings("UnusedMethodParameter")
+    List<Path> getAdditionalQaWorkDirectories(RoddyBamFile bamFile) {
+        return []
+    }
+
+    @SuppressWarnings("UnusedMethodParameter")
+    List<Path> getAdditionalQaWorkFiles(RoddyBamFile bamFile) {
+        return []
     }
 }

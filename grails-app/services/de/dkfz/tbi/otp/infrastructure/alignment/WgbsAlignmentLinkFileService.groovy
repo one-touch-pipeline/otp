@@ -19,27 +19,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataprocessing
+package de.dkfz.tbi.otp.infrastructure.alignment
 
-import grails.gorm.transactions.Transactional
-
-import de.dkfz.tbi.otp.filestore.PathOption
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 
 import java.nio.file.Path
 
-@Transactional
-abstract class AbstractAbstractBamFileService<T extends AbstractBamFile> {
+class WgbsAlignmentLinkFileService extends AbstractAlignmentLinkFileService<RoddyBamFile> implements AbstractWgbsAlignmentFileService {
 
-    abstract Path getFinalInsertSizeFile(T bamFile, PathOption... options)
-    protected abstract Path getPathForFurtherProcessingNoCheck(T bamFile)
+    WgbsAlignmentWorkFileService wgbsAlignmentWorkFileService
 
-    Path getPathForFurtherProcessing(T bamFile) {
-        bamFile.mergingWorkPackage.refresh() // Sometimes the mergingWorkPackage.processableBamFileInProjectFolder is empty but should have a value
-        AbstractBamFile processableBamFileInProjectFolder = bamFile.mergingWorkPackage.processableBamFileInProjectFolder
-        if (bamFile.id == processableBamFileInProjectFolder?.id) {
-            return getPathForFurtherProcessingNoCheck(bamFile)
-        }
-        throw new IllegalStateException("This BAM file is not in the project folder or not processable.\n" +
-                "this: ${bamFile}\nprocessableBamFileInProjectFolder: ${processableBamFileInProjectFolder}")
+    Path getDirectoryPath(RoddyBamFile bamFile) {
+        return abstractBamFileService.getBaseDirectory(bamFile)
+    }
+
+    @Override
+    protected Path getPathForFurtherProcessingNoCheck(RoddyBamFile bamFile) {
+        return wgbsAlignmentWorkFileService.getBamFile(bamFile)
     }
 }

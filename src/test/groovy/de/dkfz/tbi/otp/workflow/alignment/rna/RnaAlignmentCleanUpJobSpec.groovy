@@ -26,11 +26,11 @@ import spock.lang.Specification
 import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.RnaAlignmentWorkflowDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.alignment.RnaAlignmentWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -80,8 +80,8 @@ class RnaAlignmentCleanUpJobSpec extends Specification implements DataTest, RnaA
         Files.createFile(file1)
         Path link1 = dir1.resolve("link")
         Files.createSymbolicLink(link1, file1)
-        job.roddyBamFileService = Mock(RoddyBamFileService) {
-            1 * getBaseDirectory(bamFile) >> dir1
+        job.rnaAlignmentWorkFileService = Mock(RnaAlignmentWorkFileService) {
+            1 * getDirectoryPath(bamFile) >> dir1
         }
 
         expect:

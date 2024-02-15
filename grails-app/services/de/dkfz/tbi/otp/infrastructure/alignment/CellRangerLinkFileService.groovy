@@ -19,32 +19,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataprocessing
+package de.dkfz.tbi.otp.infrastructure.alignment
 
-import grails.gorm.transactions.Transactional
-import groovy.transform.CompileDynamic
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileService
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
-import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
+import java.nio.file.Path
 
-@Transactional
-class RoddyResultServiceFactoryService {
+class CellRangerLinkFileService extends AbstractAlignmentLinkFileService<SingleCellBamFile> implements AbstractCellRangerFileService {
 
-    RnaRoddyBamFileService rnaRoddyBamFileService
-    RoddyBamFileService roddyBamFileService
+    AbstractBamFileService abstractBamFileService
 
-    @CompileDynamic
-    RoddyResultServiceTrait<? extends RoddyResult> getService(RoddyResult rr) {
-        Map<Class<? extends RoddyResult>, RoddyResultServiceTrait<? extends RoddyResult>> map = [
-                (RnaRoddyBamFile)        : rnaRoddyBamFileService,
-                (RoddyBamFile)           : roddyBamFileService,
-        ]
-        RoddyResultServiceTrait<? extends RoddyResult> result = map[rr.class]
-        if (!result) {
-            throw new IllegalArgumentException("No service exists for ${rr.class.simpleName}")
-        }
-        return result
+    @Override
+    Path getDirectoryPath(SingleCellBamFile bamFile) {
+        return abstractBamFileService.getBaseDirectory(bamFile).resolve(bamFile.workDirectoryName)
+    }
+
+    @Override
+    protected Path getPathForFurtherProcessingNoCheck(SingleCellBamFile bamFile) {
+        return getDirectoryPath(bamFile).resolve(bamFile.bamFileName)
     }
 }

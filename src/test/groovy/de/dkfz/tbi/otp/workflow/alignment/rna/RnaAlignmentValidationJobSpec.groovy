@@ -26,8 +26,9 @@ import spock.lang.Unroll
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileService
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.RnaAlignmentWorkFileService
 import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
@@ -63,37 +64,39 @@ class RnaAlignmentValidationJobSpec extends AbstractRoddyAlignmentValidationJobS
     @Unroll
     void "test getExpectedFiles() and getExpectedDirectories, when called the correct paths (files or directories) should be returned"() {
         given:
-        RnaRoddyBamFileService rnaRoddyBamFileService = new RnaRoddyBamFileService()
-        rnaRoddyBamFileService.abstractBamFileService = Mock(AbstractBamFileService) {
+        PanCancerWorkFileService panCancerWorkFileService = new PanCancerWorkFileService()
+        RnaAlignmentWorkFileService rnaAlignmentWorkFileService = new RnaAlignmentWorkFileService()
+        rnaAlignmentWorkFileService.abstractBamFileService = Mock(AbstractBamFileService) {
             getBaseDirectory(_) >> Paths.get("/")
         }
+        panCancerWorkFileService.abstractBamFileService = rnaAlignmentWorkFileService.abstractBamFileService
         job.roddyConfigValueService = Mock(RoddyConfigValueService) {
             getRunArriba(_) >> runArriba
         }
 
         List<Path> expectedFiles = [
-                rnaRoddyBamFileService.getWorkBamFile(abstractBamFile),
-                rnaRoddyBamFileService.getWorkBaiFile(abstractBamFile),
-                rnaRoddyBamFileService.getWorkMd5sumFile(abstractBamFile),
-                rnaRoddyBamFileService.getWorkMergedQAJsonFile(abstractBamFile),
-                rnaRoddyBamFileService.getCorrespondingWorkChimericBamFile(abstractBamFile),
+                rnaAlignmentWorkFileService.getBamFile(abstractBamFile),
+                rnaAlignmentWorkFileService.getBaiFile(abstractBamFile),
+                rnaAlignmentWorkFileService.getMd5sumFile(abstractBamFile),
+                rnaAlignmentWorkFileService.getMergedQAJsonFile(abstractBamFile),
+                rnaAlignmentWorkFileService.getCorrespondingChimericBamFile(abstractBamFile),
         ]
         if (runArriba) {
-            expectedFiles.add(rnaRoddyBamFileService.getWorkArribaFusionPlotPdf(abstractBamFile))
+            expectedFiles.add(rnaAlignmentWorkFileService.getArribaFusionPlotPdf(abstractBamFile))
         }
 
         List<Path> expectedDirectories = [
-                rnaRoddyBamFileService.getWorkDirectory(abstractBamFile),
-                rnaRoddyBamFileService.getWorkQADirectory(abstractBamFile),
-                rnaRoddyBamFileService.getWorkExecutionStoreDirectory(abstractBamFile),
+                rnaAlignmentWorkFileService.getDirectoryPath(abstractBamFile),
+                rnaAlignmentWorkFileService.getQADirectory(abstractBamFile),
+                rnaAlignmentWorkFileService.getExecutionStoreDirectory(abstractBamFile),
         ]
 
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
             _ * getOutputArtefact(_, _) >> abstractBamFile
         }
         job.fileSystemService = new TestFileSystemService()
-        job.roddyBamFileService = rnaRoddyBamFileService
-        job.rnaRoddyBamFileService = rnaRoddyBamFileService
+        job.panCancerWorkFileService = panCancerWorkFileService
+        job.rnaAlignmentWorkFileService = rnaAlignmentWorkFileService
 
         when:
         List<Path> files = job.getExpectedFiles(workflowStep)

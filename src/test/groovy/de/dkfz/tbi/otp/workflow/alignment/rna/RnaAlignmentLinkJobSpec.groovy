@@ -27,11 +27,11 @@ import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.RnaAlignmentWorkflowDomainFactory
+import de.dkfz.tbi.otp.infrastructure.alignment.RnaAlignmentLinkFileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -100,8 +100,8 @@ class RnaAlignmentLinkJobSpec extends Specification implements RnaAlignmentWorkf
             _ * getOutputArtefact(workflowStep, RnaAlignmentWorkflow.OUTPUT_BAM) >> bamFile
             0 * _
         }
-        job.rnaRoddyBamFileService = Mock(RnaRoddyBamFileService) {
-            getBaseDirectory(_) >> tempBaseDir
+        job.rnaAlignmentLinkFileService = Mock(RnaAlignmentLinkFileService) {
+            getDirectoryPath(_) >> tempBaseDir
         }
         job.fileSystemService = new TestFileSystemService()
 

@@ -26,9 +26,8 @@ import groovy.util.logging.Slf4j
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ProjectSelectionService
-import de.dkfz.tbi.otp.dataprocessing.AbstractAnalysisResultsService
-import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
-import de.dkfz.tbi.otp.dataprocessing.PlotType
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 
@@ -68,7 +67,7 @@ abstract class AbstractAnalysisController {
     }
 
     def viewConfigFile(AnalysisConfigFileCommand cmd) {
-        Path configPath = abstractAnalysisService.fetchConfigPath(cmd.analysisInstance)
+        Path configPath = abstractAnalysisService.fetchConfigPath(cmd.analysisInstance as RoddyResult)
 
         if (!configPath) {
             return render(text: "No config file available", contentType: TXT.mimeType)

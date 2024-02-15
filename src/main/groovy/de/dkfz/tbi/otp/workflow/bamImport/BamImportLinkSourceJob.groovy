@@ -21,16 +21,14 @@
  */
 package de.dkfz.tbi.otp.workflow.bamImport
 
-import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
+import groovy.util.logging.Slf4j
+import org.springframework.stereotype.Component
+
 import de.dkfz.tbi.otp.dataprocessing.BamImportInstance
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
-import de.dkfz.tbi.otp.filestore.PathOption
+import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.jobs.AbstractLinkJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
-import groovy.util.logging.Slf4j
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
 
 import java.nio.file.Path
 
@@ -38,16 +36,14 @@ import java.nio.file.Path
 @Slf4j
 class BamImportLinkSourceJob extends AbstractLinkJob implements BamImportShared {
 
-    @Autowired
-    ExternallyProcessedBamFileService externallyProcessedBamFileService
-
     @Override
     protected List<LinkEntry> getLinkMap(WorkflowStep workflowStep) {
-        List<LinkEntry> linkEntries = []
-
         ExternallyProcessedBamFile bamFile = getBamFile(workflowStep)
-
         BamImportInstance importInstance = getImportInstance(bamFile)
+
+        if (!importInstance.linkOperation.linkSource) {
+            return []
+        }
 
         List<String> fileNames = [
                 bamFile.fileName,
@@ -55,15 +51,15 @@ class BamImportLinkSourceJob extends AbstractLinkJob implements BamImportShared 
         ]
         fileNames.addAll(bamFile.furtherFiles)
 
-        Path importFolder = externallyProcessedBamFileService.getImportFolder(bamFile, PathOption.REAL_PATH)
-        Path sourceFolder = externallyProcessedBamFileService.getSourceBaseDirFilePath(bamFile)
+        Path importFolder = externalAlignmentWorkFileService.getDirectoryPath(bamFile)
+        Path sourceFolder = externalAlignmentSourceFileService.getDirectoryPath(bamFile)
 
-        return importInstance.linkOperation.linkSource ? fileNames.collect {
+        return fileNames.collect {
             new LinkEntry(
                     link: importFolder.resolve(it),
                     target: sourceFolder.resolve(it),
             )
-        } : linkEntries
+        }
     }
 
     @Override

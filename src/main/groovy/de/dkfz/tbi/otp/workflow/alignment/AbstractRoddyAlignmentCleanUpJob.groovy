@@ -27,8 +27,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.filestore.WorkFolder
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractCleanUpJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -39,7 +39,7 @@ import java.nio.file.Path
 abstract class AbstractRoddyAlignmentCleanUpJob extends AbstractCleanUpJob implements AlignmentWorkflowShared {
 
     @Autowired
-    RoddyBamFileService roddyBamFileService
+    PanCancerWorkFileService panCancerWorkFileService
 
     @Override
     @CompileDynamic
@@ -48,7 +48,7 @@ abstract class AbstractRoddyAlignmentCleanUpJob extends AbstractCleanUpJob imple
         RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
         List<RoddyBamFile> roddyBamFiles = RoddyBamFile.findAllByWorkPackageAndIdNotEqual(roddyBamFile.mergingWorkPackage, roddyBamFile.id)
         List<Path> workDirectory = roddyBamFiles.collect { RoddyBamFile bamFile ->
-            roddyBamFileService.getWorkDirectory(bamFile)
+            panCancerWorkFileService.getDirectoryPath(bamFile)
         }
         return workDirectory
     }
@@ -59,7 +59,7 @@ abstract class AbstractRoddyAlignmentCleanUpJob extends AbstractCleanUpJob imple
         RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
         List<RoddyBamFile> roddyBamFiles = RoddyBamFile.findAllByWorkPackageAndIdNotEqual(roddyBamFile.mergingWorkPackage, roddyBamFile.id)
         List<WorkFolder> workFolders = roddyBamFiles.collect { RoddyBamFile bamFile ->
-            roddyBamFileService.getWorkFolder(bamFile)
+            panCancerWorkFileService.getWorkFolder(bamFile)
         }.findAll()
         return workFolders
     }
