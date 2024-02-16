@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
+import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.workflow.jobs.AbstractOtpClusterValidationJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -42,7 +43,7 @@ class FastqcClusterValidationJob extends AbstractOtpClusterValidationJob impleme
     @Override
     protected List<Path> getExpectedFiles(WorkflowStep workflowStep) {
         return getFastqcProcessedFiles(workflowStep).collect { FastqcProcessedFile fastqcProcessedFile ->
-            fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile)
+            fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile, PathOption.REAL_PATH)
         }
     }
 

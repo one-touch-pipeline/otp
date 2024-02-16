@@ -207,50 +207,14 @@ class FastqcReportServiceSpec extends Specification implements DataTest, FastqcD
             1 * pathToFastQcResultFromSeqCenter(fastqcProcessedFile2) >> sourceFastqc2
             1 * pathToFastQcResultMd5SumFromSeqCenter(fastqcProcessedFile1) >> sourceFastqcMd5sum1
             1 * pathToFastQcResultMd5SumFromSeqCenter(fastqcProcessedFile2) >> sourceFastqcMd5sum2
-            1 * fastqcOutputPath(fastqcProcessedFile1) >> targetFastqc1
-            1 * fastqcOutputPath(fastqcProcessedFile2) >> targetFastqc2
-            0 * _
-        }
-
-        service.fileService = Mock(FileService) {
-            2 * convertPermissionsToOctalString(FileService.DEFAULT_FILE_PERMISSION)
-            1 * ensureFileIsReadableAndNotEmpty(sourceFastqc1)
-            1 * ensureFileIsReadableAndNotEmpty(sourceFastqc2)
-            1 * ensureFileIsReadableAndNotEmpty(targetFastqc1)
-            1 * ensureFileIsReadableAndNotEmpty(targetFastqc2)
-            0 * _
-        }
-
-        service.remoteShellHelper = Mock(RemoteShellHelper) {
-            2 * executeCommandReturnProcessOutput(_) >> new ProcessOutput("", "", 0)
-        }
-
-        expect:
-        service.copyExistingFastqcReports([fastqcProcessedFile1, fastqcProcessedFile2], sourceDir)
-    }
-
-    @Unroll
-    void "copyExistingFastqcReportsNewSystem should return true/false depending #m1 #m2 on if fastqc processed files are available or not"() {
-        given:
-        createData(true)
-
-        CreateFileHelper.createFile(sourceFastqc1)
-        CreateFileHelper.createFile(sourceFastqc2)
-        CreateFileHelper.createFile(sourceFastqcMd5sum1)
-        CreateFileHelper.createFile(sourceFastqcMd5sum2)
-
-        service.fastqcDataFilesService = Mock(FastqcDataFilesService) {
-            1 * pathToFastQcResultFromSeqCenter(fastqcProcessedFile1) >> sourceFastqc1
-            1 * pathToFastQcResultFromSeqCenter(fastqcProcessedFile2) >> sourceFastqc2
-            1 * pathToFastQcResultMd5SumFromSeqCenter(fastqcProcessedFile1) >> sourceFastqcMd5sum1
-            1 * pathToFastQcResultMd5SumFromSeqCenter(fastqcProcessedFile2) >> sourceFastqcMd5sum2
+            1 * fastqcOutputDirectory(fastqcProcessedFile1, PathOption.REAL_PATH) >> tempOutDir
+            1 * fastqcOutputDirectory(fastqcProcessedFile2, PathOption.REAL_PATH) >> tempOutDir
             1 * fastqcOutputPath(fastqcProcessedFile1, PathOption.REAL_PATH) >> targetFastqc1
             1 * fastqcOutputPath(fastqcProcessedFile2, PathOption.REAL_PATH) >> targetFastqc2
             0 * _
         }
 
         service.fileService = Mock(FileService) {
-            2 * createDirectoryRecursivelyAndSetPermissionsViaBash(targetDir)
             1 * ensureFileIsReadableAndNotEmpty(sourceFastqc1)
             1 * ensureFileIsReadableAndNotEmpty(sourceFastqc2)
             1 * ensureFileIsReadableAndNotEmpty(targetFastqc1)
@@ -263,6 +227,6 @@ class FastqcReportServiceSpec extends Specification implements DataTest, FastqcD
         }
 
         expect:
-        service.copyExistingFastqcReportsNewSystem([fastqcProcessedFile1, fastqcProcessedFile2])
+        service.copyExistingFastqcReports([fastqcProcessedFile1, fastqcProcessedFile2])
     }
 }

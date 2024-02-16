@@ -31,13 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
-import de.dkfz.tbi.otp.workflowExecution.ArtefactType
-import de.dkfz.tbi.otp.workflowExecution.Workflow
-import de.dkfz.tbi.otp.workflowExecution.WorkflowApiVersion
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
-import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
-import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
-import de.dkfz.tbi.otp.workflowExecution.WorkflowVersionSelector
+import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.decider.FastqcDecider
 import de.dkfz.tbi.otp.workflowTest.AbstractWorkflowSpec
 

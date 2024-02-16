@@ -169,7 +169,7 @@ class FastqcExecuteWesPipelineJobSpec extends Specification implements DataTest,
             0 * _
         }
         job.fastqcReportService = Mock(FastqcReportService) {
-            n * copyExistingFastqcReportsNewSystem(_)
+            n * copyExistingFastqcReports(_)
             0 * _
         }
         job.logService = Mock(LogService) {

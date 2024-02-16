@@ -29,6 +29,8 @@ import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.alignment.*
+import de.dkfz.tbi.otp.workflow.jobs.AttachUuidJob
+import de.dkfz.tbi.otp.workflow.jobs.CalculateSizeJob
 import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
 
 class PanCancerWorkflowSpec extends Specification implements RoddyPanCancerFactory, DataTest {
@@ -59,6 +61,7 @@ class PanCancerWorkflowSpec extends Specification implements RoddyPanCancerFacto
                 RoddyAlignmentFragmentJob,
 //                RoddyAlignmentCheckFragmentKeysJob,
                 RoddyAlignmentConditionalFailJob,
+                AttachUuidJob,
                 RoddyAlignmentPrepareJob,
                 PanCancerExecuteJob,
                 PanCancerValidationJob,
@@ -66,6 +69,7 @@ class PanCancerWorkflowSpec extends Specification implements RoddyPanCancerFacto
                 RoddyAlignmentCheckQcJob,
                 PanCancerCleanUpJob,
                 SetCorrectPermissionJob,
+                CalculateSizeJob,
                 PanCancerLinkJob,
                 RoddyAlignmentFinishJob,
         ]

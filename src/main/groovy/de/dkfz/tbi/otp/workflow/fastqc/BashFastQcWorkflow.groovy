@@ -24,8 +24,11 @@ package de.dkfz.tbi.otp.workflow.fastqc
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.workflow.jobs.AttachUuidJob
+import de.dkfz.tbi.otp.workflow.jobs.CalculateSizeJob
 import de.dkfz.tbi.otp.workflow.jobs.Job
 import de.dkfz.tbi.otp.workflow.jobs.OtpClusterCheckFragmentKeysJob
+import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
 import de.dkfz.tbi.otp.workflowExecution.*
 
 /**
@@ -45,10 +48,14 @@ class BashFastQcWorkflow implements LinearWorkflow {
                 FastqcFragmentJob,
                 OtpClusterCheckFragmentKeysJob,
                 FastqcConditionalFailJob,
+                AttachUuidJob,
                 FastqcPrepareJob,
                 FastqcExecuteClusterPipelineJob,
                 FastqcClusterValidationJob,
                 FastqcParseJob,
+                SetCorrectPermissionJob,
+                CalculateSizeJob,
+                FastqcLinkJob,
                 FastqcFinishJob,
         ]
     }

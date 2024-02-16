@@ -26,7 +26,10 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.workflow.jobs.AttachUuidJob
+import de.dkfz.tbi.otp.workflow.jobs.CalculateSizeJob
 import de.dkfz.tbi.otp.workflow.jobs.OtpClusterCheckFragmentKeysJob
+import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
 import de.dkfz.tbi.otp.workflowExecution.Artefact
 
 class BashFastqcWorkflowSpec extends Specification implements DataTest, DomainFactoryCore {
@@ -50,10 +53,14 @@ class BashFastqcWorkflowSpec extends Specification implements DataTest, DomainFa
                 FastqcFragmentJob,
                 OtpClusterCheckFragmentKeysJob,
                 FastqcConditionalFailJob,
+                AttachUuidJob,
                 FastqcPrepareJob,
                 FastqcExecuteClusterPipelineJob,
                 FastqcClusterValidationJob,
                 FastqcParseJob,
+                SetCorrectPermissionJob,
+                CalculateSizeJob,
+                FastqcLinkJob,
                 FastqcFinishJob,
         ]
     }

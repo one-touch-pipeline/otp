@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.ngsdata.FastqFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
@@ -71,8 +72,8 @@ class FastqcValidationJobSpec extends Specification implements DataTest, Workflo
         FastqcClusterValidationJob job = new FastqcClusterValidationJob()
 
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
-            1 * fastqcOutputPath(fastqcProcessedFiles.first()) >> file1
-            1 * fastqcOutputPath(fastqcProcessedFiles.last()) >> file2
+            1 * fastqcOutputPath(fastqcProcessedFiles.first(), PathOption.REAL_PATH) >> file1
+            1 * fastqcOutputPath(fastqcProcessedFiles.last(), PathOption.REAL_PATH) >> file2
         }
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
             _ * getOutputArtefacts(workflowStep, BashFastQcWorkflow.OUTPUT_FASTQC) >> fastqcProcessedFiles

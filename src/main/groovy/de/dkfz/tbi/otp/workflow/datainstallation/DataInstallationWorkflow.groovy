@@ -24,8 +24,11 @@ package de.dkfz.tbi.otp.workflow.datainstallation
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.workflow.jobs.AttachUuidJob
+import de.dkfz.tbi.otp.workflow.jobs.CalculateSizeJob
 import de.dkfz.tbi.otp.workflow.jobs.Job
 import de.dkfz.tbi.otp.workflow.jobs.OtpClusterCheckFragmentKeysJob
+import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
 import de.dkfz.tbi.otp.workflowExecution.*
 
 /**
@@ -44,11 +47,14 @@ class DataInstallationWorkflow implements LinearWorkflow {
                 DataInstallationFragmentJob,
                 OtpClusterCheckFragmentKeysJob,
                 DataInstallationConditionalFailJob,
+                AttachUuidJob,
                 DataInstallationPrepareJob,
                 CopyOrLinkFastqsOfLaneJob,
                 DataInstallationValidationJob,
                 DataInstallationSingleCellLinkJob,
                 DataInstallationPidLinkJob,
+                SetCorrectPermissionJob,
+                CalculateSizeJob,
         ]
     }
 

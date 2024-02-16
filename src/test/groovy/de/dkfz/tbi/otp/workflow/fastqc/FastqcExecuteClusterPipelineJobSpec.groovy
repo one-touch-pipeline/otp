@@ -27,6 +27,7 @@ import spock.lang.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
@@ -140,11 +141,11 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         job.fileSystemService = new TestFileSystemService()
         job.fileService = Mock(FileService) {
             _ * ensureFileIsReadableAndNotEmpty(_, _)
-            _ * convertPermissionsToOctalString(_)
             callOfDelete * deleteDirectoryRecursively(_)
             callOfDelete * createDirectoryRecursivelyAndSetPermissionsViaBash(_, _)
             0 * _
         }
+
         job.logService = Mock(LogService) {
             logEntryCount * addSimpleLogEntry(_, _)
         }
@@ -181,7 +182,12 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
 
         job.fastqcReportService = Mock(FastqcReportService) {
             1 * canFastqcReportsBeCopied([fastqcProcessedFile1, fastqcProcessedFile2]) >> true
-            1 * copyExistingFastqcReports([fastqcProcessedFile1, fastqcProcessedFile2], _)
+            1 * copyExistingFastqcReports([fastqcProcessedFile1, fastqcProcessedFile2])
+            0 * _
+        }
+
+        job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
+            1 * fastqcOutputDirectory(fastqcProcessedFile1, PathOption.REAL_PATH) >> targetDir
             0 * _
         }
 
@@ -206,10 +212,7 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         final String cmd_fastqc = "cmd fastqc"
 
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
-            1 * fastqcOutputPath(fastqcProcessedFile1) >> targetFastqc1
-            1 * fastqcOutputPath(fastqcProcessedFile2) >> targetFastqc2
-            1 * fastqcHtmlPath(fastqcProcessedFile1) >> targetFastqcHtml1
-            1 * fastqcHtmlPath(fastqcProcessedFile2) >> targetFastqcHtml2
+            1 * fastqcOutputDirectory(fastqcProcessedFile1, PathOption.REAL_PATH) >> targetDir
             0 * _
         }
         job.fastqcReportService = Mock(FastqcReportService) {

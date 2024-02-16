@@ -26,7 +26,10 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.workflow.jobs.AttachUuidJob
+import de.dkfz.tbi.otp.workflow.jobs.CalculateSizeJob
 import de.dkfz.tbi.otp.workflow.jobs.OtpClusterCheckFragmentKeysJob
+import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
 import de.dkfz.tbi.otp.workflowExecution.Artefact
 
 class DataInstallationWorkflowSpec extends Specification implements DataTest, DomainFactoryCore {
@@ -50,11 +53,14 @@ class DataInstallationWorkflowSpec extends Specification implements DataTest, Do
                 DataInstallationFragmentJob,
                 OtpClusterCheckFragmentKeysJob,
                 DataInstallationConditionalFailJob,
+                AttachUuidJob,
                 DataInstallationPrepareJob,
                 CopyOrLinkFastqsOfLaneJob,
                 DataInstallationValidationJob,
                 DataInstallationSingleCellLinkJob,
                 DataInstallationPidLinkJob,
+                SetCorrectPermissionJob,
+                CalculateSizeJob,
         ]
     }
 

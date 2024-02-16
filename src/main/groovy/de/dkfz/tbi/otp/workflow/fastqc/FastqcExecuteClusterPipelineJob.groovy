@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.ngsdata.SeqTrackService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractExecuteClusterPipelineJob
 import de.dkfz.tbi.otp.workflow.shared.NoWorkflowVersionSpecifiedException
@@ -53,7 +53,8 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
 
     @Override
     protected List<String> createScripts(WorkflowStep workflowStep) {
-        Path outputDir = fileSystemService.remoteFileSystem.getPath(workflowStep.workflowRun.workDirectory)
+        List<FastqcProcessedFile> fastqcProcessedFiles = getFastqcProcessedFiles(workflowStep)
+        Path outputDir = fastqcDataFilesService.fastqcOutputDirectory(fastqcProcessedFiles.first(), PathOption.REAL_PATH)
 
         // delete existing output directory in case of restart
         if (Files.exists(outputDir)) {
@@ -62,13 +63,11 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
             fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDir, workflowStep.workflowRun.project.unixGroup,)
         }
 
-        List<FastqcProcessedFile> fastqcProcessedFiles = getFastqcProcessedFiles(workflowStep)
-
         // check if fastqc reports are provided and can be copied
         if (fastqcReportService.canFastqcReportsBeCopied(fastqcProcessedFiles)) {
             // remotely run a script to copy the existing result files
             logService.addSimpleLogEntry(workflowStep, "fastqc reports found, copy them")
-            fastqcReportService.copyExistingFastqcReports(fastqcProcessedFiles, outputDir)
+            fastqcReportService.copyExistingFastqcReports(fastqcProcessedFiles)
             return []
         }
         logService.addSimpleLogEntry(workflowStep, "no fastqc reports found, create script to create them")
@@ -78,8 +77,6 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
     }
 
     private List<String> createFastQcClusterScript(List<FastqcProcessedFile> fastqcProcessedFiles, Path outDir, WorkflowStep workflowStep) {
-        String permission = fileService.convertPermissionsToOctalString(FileService.DEFAULT_FILE_PERMISSION)
-
         return fastqcProcessedFiles.collect { FastqcProcessedFile fastqcProcessedFile ->
             String inputFileName = rawSequenceDataWorkFileService.getFilePath(fastqcProcessedFile.sequenceFile)
 
@@ -108,8 +105,6 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
                 |${fastqcActivation }
                 |${decompressFileCommand}
                 |${fastqcCommand} ${inputFileName} --noextract --nogroup -o ${outDir}
-                |chmod ${permission} ${fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile)}
-                |chmod ${permission} ${fastqcDataFilesService.fastqcHtmlPath(fastqcProcessedFile)}
                 |${deleteDecompressedFileCommand}
                 |""".stripMargin()
         }

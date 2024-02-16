@@ -28,6 +28,8 @@ import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.workflow.alignment.*
+import de.dkfz.tbi.otp.workflow.jobs.AttachUuidJob
+import de.dkfz.tbi.otp.workflow.jobs.CalculateSizeJob
 import de.dkfz.tbi.otp.workflow.jobs.Job
 import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
 import de.dkfz.tbi.otp.workflowExecution.*
@@ -50,6 +52,7 @@ class PanCancerWorkflow extends AlignmentWorkflow implements LinearWorkflow {
                 // Keep the order, since it is important
 //                RoddyAlignmentCreateNotificationJob,
                 RoddyAlignmentConditionalFailJob,
+                AttachUuidJob,
                 RoddyAlignmentPrepareJob,
                 PanCancerExecuteJob,
                 PanCancerValidationJob,
@@ -57,6 +60,7 @@ class PanCancerWorkflow extends AlignmentWorkflow implements LinearWorkflow {
                 RoddyAlignmentCheckQcJob,
                 PanCancerCleanUpJob,
                 SetCorrectPermissionJob,
+                CalculateSizeJob,
                 PanCancerLinkJob,
                 RoddyAlignmentFinishJob,
         ]

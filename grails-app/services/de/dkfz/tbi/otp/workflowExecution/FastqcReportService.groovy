@@ -50,63 +50,29 @@ class FastqcReportService {
         }
     }
 
-    /**
-     * @deprecated old system
-     */
-    @Deprecated
-    void copyExistingFastqcReports(List<FastqcProcessedFile> fastqcProcessedFiles, Path outDir) {
+    void copyExistingFastqcReports(List<FastqcProcessedFile> fastqcProcessedFiles) {
         fastqcProcessedFiles.each { FastqcProcessedFile fastqcProcessedFile ->
             Path seqCenterFastQcFile = fastqcDataFilesService.pathToFastQcResultFromSeqCenter(fastqcProcessedFile)
             Path seqCenterFastQcFileMd5Sum = fastqcDataFilesService.pathToFastQcResultMd5SumFromSeqCenter(fastqcProcessedFile)
-            Path fastqcOutputPath = fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile)
             fileService.ensureFileIsReadableAndNotEmpty(seqCenterFastQcFile)
 
-            String permission = fileService.convertPermissionsToOctalString(FileService.DEFAULT_FILE_PERMISSION)
+            Path realDir = fastqcDataFilesService.fastqcOutputDirectory(fastqcProcessedFile, PathOption.REAL_PATH)
 
             String copyAndMd5sumCommand = """|
                 |set -e
                 |
                 |#copy file
                 |cd ${seqCenterFastQcFile.parent}
-                |md5sum ${seqCenterFastQcFile.fileName} > ${outDir}/${seqCenterFastQcFileMd5Sum.fileName}
-                |chmod ${permission} ${outDir}/${seqCenterFastQcFileMd5Sum.fileName}
-                |cp ${seqCenterFastQcFile} ${outDir}
-                |chmod ${permission} ${fastqcOutputPath}
+                |md5sum ${seqCenterFastQcFile.fileName} > ${realDir}/${seqCenterFastQcFileMd5Sum.fileName}
+                |cp ${seqCenterFastQcFile} ${realDir}
                 |
                 |#check md5sum
-                |cd ${outDir}
+                |cd ${realDir}
                 |md5sum -c ${seqCenterFastQcFileMd5Sum.fileName}
                 |""".stripMargin()
 
             remoteShellHelper.executeCommandReturnProcessOutput(copyAndMd5sumCommand).assertExitCodeZeroAndStderrEmpty()
-            fileService.ensureFileIsReadableAndNotEmpty(fastqcOutputPath)
-        }
-    }
-
-    void copyExistingFastqcReportsNewSystem(List<FastqcProcessedFile> fastqcProcessedFiles) {
-        fastqcProcessedFiles.each { FastqcProcessedFile fastqcProcessedFile ->
-            Path seqCenterFastQcFile = fastqcDataFilesService.pathToFastQcResultFromSeqCenter(fastqcProcessedFile)
-            Path seqCenterFastQcFileMd5Sum = fastqcDataFilesService.pathToFastQcResultMd5SumFromSeqCenter(fastqcProcessedFile)
-            fileService.ensureFileIsReadableAndNotEmpty(seqCenterFastQcFile)
-
-            Path realPath = fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile, PathOption.REAL_PATH)
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(realPath.parent)
-
-            String copyAndMd5sumCommand = """|
-                |set -e
-                |
-                |#copy file
-                |cd ${seqCenterFastQcFile.parent}
-                |md5sum ${seqCenterFastQcFile.fileName} > ${realPath.parent}/${seqCenterFastQcFileMd5Sum.fileName}
-                |cp ${seqCenterFastQcFile} ${realPath}
-                |
-                |#check md5sum
-                |cd ${realPath.parent}
-                |md5sum -c ${seqCenterFastQcFileMd5Sum.fileName}
-                |""".stripMargin()
-
-            remoteShellHelper.executeCommandReturnProcessOutput(copyAndMd5sumCommand).assertExitCodeZeroAndStderrEmpty()
-            fileService.ensureFileIsReadableAndNotEmpty(realPath)
+            fileService.ensureFileIsReadableAndNotEmpty(fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile, PathOption.REAL_PATH))
         }
     }
 }

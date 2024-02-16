@@ -27,6 +27,8 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.workflow.alignment.*
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerCleanUpJob
+import de.dkfz.tbi.otp.workflow.jobs.AttachUuidJob
+import de.dkfz.tbi.otp.workflow.jobs.CalculateSizeJob
 import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
 
 class WgbsWorkflowSpec extends Specification implements RoddyPanCancerFactory, DataTest {
@@ -42,6 +44,7 @@ class WgbsWorkflowSpec extends Specification implements RoddyPanCancerFactory, D
         wgbsWorkflow.jobList == [
                 RoddyAlignmentFragmentJob,
 //                RoddyAlignmentCheckFragmentKeysJob,
+                AttachUuidJob,
                 RoddyAlignmentConditionalFailJob,
                 WgbsPrepareJob,
                 WgbsExecuteJob,
@@ -49,8 +52,9 @@ class WgbsWorkflowSpec extends Specification implements RoddyPanCancerFactory, D
                 WgbsParseJob,
                 RoddyAlignmentCheckQcJob,
                 PanCancerCleanUpJob,
-                WgbsLinkJob,
                 SetCorrectPermissionJob,
+                CalculateSizeJob,
+                WgbsLinkJob,
                 RoddyAlignmentFinishJob,
         ]
     }
