@@ -51,24 +51,24 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, 'Cell Ranger', TRUE, 0, NOW(), NOW(), 
 ON CONFLICT DO NOTHING;
 
 
-INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated, max_parallel_workflows)
-VALUES (NEXTVAL('hibernate_sequence'), 0, 'Roddy ACEseq (CNV calling)', TRUE, 0, NOW(), NOW(), 10)
+INSERT INTO workflow(id, version, name, bean_name, enabled, priority, date_created, last_updated, max_parallel_workflows)
+VALUES (NEXTVAL('hibernate_sequence'), 0, 'Roddy ACEseq (CNV calling)', 'aceseqWorkflow', TRUE, 0, NOW(), NOW(), 10)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated, max_parallel_workflows)
-VALUES (NEXTVAL('hibernate_sequence'), 0, 'Roddy Indel calling', TRUE, 0, NOW(), NOW(), 10)
+INSERT INTO workflow(id, version, name, bean_name, enabled, priority, date_created, last_updated, max_parallel_workflows)
+VALUES (NEXTVAL('hibernate_sequence'), 0, 'Roddy Indel calling', 'indelWorkflow', TRUE, 0, NOW(), NOW(), 10)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated, max_parallel_workflows)
-VALUES (NEXTVAL('hibernate_sequence'), 0, 'Roddy SNV calling', TRUE, 0, NOW(), NOW(), 10)
+INSERT INTO workflow(id, version, name, bean_name, enabled, priority, date_created, last_updated, max_parallel_workflows)
+VALUES (NEXTVAL('hibernate_sequence'), 0, 'Roddy SNV calling', 'snvWorkflow', TRUE, 0, NOW(), NOW(), 10)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated, max_parallel_workflows)
-VALUES (NEXTVAL('hibernate_sequence'), 0, 'Roddy Sophia (structural variation calling)', TRUE, 0, NOW(), NOW(), 10)
+INSERT INTO workflow(id, version, name, bean_name, enabled, priority, date_created, last_updated, max_parallel_workflows)
+VALUES (NEXTVAL('hibernate_sequence'), 0, 'Roddy Sophia (structural variation calling)', 'sophiaWorkflow', TRUE, 0, NOW(), NOW(), 10)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO workflow(id, version, name, enabled, priority, date_created, last_updated, max_parallel_workflows)
-VALUES (NEXTVAL('hibernate_sequence'), 0, 'runYapsa (mutational signature analysis)', TRUE, 0, NOW(), NOW(), 10)
+INSERT INTO workflow(id, version, name, bean_name, enabled, priority, date_created, last_updated, max_parallel_workflows)
+VALUES (NEXTVAL('hibernate_sequence'), 0, 'runYapsa (mutational signature analysis)', 'runYapsaWorkflow', TRUE, 0, NOW(), NOW(), 10)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO workflow(id, version, name, bean_name, enabled, priority, date_created, last_updated, max_parallel_workflows)

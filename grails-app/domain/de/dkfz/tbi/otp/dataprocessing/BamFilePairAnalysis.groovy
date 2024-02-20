@@ -35,9 +35,10 @@ import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.workflowExecution.Artefact
 
 @ManagedEntity
-abstract class BamFilePairAnalysis implements CommentableWithProject, ProcessParameterObject, Entity {
+abstract class BamFilePairAnalysis implements Artefact, CommentableWithProject, ProcessParameterObject, Entity {
     /**
      * Refers to the config file which is stored in the database and is used as a basis for all the files in the filesystem.
      */
@@ -92,6 +93,7 @@ abstract class BamFilePairAnalysis implements CommentableWithProject, ProcessPar
             }
         }
         comment nullable: true
+        workflowArtefact nullable: true
     }
 
     static Closure mapping = {
@@ -101,6 +103,7 @@ abstract class BamFilePairAnalysis implements CommentableWithProject, ProcessPar
         samplePair index: "bam_file_pair_analysis_sample_pair_idx"
         config lazy: false, index: "bam_file_pair_analysis_config_idx"
         comment cascade: "all-delete-orphan"
+        workflowArtefact index: "bam_file_pair_analysis_workflow_artefact_idx"
     }
 
     @Override
