@@ -51,6 +51,7 @@ prefix="s/${prefixChangeSet}"
 suffix="${suffixChangeSet}//g"
 
 joinTables="\
+(abstract_bam_file_seq_track)|\
 (aceseq_instance_roddy_execution_directory_names)|\
 (antibody_target_import_alias)|\
 (bam_import_instance_externally_processed_bam_file)|\
@@ -76,7 +77,6 @@ joinTables="\
 (project_request_project_request_user)|\
 (project_request_user_project_role)|\
 (roddy_bam_file_roddy_execution_directory_names)|\
-(roddy_bam_file_seq_track)|\
 (roddy_snv_calling_instance_roddy_execution_directory_names)|\
 (seq_center_import_dirs_allow_linking)|\
 (seq_platform_group_comment)|\
@@ -84,7 +84,6 @@ joinTables="\
 (seq_track_log_message)|\
 (seq_type_import_alias)|\
 (sequencing_kit_label_import_alias)|\
-(single_cell_bam_file_seq_track)|\
 (sophia_instance_roddy_execution_directory_names)|\
 (text_field_definition_allowed_text_values)|\
 (user_project_role_project_role)|\

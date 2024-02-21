@@ -172,4 +172,6 @@ databaseChangeLog = {
     include(file: 'changelogs/2024/otp-2495-change-packages-for-analyses-in-process-parameter.groovy')
 
     include(file: 'changelogs/2024/otp-2419.groovy')
+
+    include file: 'changelogs/2024/otp-2198.groovy'
 }

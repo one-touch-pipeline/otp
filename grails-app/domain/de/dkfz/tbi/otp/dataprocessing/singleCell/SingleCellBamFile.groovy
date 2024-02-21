@@ -122,8 +122,6 @@ class SingleCellBamFile extends AbstractBamFile implements HasIdentifier, Proces
             CREATED_RESULT_DIRS,
     ].flatten().asImmutable()
 
-    Set<SeqTrack> seqTracks
-
     String workDirectoryName
 
     static hasMany = [

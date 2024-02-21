@@ -41,11 +41,6 @@ import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 @ManagedEntity
 class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, ProcessParameterObject, RoddyResult {
 
-    /**
-     * Contains all seqTracks including the parents
-     */
-    Set<SeqTrack> seqTracks
-
     static hasMany = [
             seqTracks                   : SeqTrack,
             roddyExecutionDirectoryNames: String,

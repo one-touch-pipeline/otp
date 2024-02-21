@@ -109,6 +109,8 @@ abstract class AbstractBamFile implements CommentableWithProject, Entity {
         PROCESSED
     }
 
+    Set<SeqTrack> seqTracks
+
     boolean withdrawn = false
 
     /**

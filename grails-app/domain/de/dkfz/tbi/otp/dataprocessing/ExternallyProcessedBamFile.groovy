@@ -186,6 +186,7 @@ class ExternallyProcessedBamFile extends AbstractBamFile implements Artefact {
     }
 
     static constraints = {
+        seqTracks nullable: true, maxSize: 0
         importedFrom nullable: true, blank: false, shared: "absolutePath"
         fileName blank: false, shared: "pathComponent"
         workPackage validator: { val, obj ->
