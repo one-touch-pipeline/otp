@@ -22,23 +22,34 @@
 package de.dkfz.tbi.otp.workflow.alignment
 
 import grails.gorm.transactions.Transactional
+import grails.web.mapping.LinkGenerator
 import groovy.transform.CompileDynamic
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.MergingCriteria.SpecificSeqPlatformGroups
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.mergingCriteria.DefaultSeqPlatformGroupController
+import de.dkfz.tbi.otp.ngsdata.mergingCriteria.ProjectSeqPlatformGroupController
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
+import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.otp.withdraw.RoddyBamFileWithdrawService
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 import de.dkfz.tbi.otp.workflowExecution.decider.DeciderResult
 
+import static de.dkfz.tbi.otp.dataprocessing.MergingCriteria.SpecificSeqPlatformGroups.*
+
 @CompileDynamic
 @Transactional(readOnly = true)
 class TriggerAlignmentService {
+
+    @Autowired
+    LinkGenerator linkGenerator
 
     SeqTrackService seqTrackService
     SamplePairDeciderService samplePairDeciderService
@@ -47,6 +58,7 @@ class TriggerAlignmentService {
     RoddyBamFileWithdrawService roddyBamFileWithdrawService
     MergingCriteriaService mergingCriteriaService
     WorkflowService workflowService
+    MessageSourceService messageSourceService
 
     @Transactional(readOnly = false)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -121,6 +133,80 @@ class TriggerAlignmentService {
     }
 
     /**
+     * C seqTracks that do not have the alignment workflow configured (deprecated)
+     */
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    List<Map<String, Object>> createWarningsForMissingSeqPlatformGroup(Collection<SeqTrack> seqTracks) {
+        List<SeqPlatformGroup> defaultSeqPlatformGroups = mergingCriteriaService.findDefaultSeqPlatformGroupsOperator()
+        List<SeqPlatform> configuredSeqPlatformsByDefault = defaultSeqPlatformGroups ? defaultSeqPlatformGroups.collectMany { it.seqPlatforms } : []
+
+        return (((seqTracks.groupBy {
+            [
+                    it.project,
+                    it.seqType,
+            ]
+        }.collectEntries {
+            [(mergingCriteriaService.findMergingCriteria(it.key[0], it.key[1])): it.value]
+        } as Map<MergingCriteria, List<SeqTrack>>).findAll {
+            it.key.useSeqPlatformGroup != IGNORE_FOR_MERGING
+        }.collectEntries {
+            if (it.key.useSeqPlatformGroup != USE_OTP_DEFAULT) {
+                return it
+            }
+            List<SeqTrack> filteredSeqTracks = it.value.findAll { !configuredSeqPlatformsByDefault.contains(it.seqPlatform) }
+            return [it.key, filteredSeqTracks]
+        } as Map<MergingCriteria, List<SeqTrack>>).collectEntries { mergingCriteria, groupedSeqTracks ->
+            if (mergingCriteria.useSeqPlatformGroup != USE_PROJECT_SEQ_TYPE_SPECIFIC) {
+                return [mergingCriteria, groupedSeqTracks]
+            }
+            List<SeqPlatformGroup> containedSeqPlatformGroups = SeqPlatformGroup.findAllByMergingCriteria(mergingCriteria)*.seqPlatforms.flatten()
+            List<SeqTrack> filteredSeqTracks = groupedSeqTracks.findAll { !containedSeqPlatformGroups.containsAll(it.seqPlatform) }
+            return [mergingCriteria, filteredSeqTracks]
+        } as Map<MergingCriteria, List<SeqTrack>>).collectMany {
+            MergingCriteria criteria = it.key
+            it.value.groupBy {
+                it.sample
+            }.collect { sample, seqTrackList ->
+                Project project = criteria.project
+                SeqType seqType = criteria.seqType
+                [
+                        project     : project.name,
+                        individual  : sample.individual.displayName,
+                        seqType     : seqType.displayNameWithLibraryLayout,
+                        sampleType  : sample.sampleType.name,
+                        seqPlatforms: seqTrackList*.seqPlatform*.fullName.unique().sort().join(', '),
+                        link        : createSeqPlatformConfigPageLink(project, seqType, criteria.useSeqPlatformGroup),
+                ]
+            }
+        }.sort {
+            [
+                    it.project,
+                    it.individual,
+                    it.sampleType,
+                    it.seqType,
+            ]
+        }
+    }
+
+    private Map<String, String> createSeqPlatformConfigPageLink(Project project, SeqType seqType, SpecificSeqPlatformGroups specificSeqPlatformGroups) {
+        String controller = (specificSeqPlatformGroups == USE_PROJECT_SEQ_TYPE_SPECIFIC ? ProjectSeqPlatformGroupController.simpleName :
+                DefaultSeqPlatformGroupController.simpleName) - 'Controller'
+        Map<String, Long> params = specificSeqPlatformGroups == USE_PROJECT_SEQ_TYPE_SPECIFIC ? [project: project.id, seqType: seqType.id] : null
+        String linkName = specificSeqPlatformGroups == USE_PROJECT_SEQ_TYPE_SPECIFIC ?
+                messageSourceService.createMessage('triggerAlignment.warn.info.projectAndSeqTypeSpecificPlatformGroup') :
+                messageSourceService.createMessage('triggerAlignment.warn.info.defaultSeqPlatformGroup')
+        return [
+                name: linkName,
+                path: linkGenerator.link([
+                        controller: controller,
+                        action    : 'index',
+                        absolute  : 'true',
+                        params    : params,
+                ]),
+        ]
+    }
+
+    /**
      * check that the SeqTracks of a Sample seqType combination have compatible SeqPlatforms according the MergingCriteria
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -132,7 +218,7 @@ class TriggerAlignmentService {
             ]
         }.findAll {
             mergingCriteriaService.findMergingCriteria(it.key[0], it.key[1])?.useSeqPlatformGroup !=
-                    MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING
+                    IGNORE_FOR_MERGING
         }.collectMany {
             SeqType seqType = it.key[1]
             it.value.groupBy([
@@ -227,14 +313,14 @@ class TriggerAlignmentService {
         return seqTracks.findAll {
             !it.libraryPreparationKit && seqTypes.contains(it.seqType)
         }.collect {
-                [
-                        project                   : it.individual.project.name,
-                        individual                : it.individual.pid,
-                        seqType                   : it.seqType.displayNameWithLibraryLayout,
-                        sampleType                : it.sampleType.name,
-                        lane                      : it.laneId,
-                        run                       : it.run.name,
-                ]
+            [
+                    project   : it.individual.project.name,
+                    individual: it.individual.pid,
+                    seqType   : it.seqType.displayNameWithLibraryLayout,
+                    sampleType: it.sampleType.name,
+                    lane      : it.laneId,
+                    run       : it.run.name,
+            ]
         }.sort {
             [
                     it.project,

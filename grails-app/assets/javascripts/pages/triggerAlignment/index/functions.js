@@ -270,6 +270,8 @@ $.otp.triggerAlignment = {
 
   getReferenceGenomeWarningsTable: () => $('#missingReferenceGenomeWarnings').DataTable(),
 
+  getMissingSeqPlatformGroupsTable: () => $('#missingSeqPlatformGroupsTable').DataTable(),
+
   getSeqPlatformWarningsTable: () => $('#seqPlatformWarnings').DataTable(),
 
   getLibPrepKitWarningsTable: () => $('#libraryPrepKitWarnings').DataTable(),
@@ -368,6 +370,23 @@ $(document).ready(() => {
           } else {
             $('#missingReferenceGenomeWarningsCard').addClass('d-none');
             $.otp.triggerAlignment.getReferenceGenomeWarningsTable().clear().draw();
+          }
+
+          if (warnings.missingSeqPlatformGroups && warnings.missingSeqPlatformGroups.length) {
+            $('#missingSeqPlatformGroupsCard').removeClass('d-none');
+            $.otp.triggerAlignment.getMissingSeqPlatformGroupsTable().clear().rows.add(
+              warnings.missingSeqPlatformGroups.map((o) => [
+                o.project,
+                o.individual,
+                o.seqType,
+                o.sampleType,
+                o.seqPlatforms,
+                `<a href="${o.link.path}">${o.link.name}</a></a>`
+              ])
+            ).draw();
+          } else {
+            $('#missingSeqPlatformGroupsCard').addClass('d-none');
+            $.otp.triggerAlignment.getMissingSeqPlatformGroupsTable().clear().draw();
           }
 
           if (warnings.missingLibPrepKits && warnings.missingLibPrepKits.length) {

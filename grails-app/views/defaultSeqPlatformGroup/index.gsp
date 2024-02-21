@@ -54,7 +54,7 @@
     </g:if>
     <g:else>
         <div class="alert alert-info text-center" role="alert">
-            ${g.message(code: "mergingCriteria.noGroupConfigured")}
+            ${g.message(code: "seqPlatformGroup.seqPlatforms.noDefault")}
         </div>
     </g:else>
 </div>

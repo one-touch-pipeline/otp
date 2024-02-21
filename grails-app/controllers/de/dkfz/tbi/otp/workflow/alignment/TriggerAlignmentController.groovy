@@ -77,6 +77,7 @@ class TriggerAlignmentController {
         List<Map<String, String>> warningsForMissingLibPrepKits = triggerAlignmentService.createWarningsForMissingLibPrepKits(seqTracks)
         List<Map<String, String>> warningsForWithdrawnSeqTracks = triggerAlignmentService.createWarningsForWithdrawnSeqTracks(seqTracks)
         List<Map<String, String>> warningsForMissingAlignmentConfig = triggerAlignmentService.createWarningsForMissingAlignmentConfig(seqTracks)
+        List<Map<String, String>> warningsForMissingSeqPlatformGroups = triggerAlignmentService.createWarningsForMissingSeqPlatformGroup(seqTracks)
         List<Map<String, String>> warningsForMissingReferenceGenomeConfiguration =
                 triggerAlignmentService.createWarningsForMissingReferenceGenomeConfiguration(seqTracks)
         List<Map<String, String>> warningsForSamplesHavingMultipleSeqPlatformGroups =
@@ -89,12 +90,13 @@ class TriggerAlignmentController {
                     searchSeqTrackService.projectSeqTrack(seqTrack)
                 },
                 warnings: [
-                        withdrawnSeqTracks     : warningsForWithdrawnSeqTracks,
-                        missingAlignmentConfigs: warningsForMissingAlignmentConfig,
+                        withdrawnSeqTracks      : warningsForWithdrawnSeqTracks,
+                        missingAlignmentConfigs : warningsForMissingAlignmentConfig,
                         missingLibPrepKits      : warningsForMissingLibPrepKits,
-                        missingReferenceGenomes: warningsForMissingReferenceGenomeConfiguration,
-                        seqPlatformGroups      : warningsForSamplesHavingMultipleSeqPlatformGroups,
-                        libraryPreparationKits : warningsForSamplesHavingMultipleLibPrepKits,
+                        missingReferenceGenomes : warningsForMissingReferenceGenomeConfiguration,
+                        missingSeqPlatformGroups: warningsForMissingSeqPlatformGroups,
+                        seqPlatformGroups       : warningsForSamplesHavingMultipleSeqPlatformGroups,
+                        libraryPreparationKits  : warningsForSamplesHavingMultipleLibPrepKits,
                 ],
                 message : message,
         ] as JSON)

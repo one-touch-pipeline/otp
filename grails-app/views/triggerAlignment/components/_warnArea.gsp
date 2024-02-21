@@ -130,6 +130,39 @@
         </div>
     </div>
 
+    <div class="card d-none" id="missingSeqPlatformGroupsCard">
+        <div class="card-header">
+            <button class="btn btn-link w-100 text-left collapsed p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-1" aria-expanded="true"
+                    aria-controls="collapse-1">
+                <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerAlignment.warn.missingSeqPlatformGroups.title"/>
+            </button>
+        </div>
+
+        <div id="collapse-1" class="collapse" data-parent="#warnAreaAccordion">
+            <div class="card-body">
+                <div class="alert alert-warning" role="alert">
+                    <p class="card-text"><g:message code="triggerAlignment.warn.missingSeqPlatformGroups"/></p>
+                </div>
+
+                <table id="missingSeqPlatformGroupsTable" class="table table-sm table-striped table-hover table-bordered">
+                    <thead>
+                    <tr>
+                        <th><g:message code="triggerAlignment.warn.table.project"/></th>
+                        <th><g:message code="triggerAlignment.warn.table.individual"/></th>
+                        <th><g:message code="triggerAlignment.warn.table.seqType"/></th>
+                        <th><g:message code="triggerAlignment.warn.table.sampleTypeName"/></th>
+                        <th><g:message code="triggerAlignment.warn.table.seqPlatforms"/></th>
+                        <th><g:message code="triggerAlignment.warn.table.link"/></th>
+                    </tr>
+                    </thead>
+                    <tbody/>
+                </table>
+
+                <p class="card-text"><g:message code="triggerAlignment.warn.seqPlatform.triggeringStartsOnlyWhenSeqPlatformGroupsIgnored"/></p>
+            </div>
+        </div>
+    </div>
+
     <div class="card d-none" id="seqPlatformWarningsCard">
         <div class="card-header">
             <button class="btn btn-link w-100 text-left collapsed p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="true"

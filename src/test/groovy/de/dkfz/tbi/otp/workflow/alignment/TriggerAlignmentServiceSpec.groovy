@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.workflow.alignment
 
 import grails.test.hibernate.HibernateSpec
-import grails.testing.services.ServiceUnitTest
+import grails.web.mapping.LinkGenerator
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.TicketService
+import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.otp.withdraw.RoddyBamFileWithdrawService
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
@@ -41,7 +42,9 @@ import de.dkfz.tbi.otp.workflowExecution.decider.DeciderResult
 
 import java.time.LocalDate
 
-class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTest<TriggerAlignmentService>, IsRoddy, WorkflowSystemDomainFactory {
+class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, WorkflowSystemDomainFactory {
+
+    TriggerAlignmentService service
 
     @Override
     List<Class> getDomainClasses() {
@@ -65,6 +68,10 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTe
                 WorkflowRun,
                 WorkflowVersionSelector,
         ]
+    }
+
+    void setup() {
+        service = new TriggerAlignmentService()
     }
 
     void "run triggerAlignment, which should trigger one workflow"() {
@@ -362,6 +369,201 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements ServiceUnitTe
 
         then:
         TestCase.assertContainSame(countedSeqPlatformGroup, expected)
+    }
+
+    void "createWarningsForMissingSeqPlatformGroup, should create warning for project and seqType specific seqPlatformGroup and ignore the once"() {
+        given:
+        service.mergingCriteriaService = new MergingCriteriaService()
+        service.linkGenerator = Mock(LinkGenerator)
+        service.messageSourceService = Mock(MessageSourceService)
+
+        SeqPlatform seqPlatform1 = createSeqPlatform()
+        SeqPlatform seqPlatform2 = createSeqPlatform()
+
+        SeqTrack seqTrackWithDefined1 = createSeqTrack([
+                laneId: 'seqTrackWithDefined1',
+                run: createRun([seqPlatform: seqPlatform1]),
+        ])
+        SeqTrack seqTrackWithDefined2 = createSeqTrack([
+                laneId: 'seqTrackWithDefined1',
+                sample : seqTrackWithDefined1.sample,
+                seqType: seqTrackWithDefined1.seqType,
+                run    : createRun([seqPlatform: seqPlatform2]),
+        ])
+        MergingCriteria mergingCriteria1 = createMergingCriteria([
+                project            : seqTrackWithDefined1.project,
+                seqType            : seqTrackWithDefined1.seqType,
+                useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC,
+        ])
+        createSeqPlatformGroup([
+                seqPlatforms   : [seqPlatform1, seqPlatform2],
+                mergingCriteria: mergingCriteria1,
+        ])
+
+        SeqTrack seqTrackWithoutDefined1 = createSeqTrack([
+                laneId: 'seqTrackWithoutDefined1',
+                run: createRun([seqPlatform: createSeqPlatform()]),
+        ])
+        SeqTrack seqTrackWithoutDefined2 = createSeqTrack([
+                laneId: 'seqTrackWithoutDefined2',
+                sample : seqTrackWithoutDefined1.sample,
+                seqType: seqTrackWithoutDefined1.seqType,
+                run    : createRun([seqPlatform: seqPlatform2]),
+        ])
+        MergingCriteria mergingCriteria2 = createMergingCriteria([
+                project            : seqTrackWithoutDefined1.project,
+                seqType            : seqTrackWithoutDefined1.seqType,
+                useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC,
+        ])
+        createSeqPlatformGroup([
+                seqPlatforms   : [seqPlatform1],
+                mergingCriteria: mergingCriteria2,
+        ])
+
+        SeqTrack seqTrackWithDefined3 = createSeqTrack([
+                laneId: 'seqTrackWithDefined3',
+                run: createRun([seqPlatform: seqPlatform2]),
+        ])
+        SeqTrack seqTrackWithoutDefined3 = createSeqTrack([
+                laneId: 'seqTrackWithoutDefined3',
+                sample : seqTrackWithDefined3.sample,
+                seqType: seqTrackWithDefined3.seqType,
+                run    : createRun([seqPlatform: seqPlatform1]),
+        ])
+        MergingCriteria mergingCriteria3 = createMergingCriteria([
+                project            : seqTrackWithDefined3.project,
+                seqType            : seqTrackWithDefined3.seqType,
+                useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC,
+        ])
+        createSeqPlatformGroup([
+                seqPlatforms   : [seqPlatform2],
+                mergingCriteria: mergingCriteria3,
+        ])
+
+        SeqTrack seqTrackIgnored = createSeqTrack([
+                run: createRun([seqPlatform: createSeqPlatform()]),
+        ])
+        createMergingCriteria([
+                project            : seqTrackIgnored.project,
+                seqType            : seqTrackIgnored.seqType,
+                useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING,
+        ])
+
+        List<SeqTrack> seqTracks = [
+                seqTrackWithDefined1,
+                seqTrackWithDefined2,
+                seqTrackWithDefined3,
+                seqTrackWithoutDefined1,
+                seqTrackWithoutDefined2,
+                seqTrackWithoutDefined3,
+                seqTrackIgnored,
+        ]
+
+        List<SeqTrack> expectedSeqTracks = [seqTrackWithoutDefined1, seqTrackWithoutDefined2, seqTrackWithoutDefined3]
+
+        List<Map<String, Object>> expected = expectedSeqTracks
+                .groupBy { it.sample }
+                .collect {
+                    [
+                            project     : it.key.project.name,
+                            individual  : it.key.individual.displayName,
+                            seqType     : it.value[0].seqType.displayNameWithLibraryLayout,
+                            sampleType  : it.key.sampleType.name,
+                            seqPlatforms: it.value*.seqPlatform.fullName.sort().join(', '),
+                            link        : [name: 'message', path: 'link'],
+                    ]
+                }
+
+        when:
+        List<Map<String, Object>> missingSeqPlatformGroup = service.createWarningsForMissingSeqPlatformGroup(seqTracks)
+
+        then:
+        TestCase.assertContainSame(missingSeqPlatformGroup, expected)
+        2 * service.linkGenerator.link(_) >> 'link'
+        2 * service.messageSourceService.createMessage(_) >> 'message'
+    }
+
+    void "createWarningsForMissingSeqPlatformGroup, should warn for seqTracks with missing default seq platform groups"() {
+        given:
+        service.mergingCriteriaService = new MergingCriteriaService()
+        service.linkGenerator = Mock(LinkGenerator)
+        service.messageSourceService = Mock(MessageSourceService)
+
+        // Create two seqPlatforms for which a default is defined
+        SeqPlatform seqPlatform1 = createSeqPlatform()
+        SeqPlatform seqPlatform2 = createSeqPlatform()
+        createSeqPlatformGroup([
+                mergingCriteria: null,
+                seqPlatforms   : [createSeqPlatform(), seqPlatform2],
+        ])
+        createSeqPlatformGroup([
+                mergingCriteria: null,
+                seqPlatforms   : [createSeqPlatform(), seqPlatform1],
+        ])
+
+        // Two Seq Tracks in one merging criteria
+        SeqTrack seqTrackWithDefault1 = createSeqTrack([
+                run: createRun([seqPlatform: seqPlatform1]),
+        ])
+        SeqTrack seqTrackWithDefault2 = createSeqTrack([
+                sample : seqTrackWithDefault1.sample,
+                seqType: seqTrackWithDefault1.seqType,
+                run    : createRun([seqPlatform: seqPlatform2]),
+        ])
+        createMergingCriteria([
+                project            : seqTrackWithDefault2.project,
+                seqType            : seqTrackWithDefault2.seqType,
+                useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_OTP_DEFAULT,
+        ])
+
+        // Two Seq Tracks in one merging criteria
+        SeqTrack seqTrackWithDefault3 = createSeqTrack([
+                run: createRun([seqPlatform: seqPlatform1]),
+        ])
+        SeqTrack seqTrackWithoutDefault1 = createSeqTrack([
+                sample : seqTrackWithDefault3.sample,
+                seqType: seqTrackWithDefault3.seqType,
+                run    : createRun([seqPlatform: createSeqPlatform()]),
+        ])
+        createMergingCriteria([
+                project            : seqTrackWithoutDefault1.project,
+                seqType            : seqTrackWithoutDefault1.seqType,
+                useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_OTP_DEFAULT,
+        ])
+
+        // One Seq Track in one merging criteria
+        SeqTrack seqTrackWithoutDefault2 = createSeqTrack([
+                run: createRun([seqPlatform: createSeqPlatform()]),
+        ])
+        createMergingCriteria([
+                project            : seqTrackWithoutDefault2.project,
+                seqType            : seqTrackWithoutDefault2.seqType,
+                useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_OTP_DEFAULT,
+        ])
+
+        List<SeqTrack> seqTracks = [seqTrackWithDefault1, seqTrackWithDefault2, seqTrackWithDefault3, seqTrackWithoutDefault1, seqTrackWithoutDefault2]
+        List<SeqTrack> expectedSeqTracks = [seqTrackWithoutDefault1, seqTrackWithoutDefault2]
+
+        List<Map<String, Object>> expected = expectedSeqTracks
+                .groupBy { it.sample }
+                .collect {
+                    [
+                            project     : it.key.project.name,
+                            individual  : it.key.individual.displayName,
+                            seqType     : it.value[0].seqType.displayNameWithLibraryLayout,
+                            sampleType  : it.key.sampleType.name,
+                            seqPlatforms: it.value*.seqPlatform.fullName.sort().join(', '),
+                            link        : [name: 'message', path: 'link'],
+                    ]
+                }
+
+        when:
+        List<Map<String, Object>> missingSeqPlatformGroup = service.createWarningsForMissingSeqPlatformGroup(seqTracks)
+
+        then:
+        TestCase.assertContainSame(missingSeqPlatformGroup, expected)
+        2 * service.linkGenerator.link(_) >> 'link'
+        2 * service.messageSourceService.createMessage(_) >> 'message'
     }
 
     // nestedCollect not usable, since objects collected in different levels
