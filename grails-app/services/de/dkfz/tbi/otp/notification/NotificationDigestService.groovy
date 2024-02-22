@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightNotificationService
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.tracking.Ticket.ProcessingStep
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
 @Transactional
@@ -99,6 +99,6 @@ class NotificationDigestService {
 
     void sendPreparedNotification(PreparedNotification preparedNotification) {
         List<String> recipients = preparedNotification.toBeNotifiedProjectUsers*.user*.email ?: []
-        mailHelperService.sendEmail(preparedNotification.subject, preparedNotification.notification, recipients)
+        mailHelperService.saveMail(preparedNotification.subject, preparedNotification.notification, recipients)
     }
 }

@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.tracking.DeNbiKpi
 import de.dkfz.tbi.otp.tracking.DeNbiKpiService
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.administration.MailHelperService
 
 import java.time.LocalDate
 import java.time.ZoneId
@@ -85,7 +85,7 @@ class GenerateAndSendKPIsForNBI extends AbstractScheduledJob {
             ].join('\n')
         }.join('\n\n')
 
-        mailHelperService.sendEmailToTicketSystem("KPIs for de.NBI - ${fromDate.month} ${fromDate.year}", kpiMailContent)
+        mailHelperService.saveMail("KPIs for de.NBI - ${fromDate.month} ${fromDate.year}", kpiMailContent)
     }
 
     /**

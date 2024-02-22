@@ -27,6 +27,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
@@ -86,7 +87,7 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
                     _ * findOptionAsLong(_) { return 0L }
                 },
                 mailHelperService: Mock(MailHelperService) {
-                    1 * sendEmailToTicketSystem({ it.contains(expectedContent) }, _) >> { }
+                    1 * saveMail({ it.contains(expectedContent) }, _)
                 },
                 userProjectRoleService: Mock(UserProjectRoleService) {
                     _ * executeOrNotify(_, _) >> { return new UserProjectRoleService.CommandAndResult("removal command", p) }
@@ -135,9 +136,9 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
         ]
         2 * job.messageSourceService.createMessage("deactivateUsersJob.notification.userDeactivated.subject" , _) >> subject
         2 * job.messageSourceService.createMessage("deactivateUsersJob.notification.userDeactivated.body", _) >> body
-        1 * job.mailHelperService.sendEmail(subject, body, projectAuthority1.email, [user.email]) >> { }
-        1 * job.mailHelperService.sendEmail(subject, body, projectAuthority2.email, [user.email]) >> { }
-        0 * job.mailHelperService.sendEmail(_)
+        1 * job.mailHelperService.saveMail(subject, body, [projectAuthority1.email], [user.email]) >> { }
+        1 * job.mailHelperService.saveMail(subject, body, [projectAuthority2.email], [user.email]) >> { }
+        0 * job.mailHelperService.saveMail(_)
     }
 
     void "disableUserAndNotify, disables given user and sends notification mail"() {
@@ -152,7 +153,7 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
                 },
                 userService: new UserService(),
                 mailHelperService: Mock(MailHelperService) {
-                    1 * sendEmailToTicketSystem(_, _) >> { }
+                    1 * saveMail(_, _)
                 },
                 userProjectRoleService: new UserProjectRoleService(),
         ])
@@ -193,7 +194,7 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
                 },
                 userService: new UserService(),
                 mailHelperService: Mock(MailHelperService) {
-                    1 * sendEmailToTicketSystem(_, _) >> { }
+                    1 * saveMail(_, _)
                 },
                 userProjectRoleService: new UserProjectRoleService(),
         ])

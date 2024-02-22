@@ -27,6 +27,7 @@ import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.ProjectSelectionService
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
@@ -91,7 +92,7 @@ class QcTrafficLightNotificationService {
         String content = createResultsAreWarnedMessage(bamFile)
 
         if (recipients) {
-            mailHelperService.sendEmail(subject, content, recipients)
+            mailHelperService.saveMail(subject, content, recipients)
         }
     }
 

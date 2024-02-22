@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.domainFactory
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
+import de.dkfz.tbi.otp.administration.Mail
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactoryInstance
@@ -126,17 +127,17 @@ trait DomainFactoryCore implements DomainFactoryHelper {
         ]
     }
 
-    LibraryPreparationKit findOrCreateLibraryPreparationKit(Map<String, ?> requiredSearchProperties, Map<String, ?> additionalCreationProperties=[:]) {
+    LibraryPreparationKit findOrCreateLibraryPreparationKit(Map<String, ?> requiredSearchProperties, Map<String, ?> additionalCreationProperties = [:]) {
         return findOrCreateDomainObject(LibraryPreparationKit, requiredSearchProperties, [
-                name            : "library-preperation-kit-name_${nextId}",
-                importAlias     : [],
+                name       : "library-preperation-kit-name_${nextId}",
+                importAlias: [],
         ], additionalCreationProperties)
     }
 
     LibraryPreparationKit createLibraryPreparationKit(Map properties = [:]) {
         return createDomainObject(LibraryPreparationKit, [
-                name            : "library-preperation-kit-name_${nextId}",
-                importAlias     : [],
+                name       : "library-preparation-kit-name_${nextId}",
+                importAlias: [],
         ], properties)
     }
 
@@ -448,5 +449,15 @@ trait DomainFactoryCore implements DomainFactoryHelper {
                 value: value,
                 type : type,
         ])
+    }
+
+    Mail createMail(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(Mail, [
+                subject: "subject_${nextId}",
+                body   : "body_${nextId}",
+                to     : [],
+                cc     : [],
+                bcc    : [],
+        ], properties, saveAndValidate)
     }
 }

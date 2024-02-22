@@ -33,7 +33,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.util.TimeFormats
 
 import java.time.ZonedDateTime
@@ -145,7 +145,7 @@ Failed OTP Values: ${mapForLog.values().join(';')}""")
 
         String subject = "${subjectPrefix}: ${otpWorkflow.otpWorkflowName} ${object.individual?.displayName} ${object.project?.name}"
 
-        mailHelperService.sendEmailToTicketSystem(subject, message.toString())
+        mailHelperService.saveErrorMailInNewTransaction(subject, message.toString())
     }
 
     private String dateString(Date date) {

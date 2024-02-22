@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.utils.SessionUtils
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
@@ -97,7 +97,7 @@ class UserManagementInconsistenciesJob {
     }
 
     private void notify(String content) {
-        mailHelperService.sendEmailToTicketSystem(mailSubject, content)
+        mailHelperService.saveMail(mailSubject, content)
     }
 
     private static boolean allEqual(List<UserProjectRole> userProjectRoles) {

@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.*
 import org.springframework.validation.Errors
 
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
@@ -393,7 +394,7 @@ class ProjectService {
         } catch (FileSystemException | OtpFileSystemException e) {
             if (sendMailInErrorCase) {
                 String header = "Could not automatically create analysisDir '${project.dirAnalysis}' for Project '${project.name}'."
-                mailHelperService.sendEmailToTicketSystem(
+                mailHelperService.saveErrorMailInNewTransaction(
                         header,
                         "Automatic creation of analysisDir '${project.dirAnalysis}' for Project '${project.name}' failed. " +
                                 "Make sure that the share exists and that OTP has write access to the already existing base directory," +

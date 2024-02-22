@@ -33,7 +33,7 @@ import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.ngsdata.SeqTrack.DataProcessingState
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.utils.exceptions.OtpValidationException
 import de.dkfz.tbi.util.TimeUtils
@@ -85,7 +85,7 @@ class RawSequenceFileConsistencyChecker {
             } catch (OtpValidationException e) {
                 log.error("error ${e.localizedMessage}", e)
                 SessionUtils.withNewSession {
-                    mailHelperService.sendEmailToTicketSystem(
+                    mailHelperService.saveErrorMailInNewTransaction(
                             "Error: RawSequenceFileConsistencyChecker.setFileExistsForAllDataFiles() failed",
                             "${e.localizedMessage}\n${e.cause}")
                 }

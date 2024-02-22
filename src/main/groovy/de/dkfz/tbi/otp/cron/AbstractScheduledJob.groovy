@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.utils.SessionUtils
 
 import java.time.LocalDateTime
@@ -50,6 +50,7 @@ abstract class AbstractScheduledJob {
             FetchUserDataFromLdapJob,
             CheckFileAccessInconsistenciesJob,
             CheckExpiredProjects,
+            DeleteOldMailsJob,
     ]
 
     @Autowired
@@ -98,6 +99,6 @@ abstract class AbstractScheduledJob {
         t.printStackTrace(new PrintWriter(sw))
         String body = "${LocalDateTime.now()}\n\n${sw}"
 
-        mailHelperService.sendEmailToTicketSystem(subject, body)
+        mailHelperService.saveErrorMailInNewTransaction(subject, body)
     }
 }

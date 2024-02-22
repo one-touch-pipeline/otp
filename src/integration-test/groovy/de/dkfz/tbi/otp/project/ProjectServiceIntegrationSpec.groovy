@@ -30,6 +30,7 @@ import spock.lang.*
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
@@ -131,7 +132,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
         projectService.mailHelperService = Mock(MailHelperService) {
-            0 * sendEmail(_, _, _)
+            0 * saveMail(_, _, _)
         }
         projectService.configService = configService
 
@@ -451,7 +452,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 storageUntil: LocalDate.now(),
         )
         projectService.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmailToTicketSystem(_, _) >> { String emailSubject, String content ->
+            1 * saveErrorMailInNewTransaction(_, _) >> { String emailSubject, String content ->
                 assert emailSubject == "Could not automatically create analysisDir '${projectParams.dirAnalysis}' for Project '${projectParams.name}'."
                 assert content.contains(exceptionMessage)
             }
@@ -1183,7 +1184,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         then:
         project.dirAnalysis == analysisDirectory
-        0 * projectService.mailHelperService.sendEmailToTicketSystem(*_)
+        0 * projectService.mailHelperService.saveErrorMailInNewTransaction(*_)
 
         where:
         force << [true, false]
@@ -1205,7 +1206,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         then:
-        0 * projectService.mailHelperService.sendEmailToTicketSystem(*_)
+        0 * projectService.mailHelperService.saveErrorMailInNewTransaction(*_)
 
         then:
         thrown(OtpFileSystemException)
@@ -1226,7 +1227,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         then:
         project.dirAnalysis == newDirAnalysis
-        1 * projectService.mailHelperService.sendEmailToTicketSystem(_, _)
+        1 * projectService.mailHelperService.saveErrorMailInNewTransaction(_, _)
     }
 
     void "updateUnixGroup, should fail with UnixGroupIsInvalidException when it contains invalid chars"() {

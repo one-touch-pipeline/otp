@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.ngsdata.Sample
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.tracking.TicketService
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.administration.MailHelperService
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
@@ -75,7 +75,7 @@ be merged because of incompatible sequencing platforms or used chemistry.
             |${propertyOverview.join("\n\n")}
             |
             |Please be aware that OTP can currently only handle one bam file, therefore your current samples will not be aligned.
-            |Please contact ${mailHelperService.ticketSystemEmailAddress} if you wish the samples \
+            |Please contact ${mailHelperService.ticketSystemMailAddress} if you wish the samples \
 nevertheless to be merged or if you want to withdraw the old samples (would result in deletion of the old bam files), to align \
 the current ones.""".stripMargin()
     }

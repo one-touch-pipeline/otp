@@ -142,7 +142,12 @@ class TestConfigService extends ConfigService {
     @SuppressWarnings("ParameterCount")
     void fixClockTo(int year = 2000, int month = 1, int dayOfMonth = 1, int hour = 0, int minute = 0, int second = 0) {
         ZoneId zoneId = ZoneId.systemDefault()
-        fixedClock = Clock.fixed(Instant.from(ZonedDateTime.of(year, month, dayOfMonth, hour, minute, second, 0, zoneId)), zoneId)
+        fixClockTo(ZonedDateTime.of(year, month, dayOfMonth, hour, minute, second, 0, zoneId))
+    }
+
+    void fixClockTo(ZonedDateTime zonedDateTime) {
+        ZoneId zoneId = ZoneId.systemDefault()
+        fixedClock = Clock.fixed(Instant.from(zonedDateTime), zoneId)
     }
 
     String getTestingGroup() {

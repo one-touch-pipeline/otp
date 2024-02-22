@@ -159,7 +159,7 @@ class ScheduleUsersForDeactivationJob extends AbstractScheduledJob {
         |OTP on behalf of the ${otpServiceSalutation}
         |""".stripMargin()
 
-        mailHelperService.sendEmail(subject, body, authority.email)
+        mailHelperService.saveMail(subject, body, [authority.email])
 
         log.info("Sent deactivation mail to ${authority} concerning the following users: ${invalidUsers}")
     }
@@ -171,7 +171,7 @@ class ScheduleUsersForDeactivationJob extends AbstractScheduledJob {
         |${getMailBodyWithInvalidUsers(invalidUsers)}
         |""".stripMargin()
 
-        mailHelperService.sendEmailToTicketSystem(subject, body)
+        mailHelperService.saveMail(subject, body)
 
         log.info("Sent deactivation mail to service concerning the following users: ${invalidUsers}")
     }
@@ -213,7 +213,7 @@ class ScheduleUsersForDeactivationJob extends AbstractScheduledJob {
                     )
                 }.sort().join('\n\t- '),
         ])
-        mailHelperService.sendEmail(subject, body, recipient, ccs)
+        mailHelperService.saveMail(subject, body, [recipient], ccs)
     }
 
     ActionPlan buildActionPlan() {

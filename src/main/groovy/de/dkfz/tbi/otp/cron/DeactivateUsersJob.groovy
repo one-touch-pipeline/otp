@@ -110,7 +110,7 @@ class DeactivateUsersJob extends AbstractScheduledJob {
         }
         String subject = "[${prefix}] Clean up LDAP groups of expired user ${user}"
 
-        mailHelperService.sendEmailToTicketSystem(subject, body)
+        mailHelperService.saveMail(subject, body)
     }
 
     void notifyProjectAuthoritiesOfUsersProjects(User deactivatedUser) {
@@ -132,7 +132,7 @@ class DeactivateUsersJob extends AbstractScheduledJob {
                 supportTeamSalutation  : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
                 projects               : projects*.name.sort().join('\n\t- '),
         ])
-        mailHelperService.sendEmail(subject, body, recipient, ccs)
+        mailHelperService.saveMail(subject, body, [recipient], ccs)
         log.info("Sent mail to ${recipient} concerning the deactivation of ${deactivatedUser.username}")
     }
 

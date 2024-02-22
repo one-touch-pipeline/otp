@@ -48,7 +48,7 @@ import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.utils.exceptions.CopyingOfFileFailedException
 import de.dkfz.tbi.otp.utils.exceptions.MetadataFileImportException
 import de.dkfz.tbi.otp.workflow.WorkflowCreateState
@@ -230,7 +230,7 @@ class MetadataImportService {
 
             return targetFile.toString()
         } catch (Throwable t) {
-            mailHelperService.sendEmailToTicketSystem("Error: Copying of metadatafile ${source} failed",
+            mailHelperService.saveErrorMailInNewTransaction("Error: Copying of metadatafile ${source} failed",
                     "${t.localizedMessage}\n${t.cause}")
             throw new CopyingOfFileFailedException("Copying of metadata file ${source} failed", t)
         }
@@ -403,7 +403,7 @@ class MetadataImportService {
                 body += getNoThresholdSetLink(project) + "\n"
             }
 
-            mailHelperService.sendEmailToTicketSystem(subject.toString(), body)
+            mailHelperService.saveErrorMailInNewTransaction(subject.toString(), body)
         }
     }
 

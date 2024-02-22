@@ -35,7 +35,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.decider.alignment.*
 
@@ -1109,7 +1109,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
             mailCount * getMailContent(_, _) >> new UnalignableSeqTrackEmailCreator.MailContent()
         }
         decider.mailHelperService = Mock(MailHelperService) {
-            mailCount * sendEmailToTicketSystem(_, _)
+            mailCount * saveMail(_, _)
         }
     }
 

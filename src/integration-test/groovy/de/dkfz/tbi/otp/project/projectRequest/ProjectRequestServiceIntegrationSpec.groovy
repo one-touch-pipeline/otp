@@ -43,7 +43,7 @@ import de.dkfz.tbi.otp.project.additionalField.*
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.security.user.DepartmentService
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
 import java.time.LocalDate
@@ -164,7 +164,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 requester    : "${requester.realName} (${requester.username})",
                 teamSignature: emailSenderSalutation,
         ]) >> body
-        1 * projectRequestService.mailHelperService.sendEmail(subject, body, [requester.email], users*.email)
+        1 * projectRequestService.mailHelperService.saveMail(subject, body, [requester.email], users*.email)
         1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
         0 * _
     }
@@ -189,7 +189,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 link         : link,
                 teamSignature: emailSenderSalutation,
         ]) >> body
-        1 * projectRequestService.mailHelperService.sendEmail(subject, body, [requester.email], users*.email)
+        1 * projectRequestService.mailHelperService.saveMail(subject, body, [requester.email], users*.email)
         1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
         0 * _
     }
@@ -216,7 +216,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 link              : link,
                 teamSignature     : emailSenderSalutation,
         ]) >> body
-        1 * projectRequestService.mailHelperService.sendEmail(subject, body, authorities*.email, [requester.email])
+        1 * projectRequestService.mailHelperService.saveMail(subject, body, authorities*.email, [requester.email])
         1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
         0 * _
     }
@@ -244,7 +244,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 link              : link,
                 teamSignature     : emailSenderSalutation,
         ]) >> body
-        1 * projectRequestService.mailHelperService.sendEmail(subject, body, [requester.email], users*.email)
+        1 * projectRequestService.mailHelperService.saveMail(subject, body, [requester.email], users*.email)
         1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
         0 * _
     }
@@ -267,7 +267,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 projectRequestName: request.name,
                 teamSignature     : emailSenderSalutation,
         ]) >> body
-        1 * projectRequestService.mailHelperService.sendEmail(subject, body, [requester.email], users*.email)
+        1 * projectRequestService.mailHelperService.saveMail(subject, body, [requester.email], users*.email)
         1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
         0 * _
     }
@@ -297,11 +297,11 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         then:
         4 * projectRequestService.securityService.currentUser >> currentUser
         6 * projectRequestService.linkGenerator.link(_) >> link
-        7 * projectRequestService.mailHelperService.sendEmail(_, _, _, _) >> { arguments ->
+        7 * projectRequestService.mailHelperService.saveMail(_, _, _, _) >> { arguments ->
             final List<User> recipients = arguments.get(2)
             assert recipients.unique(false).size() == recipients.size()
         }
-        3 * projectRequestService.mailHelperService.sendEmail(_, _, _) >> { arguments ->
+        3 * projectRequestService.mailHelperService.saveMail(_, _, _) >> { arguments ->
             final List<User> recipients = arguments.get(2)
             assert recipients.unique(false).size() == recipients.size()
         }
@@ -335,7 +335,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 teamSignature     : emailSenderSalutation,
         ]) >> body
         1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
-        1 * projectRequestService.mailHelperService.sendEmail(subject, body, [requester.email], (usersThatNeedToApprove + usersThatAlreadyApproved)*.email)
+        1 * projectRequestService.mailHelperService.saveMail(subject, body, [requester.email], (usersThatNeedToApprove + usersThatAlreadyApproved)*.email)
         0 * _
     }
 
@@ -362,7 +362,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 teamSignature     : emailSenderSalutation,
         ]) >> body
         1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
-        1 * projectRequestService.mailHelperService.sendEmail(subject, body, expectedRecipients*.email)
+        1 * projectRequestService.mailHelperService.saveMail(subject, body, expectedRecipients*.email)
         0 * _
     }
 
@@ -385,7 +385,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 link         : link,
                 teamSignature: emailSenderSalutation,
         ]) >> body
-        1 * projectRequestService.mailHelperService.sendEmail(subject, body, [requester.email])
+        1 * projectRequestService.mailHelperService.saveMail(subject, body, [requester.email])
         1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
         0 * _
     }
@@ -407,7 +407,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 projectRequestName: request.name,
                 teamSignature     : emailSenderSalutation,
         ]) >> body
-        1 * projectRequestService.mailHelperService.sendEmail(subject, body, [requester.email])
+        1 * projectRequestService.mailHelperService.saveMail(subject, body, [requester.email])
         1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
         0 * _
     }
@@ -442,7 +442,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 teamSignature     : emailSenderSalutation,
         ]) >> body
         1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
-        1 * projectRequestService.mailHelperService.sendEmail(subject, body, users*.email, [requester.email])
+        1 * projectRequestService.mailHelperService.saveMail(subject, body, users*.email, [requester.email])
         0 * _
     }
 
@@ -489,7 +489,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 ticketingSystemMail       : ticketingSystemMail,
                 teamSignature             : emailSenderSalutation,
         ]) >> body
-        1 * projectRequestService.mailHelperService.sendEmail(subject, body, [], [])
+        1 * projectRequestService.mailHelperService.saveMail(subject, body, [], [])
     }
 
     void "sendCreatedEmail, should send a mail for project to all recipients and ccs"() {
@@ -532,7 +532,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 ticketingSystemMail       : ticketingSystemMail,
                 teamSignature             : emailSenderSalutation,
         ]) >> body
-        1 * projectRequestService.mailHelperService.sendEmail(subject, body, recipients, ccs)
+        1 * projectRequestService.mailHelperService.saveMail(subject, body, recipients, ccs)
         0 * _
     }
 

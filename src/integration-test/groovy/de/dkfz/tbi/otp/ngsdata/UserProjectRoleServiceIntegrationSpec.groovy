@@ -31,6 +31,7 @@ import spock.lang.*
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
@@ -100,7 +101,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         userProjectRoleService.userProjectRoleService = userProjectRoleService
 
         userProjectRoleService.mailHelperService = Mock(MailHelperService) {
-            getTicketSystemEmailAddress() >> EMAIL_TICKET_SYSTEM
+            getTicketSystemMailAddress() >> EMAIL_TICKET_SYSTEM
             getSenderName() >> EMAIL_SENDER_NAME
         }
 
@@ -245,7 +246,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        1 * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(
+        1 * userProjectRoleService.mailHelperService.saveMail(
                 """addToUnixGroup
                 |${requesterUserProjectRole.user.username}
                 |${formattedAction}
@@ -304,7 +305,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        1 * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(
+        1 * userProjectRoleService.mailHelperService.saveMail(
                 """${subject}addToUnixGroup
                 |${requesterUserProjectRole.user.username}
                 |${formattedAction}
@@ -353,7 +354,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        1 * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(_) { it.contains(projectList) }
+        1 * userProjectRoleService.mailHelperService.saveMail(_) { it.contains(projectList) }
     }
 
     @Unroll
@@ -389,7 +390,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        1 * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(
+        1 * userProjectRoleService.mailHelperService.saveMail(
                 """addToUnixGroup
                 |${switchedUser.username}
                 |${formattedAction}
@@ -460,19 +461,19 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         !userProjectRole.receivesNotifications
 
         and: "notification for unix group administration was sent"
-        removeMailCount * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(_ as String) { it.contains("REMOVE") }
+        removeMailCount * userProjectRoleService.mailHelperService.saveMail(_ as String) { it.contains("REMOVE") }
 
         and: "notification for user managers that a user has been enabled was sent"
-        notifyEnableUser * userProjectRoleService.mailHelperService.sendEmail({
+        notifyEnableUser * userProjectRoleService.mailHelperService.saveMail({
             it.contains("newProjectMember")
         }, _ as String, [requesterUserProjectRole.user.email, userProjectRole.user.email])
 
         and: "notification for user that he was disabled"
-        (enabledStatus ? 1 : 0) * userProjectRoleService.mailHelperService.sendEmail({
+        (enabledStatus ? 1 : 0) * userProjectRoleService.mailHelperService.saveMail({
             it.contains("deactivateUserIn")
         }, _ as String, [userProjectRole.user.email], [requesterUserProjectRole.user.email])
 
-        0 * userProjectRoleService.mailHelperService.sendEmail(*_)
+        0 * userProjectRoleService.mailHelperService.saveMail(*_)
 
         where:
         accountInLdap | accessToFiles | manageUsers | manageUsersAndDelegate | receivesNotifications | enabledStatus || removeMailCount | notifyEnableUser
@@ -714,13 +715,13 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then: "notification for unix group administration was sent"
-        expectedInvocations * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(_ as String, _ as String)
+        expectedInvocations * userProjectRoleService.mailHelperService.saveMail(_ as String, _ as String)
 
         and: "notification for user managers regarding file access was sent"
-        expectedInvocations * userProjectRoleService.mailHelperService.sendEmail(_ as String, _ as String, user.email, _ as List<String>)
+        expectedInvocations * userProjectRoleService.mailHelperService.saveMail(_ as String, _ as String, [user.email], _ as List<String>)
 
         and: "notification for user managers regarding new user was sent"
-        1 * userProjectRoleService.mailHelperService.sendEmail(_ as String, _ as String,
+        1 * userProjectRoleService.mailHelperService.saveMail(_ as String, _ as String,
                 [requesterUserProjectRole.user.email, user.email])
 
         and:
@@ -859,7 +860,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        1 * userProjectRoleService.mailHelperService.sendEmail(_ as String, _ as String, _ as List<String>)
+        1 * userProjectRoleService.mailHelperService.saveMail(_ as String, _ as String, _ as List<String>)
     }
 
     void "addExternalUserToProject, when user with same external email already exists, throws error"() {
@@ -939,7 +940,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        1 * userProjectRoleService.mailHelperService.sendEmail(
+        1 * userProjectRoleService.mailHelperService.saveMail(
                 _ as String,
                 _ as String,
                 recipients + [newUserProjectRole.user.email],
@@ -965,7 +966,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        1 * userProjectRoleService.mailHelperService.sendEmail(_ as String, _ as String,
+        1 * userProjectRoleService.mailHelperService.saveMail(_ as String, _ as String,
                 [uprToBeNotified.user.email, newUPR.user.email])
     }
 
@@ -1000,7 +1001,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        1 * userProjectRoleService.mailHelperService.sendEmail(
+        1 * userProjectRoleService.mailHelperService.saveMail(
                 expectedSubject,
                 expectedContent,
                 [executingUPR.user.email, newUPR.user.email],
@@ -1053,7 +1054,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        1 * userProjectRoleService.mailHelperService.sendEmail(_, _, [userProjectRoleToDeactivate.user.email], [piUserRole, manageUserRole]*.user*.email)
+        1 * userProjectRoleService.mailHelperService.saveMail(_, _, [userProjectRoleToDeactivate.user.email], [piUserRole, manageUserRole]*.user*.email)
     }
 
     void "notifyUsersAboutFileAccessChange, builds correct content"() {
@@ -1089,10 +1090,10 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        1 * userProjectRoleService.mailHelperService.sendEmail(
+        1 * userProjectRoleService.mailHelperService.saveMail(
                 'fileAccessChange\n' + projectName,
                 expectedBody,
-                userProjectRole.user.email,
+                [userProjectRole.user.email],
                 toBeNotified*.user*.email.sort(),
         )
     }
@@ -1148,7 +1149,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         then:
         userProjectRoles[0]."${flag}" == true
-        fileAccessMail * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(_ as String) { it.contains("ADD") }
+        fileAccessMail * userProjectRoleService.mailHelperService.saveMail(_ as String) { it.contains("ADD") }
 
         when:
         doWithAuth(OPERATOR) {
@@ -1158,8 +1159,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         then:
         userProjectRoles[0]."${flag}" == false
 
-        fileAccessMail * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(_ as String) { it.contains("REMOVE") }
-        _ * userProjectRoleService.mailHelperService.sendEmail(*_)
+        fileAccessMail * userProjectRoleService.mailHelperService.saveMail(_ as String) { it.contains("REMOVE") }
+        _ * userProjectRoleService.mailHelperService.saveMail(*_)
 
         where:
         flag                     | fileAccessMail
@@ -1268,8 +1269,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         then:
         userProjectRoles.accessToFiles.each { it == true }
-        1 * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(_ as String) { it.contains("ADD") }
-        1 * userProjectRoleService.mailHelperService.sendEmail({ it.contains("fileAccessChange") }, _ as String, _ as String, _ as List<String>)
+        1 * userProjectRoleService.mailHelperService.saveMail(_ as String) { it.contains("ADD") }
+        1 * userProjectRoleService.mailHelperService.saveMail({ it.contains("fileAccessChange") }, _ as String, _ as List<String>, _ as List<String>)
 
         when:
         doWithAuth(OPERATOR) {
@@ -1278,7 +1279,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         then:
         userProjectRoles.accessToFiles.each { it == false }
-        1 * userProjectRoleService.mailHelperService.sendEmailToTicketSystem(_ as String) { it.contains("REMOVE") }
+        1 * userProjectRoleService.mailHelperService.saveMail(_ as String) { it.contains("REMOVE") }
     }
 
     @Unroll

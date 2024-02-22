@@ -51,7 +51,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.LocalShellHelper
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.util.TimeFormats
 import de.dkfz.tbi.util.TimeUtils
@@ -129,7 +129,7 @@ class MetadataImportServiceIntegrationSpec extends Specification implements Doma
             2 * link(_) >> "link1" >> "link2"
         }
         service.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmailToTicketSystem(_, _) >> { String subject, String body ->
+            1 * saveErrorMailInNewTransaction(_, _) >> { String subject, String body ->
                 assert subject.contains("threshold")
                 assert subject.contains("category")
                 assert body.contains("link1")

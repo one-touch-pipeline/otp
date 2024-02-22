@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.tracking.PreparedNotification
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 class NotificationDigestServiceSpec extends Specification implements DomainFactoryCore, AlignmentPipelineFactory, DataTest {
@@ -94,7 +94,7 @@ class NotificationDigestServiceSpec extends Specification implements DomainFacto
                 userProjectRoleService : new UserProjectRoleService(),
                 processingOptionService: new ProcessingOptionService(),
                 mailHelperService      : Mock(MailHelperService) {
-                    mailCalls * sendEmail(_, _, _)
+                    mailCalls * saveMail(_, _, _)
                 },
         )
     }

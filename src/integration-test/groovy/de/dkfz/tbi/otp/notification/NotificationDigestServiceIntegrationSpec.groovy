@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightNotificationService
 import de.dkfz.tbi.otp.tracking.*
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
 @Rollback
@@ -117,7 +117,7 @@ class NotificationDigestServiceIntegrationSpec extends Specification implements 
                 },
                 processingOptionService: new ProcessingOptionService(),
                 mailHelperService: Mock(MailHelperService) {
-                    sendCalls * sendEmail(_, _, _)
+                    sendCalls * saveMail(_, _, _)
                 },
                 qcTrafficLightNotificationService: Mock(QcTrafficLightNotificationService),
                 ticketService: new TicketService(

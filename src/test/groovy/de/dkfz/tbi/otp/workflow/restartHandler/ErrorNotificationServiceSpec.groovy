@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobDetailService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.wes.*
@@ -68,7 +68,7 @@ class ErrorNotificationServiceSpec extends Specification
         service.sendMaintainer(step, e1, e2)
 
         then:
-        1 * service.mailHelperService.sendEmailToTicketSystem(_ as String, _ as String) >> { String subject, String content ->
+        1 * service.mailHelperService.saveErrorMailInNewTransaction(_ as String, _ as String) >> { String subject, String content ->
             assert subject.contains(step.workflowRun.priority.errorMailPrefix)
             assert subject.contains('RestartHandler')
             assert subject.contains(step.workflowRun.workflow.name)
@@ -98,7 +98,7 @@ class ErrorNotificationServiceSpec extends Specification
         1 * service.createArtefactsInformation(step) >> "artefact"
         1 * service.createWorkflowStepInformation(step) >> "workflow step"
         1 * service.createLogInformation(step) >> "log"
-        1 * service.mailHelperService.sendEmailToTicketSystem(_ as String, _ as String) >> { String subject, String content ->
+        1 * service.mailHelperService.saveErrorMailInNewTransaction(_ as String, _ as String) >> { String subject, String content ->
             assert subject.contains("header")
             assert content.contains('workflow full')
             assert content.contains('artefact')

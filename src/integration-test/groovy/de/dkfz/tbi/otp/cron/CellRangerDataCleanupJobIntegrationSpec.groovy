@@ -27,6 +27,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
@@ -157,7 +158,7 @@ class CellRangerDataCleanupJobIntegrationSpec extends Specification implements C
         cellRangerDataCleanupJob.sendNotificationEmail(project1, [crmwp1, crmwp2], type as CellRangerDataCleanupJob.InformationType)
 
         then:
-        1 * cellRangerDataCleanupJob.mailHelperService.sendEmail(
+        1 * cellRangerDataCleanupJob.mailHelperService.saveMail(
                 "${type.templateName} subject",
                 "${type.templateName} body",
                 [user.email, requester.email, requester2.email]
@@ -324,7 +325,7 @@ class CellRangerDataCleanupJobIntegrationSpec extends Specification implements C
         0 * cellRangerDataCleanupJob.cellRangerConfigurationService._
         1 * cellRangerDataCleanupJob.messageSourceService.createMessage("cellRanger.notification.failedDeletionInformation.subject", [:]) >> header
         1 * cellRangerDataCleanupJob.messageSourceService.createMessage("cellRanger.notification.failedDeletionInformation.body", _) >> body
-        1 * cellRangerDataCleanupJob.mailHelperService.sendEmailToTicketSystem(header, body)
+        1 * cellRangerDataCleanupJob.mailHelperService.saveMail(header, body)
     }
 
     void "deleteOfOldFailedWorkflows, if no old not finished mwp exist, do not call deleteMwp and do not send mail"() {
@@ -364,7 +365,7 @@ class CellRangerDataCleanupJobIntegrationSpec extends Specification implements C
         0 * cellRangerDataCleanupJob.cellRangerConfigurationService._
         0 * cellRangerDataCleanupJob.messageSourceService.createMessage("cellRanger.notification.failedDeletionInformation.subject", _)
         0 * cellRangerDataCleanupJob.messageSourceService.createMessage("cellRanger.notification.failedDeletionInformation.body", _)
-        0 * cellRangerDataCleanupJob.mailHelperService.sendEmailToTicketSystem(_, _)
+        0 * cellRangerDataCleanupJob.mailHelperService.saveErrorMailInNewTransaction(_, _)
     }
 
     void "notifyAndDeletion, uses results of getResultsToDelete"() {

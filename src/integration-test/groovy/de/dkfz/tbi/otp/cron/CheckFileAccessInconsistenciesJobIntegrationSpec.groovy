@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.administration.MailHelperService
 
 @Rollback
 @Integration
@@ -87,7 +87,7 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
                     0 * _
                 },
                 mailHelperService      : Mock(MailHelperService) {
-                    mailCount * sendEmailToTicketSystem(_, _) >> { String subject, String body ->
+                    mailCount * saveMail(_, _) >> { String subject, String body ->
                         assert subject.startsWith(CheckFileAccessInconsistenciesJob.SUBJECT)
                         assert body.contains(CheckFileAccessInconsistenciesJob.HEADER)
                         assert body.contains(USER_ACCOUNT)

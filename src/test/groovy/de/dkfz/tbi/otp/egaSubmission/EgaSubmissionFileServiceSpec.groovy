@@ -26,6 +26,7 @@ import spock.lang.Specification
 import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
@@ -352,7 +353,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         noExceptionThrown()
     }
 
-    void "sendEmail, when submission is given, then send email"() {
+    void "saveEmail, when submission is given, then send email"() {
         given:
         TestConfigService configService = new TestConfigService()
 
@@ -377,7 +378,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
             1 * createMessage(_, _) >> content
         }
         egaSubmissionFileService.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmailToTicketSystem(emailSubject, content, user.email)
+            1 * saveMail(emailSubject, content, [user.email])
         }
         egaSubmissionFileService.projectService = new ProjectService()
         egaSubmissionFileService.projectService.configService = configService
@@ -428,7 +429,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
             1 * createMessage(_, _) >> content
         }
         egaSubmissionFileService.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmailToTicketSystem(emailSubject, content, user.email)
+            1 * saveMail(emailSubject, content, [user.email])
         }
         egaSubmissionFileService.projectService = new ProjectService()
         egaSubmissionFileService.projectService.configService = configService

@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.administration.MailHelperService
 
 /**
  * Scheduled job to find and report users which can be resolved to an object in LDAP.
@@ -71,7 +71,7 @@ class UnknownLdapUsersJob extends AbstractScheduledJob {
     }
 
     void sendNotification(String body) {
-        mailHelperService.sendEmailToTicketSystem(MAIL_SUBJECT, body)
+        mailHelperService.saveMail(MAIL_SUBJECT, body)
     }
 
     List<User> getUsersThatCanNotBeFoundInLdap(List<User> users) {

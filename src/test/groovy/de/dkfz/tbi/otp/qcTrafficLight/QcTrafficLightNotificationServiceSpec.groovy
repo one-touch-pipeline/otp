@@ -36,7 +36,7 @@ import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.tracking.TicketService
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
 class QcTrafficLightNotificationServiceSpec extends Specification implements DataTest, IsRoddy {
@@ -145,7 +145,7 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
 
         service.mailHelperService = Mock(MailHelperService) {
             if (emails && !finalNotificationSent && automaticNotification && processingNotification && !ilseNumbers) {
-                1 * sendEmail(_, _, _) >> { String emailSubject, String content, List<String> receivers ->
+                1 * saveMail(_, _, _) >> { String emailSubject, String content, List<String> receivers ->
                     assert emailSubject == subjectHeader + HEADER
                     assert content == BODY
                     assert receivers == emails

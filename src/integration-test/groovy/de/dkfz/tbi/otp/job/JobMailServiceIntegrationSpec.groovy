@@ -37,7 +37,7 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.tracking.TicketService
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.administration.MailHelperService
 
 import java.nio.file.Path
 
@@ -112,7 +112,7 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
 
         JobMailService jobMailService = new JobMailService([
                 mailHelperService      : Mock(MailHelperService) {
-                    1 * sendEmailToTicketSystem(_, _) >> { String emailSubject, String content ->
+                    1 * saveErrorMailInNewTransaction(_, _) >> { String emailSubject, String content ->
                         assert emailSubject.startsWith(fasttrack ? "FASTTRACK ERROR:" : "NORMAL ERROR:")
                         assert emailSubject.contains("${step.jobExecutionPlan.name} ${step.processParameterObject.individual.displayName} ${step.processParameterObject.project.name}")
                         assert content.contains('\nWorkflow:\n')
@@ -126,6 +126,7 @@ class JobMailServiceIntegrationSpec extends Specification implements DomainFacto
                         failedClusterJobs.each {
                             assert content.contains("clusterId: ${it.clusterJobId}")
                         }
+                        return null
                     }
                     0 * _
                 },

@@ -27,6 +27,7 @@ import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 import org.springframework.security.access.prepost.PreAuthorize
 
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -194,7 +195,7 @@ class UserProjectRoleService {
 
         List<String> ccs = getUniqueProjectAuthoritiesAndUserManagers(project)*.email.sort()
 
-        mailHelperService.sendEmail(subject, body, user.email, ccs)
+        mailHelperService.saveMail(subject, body, [user.email], ccs)
     }
 
     private void notifyAdministration(UserProjectRole userProjectRole, OperatorAction action) {
@@ -256,9 +257,9 @@ class UserProjectRoleService {
                 scriptCommand         : scriptCommand,
         ])
 
-        mailHelperService.sendEmailToTicketSystem("${subjectPrefix}${subject}", body)
+        mailHelperService.saveMail("${subjectPrefix}${subject}", body)
         auditLogService.logAction(AuditLog.Action.PROJECT_USER_SENT_MAIL,
-                "Sent mail to ${mailHelperService.ticketSystemEmailAddress} to ${formattedAction} ${userProjectRole.user.username} ${conjunction} " +
+                "Sent mail to ${mailHelperService.ticketSystemMailAddress} to ${formattedAction} ${userProjectRole.user.username} ${conjunction} " +
                         "${userProjectRole.project.name} at the request of ${requester.username + switchedUserAnnotation}")
     }
 
@@ -278,7 +279,7 @@ class UserProjectRoleService {
         List<String> recipients = projectAuthoritiesAndUserManagers*.email.unique().sort() + [userProjectRole.user.email]
 
         if (recipients) {
-            mailHelperService.sendEmail(subject, body, recipients)
+            mailHelperService.saveMail(subject, body, recipients)
             auditLogService.logAction(AuditLog.Action.PROJECT_USER_SENT_MAIL,
                     "Notified project authorities (${projectAuthoritiesAndUserManagers*.realName.join(", ")}) and user (${userProjectRole.user.username})")
         }
@@ -286,7 +287,7 @@ class UserProjectRoleService {
 
     private void notifyProjectAuthoritiesAndDisabledUser(UserProjectRole userProjectRole) {
         List<User> projectAuthoritiesAndUserManagers = getUniqueProjectAuthoritiesAndUserManagers(userProjectRole.project)
-        List<String> recipient = [userProjectRole.user]*.email
+        List<String> recipients = [userProjectRole.user]*.email
         List<String> ccs = projectAuthoritiesAndUserManagers*.email.unique().sort()
 
         String subject = messageSourceService.createMessage("projectUser.notification.userDeactivated.subject", [
@@ -297,7 +298,7 @@ class UserProjectRoleService {
                 project              : userProjectRole.project.name,
                 supportTeamSalutation: processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
-        mailHelperService.sendEmail(subject, body, recipient, ccs)
+        mailHelperService.saveMail(subject, body, recipients, ccs)
     }
 
     private static String getFlagChangeLogMessage(String flagName, boolean newStatus, String username, String projectName) {

@@ -29,6 +29,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqService
@@ -170,10 +171,9 @@ class NotificationCreator {
             Project project = CollectionUtils.exactlyOneElement(seqTracks*.project.unique())
             Set<IlseSubmission> ilseSubmissions = seqTracks*.ilseSubmission.findAll() as Set
 
-            List<String> recipients = []
-            if (ticket.automaticNotification && project.processingNotification) {
-                recipients = userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([project])
-            }
+            List<String> recipients = (ticket.automaticNotification && project.processingNotification) ?
+                userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([project]) : []
+
             StringBuilder subject = new StringBuilder("[${ticketService.getPrefixedTicketNumber(ticket)}] ")
             if (!recipients) {
                 subject.append('TO BE SENT: ')
@@ -190,11 +190,7 @@ class NotificationCreator {
                 return
             }
 
-            if (recipients) {
-                mailHelperService.sendEmail(subject.toString(), content, recipients)
-            } else {
-                mailHelperService.sendEmailToTicketSystem(subject.toString(), content)
-            }
+            mailHelperService.saveMail(subject.toString(), content, recipients)
         }
     }
 
@@ -223,7 +219,7 @@ class NotificationCreator {
         content.append(createNotificationTextService.messageSourceService.createMessage("notification.import.detail.link"))
         content.append(createLinksToImportDetailPage(ticket))
 
-        mailHelperService.sendEmailToTicketSystem(subject.toString(), content.toString())
+        mailHelperService.saveMail(subject.toString(), content.toString())
     }
 
     private StringBuilder createLinksToImportDetailPage(Ticket ticket) {
@@ -267,7 +263,7 @@ class NotificationCreator {
         content += pathsToDelete.collect { "rm -f ${it}" }.join("\n")
 
         if (pathsToDelete) {
-            mailHelperService.sendEmailToTicketSystem(subject, content)
+            mailHelperService.saveMail(subject, content)
         }
     }
 
@@ -476,7 +472,7 @@ class NotificationCreator {
                 message,
         ].join('\n')
 
-        mailHelperService.sendEmailToTicketSystem(subject, body)
+        mailHelperService.saveMail(subject, body)
     }
 
     void sendWorkflowCreateErrorMail(MetaDataFile metaDataFile, Throwable throwable) {
@@ -507,7 +503,7 @@ class NotificationCreator {
                 "with the following seqTrack ids as input for the variable seqTracksIdList in the script: ",
                 seqTrackIds.join(', '),
         ].join('\n')
-        mailHelperService.sendEmailToTicketSystem(subject, body)
+        mailHelperService.saveErrorMailInNewTransaction(subject, body)
     }
 
     void sendBamImportWorkflowCreateSuccessMail(Long importId, Instant instant, String message) {
@@ -519,7 +515,7 @@ class NotificationCreator {
                 "",
                 message,
         ].join('\n')
-        mailHelperService.sendEmailToTicketSystem(subject, body)
+        mailHelperService.saveMail(subject, body)
     }
 
     void sendBamImportWorkflowCreateErrorMail(Long importId, Instant instant, Throwable throwable) {
@@ -541,6 +537,6 @@ class NotificationCreator {
                 "To delete the import, please ask the OTP Maintainer and provide them the following bam ids:",
                 bamIds.join(', '),
         ].join('\n')
-        mailHelperService.sendEmailToTicketSystem(subject, body)
+        mailHelperService.saveErrorMailInNewTransaction(subject, body)
     }
 }

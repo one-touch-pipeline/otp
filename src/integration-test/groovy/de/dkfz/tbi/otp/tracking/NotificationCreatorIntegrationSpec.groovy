@@ -29,6 +29,7 @@ import spock.lang.Unroll
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.AbstractIntegrationSpecWithoutRollbackAnnotation
 import de.dkfz.tbi.otp.TestMessageSourceService
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqService
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingService
@@ -293,10 +294,10 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             String expectedEmailSubjectCustomer = "[${prefix}#${ticket.ticketNumber}] TO BE SENT: ${seqTrack.project.name} sequencing data installed"
 
             notificationCreator.mailHelperService = Mock(MailHelperService) {
-                1 * sendEmailToTicketSystem(expectedEmailSubjectOperator, _) >> { String emailSubject, String content ->
+                1 * saveMail(expectedEmailSubjectOperator, _) >> { String emailSubject, String content ->
                     assert content.contains(expectedStatus.toString())
                 }
-                1 * sendEmailToTicketSystem(expectedEmailSubjectCustomer, _)
+                1 * saveMail(expectedEmailSubjectCustomer, _, [])
                 0 * _
             }
         }
@@ -392,11 +393,12 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             String expectedEmailSubjectCustomer2 = expectedEmailSubjectCustomer + Ticket.ProcessingStep.ALIGNMENT.notificationSubject
 
             notificationCreator.mailHelperService = Mock(MailHelperService) {
-                1 * sendEmailToTicketSystem(expectedEmailSubjectOperator, _) >> { String emailSubject, String content ->
+                1 * saveMail(expectedEmailSubjectOperator, _) >> { String emailSubject, String content ->
                     assert content.contains(expectedStatus.toString())
+                    return null
                 }
-                1 * sendEmailToTicketSystem(expectedEmailSubjectCustomer1, notificationText1)
-                1 * sendEmailToTicketSystem(expectedEmailSubjectCustomer2, notificationText2)
+                1 * saveMail(expectedEmailSubjectCustomer1, notificationText1, [])
+                1 * saveMail(expectedEmailSubjectCustomer2, notificationText2, [])
                 0 * _
             }
 
@@ -601,13 +603,11 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             String content = HelperUtils.randomEmail
 
             notificationCreator.mailHelperService = Mock(MailHelperService) {
-                if (recipients.isEmpty() && callCount == 1) {
-                    1 * sendEmailToTicketSystem(finalSubject, content)
-                } else if (callCount == 1) {
-                    1 * sendEmail(finalSubject, content, recipients)
+                if (callCount == 1) {
+                    1 * saveMail(finalSubject, content, recipients)
                 }
-                0 * sendEmailToTicketSystem(_, _)
-                0 * sendEmail(_, _, _)
+                0 * saveMail(_, _)
+                0 * saveMail(_, _, _)
             }
 
             notificationCreator.createNotificationTextService = Mock(CreateNotificationTextService) {
@@ -661,11 +661,11 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             DomainFactory.createProcessingOptionForTicketPrefix(prefix)
 
             notificationCreator.mailHelperService = Mock(MailHelperService) {
-                1 * sendEmail("[${prefix}#${ticket.ticketNumber}] Project_X1 sequencing data installed",
+                1 * saveMail("[${prefix}#${ticket.ticketNumber}] Project_X1 sequencing data installed",
                         'Project_X1', ['project1@test.com'])
-                1 * sendEmail("[${prefix}#${ticket.ticketNumber}] Project_X2 sequencing data installed",
+                1 * saveMail("[${prefix}#${ticket.ticketNumber}] Project_X2 sequencing data installed",
                         'Project_X2', ['project2@test.com'])
-                0 * sendEmail(_, _, _)
+                0 * saveMail(_, _, _)
             }
             notificationCreator.createNotificationTextService = Mock(CreateNotificationTextService) {
                 notification(ticket, _, Ticket.ProcessingStep.INSTALLATION, _) >> { Ticket ticket1, ProcessingStatus status1,
@@ -707,7 +707,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             DomainFactory.createProcessingOptionForTicketPrefix(prefix)
 
             notificationCreator.mailHelperService = Mock(MailHelperService) {
-                0 * sendEmail(_, _, _)
+                0 * saveMail(_, _, _)
             }
         }
 
@@ -1644,7 +1644,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             String prefix = ticketService.getPrefixedTicketNumber(ticket)
             String expectedHeader = "${prefix} Final Processing Status Update"
             notificationCreator.mailHelperService = Mock(MailHelperService) {
-                1 * sendEmailToTicketSystem(expectedHeader, _)
+                1 * saveMail(expectedHeader, _)
             }
         }
 
@@ -1689,7 +1689,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             ].collect { "rm -f ${it}" }.join("\n")
 
             notificationCreator.mailHelperService = Mock(MailHelperService) {
-                1 * sendEmailToTicketSystem(expectedHeader) { it.endsWith(expectedEnd) }
+                1 * saveMail(expectedHeader) { it.endsWith(expectedEnd) }
             }
         }
 
@@ -1719,7 +1719,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstance, filePathSource: "${blacklisted}")
 
             notificationCreator.mailHelperService = Mock(MailHelperService) {
-                0 * sendEmail(_, _, _)
+                0 * saveMail(_, _, _)
             }
         }
 

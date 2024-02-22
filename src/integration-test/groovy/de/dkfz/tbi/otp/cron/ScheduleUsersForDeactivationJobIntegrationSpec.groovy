@@ -38,7 +38,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
 import java.time.*
@@ -158,8 +158,8 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
                     _ * getTimeZoneId() >> { ZoneId.systemDefault() }
                 },
                 mailHelperService: Mock(MailHelperService) {
-                    2 * sendEmail(_, _, _) >> { }
-                    1 * sendEmailToTicketSystem(_, _) >> { }
+                    2 * saveMail(_, _, _) >> { }
+                    1 * saveMail(_, _) >> { }
                 },
         ])
         Map<User, Set<UserProjectRole>> map = [
@@ -199,8 +199,8 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
                 (projectAuthorityA): [projects[0], projects[1], projects[2]],
                 (projectAuthorityB): [projects[1]],
         ]
-        1 * job.mailHelperService.sendEmail(_, _, projectAuthorityA.email, [user.email]) >> { }
-        1 * job.mailHelperService.sendEmail(_, _, projectAuthorityB.email, [user.email]) >> { }
+        1 * job.mailHelperService.saveMail(_, _, [projectAuthorityA.email], [user.email]) >> { }
+        1 * job.mailHelperService.saveMail(_, _, [projectAuthorityB.email], [user.email]) >> { }
     }
 
     void "buildActionPlan, correctly groups users"() {
@@ -291,8 +291,8 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
                     _ * getTimeZoneId() >> { ZoneId.systemDefault() }
                 },
                 mailHelperService      : Mock(MailHelperService) {
-                    1 * sendEmail(_, _, _) >> { }
-                    1 * sendEmailToTicketSystem(_, _) >> { }
+                    1 * saveMail(_, _, _) >> { }
+                    1 * saveMail(_, _) >> { }
                 },
                 userService            : new UserService(),
                 userProjectRoleService : new UserProjectRoleService(),

@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.util.spreadsheet.*
 
@@ -294,7 +294,7 @@ class EgaSubmissionFileService {
                 numberOfFiles: submission.rawSequenceFilesToSubmit.size() + submission.bamFilesToSubmit.size(),
                 path         : basePath,
         ])
-        mailHelperService.sendEmailToTicketSystem(subject, content, user.email)
+        mailHelperService.saveMail(subject, content, [user.email])
     }
 
     void prepareSubmissionForUpload(EgaSubmission submission) {

@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.administration.MailHelperService
 
 @Rollback
 @Integration
@@ -101,7 +101,7 @@ class UnknownLdapUsersJobIntegrationSpec extends Specification implements Domain
                     0 * _
                 },
                 mailHelperService      : Mock(MailHelperService) {
-                    1 * sendEmailToTicketSystem(_) { usersToNotBeFound.every { User user -> it.contains(user.username) } }
+                    1 * saveMail(_) { usersToNotBeFound.every { User user -> it.contains(user.username) } }
                 },
         ])
 
@@ -121,7 +121,7 @@ class UnknownLdapUsersJobIntegrationSpec extends Specification implements Domain
                     0 * _
                 },
                 mailHelperService      : Mock(MailHelperService) {
-                    0 * sendEmailToTicketSystem(_, _)
+                    0 * saveErrorMailInNewTransaction(_, _)
                 },
         ])
 

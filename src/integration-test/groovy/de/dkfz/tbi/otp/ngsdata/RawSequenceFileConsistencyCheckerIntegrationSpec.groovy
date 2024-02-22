@@ -25,7 +25,7 @@ import de.dkfz.tbi.otp.AbstractIntegrationSpecWithoutRollbackAnnotation
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 
@@ -132,7 +132,7 @@ class RawSequenceFileConsistencyCheckerIntegrationSpec extends AbstractIntegrati
             1 * isActive() >> true
         }
         consistencyChecker.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmailToTicketSystem('Error: RawSequenceFileConsistencyChecker.setFileExistsForAllDataFiles() failed', _) >> { String emailSubject, String content ->
+            1 * saveErrorMailInNewTransaction('Error: RawSequenceFileConsistencyChecker.setFileExistsForAllDataFiles() failed', _) >> { String emailSubject, String content ->
                 assert content.contains("Error while saving datafile with id: ${rawSequenceFile.id}")
                 assert content.contains("on field 'mateNumber': rejected value [null]")
             }

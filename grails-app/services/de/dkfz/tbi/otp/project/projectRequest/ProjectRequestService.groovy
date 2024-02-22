@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ProjectSelectionService
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -236,7 +237,7 @@ class ProjectRequestService {
 
     void sendSubmitEmail(ProjectRequest projectRequest) {
         User requester = projectRequest.requester
-        List<String> recipient = [requester.email]
+        List<String> recipients = [requester.email]
         List<String> ccs = projectRequest.state.usersThatNeedToApprove*.email
         String subject = messageSourceService.createMessage("notification.projectRequest.submit.subject", [
                 projectRequestName: projectRequest.name,
@@ -247,7 +248,7 @@ class ProjectRequestService {
                 requester    : "${requester.realName} (${requester.username})",
                 teamSignature: processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
-        mailHelperService.sendEmail(subject, body, recipient, ccs)
+        mailHelperService.saveMail(subject, body, recipients, ccs)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -298,7 +299,7 @@ class ProjectRequestService {
 
     void sendOperatorRejectEmail(ProjectRequest projectRequest, String rejectComment) {
         User requester = projectRequest.requester
-        List<String> recipient = [requester.email]
+        List<String> recipients = [requester.email]
         List<String> ccs = projectRequest.state.usersThatNeedToApprove*.email
         String subject = messageSourceService.createMessage("notification.projectRequest.operatorReject.subject", [
                 projectRequestName: projectRequest.name,
@@ -310,7 +311,7 @@ class ProjectRequestService {
                 link         : getProjectRequestLinkWithoutParams(projectRequest),
                 teamSignature: processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
-        mailHelperService.sendEmail(subject, body, recipient, ccs)
+        mailHelperService.saveMail(subject, body, recipients, ccs)
     }
 
     void sendPassOnEmail(ProjectRequest projectRequest) {
@@ -330,12 +331,12 @@ class ProjectRequestService {
                 link              : getProjectRequestLinkWithoutParams(projectRequest),
                 teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
-        mailHelperService.sendEmail(subject, body, recipients, ccs)
+        mailHelperService.saveMail(subject, body, recipients, ccs)
     }
 
     void sendPiRejectEmail(ProjectRequest projectRequest, String rejectComment) {
         User requester = projectRequest.requester
-        List<String> recipient = [requester.email]
+        List<String> recipients = [requester.email]
         List<String> ccs = (ProjectRequestPersistentStateService.getAllProjectRequestAuthorities(projectRequest.state)*.email as List).unique()
         String subject = messageSourceService.createMessage("notification.projectRequest.piReject.subject", [
                 projectRequestName: projectRequest.name,
@@ -349,12 +350,12 @@ class ProjectRequestService {
                 link              : getProjectRequestLinkWithoutParams(projectRequest),
                 teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
-        mailHelperService.sendEmail(subject, body, recipient, ccs)
+        mailHelperService.saveMail(subject, body, recipients, ccs)
     }
 
     void sendApprovedEmail(ProjectRequest projectRequest) {
         User requester = projectRequest.requester
-        List<String> recipient = [requester.email]
+        List<String> recipients = [requester.email]
         List<String> ccs = (ProjectRequestPersistentStateService.getAllProjectRequestAuthorities(projectRequest.state)*.email as List).unique()
         String subject = messageSourceService.createMessage("notification.projectRequest.approved.subject", [
                 projectRequestName: projectRequest.name,
@@ -365,13 +366,13 @@ class ProjectRequestService {
                 projectRequestName: projectRequest.name,
                 teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
-        mailHelperService.sendEmail(subject, body, recipient, ccs)
+        mailHelperService.saveMail(subject, body, recipients, ccs)
     }
 
     void sendPartiallyApprovedEmail(ProjectRequest projectRequest) {
         List<User> allProjectAuthorities = ProjectRequestPersistentStateService.getAllProjectRequestAuthorities(projectRequest.state)
         User requester = projectRequest.requester
-        List<String> recipient = [requester.email]
+        List<String> recipients = [requester.email]
         List<String> ccs = allProjectAuthorities*.email
         String subject = messageSourceService.createMessage("notification.projectRequest.partiallyApproved.subject", [
                 projectRequestName: projectRequest.name,
@@ -383,7 +384,7 @@ class ProjectRequestService {
                 projectAuthority  : securityService.currentUser.username,
                 teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
-        mailHelperService.sendEmail(subject, body, recipient, ccs)
+        mailHelperService.saveMail(subject, body, recipients, ccs)
     }
 
     Set<ProjectRequest> getAllApproved() {
@@ -411,12 +412,12 @@ class ProjectRequestService {
                 deletingUser      : securityService.currentUser,
                 teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
-        mailHelperService.sendEmail(subject, body, recipients)
+        mailHelperService.saveMail(subject, body, recipients)
     }
 
     void sendDraftCreateEmail(ProjectRequest projectRequest) {
         User requester = projectRequest.requester
-        List<String> recipient = [requester.email]
+        List<String> recipients = [requester.email]
         String subject = messageSourceService.createMessage("notification.projectRequest.draft.subject", [
                 projectRequestName: projectRequest.name,
                 projectRequestId  : projectRequest.id,
@@ -426,12 +427,12 @@ class ProjectRequestService {
                 link         : getProjectRequestLinkWithoutParams(projectRequest),
                 teamSignature: processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
-        mailHelperService.sendEmail(subject, body, recipient)
+        mailHelperService.saveMail(subject, body, recipients)
     }
 
     void sendDraftDeleteEmail(ProjectRequest projectRequest) {
         User requester = projectRequest.requester
-        List<String> recipient = [requester.email]
+        List<String> recipients = [requester.email]
         String subject = messageSourceService.createMessage("notification.projectRequest.draftDelete.subject", [
                 projectRequestName: projectRequest.name,
                 projectRequestId  : projectRequest.id,
@@ -441,12 +442,12 @@ class ProjectRequestService {
                 projectRequestName: projectRequest.name,
                 teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
-        mailHelperService.sendEmail(subject, body, recipient)
+        mailHelperService.saveMail(subject, body, recipients)
     }
 
     void sendPiEditedEmail(ProjectRequest projectRequest) {
         List<User> allProjectAuthorities = ProjectRequestPersistentStateService.getAllProjectRequestAuthorities(projectRequest.state) as List
-        List<String> recipient = allProjectAuthorities*.email
+        List<String> recipients = allProjectAuthorities*.email
         List<String> ccs = [projectRequest.requester.email]
         String subject = messageSourceService.createMessage("notification.projectRequest.piEdit.subject", [
                 projectRequestName: projectRequest.name,
@@ -459,10 +460,10 @@ class ProjectRequestService {
                 link              : getProjectRequestLinkWithoutParams(projectRequest),
                 teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
-        mailHelperService.sendEmail(subject, body, recipient, ccs)
+        mailHelperService.saveMail(subject, body, recipients, ccs)
     }
 
-    void sendCreatedEmail(ProjectRequest projectRequest, Project project, List<String> recipient, List<String> ccs) {
+    void sendCreatedEmail(ProjectRequest projectRequest, Project project, List<String> recipients, List<String> ccs) {
         String sampleOverviewLink = linkGenerator.link(
                 controller: "sampleOverview",
                 action: "index",
@@ -500,7 +501,7 @@ class ProjectRequestService {
                 ticketingSystemMail       : processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_TICKET_SYSTEM),
                 teamSignature             : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
-        mailHelperService.sendEmail(subject, body, recipient, ccs)
+        mailHelperService.saveMail(subject, body, recipients, ccs)
     }
 
     private String getProjectRequestLinkWithoutParams(ProjectRequest projectRequest) {

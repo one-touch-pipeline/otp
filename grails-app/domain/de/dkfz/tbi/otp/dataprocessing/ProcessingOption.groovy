@@ -402,6 +402,14 @@ class ProcessingOption implements Entity {
                 "Additional Information, that is used in the project creation email",
                 Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
+        EMAIL_FOOTER(
+                "Footer for all emails (plain text). The text is added at the end of the mail to customers, if defined.",
+                Necessity.OPTIONAL, "", TypeValidators.MULTI_LINE_TEXT
+        ),
+        DELETE_OLD_MAILS_DELAY(
+                "Delay in days after which old mails are deleted",
+                Necessity.OPTIONAL, "30", TypeValidators.POSITIVE_NUMBER
+        ),
 
         NOTIFICATION_TEMPLATE_SEQ_CENTER_NOTE(
                 "Notes from the sequencing center that is sent with every notification mail",

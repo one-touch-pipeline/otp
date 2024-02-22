@@ -28,7 +28,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.tracking.DeNbiKpiService
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.administration.MailHelperService
 
 import java.time.ZoneId
 
@@ -57,7 +57,7 @@ class GenerateAndSendKPIsForNBIIntegrationSpec extends Specification {
     void "wrappedExecute, sends mail with list of all required workflows when job runs"() {
         when:
         job.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmailToTicketSystem(_, _)  >> { String subject, String body ->
+            1 * saveMail(_, _)  >> { String subject, String body ->
                 assert subject.startsWith("KPIs for de.NBI - ")
                 assert body.contains("Workflow: PanCan")
                 assert body.contains("Workflow: Rna alignment")

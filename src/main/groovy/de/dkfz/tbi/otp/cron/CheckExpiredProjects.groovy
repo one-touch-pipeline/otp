@@ -72,7 +72,7 @@ class CheckExpiredProjects extends AbstractScheduledJob {
             String content = messageSourceService.createMessage("notification.cron.expiredProjects.body", [
                     expiredProjects: expProjectsTable.join('\n'),
             ])
-            mailHelperService.sendEmailToTicketSystem(subject, content)
+            mailHelperService.saveMail(subject, content)
         }
     }
 }

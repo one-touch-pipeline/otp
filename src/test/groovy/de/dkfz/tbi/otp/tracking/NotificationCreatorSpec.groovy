@@ -28,6 +28,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
@@ -173,7 +174,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
 """
 
         notificationCreator.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmailToTicketSystem(_, _) >> { String emailSubject, String content ->
+            1 * saveMail(_, _) >> { String emailSubject, String content ->
                 assert "${ticketPrefix}#${ticket.ticketNumber} Processing Status Update".toString() == emailSubject
                 assert content.startsWith(expectedContent)
             }
@@ -190,7 +191,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
         given:
         Ticket ticket = createTicket()
         notificationCreator.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmailToTicketSystem("${ticketPrefix}#${ticket.ticketNumber} Final Processing Status Update", _)
+            1 * saveMail("${ticketPrefix}#${ticket.ticketNumber} Final Processing Status Update", _)
         }
 
         expect:
@@ -240,11 +241,12 @@ ILSe 5678, runA, lane 1, ${sampleText}
             assert templateName.contains("notification.import.detail.link")
             return "Details about metadata import can be found"
         }
-        1 * notificationCreator.mailHelperService.sendEmailToTicketSystem(_, _) >> { String subject, String content ->
+        1 * notificationCreator.mailHelperService.saveMail(_, _) >> { String subject, String content ->
             assert content.contains(ticket.ticketNumber)
             fastqImportInstances.each {
                 assert content.contains(pathMetadataImportDetail + "/${it.id}")
             }
+            return null
         }
     }
 
@@ -263,7 +265,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
         notificationCreator.sendWorkflowCreateSuccessMail(metaDataFile, message)
 
         then:
-        1 * notificationCreator.mailHelperService.sendEmailToTicketSystem(_, _) >> { String emailSubject, String content ->
+        1 * notificationCreator.mailHelperService.saveMail(_, _) >> { String emailSubject, String content ->
             assert emailSubject.startsWith("[${ticketPrefix}#${ticket.ticketNumber}]")
             assert emailSubject.contains("Workflow created successfully for ${metaDataFile.fileNameSource}")
             assert content.contains("The workflow creation succeeded:")
@@ -291,7 +293,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
         notificationCreator.sendWorkflowCreateErrorMail(metaDataFile, new HibernateException("Something happened"))
 
         then:
-        1 * notificationCreator.mailHelperService.sendEmailToTicketSystem(_, _) >> { String emailSubject, String content ->
+        1 * notificationCreator.mailHelperService.saveErrorMailInNewTransaction(_, _) >> { String emailSubject, String content ->
             assert emailSubject.startsWith("[${ticketPrefix}#${ticket.ticketNumber}]")
             assert emailSubject.contains("Failed to create workflows for ${metaDataFile.fileNameSource}")
             assert content.contains("The workflow creation failed:")
@@ -302,6 +304,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
             rawSequenceFiles*.seqTrack.unique().each {
                 assert content.contains(it.id.toString())
             }
+            return null
         }
     }
 

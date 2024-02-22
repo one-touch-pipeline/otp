@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.Entity
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.decider.alignment.*
 
@@ -287,7 +287,7 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
 
                 deciderResult.warnings << "skip ${group}, since existing MergingWorkPackage and Lanes do not match\n${nonMatchingString}".toString()
                 UnalignableSeqTrackEmailCreator.MailContent content = unalignableSeqTrackEmailCreator.getMailContent(workPackage, seqTrack)
-                mailHelperService.sendEmailToTicketSystem(content.subject, content.body)
+                mailHelperService.saveMail(content.subject, content.body)
                 return deciderResult
             }
         } else {

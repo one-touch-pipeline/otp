@@ -29,6 +29,7 @@ import spock.lang.*
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
@@ -1737,7 +1738,7 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         Map data = setupForCopyMetaDataFile('something')
 
         data.service.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmailToTicketSystem(_, _)
+            1 * saveErrorMailInNewTransaction(_, _)
         }
         data.service.fileService = Mock(FileService) {
             1 * createFileWithContent(_, _) >> {

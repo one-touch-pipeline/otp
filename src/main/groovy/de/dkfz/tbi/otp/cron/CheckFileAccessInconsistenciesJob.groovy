@@ -65,7 +65,7 @@ class CheckFileAccessInconsistenciesJob extends AbstractScheduledJob {
     void wrappedExecute() {
         String mailContent = createMailContent()
         if (mailContent) {
-            mailHelperService.sendEmailToTicketSystem(SUBJECT, mailContent)
+            mailHelperService.saveMail(SUBJECT, mailContent)
         }
     }
 

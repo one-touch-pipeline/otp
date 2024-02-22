@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.otp.utils.exceptions.InformationTypeException
 import de.dkfz.tbi.util.TimeFormats
@@ -109,7 +109,7 @@ class CellRangerDataCleanupJob extends AbstractScheduledJob {
             cellRangerConfigurationService.deleteMwps(mwps)
             String subject = messageSourceService.createMessage("cellRanger.notification.failedDeletionInformation.subject", [:])
             String content = buildDeletionForFailedMergingWorkPackageMessageBody(mwps)
-            mailHelperService.sendEmailToTicketSystem(subject, content)
+            mailHelperService.saveMail(subject, content)
         }
     }
 
@@ -163,7 +163,7 @@ class CellRangerDataCleanupJob extends AbstractScheduledJob {
             default:
                 throw new InformationTypeException("Invalid state ${informationType} for informationType")
         }
-        mailHelperService.sendEmail(subject, content, (userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([project]) +
+        mailHelperService.saveMail(subject, content, (userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([project]) +
                 cellRangerMwps*.requester*.email).unique())
     }
 

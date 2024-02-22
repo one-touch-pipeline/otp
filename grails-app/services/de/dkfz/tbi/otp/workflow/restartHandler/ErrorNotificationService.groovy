@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJobDetailService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.tracking.TicketService
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.utils.StackTraceUtils
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.wes.WesLog
@@ -75,7 +75,7 @@ class ErrorNotificationService {
                 StackTraceUtils.getStackTrace(exceptionInExceptionHandling),
         ].join('\n')
 
-        mailHelperService.sendEmailToTicketSystem(subject, body)
+        mailHelperService.saveErrorMailInNewTransaction(subject, body)
     }
 
     void send(WorkflowStep workflowStep, WorkflowJobErrorDefinition.Action action, String checkText, List<JobErrorDefinitionWithLogWithIdentifier> matches) {
@@ -91,7 +91,7 @@ class ErrorNotificationService {
                 createWorkflowStepInformation(workflowStep),
                 createLogInformation(workflowStep),
         ].join('\n')
-        mailHelperService.sendEmailToTicketSystem(subject, body)
+        mailHelperService.saveErrorMailInNewTransaction(subject, body)
     }
 
     protected String createSubject(WorkflowStep workflowStep, WorkflowJobErrorDefinition.Action action) {
