@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
+import de.dkfz.tbi.otp.workflowExecution.wes.WesRun
 
 @Rollback
 @Integration
@@ -80,17 +81,19 @@ class WorkflowDeletionServiceIntegrationSpec extends Specification implements Wo
     void "deleteWorkflowStep, should delete a WorkflowStep and all its dependencies if it is last in list"() {
         given:
         WorkflowRunInputArtefact wria = createWorkflowArtefactAndRun()
-        WorkflowStep LastWorkflowStep = createWorkflowSteps(wria.workflowRun).last()
+        WorkflowStep lastWorkflowStep = createWorkflowSteps(wria.workflowRun).last()
+        createWesRun([workflowStep: lastWorkflowStep])
 
         when:
-        workflowDeletionService.deleteWorkflowStep(LastWorkflowStep)
+        workflowDeletionService.deleteWorkflowStep(lastWorkflowStep)
 
         then:
-        !WorkflowStep.get(LastWorkflowStep.id)
+        !WorkflowStep.get(lastWorkflowStep.id)
         WorkflowStep.count == 2
         ClusterJob.count == 4
         WorkflowLog.count == 4
         WorkflowError.count == 1
+        WesRun.count == 0
     }
 
     void "deleteWorkflowStep, should throw IllegalArgumentException if a WorkflowStep has already been restarted"() {

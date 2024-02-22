@@ -74,6 +74,10 @@ class WesRun implements Entity {
         wesRunLog nullable: true
     }
 
+    static belongsTo = [
+            workflowStep: WorkflowStep,
+    ]
+
     static Closure mapping = {
         workflowStep index: 'wes_run_workflow_step_idx'
         wesRunLog index: 'wes_run_wes_run_log_idx'

@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.utils.exceptions.OtpAssertRuntimeException
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
+import de.dkfz.tbi.otp.workflowExecution.wes.WesRun
 
 @CompileDynamic
 @Transactional
@@ -79,10 +80,16 @@ class WorkflowDeletionService {
             it.delete(flush: true)
         }
         WorkflowError error = workflowStep.workflowError
-
+        WesRun.findAllByWorkflowStep(workflowStep).forEach { deleteWesRun(it) }
         workflowStep.delete(flush: true)
 
         deleteWorkflowError(error)
+    }
+
+    void deleteWesRun(WesRun wesRun) {
+        if (wesRun) {
+            wesRun.delete(flush: true)
+        }
     }
 
     void deleteWorkflowError(WorkflowError workflowError) {
