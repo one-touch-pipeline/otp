@@ -87,10 +87,10 @@ class ExternalWorkflowConfigSelector implements Comparable<ExternalWorkflowConfi
 
     static constraints = {
         name unique: true, blank: false, validator: { val, obj ->
-            if (obj.selectorType == SelectorType.DEFAULT_VALUES && !val.startsWith("Default values")) {
+            if (obj.selectorType == SelectorType.DEFAULT_VALUES && !val.startsWith("Default")) {
                 return "default"
             }
-            if (obj.selectorType != SelectorType.DEFAULT_VALUES && val.startsWith("Default values")) {
+            if (obj.selectorType != SelectorType.DEFAULT_VALUES && val.startsWith("Default")) {
                 return "no.default"
             }
         }

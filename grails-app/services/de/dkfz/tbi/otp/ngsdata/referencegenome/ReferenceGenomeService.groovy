@@ -229,7 +229,7 @@ class ReferenceGenomeService {
                         }
                     }
 """
-            String confName = "Default chromosome stat size file for ${referenceGenome}"
+            String confName = "Chromosome stat size file for ${referenceGenome}"
 
             ExternalWorkflowConfigFragment fragment = new ExternalWorkflowConfigFragment(
                     name: confName,
