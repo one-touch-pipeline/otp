@@ -455,7 +455,7 @@ dependencies {
 
     // JS and CSS libraries
     implementation 'org.webjars:jquery:3.7.1'
-    implementation 'org.webjars:bootstrap:5.3.0'
+    implementation 'org.webjars:bootstrap:5.3.3'
     implementation 'org.webjars.npm:bootstrap-icons:1.11.3'
     implementation 'org.webjars.npm:ttskch__select2-bootstrap4-theme:1.5.2'
     implementation 'org.webjars:select2:4.0.13'

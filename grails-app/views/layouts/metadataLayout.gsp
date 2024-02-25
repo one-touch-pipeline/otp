@@ -28,7 +28,7 @@
     <title><g:layoutTitle default="OTP"/></title>
     <script type="text/javascript" src="${otp.serverUrl()}/webjars/jquery/${otp.assetVersion([name: 'jquery'])}/jquery.js"></script>
     <script type="text/javascript" src="${otp.serverUrl()}/webjars/datatables/1.13.5/js/jquery.dataTables.js"></script>
-    <script type="text/javascript" src="${otp.serverUrl()}/webjars/bootstrap/5.3.0/js/bootstrap.bundle.js"></script>
+    <script type="text/javascript" src="${otp.serverUrl()}/webjars/bootstrap/5.3.3/js/bootstrap.bundle.js"></script>
     <asset:javascript src="modules/defaultPageDependencies.js"/>
     <asset:stylesheet src="modules/metadataImport.css"/>
     <g:layoutHead/>
