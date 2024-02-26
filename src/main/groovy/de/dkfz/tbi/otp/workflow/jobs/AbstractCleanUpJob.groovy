@@ -23,6 +23,8 @@ package de.dkfz.tbi.otp.workflow.jobs
 
 import org.springframework.beans.factory.annotation.Autowired
 
+import de.dkfz.tbi.otp.filestore.FilestoreService
+import de.dkfz.tbi.otp.filestore.WorkFolder
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -36,17 +38,30 @@ abstract class AbstractCleanUpJob extends AbstractJob {
     @Autowired
     FileService fileService
 
+    @Autowired
+    FilestoreService filestoreService
+
     @Override
     final void execute(WorkflowStep workflowStep) {
-        (getFilesToDelete(workflowStep) + getDirectoriesToDelete(workflowStep)).each {
+        List<WorkFolder> workFolderToClear = getWorkFoldersToClear(workflowStep)
+        List<Path> workFolderDirsToDelete = workFolderToClear.collect { filestoreService.getWorkFolderPath(it) }
+        (getAdditionalPathsToDelete(workflowStep) + workFolderDirsToDelete).unique().each {
             fileService.deleteDirectoryRecursively(it)
         }
+        resetWorkFoldersSize(workFolderToClear)
         workflowStateChangeService.changeStateToSuccess(workflowStep)
     }
 
-    abstract List<Path> getFilesToDelete(WorkflowStep workflowStep)
+    private void resetWorkFoldersSize(List<WorkFolder> workFolders) {
+        workFolders.each { workFolder ->
+            workFolder.size = 0
+            workFolder.save(flush: true)
+        }
+    }
 
-    abstract List<Path> getDirectoriesToDelete(WorkflowStep workflowStep)
+    abstract List<Path> getAdditionalPathsToDelete(WorkflowStep workflowStep)
+
+    abstract List<WorkFolder> getWorkFoldersToClear(WorkflowStep workflowStep)
 
     @Override
     final JobStage getJobStage() {

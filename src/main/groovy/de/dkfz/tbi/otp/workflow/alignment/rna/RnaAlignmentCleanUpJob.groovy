@@ -43,8 +43,8 @@ class RnaAlignmentCleanUpJob extends AbstractRoddyAlignmentCleanUpJob implements
     RoddyBamFileService roddyBamFileService
 
     @Override
-    List<Path> getFilesToDelete(WorkflowStep workflowStep) {
-        List<Path> files = super.getFilesToDelete(workflowStep)
+    List<Path> getAdditionalPathsToDelete(WorkflowStep workflowStep) {
+        List<Path> files = super.getAdditionalPathsToDelete(workflowStep)
 
         RnaRoddyBamFile rnaRoddyBamFile = getRoddyBamFile(workflowStep)
         Path baseDir = roddyBamFileService.getBaseDirectory(rnaRoddyBamFile)

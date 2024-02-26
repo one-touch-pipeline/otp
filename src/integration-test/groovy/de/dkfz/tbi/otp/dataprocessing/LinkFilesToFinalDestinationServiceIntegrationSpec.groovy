@@ -128,7 +128,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         assert (filesNotToBeCalledFor + tmpFiles + tmpDirectories) as Set == roddyBamFile.workDirectory.listFiles() as Set
 
         when:
-        List<Path> files = linkFilesToFinalDestinationService.getFilesToCleanup(roddyBamFile)
+        List<Path> files = linkFilesToFinalDestinationService.getUnusedResultFiles(roddyBamFile)
 
         then:
         filesNotToBeCalledFor.every {
@@ -267,7 +267,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         ].flatten()
     }
 
-    void testCleanupOldResults_bamFilesOfWorkPackageExist_allFine() {
+    void "getOldAdditionalResults, should be fine when all bam files of work package exist"() {
         given:
         setupData()
         DomainFactory.createRoddyBamFile(workPackage: roddyBamFile.workPackage, config: roddyBamFile.config)
@@ -278,7 +278,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         assert roddyBamFile.workDirectory.exists()
 
         when:
-        List<Path> files = linkFilesToFinalDestinationService.getOldResultsToCleanup(roddyBamFile2)
+        List<Path> files = linkFilesToFinalDestinationService.getOldAdditionalResults(roddyBamFile2)
 
         then:
         files*.toString().contains(roddyBamFile.workDirectory.toString())
@@ -287,7 +287,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         files*.toString().contains(roddyBamFile.finalQADirectory.toString())
     }
 
-    void testCleanupOldResults_bamFilesOfWorkPackageExistInOldStructure(boolean latestIsOld) {
+    void 'getOldAdditionalResults, should return all bam files paths, when work packages exist in old structure and latest is old is #latestIsOld'() {
         given:
         setupData()
         if (latestIsOld) {
@@ -303,7 +303,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         assert roddyBamFile2.workDirectory.exists()
 
         when:
-        List<Path> files = linkFilesToFinalDestinationService.getOldResultsToCleanup(roddyBamFile2)
+        List<Path> files = linkFilesToFinalDestinationService.getOldAdditionalResults(roddyBamFile2)
 
         then:
         !files*.toString().contains(roddyBamFile2.workDirectory.toString())
@@ -318,38 +318,38 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         latestIsOld << [true, false]
     }
 
-    void "test getOldResultsToCleanup, withoutOtherBamFilesOfTheSameWorkPackage, allFine"() {
+    void "test getOldAdditionalResults, withoutOtherBamFilesOfTheSameWorkPackage, allFine"() {
         given:
         setupData()
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
         when:
-        List<Path> files = linkFilesToFinalDestinationService.getOldResultsToCleanup(roddyBamFile)
+        List<Path> files = linkFilesToFinalDestinationService.getOldAdditionalResults(roddyBamFile)
 
         then:
         !files*.toString().contains(roddyBamFile.workDirectory.toString())
     }
 
-    void "test getOldResultsToCleanup, bamFileIsNull, shouldFail"() {
+    void "test getOldAdditionalResults, bamFileIsNull, shouldFail"() {
         given:
         setupData()
 
         when:
-        linkFilesToFinalDestinationService.getOldResultsToCleanup(null)
+        linkFilesToFinalDestinationService.getOldAdditionalResults(null)
 
         then:
         Throwable e = thrown(AssertionError)
         e.message.contains("roddyBamFile")
     }
 
-    void "test getOldResultsToCleanup, bamHasOldStructure, shouldFail"() {
+    void "test getOldAdditionalResults, bamHasOldStructure, shouldFail"() {
         given:
         setupData()
         roddyBamFile.workDirectoryName = null
         roddyBamFile.save(flush: true)
 
         when:
-        linkFilesToFinalDestinationService.getOldResultsToCleanup(roddyBamFile)
+        linkFilesToFinalDestinationService.getOldAdditionalResults(roddyBamFile)
 
         then:
         Throwable e = thrown(AssertionError)

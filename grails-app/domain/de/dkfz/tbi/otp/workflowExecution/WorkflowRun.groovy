@@ -133,6 +133,8 @@ class WorkflowRun implements Commentable, Entity {
         notificationText nullable: true
     }
 
+    static belongsTo = [workFolder: WorkFolder]
+
     static Closure mapping = {
         combinedConfig type: "text"
         project index: 'workflow_run_project_idx'

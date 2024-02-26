@@ -25,10 +25,13 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.TempDir
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.PanCancerWorkflowDomainFactory
+import de.dkfz.tbi.otp.filestore.WorkFolder
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
@@ -60,7 +63,7 @@ class PanCancerCleanUpJobSpec extends Specification implements DataTest, PanCanc
         ]
     }
 
-    void "test getFilesToDelete"() {
+    void "getAdditionalPathsToDelete, should return all additional paths that need to be deleted"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep([
                 workflowRun: createWorkflowRun([
@@ -84,44 +87,40 @@ class PanCancerCleanUpJobSpec extends Specification implements DataTest, PanCanc
             0 * _
         }
         job.linkFilesToFinalDestinationService = Mock(LinkFilesToFinalDestinationService) {
-            1 * getFilesToCleanup(_) >> [dir1, file1]
-            1 * getOldResultsToCleanup(_) >> [dir2, file2]
+            1 * getUnusedResultFiles(_) >> [dir1, file1]
+            1 * getOldAdditionalResults(_) >> [dir2, file2]
         }
         job.fileService = Mock(FileService)
 
         expect:
-        [file1, file2] == job.getFilesToDelete(workflowStep)
+        TestCase.assertContainSame(job.getAdditionalPathsToDelete(workflowStep), [dir1, file1, dir2, file2])
     }
 
-    void "test getDirectoriesToDelete"() {
+    void "getWorkFoldersToClear, should return the work folders of all old roddy bam files"() {
         WorkflowStep workflowStep = createWorkflowStep([
                 workflowRun: createWorkflowRun([
                         workflowVersion: null,
                         workflow       : findOrCreatePanCancerWorkflow(),
                 ]),
         ])
-        RoddyBamFile bamFile = createRoddyBamFile(RoddyBamFile)
-        Path file1 = tempDir.resolve("file1")
-        Files.createFile(file1)
-        Path file2 = tempDir.resolve("file2")
-        Files.createFile(file2)
-        Path dir1 = tempDir.resolve("dir1")
-        Files.createDirectory(dir1)
-        Path dir2 = tempDir.resolve("dir2")
-        Files.createDirectory(dir2)
+        RoddyBamFile bamFile1 = createRoddyBamFile(RoddyBamFile)
+        RoddyBamFile bamFile2 = createRoddyBamFile([workPackage: bamFile1.mergingWorkPackage], RoddyBamFile)
+        RoddyBamFile bamFile3 = createRoddyBamFile([workPackage: bamFile1.mergingWorkPackage], RoddyBamFile)
+        WorkFolder workFolder = createWorkFolder()
 
         PanCancerCleanUpJob job = new PanCancerCleanUpJob()
-        job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            _ * getOutputArtefact(workflowStep, PanCancerWorkflow.OUTPUT_BAM) >> bamFile
+        job.roddyBamFileService = Mock(RoddyBamFileService) {
+            1 * getWorkFolder(bamFile2) >> workFolder
+            1 * getWorkFolder(bamFile3) >> null
             0 * _
         }
-        job.linkFilesToFinalDestinationService = Mock(LinkFilesToFinalDestinationService) {
-            1 * getFilesToCleanup(_) >> [dir1, file1]
-            1 * getOldResultsToCleanup(_) >> [dir2, file2]
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            1 * getOutputArtefact(workflowStep, PanCancerWorkflow.OUTPUT_BAM) >> bamFile1
+            0 * _
         }
         job.fileService = Mock(FileService)
 
         expect:
-        [dir1, dir2] == job.getDirectoriesToDelete(workflowStep)
+        TestCase.assertContainSame(job.getWorkFoldersToClear(workflowStep), [workFolder])
     }
 }

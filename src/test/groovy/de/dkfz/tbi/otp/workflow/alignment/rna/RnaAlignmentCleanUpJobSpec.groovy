@@ -55,7 +55,7 @@ class RnaAlignmentCleanUpJobSpec extends Specification implements DataTest, RnaA
         ]
     }
 
-    void "test getFilesToDelete"() {
+    void "getAdditionalPathsToDelete, should return the correct paths"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep([
                 workflowRun: createWorkflowRun([
@@ -85,6 +85,6 @@ class RnaAlignmentCleanUpJobSpec extends Specification implements DataTest, RnaA
         }
 
         expect:
-        [link1] == job.getFilesToDelete(workflowStep)
+        job.getAdditionalPathsToDelete(workflowStep) == [link1]
     }
 }

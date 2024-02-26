@@ -26,6 +26,7 @@ import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.filestore.WorkFolder
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflowExecution.*
@@ -43,7 +44,9 @@ class WorkflowDeletionServiceIntegrationSpec extends Specification implements Wo
         given:
         WorkflowRunInputArtefact wria = createWorkflowArtefactAndRun()
         WorkflowRun workflowRun = createWorkflowRun(
-                omittedMessage: createOmittedMessage()
+                omittedMessage: createOmittedMessage(),
+                workDirectory: null,
+                workFolder: createWorkFolder(),
         )
         createWorkflowSteps(wria.workflowRun)
         wria.workflowArtefact.producedBy = workflowRun
@@ -62,6 +65,7 @@ class WorkflowDeletionServiceIntegrationSpec extends Specification implements Wo
         WorkflowLog.count == 0
         WorkflowError.count == 0
         OmittedMessage.count == 0
+        WorkFolder.count == 0
     }
 
     void "test deleteWorkflowArtefact"() {

@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.utils
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
+import de.dkfz.tbi.otp.filestore.WorkFolder
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.exceptions.OtpAssertRuntimeException
@@ -52,10 +53,17 @@ class WorkflowDeletionService {
         }
 
         OmittedMessage omittedMessage = workflowRun.omittedMessage
-
+        WorkFolder workFolder = workflowRun.workFolder
         workflowRun.delete(flush: true)
 
         deleteOmittedMessage(omittedMessage)
+        deleteWorkFolder(workFolder)
+    }
+
+    void deleteWorkFolder(WorkFolder workFolder) {
+        if (workFolder) {
+            workFolder.delete(flush: true)
+        }
     }
 
     void deleteWorkflowArtefact(WorkflowArtefact workflowArtefact) {

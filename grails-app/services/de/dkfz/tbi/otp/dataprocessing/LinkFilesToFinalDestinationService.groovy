@@ -108,7 +108,7 @@ class LinkFilesToFinalDestinationService {
         linkFileUtils.createAndValidateLinks(links, roddyBamFile.project.unixGroup)
     }
 
-    List<Path> getFilesToCleanup(RoddyBamFile roddyBamFile) {
+    List<Path> getUnusedResultFiles(RoddyBamFile roddyBamFile) {
         assert roddyBamFile: "Input roddyBamFile must not be null"
         assert !roddyBamFile.isOldStructureUsed()
 
@@ -124,13 +124,13 @@ class LinkFilesToFinalDestinationService {
             expectedFiles.add(roddyBamFile.workMethylationDirectory)
             expectedFiles.add(roddyBamFile.workMetadataTableFile)
         }
-        List<File> foundFiles = roddyBamFile.workDirectory.listFiles() ?: []
-        List<File> filesToDelete = foundFiles - expectedFiles
+        List<File> foundFiles = roddyBamFile.workDirectory.listFiles() as List<File> ?: []
+        List<File> unexpectedFiles = foundFiles - expectedFiles
         FileSystem fs = fileSystemService.remoteFileSystem
-        return filesToDelete.collect { fileService.toPath(it, fs) }
+        return unexpectedFiles.collect { fileService.toPath(it, fs) }
     }
 
-    List<Path> getOldResultsToCleanup(RoddyBamFile roddyBamFile) {
+    List<Path> getOldAdditionalResults(RoddyBamFile roddyBamFile) {
         assert roddyBamFile: "Input roddyBamFile must not be null"
         assert !roddyBamFile.isOldStructureUsed()
 

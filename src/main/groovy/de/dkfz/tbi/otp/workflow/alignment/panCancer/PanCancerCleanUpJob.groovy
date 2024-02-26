@@ -21,15 +21,18 @@
  */
 package de.dkfz.tbi.otp.workflow.alignment.panCancer
 
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.LinkFilesToFinalDestinationService
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
+import de.dkfz.tbi.otp.filestore.WorkFolder
 import de.dkfz.tbi.otp.workflow.jobs.AbstractCleanUpJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.Files
 import java.nio.file.Path
 
 @Component
@@ -39,17 +42,26 @@ class PanCancerCleanUpJob extends AbstractCleanUpJob implements PanCancerShared 
     @Autowired
     LinkFilesToFinalDestinationService linkFilesToFinalDestinationService
 
+    @Autowired
+    RoddyBamFileService roddyBamFileService
+
     @Override
-    List<Path> getFilesToDelete(WorkflowStep workflowStep) {
-        return (linkFilesToFinalDestinationService.getFilesToCleanup(getRoddyBamFile(workflowStep)) +
-                linkFilesToFinalDestinationService.getOldResultsToCleanup(getRoddyBamFile(workflowStep)))
-                .findAll { !Files.isDirectory(it) }
+    List<Path> getAdditionalPathsToDelete(WorkflowStep workflowStep) {
+        return (linkFilesToFinalDestinationService.getUnusedResultFiles(getRoddyBamFile(workflowStep)) +
+                linkFilesToFinalDestinationService.getOldAdditionalResults(getRoddyBamFile(workflowStep)))
     }
 
     @Override
-    List<Path> getDirectoriesToDelete(WorkflowStep workflowStep) {
-        return (linkFilesToFinalDestinationService.getFilesToCleanup(getRoddyBamFile(workflowStep)) +
-                linkFilesToFinalDestinationService.getOldResultsToCleanup(getRoddyBamFile(workflowStep)))
-                .findAll { Files.isDirectory(it) }
+    @CompileDynamic
+    List<WorkFolder> getWorkFoldersToClear(WorkflowStep workflowStep) {
+        RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
+
+        assert roddyBamFile: "Input roddyBamFile must not be null"
+        assert !roddyBamFile.isOldStructureUsed()
+
+        List<RoddyBamFile> roddyBamFiles = RoddyBamFile.findAllByWorkPackageAndIdNotEqual(roddyBamFile.mergingWorkPackage, roddyBamFile.id)
+        return roddyBamFiles.collect { it.isOldStructureUsed() ? null : roddyBamFileService.getWorkFolder(it) }
+                .findAll()
     }
 }
+

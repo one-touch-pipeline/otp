@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
+import de.dkfz.tbi.otp.filestore.WorkFolder
 import de.dkfz.tbi.otp.workflow.jobs.AbstractCleanUpJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -41,18 +42,25 @@ abstract class AbstractRoddyAlignmentCleanUpJob extends AbstractCleanUpJob imple
     RoddyBamFileService roddyBamFileService
 
     @Override
-    List<Path> getFilesToDelete(WorkflowStep workflowStep) {
-        return []
+    @CompileDynamic
+    List<Path> getAdditionalPathsToDelete(WorkflowStep workflowStep) {
+        // Can be removed, when all data is migrated to the uuid structure, since then this directory is covered by the workFolders
+        RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
+        List<RoddyBamFile> roddyBamFiles = RoddyBamFile.findAllByWorkPackageAndIdNotEqual(roddyBamFile.mergingWorkPackage, roddyBamFile.id)
+        List<Path> workDirectory = roddyBamFiles.collect { RoddyBamFile bamFile ->
+            roddyBamFileService.getWorkDirectory(bamFile)
+        }
+        return workDirectory
     }
 
     @CompileDynamic
     @Override
-    List<Path> getDirectoriesToDelete(WorkflowStep workflowStep) {
+    List<WorkFolder> getWorkFoldersToClear(WorkflowStep workflowStep) {
         RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
         List<RoddyBamFile> roddyBamFiles = RoddyBamFile.findAllByWorkPackageAndIdNotEqual(roddyBamFile.mergingWorkPackage, roddyBamFile.id)
-        List<Path> workDirs = roddyBamFiles.collect { RoddyBamFile bamFile ->
-            roddyBamFileService.getWorkDirectory(bamFile)
-        }
-        return workDirs
+        List<WorkFolder> workFolders = roddyBamFiles.collect { RoddyBamFile bamFile ->
+            roddyBamFileService.getWorkFolder(bamFile)
+        }.findAll()
+        return workFolders
     }
 }

@@ -39,7 +39,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 import java.nio.file.Files
 import java.nio.file.Path
 
-class RoddyAlignmentCleanUpJobSpec  extends Specification implements DataTest, PanCancerWorkflowDomainFactory, RoddyRnaFactory {
+class RoddyAlignmentCleanUpJobSpec extends Specification implements DataTest, PanCancerWorkflowDomainFactory, RoddyRnaFactory {
     @TempDir
     Path tempDir
 
@@ -55,9 +55,10 @@ class RoddyAlignmentCleanUpJobSpec  extends Specification implements DataTest, P
         ]
     }
 
-    class TestAbstractRoddyAlignmentCleanUpJob extends AbstractRoddyAlignmentCleanUpJob { }
+    class TestAbstractRoddyAlignmentCleanUpJob extends AbstractRoddyAlignmentCleanUpJob {
+    }
 
-    void "test getFilesToDelete"() {
+    void "getAdditionalPathsToDelete, should return the directories and files"() {
         WorkflowStep workflowStep = createWorkflowStep([
                 workflowRun: createWorkflowRun([
                         workflowVersion: null,
@@ -65,22 +66,9 @@ class RoddyAlignmentCleanUpJobSpec  extends Specification implements DataTest, P
                 ]),
         ])
         AbstractRoddyAlignmentCleanUpJob job = new TestAbstractRoddyAlignmentCleanUpJob()
-
-        expect:
-        [] == job.getFilesToDelete(workflowStep)
-    }
-
-    void "test getDirectoriesToDelete"() {
-        WorkflowStep workflowStep = createWorkflowStep([
-                workflowRun: createWorkflowRun([
-                        workflowVersion: null,
-                        workflow       : findOrCreatePanCancerWorkflow(),
-                ]),
-        ])
         RoddyBamFile bamFile1 = createRoddyBamFile(RoddyBamFile)
         RoddyBamFile bamFile2 = createRoddyBamFile([workPackage: bamFile1.mergingWorkPackage, config: bamFile1.config], RoddyBamFile)
 
-        AbstractRoddyAlignmentCleanUpJob job = new TestAbstractRoddyAlignmentCleanUpJob()
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
             _ * getOutputArtefact(workflowStep, PanCancerWorkflow.OUTPUT_BAM) >> bamFile1
             0 * _
@@ -95,6 +83,6 @@ class RoddyAlignmentCleanUpJobSpec  extends Specification implements DataTest, P
         }
 
         expect:
-        [dir2] == job.getDirectoriesToDelete(workflowStep)
+        job.getAdditionalPathsToDelete(workflowStep) == [dir2]
     }
 }

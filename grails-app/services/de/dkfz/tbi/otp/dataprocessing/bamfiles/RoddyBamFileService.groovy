@@ -27,6 +27,7 @@ import groovy.transform.CompileDynamic
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.filestore.PathOption
+import de.dkfz.tbi.otp.filestore.WorkFolder
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 import java.nio.file.Path
@@ -68,9 +69,11 @@ class RoddyBamFileService extends AbstractAbstractBamFileService<RoddyBamFile> i
         if (bamFile.workflowArtefact?.producedBy?.workFolder) {
             return filestoreService.getWorkFolderPath(bamFile.workflowArtefact.producedBy)
         }
-        // Example:
-        // ${OtpProperty#PATH_PROJECT_ROOT}/${project}/sequencing/whole_genome_sequencing/view-by-pid/somePid/control/paired/merged-alignment/.merging_3
         return getBaseDirectory(bamFile).resolve(bamFile.workDirectoryName)
+    }
+
+    WorkFolder getWorkFolder(RoddyBamFile bamFile) {
+        return bamFile.workflowArtefact?.producedBy?.workFolder
     }
 
     Path getFinalQADirectory(RoddyBamFile bamFile) {
