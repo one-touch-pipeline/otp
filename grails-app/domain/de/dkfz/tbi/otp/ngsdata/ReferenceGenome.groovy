@@ -41,16 +41,22 @@ class ReferenceGenome implements Entity {
      */
     String name
 
+    /**
+     * Contains a list of species for which all species with strains should be allowed for this reference genome.
+     * E.g.  add mouse to the list to apply all mouse species with strains.
+     */
     Set<Species> species
+    /**
+     * Contains a list of species with strains that should be allowed for this reference genome.
+     * E.g. add Mouse (Mus caroli) to the list to only allow the species with that strain.
+     */
     Set<SpeciesWithStrain> speciesWithStrain
 
     /**
      * Reference genome specific directory
-     *
      * This directory is in {@link de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName#BASE_PATH_REFERENCE_GENOME}.
-     *
-     * suppressing because changing this would involve refactoring the code as well as the database columns
      */
+    // changing this would involve refactoring the code as well as the database columns
     @SuppressWarnings("GrailsDomainReservedSqlKeywordName")
     String path
 
@@ -91,7 +97,7 @@ class ReferenceGenome implements Entity {
     String chromosomeLengthFilePath
 
     /**
-     * File which contains the GC content. Is also located in the stats directory per reference genome
+     * File name of the file which contains the GC content. Is also located in the stats directory per reference genome
      */
     String gcContentFile
 
@@ -106,42 +112,35 @@ class ReferenceGenome implements Entity {
 
     String fingerPrintingFileName
 
-    /*
+    /**
      * The following two files belong to ENCODE (https://genome.ucsc.edu/ENCODE/)
      * and will therefore be stored under the ENCODE folder in each reference genome
      */
     String mappabilityFile
-
     String replicationTimeFile
 
-    /*
+    /**
      * The following six files belong to IMPUTE (https://mathgen.stats.ox.ac.uk/impute/impute_v2.html)
      * and will therefore be stored under the IMPUTE folder in each reference genome
      */
-
     String geneticMapFile
-
     String knownHaplotypesFile
-
     String knownHaplotypesLegendFile
-
     String geneticMapFileX
-
     String knownHaplotypesFileX
-
     String knownHaplotypesLegendFileX
 
-    /**
-     * It has to be ensured that there is only one reference genome stored per directory -> unique path
-     */
     static constraints = {
         name(unique: true, blank: false)
-        species validator: { val, obj ->
+        species(validator: { Set<Species> val, ReferenceGenome obj ->
             if (!(val || obj.speciesWithStrain)) {
-                return "empty"
+                return "referenceGenome.species.empty"
             }
-        }
-        path(unique: true, blank: false, shared: "relativePath")
+            if (val && obj.speciesWithStrain && obj.speciesWithStrain.any { val.contains(it.species) }) {
+                return "referenceGenome.species.speciesWithStrain.collide"
+            }
+        })
+        path(unique: true, blank: false, shared: "relativePath") // It has to be ensured that there is only one reference genome stored per directory
         fileNamePrefix(blank: false, shared: "pathComponent")
         length shared: 'greaterThanZero'
         lengthWithoutN shared: 'greaterThanZero'
