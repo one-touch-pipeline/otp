@@ -99,31 +99,37 @@ stages:
         - node_modules/
         - $NPM_CACHE
         - $CYPRESS_CACHE
-  rules-test:
+  rules-default:
     - if: $CI_COMMIT_TAG
     - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  rules-test:
     - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
       changes:
         compare_to: 'refs/heads/master'
         paths:
-          #common paths, shared with cypress
-          - gradle/**/*
-          - src/main/**/*
+          #common paths, configs
           - build.gradle
-          - settings.gradle
-          - gradle.properties
+          - devScripts/gitlab-ci/init.sh
           - .gitlab-ci-core.yml
+          - gradle/**/*
+          - gradle.properties
+          - settings.gradle
+          #common paths, shared with cypress
+          - src/main/**/*
           - grails-app/conf/**/*
           - grails-app/controllers/**/*
           - grails-app/domain/**/*
           - grails-app/i18n/**/*
           - grails-app/init/**/*
           - grails-app/services/**/*
-          - devScripts/gitlab-ci/init.sh
           #test specific parts
           - src/test/**/*
           - src/integration-test/**/*
           - src/test-helper/**/*
+  rules-push:
+    - if: $CI_PIPELINE_SOURCE == "push"
+  rules-only-branch:
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
 
 
 .abstract_base_template:
@@ -131,13 +137,12 @@ stages:
   needs: [ ]
   cache: [ ]
   rules:
-    - if: $CI_PIPELINE_SOURCE == "push"
+    - !reference [ .shared, rules-push ]
   artifacts: &artifacts_template
     expire_in: 4 week
   before_script:
     - set -e
     - devScripts/gitlab-ci/init.sh
-
 
 .abstract_base_template_with_cache:
   extends: .abstract_base_template
@@ -145,23 +150,17 @@ stages:
     - build gradle
   needs:
     - build gradle
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "push"
   cache:
     - !reference [ .shared, cache, gradle-wrapper]
     - !reference [ .shared, cache, gradle-pipeline-cache]
     - !reference [ .shared, cache, gradle-cache]
-  artifacts: &artifacts_template
-    expire_in: 4 week
-  before_script:
-    - set -e
-    - devScripts/gitlab-ci/init.sh
 
 
 .abstract_test_template:
   extends: .abstract_base_template_with_cache
   stage: test
   rules:
+    - !reference [ .shared, rules-default ]
     - !reference [ .shared, rules-test ]
   artifacts:
     <<: *artifacts_template
@@ -207,7 +206,7 @@ license check:
   needs: [ ]
   cache: [ ]
   rules:
-    - if: $CI_PIPELINE_SOURCE == "push"
+    - !reference [ .shared, rules-push ]
   script:
     - groovy devScripts/gitlab-ci/license-checker/licensecheck.groovy
 
@@ -249,9 +248,11 @@ test coverage:
   coverage: '/Instruction Coverage: (\d+(?:\.\d+)?)%/'
   script:
     - set -e
-    - ./gradlew --build-cache --exclude-task test --exclude-task integrationTest --rerun-tasks classes jacocoAllTestReport jacocoToCobertura
+    - ./gradlew --build-cache classes
+    - ./gradlew --build-cache --exclude-task test --exclude-task integrationTest --rerun-tasks jacocoAllTestReport jacocoToCobertura
   when: always
   rules:
+    - !reference [ .shared, rules-default ]
     - !reference [ .shared, rules-test ]
   artifacts:
     <<: *artifacts_template
@@ -284,6 +285,22 @@ test migration:
     - bash ./devScripts/grails-migration-plugin/create-dbm-gorm-diff-without-false-changes.sh testing
     - bash ./devScripts/grails-migration-plugin/check-for-changelog-file.sh testing
     - bash ./devScripts/grails-migration-plugin/check-variable-problems.sh
+  rules:
+    - !reference [ .shared, rules-default ]
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
+      changes:
+        compare_to: 'refs/heads/master'
+        paths:
+          #common paths, configs
+          - build.gradle
+          - devScripts/gitlab-ci/init.sh
+          - .gitlab-ci-core.yml
+          - gradle/**/*
+          - gradle.properties
+          - settings.gradle
+          #migration test specific
+          - grails-app/domain/**/*
+          - migrations/**/*
   artifacts:
     <<: *artifacts_template
     paths:
@@ -297,38 +314,37 @@ cypress tests:
   rules:
     - if: $ENABLE_CYPRESS == "false"
       when: never
-    - if: $CI_COMMIT_TAG
-    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - !reference [ .shared, rules-default ]
     - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
       changes:
         compare_to: 'refs/heads/master'
         paths:
-          #common paths, shared with unit/integration
-          - gradle/**/*
-          - src/main/**/*
+          #common paths, configs
           - build.gradle
-          - settings.gradle
-          - gradle.properties
+          - devScripts/gitlab-ci/init.sh
           - .gitlab-ci-core.yml
+          - gradle/**/*
+          - gradle.properties
+          - settings.gradle
+          #common paths, shared with unit/integration
           - grails-app/conf/**/*
           - grails-app/controllers/**/*
           - grails-app/domain/**/*
           - grails-app/i18n/**/*
           - grails-app/init/**/*
           - grails-app/services/**/*
-          - devScripts/gitlab-ci/init.sh
+          - src/main/**/*
           #test specific parts
+          - cypress/**/*
+          - cypress.config.js
+          - devScripts/gitlab-ci/cypress/**/*
+          - docker/**/*
           - grails-app/assets/**/*
           - grails-app/taglib/**/*
           - grails-app/views/**/*
-          - cypress/**/*
-          - docker/**/*
-          - cypress.config.js
+          - migrations/**/*
           - package.json
           - package-lock.json
-          - .gitlab-ci-core.yml
-          - devScripts/gitlab-ci/cypress/**/*
-          - migrations/**/*
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
@@ -368,7 +384,13 @@ check cypress suite configured for ci:
   needs: [ ]
   stage: test
   rules:
-    - !reference [ cypress tests,  rules]
+    - !reference [ .shared, rules-default ]
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
+      changes:
+        compare_to: 'refs/heads/master'
+        paths:
+          - .gitlab-ci-core.yml
+          - cypress/e2e/**/*
   script:
     - set -e
     - devScripts/gitlab-ci/cypress/check-suite-configured-for-ci.sh
@@ -387,6 +409,22 @@ codenarc:
   after_script:
     - set -e
     - devScripts/gitlab-ci/codenarc-informations.sh
+  rules:
+    - !reference [ .shared, rules-default ]
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
+      changes:
+        compare_to: 'refs/heads/master'
+        paths:
+          #common paths, configs
+          - build.gradle
+          - devScripts/gitlab-ci/init.sh
+          - .gitlab-ci-core.yml
+          - gradle/**/*
+          - gradle.properties
+          - settings.gradle
+          #codenarc test specific
+          - grails-app/**/*.groovy
+          - src/**/*
   artifacts:
     <<: *artifacts_template
     paths:
@@ -401,6 +439,21 @@ eslint:
   script:
     - set -e
     - ./gradlew --build-cache esLintExportCi
+  rules:
+    - !reference [ .shared, rules-default ]
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
+      changes:
+        compare_to: 'refs/heads/master'
+        paths:
+          #common paths, configs
+          - build.gradle
+          - devScripts/gitlab-ci/init.sh
+          - .gitlab-ci-core.yml
+          - gradle/**/*
+          - gradle.properties
+          - settings.gradle
+          # ci specific
+          - grails-app/assets/javascripts/**/*
   artifacts:
     <<: *artifacts_template
     paths:
@@ -421,6 +474,22 @@ create war:
   stage: war
   script:
     - devScripts/gitlab-ci/createWar.sh
+  rules:
+    - !reference [ .shared, rules-default ]
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
+      changes:
+        compare_to: 'refs/heads/master'
+        paths:
+          #common paths, configs
+          - build.gradle
+          - devScripts/gitlab-ci/init.sh
+          - .gitlab-ci-core.yml
+          - gradle/**/*
+          - gradle.properties
+          - settings.gradle
+          # ci specific
+          - grails-app/**/*
+          - src/main/**/*
 
 # ------------------------------------------------------
 # jobs stage doc
@@ -432,6 +501,21 @@ create doc:
   script:
     - set -e
     - ./gradlew --build-cache generateHtml
+  rules:
+    - !reference [ .shared, rules-default ]
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
+      changes:
+        compare_to: 'refs/heads/master'
+        paths:
+          #common paths, configs
+          - build.gradle
+          - devScripts/gitlab-ci/init.sh
+          - .gitlab-ci-core.yml
+          - gradle/**/*
+          - gradle.properties
+          - settings.gradle
+          # ci specific
+          - docs/**/*
   artifacts:
     <<: *artifacts_template
     paths:

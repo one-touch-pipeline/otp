@@ -41,16 +41,12 @@ variables:
 # jobs stage scanning
 # ------------------------------------------------------
 
-.only-branch:
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
-
 gemnasium-dependency_scanning:
   stage: scanning
   dependencies: [ ]
   needs: [ ]
   rules:
-    - !reference [ .only-branch, rules ]
+    - !reference [ .shared, rules-only-branch ]
   script:
     - /analyzer run
 
@@ -60,7 +56,7 @@ gemnasium-maven-dependency_scanning:
   dependencies: [ ]
   needs: [ ]
   rules:
-    - !reference [ .only-branch, rules ]
+    - !reference [ .shared, rules-only-branch ]
   script:
     - /analyzer run
 
@@ -76,7 +72,7 @@ license_scanning:
     CI_PROJECT_DIR: "."
     LM_JAVA_VERSION: "11"
   rules:
-    - !reference [ .only-branch, rules ]
+    - !reference [ .shared, rules-only-branch ]
   script:
     - /run.sh analyze .
   artifacts:
@@ -90,7 +86,7 @@ new licenses:
   stage: scanning
   needs: ["license_scanning"]
   rules:
-    - !reference [.only-branch, rules]
+    - !reference [ .shared, rules-only-branch ]
   dependencies:
     - license_scanning
   script:

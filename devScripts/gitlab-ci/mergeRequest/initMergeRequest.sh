@@ -34,8 +34,6 @@ then
     exit 1
 fi
 
-set -vx
-
 echo "search for existing merge request"
 curl --header "PRIVATE-TOKEN: $PROJECT_TOKEN" "$PROJECT_URL/merge_requests?state=all&source_branch=$CI_COMMIT_BRANCH" >  responseCheck.json
 jq -C '.' responseCheck.json

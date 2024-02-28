@@ -21,15 +21,13 @@
 
 # The ci configuration to create the base image for the gitlab ci
 
-build-base-image:
+.build-image:
   when: manual
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [ "" ]
   stage: build
   needs: []
-  variables:
-    IMAGE_NAME: otp-ci-java-17
   rules:
     - if: $CI_COMMIT_TAG
       when: never
@@ -37,43 +35,30 @@ build-base-image:
       changes:
         compare_to: 'refs/heads/master'
         paths:
-          - docker/gitlab-ci/**/*
+          - ${PATH_CHECK_CHANGES}
+          - .gitlab-ci-create-image.yml
   script:
     - CURRENT_DATE_TAG=$(date '+%Y-%m-%d')
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
     - >-
       /kaniko/executor
-      --context "${CI_PROJECT_DIR}/docker/gitlab-ci"
+      --context "${CONTEXT}/"
       --dockerfile "./Dockerfile"
       --destination "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${CURRENT_DATE_TAG}"
       --destination "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:latest"
+
+build-base-image:
+  extends: .build-image
+  variables:
+    IMAGE_NAME: otp-ci-java-17
+    CONTEXT: "${CI_PROJECT_DIR}/docker/gitlab-ci"
+    PATH_CHECK_CHANGES: docker/gitlab-ci/**/*
 
 
 build-database-docker-image:
-  when: manual
-  image:
-    name: gcr.io/kaniko-project/executor:debug
-    entrypoint: [ "" ]
-  stage: build
-  needs: []
+  extends: .build-image
   variables:
     IMAGE_NAME: otp-ci-integration-test-database
-  rules:
-    - if: $CI_COMMIT_TAG
-      when: never
-    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
-      changes:
-        compare_to: 'refs/heads/master'
-        paths:
-          - docker/integration-test-build-database/**/*
-  script:
-    - CURRENT_DATE_TAG=$(date '+%Y-%m-%d')
-    - mkdir -p /kaniko/.docker
-    - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
-    - >-
-      /kaniko/executor
-      --context "${CI_PROJECT_DIR}/docker/integration-test-build-database/"
-      --dockerfile "./Dockerfile"
-      --destination "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${CURRENT_DATE_TAG}"
-      --destination "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:latest"
+    CONTEXT: "${CI_PROJECT_DIR}/docker/integration-test-build-database/"
+    PATH_CHECK_CHANGES: docker/integration-test-build-database/**/*

@@ -27,7 +27,7 @@ add author for failed pipeline:
   stage: update merge request
   dependencies: [ ]
   rules:
-    - !reference [.only-branch, rules]
+    - !reference [ .shared, rules-only-branch ]
   script:
     - devScripts/gitlab-ci/mergeRequest/addAuthorForFailedCi.sh
   when: on_failure
@@ -40,6 +40,6 @@ update labels:
   variables:
     GIT_DEPTH: "0"
   rules:
-    - !reference [.only-branch, rules]
+    - !reference [ .shared, rules-only-branch ]
   script:
     - devScripts/gitlab-ci/mergeRequest/handleLabels.sh

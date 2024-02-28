@@ -25,4 +25,4 @@
 
 include:
   - local: '.gitlab-ci-core.yml'
-
+  - local: '.gitlab-ci-create-image.yml'

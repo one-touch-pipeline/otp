@@ -20,16 +20,47 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# This script based on output of initMergeRequest.sh, which is used also in other scripts and should therefore executed outside of this script
+
+# This script add the author as assignee, if no assignee is set yet.
+
 set -e
 
-source `dirname $0`/initMergeRequest.sh
+if [ -v NO_MERGE_REQUEST_EXIST ]
+then
+    echo "variable 'NO_MERGE_REQUEST_EXIST' is not defined, please run initMergeRequest.sh"
+    exit 1
+fi
 
 if [ "$NO_MERGE_REQUEST_EXIST" == "true" ]
 then
-    echo "Exiting, because no merge request exists."
     exit 0
 fi
 
-bash `dirname $0`/addLabelsFromYoutrack.sh
-bash `dirname $0`/updateAssignees.sh
-bash `dirname $0`/updateReviewer.sh
+echo "merge request"
+MR_ID=`jq -e '.[0].iid' responseCheck.json`
+echo "Merge request id: ${MR_ID}"
+
+ASSIGNEES=`jq -e '.[0].assignees' responseCheck.json`
+echo "Merge request assignees: ${ASSIGNEES}"
+
+HAS_ASSIGNEES=`echo $ASSIGNEES | jq -Mc '. | length > 0'`
+echo $HAS_ASSIGNEES
+
+if [ "$HAS_ASSIGNEES" == "true" ]
+then
+    exit
+fi
+
+AUTHOR=`jq -e '.[0].author' responseCheck.json`
+echo "Merge request author: ${AUTHOR}"
+
+AUTHOR_ID=`jq -e '.[0].author.id' responseCheck.json`
+echo "Merge request author id: ${AUTHOR_ID}"
+
+curl -X PUT --header "PRIVATE-TOKEN: $PROJECT_TOKEN" \
+  --data-urlencode "assignee_ids=$AUTHOR_ID" \
+  "$PROJECT_URL/merge_requests/$MR_ID" > responseUpdate.json
+
+echo "Response of set assignees from MR"
+jq -C -e '.' responseUpdate.json
