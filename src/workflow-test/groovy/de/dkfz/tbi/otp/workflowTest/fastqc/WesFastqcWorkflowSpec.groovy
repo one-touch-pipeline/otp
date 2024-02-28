@@ -151,7 +151,7 @@ class WesFastqcWorkflowSpec extends AbstractDecidedWorkflowSpec {
         workflow = CollectionUtils.exactlyOneElement(Workflow.findAllByName(WesFastQcWorkflow.WORKFLOW))
         log.info("Fetch workflow: ${workflow}")
 
-        WorkflowApiVersion wav = CollectionUtils.exactlyOneElement(WorkflowApiVersion.findAllByWorkflow(workflow,  [sort: 'id', order: 'desc', max: 1]))
+        WorkflowApiVersion wav = CollectionUtils.exactlyOneElement(WorkflowApiVersion.findAllByWorkflow(workflow, [sort: 'id', order: 'desc', max: 1]))
         workflowVersion = CollectionUtils.exactlyOneElement(WorkflowVersion.findAllByApiVersion(wav, [sort: 'id', order: 'desc', max: 1]))
         log.info("Fetch workflow version: ${workflowVersion}")
 

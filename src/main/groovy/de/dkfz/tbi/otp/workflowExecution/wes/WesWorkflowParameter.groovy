@@ -29,6 +29,7 @@ import java.nio.file.Path
 @TupleConstructor
 class WesWorkflowParameter {
     final JSONObject workflowParams
+    final WesWorkflowEngineParameter wesWorkflowEngineParameter
     final WesWorkflowType workflowType
     final Path workDirectory
     final String workflowUrl
@@ -38,6 +39,7 @@ class WesWorkflowParameter {
         return [
                 "WesWorkflowParameter:",
                 "workflowParams: ${workflowParams.toString(4)}",
+                wesWorkflowEngineParameter.toString().replaceAll('\n', '\n    '),
                 "workflowType: ${workflowType}",
                 "workDirectory: ${workDirectory}",
                 "workflowUrl: ${workflowUrl}",

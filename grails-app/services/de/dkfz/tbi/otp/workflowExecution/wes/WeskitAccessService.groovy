@@ -93,7 +93,7 @@ class WeskitAccessService {
      */
     RunId runWorkflow(WesWorkflowParameter wesWorkflowParameter) {
         log.debug("Create new WES Run for: ${wesWorkflowParameter}")
-        checkWesWorkflowParameter(wesWorkflowParameter)
+        checkWesWorkflowEngineParameter(wesWorkflowParameter)
 
         Path baseDataPath = configService.wesDataDirectory
         Path workDirectory = wesWorkflowParameter.workDirectory
@@ -102,6 +102,10 @@ class WeskitAccessService {
         String tags = ([
                 run_dir: runDir.toString()
         ] as JSON).toString(true)
+        log.debug("tags: ${tags}")
+
+        String engine = wesWorkflowParameter.wesWorkflowEngineParameter.asJson().toString(true)
+        log.debug("engine: ${engine}")
 
         return doApiCall { WorkflowExecutionServiceApi api ->
             api.runWorkflow(
@@ -109,7 +113,7 @@ class WeskitAccessService {
                     wesWorkflowParameter.workflowType.weskitName,
                     wesWorkflowParameter.workflowType.version,
                     tags,
-                    "{}",
+                    engine,
                     wesWorkflowParameter.workflowUrl,
                     null
             )
@@ -163,16 +167,28 @@ class WeskitAccessService {
         ].join('\n')
     }
 
-    private void checkWesWorkflowParameter(WesWorkflowParameter parameter) {
+    private void checkWesWorkflowEngineParameter(WesWorkflowParameter parameter) {
         assert parameter
         assert parameter.workflowParams
+        assert parameter.wesWorkflowEngineParameter
         assert parameter.workflowType
         assert parameter.workDirectory
         assert parameter.workflowUrl
+
+        checkWesWorkflowEngineParameter(parameter.wesWorkflowEngineParameter)
 
         assert parameter.workDirectory.absolute
         assert Files.exists(parameter.workDirectory)
         assert Files.isDirectory(parameter.workDirectory)
         assert fileService.fileIsReadable(parameter.workDirectory)
+    }
+
+    private void checkWesWorkflowEngineParameter(WesWorkflowEngineParameter parameter) {
+        assert parameter
+        assert parameter.accountingName
+        assert parameter.jobName
+        assert parameter.queue
+        assert parameter.maxMemory
+        assert parameter.maxRuntime
     }
 }

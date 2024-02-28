@@ -28,6 +28,7 @@ import org.grails.web.json.JSONObject
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.MapUtilService
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.wes.*
@@ -37,6 +38,8 @@ import java.nio.file.Path
 @Component
 @Slf4j
 abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob {
+
+    final static String DISALLOWED_CHARS = '[^a-zA-Z0-9\\-]'
 
     @Autowired
     WorkflowRunService workflowRunService
@@ -122,7 +125,8 @@ abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob 
                 Map<String, String> config = mapper.readValue(workflowStep.workflowRun.combinedConfig, HashMap)
                 JSONObject mergedParameter = mapUtilService.mergeSortedMaps([config, parameter]) as JSONObject
 
-                WesWorkflowParameter wesParameter = new WesWorkflowParameter(mergedParameter, workflowType, path, workflowUrl)
+                WesWorkflowEngineParameter engineParameter = createWesWorkflowEngineParameter(workflowStep)
+                WesWorkflowParameter wesParameter = new WesWorkflowParameter(mergedParameter, engineParameter, workflowType, path, workflowUrl)
                 logService.addSimpleLogEntry(workflowStep, "Call Weskit with ${wesParameter}")
                 logService.addSimpleLogEntry(workflowStep, "Work directory ${path}")
 
@@ -130,7 +134,8 @@ abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob 
                 String runIdValue = runId.runId
                 logService.addSimpleLogEntry(workflowStep, "Workflow job with run id ${runIdValue} has been sent to Weskit")
 
-                wesRunService.saveWorkflowRun(workflowStep, runIdValue, path.last().toString())
+                Path subPath = basePath.relativize(path)
+                wesRunService.saveWorkflowRun(workflowStep, runIdValue, subPath.toString())
             }
             workflowRunService.markJobAsRestartable(workflowStep.workflowRun)
             workflowStateChangeService.changeStateToWaitingOnSystem(workflowStep)
@@ -139,4 +144,38 @@ abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob 
             workflowStateChangeService.changeStateToSuccess(workflowStep)
         }
     }
+
+    private WesWorkflowEngineParameter createWesWorkflowEngineParameter(WorkflowStep workflowStep) {
+        Project project = workflowStep.workflowRun.project
+        ProcessingPriority processingPriority = workflowStep.workflowRun.project.processingPriority
+        String accountName = replaceDisallowedChars(project.name)
+        String jobName = createJobName(workflowStep)
+
+        return new WesWorkflowEngineParameter(
+                accountName,
+                jobName,
+                processingPriority.queue,
+                "512M",
+                "24:00",
+        )
+    }
+
+    String createJobName(WorkflowStep step) {
+        String beanName = step.beanName
+        String workflowName = replaceDisallowedChars(step.workflowRun.workflow.name)
+        String workflowRunName = replaceDisallowedChars(step.workflowRun.shortDisplayName)
+        String stepId = step.id
+        return [
+                'otp',
+                workflowName,
+                beanName,
+                workflowRunName,
+                stepId,
+        ].findAll().join('_')
+    }
+
+    String replaceDisallowedChars(String input) {
+        return input.replaceAll(DISALLOWED_CHARS, '-')
+    }
+
 }

@@ -30,6 +30,7 @@ import spock.lang.TempDir
 import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.utils.MapUtilService
 import de.dkfz.tbi.otp.workflowExecution.*
@@ -91,6 +92,7 @@ class AbstractExecuteWesPipelineJobSpec extends Specification implements DataTes
     private void setupData() {
         workflowStep = createWorkflowStep()
         workflowStep.workflowRun.combinedConfig = '{"config":"combined"}'
+        workflowStep.workflowRun.workDirectory = tempDir.resolve("workDir").toString()
     }
 
     void "execute, when processed files cannot be copied, then do not submit Weskit jobs and change state to success"() {
@@ -125,15 +127,23 @@ class AbstractExecuteWesPipelineJobSpec extends Specification implements DataTes
             1 * changeStateToWaitingOnSystem(workflowStep)
             0 * _
         }
-        job.fileSystemService = new TestFileSystemService()
+        job.fileSystemService = Mock(FileSystemService) {
+            1 * getRemoteFileSystem() >> tempDir.getFileSystem()
+            0 * _
+        }
         job.weskitAccessService = Mock(WeskitAccessService) {
             2 * runWorkflow(_) >> new RunId().runId("RUN_ID")
+            0 * _
         }
         job.workflowRunService = Mock(WorkflowRunService) {
             1 * markJobAsNotRestartableInSeparateTransaction(_)
+            1 * markJobAsRestartable(_)
+            0 * _
         }
         job.fileService = Mock(FileService) {
             1 * deleteDirectoryContent(_)
+            2 * createDirectoryRecursivelyAndSetPermissionsViaBash(_)
+            0 * _
         }
         job.logService = Mock(LogService) {
             1 * addSimpleLogEntry(workflowStep, "Clean up the output directory ${workflowStep.workflowRun.workDirectory}")
@@ -145,6 +155,7 @@ class AbstractExecuteWesPipelineJobSpec extends Specification implements DataTes
         }
         job.wesRunService = Mock(WesRunService) {
             2 * saveWorkflowRun(workflowStep, _, _)
+            0 * _
         }
 
         when:

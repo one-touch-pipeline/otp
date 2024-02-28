@@ -21,33 +21,36 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.wes
 
+import grails.converters.JSON
 import groovy.transform.TupleConstructor
 
-/**
- * the types of workflow currently supported by weskit
- */
 @TupleConstructor
-enum WesWorkflowType {
-    NEXTFLOW('NextFlow', 'NFL', '23.04.1'),
-    SNAKE_MAKE('SnakeMake', 'SMK', '6.10.0')
+class WesWorkflowEngineParameter {
+    final String accountingName
+    final String jobName
+    final String queue
+    final String maxMemory
+    final String maxRuntime
 
-    /**
-     * name to show
-     */
-    final String displayText
-
-    /**
-     * the value used in weskit
-     */
-    final String weskitName
-
-    /**
-     * the version of the workflow available in weskit. Currently, only one supported.
-     */
-    final String version
+    JSON asJson() {
+        return [
+                "accounting-name": accountingName,
+                "job-name"       : jobName,
+                "queue"          : queue,
+                "max-memory"     : maxMemory,
+                "max-runtime"    : maxRuntime,
+        ] as JSON
+    }
 
     @Override
     String toString() {
-        return displayText
+        return [
+                "WesWorkflowEngineParameter:",
+                "accounting-name: ${accountingName}",
+                "job-name: ${jobName}",
+                "queue: ${queue}",
+                "max-memory: ${maxMemory}",
+                "max-runtime: ${maxRuntime}",
+        ].join('\n- ')
     }
 }

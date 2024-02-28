@@ -140,7 +140,13 @@ class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<Exter
             return Collections.<String> emptySet()
         }),
         WORKFLOWS({ Collections.<String> emptySet() }),
+        /**
+         * Contains cvalue and resource sets for roddy workflows
+         */
         RODDY({ String s -> RoddyConfigService.validateRoddyConfig(s) }),
+        /**
+         * Contains filenames for roddy workflows
+         */
         RODDY_FILENAMES({ String s -> RoddyConfigService.validateRoddyFilenamesConfig(s) }),
 
         final Closure<Set<String>> validateConfig

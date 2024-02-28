@@ -50,7 +50,7 @@ abstract class AbstractWesValidationJob extends AbstractValidationJob {
         List<String> errorMessages = []
         wesRuns.each { WesRun wesRun ->
             if (!(wesRun.wesRunLog.state == State.COMPLETE)) {
-                errorMessages.add("State for WES job '${wesRun.wesRunLogId}' is '${wesRun.wesRunLog.state}' and not 'COMPLETE'.".toString())
+                errorMessages.add("State for WES job '${wesRun.wesIdentifier}' is '${wesRun.wesRunLog.state}' and not 'COMPLETE'.".toString())
             } else if (!(wesRun.wesRunLog.runLog.exitCode == 0)) {
                 errorMessages.add("Exit code of WES job '${wesRun.wesRunLogId}': ${wesRun.wesRunLog.runLog.exitCode}.".toString())
             }

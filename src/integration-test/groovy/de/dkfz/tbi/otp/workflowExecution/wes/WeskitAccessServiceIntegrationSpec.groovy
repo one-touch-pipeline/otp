@@ -95,16 +95,25 @@ class WeskitAccessServiceIntegrationSpec extends Specification implements Domain
 
         String workflow = "nf-seq-qc-1.0.0/main.nf"
 
-        WesWorkflowParameter wesWorkflowParameter = new WesWorkflowParameter(workflowParamsJson, WesWorkflowType.NEXTFLOW, workDir, workflow)
+        WesWorkflowEngineParameter engineParameter = new WesWorkflowEngineParameter(
+                "account",
+                "jobName",
+                "queue",
+                "1G",
+                "24:00",
+
+        )
+        WesWorkflowParameter wesWorkflowParameter = new WesWorkflowParameter(workflowParamsJson, engineParameter, WesWorkflowType.NEXTFLOW, workDir, workflow)
 
         when:
         RunId runId = service.runWorkflow(wesWorkflowParameter)
 
         then:
-        1 * api.runWorkflow(_ as String, WesWorkflowType.NEXTFLOW.weskitName, WesWorkflowType.NEXTFLOW.version, _ as String, "{}", workflow, null
+        1 * api.runWorkflow(_ as String, WesWorkflowType.NEXTFLOW.weskitName, WesWorkflowType.NEXTFLOW.version, _ as String, _ as String, workflow, null
         ) >> { String workflowParams, String workflowType, String workflowTypeVersion, String tags, String workflowEngineParameters, String workflowUrl, List<File> workflowAttachment ->
             assert JSON.parse(workflowParams) == workflowParamsJson
             assert JSON.parse(tags) == JSON.parse(tagsJson.toString(true))
+            assert JSON.parse(workflowEngineParameters) == JSON.parse(engineParameter.asJson().toString(true))
             return mockedMonoRunId
         }
 

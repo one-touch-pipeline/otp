@@ -41,10 +41,7 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.filestore.BaseFolder
-import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
+import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
@@ -202,13 +199,10 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     }
 
     /**
-     * This method can be overridden if other job submission options are needed.
+     * This method can be overwritten if other job submission options are needed.
      */
     protected Map<JobSubmissionOption, String> getJobSubmissionOptions() {
-        return [
-                (JobSubmissionOption.WALLTIME): Duration.ofMinutes(15).toString(),
-                (JobSubmissionOption.MEMORY)  : "5g",
-        ]
+        return [:]
     }
 
     /**
@@ -547,18 +541,21 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      * initialize submission options
      */
     private void initSubmissionOptions() {
-        ExternalWorkflowConfigFragment fragment = createExternalWorkflowConfigFragment(
-                configValues: JsonOutput.toJson([OTP_CLUSTER: jobSubmissionOptions])
-        )
-        createExternalWorkflowConfigSelector(
-                workflowVersions: [],
-                workflows: [],
-                referenceGenomes: [],
-                libraryPreparationKits: [],
-                seqTypes: [],
-                projects: [],
-                externalWorkflowConfigFragment: fragment,
-        )
+        Map<JobSubmissionOption, String> options = jobSubmissionOptions
+        if (options) {
+            ExternalWorkflowConfigFragment fragment = createExternalWorkflowConfigFragment(
+                    configValues: JsonOutput.toJson([OTP_CLUSTER: options])
+            )
+            createExternalWorkflowConfigSelector(
+                    workflowVersions: [],
+                    workflows: [],
+                    referenceGenomes: [],
+                    libraryPreparationKits: [],
+                    seqTypes: [],
+                    projects: [],
+                    externalWorkflowConfigFragment: fragment,
+            )
+        }
     }
 
     /**

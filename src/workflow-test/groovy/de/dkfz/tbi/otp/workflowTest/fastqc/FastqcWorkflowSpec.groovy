@@ -27,6 +27,7 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
+import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
@@ -211,5 +212,16 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
     @Override
     String getWorkflowName() {
         return BashFastQcWorkflow.WORKFLOW
+    }
+
+    /**
+     * This method can be overwritten if other job submission options are needed.
+     */
+    @Override
+    protected Map<JobSubmissionOption, String> getJobSubmissionOptions() {
+        return [
+                (JobSubmissionOption.WALLTIME): Duration.ofMinutes(15).toString(),
+                (JobSubmissionOption.MEMORY)  : "5g",
+        ]
     }
 }

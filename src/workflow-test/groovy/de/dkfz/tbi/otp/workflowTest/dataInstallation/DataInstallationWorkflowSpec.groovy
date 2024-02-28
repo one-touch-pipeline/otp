@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflowTest.dataInstallation
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataAllWellFileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
+import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
@@ -70,6 +71,17 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
     @Override
     String getWorkflowName() {
         return DataInstallationWorkflow.WORKFLOW
+    }
+
+    /**
+     * This method can be overwritten if other job submission options are needed.
+     */
+    @Override
+    protected Map<JobSubmissionOption, String> getJobSubmissionOptions() {
+        return [
+                (JobSubmissionOption.WALLTIME): Duration.ofMinutes(15).toString(),
+                (JobSubmissionOption.MEMORY)  : "5g",
+        ]
     }
 
     @Override
