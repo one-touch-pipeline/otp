@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.bamfiles.ExternallyProcessedBamFileService
 import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactory
 import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.workflow.WorkflowCreateState
@@ -352,5 +353,13 @@ class BamImportWorkflowSpec extends AbstractWorkflowSpec implements ExternalBamF
     @Override
     String getWorkflowName() {
         return BamImportWorkflow.WORKFLOW
+    }
+
+    @Override
+    protected Map<JobSubmissionOption, String> getJobSubmissionOptions() {
+        return [
+                (JobSubmissionOption.WALLTIME): Duration.ofMinutes(15).toString(),
+                (JobSubmissionOption.MEMORY)  : "5g",
+        ]
     }
 }
