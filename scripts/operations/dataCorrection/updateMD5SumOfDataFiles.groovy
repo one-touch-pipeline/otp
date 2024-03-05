@@ -21,8 +21,9 @@
  */
 package operations.dataInstallation
 
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
+import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
+import de.dkfz.tbi.otp.ngsdata.Run
 import de.dkfz.tbi.util.TimeFormats
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
@@ -38,7 +39,7 @@ String executingUser = ""
 List<String> runNames = [""]
 Map<String, String> rawSequenceFileMap = [:]
 
-RawSequenceDataViewFileService rawSequenceDataViewFileService = ctx.rawSequenceDataViewFileService
+RawSequenceDataWorkFileService rawSequenceDataWorkFileService = ctx.rawSequenceDataWorkFileService
 
 assert executingUser: "Your username is used to set a comment that informs of the changes to the RawSequenceFile"
 assert runNames: "Define the Runs"
@@ -51,12 +52,13 @@ assert runs.size() == runNames.size(): "Didn't find Runs for all run names"
 
 RawSequenceFile.withTransaction {
     rawSequenceFileMap.each { String fileName, String newMd5sum ->
+        println "check file ${fileName}"
         RawSequenceFile rawSequenceFile = exactlyOneElement(RawSequenceFile.findAllByRunInListAndFileName(runs, fileName))
 
         String fromMd5 = rawSequenceFile.fastqMd5sum
         String toMd5 = newMd5sum
         Long fromFileSize = rawSequenceFile.fileSize
-        Long toFileSize = rawSequenceDataViewFileService.getFilePath(rawSequenceFile).size()
+        Long toFileSize = rawSequenceDataWorkFileService.getFilePath(rawSequenceFile).size()
 
         if (fromMd5 != toMd5) {
             rawSequenceFile.fastqMd5sum = newMd5sum
@@ -68,7 +70,7 @@ RawSequenceFile.withTransaction {
             String previous = rawSequenceFile.comment?.comment
             ctx.commentService.createOrUpdateComment(
                     rawSequenceFile,
-                    previous + (previous? "\n\n" : "") + newComment,
+                    (previous ? "${previous}\n\n" : "") + newComment,
                     executingUser
             )
             rawSequenceFile.save(flush: true)
