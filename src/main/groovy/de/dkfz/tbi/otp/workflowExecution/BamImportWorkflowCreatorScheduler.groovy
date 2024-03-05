@@ -89,12 +89,12 @@ class BamImportWorkflowCreatorScheduler extends AbstractWorkflowCreatorScheduler
 
     @Override
     protected void sendWorkflowCreateSuccessMail(Long importId, Instant instant, String message) {
-        notificationCreator.sendBamImportWorkflowCreateSuccessMail(importId, instant, message)
+        notificationCreator.sendBamImportWorkflowCreateSuccessMail(getImportInstance(importId).ticket, importId, instant, message)
     }
 
     @Override
     protected void sendWorkflowCreateErrorMail(Long importId, Instant instant, Throwable throwable) {
-        notificationCreator.sendBamImportWorkflowCreateErrorMail(importId, instant, throwable)
+        notificationCreator.sendBamImportWorkflowCreateErrorMail(getImportInstance(importId).ticket, importId, instant, throwable)
     }
 
     @Override

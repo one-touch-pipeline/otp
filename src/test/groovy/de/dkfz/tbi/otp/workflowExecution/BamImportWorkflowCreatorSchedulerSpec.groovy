@@ -149,7 +149,7 @@ class BamImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSched
         1 * scheduler.allDecider.decide(_) >> deciderResult
         1 * scheduler.samplePairDeciderService.findOrCreateSamplePairs(expectedListForSnv)
         0 * scheduler.samplePairDeciderService._
-        1 * scheduler.notificationCreator.sendBamImportWorkflowCreateSuccessMail(importId, _, _)
+        1 * scheduler.notificationCreator.sendBamImportWorkflowCreateSuccessMail(_, importId, _, _)
 
         where:
         name                             | analysableSeqType
@@ -176,7 +176,7 @@ class BamImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSched
         0 * scheduler.bamImportInitializationService._
         1 * scheduler.allDecider.decide(_) >> { throw otpRuntimeException }
         0 * scheduler.samplePairDeciderService.findOrCreateSamplePairs(_)
-        1 * scheduler.notificationCreator.sendBamImportWorkflowCreateErrorMail(importId, _, otpRuntimeException)
+        1 * scheduler.notificationCreator.sendBamImportWorkflowCreateErrorMail(_, importId, _, otpRuntimeException)
     }
 
     @Override

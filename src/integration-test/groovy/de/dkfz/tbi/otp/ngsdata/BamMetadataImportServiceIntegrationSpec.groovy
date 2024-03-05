@@ -218,13 +218,14 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
 
     void "validateAndImport, if all values given, then all values should be set"() {
         given:
+        String ticketNumber = '21312'
         DataBamImportRow dataBamImportRow = new DataBamImportRow(tempDir, [:])
         DataBamImportMetaData dataBamImportMetaData = new DataBamImportMetaData(tempDir, [dataBamImportRow])
         Map results
 
         when:
         results = doWithAuth(OPERATOR) {
-            bamMetadataImportService.validateAndImport(dataBamImportMetaData.metadataFile.toString(), true,
+            bamMetadataImportService.validateAndImport(dataBamImportMetaData.metadataFile.toString(), ticketNumber, true,
                     dataBamImportMetaData.md5sum, BamImportInstance.LinkOperation.COPY_AND_KEEP, false, [])
         }
 
@@ -235,13 +236,14 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
     @Unroll
     void "validateAndImport, case #name with operation #linkOperation, then create import instance without any errors"() {
         given:
+        String ticketNumber = '21312'
         DataBamImportRow dataBamImportRow = new DataBamImportRow(tempDir, updateMap)
         DataBamImportMetaData dataBamImportMetaData = new DataBamImportMetaData(tempDir, [dataBamImportRow])
         Map results
 
         when:
         results = doWithAuth(OPERATOR) {
-            bamMetadataImportService.validateAndImport(dataBamImportMetaData.metadataFile.toString(), true,
+            bamMetadataImportService.validateAndImport(dataBamImportMetaData.metadataFile.toString(), ticketNumber, true,
                     dataBamImportMetaData.md5sum, linkOperation, false, [])
         }
 
@@ -277,38 +279,40 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
     @Unroll
     void "validateAndImport, case #name with operation #linkOperation, then create no import instances and return errors"() {
         given:
+        String ticketNumber = '21312'
         DataBamImportRow dataBamImportRow = new DataBamImportRow(tempDir, updateMap)
         DataBamImportMetaData dataBamImportMetaData = new DataBamImportMetaData(tempDir, [dataBamImportRow])
         Map results
 
         when:
         results = doWithAuth(OPERATOR) {
-            bamMetadataImportService.validateAndImport(dataBamImportMetaData.metadataFile.toString(), true,
+            bamMetadataImportService.validateAndImport(dataBamImportMetaData.metadataFile.toString(), ticketNumber, true,
                     dataBamImportMetaData.md5sum, linkOperation, false, [])
         }
         then:
         assertResultError(results, dataBamImportMetaData.metadataFile, errorText)
 
         where:
-        name                                    | linkOperation                                 | updateMap                                                                                                                                         || errorText
-        'no md5sum given'                       | BamImportInstance.LinkOperation.LINK_SOURCE   | [(BamMetadataColumn.MD5): null,]                                                                                                                  || ["The md5sum is required, if the files should only be linked"]
-        'no maximal read length given'          | BamImportInstance.LinkOperation.LINK_SOURCE   | [(BamMetadataColumn.MAXIMAL_READ_LENGTH): null,]                                                                                                  || ["The maximalReadLength is required, if the files should only be linked"]
-        'bam file does not ends with bam'       | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.BAM_FILE_PATH): 'test', (BamMetadataColumn.INSERT_SIZE_FILE): null, (BamMetadataColumn.QUALITY_CONTROL_FILE): null,]          || ["Filename 'test' does not end with '.bam'.", "The path 'test' is no absolute path."]
-        'bam file path is no absolute path'     | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.BAM_FILE_PATH): 'test.bam', (BamMetadataColumn.INSERT_SIZE_FILE): null, (BamMetadataColumn.QUALITY_CONTROL_FILE): null,]      || ["The path 'test.bam' is no absolute path."]
-        'bam file does not exist'               | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.BAM_FILE_PATH): '/tmp/test.bam', (BamMetadataColumn.INSERT_SIZE_FILE): null, (BamMetadataColumn.QUALITY_CONTROL_FILE): null,] || ["'/tmp/test.bam' does not exist or cannot be accessed by OTP."]
-        'no project given'                      | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.PROJECT): null,]                                                                                                              || ["The project '' is not registered in OTP."]
-        'no individual and sample type  given'  | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.INDIVIDUAL): null, (BamMetadataColumn.SAMPLE_TYPE): null,]                                                                    || ["The individual '' is not registered in OTP.", "The sample as combination of the individual '' and the sample type '' is not registered in OTP.", "The sample type '' is not registered in OTP."]
-        'no sequencing type given'              | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.SEQUENCING_TYPE): null,]                                                                                                      || ["No seqType is given."]
-        'sequencing type is unknown'            | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.SEQUENCING_TYPE): 'unknownSeqType',]                                                                                          || ["The sequencing type 'unknownSeqType' is not registered in OTP."]
-        'no sequencing read type given'         | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.SEQUENCING_READ_TYPE): null,]                                                                                                 || ["sequencing read type '' is not registered in OTP."]
-        'sequencing read type is unknown'       | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.SEQUENCING_READ_TYPE): 'unknownSequencingRead',]                                                                              || ["sequencing read type 'unknownSequencingRead' is not registered in OTP."]
-        'no reference genome given'             | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.REFERENCE_GENOME): null,]                                                                                                     || ["The reference genome '' is not registered in OTP."]
-        'unknown reference genome'              | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.REFERENCE_GENOME): 'unknownReferenceGenome',]                                                                                 || ["The reference genome 'unknownReferenceGenome' is not registered in OTP."]
+        name                                   | linkOperation                                 | updateMap                                                                                                                                         || errorText
+        'no md5sum given'                      | BamImportInstance.LinkOperation.LINK_SOURCE   | [(BamMetadataColumn.MD5): null,]                                                                                                                  || ["The md5sum is required, if the files should only be linked"]
+        'no maximal read length given'         | BamImportInstance.LinkOperation.LINK_SOURCE   | [(BamMetadataColumn.MAXIMAL_READ_LENGTH): null,]                                                                                                  || ["The maximalReadLength is required, if the files should only be linked"]
+        'bam file does not ends with bam'      | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.BAM_FILE_PATH): 'test', (BamMetadataColumn.INSERT_SIZE_FILE): null, (BamMetadataColumn.QUALITY_CONTROL_FILE): null,]          || ["Filename 'test' does not end with '.bam'.", "The path 'test' is no absolute path."]
+        'bam file path is no absolute path'    | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.BAM_FILE_PATH): 'test.bam', (BamMetadataColumn.INSERT_SIZE_FILE): null, (BamMetadataColumn.QUALITY_CONTROL_FILE): null,]      || ["The path 'test.bam' is no absolute path."]
+        'bam file does not exist'              | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.BAM_FILE_PATH): '/tmp/test.bam', (BamMetadataColumn.INSERT_SIZE_FILE): null, (BamMetadataColumn.QUALITY_CONTROL_FILE): null,] || ["'/tmp/test.bam' does not exist or cannot be accessed by OTP."]
+        'no project given'                     | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.PROJECT): null,]                                                                                                              || ["The project '' is not registered in OTP."]
+        'no individual and sample type  given' | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.INDIVIDUAL): null, (BamMetadataColumn.SAMPLE_TYPE): null,]                                                                    || ["The individual '' is not registered in OTP.", "The sample as combination of the individual '' and the sample type '' is not registered in OTP.", "The sample type '' is not registered in OTP."]
+        'no sequencing type given'             | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.SEQUENCING_TYPE): null,]                                                                                                      || ["No seqType is given."]
+        'sequencing type is unknown'           | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.SEQUENCING_TYPE): 'unknownSeqType',]                                                                                          || ["The sequencing type 'unknownSeqType' is not registered in OTP."]
+        'no sequencing read type given'        | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.SEQUENCING_READ_TYPE): null,]                                                                                                 || ["sequencing read type '' is not registered in OTP."]
+        'sequencing read type is unknown'      | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.SEQUENCING_READ_TYPE): 'unknownSequencingRead',]                                                                              || ["sequencing read type 'unknownSequencingRead' is not registered in OTP."]
+        'no reference genome given'            | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.REFERENCE_GENOME): null,]                                                                                                     || ["The reference genome '' is not registered in OTP."]
+        'unknown reference genome'             | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.REFERENCE_GENOME): 'unknownReferenceGenome',]                                                                                 || ["The reference genome 'unknownReferenceGenome' is not registered in OTP."]
     }
 
     @Unroll
     void "validateAndImport, when further files given, then imported bam files has them if they exist on file system"() {
         given:
+        String ticketNumber = '21312'
         DataBamImportRow dataBamImportRow = new DataBamImportRow(tempDir, [:])
         DataBamImportMetaData dataBamImportMetaData = new DataBamImportMetaData(tempDir, [dataBamImportRow])
 
@@ -347,7 +351,7 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
 
         when:
         results = doWithAuth(OPERATOR) {
-            bamMetadataImportService.validateAndImport(dataBamImportMetaData.metadataFile.toString(), true,
+            bamMetadataImportService.validateAndImport(dataBamImportMetaData.metadataFile.toString(), ticketNumber, true,
                     dataBamImportMetaData.md5sum, BamImportInstance.LinkOperation.COPY_AND_KEEP, false, furtherFiles, addDefaultFiles)
         }
 

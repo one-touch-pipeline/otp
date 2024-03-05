@@ -115,6 +115,10 @@
                 <td><g:textField name="path" style="width: 1000px" value="${cmd.path}"/></td>
             </tr>
             <tr>
+                <td><g:message code="bamMetadataImport.ticketNumber"/></td>
+                <td><g:textField name="ticketNumber" style="width: 1000px" value="${cmd.ticketNumber}"/></td>
+            </tr>
+            <tr>
                 <td><label><g:message code="bamMetadataImport.linkOperation"/></label></td>
                 <td>
                     <label title="${g.message(code: 'bamMetadataImport.linkOperation.copyAndKeep.title')}">

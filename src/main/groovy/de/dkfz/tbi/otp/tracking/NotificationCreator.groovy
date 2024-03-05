@@ -506,8 +506,9 @@ class NotificationCreator {
         mailHelperService.saveErrorMailInNewTransaction(subject, body)
     }
 
-    void sendBamImportWorkflowCreateSuccessMail(Long importId, Instant instant, String message) {
-        String subject = "Workflow created successfully at ${TimeFormats.DATE_TIME.getFormattedInstant(instant)} for BamImport with ID: ${importId}"
+    void sendBamImportWorkflowCreateSuccessMail(Ticket ticket, Long importId, Instant instant, String message) {
+        String subject = ticket ? "[${ticketService.getPrefixedTicketNumber(ticket)}] " : ""
+        subject += "Workflow created successfully at ${TimeFormats.DATE_TIME.getFormattedInstant(instant)} for BamImport with ID: ${importId}"
 
         String body = [
                 "The workflow creation succeeded:",
@@ -518,8 +519,9 @@ class NotificationCreator {
         mailHelperService.saveMail(subject, body)
     }
 
-    void sendBamImportWorkflowCreateErrorMail(Long importId, Instant instant, Throwable throwable) {
-        String subject = "Failed to create workflows at ${TimeFormats.DATE_TIME.getFormattedInstant(instant)} for BamImport with ID: ${importId}"
+    void sendBamImportWorkflowCreateErrorMail(Ticket ticket, Long importId, Instant instant, Throwable throwable) {
+        String subject = ticket ? "[${ticketService.getPrefixedTicketNumber(ticket)}] " : ""
+        subject += "Failed to create workflows at ${TimeFormats.DATE_TIME.getFormattedInstant(instant)} for BamImport with ID: ${importId}"
 
         BamImportInstance importInstance = BamImportInstance.get(importId)
         List<Long> bamIds = importInstance.externallyProcessedBamFiles*.id

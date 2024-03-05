@@ -61,7 +61,7 @@ class BamMetadataImportController {
             if (cmd.hasErrors()) {
                 flash.message = new FlashMessage("Error", cmd.errors)
             } else if (cmd.submit == "Import") {
-                Map results = bamMetadataImportService.validateAndImport(cmd.path, cmd.ignoreWarnings, cmd.md5,
+                Map results = bamMetadataImportService.validateAndImport(cmd.path, cmd.ticketNumber, cmd.ignoreWarnings, cmd.md5,
                         cmd.linkOperation, cmd.triggerAnalysis, cmd.furtherFilePaths, cmd.addDefaultRoddyBamFilePaths)
                 bamMetadataValidationContext = results.context
                 if (results.project != null) {
@@ -76,10 +76,11 @@ class BamMetadataImportController {
         if (!hasRedirected) {
             flash.mvc = bamMetadataValidationContext
             redirect(action: "index", params: [
-                    path            : cmd.path,
-                    furtherFilePaths: cmd.furtherFilePaths,
-                    linkOperation   : cmd.linkOperation,
-                    triggerAnalysis : cmd.triggerAnalysis,
+                    path                       : cmd.path,
+                    ticketNumber               : cmd.ticketNumber,
+                    furtherFilePaths           : cmd.furtherFilePaths,
+                    linkOperation              : cmd.linkOperation,
+                    triggerAnalysis            : cmd.triggerAnalysis,
                     addDefaultRoddyBamFilePaths: cmd.addDefaultRoddyBamFilePaths
             ])
         }
@@ -90,6 +91,7 @@ class BamMetadataControllerSubmitCommand {
     String path
     String submit
     String md5
+    String ticketNumber
     List<String> furtherFilePaths
     BamImportInstance.LinkOperation linkOperation
     boolean triggerAnalysis

@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.exceptions.MetadataFileImportException
 import de.dkfz.tbi.util.spreadsheet.Row
@@ -66,6 +67,7 @@ class BamMetadataImportService {
     SeqTypeService seqTypeService
 
     BamMetadataValidationService bamMetadataValidationService
+    TicketService ticketService
 
     /**
      * @return A collection of descriptions of the validations which are performed
@@ -99,8 +101,8 @@ class BamMetadataImportService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Map validateAndImport(String metadataFile, boolean ignoreWarnings, String previousValidationMd5sum, BamImportInstance.LinkOperation linkOperation,
-                          boolean triggerAnalysis, List<String> furtherFiles, boolean addDefaultFiles = false) {
+    Map validateAndImport(String metadataFile, String ticketNumber, boolean ignoreWarnings, String previousValidationMd5sum,
+                          BamImportInstance.LinkOperation linkOperation, boolean triggerAnalysis, List<String> furtherFiles, boolean addDefaultFiles = false) {
         FileSystem fileSystem = fileSystemService.remoteFileSystem
         Project outputProject
         BamImportInstance importInstance
@@ -113,6 +115,7 @@ class BamMetadataImportService {
         try {
             MetadataImportService.mayImport(context, ignoreWarnings, previousValidationMd5sum)
             importInstance = new BamImportInstance([
+                    ticket                     : ticketNumber ? ticketService.createOrResetTicket(ticketNumber, null, true) : null,
                     externallyProcessedBamFiles: [],
                     state                      : BamImportInstance.State.NOT_STARTED,
                     linkOperation              : linkOperation,
@@ -227,8 +230,8 @@ class BamMetadataImportService {
         }
 
         return [
-                context      : context,
-                project      : outputProject,
+                context: context,
+                project: outputProject,
         ]
     }
 

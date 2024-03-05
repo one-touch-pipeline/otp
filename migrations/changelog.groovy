@@ -166,4 +166,6 @@ databaseChangeLog = {
     include file: 'changelogs/2024/otp-2448-cache-email.groovy'
 
     include file: 'changelogs/2024/otp-2372.groovy'
+
+    include file: 'changelogs/2024/otp-2470-add-ticket-to-bamImportInstance.groovy'
 }

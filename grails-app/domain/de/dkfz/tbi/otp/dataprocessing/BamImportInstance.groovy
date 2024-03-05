@@ -26,6 +26,7 @@ import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflow.WorkflowCreateState
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
@@ -50,7 +51,7 @@ class BamImportInstance implements Entity, ProcessParameterObject {
     enum LinkOperation {
         COPY_AND_KEEP(false, false),
         COPY_AND_LINK(false, true),
-        LINK_SOURCE(true,false),
+        LINK_SOURCE(true, false),
 
         final boolean linkSource
 
@@ -61,6 +62,8 @@ class BamImportInstance implements Entity, ProcessParameterObject {
 
     boolean triggerAnalysis
 
+    Ticket ticket
+
     Set<ExternallyProcessedBamFile> externallyProcessedBamFiles
 
     static hasMany = [
@@ -68,6 +71,7 @@ class BamImportInstance implements Entity, ProcessParameterObject {
     ]
 
     static constraints = {
+        ticket nullable: true
         externallyProcessedBamFiles validator: { val, obj ->
             List<BamImportInstance> importInstances = BamImportInstance.createCriteria().listDistinct {
                 externallyProcessedBamFiles {
@@ -88,13 +92,15 @@ class BamImportInstance implements Entity, ProcessParameterObject {
         workflowCreateState index: "bam_import_instance_workflow_create_state_idx"
     }
 
-    @SuppressWarnings("GetterMethodCouldBeProperty") // is no property
+    @SuppressWarnings("GetterMethodCouldBeProperty")
+    // is no property
     @Override
     SeqType getSeqType() {
         return null
     }
 
-    @SuppressWarnings("GetterMethodCouldBeProperty") // is no property
+    @SuppressWarnings("GetterMethodCouldBeProperty")
+    // is no property
     @Override
     Individual getIndividual() {
         return null

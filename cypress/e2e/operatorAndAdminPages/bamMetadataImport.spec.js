@@ -29,13 +29,20 @@ describe('Check bam metadata import page', () => {
       cy.visit('/bamMetadataImport/index');
     });
 
-    it('should visit the index page', () => {
+    it('should import bam metadata', () => {
+      const ticketNumber = 1234
+      const filePath = '/home/otp/filesystem/bam-import/import.tsv'
       cy.intercept('/bamMetadataImport/validateOrImport*').as('validateOrImport');
 
-      cy.get('#path').clear().type('/home/otp/filesystem/bam-import/import.tsv');
+      cy.get('#path').clear().type(filePath);
+      cy.get('input#ticketNumber').type(ticketNumber);
+      
       cy.get('input#validate').click();
 
       cy.wait('@validateOrImport').then((interception) => {
+        expect(interception.request.body).to.contain(filePath.replaceAll('/','%2F'))
+        expect(interception.request.body).to.contain(ticketNumber)
+
         expect(interception.response.statusCode).to.eq(302);
         cy.location('pathname').should('match', /\/\/?bamMetadataImport\/index/);
 
