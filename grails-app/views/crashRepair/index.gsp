@@ -97,7 +97,7 @@
 
             <div id="tableLoadingSpinner" class="text-center">
                 <div class="spinner-border" role="status">
-                    <span class="sr-only"><g:message code="crashRepair.loadingText"/></span>
+                    <span class="visually-hidden"><g:message code="crashRepair.loadingText"/></span>
                 </div>
             </div>
         </g:else>

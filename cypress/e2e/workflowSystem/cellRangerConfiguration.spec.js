@@ -23,55 +23,152 @@
 describe('Check cell ranger configuration page', () => {
   'use strict';
 
-  context('when user is an operator', () => {
+  context('when user is part of a project', () => {
     beforeEach(() => {
-      cy.loginAsOperator();
+      cy.loginAsUser();
     });
 
     it('should visit the index page', () => {
       cy.visit('/cellRangerConfiguration/index');
     });
 
-    it('should select cell ranger version submit it and afterwards invalidate it', () => {
-      cy.visit('/cellRangerConfiguration/index');
+    it('should select cell ranger version and save it', () => {
+      cy.intercept('/cellRangerConfiguration/updateVersion*').as('updateVersion');
+      cy.fixture('cellRangerConfiguration.json').then((fixture) => {
+        cy.get('select#versionSelect').select(fixture.versionToSelect, { force: true });
+        cy.get('input#submit').click();
 
-      cy.get('select#versionSelect').select('cellranger/4.0.0', { force: true });
+        cy.wait('@updateVersion').then((interception) => {
+          expect(interception.response.statusCode).to.equal(302);
+        });
 
-      cy.get('input#submit').click();
-      cy.checkPage('/cellRangerConfiguration/index');
-
-      cy.get('div.annotation-box').should('not.contain.text', 'Please configure the Cell Ranger version to use');
-      cy.get('input[type=submit]#save').should('exist');
-      cy.get('button#executeButton').should('exist');
-
-      cy.get('#invalidateConfig').click();
-      cy.checkPage('/cellRangerConfiguration/index');
-
-      cy.get('div.annotation-box').should('contain.text', 'Please configure the Cell Ranger version to use');
-      cy.get('input[type=submit]#save').should('not.exist');
-      cy.get('button#executeButton').should('not.exist');
+        cy.get('div.annotation-box').should('not.contain.text', 'Please configure the Cell Ranger version to use');
+        cy.get('input[type=submit]#save').should('exist');
+        cy.get('button#executeButton').should('exist');
+        cy.get('div#otpToastBox').contains('stored successfully');
+        cy.get('select#versionSelect').should('have.value', fixture.versionToSelect);
+      });
     });
 
     it('should select cell ranger version, then activate and deactivate automatic running', () => {
       cy.visit('/cellRangerConfiguration/index');
 
-      cy.get('select#versionSelect').select('cellranger/4.0.0', { force: true });
+      cy.intercept('/cellRangerConfiguration/updateAutomaticExecution*').as('updateAutomaticExecution');
 
-      cy.get('input#submit').click();
-      cy.checkPage('/cellRangerConfiguration/index');
+      cy.fixture('cellRangerConfiguration.json').then((fixture) => {
+        cy.get('#updateAutomaticExecution #enableAutoExec').click({ force: true });
+        cy.get('#updateAutomaticExecution #referenceGenomeIndex2')
+          .select(fixture.referenceGenome, { force: true });
+        cy.get('input#save').click();
 
-      cy.get('#updateAutomaticExecution #enableAutoExec').click({force: true});
-      cy.get('#updateAutomaticExecution #referenceGenomeIndex2').select('hg_GRCh38 CELL_RANGER 1.2.0', { force: true });
-      cy.get('button#executeButton').click();
+        cy.wait('@updateAutomaticExecution').then((interception) => {
+          expect(interception.response.statusCode).to.equal(302);
+        });
 
-      cy.checkPage('/cellRangerConfiguration/index');
-      cy.get('#updateAutomaticExecution #enableAutoExec').should('be.checked');
+        cy.get('#updateAutomaticExecution #enableAutoExec').should('be.checked');
 
-      cy.get('#updateAutomaticExecution #enableAutoExec').click({ force: true });
-      cy.get('button#executeButton').click();
+        cy.get('#updateAutomaticExecution #enableAutoExec').click({ force: true });
+        cy.get('input#save').click();
 
-      cy.checkPage('/cellRangerConfiguration/index');
-      cy.get('#updateAutomaticExecution #enableAutoExec').should('not.be.checked');
+        cy.wait('@updateAutomaticExecution').then((interception) => {
+          expect(interception.response.statusCode).to.equal(302);
+        });
+
+        cy.get('#updateAutomaticExecution #enableAutoExec').should('not.be.checked');
+      });
+    });
+
+    it('should search for samples to process and execute cell ranger all except one of them', () => {
+      cy.intercept('/cellRangerConfiguration/createMwp*').as('createMwp');
+      cy.intercept('/cellRangerConfiguration/getIndividualsAndSampleTypesBySeqType*').as('getSamples');
+      const expectedCells = Math.floor(Math.random() * 3000);
+      cy.fixture('cellRangerConfiguration.json').then((fixture) => {
+        cy.get('select#referenceGenomeSelect').select(fixture.referenceGenome, { force: true });
+        cy.get('select#individualSelect').select(fixture.individual, { force: true });
+        cy.wait('@getSamples').then((interception) => {
+          expect(interception.response.statusCode).to.equal(200);
+        });
+
+        cy.get('input#expectedCellsRadio2').click();
+        cy.get('form#sampleForm input[name="expectedCellsValue"]').type(expectedCells);
+
+        cy.get('table#sampleTable tbody tr').eq(1).find('input.tableCheckbox').click();
+        cy.get('table#mwpTable tbody tr').then((mwpTableRowsBefore) => {
+          cy.get('table#sampleTable tbody tr').then((sampleTableRows) => {
+            const cellRunsBefore = mwpTableRowsBefore.length;
+            const samplesSubmitted = sampleTableRows.length - 1;
+
+            cy.get('button#executeButton').click();
+
+            cy.wait('@createMwp').then((interception) => {
+              expect(interception.response.statusCode).to.equal(200);
+              const amountOfSamplesSend = (interception.request.body.match(/samples/g) || []).length;
+              expect(amountOfSamplesSend).to.equal(samplesSubmitted);
+            });
+
+            /** The created mwps should be contained in the table for the existing runs */
+            cy.get('#mwpTable_processing').should('not.be.visible');
+            cy.get('table#mwpTable tbody tr').then((mwpTableRowsAfter) => {
+              expect(mwpTableRowsAfter.length).to.eq(cellRunsBefore + samplesSubmitted);
+            });
+          });
+        });
+      });
+    });
+
+    it('should not be able to invalidate the selected cell ranger version', () => {
+      cy.intercept('/cellRangerConfiguration/updateVersion*').as('updateVersion');
+
+      cy.fixture('cellRangerConfiguration.json').then((fixture) => {
+        cy.get('select#versionSelect').select(0, { force: true });
+        cy.get('input#submit').click();
+
+        cy.wait('@updateVersion').then((interception) => {
+          expect(interception.response.statusCode).to.equal(302);
+        });
+
+        cy.get('div.annotation-box').should('not.contain.text', 'Please configure the Cell Ranger version to use');
+        cy.get('input[type=submit]#save').should('exist');
+        cy.get('button#executeButton').should('exist');
+        cy.get('div#otpToastBox').contains('could not be stored');
+        cy.get('select#versionSelect').should('have.value', fixture.versionToSelect);
+      });
+    });
+  });
+
+  context('when user is a operator', () => {
+    beforeEach(() => {
+      cy.loginAsOperator();
+    });
+
+    it('should be able to visit the page', () => {
+      cy.visit('/cellRangerConfiguration/index');
+    });
+
+    it('should invalidate the selected cell ranger version', () => {
+      cy.intercept('/configurePipeline/invalidateConfig*').as('invalidateConfig');
+      cy.fixture('cellRangerConfiguration.json').then((fixture) => {
+        cy.get('input#invalidateConfig').click();
+        cy.wait('@invalidateConfig').then((interception) => {
+          expect(interception.response.statusCode).to.equal(302);
+        });
+
+        cy.get('div.annotation-box').should('contain.text', 'Please configure the Cell Ranger version to use');
+        cy.get('input[type=submit]#save').should('not.exist');
+        cy.get('button#executeButton').should('not.exist');
+        cy.get('div#otpToastBox').contains('invalidated successfully');
+        cy.get('select#versionSelect').should('not.have.value', fixture.versionToSelect);
+      });
+    });
+  });
+
+  context('when user is not part of a project', () => {
+    beforeEach(() => {
+      cy.loginAsDepartmentHeadUser();
+    });
+
+    it('should not be able to visit the page', () => {
+      cy.checkAccessDenied('/cellRangerConfiguration/index', 404);
     });
   });
 });

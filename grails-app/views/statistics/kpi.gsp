@@ -65,7 +65,7 @@
                 <br>
                 <div class="alert alert-info" role="alert">
                     <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-                    <span class="sr-only">${g.message(code: "start.numbers.info.sign")}</span>
+                    <span class="visually-hidden">${g.message(code: "start.numbers.info.sign")}</span>
                     ${g.message(code: "start.numbers.info.users")}</div>
             </g:if>
             <div class="statistics-box">

@@ -94,7 +94,7 @@
                     <div class="input-group-append path-spinner" style="display: none;">
                         <button class="btn btn-outline-secondary" type="button" disabled>
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                            <span class="sr-only">Loading...</span>
+                            <span class="visually-hidden">Loading...</span>
                         </button>
                     </div>
                     <button class="add-field" type="button">+</button>
@@ -107,7 +107,7 @@
                             <div class="input-group-append path-spinner" style="display: none;">
                                 <button class="btn btn-outline-secondary" type="button" disabled>
                                     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                    <span class="sr-only">Loading...</span>
+                                    <span class="visually-hidden">Loading...</span>
                                 </button>
                             </div>
                             <button class="remove-field" type="button">-</button>
@@ -130,7 +130,7 @@
                     <div class="input-group-append content-spinner" style="display: none;">
                         <button class="btn btn-outline-secondary" type="button" disabled>
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                            <span class="sr-only">Loading...</span>
+                            <span class="visually-hidden">Loading...</span>
                         </button>
                     </div>
                     <button class="add-field" type="button">+</button>

@@ -79,7 +79,7 @@
 
     <div id="alignmentQualityOverviewSpinner" class="text-center" style="display: none">
         <div class="spinner-border" role="status">
-            <span class="sr-only">Loading...</span>
+            <span class="visually-hidden">Loading...</span>
         </div>
     </div>
 </div>

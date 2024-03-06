@@ -507,24 +507,19 @@ class ProjectService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
-    Errors createOrUpdateCellRangerConfig(Project project, SeqType seqType, String programVersion, ReferenceGenomeIndex referenceGenomeIndex) {
+    void createOrUpdateCellRangerConfig(Project project, SeqType seqType, String programVersion, ReferenceGenomeIndex referenceGenomeIndex) {
         Pipeline pipeline = CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.CELL_RANGER))
         ConfigPerProjectAndSeqType latest = getLatestCellRangerConfig(project, seqType)
 
         workflowConfigService.makeObsolete(latest)
-        try {
-            new CellRangerConfig(
-                    project: project,
-                    seqType: seqType,
-                    referenceGenomeIndex: referenceGenomeIndex,
-                    pipeline: pipeline,
-                    programVersion: programVersion,
-                    previousConfig: latest,
-            ).save(flush: true)
-        } catch (ValidationException e) {
-            return e.errors
-        }
-        return null
+        new CellRangerConfig(
+                project: project,
+                seqType: seqType,
+                referenceGenomeIndex: referenceGenomeIndex,
+                pipeline: pipeline,
+                programVersion: programVersion,
+                previousConfig: latest,
+        ).save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")

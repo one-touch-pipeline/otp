@@ -169,7 +169,7 @@ Cypress.Commands.add('clearDownloadsFolder', () => {
   });
 });
 
-Cypress.Commands.add('checkAccessDenied', (url) => {
+Cypress.Commands.add('checkAccessDenied', (url, statusCode) => {
   'use strict';
 
   cy.request({
@@ -177,7 +177,7 @@ Cypress.Commands.add('checkAccessDenied', (url) => {
     followRedirect: false,
     failOnStatusCode: false
   }).then((resp) => {
-    expect(resp.status).to.be.eq(403);
+    expect(resp.status).to.be.eq(statusCode || 403);
   });
 });
 

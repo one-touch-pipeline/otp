@@ -1,0 +1,6 @@
+{
+  "versionToSelect": "cellranger/4.0.0",
+  "referenceGenome": "hg_GRCh38 CELL_RANGER 1.2.0",
+  "individual": "example_2",
+  "expectedCells": 2000
+}

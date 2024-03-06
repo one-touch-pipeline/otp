@@ -33,10 +33,12 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfig
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfigService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.domainFactory.*
+import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.FastqcWorkflowDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.*
@@ -60,7 +62,7 @@ import java.time.temporal.ChronoUnit
 @Rollback
 @Integration
 class ProjectServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore, DomainFactoryProcessingPriority,
-        WorkflowSystemDomainFactory, FastqcWorkflowDomainFactory, UserDomainFactory {
+        WorkflowSystemDomainFactory, FastqcWorkflowDomainFactory, UserDomainFactory, CellRangerFactory {
 
     RemoteShellHelper remoteShellHelper
     ProcessingOptionService processingOptionService
@@ -1356,6 +1358,34 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
             assert resultProject == expiredProject
             assert users == []
         }
+    }
+
+    void "createOrUpdateCellRangerConfig, should not change saved CellRangerConfig when invalid"() {
+        given:
+        setupData()
+        projectService.workflowConfigService = new WorkflowConfigService()
+        Project project = createProject()
+        SeqType seqType = createSeqType()
+        Pipeline pipeline = findOrCreatePipeline()
+        CellRangerConfig cellRangerConfig = createCellRangerConfig([
+                project : project,
+                seqType : seqType,
+                pipeline: pipeline,
+        ])
+
+        when:
+        doWithAuth(ADMIN) {
+            SessionUtils.withNewTransaction {
+                projectService.createOrUpdateCellRangerConfig(project, seqType, "", null)
+            }
+        }
+
+        then:
+        thrown(ValidationException)
+        cellRangerConfig.obsoleteDate == null
+        cellRangerConfig.project == project
+        cellRangerConfig.seqType == seqType
+        cellRangerConfig.pipeline == pipeline
     }
 
     private RoddyConfiguration createRoddySnvConfiguration(Map properties = [:]) {

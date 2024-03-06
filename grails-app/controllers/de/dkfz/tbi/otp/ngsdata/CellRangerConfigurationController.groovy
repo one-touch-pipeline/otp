@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.converters.JSON
 import grails.databinding.BindUsing
 import grails.databinding.SimpleMapDataBindingSource
+import grails.validation.ValidationException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
 
@@ -120,14 +121,16 @@ class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelin
     }
 
     def updateVersion(ConfigureCellRangerSubmitCommand cmd) {
-        updatePipeline(
-                projectService.createOrUpdateCellRangerConfig(projectSelectionService.requestedProject,
-                        cmd.seqType,
-                        cmd.programVersion,
-                        cmd.referenceGenomeIndex),
-                cmd.seqType,
-                cmd.overviewController,
-        )
+        Errors errors = null
+        try {
+            projectService.createOrUpdateCellRangerConfig(projectSelectionService.requestedProject,
+                    cmd.seqType,
+                    cmd.programVersion,
+                    cmd.referenceGenomeIndex)
+        } catch (ValidationException e) {
+            errors = e.errors
+        }
+        updatePipeline(errors, cmd.seqType, cmd.overviewController)
     }
 
     def updateAutomaticExecution(UpdateAutomaticExecutionCommand cmd) {

@@ -200,9 +200,9 @@ trait CellRangerFactory implements IsAlignment {
         }
     }
 
-    CellRangerConfig createCellRangerConfig(Map proper) {
+    CellRangerConfig createCellRangerConfig(Map properties) {
         return createDomainObject(CellRangerConfig, [
                 programVersion: "${nextId}",
-        ] + proper, [:])
+        ] + properties, [:])
     }
 }

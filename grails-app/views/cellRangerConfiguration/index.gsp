@@ -250,7 +250,7 @@
         <button id="executeButton" class="btn btn-primary" type="button">
             ${g.message(code: "cellRanger.execute")}
             <span id="executeSpinner" class="spinner-border spinner-border-sm" hidden role="status" aria-hidden="true">
-                <span class="sr-only">Loading...</span>
+                <span class="visually-hidden">Loading...</span>
             </span>
         </button>
 

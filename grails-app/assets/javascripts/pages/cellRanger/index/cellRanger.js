@@ -207,7 +207,7 @@ $(() => {
 
     $.ajax({
       url: $.otp.createLink({
-        controller: 'CellRangerConfiguration',
+        controller: 'cellRangerConfiguration',
         action: 'createMwp'
       }),
       type: 'POST',
