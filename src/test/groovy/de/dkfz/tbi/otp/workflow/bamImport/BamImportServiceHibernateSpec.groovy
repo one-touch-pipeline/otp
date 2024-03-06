@@ -85,7 +85,7 @@ class BamImportServiceHibernateSpec extends HibernateSpec implements ServiceUnit
     }
 
     private BamImportInstance createImportInstanceHelper(WorkflowCreateState state) {
-        return createImportInstance([
+        return createBamImportInstance([
                 externallyProcessedBamFiles: [
                         DomainFactory.createExternallyProcessedBamFile(),
                         DomainFactory.createExternallyProcessedBamFile(),

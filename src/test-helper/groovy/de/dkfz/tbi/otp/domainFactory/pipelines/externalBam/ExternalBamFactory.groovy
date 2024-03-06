@@ -26,6 +26,7 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.IsAlignment
 import de.dkfz.tbi.otp.ngsdata.SequencingReadType
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.exceptions.NotSupportedException
+import de.dkfz.tbi.otp.workflow.WorkflowCreateState
 
 trait ExternalBamFactory implements IsAlignment {
 
@@ -109,11 +110,12 @@ trait ExternalBamFactory implements IsAlignment {
         ]
     }
 
-    BamImportInstance createImportInstance(Map properties) {
+    BamImportInstance createBamImportInstance(Map properties) {
         return createDomainObject(BamImportInstance, [
                 externallyProcessedBamFiles: { [createBamFile()] as Set },
-                state                            : BamImportInstance.State.NOT_STARTED,
-                linkOperation                    : BamImportInstance.LinkOperation.COPY_AND_KEEP,
+                state                      : BamImportInstance.State.NOT_STARTED,
+                workflowCreateState        : WorkflowCreateState.WAITING,
+                linkOperation              : BamImportInstance.LinkOperation.COPY_AND_KEEP,
         ], properties)
     }
 }

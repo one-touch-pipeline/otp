@@ -137,7 +137,7 @@ class BamImportWorkflowSpec extends AbstractWorkflowSpec implements ExternalBamF
                     fileName    : bamFilePath.fileName,
                     furtherFiles: FURTHER_FILES_LINKED,
             ])
-            bamImportInstance = createImportInstance([
+            bamImportInstance = createBamImportInstance([
                     externallyProcessedBamFiles: [bamFile],
                     workflowCreateState        : WorkflowCreateState.SUCCESS,
                     state                      : BamImportInstance.State.NOT_STARTED,

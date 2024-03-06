@@ -88,7 +88,7 @@ class BamImportCopyJobSpec extends Specification implements DataTest, DomainFact
                 furtherFiles: [SUB_DIRECTORY]
         )
 
-        createImportInstance(
+        createBamImportInstance(
                 externallyProcessedBamFiles: [epmbfWithMd5sum],
                 linkOperation: linkOperation,
         )

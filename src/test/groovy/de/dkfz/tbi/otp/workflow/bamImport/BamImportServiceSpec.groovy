@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflow.bamImport
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactory
@@ -55,7 +56,7 @@ class BamImportServiceSpec extends Specification implements ServiceUnitTest<BamI
                 WorkflowCreateState.WAITING,
                 WorkflowCreateState.WAITING,
         ].each {
-            createImportInstance([
+            createBamImportInstance([
                     workflowCreateState: it
             ])
         }
@@ -65,5 +66,39 @@ class BamImportServiceSpec extends Specification implements ServiceUnitTest<BamI
 
         then:
         count == 2
+    }
+
+    void "changeProcessToWait, should change the state from PROCESSING to WAITING"() {
+        given:
+        BamImportInstance bamImportInstance = createBamImportInstance([
+                workflowCreateState     : WorkflowCreateState.PROCESSING,
+        ])
+
+        when:
+        service.changeProcessToWait()
+
+        then:
+        bamImportInstance.workflowCreateState == WorkflowCreateState.WAITING
+    }
+
+    @Unroll
+    void "changeProcessToWait, should not change state #state"() {
+        given:
+        BamImportInstance bamImportInstance = createBamImportInstance([
+                workflowCreateState     : state,
+        ])
+
+        when:
+        service.changeProcessToWait()
+
+        then:
+        bamImportInstance.workflowCreateState == state
+
+        where:
+        state << [
+                WorkflowCreateState.FAILED,
+                WorkflowCreateState.SUCCESS,
+                WorkflowCreateState.WAITING,
+        ]
     }
 }

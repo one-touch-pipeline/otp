@@ -83,4 +83,19 @@ class BamImportService {
         bamImportDb.workflowCreateState = state
         bamImportDb.save(flush: true)
     }
+
+    /**
+     * Change all BamImportInstance with state processing to state wait. This is meant for the case, OTP is shutdown during an object is processed.
+     * Should only be called during startup
+     */
+    @Transactional(readOnly = false)
+    void changeProcessToWait() {
+        BamImportInstance.findAllWhere([
+                workflowCreateState: WorkflowCreateState.PROCESSING,
+        ]).each { BamImportInstance bamImportInstance ->
+            log.info("Change import ${bamImportInstance.id} from ${WorkflowCreateState.PROCESSING} back " +
+                    "to ${WorkflowCreateState.WAITING}")
+            updateState(bamImportInstance.id, WorkflowCreateState.WAITING)
+        }
+    }
 }

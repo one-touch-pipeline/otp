@@ -152,7 +152,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
     void "test maybe submit, when files have to be link and not yet linked, then create links"() {
         given:
-        BamImportInstance importInstance = createImportInstance(
+        BamImportInstance importInstance = createBamImportInstance(
                 externallyProcessedBamFiles: [epmbfWithMd5sum],
                 linkOperation: BamImportInstance.LinkOperation.LINK_SOURCE,
         )
@@ -186,7 +186,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
     void "test maybe submit, when files have to be link and already linked, then do not create links again"() {
         given:
-        BamImportInstance importInstance = createImportInstance(
+        BamImportInstance importInstance = createBamImportInstance(
                 externallyProcessedBamFiles: [epmbfWithMd5sum],
                 linkOperation: BamImportInstance.LinkOperation.LINK_SOURCE,
         )
@@ -411,7 +411,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
     void "test validate when everything is valid and bam file already has a md5sum"() {
         given:
-        BamImportInstance importInstance = createImportInstance([
+        BamImportInstance importInstance = createBamImportInstance([
                 externallyProcessedBamFiles: [epmbfWithMd5sum],
                 linkOperation                    : BamImportInstance.LinkOperation.COPY_AND_KEEP,
         ])
@@ -435,7 +435,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
     void "test validate when everything is valid and bam file has no md5sum yet"() {
         given:
-        BamImportInstance importInstance = createImportInstance([
+        BamImportInstance importInstance = createBamImportInstance([
                 externallyProcessedBamFiles: [epmbfWithoutMd5sum],
                 linkOperation                    : BamImportInstance.LinkOperation.COPY_AND_KEEP,
         ])
@@ -462,7 +462,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
     void "test validate when everything is valid and bam file was only linked"() {
         given:
-        BamImportInstance importInstance = createImportInstance(
+        BamImportInstance importInstance = createBamImportInstance(
                 externallyProcessedBamFiles: [epmbfWithMd5sum],
                 linkOperation: BamImportInstance.LinkOperation.LINK_SOURCE,
         )

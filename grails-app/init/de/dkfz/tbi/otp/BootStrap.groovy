@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.FastqImportInstanceService
 import de.dkfz.tbi.otp.security.user.UserService
+import de.dkfz.tbi.otp.workflow.bamImport.BamImportService
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowSystemService
 
@@ -42,10 +43,11 @@ class BootStrap {
     SchedulerService schedulerService
     WorkflowSystemService workflowSystemService
     FastqImportInstanceService fastqImportInstanceService
+    BamImportService bamImportService
     FileSystemService fileSystemService
     RemoteShellHelper remoteShellHelper
 
-    def init = { servletContext ->
+    Closure<Void> init = { servletContext ->
         // load the shutdown service
         grailsApplication.mainContext.getBean("shutdownService")
 
@@ -56,6 +58,7 @@ class BootStrap {
         }
 
         fastqImportInstanceService.changeProcessToWait()
+        bamImportService.changeProcessToWait()
 
         if (configService.isJobSystemEnabled()) {
             log.info("JobSystem is enabled")
@@ -76,7 +79,7 @@ class BootStrap {
         JSON.registerObjectMarshaller(Enum) { Enum e -> e.name() }
     }
 
-    def destroy = {
+    Closure<Void> destroy = {
         if (Environment.current == Environment.DEVELOPMENT) {
             // destroy file system to avoid problems on spring dev-tools restart
             fileSystemService.closeFileSystem()

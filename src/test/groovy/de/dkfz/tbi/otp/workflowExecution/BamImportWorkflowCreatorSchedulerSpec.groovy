@@ -58,7 +58,7 @@ class BamImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSched
     }
 
     void setup() {
-        importInstance = createImportInstance([
+        importInstance = createBamImportInstance([
                 externallyProcessedBamFiles: [
                         DomainFactory.createExternallyProcessedBamFile(),
                         DomainFactory.createExternallyProcessedBamFile()
@@ -86,8 +86,8 @@ class BamImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSched
     void "scheduleCreateWorkflow, check if createWorkflowAsync is called or nor for the case that #cases"() {
         given:
         BamImportWorkflowCreatorScheduler scheduler = createWorkflowCreatorScheduler()
-        BamImportInstance importInstanceWaiting = createImportInstance([workflowCreateState: WorkflowCreateState.WAITING])
-        createImportInstance([workflowCreateState: WorkflowCreateState.PROCESSING])
+        BamImportInstance importInstanceWaiting = createBamImportInstance([workflowCreateState: WorkflowCreateState.WAITING])
+        createBamImportInstance([workflowCreateState: WorkflowCreateState.PROCESSING])
 
         when:
         scheduler.scheduleCreateWorkflow()

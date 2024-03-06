@@ -59,7 +59,7 @@ class BamImportInitializationServiceSpec extends Specification
                 DomainFactory.createExternallyProcessedBamFile(),
         ]
 
-        BamImportInstance importInstance = createImportInstance([
+        BamImportInstance importInstance = createBamImportInstance([
                 externallyProcessedBamFiles: bamFiles,
                 workflowCreateState: WorkflowCreateState.WAITING,
         ])

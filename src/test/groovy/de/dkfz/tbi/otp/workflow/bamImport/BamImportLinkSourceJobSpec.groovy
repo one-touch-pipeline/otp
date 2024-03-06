@@ -66,7 +66,7 @@ class BamImportLinkSourceJobSpec extends Specification implements DataTest, BamI
     }
     void "test getLinkMap should return list with entries when link source is true"() {
         given:
-        createImportInstance(externallyProcessedBamFiles: [bamFile], linkOperation: BamImportInstance.LinkOperation.LINK_SOURCE)
+        createBamImportInstance(externallyProcessedBamFiles: [bamFile], linkOperation: BamImportInstance.LinkOperation.LINK_SOURCE)
         Path targetBaseDirFilePath = Paths.get("/source")
         Path sourceBamFilePath = targetBaseDirFilePath.resolve(Paths.get(bamFile.bamFileName))
         Path sourceBaiFilePath = targetBaseDirFilePath.resolve(Paths.get(bamFile.baiFileName))
@@ -88,7 +88,7 @@ class BamImportLinkSourceJobSpec extends Specification implements DataTest, BamI
 
     void "test getLinkMap should return empty list when link source is false"() {
         given:
-        createImportInstance(externallyProcessedBamFiles: [bamFile])
+        createBamImportInstance(externallyProcessedBamFiles: [bamFile])
         job.externallyProcessedBamFileService = Mock(ExternallyProcessedBamFileService)
 
         expect:
