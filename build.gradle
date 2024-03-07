@@ -467,7 +467,7 @@ dependencies {
     implementation 'org.webjars:datatables-plugins:1.13.6'
     implementation 'org.webjars.npm:corejs-typeahead:1.3.1'
     implementation 'org.webjars.npm:chartjs-plugin-datalabels:2.2.0'
-    implementation 'org.webjars.npm:chart.js:4.4.1'
+    implementation 'org.webjars.npm:chart.js:4.4.2'
 }
 
 task buildInfo {
