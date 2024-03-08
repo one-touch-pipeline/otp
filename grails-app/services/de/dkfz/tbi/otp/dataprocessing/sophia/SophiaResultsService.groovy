@@ -23,9 +23,10 @@ package de.dkfz.tbi.otp.dataprocessing.sophia
 
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
+import org.grails.datastore.mapping.query.api.Criteria
+import org.hibernate.sql.JoinType
 
-import de.dkfz.tbi.otp.ngsdata.AbstractAnalysisResultsService
-import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.dataprocessing.AbstractAnalysisResultsService
 
 @CompileDynamic
 @Transactional
@@ -34,14 +35,28 @@ class SophiaResultsService extends AbstractAnalysisResultsService<SophiaInstance
     final Class<SophiaInstance> instanceClass = SophiaInstance
 
     @Override
-    Map getQcData(SophiaInstance analysis) {
-        SophiaQc qc = CollectionUtils.atMostOneElement(SophiaQc.findAllBySophiaInstance(analysis))
+    void appendQcFetchingCriteria(Criteria criteria) {
+    }
+
+    @Override
+    void appendQcProjectionCriteria(Criteria criteria) {
+        criteria.sophiaQc(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
+            property('controlMassiveInvPrefilteringLevel', 'controlMassiveInvPrefilteringLevel')
+            property('tumorMassiveInvFilteringLevel', 'tumorMassiveInvFilteringLevel')
+            property('rnaContaminatedGenesMoreThanTwoIntron', 'rnaContaminatedGenesMoreThanTwoIntron')
+            property('rnaContaminatedGenesCount', 'rnaContaminatedGenesCount')
+            property('rnaDecontaminationApplied', 'rnaDecontaminationApplied')
+        }
+    }
+
+    @Override
+    Map mapQcData(Map data) {
         return [
-                controlMassiveInvPrefilteringLevel: qc?.controlMassiveInvPrefilteringLevel,
-                tumorMassiveInvFilteringLevel: qc?.tumorMassiveInvFilteringLevel,
-                rnaContaminatedGenesMoreThanTwoIntron: qc?.rnaContaminatedGenesMoreThanTwoIntron,
-                rnaContaminatedGenesCount: qc?.rnaContaminatedGenesCount,
-                rnaDecontaminationApplied: qc?.rnaDecontaminationApplied,
+                controlMassiveInvPrefilteringLevel   : data.controlMassiveInvPrefilteringLevel,
+                tumorMassiveInvFilteringLevel        : data.tumorMassiveInvFilteringLevel,
+                rnaContaminatedGenesMoreThanTwoIntron: data.rnaContaminatedGenesMoreThanTwoIntron,
+                rnaContaminatedGenesCount            : data.rnaContaminatedGenesCount,
+                rnaDecontaminationApplied            : data.rnaDecontaminationApplied,
         ]
     }
 }

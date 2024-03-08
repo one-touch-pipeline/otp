@@ -164,7 +164,9 @@ abstract class AbstractBamFile implements CommentableWithProject, Entity {
     QcTrafficLightStatus qcTrafficLightStatus = QcTrafficLightStatus.NOT_RUN_YET
 
     abstract AbstractMergingWorkPackage getMergingWorkPackage()
+
     abstract Set<SeqTrack> getContainedSeqTracks()
+
     abstract AbstractQualityAssessment getQualityAssessment()
 
     static constraints = {
@@ -199,7 +201,7 @@ abstract class AbstractBamFile implements CommentableWithProject, Entity {
     }
 
     BedFile getBedFile() {
-        assert seqType.needsBedFile : "A BED file is only available when needed."
+        assert seqType.needsBedFile: "A BED file is only available when needed."
 
         List<BedFile> bedFiles = BedFile.findAllWhere(
                 referenceGenome: referenceGenome,
@@ -222,7 +224,7 @@ abstract class AbstractBamFile implements CommentableWithProject, Entity {
     }
 
     SampleType getSampleType() {
-        return  sample?.sampleType
+        return sample?.sampleType
     }
 
     SeqType getSeqType() {

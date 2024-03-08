@@ -59,7 +59,7 @@ abstract class BamFilePairAnalysis implements Artefact, CommentableWithProject, 
     SamplePair samplePair
 
     static belongsTo = [
-        samplePair: SamplePair,
+            samplePair: SamplePair,
     ]
 
     /**

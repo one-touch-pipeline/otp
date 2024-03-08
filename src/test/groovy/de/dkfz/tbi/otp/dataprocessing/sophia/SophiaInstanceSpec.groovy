@@ -104,7 +104,7 @@ class SophiaInstanceSpec extends Specification implements DataTest {
         instance.delete(flush: true)
 
         expect:
-        null == SophiaInstance.getLatestValidSophiaInstanceForSamplePair(samplePair)
+        SophiaInstance.getLatestValidSophiaInstanceForSamplePair(samplePair) == null
     }
 
     void "getLatestValidSophiaInstanceForSamplePair, test if two instances exists, return latest instance"() {

@@ -23,9 +23,10 @@ package de.dkfz.tbi.otp.dataprocessing.indelcalling
 
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
+import org.grails.datastore.mapping.query.api.Criteria
+import org.hibernate.sql.JoinType
 
-import de.dkfz.tbi.otp.ngsdata.AbstractAnalysisResultsService
-import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.utils.FormatHelper
 
 @CompileDynamic
@@ -35,25 +36,49 @@ class IndelResultsService extends AbstractAnalysisResultsService<IndelCallingIns
     final Class<IndelCallingInstance> instanceClass = IndelCallingInstance
 
     @Override
-    Map getQcData(IndelCallingInstance analysis) {
-        IndelQualityControl qc = CollectionUtils.atMostOneElement(IndelQualityControl.findAllByIndelCallingInstance(analysis))
-        IndelSampleSwapDetection sampleSwap = CollectionUtils.atMostOneElement(IndelSampleSwapDetection.findAllByIndelCallingInstance(analysis))
+    void appendQcFetchingCriteria(Criteria criteria) {
+    }
+
+    @Override
+    void appendQcProjectionCriteria(Criteria criteria) {
+        criteria.indelQualityControl(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
+            property('numIndels', 'numIndels')
+            property('numIns', 'numIns')
+            property('numDels', 'numDels')
+            property('numSize1_3', 'numSize1_3')
+            property('numDelsSize4_10', 'numSize4_10')
+        }
+        criteria.indelSampleSwapDetection(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
+            property('germlineSmallVarsInBothRare', 'germlineSmallVarsInBothRare')
+            property('somaticSmallVarsInTumor', 'somaticSmallVarsInTumor')
+            property('somaticSmallVarsInControl', 'somaticSmallVarsInControl')
+            property('somaticSmallVarsInTumorCommonInGnomad', 'somaticSmallVarsInTumorCommonInGnomad')
+            property('somaticSmallVarsInControlCommonInGnomad', 'somaticSmallVarsInControlCommonInGnomad')
+            property('somaticSmallVarsInTumorPass', 'somaticSmallVarsInTumorPass')
+            property('somaticSmallVarsInControlPass', 'somaticSmallVarsInControlPass')
+            property('tindaSomaticAfterRescue', 'tindaSomaticAfterRescue')
+            property('tindaSomaticAfterRescueMedianAlleleFreqInControl', 'tindaSomaticAfterRescueMedianAlleleFreqInControl')
+        }
+    }
+
+    @Override
+    Map mapQcData(Map data) {
         return [
-                numIndels: qc?.numIndels ?: "",
-                numIns: qc?.numIns ?: "",
-                numDels: qc?.numDels ?: "",
-                numSize1_3: qc?.numSize1_3 ?: "",
-                numSize4_10: qc?.numDelsSize4_10 ?: "",
-                germlineSmallVarsInBothRare: sampleSwap?.germlineSmallVarsInBothRare != null ? sampleSwap?.germlineSmallVarsInBothRare : "N/A",
-                somaticSmallVarsInTumor: sampleSwap?.somaticSmallVarsInTumor ?: "",
-                somaticSmallVarsInControl: sampleSwap?.somaticSmallVarsInControl ?: "",
-                somaticSmallVarsInTumorCommonInGnomad: sampleSwap?.somaticSmallVarsInTumorCommonInGnomad ?: "",
-                somaticSmallVarsInControlCommonInGnomad: sampleSwap?.somaticSmallVarsInControlCommonInGnomad ?: "",
-                somaticSmallVarsInTumorPass: sampleSwap?.somaticSmallVarsInTumorPass ?: "",
-                somaticSmallVarsInControlPass: sampleSwap?.somaticSmallVarsInControlPass ?: "",
-                tindaSomaticAfterRescue: sampleSwap?.tindaSomaticAfterRescue ?: "",
-                tindaSomaticAfterRescueMedianAlleleFreqInControl: sampleSwap ?
-                        FormatHelper.formatNumber(sampleSwap.tindaSomaticAfterRescueMedianAlleleFreqInControl) : "",
+                numIndels                                       : data.numIndels ?: "",
+                numIns                                          : data.numIns ?: "",
+                numDels                                         : data.numDels ?: "",
+                numSize1_3                                      : data.numSize1_3 ?: "",
+                numSize4_10                                     : data.numSize4_10 ?: "",
+                germlineSmallVarsInBothRare                     : data.germlineSmallVarsInBothRare != null ? data?.germlineSmallVarsInBothRare : "N/A",
+                somaticSmallVarsInTumor                         : data.somaticSmallVarsInTumor ?: "",
+                somaticSmallVarsInControl                       : data.somaticSmallVarsInControl ?: "",
+                somaticSmallVarsInTumorCommonInGnomad           : data.somaticSmallVarsInTumorCommonInGnomad ?: "",
+                somaticSmallVarsInControlCommonInGnomad         : data.somaticSmallVarsInControlCommonInGnomad ?: "",
+                somaticSmallVarsInTumorPass                     : data.somaticSmallVarsInTumorPass ?: "",
+                somaticSmallVarsInControlPass                   : data.somaticSmallVarsInControlPass ?: "",
+                tindaSomaticAfterRescue                         : data.tindaSomaticAfterRescue ?: "",
+                tindaSomaticAfterRescueMedianAlleleFreqInControl: data.tindaSomaticAfterRescueMedianAlleleFreqInControl ?
+                        FormatHelper.formatNumber(data.tindaSomaticAfterRescueMedianAlleleFreqInControl) : "",
         ]
     }
 }

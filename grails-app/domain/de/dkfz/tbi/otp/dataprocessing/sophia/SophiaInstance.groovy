@@ -37,6 +37,14 @@ class SophiaInstance extends BamFilePairAnalysis implements RoddyResult {
             roddyExecutionDirectoryNames: String,
     ]
 
+    static hasOne = [
+            sophiaQc: SophiaQc,
+    ]
+
+    static constraints = {
+        sophiaQc nullable: true
+    }
+
     /**
      * @deprecated use {@link SophiaLinkFileService#getDirectoryPath()} or {@link SophiaWorkFileService#getDirectoryPath()}}
      */
@@ -75,6 +83,6 @@ class SophiaInstance extends BamFilePairAnalysis implements RoddyResult {
 
     static SophiaInstance getLatestValidSophiaInstanceForSamplePair(SamplePair samplePair) {
         return CollectionUtils.atMostOneElement(SophiaInstance.findAllBySamplePairAndWithdrawnAndProcessingState(
-                samplePair, false, AnalysisProcessingStates.FINISHED, [max : 1, sort : "id", order : "desc", ]))
+                samplePair, false, AnalysisProcessingStates.FINISHED, [max: 1, sort: "id", order: "desc",]))
     }
 }

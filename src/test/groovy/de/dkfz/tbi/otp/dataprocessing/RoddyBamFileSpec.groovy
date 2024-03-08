@@ -223,7 +223,7 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
         }
 
         then:
-        100 == roddyBamFile.maximalReadLength
+        roddyBamFile.maximalReadLength == 100
     }
 
     void "test getMaximalReadLength method, two values available for sequenceLength, should return higher value"() {
@@ -243,6 +243,6 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
         roddyBamFile.seqTracks.add(seqTrack)
 
         then:
-        100 == roddyBamFile.maximalReadLength
+        roddyBamFile.maximalReadLength == 100
     }
 }

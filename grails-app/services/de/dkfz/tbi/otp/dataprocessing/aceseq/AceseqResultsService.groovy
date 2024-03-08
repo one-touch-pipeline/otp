@@ -23,9 +23,10 @@ package de.dkfz.tbi.otp.dataprocessing.aceseq
 
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
+import org.grails.datastore.mapping.query.api.Criteria
+import org.hibernate.sql.JoinType
 
-import de.dkfz.tbi.otp.ngsdata.AbstractAnalysisResultsService
-import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.dataprocessing.AbstractAnalysisResultsService
 import de.dkfz.tbi.otp.utils.FormatHelper
 
 @CompileDynamic
@@ -35,15 +36,36 @@ class AceseqResultsService extends AbstractAnalysisResultsService<AceseqInstance
     final Class<AceseqInstance> instanceClass = AceseqInstance
 
     @Override
-    Map getQcData(AceseqInstance analysis) {
-        AceseqQc qc = CollectionUtils.atMostOneElement(AceseqQc.findAllByAceseqInstanceAndNumber(analysis, 1))
+    void appendQcFetchingCriteria(Criteria criteria) {
+        criteria.aceseqQc(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
+            or {
+                isNull('id')
+                eq('number', 1)
+            }
+        }
+    }
+
+    @Override
+    void appendQcProjectionCriteria(Criteria criteria) {
+        criteria.aceseqQc(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
+            property('tcc', 'tcc')
+            property('ploidy', 'ploidy')
+            property('ploidyFactor', 'ploidyFactor')
+            property('goodnessOfFit', 'goodnessOfFit')
+            property('gender', 'gender')
+            property('solutionPossible', 'solutionPossible')
+        }
+    }
+
+    @Override
+    Map mapQcData(Map data) {
         return [
-                tcc             : FormatHelper.formatNumber(qc?.tcc),
-                ploidy          : FormatHelper.formatNumber(qc?.ploidy),
-                ploidyFactor    : qc?.ploidyFactor,
-                goodnessOfFit   : FormatHelper.formatNumber(qc?.goodnessOfFit),
-                gender          : qc?.gender,
-                solutionPossible: qc?.solutionPossible,
+                tcc             : FormatHelper.formatNumber(data?.tcc),
+                ploidy          : FormatHelper.formatNumber(data?.ploidy),
+                ploidyFactor    : data?.ploidyFactor,
+                goodnessOfFit   : FormatHelper.formatNumber(data?.goodnessOfFit),
+                gender          : data?.gender,
+                solutionPossible: data?.solutionPossible,
         ]
     }
 }

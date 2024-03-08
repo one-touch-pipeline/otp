@@ -22,8 +22,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
+import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 
+import de.dkfz.tbi.otp.dataprocessing.PlotType
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelResultsService
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
@@ -42,7 +44,7 @@ class IndelController extends AbstractAnalysisController {
 
     Map plots(BamFilePairAnalysisCommand cmd) {
         if (cmd.hasErrors()) {
-            return response.sendError(404)
+            return response.sendError(HttpStatus.NOT_FOUND.value())
         }
         return indelResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType) ? [
                 id      : cmd.bamFilePairAnalysis.id,
@@ -57,7 +59,7 @@ class IndelController extends AbstractAnalysisController {
 
     def renderPlot(BamFilePairAnalysisCommand cmd) {
         if (cmd.hasErrors()) {
-            return response.sendError(404)
+            return response.sendError(HttpStatus.NOT_FOUND.value())
         }
         List<Path> filePaths = indelResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
         Path file = filePaths.first()

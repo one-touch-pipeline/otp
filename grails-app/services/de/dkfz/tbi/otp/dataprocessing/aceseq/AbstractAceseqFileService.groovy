@@ -24,8 +24,8 @@ package de.dkfz.tbi.otp.dataprocessing.aceseq
 import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.ArtefactFileService
+import de.dkfz.tbi.otp.dataprocessing.PlotType
 import de.dkfz.tbi.otp.dataprocessing.RoddyResultServiceTrait
-import de.dkfz.tbi.otp.ngsdata.PlotType
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.Files

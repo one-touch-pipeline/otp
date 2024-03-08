@@ -19,14 +19,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqResultsService
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
@@ -37,12 +36,13 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvResultsService
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaResultsService
-import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.security.UserAndRoles
 
 @Rollback
 @Integration
-class AbstractAnalysisResultsServiceIntegrationSpec extends Specification implements UserAndRoles {
+class AbstractAnalysisResultsServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore {
 
     AbstractAnalysisResultsService abstractAnalysisResultsService
 
@@ -55,19 +55,24 @@ class AbstractAnalysisResultsServiceIntegrationSpec extends Specification implem
         given:
         setupData()
         BamFilePairAnalysis analysisInstance = DomainFactory."create${analysis}InstanceWithRoddyBamFiles"()
+        DomainFactory."create${analysis}InstanceWithRoddyBamFiles"([
+                samplePair: DomainFactory.createSamplePair(DomainFactory.createMergingWorkPackage([
+                        sample: createSample([
+                                individual: createIndividual(project: analysisInstance.samplePair.project),
+                        ]),
+                ])),
+        ])
+        DomainFactory."create${analysis}InstanceWithRoddyBamFiles"()
         abstractAnalysisResultsService = service.newInstance()
-        abstractAnalysisResultsService.projectService = [
-                getProjectByName: { projectName -> analysisInstance.project }
-        ] as ProjectService
 
         when:
         List callingInstances
         callingInstances = doWithAuth(OPERATOR) {
-            abstractAnalysisResultsService.getCallingInstancesForProject(analysisInstance.samplePair.project.name)
+            abstractAnalysisResultsService.getCallingInstancesForProject(analysisInstance.samplePair.project)
         }
 
         then:
-        callingInstances.size() == 1
+        callingInstances.size() == 2
 
         where:
         service                | analysis       | instance

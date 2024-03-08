@@ -27,6 +27,7 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileAnalysisServiceSpec
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
+import de.dkfz.tbi.otp.dataprocessing.PlotType
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 

@@ -35,6 +35,16 @@ class IndelCallingInstance extends BamFilePairAnalysis implements RoddyResult {
             roddyExecutionDirectoryNames: String,
     ]
 
+    static hasOne = [
+            indelQualityControl     : IndelQualityControl,
+            indelSampleSwapDetection: IndelSampleSwapDetection,
+    ]
+
+    static constraints = {
+        indelSampleSwapDetection nullable: true
+        indelQualityControl nullable: true
+    }
+
     /**
      * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/indel_results/paired/tumor_control/2014-08-25_15h32
      *

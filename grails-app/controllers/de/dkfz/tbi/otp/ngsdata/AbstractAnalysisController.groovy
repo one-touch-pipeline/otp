@@ -22,12 +22,17 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import groovy.transform.ToString
+import groovy.util.logging.Slf4j
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ProjectSelectionService
+import de.dkfz.tbi.otp.dataprocessing.AbstractAnalysisResultsService
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
+import de.dkfz.tbi.otp.dataprocessing.PlotType
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 
+@Slf4j
 abstract class AbstractAnalysisController {
     ProjectSelectionService projectSelectionService
 
@@ -41,15 +46,17 @@ abstract class AbstractAnalysisController {
     }
 
     protected Map getDataTableResultsFromService(AbstractAnalysisResultsService service, Map dataToRender) {
-        Project project = projectSelectionService.requestedProject
-        List data = service.getCallingInstancesForProject(project?.name)
+        LogUsedTimeUtils.logUsedTimeStartEnd(log, "analysis dataTableSource") {
+            Project project = projectSelectionService.requestedProject
+            List data = service.getCallingInstancesForProject(project)
 
-        dataToRender.iTotalRecords = data.size()
-        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        dataToRender.aaData = data
+            dataToRender.iTotalRecords = data.size()
+            dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
+            dataToRender.aaData = data
 
-        dataToRender.archived = (project.state == Project.State.ARCHIVED)
-        dataToRender.deleted = (project.state == Project.State.DELETED)
+            dataToRender.archived = (project.state == Project.State.ARCHIVED)
+            dataToRender.deleted = (project.state == Project.State.DELETED)
+        }
         return dataToRender
     }
 }

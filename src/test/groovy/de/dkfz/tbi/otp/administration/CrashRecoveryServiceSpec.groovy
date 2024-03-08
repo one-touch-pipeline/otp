@@ -198,7 +198,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.markJobsAsFinished(ids, parameters)
 
         then:
-        def e = thrown(PowerAssertionError)
+        PowerAssertionError e = thrown(PowerAssertionError)
         e.message.contains("parameters")
     }
 
@@ -212,7 +212,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.markJobsAsFinished(ids, parameters)
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown(RuntimeException)
         e.message.contains("No ProcessingStep")
     }
 
@@ -226,7 +226,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.markJobsAsFinished(ids, parameters)
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown(RuntimeException)
         e.message == "The system is not in Crash Recovery"
     }
 
@@ -249,7 +249,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.markJobsAsFinished(ids, parameters)
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown(RuntimeException)
         e.message == "ProcessingStep ${ids[0]} has already been restarted"
     }
 
@@ -264,7 +264,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.markJobsAsFinished(processingSteps*.id, parameters)
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown(RuntimeException)
         e.message == "Parameter for type ${parameterTypeList[0].id} has not been set"
     }
 
@@ -279,7 +279,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.markJobsAsFinished(processingSteps*.id, parameters)
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown(RuntimeException)
         e.message == "Parameter for type ${parameterTypeList[0].id} has not been set"
     }
 
@@ -293,7 +293,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.markJobsAsFinished(processingSteps*.id, parameters)
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown(RuntimeException)
         e.message == "ParameterType with id ${parameterTypeList[0].id} does not belong to ProcessingStep with id ${processingSteps[0].id}"
     }
 
@@ -307,7 +307,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.markJobsAsFinished(processingSteps*.id, parameters)
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown(RuntimeException)
         e.message == "ParameterType with id ${parameterTypeList[0].id} is not an output Parameter"
     }
 
@@ -321,7 +321,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.markJobsAsFinished(processingSteps*.id, parameters)
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown(RuntimeException)
         e.message == "Parameter with type id ${parameterTypeList[0].id} and value null cannot be stored"
     }
 
@@ -334,7 +334,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.markJobsAsFinished([processingStep.id], parameters)
 
         then:
-        def e = thrown(ProcessingException)
+        ProcessingException e = thrown(ProcessingException)
         e.message == "Could not create a ${ExecutionState.FINISHED} Update for ProcessingStep ${processingStep.id}"
     }
 
@@ -391,7 +391,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.markJobsAsSucceeded(null, parameters)
 
         then:
-        def e = thrown(PowerAssertionError)
+        PowerAssertionError e = thrown(PowerAssertionError)
         e.message.contains("ids")
     }
 
@@ -405,7 +405,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.markJobsAsSucceeded(ids, parameters)
 
         then:
-        def e = thrown(PowerAssertionError)
+        PowerAssertionError e = thrown(PowerAssertionError)
         e.message.contains("parameters")
     }
 
@@ -419,7 +419,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.markJobsAsSucceeded(ids, parameters)
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown(RuntimeException)
         e.message.contains("No ProcessingStep")
     }
 
@@ -433,7 +433,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.markJobsAsSucceeded(ids, parameters)
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown(RuntimeException)
         e.message == "The system is not in Crash Recovery"
     }
 
@@ -456,7 +456,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.markJobsAsSucceeded(ids, parameters)
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown(RuntimeException)
         e.message == "ProcessingStep ${ids[0]} has already been restarted"
     }
 
@@ -471,7 +471,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.markJobsAsSucceeded(processingSteps*.id, parameters)
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown(RuntimeException)
         e.message == "Parameter for type ${parameterTypeList[0].id} has not been set"
     }
 
@@ -486,7 +486,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.markJobsAsSucceeded(processingSteps*.id, parameters)
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown(RuntimeException)
         e.message == "Parameter for type ${parameterTypeList[0].id} has not been set"
     }
 
@@ -500,7 +500,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.markJobsAsSucceeded(processingSteps*.id, parameters)
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown(RuntimeException)
         e.message == "ParameterType with id ${parameterTypeList[0].id} does not belong to ProcessingStep with id ${processingSteps[0].id}"
     }
 
@@ -514,7 +514,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.markJobsAsSucceeded(processingSteps*.id, parameters)
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown(RuntimeException)
         e.message == "ParameterType with id ${parameterTypeList[0].id} is not an output Parameter"
     }
 
@@ -528,7 +528,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.markJobsAsSucceeded(processingSteps*.id, parameters)
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown(RuntimeException)
         e.message == "Parameter with type id ${parameterTypeList[0].id} and value null cannot be stored"
     }
 
@@ -541,7 +541,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.markJobsAsSucceeded([processingStep.id], parameters)
 
         then:
-        def e = thrown(ProcessingException)
+        ProcessingException e = thrown(ProcessingException)
         e.message == "Could not create a ${ExecutionState.FINISHED} Update for ProcessingStep ${processingStep.id}"
     }
 
@@ -571,7 +571,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.markJobsAsFailed(null, ERROR_MESSAGE)
 
         then:
-        def e = thrown(PowerAssertionError)
+        PowerAssertionError e = thrown(PowerAssertionError)
         e.message.contains("ids")
     }
 
@@ -584,7 +584,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.markJobsAsFailed(ids, null)
 
         then:
-        def e = thrown(PowerAssertionError)
+        PowerAssertionError e = thrown(PowerAssertionError)
         e.message.contains("reason")
     }
 
@@ -597,7 +597,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.markJobsAsFailed(ids, ERROR_MESSAGE)
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown(RuntimeException)
         e.message.contains("No ProcessingStep")
     }
 
@@ -610,7 +610,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.markJobsAsFailed(ids, ERROR_MESSAGE)
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown(RuntimeException)
         e.message == "The system is not in Crash Recovery"
     }
 
@@ -633,7 +633,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.markJobsAsFailed(ids, ERROR_MESSAGE)
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown(RuntimeException)
         e.message == "ProcessingStep ${ids[0]} has already been restarted"
     }
 
@@ -646,7 +646,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.markJobsAsFailed([processingStep.id], ERROR_MESSAGE)
 
         then:
-        def e = thrown(ProcessingException)
+        ProcessingException e = thrown(ProcessingException)
         e.message == "Could not create a ${ExecutionState.FINISHED} Update for ProcessingStep ${processingStep.id}"
     }
 
@@ -678,7 +678,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.restartJobs(null, ERROR_MESSAGE)
 
         then:
-        def e = thrown(PowerAssertionError)
+        PowerAssertionError e = thrown(PowerAssertionError)
         e.message.contains("ids")
     }
 
@@ -691,7 +691,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.restartJobs(ids, null)
 
         then:
-        def e = thrown(PowerAssertionError)
+        PowerAssertionError e = thrown(PowerAssertionError)
         e.message.contains("reason")
     }
 
@@ -704,7 +704,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.restartJobs(ids, ERROR_MESSAGE)
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown(RuntimeException)
         e.message.contains("No ProcessingStep")
     }
 
@@ -717,7 +717,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.restartJobs(ids, ERROR_MESSAGE)
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown(RuntimeException)
         e.message == "The system is not in Crash Recovery"
     }
 
@@ -740,7 +740,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.restartJobs(ids, ERROR_MESSAGE)
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown(RuntimeException)
         e.message == "ProcessingStep ${ids[0]} has already been restarted"
     }
 
@@ -753,7 +753,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.restartJobs([processingStep.id], ERROR_MESSAGE)
 
         then:
-        def e = thrown(ProcessingException)
+        ProcessingException e = thrown(ProcessingException)
         e.message == "Could not create a ${ExecutionState.FINISHED} Update for ProcessingStep ${processingStep.id}"
     }
 
@@ -778,7 +778,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.crashedJobs()
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown(RuntimeException)
         e.message == "Not in Crash Recovery"
     }
 
@@ -814,7 +814,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.getOutputParametersOfJobs(null)
 
         then:
-        def e = thrown(PowerAssertionError)
+        PowerAssertionError e = thrown(PowerAssertionError)
         e.message.contains("ids")
     }
 
@@ -827,7 +827,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.getOutputParametersOfJobs(ids)
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown(RuntimeException)
         e.message.contains("No ProcessingStep")
     }
 
@@ -840,7 +840,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         service.getOutputParametersOfJobs(ids)
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown(RuntimeException)
         e.message == "The system is not in Crash Recovery"
     }
 

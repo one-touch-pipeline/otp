@@ -21,14 +21,24 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.runYapsa
 
-import de.dkfz.tbi.otp.ngsdata.AbstractAnalysisResultsService
+import org.grails.datastore.mapping.query.api.Criteria
+
+import de.dkfz.tbi.otp.dataprocessing.AbstractAnalysisResultsService
 
 class RunYapsaResultsService extends AbstractAnalysisResultsService<RunYapsaInstance> {
 
     final Class<RunYapsaInstance> instanceClass = RunYapsaInstance
 
     @Override
-    Map getQcData(RunYapsaInstance analysis) {
+    void appendQcFetchingCriteria(Criteria criteria) {
+    }
+
+    @Override
+    void appendQcProjectionCriteria(Criteria criteria) {
+    }
+
+    @Override
+    Map mapQcData(Map data) {
         return [:]
     }
 }

@@ -19,16 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
+import groovy.util.logging.Slf4j
+import org.grails.datastore.mapping.query.api.Criteria
 import org.hibernate.criterion.CriteriaSpecification
 import org.hibernate.sql.JoinType
 import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
-import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqService
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
@@ -38,6 +38,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.exceptions.NotSupportedException
@@ -48,6 +49,7 @@ import java.nio.file.Path
 
 @CompileDynamic
 @Transactional
+@Slf4j
 abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
 
     AceseqService aceseqService
@@ -57,8 +59,7 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
     SnvCallingService snvCallingService
     SophiaService sophiaService
 
-    List getCallingInstancesForProject(String projectName) {
-        Project proj = projectService.getProjectByName(projectName)
+    List getCallingInstancesForProject(Project proj) {
         if (!proj) {
             return []
         }
@@ -75,8 +76,10 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
                     }
                 }
             }
+            appendQcFetchingCriteria(delegate)
             resultTransformer(CriteriaSpecification.ALIAS_TO_ENTITY_MAP)
             projections {
+                appendQcProjectionCriteria(delegate)
                 samplePair {
                     mergingWorkPackage1 {
                         sample {
@@ -110,19 +113,19 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
                 config {
                     property("programVersion", 'version')
                 }
-                property('processingState', "processingState")
+                property('processingState', 'processingState')
                 property('id', "instanceId")
-                property('dateCreated', "dateCreated")
+                property('dateCreated', 'dateCreated')
             }
         }
 
         return results.collect { Map properties ->
-            T instance = instanceClass.get(properties.instanceId)
-            properties.putAll(getQcData(instance))
+            properties.putAll(mapQcData(properties))
 
             Collection<String> libPrepKitNames
             if (SeqTypeNames.fromSeqTypeName(properties.seqTypeName)?.isWgbs()) {
                 assert properties.libPrepKit1 == null && properties.libPrepKit2 == null
+                T instance = instanceClass.get(properties.instanceId as Long)
                 libPrepKitNames = instance.containedSeqTracks*.libraryPreparationKit*.name
             } else {
                 libPrepKitNames = [(String) properties.libPrepKit1, (String) properties.libPrepKit2]
@@ -145,7 +148,11 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
 
     abstract Class<T> getInstanceClass()
 
-    abstract Map getQcData(T analysis)
+    abstract Map mapQcData(Map data)
+
+    abstract void appendQcFetchingCriteria(Criteria criteria)
+
+    abstract void appendQcProjectionCriteria(Criteria criteria)
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#callingInstance.project, 'OTP_READ_ACCESS')")
     List<Path> getFiles(BamFilePairAnalysis callingInstance, PlotType plotType) {

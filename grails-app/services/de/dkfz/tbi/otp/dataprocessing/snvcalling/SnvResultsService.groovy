@@ -22,8 +22,9 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import grails.gorm.transactions.Transactional
+import org.grails.datastore.mapping.query.api.Criteria
 
-import de.dkfz.tbi.otp.ngsdata.AbstractAnalysisResultsService
+import de.dkfz.tbi.otp.dataprocessing.AbstractAnalysisResultsService
 
 @Transactional
 class SnvResultsService extends AbstractAnalysisResultsService<AbstractSnvCallingInstance> {
@@ -31,7 +32,15 @@ class SnvResultsService extends AbstractAnalysisResultsService<AbstractSnvCallin
     final Class<AbstractSnvCallingInstance> instanceClass = AbstractSnvCallingInstance
 
     @Override
-    Map getQcData(AbstractSnvCallingInstance analysis) {
+    void appendQcFetchingCriteria(Criteria criteria) {
+    }
+
+    @Override
+    void appendQcProjectionCriteria(Criteria criteria) {
+    }
+
+    @Override
+    Map mapQcData(Map data) {
         return [:]
     }
 }

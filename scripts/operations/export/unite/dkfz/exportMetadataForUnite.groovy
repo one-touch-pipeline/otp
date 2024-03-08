@@ -142,7 +142,7 @@ def snvResults(Project p, Path folder) {
     Path f = folder.resolve("${p.name}_snvResults.tsv")
     f << "PROJECT\tOTP_PID\tOTP_SAMPLE_TYPE\tSEQUENCING_TYPE\tLIBRARY_PREPARATION_KIT(S)\tCREATED_WITH_VERSION\tPROCESSING_DATE\tPROGRESS\n"
 
-    ctx.snvResultsService.getCallingInstancesForProject(p.name).each { snvResult ->
+    ctx.snvResultsService.getCallingInstancesForProject(p).each { snvResult ->
         f << "${p.name}\t${snvResult.individualPid}\t${snvResult.sampleTypes}\t${snvResult.seqType}\t${snvResult.libPrepKits}\t${snvResult.version}\t${snvResult.dateCreated}\t${snvResult.processingState}\n"
     }
 }
@@ -154,7 +154,7 @@ def indelResults(Project p, Path folder) {
             "ALL_SOMATIC_VARIANTS (T)\tALL_SOMATIC_VARIANTS (C)\tSOMATIC_COMMON_IN_gnomAD (T)\tSOMATIC_COMMON_IN_gnomAD (C)\tSOMATIC_PASS (T)\t" +
             "SOMATIC_PASS (C)\t#GERMLINE_VARIANTS\tSOMATIC_RESCUE\tCONTROL_VAF (MEDIAN)\tCREATED_WITH_VERSION\tPROCESSING_DATE\tPROGRESS\n"
 
-    ctx.indelResultsService.getCallingInstancesForProject(p.name).each { indelResults ->
+    ctx.indelResultsService.getCallingInstancesForProject(p).each { indelResults ->
         f << "${p.name}\t${indelResults.individualPid}\t${indelResults.sampleTypes}\t${indelResults.seqType}\t${indelResults.libPrepKits}\t" +
                 "${indelResults.numIndels}\t${indelResults.numIns}\t${indelResults.numDels}\t${indelResults.numSize1_3}\t${indelResults.numSize4_10}\t" +
                 "${indelResults.somaticSmallVarsInTumor}\t${indelResults.somaticSmallVarsInControl}\t${indelResults.somaticSmallVarsInTumorCommonInGnomad}\t" +
@@ -169,7 +169,7 @@ def aceseqResults(Project p, Path folder) {
     Path f = folder.resolve("${p.name}_aceseqResults.tsv")
     f << "PROJECT\tOTP_PID\tOTP_SAMPLE_TYPE\tSEQUENCING_TYPE\tTUMOR CELL CONTENT\tPLOIDY\tGENDER\tCREATED_WITH_VERSION\tPROCESSING_DATE\tPROGRESS\n"
 
-    ctx.aceseqResultsService.getCallingInstancesForProject(p.name).each { aceseqResult ->
+    ctx.aceseqResultsService.getCallingInstancesForProject(p).each { aceseqResult ->
         f << "${p.name}\t${aceseqResult.individualPid}\t${aceseqResult.sampleTypes}\t${aceseqResult.seqType}\t${aceseqResult.tcc}\t${aceseqResult.ploidy}\t" +
                 "${aceseqResult.gender}\t${aceseqResult.version}\t${aceseqResult.dateCreated}\t${aceseqResult.processingState}\n"
     }
@@ -181,7 +181,7 @@ def sophiaResults(Project p, Path folder) {
     f << "PROJECT\tOTP_PID\tOTP_SAMPLE_TYPE\tSEQUENCING_TYPE}\tCONTROL_MASSIVE_INV_PREFILTERING_LEVEL\tTUMOR_MASSIVE_INV_PREFILTERING_LEVEL\t" +
             "RNA_CONTAMINATED_GENES_COUNT\tRNA_DECONTAMINATION_APPLIED\tCREATED_WITH_VERSION\tPROCESSING_DATE\tPROGRESS\n"
 
-    ctx.sophiaResultsService.getCallingInstancesForProject(p.name).each {sophiaResult ->
+    ctx.sophiaResultsService.getCallingInstancesForProject(p).each {sophiaResult ->
         f << "${p.name}\t${sophiaResult.individualPid}\t${sophiaResult.sampleTypes}\t${sophiaResult.seqType}\t" +
                 "${sophiaResult.controlMassiveInvPrefilteringLevel}\t${sophiaResult.tumorMassiveInvFilteringLevel}\t" +
                 "${sophiaResult.rnaContaminatedGenesCount}\t${sophiaResult.rnaDecontaminationApplied}\t${sophiaResult.version}\t" +
@@ -194,7 +194,7 @@ def runYapsaResults(Project p, Path folder) {
     Path f = folder.resolve("${p.name}_runYapsaResults.tsv")
     f << "PROJECT\tOTP_PID\tOTP_SAMPLE_TYPE\tSEQUENCING_TYPE\tLIBRARY_PREPARATION_KIT(S)\tCREATED_WITH_VERSION\tPROCESSING_DATE\tPROGRESS\n"
 
-    ctx.runYapsaResultsService.getCallingInstancesForProject(p.name).each { runYapsaResult ->
+    ctx.runYapsaResultsService.getCallingInstancesForProject(p).each { runYapsaResult ->
         f << "${p.name}\t${runYapsaResult.individualPid}\t${runYapsaResult.sampleTypes}\t${runYapsaResult.seqType}\t${runYapsaResult.libPrepKits}\t" +
                 "${runYapsaResult.version}\t${runYapsaResult.dateCreated}\t${runYapsaResult.processingState}\n"
     }

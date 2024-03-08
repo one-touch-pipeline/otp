@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.converters.JSON
 import org.springframework.security.access.prepost.PreAuthorize
 
+import de.dkfz.tbi.otp.dataprocessing.PlotType
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqResultsService
 import de.dkfz.tbi.otp.utils.DataTableCommand
 

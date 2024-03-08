@@ -131,7 +131,7 @@ class MergingWorkPackageIntegrationSpec extends Specification {
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile(DomainFactory.randomBamFileProperties)
 
         expect:
-        null == ((MergingWorkPackage)(bamFile.workPackage)).bamFileThatIsReadyForFurtherAnalysis
+        ((MergingWorkPackage)(bamFile.workPackage)).bamFileThatIsReadyForFurtherAnalysis == null
     }
 
     void 'getCompleteProcessableBamFileInProjectFolder, when bamFileInProjectFolder set, withdrawn, FileOperationStatus PROCESSED, seqTracks match, returns null'() {
@@ -144,7 +144,7 @@ class MergingWorkPackageIntegrationSpec extends Specification {
         bamFile.workPackage.save(flush: true)
 
         expect:
-        null == ((MergingWorkPackage)(bamFile.workPackage)).bamFileThatIsReadyForFurtherAnalysis
+        ((MergingWorkPackage)(bamFile.workPackage)).bamFileThatIsReadyForFurtherAnalysis == null
     }
 
     void 'getCompleteProcessableBamFileInProjectFolder, when bamFileInProjectFolder set, not withdrawn, FileOperationStatus INPROGRESS, seqTracks match, returns null'() {
@@ -155,7 +155,7 @@ class MergingWorkPackageIntegrationSpec extends Specification {
         bamFile.workPackage.save(flush: true)
 
         expect:
-        null == ((MergingWorkPackage)(bamFile.workPackage)).bamFileThatIsReadyForFurtherAnalysis
+        ((MergingWorkPackage)(bamFile.workPackage)).bamFileThatIsReadyForFurtherAnalysis == null
     }
 
     void 'getCompleteProcessableBamFileInProjectFolder, when bamFileInProjectFolder set, not withdrawn, FileOperationStatus PROCESSED, seqTracks do not match, returns null'() {
@@ -167,6 +167,6 @@ class MergingWorkPackageIntegrationSpec extends Specification {
         bamFile.workPackage.save(flush: true)
 
         expect:
-        null == ((MergingWorkPackage)(bamFile.workPackage)).bamFileThatIsReadyForFurtherAnalysis
+        ((MergingWorkPackage)(bamFile.workPackage)).bamFileThatIsReadyForFurtherAnalysis == null
     }
 }
