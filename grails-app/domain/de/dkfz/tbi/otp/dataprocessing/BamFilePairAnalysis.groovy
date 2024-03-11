@@ -143,4 +143,6 @@ abstract class BamFilePairAnalysis implements Artefact, CommentableWithProject, 
      */
     @Deprecated
     abstract OtpPath getInstancePath()
+
+    abstract ReferenceGenome getReferenceGenome()
 }

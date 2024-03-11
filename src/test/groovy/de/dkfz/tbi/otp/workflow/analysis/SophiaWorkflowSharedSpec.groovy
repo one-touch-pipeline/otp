@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
+import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.sophia.SophiaWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.sophia.SophiaWorkflowShared
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
@@ -37,7 +38,7 @@ class SophiaWorkflowSharedSpec extends Specification implements WorkflowSystemDo
     private WorkflowStep workflowStep
     private SophiaWorkflowShared sophiaWorkflowSharedInstance
     private SophiaInstance sophiaInstance
-    private static final String SOPHIA_OUTPUT = "SOPHIA"
+    private static final String SOPHIA_OUTPUT = AbstractAnalysisWorkflow.ANALYSIS_OUTPUT
 
     @Override
     Class[] getDomainClassesToMock() {

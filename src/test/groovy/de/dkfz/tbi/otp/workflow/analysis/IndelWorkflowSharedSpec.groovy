@@ -26,6 +26,7 @@ import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
+import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.indel.IndelWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.indel.IndelWorkflowShared
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
@@ -36,7 +37,7 @@ class IndelWorkflowSharedSpec extends Specification implements WorkflowSystemDom
     private WorkflowStep workflowStep
     private IndelWorkflowShared indelWorkflowSharedInstance
     private IndelCallingInstance indelInstance
-    private static final String INDEL_OUTPUT = "INDEL"
+    private static final String INDEL_OUTPUT = AbstractAnalysisWorkflow.ANALYSIS_OUTPUT
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -74,5 +75,6 @@ class IndelWorkflowSharedSpec extends Specification implements WorkflowSystemDom
     }
 
     @SuppressWarnings('EmptyClass')
-    class IndelWorkflowSharedInstance implements IndelWorkflowShared { }
+    class IndelWorkflowSharedInstance implements IndelWorkflowShared {
+    }
 }

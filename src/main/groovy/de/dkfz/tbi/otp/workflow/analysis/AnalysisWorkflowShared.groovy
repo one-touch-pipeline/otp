@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflow.analysis
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.WorkflowShared
 import de.dkfz.tbi.otp.workflow.analysis.aceseq.AceseqWorkflow
@@ -39,6 +40,7 @@ trait AnalysisWorkflowShared extends WorkflowShared {
                                                    RunYapsaWorkflow.WORKFLOW]
     public static final String INPUT_TUMOR_BAM = "TUMOR_BAM"
     public static final String INPUT_CONTROL_BAM = "CONTROL_BAM"
+    public static final String ANALYSIS_OUTPUT = AbstractAnalysisWorkflow.ANALYSIS_OUTPUT
 
     @Autowired
     ConcreteArtefactService concreteArtefactService
@@ -51,5 +53,10 @@ trait AnalysisWorkflowShared extends WorkflowShared {
     AbstractBamFile getControlBamFile(WorkflowStep workflowStep) {
         checkWorkflowName(workflowStep, WORKFLOWS)
         return concreteArtefactService.<AbstractBamFile> getInputArtefact(workflowStep, INPUT_CONTROL_BAM)
+    }
+
+    BamFilePairAnalysis getOutputInstance(WorkflowStep workflowStep) {
+        checkWorkflowName(workflowStep, WORKFLOWS)
+        return concreteArtefactService.<BamFilePairAnalysis> getOutputArtefact(workflowStep, ANALYSIS_OUTPUT)
     }
 }

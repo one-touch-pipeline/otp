@@ -32,7 +32,7 @@ trait RunYapsaWorkflowShared extends AnalysisWorkflowShared {
     private static final String WORKFLOW = RunYapsaWorkflow.WORKFLOW
     private static final String SNV_INPUT = "SNV"
     private static final String INDEL_INPUT = "INDEL"
-    private static final String RUNYAPSA_OUTPUT = "RUNYAPSA"
+    private static final String RUN_YAPSA_OUTPUT = RunYapsaWorkflow.ANALYSIS_OUTPUT
 
     RoddySnvCallingInstance getSnvInstance(WorkflowStep workflowStep) {
         checkWorkflowName(workflowStep, WORKFLOW)
@@ -46,6 +46,6 @@ trait RunYapsaWorkflowShared extends AnalysisWorkflowShared {
 
     RunYapsaInstance getRunYapsaInstance(WorkflowStep workflowStep) {
         checkWorkflowName(workflowStep, WORKFLOW)
-        return concreteArtefactService.<RunYapsaInstance> getOutputArtefact(workflowStep, RUNYAPSA_OUTPUT)
+        return concreteArtefactService.<RunYapsaInstance> getOutputArtefact(workflowStep, RUN_YAPSA_OUTPUT)
     }
 }

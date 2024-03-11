@@ -24,16 +24,22 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 import grails.gorm.hibernate.annotation.ManagedEntity
 import org.hibernate.Hibernate
 
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+
 /**
  * @deprecated: succeeded by {@link RoddySnvCallingInstance}
  */
 @Deprecated
 @ManagedEntity
 class SnvCallingInstance extends AbstractSnvCallingInstance {
-
     static constraints = {
         config validator: { val, obj ->
             SnvConfig.isAssignableFrom(Hibernate.getClass(val))
         }
+    }
+
+    @Override
+    ReferenceGenome getReferenceGenome() {
+        return sampleType2BamFile.referenceGenome
     }
 }

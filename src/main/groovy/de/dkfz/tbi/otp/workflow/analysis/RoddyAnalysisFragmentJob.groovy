@@ -21,21 +21,31 @@
  */
 package de.dkfz.tbi.otp.workflow.analysis
 
-import de.dkfz.tbi.otp.workflowExecution.LinearWorkflow
+import groovy.util.logging.Slf4j
+import org.springframework.stereotype.Component
 
-/**
- * Common class for all analysis workflows
- */
-abstract class AbstractAnalysisWorkflow implements LinearWorkflow {
-    public static final String ANALYSIS_OUTPUT = "ANALYSIS_OUTPUT"
+import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
+import de.dkfz.tbi.otp.workflow.jobs.AbstractFragmentJob
+import de.dkfz.tbi.otp.workflowExecution.SingleSelectSelectorExtendedCriteria
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+
+@Component
+@Slf4j
+class RoddyAnalysisFragmentJob extends AbstractFragmentJob implements AnalysisWorkflowShared {
 
     @Override
-    boolean isAlignment() {
-        return false
-    }
+    protected List<SingleSelectSelectorExtendedCriteria> fetchSelectors(WorkflowStep workflowStep) {
+        BamFilePairAnalysis outputAnalysis = getOutputInstance(workflowStep)
 
-    @Override
-    boolean isAnalysis() {
-        return true
+        return [
+                new SingleSelectSelectorExtendedCriteria(
+                        workflowStep.workflowRun.workflow,
+                        workflowStep.workflowRun.workflowVersion,
+                        workflowStep.workflowRun.project,
+                        outputAnalysis.seqType,
+                        outputAnalysis.referenceGenome,
+                        outputAnalysis.seqType.needsBedFile ? outputAnalysis?.sampleType1BamFile?.bedFile?.libraryPreparationKit : null,
+                ),
+        ]
     }
 }

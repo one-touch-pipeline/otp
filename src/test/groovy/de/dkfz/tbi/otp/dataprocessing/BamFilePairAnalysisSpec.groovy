@@ -217,4 +217,9 @@ class MockBamFilePairAnalysis extends BamFilePairAnalysis implements DomainClass
     OtpPath getInstancePath() {
         return new OtpPath("somePath")
     }
+
+    @Override
+    ReferenceGenome getReferenceGenome() {
+        return sampleType1BamFile.referenceGenome
+    }
 }

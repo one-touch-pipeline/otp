@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 trait SnvWorkflowShared extends AnalysisWorkflowShared {
 
     private static final String WORKFLOW = SnvWorkflow.WORKFLOW
-    private static final String SNV_OUTPUT = "SNV"
+    private static final String SNV_OUTPUT = SnvWorkflow.ANALYSIS_OUTPUT
 
     RoddySnvCallingInstance getSnvInstance(WorkflowStep workflowStep) {
         checkWorkflowName(workflowStep, WORKFLOW)

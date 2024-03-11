@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 trait IndelWorkflowShared extends AnalysisWorkflowShared {
 
     private static final String WORKFLOW = IndelWorkflow.WORKFLOW
-    private static final String INDEL_OUTPUT = "INDEL"
+    private static final String INDEL_OUTPUT = IndelWorkflow.ANALYSIS_OUTPUT
 
     IndelCallingInstance getIndelInstance(WorkflowStep workflowStep) {
         checkWorkflowName(workflowStep, WORKFLOW)

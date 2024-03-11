@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
+import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.aceseq.AceseqWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.aceseq.AceseqWorkflowShared
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
@@ -39,7 +40,7 @@ class AceseqWorkflowSharedSpec extends Specification implements WorkflowSystemDo
     private SophiaInstance sophiaInstance
     private AceseqInstance aceseqInstance
     private static final String SOPHIA_INPUT = "SOPHIA"
-    private static final String ACESEQ_OUTPUT = "ACESEQ"
+    private static final String ACESEQ_OUTPUT = AbstractAnalysisWorkflow.ANALYSIS_OUTPUT
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -72,8 +73,6 @@ class AceseqWorkflowSharedSpec extends Specification implements WorkflowSystemDo
 
         then:
         1 * aceseqWorkflowSharedInstance.checkWorkflowName(workflowStep, AceseqWorkflow.WORKFLOW)
-
-        then:
         1 * aceseqWorkflowSharedInstance.concreteArtefactService.getInputArtefact(workflowStep, SOPHIA_INPUT) >> sophiaInstance
     }
 
@@ -86,11 +85,9 @@ class AceseqWorkflowSharedSpec extends Specification implements WorkflowSystemDo
 
         then:
         1 * aceseqWorkflowSharedInstance.checkWorkflowName(workflowStep, AceseqWorkflow.WORKFLOW)
-
-        then:
         1 * aceseqWorkflowSharedInstance.concreteArtefactService.getOutputArtefact(workflowStep, ACESEQ_OUTPUT) >> aceseqInstance
     }
 
     @SuppressWarnings('EmptyClass')
-    class AceseqWorkflowSharedInstance implements AceseqWorkflowShared { }
+    static class AceseqWorkflowSharedInstance implements AceseqWorkflowShared { }
 }

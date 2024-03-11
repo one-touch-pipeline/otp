@@ -19,19 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.analysis.sophia
+package de.dkfz.tbi.otp.domainFactory.workflowSystem
 
-import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
-import de.dkfz.tbi.otp.workflow.analysis.AnalysisWorkflowShared
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.workflow.analysis.aceseq.AceseqWorkflow
+import de.dkfz.tbi.otp.workflowExecution.Workflow
 
-trait SophiaWorkflowShared extends AnalysisWorkflowShared {
+trait AceseqWorkflowDomainFactory extends WorkflowSystemDomainFactory {
 
-    private static final String WORKFLOW = SophiaWorkflow.WORKFLOW
-    private static final String SOPHIA_OUTPUT = SophiaWorkflow.ANALYSIS_OUTPUT
-
-    SophiaInstance getSophiaInstance(WorkflowStep workflowStep) {
-        checkWorkflowName(workflowStep, WORKFLOW)
-        return concreteArtefactService.<SophiaInstance> getOutputArtefact(workflowStep, SOPHIA_OUTPUT)
+    Workflow findOrCreateAceseqWorkflow() {
+        return findOrCreateWorkflow(AceseqWorkflow.WORKFLOW, [beanName: AceseqWorkflow.simpleName.uncapitalize()])
     }
 }

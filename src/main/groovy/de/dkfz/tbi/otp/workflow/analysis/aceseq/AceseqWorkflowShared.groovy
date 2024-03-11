@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflow.analysis.aceseq
 
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
+import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.AnalysisWorkflowShared
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -30,7 +31,7 @@ trait AceseqWorkflowShared extends AnalysisWorkflowShared {
 
     private static final String WORKFLOW = AceseqWorkflow.WORKFLOW
     private static final String SOPHIA_INPUT = "SOPHIA"
-    private static final String ACESEQ_OUTPUT = "ACESEQ"
+    private static final String ACESEQ_OUTPUT = AbstractAnalysisWorkflow.ANALYSIS_OUTPUT
 
     SophiaInstance getSophiaInstance(WorkflowStep workflowStep) {
         checkWorkflowName(workflowStep, WORKFLOW)

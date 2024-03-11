@@ -48,6 +48,7 @@ class RunYapsaInstance extends BamFilePairAnalysis {
         return RunYapsaConfig.get(super.config.id)
     }
 
+    @Override
     ReferenceGenome getReferenceGenome() {
         return sampleType2BamFile.referenceGenome
     }

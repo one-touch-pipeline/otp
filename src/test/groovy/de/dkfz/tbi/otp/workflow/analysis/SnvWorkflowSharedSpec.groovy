@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
+import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.snv.SnvWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.snv.SnvWorkflowShared
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
@@ -37,7 +38,7 @@ class SnvWorkflowSharedSpec extends Specification implements WorkflowSystemDomai
     private WorkflowStep workflowStep
     private SnvWorkflowShared snvWorkflowSharedInstance
     private RoddySnvCallingInstance snvInstance
-    private static final String SNV_OUTPUT = "SNV"
+    private static final String SNV_OUTPUT = AbstractAnalysisWorkflow.ANALYSIS_OUTPUT
 
     @Override
     Class[] getDomainClassesToMock() {

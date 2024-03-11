@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
+import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.runyapsa.RunYapsaWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.runyapsa.RunYapsaWorkflowShared
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
@@ -42,7 +43,7 @@ class RunYapsaWorkflowSharedSpec extends Specification implements WorkflowSystem
     private RunYapsaInstance runYapsaInstance
     private static final String SNV_INPUT = "SNV"
     private static final String INDEL_INPUT = "INDEL"
-    private static final String RUNYAPSA_OUTPUT = "RUNYAPSA"
+    private static final String RUNYAPSA_OUTPUT = AbstractAnalysisWorkflow.ANALYSIS_OUTPUT
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -110,5 +111,6 @@ class RunYapsaWorkflowSharedSpec extends Specification implements WorkflowSystem
     }
 
     @SuppressWarnings('EmptyClass')
-    class RunYapsaWorkflowSharedInstance implements RunYapsaWorkflowShared { }
+    class RunYapsaWorkflowSharedInstance implements RunYapsaWorkflowShared {
+    }
 }
