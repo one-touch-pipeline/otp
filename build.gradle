@@ -39,7 +39,7 @@ buildscript {
 
 plugins {
     id "com.github.monosoul.markdown.page.generator" version "2.4.0.0"
-    id "org.openapi.generator" version "7.3.0"
+    id "org.openapi.generator" version "7.4.0"
     id "com.github.node-gradle.node" version "7.0.2"
     // plugin to calculate coverage
     id 'jacoco'
@@ -417,7 +417,7 @@ dependencies {
     implementation 'org.springframework.security:spring-security-ldap:5.8.10'
     implementation 'org.springframework.security:spring-security-oauth2-client:5.8.10'
 
-    implementation "org.openapitools:openapi-generator-gradle-plugin:7.3.0"
+    implementation "org.openapitools:openapi-generator-gradle-plugin:7.4.0"
 
     integrationTestImplementation sourceSets.testHelper.output
     integrationTestRuntimeOnly sourceSets.testHelper.output
