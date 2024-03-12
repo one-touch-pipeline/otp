@@ -23,10 +23,22 @@ package de.dkfz.tbi.otp.domainFactory.pipelines.analysis
 
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
+import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
+import de.dkfz.tbi.otp.workflow.analysis.sophia.SophiaWorkflow
 
 class SophiaDomainFactory extends AbstractAnalysisQcDomainFactory<SophiaInstance, SophiaQc> {
 
     static final SophiaDomainFactory INSTANCE = new SophiaDomainFactory()
+
+    @Override
+    protected String getWorkflowName() {
+        return SophiaWorkflow.WORKFLOW
+    }
+
+    @Override
+    protected Class<? extends AbstractAnalysisWorkflow> getWorkflowClass() {
+        return SophiaWorkflow
+    }
 
     @Override
     protected Class<SophiaInstance> getInstanceClass() {

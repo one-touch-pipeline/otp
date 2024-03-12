@@ -23,10 +23,22 @@ package de.dkfz.tbi.otp.domainFactory.pipelines.analysis
 
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelQualityControl
+import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
+import de.dkfz.tbi.otp.workflow.analysis.indel.IndelWorkflow
 
 class IndelDomainFactory extends AbstractAnalysisQcDomainFactory<IndelCallingInstance, IndelQualityControl> {
 
     static final IndelDomainFactory INSTANCE = new IndelDomainFactory()
+
+    @Override
+    protected String getWorkflowName() {
+        return IndelWorkflow.WORKFLOW
+    }
+
+    @Override
+    protected Class<? extends AbstractAnalysisWorkflow> getWorkflowClass() {
+        return IndelWorkflow
+    }
 
     @Override
     protected Class<IndelCallingInstance> getInstanceClass() {

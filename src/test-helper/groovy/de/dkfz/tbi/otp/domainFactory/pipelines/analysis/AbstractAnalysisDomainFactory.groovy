@@ -27,13 +27,24 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryHelper
 import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryInstance
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactoryInstance
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
+import de.dkfz.tbi.otp.workflowExecution.Workflow
 
 abstract class AbstractAnalysisDomainFactory<T extends BamFilePairAnalysis> implements DomainFactoryHelper, DomainFactoryCore {
 
     static final String DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY = 'exec_123456_123456789_test_test'
     static final double DEFAULT_COVERAGE = 30.0
+
+    Workflow findOrCreateWorkflow() {
+        return WorkflowSystemDomainFactoryInstance.INSTANCE.findOrCreateWorkflow(workflowName, [beanName: workflowClass.simpleName.uncapitalize()])
+    }
+
+    abstract protected String getWorkflowName()
+
+    abstract protected Class<? extends AbstractAnalysisWorkflow> getWorkflowClass()
 
     ProcessingThresholds createProcessingThresholds(Map properties = [:]) {
         return createDomainObject(ProcessingThresholds, [

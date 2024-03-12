@@ -23,10 +23,22 @@ package de.dkfz.tbi.otp.domainFactory.pipelines.analysis
 
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqQc
+import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
+import de.dkfz.tbi.otp.workflow.analysis.aceseq.AceseqWorkflow
 
 class AceseqDomainFactory extends AbstractAnalysisQcDomainFactory<AceseqInstance, AceseqQc> {
 
     static final AceseqDomainFactory INSTANCE = new AceseqDomainFactory()
+
+    @Override
+    protected String getWorkflowName() {
+        return AceseqWorkflow.WORKFLOW
+    }
+
+    @Override
+    protected Class<? extends AbstractAnalysisWorkflow> getWorkflowClass() {
+        return AceseqWorkflow
+    }
 
     @Override
     protected Class<AceseqInstance> getInstanceClass() {

@@ -22,10 +22,22 @@
 package de.dkfz.tbi.otp.domainFactory.pipelines.analysis
 
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
+import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
+import de.dkfz.tbi.otp.workflow.analysis.runyapsa.RunYapsaWorkflow
 
 class RunYapsaDomainFactory extends AbstractAnalysisDomainFactory<RunYapsaInstance> {
 
     static final RunYapsaDomainFactory INSTANCE = new RunYapsaDomainFactory()
+
+    @Override
+    protected String getWorkflowName() {
+        return RunYapsaWorkflow.WORKFLOW
+    }
+
+    @Override
+    protected Class<? extends AbstractAnalysisWorkflow> getWorkflowClass() {
+        return RunYapsaWorkflow
+    }
 
     @Override
     protected Class<RunYapsaInstance> getInstanceClass() {

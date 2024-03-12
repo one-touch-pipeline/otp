@@ -22,10 +22,22 @@
 package de.dkfz.tbi.otp.domainFactory.pipelines.analysis
 
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
+import de.dkfz.tbi.otp.workflow.analysis.snv.SnvWorkflow
 
 class SnvDomainFactory extends AbstractAnalysisDomainFactory<RoddySnvCallingInstance> {
 
     static final SnvDomainFactory INSTANCE = new SnvDomainFactory()
+
+    @Override
+    protected String getWorkflowName() {
+        return SnvWorkflow.WORKFLOW
+    }
+
+    @Override
+    protected Class<? extends AbstractAnalysisWorkflow> getWorkflowClass() {
+        return SnvWorkflow
+    }
 
     @Override
     protected Class<RoddySnvCallingInstance> getInstanceClass() {

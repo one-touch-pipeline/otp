@@ -27,6 +27,7 @@ import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.AbstractBamFileServiceFactoryService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
@@ -41,6 +42,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 @Transactional
 class RoddyConfigValueService {
 
+    AbstractBamFileServiceFactoryService abstractBamFileServiceFactoryService
     ChromosomeIdentifierSortingService chromosomeIdentifierSortingService
     RawSequenceDataViewFileService rawSequenceDataViewFileService
     ProcessingOptionService processingOptionService
@@ -134,6 +136,64 @@ class RoddyConfigValueService {
         List<String> sortedList = chromosomeIdentifierSortingService.sortIdentifiers(chromosomeNames)
 
         return ["CHROMOSOME_INDICES": "( ${sortedList.join(' ')} )"]
+    }
+
+    Map<String, String> getChromosomeIndexParameterWithoutMitochondrion(ReferenceGenome referenceGenome) {
+        assert referenceGenome
+
+        List<String> chromosomeNames = ReferenceGenomeEntry.findAllByReferenceGenomeAndClassificationInList(referenceGenome,
+                [ReferenceGenomeEntry.Classification.CHROMOSOME])*.name
+        assert chromosomeNames: "No chromosome names could be found for reference genome ${referenceGenome}"
+
+        List<String> sortedList = chromosomeIdentifierSortingService.sortIdentifiers(chromosomeNames)
+
+        return [CHROMOSOME_INDICES: "( ${sortedList.join(' ')} )"]
+    }
+
+    Map<String, String> getAnalysisInputVersion1(BamFilePairAnalysis analysis) {
+        AbstractBamFile bamFileDisease = analysis.sampleType1BamFile
+        AbstractBamFile bamFileControl = analysis.sampleType2BamFile
+
+        Path bamFileDiseasePath = abstractBamFileServiceFactoryService.getService(bamFileDisease).getPathForFurtherProcessing(bamFileDisease)
+        Path bamFileControlPath = abstractBamFileServiceFactoryService.getService(bamFileControl).getPathForFurtherProcessing(bamFileControl)
+
+        return [
+                bamfile_list                     : "${bamFileControlPath};${bamFileDiseasePath}" as String,
+                sample_list                      : "${bamFileControl.sampleType.dirName};${bamFileDisease.sampleType.dirName}" as String,
+                possibleTumorSampleNamePrefixes  : bamFileDisease.sampleType.dirName,
+                possibleControlSampleNamePrefixes: bamFileControl.sampleType.dirName,
+        ]
+    }
+
+    Map<String, String> getAnalysisInputVersion2(BamFilePairAnalysis analysis, Path workDirectory) {
+        AbstractBamFile bamFileDisease = analysis.sampleType1BamFile
+        AbstractBamFile bamFileControl = analysis.sampleType2BamFile
+
+        Path bamFileDiseasePath = linkBamFileInWorkDirectory(bamFileDisease, workDirectory)
+        Path bamFileControlPath = linkBamFileInWorkDirectory(bamFileControl, workDirectory)
+
+        return sampleExtractionVersion2RoddyParameters + [
+                bamfile_list                     : "${bamFileControlPath};${bamFileDiseasePath}" as String,
+                sample_list                      : "${bamFileControl.sampleType.dirName};${bamFileDisease.sampleType.dirName}" as String,
+                possibleTumorSampleNamePrefixes  : bamFileDisease.sampleType.dirName,
+                possibleControlSampleNamePrefixes: bamFileControl.sampleType.dirName,
+        ]
+    }
+
+    private Path linkBamFileInWorkDirectory(AbstractBamFile abstractBamFile, Path workDirectory) {
+        return workDirectory.resolve("${abstractBamFile.sampleType.dirName}_${abstractBamFile.individual.pid}_merged.mdup.bam")
+    }
+
+    /**
+     * Parameters so Roddy properly parses sample type names containing '_'
+     */
+    private Map<String, String> getSampleExtractionVersion2RoddyParameters() {
+        return [
+                selectSampleExtractionMethod           : 'version_2',
+                matchExactSampleName                   : 'true',
+                allowSampleTerminationWithIndex        : 'false',
+                useLowerCaseFilenameForSampleExtraction: 'false',
+        ]
     }
 
     String createMetadataTable(List<SeqTrack> seqTracks) {
