@@ -155,7 +155,7 @@ class LibPrepKitAdapterValidator extends AbstractValueTuplesValidator<MetadataVa
                     context.addProblem(valueTuple.cells, LogLevel.WARNING, "Adapter trimming is requested but reverse complement adapter sequence for library preparation kit '${kit}' is missing.", "Adapter trimming is requested but the reverse complement adapter sequence for at least one library preparation kit is missing.")
                 }
             } else {
-                if (roddyConfigValueService.isAdapterTrimmingUsedForPanCan(mergedFragments) && !kit.adapterFile) {
+                if (roddyConfigValueService.isAdapterTrimmingUsedForPanCancer(mergedFragments) && !kit.adapterFile) {
                     context.addProblem(valueTuple.cells, LogLevel.WARNING, "Adapter trimming is requested but adapter file for library preparation kit '${kit}' is missing.", "Adapter trimming is requested but the adapter file for at least one library preparation kit is missing.")
                 }
             }
