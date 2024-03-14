@@ -406,7 +406,7 @@ dependencies {
     //assets "com.bertramlabs.plugins:sass-asset-pipeline:4.4.0" // will fail the assertCompile task
 
     // JDBC
-    runtimeOnly 'org.postgresql:postgresql:42.7.2'
+    runtimeOnly 'org.postgresql:postgresql:42.7.3'
 
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
