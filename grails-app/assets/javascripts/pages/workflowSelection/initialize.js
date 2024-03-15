@@ -20,18 +20,37 @@
  * SOFTWARE.
  */
 
-/*
-*= require /webjars/bootstrap/5.3.3/css/bootstrap.css
-*= require /webjars/bootstrap-icons/1.11.3/font/bootstrap-icons.css
-*= require /webjars/datatables/1.13.5/css/dataTables.bootstrap5.css
-*= require /webjars/datatables-fixedcolumns/3.2.2/css/fixedColumns.dataTables.scss
-*= require /webjars/datatables-fixedheader/3.2.4/fixedHeader.dataTables.min.css
-*= require /webjars/datatables-buttons/2.4.1/css/buttons.bootstrap5.css
-*= require /webjars/select2/4.0.13/css/select2.css
-*= require /webjars/ttskch__select2-bootstrap4-theme/1.5.2/dist/select2-bootstrap4.css
+$(document).ready(() => {
+  'use strict';
 
-*= require otp.less
-*= require toaster.less
-*= require banner.less
-*= require ../bootstrapped.less
-*/
+  Object.entries($.otp.workflowSelection.addButtons).forEach(([workflowType, addButton]) => {
+    addButton.on('click', () => {
+      $.otp.workflowSelection.saveConfig(workflowType, addButton);
+    });
+  });
+
+  Object.entries($.otp.workflowSelection.selectElements).forEach(([workflowType, selectElements]) => {
+    selectElements.forEach((selectElement) => selectElement.on('change', () => {
+      $.otp.workflowSelection.getPossibleOptions(workflowType);
+    }));
+  });
+
+  Object.entries($.otp.workflowSelection.tables).forEach(([workflowType, table]) => {
+    table.$('.remove-config-btn').on('click', (e) => {
+      $.otp.workflowSelection.removeConfiguration(workflowType, e);
+    });
+
+    /** Initialize possible Options */
+    $.otp.workflowSelection.getPossibleOptions(workflowType);
+  });
+
+  $('#fastqcTable').dataTable({
+    paging: false,
+    info: false
+  });
+
+  $('#mergingCriteriaTable').dataTable({
+    paging: false,
+    info: false
+  });
+});

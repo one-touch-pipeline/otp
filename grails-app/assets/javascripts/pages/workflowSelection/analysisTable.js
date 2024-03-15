@@ -23,58 +23,44 @@
 $(() => {
   'use strict';
 
-  const workflowSelect = $('#alignment-workflow-select');
-  const versionSelect = $('#alignment-version-select');
-  const seqTypeSelect = $('#alignment-seq-type-select');
-  const speciesSelect = $('#alignment-species-select');
-  const refGenomeSelect = $('#alignment-ref-genome-select');
-  const workflowType = 'alignment';
+  const workflowSelect = $('#analysis-workflow-select');
+  const versionSelect = $('#analysis-version-select');
+  const seqTypeSelect = $('#analysis-seq-type-select');
+  const workflowType = 'analysis';
 
-  $.otp.workflowSelection.tables[workflowType] = $('#alignmentTable').DataTable({
+  $.otp.workflowSelection.tables[workflowType] = $('#analysisTable').DataTable({
     paging: false,
     info: false
   });
   $.otp.workflowSelection.selectElements[workflowType] = [
-    workflowSelect, versionSelect, seqTypeSelect, speciesSelect, refGenomeSelect
+    workflowSelect, versionSelect, seqTypeSelect
   ];
-  $.otp.workflowSelection.addButtons[workflowType] = $('#add-alignment-config-btn');
-  $.otp.workflowSelection.saveConfigActions[workflowType] = 'saveAlignmentConfiguration';
+  $.otp.workflowSelection.addButtons[workflowType] = $('#add-analysis-config-btn');
+  $.otp.workflowSelection.saveConfigActions[workflowType] = 'saveAnalysisConfiguration';
   $.otp.workflowSelection.deleteConfigActions[workflowType] = 'deleteConfiguration';
-  $.otp.workflowSelection.optionsActions[workflowType] = 'possibleAlignmentOptions';
+  $.otp.workflowSelection.optionsActions[workflowType] = 'possibleAnalysisOptions';
   $.otp.workflowSelection.optionsMapping[workflowType] = {
     workflowIds: workflowSelect,
     versionIds: versionSelect,
-    seqTypeIds: seqTypeSelect,
-    speciesIds: speciesSelect,
-    refGenomeIds: refGenomeSelect
+    seqTypeIds: seqTypeSelect
   };
   $.otp.workflowSelection.getOptionsFormData[workflowType] = () => {
     const formData = new FormData();
     formData.append('workflow.id', workflowSelect.val());
     formData.append('seqType.id', seqTypeSelect.val());
     formData.append('workflowVersion.id', versionSelect.val());
-    formData.append('referenceGenome.id', refGenomeSelect.val());
-    if (speciesSelect.val()) {
-      speciesSelect.val().forEach((species) => {
-        formData.append('speciesWithStrains', species);
-      });
-    }
     return formData;
   };
   $.otp.workflowSelection.rowDataMapping[workflowType] = (rowData) => ({
     workflow: rowData[0],
     seqType: rowData[1],
-    workflowVersion: rowData[2],
-    referenceGenome: rowData[3],
-    speciesWithStrains: rowData[4]
+    workflowVersion: rowData[2]
   });
   $.otp.workflowSelection.dataToRowMapping[workflowType] = (data) => [
     data.workflow.displayName,
     data.seqType.displayName,
     data.version.displayName,
-    data.refGenome.displayName,
-    data.species.map((specie) => specie.displayName).join(' + '),
-    `<button class="btn float-end btn-primary remove-config-btn" data-ref-genome-selector="${data.refGenSelectorId}"
-         data-version-selector="${data.workflowVersionSelector.id}">Remove Config</button>`
+    `<button class="btn float-end btn-primary remove-config-btn" 
+       data-version-selector="${data.workflowVersionSelector.id}">Remove Config</button>`
   ];
 });

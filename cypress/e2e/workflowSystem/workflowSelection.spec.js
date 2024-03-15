@@ -31,11 +31,12 @@ describe('Check workflow selection page', () => {
     it('should be able to change merging criteria', () => {
       cy.visit('/workflowSelection/index');
 
-      cy.get('table#mergingCriteria .edit-switch').should('exist');
-      cy.get('table#mergingCriteria .edit-switch').first().find('button.edit').click();
-      cy.get('table#mergingCriteria .edit-switch').first().find('select').select('No', { force: true });
-      cy.get('table#mergingCriteria .edit-switch').first().find('button.save').click();
-      cy.get('table#mergingCriteria .edit-switch').first().find('.edit-switch-label').should('contain.text', 'No');
+      cy.get('h2#headingCriteria').click();
+      cy.get('table#mergingCriteriaTable .edit-switch').should('exist');
+      cy.get('table#mergingCriteriaTable .edit-switch').first().find('button.edit').click();
+      cy.get('table#mergingCriteriaTable .edit-switch').first().find('select').select('No', { force: true });
+      cy.get('table#mergingCriteriaTable .edit-switch').first().find('button.save').click();
+      cy.get('table#mergingCriteriaTable .edit-switch').first().find('.edit-switch-label').should('contain.text', 'No');
     });
 
     it('should create alignment configuration and delete it', () => {
@@ -44,40 +45,41 @@ describe('Check workflow selection page', () => {
       cy.intercept('/workflowSelection/possibleAlignmentOptions*').as('possibleOptions');
       cy.intercept('/workflowSelection/saveAlignmentConfiguration*').as('createConfig');
 
+      cy.get('h2#headingAlignment').click();
+
       cy.fixture('workflowSelection.json').then((config) => {
-        cy.get('#alignment-workflow-select').select(config.workflow, { force: true });
+        cy.get('#alignment-workflow-select').select(config.alignment.workflow, { force: true });
         cy.wait('@possibleOptions');
-        cy.get('#alignment-seq-type-select').select(config.seqType, { force: true });
+        cy.get('#alignment-seq-type-select').select(config.alignment.seqType, { force: true });
         cy.wait('@possibleOptions');
-        cy.log(config.version);
-        cy.get('#alignment-version-select').select(config.version.id, { force: true });
+        cy.get('#alignment-version-select').select(config.alignment.version.id, { force: true });
         cy.wait('@possibleOptions');
-        cy.get('#alignment-ref-genome-select').select(config.refGenome, { force: true });
+        cy.get('#alignment-ref-genome-select').select(config.alignment.refGenome, { force: true });
         cy.wait('@possibleOptions');
-        cy.get('#alignment-species-select').select(config.species, { force: true });
+        cy.get('#alignment-species-select').select(config.alignment.species, { force: true });
         cy.wait('@possibleOptions');
 
-        cy.get('button.add-alignment-config-btn').click();
+        cy.get('button#add-alignment-config-btn').click();
         cy.wait('@createConfig').then((interception) => {
           expect(interception.response.statusCode).equal(200);
           const wvSelectorId = interception.response.body.workflowVersionSelector.id;
           const rgSelectorId = interception.response.body.refGenSelectorId;
           const btnSelector = `button[data-version-selector=${wvSelectorId}][data-ref-genome-selector=${rgSelectorId}]`;
-          cy.get(`table#alignment ${btnSelector}`).as('removeBtn');
+          cy.get(`table#alignmentTable ${btnSelector}`).as('removeBtn');
           cy.get('@removeBtn').parent().parent().find('td')
             .as('createdCells');
 
-          cy.get('@createdCells').contains(config.workflow);
-          cy.get('@createdCells').contains(config.seqType);
-          cy.get('@createdCells').contains(config.version.name);
-          cy.get('@createdCells').contains(config.refGenome);
-          cy.get('@createdCells').contains(config.species[0]);
-          cy.get('@createdCells').contains(config.species[1]);
+          cy.get('@createdCells').contains(config.alignment.workflow);
+          cy.get('@createdCells').contains(config.alignment.seqType);
+          cy.get('@createdCells').contains(config.alignment.version.name);
+          cy.get('@createdCells').contains(config.alignment.refGenome);
+          cy.get('@createdCells').contains(config.alignment.species[0]);
+          cy.get('@createdCells').contains(config.alignment.species[1]);
         });
       });
 
       // Should delete the created row again
-      cy.intercept('/workflowSelection/deleteAlignmentConfiguration*').as('deleteConfig');
+      cy.intercept('/workflowSelection/deleteConfiguration*').as('deleteConfig');
 
       cy.get('@removeBtn').click();
       cy.wait('@deleteConfig').then((interception) => {
@@ -87,19 +89,62 @@ describe('Check workflow selection page', () => {
       });
     });
 
-    it('should throw error, when species doesn\'t match reference genome', () => {
+    it('should create analysis configuration and delete it', () => {
       cy.visit('/workflowSelection/index');
 
-      cy.intercept('/workflowSelection/saveAlignmentConfiguration*').as('createConfig');
+      cy.intercept('/workflowSelection/possibleAnalysisOptions*').as('possibleOptions');
+      cy.intercept('/workflowSelection/saveAnalysisConfiguration*').as('createConfig');
+
+      cy.get('h2#headingAnalysis').click();
 
       cy.fixture('workflowSelection.json').then((config) => {
-        cy.get('#alignment-workflow-select').select(config.workflow, { force: true });
-        cy.get('#alignment-seq-type-select').select(config.seqType, { force: true });
-        cy.get('#alignment-version-select').select(config.version.id, { force: true });
-        cy.get('#alignment-ref-genome-select').select(config.refGenome, { force: true });
-        cy.get('#alignment-species-select').select(config.species[0], { force: true });
+        cy.get('#analysis-workflow-select').select(config.analysis.workflow, { force: true });
+        cy.wait('@possibleOptions');
+        cy.get('#analysis-seq-type-select').select(config.analysis.seqType, { force: true });
+        cy.wait('@possibleOptions');
+        cy.get('#analysis-version-select').select(config.analysis.version.id, { force: true });
+        cy.wait('@possibleOptions');
 
-        cy.get('button.add-alignment-config-btn').click();
+        cy.get('button#add-analysis-config-btn').click();
+        cy.wait('@createConfig').then((interception) => {
+          expect(interception.response.statusCode).equal(200);
+          const wvSelectorId = interception.response.body.workflowVersionSelector.id;
+          const btnSelector = `button[data-version-selector=${wvSelectorId}]`;
+          cy.get(`table#analysisTable ${btnSelector}`).as('removeBtn');
+          cy.get('@removeBtn').parent().parent().find('td')
+            .as('createdCells');
+
+          cy.get('@createdCells').contains(config.analysis.workflow);
+          cy.get('@createdCells').contains(config.analysis.seqType);
+          cy.get('@createdCells').contains(config.analysis.version.name);
+        });
+      });
+
+      // Should delete the created row again
+      cy.intercept('/workflowSelection/deleteConfiguration*').as('deleteConfig');
+
+      cy.get('@removeBtn').click();
+      cy.wait('@deleteConfig').then((interception) => {
+        expect(interception.response.statusCode).equal(200);
+
+        cy.get('@removeBtn').should('not.exist');
+      });
+    });
+
+    it('should throw error while saving alignment config, when species doesnt match reference genome', () => {
+      cy.visit('/workflowSelection/index');
+      cy.intercept('/workflowSelection/saveAlignmentConfiguration*').as('createConfig');
+
+      cy.get('#headingAlignment').click();
+
+      cy.fixture('workflowSelection.json').then((config) => {
+        cy.get('#alignment-workflow-select').select(config.alignment.workflow, { force: true });
+        cy.get('#alignment-seq-type-select').select(config.alignment.seqType, { force: true });
+        cy.get('#alignment-version-select').select(config.alignment.version.id, { force: true });
+        cy.get('#alignment-ref-genome-select').select(config.alignment.refGenome, { force: true });
+        cy.get('#alignment-species-select').select(config.alignment.species[0], { force: true });
+
+        cy.get('button#add-alignment-config-btn').click();
         cy.wait('@createConfig').then((interception) => {
           expect(interception.response.statusCode).equal(400);
         });
@@ -107,7 +152,7 @@ describe('Check workflow selection page', () => {
     });
   });
 
-  context('when user is normal user', () => {
+  context('when user is normal user with project access', () => {
     beforeEach(() => {
       cy.loginAsUser();
     });
@@ -115,18 +160,29 @@ describe('Check workflow selection page', () => {
     it('should be able to see workflow versions and merging criteria, but no buttons to change them', () => {
       cy.visit('/workflowSelection/index');
 
-      cy.get('table#alignment .edit-switch').should('not.exist');
-      cy.get('table#alignment tr').should('have.length.greaterThan', 3);
+      cy.get('table#alignmentTable button').should('not.exist');
+      cy.get('table#alignmentTable tr').should('have.length.greaterThan', 3);
 
-      cy.get('table#mergingCriteria .edit-switch').should('not.exist');
-      cy.get('table#mergingCriteria tr').should('have.length.greaterThan', 3);
+      cy.get('table#analysisTable button').should('not.exist');
+      cy.get('table#analysisTable tr').should('have.length.greaterThan', 1);
+
+      cy.get('table#mergingCriteriaTable .edit-switch').should('not.exist');
+      cy.get('table#mergingCriteriaTable button').should('not.exist');
+      cy.get('table#mergingCriteriaTable tr').should('have.length.greaterThan', 3);
 
       cy.get('#alignment-workflow-select').should('not.exist');
       cy.get('#alignment-seq-type-select').should('not.exist');
       cy.get('#alignment-version-select').should('not.exist');
       cy.get('#alignment-ref-genome-select').should('not.exist');
       cy.get('#alignment-species-select').should('not.exist');
-      cy.get('#remove-alignment-config-btn').should('not.exist');
+      cy.get('#analysis-workflow-select').should('not.exist');
+      cy.get('#analysis-seq-type-select').should('not.exist');
+      cy.get('#analysis-version-select').should('not.exist');
+      cy.get('#analysis-ref-genome-select').should('not.exist');
+      cy.get('#analysis-species-select').should('not.exist');
+      cy.get('.remove-config-btn').should('not.exist');
+      cy.get('#add-alignment-config-btn').should('not.exist');
+      cy.get('#add-analysis-config-btn').should('not.exist');
     });
   });
 });

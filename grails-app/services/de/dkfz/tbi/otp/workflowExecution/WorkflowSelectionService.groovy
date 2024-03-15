@@ -28,7 +28,6 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
-import de.dkfz.tbi.otp.project.Project
 
 @Transactional
 class WorkflowSelectionService {
@@ -39,21 +38,25 @@ class WorkflowSelectionService {
     WorkflowVersionService workflowVersionService
     ReferenceGenomeService referenceGenomeService
 
-    WorkflowSelectionSelectorDTO createOrUpdate(Project project, SeqType seqType, WorkflowVersion version,
-                                                List<SpeciesWithStrain> species, Workflow workflow, ReferenceGenome refGenome) {
-        WorkflowVersionSelector wvSelector = workflowVersionSelectorService.createOrUpdate(project, seqType, version)
-        ReferenceGenomeSelector rgSelector = referenceGenomeSelectorService.createOrUpdate(project, seqType, species, workflow, refGenome)
-        return new WorkflowSelectionSelectorDTO([wvSelector: wvSelector, rgSelector: rgSelector])
-    }
-
     void deleteAndDeprecateSelectors(WorkflowVersionSelector wvSelector, ReferenceGenomeSelector rgSelector) {
-        workflowVersionSelectorService.deprecateSelectorIfUnused(wvSelector)
-        referenceGenomeSelectorService.deleteSelector(rgSelector)
+        if (wvSelector) {
+            workflowVersionSelectorService.deprecateSelectorIfUnused(wvSelector)
+        }
+        if (rgSelector) {
+            referenceGenomeSelectorService.deleteSelector(rgSelector)
+        }
     }
 
     WorkflowSelectionOptionsDTO getPossibleAlignmentOptions(WorkflowSelectionOptionDTO option) {
-        List<Workflow> workflows = (option.workflow && option.workflowVersion) ? [option.workflowVersion.workflow] :
-                workflowService.findAllAlignmentWorkflows()
+        return getPossibleOptions(option) { workflowService.findAllAlignmentWorkflows() }
+    }
+
+    WorkflowSelectionOptionsDTO getPossibleAnalysisOptions(WorkflowSelectionOptionDTO option) {
+        return getPossibleOptions(option) { workflowService.findAllAnalysisWorkflows() }
+    }
+
+    WorkflowSelectionOptionsDTO getPossibleOptions(WorkflowSelectionOptionDTO option, Closure<List<Workflow>> workflowClosure) {
+        List<Workflow> workflows = (option.workflow && option.workflowVersion) ? [option.workflowVersion.workflow] : workflowClosure()
         List<WorkflowVersion> workflowVersions = option.workflow ? workflowVersionService.findAllByWorkflow(option.workflow) :
                 workflowVersionService.findAllByWorkflows(workflows)
         if (option.workflowVersion) {
@@ -110,12 +113,6 @@ class WorkflowSelectionService {
                 refGenomes      : refGenomes,
         ])
     }
-}
-
-@TupleConstructor
-class WorkflowSelectionSelectorDTO {
-    WorkflowVersionSelector wvSelector
-    ReferenceGenomeSelector rgSelector
 }
 
 @TupleConstructor

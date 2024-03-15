@@ -28,7 +28,7 @@ describe('Check projectSeqPlatformGroup page', () => {
       cy.intercept('/projectSeqPlatformGroup/update*').as('updateProjectSeqPlatformGroup');
       cy.loginAsOperator();
       cy.visit('/workflowSelection/index');
-      cy.get('table#mergingCriteria tr td').find('a').first().click();
+      cy.get('table#mergingCriteriaTable tr td').find('a').first().click({ force: true });
     });
 
     it('should visit the index page', () => {
@@ -78,7 +78,7 @@ describe('Check projectSeqPlatformGroup page', () => {
       cy.intercept('/projectSeqPlatformGroup/searchForSeqPlatformGroups*').as('searchForSeqPlatformGroups');
       cy.intercept('/projectSeqPlatformGroup/copySeqPlatformGroup*').as('copySeqPlatformGroup');
       cy.visit('/workflowSelection/index');
-      cy.get('table#mergingCriteria tbody tr').last().find('a').click();
+      cy.get('table#mergingCriteriaTable tbody tr').last().find('a').click({ force: true });
 
       cy.wait('@projectSeqPlatformGroupIndex');
 
@@ -152,10 +152,11 @@ describe('Check projectSeqPlatformGroup page', () => {
       cy.get('select#useSeqPlatformGroup').select('USE_OTP_DEFAULT', { force: true });
 
       cy.wait('@updateProjectSeqPlatformGroup');
-
       cy.get('input#libPrepKit').check();
+
       cy.visit('/workflowSelection/index');
-      cy.get('table#mergingCriteria tbody tr').last().find('a').click();
+      cy.get('#headingCriteria').click();
+      cy.get('table#mergingCriteriaTable tbody tr').last().find('a').click();
 
       cy.wait('@projectSeqPlatformGroupIndex');
 
