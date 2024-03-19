@@ -33,15 +33,8 @@ class AceseqInstance extends BamFilePairAnalysis implements RoddyResult {
 
     static hasMany = [
             roddyExecutionDirectoryNames: String,
+            aceseqQcs: AceseqQc,
     ]
-
-    static hasOne = [
-            aceseqQc: AceseqQc,
-    ]
-
-    static constraints = {
-        aceseqQc nullable: true
-    }
 
     /**
      * Example:

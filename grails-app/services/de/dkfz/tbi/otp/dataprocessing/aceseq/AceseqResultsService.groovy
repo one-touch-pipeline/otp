@@ -37,7 +37,7 @@ class AceseqResultsService extends AbstractAnalysisResultsService<AceseqInstance
 
     @Override
     void appendQcFetchingCriteria(Criteria criteria) {
-        criteria.aceseqQc(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
+        criteria.aceseqQcs(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
             or {
                 isNull('id')
                 eq('number', 1)
@@ -47,7 +47,7 @@ class AceseqResultsService extends AbstractAnalysisResultsService<AceseqInstance
 
     @Override
     void appendQcProjectionCriteria(Criteria criteria) {
-        criteria.aceseqQc(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
+        criteria.aceseqQcs(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
             property('tcc', 'tcc')
             property('ploidy', 'ploidy')
             property('ploidyFactor', 'ploidyFactor')
