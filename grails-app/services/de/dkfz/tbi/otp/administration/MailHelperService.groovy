@@ -45,7 +45,7 @@ class MailHelperService {
 
     @Transactional(readOnly = true)
     List<Mail> fetchMailsInWaiting() {
-        return Mail.findAllWhere([state: Mail.State.WAITING])
+        return Mail.findAllWhere([state: Mail.State.WAITING], [order:  'id'])
     }
 
     Mail saveErrorMailInNewTransaction(String subject, String content) {
