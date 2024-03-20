@@ -116,6 +116,7 @@ class MailHelperService {
 
         if (mail.id) {
             mail.sendDateTime = configService.zonedDateTime
+            mail.save(flush: true)
             changeMailState(mail, Mail.State.SENT)
         }
     }
