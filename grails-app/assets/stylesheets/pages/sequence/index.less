@@ -20,38 +20,19 @@
  * SOFTWARE.
  */
 
-describe('Check fastqc results page', () => {
-  'use strict';
+#sequenceTable {
+    td:nth-child(2) {
+        max-width: 20ch;
+    }
+    td:nth-child(9) {
+        max-width: 100px;
+    }
+    td:nth-child(10) {
+        min-width: 60px;
+        max-width: 60px;
+    }
+}
 
-  context('when user is an operator', () => {
-    beforeEach(() => {
-      cy.loginAsOperator();
-    });
-
-    it('should visit some show pages via the sequence index page', () => {
-      cy.visit('/sequence/index');
-      cy.get('table#sequenceTable tbody').find('tr').eq(3)
-        .find('td')
-        .eq(14)
-        .contains('R1')
-        .click();
-      cy.checkPage('/fastqcResults/show/');
-
-      cy.visit('/sequence/index');
-      cy.get('table#sequenceTable tbody').find('tr').eq(22)
-        .find('td')
-        .eq(14)
-        .contains('R1')
-        .click();
-      cy.checkPage('/fastqcResults/show/');
-
-      cy.visit('/sequence/index');
-      cy.get('table#sequenceTable tbody').find('tr').eq(12)
-        .find('td')
-        .eq(14)
-        .contains('R2')
-        .click();
-      cy.checkPage('/fastqcResults/show/');
-    });
-  });
-});
+.content-box {
+    margin: 50px 12px 12px;
+}

@@ -47,6 +47,7 @@ SELECT st.id                                                                    
        st.has_original_bam,
        st.problem,
        st.single_cell_well_label,
+       st.sample_identifier                                                                                       AS sample_name,
        lpk.name                                                                                                   AS library_preparation_kit,
        at.name                                                                                                    AS antibody_target,
        r.name,

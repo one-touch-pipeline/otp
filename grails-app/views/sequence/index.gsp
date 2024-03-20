@@ -29,9 +29,11 @@
     <asset:javascript src="common/DataTableFilter.js"/>
     <asset:javascript src="pages/sequence/index/datatable.js"/>
     <asset:javascript src="pages/sequence/index/index.js"/>
+    <asset:stylesheet src="pages/sequence/index.less"/>
 </head>
 
 <body>
+<div class="content-box">
     <input type="hidden" id="showRunLinks" value="${showRunLinks}"/>
 
     <g:render template="/templates/dataTableFilter" model="[filterTree: filterTree]"/>
@@ -43,5 +45,6 @@
     <div class="otpDataTables">
         <otp:dataTable codes="${tableHeader}" id="sequenceTable"/>
     </div>
+</div>
 </body>
 </html>

@@ -42,7 +42,7 @@ describe('Check statistics page', () => {
       cy.get('#sequenceTable_processing').should('exist');
       cy.get('div#sequenceTable_wrapper button').contains('Download').click();
       cy.checkDownloadByContent('Sequence_Export', '.csv', [
-        'Project', 'Patient ID', 'Sample Type', 'Seq. Type', 'Sequencing Read Type', 'Single Cell',
+        'Project', 'Patient ID', 'Sample Type', 'Seq. Type', 'Sequencing Read Type', 'Single Cell', 'Sample Name',
         'Seq. Center', 'Library Prep. Kit', 'Antibody Target,', 'Run,', 'Lane,', 'Library,',
         'Single Cell Well Label', 'ILSe,', 'Known Issues', 'File Exists', 'File Archived', 'Date,',
         'Withdrawn,', 'Species Common Name', 'Scientific Name', 'Strain,', 'Mixed In Species']);

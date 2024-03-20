@@ -128,6 +128,7 @@ $.otp.sequence = {
                 row.seqTypeDisplayName,
                 row.libraryLayout,
                 row.singleCell,
+                row.sampleName,
                 row.seqCenterName,
                 row.libraryPreparationKit ?
                   `<span title="${row.libraryPreparationKit}">${row.libraryPreparationKit}</span>` : '',
@@ -167,7 +168,7 @@ $.otp.sequence = {
         });
       },
       fnRowCallback(nRow) {
-        const fastqc = $('td:eq(13)', nRow);
+        const fastqc = $('td:eq(14)', nRow);
         if ($('a', fastqc).length > 0) {
           fastqc.addClass('true');
           if ($('span', fastqc).length > 0) {
@@ -178,14 +179,16 @@ $.otp.sequence = {
           fastqc.addClass('false');
           fastqc.text('');
         }
-        const contamination = $('td:eq(15)', nRow);
+
+        const contamination = $('td:eq(16)', nRow);
         if (contamination.text() === '') {
           contamination.attr('title', 'No known problems');
           contamination.addClass('VALID');
         } else {
           contamination.addClass('warning');
         }
-        const fileExists = $('td:eq(16)', nRow);
+
+        const fileExists = $('td:eq(17)', nRow);
         const fileExistsWithdrawn = $('td:eq(16) span', nRow);
         if (fileExists.text() === 'true' || fileExistsWithdrawn.text() === 'true') {
           fileExists.addClass('VALID');
@@ -195,7 +198,7 @@ $.otp.sequence = {
         fileExists.attr('title', fileExists.text());
         fileExists.text('');
 
-        const fileArchived = $('td:eq(17)', nRow);
+        const fileArchived = $('td:eq(18)', nRow);
         if (fileArchived.text() === 'true') {
           fileArchived.addClass('VALID');
         } else {

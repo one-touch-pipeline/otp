@@ -2064,6 +2064,7 @@ class DomainFactory {
                 projectName        : "projectName_${counter++}",
                 projectDirName     : "projectDirName_${counter++}",
                 qualityEncoding    : SeqTrack.QualityEncoding.UNKNOWN,
+                sampleName         : "sampleName_${counter++}",
                 sampleTypeName     : "sampleTypeName_${counter++}",
                 seqCenterDirName   : "seqCenterDirName_${counter++}",
                 seqCenterName      : "seqCenterName_${counter++}",
