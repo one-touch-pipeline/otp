@@ -91,6 +91,7 @@ class MailHelperService {
         if (!configService.otpSendsMails()) {
             return
         }
+        mail.refresh()
         logMail(mail)
 
         String footer = footerText
