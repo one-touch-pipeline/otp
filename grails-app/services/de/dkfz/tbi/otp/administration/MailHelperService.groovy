@@ -121,6 +121,7 @@ class MailHelperService {
     }
 
     void changeMailState(Mail mail, Mail.State state) {
+        mail.refresh()
         mail.state = state
         mail.save(flush: true)
     }
