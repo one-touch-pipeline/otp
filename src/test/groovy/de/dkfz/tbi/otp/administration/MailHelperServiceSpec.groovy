@@ -29,14 +29,12 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.HelperUtils
-import de.dkfz.tbi.otp.workflowExecution.WorkflowSystemService
 
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -214,8 +212,6 @@ class MailHelperServiceSpec extends Specification implements DataTest, DomainFac
         setupData()
         String footer = 'footer'
         mailHelperService.processingOptionService = Mock(ProcessingOptionService)
-        mailHelperService.workflowSystemService = Mock(WorkflowSystemService)
-        configService.addOtpProperty(OtpProperty.CONFIG_EMAIL_ENABLED, mailSystemEnabled.toString())
         configService.fixClockTo(SEND_DATE_TIME)
         Mail mail = createMail([:], saveMail)
 
@@ -223,7 +219,6 @@ class MailHelperServiceSpec extends Specification implements DataTest, DomainFac
         mailHelperService.sendMailByScheduler(mail)
 
         then:
-        1 * mailHelperService.workflowSystemService.enabled >> workflowSystemEnabled
         processingOptionCallCount * mailHelperService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER) >> SENDER
         processingOptionCallCount * mailHelperService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_REPLY_TO) >> REPLY_TO
         processingOptionCallCount * mailHelperService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_FOOTER) >> footer
@@ -233,15 +228,9 @@ class MailHelperServiceSpec extends Specification implements DataTest, DomainFac
         mail.state == expectedState
 
         where:
-        workflowSystemEnabled | mailSystemEnabled | saveMail || processingOptionCallCount | expectedState      | expectedDateTime
-        true                  | true              | true     || 1                         | Mail.State.SENT    | SEND_DATE_TIME
-        false                 | true              | true     || 0                         | Mail.State.WAITING | null
-        true                  | false             | true     || 0                         | Mail.State.WAITING | null
-        false                 | false             | true     || 0                         | Mail.State.WAITING | null
-        true                  | true              | false    || 1                         | Mail.State.WAITING | null
-        false                 | true              | false    || 0                         | Mail.State.WAITING | null
-        true                  | false             | false    || 0                         | Mail.State.WAITING | null
-        false                 | false             | false    || 0                         | Mail.State.WAITING | null
+        saveMail || processingOptionCallCount | expectedState      | expectedDateTime
+        true     || 1                         | Mail.State.SENT    | SEND_DATE_TIME
+        false    || 1                         | Mail.State.WAITING | null
     }
 
     void "changeMailState, should change mail state and save it"() {

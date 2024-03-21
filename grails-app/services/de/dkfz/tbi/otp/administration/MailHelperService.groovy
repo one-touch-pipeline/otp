@@ -30,7 +30,6 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.utils.SessionUtils
-import de.dkfz.tbi.otp.workflowExecution.WorkflowSystemService
 
 import java.time.ZonedDateTime
 
@@ -41,11 +40,10 @@ class MailHelperService {
     ConfigService configService
     ProcessingOptionService processingOptionService
     SecurityService securityService
-    WorkflowSystemService workflowSystemService
 
     @Transactional(readOnly = true)
     List<Mail> fetchMailsInWaiting() {
-        return Mail.findAllWhere([state: Mail.State.WAITING], [order:  'id'])
+        return Mail.findAllWhere([state: Mail.State.WAITING], [order: 'id'])
     }
 
     Mail saveErrorMailInNewTransaction(String subject, String content) {
@@ -85,12 +83,6 @@ class MailHelperService {
     }
 
     void sendMailByScheduler(Mail mail) {
-        if (!workflowSystemService.enabled) {
-            return
-        }
-        if (!configService.otpSendsMails()) {
-            return
-        }
         mail.refresh()
         logMail(mail)
 
@@ -103,12 +95,13 @@ class MailHelperService {
         mailService.sendMail {
             from senderAddressFetch
             replyTo replyToAddressFetched
-            to mail.to
+            // the dsl require list, otherwise exception are thrown
+            to mail.to.toList()
             if (mail.cc) {
-                cc mail.cc
+                cc mail.cc.toList()
             }
             if (mail.bcc) {
-                bcc mail.bcc
+                bcc mail.bcc.toList()
             }
             subject mail.subject
             body mailBody

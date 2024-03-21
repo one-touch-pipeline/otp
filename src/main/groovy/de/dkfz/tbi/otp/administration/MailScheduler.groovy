@@ -26,16 +26,32 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.workflowExecution.WorkflowSystemService
+
 @Slf4j
 @Component
 class MailScheduler {
 
     @Autowired
+    ConfigService configService
+
+    @Autowired
     MailHelperService mailHelperService
+
+    @Autowired
+    WorkflowSystemService workflowSystemService
 
     @SuppressWarnings("CatchThrowable")
     @Scheduled(fixedDelay = 60000L)
     void scheduleMail() {
+        if (!workflowSystemService.enabled) {
+            return
+        }
+        if (!configService.otpSendsMails()) {
+            return
+        }
+
         List<Mail> mails = mailHelperService.fetchMailsInWaiting()
         log.debug("Found ${mails.size()} mails for sending")
 
@@ -48,8 +64,8 @@ class MailScheduler {
                 mailHelperService.changeMailState(mail, Mail.State.FAILED)
                 mailHelperService.sendMailByScheduler(new Mail([
                         subject: "Error while sending mail: [${mail.id}] ${mail.subject}",
-                        body: "Error while sending mail: ${e.message}\n\n${mail.body}",
-                        to: [mailHelperService.ticketSystemMailAddress],
+                        body   : "Error while sending mail: ${e.message}\n\n${mail.body}",
+                        to     : [mailHelperService.ticketSystemMailAddress],
                 ]))
             }
         }
