@@ -8,7 +8,7 @@
     "cy-wait": "start-server-and-test './gradlew --build-cache bootRun' 'http-get://localhost:8080/health' './gradlew --build-cache runCypressTests' "
   },
   "devDependencies": {
-    "cypress": "~13.7.0",
+    "cypress": "~13.7.1",
     "eslint": "~8.57.0",
     "eslint-config-airbnb-base": "~15.0.0",
     "eslint-plugin-import": "~2.29.1",
