@@ -73,12 +73,17 @@ class BamImportWorkflowCreatorScheduler extends AbstractWorkflowCreatorScheduler
             }
 
             Collection<WorkflowArtefact> workflowArtefacts = runs.collectMany { it.outputArtefacts*.value }
+            DeciderResult deciderResult
+            if (importInstanceDb.triggerAnalysis) {
+                deciderResult = LogUsedTimeUtils.logUsedTimeStartEnd(log, "  decider for ${count} bamfiles") {
+                    allDecider.decide(workflowArtefacts)
+                }
 
-            DeciderResult deciderResult = LogUsedTimeUtils.logUsedTimeStartEnd(log, "  decider for ${count} bamfiles") {
-                allDecider.decide(workflowArtefacts)
+                createSamplePairs(workflowArtefacts, count)
+            } else {
+                deciderResult = new DeciderResult()
+                deciderResult.infos = ["Analysis was not triggered"]
             }
-
-            createSamplePairs(workflowArtefacts, count)
 
             bamImportService.updateState(importId, WorkflowCreateState.SUCCESS)
 

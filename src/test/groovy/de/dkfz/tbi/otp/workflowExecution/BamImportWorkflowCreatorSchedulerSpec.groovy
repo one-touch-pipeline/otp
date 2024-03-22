@@ -63,7 +63,7 @@ class BamImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSched
                         DomainFactory.createExternallyProcessedBamFile(),
                         DomainFactory.createExternallyProcessedBamFile()
                 ],
-                workflowCreateState: WorkflowCreateState.WAITING,
+                workflowCreateState        : WorkflowCreateState.WAITING,
         ])
     }
 
@@ -122,6 +122,8 @@ class BamImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSched
 
         List<AbstractBamFile> expectedListForSnv = []
 
+        importInstance.triggerAnalysis = createAnalysis
+        importInstance.save(flush: true)
         ExternallyProcessedBamFile bamFile = importInstance.externallyProcessedBamFiles[0]
         bamFile.workflowArtefact = workflowArtefacts.first()
         bamFile.workPackage = createMergingWorkPackage([
@@ -129,7 +131,7 @@ class BamImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSched
                         name: "OtherName",
                 ])
         ])
-        if (analysableSeqType) {
+        if (analysableSeqType && createAnalysis) {
             expectedListForSnv << bamFile.workPackage
         }
 
@@ -146,15 +148,17 @@ class BamImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSched
         0 * scheduler.messageSourceService.getMessage('workflow.bamImport.failedLoadingBamImportInstance', _)
         1 * scheduler.bamImportInitializationService.createWorkflowRuns(importInstance) >> runs
         0 * scheduler.bamImportInitializationService._
-        1 * scheduler.allDecider.decide(_) >> deciderResult
-        1 * scheduler.samplePairDeciderService.findOrCreateSamplePairs(expectedListForSnv)
+        countDecider * scheduler.allDecider.decide(_) >> deciderResult
+        countDecider * scheduler.samplePairDeciderService.findOrCreateSamplePairs(expectedListForSnv)
         0 * scheduler.samplePairDeciderService._
         1 * scheduler.notificationCreator.sendBamImportWorkflowCreateSuccessMail(_, importId, _, _)
 
         where:
-        name                             | analysableSeqType
-        "bam and not analysable seqType" | false
-        "bam and analysable seqType"     | true
+        name                                                     | analysableSeqType | createAnalysis || countDecider
+        "bam and not analysable seqType and not create analysis" | false             | false          || 0
+        "bam and analysable seqType and not create analysis"     | true              | false          || 0
+        "bam and not analysable seqType and create analysis"     | false             | true           || 1
+        "bam and analysable seqType and create analysis"         | true              | true           || 1
     }
 
     void "createWorkflowsTask, if decider throws exception, then send error E-Mail to ticketing system"() {
@@ -162,6 +166,9 @@ class BamImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSched
         BamImportWorkflowCreatorScheduler scheduler = createWorkflowCreatorScheduler()
         List<WorkflowRun> runs = [createWorkflowRun()]
         OtpRuntimeException otpRuntimeException = new OtpRuntimeException("Decider throws exceptions")
+
+        importInstance.triggerAnalysis = true
+        importInstance.save(flush: true)
 
         when:
         scheduler.createWorkflowsTask(importId)
