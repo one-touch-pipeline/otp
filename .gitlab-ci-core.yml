@@ -454,6 +454,8 @@ eslint:
           - settings.gradle
           # ci specific
           - grails-app/assets/javascripts/**/*
+          - package.json
+          - package-lock.json
   artifacts:
     <<: *artifacts_template
     paths:
