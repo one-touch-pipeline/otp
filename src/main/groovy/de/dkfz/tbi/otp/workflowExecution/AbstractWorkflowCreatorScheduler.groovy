@@ -99,14 +99,11 @@ abstract class AbstractWorkflowCreatorScheduler {
     protected void createWorkflowsTask(long importId) {
         String importIdentifier = getImportIdentifier(importId)
         try {
-            DeciderResult deciderResult = createWorkflowsTransactional(importId)
-            String message = messageFromDeciderResult(deciderResult)
-
-            sendWorkflowCreateSuccessMail(importId, getExecutionTimestamp(importId), message)
+            createWorkflowAndCreateSuccessMail(importId)
         } catch (Throwable throwable) {
             log.debug("  failed workflow creation for ${importIdentifier}", throwable)
             try {
-                sendWorkflowCreateErrorMail(importId, getExecutionTimestamp(importId), throwable)
+                createErrorMailInTransaction(importId, throwable)
             } catch (Throwable throwable2) {
                 log.debug("  failed error notification for workflow creation of ${importIdentifier}", throwable2)
                 throw throwable2
@@ -118,6 +115,19 @@ abstract class AbstractWorkflowCreatorScheduler {
                 throw throwable2
             }
         }
+    }
+
+    @Transactional
+    private void createWorkflowAndCreateSuccessMail(long importId) {
+        DeciderResult deciderResult = createWorkflows(importId)
+        String message = messageFromDeciderResult(deciderResult)
+
+        createSuccessMail(importId, getExecutionTimestamp(importId), message)
+    }
+
+    @Transactional
+    private void createErrorMailInTransaction(Long importId, Throwable throwable) {
+        createErrorMail(importId, getExecutionTimestamp(importId), throwable)
     }
 
     /**
@@ -144,7 +154,6 @@ abstract class AbstractWorkflowCreatorScheduler {
         log.debug("  sample pair creation finished for ${count} datafiles after: ${System.currentTimeMillis() - timeSamplePairs}ms")
     }
 
-    @Transactional(readOnly = true)
     protected String messageFromDeciderResult(DeciderResult deciderResult) {
         List<String> message = []
         message << "Decider Results"
@@ -198,30 +207,30 @@ abstract class AbstractWorkflowCreatorScheduler {
     abstract protected void updateImportState(Long importId, WorkflowCreateState state)
 
     /**
-     * Create workflows in one single transaction for the given import instance
+     * Create workflows for the given import instance
      *
      * @param importId id of FastqImportInstance for Fastq import or BamImportInstance for Bam import
      * @return deciderResult of newly created workflow
      */
-    abstract protected DeciderResult createWorkflowsTransactional(Long importId)
+    abstract protected DeciderResult createWorkflows(Long importId)
 
     /**
-     * Send success notification after workflows are created
+     * Create and save notification mail after workflows are created
      *
      * @param importId id of FastqImportInstance for Fastq import or BamImportInstance for Bam import
      * @param ts timestamp of execution
      * @param message success message
      */
-    abstract protected void sendWorkflowCreateSuccessMail(Long importId, Instant instant, String message)
+    abstract protected void createSuccessMail(Long importId, Instant instant, String message)
 
     /**
-     * Send error notification after workflows creation failed
+     * Create and save error notification mail after workflows creation failed
      *
      * @param importId id of FastqImportInstance for Fastq import or BamImportInstance for Bam import
      * @param ts timestamp of execution
      * @param throwable which contains the error message and stack trace
      */
-    abstract protected void sendWorkflowCreateErrorMail(Long importId, Instant instant, Throwable throwable)
+    abstract protected void createErrorMail(Long importId, Instant instant, Throwable throwable)
 
     /**
      * Return the timestamp when the scheduler creates the workflow

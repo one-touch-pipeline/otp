@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import grails.gorm.transactions.Transactional
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -63,8 +62,7 @@ class BamImportWorkflowCreatorScheduler extends AbstractWorkflowCreatorScheduler
     }
 
     @Override
-    @Transactional
-    protected DeciderResult createWorkflowsTransactional(Long importId) {
+    protected DeciderResult createWorkflows(Long importId) {
         BamImportInstance importInstanceDb = getImportInstance(importId)
         int count = importInstanceDb.externallyProcessedBamFiles.size()
 
@@ -75,6 +73,7 @@ class BamImportWorkflowCreatorScheduler extends AbstractWorkflowCreatorScheduler
             }
 
             Collection<WorkflowArtefact> workflowArtefacts = runs.collectMany { it.outputArtefacts*.value }
+
             DeciderResult deciderResult = LogUsedTimeUtils.logUsedTimeStartEnd(log, "  decider for ${count} bamfiles") {
                 allDecider.decide(workflowArtefacts)
             }
@@ -88,17 +87,16 @@ class BamImportWorkflowCreatorScheduler extends AbstractWorkflowCreatorScheduler
     }
 
     @Override
-    protected void sendWorkflowCreateSuccessMail(Long importId, Instant instant, String message) {
+    protected void createSuccessMail(Long importId, Instant instant, String message) {
         notificationCreator.sendBamImportWorkflowCreateSuccessMail(getImportInstance(importId).ticket, importId, instant, message)
     }
 
     @Override
-    protected void sendWorkflowCreateErrorMail(Long importId, Instant instant, Throwable throwable) {
+    protected void createErrorMail(Long importId, Instant instant, Throwable throwable) {
         notificationCreator.sendBamImportWorkflowCreateErrorMail(getImportInstance(importId).ticket, importId, instant, throwable)
     }
 
     @Override
-    @Transactional(readOnly = true)
     protected Instant getExecutionTimestamp(Long importId) {
         BamImportInstance importInstanceDb = BamImportInstance.get(importId)
         return importInstanceDb ? importInstanceDb.dateCreated.toInstant() : null

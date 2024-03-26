@@ -68,8 +68,7 @@ class FastqImportWorkflowCreatorScheduler extends AbstractWorkflowCreatorSchedul
     }
 
     @Override
-    @Transactional
-    protected DeciderResult createWorkflowsTransactional(Long importId) {
+    protected DeciderResult createWorkflows(Long importId) {
         FastqImportInstance fastqImportInstanceDb = getFastqImportInstance(importId)
         MetaDataFile metaDataFile = metaDataFileService.findByFastqImportInstance(fastqImportInstanceDb)
         int count = fastqImportInstanceDb.sequenceFiles.size()
@@ -94,23 +93,20 @@ class FastqImportWorkflowCreatorScheduler extends AbstractWorkflowCreatorSchedul
     }
 
     @Override
-    @Transactional(readOnly = true)
-    protected void sendWorkflowCreateSuccessMail(Long importId, Instant instant, String message) {
+    protected void createSuccessMail(Long importId, Instant instant, String message) {
         FastqImportInstance fastqImportInstance = FastqImportInstance.get(importId)
         MetaDataFile metaDataFile = metaDataFileService.findByFastqImportInstance(fastqImportInstance)
         notificationCreator.sendWorkflowCreateSuccessMail(metaDataFile, message)
     }
 
     @Override
-    @Transactional(readOnly = true)
-    protected void sendWorkflowCreateErrorMail(Long importId, Instant instant, Throwable throwable) {
+    protected void createErrorMail(Long importId, Instant instant, Throwable throwable) {
         FastqImportInstance fastqImportInstance = FastqImportInstance.get(importId)
         MetaDataFile metaDataFile = metaDataFileService.findByFastqImportInstance(fastqImportInstance)
         notificationCreator.sendWorkflowCreateErrorMail(metaDataFile, throwable)
     }
 
     @Override
-    @Transactional(readOnly = true)
     protected Instant getExecutionTimestamp(Long importId) {
         FastqImportInstance fastqImportInstanceDb = FastqImportInstance.get(importId)
         return fastqImportInstanceDb ? fastqImportInstanceDb.dateCreated.toInstant() : null

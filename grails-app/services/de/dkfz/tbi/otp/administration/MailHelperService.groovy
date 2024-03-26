@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.utils.SessionUtils
+import de.dkfz.tbi.util.TimeFormats
 
 import java.time.ZonedDateTime
 
@@ -78,6 +79,8 @@ class MailHelperService {
         ])
 
         mail.save(flush: true)
+
+        log.info("Save Mail: ${mail.id}, '${mail.subject}', to: '${mail.to.join("' & '")}', cc: '${mail.cc.join("' & '")}'")
 
         return mail
     }
@@ -149,13 +152,13 @@ class MailHelperService {
 
     private void logMail(Mail mail) {
         log.info """
-            Sent mail (${mail.id}):
-            to: '${mail.to}'
-            cc: '${mail.cc}'
-            bcc: '${mail.bcc}'
-            subject: '${mail.subject}'
-            content:\n${mail.body}
-        """.stripIndent().toString()
+            |Sent mail (id: ${mail.id},  created: ${TimeFormats.DATE_TIME.getFormattedDate(mail.dateCreated)}):
+            |to: ${mail.to.join(', ')}
+            |cc: ${mail.cc.join(', ')}
+            |bcc: ${mail.bcc.join(', ')}
+            |subject: '${mail.subject}'
+            |content:\n${mail.body}
+        """.stripMargin().toString()
     }
 
     @CompileDynamic
