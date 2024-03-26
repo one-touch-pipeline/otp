@@ -22,6 +22,6 @@
 
 set -e
 
-if [[ `git diff --cached` ]]; then
-    groovy devScripts/gitlab-ci/license-checker/licensecheck.groovy `git diff --cached --name-only`
+if [[ -n $(git diff --cached) ]]; then
+    groovy devScripts/gitlab-ci/license-checker/licensecheck.groovy "$(git diff --cached --name-only)"
 fi

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Copyright 2011-2024 The OTP authors
 #
@@ -32,9 +32,9 @@ color_end="\033[0m"
 # keyword (foo)  {
 # {foo   except ${foo
 keywords="for|while|if|switch|catch"
-checks="((${keywords})(|\s\s+)\()|((${keywords})\s\(.*\)(|\s\s+)\{)|.*(?<!\$)\{[a-Z0-9_\$]+"
-if [[ `git diff --cached | sed -r '/^(-|\s|@@|\+\+\+|diff --git|index\s[a-f0-9]{7}\.\.[a-f0-9]{7}) */d' | egrep ${checks}` ]]; then
-    echo -e ${red}Coding style violation${color_end}
-    git diff --cached | sed -r '/^(-|\s|@@|\+\+\+|diff --git|index\s[a-f0-9]{7}\.\.[a-f0-9]{7}) */d' | egrep ${checks}
+checks="((${keywords})(|\s\s+)\()|((${keywords})\s\(.*\)(|\s\s+)\{)|.*(?<!\$)\{[a-zA-Z0-9_\$]+"
+if git diff --cached | sed -r '/^(-|\s|@@|\+\+\+|diff --git|index\s[a-f0-9]{7}\.\.[a-f0-9]{7}) */d' | grep -E -q "${checks}"; then
+    echo -e "${red}Coding style violation${color_end}"
+    git diff --cached | sed -r '/^(-|\s|@@|\+\+\+|diff --git|index\s[a-f0-9]{7}\.\.[a-f0-9]{7}) */d' | grep -E "${checks}"
     exit 1
 fi
