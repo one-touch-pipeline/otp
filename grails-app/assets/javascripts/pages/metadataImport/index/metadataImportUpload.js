@@ -280,6 +280,13 @@ $(() => {
   const ignoreMd5SumRow = $('#ignore-md5-sum-row');
   const ignoreWarnings = $('#ignore-warnings-label');
   const metadataFileSourceRadioButtons = $('input[name="metadataFileSource"]');
+  const fileRadioButton = $('input[value="FILE"]');
+  const pathRadioButton = $('input[value="PATH"]');
+  const sameDirectoryRadioButton = $('input[value="SAME_DIRECTORY"]');
+  const gpcfSpecificRadioButton = $('input[value="GPCF_SPECIFIC"]');
+  const absolutePathRadioButton = $('input[value="ABSOLUTE_PATH"]');
+  const pathContainer = $('#path-container');
+  const fileContainer = $('#file-container');
   const md5HiddenContainer = document.getElementById('md5-hidden-container');
   let md5SumsMap;
 
@@ -540,6 +547,10 @@ $(() => {
     importButton.prop('disabled', !$(e.target)[0].checked);
   }).trigger('change');
 
+  $('body').on('dragenter', () => {
+    enableFileContainer();
+  });
+
   // Show or hide file selection and disable directory structure radio buttons
   // depending on selected source of metadata files
   metadataFileSourceRadioButtons.on('change', (e) => {
@@ -548,24 +559,31 @@ $(() => {
     if (!target[0].checked) {
       return;
     }
-    const pathContainer = $('#path-container');
-    const fileContainer = $('#file-container');
-    const sameDirectoryRadioButton = $('input[value="SAME_DIRECTORY"]');
-    const gpcfSpecificRadioButton = $('input[value="GPCF_SPECIFIC"]');
-    const absolutePathRadioButton = $('input[value="ABSOLUTE_PATH"]');
     if (target.val() === 'FILE') {
-      pathContainer.hide();
-      fileContainer.show();
-      sameDirectoryRadioButton.attr('disabled', true);
-      gpcfSpecificRadioButton.attr('disabled', true);
-      absolutePathRadioButton.prop('checked', true);
+      enableFileContainer();
     } else if (target.val() === 'PATH') {
-      fileContainer.hide();
-      pathContainer.show();
-      sameDirectoryRadioButton.removeAttr('disabled');
-      gpcfSpecificRadioButton.removeAttr('disabled');
+      enablePathContainer();
     }
   }).trigger('change');
+
+  function enableFileContainer() {
+    fileRadioButton.prop('checked', true);
+    pathRadioButton.prop('checked', false);
+    pathContainer.hide();
+    fileContainer.show();
+    sameDirectoryRadioButton.attr('disabled', true);
+    gpcfSpecificRadioButton.attr('disabled', true);
+    absolutePathRadioButton.prop('checked', true);
+  }
+
+  function enablePathContainer() {
+    fileRadioButton.prop('checked', false);
+    pathRadioButton.prop('checked', true);
+    fileContainer.hide();
+    pathContainer.show();
+    sameDirectoryRadioButton.removeAttr('disabled');
+    gpcfSpecificRadioButton.removeAttr('disabled');
+  }
 
   function activateButtons(problemLevel, warningLevel) {
     validateSpinner.hide();

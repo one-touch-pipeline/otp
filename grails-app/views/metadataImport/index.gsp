@@ -63,11 +63,13 @@
                 </div>
 
                 <div class="col-sm-3 d-flex align-items-center">
-                    <input class="form-check-input" name="automaticNotification" type="checkbox" ${cmd?.automaticNotification == false ? '' : 'checked'}
-                           id="automaticNotification">
-                    <label class="form-check-label" for="automaticNotification">
-                        <g:message code="metadataImport.ticket.automaticNotificationFlag"/>
-                    </label>
+                    <div class="form-check m-0">
+                        <input class="form-check-input" name="automaticNotification" type="checkbox" ${cmd?.automaticNotification == false ? '' : 'checked'}
+                               id="automaticNotification">
+                        <label class="form-check-label" for="automaticNotification">
+                            <g:message code="metadataImport.ticket.automaticNotificationFlag"/>
+                        </label>
+                    </div>
                 </div>
             </div>
 
@@ -97,7 +99,7 @@
                             <span class="visually-hidden">Loading...</span>
                         </button>
                     </div>
-                    <button class="add-field" type="button">+</button>
+                    <button class="add-field btn btn-outline-secondary p-0" type="button">+</button>
                 </div>
                 <g:if test="${cmd?.paths?.size() > 1}">
                     <g:each var="path" in="${cmd.paths.tail()}">
@@ -110,7 +112,7 @@
                                     <span class="visually-hidden">Loading...</span>
                                 </button>
                             </div>
-                            <button class="remove-field" type="button">-</button>
+                            <button class="remove-field btn btn-outline-secondary p-0" type="button">-</button>
                         </div>
                     </g:each>
                 </g:if>
@@ -125,7 +127,7 @@
 
             <div class="col-sm-10 multi-input-field">
                 <div class="input-group field">
-                    <input class="form-control" type="file" multiple name="contentList" id="contentList">
+                    <input class="form-control drag-and-drop" type="file" multiple="true" name="contentList" id="contentList">
 
                     <div class="input-group-append content-spinner" style="display: none;">
                         <button class="btn btn-outline-secondary" type="button" disabled>
@@ -133,7 +135,7 @@
                             <span class="visually-hidden">Loading...</span>
                         </button>
                     </div>
-                    <button class="add-field" type="button">+</button>
+                    <button class="add-field btn btn-outline-secondary p-0" type="button">+</button>
                 </div>
             </div>
         </div>

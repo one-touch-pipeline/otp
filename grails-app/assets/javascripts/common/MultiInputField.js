@@ -42,7 +42,7 @@ $(() => {
     // update buttons on our new field; only the first field can be cloned, user-added fields can only be removed.
     $('button.add-field', clonedField).remove();
     // the whitespace at the start prevents the button from sticking to the input element
-    clonedField.append(' <button class="remove-field">-</button>');
+    clonedField.append(' <button class="remove-field btn btn-outline-secondary p-0">-</button>');
 
     // add our shiny new field to the DOM
     // must be done before applying any potential select2; styling rules don't apply yet to elements outside the DOM,
