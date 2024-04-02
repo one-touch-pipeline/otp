@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.AnalysisConditionalSkipJob
+import de.dkfz.tbi.otp.workflow.analysis.AnalysisLinkJob
 import de.dkfz.tbi.otp.workflow.analysis.RoddyAnalysisFragmentJob
 import de.dkfz.tbi.otp.workflow.jobs.*
 import de.dkfz.tbi.otp.workflowExecution.Artefact
@@ -58,7 +59,7 @@ class AceseqWorkflow extends AbstractAnalysisWorkflow {
 //                AceseqCleanupJob,
                 SetCorrectPermissionJob,
                 CalculateSizeJob,
-//                AceseqLinkJob,
+                AnalysisLinkJob,
 //                AceseqFinishJob,
         ]
     }

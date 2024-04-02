@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.AnalysisConditionalSkipJob
+import de.dkfz.tbi.otp.workflow.analysis.AnalysisLinkJob
 import de.dkfz.tbi.otp.workflow.analysis.RoddyAnalysisFragmentJob
 import de.dkfz.tbi.otp.workflow.jobs.*
 import de.dkfz.tbi.otp.workflowExecution.Artefact
@@ -58,7 +59,7 @@ class RunYapsaWorkflow extends AbstractAnalysisWorkflow {
 //                RunYapsaCleanupJob,
                 SetCorrectPermissionJob,
                 CalculateSizeJob,
-//                RunYapsaLinkJob,
+                AnalysisLinkJob,
 //                RunYapsaFinishJob,
         ]
     }

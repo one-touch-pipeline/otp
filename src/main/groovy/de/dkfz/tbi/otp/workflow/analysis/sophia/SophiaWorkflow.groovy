@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
+import de.dkfz.tbi.otp.workflow.analysis.AnalysisLinkJob
 import de.dkfz.tbi.otp.workflow.analysis.AnalysisConditionalSkipJob
 import de.dkfz.tbi.otp.workflow.analysis.RoddyAnalysisFragmentJob
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
@@ -58,7 +59,7 @@ class SophiaWorkflow extends AbstractAnalysisWorkflow {
 //                SophiaCleanupJob,
                 SetCorrectPermissionJob,
                 CalculateSizeJob,
-//                SophiaLinkJob,
+                AnalysisLinkJob,
 //                SophiaFinishJob,
         ]
     }
