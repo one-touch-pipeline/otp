@@ -72,6 +72,6 @@ class AceseqInstance extends BamFilePairAnalysis implements RoddyResult {
 
     @Override
     RoddyWorkflowConfig getConfig() {
-        return RoddyWorkflowConfig.get(super.config.id)
+        return super.config ? RoddyWorkflowConfig.get(super.config.id) : null
     }
 }

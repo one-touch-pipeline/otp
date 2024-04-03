@@ -26,10 +26,5 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 import java.nio.file.Path
 
 abstract class AbstractTsvParseJob extends AbstractParseJob {
-    @Override
-    @SuppressWarnings(["UnusedMethodParameter", "ImplicitReturnStatement"]) // To be deleted after implementation of method
-    Map<String, String> parseFile(WorkflowStep workflowStep) {
-    }
-
     abstract Path getTsvFileToParse(WorkflowStep workflowStep)
 }

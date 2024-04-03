@@ -1919,7 +1919,7 @@ class DomainFactory {
     }
 
     /**
-     * @deprecated use {@link IndelDomainFactory#getSampleSwapDetectionFileContent()}}
+     * @deprecated use {@link IndelDomainFactory#getQcFileContent()}}
      */
     static void createIndelQcFileOnFileSystem(Path qcFile) {
         Files.createDirectories(qcFile.parent)
@@ -1956,7 +1956,7 @@ class DomainFactory {
     }
 
     /**
-     * @deprecated use {@link IndelDomainFactory#getQcFileContent()}
+     * @deprecated use {@link IndelDomainFactory#getSampleSwapDetectionFileContent()}
      */
     static void createIndelSampleSwapDetectionFileOnFileSystem(Path qcFile, Individual individual) {
         Files.createDirectories(qcFile.parent)

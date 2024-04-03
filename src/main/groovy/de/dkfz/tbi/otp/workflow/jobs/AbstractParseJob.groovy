@@ -29,11 +29,15 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 abstract class AbstractParseJob extends AbstractJob {
 
     @Override
-    @SuppressWarnings('EmptyMethodInAbstractClass') // not implemented yet, remove this annotation when implemented
-    void execute(WorkflowStep workflowStep) {
+    final JobStage getJobStage() {
+        return JobStage.PARSE
     }
 
-    abstract Map<String, String> parseFile(WorkflowStep workflowStep)
+    @Override
+    void execute(WorkflowStep workflowStep) {
+        parseOutputs(workflowStep)
+        workflowStateChangeService.changeStateToSuccess(workflowStep)
+    }
 
-    abstract Class getQcDomain(WorkflowStep workflowStep)
+    abstract void parseOutputs(WorkflowStep workflowStep)
 }
