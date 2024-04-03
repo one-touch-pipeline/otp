@@ -24,7 +24,7 @@ set -e
 
 source `dirname $0`/initMergeRequest.sh
 
-if [ "$NO_MERGE_REQUEST_EXIST" == "true" ]
+if [ "$MERGE_REQUEST_EXIST" == "false" ]
 then
     echo "Exiting, because no merge request exists."
     exit 0

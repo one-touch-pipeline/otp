@@ -24,13 +24,13 @@
 
 set -e
 
-if [ -v NO_MERGE_REQUEST_EXIST ]
+if [ -v MERGE_REQUEST_EXIST ]
 then
-    echo "variable 'NO_MERGE_REQUEST_EXIST' is not defined, please run initMergeRequest.sh"
+    echo "variable 'MERGE_REQUEST_EXIST' is not defined, please run initMergeRequest.sh"
     exit 1
 fi
 
-if [ "$NO_MERGE_REQUEST_EXIST" == "true" ]
+if [ "$MERGE_REQUEST_EXIST" == "false" ]
 then
     exit 0
 fi

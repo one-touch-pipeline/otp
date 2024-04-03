@@ -58,6 +58,7 @@ stages:
   - doc
   - public doc
   - update merge request
+  - cleanup
   - trigger deployment
 
 .shared:
@@ -151,9 +152,9 @@ stages:
   needs:
     - build gradle
   cache:
-    - !reference [ .shared, cache, gradle-wrapper]
-    - !reference [ .shared, cache, gradle-pipeline-cache]
-    - !reference [ .shared, cache, gradle-cache]
+    - !reference [ .shared, cache, gradle-wrapper ]
+    - !reference [ .shared, cache, gradle-pipeline-cache ]
+    - !reference [ .shared, cache, gradle-cache ]
 
 
 .abstract_test_template:
@@ -182,13 +183,13 @@ build gradle:
   extends: .abstract_base_template
   stage: build
   cache:
-    - key: !reference [ .shared, cache, gradle-wrapper, key]
-      paths: !reference [ .shared, cache, gradle-wrapper, paths]
+    - key: !reference [ .shared, cache, gradle-wrapper, key ]
+      paths: !reference [ .shared, cache, gradle-wrapper, paths ]
       policy: pull-push
-    - key: !reference [ .shared, cache, gradle-pipeline-cache, key]
-      paths: !reference [ .shared, cache, gradle-pipeline-cache, paths]
+    - key: !reference [ .shared, cache, gradle-pipeline-cache, key ]
+      paths: !reference [ .shared, cache, gradle-pipeline-cache, paths ]
       policy: pull-push
-    - !reference [ .shared, cache, gradle-cache]
+    - !reference [ .shared, cache, gradle-cache ]
   script:
     - set -e
     # compile also all tests
@@ -364,10 +365,10 @@ cypress tests:
       - logs/
     when: always
   cache:
-    - !reference [ .shared, cache, gradle-wrapper]
-    - !reference [ .shared, cache, gradle-pipeline-cache]
-    - !reference [ .shared, cache, gradle-cache]
-    - !reference [ .shared, cache, npm]
+    - !reference [ .shared, cache, gradle-wrapper ]
+    - !reference [ .shared, cache, gradle-pipeline-cache ]
+    - !reference [ .shared, cache, gradle-cache ]
+    - !reference [ .shared, cache, npm ]
   parallel:
     matrix:
       - SUITE:
@@ -462,9 +463,9 @@ eslint:
       - build/reports/eslint
     when: always
   cache:
-    - !reference [ .shared,  cache, gradle-wrapper]
-    - !reference [ .shared,  cache, gradle-cache]
-    - !reference [ .shared,  cache, npm]
+    - !reference [ .shared,  cache, gradle-wrapper ]
+    - !reference [ .shared,  cache, gradle-cache ]
+    - !reference [ .shared,  cache, npm ]
 
 
 # ------------------------------------------------------
@@ -566,3 +567,17 @@ pages:
       - public
   variables:
     GIT_STRATEGY: none
+
+# ------------------------------------------------------
+# jobs stage cleanup
+# ------------------------------------------------------
+
+prune stale branches:
+  stage: cleanup
+  variables:
+    GIT_DEPTH: "0"
+  needs: [ ]
+  rules:
+    - if: $CI_COMMIT_TAG
+  script:
+    - devScripts/gitlab-ci/clearStaleBranches.sh

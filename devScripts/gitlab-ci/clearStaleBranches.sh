@@ -1,5 +1,5 @@
 #!/bin/bash
-
+#
 # Copyright 2011-2024 The OTP authors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,24 +19,31 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+#
+set -e -o pipefail
 
-set -e
+git remote set-url origin "https://merge-request:${PROJECT_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
 
-source `dirname $0`/initMergeRequest.sh
+ALL_BRANCHES=$(git for-each-ref 'refs/remotes/origin' --sort='-committerdate' --format='%(refname)|%(committerdate:short)')
 
-if [ "$MERGE_REQUEST_EXIST" == "false" ]
-then
-    echo "Exiting, because no merge request exists."
-    exit 0
-fi
+CURRENT_SECONDS=$(date +%s)
+THREE_MONTH_SECONDS=$((60 * 60 * 24 * 30 * 3))
+CUTOFF_SECONDS=$(($CURRENT_SECONDS - $THREE_MONTH_SECONDS))
 
-echo "merge request"
-MR_ID=`jq -e '.[0].iid' responseCheck.json`
-echo "Merge request id: ${MR_ID}"
+echo "Delete all branches without commits before $(date -d @$CUTOFF_SECONDS +"%d-%m-%Y") and without existing merge request"
 
-curl -X PUT --header "PRIVATE-TOKEN: $PROJECT_TOKEN" \
-  --data-urlencode "add_labels=waiting for author" \
-  "$PROJECT_URL/merge_requests/$MR_ID" > responseUpdate.json
 
-echo "Response of add label 'waiting for author' to MR"
-jq -C -e '.' responseUpdate.json
+while IFS='|' read -r BRANCH_NAME BRANCH_DATE; do
+  export BRANCH_TO_CHECK=${BRANCH_NAME#refs/remotes/origin/}
+  DATE_SECONDS=$(date -d ${BRANCH_DATE} +%s)
+
+  if [ $CUTOFF_SECONDS -ge $DATE_SECONDS ]; then
+    export MERGE_REQUEST_STATE=opened
+    source "$(dirname $0)/mergeRequest/initMergeRequest.sh"
+
+    if [ "$MERGE_REQUEST_EXIST" == "false" ]; then
+      echo "Delete branch $BRANCH_TO_CHECK"
+      git push origin --delete $BRANCH_TO_CHECK
+    fi
+  fi
+done <<< "$ALL_BRANCHES"
