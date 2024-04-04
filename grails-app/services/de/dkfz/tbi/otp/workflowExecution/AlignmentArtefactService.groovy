@@ -77,7 +77,7 @@ class AlignmentArtefactService {
             wa in (:workflowArtefacts)
             and st.seqType in (:seqTypes)
             and wa.state <> '${WorkflowArtefact.State.FAILED}'
-            and wa.state <> '${WorkflowArtefact.State.OMITTED}'
+            and wa.state <> '${WorkflowArtefact.State.SKIPPED}'
             and wa.withdrawnDate is null
             and not exists (
                 select
@@ -120,7 +120,7 @@ class AlignmentArtefactService {
             wa in (:workflowArtefacts)
             and st.seqType in (:seqTypes)
             and wa.state <> '${WorkflowArtefact.State.FAILED}'
-            and wa.state <> '${WorkflowArtefact.State.OMITTED}'
+            and wa.state <> '${WorkflowArtefact.State.SKIPPED}'
             and wa.withdrawnDate is null
             and df.fileWithdrawn = false
         """
@@ -156,7 +156,7 @@ class AlignmentArtefactService {
             and st.sample = st2.sample
             and st.seqType = st2.seqType
             and wa.state <> '${WorkflowArtefact.State.FAILED}'
-            and wa.state <> '${WorkflowArtefact.State.OMITTED}'
+            and wa.state <> '${WorkflowArtefact.State.SKIPPED}'
             and wa.withdrawnDate is null
             and not exists (
                 select
@@ -204,7 +204,7 @@ class AlignmentArtefactService {
             and st.seqType = st2.seqType
             and df.fileWithdrawn = false
             and wa.state <> '${WorkflowArtefact.State.FAILED}'
-            and wa.state <> '${WorkflowArtefact.State.OMITTED}'
+            and wa.state <> '${WorkflowArtefact.State.SKIPPED}'
             and wa.withdrawnDate is null
         """
 
@@ -239,7 +239,7 @@ class AlignmentArtefactService {
             and mergingWorkPackage.seqType = st.seqType
             and bamFile.withdrawn = false
             and wa.state <> '${WorkflowArtefact.State.FAILED}'
-            and wa.state <> '${WorkflowArtefact.State.OMITTED}'
+            and wa.state <> '${WorkflowArtefact.State.SKIPPED}'
             and wa.withdrawnDate is null
             and bamFile.identifier = (
                 select

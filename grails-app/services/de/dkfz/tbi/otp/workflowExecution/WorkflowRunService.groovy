@@ -142,7 +142,7 @@ class WorkflowRunService {
                 combinedConfig  : null,
                 priority        : priority,
                 restartedFrom   : null,
-                omittedMessage  : null,
+                skipMessage     : null,
                 workflowSteps   : [],
                 workflow        : workflow,
                 workflowVersion : workflowVersion,

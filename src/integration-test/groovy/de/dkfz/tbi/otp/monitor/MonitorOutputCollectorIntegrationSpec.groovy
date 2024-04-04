@@ -242,6 +242,6 @@ class MonitorOutputCollectorIntegrationSpec extends Specification implements Dom
         where:
         hasComment | state
         false      | WorkflowArtefact.State.SUCCESS
-        true       | WorkflowArtefact.State.OMITTED
+        true       | WorkflowArtefact.State.SKIPPED
     }
 }

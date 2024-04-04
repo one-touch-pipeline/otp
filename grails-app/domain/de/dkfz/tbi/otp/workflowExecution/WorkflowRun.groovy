@@ -44,7 +44,7 @@ class WorkflowRun implements Commentable, Entity {
         RUNNING_OTP("The run is running within OTP."),
         FAILED("The run failed and is waiting for an operator decision how to continue."),
         // finished
-        OMITTED_MISSING_PRECONDITION("The run was omitted because preconditions are missing."),
+        SKIPPED_MISSING_PRECONDITION("The run was skipped because preconditions are missing."),
         SUCCESS("The run succeeded."),
         FAILED_FINAL("The run failed, and an operator decided not to restart it."),
         RESTARTED("The run was restarted after it failed."),
@@ -67,7 +67,7 @@ class WorkflowRun implements Commentable, Entity {
 
     WorkflowRun restartedFrom
 
-    OmittedMessage omittedMessage
+    WorkflowStepSkipMessage skipMessage
 
     List<WorkflowStep> workflowSteps
 
@@ -119,7 +119,7 @@ class WorkflowRun implements Commentable, Entity {
                 return 'workflowRun.restartedFrom.workflow.differ'
             }
         }
-        omittedMessage nullable: true
+        skipMessage nullable: true
         comment nullable: true
         workflowVersion nullable: true, validator: { val, obj ->
             if (val && obj.workflow != val.workflow) {

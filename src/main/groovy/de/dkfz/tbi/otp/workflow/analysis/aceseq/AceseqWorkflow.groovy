@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
+import de.dkfz.tbi.otp.workflow.analysis.AnalysisConditionalSkipJob
 import de.dkfz.tbi.otp.workflow.analysis.RoddyAnalysisFragmentJob
 import de.dkfz.tbi.otp.workflow.jobs.*
 import de.dkfz.tbi.otp.workflowExecution.Artefact
@@ -44,8 +45,8 @@ class AceseqWorkflow extends AbstractAnalysisWorkflow {
     @Override
     List<Class<? extends Job>> getJobList() {
         return [
-//                CoverageConditionalSkipJob,
-               RoddyAnalysisFragmentJob,
+                AnalysisConditionalSkipJob,
+                RoddyAnalysisFragmentJob,
 //                AceseqCheckFragmentKeysJob,
 //                AceseqConditionalFailJob,
 //                AceseqCreateNotificationJob,

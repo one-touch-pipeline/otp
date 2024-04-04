@@ -61,7 +61,7 @@ class FastqcArtefactService {
         where
             wa in (:workflowArtefacts)
             and wa.state <> '${WorkflowArtefact.State.FAILED}'
-            and wa.state <> '${WorkflowArtefact.State.OMITTED}'
+            and wa.state <> '${WorkflowArtefact.State.SKIPPED}'
             and wa.withdrawnDate is null
             and not exists (
                 select
@@ -91,7 +91,7 @@ class FastqcArtefactService {
             st in (:seqTracks)
             and df.fileWithdrawn = false
             and wa.state <> '${WorkflowArtefact.State.FAILED}'
-            and wa.state <> '${WorkflowArtefact.State.OMITTED}'
+            and wa.state <> '${WorkflowArtefact.State.SKIPPED}'
             and wa.withdrawnDate is null
         """
 

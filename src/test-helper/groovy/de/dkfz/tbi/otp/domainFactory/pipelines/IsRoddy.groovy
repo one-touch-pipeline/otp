@@ -45,8 +45,12 @@ trait IsRoddy implements IsPipeline {
         return createRoddyBamFile(properties, RoddyBamFile)
     }
 
-    public <T> T createRoddyBamFile(Map properties = [:], Class<T> clazz) {
-        MergingWorkPackage workPackage = properties.workPackage
+    public <T extends RoddyBamFile> T createRoddyBamFile(Map properties = [:], Class<T> clazz) {
+        MergingWorkPackage workPackage = properties.workPackage as MergingWorkPackage
+        if (properties.numberOfMergedLanes && !properties.seqTracks) {
+            properties.seqTracks = (1..properties.numberOfMergedLanes).collect { createSeqTrack() }
+        }
+
         if (!workPackage) {
             Map workPackageProperties = properties.seqTracks ?
                     [
@@ -55,16 +59,16 @@ trait IsRoddy implements IsPipeline {
                     ] : [:]
             workPackage = createMergingWorkPackage(workPackageProperties)
             DomainFactory.createReferenceGenomeProjectSeqType(
-                    referenceGenome : workPackage.referenceGenome,
-                    project         : workPackage.project,
-                    seqType         : workPackage.seqType,
+                    referenceGenome: workPackage.referenceGenome,
+                    project: workPackage.project,
+                    seqType: workPackage.seqType,
                     statSizeFileName: workPackage.statSizeFileName,
             )
         }
         return createRoddyBamFile(properties, workPackage, clazz)
     }
 
-    public <T> T createRoddyBamFile(Map properties = [:], MergingWorkPackage workPackage, Class<T> clazz) {
+    public <T extends RoddyBamFile> T createRoddyBamFile(Map properties = [:], MergingWorkPackage workPackage, Class<T> clazz) {
         createMergingCriteriaLazy(
                 project: workPackage.project,
                 seqType: workPackage.seqType,
@@ -76,18 +80,18 @@ trait IsRoddy implements IsPipeline {
 
         T bamFile = createDomainObject(clazz, bamFileDefaultProperties(properties, seqTracks, workPackage) +
                 [
-                workDirectoryName           : "${RoddyBamFileService.WORK_DIR_PREFIX}_${nextId}",
-                identifier                  : RoddyBamFile.nextIdentifier(workPackage),
-                config                      : {
-                    findOrCreateConfig(
-                            pipeline: workPackage.pipeline,
-                            project: workPackage.project,
-                            seqType: workPackage.seqType,
-                            adapterTrimmingNeeded: workPackage.seqType.isRna() || workPackage.seqType.isWgbs() || workPackage.seqType.isChipSeq(),
-                    )
-                },
-                roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
-        ], properties)
+                        workDirectoryName           : "${RoddyBamFileService.WORK_DIR_PREFIX}_${nextId}",
+                        identifier                  : RoddyBamFile.nextIdentifier(workPackage),
+                        config                      : {
+                            findOrCreateConfig(
+                                    pipeline: workPackage.pipeline,
+                                    project: workPackage.project,
+                                    seqType: workPackage.seqType,
+                                    adapterTrimmingNeeded: workPackage.seqType.isRna() || workPackage.seqType.isWgbs() || workPackage.seqType.isChipSeq(),
+                            )
+                        },
+                        roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
+                ], properties)
         return bamFile
     }
 

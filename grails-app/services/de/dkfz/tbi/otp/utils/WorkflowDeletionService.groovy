@@ -52,11 +52,11 @@ class WorkflowDeletionService {
             it.delete(flush: true)
         }
 
-        OmittedMessage omittedMessage = workflowRun.omittedMessage
+        WorkflowStepSkipMessage skipMessage = workflowRun.skipMessage
         WorkFolder workFolder = workflowRun.workFolder
         workflowRun.delete(flush: true)
 
-        deleteOmittedMessage(omittedMessage)
+        deleteSkipMessage(skipMessage)
         deleteWorkFolder(workFolder)
     }
 
@@ -106,9 +106,9 @@ class WorkflowDeletionService {
         }
     }
 
-    void deleteOmittedMessage(OmittedMessage omittedMessage) {
-        if (omittedMessage) {
-            omittedMessage.delete(flush: true)
+    void deleteSkipMessage(WorkflowStepSkipMessage skipMessage) {
+        if (skipMessage) {
+            skipMessage.delete(flush: true)
         }
     }
 

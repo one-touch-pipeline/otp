@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
+import de.dkfz.tbi.otp.workflow.analysis.AnalysisConditionalSkipJob
 import de.dkfz.tbi.otp.workflow.jobs.*
 import de.dkfz.tbi.otp.workflowExecution.Artefact
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
@@ -43,7 +44,7 @@ class SnvWorkflow extends AbstractAnalysisWorkflow {
     @Override
     List<Class<? extends Job>> getJobList() {
         return [
-//                CoverageConditionalSkipJob,
+                AnalysisConditionalSkipJob,
 //                SnvFragmentJob,
 //                SnvCheckFragmentKeysJob,
 //                SnvConditionalFailJob,

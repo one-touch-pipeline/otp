@@ -42,7 +42,7 @@ class WorkflowArtefact implements Withdrawable, Entity {
         // Workflow has finished with errors
         FAILED,
         // Workflow cannot be started due to unfulfilled preconditions (e.g. too low coverage). No artefact will be created
-        OMITTED,
+        SKIPPED,
     }
 
     WorkflowRun producedBy

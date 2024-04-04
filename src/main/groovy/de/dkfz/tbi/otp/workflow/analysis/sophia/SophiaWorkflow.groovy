@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
+import de.dkfz.tbi.otp.workflow.analysis.AnalysisConditionalSkipJob
 import de.dkfz.tbi.otp.workflow.analysis.RoddyAnalysisFragmentJob
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
 import de.dkfz.tbi.otp.workflow.jobs.*
@@ -44,7 +45,7 @@ class SophiaWorkflow extends AbstractAnalysisWorkflow {
     @Override
     List<Class<? extends Job>> getJobList() {
         return [
-//                CoverageConditionalSkipJob,
+                AnalysisConditionalSkipJob,
                 RoddyAnalysisFragmentJob,
 //                SophiaCheckFragmentKeysJob,
 //                SophiaConditionalFailJob,

@@ -41,6 +41,14 @@ class ProcessingThresholdsService {
         return ProcessingThresholds.findAllByProject(project)
     }
 
+    ProcessingThresholds findByAbstractBamFile(AbstractBamFile bamFile) {
+        return CollectionUtils.atMostOneElement(ProcessingThresholds.createCriteria().list {
+            eq('project', bamFile.project)
+            eq('seqType', bamFile.seqType)
+            eq('sampleType', bamFile.sampleType)
+        } as List<ProcessingThresholds>)
+    }
+
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     ProcessingThresholds createUpdateOrDelete(Project project, SampleType sampleType, SeqType seqType, Integer numberOfLanes, Double coverage) {
         ProcessingThresholds processingThresholds = CollectionUtils.atMostOneElement(
@@ -115,8 +123,8 @@ class ProcessingThresholdsService {
                         and processingThresholds.seqType = seqType2
                 )
             """, [
-                    seqTracks: seqTracks,
-            ]).collect {
+                seqTracks: seqTracks,
+        ]).collect {
             new ProcessingThresholds([
                     project      : it[0],
                     sampleType   : it[1],

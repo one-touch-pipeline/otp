@@ -33,13 +33,13 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
 @Rollback
 @Integration
-class DeleteConcreteArtefactsOfOmittedWorkflowArtefactsJobIntegrationSpec extends Specification implements DomainFactoryCore, WorkflowSystemDomainFactory {
+class DeleteConcreteArtefactsOfSkippedWorkflowArtefactsJobIntegrationSpec extends Specification implements DomainFactoryCore, WorkflowSystemDomainFactory {
 
     void "test wrappedExecute, with correct state and no dependent workflow artefact, deletes artefact"() {
         given:
-        DeleteConcreteArtefactsOfOmittedWorkflowArtefactsJob job = new DeleteConcreteArtefactsOfOmittedWorkflowArtefactsJob()
+        DeleteConcreteArtefactsOfSkippedWorkflowArtefactsJob job = new DeleteConcreteArtefactsOfSkippedWorkflowArtefactsJob()
 
-        WorkflowArtefact wa = createWorkflowArtefact(state: WorkflowArtefact.State.OMITTED)
+        WorkflowArtefact wa = createWorkflowArtefact(state: WorkflowArtefact.State.SKIPPED)
         createSeqTrack(workflowArtefact: wa)
 
         when:
@@ -51,9 +51,9 @@ class DeleteConcreteArtefactsOfOmittedWorkflowArtefactsJobIntegrationSpec extend
 
     void "test wrappedExecute, with correct state and dependent workflow artefact without artefact, deletes artefact"() {
         given:
-        DeleteConcreteArtefactsOfOmittedWorkflowArtefactsJob job = new DeleteConcreteArtefactsOfOmittedWorkflowArtefactsJob()
+        DeleteConcreteArtefactsOfSkippedWorkflowArtefactsJob job = new DeleteConcreteArtefactsOfSkippedWorkflowArtefactsJob()
 
-        WorkflowArtefact wa = createWorkflowArtefact(state: WorkflowArtefact.State.OMITTED)
+        WorkflowArtefact wa = createWorkflowArtefact(state: WorkflowArtefact.State.SKIPPED)
         createSeqTrack(workflowArtefact: wa)
 
         WorkflowRun wr = createWorkflowRun()
@@ -69,7 +69,7 @@ class DeleteConcreteArtefactsOfOmittedWorkflowArtefactsJobIntegrationSpec extend
 
     void "test wrappedExecute, with incorrect state, doesn't delete artefact"() {
         given:
-        DeleteConcreteArtefactsOfOmittedWorkflowArtefactsJob job = new DeleteConcreteArtefactsOfOmittedWorkflowArtefactsJob()
+        DeleteConcreteArtefactsOfSkippedWorkflowArtefactsJob job = new DeleteConcreteArtefactsOfSkippedWorkflowArtefactsJob()
 
         WorkflowArtefact wa = createWorkflowArtefact(state: state)
         SeqTrack artefact = createSeqTrack(workflowArtefact: wa)
@@ -89,9 +89,9 @@ class DeleteConcreteArtefactsOfOmittedWorkflowArtefactsJobIntegrationSpec extend
 
     void "test wrappedExecute, with correct state and dependent workflow artefact with artefact, doesn't delete artefact"() {
         given:
-        DeleteConcreteArtefactsOfOmittedWorkflowArtefactsJob job = new DeleteConcreteArtefactsOfOmittedWorkflowArtefactsJob()
+        DeleteConcreteArtefactsOfSkippedWorkflowArtefactsJob job = new DeleteConcreteArtefactsOfSkippedWorkflowArtefactsJob()
 
-        WorkflowArtefact wa = createWorkflowArtefact(state: WorkflowArtefact.State.OMITTED)
+        WorkflowArtefact wa = createWorkflowArtefact(state: WorkflowArtefact.State.SKIPPED)
         SeqTrack artefact = createSeqTrack(workflowArtefact: wa)
 
         WorkflowRun wr = createWorkflowRun()

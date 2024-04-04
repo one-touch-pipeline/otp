@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
+import de.dkfz.tbi.otp.workflow.analysis.AnalysisConditionalSkipJob
 import de.dkfz.tbi.otp.workflow.analysis.RoddyAnalysisFragmentJob
 import de.dkfz.tbi.otp.workflow.jobs.*
 import de.dkfz.tbi.otp.workflowExecution.Artefact
@@ -44,7 +45,7 @@ class IndelWorkflow extends AbstractAnalysisWorkflow {
     @Override
     List<Class<? extends Job>> getJobList() {
         return [
-//                CoverageConditionalSkipJob,
+                AnalysisConditionalSkipJob,
                 RoddyAnalysisFragmentJob,
 //                IndelCheckFragmentKeysJob,
 //                IndelConditionalFailJob,

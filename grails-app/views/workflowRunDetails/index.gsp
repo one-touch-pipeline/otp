@@ -108,8 +108,8 @@
 
             <p>${workflowRun.state.description}</p>
 
-            <g:if test="${workflowRun.omittedMessage}">
-                <p>${g.message(code: "workflowRun.details.omitted", args: [workflowRun.omittedMessage?.category, workflowRun.omittedMessage?.message])}</p>
+            <g:if test="${workflowRun.skipMessage}">
+                <p>${g.message(code: "workflowRun.details.skipped", args: [workflowRun.skipMessage?.category, workflowRun.skipMessage?.message])}</p>
             </g:if>
 
         </div>

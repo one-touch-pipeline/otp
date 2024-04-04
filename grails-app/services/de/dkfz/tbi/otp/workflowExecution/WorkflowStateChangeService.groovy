@@ -33,29 +33,29 @@ class WorkflowStateChangeService {
 
     OtpWorkflowService otpWorkflowService
 
-    void changeStateToOmitted(WorkflowStep step, OmittedMessage message) {
+    void changeStateToSkipped(WorkflowStep step, WorkflowStepSkipMessage message) {
         assert step
         assert message
-        step.state = WorkflowStep.State.OMITTED
+        step.state = WorkflowStep.State.SKIPPED
         step.save(flush: true)
 
-        step.workflowRun.state = WorkflowRun.State.OMITTED_MISSING_PRECONDITION
-        step.workflowRun.omittedMessage = message
+        step.workflowRun.state = WorkflowRun.State.SKIPPED_MISSING_PRECONDITION
+        step.workflowRun.skipMessage = message
         step.workflowRun.save(flush: true)
 
         step.workflowRun.outputArtefacts.each { String role, WorkflowArtefact workflowArtefact ->
-            workflowArtefact.state = WorkflowArtefact.State.OMITTED
+            workflowArtefact.state = WorkflowArtefact.State.SKIPPED
             workflowArtefact.save(flush: true)
         }
 
         getDependingWorkflowRuns(step.workflowRun).each { WorkflowRun workflowRun ->
             if (workflowRun.state == WorkflowRun.State.PENDING) {
-                workflowRun.state = WorkflowRun.State.OMITTED_MISSING_PRECONDITION
-                workflowRun.omittedMessage = message
+                workflowRun.state = WorkflowRun.State.SKIPPED_MISSING_PRECONDITION
+                workflowRun.skipMessage = message
                 workflowRun.save(flush: true)
                 workflowRun.outputArtefacts.each { String role, WorkflowArtefact workflowArtefact ->
                     if (workflowArtefact.state == WorkflowArtefact.State.PLANNED_OR_RUNNING) {
-                        workflowArtefact.state = WorkflowArtefact.State.OMITTED
+                        workflowArtefact.state = WorkflowArtefact.State.SKIPPED
                         workflowArtefact.save(flush: true)
                     }
                 }
@@ -99,16 +99,16 @@ class WorkflowStateChangeService {
 
         getDependingWorkflowRuns(step.workflowRun).each { WorkflowRun workflowRun ->
             if (workflowRun.state == WorkflowRun.State.PENDING) {
-                workflowRun.state = WorkflowRun.State.OMITTED_MISSING_PRECONDITION
-                workflowRun.omittedMessage = new OmittedMessage(
+                workflowRun.state = WorkflowRun.State.SKIPPED_MISSING_PRECONDITION
+                workflowRun.skipMessage = new WorkflowStepSkipMessage(
                         message: "Previous run failed",
-                        category: OmittedMessage.Category.PREREQUISITE_WORKFLOW_RUN_NOT_SUCCESSFUL,
+                        category: WorkflowStepSkipMessage.Category.PREREQUISITE_WORKFLOW_RUN_NOT_SUCCESSFUL,
                 ).save(flush: true)
                 workflowRun.save(flush: true)
 
                 workflowRun.outputArtefacts.each { String role, WorkflowArtefact workflowArtefact ->
                     if (workflowArtefact.state == WorkflowArtefact.State.PLANNED_OR_RUNNING) {
-                        workflowArtefact.state = WorkflowArtefact.State.OMITTED
+                        workflowArtefact.state = WorkflowArtefact.State.SKIPPED
                         workflowArtefact.save(flush: true)
                     }
                 }

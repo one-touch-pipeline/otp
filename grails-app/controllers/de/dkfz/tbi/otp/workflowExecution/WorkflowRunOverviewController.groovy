@@ -47,7 +47,7 @@ class WorkflowRunOverviewController {
             ].asImmutable(),
             ("Finished")      : [
                     WorkflowRun.State.SUCCESS,
-                    WorkflowRun.State.OMITTED_MISSING_PRECONDITION,
+                    WorkflowRun.State.SKIPPED_MISSING_PRECONDITION,
                     WorkflowRun.State.FAILED_FINAL,
                     WorkflowRun.State.RESTARTED,
                     WorkflowRun.State.KILLED,

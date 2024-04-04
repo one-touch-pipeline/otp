@@ -44,7 +44,7 @@ class WorkflowDeletionServiceIntegrationSpec extends Specification implements Wo
         given:
         WorkflowRunInputArtefact wria = createWorkflowArtefactAndRun()
         WorkflowRun workflowRun = createWorkflowRun(
-                omittedMessage: createOmittedMessage(),
+                skipMessage: createSkipMessage(),
                 workDirectory: null,
                 workFolder: createWorkFolder(),
         )
@@ -64,7 +64,7 @@ class WorkflowDeletionServiceIntegrationSpec extends Specification implements Wo
         ClusterJob.count == 0
         WorkflowLog.count == 0
         WorkflowError.count == 0
-        OmittedMessage.count == 0
+        WorkflowStepSkipMessage.count == 0
         WorkFolder.count == 0
     }
 

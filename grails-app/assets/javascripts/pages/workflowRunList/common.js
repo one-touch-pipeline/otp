@@ -47,8 +47,8 @@ const statusToClassName = function (status) {
     case 'FINISHED/COMPLETED':
     case 'COMPLETE':
       return 'dot green';
-    case 'OMITTED':
-    case 'OMITTED_MISSING_PRECONDITION':
+    case 'SKIPPED':
+    case 'SKIPPED_MISSING_PRECONDITION':
       return 'dot purple';
     case 'FAILED_FINAL':
       return 'dot darkorange';

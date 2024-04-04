@@ -316,7 +316,7 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
                                       combinedConfig  : null,
                                       priority        : priorityParam,
                                       restartedFrom   : null,
-                                      omittedMessage  : null,
+                                      skipMessage     : null,
                                       workflowSteps   : [],
                                       workflow        : workflowParam,
                                       workflowVersion : workflowVersionParam,

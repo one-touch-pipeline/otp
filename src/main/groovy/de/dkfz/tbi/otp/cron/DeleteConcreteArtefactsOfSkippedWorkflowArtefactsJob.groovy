@@ -19,27 +19,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.jobs
+package de.dkfz.tbi.otp.cron
 
-import de.dkfz.tbi.otp.workflow.shared.SkipWorkflowStepException
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import groovy.transform.CompileDynamic
+import groovy.util.logging.Slf4j
+import org.springframework.stereotype.Component
 
-abstract class AbstractConditionalSkipJob extends AbstractJob {
+import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRunInputArtefact
+
+@CompileDynamic
+@Component
+@Slf4j
+class DeleteConcreteArtefactsOfSkippedWorkflowArtefactsJob extends AbstractScheduledJob {
 
     @Override
-    final void execute(WorkflowStep workflowStep) {
-        try {
-            checkRequirements(workflowStep)
-        } catch (SkipWorkflowStepException e) {
-            workflowStateChangeService.changeStateToSkipped(workflowStep, e.skipMessage)
+    void wrappedExecute() {
+        WorkflowArtefact.findAllByState(WorkflowArtefact.State.SKIPPED).each { workflowArtefact ->
+            if (hasNoDependentConcreteArtefact(workflowArtefact)) {
+                workflowArtefact.artefact.ifPresent {
+                    it.delete(flush: true)
+                }
+            }
         }
     }
 
-    /** Should throw SkipWorkflowStepException when WorkflowStep should be skipped  */
-    abstract void checkRequirements(WorkflowStep workflowStep) throws SkipWorkflowStepException
-
-    @Override
-    final JobStage getJobStage() {
-        return JobStage.CONDITIONAL_SKIP
+    private boolean hasNoDependentConcreteArtefact(WorkflowArtefact workflowArtefact) {
+        return WorkflowRunInputArtefact.findAllByWorkflowArtefact(workflowArtefact)*.workflowRun*.outputArtefacts.every {
+            it.values().every {
+                !(it.artefact.orElse(null))
+            }
+        }
     }
 }

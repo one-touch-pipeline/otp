@@ -19,27 +19,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.jobs
+package de.dkfz.tbi.otp.workflow.shared
 
-import de.dkfz.tbi.otp.workflow.shared.SkipWorkflowStepException
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStepSkipMessage
 
-abstract class AbstractConditionalSkipJob extends AbstractJob {
+class SkipWorkflowStepException extends WorkflowException {
+    WorkflowStepSkipMessage skipMessage
 
-    @Override
-    final void execute(WorkflowStep workflowStep) {
-        try {
-            checkRequirements(workflowStep)
-        } catch (SkipWorkflowStepException e) {
-            workflowStateChangeService.changeStateToSkipped(workflowStep, e.skipMessage)
-        }
-    }
-
-    /** Should throw SkipWorkflowStepException when WorkflowStep should be skipped  */
-    abstract void checkRequirements(WorkflowStep workflowStep) throws SkipWorkflowStepException
-
-    @Override
-    final JobStage getJobStage() {
-        return JobStage.CONDITIONAL_SKIP
+    SkipWorkflowStepException(WorkflowStepSkipMessage skipMessage) {
+        super(skipMessage.message)
+        this.skipMessage = skipMessage
     }
 }

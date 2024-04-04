@@ -24,13 +24,18 @@ package de.dkfz.tbi.otp.dataprocessing
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
+import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.SnvDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
-class ProcessingThresholdsServiceSpec extends Specification implements DataTest, DomainFactoryCore {
+class ProcessingThresholdsServiceSpec extends Specification implements DataTest, DomainFactoryCore, IsRoddy {
     private static final Integer LANES = 1
     private static final Double COVERAGE = null
+
+    ProcessingThresholdsService service
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -41,7 +46,19 @@ class ProcessingThresholdsServiceSpec extends Specification implements DataTest,
                 Sample,
                 SampleType,
                 SeqType,
+                Pipeline,
+                MergingWorkPackage,
+                ReferenceGenomeProjectSeqType,
+                FileType,
+                FastqImportInstance,
+                FastqFile,
+                RoddyWorkflowConfig,
+                RoddyBamFile,
         ]
+    }
+
+    void setup() {
+        service = new ProcessingThresholdsService()
     }
 
     void "test createUpdateOrDelete, test create"() {
@@ -50,8 +67,6 @@ class ProcessingThresholdsServiceSpec extends Specification implements DataTest,
         Project project = createProject()
         SampleType sampleType = createSampleType()
         SeqType seqType = createSeqType()
-
-        ProcessingThresholdsService service = new ProcessingThresholdsService()
 
         when:
         processingThresholds = service.createUpdateOrDelete(project, sampleType, seqType, LANES, COVERAGE)
@@ -67,7 +82,6 @@ class ProcessingThresholdsServiceSpec extends Specification implements DataTest,
     void "test createUpdateOrDelete, test update"() {
         given:
         ProcessingThresholds processingThresholds = DomainFactory.createProcessingThresholds()
-        ProcessingThresholdsService service = new ProcessingThresholdsService()
 
         expect:
         processingThresholds.numberOfLanes != LANES
@@ -84,12 +98,26 @@ class ProcessingThresholdsServiceSpec extends Specification implements DataTest,
     void "test createUpdateOrDelete, test delete"() {
         given:
         ProcessingThresholds processingThresholds = DomainFactory.createProcessingThresholds()
-        ProcessingThresholdsService service = new ProcessingThresholdsService()
 
         when:
         service.createUpdateOrDelete(processingThresholds.project, processingThresholds.sampleType, processingThresholds.seqType, null, null)
 
         then:
         ProcessingThresholds.all.size() == 0
+    }
+
+    void "findByAbstractBamFile, should return ProcessingThreshold that fit the bam file"() {
+        given:
+        SnvDomainFactory snvDomainFactory = SnvDomainFactory.INSTANCE
+        AbstractBamFile bamFile = createBamFile()
+        ProcessingThresholds processingThresholds = snvDomainFactory.createProcessingThresholds([
+                project   : bamFile.project,
+                sampleType: bamFile.sampleType,
+                seqType   : bamFile.seqType,
+        ])
+        snvDomainFactory.createProcessingThresholds()
+
+        expect:
+        service.findByAbstractBamFile(bamFile) == processingThresholds
     }
 }

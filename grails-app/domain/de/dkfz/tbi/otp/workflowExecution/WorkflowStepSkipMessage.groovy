@@ -26,7 +26,7 @@ import grails.gorm.hibernate.annotation.ManagedEntity
 import de.dkfz.tbi.otp.utils.Entity
 
 @ManagedEntity
-class OmittedMessage implements Entity {
+class WorkflowStepSkipMessage implements Entity {
 
     enum Category {
         PREREQUISITE_WORKFLOW_RUN_NOT_SUCCESSFUL,

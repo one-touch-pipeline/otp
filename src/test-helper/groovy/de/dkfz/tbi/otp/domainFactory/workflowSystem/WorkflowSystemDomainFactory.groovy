@@ -229,9 +229,9 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
         ], properties, saveAndValidate)
     }
 
-    OmittedMessage createOmittedMessage(Map properties = [:], boolean saveAndValidate = true) {
-        return createDomainObject(OmittedMessage, [
-                category: OmittedMessage.Category.PREREQUISITE_WORKFLOW_RUN_NOT_SUCCESSFUL,
+    WorkflowStepSkipMessage createSkipMessage(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(WorkflowStepSkipMessage, [
+                category: WorkflowStepSkipMessage.Category.PREREQUISITE_WORKFLOW_RUN_NOT_SUCCESSFUL,
                 message : "message_${nextId}",
         ], properties, saveAndValidate)
     }

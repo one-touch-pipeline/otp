@@ -1062,7 +1062,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
                                       combinedConfig  : null,
                                       priority        : priorityParam,
                                       restartedFrom   : null,
-                                      omittedMessage  : null,
+                                      skipMessage     : null,
                                       workflowSteps   : [],
                                       workflow        : workflowParam,
                                       workflowVersion : workflowVersionParam,

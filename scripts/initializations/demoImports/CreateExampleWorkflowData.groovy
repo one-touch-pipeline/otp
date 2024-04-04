@@ -246,11 +246,11 @@ WorkflowRun.withNewTransaction {
             createInputArtefact(workflowRun, "input artefact")
 
             switch (workflowState) {
-                case WorkflowRun.State.OMITTED_MISSING_PRECONDITION:
-                    createWorkflowStep(workflowRun, WorkflowStep.State.OMITTED)
-                    workflowRun.omittedMessage = new OmittedMessage(
-                            category: OmittedMessage.Category.PREREQUISITE_WORKFLOW_RUN_NOT_SUCCESSFUL,
-                            message: "omitted info",
+                case WorkflowRun.State.SKIPPED_MISSING_PRECONDITION:
+                    createWorkflowStep(workflowRun, WorkflowStep.State.SKIPPED)
+                    workflowRun.skipMessage = new WorkflowStepSkipMessage(
+                            category: WorkflowStepSkipMessage.Category.PREREQUISITE_WORKFLOW_RUN_NOT_SUCCESSFUL,
+                            message: "skipped info",
                     )
                     break
                 case WorkflowRun.State.RUNNING_OTP:

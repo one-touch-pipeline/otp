@@ -19,36 +19,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.cron
 
-import groovy.transform.CompileDynamic
-import groovy.util.logging.Slf4j
-import org.springframework.stereotype.Component
+databaseChangeLog = {
 
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
-import de.dkfz.tbi.otp.workflowExecution.WorkflowRunInputArtefact
-
-@CompileDynamic
-@Component
-@Slf4j
-class DeleteConcreteArtefactsOfOmittedWorkflowArtefactsJob extends AbstractScheduledJob {
-
-    @Override
-    void wrappedExecute() {
-        WorkflowArtefact.findAllByState(WorkflowArtefact.State.OMITTED).each { workflowArtefact ->
-            if (hasNoDependentConcreteArtefact(workflowArtefact)) {
-                workflowArtefact.artefact.ifPresent {
-                    it.delete(flush: true)
-                }
-            }
-        }
+    changeSet(author: "Julian Rausch", id: "otp-2419") {
+        sql("""
+               UPDATE workflow_step
+                SET state = 'SKIPPED'
+                WHERE state='OMITTED';
+            """)
+        sql("""
+               UPDATE workflow_run
+                SET state = 'SKIPPED_MISSING_PRECONDITION'
+                WHERE state='OMITTED_MISSING_PRECONDITION';
+            """)
+        sql("""
+               UPDATE workflow_artefact
+                SET state = 'SKIPPED'
+                WHERE state='OMITTED';
+            """)
     }
 
-    private boolean hasNoDependentConcreteArtefact(WorkflowArtefact workflowArtefact) {
-        return WorkflowRunInputArtefact.findAllByWorkflowArtefact(workflowArtefact)*.workflowRun*.outputArtefacts.every {
-            it.values().every {
-                !(it.artefact.orElse(null))
-            }
-        }
+    changeSet(author: "Julian Rausch", id: "1711636381583-91") {
+        renameTable(oldTableName: "omitted_message", newTableName: "workflow_step_skip_message")
+    }
+    changeSet(author: "-", id: "1711636381583-92") {
+        renameColumn(tableName: "workflow_run", oldColumnName:"omitted_message_id", newColumnName:"skip_message_id" )
     }
 }
