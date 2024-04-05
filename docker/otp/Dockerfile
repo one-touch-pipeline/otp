@@ -34,11 +34,11 @@ ENV OTP_PROPERTIES=$APP_HOME/.otp.properties
 WORKDIR $APP_HOME
 
 RUN if [ "$GRADLE_PROXY_ENABLED" = "true" ] ; then \
-    mkdir -p ~/.gradle && \
-    echo "systemProp.http.proxyHost=${GRADLE_PROXY_HOST}" >> ~/.gradle/gradle.properties && \
-    echo "systemProp.http.proxyPort=${GRADLE_PROXY_PORT}" >> ~/.gradle/gradle.properties && \
-    echo "systemProp.https.proxyHost=${GRADLE_PROXY_HOST}" >> ~/.gradle/gradle.properties && \
-    echo "systemProp.https.proxyPort=${GRADLE_PROXY_PORT}" >> ~/.gradle/gradle.properties \
+    mkdir -p $GRADLE_USER_HOME && \
+    echo "systemProp.http.proxyHost=${GRADLE_PROXY_HOST}" >> $GRADLE_USER_HOME/gradle.properties && \
+    echo "systemProp.http.proxyPort=${GRADLE_PROXY_PORT}" >> $GRADLE_USER_HOME/gradle.properties && \
+    echo "systemProp.https.proxyHost=${GRADLE_PROXY_HOST}" >> $GRADLE_USER_HOME/gradle.properties && \
+    echo "systemProp.https.proxyPort=${GRADLE_PROXY_PORT}" >> $GRADLE_USER_HOME/gradle.properties \
     ; fi
 
 ENTRYPOINT ./gradlew $GRADLE_COMMAND
