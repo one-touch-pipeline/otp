@@ -34,7 +34,7 @@ import java.util.regex.Matcher
 @Component
 class HipoSampleIdentifierParser implements SampleIdentifierParser {
 
-    private final static String REGEX = /^(${PIDREGEX})-([${HipoTissueType.values()*.key.join("")}])(\d{1,2})-(([BDRPACWY])(\d{1,2}))$/
+    private final static String REGEX = /^(${PIDREGEX})-([${HipoTissueType.values()*.key.join("")}])(\d{1,2})-(([BDRPACWY])(\d{1,2}))(-V8)?$/
     private final static String PIDREGEX = "([A-Z])(\\d\\d\\w)-(?:\\w\\w)?\\w\\w\\w(\\w)"
 
     @Override
@@ -89,6 +89,7 @@ class HipoSampleIdentifierParser implements SampleIdentifierParser {
                 /* pid: */ matcher.group(1),
                 /* tissueType: */ tissueType,
                 /* sampleNumber: */ sampleNumber,
+                /* v8 */ matcher.group(10) as boolean,
                 /* experiment: */ matcher.group(7),
                 tissueType.specificReferenceGenome,
         )
@@ -100,7 +101,8 @@ class HipoSampleIdentifierParser implements SampleIdentifierParser {
     }
 }
 
-@TupleConstructor  // see http://jeffastorey.blogspot.de/2011/10/final-variables-in-groovy-with-dynamic.html
+@TupleConstructor
+// see http://jeffastorey.blogspot.de/2011/10/final-variables-in-groovy-with-dynamic.html
 class HipoSampleIdentifier implements ParsedSampleIdentifier {
 
     /**
@@ -128,6 +130,12 @@ class HipoSampleIdentifier implements ParsedSampleIdentifier {
     final String sampleNumber
 
     /**
+     * Info if the Library Prep Kit Version 8 is used
+     * Example: V8
+     */
+    final boolean v8
+
+    /**
      * Which analyte type was applied to the sample, [DRPAC] (DNA, RNA, Protein, miRNA or ChiPSeq).
      * Always followed by the order number.
      * Example: D1 (DNA, attempt 1)
@@ -147,7 +155,7 @@ class HipoSampleIdentifier implements ParsedSampleIdentifier {
      */
     @Override
     String getFullSampleName() {
-        return "${pid}-${tissueType.key}${sampleNumber}-${analyteTypeAndNumber}"
+        return "${pid}-${tissueType.key}${sampleNumber}-${analyteTypeAndNumber}${v8 ? "-V8" : ""}"
     }
 
     @Override
@@ -156,10 +164,10 @@ class HipoSampleIdentifier implements ParsedSampleIdentifier {
         return null
     }
 /**
-     * The sample type name as it appears in the database, i.e. the tissue type name, followed by
-     * the {@link #sampleNumber} if different from 1 or for project 35.
-     * Example: TUMOR03
-     */
+ * The sample type name as it appears in the database, i.e. the tissue type name, followed by
+ * the {@link #sampleNumber} if different from 1 or for project 35.
+ * Example: TUMOR03
+ */
     @Override
     String getSampleTypeDbName() {
         String dbName = tissueType
@@ -175,7 +183,8 @@ class HipoSampleIdentifier implements ParsedSampleIdentifier {
                 dbName += String.format('%02d', sampleNumberInt)
             }
         }
-        return dbName
+
+        return dbName + (v8 ? "-v8" : "")
     }
 
     @Override

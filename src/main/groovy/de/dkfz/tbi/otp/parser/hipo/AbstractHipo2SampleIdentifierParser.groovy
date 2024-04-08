@@ -55,10 +55,13 @@ abstract class AbstractHipo2SampleIdentifierParser implements SampleIdentifierPa
     private final static String ANALYTE_PATTERN_SINGLE_CELL_DEMULTIPLEX =
             "[0-9]+(?<analyteSingleCellDemultiplex>[${ANALYTE_CHARS_SINGLE_CELL}])[0-9]{1,2}"
 
+    // Info if the Library Prep Kit Version 8 is used
+    private final static String V8 = "(-(?<v8>V8))?"
+
     private final static String ANALYTE_PATTERN =
             "(?<analyte>${ANALYTE_PATTERN_NO_DIGIT_BEFORE}|${ANALYTE_PATTERN_SKIP_ANALYTE}|${ANALYTE_PATTERN_SINGLE_CELL_DEMULTIPLEX})"
 
-    static final String REGEX = /^${PID}-${TISSUE}-${ANALYTE_PATTERN}$/
+    static final String REGEX = /^${PID}-${TISSUE}-${ANALYTE_PATTERN}${V8}$/
 
     @Override
     boolean tryParsePid(String pid) {
@@ -99,6 +102,9 @@ abstract class AbstractHipo2SampleIdentifierParser implements SampleIdentifierPa
                 realSampleTypeName = baseSampleTypeName
             } else {
                 assert false: 'may not occur'
+            }
+            if (matcher.group('v8')) {
+                realSampleTypeName += '-v8'
             }
             return new DefaultParsedSampleIdentifier(
                     projectName,
