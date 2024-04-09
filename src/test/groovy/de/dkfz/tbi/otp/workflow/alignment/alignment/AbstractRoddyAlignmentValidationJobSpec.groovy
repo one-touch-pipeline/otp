@@ -126,7 +126,7 @@ abstract class AbstractRoddyAlignmentValidationJobSpec extends Specification imp
     void "test doFurtherValidation, when the readGroups are different, throw exception"() {
         given:
         final PanCancerValidationJob job = new PanCancerValidationJob()
-        final RoddyBamFile bamFile = createRoddyBamFile(RoddyBamFile)
+        final AbstractBamFile bamFile = createRoddyBamFile(RoddyBamFile)
 
         job.fileSystemService = new TestFileSystemService()
         job.roddyService = Mock(RoddyService) {
@@ -173,6 +173,9 @@ abstract class AbstractRoddyAlignmentValidationJobSpec extends Specification imp
             1 * getPreviousRunningWorkflowStep(workflowStepCurrent) >> workflowStep
         }
         job.roddyBamFileService = Mock(RoddyBamFileService)
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            1 * getOutputArtefact(workflowStepCurrent, _) >> abstractBamFile
+        }
 
         when:
         job.ensureExternalJobsRunThrough(workflowStepCurrent)
@@ -203,6 +206,9 @@ abstract class AbstractRoddyAlignmentValidationJobSpec extends Specification imp
             1 * getPreviousRunningWorkflowStep(workflowStepCurrent) >> workflowStep
         }
         job.roddyBamFileService = Mock(RoddyBamFileService)
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            1 * getOutputArtefact(workflowStepCurrent, _) >> abstractBamFile
+        }
 
         when:
         job.ensureExternalJobsRunThrough(workflowStepCurrent)

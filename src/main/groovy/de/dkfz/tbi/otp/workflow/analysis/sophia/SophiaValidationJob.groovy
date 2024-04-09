@@ -19,59 +19,57 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.alignment.panCancer
+package de.dkfz.tbi.otp.workflow.analysis.sophia
 
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
-import de.dkfz.tbi.otp.workflow.alignment.AbstractRoddyAlignmentValidationJob
+import de.dkfz.tbi.otp.dataprocessing.sophia.*
+import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
+import de.dkfz.tbi.otp.workflow.jobs.AbstractRoddyClusterValidationJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
 
 @Component
 @Slf4j
-class PanCancerValidationJob extends AbstractRoddyAlignmentValidationJob implements PanCancerShared {
+class SophiaValidationJob extends AbstractRoddyClusterValidationJob implements SophiaWorkflowShared {
+
+    @Autowired
+    SophiaWorkFileService sophiaWorkFileService
+
+    @Autowired
+    ExecuteRoddyCommandService executeRoddyCommandService
+
+    @Autowired
+    SophiaService sophiaService
+
+    @Override
+    protected List<Path> getExpectedFiles(WorkflowStep workflowStep) {
+        SophiaInstance instance = getSophiaInstance(workflowStep)
+        return [sophiaWorkFileService.getFinalAceseqInputFile(instance)]
+    }
 
     @Override
     protected List<Path> getExpectedDirectories(WorkflowStep workflowStep) {
-        List<Path> directories = super.getExpectedDirectories(workflowStep)
-
-        RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
-        directories.add(roddyBamFileService.getWorkMergedQADirectory(roddyBamFile))
-
-        return directories
+        SophiaInstance instance = getSophiaInstance(workflowStep)
+        return [sophiaWorkFileService.getWorkExecutionStoreDirectory(instance)] + sophiaWorkFileService.getWorkExecutionDirectories(instance)
     }
 
-    /**
-     * Returns the expected files for validation
-     *
-     * @return the following paths
-     * <ul>
-     *     <li>super.getExpectedFiles</li>
-     *     <li>workMergedQAJsonFile</li>
-     *     <li>workMergedQATargetExtractJsonFile (if seq type needs BED file)</li>
-     * </ul>
-     */
     @Override
-    protected List<Path> getExpectedFiles(WorkflowStep workflowStep) {
-        List<Path> expectedFiles = super.getExpectedFiles(workflowStep)
-
-        RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
-
-        expectedFiles.add(roddyBamFileService.getWorkMergedQAJsonFile(roddyBamFile))
-        if (roddyBamFile.seqType.needsBedFile) {
-            expectedFiles.add(roddyBamFileService.getWorkMergedQATargetExtractJsonFile(roddyBamFile))
-        }
-        expectedFiles.addAll(roddyBamFileService.getWorkSingleLaneQAJsonFiles(roddyBamFile).values())
-
-        return expectedFiles
+    protected void saveResult(WorkflowStep workflowStep) {
     }
 
     @Override
     protected RoddyResult getRoddyResult(WorkflowStep workflowStep) {
-        return getRoddyBamFile(workflowStep)
+        return getSophiaInstance(workflowStep)
+    }
+
+    @Override
+    protected void doFurtherValidation(WorkflowStep workflowStep) {
+        SophiaInstance instance = getSophiaInstance(workflowStep)
+        sophiaService.validateInputBamFiles(instance)
     }
 }

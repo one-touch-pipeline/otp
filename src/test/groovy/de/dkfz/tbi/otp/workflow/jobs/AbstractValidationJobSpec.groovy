@@ -25,6 +25,7 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.otp.workflowExecution.*
@@ -94,6 +95,7 @@ class AbstractValidationJobSpec extends Specification implements DataTest, Workf
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
         WorkflowStep workflowStep = createWorkflowStep()
         job.logService = Mock(LogService)
+        job.fileService = new FileService()
 
         when:
         job.execute(workflowStep)
@@ -103,7 +105,8 @@ class AbstractValidationJobSpec extends Specification implements DataTest, Workf
         }
         1 * job.getExpectedFiles(workflowStep) >> [Paths.get("file-not-found")]
         1 * job.getExpectedDirectories(workflowStep) >> [Paths.get("dir-not-found")]
-        0 * job.doFurtherValidation(workflowStep)
+        0 * job.doFurtherValidation(workflowStep) >> {
+        }
 
         0 * job.saveResult(workflowStep) >> null
         0 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)

@@ -55,17 +55,20 @@ abstract class AbstractValidationJob extends AbstractJob {
     @Autowired
     JobStatusLoggingFileService jobStatusLoggingFileService
 
+    @Autowired
+    FileService fileService
+
     @CompileDynamic
     @Override
     final void execute(WorkflowStep workflowStep) {
         ensureExternalJobsRunThrough(workflowStep)
 
-        List<String> errors = []
+        List<GString> errors = []
 
         getExpectedFiles(workflowStep).each {
             try {
                 logService.addSimpleLogEntry(workflowStep, "Check file ${it}")
-                FileService.ensureFileIsReadableAndNotEmptyStatic(it)
+                fileService.ensureFileIsReadableAndNotEmpty(it)
             } catch (AssertionError e) {
                 errors << "Expected file ${it} not found, ${e.message}"
             }
@@ -74,7 +77,7 @@ abstract class AbstractValidationJob extends AbstractJob {
         getExpectedDirectories(workflowStep).each {
             try {
                 logService.addSimpleLogEntry(workflowStep, "Check directory ${it}")
-                FileService.ensureDirIsReadableStatic(it)
+                fileService.ensureDirIsReadable(it)
             } catch (AssertionError e) {
                 errors << "Expected directory ${it} not found, ${e.message}"
             }

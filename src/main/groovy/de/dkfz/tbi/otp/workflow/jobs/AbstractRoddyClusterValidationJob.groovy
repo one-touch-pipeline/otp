@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflow.jobs
 import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.workflow.RoddyService
 import de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFile
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
@@ -59,19 +60,19 @@ abstract class AbstractRoddyClusterValidationJob extends AbstractValidationJob {
      */
     @CompileDynamic
     @Override
-    protected void ensureExternalJobsRunThrough(WorkflowStep workflowStep) {
+    protected final void ensureExternalJobsRunThrough(WorkflowStep workflowStep) {
         // cluster jobs are connected to the job sending them, not to this validation job
         Set<ClusterJob> clusterJobs = workflowStepService.getPreviousRunningWorkflowStep(workflowStep).clusterJobs
         if (!clusterJobs) {
             logService.addSimpleLogEntry(workflowStep, "No cluster job found to be validated.")
             return
         }
-
-        JobStateLogFile jobStateLogFile = roddyService.getJobStateLogFile(workflowStep)
+        RoddyResult roddyResult = getRoddyResult(workflowStep)
+        JobStateLogFile jobStateLogFile = roddyService.getJobStateLogFile(roddyResult)
         List<String> errorMessages = []
         clusterJobs.each { ClusterJob clusterJob ->
             if (!jobStateLogFile.containsClusterJobId(clusterJob.clusterJobId)) {
-                errorMessages.add("JobStateLogFile contains no information for this cluster job ${clusterJob.clusterJobId}.")
+                errorMessages.add("JobStateLogFile contains no information for cluster job ${clusterJob.clusterJobId}.")
             } else if (!jobStateLogFile.isClusterJobFinishedSuccessfully(clusterJob.clusterJobId)) {
                 errorMessages.add("Status code of cluster job ${clusterJob.clusterJobId}: " +
                         "${jobStateLogFile.getPropertyFromLatestLogFileEntry(clusterJob.clusterJobId, "statusCode")}.")
@@ -86,4 +87,6 @@ abstract class AbstractRoddyClusterValidationJob extends AbstractValidationJob {
             throw new ValidationJobFailedException(message)
         }
     }
+
+    protected abstract RoddyResult getRoddyResult(WorkflowStep workflowStep)
 }

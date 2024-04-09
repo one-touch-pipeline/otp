@@ -26,6 +26,7 @@ import htsjdk.samtools.SamReaderFactory
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFile
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
@@ -53,9 +54,8 @@ class RoddyService implements WorkflowShared {
         return roddyBamFile.containedSeqTracks*.readGroupName.sort()
     }
 
-    JobStateLogFile getJobStateLogFile(WorkflowStep workflowStep) {
-        RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
-        return JobStateLogFile.getInstance(roddyBamFile.latestWorkExecutionDirectory)
+    JobStateLogFile getJobStateLogFile(RoddyResult roddyResult) {
+        return JobStateLogFile.getInstance(roddyResult.latestWorkExecutionDirectory)
     }
 
     RoddyBamFile getRoddyBamFile(WorkflowStep workflowStep) {

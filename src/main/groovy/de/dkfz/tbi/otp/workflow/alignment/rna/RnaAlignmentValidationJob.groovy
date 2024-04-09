@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
 import de.dkfz.tbi.otp.workflow.alignment.AbstractRoddyAlignmentValidationJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -66,5 +67,10 @@ class RnaAlignmentValidationJob extends AbstractRoddyAlignmentValidationJob impl
         }
 
         return expectedFiles
+    }
+
+    @Override
+    protected RoddyResult getRoddyResult(WorkflowStep workflowStep) {
+        return getRoddyBamFile(workflowStep)
     }
 }
