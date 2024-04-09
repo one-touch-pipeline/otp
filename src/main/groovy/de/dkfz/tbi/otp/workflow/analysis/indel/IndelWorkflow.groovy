@@ -52,7 +52,7 @@ class IndelWorkflow extends AbstractAnalysisWorkflow {
 //                IndelConditionalFailJob,
 //                IndelCreateNotificationJob,
                 AttachUuidJob,
-//                IndelPrepareJob,
+                IndelPrepareJob,
 //                IndelExecuteJob,
 //                IndelValidationJob,
 //                IndelParseJob,

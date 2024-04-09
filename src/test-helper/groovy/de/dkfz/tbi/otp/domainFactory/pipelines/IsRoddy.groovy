@@ -40,6 +40,17 @@ trait IsRoddy implements IsPipeline {
         ], properties, saveAndValidate)
     }
 
+    MergingWorkPackage createMergingWorkPackage(AbstractMergingWorkPackage mwp, Map properties = [:], boolean saveAndValidate = true) {
+        Pipeline pipeline = properties.pipeline ?: mwp.pipeline
+        return createDomainObject(MergingWorkPackage, baseMergingWorkPackageProperties(properties) + [
+                seqType         : mwp.seqType,
+                pipeline        : pipeline,
+                statSizeFileName: {
+                    pipeline?.name == Pipeline.Name.PANCAN_ALIGNMENT ? "statSizeFileName_${nextId}.tab" : null
+                },
+        ], properties, saveAndValidate)
+    }
+
     @Override
     RoddyBamFile createBamFile(Map properties = [:]) {
         return createRoddyBamFile(properties, RoddyBamFile)

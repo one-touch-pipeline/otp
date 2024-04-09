@@ -19,25 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package de.dkfz.tbi.otp.workflow.analysis.snv
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
-import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
+
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
-import de.dkfz.tbi.otp.workflow.analysis.indel.IndelWorkflow
-import de.dkfz.tbi.otp.workflow.analysis.indel.IndelWorkflowShared
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-class IndelWorkflowSharedSpec extends Specification implements WorkflowSystemDomainFactory, DataTest {
+class SnvWorkflowSharedSpec extends Specification implements WorkflowSystemDomainFactory, DataTest {
 
     private WorkflowStep workflowStep
-    private IndelWorkflowShared indelWorkflowSharedInstance
-    private IndelCallingInstance indelInstance
-    private static final String INDEL_OUTPUT = AbstractAnalysisWorkflow.ANALYSIS_OUTPUT
+    private SnvWorkflowShared snvWorkflowSharedInstance
+    private RoddySnvCallingInstance snvInstance
+    private static final String SNV_OUTPUT = AbstractAnalysisWorkflow.ANALYSIS_OUTPUT
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -49,32 +49,31 @@ class IndelWorkflowSharedSpec extends Specification implements WorkflowSystemDom
     }
 
     private void createData() {
-        indelWorkflowSharedInstance = Spy(IndelWorkflowSharedInstance)
-        indelInstance = new IndelCallingInstance()
-        indelWorkflowSharedInstance.concreteArtefactService = Mock(ConcreteArtefactService)
+        snvWorkflowSharedInstance = Spy(SnvWorkflowSharedInstance)
+        snvInstance = new RoddySnvCallingInstance()
+        snvWorkflowSharedInstance.concreteArtefactService = Mock(ConcreteArtefactService)
         final WorkflowRun run = createWorkflowRun([
                 workflow: createWorkflow([
-                        name: IndelWorkflow.WORKFLOW
+                        name: SnvWorkflow.WORKFLOW
                 ]),
         ])
         workflowStep = createWorkflowStep([workflowRun: run])
     }
 
-    void "getSophiaInstance, should call checkWorkflowName and getInputArtefact with correct arguments and in order"() {
+    void "getAceseqInstance, should call checkWorkflowName and getOutputArtefact with correct arguments and in order"() {
         given:
         createData()
 
         when:
-        indelWorkflowSharedInstance.getIndelInstance(workflowStep)
+        snvWorkflowSharedInstance.getSnvInstance(workflowStep)
 
         then:
-        1 * indelWorkflowSharedInstance.checkWorkflowName(workflowStep, IndelWorkflow.WORKFLOW)
+        1 * snvWorkflowSharedInstance.checkWorkflowName(workflowStep, SnvWorkflow.WORKFLOW)
 
         then:
-        1 * indelWorkflowSharedInstance.concreteArtefactService.getOutputArtefact(workflowStep, INDEL_OUTPUT) >> indelInstance
+        1 * snvWorkflowSharedInstance.concreteArtefactService.getOutputArtefact(workflowStep, SNV_OUTPUT) >> snvInstance
     }
 
     @SuppressWarnings('EmptyClass')
-    class IndelWorkflowSharedInstance implements IndelWorkflowShared {
-    }
+    class SnvWorkflowSharedInstance implements SnvWorkflowShared { }
 }

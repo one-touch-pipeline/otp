@@ -38,19 +38,19 @@ class RoddySnvCallingInstance extends AbstractSnvCallingInstance implements Rodd
 
     static constraints = {
         config validator: { val, obj ->
-            RoddyWorkflowConfig.isAssignableFrom(Hibernate.getClass(val)) && val.pipeline.name.type == Pipeline.Type.SNV
+            !val || (RoddyWorkflowConfig.isAssignableFrom(Hibernate.getClass(val)) && val.pipeline.name.type == Pipeline.Type.SNV)
         }
     }
 
     @Override
     RoddyWorkflowConfig getConfig() {
-        return RoddyWorkflowConfig.get(super.config.id)
+        return super.config ? RoddyWorkflowConfig.get(super.config.id) : null
     }
 
     @Deprecated
     @Override
     Pipeline getPipeline() {
-        return config.pipeline
+        return config?.pipeline
     }
 
     @Deprecated

@@ -57,7 +57,7 @@ class SophiaInstance extends BamFilePairAnalysis implements RoddyResult {
     @Deprecated
     @Override
     Pipeline getPipeline() {
-        return config.pipeline
+        return config?.pipeline
     }
 
     @Deprecated
@@ -81,8 +81,10 @@ class SophiaInstance extends BamFilePairAnalysis implements RoddyResult {
         return super.config ? RoddyWorkflowConfig.get(super.config.id) : null
     }
 
+    /** @deprecated the new workflow system should use {@link AceseqWorkflowShared#getSophiaInstance()}*/
+    @Deprecated
     static SophiaInstance getLatestValidSophiaInstanceForSamplePair(SamplePair samplePair) {
-        return CollectionUtils.atMostOneElement(SophiaInstance.findAllBySamplePairAndWithdrawnAndProcessingState(
+        return CollectionUtils.atMostOneElement(findAllBySamplePairAndWithdrawnAndProcessingState(
                 samplePair, false, AnalysisProcessingStates.FINISHED, [max: 1, sort: "id", order: "desc",]))
     }
 }

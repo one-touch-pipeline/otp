@@ -19,46 +19,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataprocessing.runYapsa
+package de.dkfz.tbi.otp.workflow.analysis.runyapsa
 
-import grails.gorm.hibernate.annotation.ManagedEntity
+import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaWorkFileService
+import de.dkfz.tbi.otp.utils.LinkEntry
+import de.dkfz.tbi.otp.workflow.jobs.AbstractRoddyPrepareJob
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-/**
- * An execution of the RunYAPSA workflow.
- */
-@ManagedEntity
-class RunYapsaInstance extends BamFilePairAnalysis {
+import java.nio.file.Path
 
-    /**
-     * @deprecated use {@link RunYapsaLinkFileService#getDirectoryPath()} or {@link RunYapsaWorkFileService#getDirectoryPath()}}
-     */
+@Component
+@Slf4j
+class RunYapsaPrepareJob extends AbstractRoddyPrepareJob implements RunYapsaWorkflowShared {
+    @Autowired
+    RunYapsaWorkFileService runYapsaWorkFileService
+
     @Override
-    @Deprecated
-    OtpPath getInstancePath() {
-        return new OtpPath(samplePair.runYapsaSamplePairPath, instanceName)
+    protected Path buildWorkDirectoryPath(WorkflowStep workflowStep) {
+        return runYapsaWorkFileService.getDirectoryPath(getRunYapsaInstance(workflowStep))
     }
 
     @Override
-    RunYapsaConfig getConfig() {
-        return super.config ? RunYapsaConfig.get(super.config.id) : null
+    protected Collection<LinkEntry> generateMapForLinking(WorkflowStep workflowStep) {
+        return []
     }
 
     @Override
-    ReferenceGenome getReferenceGenome() {
-        return sampleType2BamFile.referenceGenome
-    }
-
-    LibraryPreparationKit getLibraryPreparationKit() {
-        return sampleType2BamFile.workPackage.libraryPreparationKit
-    }
-
-    @Override
-    String toString() {
-        return "RYI ${id}${withdrawn ? ' (withdrawn)' : ''}: ${instanceName} ${samplePair.toStringWithoutId()}"
+    protected void doFurtherPreparation(WorkflowStep workflowStep) {
     }
 }

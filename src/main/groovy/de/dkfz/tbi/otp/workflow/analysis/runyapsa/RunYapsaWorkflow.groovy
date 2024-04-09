@@ -52,7 +52,7 @@ class RunYapsaWorkflow extends AbstractAnalysisWorkflow {
 //                RunYapsaConditionalFailJob,
 //                RunYapsaCreateNotificationJob,
                 AttachUuidJob,
-//                RunYapsaPrepareJob,
+                RunYapsaPrepareJob,
 //                RunYapsaExecuteJob,
 //                RunYapsaValidationJob,
 //                RunYapsaParseJob,

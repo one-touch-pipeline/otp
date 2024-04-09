@@ -38,9 +38,9 @@ class AbstractBamFileServiceFactoryService {
     AbstractAbstractBamFileService<? extends AbstractBamFile> getService(AbstractBamFile bamFile) {
         Map<Class<? extends AbstractBamFile>, AbstractAbstractBamFileService<? extends AbstractBamFile>> map = [
                 (ExternallyProcessedBamFile): externallyProcessedBamFileService,
-                (RnaRoddyBamFile)                 : rnaRoddyBamFileService,
-                (RoddyBamFile)                    : roddyBamFileService,
-                (SingleCellBamFile)               : singleCellBamFileService,
+                (RnaRoddyBamFile)           : rnaRoddyBamFileService,
+                (RoddyBamFile)              : roddyBamFileService,
+                (SingleCellBamFile)         : singleCellBamFileService,
         ]
         AbstractAbstractBamFileService<? extends AbstractBamFile> result = map[bamFile.class]
         if (!result) {

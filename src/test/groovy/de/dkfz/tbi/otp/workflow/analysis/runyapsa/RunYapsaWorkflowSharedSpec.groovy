@@ -19,6 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package de.dkfz.tbi.otp.workflow.analysis.runyapsa
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
@@ -29,8 +30,6 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
-import de.dkfz.tbi.otp.workflow.analysis.runyapsa.RunYapsaWorkflow
-import de.dkfz.tbi.otp.workflow.analysis.runyapsa.RunYapsaWorkflowShared
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -41,6 +40,7 @@ class RunYapsaWorkflowSharedSpec extends Specification implements WorkflowSystem
     private RoddySnvCallingInstance snvCallingInstance
     private IndelCallingInstance indelInstance
     private RunYapsaInstance runYapsaInstance
+
     private static final String SNV_INPUT = "SNV"
     private static final String INDEL_INPUT = "INDEL"
     private static final String RUNYAPSA_OUTPUT = AbstractAnalysisWorkflow.ANALYSIS_OUTPUT
@@ -77,8 +77,6 @@ class RunYapsaWorkflowSharedSpec extends Specification implements WorkflowSystem
 
         then:
         1 * runYapsaWorkflowSharedInstance.checkWorkflowName(workflowStep, RunYapsaWorkflow.WORKFLOW)
-
-        then:
         1 * runYapsaWorkflowSharedInstance.concreteArtefactService.getInputArtefact(workflowStep, SNV_INPUT) >> snvCallingInstance
     }
 
@@ -91,8 +89,6 @@ class RunYapsaWorkflowSharedSpec extends Specification implements WorkflowSystem
 
         then:
         1 * runYapsaWorkflowSharedInstance.checkWorkflowName(workflowStep, RunYapsaWorkflow.WORKFLOW)
-
-        then:
         1 * runYapsaWorkflowSharedInstance.concreteArtefactService.getInputArtefact(workflowStep, INDEL_INPUT) >> indelInstance
     }
 
@@ -105,8 +101,6 @@ class RunYapsaWorkflowSharedSpec extends Specification implements WorkflowSystem
 
         then:
         1 * runYapsaWorkflowSharedInstance.checkWorkflowName(workflowStep, RunYapsaWorkflow.WORKFLOW)
-
-        then:
         1 * runYapsaWorkflowSharedInstance.concreteArtefactService.getOutputArtefact(workflowStep, RUNYAPSA_OUTPUT) >> runYapsaInstance
     }
 

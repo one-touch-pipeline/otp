@@ -33,7 +33,7 @@ class AceseqInstance extends BamFilePairAnalysis implements RoddyResult {
 
     static hasMany = [
             roddyExecutionDirectoryNames: String,
-            aceseqQcs: AceseqQc,
+            aceseqQcs                   : AceseqQc,
     ]
 
     /**

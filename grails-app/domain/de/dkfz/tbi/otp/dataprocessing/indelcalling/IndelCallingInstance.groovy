@@ -59,7 +59,7 @@ class IndelCallingInstance extends BamFilePairAnalysis implements RoddyResult {
     @Deprecated
     @Override
     Pipeline getPipeline() {
-        return config.pipeline
+        return config?.pipeline
     }
 
     @Deprecated

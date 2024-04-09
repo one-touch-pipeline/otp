@@ -133,9 +133,9 @@ abstract class AbstractAnalysisDomainFactory<T extends BamFilePairAnalysis> impl
         findOrCreateProcessingThresholdsForBamFile(bamFile2, [numberOfLanes: null])
 
         return [
-                samplePair : samplePair,
-                bamFile1   : bamFile1,
-                bamFile2   : bamFile2,
+                samplePair: samplePair,
+                bamFile1  : bamFile1,
+                bamFile2  : bamFile2,
         ]
     }
 
