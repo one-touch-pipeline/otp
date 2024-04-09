@@ -76,6 +76,10 @@
             ${g.message(code: "sampleOverview.information.withdrawn")}
         </otp:annotation>
 
+        <otp:annotation type="warning" id="ega-upload-in-Progress" style="display:none">
+             ${g.message(code: "sampleOverview.information.egaUpload")}
+        </otp:annotation>
+
         <div class="otpDataTables">
             <table id="laneOverviewId" data-ignore-filter-columns="2" data-workflow-size="${pipelines.size()}" data-seq-type-size="${seqTypes.size()}">
                 <thead>

@@ -21,16 +21,17 @@
  */
 package de.dkfz.tbi.otp.egaSubmission
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
-import spock.lang.Specification
-import spock.lang.Unroll
+import grails.testing.mixin.integration.Integration
+import spock.lang.*
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.submissions.ega.EgaSubmissionFactory
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback
@@ -38,6 +39,9 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSubmissionFactory, IsRoddy {
 
     private final EgaSubmissionService egaSubmissionService = new EgaSubmissionService()
+
+    EgaSubmission egaSubmission1
+    EgaSubmission egaSubmission2
 
     @Unroll
     void "checkFastqFiles, when withRawSequenceFile is #withRawSequenceFile and fileExists is #fileExists and withdrawn is #withdrawn, then result is #result"() {
@@ -114,12 +118,60 @@ class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSu
         map.get(sampleSubmissionObject) == result
 
         where:
-        withBamFile | withdrawn | bamFileInProjectFolderSet | status                                               || result
+        withBamFile | withdrawn | bamFileInProjectFolderSet | status                                         || result
         true        | false     | true                      | AbstractBamFile.FileOperationStatus.PROCESSED  || true
         false       | false     | true                      | AbstractBamFile.FileOperationStatus.PROCESSED  || false
         true        | true      | true                      | AbstractBamFile.FileOperationStatus.PROCESSED  || true
         true        | false     | true                      | AbstractBamFile.FileOperationStatus.INPROGRESS || false
         true        | false     | false                     | AbstractBamFile.FileOperationStatus.PROCESSED  || false
+    }
+
+    @Unroll
+    void "egaUploadIsInProgress returns a list of EgaSubmission with specified state"() {
+        given:
+        Project project = createProject()
+        SeqTrack seqTrack = createSeqTrackWithOneFastqFile()
+
+        egaSubmission1 = createEgaSubmission([
+                project                 : project,
+                state                   : ega1UploadState,
+                samplesToSubmit         : [
+                        createSampleSubmissionObject([
+                                sample      : seqTrack.sample,
+                                seqType     : seqTrack.seqType,
+                                useFastqFile: true,
+                        ]),
+                ] as Set,
+                rawSequenceFilesToSubmit: [
+                        createRawSequenceFileSubmissionObject(),
+                ] as Set,
+        ])
+        egaSubmission2 = createEgaSubmission([
+                project                 : project,
+                state                   : ega2UploadState,
+                samplesToSubmit         : [
+                        createSampleSubmissionObject([
+                                sample      : seqTrack.sample,
+                                seqType     : seqTrack.seqType,
+                                useFastqFile: false,
+                        ]),
+                ] as Set,
+                rawSequenceFilesToSubmit: [
+                        createRawSequenceFileSubmissionObject(),
+                ] as Set,
+        ])
+
+        when:
+        boolean result = egaSubmissionService.egaUploadIsInProgress(project)
+
+        then:
+        result == expectedFlag
+
+        where:
+        name            | ega1UploadState                          | ega2UploadState                          || expectedFlag
+        'All finished'  | EgaSubmission.State.FILE_UPLOAD_FINISHED | EgaSubmission.State.FILE_UPLOAD_FINISHED || false
+        'One uploading' | EgaSubmission.State.FILE_UPLOAD_STARTED  | EgaSubmission.State.FILE_UPLOAD_FINISHED || true
+        'All uploading' | EgaSubmission.State.FILE_UPLOAD_STARTED  | EgaSubmission.State.FILE_UPLOAD_STARTED  || true
     }
 
     void "getRawSequenceFilesAndAlias, when already DataFiles are connected with the submission, then return these"() {
@@ -295,7 +347,7 @@ class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSu
         TestCase.assertContainSame(list*.bamFile, expectedBamFiles)
 
         where:
-        name                                   | bamFileExist | useBamFile | withdrawn | bamFileInProjectFolderSet | fileOperationStatus                                  || returnedValue
+        name                                   | bamFileExist | useBamFile | withdrawn | bamFileInProjectFolderSet | fileOperationStatus                            || returnedValue
         'all fine'                             | true         | true       | false     | true                      | AbstractBamFile.FileOperationStatus.PROCESSED  || true
         'no bam file'                          | false        | true       | false     | true                      | AbstractBamFile.FileOperationStatus.PROCESSED  || false
         'useBamFile is false'                  | true         | false      | false     | true                      | AbstractBamFile.FileOperationStatus.PROCESSED  || false

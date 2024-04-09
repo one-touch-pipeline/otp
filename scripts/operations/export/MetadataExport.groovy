@@ -58,6 +58,8 @@
  * or all data (false).
  */
 
+import de.dkfz.tbi.otp.egaSubmission.EgaSubmission
+import de.dkfz.tbi.otp.egaSubmission.EgaSubmissionService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
@@ -191,6 +193,7 @@ boolean exportWithdrawn = false
 // check input area
 
 SeqTypeService seqTypeService = ctx.seqTypeService
+EgaSubmissionService egaSubmissionService = ctx.egaSubmissionService
 
 static <T> List<T> parseHelper(String inputArea, String inputType, Closure<T> selection) {
     inputArea.split('\n')*.trim().findAll {
@@ -305,6 +308,14 @@ if (seqTrackPerMultiImport && seqTypes && !seqTypes.containsAll(seqTrackPerMulti
     println "Attention: your seqTypes filter do not contain all seqTypes used in your table input. " +
             "Therefore some of the seqTracks there will removed"
 }
+
+List<Project> projectsEgaSubmissionInProgress = egaSubmissionService.findProjectsWithUploadInProgress(projects)
+
+if (projectsEgaSubmissionInProgress) {
+    println "Attention: some data of following projects could change, since Ega submission is still uploading data:\n"
+    println projectsEgaSubmissionInProgress.name.join('\n')
+}
+
 
 // =============================================
 // work area

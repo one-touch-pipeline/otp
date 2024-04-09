@@ -96,6 +96,17 @@ class EgaSubmissionService {
         return EgaSubmission.findAllByProject(project)
     }
 
+    @CompileDynamic
+    List<Project> findProjectsWithUploadInProgress(List<Project> projects = []) {
+        return (projects ? EgaSubmission.findAllByProjectInListAndState(projects, EgaSubmission.State.FILE_UPLOAD_STARTED)
+                : EgaSubmission.findAllByState(EgaSubmission.State.FILE_UPLOAD_STARTED))*.project.unique()
+    }
+
+    @CompileDynamic
+    boolean egaUploadIsInProgress(Project project) {
+        return !EgaSubmission.findAllByProjectAndState(project, EgaSubmission.State.FILE_UPLOAD_STARTED).empty
+    }
+
     void createAndSaveSampleSubmissionObjects(EgaSubmission submission, List<String> sampleIdSeqTypeIdList) {
         assert submission
         assert sampleIdSeqTypeIdList

@@ -487,4 +487,49 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         then:
         defaultEgaAliasesForRawSequenceFiles.get(bamFile.bamFileName + alias) == "${aliasNameHelper.join("_")}.bam"
     }
+
+    void "test findProjectsWithUploadInProgress with given projects, should return the given projects"() {
+        given:
+        Set<Project> projects = createProjectsWithEgaSubmission()
+
+        when:
+        List<Project> found = egaSubmissionService.findProjectsWithUploadInProgress([projects[0], projects[1]])
+
+        then:
+        TestCase.assertContainSame(found, [projects[0]])
+    }
+
+    void "test findProjectsWithUploadInProgress without given projects, should return the given projects"() {
+        given:
+        Set<Project> projects = createProjectsWithEgaSubmission()
+
+        when:
+        List<Project> found = egaSubmissionService.findProjectsWithUploadInProgress()
+
+        then:
+        TestCase.assertContainSame(found, [projects[0], projects[4]])
+    }
+
+    /*
+     * Default test data
+     */
+    static final List<EgaSubmission.State> TEST_STATES = [
+            EgaSubmission.State.FILE_UPLOAD_STARTED,
+            EgaSubmission.State.FILE_UPLOAD_FINISHED,
+            EgaSubmission.State.SELECTION,
+            EgaSubmission.State.PUBLISHED,
+            EgaSubmission.State.FILE_UPLOAD_STARTED,
+    ].asImmutable()
+
+    private Set<Project> createProjectsWithEgaSubmission(List<EgaSubmission.State> states = TEST_STATES) {
+        return states.collect {
+            return createEgaSubmission([
+                    project                 : createProject(),
+                    state                   : it,
+                    samplesToSubmit         : [createSampleSubmissionObject()] as Set,
+                    bamFilesToSubmit        : [createBamFileSubmissionObject()] as Set,
+                    rawSequenceFilesToSubmit: [createRawSequenceFileSubmissionObject()] as Set,
+            ]).project
+        }
+    }
 }

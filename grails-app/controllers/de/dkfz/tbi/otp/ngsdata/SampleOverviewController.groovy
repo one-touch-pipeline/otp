@@ -27,6 +27,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.egaSubmission.EgaSubmissionService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
@@ -36,6 +37,7 @@ class SampleOverviewController {
     ProjectSelectionService projectSelectionService
     SampleOverviewService sampleOverviewService
     SampleService sampleService
+    EgaSubmissionService egaSubmissionService
 
     static allowedMethods = [
             index                      : "GET",
@@ -104,6 +106,7 @@ class SampleOverviewController {
         List<Pipeline> pipelines = findPipelines()
 
         boolean anythingWithdrawn = false
+
         int numberOfFixesCols = 2
         int numberOfCols = numberOfFixesCols + (seqTypes.size() * (1 + pipelines.size()))
         Set<Integer> columnsToHide = numberOfCols == numberOfFixesCols ?
@@ -155,12 +158,15 @@ class SampleOverviewController {
             }
         }
 
-        Map dataToRender = cmd.dataToRender()
-        dataToRender.iTotalRecords = data.size()
-        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        dataToRender.aaData = data
-        dataToRender.anythingWithdrawn = anythingWithdrawn
-        dataToRender.columnsToHide = columnsToHide
+        boolean egaUploadInProgress = egaSubmissionService.egaUploadIsInProgress(projectSelectionService.selectedProject)
+        def dataToRender = cmd.dataToRender().with {
+            it << [iTotalRecords       : data.size(),
+                   iTotalDisplayRecords: it.iTotalRecords,
+                   aaData              : data,
+                   anythingWithdrawn   : anythingWithdrawn,
+                   egaUploadInProgress : egaUploadInProgress,
+                   columnsToHide       : columnsToHide]
+        }
 
         return render(dataToRender as JSON)
     }

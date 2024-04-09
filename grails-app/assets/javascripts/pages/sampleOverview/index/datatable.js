@@ -105,6 +105,9 @@ $(() => {
           for (let j = 0; j < json.columnsToHide.length; j++) {
             oTableLaneOverview.fnSetColumnVis(json.columnsToHide[j], false);
           }
+          if (json.egaUploadInProgress) {
+            $('#ega-upload-in-Progress').show();
+          }
           if (json.anythingWithdrawn) {
             $('#withdrawn_description').show();
           }
