@@ -311,7 +311,7 @@ $(document).ready(() => {
         data: 'withdrawn',
         width: '5em'
       },
-      { data: 'libPrepKit' },
+      { data: 'libPrepkit' },
       { data: 'seqPlatform' },
       { data: 'seqPlatformGroup' }
     ],
