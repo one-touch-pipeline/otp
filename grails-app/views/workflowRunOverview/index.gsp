@@ -38,7 +38,7 @@
     <h1>${g.message(code: "workflowRun.overview.title")}</h1>
     <button class="btn btn-primary toggleButton">${g.message(code: "workflowRun.overview.show.detailed")}</button>
     <button class="btn btn-primary toggleButton" style="display: none">${g.message(code: "workflowRun.overview.show.condensed")}</button>
-    <table id="runs" class="table table-sm table-striped table-hover">
+    <table id="runs" class="w-100 table table-sm table-striped table-hover">
         <thead>
         <tr>
             <th></th>
