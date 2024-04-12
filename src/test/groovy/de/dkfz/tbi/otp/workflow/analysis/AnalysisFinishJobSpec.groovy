@@ -25,51 +25,47 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.IndelDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.FastqFile
 import de.dkfz.tbi.otp.ngsdata.FastqImportInstance
-import de.dkfz.tbi.otp.ngsdata.FileType
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType
+import de.dkfz.tbi.otp.ngsdata.SampleTypePerProject
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.analysis.snv.SnvWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 
-class AnalysisFinishJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, IsRoddy {
+class AnalysisFinishJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
         return [
                 MergingWorkPackage,
-                ReferenceGenomeProjectSeqType,
-                FileType,
                 FastqImportInstance,
                 FastqFile,
+                RoddySnvCallingInstance,
+                SampleTypePerProject,
                 RoddyWorkflowConfig,
                 RoddyBamFile,
+                IndelCallingInstance,
         ]
     }
 
     WorkflowStep workflowStep
-    AbstractBamFile bamFile1
-    AbstractBamFile bamFile2
+    BamFilePairAnalysis analysis
     AnalysisFinishJob job
 
-    void "updateDomains should update bamFiles"() {
+    void "updateDomains should update analysis"() {
         given:
-        workflowStep = createWorkflowStep([
-                workflowRun: createWorkflowRun([
-                        workflowVersion: null,
-                        workflow       : findOrCreateWorkflow(SnvWorkflow.WORKFLOW, [beanName: SnvWorkflow.simpleName.uncapitalize()]),
-                ]),
-        ])
-        bamFile1 = createBamFile()
-        bamFile2 = createBamFile()
+        workflowStep = createWorkflowStep([workflowRun: createWorkflowRun([
+                workflow: findOrCreateWorkflow(SnvWorkflow.WORKFLOW, [beanName: SnvWorkflow.simpleName.uncapitalize()]),
+        ])])
+        analysis = IndelDomainFactory.INSTANCE.createInstanceWithRoddyBamFiles()
         job = new AnalysisFinishJob()
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            _ * getInputArtefact(workflowStep, AnalysisFinishJob.de_dkfz_tbi_otp_workflow_analysis_AnalysisWorkflowShared__INPUT_TUMOR_BAM) >> bamFile1
-            _ * getInputArtefact(workflowStep, AnalysisFinishJob.de_dkfz_tbi_otp_workflow_analysis_AnalysisWorkflowShared__INPUT_CONTROL_BAM) >> bamFile2
+            1 * getOutputArtefact(workflowStep, AbstractAnalysisWorkflow.ANALYSIS_OUTPUT) >> analysis
             0 * _
         }
 
@@ -77,7 +73,6 @@ class AnalysisFinishJobSpec extends Specification implements DataTest, WorkflowS
         job.updateDomains(workflowStep)
 
         then:
-        bamFile1.fileOperationStatus == AbstractBamFile.FileOperationStatus.PROCESSED
-        bamFile2.fileOperationStatus == AbstractBamFile.FileOperationStatus.PROCESSED
+        analysis.processingState == AnalysisProcessingStates.FINISHED
     }
 }

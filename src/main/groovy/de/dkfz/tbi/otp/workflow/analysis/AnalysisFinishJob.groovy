@@ -22,14 +22,12 @@
 package de.dkfz.tbi.otp.workflow.analysis
 
 import groovy.util.logging.Slf4j
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
+import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.workflow.jobs.AbstractFinishJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
-
-import java.nio.file.*
 
 @Component
 @Slf4j
@@ -37,12 +35,9 @@ class AnalysisFinishJob extends AbstractFinishJob implements AnalysisWorkflowSha
 
     @Override
     void updateDomains(WorkflowStep workflowStep) {
-        AbstractBamFile tumorBamFile = getTumorBamFile(workflowStep)
-        AbstractBamFile controlBamFile = getControlBamFile(workflowStep)
+        BamFilePairAnalysis analysisFile = getOutputInstance(workflowStep)
 
-        tumorBamFile.fileOperationStatus = AbstractBamFile.FileOperationStatus.PROCESSED
-        tumorBamFile.save(flush: true)
-        controlBamFile.fileOperationStatus = AbstractBamFile.FileOperationStatus.PROCESSED
-        controlBamFile.save(flush: true)
+        analysisFile.processingState = AnalysisProcessingStates.FINISHED
+        analysisFile.save(flush: true)
     }
 }
