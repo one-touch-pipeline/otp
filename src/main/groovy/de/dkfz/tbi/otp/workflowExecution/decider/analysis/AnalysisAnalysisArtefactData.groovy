@@ -19,39 +19,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution.decider.alignment
+package de.dkfz.tbi.otp.workflowExecution.decider.analysis
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.workflowExecution.Artefact
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 import de.dkfz.tbi.otp.workflowExecution.decider.ArtefactData
 
 @ToString(includePackage = false, includeNames = true, includeSuper = true)
 @EqualsAndHashCode(callSuper = true, cache = true)
-class AlignmentArtefactData<A extends Artefact> extends ArtefactData<A> {
+class AnalysisAnalysisArtefactData<A extends BamFilePairAnalysis> extends ArtefactData<A> {
+    final SamplePair samplePair
     final Individual individual
-    final SampleType sampleType
-    final Sample sample
-    final AntibodyTarget antibodyTarget
-    final LibraryPreparationKit libraryPreparationKit
-    final SeqPlatform seqPlatform
-    final SeqPlatformGroup seqPlatformGroup
+    final SampleType sampleType1
+    final SampleType sampleType2
+    final Sample sample1
+    final Sample sample2
+    final AbstractBamFile abstractBamFile1
+    final AbstractBamFile abstractBamFile2
 
     @SuppressWarnings("ParameterCount")
-    AlignmentArtefactData(WorkflowArtefact workflowArtefact, A artefact, Project project, SeqType seqType, Individual individual, SampleType sampleType,
-                          Sample sample, AntibodyTarget antibodyTarget, LibraryPreparationKit libraryPreparationKit, SeqPlatform seqPlatform,
-                          SeqPlatformGroup seqPlatformGroup) {
+    AnalysisAnalysisArtefactData(WorkflowArtefact workflowArtefact, A artefact, Project project, SeqType seqType,
+                                 SamplePair samplePair, Individual individual, SampleType sampleType1, SampleType sampleType2, Sample sample1, Sample sample2,
+                                 AbstractBamFile abstractBamFile1, AbstractBamFile abstractBamFile2) {
         super(workflowArtefact, artefact, project, seqType)
+        this.samplePair = samplePair
         this.individual = individual
-        this.sampleType = sampleType
-        this.sample = sample
-        this.antibodyTarget = antibodyTarget
-        this.libraryPreparationKit = libraryPreparationKit
-        this.seqPlatform = seqPlatform
-        this.seqPlatformGroup = seqPlatformGroup
+        this.sampleType1 = sampleType1
+        this.sampleType2 = sampleType2
+        this.sample1 = sample1
+        this.sample2 = sample2
+        this.abstractBamFile1 = abstractBamFile1
+        this.abstractBamFile2 = abstractBamFile2
     }
 }

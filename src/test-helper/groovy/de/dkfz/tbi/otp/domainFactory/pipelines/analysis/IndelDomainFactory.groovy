@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.domainFactory.pipelines.analysis
 
+import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelQualityControl
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
@@ -40,10 +41,7 @@ class IndelDomainFactory extends AbstractAnalysisQcDomainFactory<IndelCallingIns
         return IndelWorkflow
     }
 
-    @Override
-    protected Class<IndelCallingInstance> getInstanceClass() {
-        return IndelCallingInstance
-    }
+    final Class<AceseqInstance> instanceClass = IndelCallingInstance
 
     @Override
     protected Class<IndelQualityControl> getQcClass() {

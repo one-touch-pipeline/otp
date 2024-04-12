@@ -24,4 +24,6 @@ package de.dkfz.tbi.otp.dataprocessing.sophia
 import de.dkfz.tbi.otp.dataprocessing.AbstractAnalysisWorkFileService
 
 class SophiaWorkFileService extends AbstractAnalysisWorkFileService<SophiaInstance> implements AbstractSophiaFileService {
+
+    final String workflowDirectoryName = 'SophiaWorkflow'
 }

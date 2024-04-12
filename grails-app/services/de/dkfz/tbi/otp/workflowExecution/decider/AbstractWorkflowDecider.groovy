@@ -53,14 +53,41 @@ abstract class AbstractWorkflowDecider<ADL extends ArtefactDataList, G extends B
      */
     abstract protected Set<ArtefactType> getSupportedInputArtefactTypes()
 
+    /**
+     * Query for the artefacts including all required referenced data from the database for the decider.
+     *
+     * Only artefacts of ArtefactTypes supported by the decider (workflow) are loaded. Other artefacts are ignored.
+     */
     abstract protected ADL fetchInputArtefacts(Collection<WorkflowArtefact> inputArtefacts, Set<SeqType> seqTypes)
 
+    /**
+     * Fetches additional available artefacts corresponding to the given input artefacts.
+     *
+     * Sometimes not all artefacts are required for a workflow creation are part of a workflow creation request.
+     * Therefore it is needed to check for additional artefacts to use for the workflow creation.
+     * This method should fetch all artefacts, which may be needed therefore from the database in few queries (1 per artefact type).
+     */
     abstract protected ADL fetchAdditionalArtefacts(ADL inputArtefactDataList)
 
+    /**
+     * Fetches additional data for the given input artefacts.
+     * All additional information needed for checking the input or to create the new data should be fetched within this method.
+     * For performance reason, the query shouldn't contain any loops, so the query should be as efficient as possible.
+     *
+     * This method is called only once for each input artefact list.
+     */
     abstract protected AD fetchAdditionalData(ADL inputArtefactDataList, Workflow workflow)
 
+    /**
+     * Fetches the workflow version selector for the given input artefacts.
+     *
+     * This query fetches all WorkflowVersionSelector relevant for the given input data.
+     */
     abstract protected List<WorkflowVersionSelector> fetchWorkflowVersionSelector(ADL inputArtefactDataList, Workflow workflow)
 
+    /**
+     * Groups the given artefacts into groups for workflow creation. The group definition depends on the workflow.
+     */
     abstract protected Map<G, ADL> groupData(ADL inputArtefactDataList, AD additionalData, Map<String, String> userParams)
 
     /**
@@ -94,7 +121,7 @@ abstract class AbstractWorkflowDecider<ADL extends ArtefactDataList, G extends B
         deciderResult.infos << "start decider for ${w}".toString()
         Set<SeqType> supportedSeqTypes = (workflowService.getSupportedSeqTypesOfVersions(w) ?: SeqType.list()) as Set
 
-        ADL inputArtefactDataList = LogUsedTimeUtils.logUsedTime(log, "        fetch concrete Artefacts") {
+        ADL inputArtefactDataList = LogUsedTimeUtils.logUsedTimeStartEnd(log, "        fetch concrete Artefacts") {
             fetchInputArtefacts(inputWorkflowArtefacts, supportedSeqTypes)
         }
 
@@ -105,11 +132,11 @@ abstract class AbstractWorkflowDecider<ADL extends ArtefactDataList, G extends B
             return deciderResult
         }
 
-        ADL additionalArtefactDataList = LogUsedTimeUtils.logUsedTime(log, "        fetch additional Artefacts") {
+        ADL additionalArtefactDataList = LogUsedTimeUtils.logUsedTimeStartEnd(log, "        fetch additional Artefacts") {
             fetchAdditionalArtefacts(inputArtefactDataList)
         }
 
-        AD additionalData = LogUsedTimeUtils.logUsedTime(log, "        fetch additional Data") {
+        AD additionalData = LogUsedTimeUtils.logUsedTimeStartEnd(log, "        fetch additional Data") {
             fetchAdditionalData(inputArtefactDataList, w)
         }
 

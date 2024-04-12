@@ -24,4 +24,6 @@ package de.dkfz.tbi.otp.dataprocessing.runYapsa
 import de.dkfz.tbi.otp.dataprocessing.AbstractAnalysisWorkFileService
 
 class RunYapsaWorkFileService extends AbstractAnalysisWorkFileService<RunYapsaInstance> implements AbstractRunYapsaFileService {
+
+    final String workflowDirectoryName = 'runYapsa'
 }

@@ -22,14 +22,13 @@
 package de.dkfz.tbi.otp.workflow.analysis.sophia
 
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
-import de.dkfz.tbi.otp.workflow.analysis.AnalysisLinkJob
-import de.dkfz.tbi.otp.workflow.analysis.AnalysisConditionalSkipJob
-import de.dkfz.tbi.otp.workflow.analysis.RoddyAnalysisFragmentJob
-import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaWorkFileService
+import de.dkfz.tbi.otp.workflow.analysis.*
 import de.dkfz.tbi.otp.workflow.jobs.*
 import de.dkfz.tbi.otp.workflowExecution.Artefact
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
@@ -43,6 +42,9 @@ class SophiaWorkflow extends AbstractAnalysisWorkflow {
 
     public static final String WORKFLOW = "Roddy Sophia (structural variation calling)"
     public static final String SOPHIA_INPUT = "SOPHIA_INPUT"
+
+    @Autowired
+    SophiaWorkFileService sophiaWorkFileService
 
     @Override
     List<Class<? extends Job>> getJobList() {
@@ -73,7 +75,7 @@ class SophiaWorkflow extends AbstractAnalysisWorkflow {
 
         SophiaInstance outputSophiaInstance = new SophiaInstance([
                 samplePair        : samplePair,
-                instanceName      : sophiaInstance.instanceName,
+                instanceName      : sophiaWorkFileService.constructInstanceName(artefact.workflowArtefact.producedBy.workflowVersion),
                 config            : sophiaInstance.config,
                 sampleType1BamFile: samplePair.mergingWorkPackage1.bamFileInProjectFolder,
                 sampleType2BamFile: samplePair.mergingWorkPackage2.bamFileInProjectFolder,

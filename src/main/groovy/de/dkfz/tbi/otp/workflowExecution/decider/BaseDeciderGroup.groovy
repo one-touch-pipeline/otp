@@ -22,12 +22,10 @@
 package de.dkfz.tbi.otp.workflowExecution.decider
 
 import groovy.transform.EqualsAndHashCode
-import groovy.transform.ToString
 
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.ngsdata.SeqType
 
-@ToString(includePackage = false, includeNames = true)
 @EqualsAndHashCode
 class BaseDeciderGroup implements DeciderGroup {
     final Individual individual
@@ -36,5 +34,10 @@ class BaseDeciderGroup implements DeciderGroup {
     BaseDeciderGroup(Individual individual, SeqType seqType) {
         this.individual = individual
         this.seqType = seqType
+    }
+
+    @Override
+    String toString() {
+        return "${individual.pid} ${seqType.displayNameWithLibraryLayout}"
     }
 }

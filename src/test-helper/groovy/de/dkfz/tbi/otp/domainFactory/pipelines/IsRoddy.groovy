@@ -45,6 +45,7 @@ trait IsRoddy implements IsPipeline {
         return createDomainObject(MergingWorkPackage, baseMergingWorkPackageProperties(properties) + [
                 seqType         : mwp.seqType,
                 pipeline        : pipeline,
+                sample          : { createSample([individual: mwp.sample.individual]) },
                 statSizeFileName: {
                     pipeline?.name == Pipeline.Name.PANCAN_ALIGNMENT ? "statSizeFileName_${nextId}.tab" : null
                 },
@@ -54,6 +55,21 @@ trait IsRoddy implements IsPipeline {
     @Override
     RoddyBamFile createBamFile(Map properties = [:]) {
         return createRoddyBamFile(properties, RoddyBamFile)
+    }
+
+    /**
+     * Create another bam file for the same {@link Individual} and {@link SeqType}
+     */
+    RoddyBamFile createCorrespondingBamFile(RoddyBamFile bamFile, Map properties = [:]) {
+        return createBamFile([
+                workPackage: createMergingWorkPackage([
+                        sample : createSample([
+                                individual: bamFile.individual,
+                        ]),
+                        seqType: bamFile.seqType,
+                        seqPlatformGroup: bamFile.mergingWorkPackage.seqPlatformGroup,
+                ]),
+        ] + properties)
     }
 
     public <T extends RoddyBamFile> T createRoddyBamFile(Map properties = [:], Class<T> clazz) {

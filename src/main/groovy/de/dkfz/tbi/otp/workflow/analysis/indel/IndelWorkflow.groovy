@@ -22,14 +22,13 @@
 package de.dkfz.tbi.otp.workflow.analysis.indel
 
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelWorkFileService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
-import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
-import de.dkfz.tbi.otp.workflow.analysis.AnalysisLinkJob
-import de.dkfz.tbi.otp.workflow.analysis.AnalysisConditionalSkipJob
-import de.dkfz.tbi.otp.workflow.analysis.RoddyAnalysisFragmentJob
+import de.dkfz.tbi.otp.workflow.analysis.*
 import de.dkfz.tbi.otp.workflow.jobs.*
 import de.dkfz.tbi.otp.workflowExecution.Artefact
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
@@ -42,6 +41,9 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 class IndelWorkflow extends AbstractAnalysisWorkflow {
 
     public static final String WORKFLOW = "Roddy Indel calling"
+
+    @Autowired
+    IndelWorkFileService indelWorkFileService
 
     @Override
     List<Class<? extends Job>> getJobList() {
@@ -72,7 +74,7 @@ class IndelWorkflow extends AbstractAnalysisWorkflow {
 
         IndelCallingInstance outputIndelCallingInstance = new IndelCallingInstance([
                 samplePair        : samplePair,
-                instanceName      : indelCallingInstance.instanceName,
+                instanceName      : indelWorkFileService.constructInstanceName(artefact.workflowArtefact.producedBy.workflowVersion),
                 config            : indelCallingInstance.config,
                 sampleType1BamFile: samplePair.mergingWorkPackage1.bamFileInProjectFolder,
                 sampleType2BamFile: samplePair.mergingWorkPackage2.bamFileInProjectFolder,

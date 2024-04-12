@@ -19,54 +19,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.domainFactory.pipelines.analysis
+package de.dkfz.tbi.otp.workflowExecution.decider.analysis
 
+import grails.gorm.transactions.Transactional
+import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
-import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
-import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaWorkFileService
 import de.dkfz.tbi.otp.workflow.analysis.sophia.SophiaWorkflow
+import de.dkfz.tbi.otp.workflowExecution.ArtefactType
 
-class SophiaDomainFactory extends AbstractAnalysisQcDomainFactory<SophiaInstance, SophiaQc> {
+@Component
+@Transactional
+@Slf4j
+class SophiaDecider extends AbstractAnalysisDecider<SophiaInstance> {
 
-    static final SophiaDomainFactory INSTANCE = new SophiaDomainFactory()
+    @Autowired
+    SophiaWorkFileService sophiaWorkFileService
 
     @Override
-    protected String getWorkflowName() {
-        return SophiaWorkflow.WORKFLOW
+    SophiaWorkFileService getWorkFileService() {
+        return sophiaWorkFileService
     }
 
-    @Override
-    protected Class<? extends AbstractAnalysisWorkflow> getWorkflowClass() {
-        return SophiaWorkflow
-    }
+    final String workflowName = SophiaWorkflow.WORKFLOW
 
     final Class<SophiaInstance> instanceClass = SophiaInstance
 
-    @Override
-    protected Class<SophiaQc> getQcClass() {
-        return SophiaQc
-    }
+    final ArtefactType artefactType = ArtefactType.SOPHIA
 
-    final String qcFileContent = """\
-{
-  "all": {
-    "controlMassiveInvPrefilteringLevel": 0,
-    "tumorMassiveInvFilteringLevel": 0,
-    "rnaContaminatedGenesMoreThanTwoIntron": "PRKRA;ACTG2;TYRO3;COL18A1;",
-    "rnaContaminatedGenesCount": 4,
-    "rnaDecontaminationApplied": false
-  }
-}
-"""
+    final Pipeline.Name pipelineName = Pipeline.Name.RODDY_SOPHIA
 
     @Override
-    Map getQcValues() {
-        return [
-                controlMassiveInvPrefilteringLevel   : 0,
-                tumorMassiveInvFilteringLevel        : 0,
-                rnaContaminatedGenesMoreThanTwoIntron: 'PRKRA;ACTG2;TYRO3;COL18A1;',
-                rnaContaminatedGenesCount            : 4,
-                rnaDecontaminationApplied            : false,
-        ]
+    BamFilePairAnalysis createAnalysisWithoutFlush(Map properties) {
+        return new SophiaInstance(properties).save(flush: false, deepValidate: false)
     }
 }

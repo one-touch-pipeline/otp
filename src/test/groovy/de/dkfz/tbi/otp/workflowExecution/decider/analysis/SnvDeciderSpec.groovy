@@ -19,25 +19,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.domainFactory.pipelines.analysis
+package de.dkfz.tbi.otp.workflowExecution.decider.analysis
 
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
-import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.SnvDomainFactory
 import de.dkfz.tbi.otp.workflow.analysis.snv.SnvWorkflow
+import de.dkfz.tbi.otp.workflowExecution.ArtefactType
 
-class SnvDomainFactory extends AbstractAnalysisDomainFactory<RoddySnvCallingInstance> {
-
-    static final SnvDomainFactory INSTANCE = new SnvDomainFactory()
+class SnvDeciderSpec extends AbstractAnalysisDeciderSpec<AbstractSnvCallingInstance> {
 
     @Override
-    protected String getWorkflowName() {
-        return SnvWorkflow.WORKFLOW
+    Class[] getDomainClassesToMock() {
+        return super.domainClassesToMock + [
+                RoddySnvCallingInstance,
+        ]
+    }
+
+    void setup() {
+        decider = new SnvDecider([
+                snvWorkFileService: new SnvWorkFileService(),
+        ])
+    }
+
+    void "getWorkflowName"() {
+        expect:
+        decider.workflowName == SnvWorkflow.WORKFLOW
+    }
+
+    void "getInstanceClass"() {
+        expect:
+        decider.instanceClass == AbstractSnvCallingInstance
+    }
+
+    void "getArtefactType"() {
+        expect:
+        decider.artefactType == ArtefactType.SNV
+    }
+
+    void "getPipelineName"() {
+        expect:
+        decider.pipelineName == Pipeline.Name.RODDY_SNV
     }
 
     @Override
-    protected Class<? extends AbstractAnalysisWorkflow> getWorkflowClass() {
-        return SnvWorkflow
+    protected SnvDomainFactory getFactory() {
+        return SnvDomainFactory.INSTANCE
     }
-
-    final Class<RoddySnvCallingInstance> instanceClass = RoddySnvCallingInstance
 }

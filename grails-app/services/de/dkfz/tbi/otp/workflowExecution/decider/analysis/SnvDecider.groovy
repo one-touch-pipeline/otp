@@ -19,21 +19,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataprocessing
+package de.dkfz.tbi.otp.workflowExecution.decider.analysis
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileDynamic
+import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.workflow.analysis.snv.SnvWorkflow
+import de.dkfz.tbi.otp.workflowExecution.ArtefactType
 
-/**
- * @deprecated old workflow system
- */
-@CompileDynamic
+@Component
 @Transactional
-class PipelineService {
+@Slf4j
+class SnvDecider extends AbstractAnalysisDecider<AbstractSnvCallingInstance> {
 
-    Pipeline findByPipelineName(Pipeline.Name name) {
-        return CollectionUtils.atMostOneElement(Pipeline.findAllByName(name))
+    @Autowired
+    SnvWorkFileService snvWorkFileService
+
+    @Override
+    SnvWorkFileService getWorkFileService() {
+        return snvWorkFileService
+    }
+
+    final String workflowName = SnvWorkflow.WORKFLOW
+
+    final Class<AbstractSnvCallingInstance> instanceClass = AbstractSnvCallingInstance
+
+    final ArtefactType artefactType = ArtefactType.SNV
+
+    final Pipeline.Name pipelineName = Pipeline.Name.RODDY_SNV
+
+    @Override
+    BamFilePairAnalysis createAnalysisWithoutFlush(Map properties) {
+        return new RoddySnvCallingInstance(properties).save(flush: false, deepValidate: false)
     }
 }

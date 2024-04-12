@@ -168,9 +168,7 @@ class FastqcDecider implements Decider {
 
         boolean useUuid = fastQcProcessedFileService.useUuid(workflowVersion)
 
-        List<String> runDisplayName = generateWorkflowRunDisplayName(seqTrack)
-        List<String> artefactDisplayName = new ArrayList<>(runDisplayName)
-        artefactDisplayName.remove(0)
+        List<String> displayName = generateWorkflowRunDisplayName(seqTrack)
         String shortName = "${workflow}: ${seqTrack.individual.pid} " +
                 "${seqTrack.sampleType.displayName} ${seqTrack.seqType.displayNameWithLibraryLayout}"
 
@@ -179,7 +177,7 @@ class FastqcDecider implements Decider {
                 seqTrack.project.processingPriority,
                 useUuid ? null : fastqcDataFilesService.fastqcOutputDirectory(fastqcProcessedFiles.values().first()).toString(),
                 seqTrack.individual.project,
-                runDisplayName,
+                displayName,
                 shortName,
                 workflowVersion,
         )
@@ -197,7 +195,7 @@ class FastqcDecider implements Decider {
                     run,
                     "${BashFastQcWorkflow.OUTPUT_FASTQC}_${i + 1}",
                     ArtefactType.FASTQC,
-                    artefactDisplayName,
+                    displayName,
             )).save(flush: false)
 
             FastqcProcessedFile fastqcProcessedFile = fastqcProcessedFiles[it]

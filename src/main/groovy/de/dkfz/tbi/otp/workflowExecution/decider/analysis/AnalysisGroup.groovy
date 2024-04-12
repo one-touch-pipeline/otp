@@ -19,21 +19,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataprocessing
+package de.dkfz.tbi.otp.workflowExecution.decider.analysis
 
-import grails.gorm.transactions.Transactional
-import groovy.transform.CompileDynamic
+import groovy.transform.*
 
-import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackage
+import de.dkfz.tbi.otp.ngsdata.*
 
-/**
- * @deprecated old workflow system
- */
-@CompileDynamic
-@Transactional
-class PipelineService {
-
-    Pipeline findByPipelineName(Pipeline.Name name) {
-        return CollectionUtils.atMostOneElement(Pipeline.findAllByName(name))
-    }
+@TupleConstructor
+@ToString(includePackage = false, includeNames = true)
+@EqualsAndHashCode
+class AnalysisGroup {
+    final AbstractMergingWorkPackage mergingWorkPackage1
+    final AbstractMergingWorkPackage mergingWorkPackage2
 }

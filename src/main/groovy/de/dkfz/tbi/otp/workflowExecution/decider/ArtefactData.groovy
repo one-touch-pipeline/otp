@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.workflowExecution.Artefact
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
 @ToString(includePackage = false, includeNames = true)
-@EqualsAndHashCode
+@EqualsAndHashCode(cache = true)
 class ArtefactData<A extends Artefact> {
     final WorkflowArtefact workflowArtefact
     final A artefact

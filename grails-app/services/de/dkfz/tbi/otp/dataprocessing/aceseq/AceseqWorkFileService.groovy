@@ -24,4 +24,6 @@ package de.dkfz.tbi.otp.dataprocessing.aceseq
 import de.dkfz.tbi.otp.dataprocessing.AbstractAnalysisWorkFileService
 
 class AceseqWorkFileService extends AbstractAnalysisWorkFileService<AceseqInstance> implements AbstractAceseqFileService {
+
+    final String workflowDirectoryName = 'ACEseqWorkflow'
 }

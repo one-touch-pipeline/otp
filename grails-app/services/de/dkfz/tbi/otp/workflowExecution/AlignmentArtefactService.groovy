@@ -140,7 +140,6 @@ class AlignmentArtefactService {
         from
             SeqTrack st
             join st.workflowArtefact wa
-            join st.workflowArtefact wa
             join st.sample sample
             join sample.sampleType sampleType
             join sample.individual individual
@@ -454,8 +453,8 @@ class AlignmentArtefactService {
             return (AbstractBamFile.executeQuery(HQL_FETCH_WORK_PACKAGES, [
                     seqTracks: seqTracks,
             ]) as List<List<?>>).collectEntries {
-                [(new AlignmentWorkPackageGroup(it[INDEX_0] as Sample, it[INDEX_1] as SeqType, it[INDEX_2] as AntibodyTarget)):
-                 it[INDEX_3] as MergingWorkPackage]
+                AlignmentWorkPackageGroup group = new AlignmentWorkPackageGroup(it[INDEX_0] as Sample, it[INDEX_1] as SeqType, it[INDEX_2] as AntibodyTarget)
+                [(group): it[INDEX_3] as MergingWorkPackage]
             } as Map<AlignmentWorkPackageGroup, MergingWorkPackage>
         }
     }

@@ -24,4 +24,6 @@ package de.dkfz.tbi.otp.dataprocessing.indelcalling
 import de.dkfz.tbi.otp.dataprocessing.AbstractAnalysisWorkFileService
 
 class IndelWorkFileService extends AbstractAnalysisWorkFileService<IndelCallingInstance> implements AbstractIndelFileService {
+
+    final String workflowDirectoryName = 'IndelCallingWorkflow'
 }

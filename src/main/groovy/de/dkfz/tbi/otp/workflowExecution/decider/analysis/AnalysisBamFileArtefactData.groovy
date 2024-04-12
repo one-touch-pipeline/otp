@@ -19,39 +19,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution.decider.alignment
+package de.dkfz.tbi.otp.workflowExecution.decider.analysis
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackage
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.workflowExecution.Artefact
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 import de.dkfz.tbi.otp.workflowExecution.decider.ArtefactData
 
 @ToString(includePackage = false, includeNames = true, includeSuper = true)
 @EqualsAndHashCode(callSuper = true, cache = true)
-class AlignmentArtefactData<A extends Artefact> extends ArtefactData<A> {
+class AnalysisBamFileArtefactData extends ArtefactData<AbstractBamFile> {
     final Individual individual
     final SampleType sampleType
     final Sample sample
-    final AntibodyTarget antibodyTarget
-    final LibraryPreparationKit libraryPreparationKit
-    final SeqPlatform seqPlatform
+    final AbstractMergingWorkPackage mergingWorkPackage
     final SeqPlatformGroup seqPlatformGroup
 
     @SuppressWarnings("ParameterCount")
-    AlignmentArtefactData(WorkflowArtefact workflowArtefact, A artefact, Project project, SeqType seqType, Individual individual, SampleType sampleType,
-                          Sample sample, AntibodyTarget antibodyTarget, LibraryPreparationKit libraryPreparationKit, SeqPlatform seqPlatform,
-                          SeqPlatformGroup seqPlatformGroup) {
+    AnalysisBamFileArtefactData(WorkflowArtefact workflowArtefact, AbstractBamFile artefact, Project project, SeqType seqType,
+                                Individual individual, SampleType sampleType, Sample sample, AbstractMergingWorkPackage mergingWorkPackage,
+                                SeqPlatformGroup seqPlatformGroup) {
         super(workflowArtefact, artefact, project, seqType)
         this.individual = individual
         this.sampleType = sampleType
         this.sample = sample
-        this.antibodyTarget = antibodyTarget
-        this.libraryPreparationKit = libraryPreparationKit
-        this.seqPlatform = seqPlatform
+        this.mergingWorkPackage = mergingWorkPackage
         this.seqPlatformGroup = seqPlatformGroup
     }
 }

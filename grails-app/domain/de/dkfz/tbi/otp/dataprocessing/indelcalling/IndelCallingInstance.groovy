@@ -40,7 +40,7 @@ class IndelCallingInstance extends BamFilePairAnalysis implements RoddyResult {
             indelSampleSwapDetection: IndelSampleSwapDetection,
     ]
 
-    static constraints = {
+    static Closure constraints = {
         indelSampleSwapDetection nullable: true
         indelQualityControl nullable: true
     }

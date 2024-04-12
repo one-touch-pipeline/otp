@@ -59,9 +59,6 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
     @Autowired
     WorkflowRunService workflowRunService
 
-    @Autowired
-    WorkflowService workflowService
-
     abstract boolean requiresFastqcResults()
 
     abstract String getWorkflowName()
@@ -304,14 +301,12 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
         workPackage.seqTracks = seqTracks as Set
         workPackage.save(flush: false, deepValidate: false)
 
-        List<String> runDisplayName = [
+        List<String> displayName = [
                 "project: ${projectSeqTypeGroup.project.name}",
                 "individual: ${group.individual.displayName}",
                 "sampleType: ${group.sampleType.displayName}",
                 "seqType: ${group.seqType.displayNameWithLibraryLayout}",
         ]*.toString()
-        List<String> artefactDisplayName = runDisplayName[1, -1]
-        artefactDisplayName.remove(0)
         String shortName = "${workflowName}: ${group.individual.pid} ${group.sampleType.displayName} ${group.seqType.displayNameWithLibraryLayout}"
 
         WorkflowRun run = workflowRunService.buildWorkflowRun(
@@ -319,7 +314,7 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
                 projectSeqTypeGroup.project.processingPriority,
                 "", // set later
                 projectSeqTypeGroup.project,
-                runDisplayName,
+                displayName,
                 shortName,
                 version,
         )
@@ -349,7 +344,7 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
                 run,
                 outputBamRole,
                 ArtefactType.BAM,
-                artefactDisplayName,
+                displayName,
         ))
 
         int identifier = RoddyBamFile.nextIdentifier(workPackage)

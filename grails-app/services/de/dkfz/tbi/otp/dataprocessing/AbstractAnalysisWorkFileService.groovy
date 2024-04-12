@@ -21,14 +21,20 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RoddyConfigService
+import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
+import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.file.Path
+import java.time.ZonedDateTime
 
 @SuppressWarnings('AbstractClassWithoutAbstractMethod')
 abstract class AbstractAnalysisWorkFileService<T extends BamFilePairAnalysis> implements ArtefactFileService<T> {
+
+    ConfigService configService
 
     FilestoreService filestoreService
     RoddyConfigService roddyConfigService
@@ -36,5 +42,29 @@ abstract class AbstractAnalysisWorkFileService<T extends BamFilePairAnalysis> im
 
     Path getDirectoryPath(T instance) {
         return filestoreService.getWorkFolderPath(instance.workflowArtefact.producedBy)
+    }
+
+    /**
+     * Returns the workflow name part of the directory where the workflow results are stored.
+     *
+     * For migrated workflows it should have the same value as in the old workflow system.
+     *
+     * @see #constructInstanceName(WorkflowVersion)
+     */
+    abstract String getWorkflowDirectoryName()
+
+    /**
+     * Construct the name to use for the analysis directory.
+     *
+     * Its based on following components:
+     * - the prefix result
+     * - the workflow directory name as returned by {@link #getWorkflowDirectoryName()} (for roddy workflows: the roddy plugin name))
+     * - the used plugin version
+     * - the current date and time (use format {@link TimeFormats#DATE_TIME_DASHES})
+     */
+    String constructInstanceName(WorkflowVersion workflowVersion) {
+        ZonedDateTime zonedDateTime = configService.zonedDateTime
+        String formattedDate = TimeFormats.DATE_TIME_DASHES.getFormattedZonedDateTime(zonedDateTime)
+        return "results_${workflowDirectoryName}-${workflowVersion.workflowVersion}_${formattedDate}"
     }
 }

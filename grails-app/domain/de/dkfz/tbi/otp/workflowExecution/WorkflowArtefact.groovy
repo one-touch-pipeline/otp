@@ -92,6 +92,6 @@ class WorkflowArtefact implements Withdrawable, Entity {
 
     @Override
     String toString() {
-        return "workflowArtefact ${id} ${displayName}"
+        return "workflowArtefact ${id} ${artefactType} ${displayName}"
     }
 }

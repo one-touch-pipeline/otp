@@ -32,14 +32,13 @@ import de.dkfz.tbi.otp.ngsdata.HasIdentifier
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
-import de.dkfz.tbi.otp.workflowExecution.Artefact
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 
 /**
  * This bam file is produced by some Roddy alignment workflow.
  */
 @ManagedEntity
-class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, ProcessParameterObject, RoddyResult {
+class RoddyBamFile extends AbstractBamFile implements HasIdentifier, ProcessParameterObject, RoddyResult {
 
     static hasMany = [
             seqTracks                   : SeqTrack,
@@ -53,14 +52,12 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
 
     String workDirectoryName
 
-    static constraints = {
+    static Closure constraints = {
         seqTracks minSize: 1, validator: { val, obj, errors ->
             obj.isConsistentAndContainsNoWithdrawnData().each {
                 errors.reject(null, it)
             }
         }
-        workflowArtefact nullable: true
-
         workPackage validator: { val, obj ->
             [Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Name.RODDY_RNA_ALIGNMENT].contains(val?.pipeline?.name) &&
                     MergingWorkPackage.isAssignableFrom(Hibernate.getClass(val))
@@ -83,14 +80,14 @@ class RoddyBamFile extends AbstractBamFile implements Artefact, HasIdentifier, P
         }
     }
 
-    static mapping = {
+    static Closure mapping = {
         config index: "roddy_bam_file_config_idx"
     }
 
     List<String> isConsistentAndContainsNoWithdrawnData() {
         List<String> errors = []
 
-        def assertAndTrackOnError = { def expression, String errorMessage ->
+        Closure assertAndTrackOnError = { def expression, String errorMessage ->
             if (!expression) {
                 errors << errorMessage
             }

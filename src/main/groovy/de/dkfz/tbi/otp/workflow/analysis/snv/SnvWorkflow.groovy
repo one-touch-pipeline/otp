@@ -22,13 +22,11 @@
 package de.dkfz.tbi.otp.workflow.analysis.snv
 
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
-import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
-import de.dkfz.tbi.otp.workflow.analysis.AnalysisLinkJob
-import de.dkfz.tbi.otp.workflow.analysis.AnalysisConditionalSkipJob
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.workflow.analysis.*
 import de.dkfz.tbi.otp.workflow.jobs.*
 import de.dkfz.tbi.otp.workflowExecution.Artefact
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
@@ -42,6 +40,9 @@ class SnvWorkflow extends AbstractAnalysisWorkflow {
 
     public static final String WORKFLOW = "Roddy SNV calling"
     public static final String SNV_INPUT = "SNV_INPUT"
+
+    @Autowired
+    SnvWorkFileService snvWorkFileService
 
     @Override
     List<Class<? extends Job>> getJobList() {
@@ -72,7 +73,7 @@ class SnvWorkflow extends AbstractAnalysisWorkflow {
 
         RoddySnvCallingInstance outputSnvCallingInstance = new RoddySnvCallingInstance([
                 samplePair        : samplePair,
-                instanceName      : snvCallingInstance.instanceName,
+                instanceName      : snvWorkFileService.constructInstanceName(artefact.workflowArtefact.producedBy.workflowVersion),
                 config            : snvCallingInstance.config,
                 sampleType1BamFile: samplePair.mergingWorkPackage1.bamFileInProjectFolder,
                 sampleType2BamFile: samplePair.mergingWorkPackage2.bamFileInProjectFolder,

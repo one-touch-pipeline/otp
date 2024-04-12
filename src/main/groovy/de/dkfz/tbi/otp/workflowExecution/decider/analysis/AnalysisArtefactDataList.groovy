@@ -19,21 +19,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataprocessing
+package de.dkfz.tbi.otp.workflowExecution.decider.analysis
 
-import grails.gorm.transactions.Transactional
-import groovy.transform.CompileDynamic
+import groovy.transform.*
 
-import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
+import de.dkfz.tbi.otp.workflowExecution.decider.ArtefactDataList
 
-/**
- * @deprecated old workflow system
- */
-@CompileDynamic
-@Transactional
-class PipelineService {
+@ToString(includePackage = false, includeNames = true)
+@EqualsAndHashCode
+@TupleConstructor
+class AnalysisArtefactDataList implements ArtefactDataList {
+    final Collection<AnalysisBamFileArtefactData> bamFileDataList
+    final Collection<AnalysisAnalysisArtefactData<BamFilePairAnalysis>> alreadyRunAnalysisDataList
 
-    Pipeline findByPipelineName(Pipeline.Name name) {
-        return CollectionUtils.atMostOneElement(Pipeline.findAllByName(name))
+    @Override
+    boolean isEmpty() {
+        return !bamFileDataList && !alreadyRunAnalysisDataList
     }
 }

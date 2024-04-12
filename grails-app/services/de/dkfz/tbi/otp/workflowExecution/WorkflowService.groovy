@@ -48,7 +48,7 @@ class WorkflowService {
     ].toSet().asImmutable()
 
     Workflow getExactlyOneWorkflow(String name) {
-        return CollectionUtils.exactlyOneElement(Workflow.findAllByNameAndDeprecatedDateIsNull(name))
+        return CollectionUtils.exactlyOneElement(Workflow.findAllByNameAndDeprecatedDateIsNull(name), "Could not find workflow with name '${name}'")
     }
 
     Set<SeqType> getSupportedSeqTypes(String name) {

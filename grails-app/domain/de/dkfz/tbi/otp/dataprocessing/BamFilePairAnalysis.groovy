@@ -25,7 +25,6 @@ import grails.gorm.hibernate.annotation.ManagedEntity
 import org.hibernate.Hibernate
 
 import de.dkfz.tbi.otp.CommentableWithProject
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QcTrafficLightStatus
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
@@ -71,15 +70,13 @@ abstract class BamFilePairAnalysis implements Artefact, CommentableWithProject, 
 
     QcTrafficLightStatus qcTrafficLightStatus
 
-    static constraints = {
+    static Closure constraints = {
         sampleType1BamFile validator: { AbstractBamFile val, BamFilePairAnalysis obj ->
             obj.samplePair &&
-                    val.fileOperationStatus == FileOperationStatus.PROCESSED &&
                     val.mergingWorkPackage.id == obj.samplePair.mergingWorkPackage1.id
         }
         sampleType2BamFile validator: { AbstractBamFile val, BamFilePairAnalysis obj ->
             obj.samplePair &&
-                    val.fileOperationStatus == FileOperationStatus.PROCESSED &&
                     val.mergingWorkPackage.id == obj.samplePair.mergingWorkPackage2.id
         }
         instanceName blank: false, unique: 'samplePair', shared: "pathComponent"

@@ -19,21 +19,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataprocessing
+package de.dkfz.tbi.otp.dataprocessing.indelcalling
 
-import grails.gorm.transactions.Transactional
-import groovy.transform.CompileDynamic
+import spock.lang.Specification
 
-import de.dkfz.tbi.otp.utils.CollectionUtils
+class IndelWorkFileServiceSpec extends Specification {
 
-/**
- * @deprecated old workflow system
- */
-@CompileDynamic
-@Transactional
-class PipelineService {
+    void "getWorkflowDirectoryName returns correct directory name"() {
+        given:
+        IndelWorkFileService indelWorkFileService = new IndelWorkFileService()
 
-    Pipeline findByPipelineName(Pipeline.Name name) {
-        return CollectionUtils.atMostOneElement(Pipeline.findAllByName(name))
+        expect:
+        indelWorkFileService.workflowDirectoryName == 'IndelCallingWorkflow'
     }
 }

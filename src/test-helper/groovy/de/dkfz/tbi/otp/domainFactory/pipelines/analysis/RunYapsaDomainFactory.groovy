@@ -39,8 +39,5 @@ class RunYapsaDomainFactory extends AbstractAnalysisDomainFactory<RunYapsaInstan
         return RunYapsaWorkflow
     }
 
-    @Override
-    protected Class<RunYapsaInstance> getInstanceClass() {
-        return RunYapsaInstance
-    }
+    final Class<RunYapsaInstance> instanceClass = RunYapsaInstance
 }

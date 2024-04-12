@@ -27,9 +27,12 @@ import de.dkfz.tbi.otp.workflowExecution.LinearWorkflow
  * Common class for all analysis workflows
  */
 abstract class AbstractAnalysisWorkflow implements LinearWorkflow {
-    public static final String ANALYSIS_OUTPUT = "ANALYSIS_OUTPUT"
-    public static final String INPUT_TUMOR_BAM = "TUMOR_BAM"
-    public static final String INPUT_CONTROL_BAM = "CONTROL_BAM"
+
+    static final String ANALYSIS_OUTPUT = "ANALYSIS_OUTPUT"
+
+    static final String INPUT_TUMOR_BAM = "TUMOR_BAM"
+
+    static final String INPUT_CONTROL_BAM = "CONTROL_BAM"
 
     @Override
     boolean isAlignment() {

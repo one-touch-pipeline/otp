@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.bamfiles.AbstractBamFileServiceFactoryServ
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.workflowExecution.Artefact
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
@@ -39,7 +40,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
  * generations).
  */
 @ManagedEntity
-abstract class AbstractBamFile implements CommentableWithProject, Entity {
+abstract class AbstractBamFile implements Artefact, CommentableWithProject, Entity {
 
     enum QaProcessingStatus {
         UNKNOWN,
@@ -167,11 +168,12 @@ abstract class AbstractBamFile implements CommentableWithProject, Entity {
 
     abstract AbstractMergingWorkPackage getMergingWorkPackage()
 
+    @Override
     abstract Set<SeqTrack> getContainedSeqTracks()
 
     abstract AbstractQualityAssessment getQualityAssessment()
 
-    static constraints = {
+    static Closure constraints = {
         coverage(nullable: true)
         coverageWithN(nullable: true)
         comment nullable: true
@@ -190,9 +192,10 @@ abstract class AbstractBamFile implements CommentableWithProject, Entity {
                 return "comment.missing"
             }
         }
+        workflowArtefact nullable: true
     }
 
-    static mapping = {
+    static Closure mapping = {
         'class' index: "abstract_bam_file_class_idx"
         withdrawn index: "abstract_bam_file_withdrawn_idx"
         qualityAssessmentStatus index: "abstract_bam_file_quality_assessment_status_idx"

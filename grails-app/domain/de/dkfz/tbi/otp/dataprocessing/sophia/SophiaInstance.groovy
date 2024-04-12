@@ -41,7 +41,7 @@ class SophiaInstance extends BamFilePairAnalysis implements RoddyResult {
             sophiaQc: SophiaQc,
     ]
 
-    static constraints = {
+    static Closure constraints = {
         sophiaQc nullable: true
     }
 

@@ -19,21 +19,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataprocessing
+package de.dkfz.tbi.otp.workflowExecution.decider.analysis
 
-import grails.gorm.transactions.Transactional
-import groovy.transform.CompileDynamic
+import groovy.transform.ToString
+import groovy.transform.TupleConstructor
 
-import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.ngsdata.SampleTypePerProject
+import de.dkfz.tbi.otp.workflowExecution.decider.AdditionalData
 
-/**
- * @deprecated old workflow system
- */
-@CompileDynamic
-@Transactional
-class PipelineService {
+@ToString(includePackage = false, includeNames = true)
+@TupleConstructor
+class AnalysisAdditionalData implements AdditionalData {
 
-    Pipeline findByPipelineName(Pipeline.Name name) {
-        return CollectionUtils.atMostOneElement(Pipeline.findAllByName(name))
-    }
+    Map<AnalysisGroup, SamplePair> samplePairMap
+    Map<ProjectSampleTypeGroup, SampleTypePerProject.Category> categoryMap
+    Pipeline pipeline
 }

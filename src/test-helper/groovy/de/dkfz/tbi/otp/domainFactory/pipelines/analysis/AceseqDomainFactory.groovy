@@ -40,10 +40,7 @@ class AceseqDomainFactory extends AbstractAnalysisQcDomainFactory<AceseqInstance
         return AceseqWorkflow
     }
 
-    @Override
-    protected Class<AceseqInstance> getInstanceClass() {
-        return AceseqInstance
-    }
+    final Class<AceseqInstance> instanceClass = AceseqInstance
 
     @Override
     protected Class<AceseqQc> getQcClass() {

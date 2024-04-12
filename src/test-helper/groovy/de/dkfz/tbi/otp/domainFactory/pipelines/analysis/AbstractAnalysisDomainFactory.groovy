@@ -107,7 +107,8 @@ abstract class AbstractAnalysisDomainFactory<T extends BamFilePairAnalysis> impl
     }
 
     SamplePair createSamplePair(Map properties = [:]) {
-        AbstractMergingWorkPackage mergingWorkPackage1 = properties.mergingWorkPackage1 ?:
+        AbstractMergingWorkPackage mergingWorkPackage1 = properties.mergingWorkPackage1 ?: properties.mergingWorkPackage2 ?
+                AlignmentPipelineFactory.RoddyPanCancerFactoryInstance.INSTANCE.createMergingWorkPackage(properties.mergingWorkPackage2) :
                 AlignmentPipelineFactory.RoddyPanCancerFactoryInstance.INSTANCE.createMergingWorkPackage()
         AbstractMergingWorkPackage mergingWorkPackage2 = properties.mergingWorkPackage2 ?:
                 AlignmentPipelineFactory.RoddyPanCancerFactoryInstance.INSTANCE.createMergingWorkPackage(mergingWorkPackage1)
@@ -266,7 +267,7 @@ abstract class AbstractAnalysisDomainFactory<T extends BamFilePairAnalysis> impl
         ], [:])
     }
 
-    abstract protected Class<T> getInstanceClass()
+    abstract Class<T> getInstanceClass()
 
     private Map createAnalysisInstanceWithRoddyBamFilesMapHelper(Map properties, Map bamFile1Properties, Map bamFile2Properties) {
         Pipeline pipeline = DomainFactory.createPanCanPipeline()
