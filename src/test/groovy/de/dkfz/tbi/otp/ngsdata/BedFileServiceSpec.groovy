@@ -23,8 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
-import spock.lang.Specification
-import spock.lang.TempDir
+import spock.lang.*
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -39,13 +38,17 @@ class BedFileServiceSpec extends Specification implements DataTest, ServiceUnitT
         return [
                 BedFile,
                 ProcessingOption,
+                ReferenceGenome,
+                LibraryPreparationKit,
         ]
     }
 
     @TempDir
     Path tempDir
 
+    @Shared
     BedFile bedFile
+
     File referenceGenomesBaseDirectory
 
     void setup() {
@@ -83,5 +86,25 @@ class BedFileServiceSpec extends Specification implements DataTest, ServiceUnitT
 
         expect:
         service.filePath(bedFile) == "${referenceGenomesBaseDirectory.parentFile.path}/targetRegions/bedFileName" as String
+    }
+
+    @Unroll
+    void "test findBedFileByReferenceGenomeAndLibraryPreparationKit, when bed file contains #condition, should return the #res"() {
+        given:
+        ReferenceGenome referenceGenome = refGenomeClosure()
+        LibraryPreparationKit libraryPreparationKit = libPrepKitClosure()
+
+        when:
+        BedFile result = service.findBedFileByReferenceGenomeAndLibraryPreparationKit(referenceGenome, libraryPreparationKit)
+
+        then:
+        result == resultClosure()
+
+        where:
+        condition                                  | refGenomeClosure                          | libPrepKitClosure                               || res        | resultClosure
+        "correct ref genome, correct lib prep kit" | { bedFile.referenceGenome }               | { bedFile.libraryPreparationKit }               || "bed file" | { bedFile }
+        "wrong ref genome, correct lib prep kit"   | { DomainFactory.createReferenceGenome() } | { bedFile.libraryPreparationKit }               || "null"     | { null }
+        "correct ref genome, wrong lib prep kit"   | { bedFile.referenceGenome }               | { DomainFactory.createLibraryPreparationKit() } || "null"     | { null }
+        "wrong ref genome, wrong lib prep kit"     | { DomainFactory.createReferenceGenome() } | { DomainFactory.createLibraryPreparationKit() } || "null"     | { null }
     }
 }

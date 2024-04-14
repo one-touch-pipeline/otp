@@ -22,8 +22,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import static org.springframework.util.Assert.notNull
 
@@ -45,5 +47,13 @@ class BedFileService {
             return bedFilePath
         }
         throw new FileNotReadableException("the bedFile can not be read: ${bedFilePath}")
+    }
+
+    @CompileDynamic
+    BedFile findBedFileByReferenceGenomeAndLibraryPreparationKit(ReferenceGenome referenceGenome, LibraryPreparationKit libraryPreparationKit) {
+        return CollectionUtils.atMostOneElement(BedFile.findAllByReferenceGenomeAndLibraryPreparationKit(
+                referenceGenome,
+                libraryPreparationKit
+        ))
     }
 }

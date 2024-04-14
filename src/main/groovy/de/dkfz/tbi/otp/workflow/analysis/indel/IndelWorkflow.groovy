@@ -49,7 +49,7 @@ class IndelWorkflow extends AbstractAnalysisWorkflow {
                 AnalysisConditionalSkipJob,
                 RoddyAnalysisFragmentJob,
 //                IndelCheckFragmentKeysJob,
-//                IndelConditionalFailJob,
+                IndelConditionalFailJob,
 //                IndelCreateNotificationJob,
                 AttachUuidJob,
                 IndelPrepareJob,

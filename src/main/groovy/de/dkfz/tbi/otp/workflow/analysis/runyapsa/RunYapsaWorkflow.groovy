@@ -49,7 +49,7 @@ class RunYapsaWorkflow extends AbstractAnalysisWorkflow {
                 AnalysisConditionalSkipJob,
                 RoddyAnalysisFragmentJob,
                 OtpClusterCheckFragmentKeysJob,
-//                RunYapsaConditionalFailJob,
+                RunYapsaConditionalFailJob,
 //                RunYapsaCreateNotificationJob,
                 AttachUuidJob,
                 RunYapsaPrepareJob,

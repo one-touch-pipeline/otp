@@ -123,8 +123,8 @@ class ProcessingThresholdsService {
                         and processingThresholds.seqType = seqType2
                 )
             """, [
-                seqTracks: seqTracks,
-        ]).collect {
+                    seqTracks: seqTracks,
+            ]).collect {
             new ProcessingThresholds([
                     project      : it[0],
                     sampleType   : it[1],

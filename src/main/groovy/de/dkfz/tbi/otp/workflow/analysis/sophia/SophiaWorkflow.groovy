@@ -49,7 +49,7 @@ class SophiaWorkflow extends AbstractAnalysisWorkflow {
                 AnalysisConditionalSkipJob,
                 RoddyAnalysisFragmentJob,
 //                SophiaCheckFragmentKeysJob,
-//                SophiaConditionalFailJob,
+                SophiaConditionalFailJob,
 //                SophiaCreateNotificationJob,
                 AttachUuidJob,
                 SophiaPrepareJob,

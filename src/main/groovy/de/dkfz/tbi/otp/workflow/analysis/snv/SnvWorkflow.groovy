@@ -48,7 +48,7 @@ class SnvWorkflow extends AbstractAnalysisWorkflow {
                 AnalysisConditionalSkipJob,
 //                SnvFragmentJob,
 //                SnvCheckFragmentKeysJob,
-//                SnvConditionalFailJob,
+                SnvConditionalFailJob,
 //                SnvCreateNotificationJob,
                 AttachUuidJob,
                 SnvPrepareJob,

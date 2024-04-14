@@ -49,7 +49,7 @@ class AceseqWorkflow extends AbstractAnalysisWorkflow {
                 AnalysisConditionalSkipJob,
                 RoddyAnalysisFragmentJob,
 //                AceseqCheckFragmentKeysJob,
-//                AceseqConditionalFailJob,
+                AceseqConditionalFailJob,
 //                AceseqCreateNotificationJob,
                 AttachUuidJob,
                 AceseqPrepareJob,
