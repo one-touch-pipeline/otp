@@ -38,8 +38,8 @@ trait AnalysisWorkflowShared extends WorkflowShared {
 
     private static final List<String> WORKFLOWS = [AceseqWorkflow.WORKFLOW, IndelWorkflow.WORKFLOW, SnvWorkflow.WORKFLOW, SophiaWorkflow.WORKFLOW,
                                                    RunYapsaWorkflow.WORKFLOW]
-    public static final String INPUT_TUMOR_BAM = "TUMOR_BAM"
-    public static final String INPUT_CONTROL_BAM = "CONTROL_BAM"
+    public static final String INPUT_TUMOR_BAM = AbstractAnalysisWorkflow.INPUT_TUMOR_BAM
+    public static final String INPUT_CONTROL_BAM = AbstractAnalysisWorkflow.INPUT_CONTROL_BAM
     public static final String ANALYSIS_OUTPUT = AbstractAnalysisWorkflow.ANALYSIS_OUTPUT
 
     @Autowired

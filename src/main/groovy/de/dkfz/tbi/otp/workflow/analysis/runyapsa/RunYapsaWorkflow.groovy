@@ -41,7 +41,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 @Slf4j
 class RunYapsaWorkflow extends AbstractAnalysisWorkflow {
 
-    public static final String WORKFLOW = "RunYapsa Workflow"
+    public static final String WORKFLOW = "runYapsa (mutational signature analysis)"
 
     @Override
     List<Class<? extends Job>> getJobList() {

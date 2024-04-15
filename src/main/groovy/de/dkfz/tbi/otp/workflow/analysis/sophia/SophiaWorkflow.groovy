@@ -41,7 +41,8 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 @Slf4j
 class SophiaWorkflow extends AbstractAnalysisWorkflow {
 
-    public static final String WORKFLOW = "Sophia Workflow"
+    public static final String WORKFLOW = "Roddy Sophia (structural variation calling)"
+    public static final String SOPHIA_INPUT = "SOPHIA_INPUT"
 
     @Override
     List<Class<? extends Job>> getJobList() {

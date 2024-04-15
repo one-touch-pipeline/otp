@@ -40,7 +40,8 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 @Slf4j
 class SnvWorkflow extends AbstractAnalysisWorkflow {
 
-    public static final String WORKFLOW = "Snv Workflow"
+    public static final String WORKFLOW = "Roddy SNV calling"
+    public static final String SNV_INPUT = "SNV_INPUT"
 
     @Override
     List<Class<? extends Job>> getJobList() {

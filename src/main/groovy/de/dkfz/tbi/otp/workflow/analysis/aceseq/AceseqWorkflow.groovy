@@ -41,7 +41,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 @Slf4j
 class AceseqWorkflow extends AbstractAnalysisWorkflow {
 
-    public static final String WORKFLOW = "Aceseq Workflow"
+    public static final String WORKFLOW = "Roddy ACEseq (CNV calling)"
 
     @Override
     List<Class<? extends Job>> getJobList() {

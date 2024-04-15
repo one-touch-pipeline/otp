@@ -41,7 +41,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 @Slf4j
 class IndelWorkflow extends AbstractAnalysisWorkflow {
 
-    public static final String WORKFLOW = "Indel Workflow"
+    public static final String WORKFLOW = "Roddy Indel calling"
 
     @Override
     List<Class<? extends Job>> getJobList() {
