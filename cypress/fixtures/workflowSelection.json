@@ -1,5 +1,5 @@
 {
-  "alignment" : {
+  "alignment": {
     "workflow": "WGBS alignment",
     "seqType": "WGBS_TAG PAIRED bulk",
     "version": {
@@ -12,12 +12,22 @@
       "Human (Homo sapiens) [No strain available]"
     ]
   },
-  "analysis": {
-    "workflow": "Roddy SNV calling",
-    "seqType": "WGS PAIRED bulk",
-    "version": {
-      "name": "1.2.166-3",
-      "id": "575"
+  "analysis": [
+    {
+      "workflow": "Roddy SNV calling",
+      "seqType": "WGS PAIRED bulk",
+      "version": {
+        "name": "1.2.166-3",
+        "id": "575"
+      }
+    },
+    {
+      "workflow": "Roddy Indel calling",
+      "seqType": "WGS PAIRED bulk",
+      "version": {
+        "name": "2.4.1",
+        "id": "576"
+      }
     }
-  }
+  ]
 }

@@ -89,7 +89,7 @@ describe('Check workflow selection page', () => {
       });
     });
 
-    it('should create analysis configuration and delete it', () => {
+    it('should create two analysis configurations for same project and seq type and delete it', () => {
       cy.visit('/workflowSelection/index');
 
       cy.intercept('/workflowSelection/possibleAnalysisOptions*').as('possibleOptions');
@@ -98,36 +98,66 @@ describe('Check workflow selection page', () => {
       cy.get('h2#headingAnalysis').click();
 
       cy.fixture('workflowSelection.json').then((config) => {
-        cy.get('#analysis-workflow-select').select(config.analysis.workflow, { force: true });
+        cy.get('#analysis-workflow-select').select(config.analysis[0].workflow, { force: true });
         cy.wait('@possibleOptions');
-        cy.get('#analysis-seq-type-select').select(config.analysis.seqType, { force: true });
+        cy.get('#analysis-seq-type-select').select(config.analysis[0].seqType, { force: true });
         cy.wait('@possibleOptions');
-        cy.get('#analysis-version-select').select(config.analysis.version.id, { force: true });
+        cy.get('#analysis-version-select').select(config.analysis[0].version.id, { force: true });
         cy.wait('@possibleOptions');
 
         cy.get('button#add-analysis-config-btn').click();
         cy.wait('@createConfig').then((interception) => {
           expect(interception.response.statusCode).equal(200);
-          const wvSelectorId = interception.response.body.workflowVersionSelector.id;
-          const btnSelector = `button[data-version-selector=${wvSelectorId}]`;
-          cy.get(`table#analysisTable ${btnSelector}`).as('removeBtn');
-          cy.get('@removeBtn').parent().parent().find('td')
-            .as('createdCells');
-
-          cy.get('@createdCells').contains(config.analysis.workflow);
-          cy.get('@createdCells').contains(config.analysis.seqType);
-          cy.get('@createdCells').contains(config.analysis.version.name);
+          const wvSelectorId1 = interception.response.body.workflowVersionSelector.id;
+          const btnSelector1 = `button[data-version-selector=${wvSelectorId1}]`;
+          cy.get(`table#analysisTable ${btnSelector1}`).as('removeBtn1');
+          cy.get('@removeBtn1').parent().parent().find('td')
+            .as('createdCells1');
         });
+
+        // Create a second workflowVersionSelector with same project and seqType
+        cy.get('#analysis-workflow-select').select(config.analysis[1].workflow, { force: true });
+        cy.wait('@possibleOptions');
+        cy.get('#analysis-seq-type-select').select(config.analysis[1].seqType, { force: true });
+        cy.wait('@possibleOptions');
+        cy.get('#analysis-version-select').select(config.analysis[1].version.id, { force: true });
+        cy.wait('@possibleOptions');
+
+        cy.get('button#add-analysis-config-btn').click();
+        cy.wait('@createConfig').then((interception2) => {
+          expect(interception2.response.statusCode).equal(200);
+          const wvSelectorId2 = interception2.response.body.workflowVersionSelector.id;
+          const btnSelector2 = `button[data-version-selector=${wvSelectorId2}]`;
+          cy.get(`table#analysisTable ${btnSelector2}`).as('removeBtn2');
+          cy.get('@removeBtn2').parent().parent().find('td')
+            .as('createdCells2');
+        });
+
+        cy.get('@createdCells1').contains(config.analysis[0].workflow);
+        cy.get('@createdCells1').contains(config.analysis[0].seqType);
+        cy.get('@createdCells1').contains(config.analysis[0].version.name);
+
+        cy.get('@createdCells2').contains(config.analysis[1].workflow);
+        cy.get('@createdCells2').contains(config.analysis[1].seqType);
+        cy.get('@createdCells2').contains(config.analysis[1].version.name);
       });
 
-      // Should delete the created row again
+
+      // Should delete the created rows again
       cy.intercept('/workflowSelection/deleteConfiguration*').as('deleteConfig');
 
-      cy.get('@removeBtn').click();
+      cy.get('@removeBtn1').click();
       cy.wait('@deleteConfig').then((interception) => {
         expect(interception.response.statusCode).equal(200);
 
-        cy.get('@removeBtn').should('not.exist');
+        cy.get('@removeBtn1').should('not.exist');
+      });
+
+      cy.get('@removeBtn2').click();
+      cy.wait('@deleteConfig').then((interception) => {
+        expect(interception.response.statusCode).equal(200);
+
+        cy.get('@removeBtn2').should('not.exist');
       });
     });
 

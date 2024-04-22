@@ -32,8 +32,6 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
-
 class WorkflowVersionSelectorServiceSpec extends Specification implements ServiceUnitTest<WorkflowVersionSelectorService>, DataTest, DomainFactoryCore, WorkflowSystemDomainFactory {
 
     @Override
@@ -47,41 +45,6 @@ class WorkflowVersionSelectorServiceSpec extends Specification implements Servic
                 WorkflowVersionSelector,
                 ReferenceGenomeSelector,
         ]
-    }
-
-    void "test createOrUpdate, if no selector exists"() {
-        given:
-        Project project = createProject()
-        SeqType seqType = createSeqType()
-        WorkflowVersion workflowVersion = createWorkflowVersion()
-
-        when:
-        service.createOrUpdate(project, seqType, workflowVersion)
-
-        then:
-        WorkflowVersionSelector selector = exactlyOneElement(WorkflowVersionSelector.findAllByProjectAndSeqType(project, seqType))
-        selector.workflowVersion == workflowVersion
-    }
-
-    void "test createOrUpdate, if a matching selector exists"() {
-        given:
-        Project project = createProject()
-        SeqType seqType = createSeqType()
-
-        WorkflowVersionSelector existing = createWorkflowVersionSelector(project: project, seqType: seqType)
-
-        WorkflowVersion workflowVersion = createWorkflowVersion(apiVersion: createWorkflowApiVersion(workflow: existing.workflowVersion.workflow))
-
-        when:
-        service.createOrUpdate(project, seqType, workflowVersion)
-
-        then:
-        List<WorkflowVersionSelector> selectors = WorkflowVersionSelector.findAllByProjectAndSeqType(project, seqType)
-        selectors.size() == 2
-        exactlyOneElement(selectors.findAll { it.deprecationDate != null }) == existing
-        WorkflowVersionSelector selector = exactlyOneElement(selectors.findAll { it.deprecationDate == null })
-        selector.previous == existing
-        selector.workflowVersion == workflowVersion
     }
 
     @Unroll

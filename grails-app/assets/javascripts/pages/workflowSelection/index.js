@@ -128,7 +128,7 @@ $.otp.workflowSelection = {
     const wvPreviousAttribute = wvPreviousId ? `[data-version-selector="${wvPreviousId}"]` : '';
     const table = $.otp.workflowSelection.tables[workflowType];
     let existingButton = table.$(`button${rgAttribute}${wvAttribute}`);
-    if (existingButton.length === 0) {
+    if (existingButton.length === 0 && wvPreviousAttribute) {
       existingButton = table.$(`button${rgAttribute}${wvPreviousAttribute}`);
     }
     if (existingButton.length > 0) {

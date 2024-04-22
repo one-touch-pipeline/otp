@@ -29,8 +29,6 @@ import de.dkfz.tbi.otp.project.Project
 
 import java.time.LocalDate
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
-
 @CompileDynamic
 @Transactional
 class WorkflowVersionSelectorService {
@@ -63,7 +61,7 @@ class WorkflowVersionSelectorService {
     }
 
     WorkflowVersionSelector createOrUpdate(Project project, SeqType seqType, WorkflowVersion version) {
-        WorkflowVersionSelector previous = atMostOneElement(WorkflowVersionSelector.findAllByProjectAndSeqTypeAndDeprecationDateIsNull(project, seqType))
+        WorkflowVersionSelector previous = findByProjectAndWorkflowAndSeqType(project, version.apiVersion.workflow, seqType)
         if (previous) {
             previous.deprecationDate = LocalDate.now()
             previous.save(flush: true)
