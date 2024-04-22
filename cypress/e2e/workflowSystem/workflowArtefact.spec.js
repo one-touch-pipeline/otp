@@ -29,9 +29,15 @@ describe('Check workflow artefact page', () => {
     });
 
     it('should visit different workflow artefacts index pages for a succeeded workflow', () => {
+      cy.intercept('/workflowRunList/data*').as('data');
       cy.visit('/workflowRunList');
+      cy.wait('@data').its('response.statusCode').should('eq', 200);
 
       cy.get('select#state').select('SUCCESS', { force: true });
+      cy.wait('@data').its('response.statusCode').should('eq', 200);
+
+      cy.get('input#name').type('example_2{enter}');
+      cy.wait('@data').its('response.statusCode').should('eq', 200);
 
       cy.get('table#runs tbody').find('tr')
         .eq(2)

@@ -14,7 +14,7 @@
   },
   "analysis": {
     "workflow": "Roddy SNV calling",
-    "seqType": "ATAC PAIRED bulk",
+    "seqType": "WGS PAIRED bulk",
     "version": {
       "name": "1.2.166-3",
       "id": "575"

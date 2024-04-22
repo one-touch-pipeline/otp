@@ -68,6 +68,8 @@ describe('Check projectUser page', () => {
         .find('button.changeProjectAccess').contains('Reactivate')
         .click();
 
+      cy.get('#confirmationModal').should('be.visible').find('button#confirmModal').click();
+
       cy.wait('@setEnabled').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
         expect(interception.response.body.success).to.eq(true);
@@ -162,17 +164,13 @@ describe('Check projectUser page', () => {
         .find('button.edit')
         .click();
 
-      cy.get('#confirmationModal').then((modal) => {
-        if (modal.is(':visible')) {
-          cy.get('.modal-footer #confirmModal').click();
-        } else {
-          cy.get('.projectUserTable tr').contains('Dori Development').parent()
-            .find('td.accessToFiles')
-            .find('button')
-            .contains('Toggle')
-            .click();
-        }
-      });
+      cy.get('.projectUserTable tr').contains('Dori Development').parent()
+        .find('td.accessToFiles')
+        .find('button')
+        .contains('Toggle')
+        .click();
+
+      cy.get('#confirmationModal').should('be.visible').find('button#confirmModal').click();
 
       cy.wait('@setAccessToFiles').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
@@ -247,6 +245,7 @@ describe('Check projectUser page', () => {
     it('should toggle notification', () => {
       cy.get('.projectUserTable tr').filter(':contains("Dave Development")')
         .find('td.receivesNotifications .icon-true').should('exist');
+
       cy.get('.projectUserTable tr').filter(':contains("Dave Development")')
         .find('td.receivesNotifications button.edit').first()
         .click();
@@ -255,6 +254,15 @@ describe('Check projectUser page', () => {
         .click();
       cy.get('.projectUserTable tr').filter(':contains("Dave Development")')
         .find('td.receivesNotifications .icon-false').should('exist');
+
+      cy.get('.projectUserTable tr').filter(':contains("Dave Development")')
+        .find('td.receivesNotifications button.edit').first()
+        .click();
+      cy.get('.projectUserTable tr').filter(':contains("Dave Development")')
+        .find('td.receivesNotifications button.toggle').first()
+        .click();
+      cy.get('.projectUserTable tr').filter(':contains("Dave Development")')
+        .find('td.receivesNotifications .icon-true').should('exist');
     });
 
     it('should see deactivate button', () => {

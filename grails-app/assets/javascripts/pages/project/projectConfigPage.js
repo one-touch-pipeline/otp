@@ -72,20 +72,15 @@ function updateUnixGroup(oldUnixGroup, force = false) {
       );
     },
     error(error) {
-      if (error && error.responseJSON && error.responseJSON.message) {
-        if (error.status === 409) {
-          openConfirmationModal(error.responseJSON.message, () => {
-            updateUnixGroup(oldUnixGroup, true);
-          }, () => {
-            unixGroupInputField.val(oldUnixGroup);
-          });
-        } else {
+      if (error && error.responseJSON && error.status === 409) {
+        openConfirmationModal(error.responseJSON.message, () => {
+          updateUnixGroup(oldUnixGroup, true);
+        }, () => {
           unixGroupInputField.val(oldUnixGroup);
-          $.otp.toaster.showErrorToast('Update unix group failed', error.responseJSON.message);
-        }
+        });
       } else {
         unixGroupInputField.val(oldUnixGroup);
-        $.otp.toaster.showErrorToast('Update unix group failed', 'Unknown error during the unix group update.');
+        $.otp.toaster.showErrorToast('Update unix group failed', error.responseJSON.message);
       }
     }
   });

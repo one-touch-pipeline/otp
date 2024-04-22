@@ -51,8 +51,14 @@ describe('Check workflow run details page', () => {
     });
 
     it('should visit the logs of a successfully workflow run', () => {
+      cy.intercept('/workflowRunList/data*').as('data');
       cy.intercept('/workflowRunDetails/showLogs/*').as('showWorkflowLogs');
+
       cy.visit('/workflowRunList/index?state=SUCCESS');
+      cy.wait('@data').its('response.statusCode').should('eq', 200);
+
+      cy.get('input#name').type('example_2{enter}');
+      cy.wait('@data').its('response.statusCode').should('eq', 200);
 
       cy.get('table#runs tbody').should('not.be.empty');
       cy.get('table#runs tbody tr').first().find('a').click();

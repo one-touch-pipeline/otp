@@ -20,4 +20,5 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-psql otp --username "$POSTGRES_USER" -f /docker-entrypoint-initdb.d/dev_base.dump
+set -o pipefail
+gzip -dc /docker-entrypoint-initdb.d/dev_base.dump.gz | psql otp --username "$POSTGRES_USER" -f - || { echo "Error applying database dump"; exit 1; }

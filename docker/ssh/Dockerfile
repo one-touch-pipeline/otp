@@ -27,7 +27,7 @@ RUN mkdir -p /home/otp
 ADD https://gitlab.com/one-touch-pipeline/otp/-/wikis/uploads/ci/config_files.tar.gz /home/otp
 
 #cache file system for the dump
-ADD https://gitlab.com/one-touch-pipeline/otp/-/wikis/uploads/ci/filesystem.tar.gz /home/otp
+ADD https://gitlab.com/one-touch-pipeline/otp/-/wikis/uploads/ci/filesystem_20240405.tar.gz /home/otp/filesystem.tar.gz
 
 # example data for fastq meta data import
 ADD https://gitlab.com/one-touch-pipeline/otp/-/wikis/uploads/ci/v2/otp_example_data.tar.gz /home/otp

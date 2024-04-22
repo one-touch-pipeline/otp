@@ -38,11 +38,9 @@ import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellMappingFileService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
-import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
-import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataAllWellFileService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
+import de.dkfz.tbi.otp.filestore.BaseFolder
+import de.dkfz.tbi.otp.filestore.WorkFolder
+import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RoddyConfigService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -129,6 +127,11 @@ class ExampleData {
      * A flag indicating to use CRAM instead of FASTQ files for WGS/WES
      */
     boolean usingCram = true
+
+    /**
+     * A flag to create data in the uuid (enabled) or in the old structure (disabled)
+     */
+    boolean usingUuid = true
 
     /**
      * Should data files be marked as existing when no files were created?
@@ -282,6 +285,7 @@ class ExampleData {
     SoftwareTool softwareTool
     AntibodyTarget antibodyTarget
     IlseSubmission ilseSubmission
+    BaseFolder baseFolder
     User otpUser
 
     final static Date FAST_QC_CREATE_DATE = LocalDateTime.of(2000, 01, 01, 0, 0, 0).toDate()
@@ -353,6 +357,7 @@ class ExampleData {
         seqPlatformGroup = findOrCreateSeqPlatformGroup()
         softwareTool = findOrCreateSoftwareTool()
         antibodyTarget = findOrCreateAntibodyTarget()
+        baseFolder = findOrCreateBaseFolder()
 
         workflowDataInstallation = findWorkflow(DataInstallationWorkflow.WORKFLOW)
         workflowWesFastqc = findWorkflow(WesFastQcWorkflow.WORKFLOW)
@@ -1020,6 +1025,12 @@ class ExampleData {
         ]).save(flush: true)
     }
 
+    BaseFolder findOrCreateBaseFolder() {
+        return BaseFolder.last() ?: new BaseFolder([
+                path: '/home/otp/filesystem/otp_data',
+        ]).save(flush: true)
+    }
+
     Workflow findWorkflow(String name) {
         return CollectionUtils.exactlyOneElement(Workflow.findAllByName(name))
     }
@@ -1156,6 +1167,16 @@ class ExampleData {
                 sampleType    : sampleType,
                 individual    : individual,
                 mixedInSpecies: (mixedInSpecies == MixedInSpecies.MOUSE ? [speciesWithStrainMouse] : []) as Set
+        ]).save(flush: false)
+    }
+
+    WorkFolder createWorkFolder() {
+        if (!usingUuid) {
+            return null
+        }
+        return new WorkFolder([
+                uuid      : UUID.randomUUID(),
+                baseFolder: baseFolder,
         ]).save(flush: false)
     }
 
@@ -1885,6 +1906,7 @@ class ExampleData {
                 workflow        : workflow,
                 displayName     : name,
                 shortDisplayName: name,
+                workFolder      : createWorkFolder(),
         ]).save(flush: false)
     }
 

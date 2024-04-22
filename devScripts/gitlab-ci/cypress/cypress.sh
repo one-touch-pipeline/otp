@@ -50,6 +50,7 @@ cp $OTP_PROPERTIES_CYPRESS ~/.otp.properties
 
 echo "===================================="
 docker compose -f docker-compose.yml up --build postgres > logs/postgres.log &
+sleep 10s
 docker compose -f docker-compose.yml up --build open-ldap > logs/open-ldap.log &
 docker compose -f docker-compose.yml up --build openssh-server > logs/openssh-server.log &
 
