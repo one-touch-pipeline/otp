@@ -62,4 +62,23 @@ class SequenceControllerSpec extends Specification implements ControllerUnitTest
             it.split(",", -1).size() == expectedNumberOfColumns
         }
     }
+
+    void "test sampleSwapTemplate to ensure that both header and content have the correct number of columns"() {
+        given:
+        Sequence sequence = DomainFactory.createSequence()
+        createSeqTrack(id: sequence.seqTrackId)
+        controller.seqTrackService = Mock(SeqTrackService) {
+            1 * listSequences(*_) >> [sequence]
+        }
+        int expectedNumberOfColumns = 19
+
+        when:
+        controller.sampleSwapTemplate()
+
+        then:
+        controller.response.status == SC_OK
+        (controller.response.text as String).split("\n").every {
+            it.split(",", -1).size() == expectedNumberOfColumns
+        }
+    }
 }

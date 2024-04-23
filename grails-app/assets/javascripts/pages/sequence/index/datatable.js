@@ -30,32 +30,38 @@ $.otp.sequence = {
     });
     const showRunLinks = document.getElementById('showRunLinks').value;
 
-    $('#sequenceTable').dataTable({
-      dom: '<i> B rt<"clear">S',
-      buttons: [$.otp.getDownloadButtonServerSide(() => $.otp.createLink({
-        controller: 'sequence',
-        action: 'exportAll',
-        parameters: {
-          filtering: JSON.stringify(searchCriteria())
-        }
-      })), $.otp.showOrHideColumn(() => $.otp.showOrHideColumn())],
+    $('#sequenceTable').DataTable({
+      dom: '<"row align-items-end" <"col" Bfr>><"row" t>Si',
+      buttons: [
+        $.otp.showOrHideColumn(() => $.otp.showOrHideColumn()),
+        $.otp.getDownloadButtonServerSide(() => $.otp.createLink({
+          controller: 'sequence',
+          action: 'exportAll',
+          parameters: { filtering: JSON.stringify(searchCriteria()) }
+        }), 'Download CSV'),
+        $.otp.getDownloadButtonServerSide(() => $.otp.createLink({
+          controller: 'sequence',
+          action: 'sampleSwapTemplate',
+          parameters: { filtering: JSON.stringify(searchCriteria()) }
+        }), 'Download Sample Swap Template')
+      ],
       bFilter: false,
       bProcessing: true,
       bServerSide: true,
       bSort: true,
-      bAutoWidth: false,
+      bAutoWidth: true,
       sAjaxSource: $.otp.createLink({
         controller: 'sequence',
         action: 'dataTableSource'
       }),
       sScrollX: 'auto',
       sScrollXInner: '100%',
-      sScrollY: 490,
-      iDisplayLength: 100,
+      sScrollY: 500,
+      iDisplayLength: 150,
       bDeferRender: true,
       scroller: true,
       columnDefs: [{
-        targets: 22,
+        targets: 23,
         visible: false
       }],
       fnServerData(sSource, aoData, fnCallback) {
@@ -69,6 +75,7 @@ $.otp.sequence = {
           url: sSource,
           data: aoData,
           scroller: {
+            boundaryScale: 1,
             loadingIndicator: true
           },
           error() {
@@ -77,8 +84,7 @@ $.otp.sequence = {
           success(json) {
             const result = json;
             $('#withdrawn_description').hide();
-            let i; let j; let rowData; let row; let
-              fastQC;
+            let i; let j; let rowData; let row; let fastQC;
             for (i = 0; i < json.aaData.length; i += 1) {
               row = json.aaData[i];
               if (row.fastQCFiles !== undefined) {

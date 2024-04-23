@@ -21,18 +21,23 @@
  */
 
 #sequenceTable {
+    td { white-space: nowrap; }
     td:nth-child(2) {
         max-width: 20ch;
     }
     td:nth-child(9) {
         max-width: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     td:nth-child(10) {
         min-width: 60px;
         max-width: 60px;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 }
 
-.content-box {
-    margin: 50px 12px 12px;
+#sequenceTable_processing {
+  z-index: -1;
 }

@@ -25,10 +25,11 @@ $.otp.showOrHideColumn = function () {
 
   return [{
     text: 'Show MixedInSpecies',
+    name: 'toggleMixedInSpecies',
     action() {
       const dt = $('#sequenceTable').dataTable().api();
       const column = dt.column(23);
-      const button = dt.button(1);
+      const button = dt.buttons('toggleMixedInSpecies:name');
       const toggledVisibility = !column.visible();
       column.visible(toggledVisibility);
       const newText = `${(toggledVisibility ? 'Hide' : 'Show')} MixedInSpecies`;

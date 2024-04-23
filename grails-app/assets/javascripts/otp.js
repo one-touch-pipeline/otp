@@ -371,7 +371,7 @@ $.otp.autorefresh = {
     });
   },
   /**
-   * Callback for AJAX request to enable/diasble auto-refresh
+   * Callback for AJAX request to enable/disable auto-refresh
    * @param data
    */
   ajaxHandler(data) {
@@ -421,17 +421,15 @@ $.otp.resizeBodyInit = function (table, margin) {
 /**
  * Generates a button for a CSV download in the DataTables.
  *
- * @param columnSelector, css selector for the columns to download
- * @param fileName, name of the file to download
- * @param beforeDownload, optional a function which should be performed before
- * the download is started. (requires a callback)
- * @returns {[{extend: string, exportOptions: {columns: string}, footer: boolean,
- * action: action, text: string, title: string}]}
+ * @param {string} columnSelector - CSS selector for the columns to download.
+ * @param {string} fileName - Name of the file to download.
+ * @param {Function} beforeDownload - Optional function to be performed before the download starts
+ * (requires a callback).
+ * @returns {[{extend: string, exportOptions: {columns: string}, footer: boolean, action: action,
+ * text: string, title: string}]} Array containing the button configuration.
  */
 // eslint-disable-next-line strict
-$.otp.getDownloadButton = (columnSelector, fileName, beforeDownload = (callback) => {
-  callback();
-}) => {
+$.otp.getDownloadButton = (columnSelector, fileName, beforeDownload = (callback) => { callback(); }) => {
   const defaultFileName = document.title.replaceAll(' ', '_');
   const date = new Date();
   const formattedDate = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1)
@@ -455,12 +453,12 @@ $.otp.getDownloadButton = (columnSelector, fileName, beforeDownload = (callback)
   }];
 };
 
-$.otp.getDownloadButtonServerSide = function (downloadLink) {
+$.otp.getDownloadButtonServerSide = function (downloadLink, buttonText) {
   'use strict';
 
   return [{
     extend: 'csv',
-    text: 'Download CSV',
+    text: buttonText,
     titleAttr: 'Attention: Download can take a while',
     action() {
       const iframe = document.createElement('iframe');

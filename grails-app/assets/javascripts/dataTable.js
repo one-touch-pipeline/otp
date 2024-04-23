@@ -22,6 +22,7 @@
 
 /** Contains the default settings for the dataTables with bootstrap */
 $.fn.dataTable.Buttons.defaults.dom.button.className = 'btn btn-primary';
+$.fn.dataTable.Buttons.defaults.dom.container.className = 'dt-buttons';
 $.extend(true, $.fn.dataTable.defaults, {
   language: {
     buttons: {

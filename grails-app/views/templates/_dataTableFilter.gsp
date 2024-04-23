@@ -27,7 +27,8 @@ To be used in conjunction with: common/DataTableFilter.js
 <%@ page import="java.time.Instant" %>
 <%@ page import="java.time.temporal.ChronoUnit" %>
 <div id="data-table-filter-container" class="rounded-page-header-box" style="display: table">
-    <h3 style="display: table-cell; vertical-align: middle"><g:message code="search.extended.header"/>:</h3>
+    <h4 style="display: table-cell; vertical-align: middle"><g:message code="search.extended.header"/>:</h4>
+
     <table style="display: table-cell" id="searchCriteriaTable">
         <tr class="dtf_row">
             <td class="attribute" style="width: 22ch">

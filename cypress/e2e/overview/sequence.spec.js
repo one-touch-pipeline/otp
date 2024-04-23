@@ -40,12 +40,26 @@ describe('Check statistics page', () => {
       cy.visit('/sequence/index');
 
       cy.get('#sequenceTable_processing').should('exist');
-      cy.get('div#sequenceTable_wrapper button').contains('Download').click();
+      cy.get('div#sequenceTable_wrapper button').contains('Download CSV').click();
       cy.checkDownloadByContent('Sequence_Export', '.csv', [
         'Project', 'Patient ID', 'Sample Type', 'Seq. Type', 'Sequencing Read Type', 'Single Cell', 'Sample Name',
         'Seq. Center', 'Library Prep. Kit', 'Antibody Target,', 'Run,', 'Lane,', 'Library,',
         'Single Cell Well Label', 'ILSe,', 'Known Issues', 'File Exists', 'File Archived', 'Date,',
         'Withdrawn,', 'Species Common Name', 'Scientific Name', 'Strain,', 'Mixed In Species']);
+    });
+
+    it('should download the sample swap template and verify the download', () => {
+      cy.visit('/sequence/index');
+
+      cy.get('#sequenceTable_processing').should('exist');
+      cy.get('div#sequenceTable_wrapper button').contains('Download Sample Swap Template').click();
+      cy.checkDownloadByContent('Sample_Swap_Template', '.csv', [
+        'Seq. Track ID', 'ILSe', 'Run', 'Lane', 'Single Cell Well Label',
+        'Project Old', 'Project New', 'Patient ID Old', 'Patient ID New',
+        'Sample Type Old', 'Sample Type New', 'Seq. Type Old', 'Seq. Type New',
+        'Sequencing Read Type', 'Single Cell',
+        'Sample Name Old', 'Sample Name New', 'Antibody Target Old', 'Antibody Target New'
+      ]);
     });
 
     it('should filter the table by sample type', () => {

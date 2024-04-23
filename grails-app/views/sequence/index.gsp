@@ -24,7 +24,6 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <meta name="layout" content="main"/>
     <title><g:message code="sequence.title"/></title>
     <asset:javascript src="common/DataTableFilter.js"/>
     <asset:javascript src="pages/sequence/index/datatable.js"/>
@@ -33,7 +32,7 @@
 </head>
 
 <body>
-<div class="content-box">
+<div class="m-3">
     <input type="hidden" id="showRunLinks" value="${showRunLinks}"/>
 
     <g:render template="/templates/dataTableFilter" model="[filterTree: filterTree]"/>
@@ -42,9 +41,7 @@
         <g:message code="sequence.information.withdrawn"/>
     </otp:annotation>
 
-    <div class="otpDataTables">
-        <otp:dataTable codes="${tableHeader}" id="sequenceTable"/>
-    </div>
+    <otp:dataTable codes="${tableHeader}" id="sequenceTable" classes="table table-sm table-striped table-hover table-bordered w-100"/>
 </div>
 </body>
 </html>

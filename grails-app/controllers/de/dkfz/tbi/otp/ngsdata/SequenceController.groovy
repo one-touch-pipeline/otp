@@ -43,9 +43,10 @@ class SequenceController {
     SecurityService securityService
 
     static allowedMethods = [
-            index          : "GET",
-            dataTableSource: "POST",
-            exportAll      : "GET",
+            index             : "GET",
+            dataTableSource   : "POST",
+            exportAll         : "GET",
+            sampleSwapTemplate: "GET",
     ]
 
     def index() {
@@ -158,7 +159,7 @@ class SequenceController {
                     row.sampleTypeName,
                     row.seqTypeDisplayName,
                     row.libraryLayout,
-                    row.singleCell,
+                    row.singleCell ?: "false",
                     row.sampleName,
                     row.seqCenterName,
                     row.libraryPreparationKit,
@@ -169,10 +170,10 @@ class SequenceController {
                     row.singleCellWellLabel,
                     row.ilseId,
                     row.problem?.name() ?: "",
-                    row.fileExists,
-                    row.fileArchived,
+                    row.fileExists ?: "false",
+                    row.fileArchived ?: "false",
                     TimeFormats.DATE.getFormattedDate(row.dateCreated),
-                    row.fileWithdrawn,
+                    row.fileWithdrawn ?: "false",
                     row.speciesCommonName,
                     row.scientificName,
                     row.strain,
@@ -186,6 +187,47 @@ class SequenceController {
         String content = "${contentHeader}\n${contentBody}\n"
         response.contentType = "application/octet-stream"
         response.setHeader("Content-disposition", "filename=Sequence_Export_" + currentDate + ".csv")
+        response.outputStream << content.toString().bytes
+    }
+
+    def sampleSwapTemplate(DataTableCommand cmd) {
+        SequenceFiltering filtering = SequenceFiltering.fromJSON(params.filtering)
+        String currentDate = TimeFormats.DATE.getFormattedDate(new Date())
+
+        List<Sequence> sequences = seqTrackService.listSequences(0, -1, cmd.sortOrder, SequenceColumn.fromDataTable(cmd.iSortCol_0), filtering)
+
+        String contentBody = sequences.collect { Sequence row ->
+            [
+                    row.seqTrackId,
+                    row.ilseId,
+                    row.name,
+                    row.laneId,
+                    row.singleCellWellLabel,
+                    row.projectName,
+                    "", // projectNew
+                    row.pid,
+                    "", // pidNew
+                    row.sampleTypeName,
+                    "", // sampleTypeNew
+                    row.seqTypeDisplayName,
+                    "", // seqTypeNew
+                    row.libraryLayout,
+                    row.singleCell ?: "false",
+                    row.sampleName,
+                    "", // sampleNameNew
+                    row.antibodyTarget,
+                    "", // antibodyTargetNew
+            ].collect { it ?: "" }.join(",")
+        }.join("\n")
+        String contentHeader = SampleSwapSequenceColumn.values()
+                .collectMany {
+                    return (it.duplicateColumnForSampleSwapTemplate) ?
+                            // adds suffix " Old" and a duplicated column with the suffix " New" for the sample swap template
+                            ["${g.message(code: it.message)} Old", "${g.message(code: it.message)} New"] : [g.message(code: it.message)]
+                }.join(',')
+        String content = "${contentHeader}\n${contentBody}\n"
+        response.contentType = "application/octet-stream"
+        response.setHeader("Content-disposition", "filename=Sample_Swap_Template_" + currentDate + ".csv")
         response.outputStream << content.toString().bytes
     }
 }
@@ -229,6 +271,29 @@ enum SequenceColumn {
         }
         return values()[column]
     }
+}
+
+@TupleConstructor
+enum SampleSwapSequenceColumn {
+    SEQ_TRACK("sequence.list.headers.seqTrack"),
+    ILSE_ID("sequence.list.headers.ilseId"),
+    RUN("sequence.list.headers.run"),
+    LANE("sequence.list.headers.lane"),
+    SINGLE_CELL_WELL_LABEL('sequence.list.headers.singleCellWellLabel'),
+
+    PROJECT("sequence.list.headers.project", true),
+    INDIVIDUAL("sequence.list.headers.individual", true),
+    SAMPLE_TYPE("sequence.list.headers.sampleType", true),
+    SEQ_TYPE("sequence.list.headers.seqType", true),
+
+    LIBRARY_LAYOUT("sequence.list.headers.sequencingReadType"),
+    SINGLE_CELL("sequence.list.headers.singleCell"),
+
+    SAMPLE_NAME("sequence.list.headers.sampleName", true),
+    ANTIBODY_TARGET("sequence.list.headers.antibodyTarget", true),
+
+    final String message
+    final Boolean duplicateColumnForSampleSwapTemplate
 }
 
 /**
