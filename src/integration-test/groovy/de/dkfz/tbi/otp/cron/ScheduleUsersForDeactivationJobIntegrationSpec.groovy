@@ -52,36 +52,48 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
         ScheduleUsersForDeactivationJob job = new ScheduleUsersForDeactivationJob()
 
         User userA = createUser()
-        User userB = createUser()
-        User userC = createUser()
-        [
-                [userA, true],
-                [userA, true],
-                [userA, false],
-                [userB, true],
-                [userC, false],
-        ].each { List<?> properties ->
-            createUserProjectRole(
-                    user: properties[0],
-                    enabled: properties[1],
-            )
-        }
+        createUserProjectRole([
+                user   : userA,
+                enabled: true,
+        ])
+        createUserProjectRole([
+                user   : userA,
+                enabled: true,
+        ])
+        createUserProjectRole([
+                user   : userA,
+                enabled: false,
+        ])
 
-        List<User> result
+        User userB = createUser()
+        createUserProjectRole([
+                user   : userB,
+                enabled: true,
+        ])
+        User userC = createUser()
+        createUserProjectRole([
+                user   : userC,
+                enabled: false,
+        ])
+        createUserProjectRole([
+                user   : userC,
+                enabled: true,
+                project: createProject([state: Project.State.DELETED]),
+        ])
 
         when:
-        result = job.usersToCheckForDeactivation
+        List<User> result = job.usersToCheckForDeactivation
 
         then:
         TestCase.assertContainSame([userA, userB], result)
     }
 
-    void "getPlannedDeactivationDate, is now + the offset defined in LDAP_ACCOUNT_DEACTIVATION_GRACE_PERIOD"() {
+    void "getPlannedDeactivationDate adds the offset defined in LDAP_ACCOUNT_DEACTIVATION_GRACE_PERIOD"() {
         given:
         int offset = 10
         ScheduleUsersForDeactivationJob job = new ScheduleUsersForDeactivationJob([
                 processingOptionService: new ProcessingOptionService(),
-                configService: Mock(TestConfigService) {
+                configService          : Mock(TestConfigService) {
                     _ * getClock() >> { return Clock.fixed(Instant.ofEpochSecond(0), ZoneId.systemDefault()) }
                     _ * getTimeZoneId() >> { ZoneId.systemDefault() }
                 },
@@ -97,7 +109,7 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
         result.time == offset * 24 * 60 * 60 * 1000
     }
 
-    void "resetPlannedDeactivationDateOfUser, sets plannedDeactivationDate to null"() {
+    void "resetPlannedDeactivationDateOfUser sets plannedDeactivationDate to null"() {
         given:
         ScheduleUsersForDeactivationJob job = new ScheduleUsersForDeactivationJob(
                 userService: new UserService(),
@@ -157,9 +169,9 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
                     _ * getClock() >> { return Clock.fixed(Instant.ofEpochSecond(0), ZoneId.systemDefault()) }
                     _ * getTimeZoneId() >> { ZoneId.systemDefault() }
                 },
-                mailHelperService: Mock(MailHelperService) {
-                    2 * saveMail(_, _, _) >> { }
-                    1 * saveMail(_, _) >> { }
+                mailHelperService      : Mock(MailHelperService) {
+                    2 * saveMail(_, _, _)
+                    1 * saveMail(_, _)
                 },
         ])
         Map<User, Set<UserProjectRole>> map = [
@@ -183,7 +195,7 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
                 messageSourceService   : Mock(MessageSourceService) {
                     _ * createMessage(_) { return "message" }
                 },
-                linkGenerator: Mock(LinkGenerator),
+                linkGenerator          : Mock(LinkGenerator),
         ])
         List<Project> projects = [createProject(), createProject(), createProject()]
         User user = createUser()
@@ -199,8 +211,8 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
                 (projectAuthorityA): [projects[0], projects[1], projects[2]],
                 (projectAuthorityB): [projects[1]],
         ]
-        1 * job.mailHelperService.saveMail(_, _, [projectAuthorityA.email], [user.email]) >> { }
-        1 * job.mailHelperService.saveMail(_, _, [projectAuthorityB.email], [user.email]) >> { }
+        1 * job.mailHelperService.saveMail(_, _, [projectAuthorityA.email], [user.email])
+        1 * job.mailHelperService.saveMail(_, _, [projectAuthorityB.email], [user.email])
     }
 
     void "buildActionPlan, correctly groups users"() {
@@ -209,7 +221,7 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
         List<User> expiredUsers = []
         ScheduleUsersForDeactivationJob job = new ScheduleUsersForDeactivationJob([
                 processingOptionService: new ProcessingOptionService(),
-                identityProvider: Mock(IdentityProvider) {
+                identityProvider       : Mock(IdentityProvider) {
                     _ * isUserDeactivated(_) >> { User user ->
                         return user in expiredUsers
                     }
@@ -291,8 +303,8 @@ class ScheduleUsersForDeactivationJobIntegrationSpec extends Specification imple
                     _ * getTimeZoneId() >> { ZoneId.systemDefault() }
                 },
                 mailHelperService      : Mock(MailHelperService) {
-                    1 * saveMail(_, _, _) >> { }
-                    1 * saveMail(_, _) >> { }
+                    1 * saveMail(_, _, _)
+                    1 * saveMail(_, _)
                 },
                 userService            : new UserService(),
                 userProjectRoleService : new UserProjectRoleService(),

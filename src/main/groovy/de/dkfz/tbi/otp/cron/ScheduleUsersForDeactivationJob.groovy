@@ -81,6 +81,9 @@ class ScheduleUsersForDeactivationJob extends AbstractScheduledJob {
     List<User> getUsersToCheckForDeactivation() {
         List<User> enabledProjectUsers = UserProjectRole.withCriteria {
             eq("enabled", true)
+            project {
+                ne('state', Project.State.DELETED)
+            }
             user {
                 isNotNull("username")
             }

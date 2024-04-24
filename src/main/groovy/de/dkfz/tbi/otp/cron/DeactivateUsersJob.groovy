@@ -143,7 +143,7 @@ class DeactivateUsersJob extends AbstractScheduledJob {
     void disableUserAndNotify(User user) {
         log.info("Disable user ${user} with deactivation date ${user.plannedDeactivationDate}")
         Set<UserProjectRole> affectedGroups = [] as Set<UserProjectRole>
-        UserProjectRole.findAllByUserAndEnabled(user, true).each { UserProjectRole userProjectRole ->
+        getUserProjectRolesToDeactivate(user).each { UserProjectRole userProjectRole ->
             userProjectRoleService.doSetEnabled(userProjectRole, false)
             if (isInGroup(user, userProjectRole.project.unixGroup)) {
                 affectedGroups.add(userProjectRole)
@@ -152,6 +152,16 @@ class DeactivateUsersJob extends AbstractScheduledJob {
         userService.setPlannedDeactivationDateOfUser(user, null)
         notifyProjectAuthoritiesOfUsersProjects(user)
         notifyAdministration(user, affectedGroups)
+    }
+
+    List<UserProjectRole> getUserProjectRolesToDeactivate(User user) {
+        return UserProjectRole.createCriteria().list {
+            eq('user', user)
+            eq('enabled', true)
+            project {
+                ne('state', Project.State.DELETED)
+            }
+        } as List<UserProjectRole>
     }
 
     @Override

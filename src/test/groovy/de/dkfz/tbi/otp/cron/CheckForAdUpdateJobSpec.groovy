@@ -22,10 +22,10 @@
 package de.dkfz.tbi.otp.cron
 
 import grails.testing.gorm.DataTest
-import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.config.ConfigService
@@ -48,26 +48,19 @@ class CheckForAdUpdateJobSpec extends Specification implements DataTest, DomainF
         ]
     }
 
-    @Ignore
     @Unroll
     void "fileAccessChangeRequested, when enabled '#enabled', accessToFiles: #accessToFiles, fileAccessChangeRequested: #fileAccessChangeRequested, groups: #groups, then callCount: #callCount and expectedFileAccessChangeRequested: #expectedFileAccessChangeRequested"() {
         given:
         UserProjectRole role = DomainFactory.createUserProjectRole([
-                user                     : DomainFactory.createUser([
-                        enabled: enabled,
-                ]),
-                project                  : createProject([
-                        unixGroup: UNIX_GROUP,
-                ]),
+                user                     : DomainFactory.createUser([enabled: enabled,]),
+                project                  : createProject([unixGroup: UNIX_GROUP, state: projectState]),
                 accessToFiles            : accessToFiles,
                 fileAccessChangeRequested: fileAccessChangeRequested,
         ])
         CheckForAdUpdateJob job = new CheckForAdUpdateJob([
                 identityProvider: Mock(IdentityProvider) {
                     callCount * getIdpUserDetailsByUsername(_) >> {
-                        new IdpUserDetails([
-                                memberOfGroupList: groups
-                        ])
+                        new IdpUserDetails([memberOfGroupList: groups])
                     }
                 }
         ])
@@ -79,45 +72,47 @@ class CheckForAdUpdateJobSpec extends Specification implements DataTest, DomainF
         role.fileAccessChangeRequested == expectedFileAccessChangeRequested
 
         where:
-        enabled | accessToFiles | fileAccessChangeRequested | groups       || callCount | expectedFileAccessChangeRequested
-        true    | true          | false                     | [UNIX_GROUP] || 0         | false
-        true    | true          | false                     | ['abc']      || 0         | false
-        true    | true          | false                     | []           || 0         | false
-        true    | true          | true                      | [UNIX_GROUP] || 1         | false
-        true    | true          | true                      | ['abc']      || 1         | true
-        true    | true          | true                      | []           || 1         | true
+        enabled | accessToFiles | fileAccessChangeRequested | groups       || callCount | expectedFileAccessChangeRequested | projectState
+        true    | true          | false                     | [UNIX_GROUP] || 0         | false                             | Project.State.OPEN
+        true    | true          | false                     | ['abc']      || 0         | false                             | Project.State.OPEN
+        true    | true          | false                     | []           || 0         | false                             | Project.State.OPEN
+        true    | true          | true                      | [UNIX_GROUP] || 1         | false                             | Project.State.OPEN
+        true    | true          | true                      | ['abc']      || 1         | true                              | Project.State.OPEN
+        true    | true          | true                      | []           || 1         | true                              | Project.State.OPEN
 
-        true    | false         | false                     | [UNIX_GROUP] || 0         | false
-        true    | false         | false                     | ['abc']      || 0         | false
-        true    | false         | false                     | []           || 0         | false
-        true    | false         | true                      | [UNIX_GROUP] || 1         | true
-        true    | false         | true                      | ['abc']      || 1         | false
-        true    | false         | true                      | []           || 1         | false
+        true    | false         | false                     | [UNIX_GROUP] || 0         | false                             | Project.State.OPEN
+        true    | false         | false                     | ['abc']      || 0         | false                             | Project.State.OPEN
+        true    | false         | false                     | []           || 0         | false                             | Project.State.OPEN
+        true    | false         | true                      | [UNIX_GROUP] || 1         | true                              | Project.State.OPEN
+        true    | false         | true                      | ['abc']      || 1         | false                             | Project.State.OPEN
+        true    | false         | true                      | []           || 1         | false                             | Project.State.OPEN
 
-        false   | true          | false                     | [UNIX_GROUP] || 0         | false
-        false   | true          | false                     | ['abc']      || 0         | false
-        false   | true          | false                     | []           || 0         | false
-        false   | true          | true                      | [UNIX_GROUP] || 1         | true
-        false   | true          | true                      | ['abc']      || 1         | false
-        false   | true          | true                      | []           || 1         | false
+        false   | true          | false                     | [UNIX_GROUP] || 0         | false                             | Project.State.OPEN
+        false   | true          | false                     | ['abc']      || 0         | false                             | Project.State.OPEN
+        false   | true          | false                     | []           || 0         | false                             | Project.State.OPEN
+        false   | true          | true                      | [UNIX_GROUP] || 1         | true                              | Project.State.OPEN
+        false   | true          | true                      | ['abc']      || 1         | false                             | Project.State.OPEN
+        false   | true          | true                      | []           || 1         | false                             | Project.State.OPEN
 
-        false   | false         | false                     | [UNIX_GROUP] || 0         | false
-        false   | false         | false                     | ['abc']      || 0         | false
-        false   | false         | false                     | []           || 0         | false
-        false   | false         | true                      | [UNIX_GROUP] || 1         | true
-        false   | false         | true                      | ['abc']      || 1         | false
-        false   | false         | true                      | []           || 1         | false
+        false   | false         | false                     | [UNIX_GROUP] || 0         | false                             | Project.State.OPEN
+        false   | false         | false                     | ['abc']      || 0         | false                             | Project.State.OPEN
+        false   | false         | false                     | []           || 0         | false                             | Project.State.OPEN
+        false   | false         | true                      | [UNIX_GROUP] || 1         | true                              | Project.State.OPEN
+        false   | false         | true                      | ['abc']      || 1         | false                             | Project.State.OPEN
+        false   | false         | true                      | []           || 1         | false                             | Project.State.OPEN
+
+        true    | true          | false                     | [UNIX_GROUP] || 0         | false                             | Project.State.DELETED
     }
 
     @Unroll
     void "scheduledJobRunPreconditionsMet, when ldapEnabled is #ldapEnabled and jobSystem is #jobSystem, then expected is #expected"() {
         given:
         CheckForAdUpdateJob job = new CheckForAdUpdateJob([
-                configService   : Mock(ConfigService) {
+                configService          : Mock(ConfigService) {
                     _ * getLdapEnabled() >> ldapEnabled
                     0 * _
                 },
-                schedulerService: Mock(SchedulerService) {
+                schedulerService       : Mock(SchedulerService) {
                     _ * isActive() >> jobSystem
                     0 * _
                 },

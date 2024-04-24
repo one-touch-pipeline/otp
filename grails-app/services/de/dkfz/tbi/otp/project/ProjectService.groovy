@@ -717,7 +717,7 @@ echo 'OK'
      * It checks
      *      - whether a unixGroup has invalid chars
      *      - whether a unixGroup exists on the cluster
-     *      - whether a unixGroup is shared by another project
+     *      - whether a unixGroup is shared by another project that is not deleted
      *
      * @param unixGroup to check
      * @throws UnixGroupException if a validation fails
@@ -727,7 +727,7 @@ echo 'OK'
             throw new UnixGroupIsInvalidException("The unixGroup '${unixGroup}' contains invalid characters.")
         }
 
-        if (Project.countByUnixGroup(unixGroup) > 0) {
+        if (Project.countByUnixGroupAndStateNotInList(unixGroup, [Project.State.DELETED]) > 0) {
             throw new UnixGroupIsSharedException("Unix group ${unixGroup} is already used in another project.")
         }
 
@@ -788,7 +788,7 @@ echo 'OK'
     }
 
     Map<String, List<Project>> getAllProjectsWithSharedUnixGroup() {
-        return Project.list().groupBy { Project project ->
+        return Project.findAllByStateNotInList([Project.State.DELETED]).groupBy { Project project ->
             project.unixGroup
         }.findAll { String unixGroup, List<Project> projects ->
             projects.size() > 1
@@ -837,7 +837,7 @@ echo 'OK'
     }
 
     Map<Project, List<User>> getExpiredProjectsWithPIs() {
-        List<Project> projects = Project.findAllByStorageUntilLessThan(LocalDate.now())
+        List<Project> projects = Project.findAllByStorageUntilLessThanAndStateNotInList(LocalDate.now(), [Project.State.DELETED, Project.State.ARCHIVED])
 
         if (projects.empty) {
             return [:]

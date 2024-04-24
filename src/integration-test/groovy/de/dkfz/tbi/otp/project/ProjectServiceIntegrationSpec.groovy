@@ -1328,12 +1328,14 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
     }
 
-    void "getExpiredProjectsWithPIs, when all projects are not expired, it should return an empty map"() {
+    void "getExpiredProjectsWithPIs, when all projects are not expired or deleted or archived, it should return an empty map"() {
         given:
         setupData()
         createProject([storageUntil: LocalDate.of(3000, 1, 1)])
         createProject([storageUntil: LocalDate.of(3010, 2, 2)])
         createProject([storageUntil: LocalDate.of(3020, 3, 3)])
+        createProject([storageUntil: LocalDate.of(1970, 1, 1), state: Project.State.DELETED])
+        createProject([storageUntil: LocalDate.of(1970, 1, 1), state: Project.State.ARCHIVED])
 
         when:
         Map<Project, List<User>> projectUsers = projectService.expiredProjectsWithPIs

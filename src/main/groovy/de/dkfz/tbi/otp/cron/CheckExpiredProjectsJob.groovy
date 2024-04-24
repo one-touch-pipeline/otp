@@ -36,7 +36,7 @@ import java.time.LocalDate
 @CompileDynamic
 @Component
 @Slf4j
-class CheckExpiredProjects extends AbstractScheduledJob {
+class CheckExpiredProjectsJob extends AbstractScheduledJob {
 
     @Autowired
     ProjectService projectService
@@ -65,7 +65,7 @@ class CheckExpiredProjects extends AbstractScheduledJob {
             List<String> expProjectsTable = ["project\texpired on\tPIs"]
             expProjectsTable += expiredProjects.collect { Project project, List<User> users ->
                 String userString = users.collect { "${it.realName} (${it.email})" }.join(", ")
-                return "${project.name}\t${project.storageUntil}\t${userString}"
+                return "${project.name}\t${project.storageUntil}\t${userString}" as String
             }
 
             String subject = messageSourceService.createMessage("notification.cron.expiredProjects.subject", [:])

@@ -86,10 +86,10 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
                     _ * findOptionAsString(_) { return "option" }
                     _ * findOptionAsLong(_) { return 0L }
                 },
-                mailHelperService: Mock(MailHelperService) {
+                mailHelperService      : Mock(MailHelperService) {
                     1 * saveMail({ it.contains(expectedContent) }, _)
                 },
-                userProjectRoleService: Mock(UserProjectRoleService) {
+                userProjectRoleService : Mock(UserProjectRoleService) {
                     _ * executeOrNotify(_, _) >> { return new UserProjectRoleService.CommandAndResult("removal command", p) }
                 },
         ])
@@ -134,10 +134,10 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
                 (projectAuthority1): [projects[0], projects[1]],
                 (projectAuthority2): [projects[1], projects[2]],
         ]
-        2 * job.messageSourceService.createMessage("deactivateUsersJob.notification.userDeactivated.subject" , _) >> subject
+        2 * job.messageSourceService.createMessage("deactivateUsersJob.notification.userDeactivated.subject", _) >> subject
         2 * job.messageSourceService.createMessage("deactivateUsersJob.notification.userDeactivated.body", _) >> body
-        1 * job.mailHelperService.saveMail(subject, body, [projectAuthority1.email], [user.email]) >> { }
-        1 * job.mailHelperService.saveMail(subject, body, [projectAuthority2.email], [user.email]) >> { }
+        1 * job.mailHelperService.saveMail(subject, body, [projectAuthority1.email], [user.email])
+        1 * job.mailHelperService.saveMail(subject, body, [projectAuthority2.email], [user.email])
         0 * job.mailHelperService.saveMail(_)
     }
 
@@ -148,14 +148,14 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
                     _ * findOptionAsString(_) { return "option" }
                     _ * findOptionAsLong(_) { return 0L }
                 },
-                identityProvider: Mock(IdentityProvider) {
+                identityProvider       : Mock(IdentityProvider) {
                     _ * getGroupsOfUser(_) >> { return ["group"] }
                 },
-                userService: new UserService(),
-                mailHelperService: Mock(MailHelperService) {
+                userService            : new UserService(),
+                mailHelperService      : Mock(MailHelperService) {
                     1 * saveMail(_, _)
                 },
-                userProjectRoleService: new UserProjectRoleService(),
+                userProjectRoleService : new UserProjectRoleService(),
         ])
         job.userProjectRoleService.identityProvider = Mock(IdentityProvider) {
             isUserInIdpAndActivated(_) >> false
@@ -181,6 +181,42 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
         user.plannedDeactivationDate == null
     }
 
+    void "disableUserAndNotify, disables user roles only for not deleted projects"() {
+        given:
+        DeactivateUsersJob job = new DeactivateUsersJob([
+                processingOptionService: Mock(ProcessingOptionService) {
+                    _ * findOptionAsString(_) { return "option" }
+                    _ * findOptionAsLong(_) { return 0L }
+                    0 * _
+                },
+                identityProvider       : Mock(IdentityProvider) {
+                    _ * getGroupsOfUser(_) >> { return ["group"] }
+                    0 * _
+                },
+                userService            : new UserService(),
+                mailHelperService      : Mock(MailHelperService) {
+                    1 * saveMail(_, _)
+                    0 * _
+                },
+                userProjectRoleService : new UserProjectRoleService(),
+        ])
+        job.userProjectRoleService.identityProvider = Mock(IdentityProvider) {
+            _ * isUserInIdpAndActivated(_) >> false
+            0 * _
+        }
+
+        User user = createUser()
+        createUserProjectRole([user: user, project: createProject(state: Project.State.DELETED)])
+        createUserProjectRole([user: user])
+        createUserProjectRole([user: user, enabled: false, accessToOtp: false, receivesNotifications: false])
+
+        when:
+        job.disableUserAndNotify(user)
+
+        then:
+        UserProjectRole.findAllByEnabled(false).size() == 2
+    }
+
     @Unroll
     void "wrappedExecute, calls disableUserAndNotify for all users found by getUsersToCheck"() {
         given:
@@ -189,14 +225,14 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
                     _ * findOptionAsString(_) { return "option" }
                     _ * findOptionAsLong(_) { return 0L }
                 },
-                identityProvider: Mock(IdentityProvider) {
+                identityProvider       : Mock(IdentityProvider) {
                     1 * getGroupsOfUser(_) >> { return ["group"] }
                 },
-                userService: new UserService(),
-                mailHelperService: Mock(MailHelperService) {
+                userService            : new UserService(),
+                mailHelperService      : Mock(MailHelperService) {
                     1 * saveMail(_, _)
                 },
-                userProjectRoleService: new UserProjectRoleService(),
+                userProjectRoleService : new UserProjectRoleService(),
         ])
         job.userProjectRoleService.identityProvider = Mock(IdentityProvider)
 
@@ -210,9 +246,9 @@ class DeactivateUsersJobIntegrationSpec extends Specification implements DomainF
 
         User userA = createUserWithProjectsHelper("username.a", -1)
         List<User> untouchedUsers = [
-            createUserWithProjectsHelper("username.b", +1),
-            createUserWithProjectsHelper(null, -1),
-            createUserWithProjectsHelper(null, +1),
+                createUserWithProjectsHelper("username.b", +1),
+                createUserWithProjectsHelper(null, -1),
+                createUserWithProjectsHelper(null, +1),
         ]
 
         when:

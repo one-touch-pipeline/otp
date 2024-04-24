@@ -82,7 +82,12 @@ class CheckFileAccessInconsistenciesJob extends AbstractScheduledJob {
             [(it.username): it]
         }
 
-        UserProjectRole.findAllByUserInList(userList).each { UserProjectRole userProjectRole ->
+        UserProjectRole.createCriteria().list {
+            'in'('user', userList)
+            project {
+                ne('state', Project.State.DELETED)
+            }
+        }.each { UserProjectRole userProjectRole ->
             User user = userProjectRole.user
             Project project = userProjectRole.project
 

@@ -26,6 +26,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.config.ConfigService
@@ -58,9 +59,9 @@ class CheckForAdUpdateJob extends AbstractScheduledJob {
 
         checkingUserProjectRoles.groupBy {
             it.user
-        }.each { User user, List<UserProjectRole> userProjectRoleService ->
+        }.each { User user, List<UserProjectRole> userProjectRoles ->
             IdpUserDetails idpUserDetails = identityProvider.getIdpUserDetailsByUsername(user.username)
-            userProjectRoleService.each { UserProjectRole userProjectRole ->
+            userProjectRoles.each { UserProjectRole userProjectRole ->
                 if ((userProjectRole.accessToFiles && userProjectRole.user.enabled) ==
                         (idpUserDetails && idpUserDetails.memberOfGroupList?.contains(userProjectRole.project.unixGroup))) {
                     log.debug("File access of user ${user} in project ${userProjectRole.project.name} now matches the target")
@@ -76,6 +77,11 @@ class CheckForAdUpdateJob extends AbstractScheduledJob {
     }
 
     private List<UserProjectRole> userProjectRolesToCheck() {
-        return UserProjectRole.findAllByFileAccessChangeRequested(true)
+        return UserProjectRole.createCriteria().list {
+            eq('fileAccessChangeRequested', true)
+            project {
+                ne('state', Project.State.DELETED)
+            }
+        } as List<UserProjectRole>
     }
 }

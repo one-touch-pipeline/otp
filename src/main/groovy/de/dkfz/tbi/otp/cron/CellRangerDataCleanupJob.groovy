@@ -69,7 +69,7 @@ class CellRangerDataCleanupJob extends AbstractScheduledJob {
 
     @Override
     void wrappedExecute() {
-        checkAndNotifyUncategorisedResults()
+        checkAndNotifyUncategorizedResults()
         notifyAndDeletion()
         deleteOfOldFailedWorkflows()
     }
@@ -122,7 +122,7 @@ class CellRangerDataCleanupJob extends AbstractScheduledJob {
         }
     }
 
-    void checkAndNotifyUncategorisedResults() {
+    void checkAndNotifyUncategorizedResults() {
         resultsNeedingReminder.groupBy { CellRangerMergingWorkPackage mwp ->
             mwp.project
         }.each { Project project, List<CellRangerMergingWorkPackage> cellRangerMwps ->
@@ -137,6 +137,13 @@ class CellRangerDataCleanupJob extends AbstractScheduledJob {
                 eq("status", CellRangerMergingWorkPackage.Status.UNSET)
                 isNull("informed")
                 isNotNull('bamFileInProjectFolder')
+                sample {
+                    individual {
+                        project {
+                            not { 'in'('state', [Project.State.DELETED, Project.State.ARCHIVED]) }
+                        }
+                    }
+                }
             }
             eq("fileOperationStatus", AbstractBamFile.FileOperationStatus.PROCESSED)
             lt("lastUpdated", reminderDeadline)
@@ -225,6 +232,15 @@ class CellRangerDataCleanupJob extends AbstractScheduledJob {
             lt("informed", deletionDeadline)
             isNotNull("informed")
             isNotNull('bamFileInProjectFolder')
+            sample {
+                individual {
+                    project {
+                        not {
+                            'in'('state', [Project.State.DELETED, Project.State.ARCHIVED])
+                        }
+                    }
+                }
+            }
         } as List<CellRangerMergingWorkPackage>
     }
 

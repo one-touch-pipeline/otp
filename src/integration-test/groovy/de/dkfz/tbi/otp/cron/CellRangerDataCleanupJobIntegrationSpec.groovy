@@ -168,7 +168,7 @@ class CellRangerDataCleanupJobIntegrationSpec extends Specification implements C
         type << CellRangerDataCleanupJob.InformationType.findAll()
     }
 
-    void "getResultsToDelete, only deletes too old mwps"() {
+    void "getResultsToDelete, only deletes too old mwps where the project is neither archived nor deleted"() {
         given:
         setupData()
 
@@ -190,13 +190,17 @@ class CellRangerDataCleanupJobIntegrationSpec extends Specification implements C
                 [DELETED, null, 1, true],
                 [DELETED, null, -1, true],
                 [UNSET, 1, 1, false], // not expected, since workflow has not run through
+                [UNSET, 1, 1, true, Project.State.DELETED],
+                [UNSET, 1, 1, true, Project.State.ARCHIVED],
         ].collect { List it ->
+            Sample sample = createSample(individual: createIndividual(project: createProject([state: it[4] ?: Project.State.OPEN])))
             createCellRangerMwpHelper(
                     it[0] as CellRangerMergingWorkPackage.Status,
                     baseDate,
                     it[1] ? DELETION_DAYS + (it[1] as Integer) : null,
                     it[2] ? DELETION_DAYS + REMINDER_DAYS + (it[2] as Integer) : null,
-                    it[3],
+                    it[3] as boolean,
+                    [sample: sample],
             )
         }
 
@@ -204,7 +208,7 @@ class CellRangerDataCleanupJobIntegrationSpec extends Specification implements C
         TestCase.assertContainSame(cellRangerDataCleanupJob.resultsToDelete, [mwps[0]])
     }
 
-    void "getResultsNeedingReminder, only finds undecided mwps older than the deadline"() {
+    void "getResultsNeedingReminder, only finds undecided mwps older than the deadline for projects that are neither deleted nor archived"() {
         given:
         setupData()
 
@@ -223,13 +227,17 @@ class CellRangerDataCleanupJobIntegrationSpec extends Specification implements C
                 [DELETED, null, -1, true],
                 [UNSET, null, 1, false],
                 [UNSET, null, -1, false],
+                [UNSET, null, 1, true, Project.State.DELETED],
+                [UNSET, null, 1, true, Project.State.ARCHIVED],
         ].collect { List it ->
+            Sample sample = createSample(individual: createIndividual(project: createProject([state: it[4] ?: Project.State.OPEN])))
             createCellRangerMwpHelper(
                     it[0] as CellRangerMergingWorkPackage.Status,
                     baseDate,
                     it[1] as Integer,
                     it[2] ? REMINDER_DAYS + (it[2] as Integer) : null,
-                    it[3],
+                    it[3] as boolean,
+                    [sample: sample],
             )
         }
 
@@ -391,7 +399,7 @@ class CellRangerDataCleanupJobIntegrationSpec extends Specification implements C
                     baseDate,
                     it[1] ? REMINDER_DAYS + (it[1] as Integer) : null,
                     it[2] ? DELETION_DAYS + REMINDER_DAYS + (it[2] as Integer) : null,
-                    it[3],
+                    it[3] as boolean,
             )
         }
 
@@ -468,7 +476,7 @@ class CellRangerDataCleanupJobIntegrationSpec extends Specification implements C
         CellRangerMergingWorkPackage crmwp3 = createMwpToBeNotifiedForProject(project2)
 
         when:
-        cellRangerDataCleanupJob.checkAndNotifyUncategorisedResults()
+        cellRangerDataCleanupJob.checkAndNotifyUncategorizedResults()
 
         then:
         1 * cellRangerDataCleanupJob.messageSourceService.createMessage("cellRanger.notification.${CellRangerDataCleanupJob.InformationType.REMINDER}." +

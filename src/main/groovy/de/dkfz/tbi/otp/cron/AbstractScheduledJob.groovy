@@ -49,7 +49,7 @@ abstract class AbstractScheduledJob {
             GenerateAndSendKPIsForNBI,
             FetchUserDataFromLdapJob,
             CheckFileAccessInconsistenciesJob,
-            CheckExpiredProjects,
+            CheckExpiredProjectsJob,
             DeleteOldMailsJob,
     ]
 

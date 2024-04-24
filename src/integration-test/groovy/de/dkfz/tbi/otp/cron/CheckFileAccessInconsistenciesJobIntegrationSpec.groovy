@@ -62,6 +62,7 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
         Project testProject = createProject([
                 name     : PROJECT_NAME_TEST,
                 unixGroup: UNIX_GROUP_PROJECT,
+                state    : projectState,
         ])
 
         createUserProjectRole([
@@ -81,7 +82,7 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
 
         CheckFileAccessInconsistenciesJob job = new CheckFileAccessInconsistenciesJob([
                 processingOptionService: new ProcessingOptionService(),
-                identityProvider: Mock(IdentityProvider) {
+                identityProvider       : Mock(IdentityProvider) {
                     1 * getIdpUserDetailsByUserList(_) >> [idpUserDetails,]
                     1 * isUserDeactivated(_) >> ldapDisabled
                     0 * _
@@ -107,20 +108,79 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
         noExceptionThrown()
 
         where:
-        name                                                    | fileAcessOtp | fileAccessLdap | fileAccessChangeRequested | otpEnabled | projectEnabled | ldapDisabled || mailCount | accessCount
-        'access in otp and ldap, no change request'             | true         | true           | true                      | true       | true           | false        || 0         | 0
-        'access in otp and ldap, but change request'            | true         | true           | false                     | true       | true           | false        || 0         | 0
-        'access in otp but not in ldap, no change request'      | true         | false          | true                      | true       | true           | false        || 1         | 0
-        'access in otp but not in ldap, but change request'     | true         | false          | false                     | true       | true           | false        || 0         | 1
-        'access in ldap and not in otp, no change request'      | false        | true           | true                      | true       | true           | false        || 1         | 0
-        'access in ldap and not in otp, but change request'     | false        | true           | false                     | true       | true           | false        || 1         | 0
-        'no file access in otp nor in ldap, no change request'  | false        | false          | true                      | true       | true           | false        || 0         | 0
-        'no file access in otp nor in ldap, but change request' | false        | false          | false                     | true       | true           | false        || 0         | 0
+        name                                                    | fileAcessOtp | fileAccessLdap | fileAccessChangeRequested | otpEnabled | projectEnabled | projectState       | ldapDisabled || mailCount | accessCount
+        'access in otp and ldap, no change request'             | true         | true           | true                      | true       | true           | Project.State.OPEN | false        || 0         | 0
+        'access in otp and ldap, but change request'            | true         | true           | false                     | true       | true           | Project.State.OPEN | false        || 0         | 0
+        'access in otp but not in ldap, no change request'      | true         | false          | true                      | true       | true           | Project.State.OPEN | false        || 1         | 0
+        'access in otp but not in ldap, but change request'     | true         | false          | false                     | true       | true           | Project.State.OPEN | false        || 0         | 1
+        'access in ldap and not in otp, no change request'      | false        | true           | true                      | true       | true           | Project.State.OPEN | false        || 1         | 0
+        'access in ldap and not in otp, but change request'     | false        | true           | false                     | true       | true           | Project.State.OPEN | false        || 1         | 0
+        'no file access in otp nor in ldap, no change request'  | false        | false          | true                      | true       | true           | Project.State.OPEN | false        || 0         | 0
+        'no file access in otp nor in ldap, but change request' | false        | false          | false                     | true       | true           | Project.State.OPEN | false        || 0         | 0
         // some special cases
-        'send mail also if disabled in otp'                     | false        | true           | true                      | false      | true           | false        || 1         | 0
-        'send mail also if disabled in project'                 | false        | true           | true                      | true       | false          | false        || 1         | 0
-        'send mail also if disabled in ldap'                    | false        | true           | true                      | true       | true           | true         || 1         | 0
+        'send mail also if disabled in otp'                     | false        | true           | true                      | false      | true           | Project.State.OPEN | false        || 1         | 0
+        'send mail also if disabled in project'                 | false        | true           | true                      | true       | false          | Project.State.OPEN | false        || 1         | 0
+        'send mail also if disabled in ldap'                    | false        | true           | true                      | true       | true           | Project.State.OPEN | true         || 1         | 0
 
         mailSending = mailCount ? 'send mail' : 'do not send mail'
+    }
+
+    void "wrappedExecute, should not be executed when project is deleted"() {
+        given:
+        User systemUser = createUser()
+        findOrCreateProcessingOption(ProcessingOption.OptionName.OTP_SYSTEM_USER, systemUser.username)
+
+        IdpUserDetails idpUserDetails = new IdpUserDetails([
+                username         : USER_ACCOUNT,
+                realName         : USER_REAL_NAME,
+                mail             : USER_EMAIL,
+                memberOfGroupList: [UNIX_GROUP_PROJECT],
+        ])
+
+        User testUser = createUser([
+                username: USER_ACCOUNT,
+                realName: USER_REAL_NAME,
+                email   : USER_EMAIL,
+                enabled : true,
+        ])
+        Project testProject = createProject([
+                name     : PROJECT_NAME_TEST,
+                unixGroup: UNIX_GROUP_PROJECT,
+                state    : Project.State.DELETED,
+        ])
+
+        createUserProjectRole([
+                project                  : testProject,
+                user                     : testUser,
+                enabled                  : true,
+                accessToFiles            : true,
+                fileAccessChangeRequested: true,
+        ])
+
+        CheckFileAccessInconsistenciesJob job = new CheckFileAccessInconsistenciesJob([
+                identityProvider       : Mock(IdentityProvider) {
+                    1 * getIdpUserDetailsByUserList(_) >> [idpUserDetails]
+                    0 * _
+                },
+                processingOptionService: new ProcessingOptionService(),
+                mailHelperService      : Mock(MailHelperService) {
+                    0 * saveMail(_, _) >> { String subject, String body ->
+                        assert subject.startsWith(CheckFileAccessInconsistenciesJob.SUBJECT)
+                        assert body.contains(CheckFileAccessInconsistenciesJob.HEADER)
+                        assert body.contains(USER_ACCOUNT)
+                        assert body.contains(PROJECT_NAME_TEST)
+                    }
+                },
+                userProjectRoleService : Mock(UserProjectRoleService) {
+                    0 * setAccessToFiles(_, false, true)
+                    0 * _
+                },
+        ])
+
+        when:
+        job.wrappedExecute()
+
+        then:
+        noExceptionThrown()
     }
 }
