@@ -57,6 +57,9 @@ class AnalysisDeletionService {
         Path directory = bamFileAnalysisServiceFactoryService.getService(analysisInstance).getWorkDirectory(analysisInstance)
         switch (analysisInstance) {
             case { it instanceof IndelCallingInstance }:
+                ((IndelCallingInstance)analysisInstance).indelQualityControl = null
+                ((IndelCallingInstance)analysisInstance).indelSampleSwapDetection = null
+                analysisInstance.save(flush: true)
                 List<IndelQualityControl> indelQualityControl = IndelQualityControl.findAllByIndelCallingInstance(analysisInstance, [sort: 'id', order: 'desc'])
                 indelQualityControl.each {
                     it.delete(flush: true)
@@ -69,12 +72,16 @@ class AnalysisDeletionService {
                 break
             case { it instanceof SophiaInstance }:
                 List<SophiaQc> sophiaQc = SophiaQc.findAllBySophiaInstance(analysisInstance, [sort: 'id', order: 'desc'])
+                ((SophiaInstance)analysisInstance).sophiaQc = null
+                analysisInstance.save(flush: true)
                 sophiaQc.each {
                     it.delete(flush: true)
                 }
                 break
             case { it instanceof AceseqInstance }:
                 List<AceseqQc> aceseqQc = AceseqQc.findAllByAceseqInstance(analysisInstance, [sort: 'id', order: 'desc'])
+                ((AceseqInstance)analysisInstance).aceseqQcs = null
+                analysisInstance.save(flush: true)
                 aceseqQc.each {
                     it.delete(flush: true)
                 }
