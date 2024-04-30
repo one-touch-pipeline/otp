@@ -20,6 +20,7 @@
  * SOFTWARE.
  */
 
+import org.cyclonedx.gradle.CycloneDxTask
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
 
@@ -55,6 +56,11 @@ plugins {
     // http://www.asset-pipeline.com/manual/#configuration
     // plugins for less / sass available
     id "com.bertramlabs.asset-pipeline" version "4.4.0"
+
+    // allow to create SBOM dependencies list as xml & json for gradle
+    // https://cyclonedx.org/tool-center/
+    // https://plugins.gradle.org/plugin/org.cyclonedx.bom
+    id 'org.cyclonedx.bom' version '1.8.2'
 }
 
 buildScan {
@@ -223,6 +229,21 @@ jacocoToCobertura {
             layout.projectDirectory.dir("grails-app/domain"),
             layout.projectDirectory.dir("grails-app/init"),
     )
+
+    doFirst {
+        // Workaround for parse error: Download JaCoCo DTD to working directory
+        // see https://github.com/razvn/jacoco-to-cobertura-gradle-plugin/issues/11
+        File workingDir = new File(".").getAbsoluteFile().getParentFile()
+        File file = new File(workingDir, 'report.dtd')
+        if (!file.exists()) {
+            println "Create file ${file} from class loader"
+            def jacocoClasspathUrls = jacocoTestReport.jacocoClasspath.collect { it.toURI().toURL() }
+            def classloader = new URLClassLoader(jacocoClasspathUrls as URL[])
+            file.withWriter {
+                it << classloader.getResourceAsStream('org/jacoco/report/xml/report.dtd')
+            }
+        }
+    }
 }
 
 test {
@@ -657,6 +678,8 @@ generateHtml {
 
 node {
     version = '16.19.0'
+    // version v18.20.1 and newer are not compatible with centos7
+    // version '17.9.1' is incompatible with many dependencies
     download = true
 }
 
@@ -702,4 +725,119 @@ task runCypressTestsInWindow(type: NpmTask) {
     }
     dependsOn npmInstall
     args = ['run', 'cy-open']
+}
+
+/**
+ * redefine output directory for the cyclonedx task
+ */
+cyclonedxBom {
+    destination = file("${project.buildDir}/reports/cyclonedx")
+}
+
+/**
+ * creates a list of all configurations with description.
+ * Its shown on the console and written to $buildDir/reports/list/configurations.txt
+ */
+task listConfigurations {
+    group = "reporting"
+    description = "List all configurations, as needed for discerning development and production configurations by the SBOM tasks."
+    doLast {
+        String path = "$buildDir/reports/list"
+        mkdir path
+        String list = configurations.collect { Configuration c ->
+            "${c.name}: ${c.description}\n".toString()
+        }.sort().join()
+        println list
+        new File(path, "configurations.txt").text = list
+    }
+}
+
+/**
+ * creates a list of all plugins.
+ * Its shown on the console and written to $buildDir/reports/list/plugins.txt
+ */
+task listPlugins {
+    group = "reporting"
+    description = "List all plugin"
+    doLast {
+        String path = "$buildDir/reports/list"
+        mkdir path
+        String list = project.plugins.collect {
+            "${it.class.name}\n".toString()
+        }.sort().join()
+        println list
+        new File(path, "plugins.txt").text = list
+    }
+}
+
+/**
+ * group task to run all single configuration software inventory task
+ */
+task runAllConfigsGradleBom() {
+    // a grouping task to execute the CycloneDxTask for each configuration
+    group = "reporting"
+}
+
+/**
+ * creates for each configuration a software inventory task and add it to the runAllConfigsGradleBom task
+ */
+rootProject.configurations.each {
+    String name = it.name
+    task "${name}Bom"(type: CycloneDxTask) {
+        group = "reporting"
+        destination = file("${project.buildDir}/reports/softwareInventory/gradle")
+        description = "Creates a CycloneDX SBOM for the configuration ${name}."
+        outputName = "${name}"
+        includeConfigs = [name]
+        schemaVersion = "1.5"
+        outputFormat = "json"
+        includeLicenseText = false
+        projectType = "application"
+    }
+    runAllConfigsGradleBom.dependsOn tasks.getByName("${name}Bom")
+}
+
+/**
+ * task to create a software inventory for all configurations in one list
+ */
+task allConfigsGradleBom(type: CycloneDxTask) {
+    group = "reporting"
+    destination = file("${project.buildDir}/reports/softwareInventory/gradleAll")
+    description = "Creates a CycloneDX SBOM for all configuration."
+    outputName = "all"
+    includeConfigs = configurations*.name
+    schemaVersion = "1.5"
+    outputFormat = "json"
+    includeLicenseText = false
+    projectType = "application"
+}
+
+/**
+ * create directory for the npm software inventory task
+ */
+task ensureCyclonedxNpmBomDirExist {
+    doLast {
+        mkdir "$buildDir/reports/softwareInventory/npm"
+    }
+}
+
+/**
+ * adapt the the npm software inventory task to depend it on ensureCyclonedxNpmBomDirExist
+ */
+tasks.named('npm_run_cyclonedx-npm') {
+    dependsOn tasks.ensureCyclonedxNpmBomDirExist
+}
+
+/**
+ * group task to execute the other software inventory tasks:
+ * - runAllConfigsGradleBom
+ * - allConfigsGradleBom
+ * - npm_run_cyclonedx-npm
+ */
+task allBom() {
+    // a grouping task to execute all task with bom
+    group = "reporting"
+    dependsOn tasks.runAllConfigsGradleBom
+    dependsOn tasks.allConfigsGradleBom
+    dependsOn tasks.named('npm_run_cyclonedx-npm')
 }

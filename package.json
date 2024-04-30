@@ -3,11 +3,13 @@
     "lint": "eslint ./grails-app/assets/javascripts",
     "lint-fix": "npm run lint -- --fix --rule \"prefer-template: 0\" --rule \"strict: 0\"",
     "lint-export": "npm run lint -- -f html -o ./build/reports/eslint/lint.html",
+    "cyclonedx-npm": "cyclonedx-npm --output-file ./build/reports/softwareInventory/npm/bom-npm.json",
     "cy-run": "cypress run",
     "cy-open": "npx cypress open",
     "cy-wait": "start-server-and-test './gradlew --build-cache bootRun' 'http-get://localhost:8080/health' './gradlew --build-cache runCypressTests' "
   },
   "devDependencies": {
+    "@cyclonedx/cyclonedx-npm": "1.16.2",
     "cypress": "~13.10.0",
     "eslint": "~8.57.0",
     "eslint-config-airbnb-base": "~15.0.0",
