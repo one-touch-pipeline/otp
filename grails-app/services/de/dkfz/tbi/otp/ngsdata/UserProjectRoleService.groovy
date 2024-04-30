@@ -59,17 +59,28 @@ class UserProjectRoleService {
         assert user: "the user must not be null"
         assert project: "the project must not be null"
         assert !UserProjectRole.findAllByUserAndProject(user, project): "User '${user.username ?: user.realName}' is already part of project '${project.name}'"
-
         UserProjectRole userProjectRole = new UserProjectRole([
                 user   : user,
                 project: project,
         ])
-
-        projectRoles.each {
-            userProjectRole.addToProjectRoles(it)
+        projectRoles.each { ProjectRole role ->
+            userProjectRole.addToProjectRoles(role)
         }
-
         userProjectRole.save(flush: true)
+
+        // loop over all projects of the unixGroup and create the userProjectRole for each
+        applyToRelatedProjects(project.unixGroup) { Project relatedProject ->
+            if (relatedProject != project) {
+                UserProjectRole relatedUserProjectRole = new UserProjectRole([
+                        user   : user,
+                        project: relatedProject,
+                ])
+                projectRoles.each { ProjectRole role ->
+                    relatedUserProjectRole.addToProjectRoles(role)
+                }
+                relatedUserProjectRole.save(flush: true)
+            }
+        }
 
         if (ProjectRoleService.projectRolesContainAuthoritativeRole(projectRoles)) {
             flags.manageUsersAndDelegate = true
@@ -139,9 +150,7 @@ class UserProjectRoleService {
             throw new UserDisabledException("User is disabled.")
         }
 
-        applyToRelatedProjects(project.unixGroup) { Project p ->
-            createUserProjectRole(user, p, projectRolesSet, flags)
-        }
+        createUserProjectRole(user, project, projectRolesSet, flags)
 
         UserProjectRole userProjectRole = CollectionUtils.exactlyOneElement(UserProjectRole.findAllByProjectAndUser(project, user))
         if (userProjectRole.accessToFiles) {
@@ -162,9 +171,7 @@ class UserProjectRoleService {
             user = userService.createUser(null, email, realName)
         }
 
-        applyToRelatedProjects(project.unixGroup) { Project p ->
-            createUserProjectRole(user, p, projectRoles)
-        }
+        createUserProjectRole(user, project, projectRoles)
 
         UserProjectRole userProjectRole = CollectionUtils.exactlyOneElement(UserProjectRole.findAllByProjectAndUser(project, user))
 
@@ -247,10 +254,11 @@ class UserProjectRoleService {
                 role    : requesterUserProjectRole ? requesterUserProjectRole.projectRoles*.name.join(", ") : "Non-Project-User",
         ])
 
+        String projectList = Project.findAllByUnixGroup(userProjectRole.project.unixGroup)*.name.sort().join(", ")
         String body = messageSourceService.createMessage("projectUser.notification.addToUnixGroup.body", [
                 projectName           : userProjectRole.project,
                 projectUnixGroup      : userProjectRole.project.unixGroup,
-                projectList           : Project.findAllByUnixGroup(userProjectRole.project.unixGroup)*.name.sort().join(", "),
+                projectList           : projectList,
                 requestedAction       : action,
                 affectedUserUserDetail: affectedUserUserDetail,
                 requesterUserDetail   : requesterUserDetail,
@@ -260,7 +268,7 @@ class UserProjectRoleService {
         mailHelperService.saveMail("${subjectPrefix}${subject}", body)
         auditLogService.logAction(AuditLog.Action.PROJECT_USER_SENT_MAIL,
                 "Sent mail to ${mailHelperService.ticketSystemMailAddress} to ${formattedAction} ${userProjectRole.user.username} ${conjunction} " +
-                        "${userProjectRole.project.name} at the request of ${requester.username + switchedUserAnnotation}")
+                        "${projectList ?: userProjectRole.project.name} at the request of ${requester.username + switchedUserAnnotation}")
     }
 
     private void notifyProjectAuthoritiesAndUser(UserProjectRole userProjectRole) {
@@ -346,7 +354,7 @@ class UserProjectRoleService {
         }
         applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.accessToOtp = accessToOtp
-            assert upr.save(flush: true)
+            upr.save(flush: true)
             String message = getFlagChangeLogMessage("Access to OTP", upr.accessToOtp, upr.user.username, upr.project.name)
             auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ACCESS_TO_OTP, message)
         }
@@ -371,7 +379,7 @@ class UserProjectRoleService {
         applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.accessToFiles = accessToFiles
             upr.fileAccessChangeRequested = !force
-            assert upr.save(flush: true)
+            upr.save(flush: true)
             if (force) {
                 String message = getFlagChangeLogMessage("Take the state over of file access over from the ldap",
                         upr.accessToFiles, upr.user.username, upr.project.name)
@@ -421,7 +429,7 @@ class UserProjectRoleService {
         }
         applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.manageUsersAndDelegate = value
-            assert upr.save(flush: true)
+            upr.save(flush: true)
             String message = getFlagChangeLogMessage("Delegate Manage Users", upr.manageUsersAndDelegate, upr.user.username, upr.project.name)
             auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_DELEGATE_MANAGE_USER, message)
         }
@@ -435,7 +443,7 @@ class UserProjectRoleService {
         }
         applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.receivesNotifications = value
-            assert upr.save(flush: true)
+            upr.save(flush: true)
             String message = getFlagChangeLogMessage("Receives Notification", upr.receivesNotifications, upr.user.username, upr.project.name)
             auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_RECEIVES_NOTIFICATION, message)
         }
