@@ -209,7 +209,8 @@ abstract class AbstractBamFile implements CommentableWithProject, Entity {
                 referenceGenome: referenceGenome,
                 libraryPreparationKit: mergingWorkPackage.libraryPreparationKit
         )
-        return exactlyOneElement(bedFiles, "Wrong BedFile count, found: ${bedFiles}")
+        return exactlyOneElement(bedFiles, "Wrong BedFile count, found: ${bedFiles} for " +
+                "referenceGenome '${referenceGenome}' and libraryPreparationKit '${mergingWorkPackage.libraryPreparationKit}'")
     }
 
     @Override

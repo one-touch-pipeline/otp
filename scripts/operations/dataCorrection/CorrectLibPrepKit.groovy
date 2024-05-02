@@ -106,8 +106,9 @@ SeqTrack.withTransaction {
                 String oldComment = it.comment?.comment ?: ''
                 String newComment = "Correct ${entry?.value} to ${libPrepKit},\n${commentInfo}".trim()
                 String combinedComment = (oldComment ? "$oldComment\n\n" : '') + newComment
-                println "    $entry"
-                println newComment
+                println "    MetaDataEntry: $entry"
+                println "    added comment: ${newComment.replaceAll('\n','\n\t')}"
+                println "    complete comment: ${combinedComment.replaceAll('\n','\n\t')}"
                 commentService.saveComment(it, combinedComment)
             }
             /*
@@ -122,6 +123,7 @@ SeqTrack.withTransaction {
                 }*.mergingWorkPackage.unique().each { MergingWorkPackage workPackage ->
                     println "    $workPackage  ${workPackage.libraryPreparationKit}"
                     workPackage.libraryPreparationKit = libraryPreparationKit
+                    workPackage.save(flush: true)
                 }
             }
         } else {

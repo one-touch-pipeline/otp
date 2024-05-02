@@ -32,17 +32,26 @@ import static org.springframework.util.Assert.*
 /**
  * Name of the bed file. It has to be exist for all given reference genomes in the target region directory
  */
-String bedFileName = 'Agilent_S0447132_Covered.bed'
+String bedFileName = ''
 
 // Name of the lib prep kit the bedfile is to load for
-String libPrepKitName = '10XGenomics'
+String libPrepKitName = ''
 
 // The name of the reference genomes the bedfile should be load for
 List<String> refGenomeNames = [
+        // human hg37
         'hs37d5',
         '1KGRef_PhiX',
         'hs37d5_GRCm38mm',
         'hs37d5_GRCm38mm_PhiX',
+
+        // mouse
+        // 'GRCm38mm10',
+        // 'GRCm38mm10_PhiX',
+
+        // human hg38
+        // 'GRCh38_decoy_ebv_alt_hla_phiX',
+        // 'xg_GRCm38_GRCh38_decoy_ebv_alt_hla_phiX',
 ]
 
 // -----------------------------------
@@ -77,15 +86,16 @@ BedFile.withTransaction {
                 fileName: bedFileName,
                 referenceGenome: referenceGenome,
                 libraryPreparationKit: libraryPreparationKit)
-        notNull bedFilePath = bedFileService.filePath(bedFileDom)
+        String bedFilePath = bedFileService.filePath(bedFileDom)
+        assert bedFilePath
         // retrieve referenceGenomeEntryNames for a specific referenceGenome
         List<ReferenceGenomeEntry> referenceGenomeEntries = ReferenceGenomeEntry.findAllByReferenceGenome(referenceGenome)
-        notEmpty referenceGenomeEntries
+        assert referenceGenomeEntries
         TargetIntervals targetIntervals = TargetIntervalsFactory.create(bedFilePath, referenceGenomeEntries*.name)
         bedFileDom.targetSize = targetIntervals.baseCount
         bedFileDom.mergedTargetSize = targetIntervals.uniqueBaseCount
-        notNull bedFileDom.validate()
         bedFileDom.save(flush: true)
-        println "Added ${bedFileName} to OTP database."
+        println "Added ${bedFileName} for ${referenceGenome} to OTP database."
     }
 }
+''
