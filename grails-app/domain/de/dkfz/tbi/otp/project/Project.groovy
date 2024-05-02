@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.project.dta.DataTransferAgreement
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
-
+import java.time.LocalDate
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 /** This table is used externally. Please discuss a change in the team */
@@ -60,7 +60,7 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
     String dirAnalysis
 
     /**
-     * Historic flag to signal whether the individualPrefix field has to be unqiue or not.
+     * Historic flag to signal whether the individualPrefix field has to be unique or not.
      *
      * Currently we still have projects sharing an individual prefix, so need this flag as a workaround
      * but new projects should not rely on this and provide a unique individualPrefix.
@@ -101,6 +101,9 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
     /** This attribute is used externally. Please discuss a change in the team */
     SampleIdentifierParserBeanName sampleIdentifierParserBeanName = SampleIdentifierParserBeanName.NO_PARSER
 
+    /** Real time date when the data should be deleted, may be adapted during the lifetime. */
+    LocalDate deleteOn
+
     static hasMany = [
             speciesWithStrains    : SpeciesWithStrain,
             projectInfos          : ProjectInfo,
@@ -119,17 +122,17 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
     ]
 
     static constraints = {
-        name(blank: false, unique: true, validator: { val, obj ->
+        name(blank: false, unique: true, validator: { val, proj ->
             Project project = atMostOneElement(Project.findAllByNameInMetadataFiles(val))
-            if (project && project.id != obj.id) {
+            if (project && project.id != proj.id) {
                 return 'duplicate.metadataFilesName'
             }
         })
 
-        individualPrefix(nullable: true, blank: false, validator: { val, obj ->
-            if (obj.uniqueIndividualPrefix) {
-                List<Project> list = Project.findAllByIndividualPrefixAndIdNotEqual(val, obj.id)
-                if (list && ((list.size() == 1 && !list*.id.contains(obj.id)) || (list.size() > 1))) { // true if list contains other projects than itself
+        individualPrefix(nullable: true, blank: false, validator: { val, project ->
+            if (project.uniqueIndividualPrefix) {
+                List<Project> list = Project.findAllByIndividualPrefixAndIdNotEqual(val, project.id)
+                if (list && ((list.size() == 1 && !list*.id.contains(project.id)) || (list.size() > 1))) { // true if list contains other projects than itself
                     return 'duplicate'
                 }
                 if (!val) {
@@ -144,14 +147,14 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
 
         projectGroup(nullable: true)
 
-        nameInMetadataFiles(nullable: true, blank: false, validator: { val, obj ->
+        nameInMetadataFiles(nullable: true, blank: false, validator: { val, project ->
             if (val) {
                 Project projectByMetadata = atMostOneElement(Project.findAllByNameInMetadataFiles(val))
                 Project projectByName = atMostOneElement(Project.findAllByName(val))
-                if (projectByMetadata && projectByMetadata.id != obj.id) {
+                if (projectByMetadata && projectByMetadata.id != project.id) {
                     return 'duplicate'
                 }
-                if (projectByName && projectByName.id != obj.id) {
+                if (projectByName && projectByName.id != project.id) {
                     return 'duplicate.name'
                 }
             }
@@ -164,6 +167,7 @@ class Project implements CommentableWithProject, ProjectPropertiesGivenWithReque
         relatedProjects nullable: true
         internalNotes nullable: true
         storageUntil nullable: true
+        deleteOn nullable: true
         state nullable: false
     }
 

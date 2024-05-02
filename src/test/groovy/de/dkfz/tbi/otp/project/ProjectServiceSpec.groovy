@@ -37,6 +37,7 @@ import de.dkfz.tbi.otp.utils.HelperUtils
 
 import java.nio.file.Path
 import java.time.LocalDate
+import java.time.format.DateTimeParseException
 
 class ProjectServiceSpec extends Specification implements DataTest, DomainFactoryCore, UserAndRoles {
 
@@ -151,5 +152,64 @@ class ProjectServiceSpec extends Specification implements DataTest, DomainFactor
         then:
         file.absolute
         file.toString().contains(project.dirName)
+    }
+
+    void "test updateProjectFieldDate all fine"() {
+        given:
+        ProjectService projectService = new ProjectService([
+                configService    : new TestConfigService(),
+                fileSystemService: new TestFileSystemService(),
+        ])
+
+        Project project = createProject()
+
+        when:
+        projectService.updateProjectFieldDate(date, fieldName, project)
+
+        then:
+        project."${fieldName}" == result
+
+        where:
+        fieldName      | date         || result
+        'endDate'      | "2024-01-01" || LocalDate.of(2024, 1, 1)
+        'endDate'      | null         || null
+        'storageUntil' | "2024-01-01" || LocalDate.of(2024, 1, 1)
+        'storageUntil' | null         || null
+        'deleteOn'     | "2024-01-01" || LocalDate.of(2024, 1, 1)
+        'deleteOn'     | null         || null
+    }
+
+    void "test updateProjectFieldDate with invalid date"() {
+        given:
+        ProjectService projectService = new ProjectService([
+                configService    : new TestConfigService(),
+                fileSystemService: new TestFileSystemService(),
+        ])
+
+        Project project = createProject()
+
+        when:
+        projectService.updateProjectFieldDate("invalid date", "deleteOn", project)
+
+        then:
+        DateTimeParseException exception = thrown()
+        exception.message.contains("invalid date")
+    }
+
+    void "test updateProjectFieldDate with invalid field name"() {
+        given:
+        ProjectService projectService = new ProjectService([
+                configService    : new TestConfigService(),
+                fileSystemService: new TestFileSystemService(),
+        ])
+
+        Project project = createProject()
+
+        when:
+        projectService.updateProjectFieldDate("2024-01-01", "invalidFieldName", project)
+
+        then:
+        AssertionError err = thrown()
+        err.message.contains("invalidFieldName")
     }
 }

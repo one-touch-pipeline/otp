@@ -19,33 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.project
-
-import de.dkfz.tbi.otp.ngsdata.TumorEntity
-import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
-import de.dkfz.tbi.otp.project.additionalField.AbstractFieldValue
-import de.dkfz.tbi.otp.searchability.Keyword
-
-import java.time.LocalDate
-
-// doesn't work as abstract class
-trait ProjectPropertiesGivenWithRequest {
-
-    Set<AbstractFieldValue> projectFields = [] as Set
-
-    /** This attribute is used externally. Please discuss a change in the team */
-    String name
-    String description
-
-    LocalDate endDate
-    /** Time point until when the data should be stored. This is defined in the project request and may not be changed. */
-    LocalDate storageUntil
-
-    String relatedProjects
-    TumorEntity tumorEntity
-    Set<SpeciesWithStrain> speciesWithStrains = [] as Set
-
-    Project.ProjectType projectType
-
-    Set<Keyword> keywords = [] as Set
+databaseChangeLog = {
+    changeSet(author: "-", id: "1714472098084-91") {
+        addColumn(tableName: "project") {
+            column(name: "delete_on", type: "date")
+        }
+    }
 }

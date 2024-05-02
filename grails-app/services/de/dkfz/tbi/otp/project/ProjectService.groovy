@@ -167,7 +167,7 @@ class ProjectService {
 
     @PostAuthorize("hasRole('ROLE_OPERATOR') or returnObject == null or hasPermission(returnObject, 'OTP_READ_ACCESS')")
     Project getProjectByName(String name) {
-        return CollectionUtils.atMostOneElement(Project.findAllByName(name))
+        return atMostOneElement(Project.findAllByName(name))
     }
 
     @PostFilter("hasRole('ROLE_OPERATOR') or hasPermission(filterObject, 'OTP_READ_ACCESS')")
@@ -200,7 +200,8 @@ class ProjectService {
                 individualPrefix              : projectParams.individualPrefix,
                 projectType                   : projectParams.projectType,
                 storageUntil                  : projectParams.storageUntil,
-                projectGroup                  : CollectionUtils.atMostOneElement(ProjectGroup.findAllByName(projectParams.projectGroup)),
+                deleteOn                      : null,
+                projectGroup                  : atMostOneElement(ProjectGroup.findAllByName(projectParams.projectGroup)),
                 dirAnalysis                   : projectParams.dirAnalysis,
                 processingPriority            : projectParams.processingPriority,
                 fingerPrinting                : projectParams.fingerPrinting,
@@ -458,6 +459,7 @@ class ProjectService {
         assert fieldName && [
                 "endDate",
                 "storageUntil",
+                "deleteOn",
         ].contains(fieldName)
 
         project."${fieldName}" = fieldValue ? LocalDate.from(DateTimeFormatter.ISO_LOCAL_DATE.parse(fieldValue)) : null
@@ -478,7 +480,7 @@ class ProjectService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Errors createOrUpdateRunYapsaConfig(Project project, SeqType seqType, String programVersion) {
-        Pipeline pipeline = CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.RUN_YAPSA))
+        Pipeline pipeline = atMostOneElement(Pipeline.findAllByName(Pipeline.Name.RUN_YAPSA))
         ConfigPerProjectAndSeqType latest = getLatestRunYapsaConfig(project, seqType)
 
         if (latest?.programVersion != programVersion) {
@@ -511,7 +513,7 @@ class ProjectService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     void createOrUpdateCellRangerConfig(Project project, SeqType seqType, String programVersion, ReferenceGenomeIndex referenceGenomeIndex) {
-        Pipeline pipeline = CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.CELL_RANGER))
+        Pipeline pipeline = atMostOneElement(Pipeline.findAllByName(Pipeline.Name.CELL_RANGER))
         ConfigPerProjectAndSeqType latest = getLatestCellRangerConfig(project, seqType)
 
         workflowConfigService.makeObsolete(latest)
@@ -527,19 +529,19 @@ class ProjectService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     RunYapsaConfig getLatestRunYapsaConfig(Project project, SeqType seqType) {
-        return CollectionUtils.atMostOneElement(RunYapsaConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType))
+        return atMostOneElement(RunYapsaConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType))
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     CellRangerConfig getLatestCellRangerConfig(Project project, SeqType seqType) {
-        return CollectionUtils.atMostOneElement(CellRangerConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType))
+        return atMostOneElement(CellRangerConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType))
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     RoddyWorkflowConfig configureSnvPipelineProject(RoddyConfiguration snvPipelineConfiguration) {
         RoddyWorkflowConfig roddyWorkflowConfig = configurePipelineProject(snvPipelineConfiguration, Pipeline.Name.RODDY_SNV.pipeline, RoddySnvConfigTemplate)
 
-        SnvConfig snvConfig = CollectionUtils.atMostOneElement(SnvConfig.findAllWhere([
+        SnvConfig snvConfig = atMostOneElement(SnvConfig.findAllWhere([
                 project     : snvPipelineConfiguration.project,
                 seqType     : snvPipelineConfiguration.seqType,
                 obsoleteDate: null,

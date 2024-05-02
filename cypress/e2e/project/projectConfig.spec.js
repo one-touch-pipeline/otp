@@ -28,9 +28,12 @@ describe('Check projectConfig page', () => {
       cy.loginAsUser();
     });
 
-    it('should not see the edit button on the index page', () => {
+    it('should not see the edit button and operator exclusive rows on the index page', () => {
       cy.visit('/projectConfig/index');
       cy.get('button.edit').should('not.exist');
+      cy.get('tr').contains('Delete On').should('not.exist');
+      cy.get('tr').contains('Internal Notes').should('not.exist');
+      cy.get('tr').contains('Project Info').should('not.exist');
     });
   });
 
@@ -183,17 +186,19 @@ describe('Check projectConfig page', () => {
 
     it('should update the storage until date', () => {
       const cellKey = 'Storage Until';
+      checkProjectDateField(cellKey, '2022-01-01');
+      cy.wait('@updateProjectField').its('response.statusCode').should('eq', 200);
+    });
 
-      cy.get('td').contains(cellKey).siblings().last()
-        .find('button.edit')
-        .click();
-      cy.get('td').contains(cellKey).siblings().last()
-        .find('input[type=date]')
-        .type('2022-01-01');
-      cy.get('td').contains(cellKey).siblings().last()
-        .find('button.save')
-        .click();
+    it('should update the delete on date', () => {
+      const cellKey = 'Delete On';
+      checkProjectDateField(cellKey, '2022-01-01');
+      cy.wait('@updateProjectField').its('response.statusCode').should('eq', 200);
+    });
 
+    it('should be able to set the delete on date to null', () => {
+      const cellKey = 'Delete On';
+      checkProjectDateField(cellKey, '2022-01-01');
       cy.wait('@updateProjectField').its('response.statusCode').should('eq', 200);
     });
 
@@ -385,7 +390,7 @@ describe('Check projectConfig page', () => {
         .click();
       cy.get('td').contains(cellKey).siblings().last()
         .find('input[type=date]')
-        .type('2022-01-01');
+        .clear();
       cy.get('td').contains(cellKey).siblings().last()
         .find('button.save')
         .click();
@@ -412,3 +417,15 @@ describe('Check projectConfig page', () => {
     });
   });
 });
+
+function checkProjectDateField(cellKey, date) {
+  cy.get('td').contains(cellKey).siblings().last()
+    .find('button.edit')
+    .click();
+  cy.get('td').contains(cellKey).siblings().last()
+    .find('input[type=date]')
+    .type(date);
+  cy.get('td').contains(cellKey).siblings().last()
+    .find('button.save')
+    .click();
+}

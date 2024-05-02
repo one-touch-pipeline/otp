@@ -196,6 +196,18 @@
                 </sec:ifNotGranted>
             </td>
         </tr>
+        <sec:ifAllGranted roles="ROLE_OPERATOR">
+            <tr>
+                <td><g:message code="project.deleteOn"/></td>
+                <td>
+                    <otp:editorSwitch
+                            roles="ROLE_OPERATOR"
+                            template="date"
+                            link="${g.createLink(controller: 'projectConfig', action: 'updateProjectFieldDate', params: ['fieldName': 'deleteOn'])}"
+                            value="${selectedProject.deleteOn}"/>
+                </td>
+            </tr>
+        </sec:ifAllGranted>
         <tr>
             <td><g:message code="project.nameInMetadata"/></td>
             <td>
