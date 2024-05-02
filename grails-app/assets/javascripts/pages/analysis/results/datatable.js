@@ -153,7 +153,8 @@ $.otp.resultsTable = {
         $.otp.resultsTable.plotLinkHelper(row.instanceId, 'aceseq', 'ACESEQ_ALL'),
         row.version,
         row.dateCreated,
-        row.processingState
+        row.processingState,
+        this.prepareLinkArray(row.configFile)
       ]
     );
   },
@@ -197,9 +198,11 @@ $.otp.resultsTable = {
         row.tindaSomaticAfterRescue,
         row.tindaSomaticAfterRescueMedianAlleleFreqInControl,
         $.otp.resultsTable.plotLinkHelper(row.instanceId, 'indel', 'INDEL_TINDA'),
+        // Remaining
         row.version,
         row.dateCreated,
-        row.processingState
+        row.processingState,
+        this.prepareLinkArray(row.configFile)
       ]
     );
   },
@@ -234,7 +237,8 @@ $.otp.resultsTable = {
         $.otp.resultsTable.plotLinkHelper(row.instanceId, 'sophia', 'SOPHIA'),
         row.version,
         row.dateCreated,
-        row.processingState
+        row.processingState,
+        this.prepareLinkArray(row.configFile)
       ]
     );
   },
@@ -262,7 +266,8 @@ $.otp.resultsTable = {
         $.otp.resultsTable.plotLinkHelper(row.instanceId, 'snv', 'SNV'),
         row.version,
         row.dateCreated,
-        row.processingState
+        row.processingState,
+        this.prepareLinkArray(row.configFile)
       ]
     );
   },
@@ -288,8 +293,26 @@ $.otp.resultsTable = {
         row.libPrepKits,
         row.version,
         row.dateCreated,
-        row.processingState
+        row.processingState,
+        this.prepareLinkArray(row.configFile)
       ]
     );
+  },
+  prepareLinkArray(data) {
+    'use strict';
+
+    return data.map((el) => this.prepareLink(el)).join(' | ');
+  },
+  prepareLink(data) {
+    'use strict';
+
+    if (!data.link) {
+      return data.value;
+    }
+
+    const target = data.linkTarget ? `target="${data.linkTarget}"` : '';
+    const href = `href="${data.link}"`;
+
+    return `<a ${target} ${href}>${data.value}</a>`;
   }
 };

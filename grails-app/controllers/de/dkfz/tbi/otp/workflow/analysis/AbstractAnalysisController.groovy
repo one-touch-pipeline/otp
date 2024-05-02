@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.workflow.analysis
 
 import groovy.transform.ToString
 import groovy.util.logging.Slf4j
@@ -32,15 +32,19 @@ import de.dkfz.tbi.otp.dataprocessing.PlotType
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 
+import java.nio.file.Path
+
 @Slf4j
+@PreAuthorize('isFullyAuthenticated()')
 abstract class AbstractAnalysisController {
     ProjectSelectionService projectSelectionService
+    AbstractAnalysisService abstractAnalysisService
 
     static allowedMethods = [
-            results: "GET",
+            results       : "GET",
+            viewConfigFile: "GET",
     ]
 
-    @PreAuthorize('isFullyAuthenticated()')
     Map results() {
         return [:]
     }
@@ -59,10 +63,29 @@ abstract class AbstractAnalysisController {
         }
         return dataToRender
     }
+
+    def viewConfigFile(AnalysisConfigFileCommand cmd) {
+        Path configPath = abstractAnalysisService.fetchConfigPath(cmd.analysisInstance)
+
+        if (!configPath) {
+            return render(text: "No config file available", contentType: "text/plain")
+        }
+
+        byte[] content = configPath.bytes
+        if (cmd.to == 'DOWNLOAD') {
+            response.setHeader("Content-disposition", "attachment; filename=${configPath.fileName}")
+        }
+        render(contentType: "text/xml", file: content)
+    }
+}
+
+class AnalysisConfigFileCommand {
+    BamFilePairAnalysis analysisInstance
+    String to
 }
 
 @ToString
-class BamFilePairAnalysisCommand {
+class BamFilePairAnalysisPlotCommand {
     BamFilePairAnalysis bamFilePairAnalysis
     PlotType plotType
     int index

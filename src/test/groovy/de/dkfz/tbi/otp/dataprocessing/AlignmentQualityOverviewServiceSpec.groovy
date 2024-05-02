@@ -29,6 +29,7 @@ import spock.lang.TempDir
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RoddyConfigService
+import de.dkfz.tbi.otp.workflow.alignment.AlignmentQualityOverviewService
 
 import java.nio.file.Path
 
@@ -68,7 +69,7 @@ class AlignmentQualityOverviewServiceSpec extends Specification implements Servi
             0 * _
         }
         service.roddyConfigService = Mock(RoddyConfigService) {
-            1 * getConfigFile(workDir) >> configFile
+            1 * getConfigPath(workDir) >> configFile
             0 * _
         }
         service.fileService = Mock(FileService) {

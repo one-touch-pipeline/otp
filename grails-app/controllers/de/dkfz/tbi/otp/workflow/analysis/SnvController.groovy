@@ -19,34 +19,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.workflow.analysis
 
 import grails.converters.JSON
-import org.springframework.http.HttpStatus
-import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.tbi.otp.dataprocessing.PlotType
-import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelResultsService
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvResultsService
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
 import java.nio.file.Path
 
-@PreAuthorize('isFullyAuthenticated()')
-class IndelController extends AbstractAnalysisController {
+class SnvController extends AbstractAnalysisController {
 
-    IndelResultsService indelResultsService
+    SnvResultsService snvResultsService
 
     static allowedMethods = [
             plots           : "GET",
-            renderPlot      : "GET",
+            renderPDF       : "GET",
             dataTableResults: "POST",
     ]
 
-    Map plots(BamFilePairAnalysisCommand cmd) {
+    Map plots(BamFilePairAnalysisPlotCommand cmd) {
         if (cmd.hasErrors()) {
-            return response.sendError(HttpStatus.NOT_FOUND.value())
+            return response.sendError(404)
         }
-        return indelResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType) ? [
+        return snvResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType) ? [
                 id      : cmd.bamFilePairAnalysis.id,
                 pid     : cmd.bamFilePairAnalysis.individual.pid,
                 plotType: cmd.plotType,
@@ -57,21 +53,17 @@ class IndelController extends AbstractAnalysisController {
         ]
     }
 
-    def renderPlot(BamFilePairAnalysisCommand cmd) {
+    def renderPDF(BamFilePairAnalysisPlotCommand cmd) {
         if (cmd.hasErrors()) {
-            return response.sendError(HttpStatus.NOT_FOUND.value())
+            return response.sendError(404)
         }
-        List<Path> filePaths = indelResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
+        List<Path> filePaths = snvResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
         Path file = filePaths.first()
-        if (cmd.plotType == PlotType.INDEL) {
-            render(file: file.bytes, contentType: "application/pdf")
-        } else {
-            render(file: file.bytes, contentType: "image/png")
-        }
+        render(file: file.bytes, contentType: "application/pdf")
     }
 
     JSON dataTableResults(DataTableCommand cmd) {
-        Map dataToRender = getDataTableResultsFromService(indelResultsService, cmd.dataToRender())
+        Map dataToRender = getDataTableResultsFromService(snvResultsService, cmd.dataToRender())
         return render(dataToRender as JSON)
     }
 }

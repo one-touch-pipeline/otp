@@ -22,6 +22,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.filestore.FilestoreService
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.RoddyConfigService
 
 import java.nio.file.Path
 
@@ -29,6 +31,8 @@ import java.nio.file.Path
 abstract class AbstractAnalysisWorkFileService<T extends BamFilePairAnalysis> implements ArtefactFileService<T> {
 
     FilestoreService filestoreService
+    RoddyConfigService roddyConfigService
+    FileService fileService
 
     Path getDirectoryPath(T instance) {
         return filestoreService.getWorkFolderPath(instance.workflowArtefact.producedBy)

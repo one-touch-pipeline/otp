@@ -116,7 +116,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         1 * job.roddyConfigService.createRoddyXmlConfig(_, [e: "f", a: "b"], "workflow-name", workflowStep.workflowRun.workflowVersion, "analysis-id", _, _, _,
                 true) >> { configText }
         1 * job.roddyConfigService.getConfigDirectory(base) >> configDir
-        1 * job.roddyConfigService.getConfigFile(base) >> configFile
+        1 * job.roddyConfigService.getConfigPath(base) >> configFile
         0 * job.roddyConfigService._
         1 * job.fileService.createFileWithContent(configFile, configText, _, true)
         1 * job.roddyCommandService.createRoddyCommand(_, _, ["c", "d"]) >> { cmd }
@@ -174,7 +174,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         1 * job.roddyConfigService.createRoddyXmlConfig(_, [e: "f", a: "b"], "workflow-name", workflowStep.workflowRun.workflowVersion, "analysis-id", _, _, _,
                 true) >> { configText }
         1 * job.roddyConfigService.getConfigDirectory(base) >> configDir
-        1 * job.roddyConfigService.getConfigFile(base) >> configFile
+        1 * job.roddyConfigService.getConfigPath(base) >> configFile
         0 * job.roddyConfigService._
         1 * job.fileService.createFileWithContent(configFile, configText, _, true)
         1 * job.roddyCommandService.createRoddyCommand(_, _, ["c", "d"]) >> { cmd }
@@ -233,7 +233,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         1 * job.roddyConfigService.createRoddyXmlConfig(_, [e: "f", a: "b"], "workflow-name", workflowStep.workflowRun.workflowVersion, "analysis-id", _, _, _,
                 true) >> { configText }
         1 * job.roddyConfigService.getConfigDirectory(base) >> configDir
-        1 * job.roddyConfigService.getConfigFile(base) >> configFile
+        1 * job.roddyConfigService.getConfigPath(base) >> configFile
         0 * job.roddyConfigService._
         1 * job.fileService.createFileWithContent(configFile, configText, _, true)
         1 * job.roddyCommandService.createRoddyCommand(_, _, ["c", "d"]) >> { cmd }

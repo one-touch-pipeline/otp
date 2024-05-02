@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
+import grails.web.mapping.LinkGenerator
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -64,6 +65,7 @@ class AbstractAnalysisResultsServiceIntegrationSpec extends Specification implem
         ])
         DomainFactory."create${analysis}InstanceWithRoddyBamFiles"()
         abstractAnalysisResultsService = service.newInstance()
+        abstractAnalysisResultsService.grailsLinkGenerator = Mock(LinkGenerator)
 
         when:
         List callingInstances

@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.transactions.Transactional
+import grails.web.mapping.LinkGenerator
 import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.grails.datastore.mapping.query.api.Criteria
@@ -42,6 +43,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.exceptions.NotSupportedException
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.file.Files
@@ -58,6 +60,7 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
     ProjectService projectService
     SnvCallingService snvCallingService
     SophiaService sophiaService
+    LinkGenerator grailsLinkGenerator
 
     List getCallingInstancesForProject(Project proj) {
         if (!proj) {
@@ -80,6 +83,11 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
             resultTransformer(CriteriaSpecification.ALIAS_TO_ENTITY_MAP)
             projections {
                 appendQcProjectionCriteria(delegate)
+                workflowArtefact(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
+                    producedBy(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
+                        property('state', 'runState')
+                    }
+                }
                 samplePair {
                     mergingWorkPackage1 {
                         sample {
@@ -131,16 +139,19 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
                 libPrepKitNames = [(String) properties.libPrepKit1, (String) properties.libPrepKit2]
             }
             properties.with {
+                configFile = getConfigLinks(properties.instanceId as long, properties.runState as WorkflowRun.State)
                 libPrepKits = libPrepKitNames.unique().collect { it ?: 'unknown' }.join(", <br>")
                 remove('libPrepKit1')
                 remove('libPrepKit2')
                 sampleTypes = "${properties.sampleType1} \u2013 ${properties.sampleType2}"
                 remove('sampleType1')
                 remove('sampleType2')
+                remove('runState')
                 dateCreated = TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(dateCreated)
-            }
-            if (properties.processingState != AnalysisProcessingStates.FINISHED) {
-                properties.remove('instanceId')
+                if (processingState != AnalysisProcessingStates.FINISHED) {
+                    remove('instanceId')
+                }
+                return it
             }
             return properties
         }
@@ -153,6 +164,25 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
     abstract void appendQcFetchingCriteria(Criteria criteria)
 
     abstract void appendQcProjectionCriteria(Criteria criteria)
+
+    List<Map> getConfigLinks(long analysisId, WorkflowRun.State runState) {
+        return (!analysisId || !runState || runState == WorkflowRun.State.LEGACY) ? [[value: 'N/A']] :
+                [[
+                         value     : 'View',
+                         linkTarget: '_blank',
+                         link      : grailsLinkGenerator.link(
+                                 action: 'viewConfigFile',
+                                 params: ['analysisInstance.id': analysisId],
+                         ),
+                 ], [
+                         value: 'Download',
+                         link : grailsLinkGenerator.link(
+                                 action: 'viewConfigFile',
+                                 params: ['analysisInstance.id': analysisId, 'to': 'DOWNLOAD'],
+                         ),
+                 ],
+                ]
+    }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#callingInstance.project, 'OTP_READ_ACCESS')")
     List<Path> getFiles(BamFilePairAnalysis callingInstance, PlotType plotType) {

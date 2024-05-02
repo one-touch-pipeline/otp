@@ -52,6 +52,7 @@
                             'analysis.programVersion',
                             'analysis.processingDate',
                             'analysis.progress',
+                            'analysis.configFile',
                     ]}" id="resultsTable" />
         </div>
     </div>

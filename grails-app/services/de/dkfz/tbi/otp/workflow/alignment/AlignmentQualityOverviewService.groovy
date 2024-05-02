@@ -19,25 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.workflow.alignment
 
-import grails.converters.JSON
+import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaResultsService
-import de.dkfz.tbi.otp.utils.DataTableCommand
+import de.dkfz.tbi.otp.dataprocessing.RoddyResultServiceFactoryService
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.RoddyConfigService
 
-@PreAuthorize('isFullyAuthenticated()')
-class RunYapsaController extends AbstractAnalysisController {
+import java.nio.file.Path
 
-    RunYapsaResultsService runYapsaResultsService
+@Transactional
+class AlignmentQualityOverviewService {
 
-    static allowedMethods = [
-            dataTableResults: "POST",
-    ]
+    FileService fileService
 
-    JSON dataTableResults(DataTableCommand cmd) {
-        Map dataToRender = getDataTableResultsFromService(runYapsaResultsService, cmd.dataToRender())
-        return render(dataToRender as JSON)
+    RoddyConfigService roddyConfigService
+
+    RoddyResultServiceFactoryService roddyResultServiceFactoryService
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#roddyResult.project, 'OTP_READ_ACCESS')")
+    byte[] fetchConfigFileContent(RoddyResult roddyResult) {
+        Path workDir = roddyResultServiceFactoryService.getService(roddyResult).getDirectoryPath(roddyResult)
+        Path configFile = roddyConfigService.getConfigPath(workDir)
+
+        return fileService.fileIsReadable(configFile) ? configFile.bytes : new byte[0]
     }
 }

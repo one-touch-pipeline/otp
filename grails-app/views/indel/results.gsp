@@ -43,7 +43,7 @@
                         <th colspan="6"><g:message code="analysis.indel.indels"/></th>
                         <th colspan="7"><g:message code="analysis.indel.swapChecker"/></th>
                         <th colspan="3"><g:message code="analysis.indel.tinda"/></th>
-                        <th colspan="3"></th>
+                        <th colspan="4"></th>
                     </tr>
                     <tr class="indel-table">
                         <th><g:message code="projectOverview.index.PID"/></th>
@@ -69,9 +69,11 @@
                         <th><g:message code="analysis.indel.tinda.tindaSomaticAfterRescue"/></th>
                         <th><g:message code="analysis.indel.tinda.tindaSomaticAfterRescueMedianAlleleFreqInControl"/></th>
                         <th><g:message code="analysis.indel.tinda.plot"/></th>
+                        <%-- Remainings --%>
                         <th><g:message code="analysis.programVersion"/></th>
                         <th><g:message code="analysis.processingDate"/></th>
                         <th><g:message code="analysis.progress"/></th>
+                        <th><g:message code="analysis.configFile"/></th>
                     </tr>
                     </thead>
                     <tbody class="indel-table"></tbody>

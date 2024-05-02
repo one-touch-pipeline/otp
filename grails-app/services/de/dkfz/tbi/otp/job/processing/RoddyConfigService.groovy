@@ -334,11 +334,11 @@ class RoddyConfigService {
         return writer.toString()
     }
 
-    Path getConfigDirectory(Path basPath) {
-        return basPath.resolve(CONFIGURATION_DIRECTORY)
+    Path getConfigDirectory(Path basePath) {
+        return basePath.resolve(CONFIGURATION_DIRECTORY)
     }
 
-    Path getConfigFile(Path basPath) {
-        return getConfigDirectory(basPath).resolve(CONFIGURATION_FILE)
+    Path getConfigPath(Path basePath) {
+        return getConfigDirectory(basePath).resolve(CONFIGURATION_FILE)
     }
 }

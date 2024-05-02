@@ -19,53 +19,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.workflow.analysis
 
 import grails.converters.JSON
-import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaResultsService
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaResultsService
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
-import java.nio.file.Path
+class RunYapsaController extends AbstractAnalysisController {
 
-@PreAuthorize('isFullyAuthenticated()')
-class SophiaController extends AbstractAnalysisController {
-
-    SophiaResultsService sophiaResultsService
+    RunYapsaResultsService runYapsaResultsService
 
     static allowedMethods = [
             dataTableResults: "POST",
-            plots           : "GET",
-            renderPDF       : "GET",
     ]
 
     JSON dataTableResults(DataTableCommand cmd) {
-        Map dataToRender = getDataTableResultsFromService(sophiaResultsService, cmd.dataToRender())
+        Map dataToRender = getDataTableResultsFromService(runYapsaResultsService, cmd.dataToRender())
         return render(dataToRender as JSON)
-    }
-
-    Map plots(BamFilePairAnalysisCommand cmd) {
-        if (cmd.hasErrors()) {
-            return response.sendError(404)
-        }
-        return sophiaResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType) ? [
-                id      : cmd.bamFilePairAnalysis.id,
-                pid     : cmd.bamFilePairAnalysis.individual.pid,
-                plotType: cmd.plotType,
-                error   : null,
-        ] : [
-                error: "File not found",
-                pid  : "no File",
-        ]
-    }
-
-    def renderPDF(BamFilePairAnalysisCommand cmd) {
-        if (cmd.hasErrors()) {
-            return response.sendError(404)
-        }
-        List<Path> filePaths = sophiaResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
-        Path file = filePaths.first()
-        render(file: file.bytes, contentType: "application/pdf")
     }
 }

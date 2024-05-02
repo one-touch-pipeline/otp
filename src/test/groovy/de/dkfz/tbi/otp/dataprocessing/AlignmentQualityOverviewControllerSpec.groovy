@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.dataprocessing.qaalignmentoverview.QcStatusCellService
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.tracking.TicketService
+import de.dkfz.tbi.otp.workflow.alignment.AlignmentQualityOverviewController
 
 class AlignmentQualityOverviewControllerSpec extends Specification implements ControllerUnitTest<AlignmentQualityOverviewController>, DataTest {
 

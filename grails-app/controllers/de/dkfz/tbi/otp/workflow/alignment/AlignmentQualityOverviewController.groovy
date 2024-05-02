@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataprocessing
+package de.dkfz.tbi.otp.workflow.alignment
 
 import grails.converters.JSON
 import grails.validation.Validateable
@@ -27,6 +27,11 @@ import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.RoddyResultServiceFactoryService
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.RnaRoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerService

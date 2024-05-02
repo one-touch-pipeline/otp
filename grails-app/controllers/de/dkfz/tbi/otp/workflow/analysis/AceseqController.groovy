@@ -19,10 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.workflow.analysis
 
 import grails.converters.JSON
-import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.PlotType
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqResultsService
@@ -30,7 +29,6 @@ import de.dkfz.tbi.otp.utils.DataTableCommand
 
 import java.nio.file.Path
 
-@PreAuthorize('isFullyAuthenticated()')
 class AceseqController extends AbstractAnalysisController {
 
     AceseqResultsService aceseqResultsService
@@ -46,7 +44,7 @@ class AceseqController extends AbstractAnalysisController {
         return render(dataToRender as JSON)
     }
 
-    Map plots(BamFilePairAnalysisCommand cmd) {
+    Map plots(BamFilePairAnalysisPlotCommand cmd) {
         if (cmd.hasErrors()) {
             return response.sendError(404)
         }
@@ -76,7 +74,7 @@ class AceseqController extends AbstractAnalysisController {
         ]
     }
 
-    Map plotImages(BamFilePairAnalysisCommand cmd) {
+    Map plotImages(BamFilePairAnalysisPlotCommand cmd) {
         if (cmd.hasErrors()) {
             return response.sendError(404)
         }

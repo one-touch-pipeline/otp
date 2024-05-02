@@ -551,7 +551,7 @@ class ExampleData {
                 fileService.createFileWithContent(pathWork, pathWork.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
                 fileService.createLink(pathFinal, pathWork, CreateLinkOption.DELETE_EXISTING_FILE)
             }
-            Path config = roddyConfigService.getConfigFile(workDir)
+            Path config = roddyConfigService.getConfigPath(workDir)
             fileService.createFileWithContent(config, config.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
         }
     }
@@ -614,7 +614,7 @@ class ExampleData {
             }
             Path plot = rnaRoddyBamFileService.getWorkArribaFusionPlotPdf(bam)
             fileService.createFileWithContent(plot, plot.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
-            Path config = roddyConfigService.getConfigFile(workDir)
+            Path config = roddyConfigService.getConfigPath(workDir)
             fileService.createFileWithContent(config, config.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
         }
     }

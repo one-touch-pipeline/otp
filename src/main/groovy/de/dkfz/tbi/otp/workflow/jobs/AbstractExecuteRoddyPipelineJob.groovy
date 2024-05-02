@@ -67,7 +67,7 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
         FileSystem fs = fileSystemService.remoteFileSystem
         Path outputDir = fs.getPath(roddyResult.workDirectory.absolutePath)
         Path confDir = roddyConfigService.getConfigDirectory(outputDir)
-        Path confFile = roddyConfigService.getConfigFile(outputDir)
+        Path confFile = roddyConfigService.getConfigPath(outputDir)
 
         logService.addSimpleLogEntry(workflowStep,
                 "The json config (without run specific values):\n${JsonOutput.prettyPrint(workflowStep.workflowRun.combinedConfig)}")
