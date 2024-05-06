@@ -26,16 +26,28 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
+import de.dkfz.tbi.otp.utils.ProcessOutput
+import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
+import de.dkfz.tbi.otp.utils.exceptions.NotSupportedException
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
+
+import java.util.regex.Matcher
 
 @CompileDynamic
 @Transactional
 class AlignmentInfoService {
 
     ConfigFragmentService configFragmentService
+    ExecuteRoddyCommandService executeRoddyCommandService
+    RemoteShellHelper remoteShellHelper
+    SeqTypeService seqTypeService
     OtpWorkflowService otpWorkflowService
 
     private static final ObjectMapper MAPPER = new ObjectMapper()
@@ -82,6 +94,42 @@ class AlignmentInfoService {
         return node.get('RODDY').get('cvalues').fields().collectEntries {
             [(it.key): it.value.get('value').asText()]
         }
+    }
+
+    /**
+     * @deprecated method is part of the old workflow system
+     */
+    @Deprecated
+    protected RoddyAlignmentInfo getRoddyAlignmentInformation(RoddyWorkflowConfig workflowConfig) {
+        assert workflowConfig
+        ProcessOutput output = getRoddyProcessOutput(workflowConfig)
+        Map<String, String> config = extractConfigRoddyOutput(output)
+        return generateRoddyAlignmentInfo(config, workflowConfig.project, workflowConfig.seqType, workflowConfig.programVersion)
+    }
+
+    /**
+     * get the output check it and returns result if successful
+     *
+     * @deprecated method is part of the old workflow system
+     */
+    @Deprecated
+    protected ProcessOutput getRoddyProcessOutput(RoddyWorkflowConfig workflowConfig) {
+        String nameInConfigFile = workflowConfig.nameUsedInConfig
+        String cmd = executeRoddyCommandService.roddyGetRuntimeConfigCommand(workflowConfig, nameInConfigFile, workflowConfig.seqType.roddyName)
+
+        ProcessOutput output = remoteShellHelper.executeCommandReturnProcessOutput(cmd)
+
+        if (output.exitCode != 0) {
+            log?.debug("Alignment information can't be detected:\n${output}")
+            throw new NotSupportedException("Alignment information can't be detected. Is Roddy with support for printidlessruntimeconfig installed?")
+        }
+
+        if (output.stderr.contains("The project configuration \"${nameInConfigFile}.config\" could not be found")) {
+            log?.debug("Error during output of roddy:\n${output}")
+            throw new FileNotFoundException("Roddy could not find the configuration '${nameInConfigFile}'. Probably some access problem.")
+        }
+
+        return output
     }
 
     /**
@@ -189,11 +237,41 @@ class AlignmentInfoService {
     }
 
     /**
+     * Extracts Configurations from the roddy Output as a map
+     * @param output of Roddy
+     * @return Map with Roddy config value output
+     *
+     * @deprecated method is part of the old workflow system
+     */
+    @Deprecated
+    private Map<String, String> extractConfigRoddyOutput(ProcessOutput output) {
+        Map<String, String> res = [:]
+        output.stdout.eachLine { String line ->
+            Matcher matcher = line =~ /(?:declare +-x +(?:-i +)?)?([^ =]*)=(.*)/
+            if (matcher.matches()) {
+                String key = matcher.group(1)
+                String value = matcher.group(2)
+                res[key] = value.startsWith("\"") && value.length() > 2 ? value.substring(1, value.length() - 1) : value
+            }
+        }
+
+        if (res.isEmpty()) {
+            log?.debug("Could not extract any configuration value from the roddy output:\n${output}")
+            throw new ParsingException("Could not extract any configuration value from the roddy output")
+        }
+
+        return res
+    }
+
+    /**
      * @deprecated method is part of the old workflow system, use {@link #getAlignmentInformationForRun(WorkflowRun)} instead
      */
     @Deprecated
     AlignmentInfo getAlignmentInformationFromConfig(AlignmentConfig config) {
         assert config
+        if (config.class == RoddyWorkflowConfig) {
+            return getRoddyAlignmentInformation((RoddyWorkflowConfig) config)
+        }
         return config.alignmentInformation
     }
 }
