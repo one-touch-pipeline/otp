@@ -184,7 +184,7 @@ class WorkflowSelectionController implements CheckAndCall {
                     version                : [id: wvSelector.workflowVersion.id, displayName: wvSelector.workflowVersion.workflowVersion],
                     species                : rgSelector.species.collect { [id: it.id, displayName: it.displayName] },
                     refGenome              : [id: rgSelector.referenceGenome.id, displayName: rgSelector.referenceGenome.name],
-                    workflowVersionSelector: [id: wvSelector.id, previousId: wvSelector.previous.id],
+                    workflowVersionSelector: [id: wvSelector.id, previousId: wvSelector.previous?.id],
                     refGenSelectorId       : rgSelector.id,
             ] as JSON)
         }
