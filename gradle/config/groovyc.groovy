@@ -19,7 +19,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+// this file uses groovy.transform.CompilationCustomizer
+// see documentation: https://melix.github.io/blog/2011/05/12/customizing_groovy_compilation_process.html
+
 import groovy.transform.CompileStatic
+import groovy.transform.Generated
+import org.codehaus.groovy.ast.*
 
 withConfig(configuration) {
     source(unitValidator: { unit ->
@@ -34,5 +40,33 @@ withConfig(configuration) {
         }
     }) {
         ast(CompileStatic)
+    }
+}
+
+// mark generated code with annotation @Generated
+withConfig(configuration) {
+    source(unitValidator: { unit ->
+        // filter code to apply change only for production code and not for test code
+        String fileName = unit.source.file.toString()
+        [
+                '/grails-app/',
+                '/src/main/',
+                '/src/init/',
+        ].any {
+            fileName.contains(it)
+        }
+    }) {
+        inline(phase: 'INSTRUCTION_SELECTION') { source, context, ClassNode classNode ->
+            classNode.methods.each { MethodNode methodNode ->
+                if (methodNode.lineNumber == -1) {
+                    if (!methodNode.getAnnotations().any {
+                        // checking on class level don't work correctly
+                        it.classNode.name == Generated.name
+                    }) {
+                        methodNode.addAnnotation(new AnnotationNode(new ClassNode(Generated)))
+                    }
+                }
+            }
+        }
     }
 }
