@@ -126,6 +126,8 @@ class JobScheduler {
             throw new JobSchedulerException("Workflow step is still in state `RUNNING_OTP` after the job finished")
         } else if (workflowStep.state == WorkflowStep.State.FAILED) {
             autoRestartHandlerService.handleRestarts(workflowStep)
+        } else if (workflowStep.state == WorkflowStep.State.SKIPPED && workflowStep.workflowRun.state == WorkflowRun.State.SKIPPED_MISSING_PRECONDITION) {
+            notifyUsers(workflowStep)
         }
     }
 
