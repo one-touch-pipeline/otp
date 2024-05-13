@@ -27,13 +27,15 @@ import org.springframework.security.access.AccessDeniedException
 import spock.lang.Shared
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
 @Rollback
 @Integration
-class SeqTypeServiceIntegrationSpec extends Specification implements UserAndRoles {
+class SeqTypeServiceIntegrationSpec extends Specification implements UserAndRoles, WorkflowSystemDomainFactory {
 
     SeqTypeService seqTypeService
 
@@ -45,7 +47,7 @@ class SeqTypeServiceIntegrationSpec extends Specification implements UserAndRole
     void setupData() {
         createUserAndRoles()
         alignableSeqTypes = DomainFactory.createAllAlignableSeqTypes()
-        seqTrack = DomainFactory.createSeqTrack()
+        seqTrack = createSeqTrack()
         addUserWithReadAccessToProject(CollectionUtils.atMostOneElement(User.findAllByUsername(USER)), seqTrack.project)
     }
 
@@ -73,9 +75,9 @@ class SeqTypeServiceIntegrationSpec extends Specification implements UserAndRole
         given:
         setupData()
         List<SeqType> seqTypes = []
-        DomainFactory.createSeqTrack(sample: seqTrack.sample)
-        DomainFactory.createSeqTrack(sample: seqTrack.sample, seqType: alignableSeqTypes[0])
-        DomainFactory.createSeqTrack(sample: seqTrack.sample, seqType: alignableSeqTypes[0])
+        createSeqTrack(sample: seqTrack.sample)
+        createSeqTrack(sample: seqTrack.sample, seqType: alignableSeqTypes[0])
+        createSeqTrack(sample: seqTrack.sample, seqType: alignableSeqTypes[0])
 
         when:
         seqTypes = doWithAuth(user) {
@@ -96,11 +98,11 @@ class SeqTypeServiceIntegrationSpec extends Specification implements UserAndRole
         given:
         setupData()
         List<SeqType> seqTypes = []
-        DomainFactory.createSeqTrack(sample: seqTrack.sample)
-        DomainFactory.createSeqTrack(sample: seqTrack.sample, seqType: alignableSeqTypes[0])
-        DomainFactory.createSeqTrack(sample: seqTrack.sample, seqType: alignableSeqTypes[0])
-        DomainFactory.createSeqTrack(sample: seqTrack.sample, seqType: alignableSeqTypes[1])
-        DomainFactory.createSeqTrack(sample: seqTrack.sample, seqType: alignableSeqTypes[1])
+        createSeqTrack(sample: seqTrack.sample)
+        createSeqTrack(sample: seqTrack.sample, seqType: alignableSeqTypes[0])
+        createSeqTrack(sample: seqTrack.sample, seqType: alignableSeqTypes[0])
+        createSeqTrack(sample: seqTrack.sample, seqType: alignableSeqTypes[1])
+        createSeqTrack(sample: seqTrack.sample, seqType: alignableSeqTypes[1])
 
         when:
         seqTypes = doWithAuth(user) {
@@ -109,6 +111,32 @@ class SeqTypeServiceIntegrationSpec extends Specification implements UserAndRole
 
         then:
         2 == seqTypes.size()
+
+        where:
+        user     | _
+        ADMIN    | _
+        OPERATOR | _
+        USER     | _
+    }
+
+    void "test alignableSeqTypesByProject with different users, when custom seqType is used"() {
+        given:
+        setupData()
+        List<SeqType> seqTypes = []
+        SeqType customSeqType = createSeqType()
+        seqTrack.seqType = customSeqType
+        seqTypeService.workflowService = Mock(WorkflowService) {
+            findAllAlignmentWorkflows() >> [createWorkflow()]
+            getSupportedSeqTypesOfVersions(_) >> [customSeqType]
+        }
+
+        when:
+        seqTypes = doWithAuth(user) {
+            seqTypeService.alignableSeqTypesByProject(seqTrack.project)
+        }
+
+        then:
+        1 == seqTypes.size()
 
         where:
         user     | _

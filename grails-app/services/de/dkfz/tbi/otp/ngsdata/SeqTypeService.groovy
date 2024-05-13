@@ -84,7 +84,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
         return SeqTrack.createCriteria().listDistinct {
             projections {
                 groupProperty('seqType')
-                'in'('seqType', allAlignableSeqTypes)
+                'in'('seqType', findAlignAbleSeqTypes())
                 sample {
                     individual {
                         eq("project", project)
