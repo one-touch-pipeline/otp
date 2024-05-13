@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.SearchSeqTrackService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.workflow.TriggerWorkflowService
 
 /**
  * Action handler to search seqTrack by supplying either
@@ -50,6 +51,7 @@ class SearchSeqTrackController {
     ProjectSelectionService projectSelectionService
     SearchSeqTrackService searchSeqTrackService
     SeqTrackService seqTrackService
+    TriggerWorkflowService triggerWorkflowService
 
     static final String PARAM_KEY_PIDS = 'pids[]'
     static final String PARAM_KEY_SEQTYPES = 'seqTypes[]'
@@ -58,6 +60,7 @@ class SearchSeqTrackController {
     static final String PARAM_KEY_SAMPLE_TYPES = 'sampleTypes[]'
     static final String PARAM_KEY_READ_TYPES = 'readTypes[]'
     static final String PARAM_KEY_SINGLE_CELLS = 'singleCells[]'
+    static final String PARAM_KEY_BAMS = 'bamIds[]'
 
     static allowedMethods = [
             searchSeqTrackByProjectSeqType: "GET",
@@ -65,6 +68,7 @@ class SearchSeqTrackController {
             searchSeqTrackByLaneId        : "GET",
             searchSeqTrackByIlseNumber    : "GET",
             searchSeqTrackByMultiInput    : "GET",
+            searchSeqTrackByBamId         : "GET",
     ]
 
     JSON searchSeqTrackByProjectSeqType() {
@@ -115,9 +119,29 @@ class SearchSeqTrackController {
             return render([error: HttpStatus.NOT_FOUND.reasonPhrase, message: g.message(code: "triggerAlignment.error.noLanes") as String] as JSON)
         }
 
-        Set<SeqTrack> seqTracks = SeqTrack.getAll(laneIds)
+        Set<SeqTrack> seqTracks = SeqTrack.getAll(laneIds).findAll()
 
         Set<String> missingItems = (laneIds - seqTracks*.id)*.toString()
+        return redirectHelper(params, seqTracks, missingItems ?: null)
+    }
+
+    JSON searchSeqTrackByBamId() {
+        Set<Long> bamIds
+        try {
+            bamIds = getListParam(PARAM_KEY_BAMS).collect { it as long }
+        } catch (NumberFormatException ex) {
+            response.status = HttpStatus.BAD_REQUEST.value()
+            return render([error: HttpStatus.BAD_REQUEST.reasonPhrase, message: ex.message] as JSON)
+        }
+
+        if (!bamIds) {
+            response.status = HttpStatus.NOT_FOUND.value()
+            return render([error: HttpStatus.NOT_FOUND.reasonPhrase, message: g.message(code: "triggerAlignment.error.noLanes.bam") as String] as JSON)
+        }
+
+        Set<SeqTrack> seqTracks = triggerWorkflowService.getSeqTracks(bamIds)
+
+        Set<String> missingItems = (bamIds - triggerWorkflowService.getBamFiles(seqTracks*.id)*.id)*.toString()
         return redirectHelper(params, seqTracks, missingItems ?: null)
     }
 

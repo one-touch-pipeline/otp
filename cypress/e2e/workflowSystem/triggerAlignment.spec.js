@@ -57,6 +57,11 @@ describe('Check trigger alignment page', () => {
             cy.wrap(row).find('td').eq(4).contains(alignment[0].seqType);
           });
 
+        cy.get('table#bamTable').find('tbody tr').should('have.length', 6)
+          .each((row) => {
+            cy.wrap(row).find('td').eq(1).contains(alignment[0].project);
+          });
+
         cy.get('input#ignoreSeqPlatformGroup').uncheck();
         cy.get('input#withdrawBamFiles1').click();
 
@@ -103,6 +108,11 @@ describe('Check trigger alignment page', () => {
           .each((row) => {
             cy.wrap(row).find('td').eq(2).should('satisfy', (el) => alignment[1].pid.includes(el[0].innerText));
             cy.wrap(row).find('td').eq(4).contains(alignment[1].seqType);
+          });
+
+        cy.get('table#bamTable').find('tbody tr').should('have.length', 6)
+          .each((row) => {
+            cy.wrap(row).find('td').eq(2).should('satisfy', (el) => alignment[1].pid.includes(el[0].innerText));
           });
 
         // TODO otp-2027: Next line should be commented in, when the bug is fixed
@@ -256,6 +266,11 @@ describe('Check trigger alignment page', () => {
           cy.wrap(row).find('td').eq(3).should('satisfy', (el) => fix.sampleTypes.includes(el[0].innerText));
         });
 
+        cy.get('table#bamTable').find('tbody tr').each((row) => {
+          cy.wrap(row).find('td').eq(2).should('satisfy', (el) => fix.pids.includes(el[0].innerText));
+          cy.wrap(row).find('td').eq(3).should('satisfy', (el) => fix.sampleTypes.includes(el[0].innerText));
+        });
+
         cy.get('input#ignoreSeqPlatformGroup').uncheck();
         cy.get('input#withdrawBamFiles1').click();
 
@@ -265,6 +280,56 @@ describe('Check trigger alignment page', () => {
           expect(interception.response.statusCode).to.eq(200);
         });
 
+        cy.get('#infos li').should('not.be.empty');
+        cy.get('#resultWarning li').should('have.length', 2)
+          .each((row) => {
+            cy.wrap(row).contains('skip').contains('since fastqc already exist');
+          });
+        cy.get('#resultWorkPackageList li').should('have.length', 1);
+      });
+    });
+
+    it('should search seq tracks by BAM ID and trigger alignment', () => {
+      cy.visit('/triggerAlignment/index');
+      cy.intercept('/searchSeqTrack/searchSeqTrackByBamId*').as('search');
+      cy.intercept('/triggerAlignment/generateWarnings*').as('warnings');
+      cy.intercept('/triggerAlignment/triggerAlignment*').as('triggerAlignment');
+
+      cy.fixture('triggerAlignment.json').then((alignment) => {
+        cy.get('a#bam-tab').click();
+
+        cy.get('textarea#bam-selection').clear().type(alignment[5].bamIds.join('\t'));
+        cy.get('button#searchSeqTrackButton').click();
+
+        cy.wait('@search').then((interception) => {
+          expect(interception.response.statusCode).to.eq(302);
+        });
+
+        cy.wait('@warnings').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+        });
+
+        // Wait until table is rendered
+        cy.get('div#seqTrackTable_processing').should('not.be.visible');
+
+        cy.get('div#seqTrackTable_wrapper').find('tbody tr').each((row) => {
+          cy.wrap(row).find('td').eq(14).should('satisfy', (el) => alignment[5].bamIds.includes(el[0].innerText));
+        });
+
+        cy.get('div#bamTable_wrapper').find('tbody tr').each((row) => {
+          cy.wrap(row).find('td').eq(0).should('satisfy', (el) => alignment[5].bamIds.includes(el[0].innerText));
+        });
+
+        cy.get('input#ignoreSeqPlatformGroup').uncheck();
+        cy.get('input#withdrawBamFiles1').click();
+
+        cy.get('button#triggerAlignmentButton').click();
+
+        cy.wait('@triggerAlignment').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+        });
+
+        cy.get('#warnAreaAccordion').should('not.be.visible');
         cy.get('#infos li').should('not.be.empty');
         cy.get('#resultWarning li').should('have.length', 2)
           .each((row) => {

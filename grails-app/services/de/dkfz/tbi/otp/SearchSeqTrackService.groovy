@@ -27,11 +27,14 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.workflow.TriggerWorkflowService
 
 @CompileDynamic
 @Transactional
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
 class SearchSeqTrackService {
+
+    TriggerWorkflowService triggerWorkflowService
 
     Set<SeqTrack> getAllSeqTracksByProjectAndSeqTypes(Project project, Set<SeqType> seqTypes) {
         if (!(project && seqTypes)) {
@@ -95,6 +98,9 @@ class SearchSeqTrackService {
                 libPrepkit      : seqTrack.libraryPreparationKit ? seqTrack.libraryPreparationKit.name : '',
                 seqPlatform     : seqTrack.seqPlatform?.fullName,
                 seqPlatformGroup: seqTrack.seqPlatformGroup?.toString(),
+                species         : seqTrack.individual.species.displayName,
+                mixedInSpecies  : seqTrack.sample.mixedInSpecies*.displayName.join(', '),
+                bamIds          : triggerWorkflowService.getBamFiles([seqTrack.id])*.id.join(', '),
         ]
     }
 }

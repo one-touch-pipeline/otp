@@ -69,6 +69,13 @@
             </a>
         </li>
     </g:if>
+    <g:if test="${tabs.contains('bam')}">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="bam-tab" data-bs-toggle="tab" data-bs-target="#bam" type="button" role="tab" aria-controls="bam" aria-selected="false">
+                <g:message code="triggerAlignment.input.tab.bam"/>
+            </a>
+        </li>
+    </g:if>
 </ul>
 
 <div class="tab-content" id="inputTabsContent">
@@ -95,6 +102,11 @@
     <g:if test="${tabs.contains('multiInput')}">
         <div class="tab-pane fade mt-2" id="multi-input" role="tabpanel" aria-labelledby="multi-input-tab">
             <g:render template="/templates/bootstrap/seqTrackSelectionTabBar/tabs/multiInputTab"/>
+        </div>
+    </g:if>
+    <g:if test="${tabs.contains('bam')}">
+        <div class="tab-pane fade mt-2" id="bam" role="tabpanel" aria-labelledby="bam-tab">
+            <g:render template="/templates/bootstrap/seqTrackSelectionTabBar/tabs/bamTab"/>
         </div>
     </g:if>
 </div>

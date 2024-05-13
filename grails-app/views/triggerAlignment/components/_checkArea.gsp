@@ -21,10 +21,10 @@
   --}%
 <div class="card">
     <div class="card-header">
-        <i class="bi bi-list-check"></i> <g:message code="triggerAlignment.check.header"/>
+        <i class="bi bi-list-check"></i> <g:message code="triggerAlignment.check.header.seqTracksCheck"/>
     </div>
     <div class="card-body">
-        <p id="seqTrackTableText" class="card-text"><g:message code="triggerAlignment.check.body"/></p>
+        <p id="seqTrackTableText" class="card-text"><g:message code="triggerAlignment.check.body.seqTrack"/></p>
         <table id="seqTrackTable" class="table table-sm table-striped display table-hover table-bordered w-100">
             <thead>
             <tr>
@@ -39,6 +39,33 @@
                 <th><g:message code="triggerAlignment.check.header.withdrawn"/></th>
                 <th><g:message code="triggerAlignment.check.header.libPrepKit"/></th>
                 <th><g:message code="triggerAlignment.check.header.seqPlatform"/></th>
+                <th><g:message code="triggerAlignment.check.header.seqPlatformGroup"/></th>
+                <th><g:message code="triggerAlignment.check.header.species"/></th>
+                <th><g:message code="triggerAlignment.check.header.mixedInSpecies"/></th>
+                <th><g:message code="triggerAlignment.check.header.bamIds"/></th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <div class="card-header">
+        <i class="bi bi-list-check"></i> <g:message code="triggerAlignment.check.header.bamCheck"/>
+    </div>
+    <div class="card-body">
+        <p id="bamTableText" class="card-text"><g:message code="triggerAlignment.check.body.bam"/></p>
+        <table id="bamTable" class="table table-sm table-striped display table-hover table-bordered w-100">
+            <thead>
+            <tr>
+                <th><g:message code="triggerAlignment.check.header.bam"/></th>
+                <th><g:message code="triggerAlignment.check.header.project"/></th>
+                <th><g:message code="triggerAlignment.check.header.individual"/></th>
+                <th><g:message code="triggerAlignment.check.header.sampleType"/></th>
+                <th><g:message code="triggerAlignment.check.header.withdrawn"/></th>
+                <th><g:message code="triggerAlignment.check.header.libPrepKit"/></th>
+                <th><g:message code="triggerAlignment.check.header.species"/></th>
+                <th><g:message code="triggerAlignment.check.header.mixedInSpecies"/></th>
+                <th><g:message code="triggerAlignment.check.header.referenceGenome"/></th>
                 <th><g:message code="triggerAlignment.check.header.seqPlatformGroup"/></th>
             </tr>
             </thead>

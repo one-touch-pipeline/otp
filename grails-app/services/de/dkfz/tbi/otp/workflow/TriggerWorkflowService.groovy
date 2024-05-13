@@ -40,7 +40,7 @@ class TriggerWorkflowService {
             return []
         }
 
-        return RoddyBamFile.createCriteria().list {
+        return RoddyBamFile.createCriteria().listDistinct {
             seqTracks {
                 'in'('id', seqTrackIds)
             }

@@ -35,6 +35,7 @@ $.otp.triggerAlignment = {
     'pid-tab': 'searchSeqTrackByPidSeqType',
     'lane-tab': 'searchSeqTrackByLaneId',
     'ilse-tab': 'searchSeqTrackByIlseNumber',
+    'bam-tab': 'searchSeqTrackByBamId',
     'multi-input-tab': 'searchSeqTrackByMultiInput'
   },
 
@@ -186,7 +187,7 @@ $.otp.triggerAlignment = {
         if (!$.otp.triggerAlignment.searchQuery.lanes.length) {
           $.otp.toaster.showErrorToast(
             $.otp.triggerAlignment.TOAST_TITLE.SEARCH_ERROR,
-            'At least one Land ID must be supplied'
+            'At least one lane ID must be supplied'
           );
           return;
         }
@@ -197,6 +198,16 @@ $.otp.triggerAlignment = {
           $.otp.toaster.showErrorToast(
             $.otp.triggerAlignment.TOAST_TITLE.SEARCH_ERROR,
             'At least one ilse Number must be supplied'
+          );
+          return;
+        }
+        break;
+      case 'bam-tab':
+        $.otp.triggerAlignment.searchQuery.bamIds = $.otp.parseDelimitedStringToArray($('#bam-selection').val());
+        if (!$.otp.triggerAlignment.searchQuery.bamIds.length) {
+          $.otp.toaster.showErrorToast(
+            $.otp.triggerAlignment.TOAST_TITLE.SEARCH_ERROR,
+            'At least one BAM ID must be supplied'
           );
           return;
         }
@@ -278,6 +289,10 @@ $.otp.triggerAlignment = {
 
   getSeqTrackTable: () => $('#seqTrackTable').DataTable(),
 
+  getBamTable: () => $('#bamTable').DataTable(),
+
+  getWorkflowTable: () => $('#workflowTable').DataTable(),
+
   getMissingLibraryPrepKitWarningsTable: () => $('#missingLibraryPrepKitWarnings').DataTable()
 };
 
@@ -313,7 +328,10 @@ $(document).ready(() => {
       },
       { data: 'libPrepkit' },
       { data: 'seqPlatform' },
-      { data: 'seqPlatformGroup' }
+      { data: 'seqPlatformGroup' },
+      { data: 'species' },
+      { data: 'mixedInSpecies' },
+      { data: 'bamIds' }
     ],
     columnDefs: [{
       defaultContent: '',
@@ -327,6 +345,53 @@ $(document).ready(() => {
           callback(outputdata.data);
 
           const { warnings } = outputdata.data;
+
+          if (outputdata.data.bamData && outputdata.data.bamData.length) {
+            $.otp.triggerAlignment.getBamTable().clear().rows.add(outputdata.data.bamData.map((o) => [
+              o.id,
+              o.project,
+              o.individual,
+              o.sampleType,
+              o.withdrawn,
+              o.libPrepKit,
+              o.species,
+              o.mixedInSpecies,
+              o.referenceGenome,
+              o.seqPlatformGroup
+            ])).draw();
+          } else {
+            $.otp.triggerAlignment.getBamTable().clear().draw();
+          }
+
+          if (outputdata.data.info && outputdata.data.info.workflows && outputdata.data.info.workflows.length) {
+            $.otp.triggerAlignment.getWorkflowTable().clear().rows.add(outputdata.data.info.workflows.map((o) => [
+              o.project,
+              o.seqType,
+              o.workflow,
+              o.version,
+              o.referenceGenome.length > 0 ?
+                `
+                    <table class="table table-bordered">
+                    <thead>
+                      <tr>
+                          <th>Species</th>
+                          <th>Reference genome</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                    ${o.referenceGenome.map((subTableElement) => [`
+                        <tr>
+                            <td>${subTableElement.species}</td>
+                            <td>${subTableElement.referenceGenome}</td>
+                        </tr>
+                      `]).join('')}
+                    </tbody>
+                  </table>
+              ` : '-'
+            ])).draw();
+          } else {
+            $.otp.triggerAlignment.getWorkflowTable().clear().draw();
+          }
 
           // withdrawnData
           if (warnings.withdrawnSeqTracks && warnings.withdrawnSeqTracks.length) {
@@ -511,6 +576,21 @@ $(document).ready(() => {
 
   /** Move description text to toolbar */
   $('div.toolbar').html($('#seqTrackTableText'));
+
+  $('#bamTable').DataTable({
+    dom: 'B<"toolbar">frtip',
+    buttons: ['csv'],
+    scrollCollapse: true,
+    paging: false,
+    scrollY: '500px'
+  });
+
+  $('#workflowTable').DataTable({
+    dom: 'B<"toolbar">frtip',
+    buttons: ['csv'],
+    scrollCollapse: true,
+    paging: false
+  });
 
   $('#withdrawnWarnings').DataTable({
     dom: 'B<"toolbar">frtip',

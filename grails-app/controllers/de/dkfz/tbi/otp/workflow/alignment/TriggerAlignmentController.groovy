@@ -25,8 +25,12 @@ import grails.converters.JSON
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.SearchSeqTrackService
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
+import de.dkfz.tbi.otp.workflow.TriggerWorkflowService
+import de.dkfz.tbi.otp.workflow.WorkflowVersionAndReferenceGenomeSelector
 
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
 class TriggerAlignmentController {
@@ -36,6 +40,7 @@ class TriggerAlignmentController {
     private static final String PARAM_KEY_WITHDRAW_BAMFILES = 'withdrawBamFiles'
 
     TriggerAlignmentService triggerAlignmentService
+    TriggerWorkflowService triggerWorkflowService
     SearchSeqTrackService searchSeqTrackService
     SeqTypeService seqTypeService
 
@@ -54,7 +59,9 @@ class TriggerAlignmentController {
 
     def index() {
         return [
-                seqTypes: seqTypeService.findAlignAbleSeqTypes(),
+                seqTypes: seqTypeService.list().sort {
+                    it.displayNameWithLibraryLayout
+                },
                 warnings: EMPTY_WARNINGS,
         ]
     }
@@ -89,6 +96,14 @@ class TriggerAlignmentController {
                 data    : seqTracks.collect { SeqTrack seqTrack ->
                     searchSeqTrackService.projectSeqTrack(seqTrack)
                 },
+                bamData : triggerWorkflowService.getBamFiles(seqTracks*.id).collect { AbstractBamFile bamFile ->
+                    getBamValue(bamFile)
+                },
+                info    : [
+                        workflows: triggerWorkflowService.getInfo(seqTracks).collect {
+                            getWorkflowsValue(it)
+                        }
+                ],
                 warnings: [
                         withdrawnSeqTracks      : warningsForWithdrawnSeqTracks,
                         missingAlignmentConfigs : warningsForMissingAlignmentConfig,
@@ -124,5 +139,35 @@ class TriggerAlignmentController {
                 warnings       : triggerAlignmentResult.warnings,
                 newWorkPackages: triggerAlignmentResult.mergingWorkPackages*.toString(),
         ] as JSON)
+    }
+
+    private Map<String, Object> getBamValue(AbstractBamFile bamFile) {
+        return [
+                id              : bamFile.id,
+                project         : bamFile.project.displayName,
+                individual      : bamFile.individual.displayName,
+                sampleType      : bamFile.sampleType.displayName,
+                withdrawn       : bamFile.withdrawn,
+                libPrepKit      : bamFile.workPackage.libraryPreparationKit,
+                species         : bamFile.individual.species.displayName,
+                mixedInSpecies  : bamFile.sample.mixedInSpecies*.displayName.join(', '),
+                referenceGenome : bamFile.referenceGenome.name,
+                seqPlatformGroup: (bamFile.workPackage as MergingWorkPackage).seqPlatformGroup?.toString(),
+        ]
+    }
+
+    private Map<String, Object> getWorkflowsValue(WorkflowVersionAndReferenceGenomeSelector selector) {
+        return [
+                project        : selector.workflowVersionSelector.project.displayName,
+                seqType        : selector.workflowVersionSelector.seqType.displayName,
+                workflow       : selector.workflowVersionSelector.workflowVersion.workflow.displayName,
+                version        : selector.workflowVersionSelector.workflowVersion.workflowVersion,
+                referenceGenome: selector.referenceGenomeSelectors.collect {
+                    [
+                            species        : it.species*.displayName.join(', '),
+                            referenceGenome: it.referenceGenome.name,
+                    ]
+                },
+        ]
     }
 }
