@@ -501,6 +501,10 @@ class ProjectRequestService {
                 ticketingSystemMail       : processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_TICKET_SYSTEM),
                 teamSignature             : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
+        String emailStorageAdministration = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_STORAGE_ADMINISTRATION)
+        if (emailStorageAdministration) {
+            ccs.add(emailStorageAdministration)
+        }
         mailHelperService.saveMail(subject, body, recipients, ccs)
     }
 

@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.administration
 
 import grails.gorm.hibernate.annotation.ManagedEntity
 import org.apache.commons.validator.routines.EmailValidator
+import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.utils.Entity
 
@@ -62,21 +63,23 @@ class Mail implements Entity {
         subject blank: false, maxSize: 1000
         body blank: false
         sendDateTime nullable: true
-        to validator: {
-            checkMail(it)
+        to validator: { Set<String> to, Mail mail, Errors errors ->
+            checkMail(to, "to", errors)
         }
-        cc validator: {
-            checkMail(it)
+        cc validator: { Set<String> cc, Mail mail, Errors errors ->
+            checkMail(cc, "cc", errors)
         }
-        bcc validator: {
-            checkMail(it)
+        bcc validator: { Set<String> bcc, Mail mail, Errors errors ->
+            checkMail(bcc, "bcc", errors)
         }
     }
 
-    static private boolean checkMail(Set<String> mailAddresses) {
+    static private void checkMail(Set<String> mailAddresses, String property, Errors error) {
         EmailValidator emailValidator = EmailValidator.instance
-        return mailAddresses.every {
-            emailValidator.isValid(it)
+        mailAddresses.each {
+            if (!emailValidator.isValid(it)) {
+                error.rejectValue(property, "mail.invalid.mail.address", [it] as Object[], "Invalid email address: ${it}")
+            }
         }
     }
 }

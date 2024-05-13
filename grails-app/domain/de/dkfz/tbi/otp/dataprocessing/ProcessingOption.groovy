@@ -394,6 +394,10 @@ class ProcessingOption implements Entity {
                 "Email address that is used to send emails",
                 Necessity.REQUIRED, null, TypeValidators.MAIL
         ),
+        EMAIL_STORAGE_ADMINISTRATION(
+                "Email address to the administration of the storage system",
+                Necessity.OPTIONAL, "", TypeValidators.MAIL
+        ),
         EMAIL_TEXT_REASON_DEACTIVATED_USERS(
                 "A reason which will be printed in an email to the PI, which informs about deactivated users.",
                 Necessity.OPTIONAL, "", TypeValidators.MULTI_LINE_TEXT
