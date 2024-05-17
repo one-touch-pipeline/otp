@@ -65,7 +65,6 @@ ClusterJob.withCriteria {
                 // excluded as those are receive their values via ProcessingOptions
                 "CopyFilesJob",
                 "FastqcJob",
-                "ImportExternallyMergedBamJob",
                 "ExecuteRunYapsaJob",
                 "ExecuteCellRangerJob",
         ])

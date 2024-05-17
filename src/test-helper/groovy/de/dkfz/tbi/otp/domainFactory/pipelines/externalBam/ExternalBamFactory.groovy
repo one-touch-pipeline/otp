@@ -113,7 +113,6 @@ trait ExternalBamFactory implements IsAlignment {
     BamImportInstance createBamImportInstance(Map properties) {
         return createDomainObject(BamImportInstance, [
                 externallyProcessedBamFiles: { [createBamFile()] as Set },
-                state                      : BamImportInstance.State.NOT_STARTED,
                 workflowCreateState        : WorkflowCreateState.WAITING,
                 linkOperation              : BamImportInstance.LinkOperation.COPY_AND_KEEP,
         ], properties)

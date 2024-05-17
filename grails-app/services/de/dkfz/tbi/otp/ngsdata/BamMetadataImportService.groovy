@@ -117,7 +117,6 @@ class BamMetadataImportService {
             importInstance = new BamImportInstance([
                     ticket                     : ticketNumber ? ticketService.createOrResetTicket(ticketNumber, null, true) : null,
                     externallyProcessedBamFiles: [],
-                    state                      : BamImportInstance.State.NOT_STARTED,
                     linkOperation              : linkOperation,
                     triggerAnalysis            : triggerAnalysis,
             ])

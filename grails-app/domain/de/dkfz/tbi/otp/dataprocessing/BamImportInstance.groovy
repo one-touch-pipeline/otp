@@ -37,14 +37,6 @@ import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 @ManagedEntity
 class BamImportInstance implements Entity, ProcessParameterObject {
 
-    enum State {
-        NOT_STARTED,
-        STARTED,
-        FINISHED
-    }
-
-    State state = State.NOT_STARTED
-
     WorkflowCreateState workflowCreateState = WorkflowCreateState.WAITING
 
     @TupleConstructor

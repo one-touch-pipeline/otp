@@ -21,12 +21,12 @@
  */
 package de.dkfz.tbi.otp.config
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.job.jobs.importExternallyMergedBam.ReplaceSourceWithLinkJob
+import de.dkfz.tbi.otp.job.jobs.examplePBS.MyPBSWatchdogJob
 
 @Rollback
 @Integration
@@ -38,11 +38,11 @@ class TypeValidatorsIntegrationSpec extends Specification {
         returnValue == TypeValidators.JOB_NAME_SEQ_TYPE.validate(valueClosure())
 
         where:
-        name                       | valueClosure                                       || returnValue
-        'empty'                    | { '' }                                             || false
-        'null'                     | { null }                                           || false
-        'OtherName'                | { 'OtherJobName' }                                 || false
+        name               | valueClosure                    || returnValue
+        'empty'            | { '' }                          || false
+        'null'             | { null }                        || false
+        'OtherName'        | { 'OtherJobName' }              || false
         // example for no cluster job
-        'ReplaceSourceWithLinkJob' | { ReplaceSourceWithLinkJob.simpleName }            || false
+        'MyPBSWatchdogJob' | { MyPBSWatchdogJob.simpleName } || false
     }
 }
