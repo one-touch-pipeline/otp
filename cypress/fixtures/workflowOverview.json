@@ -1,0 +1,20 @@
+{
+  "states": [
+    "Input required",
+    "Not finished",
+    "Finished"
+  ],
+  "subStates": [
+    "WAITING_FOR_USER",
+    "FAILED",
+    "FAILED_WAITING",
+    "PENDING",
+    "RUNNING_WES",
+    "RUNNING_OTP",
+    "SUCCESS",
+    "SKIPPED_MISSING_PRECONDITION",
+    "FAILED_FINAL",
+    "RESTARTED",
+    "KILLED"
+  ]
+}

@@ -41,9 +41,9 @@
     <nav class="navbar">
         <div class="navbar-brand">
             <div id="statusDot" title="${workflowRun.state}" data-status="${workflowRun.state}" class="d-inline-block"></div>
-            <span class="d-inline-flex align-top pt-1 ml-2">
+            <h3 class="d-inline-flex align-top pt-1 ml-2">
                 ${g.message(code: "workflowRun.details.title")} (${workflowRun.id}) ${g.message(code: "workflowRun.details.of")} ${workflowRun.workflow.name}
-            </span>
+            </h3>
         </div>
     </nav>
 
@@ -58,11 +58,26 @@
                 <input type="hidden" name="redirect" value="${uriWithParams}"/>
 
                 <div class="btn-group">
-                    <button class="btn btn-sm btn-primary failed-final-btn" ${workflowRun.state != WorkflowRun.State.FAILED ? "disabled" : ""}
-                            formaction="${g.createLink(action: "setFailedFinal")}" title="${g.message(code: "workflowRun.details.setFailed")}">
-                        <i class="bi-file-earmark-x"></i> ${g.message(code: "workflowRun.details.setFailed")}
+                    %{-- Button to set the workflow run to failed final, only enabled if the workflow run is in the failed or failed waiting state --}%
+                    <button class="btn btn-sm btn-primary failed-final-btn"
+                        ${(workflowRun.state != WorkflowRun.State.FAILED && workflowRun.state != WorkflowRun.State.FAILED_WAITING) ? "disabled" : ""}
+                            formaction="${g.createLink(action: "setFailedFinal")}" title="${g.message(code: "workflowRun.details.setFailedFinal")}">
+                        <i class="bi-file-earmark-x"></i> ${g.message(code: "workflowRun.details.setFailedFinal")}
                     </button>
-                    <button class="btn btn-sm btn-primary restart-run-btn" ${workflowRun.state != WorkflowRun.State.FAILED ? "disabled" : ""}
+
+                    %{-- Button to set the workflow run to toggle between the failed and failed waiting state, only visible and enabled if the workflow run is in the failed state --}%
+                    <button class="btn btn-sm btn-primary failed-waiting-btn"
+                        ${(workflowRun.state != WorkflowRun.State.FAILED && workflowRun.state != WorkflowRun.State.FAILED_WAITING) ? "hidden disabled" : ""}
+                            formaction="${g.createLink(action: "toggleFailedWaiting")}" title="${g.message(code: "workflowRun.details.toggleFailedWaiting")}">
+                        <i class="bi-file-earmark-minus"></i>
+                        ${workflowRun.state == WorkflowRun.State.FAILED_WAITING ?
+                                g.message(code: "workflowRun.details.removeFailedWaiting")
+                                : g.message(code: "workflowRun.details.setFailedWaiting")}
+                    </button>
+
+                    %{-- Button to restart the run, only enabled if the workflow run is in the failed or failed waiting state --}%
+                    <button class="btn btn-sm btn-primary restart-run-btn"
+                        ${(workflowRun.state != WorkflowRun.State.FAILED && workflowRun.state != WorkflowRun.State.FAILED_WAITING) ? "disabled" : ""}
                             formaction="${g.createLink(action: "restartRun")}" title="${g.message(code: "workflowRun.details.restartRun")}">
                         <i class="bi-reply-all"></i> ${g.message(code: "workflowRun.details.restartRun")}
                     </button>
@@ -106,12 +121,12 @@
 
     <div class="accordion pt-3" id="workflowRunDetailsAccordion">
         <div class="accordion-item">
-            <h2 class="accordion-header" id="stepsHeader">
+            <h4 class="accordion-header" id="stepsHeader">
                 <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#stepsBody" aria-expanded="true"
                         aria-controls="stepsBody">
-                    <h2>${g.message(code: "workflowRun.details.steps")}</h2>
+                    <h4>${g.message(code: "workflowRun.details.steps")}</h4>
                 </button>
-            </h2>
+            </h4>
 
             <div id="stepsBody" class="accordion-collapse collapse show" aria-labelledby="stepsHeader">
                 <div class="accordion-body">
@@ -148,12 +163,12 @@
         </div>
 
         <div class="accordion-item">
-            <h2 class="accordion-header" id="inputHeader">
+            <h4 class="accordion-header" id="inputHeader">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#inputBody" aria-expanded="false"
                         aria-controls="inputBody">
-                    <h2>${g.message(code: "workflowRun.details.input")} (${workflowRun.inputArtefacts.size()})</h2>
+                    <h4>${g.message(code: "workflowRun.details.input")} (${workflowRun.inputArtefacts.size()})</h4>
                 </button>
-            </h2>
+            </h4>
 
             <div id="inputBody" class="accordion-collapse collapse" aria-labelledby="inputHeader">
                 <div class="accordion-body alert alert-secondary">
@@ -174,12 +189,12 @@
         </div>
 
         <div class="accordion-item">
-            <h2 class="accordion-header" id="outputHeader">
+            <h4 class="accordion-header" id="outputHeader">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#outputBody" aria-expanded="false"
                         aria-controls="outputBody">
-                    <h2>${g.message(code: "workflowRun.details.output")} (${workflowRun.outputArtefacts.size()})</h2>
+                    <h4>${g.message(code: "workflowRun.details.output")} (${workflowRun.outputArtefacts.size()})</h4>
                 </button>
-            </h2>
+            </h4>
 
             <div id="outputBody" class="accordion-collapse collapse" aria-labelledby="outputHeader">
                 <div class="accordion-body alert alert-secondary">
@@ -200,12 +215,12 @@
         </div>
 
         <div class="accordion-item">
-            <h2 class="accordion-header" id="configurationHeader">
+            <h4 class="accordion-header" id="configurationHeader">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#configurationBody" aria-expanded="false"
                         aria-controls="configurationBody">
-                    <h2>${g.message(code: "workflowRun.details.config")}</h2>
+                    <h4>${g.message(code: "workflowRun.details.config")}</h4>
                 </button>
-            </h2>
+            </h4>
 
             <div id="configurationBody" class="accordion-collapse collapse" aria-labelledby="configurationHeader">
                 <div class="accordion-body">

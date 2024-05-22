@@ -51,6 +51,12 @@ class WorkflowService {
         return CollectionUtils.exactlyOneElement(Workflow.findAllByNameAndDeprecatedDateIsNull(name), "Could not find workflow with name '${name}'")
     }
 
+    WorkflowRun getUniqueWorkflowFromWorkflowSteps(List<Long> stepIds) {
+        List<WorkflowStep> steps = WorkflowStep.findAllByIdInList(stepIds)
+        assert steps*.workflowRun.unique().size() == 1
+        return CollectionUtils.atMostOneElement(steps*.workflowRun.unique())
+    }
+
     Set<SeqType> getSupportedSeqTypes(String name) {
         return getSupportedSeqTypesOfVersions(Workflow.findAllByName(name))
     }
@@ -63,7 +69,7 @@ class WorkflowService {
 
     WorkflowRun createRestartedWorkflow(WorkflowStep step, boolean startDirectly = true) {
         assert step
-        assert step.workflowRun.state == WorkflowRun.State.FAILED
+        assert step.workflowRun.state in [WorkflowRun.State.FAILED, WorkflowRun.State.FAILED_WAITING]
 
         if (step.workflowRun.project.state == Project.State.ARCHIVED || step.workflowRun.project.state == Project.State.DELETED) {
             String stateName = step.workflowRun.project.state.name().toLowerCase()

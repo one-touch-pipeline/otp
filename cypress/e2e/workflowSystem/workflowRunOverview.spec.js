@@ -31,6 +31,39 @@ describe('Check workflow run overview page', () => {
     it('should visit the index page', () => {
       cy.visit('/workflowRunOverview/index');
     });
+
+    it('should see the list of workflow runs in the condensed view', () => {
+      cy.visit('/workflowRunOverview/index');
+
+      cy.get('table#runs tbody').should('not.be.empty');
+
+      cy.get('table#runs thead tr').find('th').should(ths => {
+        expect(ths).to.contain('Input required');
+        expect(ths).to.contain('Not finished');
+        expect(ths).to.contain('Finished');
+      });
+    });
+
+    it('should switch to detailed overview', function() {
+      cy.visit('/workflowRunOverview/index');
+
+      cy.get('div.container-fluid').find('button.toggleButton:visible')
+        .contains('Show detailed states')
+        .click();
+
+      cy.get('.toggleButton:visible').should('have.text', 'Show condensed states');
+      cy.get('table#runs tbody').should('not.be.empty');
+
+      cy.get('table#runs thead tr').last().find('th').should('have.length', 16);
+      cy.fixture('workflowOverview').then((fixture) => {
+        fixture.states.forEach((state) => {
+          cy.get('table#runs thead tr').first().find('th').should('contain.text', state);
+        });
+        fixture.subStates.forEach((subState) => {
+          cy.get('table#runs thead tr').last().find('th').should('contain.text', subState);
+        });
+      });
+    });
   });
 
   context('when user is normal user', () => {

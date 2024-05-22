@@ -136,7 +136,7 @@ class JobScheduler {
         try {
             WorkflowStep.withTransaction {
                 workflowStep.refresh()
-                workflowStateChangeService.changeStateToFailed(workflowStep, exceptionInJob)
+                workflowStateChangeService.changeStateToFailedWithManualChangedError(workflowStep, exceptionInJob)
                 logService.addSimpleLogEntry(workflowStep, "Failed")
                 log.debug("Failed job: ${workflowStep.displayInfo()}")
             }

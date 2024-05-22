@@ -87,6 +87,14 @@ class WorkflowStateChangeService {
         }
     }
 
+    void toggleFailedWaitingState(WorkflowRun run) {
+        assert run
+        assert run.state in [WorkflowRun.State.FAILED, WorkflowRun.State.FAILED_WAITING]
+
+        run.state = run.state == WorkflowRun.State.FAILED ? WorkflowRun.State.FAILED_WAITING : WorkflowRun.State.FAILED
+        run.save(flush: true)
+    }
+
     void changeStateToFinalFailed(WorkflowStep step) {
         assert step
         step.workflowRun.state = WorkflowRun.State.FAILED_FINAL
@@ -116,7 +124,7 @@ class WorkflowStateChangeService {
         }
     }
 
-    void changeStateToFailed(WorkflowStep step, Throwable throwable) {
+    void changeStateToFailedWithManualChangedError(WorkflowStep step, Throwable throwable) {
         assert step
         step.workflowRun.state = WorkflowRun.State.FAILED
         step.workflowRun.save(flush: true)
@@ -151,7 +159,7 @@ class WorkflowStateChangeService {
      */
     void changeStateToFailedWithManualChangedError(WorkflowStep step) {
         Throwable throwable = new Throwable("Step has manually been set to failed state.")
-        changeStateToFailed(step, throwable)
+        changeStateToFailedWithManualChangedError(step, throwable)
     }
 
     void changeStateToSuccess(WorkflowStep step) {
