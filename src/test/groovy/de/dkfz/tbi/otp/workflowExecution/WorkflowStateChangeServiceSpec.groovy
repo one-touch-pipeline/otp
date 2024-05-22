@@ -137,6 +137,19 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
         workflowStep.workflowRun.state == WorkflowRun.State.FAILED
     }
 
+    void "test changeStateToFailedWaiting"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep()
+
+        when:
+        service.changeStateToFailedWaiting(workflowStep)
+
+        then:
+        workflowStep.state == WorkflowStep.State.FAILED
+        workflowStep.workflowError.message == "The run failed and the process of restarting it is already in progress, but it will take some time."
+        workflowStep.workflowRun.state == WorkflowRun.State.FAILED_WAITING
+    }
+
     void "test changeStateToSuccess, is not last step"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep(beanName: "1st job bean")

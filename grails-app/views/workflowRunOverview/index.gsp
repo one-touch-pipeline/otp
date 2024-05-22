@@ -20,6 +20,7 @@
   - SOFTWARE.
   --}%
 <%@ page import="grails.util.Pair" %>
+<%@ page import="de.dkfz.tbi.otp.workflowExecution.WorkflowRun" %>
 
 <html>
 <head>
@@ -40,30 +41,30 @@
     <button class="btn btn-primary toggleButton" style="display: none">${g.message(code: "workflowRun.overview.show.condensed")}</button>
     <table id="runs" class="w-100 table table-sm table-striped table-hover">
         <thead>
-        <tr>
-            <th></th>
-            <th></th>
-            <th></th>
-            <g:each in="${states}" var="state">
+            <tr>
                 <th></th>
-                <th colspan="${state.value.size()}">${state.key}</th>
-            </g:each>
-            <th></th>
-            <th></th>
-        </tr>
-        <tr>
-            <th></th>
-            <th>${g.message(code: "workflowRun.overview.workflow")}</th>
-            <th>${g.message(code: "workflowRun.overview.all")}</th>
-            <g:each in="${states}" var="stateAndSubStates">
-                <th>${stateAndSubStates.key}</th>
-                <g:each in="${stateAndSubStates.value}" var="subState">
-                    <th title="${subState.description}">${subState}</th>
+                <th></th>
+                <th></th>
+                <g:each in="${states}" var="state">
+                    <th></th>
+                    <th colspan="${state.value.size()}">${state.key}</th>
                 </g:each>
-            </g:each>
-            <th>${g.message(code: "workflowRun.overview.lastRun")}</th>
-            <th>${g.message(code: "workflowRun.overview.lastFail")}</th>
-        </tr>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th></th>
+                <th>${g.message(code: "workflowRun.overview.workflow")}</th>
+                <th>${g.message(code: "workflowRun.overview.all")}</th>
+                <g:each in="${states}" var="stateAndSubStates">
+                    <th>${stateAndSubStates.key}</th>
+                    <g:each in="${stateAndSubStates.value}" var="subState">
+                        <th title="${subState.description}">${subState}</th>
+                    </g:each>
+                </g:each>
+                <th>${g.message(code: "workflowRun.overview.lastRun")}</th>
+                <th>${g.message(code: "workflowRun.overview.lastFail")}</th>
+            </tr>
         </thead>
 
         <tbody>
@@ -75,12 +76,20 @@
                     ${states.collect { state -> state.value.sum { runs[new Pair(it, workflow)] ?: 0 } }.sum()}
                 </g:link></td>
                 <g:each in="${states}" var="stateAndSubStates">
-                    <td><g:link controller="workflowRunList" action="index" params="${["workflow.id": workflow.id, state: stateAndSubStates.value]}">
-                        ${stateAndSubStates.value.sum { runs[new Pair(it, workflow)] ?: 0 }}
-                    </g:link></td>
+                    <td>
+                        <g:link controller="workflowRunList" action="index" params="${["workflow.id": workflow.id, state: stateAndSubStates.value]}">
+                            ${stateAndSubStates.value.sum { runs[new Pair(it, workflow)] ?: 0 }}
+                            <g:if test="${stateAndSubStates.key == 'Input required' && stateAndSubStates.value.sum { runs[new Pair(it, workflow)] ?: 0 } > 0}">
+                                (${runs[new Pair(WorkflowRun.State.FAILED_WAITING, workflow)] ?: 0})
+                            </g:if>
+                        </g:link>
+                    </td>
                     <g:each in="${stateAndSubStates.value}" var="subState">
-                        <td><g:link controller="workflowRunList" action="index"
-                                    params="${["workflow.id": workflow.id, state: subState]}">${runs[new Pair(subState, workflow)] ?: "0"}</g:link></td>
+                        <td>
+                            <g:link controller="workflowRunList" action="index"
+                                    params="${["workflow.id": workflow.id, state: subState]}">${runs[new Pair(subState, workflow)] ?: "0"}
+                            </g:link>
+                        </td>
                     </g:each>
                 </g:each>
                 <td>${lastRuns[workflow]}</td>

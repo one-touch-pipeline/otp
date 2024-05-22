@@ -87,6 +87,31 @@ class WorkflowStateChangeService {
         }
     }
 
+    void changeStateToFailedWaiting(List<WorkflowStep> steps) {
+        steps.each {
+            changeStateToFailedWaiting(it)
+        }
+    }
+
+    void changeStateToFailed(List<WorkflowStep> steps) {
+        steps.each {
+            changeStateToFailedWithManualChangedError(it)
+        }
+    }
+
+    void changeStateToFailedWaiting(WorkflowStep step) {
+        assert step
+        step.workflowRun.state = WorkflowRun.State.FAILED_WAITING
+        step.workflowRun.save(flush: true)
+
+        step.workflowError = new WorkflowError(
+                message: "The run failed and the process of restarting it is already in progress, but it will take some time. ",
+                stacktrace: ""
+        )
+        step.state = WorkflowStep.State.FAILED
+        step.save(flush: true)
+    }
+
     void changeStateToFinalFailed(WorkflowStep step) {
         assert step
         step.workflowRun.state = WorkflowRun.State.FAILED_FINAL

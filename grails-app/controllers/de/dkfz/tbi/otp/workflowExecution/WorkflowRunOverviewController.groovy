@@ -39,6 +39,7 @@ class WorkflowRunOverviewController {
             ("Input required"): [
                     WorkflowRun.State.WAITING_FOR_USER,
                     WorkflowRun.State.FAILED,
+                    WorkflowRun.State.FAILED_WAITING,
             ].asImmutable(),
             ("Not finished")  : [
                     WorkflowRun.State.PENDING,

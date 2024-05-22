@@ -145,6 +145,44 @@ describe('Check workflow run details page', () => {
         cy.get('#statusDot').should('have.attr', 'data-status', 'FAILED_FINAL');
       });
     });
+
+    it('should visit a failed workflow and set it as failed waiting', () => {
+      cy.visit('/workflowRunList/index?state=FAILED');
+
+      cy.intercept('/workflowRunDetails/setFailedWaiting*').as('setFailedWaiting');
+      cy.get('table#runs tbody').should('not.be.empty');
+
+      cy.get('table#runs tbody tr').first().find('a').click();
+      cy.location('pathname').should('contain', '/workflowRunDetails/index');
+
+      cy.get('form button.failed-waiting-btn').click();
+
+      cy.wait('@setFailedWaiting').then((interception) => {
+        expect(interception.response.statusCode).to.eq(302);
+        cy.location('pathname').should('contain', '/workflowRunDetails/index');
+        cy.get('#statusDot').should('have.attr', 'data-status', 'FAILED_WAITING');
+        cy.get('form button.failed-waiting-btn').should('not.be.visible').should('not.be.enabled');
+      });
+    });
+
+    it('should visit a workflow on failed waiting and set it back to failed', () => {
+      cy.visit('/workflowRunList/index?state=FAILED_WAITING');
+
+      cy.intercept('/workflowRunDetails/setFailed*').as('setFailed');
+      cy.get('table#runs tbody').should('not.be.empty');
+
+      cy.get('table#runs tbody tr').first().find('a').click();
+      cy.location('pathname').should('contain', '/workflowRunDetails/index');
+
+      cy.get('form button.failed-btn').click();
+
+      cy.wait('@setFailed').then((interception) => {
+        expect(interception.response.statusCode).to.eq(302);
+        cy.location('pathname').should('contain', '/workflowRunDetails/index');
+        cy.get('#statusDot').should('have.attr', 'data-status', 'FAILED');
+        cy.get('form button.failed-btn').should('not.be.visible').should('not.be.enabled');
+      });
+    });
   });
 
   context('when user is normal user', () => {
@@ -158,7 +196,9 @@ describe('Check workflow run details page', () => {
       cy.checkAccessDenied('/workflowRunDetails/showError');
       cy.checkAccessDenied('/workflowRunDetails/showLogs');
       cy.checkAccessDenied('/workflowRunDetails/saveComment');
+      cy.checkAccessDenied('/workflowRunDetails/setFailed');
       cy.checkAccessDenied('/workflowRunDetails/setFailedFinal');
+      cy.checkAccessDenied('/workflowRunDetails/setFailedWaiting');
     });
   });
 });

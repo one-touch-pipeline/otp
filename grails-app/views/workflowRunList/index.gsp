@@ -92,7 +92,7 @@
             <form method="POST" id="bulk">
                 <div class="btn-group">
                     <button class="btn btn-primary" formaction="${g.createLink(action: "setFailedFinal")}"
-                            title="${g.message(code: "workflowRun.list.setFailed")}"><i class="bi-file-earmark-x"></i></button>
+                            title="${g.message(code: "workflowRun.list.setFailedFinal")}"><i class="bi-file-earmark-x"></i></button>
                     <button class="btn btn-primary" formaction="${g.createLink(action: "restartStep")}"
                             title="${g.message(code: "workflowRun.list.restartSteps")}"><i class="bi-reply"></i></button>
                     <button class="btn btn-primary" formaction="${g.createLink(action: "restartPreviousStep")}"

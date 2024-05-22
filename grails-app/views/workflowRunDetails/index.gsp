@@ -58,11 +58,28 @@
                 <input type="hidden" name="redirect" value="${uriWithParams}"/>
 
                 <div class="btn-group">
-                    <button class="btn btn-sm btn-primary failed-final-btn" ${workflowRun.state != WorkflowRun.State.FAILED ? "disabled" : ""}
-                            formaction="${g.createLink(action: "setFailedFinal")}" title="${g.message(code: "workflowRun.details.setFailed")}">
-                        <i class="bi-file-earmark-x"></i> ${g.message(code: "workflowRun.details.setFailed")}
+                    %{-- Button to set the workflow run to failed final, only enabled if the workflow run is in the failed or failed waiting state --}%
+                    <button class="btn btn-sm btn-primary failed-final-btn"
+                        ${(workflowRun.state != WorkflowRun.State.FAILED && workflowRun.state != WorkflowRun.State.FAILED_WAITING) ? "disabled" : ""}
+                            formaction="${g.createLink(action: "setFailedFinal")}" title="${g.message(code: "workflowRun.details.setFailedFinal")}">
+                        <i class="bi-file-earmark-x"></i> ${g.message(code: "workflowRun.details.setFailedFinal")}
                     </button>
-                    <button class="btn btn-sm btn-primary restart-run-btn" ${workflowRun.state != WorkflowRun.State.FAILED ? "disabled" : ""}
+
+                    %{-- Button to set the workflow run to failed waiting, only visible and enabled if the workflow run is not already in the failed waiting state --}%
+                    <button class="btn btn-sm btn-primary failed-waiting-btn" ${workflowRun.state != WorkflowRun.State.FAILED_WAITING ? "" : "hidden disabled"}
+                            formaction="${g.createLink(action: "setFailedWaiting")}" title="${g.message(code: "workflowRun.details.setFailedWaiting")}">
+                        <i class="bi-file-earmark-minus"></i> ${g.message(code: "workflowRun.details.setFailedWaiting")}
+                    </button>
+
+                    %{-- Button to set the workflow run to failed, only visible and enabled if the workflow run is not already in the failed state --}%
+                    <button class="btn btn-sm btn-primary failed-btn" ${workflowRun.state != WorkflowRun.State.FAILED ? "" : "hidden disabled"}
+                            formaction="${g.createLink(action: "setFailed")}" title="${g.message(code: "workflowRun.details.setFailed")}">
+                        <i class="bi-file-earmark-minus"></i> ${g.message(code: "workflowRun.details.setFailed")}
+                    </button>
+
+                    %{-- Button to restart the run, only enabled if the workflow run is in the failed or failed waiting state --}%
+                    <button class="btn btn-sm btn-primary restart-run-btn"
+                        ${(workflowRun.state != WorkflowRun.State.FAILED && workflowRun.state != WorkflowRun.State.FAILED_WAITING) ? "disabled" : ""}
                             formaction="${g.createLink(action: "restartRun")}" title="${g.message(code: "workflowRun.details.restartRun")}">
                         <i class="bi-reply-all"></i> ${g.message(code: "workflowRun.details.restartRun")}
                     </button>

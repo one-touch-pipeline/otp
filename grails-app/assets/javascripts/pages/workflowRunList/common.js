@@ -52,6 +52,8 @@ const statusToClassName = function (status) {
       return 'dot purple';
     case 'FAILED_FINAL':
       return 'dot darkorange';
+    case 'FAILED_WAITING':
+      return 'dot turquoise';
     case 'RESTARTED':
       return 'dot orange';
     case 'KILLED':
