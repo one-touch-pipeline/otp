@@ -55,12 +55,6 @@ class WorkflowRunDetailsController extends AbstractWorkflowRunController {
 
         WorkflowRun restartedAs = workflowRunService.findAllByRestartedFrom(cmd.id)
 
-        List<WorkflowRun> workflowRuns = workflowRunService.workflowRunList(cmd.workflow, cmd.states, cmd.name)
-
-        int index = workflowRuns.findIndexOf { cmd.id == it.id }
-        WorkflowRun previous = (index <= 0) ? null : workflowRuns[index - 1]
-        WorkflowRun next = (index in [-1, workflowRuns.size() - 1]) ? null : workflowRuns[index + 1]
-
         String unFormattedJson = cmd.id.combinedConfig ?: '{}'
         JSONObject jsonObject = JSON.parse(unFormattedJson) as JSONObject
         String formattedJson = jsonObject.toString(4)
@@ -68,8 +62,6 @@ class WorkflowRunDetailsController extends AbstractWorkflowRunController {
         return [
                 workflowRun   : cmd.id,
                 restartedAs   : restartedAs,
-                previous      : previous,
-                next          : next,
                 cmd           : cmd,
                 combinedConfig: formattedJson,
         ]

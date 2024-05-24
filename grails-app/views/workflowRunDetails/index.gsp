@@ -38,34 +38,12 @@
             <li class="breadcrumb-item active" aria-current="page">${g.message(code: "workflow.navigation.details")} (${workflowRun.id})</li>
         </ol>
     </nav>
-
     <nav class="navbar">
         <div class="navbar-brand">
             <div id="statusDot" title="${workflowRun.state}" data-status="${workflowRun.state}" class="d-inline-block"></div>
             <span class="d-inline-flex align-top pt-1 ml-2">
                 ${g.message(code: "workflowRun.details.title")} (${workflowRun.id}) ${g.message(code: "workflowRun.details.of")} ${workflowRun.workflow.name}
             </span>
-        </div>
-
-        <div class="btn-group">
-            <g:if test="${previous}">
-                <g:link class="btn btn-primary" action="index" id="${previous.id}"
-                        params="['workflow.id': cmd.workflow?.id, state: cmd.states?.join(','), name: cmd.name]">
-                    <i title="${g.message(code: "workflowRun.details.previous")}" class='bi-caret-left'></i>
-                </g:link>
-            </g:if>
-            <g:else>
-                <button class="btn btn-primary" disabled><i title="${g.message(code: "workflowRun.details.previous")}" class='bi-caret-left'></i></button>
-            </g:else>
-            <g:if test="${next}">
-                <g:link class="btn btn-primary" action="index" id="${next.id}"
-                        params="['workflow.id': cmd.workflow?.id, state: cmd.states?.join(','), name: cmd.name]">
-                    <i title="${g.message(code: "workflowRun.details.next")}" class='bi-caret-right'></i>
-                </g:link>
-            </g:if>
-            <g:else>
-                <button class="btn btn-primary" disabled><i title="${g.message(code: "workflowRun.details.next")}" class='bi-caret-right'></i></button>
-            </g:else>
         </div>
     </nav>
 
