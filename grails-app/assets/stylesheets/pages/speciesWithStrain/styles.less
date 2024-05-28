@@ -20,52 +20,7 @@
  * SOFTWARE.
  */
 
-
-table {
-  width: auto;
+.listing-content {
+    max-height: 20em;
+    overflow: auto;
 }
-
-.box {
-  border: 1px solid black;
-  background-color: #F3FAFF;
-  padding: 10px;
-  margin-bottom: 12px;
-}
-
-.input-field {
-  width: 40ch;
-}
-
-.box-content {
-  display: flex;
-  flex: 2;
-
-  .form {
-    flex: 1;
-  }
-
-  .listing {
-    flex: 1;
-
-    .listing-content {
-      max-height: 20em;
-    }
-  }
-}
-
-.speciesCommonName-container {
-  display: flex;
-  justify-content: space-between;
-  flex: 3;
-
-  .name-box {
-    flex: 1;
-  }
-
-  .alias-box {
-    flex: 2;
-  }
-
-  //legacy automatically has flex: 0;
-}
-

@@ -27,6 +27,7 @@ module.exports = defineConfig({
     specPattern: 'cypress/e2e/**/*.spec.js',
     supportFile: 'cypress/support/index.js',
     experimentalRunAllSpecs: true,
+    experimentalStudio: true,
     testIsolation: false
   },
   screenshotsFolder: 'cypress/screenshots',

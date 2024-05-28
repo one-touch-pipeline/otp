@@ -1,0 +1,8 @@
+{
+  "commonName": "New common name",
+  "scientificName": "Some scientific name",
+  "strainName": "New Strain Name12&",
+  "speciesName": "New common name (Some scientific name)",
+  "speciesWithStrainName": "New common name (Some scientific name) [New Strain Name12&]",
+  "importAlias": "New Alias"
+}

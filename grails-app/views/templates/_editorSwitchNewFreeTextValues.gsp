@@ -42,6 +42,6 @@
         <button class="buttons save"><g:message code="default.button.save.label"/></button>
         <button class="buttons cancel"><g:message code="default.button.cancel.label"/></button>
     </span>
-    <span class="edit-switch-label"><button class="add js-edit"><g:message code="default.new"/></button>
+    <span class="edit-switch-label"><button class="btn btn-primary add js-edit"><g:message code="default.new"/></button>
     </span>
 </div>
