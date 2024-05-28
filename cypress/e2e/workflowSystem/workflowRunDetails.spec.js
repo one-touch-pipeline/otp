@@ -168,7 +168,7 @@ describe('Check workflow run details page', () => {
     it('should visit a workflow on failed waiting and set it back to failed', () => {
       cy.visit('/workflowRunList/index?state=FAILED_WAITING');
 
-      cy.intercept('/workflowRunDetails/setFailed*').as('setFailed');
+      cy.intercept('/workflowRunDetails/removeFailedWaiting*').as('removeFailedWaiting');
       cy.get('table#runs tbody').should('not.be.empty');
 
       cy.get('table#runs tbody tr').first().find('a').click();
@@ -176,7 +176,7 @@ describe('Check workflow run details page', () => {
 
       cy.get('form button.failed-btn').click();
 
-      cy.wait('@setFailed').then((interception) => {
+      cy.wait('@removeFailedWaiting').then((interception) => {
         expect(interception.response.statusCode).to.eq(302);
         cy.location('pathname').should('contain', '/workflowRunDetails/index');
         cy.get('#statusDot').should('have.attr', 'data-status', 'FAILED');
@@ -196,9 +196,9 @@ describe('Check workflow run details page', () => {
       cy.checkAccessDenied('/workflowRunDetails/showError');
       cy.checkAccessDenied('/workflowRunDetails/showLogs');
       cy.checkAccessDenied('/workflowRunDetails/saveComment');
-      cy.checkAccessDenied('/workflowRunDetails/setFailed');
       cy.checkAccessDenied('/workflowRunDetails/setFailedFinal');
       cy.checkAccessDenied('/workflowRunDetails/setFailedWaiting');
+      cy.checkAccessDenied('/workflowRunDetails/removeFailedWaiting');
     });
   });
 });

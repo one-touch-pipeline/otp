@@ -49,7 +49,7 @@ describe('Check workflow run list page', () => {
 
     it('should set a failed workflow to failed final', () => {
       cy.get('td button.failed-final-btn').first().click();
-      cy.get('.toast-body').should('contain.text', 'success');
+      cy.get('.toast-body').should('contain.text', 'Success');
     });
 
     it('should restart a failed workflow step', () => {
