@@ -26,13 +26,21 @@ import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflowExecution.ReferenceGenomeSelector
+import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 import de.dkfz.tbi.otp.workflowExecution.WorkflowVersionSelector
+import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 
 @Transactional
 class TriggerWorkflowService {
+
+    AbstractBamFileService abstractBamFileService
+    AllDecider allDecider
 
     @CompileDynamic
     List<AbstractBamFile> getBamFiles(List<Long> seqTrackIds) {
@@ -82,6 +90,11 @@ class TriggerWorkflowService {
             new WorkflowVersionAndReferenceGenomeSelector(it,
                     ReferenceGenomeSelector.findAllByProjectAndSeqTypeAndWorkflow(it.project, it.seqType, it.workflowVersion.workflow))
         }
+    }
+
+    void triggerWorkflowByProjectAndSampleTypes(Project project, Set<SampleType> sampleTypes) {
+        List<WorkflowArtefact> artefacts = abstractBamFileService.findAllByProjectAndSampleType(project, sampleTypes)*.workflowArtefact
+        allDecider.decide(artefacts)
     }
 }
 

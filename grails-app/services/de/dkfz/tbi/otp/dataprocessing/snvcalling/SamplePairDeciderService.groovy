@@ -30,12 +30,15 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+// Is used in old Workflow system
+@Deprecated
 @GrailsCompileStatic
 @Transactional
 class SamplePairDeciderService {
 
     AbstractMergingWorkPackageService abstractMergingWorkPackageService
 
+    @Deprecated
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<SamplePair> findOrCreateSamplePairsForProject(Project project) {
         assert project != null
@@ -62,6 +65,7 @@ class SamplePairDeciderService {
         return findOrCreateSamplePairs(mergingWorkPackages)
     }
 
+    @Deprecated
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<SamplePair> createSamplePairs(Project project, Set<SampleType> sampleTypes) {
         if (!sampleTypes) {
@@ -87,6 +91,7 @@ class SamplePairDeciderService {
         return findOrCreateSamplePairs(mergingWorkPackages)
     }
 
+    @Deprecated
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<SamplePair> findOrCreateSamplePairs(Collection<AbstractMergingWorkPackage> mergingWorkPackages) {
         assert mergingWorkPackages != null
@@ -96,6 +101,7 @@ class SamplePairDeciderService {
         }.unique() as List<SamplePair>
     }
 
+    @Deprecated
     @SuppressWarnings(['Instanceof', 'ConstantAssertExpression']) // Instanceof: The method needs to do a check depending on MergingWorkPackage
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<SamplePair> findOrCreateSamplePairs(AbstractMergingWorkPackage mergingWorkPackage) {
@@ -134,6 +140,7 @@ class SamplePairDeciderService {
         }
     }
 
+    @Deprecated
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<SamplePair> findOrCreateSamplePairs(List<AbstractMergingWorkPackage> diseases, AbstractMergingWorkPackage control) {
         return diseases.collect { AbstractMergingWorkPackage disease ->
@@ -141,6 +148,7 @@ class SamplePairDeciderService {
         }
     }
 
+    @Deprecated
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<SamplePair> findOrCreateSamplePairs(AbstractMergingWorkPackage disease, List<AbstractMergingWorkPackage> controls) {
         return controls.collect { AbstractMergingWorkPackage control ->
@@ -148,6 +156,7 @@ class SamplePairDeciderService {
         }
     }
 
+    @Deprecated
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     SamplePair findOrCreateSamplePair(AbstractMergingWorkPackage disease, AbstractMergingWorkPackage control) {
         assert disease

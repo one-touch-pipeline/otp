@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflow
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
+import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
@@ -31,19 +32,22 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
 import de.dkfz.tbi.otp.workflowExecution.ReferenceGenomeSelector
+import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 import de.dkfz.tbi.otp.workflowExecution.WorkflowVersionSelector
+import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 
 @Rollback
 @Integration
 class TriggerWorkflowServiceIntegrationSpec extends Specification implements DomainFactoryCore, RoddyPanCancerFactory, WorkflowSystemDomainFactory {
 
+    @Autowired
     TriggerWorkflowService service
-
-    void setup() {
-        service = new TriggerWorkflowService()
-    }
 
     void "test getBamFiles, with empty input"() {
         when:
@@ -191,5 +195,41 @@ class TriggerWorkflowServiceIntegrationSpec extends Specification implements Dom
                 [referenceGenomeSelector1a, referenceGenomeSelector1b])
         TestCase.assertContainSame(result.find { it.workflowVersionSelector == workflowVersionSelector2 }.referenceGenomeSelectors,
                 [referenceGenomeSelector2a, referenceGenomeSelector2b])
+    }
+
+    void "triggerWorkflowByProjectAndSampleTypes should trigger allDecider for workflow artefacts"() {
+        given:
+        service.allDecider = Mock(AllDecider)
+
+        Project project = createProject()
+        SampleType sampleType1 = createSampleType()
+        SampleType sampleType2 = createSampleType()
+        SampleType sampleType3 = createSampleType()
+        WorkflowArtefact workflowArtefact1 = createWorkflowArtefact()
+        WorkflowArtefact workflowArtefact2 = createWorkflowArtefact()
+        WorkflowArtefact workflowArtefact3 = createWorkflowArtefact()
+        createBamFile([
+                workflowArtefact: workflowArtefact1,
+                workPackage     : createMergingWorkPackage([sample: createSample([sampleType: sampleType1, individual: createIndividual([project: project])])]),
+        ])
+        createBamFile([
+                workflowArtefact: workflowArtefact2,
+                workPackage     : createMergingWorkPackage([sample: createSample([sampleType: sampleType2, individual: createIndividual([project: project])])]),
+        ])
+        createBamFile([
+                workflowArtefact: workflowArtefact3,
+                workPackage     : createMergingWorkPackage([sample: createSample([sampleType: sampleType3, individual: createIndividual([project: project])])]),
+        ])
+        createBamFile([workPackage: createMergingWorkPackage([sample: createSample([individual: createIndividual([project: project])])])])
+        createBamFile([workPackage: createMergingWorkPackage([sample: createSample([sampleType: sampleType3])])])
+        createBamFile()
+        createWorkflow(name: PanCancerWorkflow.WORKFLOW)
+        createWorkflow(name: RnaAlignmentWorkflow.WORKFLOW)
+
+        when:
+        service.triggerWorkflowByProjectAndSampleTypes(project, [sampleType1, sampleType2, sampleType3] as Set)
+
+        then:
+        1 * service.allDecider.decide([workflowArtefact1, workflowArtefact2, workflowArtefact3])
     }
 }

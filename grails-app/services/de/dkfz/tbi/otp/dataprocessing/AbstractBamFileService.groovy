@@ -26,6 +26,7 @@ import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 
 import java.nio.file.Path
 
@@ -117,6 +118,22 @@ class AbstractBamFileService {
                 }
             }
         }.findAll { it.isMostRecentBamFile() }
+    }
+
+    List<AbstractBamFile> findAllByProjectAndSampleType(Project project, Set<SampleType> sampleTypes) {
+        return AbstractBamFile.createCriteria().list {
+            eq("withdrawn", false)
+            eq("fileOperationStatus",
+                    AbstractBamFile.FileOperationStatus.PROCESSED)
+            workPackage {
+                sample {
+                    individual {
+                        eq('project', project)
+                    }
+                    'in'('sampleType', sampleTypes)
+                }
+            }
+        } as List<AbstractBamFile>
     }
 
     Double calculateCoverageWithN(AbstractBamFile bamFile) {

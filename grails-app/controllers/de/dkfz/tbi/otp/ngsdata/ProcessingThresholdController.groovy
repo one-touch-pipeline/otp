@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholdsService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.SecurityService
+import de.dkfz.tbi.otp.workflow.TriggerWorkflowService
 
 @PreAuthorize('isFullyAuthenticated()')
 class ProcessingThresholdController {
@@ -45,6 +46,7 @@ class ProcessingThresholdController {
     SampleTypePerProjectService sampleTypePerProjectService
     SampleTypeService sampleTypeService
     SecurityService securityService
+    TriggerWorkflowService triggerWorkflowService
 
     Map index(ProcThresholdsEditCommand cmd) {
         Project project = projectSelectionService.selectedProject
@@ -113,8 +115,10 @@ class ProcessingThresholdController {
             }
         }
 
-        // Sample pairs are created only if their sample types have been changed
+        // Sample pairs are created only if their sample types have been changed. Has to stay until snv, indel and sophia are created in new system
         samplePairDeciderService.createSamplePairs(project, sampleTypesChanged)
+        triggerWorkflowService.triggerWorkflowByProjectAndSampleTypes(project, sampleTypesChanged)
+
         flash.message = new FlashMessage("success")
         redirect(action: "index")
     }
