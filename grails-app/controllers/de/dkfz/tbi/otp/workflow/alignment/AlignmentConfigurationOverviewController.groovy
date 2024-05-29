@@ -64,7 +64,7 @@ class AlignmentConfigurationOverviewController {
     @Deprecated
     private Map<SeqType, MergingCriteria> getSeqTypeMergingCriteria(Project project) {
         List<MergingCriteria> mergingCriteria = mergingCriteriaService.findAllByProject(project)
-        return SeqTypeService.allAlignableSeqTypes.findAll { !(it in seqTypeService.seqTypesNewWorkflowSystem) }.collectEntries { SeqType seqType ->
+        return SeqTypeService.allAlignableSeqTypes.findAll { it in seqTypeService.seqTypesOldWorkflowSystem }.collectEntries { SeqType seqType ->
             [(seqType): mergingCriteria.find { it.seqType == seqType }]
         }.sort { Map.Entry<SeqType, MergingCriteria> it -> it.key.displayNameWithLibraryLayout }
     }

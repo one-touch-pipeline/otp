@@ -87,8 +87,8 @@ class AlignmentValidatorSpec extends Specification implements DataTest, DomainFa
                     seqTypeOldSystem,
                     seqTypeNewSystem,
             ]
-            count * seqTypesNewWorkflowSystem >> [
-                    seqTypeNewSystem,
+            count * seqTypesOldWorkflowSystem >> [
+                    seqTypeOldSystem,
             ]
             _ * findByNameOrImportAlias(_, _) >> { String nameOrImportAlias, Map properties ->
                 return CollectionUtils.exactlyOneElement(SeqType.findAllByName(nameOrImportAlias), "Not found: ${nameOrImportAlias}")
@@ -163,18 +163,14 @@ ${seqTypeNotAlignable.name},${createProject().name},,DNA,${seqTypeNotAlignable.l
     void 'validate, when alignment is not configured, return warning'() {
         given:
         setupData()
-        DomainFactory.createPanCanPipeline()
-        Pipeline pipeline = DomainFactory.createRnaPipeline()
         Project project = createProject()
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${SEQUENCING_TYPE},${PROJECT},${SAMPLE_NAME},${BASE_MATERIAL},${SEQUENCING_READ_TYPE},${SPECIES}
-${seqTypeOldSystem.name},${project.name},,DNA,${seqTypeOldSystem.libraryLayout},mouse
 ${seqTypeCellRanger.name},${project.name},,${SeqType.SINGLE_CELL_DNA},${seqTypeCellRanger.libraryLayout},mouse
 ${seqTypeNewSystem.name},${project.name},,DNA,${seqTypeNewSystem.libraryLayout},mouse
 """.replaceAll(',', '\t'))
 
         Collection<Problem> expectedProblems = [
-                new Problem(Collections.emptySet(), LogLevel.WARNING, "${pipeline.name} is not configured for Project '${project}' and SeqType '${seqTypeOldSystem}'", "At least one Alignment or Reference Genome is not configured."),
                 new Problem(Collections.emptySet(), LogLevel.WARNING, "CellRanger is not configured for Project '${project}' and SeqType '${seqTypeCellRanger}'", "At least one Alignment or Reference Genome is not configured."),
                 new Problem(Collections.emptySet(), LogLevel.WARNING, "Alignment is not configured for Project '${project}' and SeqType '${seqTypeNewSystem}'", "At least one Alignment or Reference Genome is not configured."),
         ]
@@ -244,14 +240,11 @@ ${seqTypeNewSystem.name},${project.name},,DNA,${seqTypeNewSystem.libraryLayout},
     void 'validate, when alignment is configured, no warnings or errors'() {
         given:
         setupData()
-        Pipeline pipeline = DomainFactory.createRnaPipeline()
         Project project = createProject()
-        DomainFactory.createRoddyWorkflowConfig(project: project, pipeline: pipeline, seqType: seqTypeOldSystem)
         DomainFactory.proxyCellRanger.createConfig(project: project, seqType: seqTypeCellRanger)
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${SEQUENCING_TYPE},${PROJECT},${SAMPLE_NAME},${BASE_MATERIAL},${SEQUENCING_READ_TYPE}
-${seqTypeOldSystem.name},${project.name},,DNA,${seqTypeOldSystem.libraryLayout}
 ${seqTypeCellRanger.name},${project.name},,${SeqType.SINGLE_CELL_DNA},${seqTypeCellRanger.libraryLayout}
 ${seqTypeNewSystem.name},${project.name},,DNA,${seqTypeNewSystem.libraryLayout}
 """.replaceAll(',', '\t'))

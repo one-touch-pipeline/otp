@@ -414,15 +414,9 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
     }
 
     @Deprecated
-    List<SeqType> getSeqTypesNewWorkflowSystem() {
+    List<SeqType> getSeqTypesOldWorkflowSystem() {
         return [
-                exomePairedSeqType,
-                wholeGenomePairedSeqType,
-                chipSeqPairedSeqType,
-                wholeGenomeBisulfitePairedSeqType,
-                wholeGenomeBisulfiteTagmentationPairedSeqType,
-                rnaPairedSeqType,
-                rnaSingleSeqType,
+                get10xSingleCellRnaSeqType()
         ]
     }
 

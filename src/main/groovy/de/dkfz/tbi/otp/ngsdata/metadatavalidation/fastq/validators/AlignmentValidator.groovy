@@ -26,15 +26,12 @@ import groovy.transform.TupleConstructor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflowExecution.ReferenceGenomeSelectorService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowVersionSelectorService
 import de.dkfz.tbi.util.spreadsheet.validation.*
@@ -49,9 +46,6 @@ class AlignmentValidator extends AbstractValueTuplesValidator<MetadataValidation
 
     @Autowired
     ProjectService projectService
-
-    @Autowired
-    MetadataImportService metadataImportService
 
     @Autowired
     ValidatorHelperService validatorHelperService
@@ -86,9 +80,7 @@ class AlignmentValidator extends AbstractValueTuplesValidator<MetadataValidation
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> allValueTuples) {
         List<SeqType> alignAbleSeqTypes = seqTypeService.findAlignAbleSeqTypes()
-        List<SeqType> seqTypesNewSystem = seqTypeService.seqTypesNewWorkflowSystem
-        List<SeqType> seqTypesOldSystem = alignAbleSeqTypes - seqTypesNewSystem
-
+        List<SeqType> seqTypesNewSystem = alignAbleSeqTypes - seqTypeService.seqTypesOldWorkflowSystem
         allValueTuples.groupBy {
             new ProjectSeqTypeSpecies(
                     validatorHelperService.getProjectFromMetadata(it),
@@ -98,21 +90,16 @@ class AlignmentValidator extends AbstractValueTuplesValidator<MetadataValidation
         }.findAll {
             it.key.valuesGiven()
         }.each { ProjectSeqTypeSpecies projectSeqTypeSpecies, List<ValueTuple> valueTuplesSameSeqType ->
-            checkSingleTuple(projectSeqTypeSpecies, seqTypesOldSystem, context, seqTypesNewSystem)
+            checkSingleTuple(projectSeqTypeSpecies, context, seqTypesNewSystem)
         }
     }
 
     @CompileDynamic
-    private void checkSingleTuple(ProjectSeqTypeSpecies projectSeqTypeSpecies, List<SeqType> seqTypesOldSystem, MetadataValidationContext context, List<SeqType> seqTypesNewSystem) {
+    private void checkSingleTuple(ProjectSeqTypeSpecies projectSeqTypeSpecies, MetadataValidationContext context, List<SeqType> seqTypesNewSystem) {
         Project project = projectSeqTypeSpecies.project
         SeqType seqType = projectSeqTypeSpecies.seqType
         List<SpeciesWithStrain> species = projectSeqTypeSpecies.speciesWithStrains
-        if (seqType in seqTypesOldSystem) {
-            Pipeline pipeline = CollectionUtils.atMostOneElement(Pipeline.findAllByNameAndType(Pipeline.Name.forSeqType(seqType), Pipeline.Type.ALIGNMENT))
-            if (!RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)) {
-                createWarningMessage(context, "${pipeline.name.name()} is not configured for Project '${project}' and SeqType '${seqType}'")
-            }
-        } else if (seqType in seqTypesNewSystem) {
+        if (seqType in seqTypesNewSystem) {
             if (!workflowVersionSelectorService.hasAlignmentConfigForProjectAndSeqType(project, seqType)) {
                 createWarningMessage(context, "Alignment is not configured for Project '${project}' and SeqType '${seqType}'")
             }

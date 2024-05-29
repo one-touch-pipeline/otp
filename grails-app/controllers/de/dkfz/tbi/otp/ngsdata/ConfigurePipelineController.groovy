@@ -43,7 +43,7 @@ class ConfigurePipelineController {
     ]
 
     def invalidateConfig(InvalidateConfigurationCommand cmd) {
-        if (cmd.seqType in seqTypeService.seqTypesNewWorkflowSystem && cmd.pipeline?.type == Pipeline.Type.ALIGNMENT) {
+        if (!(cmd.seqType in seqTypeService.seqTypesOldWorkflowSystem) && cmd.pipeline?.type == Pipeline.Type.ALIGNMENT) {
             log.debug("invalidateConfig is not available for new workflow system")
             return response.sendError(404)
         }
