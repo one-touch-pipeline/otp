@@ -39,8 +39,7 @@ abstract class AbstractWorkflowRunController implements CheckAndCall {
 
     static allowedMethods = [
             setFailedFinal     : "POST",
-            setFailedWaiting   : "POST",
-            removeFailedWaiting: "POST",
+            toggleFailedWaiting: "POST",
             restartStep        : "POST",
             restartPreviousStep: "POST",
             restartRun         : "POST",
@@ -56,19 +55,14 @@ abstract class AbstractWorkflowRunController implements CheckAndCall {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    def setFailedWaiting(RunUpdateCommand cmd) {
-        checkErrorAndCallMethodWithFlashMessageWithoutTokenCheck(cmd, "workflowRun.list.setFailedWaiting") {
+    def toggleFailedWaiting(RunUpdateCommand cmd) {
+        WorkflowRun workflowRun = cmd.step.collect { WorkflowStep.get(it) }*.workflowRun.first()
+        checkErrorAndCallMethodWithFlashMessageWithoutTokenCheck(
+                cmd,
+                (workflowRun.state == WorkflowRun.State.FAILED_WAITING) ? "workflowRun.list.removeFailedWaiting" : "workflowRun.list.setFailedWaiting"
+        ) {
             assert cmd.step: 'No steps defined.'
-            workflowStateChangeService.changeStateToFailedWaiting(cmd.step.collect { WorkflowStep.get(it) })
-        }
-        redirect uri: cmd.redirect
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    def removeFailedWaiting(RunUpdateCommand cmd) {
-        checkErrorAndCallMethodWithFlashMessageWithoutTokenCheck(cmd, "workflowRun.list.removeFailedWaiting") {
-            assert cmd.step: 'No steps defined.'
-            workflowStateChangeService.changeStateToFailed(cmd.step.collect { WorkflowStep.get(it) })
+            workflowStateChangeService.toggleFailedWaitingState(workflowRun)
         }
         redirect uri: cmd.redirect
     }

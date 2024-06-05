@@ -87,29 +87,17 @@ class WorkflowStateChangeService {
         }
     }
 
-    void changeStateToFailedWaiting(List<WorkflowStep> steps) {
-        steps.each {
-            changeStateToFailedWaiting(it)
+    void toggleFailedWaitingState(WorkflowRun run) {
+        assert run
+        assert run.state == WorkflowRun.State.FAILED || run.state == WorkflowRun.State.FAILED_WAITING
+
+        if (run.state == WorkflowRun.State.FAILED) {
+            run.state = WorkflowRun.State.FAILED_WAITING
+            run.save(flush: true)
+        } else if (run.state == WorkflowRun.State.FAILED_WAITING) {
+            run.state = WorkflowRun.State.FAILED
+            run.save(flush: true)
         }
-    }
-
-    void changeStateToFailed(List<WorkflowStep> steps) {
-        steps.each {
-            changeStateToFailedWithManualChangedError(it)
-        }
-    }
-
-    void changeStateToFailedWaiting(WorkflowStep step) {
-        assert step
-        step.workflowRun.state = WorkflowRun.State.FAILED_WAITING
-        step.workflowRun.save(flush: true)
-
-        step.workflowError = new WorkflowError(
-                message: "The run failed and the process of restarting it is already in progress, but it will take some time. ",
-                stacktrace: ""
-        )
-        step.state = WorkflowStep.State.FAILED
-        step.save(flush: true)
     }
 
     void changeStateToFinalFailed(WorkflowStep step) {
@@ -141,7 +129,7 @@ class WorkflowStateChangeService {
         }
     }
 
-    void changeStateToFailed(WorkflowStep step, Throwable throwable) {
+    void changeStateToFailedWithManualChangedError(WorkflowStep step, Throwable throwable) {
         assert step
         step.workflowRun.state = WorkflowRun.State.FAILED
         step.workflowRun.save(flush: true)
@@ -176,7 +164,7 @@ class WorkflowStateChangeService {
      */
     void changeStateToFailedWithManualChangedError(WorkflowStep step) {
         Throwable throwable = new Throwable("Step has manually been set to failed state.")
-        changeStateToFailed(step, throwable)
+        changeStateToFailedWithManualChangedError(step, throwable)
     }
 
     void changeStateToSuccess(WorkflowStep step) {

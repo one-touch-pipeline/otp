@@ -65,16 +65,14 @@
                         <i class="bi-file-earmark-x"></i> ${g.message(code: "workflowRun.details.setFailedFinal")}
                     </button>
 
-                    %{-- Button to set the workflow run to failed waiting, only visible and enabled if the workflow run is in the failed state --}%
-                    <button class="btn btn-sm btn-primary failed-waiting-btn" ${workflowRun.state == WorkflowRun.State.FAILED ? "" : "hidden disabled"}
-                            formaction="${g.createLink(action: "setFailedWaiting")}" title="${g.message(code: "workflowRun.details.setFailedWaiting")}">
-                        <i class="bi-file-earmark-minus"></i> ${g.message(code: "workflowRun.details.setFailedWaiting")}
-                    </button>
-
-                    %{-- Button to remove the failed waiting status of the workflow run, only visible and enabled if the workflow run is in the failed waiting state --}%
-                    <button class="btn btn-sm btn-primary failed-btn" ${workflowRun.state == WorkflowRun.State.FAILED_WAITING ? "" : "hidden disabled"}
-                            formaction="${g.createLink(action: "removeFailedWaiting")}" title="${g.message(code: "workflowRun.details.removeFailedWaiting")}">
-                        <i class="bi-file-earmark-minus"></i> ${g.message(code: "workflowRun.details.removeFailedWaiting")}
+                    %{-- Button to set the workflow run to toggle between the failed and failed waiting state, only visible and enabled if the workflow run is in the failed state --}%
+                    <button class="btn btn-sm btn-primary failed-waiting-btn"
+                        ${(workflowRun.state != WorkflowRun.State.FAILED && workflowRun.state != WorkflowRun.State.FAILED_WAITING) ? "hidden disabled" : ""}
+                            formaction="${g.createLink(action: "toggleFailedWaiting")}" title="${g.message(code: "workflowRun.details.toggleFailedWaiting")}">
+                        <i class="bi-file-earmark-minus"></i>
+                        ${workflowRun.state == WorkflowRun.State.FAILED_WAITING ?
+                                g.message(code: "workflowRun.details.removeFailedWaiting")
+                                : g.message(code: "workflowRun.details.setFailedWaiting")}
                     </button>
 
                     %{-- Button to restart the run, only enabled if the workflow run is in the failed or failed waiting state --}%

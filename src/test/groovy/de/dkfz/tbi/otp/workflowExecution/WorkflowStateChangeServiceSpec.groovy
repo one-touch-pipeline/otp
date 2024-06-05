@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 
@@ -123,13 +124,13 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
         wr3.skipMessage.message == "Previous run failed"
     }
 
-    void "test changeStateToFailed"() {
+    void "test changeStateToFailedWithManualChangedError"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
         Throwable throwable = new IOException("test")
 
         when:
-        service.changeStateToFailed(workflowStep, throwable)
+        service.changeStateToFailedWithManualChangedError(workflowStep, throwable)
 
         then:
         workflowStep.state == WorkflowStep.State.FAILED
@@ -137,17 +138,32 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
         workflowStep.workflowRun.state == WorkflowRun.State.FAILED
     }
 
-    void "test changeStateToFailedWaiting"() {
+    @Unroll
+    void "test toggleFailedWaitingState"() {
         given:
-        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowRun workflowRun = createWorkflowRun(state: state)
 
         when:
-        service.changeStateToFailedWaiting(workflowStep)
+        service.toggleFailedWaitingState(workflowRun)
 
         then:
-        workflowStep.state == WorkflowStep.State.FAILED
-        workflowStep.workflowError.message == "The run failed and the process of restarting it is already in progress, but it will take some time."
-        workflowStep.workflowRun.state == WorkflowRun.State.FAILED_WAITING
+        workflowRun.state == expected
+
+        where:
+        state                            | expected
+        WorkflowRun.State.FAILED         | WorkflowRun.State.FAILED_WAITING
+        WorkflowRun.State.FAILED_WAITING | WorkflowRun.State.FAILED
+    }
+
+    void "toggleFailedWaitingState, when called for workflow state other than FAILED or FAILED_WAITING, then throw assertion"() {
+        given:
+        WorkflowRun workflowRun = createWorkflowRun(state: WorkflowRun.State.SUCCESS)
+
+        when:
+        service.toggleFailedWaitingState(workflowRun)
+
+        then:
+        thrown(AssertionError)
     }
 
     void "test changeStateToSuccess, is not last step"() {
