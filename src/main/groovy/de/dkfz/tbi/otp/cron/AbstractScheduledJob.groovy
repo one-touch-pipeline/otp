@@ -41,16 +41,17 @@ abstract class AbstractScheduledJob {
 
     static final List<Class> ALL_JOB_CLASSES = [
             CellRangerDataCleanupJob,
+            CheckExpiredProjectsJob,
+            CheckFileAccessInconsistenciesJob,
             CheckForAdUpdateJob,
+            CleanupWorkFoldersJob,
             DeactivateUsersJob,
             DeleteConcreteArtefactsOfSkippedWorkflowArtefactsJob,
+            DeleteOldMailsJob,
+            FetchUserDataFromLdapJob,
+            GenerateAndSendKPIsForNBI,
             ScheduleUsersForDeactivationJob,
             UnknownLdapUsersJob,
-            GenerateAndSendKPIsForNBI,
-            FetchUserDataFromLdapJob,
-            CheckFileAccessInconsistenciesJob,
-            CheckExpiredProjectsJob,
-            DeleteOldMailsJob,
     ]
 
     @Autowired

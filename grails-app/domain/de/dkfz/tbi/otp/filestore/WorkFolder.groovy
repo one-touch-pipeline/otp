@@ -60,6 +60,11 @@ class WorkFolder implements Entity {
      */
     BaseFolder baseFolder
 
+    /**
+     * Whether or not the folder is deleted on the file system
+     */
+    boolean deleted = false
+
     static Closure constraints = {
         size nullable: true
     }

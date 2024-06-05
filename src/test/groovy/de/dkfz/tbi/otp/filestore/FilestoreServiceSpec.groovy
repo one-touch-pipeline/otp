@@ -27,6 +27,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
@@ -165,7 +166,7 @@ class FilestoreServiceSpec extends Specification implements ServiceUnitTest<File
         createWorkflowRun()
         and: 'no workFolder, old system -> ignored'
         createWorkflowRun(project: run.project, workFolder: null)
-        and: 'different workfolder -> added'
+        and: 'different workFolder -> added'
         createWorkflowRun(project: run.project, workFolder: anotherWorkFolder)
 
         when:
@@ -173,5 +174,21 @@ class FilestoreServiceSpec extends Specification implements ServiceUnitTest<File
 
         then:
         TestCase.assertContainSame(workFolders, [workFolder, anotherWorkFolder])
+    }
+
+    void "test deleteWorkFolderOnFileSystem"() {
+        given:
+        WorkflowRun workflowRun = createWorkflowRun(workFolder: createWorkFolder(baseFolder: baseFolder))
+        service.fileService = Mock(FileService) {
+            1 * deleteDirectoryRecursively(_)
+            0 * _
+        }
+
+        when:
+        service.deleteWorkFolderOnFileSystem(workflowRun)
+
+        then:
+        workflowRun.workFolder.size == 0
+        workflowRun.workFolder.deleted
     }
 }

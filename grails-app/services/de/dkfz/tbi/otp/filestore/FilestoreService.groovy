@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.filestore
 import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -46,6 +47,7 @@ class FilestoreService {
     private final static int OFFSET_4 = 4
 
     FileSystemService fileSystemService
+    FileService fileService
 
     /**
      * returns a writable {@link BaseFolder}.
@@ -148,5 +150,34 @@ class FilestoreService {
                 property('workFolder')
             }
         } as List<WorkFolder>
+    }
+
+    /**
+     * Deletes the WorkflowFolder on the filesystem
+     */
+    void deleteWorkFolderOnFileSystem(WorkflowRun run) {
+        WorkFolder workFolder = run.workFolder
+        if (!workFolder) {
+            throw new WorkFolderNotAttachedException("WorkflowRun ${run} has no workFolder attached and no path can be found")
+        }
+        Path path = getWorkFolderPath(workFolder)
+        fileService.deleteDirectoryRecursively(path)
+        markWorkFolderAsDeleted(workFolder)
+        log.info("Deleted ${path} for WorkflowRun ${run}")
+    }
+
+    /**
+     * Sets the workFolder to deleted and the size to 0
+     */
+    void markWorkFoldersAsDeleted(List<WorkFolder> workFolders) {
+        workFolders.each { workFolder ->
+            markWorkFolderAsDeleted(workFolder)
+        }
+    }
+
+    private void markWorkFolderAsDeleted(WorkFolder workFolder) {
+        workFolder.size = 0
+        workFolder.deleted = true
+        workFolder.save(flush: true)
     }
 }

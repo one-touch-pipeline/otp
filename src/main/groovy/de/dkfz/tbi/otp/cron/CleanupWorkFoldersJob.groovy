@@ -19,45 +19,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.jobs
+package de.dkfz.tbi.otp.cron
 
-import org.springframework.beans.factory.annotation.Autowired
+import groovy.transform.CompileDynamic
+import groovy.util.logging.Slf4j
+import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.filestore.FilestoreService
-import de.dkfz.tbi.otp.filestore.WorkFolder
-import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
-
-import java.nio.file.Path
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
 /**
- * Deletes files, directories that should not be kept
+ * Deletes WorkFolders of restarted/final failed Workflows on the FileSystem
  */
-abstract class AbstractCleanUpJob extends AbstractJob {
-
-    @Autowired
-    FileService fileService
+@Component
+@Slf4j
+class CleanupWorkFoldersJob extends AbstractScheduledJob {
 
     @Autowired
     FilestoreService filestoreService
 
     @Override
-    final void execute(WorkflowStep workflowStep) {
-        List<WorkFolder> workFolderToClear = getWorkFoldersToClear(workflowStep)
-        List<Path> workFolderDirsToDelete = workFolderToClear.collect { filestoreService.getWorkFolderPath(it) }
-        (getAdditionalPathsToDelete(workflowStep) + workFolderDirsToDelete).unique().each {
-            fileService.deleteDirectoryRecursively(it)
+    void wrappedExecute() {
+        workflowRuns.each { WorkflowRun workflowRun ->
+            filestoreService.deleteWorkFolderOnFileSystem(workflowRun)
         }
-        filestoreService.markWorkFoldersAsDeleted(workFolderToClear)
-        workflowStateChangeService.changeStateToSuccess(workflowStep)
     }
 
-    abstract List<Path> getAdditionalPathsToDelete(WorkflowStep workflowStep)
-
-    abstract List<WorkFolder> getWorkFoldersToClear(WorkflowStep workflowStep)
-
-    @Override
-    final JobStage getJobStage() {
-        return JobStage.CLEANUP
+    @CompileDynamic
+    private List<WorkflowRun> getWorkflowRuns() {
+        return WorkflowRun.createCriteria().list {
+            'in'('state', [WorkflowRun.State.FAILED_FINAL, WorkflowRun.State.RESTARTED])
+            workFolder {
+                eq("deleted", false)
+            }
+        } as List<WorkflowRun>
     }
 }

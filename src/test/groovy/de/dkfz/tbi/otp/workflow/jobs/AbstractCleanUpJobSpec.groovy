@@ -83,6 +83,7 @@ class AbstractCleanUpJobSpec extends Specification implements DataTest, Workflow
         1 * job.fileService.deleteDirectoryRecursively(workFolderPath)
         1 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
         1 * job.filestoreService.getWorkFolderPath(workFolder) >> workFolderPath
+        1 * job.filestoreService.markWorkFoldersAsDeleted([workFolder])
         0 * _
     }
 
@@ -90,7 +91,7 @@ class AbstractCleanUpJobSpec extends Specification implements DataTest, Workflow
         given:
         WorkFolder workFolder1 = createWorkFolder([size: 15])
         WorkFolder workFolder2 = createWorkFolder([size: 4])
-        WorkFolder workFolder3 = createWorkFolder([size: 8])
+        createWorkFolder([size: 8])
         WorkflowStep workflowStep = createWorkflowStep()
         AbstractCleanUpJob job = new TestAbstractCleanUpJob([], [workFolder1, workFolder2])
         job.fileService = Mock(FileService)
@@ -101,8 +102,6 @@ class AbstractCleanUpJobSpec extends Specification implements DataTest, Workflow
         job.execute(workflowStep)
 
         then:
-        workFolder1.size == 0
-        workFolder2.size == 0
-        workFolder3.size != 0
+        1 * job.filestoreService.markWorkFoldersAsDeleted([workFolder1, workFolder2])
     }
 }
