@@ -82,6 +82,8 @@ abstract class AbstractHipo2SampleIdentifierParserSpec extends Specification imp
         'ABCD-T0-D1'       || 'tumor'                            | '0'  | '01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
         'AB12-T0-D1'       || 'tumor'                            | '0'  | '01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
         '12AB-T0-D1'       || 'tumor'                            | '0'  | '01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABCD-T0-D1'    || 'tumor'                            | '0'  | '01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABCDE-T0-D1'   || 'tumor'                            | '0'  | '01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
         // different sample types
         '123ABC-T0-D1'     || 'tumor'                            | '0'  | '01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
@@ -181,8 +183,6 @@ abstract class AbstractHipo2SampleIdentifierParserSpec extends Specification imp
         identifier << [
                 // invalid pid
                 '123-N0-D1',
-                '123AB-N0-D1',
-                '123ABCD-N0-D1',
 
                 // invalid sample type
                 '123ABC-V0-D1',
@@ -223,9 +223,9 @@ abstract class AbstractHipo2SampleIdentifierParserSpec extends Specification imp
         !validPid
 
         where:
-        pid  | _
-        ''   | _
-        null | _
+        pid           | _
+        ''            | _
+        null          | _
         and: 'Input with invalid pid'
         'INVALID_PID' | _
     }

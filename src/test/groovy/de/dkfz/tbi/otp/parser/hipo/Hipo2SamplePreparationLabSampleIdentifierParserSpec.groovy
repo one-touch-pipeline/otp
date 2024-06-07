@@ -70,10 +70,11 @@ class Hipo2SamplePreparationLabSampleIdentifierParserSpec extends AbstractHipo2S
         parsed.useSpecificReferenceGenome == SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
         where:
-        identifier          || sampleTypeDbName
-        'H021-12AB-T1-D1'   || 'tumor001-01'
-        'H021-12AB-T12-D1'  || 'tumor012-01'
-        'H021-12AB-T123-D1' || 'tumor123-01'
+        identifier             || sampleTypeDbName
+        'H021-12AB-T1-D1'      || 'tumor001-01'
+        'H021-12AB-T12-D1'     || 'tumor012-01'
+        'H021-12AB-T123-D1'    || 'tumor123-01'
+        'H021-123ABCD-T123-D1' || 'tumor123-01'
     }
 
     @Unroll

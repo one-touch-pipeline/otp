@@ -35,7 +35,7 @@ import java.util.regex.Matcher
 class HipoSampleIdentifierParser implements SampleIdentifierParser {
 
     private final static String REGEX = /^(${PIDREGEX})-([${HipoTissueType.values()*.key.join("")}])(\d{1,2})-(([BDRPACWY])(\d{1,2}))(-V8)?$/
-    private final static String PIDREGEX = "([A-Z])(\\d\\d\\w)-(?:\\w\\w)?\\w\\w\\w(\\w)"
+    private final static String PIDREGEX = "([A-Z])(\\d\\d\\w)-(?:\\w\\w)?\\w\\w\\w(\\w)+"
 
     @Override
     boolean tryParsePid(String pid) {

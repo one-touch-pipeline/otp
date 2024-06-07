@@ -80,13 +80,15 @@ class Hipo2SampleIdentifierParserSpec extends AbstractHipo2SampleIdentifierParse
         parsed.useSpecificReferenceGenome == SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
         where:
-        identifier          || sampleTypeDbName
-        'H021-123ABC-N0-D1' || 'control0-01'
-        'H021-123ABC-N0-D1-V8' || 'control0-01-v8'
+        identifier               || sampleTypeDbName
+        'H021-123ABC-N0-D1'      || 'control0-01'
+        'H021-123ABC-N0-D1-V8'   || 'control0-01-v8'
+        'H021-123ABCD-N0-D1-V8'  || 'control0-01-v8'
 
         // different project prefixes
-        'H022-123ABC-T0-D1' || 'tumor0-01'
-        'H022-123ABC-T0-D1-V8' || 'tumor0-01-v8'
+        'H022-123ABC-T0-D1'      || 'tumor0-01'
+        'H022-123ABC-T0-D1-V8'   || 'tumor0-01-v8'
+        'H022-123ABCDE-T0-D1-V8' || 'tumor0-01-v8'
     }
 
     @Unroll
@@ -104,6 +106,7 @@ class Hipo2SampleIdentifierParserSpec extends AbstractHipo2SampleIdentifierParse
                 '212A-123ABC-N0-D1',
                 'KABC-123ABC-N0-D1',
                 'K123-123ABC-N012-D1',
+                'K123-123ABCD-N012-D1',
         ]
     }
 

@@ -29,7 +29,7 @@ import java.util.regex.Matcher
 
 abstract class AbstractHipo2SampleIdentifierParser implements SampleIdentifierParser {
 
-    private final static String PID = "(?<pid>(?<project>[A-Z0-9]{4})-[A-Z0-9]{4}([A-Z0-9]{2}([A-Z0-9]{2})?)?)"
+    private final static String PID = "(?<pid>(?<project>[A-Z0-9]{4})-[A-Z0-9]{4,})"
 
     private final static String TISSUE = "(?<tissueType>[${HipoTissueType.values()*.key.join('')}])(?<tissueNumber>[0-9]{1,3})"
 

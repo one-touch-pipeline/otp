@@ -142,27 +142,30 @@ class HipoSampleIdentifierParserSpec extends Specification {
         parser.tryParse(sampleName)
 
         where:
-        sampleName           || _
-        "H004-ABCD-T1-D1"    || _
-        "P021-EFGH-T1-D1"    || _
-        "H035-BPDM-B3-D1"    || _
-        "H035-BPDM-C4-D1"    || _
-        "H035-BPDK-B1-D1"    || _
-        "H035-BPDK-C8-D1"    || _
-        "H003-BPDK-C8-A1"    || _
-        "H00B-BPD1-T1-D1"    || _
-        "H00A-BPD1-T1-D1"    || _
-        "H003-BPDK-C8-C10"   || _
-        "H003-BPDK-C8-C02"   || _
-        "H059-BPDK-C80-C02"  || _
-        "H003-BPDK-C80-C02"  || _
-        "H032-PX6D42-M2-D1"  || _
-        "H032-PX6D42-T2-W1"  || _
-        "H032-PX6D42-T2-Y1"  || _
-        "H032-PX6D42-T2-B1"  || _
-        "K032-PX6D42-T2-B1"  || _
-        "A032-PX6D42-T2-B1"  || _
-        "H456-ABCD-T3-D1-V8" || _
+        sampleName                || _
+        "H004-ABCD-T1-D1"         || _
+        "P021-EFGH-T1-D1"         || _
+        "H035-BPDM-B3-D1"         || _
+        "H035-BPDM-C4-D1"         || _
+        "H035-BPDK-B1-D1"         || _
+        "H035-BPDK-C8-D1"         || _
+        "H003-BPDK-C8-A1"         || _
+        "H00B-BPD1-T1-D1"         || _
+        "H00A-BPD1-T1-D1"         || _
+        "H003-BPDK-C8-C10"        || _
+        "H003-BPDK-C8-C02"        || _
+        "H059-BPDK-C80-C02"       || _
+        "H003-BPDK-C80-C02"       || _
+        "H032-PX6D42-M2-D1"       || _
+        "H032-PX6D42-T2-W1"       || _
+        "H032-PX6D42-T2-Y1"       || _
+        "H032-PX6D42-T2-B1"       || _
+        "K032-PX6D42-T2-B1"       || _
+        "A032-PX6D42-T2-B1"       || _
+        "H456-ABCD-T3-D1-V8"      || _
+        "H456-ABCDEFG-T3-D1-V8"   || _
+        "H456-ABCDEFGH-T3-D1-V8"  || _
+        "H456-ABCDEFGHI-T3-D1-V8" || _
     }
 
     void "test tryParse, valid sample name, check results"() {
@@ -180,11 +183,12 @@ class HipoSampleIdentifierParserSpec extends Specification {
         sampleName == identifier.toString()
 
         where:
-        sampleName             || projectNumber | pid           | tissueType                | sampleNumber | analyteTypeAndNumber
-        "H456-ABCD-T3-D1"      || "456"         | "H456-ABCD"   | HipoTissueType.TUMOR      | '3'          | "D1"
-        "C026-EFGH-M2-D1"      || "C026"        | "C026-EFGH"   | HipoTissueType.METASTASIS | '2'          | "D1"
-        "H035-IJKLMM-B1-D1"    || "035"         | "H035-IJKLMM" | HipoTissueType.BLOOD      | '1'          | "D1"
-        "H035-IJKLMM-B1-D1-V8" || "035"         | "H035-IJKLMM" | HipoTissueType.BLOOD      | '1'          | "D1"
+        sampleName                || projectNumber | pid              | tissueType                | sampleNumber | analyteTypeAndNumber
+        "H456-ABCD-T3-D1"         || "456"         | "H456-ABCD"      | HipoTissueType.TUMOR      | '3'          | "D1"
+        "C026-EFGH-M2-D1"         || "C026"        | "C026-EFGH"      | HipoTissueType.METASTASIS | '2'          | "D1"
+        "H035-IJKLMM-B1-D1"       || "035"         | "H035-IJKLMM"    | HipoTissueType.BLOOD      | '1'          | "D1"
+        "H035-IJKLMM-B1-D1-V8"    || "035"         | "H035-IJKLMM"    | HipoTissueType.BLOOD      | '1'          | "D1"
+        "H456-ABCDEFGHI-T3-D1-V8" || "456"         | "H456-ABCDEFGHI" | HipoTissueType.TUMOR      | '3'          | "D1"
     }
 
     void "test sampleTypeDbName"() {
@@ -194,6 +198,7 @@ class HipoSampleIdentifierParserSpec extends Specification {
         where:
         sampleName           || tissueTypeExp
         "H004-ABCD-T1-D1"    || "tumor"
+        "H004-ABCDEFG-T1-D1" || "tumor"
         "H004-ABCD-T1-D1-V8" || "tumor-v8"
         "H456-ABCD-T3-D1"    || "tumor03"
         "H456-ABCD-T3-D1-V8" || "tumor03-v8"
