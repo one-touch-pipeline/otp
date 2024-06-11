@@ -89,15 +89,10 @@ class WorkflowStateChangeService {
 
     void toggleFailedWaitingState(WorkflowRun run) {
         assert run
-        assert run.state == WorkflowRun.State.FAILED || run.state == WorkflowRun.State.FAILED_WAITING
+        assert run.state in [WorkflowRun.State.FAILED, WorkflowRun.State.FAILED_WAITING]
 
-        if (run.state == WorkflowRun.State.FAILED) {
-            run.state = WorkflowRun.State.FAILED_WAITING
-            run.save(flush: true)
-        } else if (run.state == WorkflowRun.State.FAILED_WAITING) {
-            run.state = WorkflowRun.State.FAILED
-            run.save(flush: true)
-        }
+        run.state = run.state == WorkflowRun.State.FAILED ? WorkflowRun.State.FAILED_WAITING : WorkflowRun.State.FAILED
+        run.save(flush: true)
     }
 
     void changeStateToFinalFailed(WorkflowStep step) {

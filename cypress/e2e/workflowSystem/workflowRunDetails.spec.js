@@ -168,6 +168,48 @@ describe('Check workflow run details page', () => {
       });
     });
 
+    it('should visit a failed waiting waiting workflow and set it as failed final', () => {
+      setWorkflowToFailedWaiting();
+      cy.visit('/workflowRunList/index?state=FAILED_WAITING');
+
+      cy.intercept('/workflowRunDetails/setFailedFinal*').as('setFailedFinal');
+      cy.get('table#runs tbody').should('not.be.empty');
+      cy.get('table#runs tbody tr').first().find('a').click();
+
+      cy.location('pathname').should('contain', '/workflowRunDetails/index');
+      cy.get('form button.failed-final-btn').should('be.enabled');
+
+      cy.get('form button.failed-final-btn').click();
+
+      cy.wait('@setFailedFinal').then((interception) => {
+        expect(interception.response.statusCode).to.eq(302);
+        cy.location('pathname').should('contain', '/workflowRunDetails/index');
+        cy.get('#statusDot').should('have.attr', 'data-status', 'FAILED_FINAL');
+      });
+    });
+
+    it('should visit a failed waiting workflow and restart it', () => {
+      setWorkflowToFailedWaiting();
+      cy.visit('/workflowRunList/index?state=FAILED_WAITING');
+
+      cy.get('table#runs tbody').should('not.be.empty');
+      cy.get('table#runs tbody tr').last().find('a').click();
+
+      cy.location('pathname').should('contain', '/workflowRunDetails/index');
+      cy.get('form button.restart-run-btn').should('be.enabled');
+
+      // Restart run
+      cy.intercept('/workflowRunDetails/restartRun*').as('restartWorkflowRun');
+
+      cy.get('form button.restart-run-btn').click();
+      cy.wait('@restartWorkflowRun').then((interception) => {
+        expect(interception.response.statusCode).to.eq(302);
+        cy.location('pathname').should('contain', '/workflowRunDetails/index');
+        cy.get('div#statusDot').should('have.attr', 'data-status', 'RESTARTED');
+      });
+
+    });
+
     it('should visit a workflow on failed waiting and set it back to failed', () => {
       cy.visit('/workflowRunList/index?state=FAILED_WAITING');
 
@@ -206,3 +248,12 @@ describe('Check workflow run details page', () => {
     });
   });
 });
+
+
+// This is a helper function to set a workflow to failed waiting since the test database currently does not have any failed waiting workflows
+function setWorkflowToFailedWaiting() {
+  cy.visit('/workflowRunList/index?state=FAILED');
+  cy.get('table#runs tbody tr').first().find('a').click();
+  cy.location('pathname').should('contain', '/workflowRunDetails/index');
+  cy.get('form button.failed-waiting-btn').click();
+}

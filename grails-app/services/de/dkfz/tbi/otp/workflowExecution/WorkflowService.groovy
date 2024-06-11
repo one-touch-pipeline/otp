@@ -63,7 +63,7 @@ class WorkflowService {
 
     WorkflowRun createRestartedWorkflow(WorkflowStep step, boolean startDirectly = true) {
         assert step
-        assert step.workflowRun.state == WorkflowRun.State.FAILED || step.workflowRun.state == WorkflowRun.State.FAILED_WAITING
+        assert step.workflowRun.state in [WorkflowRun.State.FAILED, WorkflowRun.State.FAILED_WAITING]
 
         if (step.workflowRun.project.state == Project.State.ARCHIVED || step.workflowRun.project.state == Project.State.DELETED) {
             String stateName = step.workflowRun.project.state.name().toLowerCase()
