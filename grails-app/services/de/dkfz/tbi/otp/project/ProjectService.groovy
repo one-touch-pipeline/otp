@@ -26,6 +26,7 @@ import grails.validation.ValidationException
 import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.*
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.administration.MailHelperService
@@ -233,14 +234,10 @@ class ProjectService {
 
         createProjectDirectoryIfNeeded(project)
 
-        SessionUtils.withNewSession {
-            // open new session to prevent project creation from rollback on failing creation of analysis dir
-            // In this case an email is send
-            if (project.dirAnalysis) {
-                try {
-                    createAnalysisDirectoryIfPossible(project)
-                } catch (FileSystemException | OtpFileSystemException ignore) {
-                }
+        if (project.dirAnalysis) {
+            try {
+                createAnalysisDirectoryIfPossible(project)
+            } catch (FileSystemException | OtpFileSystemException ignore) {
             }
         }
 
@@ -375,6 +372,7 @@ class ProjectService {
         fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectDirectory, project.unixGroup)
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     private void createAnalysisDirectoryIfPossible(Project project, Boolean sendMailInErrorCase = true)
             throws OtpFileSystemException, AssertionError, FileSystemException {
         assert project.dirAnalysis

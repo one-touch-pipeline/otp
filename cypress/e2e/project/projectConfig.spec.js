@@ -91,6 +91,36 @@ describe('Check projectConfig page', () => {
       cy.wait('@updateAnalysisDir').its('response.statusCode').should('eq', 200);
     });
 
+    it('should update the analysis directory even though creation fails', () => {
+      const cellKey = 'Analysis Directory';
+      const analysisDir = `/${Cypress._.random(0, 1e6)}`;
+
+      cy.intercept('/projectConfig/updateAnalysisDir*').as('updateAnalysisDir');
+
+      cy.get('td').contains(cellKey).siblings().last()
+        .find('#button-edit-analysisDir')
+        .click();
+
+      cy.get('td').contains(cellKey).siblings().last()
+        .find('#analysisDirInput')
+        .clear()
+        .type(analysisDir);
+
+      cy.get('td').contains(cellKey).siblings().last()
+        .find('#button-save-analysisDir')
+        .click();
+
+      cy.wait('@updateAnalysisDir').its('response.statusCode').should('eq', 418);
+
+      cy.get('#confirmationUserGroupModal').should('be.visible').find('button#confirmModal').click();
+
+      cy.wait('@updateAnalysisDir').its('response.statusCode').should('eq', 200);
+
+      cy.visit('/projectConfig/index');
+
+      cy.get('#analysisDirInput').should('have.value', analysisDir);
+    });
+
     it('should update the unix group', () => {
       const cellKey = 'Unix Group';
       const unixGroup = 'users';

@@ -138,7 +138,7 @@ function updateAnalysisDir(oldAnalysisDir, force = false) {
       );
     },
     error(error) {
-      if (error && error.responseJSON && error.responseJSON.message) {
+      if (error && error.responseJSON) {
         if (error.status === 418) {
           openConfirmationModal(error.responseJSON.message, () => {
             updateAnalysisDir(oldAnalysisDir, true);
