@@ -56,7 +56,7 @@ class SearchSeqTrackController {
     static final String PARAM_KEY_PIDS = 'pids[]'
     static final String PARAM_KEY_SEQTYPES = 'seqTypes[]'
     static final String PARAM_KEY_ILSE_NUMBERS = 'ilseNumbers[]'
-    static final String PARAM_KEY_LANES = 'lanes[]'
+    static final String PARAM_KEY_SEQTRACK_IDS = 'seqtrackIds[]'
     static final String PARAM_KEY_SAMPLE_TYPES = 'sampleTypes[]'
     static final String PARAM_KEY_READ_TYPES = 'readTypes[]'
     static final String PARAM_KEY_SINGLE_CELLS = 'singleCells[]'
@@ -65,7 +65,7 @@ class SearchSeqTrackController {
     static allowedMethods = [
             searchSeqTrackByProjectSeqType: "GET",
             searchSeqTrackByPidSeqType    : "GET",
-            searchSeqTrackByLaneId        : "GET",
+            searchSeqTrackBySeqTrackId    : "GET",
             searchSeqTrackByIlseNumber    : "GET",
             searchSeqTrackByMultiInput    : "GET",
             searchSeqTrackByBamId         : "GET",
@@ -105,23 +105,23 @@ class SearchSeqTrackController {
         return redirectHelper(params, seqTracks, missingItems ?: null)
     }
 
-    JSON searchSeqTrackByLaneId() {
-        Set<Long> laneIds
+    JSON searchSeqTrackBySeqTrackId() {
+        Set<Long> seqTrackIds
         try {
-            laneIds = getListParam(PARAM_KEY_LANES).collect { it as long }
+            seqTrackIds = getListParam(PARAM_KEY_SEQTRACK_IDS).collect { it as long }
         } catch (NumberFormatException ex) {
             response.status = HttpStatus.BAD_REQUEST.value()
             return render([error: HttpStatus.BAD_REQUEST.reasonPhrase, message: ex.message] as JSON)
         }
 
-        if (!laneIds) {
+        if (!seqTrackIds) {
             response.status = HttpStatus.NOT_FOUND.value()
-            return render([error: HttpStatus.NOT_FOUND.reasonPhrase, message: g.message(code: "triggerAlignment.error.noLanes") as String] as JSON)
+            return render([error: HttpStatus.NOT_FOUND.reasonPhrase, message: g.message(code: "triggerAlignment.error.noSeqTrackIds") as String] as JSON)
         }
 
-        Set<SeqTrack> seqTracks = SeqTrack.getAll(laneIds).findAll()
+        Set<SeqTrack> seqTracks = SeqTrack.getAll(seqTrackIds).findAll()
 
-        Set<String> missingItems = (laneIds - seqTracks*.id)*.toString()
+        Set<String> missingItems = (seqTrackIds - seqTracks*.id)*.toString()
         return redirectHelper(params, seqTracks, missingItems ?: null)
     }
 

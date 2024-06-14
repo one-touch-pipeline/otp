@@ -27,11 +27,11 @@
   - Available tabs:
   - project
   - pid
-  - lane
+  - seqTrackId
   - ilse
   - multiInput
   -
-  - Usage example: <g:render template="/templates/bootstrap/seqTrackSelectionTabBar" model="[tabs: ['project', 'pid', 'lane', 'ilse', 'multiInput']]"/>
+  - Usage example: <g:render template="/templates/bootstrap/seqTrackSelectionTabBar" model="[tabs: ['project', 'pid', 'seqTrackId', 'ilse', 'multiInput']]"/>
   --}%
 <ul class="nav nav-tabs" id="myTab" role="tablist">
     <g:if test="${tabs.contains('project')}">
@@ -48,10 +48,10 @@
             </a>
         </li>
     </g:if>
-    <g:if test="${tabs.contains('lane')}">
+    <g:if test="${tabs.contains('seqTrackId')}">
         <li class="nav-item" role="presentation">
-            <a class="nav-link" id="lane-tab" data-bs-toggle="tab" data-bs-target="#lane" type="button" role="tab" aria-controls="lane" aria-selected="false">
-                <g:message code="triggerAlignment.input.tab.lane"/>
+            <a class="nav-link" id="seqtrack-id-tab" data-bs-toggle="tab" data-bs-target="#seqTrackId" type="button" role="tab" aria-controls="seqTrackId" aria-selected="false">
+                <g:message code="triggerAlignment.input.tab.seqTrackId"/>
             </a>
         </li>
     </g:if>
@@ -89,9 +89,9 @@
             <g:render template="/templates/bootstrap/seqTrackSelectionTabBar/tabs/pidAndSeqTypeTab" model="[seqTypes: seqTypes, id: 'seqTypePid']"/>
         </div>
     </g:if>
-    <g:if test="${tabs.contains('lane')}">
-        <div class="tab-pane fade mt-2" id="lane" role="tabpanel" aria-labelledby="lane-tab">
-            <g:render template="/templates/bootstrap/seqTrackSelectionTabBar/tabs/laneIdTab"/>
+    <g:if test="${tabs.contains('seqTrackId')}">
+        <div class="tab-pane fade mt-2" id="seqTrackId" role="tabpanel" aria-labelledby="seqtrack-id-tab">
+            <g:render template="/templates/bootstrap/seqTrackSelectionTabBar/tabs/seqTrackIdTab"/>
         </div>
     </g:if>
     <g:if test="${tabs.contains('ilse')}">

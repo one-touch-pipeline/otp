@@ -136,16 +136,16 @@ describe('Check trigger alignment page', () => {
       });
     });
 
-    it('should search seq tracks by lane ids and trigger alignment', () => {
+    it('should search seq tracks by seqTrack ids and trigger alignment', () => {
       cy.visit('/triggerAlignment/index');
-      cy.intercept('/searchSeqTrack/searchSeqTrackByLaneId*').as('search');
+      cy.intercept('/searchSeqTrack/searchSeqTrackBySeqTrackId*').as('search');
       cy.intercept('/triggerAlignment/generateWarnings*').as('warnings');
       cy.intercept('/triggerAlignment/triggerAlignment*').as('triggerAlignment');
 
       cy.fixture('triggerAlignment.json').then((alignment) => {
-        cy.get('a#lane-tab').click();
+        cy.get('a#seqtrack-id-tab').click();
 
-        cy.get('textarea#lane-selection').clear().type(alignment[2].laneIds.join('\t'));
+        cy.get('textarea#seqTrackId-selection').clear().type(alignment[2].seqTrackIds.join('\t'));
         cy.get('button#searchSeqTrackButton').click();
 
         cy.wait('@search').then((interception) => {
@@ -161,7 +161,7 @@ describe('Check trigger alignment page', () => {
 
         cy.get('table#seqTrackTable').find('tbody tr').should('have.length', 2)
           .each((row) => {
-            cy.wrap(row).find('td').eq(0).should('satisfy', (el) => alignment[2].laneIds.includes(el[0].innerText));
+            cy.wrap(row).find('td').eq(0).should('satisfy', (el) => alignment[2].seqTrackIds.includes(el[0].innerText));
           });
       });
 
@@ -351,7 +351,7 @@ describe('Check trigger alignment page', () => {
       cy.checkAccessDenied('/triggerAlignment/triggerAlignment');
       cy.checkAccessDenied('/searchSeqTrack/searchSeqTrackByProjectSeqType');
       cy.checkAccessDenied('/searchSeqTrack/searchSeqTrackByPidSeqType');
-      cy.checkAccessDenied('/searchSeqTrack/searchSeqTrackByLaneId');
+      cy.checkAccessDenied('/searchSeqTrack/searchSeqTrackBySeqTrackId');
       cy.checkAccessDenied('/searchSeqTrack/searchSeqTrackByIlseNumber');
       cy.checkAccessDenied('/searchSeqTrack/searchSeqTrackByMultiInput');
     });

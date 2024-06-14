@@ -20,10 +20,10 @@
   - SOFTWARE.
   --}%
 
-<g:message code="laneSelection.note"/>
+<g:message code="seqTrackSelection.note"/>
 <div class="input-group mb-3">
     <div class="input-group-prepend">
-        <label class="input-group-text" for="lane-selection"><g:message code="laneSelection.lane"/></label>
+        <label class="input-group-text" for="seqTrackId-selection"><g:message code="seqTrackSelection.seqTrackId"/></label>
     </div>
-    <textarea id="lane-selection" class="form-control"></textarea>
+    <textarea id="seqTrackId-selection" class="form-control"></textarea>
 </div>

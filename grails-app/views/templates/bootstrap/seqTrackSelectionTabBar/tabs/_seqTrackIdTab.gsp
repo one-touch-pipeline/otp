@@ -26,6 +26,6 @@
   - Required params:
   - None
   -
-  - Usage example: <g:render template="/templates/bootstrap/seqTrackSelectionTabBar/tabs/laneIdTab"/>
+  - Usage example: <g:render template="/templates/bootstrap/seqTrackSelectionTabBar/tabs/seqTrackIdTab"/>
   --}%
-<g:render template="/templates/bootstrap/laneSelection"/>
+<g:render template="/templates/bootstrap/seqTrackSelection"/>

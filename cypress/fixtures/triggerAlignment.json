@@ -11,7 +11,7 @@
     "seqType": "WGBS PAIRED bulk"
   },
   {
-    "laneIds": [
+    "seqTrackIds": [
       "1044",
       "1367"
     ]

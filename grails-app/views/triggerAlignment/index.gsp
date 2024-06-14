@@ -33,7 +33,7 @@
     </nav>
 
     <div class="mt-3">
-        <g:render template="/triggerAlignment/components/inputArea" model="[tabs: ['project', 'pid', 'lane', 'ilse', 'multiInput', 'bam'], seqTypes: seqTypes]"/>
+        <g:render template="/triggerAlignment/components/inputArea" model="[tabs: ['project', 'pid', 'seqTrackId', 'ilse', 'multiInput', 'bam'], seqTypes: seqTypes]"/>
     </div>
 
     <div class="mt-3">

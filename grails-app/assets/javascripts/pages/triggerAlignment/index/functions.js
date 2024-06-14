@@ -33,7 +33,7 @@ $.otp.triggerAlignment = {
   SEARCH_ACTION: {
     'project-tab': 'searchSeqTrackByProjectSeqType',
     'pid-tab': 'searchSeqTrackByPidSeqType',
-    'lane-tab': 'searchSeqTrackByLaneId',
+    'seqtrack-id-tab': 'searchSeqTrackBySeqTrackId',
     'ilse-tab': 'searchSeqTrackByIlseNumber',
     'bam-tab': 'searchSeqTrackByBamId',
     'multi-input-tab': 'searchSeqTrackByMultiInput'
@@ -182,12 +182,13 @@ $.otp.triggerAlignment = {
           return;
         }
         break;
-      case 'lane-tab':
-        $.otp.triggerAlignment.searchQuery.lanes = $.otp.parseDelimitedStringToArray($('#lane-selection').val());
-        if (!$.otp.triggerAlignment.searchQuery.lanes.length) {
+      case 'seqtrack-id-tab':
+        $.otp.triggerAlignment.searchQuery.seqtrackIds =
+          $.otp.parseDelimitedStringToArray($('#seqTrackId-selection').val());
+        if (!$.otp.triggerAlignment.searchQuery.seqtrackIds.length) {
           $.otp.toaster.showErrorToast(
             $.otp.triggerAlignment.TOAST_TITLE.SEARCH_ERROR,
-            'At least one lane ID must be supplied'
+            'At least one seqTrack ID must be supplied'
           );
           return;
         }
