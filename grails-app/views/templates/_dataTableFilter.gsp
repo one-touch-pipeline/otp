@@ -23,7 +23,7 @@
 %{--
 To be used in conjunction with: common/DataTableFilter.js
 --}%
-<%@ page import="de.dkfz.tbi.util.TimeFormats" %>
+<%@ page import="de.dkfz.tbi.otp.utils.TimeFormats" %>
 <%@ page import="java.time.Instant" %>
 <%@ page import="java.time.temporal.ChronoUnit" %>
 <div id="data-table-filter-container" class="rounded-page-header-box" style="display: table">

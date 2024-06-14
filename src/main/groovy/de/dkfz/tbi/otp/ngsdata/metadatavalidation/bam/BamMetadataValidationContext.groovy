@@ -24,8 +24,8 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam
 import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.Spreadsheet
-import de.dkfz.tbi.util.spreadsheet.validation.Problems
+import de.dkfz.tbi.otp.utils.spreadsheet.Spreadsheet
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.Problems
 
 import java.nio.file.FileSystem
 import java.nio.file.Path

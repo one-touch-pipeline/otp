@@ -36,7 +36,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeIndexService
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightCheckService
 import de.dkfz.tbi.otp.utils.Md5SumService
-import de.dkfz.tbi.util.spreadsheet.*
+import de.dkfz.tbi.otp.utils.spreadsheet.*
 
 import java.nio.file.*
 

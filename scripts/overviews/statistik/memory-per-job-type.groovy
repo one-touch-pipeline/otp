@@ -29,7 +29,7 @@
  */
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.util.UnitHelper
+import de.dkfz.tbi.otp.utils.UnitHelper
 
 Date start = new Date(119, 0, 1)
 

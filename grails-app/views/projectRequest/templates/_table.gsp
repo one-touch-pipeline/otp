@@ -20,7 +20,7 @@
   - SOFTWARE.
   --}%
 
-<%@ page import="de.dkfz.tbi.util.TimeFormats" %>
+<%@ page import="de.dkfz.tbi.otp.utils.TimeFormats" %>
 <html>
 <head>
     <title></title>

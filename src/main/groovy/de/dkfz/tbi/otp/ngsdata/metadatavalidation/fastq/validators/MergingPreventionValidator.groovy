@@ -29,8 +29,8 @@ import de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit
 import de.dkfz.tbi.otp.ngsdata.SeqPlatformGroup
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
-import de.dkfz.tbi.util.spreadsheet.validation.AbstractValueTuplesValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.ValueTuple
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractValueTuplesValidator
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 

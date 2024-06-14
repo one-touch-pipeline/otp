@@ -49,7 +49,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
-import de.dkfz.tbi.util.TimeFormats
+import de.dkfz.tbi.otp.utils.TimeFormats
 
 import java.time.LocalDate
 

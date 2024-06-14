@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.utils.SessionUtils
-import de.dkfz.tbi.util.TimeFormats
+import de.dkfz.tbi.otp.utils.TimeFormats
 
 import java.time.ZonedDateTime
 

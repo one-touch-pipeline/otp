@@ -28,7 +28,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.utils.CommentCommand
 import de.dkfz.tbi.otp.utils.DataTablesCommand
-import de.dkfz.tbi.util.TimeFormats
+import de.dkfz.tbi.otp.utils.TimeFormats
 
 import javax.servlet.http.HttpServletResponse
 

@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.egaSubmission
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 
-import de.dkfz.tbi.util.spreadsheet.Row
+import de.dkfz.tbi.otp.utils.spreadsheet.Row
 
 import static de.dkfz.tbi.otp.egaSubmission.EgaSubmissionFileService.EgaColumnName.*
 

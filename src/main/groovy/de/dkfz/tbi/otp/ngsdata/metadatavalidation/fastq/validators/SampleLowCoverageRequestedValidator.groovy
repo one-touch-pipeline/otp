@@ -33,10 +33,10 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.ValidatorHelperService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
-import de.dkfz.tbi.util.spreadsheet.validation.AbstractValueTuplesValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.Cell
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.ValueTuple
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractValueTuplesValidator
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.BASE_MATERIAL
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.LOW_COVERAGE_REQUESTED

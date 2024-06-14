@@ -26,8 +26,8 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
-import de.dkfz.tbi.util.TimeFormats
-import de.dkfz.tbi.util.TimeUtils
+import de.dkfz.tbi.otp.utils.TimeFormats
+import de.dkfz.tbi.otp.utils.TimeUtils
 
 import java.time.Duration
 import java.time.LocalDate

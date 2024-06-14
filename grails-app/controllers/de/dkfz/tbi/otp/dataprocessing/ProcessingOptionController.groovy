@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
-import de.dkfz.tbi.util.TimeFormats
+import de.dkfz.tbi.otp.utils.TimeFormats
 
 @PreAuthorize("hasRole('ROLE_ADMIN')")
 class ProcessingOptionController {

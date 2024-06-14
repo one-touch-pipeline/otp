@@ -23,7 +23,7 @@
 %{--
 To be used in conjunction with: common/CommentBox.js
 --}%
-<%@ page import="de.dkfz.tbi.util.TimeFormats" %>
+<%@ page import="de.dkfz.tbi.otp.utils.TimeFormats" %>
 <div id="comment-box-container" class="card">
     <g:set var="comment" value="${commentable?.comment}"/>
     <input type="hidden" id="entity-id" name="entityId" value="${commentable?.id}">

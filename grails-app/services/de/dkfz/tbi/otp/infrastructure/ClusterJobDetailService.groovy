@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.infrastructure
 
-import de.dkfz.tbi.util.TimeUtils
+import de.dkfz.tbi.otp.utils.TimeUtils
 
 import java.time.Duration
 

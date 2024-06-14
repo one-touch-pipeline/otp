@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.OtpException
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
-import de.dkfz.tbi.util.TimeFormats
+import de.dkfz.tbi.otp.utils.TimeFormats
 
 @PreAuthorize("hasRole('ROLE_ADMIN')")
 class ShutdownController {

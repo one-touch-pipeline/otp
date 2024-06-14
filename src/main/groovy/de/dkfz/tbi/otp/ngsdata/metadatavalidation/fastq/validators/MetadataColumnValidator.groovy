@@ -27,9 +27,9 @@ import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.MetaDataKey
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.Row
-import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
+import de.dkfz.tbi.otp.utils.spreadsheet.Cell
+import de.dkfz.tbi.otp.utils.spreadsheet.Row
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
 
 @Component
 class MetadataColumnValidator implements MetadataValidator {

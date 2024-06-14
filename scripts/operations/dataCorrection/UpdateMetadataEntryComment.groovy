@@ -23,8 +23,8 @@ package operations.dataCorrection
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.util.spreadsheet.Row
-import de.dkfz.tbi.util.spreadsheet.Spreadsheet
+import de.dkfz.tbi.otp.utils.spreadsheet.Row
+import de.dkfz.tbi.otp.utils.spreadsheet.Spreadsheet
 
 /**
  * Script to add/change the COMMENT for meta data entries

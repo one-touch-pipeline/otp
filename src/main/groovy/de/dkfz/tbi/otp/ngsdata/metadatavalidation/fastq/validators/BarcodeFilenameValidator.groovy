@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.ngsdata.MultiplexingService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.util.spreadsheet.validation.*
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.FASTQ_FILE
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.INDEX

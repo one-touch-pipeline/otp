@@ -28,8 +28,8 @@ import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
-import de.dkfz.tbi.util.TimeFormats
-import de.dkfz.tbi.util.TimeUtils
+import de.dkfz.tbi.otp.utils.TimeFormats
+import de.dkfz.tbi.otp.utils.TimeUtils
 
 import java.time.Duration
 

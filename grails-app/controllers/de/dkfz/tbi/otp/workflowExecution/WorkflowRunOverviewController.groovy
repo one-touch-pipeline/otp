@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.util.Pair
 import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.tbi.util.TimeFormats
+import de.dkfz.tbi.otp.utils.TimeFormats
 
 import java.sql.Timestamp
 

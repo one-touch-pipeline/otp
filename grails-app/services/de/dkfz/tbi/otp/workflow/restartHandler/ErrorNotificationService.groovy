@@ -36,7 +36,7 @@ import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.wes.WesLog
 import de.dkfz.tbi.otp.workflowExecution.wes.WesRun
 import de.dkfz.tbi.otp.workflowExecution.wes.WesRunLog
-import de.dkfz.tbi.util.TimeFormats
+import de.dkfz.tbi.otp.utils.TimeFormats
 
 import java.time.LocalDateTime
 import java.time.ZonedDateTime

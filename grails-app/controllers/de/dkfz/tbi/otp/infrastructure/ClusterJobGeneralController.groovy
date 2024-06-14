@@ -26,7 +26,7 @@ import groovy.transform.TupleConstructor
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.utils.DataTableCommand
-import de.dkfz.tbi.util.TimeFormats
+import de.dkfz.tbi.otp.utils.TimeFormats
 
 import java.time.LocalDate
 import java.time.ZonedDateTime

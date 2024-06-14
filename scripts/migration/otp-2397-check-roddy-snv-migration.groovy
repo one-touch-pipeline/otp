@@ -38,7 +38,6 @@ import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.exceptions.NotSupportedException
 import de.dkfz.tbi.otp.workflow.analysis.snv.SnvWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
-import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.file.FileSystem
 import java.nio.file.Path

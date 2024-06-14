@@ -21,7 +21,7 @@
   --}%
 
 <%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page import="de.dkfz.tbi.util.TimeFormats" %>
+<%@ page import="de.dkfz.tbi.otp.utils.TimeFormats" %>
 <html>
 <head>
     <meta name="layout" content="main"/>
@@ -157,7 +157,7 @@
                             </li>
                         </g:each>
                         <g:each in="${seqTrack.seqTrack.logMessages}" var="msg">
-                            <li>${de.dkfz.tbi.util.TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(msg.dateCreated)}: ${msg.message}</li>
+                            <li>${TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(msg.dateCreated)}: ${msg.message}</li>
                         </g:each>
                     </ul>
                 </li>

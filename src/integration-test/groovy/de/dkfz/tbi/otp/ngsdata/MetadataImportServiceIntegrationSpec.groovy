@@ -53,8 +53,8 @@ import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
-import de.dkfz.tbi.util.TimeFormats
-import de.dkfz.tbi.util.TimeUtils
+import de.dkfz.tbi.otp.utils.TimeFormats
+import de.dkfz.tbi.otp.utils.TimeUtils
 
 import java.nio.file.Files
 import java.nio.file.Path

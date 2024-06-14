@@ -35,7 +35,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.utils.exceptions.SampleTypeDoesNotExistException
-import de.dkfz.tbi.util.spreadsheet.Delimiter
+import de.dkfz.tbi.otp.utils.spreadsheet.Delimiter
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 

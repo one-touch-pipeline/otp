@@ -20,6 +20,7 @@
   - SOFTWARE.
   --}%
 
+<%@ page import="de.dkfz.tbi.otp.utils.TimeFormats" %>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -107,12 +108,12 @@
                     <tr>
                         <td></td>
                         <td class="pl-3"><g:message code="wesLog.startTime"/></td>
-                        <td>${de.dkfz.tbi.util.TimeFormats.DATE_TIME.getFormattedZonedDateTime(wesRun.wesRunLog?.runLog?.startTime) ?: NA}</td>
+                        <td>${TimeFormats.DATE_TIME.getFormattedZonedDateTime(wesRun.wesRunLog?.runLog?.startTime) ?: NA}</td>
                     </tr>
                     <tr>
                         <td></td>
                         <td class="pl-3"><g:message code="wesLog.endTime"/></td>
-                        <td>${de.dkfz.tbi.util.TimeFormats.DATE_TIME.getFormattedZonedDateTime(wesRun.wesRunLog?.runLog?.endTime) ?: NA}</td>
+                        <td>${TimeFormats.DATE_TIME.getFormattedZonedDateTime(wesRun.wesRunLog?.runLog?.endTime) ?: NA}</td>
                     </tr>
                 </table>
             </div>

@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.workflowExecution.wes
 import grails.gorm.hibernate.annotation.ManagedEntity
 
 import de.dkfz.tbi.otp.utils.Entity
-import de.dkfz.tbi.util.TimeFormats
+import de.dkfz.tbi.otp.utils.TimeFormats
 
 import java.time.ZonedDateTime
 

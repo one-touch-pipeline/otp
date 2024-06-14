@@ -52,7 +52,6 @@ import de.dkfz.tbi.otp.workflow.shared.WorkflowTestException
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
-import de.dkfz.tbi.util.TimeFormats
 
 import javax.sql.DataSource
 import java.nio.file.*

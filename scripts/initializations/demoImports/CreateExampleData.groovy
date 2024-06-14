@@ -56,7 +56,6 @@ import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationWorkflow
 import de.dkfz.tbi.otp.workflow.fastqc.WesFastQcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
-import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.file.FileSystem
 import java.nio.file.Path

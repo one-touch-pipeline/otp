@@ -26,8 +26,8 @@ import de.dkfz.tbi.otp.project.ProjectRequest
 import de.dkfz.tbi.otp.project.additionalField.AbstractFieldDefinition
 import de.dkfz.tbi.otp.project.additionalField.TextFieldValue
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.util.spreadsheet.Row
-import de.dkfz.tbi.util.spreadsheet.Spreadsheet
+import de.dkfz.tbi.otp.utils.spreadsheet.Row
+import de.dkfz.tbi.otp.utils.spreadsheet.Spreadsheet
 
 import java.nio.file.FileSystem
 import java.nio.file.Path

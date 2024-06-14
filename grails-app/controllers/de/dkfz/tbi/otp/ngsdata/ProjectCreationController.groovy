@@ -43,7 +43,7 @@ import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriorityService
-import de.dkfz.tbi.util.MultiObjectValueSource
+import de.dkfz.tbi.otp.utils.MultiObjectValueSource
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter

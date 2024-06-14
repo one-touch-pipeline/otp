@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.security.user.identityProvider
 
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
-import de.dkfz.tbi.util.ldap.UserAccountControl
+import de.dkfz.tbi.otp.utils.ldap.UserAccountControl
 
 interface IdentityProvider {
 

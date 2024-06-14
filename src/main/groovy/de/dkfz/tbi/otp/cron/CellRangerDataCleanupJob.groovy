@@ -37,7 +37,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.otp.utils.exceptions.InformationTypeException
-import de.dkfz.tbi.util.TimeFormats
+import de.dkfz.tbi.otp.utils.TimeFormats
 
 import java.sql.Timestamp
 import java.time.LocalDate

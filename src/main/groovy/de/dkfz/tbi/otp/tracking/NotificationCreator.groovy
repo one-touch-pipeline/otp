@@ -49,7 +49,6 @@ import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.workflow.WorkflowCreateState
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
-import de.dkfz.tbi.util.TimeFormats
 
 import java.time.Instant
 

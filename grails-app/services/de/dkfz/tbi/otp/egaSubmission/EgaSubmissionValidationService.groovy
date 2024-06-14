@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.egaSubmission
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
-import de.dkfz.tbi.util.spreadsheet.Spreadsheet
+import de.dkfz.tbi.otp.utils.spreadsheet.Spreadsheet
 
 @Transactional
 class EgaSubmissionValidationService {

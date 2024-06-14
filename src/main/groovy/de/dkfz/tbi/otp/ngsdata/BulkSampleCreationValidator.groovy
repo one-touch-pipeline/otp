@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.ngsdata
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.project.ProjectService
-import de.dkfz.tbi.util.spreadsheet.validation.*
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.SampleIdentifierService.BulkSampleCreationHeader.*
 

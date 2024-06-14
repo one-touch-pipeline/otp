@@ -22,7 +22,7 @@
 
 import de.dkfz.tbi.otp.project.dta.DataTransfer
 import de.dkfz.tbi.otp.project.dta.DataTransferAgreement
-import de.dkfz.tbi.util.TimeFormats
+import de.dkfz.tbi.otp.utils.TimeFormats
 
 /**
  * scripts show details to all listed DataTransfer

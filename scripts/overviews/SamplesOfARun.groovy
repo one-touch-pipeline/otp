@@ -26,7 +26,7 @@
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.util.TimeFormats
+import de.dkfz.tbi.otp.utils.TimeFormats
 
 Run run = CollectionUtils.atMostOneElement(Run.findAllByName("140819_SN7001149_0212_BC4H1BACXX"))
 

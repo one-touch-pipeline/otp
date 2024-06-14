@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.config.PropertiesValidationService
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.otp.workflowExecution.*
-import de.dkfz.tbi.util.TimeFormats
+import de.dkfz.tbi.otp.utils.TimeFormats
 
 @PreAuthorize("hasRole('ROLE_ADMIN')")
 class CrashRepairController implements CheckAndCall {

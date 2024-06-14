@@ -21,8 +21,8 @@
   --}%
 
 <%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page import="de.dkfz.tbi.util.spreadsheet.validation.Problems" %>
-<%@ page import="de.dkfz.tbi.util.spreadsheet.validation.LogLevel" %>
+<%@ page import="de.dkfz.tbi.otp.utils.spreadsheet.validation.Problems" %>
+<%@ page import="de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel" %>
 <html>
 <head>
     <meta name="layout" content="metadataLayout"/>

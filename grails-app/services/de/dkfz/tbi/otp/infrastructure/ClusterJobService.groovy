@@ -33,8 +33,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
-import de.dkfz.tbi.util.TimeFormats
-import de.dkfz.tbi.util.TimeUtils
+import de.dkfz.tbi.otp.utils.TimeFormats
+import de.dkfz.tbi.otp.utils.TimeUtils
 
 import javax.sql.DataSource
 import java.nio.file.FileSystem

@@ -24,6 +24,7 @@ package wes.weskit.nextflow
 import org.grails.web.json.JSONObject
 
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.utils.TimeFormats
 import de.dkfz.tbi.otp.workflowExecution.wes.*
 
 import java.nio.file.*
@@ -75,7 +76,7 @@ work('run state') { weskitAccessService.getRunStatus(uuid) }
 work('run log') { weskitAccessService.getRunLog(uuid) }
 
 work('runWorkflow') {
-    Path workDir = fileSystem.getPath(TEST_OUTPUT_EXTERN).resolve("test_${de.dkfz.tbi.util.TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date())}")
+    Path workDir = fileSystem.getPath(TEST_OUTPUT_EXTERN).resolve("test_${TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date())}")
     Files.createDirectories(workDir)
 
     JSONObject workflowParams = [

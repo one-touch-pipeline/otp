@@ -21,9 +21,9 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation
 
-import de.dkfz.tbi.util.spreadsheet.Spreadsheet
-import de.dkfz.tbi.util.spreadsheet.validation.Problems
-import de.dkfz.tbi.util.spreadsheet.validation.ValidationContext
+import de.dkfz.tbi.otp.utils.spreadsheet.Spreadsheet
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.Problems
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.ValidationContext
 
 import java.nio.charset.Charset
 import java.nio.file.Path

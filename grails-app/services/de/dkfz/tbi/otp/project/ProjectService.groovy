@@ -57,7 +57,6 @@ import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.otp.workflowExecution.*
-import de.dkfz.tbi.util.TimeFormats
 
 import java.nio.file.*
 import java.sql.Timestamp

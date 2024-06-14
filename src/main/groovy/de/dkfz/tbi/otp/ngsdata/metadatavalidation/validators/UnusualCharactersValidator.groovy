@@ -26,9 +26,9 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.AbstractAllCellsValidator
-import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
+import de.dkfz.tbi.otp.utils.spreadsheet.Cell
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractAllCellsValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
 
 import java.util.regex.Matcher
 import java.util.regex.Pattern

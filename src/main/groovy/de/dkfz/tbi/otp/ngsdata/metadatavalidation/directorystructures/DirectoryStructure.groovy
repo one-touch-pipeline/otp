@@ -22,9 +22,9 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures
 
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.Row
-import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
+import de.dkfz.tbi.otp.utils.spreadsheet.Cell
+import de.dkfz.tbi.otp.utils.spreadsheet.Row
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.ValueTuple
 
 import java.nio.file.*
 

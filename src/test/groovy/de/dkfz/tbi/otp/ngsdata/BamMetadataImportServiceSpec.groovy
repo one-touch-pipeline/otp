@@ -36,7 +36,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationConte
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.LocalShellHelper
-import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
 
 import java.nio.file.Path
 import java.nio.file.Paths

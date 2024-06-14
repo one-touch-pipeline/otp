@@ -21,8 +21,6 @@
  */
 package de.dkfz.tbi.otp.utils
 
-import de.dkfz.tbi.util.TimeFormats
-
 import java.security.SecureRandom
 import java.time.ZonedDateTime
 

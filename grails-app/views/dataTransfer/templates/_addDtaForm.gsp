@@ -19,7 +19,7 @@
   - OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   - SOFTWARE.
   --}%
-<%@ page import="de.dkfz.tbi.util.TimeFormats" %>
+<%@ page import="de.dkfz.tbi.otp.utils.TimeFormats" %>
 <div class="container-sm left-aligned">
     <div class="card">
         <div class="card-header">

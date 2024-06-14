@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.Entity
-import de.dkfz.tbi.util.TimeFormats
+import de.dkfz.tbi.otp.utils.TimeFormats
 
 @ManagedEntity
 class DataTransfer implements Entity {

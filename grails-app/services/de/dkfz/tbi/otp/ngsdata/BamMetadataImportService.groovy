@@ -39,8 +39,8 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.exceptions.MetadataFileImportException
-import de.dkfz.tbi.util.spreadsheet.Row
-import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
+import de.dkfz.tbi.otp.utils.spreadsheet.Row
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
 
 import java.nio.file.*
 

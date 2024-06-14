@@ -34,8 +34,8 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.tracking.ProcessingTimeStatisticsService
-import de.dkfz.tbi.util.TimeFormats
-import de.dkfz.tbi.util.TimeUtils
+import de.dkfz.tbi.otp.utils.TimeFormats
+import de.dkfz.tbi.otp.utils.TimeUtils
 
 import java.time.Instant
 import java.time.LocalDate

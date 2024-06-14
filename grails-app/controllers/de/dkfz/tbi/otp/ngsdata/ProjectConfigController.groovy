@@ -42,7 +42,7 @@ import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.utils.CommentCommand
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriorityService
-import de.dkfz.tbi.util.TimeFormats
+import de.dkfz.tbi.otp.utils.TimeFormats
 
 import java.nio.file.FileSystemException
 

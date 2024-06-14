@@ -36,7 +36,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack.DataProcessingState
 import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.utils.exceptions.OtpValidationException
-import de.dkfz.tbi.util.TimeUtils
+import de.dkfz.tbi.otp.utils.TimeUtils
 
 @Component
 @Slf4j

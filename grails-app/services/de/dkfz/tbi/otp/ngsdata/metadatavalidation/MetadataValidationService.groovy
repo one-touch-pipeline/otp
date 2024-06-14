@@ -27,10 +27,10 @@ import groovy.transform.stc.SimpleType
 
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.utils.spreadsheet.*
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.Problems
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
-import de.dkfz.tbi.util.spreadsheet.*
-import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.util.spreadsheet.validation.Problems
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -89,7 +89,7 @@ class MetadataValidationService {
     @CompileDynamic
     Map readAndCheckFile(Path metadataFile,
                          @ClosureParams(value = SimpleType, options = ['java.lang.String']) Closure<String> renameHeader = Closure.IDENTITY,
-                         @ClosureParams(value = SimpleType, options = ['de.dkfz.tbi.util.spreadsheet.Row']) Closure<Boolean> dataRowFilter = { true }) {
+                         @ClosureParams(value = SimpleType, options = ['de.dkfz.tbi.otp.utils.spreadsheet.Row']) Closure<Boolean> dataRowFilter = { true }) {
         Problems problems = new Problems()
 
         ContentWithPathAndProblems readPathMap = readPath(metadataFile)
@@ -109,7 +109,7 @@ class MetadataValidationService {
     }
 
     Map checkContent(byte[] content, @ClosureParams(value = SimpleType, options = ['java.lang.String']) Closure<String> renameHeader = Closure.IDENTITY,
-                     @ClosureParams(value = SimpleType, options = ['de.dkfz.tbi.util.spreadsheet.Row']) Closure<Boolean> dataRowFilter = { true }) {
+                     @ClosureParams(value = SimpleType, options = ['de.dkfz.tbi.otp.utils.spreadsheet.Row']) Closure<Boolean> dataRowFilter = { true }) {
         Problems problems = new Problems()
         String metadataFileMd5sum = null
         Spreadsheet spreadsheet = null

@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam
 
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.util.spreadsheet.validation.Validator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.Validator
 
 /**
  * Validators implementing this interfaces and annotated with {@link Component} will automatically be used for

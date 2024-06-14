@@ -35,7 +35,7 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.util.ldap.UserAccountControl
+import de.dkfz.tbi.otp.utils.ldap.UserAccountControl
 
 import java.nio.charset.StandardCharsets
 

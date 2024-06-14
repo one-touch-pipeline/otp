@@ -36,8 +36,6 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJobService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.workflowExecution.wes.WesRun
-import de.dkfz.tbi.util.TimeFormats
-import de.dkfz.tbi.util.TimeUtils
 
 import java.time.LocalDateTime
 

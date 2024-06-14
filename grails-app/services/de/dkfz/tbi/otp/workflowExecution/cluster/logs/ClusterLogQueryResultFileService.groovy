@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.workflowExecution.cluster.logs
 
 import grails.gorm.transactions.Transactional
 
-import de.dkfz.tbi.util.TimeFormats
+import de.dkfz.tbi.otp.utils.TimeFormats
 
 import java.nio.file.Path
 

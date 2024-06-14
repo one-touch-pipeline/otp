@@ -23,7 +23,7 @@
 <%@ page import="de.dkfz.tbi.otp.project.projectRequest.StoragePeriod" %>
 <%@ page import="de.dkfz.tbi.otp.project.projectRequest.ProjectRequestStateProvider" %>
 <%@ page import="de.dkfz.tbi.otp.project.projectRequest.Approval" %>
-<%@ page import="de.dkfz.tbi.util.TimeFormats" %>
+<%@ page import="de.dkfz.tbi.otp.utils.TimeFormats" %>
 
 
 <html>

@@ -37,7 +37,6 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.restarting.RestartActionService
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-import de.dkfz.tbi.util.TimeFormats
 
 import static grails.async.Promises.task
 import static grails.async.Promises.waitAll

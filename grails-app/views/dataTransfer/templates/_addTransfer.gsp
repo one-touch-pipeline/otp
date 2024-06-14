@@ -19,7 +19,7 @@
   - OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   - SOFTWARE.
   --}%
-<%@ page import="de.dkfz.tbi.util.TimeFormats" %>
+<%@ page import="de.dkfz.tbi.otp.utils.TimeFormats" %>
 <div class="card card-body">
     <g:uploadForm action="addTransfer" useToken="true">
         <input type="hidden" name="dataTransferAgreement.id" value="${dta.id}">

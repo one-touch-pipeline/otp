@@ -20,7 +20,7 @@
   - SOFTWARE.
   --}%
 
-<%@ page import="de.dkfz.tbi.util.TimeFormats; de.dkfz.tbi.otp.project.Project; de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage.Status" %>
+<%@ page import="de.dkfz.tbi.otp.utils.TimeFormats; de.dkfz.tbi.otp.project.Project; de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage.Status" %>
 <html>
 <head>
     <title>${g.message(code: "otp.menu.cellRanger.finalRunSelection")}</title>

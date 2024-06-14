@@ -52,7 +52,6 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.workflow.shared.WorkflowTestException
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 import de.dkfz.tbi.otp.workflowTest.AbstractWorkflowSpec
-import de.dkfz.tbi.util.TimeFormats
 
 import javax.sql.DataSource
 import java.nio.file.FileSystem

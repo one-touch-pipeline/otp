@@ -41,8 +41,8 @@ import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.util.spreadsheet.Delimiter
-import de.dkfz.tbi.util.spreadsheet.Spreadsheet
+import de.dkfz.tbi.otp.utils.spreadsheet.Delimiter
+import de.dkfz.tbi.otp.utils.spreadsheet.Spreadsheet
 
 import java.nio.file.FileSystem
 import java.nio.file.Path

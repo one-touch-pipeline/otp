@@ -24,8 +24,8 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq
 import de.dkfz.tbi.otp.ngsdata.SampleIdentifier
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
-import de.dkfz.tbi.util.spreadsheet.Spreadsheet
-import de.dkfz.tbi.util.spreadsheet.validation.Problems
+import de.dkfz.tbi.otp.utils.spreadsheet.Spreadsheet
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.Problems
 
 import java.nio.file.Path
 

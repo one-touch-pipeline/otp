@@ -24,7 +24,7 @@ package operations.dataInstallation
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.ngsdata.Run
-import de.dkfz.tbi.util.TimeFormats
+import de.dkfz.tbi.otp.utils.TimeFormats
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 

@@ -47,7 +47,7 @@
  */
 
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
-import de.dkfz.tbi.util.TimeFormats
+import de.dkfz.tbi.otp.utils.TimeFormats
 import java.text.SimpleDateFormat
 
 // ---------------------------

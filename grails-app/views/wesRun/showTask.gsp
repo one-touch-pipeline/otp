@@ -19,6 +19,8 @@
   - OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   - SOFTWARE.
   --}%
+
+<%@ page import="de.dkfz.tbi.otp.utils.TimeFormats" %>
 <html>
 <head>
     <title>${g.message(code: "wesTask.title")}</title>
@@ -56,11 +58,11 @@
             </tr>
             <tr>
                 <td>${g.message(code: "wesLog.startTime")}</td>
-                <td>${de.dkfz.tbi.util.TimeFormats.DATE_TIME.getFormattedLocalDateTime(wesLog.startTime)}</td>
+                <td>${TimeFormats.DATE_TIME.getFormattedLocalDateTime(wesLog.startTime)}</td>
             </tr>
             <tr>
                 <td>${g.message(code: "wesLog.endTime")}</td>
-                <td>${de.dkfz.tbi.util.TimeFormats.DATE_TIME.getFormattedLocalDateTime(wesLog.endTime)}</td>
+                <td>${TimeFormats.DATE_TIME.getFormattedLocalDateTime(wesLog.endTime)}</td>
             </tr>
         </table>
     </div>

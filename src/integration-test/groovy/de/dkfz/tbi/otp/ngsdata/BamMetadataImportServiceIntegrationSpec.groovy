@@ -38,7 +38,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators.Md5sumFormatValidat
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.util.spreadsheet.validation.LogLevel
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
 
 import java.nio.file.Files
 import java.nio.file.Path
