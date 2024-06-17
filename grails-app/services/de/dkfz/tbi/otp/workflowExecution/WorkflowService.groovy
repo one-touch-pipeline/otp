@@ -51,6 +51,10 @@ class WorkflowService {
         return CollectionUtils.exactlyOneElement(Workflow.findAllByNameAndDeprecatedDateIsNull(name), "Could not find workflow with name '${name}'")
     }
 
+    WorkflowRun getWorkflowFromWorkflowSteps(List<WorkflowStep> steps) {
+        return CollectionUtils.atMostOneElement(steps*.workflowRun.unique())
+    }
+
     Set<SeqType> getSupportedSeqTypes(String name) {
         return getSupportedSeqTypesOfVersions(Workflow.findAllByName(name))
     }

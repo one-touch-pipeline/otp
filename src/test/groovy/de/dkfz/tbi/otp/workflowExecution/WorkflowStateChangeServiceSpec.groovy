@@ -142,9 +142,10 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
     void "test toggleFailedWaitingState"() {
         given:
         WorkflowRun workflowRun = createWorkflowRun(state: state)
+        List<WorkflowStep> workflowSteps = (1..3).collect { createWorkflowStep(workflowRun: workflowRun) }
 
         when:
-        service.toggleFailedWaitingState(workflowRun)
+        service.toggleFailedWaitingState(workflowSteps)
 
         then:
         workflowRun.state == expected
@@ -158,9 +159,23 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
     void "toggleFailedWaitingState, when called for workflow state other than FAILED or FAILED_WAITING, then throw assertion"() {
         given:
         WorkflowRun workflowRun = createWorkflowRun(state: WorkflowRun.State.SUCCESS)
+        List<WorkflowStep> workflowSteps = (1..3).collect { createWorkflowStep(workflowRun: workflowRun) }
 
         when:
-        service.toggleFailedWaitingState(workflowRun)
+        service.toggleFailedWaitingState(workflowSteps)
+
+        then:
+        thrown(AssertionError)
+    }
+
+    void "toggleFailedWaitingState, when workflowSteps have different workflowRuns, then throw assertion"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep()
+        WorkflowStep workflowStep2 = createWorkflowStep()
+        List<WorkflowStep> workflowSteps = [workflowStep, workflowStep2]
+
+        when:
+        service.toggleFailedWaitingState(workflowSteps)
 
         then:
         thrown(AssertionError)

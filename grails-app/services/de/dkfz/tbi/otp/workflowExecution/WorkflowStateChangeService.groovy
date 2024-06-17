@@ -87,8 +87,9 @@ class WorkflowStateChangeService {
         }
     }
 
-    void toggleFailedWaitingState(WorkflowRun run) {
-        assert run
+    void toggleFailedWaitingState(List<WorkflowStep> steps) {
+        WorkflowRun run = steps.first().workflowRun
+        assert run && steps*.workflowRun*.id.unique().size() == 1
         assert run.state in [WorkflowRun.State.FAILED, WorkflowRun.State.FAILED_WAITING]
 
         run.state = run.state == WorkflowRun.State.FAILED ? WorkflowRun.State.FAILED_WAITING : WorkflowRun.State.FAILED
