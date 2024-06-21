@@ -51,7 +51,9 @@ class WorkflowService {
         return CollectionUtils.exactlyOneElement(Workflow.findAllByNameAndDeprecatedDateIsNull(name), "Could not find workflow with name '${name}'")
     }
 
-    WorkflowRun getWorkflowFromWorkflowSteps(List<WorkflowStep> steps) {
+    WorkflowRun getWorkflowFromWorkflowSteps(List<Long> stepIds) {
+        List<WorkflowStep> steps = stepIds.collect { WorkflowStep.get(it) }
+        assert steps*.workflowRun.unique().size() == 1
         return CollectionUtils.atMostOneElement(steps*.workflowRun.unique())
     }
 
