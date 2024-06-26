@@ -56,7 +56,7 @@ abstract class AbstractWorkflowRunController implements CheckAndCall {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     def toggleFailedWaiting(RunUpdateCommand cmd) {
-        WorkflowRun workflowRun = workflowService.getWorkflowFromWorkflowSteps(cmd.step)
+        WorkflowRun workflowRun = workflowService.getUniqueWorkflowFromWorkflowSteps(cmd.step)
         checkErrorAndCallMethodWithFlashMessageWithoutTokenCheck(
                 cmd,
                 (workflowRun.state == WorkflowRun.State.FAILED_WAITING) ? "workflowRun.list.removeFailedWaiting" : "workflowRun.list.setFailedWaiting"

@@ -37,26 +37,26 @@ class WorkflowServiceSpec extends Specification implements ServiceUnitTest<Workf
         ]
     }
 
-    void "check getWorkflowFromWorkflowSteps functionality"() {
+    void "check getUniqueWorkflowFromWorkflowSteps functionality"() {
         given:
         WorkflowRun workflowRun = createWorkflowRun()
         List<WorkflowStep> workflowSteps = (1..3).collect { createWorkflowStep(workflowRun: workflowRun) }
 
         when:
-        WorkflowRun result = service.getWorkflowFromWorkflowSteps(workflowSteps*.id)
+        WorkflowRun result = service.getUniqueWorkflowFromWorkflowSteps(workflowSteps*.id)
 
         then:
         result == workflowRun
     }
 
-    void "getWorkflowFromWorkflowSteps, when workflowSteps have different workflowRuns, then throw assertion"() {
+    void "getUniqueWorkflowFromWorkflowSteps, when workflowSteps have different workflowRuns, then throw assertion"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()
         WorkflowStep workflowStep2 = createWorkflowStep()
         List<WorkflowStep> workflowSteps = [workflowStep, workflowStep2]
 
         when:
-        service.getWorkflowFromWorkflowSteps(workflowSteps*.id)
+        service.getUniqueWorkflowFromWorkflowSteps(workflowSteps*.id)
 
         then:
         thrown(AssertionError)
