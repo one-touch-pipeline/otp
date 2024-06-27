@@ -55,6 +55,8 @@ class WorkflowSelectionServiceSpec extends Specification implements ServiceUnitT
 
         then:
         (rgSelectorDefined ? 1 : 0) * service.referenceGenomeSelectorService.deleteSelector(rgSelector)
+
+        then:
         (wvSelectorDefined ? 1 : 0) * service.workflowVersionSelectorService.deprecateSelectorIfUnused(wvSelector)
 
         where:

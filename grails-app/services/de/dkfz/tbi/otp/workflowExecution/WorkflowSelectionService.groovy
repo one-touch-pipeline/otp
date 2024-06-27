@@ -39,11 +39,11 @@ class WorkflowSelectionService {
     ReferenceGenomeService referenceGenomeService
 
     void deleteAndDeprecateSelectors(WorkflowVersionSelector wvSelector, ReferenceGenomeSelector rgSelector) {
-        if (wvSelector) {
-            workflowVersionSelectorService.deprecateSelectorIfUnused(wvSelector)
-        }
         if (rgSelector) {
             referenceGenomeSelectorService.deleteSelector(rgSelector)
+        }
+        if (wvSelector) {
+            workflowVersionSelectorService.deprecateSelectorIfUnused(wvSelector)
         }
     }
 
