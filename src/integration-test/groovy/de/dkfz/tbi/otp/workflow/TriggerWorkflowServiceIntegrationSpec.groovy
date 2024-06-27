@@ -230,6 +230,6 @@ class TriggerWorkflowServiceIntegrationSpec extends Specification implements Dom
         service.triggerWorkflowByProjectAndSampleTypes(project, [sampleType1, sampleType2, sampleType3] as Set)
 
         then:
-        1 * service.allDecider.decide([workflowArtefact1, workflowArtefact2, workflowArtefact3])
+        1 * service.allDecider.decide { data -> data.toSet() == [workflowArtefact1, workflowArtefact2, workflowArtefact3] as Set }
     }
 }
