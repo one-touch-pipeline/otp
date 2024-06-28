@@ -31,7 +31,7 @@ buildscript {
         maven { url "https://repo.grails.org/grails/core" }
     }
     dependencies {
-        classpath "org.grails:grails-gradle-plugin:$grailsGradlePluginVersion"
+        classpath "org.grails:grails-gradle-plugin:$grailsVersion"
         classpath "org.grails.plugins:hibernate5:8.1.0"
 
         classpath 'org.grails.plugins:database-migration:4.2.1'
@@ -63,15 +63,15 @@ plugins {
     id 'org.cyclonedx.bom' version '1.8.2'
 }
 
-buildScan {
-    termsOfServiceUrl = 'https://gradle.com/terms-of-service'
-    termsOfServiceAgree = 'yes'
-    if (System.getenv('PUBLISH_SCAN') == '1') {
-        publishAlways()
+develocity {
+    buildScan {
+        publishing.onlyIf { System.getenv('PUBLISH_SCAN') == '1' }
+        termsOfUseUrl = 'https://gradle.com/terms-of-service'
+        termsOfUseAgree = 'yes'
         String commitId = 'git rev-parse --verify HEAD'.execute().text.trim()
         String gitlabUrl = "https://gitlab.com/one-touch-pipeline/otp"
         value 'Git Commit ID', commitId
-        buildScan.link 'Source', "$gitlabUrl/-/commit/$commitId"
+        link 'Source', "$gitlabUrl/-/commit/$commitId"
         buildScanPublished { scan ->
             file("$buildDir/scan-journal.log") << "${new Date()} - ${scan.buildScanId} - ${scan.buildScanUri}\n"
         }
@@ -124,6 +124,7 @@ sourceSets {
         File r = new File(project.projectDir, "grails-app/conf")
         resources.srcDir(r)
     }
+
     main {
         resources {
             srcDirs 'migrations', "$buildDir/version"

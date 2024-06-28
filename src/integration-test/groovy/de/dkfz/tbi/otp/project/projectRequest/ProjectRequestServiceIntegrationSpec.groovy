@@ -44,6 +44,7 @@ import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.security.user.DepartmentService
 import de.dkfz.tbi.otp.administration.MailHelperService
+import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
 import java.time.LocalDate
@@ -80,6 +81,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 ]),
                 configService                       : configService,
                 departmentService                   : Mock(DepartmentService),
+                userService                         : new UserService(),
         ])
     }
 

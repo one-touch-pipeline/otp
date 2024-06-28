@@ -133,7 +133,7 @@ class DeputyRelationService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Map<User, List<String>> listDeputiesByHead() {
-        Map deputiesByHead = [:]
+        Map<User, List<String>> deputiesByHead = [:]
         DeputyRelation.all.groupBy { it.grantingDeputyUser }.each { User user, List<DeputyRelation> deputyRelations ->
             deputiesByHead << [(user): deputyRelations*.deputyUser*.toString()]
         }

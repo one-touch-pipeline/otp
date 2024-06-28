@@ -89,6 +89,10 @@ class UserService {
         return user
     }
 
+    Set<Role> getAuthorities(User user) {
+        return UserRole.findAllByUser(user)*.role as Set
+    }
+
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     User updateRealName(User user, String newName) {
         assert newName: "the input newName '${newName}' must not be null"

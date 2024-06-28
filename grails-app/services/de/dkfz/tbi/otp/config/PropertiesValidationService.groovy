@@ -87,7 +87,7 @@ class PropertiesValidationService {
             List<String> types = name.validatorForType?.allowedValues != null ? name.validatorForType.allowedValues : []
 
             return types.collect { type ->
-                validateProcessingOptionName(name, type as String)
+                validateProcessingOptionName(name, type)
             }.findAll()
         } as List<OptionProblem>
     }

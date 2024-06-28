@@ -24,7 +24,9 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
-class SeqPlatformServiceSpec extends Specification implements DataTest {
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+
+class SeqPlatformServiceSpec extends Specification implements DataTest, DomainFactoryCore {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -86,8 +88,8 @@ class SeqPlatformServiceSpec extends Specification implements DataTest {
 
     void "test createNewSeqPlatform, when everything is provided"() {
         given:
-        SeqPlatformModelLabel seqPlatformModelLabel = DomainFactory.createSeqPlatformModelLabel()
-        SequencingKitLabel sequencingKitLabel = DomainFactory.createSequencingKitLabel()
+        SeqPlatformModelLabel seqPlatformModelLabel = createSeqPlatformModelLabel()
+        SequencingKitLabel sequencingKitLabel = createSequencingKitLabel()
 
         when:
         SeqPlatform seqPlatform = SeqPlatformService.createNewSeqPlatform(
@@ -104,7 +106,7 @@ class SeqPlatformServiceSpec extends Specification implements DataTest {
 
     void "test changeLegacyState"() {
         given:
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup()
+        SeqPlatform seqPlatform = createSeqPlatformWithSeqPlatformGroup()
         boolean legacy = true
 
         when:
@@ -112,5 +114,36 @@ class SeqPlatformServiceSpec extends Specification implements DataTest {
 
         then:
         seqPlatform.legacy == legacy
+    }
+
+    void "test displayableMetadata"() {
+        given:
+        List<String> importAlias = ['alias1', 'alias2']
+        List<String> seqKitImportAlias = ['seqKitAlias1', 'seqKitAlias2']
+        SeqPlatform seqPlatform = createSeqPlatformWithSeqPlatformGroup([
+                sequencingKitLabel   : createSequencingKitLabel([
+                        importAlias: seqKitImportAlias,
+                ]),
+                seqPlatformModelLabel: createSeqPlatformModelLabel([
+                        importAlias: importAlias,
+                ]),
+        ])
+
+        expect:
+        service.displayableMetadata() == [
+                [
+                        id                 : seqPlatform.id,
+                        name               : seqPlatform.name,
+                        modelId            : seqPlatform.seqPlatformModelLabel?.id,
+                        model              : seqPlatform.seqPlatformModelLabel?.name,
+                        modelImportAliases : importAlias.join(AbstractMetadataFieldsService.MULTILINE_JOIN_STRING),
+                        hasModel           : seqPlatform.seqPlatformModelLabel ? true : false,
+                        seqKitId           : seqPlatform.sequencingKitLabel?.id,
+                        seqKit             : seqPlatform.sequencingKitLabel?.name,
+                        seqKitImportAliases: seqKitImportAlias.join(AbstractMetadataFieldsService.MULTILINE_JOIN_STRING),
+                        hasSeqKit          : seqPlatform.sequencingKitLabel?.name ? true : false,
+                        legacy             : seqPlatform.legacy,
+                ]
+        ]
     }
 }

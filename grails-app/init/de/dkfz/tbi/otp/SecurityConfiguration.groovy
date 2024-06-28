@@ -84,6 +84,9 @@ class SecurityConfiguration {
     @Autowired
     SecurityService securityService
 
+    @Autowired
+    UserService userService
+
     @Bean
     static MethodSecurityExpressionHandler securityExpressionHandler(ProjectPermissionEvaluator projectPermissionEvaluator) {
         DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler()
@@ -252,7 +255,7 @@ class SecurityConfiguration {
                     SessionUtils.withNewSession {
                         User user = userService.findOrCreateUserWithLdapData(idToken.preferredUsername)
 
-                        user.authorities.each { Role role ->
+                        userService.getAuthorities(user).each { Role role ->
                                 mappedAuthorities.add(new SimpleGrantedAuthority(role.authority))
                         }
 

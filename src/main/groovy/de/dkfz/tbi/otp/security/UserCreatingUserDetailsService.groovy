@@ -63,6 +63,6 @@ class UserCreatingUserDetailsService implements UserDetailsService {
             }
             user = userService.createUser(idpUserDetails.username, idpUserDetails.mail, idpUserDetails.realName)
         }
-        return new Principal(user.username, user.authorities.collect { new SimpleGrantedAuthority(it.authority) }, user.enabled)
+        return new Principal(user.username, userService.getAuthorities(user).collect { new SimpleGrantedAuthority(it.authority) }, user.enabled)
     }
 }

@@ -189,13 +189,13 @@ abstract class AbstractQaOverviewService {
         return ((numerator != null && denominator) ? (100.0 * numerator.doubleValue() / denominator.doubleValue()) : null)
     }
 
-    List<Map<String, ?>> createList(Project project, SeqType seqType, List<Map<String, ?>> qaMapList) {
+    List<Map<String, ? extends Object>> createList(Project project, SeqType seqType, List<Map<String, Object>> qaMapList) {
         QcThresholdService.ThresholdColorizer thresholdColorizer =
                 qcThresholdService.createThresholdColorizer(project, seqType, (Class<QcTrafficLightValue>) qaClass())
 
-        List<Map<String, ?>> result = []
-        qaMapList.each { Map<String, ?> qaMap ->
-            Map<String, ?> qcTableRow = [:]
+        List<Map<String, ? extends Object>> result = []
+        qaMapList.each { Map<String, ? extends Object> qaMap ->
+            Map<String, ? extends Object> qcTableRow = [:]
             KEY_BASE.each {
                 qcTableRow[it] = qaMap[it]
             }

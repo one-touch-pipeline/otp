@@ -42,6 +42,7 @@ import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.security.user.DepartmentService
 import de.dkfz.tbi.otp.security.user.SwitchedUserDeniedException
+import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
@@ -65,6 +66,7 @@ class ProjectRequestService {
     UserProjectRoleService userProjectRoleService
     ConfigService configService
     DepartmentService departmentService
+    UserService userService
 
     boolean piBelongsToDepartment(List<String> piUsernameList, String department) {
         List<String> piUsernames = User.findAllByUsernameInList(piUsernameList)*.username
@@ -524,7 +526,7 @@ class ProjectRequestService {
             if (securityService.hasCurrentUserAdministrativeRoles()) {
                 return currentOwner.username
             }
-            List<String> currentOwnerAuthorities = currentOwner.authorities*.authority
+            List<String> currentOwnerAuthorities = userService.getAuthorities(currentOwner)*.authority
             List<String> containedAdministrativeRoles = Role.ADMINISTRATIVE_ROLES.findAll { currentOwnerAuthorities.contains(it) }
             return containedAdministrativeRoles ?
                     processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME) :

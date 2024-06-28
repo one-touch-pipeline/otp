@@ -179,7 +179,7 @@ class EgaSubmissionService {
 
         Set<Long> submissionSampleIdsWithFastqFiles = SampleSubmissionObject.executeQuery(checkFastqFileExistQuery, [
                 egaSubmission: egaSubmission,
-        ]).toSet()
+        ]).toSet() as Set<Long>
 
         egaSubmission.samplesToSubmit.each {
             map.put(it, submissionSampleIdsWithFastqFiles.contains(it.id))

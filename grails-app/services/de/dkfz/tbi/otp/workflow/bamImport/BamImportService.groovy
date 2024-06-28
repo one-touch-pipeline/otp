@@ -69,7 +69,7 @@ class BamImportService {
     BamImportInstance waiting() {
         return CollectionUtils.atMostOneElement(
                 BamImportInstance.executeQuery(QUERY_WAITING_AND_ALLOWED_IMPORT_INSTANCE, [:], [max: 1])
-        )
+        ) as BamImportInstance
     }
 
     @CompileDynamic

@@ -66,10 +66,6 @@ class User implements Entity {
         password column: '`password`'
     }
 
-    Set<Role> getAuthorities() {
-        return UserRole.findAllByUser(this)*.role as Set
-    }
-
     String getFormattedPlannedDeactivationDate() {
         return TimeFormats.asTimestamp(plannedDeactivationDate)["full"]
     }
