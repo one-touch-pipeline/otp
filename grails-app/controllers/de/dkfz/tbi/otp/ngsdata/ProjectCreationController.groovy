@@ -94,7 +94,7 @@ class ProjectCreationController {
         }
 
         Map<String, ?> defaults = [
-                processingPriority             : processingPriorityService.defaultPriority(),
+                processingPriority             : processingPriorityService.defaultPriority,
                 storageUntil                   : "3000-01-01",
                 projectType                    : Project.ProjectType.SEQUENCING,
                 fingerPrinting                 : true,

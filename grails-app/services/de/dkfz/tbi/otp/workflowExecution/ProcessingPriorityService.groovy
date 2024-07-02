@@ -40,7 +40,7 @@ class ProcessingPriorityService {
         return ProcessingPriority.list(sort: 'priority')
     }
 
-    ProcessingPriority defaultPriority() {
+    ProcessingPriority getDefaultPriority() {
         return CollectionUtils.atMostOneElement(
                 ProcessingPriority.findAllByName(
                         processingOptionService.findOptionAsString(ProcessingOption.OptionName.PROCESSING_PRIORITY_DEFAULT_NAME)
@@ -48,21 +48,16 @@ class ProcessingPriorityService {
         )
     }
 
-    // operations on Priority domain object
-    ProcessingPriority getPriority(Long id) {
-        return ProcessingPriority.get(id)
-    }
-
     ProcessingPriority findByName(String name) {
         return CollectionUtils.atMostOneElement(ProcessingPriority.findAllByName(name))
     }
 
     int getPriorityListCount() {
-        return ProcessingPriority.count()
+        return ProcessingPriority.count
     }
 
-    List<ProcessingPriority> getPriorityList(Map params) {
-        return ProcessingPriority.list(params)
+    List<ProcessingPriority> getPriorityList() {
+        return ProcessingPriority.all
     }
 
     ProcessingPriority savePriority(ProcessingPriority processingPriority) {
@@ -73,16 +68,16 @@ class ProcessingPriorityService {
         ProcessingPriority.get(id).delete(flush: true)
     }
 
-    Map getReferences(ProcessingPriority processingPriority) {
+    /** Map of domain objects (Projects and WorkflowRuns), where processingPriority is currently used and whether it is the default ProcessingPriority. */
+    Map getReferences(Long processingPriorityId) {
         Map references = [:]
+        ProcessingPriority processingPriority = ProcessingPriority.get(processingPriorityId)
+        assert processingPriority
 
-        // if it is defined in ProcessingOption as default
-        String defaultName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.PROCESSING_PRIORITY_DEFAULT_NAME)
-        if (processingPriority.name == defaultName) {
-            references.put(ProcessingOption.OptionName.PROCESSING_PRIORITY_DEFAULT_NAME, ProcessingOption.simpleName)
+        if (defaultPriority == processingPriority) {
+            references.put(processingPriority.name, ProcessingOption.simpleName)
         }
 
-        // if it is used by WorkflowRun, WorkflowRunStep, Project
         Project.findAllByProcessingPriority(processingPriority).each {
             references.put(it.id, it.class.simpleName)
         }

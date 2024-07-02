@@ -99,8 +99,8 @@ class LogService {
                 workflowStep = workflowStepParam
                 command = commandParam
                 exitCode = processOutput.exitCode
-                stdout = processOutput.stdout
-                stderr = processOutput.stderr
+                stdout = processOutput.stdout ?: ""
+                stderr = processOutput.stderr ?: ""
                 createdBy = userName()
                 save(flush: true)
             }

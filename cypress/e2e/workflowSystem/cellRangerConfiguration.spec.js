@@ -108,6 +108,7 @@ describe('Check cell ranger configuration page', () => {
 
             /** The created mwps should be contained in the table for the existing runs */
             cy.get('#mwpTable_processing').should('not.be.visible');
+            cy.get('.otpSuccessToast').should('be.visible').and('contain.text', 'successfully created');
             cy.get('table#mwpTable tbody tr').then((mwpTableRowsAfter) => {
               expect(mwpTableRowsAfter.length).to.eq(cellRunsBefore + samplesSubmitted);
             });

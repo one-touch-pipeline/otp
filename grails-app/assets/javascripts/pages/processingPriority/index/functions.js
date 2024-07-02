@@ -41,14 +41,14 @@ $.otp.processingPriority = {
      */
   /* eslint-disable no-template-curly-in-string */
   ppActionColumn:
-        '<button id="delete-row" class="btn btn-sm btn-outline-danger"' +
-        ' type="button" title="${g.message(code: "processingPriority.tooltip.delete")}">\n' +
-        '         <i class="bi bi-trash"></i>\n' +
-        '</button>\n' +
-        '<button id="edit-row" class="btn btn-sm btn-outline-secondary"' +
-        ' type="button" title="${g.message(code: "processingPriority.tooltip.edit")}">\n' +
-        '        <i class="bi bi-pencil"></i>\n' +
-        '</button>',
+    '<button id="delete-row" class="btn btn-sm btn-outline-danger"' +
+    ' type="button" title="${g.message(code: "processingPriority.tooltip.delete")}">\n' +
+    '         <i class="bi bi-trash"></i>\n' +
+    '</button>\n' +
+    '<button id="edit-row" class="btn btn-sm btn-outline-secondary"' +
+    ' type="button" title="${g.message(code: "processingPriority.tooltip.edit")}">\n' +
+    '        <i class="bi bi-pencil"></i>\n' +
+    '</button>',
   /* eslint-enable no-template-curly-in-string */
 
   /*
@@ -321,7 +321,7 @@ $(document).ready(() => {
       type: 'get',
       url: $.otp.createLink({
         controller: 'ProcessingPriority',
-        action: 'refer',
+        action: 'getReferences',
         id: aData[0]
       }),
       success(response) {
@@ -336,10 +336,11 @@ $(document).ready(() => {
           oDialog.find('.modal-body input#pp-row').val(rowIndex);
           oDialog.find('.modal-body em#em-name').text(aData[$.otp.processingPriority.mapFieldIndex.name]);
         } else {
+          const referenceList = Object.entries(response).map((entry) => `<li>${entry.join(': ')}</li>`);
           $.otp.toaster.showErrorToast(
             'Delete Processing Priority',
-            `${aData[$.otp.processingPriority.mapFieldIndex.name]}
-               cannot be deleted due to references: ${JSON.stringify(response)}`
+            `${aData[$.otp.processingPriority.mapFieldIndex.name]} cannot be deleted due to references:
+               <ul>${referenceList.join('')}</ul>`
           );
         }
       },

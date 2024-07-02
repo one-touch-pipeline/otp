@@ -61,8 +61,8 @@ class WorkflowService {
         return getSupportedSeqTypesOfVersions(Workflow.findAllByName(name))
     }
 
-    void createRestartedWorkflows(List<WorkflowStep> steps, boolean startDirectly = true) {
-        steps.each {
+    List<WorkflowRun> createRestartedWorkflows(List<WorkflowStep> steps, boolean startDirectly = true) {
+        return steps.collect {
             createRestartedWorkflow(it, startDirectly)
         }
     }
@@ -256,6 +256,6 @@ class WorkflowService {
      * returns if a given workflow is an alignment workflow
      */
     boolean isAlignment(Workflow workflow) {
-        return otpWorkflowService.lookupOtpWorkflowBean(workflow).isAlignment()
+        return otpWorkflowService.lookupOtpWorkflowBean(workflow)?.isAlignment()
     }
 }

@@ -29,10 +29,11 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.utils.ProcessOutput
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
+import de.dkfz.tbi.otp.workflowExecution.log.WorkflowCommandLog
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
 
@@ -44,6 +45,7 @@ class LogServiceSpec extends Specification implements ServiceUnitTest<LogService
     Class[] getDomainClassesToMock() {
         return [
                 WorkflowMessageLog,
+                WorkflowCommandLog,
         ]
     }
 
@@ -58,7 +60,7 @@ class LogServiceSpec extends Specification implements ServiceUnitTest<LogService
         given:
         WorkflowStep workflowStep = createWorkflowStep()
         String message1 = "message ${nextId}"
-        String message2 = "message ${nextId}"
+        GString message2 = """message ${nextId}"""
 
         when:
         service.addSimpleLogEntry(workflowStep, message1)
@@ -158,7 +160,7 @@ class LogServiceSpec extends Specification implements ServiceUnitTest<LogService
         String message = "message ${nextId}"
         String exceptionMessage = "exception ${nextId}"
         OtpRuntimeException otpRuntimeException = new OtpRuntimeException(exceptionMessage)
-        User testUser = DomainFactory.createUser()
+        User testUser = createUser()
 
         service.securityService = Mock(SecurityService) {
             getCurrentUser() >> testUser
@@ -172,5 +174,63 @@ class LogServiceSpec extends Specification implements ServiceUnitTest<LogService
         logs.size() == 1
         logs[0].createdBy == testUser.username
         logs[0].workflowStep == workflowStep
+    }
+
+    void "addCommandLogEntry, should create a new WorkflowCommandLog when ProcessOutput is set"() {
+        given:
+        User testUser = createUser()
+        WorkflowStep workflowStep = createWorkflowStep()
+        String commandParam = "command ${nextId}"
+        ProcessOutput processOutput = new ProcessOutput([
+                stdout  : "message  ${nextId}",
+                stderr  : "message  ${nextId}",
+                exitCode: 3,
+        ])
+
+        service.securityService = Mock(SecurityService) {
+            getCurrentUser() >> testUser
+        }
+
+        when:
+        service.addCommandLogEntry(workflowStep, commandParam, processOutput)
+
+        then:
+        List<WorkflowCommandLog> logs = WorkflowCommandLog.all
+        logs.size() == 1
+        logs[0].command == commandParam
+        logs[0].exitCode == processOutput.exitCode as Long
+        logs[0].stdout == processOutput.stdout
+        logs[0].workflowStep == workflowStep
+        logs[0].stderr == processOutput.stderr
+        logs[0].createdBy == testUser.username
+    }
+
+    void "addCommandLogEntry, should create a new WorkflowCommandLog when ProcessOutput is empty"() {
+        given:
+        User testUser = createUser()
+        WorkflowStep workflowStep = createWorkflowStep()
+        String commandParam = "command ${nextId}"
+        ProcessOutput processOutput = new ProcessOutput([
+                stdout  : "",
+                stderr  : null,
+                exitCode: 0,
+        ])
+
+        service.securityService = Mock(SecurityService) {
+            getCurrentUser() >> testUser
+        }
+
+        when:
+        service.addCommandLogEntry(workflowStep, commandParam, processOutput)
+
+        then:
+        List<WorkflowCommandLog> logs = WorkflowCommandLog.all
+        logs.size() == 1
+        logs[0].command == commandParam
+        logs[0].exitCode == processOutput.exitCode as Long
+        logs[0].stdout == ""
+        logs[0].workflowStep == workflowStep
+        logs[0].stderr == ""
+        logs[0].createdBy == testUser.username
     }
 }

@@ -33,16 +33,15 @@ class ProcessingPriorityController {
 
     static allowedMethods = [
             index: "GET",
-            refer: "GET",
+            getReferences: "GET",
             save: "POST",
             update: "POST",
             delete: "DELETE",
     ]
 
     def index() {
-        params.max = 1000
         return [
-                processingPriorityList: processingPriorityService.getPriorityList(params),
+                processingPriorityList: processingPriorityService.priorityList,
                 processingPriorityCount: processingPriorityService.priorityListCount,
         ]
     }
@@ -77,11 +76,11 @@ class ProcessingPriorityController {
         render(view: 'index')
     }
 
-    JSON refer(Long id) {
+    JSON getReferences(Long id) {
         if (id == null) {
             response.sendError(HttpStatus.BAD_REQUEST.value(), g.message(code: "processingPriority.fetch.failure") as String)
         }
 
-        return render(processingPriorityService.getReferences(processingPriorityService.getPriority(id)) as JSON)
+        return render(processingPriorityService.getReferences(id) as JSON)
     }
 }
