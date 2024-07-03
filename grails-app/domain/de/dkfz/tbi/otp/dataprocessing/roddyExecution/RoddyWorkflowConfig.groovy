@@ -188,6 +188,7 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
     }
 
     @Deprecated
+    @SuppressWarnings('NoPathToFile') // old WF
     static File getStandardConfigDirectory(Project project, Pipeline.Name pipelineName) {
         assert project && pipelineName
         return Paths.get(
