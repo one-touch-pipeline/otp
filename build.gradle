@@ -461,7 +461,7 @@ dependencies {
     implementation 'com.github.robtimus:sftp-fs:3.3.1'
 
     // library for easy HTML editing
-    implementation 'org.jsoup:jsoup:1.17.2'
+    implementation 'org.jsoup:jsoup:1.18.1'
 
     implementation 'com.networknt:json-schema-validator:1.5.0'
 
