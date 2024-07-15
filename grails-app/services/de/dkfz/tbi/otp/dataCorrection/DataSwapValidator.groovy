@@ -19,42 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.dataCorrection
 
-import grails.testing.gorm.DataTest
-import spock.lang.Specification
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.ValidationContext
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.Validator
 
-class FileNotReadableExceptionSpec extends Specification implements DataTest {
-
-    void testFileNotReadableExceptionString() {
-        given:
-        FileNotReadableException e = new FileNotReadableException("tmp")
-
-        expect:
-        e.message == "can not read file: tmp"
-    }
-
-    void testFileNotReadableExceptionStringParamIsNull() {
-        given:
-        FileNotReadableException e = new FileNotReadableException(null as String)
-
-        expect:
-        e.message == "can not read file: null"
-    }
-
-    void testFileNotReadableExceptionFile() {
-        given:
-        FileNotReadableException e = new FileNotReadableException(new File("tmp"))
-
-        expect:
-        e.message == "can not read file: tmp"
-    }
-
-    void testFileNotReadableExceptionFileParamIsNull() {
-        given:
-        FileNotReadableException e = new FileNotReadableException(null as File)
-
-        expect:
-        e.message == "can not read file: null"
-    }
+interface DataSwapValidator extends Validator<ValidationContext> {
 }

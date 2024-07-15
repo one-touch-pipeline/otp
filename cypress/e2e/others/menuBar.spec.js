@@ -142,7 +142,7 @@ describe('Click all menu items in the menu bar', () => {
       const menuBar = 'div.menuContainer';
       const menuBarItem = 'li:not(.nav_container)';
       cy.get(menuBar).find(menuBarItem)
-        .should('have.length', 68).and('contain', 'a');
+        .should('have.length', 69).and('contain', 'a');
     });
 
     it('should check the number of menu items and click additional Project menu items', () => {
@@ -182,7 +182,7 @@ describe('Click all menu items in the menu bar', () => {
 
     it('should check the number of menu items and click all Operator menu items', () => {
       cy.get('li.navigation').contains('Operator').parent().find('li')
-        .should('have.length', 12);
+        .should('have.length', 13);
       cy.get('.navigation li').contains('FASTQ Import').click({ force: true });
       cy.checkPage('/metadataImport/index');
       cy.go('back');
@@ -205,6 +205,9 @@ describe('Click all menu items in the menu bar', () => {
 
       cy.get('.navigation li').contains('New Sample').click({ force: true });
       cy.checkPage('/bulkSampleCreation/index');
+
+      cy.get('.navigation li').contains('Data Swap').click({ force: true });
+      cy.checkPage('/dataSwap/index');
 
       cy.get('.navigation li').contains('Workflows').click({ force: true });
       cy.checkPage('/processes/list');

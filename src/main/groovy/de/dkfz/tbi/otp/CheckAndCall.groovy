@@ -63,7 +63,8 @@ trait CheckAndCall {
      * @param method closure method with the main logic
      * @return object returned by the method or http error message in case of an error
      */
-    @SuppressWarnings(["CatchRuntimeException", "MethodReturnTypeRequired"]) // ignored: will be removed with the old workflow system
+    @SuppressWarnings(["CatchRuntimeException", "MethodReturnTypeRequired", "NoDef"])
+    // ignored: will be removed with the old workflow system
     def checkErrorAndCallMethodReturns(Validateable cmd, Closure method) {
         if (cmd.hasErrors()) {
             String errorMessage = createErrorMessageHtmlFromErrors(cmd.errors) ?: g.message(code: "default.message.error.notAcceptable")
@@ -121,7 +122,7 @@ trait CheckAndCall {
         if (cmd && cmd.hasErrors()) {
             flash.message = new FlashMessage(g.message(code: "${msgCode}.failed") as String, cmd.errors)
             flash.cmd = cmd
-       } else {
+        } else {
             try {
                 result = method()
                 flash.message = new FlashMessage(g.message(code: "${msgCode}.success") as String)
@@ -169,7 +170,7 @@ trait CheckAndCall {
             try {
                 Map additionalData = method()
                 data = [
-                        success: true,
+                        success       : true,
                         additionalData: additionalData,
                 ]
             } catch (ValidationException e) {
@@ -220,7 +221,7 @@ trait CheckAndCall {
         List<String> errorMessages = []
 
         errorMessages.add(errors.errorCount == 1 ? g.message(code: "default.message.error") :
-            g.message(code: "default.message.errors", args: errors.errorCount))
+                g.message(code: "default.message.errors", args: errors.errorCount))
 
         errors.allErrors.each {
             errorMessages.add(g.message(error: it))

@@ -140,6 +140,7 @@
                                             <li><g:link controller="individual" action="insert"><g:message code="otp.menu.createIndividual"/></g:link></li>
                                             <li><g:link controller="bulkSampleCreation" action="index"><g:message code="otp.menu.createSample"/></g:link></li>
                                             <li><g:link controller="processes" action="list"><g:message code="otp.menu.processes"/></g:link></li>
+                                            <li><g:link controller="dataSwap" action="index"><g:message code="otp.menu.dataSwap"/></g:link></li>
                                             <li><g:link controller="defaultSeqPlatformGroup" action="index"><g:message
                                                     code="otp.menu.seqPlatformGroup"/></g:link></li>
                                             <li><g:link controller="metaDataFields" action="index"><g:message code="otp.menu.metaDataFields"/></g:link></li>

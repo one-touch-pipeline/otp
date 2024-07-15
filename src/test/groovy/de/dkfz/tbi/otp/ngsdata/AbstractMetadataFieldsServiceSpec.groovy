@@ -53,7 +53,7 @@ abstract class AbstractMetadataFieldsServiceSpec<T> extends Specification {
         DomainFactory.<T> createDomainWithImportAlias(service.clazz, [name: NAME, importAlias: [IMPORT_ALIAS]] + properties)
 
         then:
-        null == service.findByNameOrImportAlias("unknown")
+        service.findByNameOrImportAlias("unknown") == null
     }
 
     void  "test findByNameOrImportAlias with name.toUpperCase(), succeeds"() {

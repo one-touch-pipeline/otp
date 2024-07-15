@@ -53,36 +53,36 @@ class ParameterMappingSpec extends Specification implements DataTest {
 
         expect:
         !mapping.validate()
-        "nullable" == mapping.errors["from"].code
-        "nullable" == mapping.errors["to"].code
-        "nullable" == mapping.errors["job"].code
+        mapping.errors["from"].code == "nullable"
+        mapping.errors["to"].code == "nullable"
+        mapping.errors["job"].code == "nullable"
 
         when:
         mapping.job = jobDefinition
 
         then:
         !mapping.validate()
-        "nullable" == mapping.errors["from"].code
-        "nullable" == mapping.errors["to"].code
-        "validator.invalid" == mapping.errors["job"].code
+        mapping.errors["from"].code == "nullable"
+        mapping.errors["to"].code == "nullable"
+        mapping.errors["job"].code == "validator.invalid"
 
         when: // use the from
         mapping.from = type
 
         then:
         !mapping.validate()
-        "nullable" == mapping.errors["to"].code
-        "validator.invalid" == mapping.errors["job"].code
-        "parameterUsage" == mapping.errors["from"].code
+        mapping.errors["to"].code == "nullable"
+        mapping.errors["job"].code == "validator.invalid"
+        mapping.errors["from"].code == "parameterUsage"
 
         when: // use the to - same as from
         mapping.to = type
 
         then:
         !mapping.validate()
-        "jobDefinition" == mapping.errors["from"].code
-        "jobDefinition" == mapping.errors["to"].code
-        null == mapping.errors["job"]
+        mapping.errors["from"].code == "jobDefinition"
+        mapping.errors["to"].code == "jobDefinition"
+        mapping.errors["job"] == null
 
         when: // change the to to a wrong jobDefinition
         mapping.to = type3
@@ -90,9 +90,9 @@ class ParameterMappingSpec extends Specification implements DataTest {
         then:
 
         !mapping.validate()
-        "validator.invalid" == mapping.errors["job"].code
-        "parameterUsage" == mapping.errors["from"].code
-        null == mapping.errors["to"]
+        mapping.errors["job"].code == "validator.invalid"
+        mapping.errors["from"].code == "parameterUsage"
+        mapping.errors["to"] == null
 
         when: // use correct type for from, but same jobDefinition for to
         mapping.from = type2
@@ -100,9 +100,9 @@ class ParameterMappingSpec extends Specification implements DataTest {
 
         then:
         !mapping.validate()
-        "jobDefinition" == mapping.errors["from"].code
-        "jobDefinition" == mapping.errors["to"].code
-        null == mapping.errors["job"]
+        mapping.errors["from"].code == "jobDefinition"
+        mapping.errors["to"].code == "jobDefinition"
+        mapping.errors["job"] == null
 
         when: // finally something useful
         mapping.from = type4

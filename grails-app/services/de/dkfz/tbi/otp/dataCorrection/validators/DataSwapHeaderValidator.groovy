@@ -19,42 +19,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.dataCorrection.validators
 
-import grails.testing.gorm.DataTest
-import spock.lang.Specification
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 
-class FileNotReadableExceptionSpec extends Specification implements DataTest {
+import de.dkfz.tbi.otp.dataCorrection.DataSwapService
+import de.dkfz.tbi.otp.dataCorrection.DataSwapValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractColumnSetValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.ValidationContext
 
-    void testFileNotReadableExceptionString() {
-        given:
-        FileNotReadableException e = new FileNotReadableException("tmp")
+@Component
+class DataSwapHeaderValidator extends AbstractColumnSetValidator<ValidationContext> implements DataSwapValidator {
+    @Autowired
+    DataSwapService dataSwapService
 
-        expect:
-        e.message == "can not read file: tmp"
+    @Override
+    void validate(ValidationContext context) {
+        (getRequiredColumnTitles(context) - context.spreadsheet.header.cells*.text).each { header ->
+            context.addProblem(Collections.emptySet(), LogLevel.ERROR, "The Header \"${header}\" is missing.")
+        }
     }
 
-    void testFileNotReadableExceptionStringParamIsNull() {
-        given:
-        FileNotReadableException e = new FileNotReadableException(null as String)
-
-        expect:
-        e.message == "can not read file: null"
-    }
-
-    void testFileNotReadableExceptionFile() {
-        given:
-        FileNotReadableException e = new FileNotReadableException(new File("tmp"))
-
-        expect:
-        e.message == "can not read file: tmp"
-    }
-
-    void testFileNotReadableExceptionFileParamIsNull() {
-        given:
-        FileNotReadableException e = new FileNotReadableException(null as File)
-
-        expect:
-        e.message == "can not read file: null"
+    @Override
+    List<String> getRequiredColumnTitles(ValidationContext context) {
+        return dataSwapService.dataSwapHeaders
     }
 }

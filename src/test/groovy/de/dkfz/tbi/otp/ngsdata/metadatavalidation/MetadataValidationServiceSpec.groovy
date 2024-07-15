@@ -148,7 +148,7 @@ class MetadataValidationServiceSpec extends Specification implements DomainFacto
 
         where:
         bytes                                                 || md5sum                             | problemMessage
-        'a\tb\ta'.getBytes(MetadataValidationContext.CHARSET) || '51cfcea2dc88d9baff201d447d2316df' | "Duplicate column 'a'"
+        'a\tb\ta'.getBytes(MetadataValidationContext.CHARSET) || '51cfcea2dc88d9baff201d447d2316df' | "Column 'a' is duplicated"
         'x\na"b'.getBytes(MetadataValidationContext.CHARSET)  || '01a73fb20c4582eb9668dc39431c4748' | "Unterminated quoted field at end of CSV line"
     }
 

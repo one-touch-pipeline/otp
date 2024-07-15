@@ -25,8 +25,10 @@ import grails.testing.gorm.DataTest
 import grails.testing.web.controllers.ControllerUnitTest
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.dataCorrection.DataSwapService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 import static javax.servlet.http.HttpServletResponse.SC_OK
@@ -69,6 +71,10 @@ class SequenceControllerSpec extends Specification implements ControllerUnitTest
         createSeqTrack(id: sequence.seqTrackId)
         controller.seqTrackService = Mock(SeqTrackService) {
             1 * listSequences(*_) >> [sequence]
+        }
+        controller.dataSwapService = new DataSwapService()
+        controller.dataSwapService.messageSourceService = Mock(MessageSourceService) {
+            _ * getMessage(_) >> { args -> args[0] }
         }
         int expectedNumberOfColumns = 19
 

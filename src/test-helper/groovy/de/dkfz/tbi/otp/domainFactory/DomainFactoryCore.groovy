@@ -242,11 +242,11 @@ trait DomainFactoryCore implements DomainFactoryHelper {
         return createFastqFile(defaultProperties + properties)
     }
 
-    SeqTrack createSeqTrack(Map properties = [:]) {
+    SeqTrack createSeqTrack(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(SeqTrack, getSeqTrackProperties(properties) + [
                 seqType       : { createSeqType() },
                 antibodyTarget: { properties.seqType?.hasAntibodyTarget ? createAntibodyTarget() : null },
-        ], properties)
+        ], properties, saveAndValidate)
     }
 
     SeqTrack createExomeSeqTrack(Map properties = [:]) {

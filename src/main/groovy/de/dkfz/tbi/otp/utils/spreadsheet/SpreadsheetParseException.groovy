@@ -42,12 +42,12 @@ class EmptyHeaderException extends SpreadsheetParseException {
 
 class DuplicateHeaderException extends SpreadsheetParseException {
     DuplicateHeaderException(String header) {
-        super("Duplicate column '${header}'")
+        super("Column '${header}' is duplicated")
     }
 }
 
 class MultipleDelimitersDetectedException extends SpreadsheetParseException {
     MultipleDelimitersDetectedException(List<String> delimiters) {
-        super("detected multiple delimiter candidates, can't make a choice: ${delimiters}")
+        super("Detected multiple delimiter candidates, can't make a choice: ${delimiters}")
     }
 }

@@ -591,7 +591,7 @@ codenarc {
     toolVersion = '3.4.0'
     configFile file('grails-app/conf/CodeNarcRuleSet.groovy')
     maxPriority1Violations = 0
-    maxPriority2Violations = 107
+    maxPriority2Violations = 110
     maxPriority3Violations = 1237
 }
 

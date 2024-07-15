@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.utils.spreadsheet.validation
 import groovy.transform.CompileDynamic
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
 
@@ -31,7 +32,7 @@ import java.util.logging.Level
 
 @CompileDynamic
 @EqualsAndHashCode
-@ToString(allProperties=false)
+@ToString(allProperties = false)
 class Problem {
 
     final Set<Cell> affectedCells
@@ -57,4 +58,17 @@ class Problem {
     String fetchMessageWithIndentedMultiline(String indent = "    ") {
         return message?.split("\\n")?.join("\n${indent}")
     }
+
+    ProblemDTO toProblemDTO() {
+        return new ProblemDTO([
+                affectedCells: this.affectedCells*.cellAddress,
+                message      : this.message,
+        ])
+    }
+}
+
+@TupleConstructor
+class ProblemDTO {
+    List<String> affectedCells
+    String message
 }

@@ -1,0 +1,2 @@
+Seq. Track ID,ILS,Run,Lane,Single Cell Well Label,Project Old,Project New,Patient ID Old,Patient ID New,Sample Type Old,Sample Type New,Seq. Type Old,Seq. Type New,Sequencing Read Type,Single Cell,Sample Name Old,Sample Name New,Antibody Target Old,Antibody Target New
+3046,,run_6,196,,ExampleProject,,example_2,,tumor01,,EXAMPLE,,PAIRED,false,sample_195,,,

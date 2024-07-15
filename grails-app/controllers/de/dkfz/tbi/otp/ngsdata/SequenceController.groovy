@@ -26,6 +26,7 @@ import groovy.json.JsonSlurper
 import groovy.transform.TupleConstructor
 import org.springframework.security.access.prepost.PreAuthorize
 
+import de.dkfz.tbi.otp.dataCorrection.DataSwapService
 import de.dkfz.tbi.otp.ngsdata.taxonomy.*
 import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 import de.dkfz.tbi.otp.project.ProjectService
@@ -41,6 +42,7 @@ class SequenceController {
     FastqcResultsService fastqcResultsService
     RawSequenceFileService rawSequenceFileService
     SecurityService securityService
+    DataSwapService dataSwapService
 
     static allowedMethods = [
             index             : "GET",
@@ -219,12 +221,7 @@ class SequenceController {
                     "", // antibodyTargetNew
             ].collect { it ?: "" }.join(",")
         }.join("\n")
-        String contentHeader = SampleSwapSequenceColumn.values()
-                .collectMany {
-                    return (it.duplicateColumnForSampleSwapTemplate) ?
-                            // adds suffix " Old" and a duplicated column with the suffix " New" for the sample swap template
-                            ["${g.message(code: it.message)} Old", "${g.message(code: it.message)} New"] : [g.message(code: it.message)]
-                }.join(',')
+        String contentHeader = dataSwapService.dataSwapHeaders.join(',')
         String content = "${contentHeader}\n${contentBody}\n"
         response.contentType = "application/octet-stream"
         response.setHeader("Content-disposition", "filename=Sample_Swap_Template_" + currentDate + ".csv")
@@ -271,29 +268,6 @@ enum SequenceColumn {
         }
         return values()[column]
     }
-}
-
-@TupleConstructor
-enum SampleSwapSequenceColumn {
-    SEQ_TRACK("sequence.list.headers.seqTrack"),
-    ILSE_ID("sequence.list.headers.ilseId"),
-    RUN("sequence.list.headers.run"),
-    LANE("sequence.list.headers.lane"),
-    SINGLE_CELL_WELL_LABEL('sequence.list.headers.singleCellWellLabel'),
-
-    PROJECT("sequence.list.headers.project", true),
-    INDIVIDUAL("sequence.list.headers.individual", true),
-    SAMPLE_TYPE("sequence.list.headers.sampleType", true),
-    SEQ_TYPE("sequence.list.headers.seqType", true),
-
-    LIBRARY_LAYOUT("sequence.list.headers.sequencingReadType"),
-    SINGLE_CELL("sequence.list.headers.singleCell"),
-
-    SAMPLE_NAME("sequence.list.headers.sampleName", true),
-    ANTIBODY_TARGET("sequence.list.headers.antibodyTarget", true),
-
-    final String message
-    final Boolean duplicateColumnForSampleSwapTemplate
 }
 
 /**
