@@ -29,30 +29,38 @@ import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.TimeFormats
 
-import java.nio.file.Files
 import java.nio.file.Path
 
+//-------------
+// input area
+
+/**
+ * Provide projects, seperated by newline.
+ * empty lines and lines starting with '#' are ignored.
+ */
 String projectString = """
 #project 1
 #project 2
 
 """
 
-// ---
+//-------------
+// work area
 
-List<String> projectNames = projectString.split("\n").findAll {
-    if (it.trim().isEmpty() || it.trim().startsWith("#")) {
-        return null
-    }
-    return it.trim()
+ProjectService projectService = ctx.projectService
+FileService fileService = ctx.fileService
+
+List<Project> projects = projectString.split("\n")*.trim().findAll {
+    it && !it.startsWith("#")
+}.collect {
+    CollectionUtils.exactlyOneElement(Project.findAllByName(it), "No Project with name '${it}' exist")
 }
 
-assert projectNames: "No projects given"
-List<Project> projects = Project.findAllByNameInList(projectNames)
-assert projects.size() == projectNames.size(): "Not all project names could be resolved to a project"
+assert projects: "No projects given"
 
 @TupleConstructor
 enum RawSequenceFileColumns {
@@ -324,9 +332,6 @@ class MolgenisExporter {
 
 String timestamp = TimeFormats.DATE_TIME_DASHES.getFormattedDate(new Date())
 
-final Path baseDirectory = ctx.fileService.toPath(ctx.configService.scriptOutputPath, ctx.fileSystemService.remoteFileSystem)
-final Path outputExportDirectory = baseDirectory.resolve("export").resolve("molgenis").resolve(timestamp)
-
 projects.each { Project project ->
     List<RawSequenceFile> rawSequenceFiles = RawSequenceFile.withCriteria {
         seqTrack {
@@ -348,9 +353,10 @@ projects.each { Project project ->
         }
     } as List<AbstractBamFile>
 
-    final Path outputDirectory = outputExportDirectory.resolve(project.name)
-    ctx.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDirectory)
-    ctx.fileService.setPermission(outputDirectory, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
+    Path projectPath = projectService.getProjectDirectory(project)
+    Path outputDirectory = projectPath.resolve("exports").resolve("molgenis").resolve(timestamp)
+
+    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDirectory, project.unixGroup)
 
     MolgenisExporter exporter = new MolgenisExporter(ctx: ctx)
 
@@ -361,7 +367,7 @@ projects.each { Project project ->
     ].each {
         Path path = outputDirectory.resolve("${it[0]}.csv")
         println "    - ${path}"
-        Files.write(path, it[1].bytes)
+        fileService.createFileWithContent(path, it[1])
     }
 }
 
