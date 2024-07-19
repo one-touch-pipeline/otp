@@ -48,11 +48,15 @@ databaseChangeLog = {
     ]
 
     // External workflow configs
-    Path ewcDir = dir.resolve("ewc")
+    Path ewcDir = dir.resolve("workflow-config")
 
-    files += Files.list(ewcDir).findAll {
-        !it.fileName.toString().contains('test-resource')
+    List<Path> workflowDirs = Files.list(ewcDir).findAll {
+        !it.fileName.toString().contains('test')
     }.sort()
+
+    workflowDirs.each { workflowDir ->
+        files.addAll(Files.list(workflowDir).toList())
+    }
 
     files.each { file ->
         changeSet(author: "otp", id: file.getFileName().toString(), runOnChange: "true") {

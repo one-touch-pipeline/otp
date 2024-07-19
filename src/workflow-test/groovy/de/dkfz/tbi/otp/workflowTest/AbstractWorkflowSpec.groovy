@@ -55,6 +55,7 @@ import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
 
 import javax.sql.DataSource
 import java.nio.file.*
+import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.attribute.PosixFilePermission
 import java.time.Duration
 import java.time.LocalDateTime
@@ -585,7 +586,13 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                 dir.resolve("workflow-api-versions.sql"),
                 dir.resolve("workflow-versions.sql"),
         ]
-        files.addAll(Files.newDirectoryStream(dir.resolve('ewc'), "ewc-*.sql").toList().sort())
+        Files.walkFileTree(dir.resolve('workflow-config'), new SimpleFileVisitor<Path>() {
+            @Override
+            FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                files.add(file)
+                return FileVisitResult.CONTINUE
+            }
+        })
 
         files.each {
             log.debug("  - Load ${it}")
