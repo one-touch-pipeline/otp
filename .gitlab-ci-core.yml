@@ -55,6 +55,7 @@ stages:
   - war
   - codestyle
   - scanning
+  - risc
   - doc
   - public doc
   - update merge request
@@ -464,9 +465,10 @@ eslint:
       - build/reports/eslint
     when: always
   cache:
-    - !reference [ .shared,  cache, gradle-wrapper ]
-    - !reference [ .shared,  cache, gradle-cache ]
-    - !reference [ .shared,  cache, npm ]
+    - !reference [ .shared, cache, gradle-wrapper ]
+    - !reference [ .shared, cache, gradle-pipeline-cache ]
+    - !reference [ .shared, cache, gradle-cache ]
+    - !reference [ .shared, cache, npm ]
 
 
 # ------------------------------------------------------
@@ -494,6 +496,58 @@ create war:
           # ci specific
           - grails-app/**/*
           - src/main/**/*
+
+# ------------------------------------------------------
+# risc
+# ------------------------------------------------------
+
+createSboms:
+  extends: .abstract_base_template_with_cache
+  stage: risc
+  script:
+    - set -e
+    - devScripts/gitlab-ci/risc/createDependencies.sh
+  artifacts:
+    <<: *artifacts_template
+    paths:
+      - build/reports/softwareInventory
+  rules:
+    - !reference [ .shared, rules-default ]
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
+      changes:
+        compare_to: 'refs/heads/master'
+        paths:
+          - build.gradle
+          - package-lock.json
+          - devScripts/gitlab-ci/init.sh
+          - devScripts/gitlab-ci/risc/createDependencies.sh
+          - .gitlab-ci-core.yml
+
+
+createTestIdentifierList:
+  extends: .abstract_base_template
+  stage: risc
+  script:
+    - set -e
+    - devScripts/gitlab-ci/risc/createTestIdentifierList.sh
+  artifacts:
+    <<: *artifacts_template
+    paths:
+      - build/reports/test-identifier-list
+  rules:
+    - !reference [ .shared, rules-default ]
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
+      changes:
+        compare_to: 'refs/heads/master'
+        paths:
+          - src/test
+          - src/integration-test
+          - src/workflow-test
+          - cypress/e2e
+          - devScripts/gitlab-ci/init.sh
+          - devScripts/gitlab-ci/risc/createTestIdentifierList.sh
+          - .gitlab-ci-core.yml
+
 
 # ------------------------------------------------------
 # jobs stage doc
