@@ -36,49 +36,29 @@ import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 trait CheckAndCall {
 
     /**
-     * Catch default errors for the input command and the method processing. Return default error messages and default HTTP status codes.
-     * @param cmd Validateable input command
+     * This method is for usage in controllers, for pages that use toaster.
+     * It checks a command object for validation errors and if successful calls the passed closure.
+     *
+     * If an exception occurs, it is logged and a JSON error message and HTTP error code is sent to the user agent.
+     *
+     * @param cmd input command
      * @param method closure method with the main logic
-     * @return http error message in case of an error
      */
     void checkDefaultErrorsAndCallMethod(Validateable cmd, Closure method) {
         if (cmd.hasErrors()) {
-            String errorMessage = createErrorMessageStringFromErrors(cmd.errors) ?: g.message(code: "default.message.error.notAcceptable")
+            String errorMessage = createErrorMessageHtmlFromErrors(cmd.errors) ?: g.message(code: "default.message.error.notAcceptable")
             response.sendError(HttpStatus.NOT_ACCEPTABLE.value(), errorMessage)
             return
         }
 
         try {
             method()
-        } catch (OtpRuntimeException | ValidationException | AssertionError e) {
-            log.error(e.localizedMessage)
-            response.sendError(HttpStatus.BAD_REQUEST.value(), g.message(code: "default.message.error.unknown"))
-        }
-    }
-
-    /**
-     * Catch errors for the input command and the method processing. Return the method returns if it is successful,
-     * otherwise return the default detailed error messages and default HTTP status codes.
-     * @param cmd Validateable input command
-     * @param method closure method with the main logic
-     * @return object returned by the method or http error message in case of an error
-     */
-    @SuppressWarnings(["CatchRuntimeException", "MethodReturnTypeRequired", "NoDef"])
-    // ignored: will be removed with the old workflow system
-    def checkErrorAndCallMethodReturns(Validateable cmd, Closure method) {
-        if (cmd.hasErrors()) {
-            String errorMessage = createErrorMessageHtmlFromErrors(cmd.errors) ?: g.message(code: "default.message.error.notAcceptable")
-            return response.sendError(HttpStatus.NOT_ACCEPTABLE.value(), errorMessage)
-        }
-
-        try {
-            return method()
         } catch (ValidationException e) {
             log.debug(e.localizedMessage)
-            return response.sendError(HttpStatus.BAD_REQUEST.value(), createErrorMessageHtmlFromErrors(e.errors))
-        } catch (AssertionError | RuntimeException e) {
-            log.error(e.localizedMessage)
-            return response.sendError(HttpStatus.BAD_REQUEST.value(), e.localizedMessage)
+            response.sendError(HttpStatus.BAD_REQUEST.value(), createErrorMessageHtmlFromErrors(e.errors))
+        } catch (AssertionError | OtpRuntimeException e) {
+            log.error(e.message, e)
+            response.sendError(HttpStatus.BAD_REQUEST.value(), e.localizedMessage)
         }
     }
 
@@ -95,10 +75,13 @@ trait CheckAndCall {
                 method()
                 data = [success: true] + additionalSuccessReturnValues()
             } catch (ValidationException e) {
+                log.debug(e.localizedMessage)
                 data = createErrorMessage(e.errors)
             } catch (AssertionError e) {
+                log.error(e.message, e)
                 data = [success: false, error: "An error occurred: ${e.localizedMessage}"]
             } catch (OtpRuntimeException e) {
+                log.error(e.message, e)
                 data = [success: false, error: e.localizedMessage]
             }
         }
@@ -127,74 +110,20 @@ trait CheckAndCall {
                 result = method()
                 flash.message = new FlashMessage(g.message(code: "${msgCode}.success") as String)
             } catch (ValidationException e) {
+                log.debug(e.localizedMessage)
                 flash.message = new FlashMessage(g.message(code: "${msgCode}.failed") as String, e.errors)
                 flash.cmd = cmd
             } catch (AssertionError e) {
+                log.error(e.message, e)
                 flash.message = new FlashMessage(g.message(code: "${msgCode}.failed") as String, e.localizedMessage)
                 flash.cmd = cmd
             } catch (OtpRuntimeException e) {
+                log.error(e.message, e)
                 flash.message = new FlashMessage(g.message(code: "${msgCode}.failed") as String, e.localizedMessage)
                 flash.cmd = cmd
             }
         }
         return result
-    }
-
-    /**
-     * @deprecated Is deprecated because it returns on errors a HTTP success status code.
-     *
-     * A helper to check first the cmd object for validation errors and do then closure in try catch block and render the result as JSON.
-     *
-     * In case the cmd object has errors, the errors are concerted to a json result and rendered.
-     * Otherwise it execute the callable in a try catch block, which catches:
-     * - {@link ValidationException}
-     * - {@link NumberFormatException}
-     * - {@link AssertionError}
-     * - {@link RuntimeException}
-     * If one of them occurs, the error is converted to an failed JSON message and rendered.
-     * Other exception are not handled here.
-     *
-     * If no exception occurs, an success JSON is created. If the method return an Map, that would be added to the JSON respond.
-     *
-     * @param cmd the command o validate
-     * @param method the action to do if cmd has no errors. It should return a Map, which will be added to the success
-     * @return the JSON, which is already rendered to the browser
-     */
-    @Deprecated
-    @SuppressWarnings('CatchRuntimeException')
-    JSON checkErrorAndCallMethodWithExtendedMessagesAndJsonRendering(Validateable cmd, Closure<Map> method) {
-        Map data
-        if (cmd.hasErrors()) {
-            data = createErrorMessage(cmd.errors)
-        } else {
-            try {
-                Map additionalData = method()
-                data = [
-                        success       : true,
-                        additionalData: additionalData,
-                ]
-            } catch (ValidationException e) {
-                data = createErrorMessage(e.errors)
-            } catch (NumberFormatException e) {
-                data = [
-                        success: false,
-                        error  : [
-                                g.message(code: 'default.message.error'),
-                                g.message(code: 'default.message.noNumberException'),
-                        ].join('\n    '),
-                ]
-            } catch (AssertionError | RuntimeException e) {
-                data = [
-                        success: false,
-                        error  : [
-                                g.message(code: 'default.message.error'),
-                                e.localizedMessage,
-                        ].join('\n    '),
-                ]
-            }
-        }
-        render(data as JSON)
-        return data
     }
 
     /**
@@ -215,19 +144,6 @@ trait CheckAndCall {
                 success: false,
                 error  : errorMessages.join('\n    '),
         ]
-    }
-
-    private String createErrorMessageStringFromErrors(Errors errors) {
-        List<String> errorMessages = []
-
-        errorMessages.add(errors.errorCount == 1 ? g.message(code: "default.message.error") :
-                g.message(code: "default.message.errors", args: errors.errorCount))
-
-        errors.allErrors.each {
-            errorMessages.add(g.message(error: it))
-        }
-
-        return errorMessages.join('\n    ')
     }
 
     private String createErrorMessageHtmlFromErrors(Errors errors) {

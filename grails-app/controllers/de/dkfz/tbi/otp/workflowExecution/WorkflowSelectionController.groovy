@@ -152,7 +152,7 @@ class WorkflowSelectionController implements CheckAndCall {
     }
 
     def possibleAlignmentOptions(ConfigurationCommand cmd) {
-        checkErrorAndCallMethodReturns(cmd) {
+        checkDefaultErrorsAndCallMethod(cmd) {
             WorkflowSelectionOptionsDTO options = workflowSelectionService.getPossibleAlignmentOptions(new WorkflowSelectionOptionDTO([
                     workflow       : cmd.workflow,
                     workflowVersion: cmd.workflowVersion,
@@ -161,7 +161,7 @@ class WorkflowSelectionController implements CheckAndCall {
                     refGenome      : cmd.referenceGenome,
             ]))
 
-            return render([
+            render([
                     workflowIds : options.workflows*.id,
                     versionIds  : options.workflowVersions*.id,
                     seqTypeIds  : options.seqTypes*.id,
@@ -172,13 +172,13 @@ class WorkflowSelectionController implements CheckAndCall {
     }
 
     def saveAlignmentConfiguration(CreateAlignmentConfigurationCommand cmd) {
-        checkErrorAndCallMethodReturns(cmd) {
+        checkDefaultErrorsAndCallMethod(cmd) {
             Project project = projectSelectionService.requestedProject
             ReferenceGenomeSelector rgSelector = referenceGenomeSelectorService.createOrUpdate(
                     project, cmd.seqType, cmd.speciesWithStrains, cmd.workflow, cmd.referenceGenome
             )
             WorkflowVersionSelector wvSelector = workflowVersionSelectorService.createOrUpdate(project, cmd.seqType, cmd.workflowVersion)
-            return render([
+            render([
                     workflow               : [id: rgSelector.workflow.id, displayName: rgSelector.workflow.displayName],
                     seqType                : [id: wvSelector.seqType.id, displayName: wvSelector.seqType.displayNameWithLibraryLayout],
                     version                : [id: wvSelector.workflowVersion.id, displayName: wvSelector.workflowVersion.workflowVersion],
@@ -191,14 +191,14 @@ class WorkflowSelectionController implements CheckAndCall {
     }
 
     def possibleAnalysisOptions(ConfigurationCommand cmd) {
-        checkErrorAndCallMethodReturns(cmd) {
+        checkDefaultErrorsAndCallMethod(cmd) {
             WorkflowSelectionOptionsDTO options = workflowSelectionService.getPossibleAnalysisOptions(new WorkflowSelectionOptionDTO([
                     workflow       : cmd.workflow,
                     workflowVersion: cmd.workflowVersion,
                     seqType        : cmd.seqType,
             ]))
 
-            return render([
+            render([
                     workflowIds: options.workflows*.id,
                     versionIds : options.workflowVersions*.id,
                     seqTypeIds : options.seqTypes*.id,
@@ -207,12 +207,12 @@ class WorkflowSelectionController implements CheckAndCall {
     }
 
     def saveAnalysisConfiguration(CreateAnalysisConfigurationCommand cmd) {
-        checkErrorAndCallMethodReturns(cmd) {
+        checkDefaultErrorsAndCallMethod(cmd) {
             Project project = projectSelectionService.requestedProject
             WorkflowVersionSelector wvSelector = workflowVersionSelectorService.createOrUpdate(
                     project, cmd.seqType, cmd.workflowVersion
             )
-            return render([
+            render([
                     workflow               : [id: wvSelector.workflowVersion.workflow.id, displayName: wvSelector.workflowVersion.workflow.displayName],
                     seqType                : [id: wvSelector.seqType.id, displayName: wvSelector.seqType.displayNameWithLibraryLayout],
                     version                : [id: wvSelector.workflowVersion.id, displayName: wvSelector.workflowVersion.workflowVersion],
@@ -222,7 +222,7 @@ class WorkflowSelectionController implements CheckAndCall {
     }
 
     def deleteConfiguration(DeleteConfigurationCommand cmd) {
-        checkErrorAndCallMethodReturns(cmd) {
+        checkDefaultErrorsAndCallMethod(cmd) {
             workflowSelectionService.deleteAndDeprecateSelectors(cmd.workflowVersionSelector, cmd.referenceGenomeSelector)
             render([] as JSON)
         }

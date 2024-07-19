@@ -153,16 +153,16 @@ class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelin
         return defaultIndexRedirect()
     }
 
-    JSON createMwp(CreateMwpCommand cmd) {
-        return checkErrorAndCallMethodReturns(cmd) {
+    def createMwp(CreateMwpCommand cmd) {
+        checkDefaultErrorsAndCallMethod(cmd) {
             cellRangerConfigurationService.prepareCellRangerExecution(
                     cmd.samples,
                     cmd.expectedCellsValue,
                     cmd.enforcedCellsValue,
                     cmd.referenceGenomeIndex,
             )
-            return [:] as JSON
-        } as JSON
+            render([:] as JSON)
+        }
     }
 
     private void defaultIndexRedirect() {

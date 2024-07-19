@@ -56,9 +56,9 @@ abstract class AbstractGeneralDomainPropertyUpdateController<T extends Entity> i
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     JSON updateField(UpdateDomainPropertyCommand cmd) {
-        return checkErrorAndCallMethodWithExtendedMessagesAndJsonRendering(cmd) {
+        return checkDefaultErrorsAndCallMethod(cmd) {
             updateDomainPropertyService.updateProperty(entityClass, cmd.entityId, cmd.property, cmd.value)
-            return [:]
+            render([success: true] as JSON)
         }
     }
 
@@ -72,9 +72,9 @@ abstract class AbstractGeneralDomainPropertyUpdateController<T extends Entity> i
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     JSON updateMultiField(UpdateDomainPropertiesCommand cmd) {
-        return checkErrorAndCallMethodWithExtendedMessagesAndJsonRendering(cmd) {
+        return checkDefaultErrorsAndCallMethod(cmd) {
             updateDomainPropertyService.updateProperties(entityClass, cmd.entityId, cmd.property, cmd.value)
-            return [:]
+            render([success: true] as JSON)
         }
     }
 }
