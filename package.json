@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "@cyclonedx/cyclonedx-npm": "1.19.3",
-    "cypress": "~13.13.0",
+    "cypress": "~13.13.1",
     "eslint": "~8.57.0",
     "eslint-config-airbnb-base": "~15.0.0",
     "eslint-plugin-import": "~2.29.1",
