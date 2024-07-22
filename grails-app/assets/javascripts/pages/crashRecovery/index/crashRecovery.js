@@ -76,7 +76,7 @@ $.otp.crashRecovery.createListView = function () {
     undefined,
     undefined,
     140,
-    { bSort: false }
+    { sort: false }
   );
 };
 

@@ -77,14 +77,14 @@ $.otp.workflows.registerProcessingStep = function (selector, processId) {
       result.aaData[index] = row;
     });
   }, [
-    { bSortable: true, aTargets: [0] },
-    { bSortable: false, aTargets: [1] },
-    { bSortable: false, aTargets: [2] },
-    { bSortable: false, aTargets: [3] },
-    { bSortable: false, aTargets: [4] },
-    { bSortable: false, aTargets: [5] },
-    { bSortable: false, aTargets: [6] },
-    { bSortable: false, aTargets: [7] },
-    { bSortable: false, aTargets: [8] }
+    { sortable: true, targets: [0] },
+    { sortable: false, targets: [1] },
+    { sortable: false, targets: [2] },
+    { sortable: false, targets: [3] },
+    { sortable: false, targets: [4] },
+    { sortable: false, targets: [5] },
+    { sortable: false, targets: [6] },
+    { sortable: false, targets: [7] },
+    { sortable: false, targets: [8] }
   ], undefined, 100);
 };

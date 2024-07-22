@@ -111,7 +111,7 @@
                 <li><strong>Start Scheduler:</strong> Tries to restart the Scheduler. Only use after all Jobs have been triaged.</li>
             </ul>
         </div>
-        <table id="crashRecoveryTable">
+        <table id="crashRecoveryTable" class="table table-striped table-bordered">
             <thead>
                 <tr>
                     <th></th>

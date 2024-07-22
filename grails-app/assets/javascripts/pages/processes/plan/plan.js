@@ -80,21 +80,21 @@ $.otp.workflows.registerProcesses = function (selector, planId, state) {
       }
     }
   }, [
-    { bSortable: true, aTargets: [0] },
-    { bSortable: false, aTargets: [1] },
-    { bSortable: false, aTargets: [2] },
-    { bSortable: true, aTargets: [3] },
-    { bSortable: false, aTargets: [4] },
-    { bSortable: false, aTargets: [5] },
-    { bSortable: false, aTargets: [6] },
-    { bSortable: false, aTargets: [7] },
-    { bSortable: false, aTargets: [8] }
+    { sortable: true, targets: [0] },
+    { sortable: false, targets: [1] },
+    { sortable: false, targets: [2] },
+    { sortable: true, targets: [3] },
+    { sortable: false, targets: [4] },
+    { sortable: false, targets: [5] },
+    { sortable: false, targets: [6] },
+    { sortable: false, targets: [7] },
+    { sortable: false, targets: [8] }
   ], undefined, undefined, {
-    iDisplayLength: 25,
-    bPaginate: true,
-    sPaginationType: 'listbox',
-    bScrollCollapse: false,
-    sDom: '<i>prtp<"clear">'
+    displayLength: 25,
+    paginate: true,
+    paginationType: 'listbox',
+    scrollCollapse: false,
+    dom: '<i>prtp<"clear">'
   });
   $('#enable-workflow-button').on('click', () => {
     $.post($.otp.createLink({

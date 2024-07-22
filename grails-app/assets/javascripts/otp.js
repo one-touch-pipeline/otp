@@ -224,95 +224,41 @@ $.otp.createListView = (selector, sourcePath, sortOrder, jsonCallback, columnDef
   'use strict';
 
   const config = {
-    bFilter: false,
-    bSort: true,
-    bProcessing: true,
-    bServerSide: true,
-    bAutoWidth: false,
-    bScrollCollapse: true,
-    bPaginate: false,
-    bDeferRender: true,
-    sAjaxSource: sourcePath,
-    fnServerData(sSource, aoData, fnCallback) {
-      let i;
-      if (postData) {
-        for (i = 0; i < postData.length; i += 1) {
-          aoData.push(postData[i]);
-        }
-      }
+    filter: false,
+    sort: true,
+    processing: true,
+    autoWidth: false,
+    scrollCollapse: true,
+    paginate: false,
+    deferRender: true,
+    ajax: (data, callback) => {
       $.ajax({
         dataType: 'json',
         type: 'POST',
-        url: sSource,
-        data: aoData,
-        success(json) {
-          if (jsonCallback) {
-            jsonCallback(json);
-          }
-          fnCallback(json);
-        }
-      });
-    },
-    aoColumnDefs: columnDefs,
-    aaSorting: [[0, sortOrder ? 'asc' : 'desc']]
-  };
-  if (height !== undefined) {
-    config.sScrollY = ($('.body').height() - height);
-  }
-  $.extend(config, dataTableArguments);
-  $(selector).dataTable(config);
-  $.otp.refreshTable.setup(selector, 10000);
-  if (height !== undefined) {
-    $.otp.resizeBodyInit(selector, height);
-  }
-};
-// eslint-disable-next-line max-len
-$.otp.createInfinityScrollListView = (selector, sourcePath, sortOrder, jsonCallback, columnDefs, postData, height, dataTableArguments) => {
-  'use strict';
-
-  const config = {
-    sDom: '<i> T rt<"clear">S',
-    bFilter: false,
-    bSort: true,
-    bProcessing: true,
-    bServerSide: true,
-    bAutoWidth: false,
-    bScrollCollapse: true,
-    bPaginate: false,
-    bDeferRender: true,
-    sAjaxSource: sourcePath,
-    fnServerData(sSource, aoData, fnCallback) {
-      let i;
-      if (postData) {
-        for (i = 0; i < postData.length; i += 1) {
-          aoData.push(postData[i]);
-        }
-      }
-      $.ajax({
-        dataType: 'json',
-        type: 'POST',
-        url: sSource,
-        data: aoData,
-        scroller: {
-          loadingIndicator: true
+        url: sourcePath,
+        data: postData ? postData.reduce((obj, item) => ({
+          ...obj,
+          [item.name]: item.value
+        }), data) : {},
+        error() {
         },
         success(json) {
           if (jsonCallback) {
             jsonCallback(json);
           }
-          fnCallback(json);
+          callback(json);
         }
       });
     },
-    aoColumnDefs: columnDefs,
-    aaSorting: [[0, sortOrder ? 'asc' : 'desc']]
+    columnDefs,
+    sorting: [[0, sortOrder ? 'asc' : 'desc']]
   };
   if (height !== undefined) {
-    config.sScrollY = ($('.body').height() - height);
+    config.scrollY = ($('.body').height() - height);
   }
   $.extend(config, dataTableArguments);
-  $(selector).dataTable(config);
-  $.otp.refreshTable.setup(selector, 10000);
+  const table = $(selector).DataTable(config);
+  $.otp.refreshTable.setup(table, 10000);
   if (height !== undefined) {
     $.otp.resizeBodyInit(selector, height);
   }
@@ -327,12 +273,12 @@ $.otp.refreshTable = {
    * @param selector A jquery selector for a datatable to be refreshed
    * @param time the time interval for refresh
    */
-  setup(selector, time) {
+  setup(table, time) {
     'use strict';
 
     window.setInterval(() => {
       if ($.otp.autorefresh.enabled && !document.hidden) {
-        $(selector).dataTable().fnDraw();
+        table.ajax.reload(null, false);
       }
     }, time);
   }
@@ -433,8 +379,7 @@ $.otp.getDownloadButton = (columnSelector, fileName, beforeDownload = (callback)
   const defaultFileName = document.title.replaceAll(' ', '_');
   const date = new Date();
   const formattedDate = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1)
-    .padStart(2, '0')}-${String(date.getUTCDate())
-    .padStart(2, '0')}`;
+    .padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
 
   return [{
     extend: 'csvHtml5',

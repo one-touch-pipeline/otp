@@ -98,7 +98,7 @@
         </button>
         <g:submitButton name="next" value="${message(code: 'egaSubmission.selectSamples.next')}"/>
     </g:form>
-    <g:set var="seqTypeColumnIndex" value="2"/>
+    <g:set var="seqTypeColumnIndex" value="3"/>
 
     <asset:script type="text/javascript">
         $(function() {

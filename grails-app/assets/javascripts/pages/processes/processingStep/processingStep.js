@@ -54,10 +54,10 @@ $.otp.workflows.processingStep = {
         }
       }
     }, [
-      { bSortable: true, aTargets: [0] },
-      { bSortable: false, aTargets: [1] },
-      { bSortable: false, aTargets: [2] },
-      { bSortable: false, aTargets: [3] }
+      { sortable: true, targets: [0] },
+      { sortable: false, targets: [1] },
+      { sortable: false, targets: [2] },
+      { sortable: false, targets: [3] }
     ]);
   },
   /**
@@ -94,10 +94,10 @@ $.otp.workflows.processingStep = {
         }
       }
     }, [
-      { bSortable: true, aTargets: [0] },
-      { bSortable: false, aTargets: [1] },
-      { bSortable: false, aTargets: [2] },
-      { bSortable: false, aTargets: [3] }
+      { sortable: true, targets: [0] },
+      { sortable: false, targets: [1] },
+      { sortable: false, targets: [2] },
+      { sortable: false, targets: [3] }
     ], [{ name: 'input', value: inputOrOutput }]);
     $(selector).on('click', 'tbody tr td ul li a', function () {
       $('li', $(this).parent().parent()).show();

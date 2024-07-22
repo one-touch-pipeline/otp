@@ -37,7 +37,7 @@ $.otp.workflows.registerJobExecutionPlan = function (selector) {
     undefined,
     [
       {
-        mRender(data, type, row) {
+        render(data, type, row) {
           return $.otp.createLinkMarkup({
             controller: 'processes',
             action: 'plan',
@@ -45,10 +45,10 @@ $.otp.workflows.registerJobExecutionPlan = function (selector) {
             text: row.name
           });
         },
-        aTargets: [0]
+        targets: [0]
       },
       {
-        mRender(data, type, row) {
+        render(data, type, row) {
           if (row.allProcessesCount) {
             return $.otp.createLinkMarkup({
               controller: 'processes',
@@ -59,10 +59,10 @@ $.otp.workflows.registerJobExecutionPlan = function (selector) {
           }
           return '-';
         },
-        aTargets: [1]
+        targets: [1]
       },
       {
-        mRender(data, type, row) {
+        render(data, type, row) {
           if (row.failedProcessesCount) {
             return $.otp.createLinkMarkup({
               controller: 'processes',
@@ -76,10 +76,10 @@ $.otp.workflows.registerJobExecutionPlan = function (selector) {
           }
           return '-';
         },
-        aTargets: [2]
+        targets: [2]
       },
       {
-        mRender(data, type, row) {
+        render(data, type, row) {
           if (row.runningProcessesCount) {
             return $.otp.createLinkMarkup({
               controller: 'processes',
@@ -93,28 +93,28 @@ $.otp.workflows.registerJobExecutionPlan = function (selector) {
           }
           return '-';
         },
-        aTargets: [3]
+        targets: [3]
       },
       {
-        mRender(data, type, row) {
+        render(data, type, row) {
           return $.otp.workflows.renderDate(row.lastSuccessfulDate);
         },
-        aTargets: [4]
+        targets: [4]
       },
       {
-        mRender(data, type, row) {
+        render(data, type, row) {
           return $.otp.workflows.renderDate(row.lastFailureDate);
         },
-        aTargets: [5]
+        targets: [5]
       }
     ],
     undefined,
     140,
     {
-      aaSorting: [[5, 'desc']],
-      fnRowCallback(nRow, aData) {
-        if (aData.enabled === false) {
-          $(nRow).addClass('withdrawn');
+      sorting: [[5, 'desc']],
+      rowCallback(row, data) {
+        if (data.enabled === false) {
+          $(row).addClass('withdrawn');
         }
       }
     }
