@@ -44,7 +44,6 @@ import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
 
 import java.nio.file.*
 
-@CompileDynamic
 @Transactional
 class BamMetadataImportService {
 
@@ -100,6 +99,7 @@ class BamMetadataImportService {
         return context
     }
 
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Map validateAndImport(String metadataFile, String ticketNumber, boolean ignoreWarnings, String previousValidationMd5sum,
                           BamImportInstance.LinkOperation linkOperation, boolean triggerAnalysis, List<String> furtherFiles, boolean addDefaultFiles = false) {

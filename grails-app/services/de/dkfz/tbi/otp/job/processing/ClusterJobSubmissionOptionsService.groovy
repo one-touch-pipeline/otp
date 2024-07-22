@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.SeqType
 
-@CompileDynamic
 @Transactional
 class ClusterJobSubmissionOptionsService {
 
@@ -84,6 +83,7 @@ class ClusterJobSubmissionOptionsService {
         return convertJsonObjectStringToMap(jsonElement)
     }
 
+    @CompileDynamic
     static Map<JobSubmissionOption, String> convertJsonObjectStringToMap(JSONElement jsonElement) {
         if (!(jsonElement instanceof JSONObject)) {
             throw new IllegalArgumentException("The JSON string doesn't contain a map")

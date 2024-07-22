@@ -22,14 +22,12 @@
 package de.dkfz.tbi.otp.withdraw
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 
-@CompileDynamic
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
 @Transactional
 class WithdrawService {
@@ -49,7 +47,7 @@ class WithdrawService {
         Map<AbstractWithdrawBamFileService, List<AbstractBamFile>> bamFileMap = withdrawBamFileServices.collectEntries {
             [(it), it.collectObjects(withdrawStateHolder.seqTracks)]
         }
-        withdrawStateHolder.bamFiles = bamFileMap.values().flatten()
+        withdrawStateHolder.bamFiles = bamFileMap.values().collectMany { it }
 
         withdrawStateHolder.analysis = withdrawAnalysisService.collectObjects(withdrawStateHolder.bamFiles)
 

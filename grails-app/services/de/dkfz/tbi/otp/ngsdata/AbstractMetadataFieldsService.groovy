@@ -71,7 +71,7 @@ abstract class AbstractMetadataFieldsService<T extends MetadataField> {
         return t
     }
 
-    protected void checkProperties(Map properties) {
+    protected void checkProperties(Map<String, Object> properties) {
         assert !properties: "this class doesn't support additional properties, if you wish to use them this has to be done in a dedicated sub-class"
     }
 

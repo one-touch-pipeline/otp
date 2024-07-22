@@ -287,7 +287,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
             getBean(directoryStructureName.beanName, DirectoryStructure) >> directoryStructure
         }
         service.fileSystemService = new TestFileSystemService()
-        service.configService = new TestConfigService()
+        service.configService = new TestConfigService([(OtpProperty.PATH_METADATA_STORAGE): '/metadata-storage'])
         service.configService.processingOptionService = new ProcessingOptionService()
 
         when:
@@ -318,7 +318,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
             1 * importMetadataFile(context2, FastqImportInstance.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true, _) >> metadataFile2
         }
         service.fileSystemService = new TestFileSystemService()
-        service.configService = new TestConfigService()
+        service.configService = new TestConfigService([(OtpProperty.PATH_METADATA_STORAGE): '/metadata-storage'])
         service.configService.processingOptionService = new ProcessingOptionService()
 
         expect:
@@ -516,7 +516,7 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
         }
 
         service.fileSystemService = new TestFileSystemService()
-        service.configService = new TestConfigService()
+        service.configService = new TestConfigService([(OtpProperty.PATH_METADATA_STORAGE): '/metadata-storage'])
         service.configService.processingOptionService = new ProcessingOptionService()
 
         when:

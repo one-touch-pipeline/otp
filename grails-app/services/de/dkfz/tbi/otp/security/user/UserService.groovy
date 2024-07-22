@@ -37,7 +37,6 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  * This service is meant for any kind of user management, such as changing password
  * and administrative tasks like enabling/disabling users, etc.
  */
-@CompileDynamic
 @Transactional
 class UserService {
 
@@ -51,6 +50,7 @@ class UserService {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @CompileDynamic
     List<User> allUsers() {
         return User.list()
     }
@@ -59,15 +59,18 @@ class UserService {
      * returns otp users of a list of ad accounts.
      * It is needed for autocompletion, so it needs accessible for normal users.
      */
+    @CompileDynamic
     Set<String> getAllUserNamesOfOtpUsers(List<String> usernames) {
         return usernames ? User.findAllByUsernameInList(usernames)*.username : []
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @CompileDynamic
     int userCount() {
         return User.count()
     }
 
+    @CompileDynamic
     User createUser(String username, String email, String realName) {
         User user = new User([
                 username: username,
@@ -89,11 +92,13 @@ class UserService {
         return user
     }
 
+    @CompileDynamic
     Set<Role> getAuthorities(User user) {
         return UserRole.findAllByUser(user)*.role as Set
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     User updateRealName(User user, String newName) {
         assert newName: "the input newName '${newName}' must not be null"
         assert user: "the input user must not be null"
@@ -103,6 +108,7 @@ class UserService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     User updateEmail(User user, String email) {
         assert email: "the input Email '${email}' must not be null"
         assert user: "the input user must not be null"
@@ -112,6 +118,7 @@ class UserService {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @CompileDynamic
     User enableUser(User user, boolean enable) {
         assert user: "the input user must not be null"
         user.enabled = enable
@@ -120,28 +127,33 @@ class UserService {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @CompileDynamic
     List<Role> allRoles() {
         return Role.findAllByAuthorityLike("ROLE_%")
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @CompileDynamic
     List<Role> allGroups() {
         return Role.findAllByAuthorityLike("GROUP_%")
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @CompileDynamic
     List<Role> getRolesOfUser(User user) {
         List<Role> roles = allRoles()
         return roles ? UserRole.findAllByUserAndRoleInList(user, roles)*.role : []
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @CompileDynamic
     List<Role> getGroupsOfUser(User user) {
         List<Role> groups = allGroups()
         return groups ? UserRole.findAllByUserAndRoleInList(user, groups)*.role : []
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @CompileDynamic
     void addRoleToUser(User user, Role role) {
         assert user: "User can not be null"
         assert role: "Role can not be null"
@@ -151,6 +163,7 @@ class UserService {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @CompileDynamic
     void removeRoleFromUser(User user, Role role) {
         assert user: "User can not be null"
         assert role: "Role can not be null"
@@ -160,6 +173,7 @@ class UserService {
         }
     }
 
+    @CompileDynamic
     boolean isDepartmentHead(User user) {
         return Department.createCriteria().list {
             departmentHeads {
@@ -209,6 +223,7 @@ class UserService {
      *
      * If already a user exists, nothing is done.
      */
+    @CompileDynamic
     static void createFirstAdminUserIfNoUserExists() {
         if (User.count == 0) {
             User.withTransaction {
@@ -236,6 +251,7 @@ No user exists yet, create user ${currentUser} with admin rights.
         }
     }
 
+    @CompileDynamic
     User findOrCreateUserWithLdapData(String username) throws LdapUserCreationException {
         IdpUserDetails idpUserDetails = identityProvider.getIdpUserDetailsByUsername(username)
         if (!idpUserDetails) {

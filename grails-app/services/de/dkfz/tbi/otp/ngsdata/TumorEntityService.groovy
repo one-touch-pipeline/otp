@@ -26,14 +26,15 @@ import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-@CompileDynamic
 @Transactional
 class TumorEntityService {
 
+    @CompileDynamic
     List<TumorEntity> list() {
         return TumorEntity.list()
     }
 
+    @CompileDynamic
     TumorEntity findByName(String name) {
         return CollectionUtils.atMostOneElement(TumorEntity.findAllByName(name))
     }

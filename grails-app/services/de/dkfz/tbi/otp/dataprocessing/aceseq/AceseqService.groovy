@@ -33,7 +33,6 @@ import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.util.stream.Collectors
 
-@CompileDynamic
 @Transactional
 class AceseqService extends AbstractBamFileAnalysisService<AceseqInstance> implements RoddyBamFileAnalysis, WithReferenceGenomeRestriction {
 
@@ -112,6 +111,7 @@ class AceseqService extends AbstractBamFileAnalysisService<AceseqInstance> imple
      * @return List with Files that matches with the Pattern
      * @deprecated use {@link AceseqLinkFileService#getPlots()} or {@link AceseqWorkFileService#getPlots()}
      */
+    @CompileDynamic
     List<Path> getPlots(AceseqInstance instance, PlotType plot) {
         Path workDirectory = getWorkDirectory(instance)
         String pattern

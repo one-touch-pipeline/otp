@@ -45,7 +45,6 @@ import java.nio.file.Path
 
 import static org.springframework.util.Assert.notNull
 
-@CompileDynamic
 @Transactional
 class ReferenceGenomeService {
 
@@ -63,10 +62,12 @@ class ReferenceGenomeService {
      * @param id the id of the {@link ReferenceGenome} to load
      * @return the loaded {@link ReferenceGenome} or <code>null</code>, if not founded
      */
+    @CompileDynamic
     ReferenceGenome referenceGenome(long id) {
         return ReferenceGenome.get(id)
     }
 
+    @CompileDynamic
     List<ReferenceGenome> list() {
         return ReferenceGenome.list(sort: "name", order: "asc")
     }
@@ -101,6 +102,7 @@ class ReferenceGenomeService {
      * returns the entries in the reference genome, which belong to a chromosome
      * @param referenceGenome , the reference genome, for which the chromosomes shall be returned
      */
+    @CompileDynamic
     List<ReferenceGenomeEntry> chromosomesInReferenceGenome(ReferenceGenome referenceGenome) {
         notNull(referenceGenome, "the referenceGenome in method chromosomesInReferenceGenome is null")
         Classification classification = Classification.CHROMOSOME
@@ -170,6 +172,7 @@ class ReferenceGenomeService {
      * @param cytosinePositionsIndex only for methylCtools processed reference genomes
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void loadReferenceGenome(String name, Set<Species> species, Set<SpeciesWithStrain> speciesWithStrain,
                              String path, String fileNamePrefix, String cytosinePositionsIndex,
                              String chromosomePrefix, String chromosomeSuffix,
@@ -268,6 +271,7 @@ class ReferenceGenomeService {
         createReferenceGenomeMetafile(referenceGenome)
     }
 
+    @CompileDynamic
     Set<SpeciesWithStrain> getAllSpeciesWithStrains(Set<ReferenceGenome> referenceGenomes) {
         if (!referenceGenomes) {
             return [] as Set
@@ -288,6 +292,7 @@ class ReferenceGenomeService {
      * @param referenceGenome to group the speciesWithStrains for
      * @return a list of lists, where each inner list contains SpeciesWithStrains that are valid to use with the reference genome.
      */
+    @CompileDynamic
     List<List<SpeciesWithStrain>> getSpeciesWithStrainCombinations(ReferenceGenome referenceGenome) {
         List<List<SpeciesWithStrain>> speciesWithStrains = referenceGenome.speciesWithStrain.collect { [it] }
         speciesWithStrains.addAll(referenceGenome.species.collect { SpeciesWithStrain.findAllBySpecies(it) })
@@ -305,7 +310,7 @@ class ReferenceGenomeService {
      */
     Set<SpeciesWithStrain> getSpeciesWithStrainOptions(ReferenceGenome referenceGenome, List<SpeciesWithStrain> selectedSpecies) {
         if (!referenceGenome) {
-            return []
+            return [] as Set
         }
 
         return getSpeciesWithStrainCombinations(referenceGenome).collectMany { speciesList ->
@@ -322,6 +327,7 @@ class ReferenceGenomeService {
      *
      * The create tsv file is required by qa.jar
      */
+    @CompileDynamic
     void createReferenceGenomeMetafile(ReferenceGenome referenceGenome) {
         FileSystem fileSystem = fileSystemService.remoteFileSystem
         Path path = fileSystem.getPath(referenceGenomeMetaInformationPath(referenceGenome).absolutePath)

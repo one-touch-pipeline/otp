@@ -27,11 +27,11 @@ import groovy.transform.CompileDynamic
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
-@CompileDynamic
 @Transactional
 class CellRangerBamFileWithdrawService extends AbstractWithdrawBamFileService<SingleCellBamFile> {
 
     @Override
+    @CompileDynamic
     List<SingleCellBamFile> collectObjects(List<SeqTrack> seqTrackList) {
         return SingleCellBamFile.createCriteria().list {
             seqTracks {

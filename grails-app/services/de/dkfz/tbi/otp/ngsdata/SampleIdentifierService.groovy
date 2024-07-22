@@ -41,9 +41,12 @@ import de.dkfz.tbi.otp.utils.spreadsheet.validation.ValidationContext
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
-@CompileDynamic
 @Transactional
 class SampleIdentifierService {
+
+    @Autowired
+    ApplicationContext applicationContext
+
     MessageSourceService messageSourceService
 
     enum BulkSampleCreationHeader {
@@ -61,9 +64,6 @@ class SampleIdentifierService {
             return values().join(delimiter.delimiter as String)
         }
     }
-
-    @Autowired
-    ApplicationContext applicationContext
 
     SampleIdentifierParser getSampleIdentifierParser(SampleIdentifierParserBeanName sampleIdentifierParserBeanName) {
         return applicationContext.getBean(sampleIdentifierParserBeanName.beanName, SampleIdentifierParser)
@@ -157,6 +157,7 @@ class SampleIdentifierService {
         return sampleTypeDbName.replaceAll('_', '-').toLowerCase()
     }
 
+    @CompileDynamic
     SampleIdentifier findOrSaveSampleIdentifier(ParsedSampleIdentifier identifier) {
         SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(identifier.fullSampleName))
         if (sampleIdentifier) {
@@ -170,6 +171,7 @@ class SampleIdentifierService {
         ).save(flush: true)
     }
 
+    @CompileDynamic
     Sample findOrSaveSample(ParsedSampleIdentifier identifier) {
         Individual individual = findOrSaveIndividual(identifier)
         SampleType sampleType = findOrSaveSampleType(identifier)
@@ -194,6 +196,7 @@ class SampleIdentifierService {
         ).save(flush: true)
     }
 
+    @CompileDynamic
     SampleType findOrSaveSampleType(ParsedSampleIdentifier identifier) {
         SampleType sampleType = SampleTypeService.findSampleTypeByName(identifier.sampleTypeDbName)
         if (sampleType) {
@@ -214,6 +217,7 @@ class SampleIdentifierService {
         ).save(flush: true)
     }
 
+    @CompileDynamic
     Individual findOrSaveIndividual(ParsedSampleIdentifier identifier) {
         Individual individual = atMostOneElement(Individual.findAllByPid(identifier.pid))
         if (individual) {
@@ -234,6 +238,7 @@ class SampleIdentifierService {
         return individual
     }
 
+    @CompileDynamic
     Project findProject(ParsedSampleIdentifier identifier) {
         Project result = ProjectService.findByNameOrNameInMetadataFiles(identifier.projectName)
         if (result) {
@@ -262,17 +267,20 @@ class SampleIdentifierService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void updateSampleIdentifierName(SampleIdentifier sampleIdentifier, String name) {
         sampleIdentifier.name = name
         sampleIdentifier.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void deleteSampleIdentifier(SampleIdentifier sampleIdentifier) {
         sampleIdentifier.delete(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     SampleIdentifier createSampleIdentifier(String name, Sample sample) {
         SampleIdentifier sampleIdentifier = new SampleIdentifier(name: name, sample: sample)
         sampleIdentifier.save(flush: true)
@@ -280,6 +288,7 @@ class SampleIdentifierService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     SampleIdentifier getOrCreateSampleIdentifier(String name, Sample sample) {
         SampleIdentifier sampleIdentifier = CollectionUtils.atMostOneElement(SampleIdentifier.findAllByNameAndSample(name, sample))
         if (!sampleIdentifier) {
@@ -292,6 +301,7 @@ class SampleIdentifierService {
     /**
      * @return List of SampleIdentifier objects for this Sample.
      */
+    @CompileDynamic
     static List<SampleIdentifier> getSampleIdentifierObjects(Sample sample) {
         return SampleIdentifier.findAllBySample(sample)
     }

@@ -48,7 +48,6 @@ import java.nio.file.*
  *
  * The service should used outside.
  */
-@CompileDynamic
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
 @Transactional
 class WithdrawHelperService {
@@ -73,28 +72,29 @@ class WithdrawHelperService {
     WithdrawAnalysisService withdrawAnalysisService
     WithdrawDisplayDomainService withdrawDisplayDomainService
 
+    @CompileDynamic
     void createOverviewSummary(WithdrawStateHolder withdrawStateHolder) {
         List summary = withdrawStateHolder.summary
         summary << "Withdraw summary"
         summary << "\n"
         summary << TRIM_LINE
-        summary << "Withdrawing ${withdrawStateHolder.seqTracksWithComments.size()} lanes"
+        summary << ("Withdrawing ${withdrawStateHolder.seqTracksWithComments.size()} lanes" as String)
         withdrawStateHolder.seqTracksWithComments.each {
-            summary << "  - ${withdrawDisplayDomainService.seqTrackInfo(it.seqTrack)}\twith comment: \'" + it.comment + "\'"
+            summary << ("  - ${withdrawDisplayDomainService.seqTrackInfo(it.seqTrack)}\twith comment: \'" + it.comment + "\'" as String)
         }
         summary << "\n"
         summary << TRIM_LINE
         String deleteOrWithdrawBamFile = withdrawStateHolder.deleteBamFile ? 'Deleting' : 'Withdrawing'
-        summary << "${deleteOrWithdrawBamFile} ${withdrawStateHolder.bamFiles.unique().size()} bam file(s)"
+        summary << ("${deleteOrWithdrawBamFile} ${withdrawStateHolder.bamFiles.unique().size()} bam file(s)" as String)
         withdrawStateHolder.bamFiles.unique().each {
-            summary << "  - ${withdrawDisplayDomainService.bamFileInfo(it)}"
+            summary << ("  - ${withdrawDisplayDomainService.bamFileInfo(it)}" as String)
         }
         summary << "\n"
         summary << TRIM_LINE
         String deleteOrWithdrawAnalysis = withdrawStateHolder.deleteBamFile || withdrawStateHolder.deleteAnalysis ? 'Deleting' : 'Withdrawing'
-        summary << "${deleteOrWithdrawAnalysis} ${withdrawStateHolder.analysis.unique().size()} analysis"
+        summary << ("${deleteOrWithdrawAnalysis} ${withdrawStateHolder.analysis.unique().size()} analysis" as String)
         withdrawStateHolder.analysis.unique().each {
-            summary << "  - ${withdrawDisplayDomainService.analysisInfo(it)}"
+            summary << ("  - ${withdrawDisplayDomainService.analysisInfo(it)}" as String)
         }
         summary << "\n"
         summary << TRIM_LINE
@@ -109,6 +109,7 @@ class WithdrawHelperService {
         }
     }
 
+    @CompileDynamic
     void checkNonExistingRawSequenceFiles(WithdrawStateHolder withdrawStateHolder) {
         List<RawSequenceFile> nonExistingRawSequenceFiles = RawSequenceFile.findAllBySeqTrackInListAndFileExists(withdrawStateHolder.seqTracks, false)
 
@@ -128,6 +129,7 @@ class WithdrawHelperService {
         }
     }
 
+    @CompileDynamic
     void checkForAlreadyWithdrawnRawSequenceFiles(WithdrawStateHolder withdrawStateHolder) {
         List<RawSequenceFile> withdrawnRawSequenceFiles = RawSequenceFile.findAllBySeqTrackInListAndFileWithdrawn(withdrawStateHolder.seqTracks, true)
 
@@ -169,6 +171,7 @@ class WithdrawHelperService {
         }
     }
 
+    @CompileDynamic
     void handleRawSequenceFiles(WithdrawStateHolder withdrawStateHolder) {
         List<RawSequenceFile> rawSequenceFiles = RawSequenceFile.findAllBySeqTrackInListAndFileWithdrawn(withdrawStateHolder.seqTracksWithComments*.seqTrack,
                 false)
@@ -225,7 +228,7 @@ class WithdrawHelperService {
         fileService.createFileWithContent(outputFile, script, FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION)
 
         withdrawStateHolder.summary << "\nScript Path:"
-        withdrawStateHolder.summary << outputFile
+        withdrawStateHolder.summary << outputFile.toString()
 
         return outputFile
     }
@@ -239,12 +242,12 @@ class WithdrawHelperService {
 
         script << "\n#Deleted links, files and directories"
         withdrawStateHolder.pathsToDelete.each {
-            script << "rm --recursive --force --verbose ${it}"
+            script << ("rm --recursive --force --verbose ${it}" as String)
         }
 
         script << "\n#change group for links, files and directories"
         withdrawStateHolder.pathsToChangeGroup.each {
-            script << "chgrp --recursive --verbose ${withdrawnGroup} ${it}"
+            script << ("chgrp --recursive --verbose ${withdrawnGroup} ${it}" as String)
         }
 
         script << "\necho script has run till end\n"

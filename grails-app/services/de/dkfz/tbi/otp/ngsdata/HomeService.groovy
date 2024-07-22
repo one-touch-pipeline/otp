@@ -28,7 +28,6 @@ import groovy.transform.TupleConstructor
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 
-@CompileDynamic
 @Transactional
 class HomeService {
     ProjectService projectService
@@ -41,6 +40,7 @@ class HomeService {
         return getProjectData(projectService.allPublicProjects)
     }
 
+    @CompileDynamic
     private List<ProjectData> getProjectData(List<Project> projects) {
         if (!projects) {
             return []

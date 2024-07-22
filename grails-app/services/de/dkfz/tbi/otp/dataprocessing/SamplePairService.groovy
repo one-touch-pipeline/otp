@@ -27,7 +27,6 @@ import groovy.transform.CompileDynamic
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
 
-@CompileDynamic
 @Transactional
 class SamplePairService {
 
@@ -42,6 +41,7 @@ class SamplePairService {
      * @param seqType all seq types if missing
      * @return all the SamplePairs
      */
+    @CompileDynamic
     List<SamplePair> findAllByIndividualSampleTypeSeqType(Individual individual, SampleType sampleType = null, SeqType seqType = null) {
         return SamplePair.withCriteria {
             or {

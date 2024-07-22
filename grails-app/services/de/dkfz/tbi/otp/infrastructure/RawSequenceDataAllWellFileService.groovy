@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.infrastructure
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 
 import de.dkfz.tbi.otp.ngsdata.*
@@ -38,7 +37,6 @@ import java.nio.file.Paths
  * This is only possible if a singleCellWellLabel is defined on the SeqTrack.
  */
 @Slf4j
-@CompileDynamic
 @Transactional
 class RawSequenceDataAllWellFileService implements RawSequenceDataFileService {
     private static final String SINGLE_CELL_ALL_WELL = '0_all'

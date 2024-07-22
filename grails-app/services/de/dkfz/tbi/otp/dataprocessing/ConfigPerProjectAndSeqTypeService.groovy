@@ -32,18 +32,20 @@ import de.dkfz.tbi.otp.project.Project
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
-@CompileDynamic
 @Transactional
 class ConfigPerProjectAndSeqTypeService {
 
+    @CompileDynamic
     SnvConfig findSnvConfigByProjectAndSeqType(Project project, SeqType seqType) {
         return atMostOneElement(SnvConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType))
     }
 
+    @CompileDynamic
     RunYapsaConfig findRunYapsaConfigByProjectAndSeqType(Project project, SeqType seqType) {
         return atMostOneElement(RunYapsaConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType))
     }
 
+    @CompileDynamic
     RoddyWorkflowConfig findRoddyWorkflowConfigByProjectAndSeqTypeAndPipeline(Project project, SeqType seqType, Pipeline pipeline) {
         return atMostOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndObsoleteDateIsNull(project, seqType, pipeline))
     }

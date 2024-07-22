@@ -67,7 +67,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 /**
  * Metadata import 2.0 (OTP-34)
  */
-@CompileDynamic
 @Transactional
 class MetadataImportService {
 
@@ -186,12 +185,14 @@ class MetadataImportService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void updateAutomaticNotificationFlag(Ticket ticket, boolean automaticNotification) {
         ticket.automaticNotification = automaticNotification
         assert ticket.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void updateFinalNotificationFlag(Ticket ticket, boolean finalNotificationSent) {
         ticket.finalNotificationSent = finalNotificationSent
         assert ticket.save(flush: true)
@@ -265,6 +266,7 @@ class MetadataImportService {
         throw new MultiImportFailedException(failedValidations, metadataFiles)
     }
 
+    @CompileDynamic
     protected Path getMetadataFilePathForIlseNumber(int ilseNumber, FileSystem fileSystem) {
         String ilseNumberString = Integer.toString(ilseNumber)
         SeqCenter seqCenter = exactlyOneElement(SeqCenter.findAllByAutoImportable(true))
@@ -327,6 +329,7 @@ class MetadataImportService {
         }
     }
 
+    @CompileDynamic
     protected MetaDataFile importMetadataFile(MetadataValidationContext context, FastqImportInstance.ImportMode importMode, String ticketNumber,
                                               String seqCenterComment, boolean automaticNotification, Path filePathTarget) {
         Long timeImportStarted = System.currentTimeMillis()
@@ -414,6 +417,7 @@ class MetadataImportService {
         )
     }
 
+    @CompileDynamic
     private void importRuns(MetadataValidationContext context, FastqImportInstance fastqImportInstance, Collection<Row> metadataFileRows) {
         Map<String, List<Row>> seqTrackPerRun = metadataFileRows.groupBy {
             it.getCellByColumnTitle(RUN_ID.name()).text
@@ -433,6 +437,7 @@ class MetadataImportService {
         context.usedSampleIdentifiers*.delete(flush: false)
     }
 
+    @CompileDynamic
     protected Run getOrCreateRun(String runName, List<Row> rows) {
         SeqCenter seqCenter = exactlyOneElement(SeqCenter.findAllWhere(name: uniqueColumnValue(rows, CENTER_NAME)))
         SeqPlatform seqPlatform = seqPlatformService.findSeqPlatform(
@@ -460,6 +465,7 @@ class MetadataImportService {
         return newRun
     }
 
+    @CompileDynamic
     private void importSeqTracks(MetadataValidationContext context, FastqImportInstance fastqImportInstance, Run run, Collection<Row> runRows) {
         Map<String, List<Row>> runsGroupedByLane = runRows.groupBy {
             MultiplexingService.combineLaneNumberAndBarcode(it.getCellByColumnTitle(LANE_NO.name()).text, extractBarcode(it).value)
@@ -580,6 +586,7 @@ class MetadataImportService {
         }
     }
 
+    @CompileDynamic
     private static void importDataFiles(MetadataValidationContext context, FastqImportInstance fastqImportInstance, SeqTrack seqTrack,
                                         Collection<Row> seqTrackRows) {
         Map<String, Collection<Row>> seqTrackRowsByMateNumber = seqTrackRows.groupBy {
@@ -622,6 +629,7 @@ class MetadataImportService {
         }
     }
 
+    @CompileDynamic
     private static void importMetadataEntries(MetadataValidationContext context, RawSequenceFile dataFile, Row row) {
         for (Cell it : context.spreadsheet.header.cells) {
             MetaDataKey metaDataKey = CollectionUtils.atMostOneElement(MetaDataKey.findAllWhere(name: it.text))
@@ -691,10 +699,12 @@ class MetadataImportService {
         return Paths.get([metaDataFile.filePathSource, metaDataFile.fileNameSource].findAll().join(FileSystems.default.separator))
     }
 
+    @CompileDynamic
     MetaDataFile findById(long id) {
         return MetaDataFile.get(id)
     }
 
+    @CompileDynamic
     List<MetaDataFile> findAllByFastqImportInstance(FastqImportInstance importInstance) {
         return MetaDataFile.findAllByFastqImportInstance(importInstance, [sort: "dateCreated", order: "desc"])
     }

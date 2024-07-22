@@ -29,7 +29,6 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.security.SecurityService
 
-@CompileDynamic
 @Transactional
 class CommentService {
 
@@ -47,6 +46,7 @@ class CommentService {
     }
 
     // only for otp internal use, not for gui
+    @CompileDynamic
     Comment createOrUpdateComment(Commentable commentable, String message, String userName) {
         Comment comment = commentable.comment ?: new Comment()
         comment.comment = message
@@ -70,6 +70,7 @@ class CommentService {
         addCommentToList(commentableWithHistory, message, author)
     }
 
+    @CompileDynamic
     void addCommentToList(CommentableWithHistory commentableWithHistory, String message, String userName) {
         Comment comment = new Comment(
                 comment: message,

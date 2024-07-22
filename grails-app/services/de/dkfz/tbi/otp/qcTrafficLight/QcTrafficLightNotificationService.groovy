@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.qcTrafficLight
 
 import grails.gorm.transactions.Transactional
 import grails.web.mapping.LinkGenerator
-import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.ProjectSelectionService
@@ -34,9 +33,8 @@ import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.tracking.TicketService
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.MessageSourceService
 
-@CompileDynamic
 @Transactional
 class QcTrafficLightNotificationService {
 
@@ -106,7 +104,7 @@ class QcTrafficLightNotificationService {
     }
 
     private String getAlignmentQualityOverviewLink(Project project, SeqType seqType, Sample sample = null) {
-        Map conditionalParams = [:]
+        Map<String, Object> conditionalParams = [:]
         if (sample) {
             conditionalParams["sample"] = sample.id
         }

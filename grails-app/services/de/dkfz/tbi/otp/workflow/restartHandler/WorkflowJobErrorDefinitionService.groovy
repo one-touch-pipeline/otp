@@ -30,7 +30,6 @@ import de.dkfz.tbi.otp.workflow.restartHandler.logging.RestartHandlerLogService
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-@CompileDynamic
 @Transactional
 class WorkflowJobErrorDefinitionService {
 
@@ -39,6 +38,7 @@ class WorkflowJobErrorDefinitionService {
     List<RestartHandlerLogService> restartHandlerLogServices
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     List<WorkflowJobErrorDefinition> listAll() {
         return WorkflowJobErrorDefinition.list().sort {
             it.name
@@ -46,6 +46,7 @@ class WorkflowJobErrorDefinitionService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     WorkflowJobErrorDefinition create(WorkflowJobErrorDefinitionCreateCommand cmd) {
         return new WorkflowJobErrorDefinition([
                 name                : cmd.name,
@@ -60,6 +61,7 @@ class WorkflowJobErrorDefinitionService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void delete(WorkflowJobErrorDefinition workflowJobErrorDefinition) {
         workflowJobErrorDefinition.delete(flush: true)
     }
@@ -72,6 +74,7 @@ class WorkflowJobErrorDefinitionService {
      * When the new action is not {@link Action#RESTART_JOB} and {@link WorkflowJobErrorDefinition#beanToRestart} is not null, then set it to the value null.
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     WorkflowJobErrorDefinition updateAction(WorkflowJobErrorDefinition workflowJobErrorDefinition, Action action) {
         workflowJobErrorDefinition.action = action
         if (action == Action.RESTART_JOB && !workflowJobErrorDefinition.beanToRestart) {
@@ -90,6 +93,7 @@ class WorkflowJobErrorDefinitionService {
      */
     // UnnecessaryGetter is needed for mocking
     @SuppressWarnings('UnnecessaryGetter')
+    @CompileDynamic
     List<JobErrorDefinitionWithLogWithIdentifier> findMatchingJobErrorDefinition(WorkflowStep workflowStep) {
         List<JobErrorDefinitionWithLogWithIdentifier> definitions = []
 

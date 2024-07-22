@@ -35,7 +35,6 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import java.nio.file.Path
 
 @SuppressWarnings("JavaIoPackageAccess")
-@CompileDynamic
 @Transactional
 class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSwapData> {
 
@@ -136,6 +135,7 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
         createCommentForSwappedRawSequenceFiles(data)
     }
 
+    @CompileDynamic
     @Override
     protected void cleanupLeftOvers(LaneSwapData data) {
         data.moveFilesCommands << "\n\n################ cleanup empty sample and pid directories ################\n\n"
@@ -178,6 +178,7 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
      * @param data DTO containing all entities necessary to perform a swap.
      * @return swapped seqTrack
      */
+    @CompileDynamic
     void swapLanes(LaneSwapData data) {
         // copy the species if the new individual has no species defined
         // and the sample doesn't exist
@@ -220,6 +221,7 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
      *
      * @param data DTO containing all entities necessary to perform a swap.
      */
+    @CompileDynamic
     private void checkForRemainingSeqTracks(LaneSwapData data) {
         String basePath = projectService.getSequencingDirectory(data.projectSwap.old)
         data.seqTrackList*.antibodyTarget.unique().each { AntibodyTarget antibodyTarget ->
@@ -238,6 +240,7 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
      * @param parameters which contain the names of the old and new SampleType.
      * @return Swap contain the entities of the old and new SampleType.
      */
+    @CompileDynamic
     private Swap<SampleType> getSampleTypeSwap(LaneSwapParameters parameters) {
         return new Swap(
                 CollectionUtils.exactlyOneElement(SampleType.findAllByName(parameters.sampleTypeSwap.old),
@@ -254,6 +257,7 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
      * @return Swap contain the entities of the old and new SequencingReadType.
      */
     @SuppressWarnings('AvoidFindWithoutAll')
+    @CompileDynamic
     private Swap<SequencingReadType> getSequencingReadTypeSwaps(LaneSwapParameters parameters) {
         return new Swap<SequencingReadType>(
                 SequencingReadType.getByName(parameters.sequencingReadTypeSwap.old),
@@ -267,6 +271,7 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
      * @param parameters which contain the names, sequencingReadTypes and singleCell flags of the old and new SeqType.
      * @return Swap contain the entities of the old and new SeqType.
      */
+    @CompileDynamic
     private Swap<SeqType> getSeqTypeSwap(LaneSwapParameters parameters, Swap<SequencingReadType> sequencingReadTypeSwap) {
         return new Swap<SeqType>(
                 CollectionUtils.exactlyOneElement(SeqType.findAllByNameAndLibraryLayoutAndSingleCell(
@@ -290,6 +295,7 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
      * @param sampleTypeSwap as parameters for searching for the corresponding sample.
      * @return Swap contain the entities of the old and new Sample.
      */
+    @CompileDynamic
     private Swap<Sample> getSampleSwap(LaneSwapParameters parameters, Swap<Individual> individualSwap, Swap<SampleType> sampleTypeSwap) {
         Sample oldSample = CollectionUtils.exactlyOneElement(Sample.findAllByIndividualAndSampleType(individualSwap.old, sampleTypeSwap.old),
                 "The old Sample (${individualSwap.old} ${sampleTypeSwap.old}) does not exist")
@@ -316,6 +322,7 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
      * @param run as parameters for searching for corresponding seq tracks.
      * @return found list of seq tracks.
      */
+    @CompileDynamic
     private List<SeqTrack> getSeqTracksBySampleAndRunAndLaneIdInList(LaneSwapParameters parameters, Swap<Sample> sampleSwap, Run run) {
         List<SeqTrack> seqTrackList = SeqTrack.findAllBySampleAndRunAndLaneIdInList(sampleSwap.old, run, parameters.lanes)
         logListEntries(seqTrackList, "seqtracks", parameters.log)
@@ -328,6 +335,7 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
      * @param parameters which contain the run name.
      * @return found Run.
      */
+    @CompileDynamic
     private Run getRunByName(LaneSwapParameters parameters) {
         return CollectionUtils.exactlyOneElement(Run.findAllByName(parameters.runName),
                 "The run (${parameters.runName}) does not exist"

@@ -40,7 +40,6 @@ import de.dkfz.tbi.otp.utils.spreadsheet.*
 
 import java.nio.file.*
 
-@CompileDynamic
 @Transactional
 class CellRangerService {
 
@@ -131,7 +130,7 @@ class CellRangerService {
     Map<String, String> createCellRangerParameters(SingleCellBamFile singleCellBamFile) {
         assert singleCellBamFile
 
-        CellRangerMergingWorkPackage workPackage = singleCellBamFile.workPackage
+        CellRangerMergingWorkPackage workPackage = singleCellBamFile.workPackage as CellRangerMergingWorkPackage
 
         ReferenceGenomeIndex referenceGenomeIndex = workPackage.referenceGenomeIndex
 
@@ -161,6 +160,7 @@ class CellRangerService {
         return parameters
     }
 
+    @CompileDynamic
     CellRangerQualityAssessment parseCellRangerQaStatistics(SingleCellBamFile singleCellBamFile) {
         Path path = singleCellBamFileService.getQualityAssessmentCsvFile(singleCellBamFile)
         Spreadsheet spreadsheet = new Spreadsheet(path.text, Delimiter.COMMA)
@@ -188,6 +188,7 @@ class CellRangerService {
         cellRangerWorkflowService.linkResultFiles(singleCellBamFile)
     }
 
+    @CompileDynamic
     private void completeBamFile(SingleCellBamFile singleCellBamFile) {
         assert singleCellBamFile.isMostRecentBamFile(): "The BamFile ${singleCellBamFile} is not the most recent one. This must not happen!"
         assert [
@@ -204,6 +205,7 @@ class CellRangerService {
         abstractBamFileService.updateSamplePairStatusToNeedProcessing(singleCellBamFile)
     }
 
+    @CompileDynamic
     private void updateBamFile(SingleCellBamFile singleCellBamFile) {
         FileSystem fileSystem = fileSystemService.remoteFileSystem
         Path resultDirectory = fileSystem.getPath(singleCellBamFile.resultDirectory.path)

@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
-@CompileDynamic
 @Transactional
 class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
 
@@ -41,10 +40,12 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
 
     WorkflowService workflowService
 
+    @CompileDynamic
     SeqType findById(long id) {
         return SeqType.get(id)
     }
 
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<Map> displayableMetadata() {
         return SeqType.list(sort: "name", order: "asc").collect {
@@ -75,11 +76,13 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
         }.unique().sort { it.name.toLowerCase() + it.id }
     }
 
+    @CompileDynamic
     List<SeqType> list() {
         return SeqType.list()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
+    @CompileDynamic
     List<SeqType> alignableSeqTypesByProject(Project project) {
         return SeqTrack.createCriteria().listDistinct {
             projections {
@@ -94,6 +97,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
         }.sort { it.name }
     }
 
+    @CompileDynamic
     static boolean hasSeqTypeByNameOrDisplayName(String nameOrDisplayName) {
         assert nameOrDisplayName: "the input nameOrDisplayName '${nameOrDisplayName}' is null"
         return SeqType.findAllByNameOrDisplayName(nameOrDisplayName, nameOrDisplayName).size() > 0
@@ -121,6 +125,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
         }
     }
 
+    @CompileDynamic
     void changeLegacyState(SeqType seqType, boolean legacy) {
         SeqType.findAllByNameAndSingleCell(seqType.name, seqType.singleCell).each {
             it.legacy = legacy
@@ -129,6 +134,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void toggleNeedsBedFileFlag(SeqType seqType) {
         SeqType.findAllByNameAndSingleCell(seqType.name, seqType.singleCell).each {
             it.needsBedFile = !it.needsBedFile
@@ -137,6 +143,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
     }
 
     @Override
+    @CompileDynamic
     void getTAndAddAlias(String name, String importAlias) {
         List<SeqType> seqTypes = []
         seqTypes += findByNameOrImportAlias(name, [libraryLayout: SequencingReadType.SINGLE, singleCell: false]) ?: []
@@ -157,6 +164,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
     }
 
     @Override
+    @CompileDynamic
     protected SeqType findByName(String name, Map properties = [:]) {
         if (properties.libraryLayout && properties.singleCell != null) {
             return CollectionUtils.atMostOneElement(clazz.findAllByNameIlikeAndLibraryLayoutAndSingleCell(name, properties.libraryLayout as SequencingReadType,
@@ -173,6 +181,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
     }
 
     @Override
+    @CompileDynamic
     protected SeqType findByImportAlias(String importAlias, Map properties = [:]) {
         if (properties.libraryLayout && properties.singleCell != null) {
             return CollectionUtils.<SeqType> atMostOneElement(clazz.list().findAll {
@@ -187,14 +196,14 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
     }
 
     @Override
-    protected void checkProperties(Map properties) {
+    protected void checkProperties(Map<String, Object> properties) {
         assert properties.dirName: "the input dirname must not be null"
         assert properties.libraryLayout: "the input libraryLayout must not be null"
         assert properties.libraryLayout instanceof SequencingReadType: "the input libraryLayout has to be of class 'LibraryLayout' but " +
                 "is '${properties.libraryLayout.class}"
         assert properties.displayName: "the input displayName must not be null"
         assert properties.singleCell != null: "the input singleCell must not be null"
-        assert !findByNameOrImportAlias(properties.displayName, properties): "The SeqType with displayname'${properties.displayName}' exists already"
+        assert !findByNameOrImportAlias(properties.displayName as String, properties): "The SeqType with displayname'${properties.displayName}' exists already"
     }
 
     @Override
@@ -202,6 +211,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
         return SeqType
     }
 
+    @CompileDynamic
     static List<SeqType> getAllSingleCellSeqTypes() {
         return SeqType.findAllBySingleCell(true)
     }
@@ -239,6 +249,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
         return getSingleSeqType(SeqTypeNames._10X_SCRNA.seqTypeName, SequencingReadType.PAIRED, true, '10x_scRNA PAIRED not found')
     }
 
+    @CompileDynamic
     private static SeqType getSingleSeqType(String seqTypeName, SequencingReadType layout, boolean singleCell = false, String customErrorMessage) {
         return CollectionUtils.exactlyOneElement(SeqType.findAllByNameAndLibraryLayoutAndSingleCell(seqTypeName, layout, singleCell), customErrorMessage)
     }
@@ -283,6 +294,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
      * @deprecated method is part of the old workflow system, use {@link Workflow#defaultSeqTypesForWorkflowVersions} instead
      */
     @Deprecated
+    @CompileDynamic
     static List<SeqType> getRoddyAlignableSeqTypes() {
         return [
                 panCanAlignableSeqTypes,
@@ -294,6 +306,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
      * @deprecated method is part of the old workflow system, use {@link Workflow#defaultSeqTypesForWorkflowVersions} instead
      */
     @Deprecated
+    @CompileDynamic
     static List<SeqType> getCellRangerAlignableSeqTypes() {
         return [
                 get10xSingleCellRnaSeqType(),
@@ -304,6 +317,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
      * @deprecated method is part of the old workflow system, use {@link Workflow#defaultSeqTypesForWorkflowVersions} instead
      */
     @Deprecated
+    @CompileDynamic
     static List<SeqType> getAllAlignableSeqTypes() {
         return [
                 defaultOtpAlignableSeqTypes,
@@ -312,6 +326,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
         ].flatten().unique()
     }
 
+    @CompileDynamic
     static List<SeqType> getSeqTypesRequiredLibPrepKit() {
         return [
                 wholeGenomeBisulfitePairedSeqType,
@@ -392,6 +407,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
      * @deprecated method is part of the old workflow system, use {@link Workflow#defaultSeqTypesForWorkflowVersions} instead
      */
     @Deprecated
+    @CompileDynamic
     static List<SeqType> getAllAnalysableSeqTypes() {
         return [
                 snvPipelineSeqTypes,
@@ -406,6 +422,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
      * @deprecated method is part of the old workflow system, use {@link Workflow#defaultSeqTypesForWorkflowVersions} instead
      */
     @Deprecated
+    @CompileDynamic
     static List<SeqType> getAllProcessableSeqTypes() {
         return [
                 allAlignableSeqTypes,
@@ -420,6 +437,7 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
         ]
     }
 
+    @CompileDynamic
     List<SeqType> getSeqTypesWithAntibodyTarget() {
         return SeqType.findAllByHasAntibodyTarget(true)
     }

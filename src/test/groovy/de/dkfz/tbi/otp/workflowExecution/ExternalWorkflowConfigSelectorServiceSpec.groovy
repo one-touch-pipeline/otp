@@ -35,14 +35,10 @@ class ExternalWorkflowConfigSelectorServiceSpec extends Specification implements
 
     ExternalWorkflowConfigSelectorService service = new ExternalWorkflowConfigSelectorService()
 
-    @SuppressWarnings("LineLength")
     @Unroll()
     void "getAllConflictingConfigValues, should return conflicting key with corresponding values in json formatted strings"() {
-        when:
-        List<JsonConflictingParameters> conflictingValues = service.getAllConflictingConfigValues(string1, string2)
-
-        then:
-        conflictingValues.toString() == expectedConflictingValues.toString()
+        expect:
+        service.getAllConflictingConfigValues(string1, string2) == expectedConflictingValues
 
         where:
         string1                                   | string2                                    | expectedConflictingValues

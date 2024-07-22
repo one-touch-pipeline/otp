@@ -46,7 +46,6 @@ import java.util.stream.Stream
  * Helper methods to work with file paths
  */
 @Slf4j
-@CompileDynamic
 @Transactional
 class FileService {
 
@@ -186,6 +185,7 @@ class FileService {
      * by the default FileSystemProvider, such as {@link com.github.robtimus.filesystems.sftp.SFTPPath}s.
      */
     @SuppressWarnings(['JavaIoPackageAccess', 'UnnecessaryCollectCall'])
+    @CompileDynamic
     File toFile(Path path) {
         assert path.absolute
         return new File(File.separator + path*.toString().join(File.separator))
@@ -419,6 +419,7 @@ class FileService {
                         "${shouldExist ? 'is not accessible or does not exist' : 'still exists'}"
     }
 
+    @CompileDynamic
     static Duration getTimeout() {
         return (Environment.current == Environment.TEST) ? Duration.ZERO : Duration.ofMinutes(
                 StaticApplicationContextWrapper.context.processingOptionService.findOptionAsInteger(ProcessingOption.OptionName.FILESYSTEM_TIMEOUT)
@@ -767,7 +768,7 @@ class FileService {
             Stream<Path> stream = null
             try {
                 stream = Files.list(path)
-                stream.each {
+                stream.each { Path it ->
                     correctPathAndGroupPermissionRecursiveInternal(it, group)
                 }
                 setGroupViaBash(path, group)

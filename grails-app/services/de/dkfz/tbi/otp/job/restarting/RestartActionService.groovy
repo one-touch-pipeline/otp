@@ -36,7 +36,6 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 
-@CompileDynamic
 @Transactional
 class RestartActionService {
 
@@ -54,6 +53,7 @@ class RestartActionService {
 
     ProcessService processService
 
+    @CompileDynamic
     void handleAction(JobErrorDefinition.Action action, Job job) {
         if (!action) {
             job.log.debug("Stopping, because action is null.")
@@ -83,6 +83,7 @@ class RestartActionService {
     }
 
     @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
+    @CompileDynamic
     private void restartJob(Job job) {
         ProcessingStep step = job.processingStep
 
@@ -109,6 +110,7 @@ class RestartActionService {
 
     @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @CompileDynamic
     void restartWorkflowWithProcess(Process process) {
         StartJob startJob = getStartJob(process)
         ProcessingStepUpdate processingStepUpdate = processService.getLatestProcessingStepUpdate(processService.getLatestProcessingStep(process))
@@ -121,18 +123,21 @@ class RestartActionService {
         }
     }
 
+    @CompileDynamic
     StartJob getStartJob(Process process) {
         JobExecutionPlan plan = process.jobExecutionPlan
         StartJob startJob = context.getBean(plan.startJob.bean)
         return startJob
     }
 
+    @CompileDynamic
     void restart(StartJob startJob, Process process) {
         Process process1 = ((RestartableStartJob) startJob).restart(process)
         process1.restarted = process
         assert process1.save(flush: true)
     }
 
+    @CompileDynamic
     void logInCommentAndJobLog(Job job, String message) {
         job.log.debug(message)
         ProcessingStep step = job.processingStep

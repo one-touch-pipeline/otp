@@ -28,16 +28,17 @@ import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-@CompileDynamic
 @Transactional
 class FastqcResultsService {
 
     SeqTrackService seqTrackService
 
+    @CompileDynamic
     boolean isFastqcAvailable(RawSequenceFile rawSequenceFile) {
         return CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllBySequenceFileAndContentUploaded(rawSequenceFile, true))
     }
 
+    @CompileDynamic
     Map<Long, Boolean> fastqcLinkMap(Run run) {
         Map<Long, Boolean> map = [:]
         List<SeqTrack> seqTracks = SeqTrack.findAllByRun(run) // to be protected by ACLs
@@ -59,6 +60,7 @@ class FastqcResultsService {
      * @param sequences The Sequences for which the FastQC DataFiles should be retrieved
      * @return The FastQC DataFiles found by the Sequences
      */
+    @CompileDynamic
     List<RawSequenceFile> fastQCFiles(List<Sequence> sequences) {
         return FastqcProcessedFile.createCriteria().list {
             sequenceFile {

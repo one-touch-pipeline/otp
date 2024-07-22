@@ -35,7 +35,6 @@ import java.nio.file.FileSystem
 import java.nio.file.Path
 
 @SuppressWarnings("JavaIoPackageAccess")
-@CompileDynamic
 @Transactional
 class IndividualSwapService extends AbstractDataSwapService<IndividualSwapParameters, IndividualSwapData> {
 
@@ -86,6 +85,7 @@ class IndividualSwapService extends AbstractDataSwapService<IndividualSwapParame
         )
     }
 
+    @CompileDynamic
     @Override
     protected void performDataSwap(IndividualSwapData data) {
         swapIndividual(data)
@@ -123,6 +123,7 @@ class IndividualSwapService extends AbstractDataSwapService<IndividualSwapParame
         createCommentForSwappedRawSequenceFiles(data)
     }
 
+    @CompileDynamic
     @Override
     protected Swap<Individual> getIndividualSwap(IndividualSwapParameters parameters) {
         return new Swap<Individual>(
@@ -158,6 +159,7 @@ class IndividualSwapService extends AbstractDataSwapService<IndividualSwapParame
      * @param sample sample to swap
      * @param data DTO containing all entities necessary to perform a swap.
      */
+    @CompileDynamic
     private void swapSampleAndDeleteOldIdentifier(Sample sample, IndividualSwapData data) {
         SampleType newSampleType = CollectionUtils.exactlyOneElement(SampleType.findAllByName(
                 data.sampleTypeSwaps.find { it.old == sample.sampleType.name }.new
@@ -176,6 +178,7 @@ class IndividualSwapService extends AbstractDataSwapService<IndividualSwapParame
      * @param parameters containing the StringBuilder for logging
      * @return found list of samples
      */
+    @CompileDynamic
     private List<Sample> getSamplesByIndividual(Individual individual, IndividualSwapParameters parameters) {
         List<Sample> samples = Sample.findAllByIndividual(individual)
         parameters.log << "\n  samples (${samples.size()}): ${samples}"
@@ -189,6 +192,7 @@ class IndividualSwapService extends AbstractDataSwapService<IndividualSwapParame
      * @param parameters containing the StringBuilder for logging
      * @return found list of seq tracks
      */
+    @CompileDynamic
     private List<SeqTrack> getSeqTracksBySampleInList(List<Sample> samples, IndividualSwapParameters parameters) {
         List<SeqTrack> seqTrackList = samples ? SeqTrack.findAllBySampleInList(samples) : []
         logListEntries(seqTrackList, "seqtracks", parameters.log)

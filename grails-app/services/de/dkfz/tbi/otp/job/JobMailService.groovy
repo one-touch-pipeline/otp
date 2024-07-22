@@ -38,7 +38,6 @@ import de.dkfz.tbi.otp.utils.TimeFormats
 
 import java.time.ZonedDateTime
 
-@CompileDynamic
 @Transactional
 class JobMailService {
 
@@ -54,6 +53,7 @@ class JobMailService {
 
     ClusterJobDetailService clusterJobDetailService
 
+    @CompileDynamic
     void sendErrorNotification(Job job, String errorMessage) {
         assert job: 'job may not be null'
         assert errorMessage: 'message may not be null'
@@ -156,6 +156,7 @@ Failed OTP Values: ${mapForLog.values().join(';')}""")
         return step instanceof RestartedProcessingStep ? restartCount(((RestartedProcessingStep) step).original) + 1 : 0
     }
 
+    @CompileDynamic
     private String mapToString(String header, Map data) {
         return """
 
@@ -164,6 +165,7 @@ ${data.collect { key, value -> "  ${key}: ${value}" }.join('\n')}
 """
     }
 
+    @CompileDynamic
     private Process firstWorkflowJobId(Process process) {
         Process previous = CollectionUtils.atMostOneElement(Process.findAllByRestarted(process))
         if (previous) {

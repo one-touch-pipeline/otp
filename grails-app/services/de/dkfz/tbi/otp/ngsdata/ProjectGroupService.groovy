@@ -28,25 +28,28 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-@CompileDynamic
 @Transactional
 class ProjectGroupService {
 
     ProjectService projectService
 
+    @CompileDynamic
     List<ProjectGroup> list() {
         return ProjectGroup.list()
     }
 
+    @CompileDynamic
     ProjectGroup findByName(String name) {
         return CollectionUtils.atMostOneElement(ProjectGroup.findAllByName(name))
     }
 
+    @CompileDynamic
     List<ProjectGroup> availableProjectGroups() {
         List<Project> projects = projectService.allProjects
         return projects*.projectGroup.unique().findAll { it != null }.sort { it.name }
     }
 
+    @CompileDynamic
     ProjectGroup projectGroupByName(String projectGroupName) {
         return CollectionUtils.atMostOneElement(ProjectGroup.findAllByName(projectGroupName))
     }

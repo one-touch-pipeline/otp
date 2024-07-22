@@ -26,18 +26,16 @@ import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
+import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 
 import java.nio.file.*
 
-@SuppressWarnings("GStringExpressionWithinString")
+@SuppressWarnings(["GStringExpressionWithinString", "DoNotUseCompileDynamicWithClasses"])
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
-@CompileDynamic
 @Transactional
+@CompileDynamic
 class DataExportService {
 
     FileService fileService
@@ -48,7 +46,7 @@ class DataExportService {
     RawSequenceDataViewFileService rawSequenceDataViewFileService
 
     DataExportOutput exportHeaderInfo(DataExportInput dataExportInput) {
-        return exportFilesWrapper(dataExportInput, exportHeaderInfoClosure,)
+        return exportFilesWrapper(dataExportInput, exportHeaderInfoClosure)
     }
 
     DataExportOutput exportRawSequenceFiles(DataExportInput dataExportInput) {
@@ -63,7 +61,8 @@ class DataExportService {
         return exportFilesWrapper(dataExportInput, exportAnalysisFilesClosure)
     }
 
-    private final Closure exportHeaderInfoClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder, consoleBuilder, copyConnection, copyTargetBase ->
+    private final Closure exportHeaderInfoClosure = { DataExportInput dataExportInput, StringBuilder scriptFileBuilder, StringBuilder scriptListBuilder,
+                                                      StringBuilder consoleBuilder, String copyConnection, String copyTargetBase ->
         String umask = dataExportInput.external ? "027" : "022"
 
         if (dataExportInput.copyExternal) {
@@ -87,8 +86,8 @@ class DataExportService {
         }
     }
 
-    private final Closure exportRawSequenceFilesClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder, consoleBuilder, copyConnection,
-                                                            copyTargetBase ->
+    private final Closure exportRawSequenceFilesClosure = { DataExportInput dataExportInput, StringBuilder scriptFileBuilder, StringBuilder scriptListBuilder,
+                                                            StringBuilder consoleBuilder, String copyConnection, String copyTargetBase ->
         if (dataExportInput.checkFileStatus) {
             consoleBuilder.append("\n************************************ FASTQ ************************************\n")
             if (dataExportInput.copyWithdrawnData) {
@@ -134,7 +133,8 @@ class DataExportService {
         }
     }
 
-    private final Closure exportBamFilesClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder, consoleBuilder, copyConnection, copyTargetBase ->
+    private final Closure exportBamFilesClosure = { DataExportInput dataExportInput, StringBuilder scriptFileBuilder, StringBuilder scriptListBuilder,
+                                                    StringBuilder consoleBuilder, String copyConnection, String copyTargetBase ->
         if (dataExportInput.checkFileStatus) {
             consoleBuilder.append("\n************************************ BAM ************************************\n")
             consoleBuilder.append("Found BAM files ${dataExportInput.bamFileList.size()}\n")
@@ -198,12 +198,12 @@ class DataExportService {
         }
     }
 
-    private final Closure exportAnalysisFilesClosure = { dataExportInput, scriptFileBuilder, scriptListBuilder,
-                                                         consoleBuilder, copyConnection, copyTargetBase ->
+    private final Closure exportAnalysisFilesClosure = { DataExportInput dataExportInput, StringBuilder scriptFileBuilder, StringBuilder scriptListBuilder,
+                                                         StringBuilder consoleBuilder, String copyConnection, String copyTargetBase ->
         if (dataExportInput.checkFileStatus) {
             consoleBuilder.append("\n************************************ Analyses ************************************\n")
         }
-        dataExportInput.analysisListMap.each { Map.Entry<String, List<BamFilePairAnalysis>> entry ->
+        dataExportInput.analysisListMap.each { Map.Entry<PipelineType, List<BamFilePairAnalysis>> entry ->
             String instanceName = entry.key
             List<BamFilePairAnalysis> analyses = entry.value
             if (analyses) {

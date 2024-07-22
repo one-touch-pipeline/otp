@@ -31,7 +31,6 @@ import de.dkfz.tbi.otp.job.jobs.RestartableStartJob
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 
-@CompileDynamic
 @Transactional
 class RestartCheckerService {
 
@@ -42,6 +41,7 @@ class RestartCheckerService {
         return job instanceof AutoRestartableJob
     }
 
+    @CompileDynamic
     boolean canWorkflowBeRestarted(ProcessingStep step) {
         JobExecutionPlan plan = step.process.jobExecutionPlan
         StartJob startJob = context.getBean(plan.startJob.bean)

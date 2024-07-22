@@ -33,12 +33,12 @@ import de.dkfz.tbi.otp.security.DeputyRelation
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-@CompileDynamic
 @Transactional
 class DepartmentService {
 
     AuditLogService auditLogService
 
+    @CompileDynamic
     Map<String, String> getListOfPIForDepartment(String department) {
         List<User> departmentHeads = getListOfHeadsForDepartment(department)
         Map<String, String> result = [:]
@@ -52,6 +52,7 @@ class DepartmentService {
         return result.sort { a, b -> a.value <=> b.value }
     }
 
+    @CompileDynamic
     Map<String, String> listOfAllUsers() {
         Map<String, String> result = [:]
         User.findAllByEnabled(true).each {
@@ -60,6 +61,7 @@ class DepartmentService {
         return result.sort { a, b -> a.value <=> b.value }
     }
 
+    @CompileDynamic
     List<User> getListOfHeadsForDepartment(String department) {
         List<User> departmentHeads = CollectionUtils.atMostOneElement(Department.findAllByOuNumber(department))?.departmentHeads as List<User> ?: []
         return departmentHeads.unique()
@@ -79,6 +81,7 @@ class DepartmentService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     private void updateDepartment(Department department, DepartmentCommand departmentCommand) {
         if (!departmentCommand || !departmentCommand.departmentHeads || !departmentCommand.costCenter) {
             auditLogService.logAction(AuditLog.Action.DELETED_DEPARTMENT, "Deleted Department: ${department}")
@@ -99,6 +102,7 @@ class DepartmentService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void createDepartment(DepartmentCommand departmentCommand) {
         if (!departmentCommand || !departmentCommand.departmentHeads || !departmentCommand.costCenter) {
             log.info("Could not create ${departmentCommand}.")
@@ -116,6 +120,7 @@ class DepartmentService {
 
     @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#departmentHead, 'IS_DEPARTMENT_HEAD')")
+    @CompileDynamic
     List<Department> getDepartmentsForDepartmentHead(User departmentHead) {
         assert departmentHead: "Department Head has to be not null"
         return Department.createCriteria().list {
@@ -126,6 +131,7 @@ class DepartmentService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     List<Department> listDepartments() {
         return Department.all
     }

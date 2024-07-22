@@ -28,7 +28,6 @@ import org.springframework.security.access.prepost.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-@CompileDynamic
 @Transactional
 class JobExecutionPlanService {
 
@@ -42,6 +41,7 @@ class JobExecutionPlanService {
      * Security aware way to access a JobExecutionPlan.
      * @param id The JobExecutionPlan's id
      */
+    @CompileDynamic
     @PostAuthorize("hasRole('ROLE_OPERATOR')")
     JobExecutionPlan getPlan(long id) {
         return JobExecutionPlan.get(id)
@@ -51,6 +51,7 @@ class JobExecutionPlanService {
      * Security aware way to access a JobDefinition.
      * @param id The JobDefinition's id
      */
+    @CompileDynamic
     @PostAuthorize("hasRole('ROLE_OPERATOR')")
     JobDefinition getJobDefinition(long id) {
         return JobDefinition.get(id)
@@ -80,6 +81,7 @@ class JobExecutionPlanService {
         return changePlanStatus(plan, false)
     }
 
+    @CompileDynamic
     private boolean changePlanStatus(JobExecutionPlan plan, boolean enable) {
         boolean before = plan.enabled
         plan.enabled = enable
@@ -98,11 +100,13 @@ class JobExecutionPlanService {
      * Obsoleted JobExecutionPlans are not considered.
      * @return List of all not obsoleted JobExecutionPlans
      */
+    @CompileDynamic
     @PostFilter("hasRole('ROLE_OPERATOR')")
     List<JobExecutionPlan> jobExecutionPlans() {
         return JobExecutionPlan.findAllByObsoleted(false, [sort: "name", order: "asc"])
     }
 
+    @CompileDynamic
     @PostFilter("hasRole('ROLE_OPERATOR')")
     List<JobExecutionPlan> jobExecutionPlansWithPreviousVersions() {
         return JobExecutionPlan.findAllByNameInList(jobExecutionPlans()*.name)
@@ -117,6 +121,7 @@ class JobExecutionPlanService {
      * @param order {@code true} for ascending ordering, {@code false} for descending, default {@code false}
      * @return List of all Processes run for the JobExecutionPlan filtered as requested
      */
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<Process> getAllProcesses(JobExecutionPlan plan, int max = 10, int offset = 0, String column = "id", boolean order = false) {
         final List<JobExecutionPlan> plans = withParents(plan)
@@ -138,6 +143,7 @@ class JobExecutionPlanService {
      * @param state The execution state for restricting the result
      * @return Map of Processes with latest ProcessingStepUpdate
      */
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Map<Process, ProcessingStepUpdate> getLatestUpdatesForPlan(
             JobExecutionPlan plan, int max = 10, int offset = 0, String column = "id", boolean order = false, List<ExecutionState> states = []) {
@@ -188,6 +194,7 @@ class JobExecutionPlanService {
      * @param plan The Plan for which the number of run Processes should be returned
      * @return The number of Processes run for this plan
      */
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     int getProcessCount(JobExecutionPlan plan) {
         final List<JobExecutionPlan> plans = withParents(plan)
@@ -200,6 +207,7 @@ class JobExecutionPlanService {
      * @param plan The JobExecutionPlan for which it should be checked whether a Process is running
      * @return {@code true} in case there is a Process running for plan, {@code false} otherwise
      */
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     boolean isProcessRunning(JobExecutionPlan plan) {
         final List<JobExecutionPlan> plans = withParents(plan)
@@ -249,6 +257,7 @@ class JobExecutionPlanService {
      * @param state Optional ExecutionState to restrict the number of Processes returned
      * @return The number of Processes which have been started for plan
      */
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     int getNumberOfProcesses(JobExecutionPlan plan, List<ExecutionState> states = null) {
         final List<JobExecutionPlan> plans = withParents(plan)
@@ -323,6 +332,7 @@ class JobExecutionPlanService {
      * Number of processes of each workflow
      * return Map of job execution plan names -> all processes count
      */
+    @CompileDynamic
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Map<String, Long> processCount(List<JobExecutionPlan> plans = []) {
@@ -345,6 +355,7 @@ class JobExecutionPlanService {
      * Number of finished processes of each workflow
      * @return Map of job execution plan names -> finished processes
      */
+    @CompileDynamic
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Map<String, Long> finishedProcessCount(List<JobExecutionPlan> plans = []) {
@@ -368,6 +379,7 @@ class JobExecutionPlanService {
      * Number of failed processes of each workflow
      * @return Map of job execution plan names -> failed processes
      */
+    @CompileDynamic
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Map<String, Long> failedProcessCount(List<JobExecutionPlan> plans) {
@@ -408,6 +420,7 @@ class JobExecutionPlanService {
      * Last process with given state of each workflow
      * @return Map of job execution plan names -> date of last process with given state
      */
+    @CompileDynamic
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Map<String, Date> lastProcessDate(List<JobExecutionPlan> plans, ExecutionState state) {

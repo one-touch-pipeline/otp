@@ -26,7 +26,6 @@ import groovy.transform.CompileDynamic
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 
-@CompileDynamic
 class WorkflowBeanNameService {
     @Autowired
     ApplicationContext applicationContext
@@ -38,6 +37,7 @@ class WorkflowBeanNameService {
      * @return the list of classes, which don't have bean name in the {@link Workflow} domain object.
      */
     @Transactional(readOnly = true)
+    @CompileDynamic
     List<String> findWorkflowBeanNamesNotSet() {
         List<String> beanNamesInDatabase = Workflow.withCriteria {
             projections {
@@ -51,6 +51,6 @@ class WorkflowBeanNameService {
     }
 
     List<String> getImplementedWorkflowBeanNames() {
-        return applicationContext.getBeanNamesForType(OtpWorkflow)
+        return applicationContext.getBeanNamesForType(OtpWorkflow).toList()
     }
 }

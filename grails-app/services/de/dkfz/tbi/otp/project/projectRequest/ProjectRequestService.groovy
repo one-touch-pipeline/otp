@@ -48,7 +48,6 @@ import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
 import java.time.LocalDate
 
-@CompileDynamic
 @Transactional
 class ProjectRequestService {
 
@@ -68,11 +67,13 @@ class ProjectRequestService {
     DepartmentService departmentService
     UserService userService
 
+    @CompileDynamic
     boolean piBelongsToDepartment(List<String> piUsernameList, String department) {
         List<String> piUsernames = User.findAllByUsernameInList(piUsernameList)*.username
         return departmentService.getListOfPIForDepartment(department).any { it.key in piUsernames }
     }
 
+    @CompileDynamic
     String getDepartmentIfExists(Map<String, String> additionalFieldValue) {
         if (processingOptionService.findOptionAsString(ProcessingOption.OptionName.ENABLE_PROJECT_REQUEST_PI).toBoolean()) {
             Map.Entry<String, String> organizationalUnit = additionalFieldValue.find {
@@ -92,6 +93,7 @@ class ProjectRequestService {
         return departmentService.getListOfHeadsForDepartment(department)
     }
 
+    @CompileDynamic
     ProjectRequest saveProjectRequestFromCommand(ProjectRequestCreationCommand cmd) throws OtpRuntimeException {
         securityService.ensureNotSwitchedUser()
         ProjectRequest projectRequest
@@ -165,6 +167,7 @@ class ProjectRequestService {
         return projectRequest
     }
 
+    @CompileDynamic
     void saveAdditionalFieldValuesForProjectRequest(String fieldValue, String fieldId, ProjectRequest projectRequest) {
         AbstractFieldDefinition afd = AbstractFieldDefinition.get(fieldId as Long)
         if (afd.projectFieldType == ProjectFieldType.TEXT) {
@@ -183,6 +186,7 @@ class ProjectRequestService {
         projectRequest.save(flush: true)
     }
 
+    @CompileDynamic
     List<AbstractFieldDefinition> listAndFetchAbstractFields(Project.ProjectType projectType, ProjectPageType page) {
         boolean isOperator = securityService.ifAllGranted(Role.ROLE_OPERATOR)
         List<AbstractFieldDefinition> fieldDefinitions = []
@@ -218,10 +222,12 @@ class ProjectRequestService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     ProjectRequest findProjectRequestByProject(Project project) {
         return CollectionUtils.atMostOneElement(ProjectRequest.findAllByProject(project))
     }
 
+    @CompileDynamic
     void deleteProjectRequest(ProjectRequest projectRequest) {
         Set<ProjectRequestUser> projectRequestUsers = projectRequest.users + projectRequest.piUsers
         ProjectRequestPersistentState projectRequestPersistentState = projectRequest.state
@@ -273,6 +279,7 @@ class ProjectRequestService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void addDepartmentHeadsToProject(Map<String, String> additionalFieldsValue, ProjectRequest projectRequest) {
         List<User> departmentHeads = getDepartmentHeads(additionalFieldsValue)
         if (!departmentHeads) {
@@ -389,6 +396,7 @@ class ProjectRequestService {
         mailHelperService.saveMail(subject, body, recipients, ccs)
     }
 
+    @CompileDynamic
     Set<ProjectRequest> getAllApproved() {
         return ProjectRequest.createCriteria().listDistinct {
             state {
@@ -553,6 +561,7 @@ class ProjectRequestService {
         return auditLogService.logAction(AuditLog.Action.PROJECT_REQUEST, "${staticLogPrefix} ${description}")
     }
 
+    @CompileDynamic
     List<ProjectRequest> getRequestsUserIsInvolved(boolean resolved) {
         String equalOrNotEqual = resolved ? "eq" : "ne"
         boolean currentUserIsOperator = securityService.ifAllGranted(Role.ROLE_OPERATOR)
@@ -600,6 +609,7 @@ class ProjectRequestService {
         }
     }
 
+    @CompileDynamic
     void saveProjectRequest(ProjectRequest projectRequest) {
         projectRequest.save(flush: true)
     }

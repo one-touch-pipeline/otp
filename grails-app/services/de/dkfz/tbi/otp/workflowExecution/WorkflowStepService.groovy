@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import groovy.transform.CompileDynamic
 
-@CompileDynamic
 class WorkflowStepService {
 
     /**
@@ -44,6 +43,7 @@ class WorkflowStepService {
         return (workflowStep.restartedFrom ?: workflowStep).previous
     }
 
+    @CompileDynamic
     List<WorkflowStep> runningWorkflowSteps() {
         return WorkflowStep.withCriteria {
             eq('state', WorkflowStep.State.RUNNING)

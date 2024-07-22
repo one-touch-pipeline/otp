@@ -30,13 +30,13 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-@CompileDynamic
 @Transactional
 class CrashRepairService {
 
     WorkflowStateChangeService workflowStateChangeService
     WorkflowService workflowService
 
+    @CompileDynamic
     List<WorkflowStep> findStillRunningWorkflowStepsAfterCrash() {
         return WorkflowStep.createCriteria().list {
             eq("state", WorkflowStep.State.RUNNING)

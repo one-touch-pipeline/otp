@@ -39,7 +39,6 @@ import java.nio.file.Path
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
-@CompileDynamic
 @Transactional
 class RoddyWorkflowConfigService {
 
@@ -78,6 +77,7 @@ class RoddyWorkflowConfigService {
         return config
     }
 
+    @CompileDynamic
     void createConfigPerProjectAndSeqType(ConfigPerProjectAndSeqType configPerProjectAndSeqType) {
         Project.withTransaction {
             if (configPerProjectAndSeqType.previousConfig) {
@@ -87,6 +87,7 @@ class RoddyWorkflowConfigService {
         }
     }
 
+    @CompileDynamic
     void makeObsolete(ConfigPerProjectAndSeqType configPerProjectAndSeqType) {
         configPerProjectAndSeqType.obsoleteDate = new Date()
         assert configPerProjectAndSeqType.save(flush: true)
@@ -102,11 +103,11 @@ class RoddyWorkflowConfigService {
 
         fileService.ensureFileIsReadableAndNotEmpty(configFile)
         List<String> patternHelper = [
-                "${Pattern.quote(config.pipeline.name.name())}",
-                "${Pattern.quote(config.seqType.roddyName)}",
-                "${Pattern.quote(config.seqType.libraryLayout.name())}",
-                "${config.seqType.singleCell ? 'SingleCell_' : ''}(.+)",
-                "${Pattern.quote(config.configVersion)}",
+                "${Pattern.quote(config.pipeline.name.name())}" as String,
+                "${Pattern.quote(config.seqType.roddyName)}" as String,
+                "${Pattern.quote(config.seqType.libraryLayout.name())}" as String,
+                "${config.seqType.singleCell ? 'SingleCell_' : ''}(.+)" as String,
+                "${Pattern.quote(config.configVersion)}" as String,
         ]
         String pattern = /^${patternHelper.join("_")}\.xml$/
         Matcher matcher = configFile.fileName.toString() =~ pattern
@@ -119,6 +120,7 @@ class RoddyWorkflowConfigService {
         }
     }
 
+    @CompileDynamic
     ConfigState getCurrentFilesystemState(Project project, SeqType seqType, Pipeline pipeline) {
         RoddyWorkflowConfig config = RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)
         if (config) {
@@ -152,6 +154,7 @@ class RoddyWorkflowConfigService {
         ])
     }
 
+    @CompileDynamic
     RoddyWorkflowConfig findLatestConfigByProjectAndSeqTypeAndPipeline(Project project, SeqType seqType, Pipeline pipeline) {
         return CollectionUtils.atMostOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndIndividualIsNull(
                 project, seqType, pipeline, [sort: 'id', order: 'desc', max: 1,]

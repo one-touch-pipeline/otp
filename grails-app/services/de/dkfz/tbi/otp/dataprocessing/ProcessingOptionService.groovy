@@ -31,7 +31,6 @@ import de.dkfz.tbi.otp.project.Project
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.singleElement
 
-@CompileDynamic
 @Transactional
 class ProcessingOptionService {
 
@@ -65,6 +64,7 @@ class ProcessingOptionService {
         }
     }
 
+    @CompileDynamic
     static ProcessingOption findOption(OptionName name, String type = null, Project project = null) {
         return singleElement(ProcessingOption.findAllWhere(
                 name: name,
@@ -124,6 +124,7 @@ class ProcessingOptionService {
      * Retrieves all ProcessingOptions.
      * @return List of ProcessingOptions
      */
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     List<ProcessingOption> listProcessingOptions() {
         return ProcessingOption.findAllByDateObsoletedIsNull()

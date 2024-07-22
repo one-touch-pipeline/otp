@@ -22,12 +22,9 @@
 package de.dkfz.tbi.otp.infrastructure
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 
-import de.dkfz.tbi.otp.ngsdata.IndividualService
-import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.*
 
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -38,7 +35,6 @@ import java.nio.file.Paths
  * If a singleCellWellLabel is defined on the SeqTrack another layer is added for the well structure.
  */
 @Slf4j
-@CompileDynamic
 @Transactional
 class RawSequenceDataViewFileService implements RawSequenceDataFileService {
     IndividualService individualService

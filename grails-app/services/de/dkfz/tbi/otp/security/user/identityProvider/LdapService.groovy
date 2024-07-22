@@ -50,7 +50,6 @@ import java.util.regex.Matcher
 
 import static org.springframework.ldap.query.LdapQueryBuilder.query
 
-@CompileDynamic
 @SuppressWarnings(["ExplicitCallToAndMethod", "ExplicitCallToOrMethod"])
 @Transactional
 class LdapService implements InitializingBean, IdentityProvider {

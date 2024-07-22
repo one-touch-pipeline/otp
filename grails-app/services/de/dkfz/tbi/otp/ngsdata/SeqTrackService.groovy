@@ -39,7 +39,6 @@ import java.text.MessageFormat
 
 import static org.springframework.util.Assert.notNull
 
-@CompileDynamic
 @Transactional
 class SeqTrackService {
 
@@ -60,6 +59,7 @@ class SeqTrackService {
      * @param filtering Filtering restrictions
      * @return List of matching Sequences
      */
+    @CompileDynamic
     List<Sequence> listSequences(int offset, int max, boolean sortOrder, SequenceColumn column, SequenceFiltering filtering) {
         if (filtering.enabled) {
             Closure filteringClosure = createSequenceFilteringClosure()
@@ -88,6 +88,7 @@ class SeqTrackService {
      * @param filtering The filters to apply on the data
      * @return Number of Sequences matching the filtering
      */
+    @CompileDynamic
     int countSequences(SequenceFiltering filtering) {
         if (filtering.enabled) {
             Closure filteringClosure = createSequenceFilteringClosure()
@@ -103,6 +104,7 @@ class SeqTrackService {
         return projects ? Sequence.countByProjectIdInList(projects*.id) : 0
     }
 
+    @CompileDynamic
     Closure createSequenceFilteringClosure() {
         return { SequenceFiltering filtering ->
             'in'('projectId', projectService.allProjects*.id)
@@ -160,6 +162,7 @@ class SeqTrackService {
     }
 
     @Deprecated
+    @CompileDynamic
     static boolean mayAlign(SeqTrack seqTrack) {
         if (seqTrack.withdrawn) {
             return false
@@ -184,11 +187,13 @@ class SeqTrackService {
         return seqTrack.seqPlatformGroup != null
     }
 
+    @CompileDynamic
     void markFastqcFinished(SeqTrack seqTrack) {
         seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
         assert (seqTrack.save(flush: true))
     }
 
+    @CompileDynamic
     List<RawSequenceFile> getSequenceFilesForSeqTrack(SeqTrack seqTrack) {
         List<RawSequenceFile> files = RawSequenceFile.findAllBySeqTrack(seqTrack)
         List<RawSequenceFile> filteredFiles = []
@@ -200,12 +205,14 @@ class SeqTrackService {
         return filteredFiles
     }
 
+    @CompileDynamic
     void fillBaseCount(SeqTrack seqTrack) {
         seqTrack.nBasePairs = seqTrack.sequenceFilesWhereIndexFileIsFalse.sum { RawSequenceFile it -> it.NBasePairs } as Long ?: 0
         assert seqTrack.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#individual.project, 'OTP_READ_ACCESS')")
+    @CompileDynamic
     List<SeqTrack> getSeqTrackSet(Individual individual, SampleType sampleType, SeqType seqType) {
         return SeqTrack.createCriteria().list {
             sample {
@@ -216,6 +223,7 @@ class SeqTrackService {
         } as List<SeqTrack>
     }
 
+    @CompileDynamic
     List<SeqTrack> getSeqTracksByIndividual(Individual individual) {
         return SeqTrack.createCriteria().list {
             sample {
@@ -225,6 +233,7 @@ class SeqTrackService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     List<SeqTrack> getSeqTracksByMultiInput(String pid, String sampleTypeName, String seqTypeName,
                                             String readTypeName, Boolean singleCell) throws AssertionError {
         SequencingReadType libraryLayout = SequencingReadType.getByName(readTypeName)
@@ -254,6 +263,7 @@ class SeqTrackService {
         } as List<SeqTrack>
     }
 
+    @CompileDynamic
     List<ExternallyProcessedBamFile> returnExternallyProcessedBamFiles(List<SeqTrack> seqTracks) {
         notNull(seqTracks, "The input of returnExternallyProcessedBamFiles is null")
         assert !seqTracks.empty: "The input list of returnExternallyProcessedBamFiles is empty"
@@ -282,6 +292,7 @@ class SeqTrackService {
      * @param sampleName all samples if missing
      * @return all the SamplePairs
      */
+    @CompileDynamic
     List<SeqTrack> findAllByIndividualSampleTypeSeqTypeSampleNameMd5sum(Individual individual,
                                                                         SampleType sampleType = null, SeqType seqType = null, String sampleName = null,
                                                                         String md5sum = null) {
@@ -306,6 +317,7 @@ class SeqTrackService {
         }*.seqTrack.unique()
     }
 
+    @CompileDynamic
     static void logToSeqTrack(SeqTrack seqTrack, String message, boolean saveInSeqTrack = true) {
         LogThreadLocal.threadLog?.info(MessageFormat.format(message, " " + seqTrack))
         if (saveInSeqTrack) {
@@ -325,6 +337,7 @@ class SeqTrackService {
      * @param inputSeqTracks the SeqTracks to transform
      * @return the transformed Map
      */
+    @CompileDynamic
     Map<SeqType, Map<SampleType, SeqTrackSet>> groupSeqTracksBySeqTypeAndSampleType(List<SeqTrack> inputSeqTracks) {
         Map<SeqType, Map<SampleType, SeqTrackSet>> fullyGroupedAsSets = [:]
         inputSeqTracks.groupBy { it.seqType } { it.sampleType }.collectEntries(fullyGroupedAsSets) { SeqType seqType,
@@ -369,6 +382,7 @@ class SeqTrackService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#sample.project, 'OTP_READ_ACCESS')")
+    @CompileDynamic
     List<SeqTrack> findAllBySampleAndSeqTypeAndAntibodyTarget(Sample sample, SeqType seqType, AntibodyTarget antibodyTarget) {
         return SeqTrack.findAllWhere(
                 sample: sample,

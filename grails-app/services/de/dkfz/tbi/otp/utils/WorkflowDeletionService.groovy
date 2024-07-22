@@ -33,12 +33,12 @@ import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
 import de.dkfz.tbi.otp.workflowExecution.wes.WesRun
 
-@CompileDynamic
 @Transactional
 class WorkflowDeletionService {
 
     WorkflowLogService workflowLogService
 
+    @CompileDynamic
     void deleteWorkflowRun(WorkflowRun workflowRun) {
         workflowRun.workflowSteps?.reverse()?.each {
             deleteWorkflowStep(it)
@@ -60,12 +60,14 @@ class WorkflowDeletionService {
         deleteWorkFolder(workFolder)
     }
 
+    @CompileDynamic
     void deleteWorkFolder(WorkFolder workFolder) {
         if (workFolder) {
             workFolder.delete(flush: true)
         }
     }
 
+    @CompileDynamic
     void deleteWorkflowArtefact(WorkflowArtefact workflowArtefact) {
         WorkflowRunInputArtefact.findAllByWorkflowArtefact(workflowArtefact).each {
             deleteWorkflowRun(it.workflowRun)
@@ -76,6 +78,7 @@ class WorkflowDeletionService {
         workflowArtefact.delete(flush: true)
     }
 
+    @CompileDynamic
     void deleteWorkflowStep(WorkflowStep workflowStep) {
         if (WorkflowStep.findAllByPrevious(workflowStep) || WorkflowStep.findAllByRestartedFrom(workflowStep)) {
             throw new IllegalArgumentException()
@@ -94,40 +97,47 @@ class WorkflowDeletionService {
         deleteWorkflowError(error)
     }
 
+    @CompileDynamic
     void deleteWesRun(WesRun wesRun) {
         if (wesRun) {
             wesRun.delete(flush: true)
         }
     }
 
+    @CompileDynamic
     void deleteWorkflowError(WorkflowError workflowError) {
         if (workflowError) {
             workflowError.delete(flush: true)
         }
     }
 
+    @CompileDynamic
     void deleteSkipMessage(WorkflowStepSkipMessage skipMessage) {
         if (skipMessage) {
             skipMessage.delete(flush: true)
         }
     }
 
+    @CompileDynamic
     void deleteWorkflowLog(WorkflowLog workflowLog) {
         if (workflowLog) {
             workflowLog.delete(flush: true)
         }
     }
 
+    @CompileDynamic
     void deleteWorkflowVersionSelector(Project project) {
         WorkflowVersionSelector.findAllByProject(project, [sort: 'id', order: 'desc'])
                 .each { it.delete(flush: true) }
     }
 
+    @CompileDynamic
     void deleteReferenceGenomeSelector(Project project) {
         ReferenceGenomeSelector.findAllByProject(project, [sort: 'id', order: 'desc'])
                 .each { it.delete(flush: true) }
     }
 
+    @CompileDynamic
     void deleteWorkflowRun(Project project) {
         WorkflowRun.findAllByProject(project, [sort: 'id', order: 'desc'])
                 .each { deleteWorkflowRun(it) }

@@ -36,7 +36,6 @@ import de.dkfz.tbi.otp.utils.spreadsheet.validation.ValueTuple
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
-@CompileDynamic
 class ValidatorHelperService {
 
     AntibodyTargetService antibodyTargetService
@@ -65,6 +64,7 @@ class ValidatorHelperService {
         return speciesList.size() > speciesWithStrainsList.size() ? [] : speciesWithStrainsList.unique()
     }
 
+    @CompileDynamic
     Project getProjectFromMetadata(ValueTuple tuple) {
         assert tuple
 
@@ -126,6 +126,7 @@ class ValidatorHelperService {
         return seqPlatformName ? seqPlatformService.findSeqPlatform(seqPlatformName, seqPlatformModel, sequencingKit) : null
     }
 
+    @CompileDynamic
     Sample findExistingSampleForValueTuple(ValueTuple valueTuple) {
         assert valueTuple
 
@@ -170,6 +171,7 @@ class ValidatorHelperService {
         ) : null
     }
 
+    @CompileDynamic
     String getPid(ValueTuple valueTuple) {
         assert valueTuple
 
@@ -191,6 +193,7 @@ class ValidatorHelperService {
         return parsedSampleIdentifier.pid
     }
 
+    @CompileDynamic
     String getSampleType(ValueTuple valueTuple) {
         assert valueTuple
 
@@ -221,6 +224,7 @@ class ValidatorHelperService {
         return findMergingCriteria(project, seqType)
     }
 
+    @CompileDynamic
     MergingCriteria findMergingCriteria(Project project, SeqType seqType) {
         return CollectionUtils.atMostOneElement(MergingCriteria.findAllByProjectAndSeqType(project, seqType))
     }

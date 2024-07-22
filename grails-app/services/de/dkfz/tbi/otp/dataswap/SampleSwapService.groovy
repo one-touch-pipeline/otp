@@ -33,7 +33,6 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import java.nio.file.Path
 
 @SuppressWarnings("JavaIoPackageAccess")
-@CompileDynamic
 @Transactional
 class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, SampleSwapData> {
 
@@ -83,6 +82,7 @@ class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, Sa
         )
     }
 
+    @CompileDynamic
     @Override
     protected void performDataSwap(SampleSwapData data) {
         swapSample(data)
@@ -127,6 +127,7 @@ class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, Sa
      *
      * @param data DTO containing all entities necessary to perform a swap.
      */
+    @CompileDynamic
     private void swapSample(SampleSwapData data) {
         // copy the species if the new individual has no species defined
         // and the sample doesn't exist
@@ -149,6 +150,7 @@ class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, Sa
      * @param parameters which contain the names of the old and new SampleType.
      * @return Swap contain the entities of the old and new SampleType.
      */
+    @CompileDynamic
     private Swap<SampleType> getSampleTypeSwap(SampleSwapParameters parameters) {
         return new Swap(
                 CollectionUtils.exactlyOneElement(SampleType.findAllByName(parameters.sampleTypeSwap.old),
@@ -166,6 +168,7 @@ class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, Sa
      * @param parameters containing the StringBuilder for logging
      * @return found sample
      */
+    @CompileDynamic
     private Sample getSampleByIndividualAndSampleType(Individual individual, SampleType sampleType, SampleSwapParameters parameters) {
         Sample sample = CollectionUtils.exactlyOneElement(Sample.findAllByIndividualAndSampleType(individual, sampleType),
                 "The old Sample (${individual} ${sampleType}) does not exist")
@@ -180,6 +183,7 @@ class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, Sa
      * @param parameters containing the StringBuilder for logging
      * @return found list of seq tracks
      */
+    @CompileDynamic
     private List<SeqTrack> getSeqTracksBySample(Sample sample, SampleSwapParameters parameters) {
         List<SeqTrack> seqTrackList = sample ? SeqTrack.findAllBySample(sample) : []
         logListEntries(seqTrackList, "seqtracks", parameters.log)

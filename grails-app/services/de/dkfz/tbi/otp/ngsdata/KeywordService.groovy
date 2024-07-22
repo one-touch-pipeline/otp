@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.utils.StringUtils
 
 import grails.gorm.transactions.Transactional
 
-@CompileDynamic
 @Transactional
 class KeywordService {
 
@@ -43,12 +42,14 @@ class KeywordService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void addKeywordToProject(Keyword keyword, Project project) {
         project.keywords.add(keyword)
         project.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     boolean removeKeywordFromProjectAndUnusedKeyword(Keyword keyword, Project project) {
         project.keywords.remove(keyword)
         keyword.save(flush: true)
@@ -67,10 +68,12 @@ class KeywordService {
         return false
     }
 
+    @CompileDynamic
     List<Keyword> list() {
         return Keyword.list()
     }
 
+    @CompileDynamic
     Keyword findOrSaveByName(String name) {
         return CollectionUtils.atMostOneElement(Keyword.findAllByName(name)) ?: new Keyword(name: name).save(flush: true)
     }

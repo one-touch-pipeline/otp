@@ -34,7 +34,6 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
-@CompileDynamic
 @Transactional
 class MergingCriteriaService {
 
@@ -42,16 +41,19 @@ class MergingCriteriaService {
     WorkflowService workflowService
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
+    @CompileDynamic
     MergingCriteria findMergingCriteria(Project project, SeqType seqType) {
         return CollectionUtils.atMostOneElement(MergingCriteria.findAllByProjectAndSeqType(project, seqType)) ?: new MergingCriteria()
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
+    @CompileDynamic
     List<MergingCriteria> findAllByProject(Project project) {
         return MergingCriteria.findAllByProject(project)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     Errors createOrUpdateMergingCriteria(
             Project project, SeqType seqType, boolean useLibPrepKit, MergingCriteria.SpecificSeqPlatformGroups useSeqPlatformGroups
     ) {
@@ -67,6 +69,7 @@ class MergingCriteriaService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     Errors updateMergingCriteria(MergingCriteria mergingCriteria, boolean useLibPrepKit) {
         mergingCriteria.useLibPrepKit = useLibPrepKit
         try {
@@ -78,6 +81,7 @@ class MergingCriteriaService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     Errors updateMergingCriteria(MergingCriteria mergingCriteria, MergingCriteria.SpecificSeqPlatformGroups useSeqPlatformGroups) {
         mergingCriteria.useSeqPlatformGroup = useSeqPlatformGroups
         try {
@@ -88,6 +92,7 @@ class MergingCriteriaService {
         return null
     }
 
+    @CompileDynamic
     void createDefaultMergingCriteria(Project project, SeqType seqType) {
         if ((seqType in SeqTypeService.allAlignableSeqTypes || seqType in workflowService.getSupportedSeqTypesOfVersions(Workflow.all)) &&
                 !MergingCriteria.findAllByProjectAndSeqType(project, seqType)) {
@@ -100,6 +105,7 @@ class MergingCriteriaService {
         }
     }
 
+    @CompileDynamic
     void createDefaultMergingCriteria(SeqType seqType) {
         if (!(seqType in workflowService.getSupportedSeqTypesOfVersions(Workflow.all))) {
             return
@@ -111,6 +117,7 @@ class MergingCriteriaService {
         }
     }
 
+    @CompileDynamic
     void createDefaultMergingCriteria(Project project) {
         List<SeqType> allSeqTypes = workflowService.getSupportedSeqTypesOfVersions(Workflow.all)
         if (!allSeqTypes) {
@@ -122,6 +129,7 @@ class MergingCriteriaService {
         }
     }
 
+    @CompileDynamic
     List<SeqPlatformGroup> findDefaultSeqPlatformGroups() {
         return SeqPlatformGroup.createCriteria().list {
             isNull("mergingCriteria")
@@ -134,6 +142,7 @@ class MergingCriteriaService {
         return findDefaultSeqPlatformGroups()
     }
 
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     List<SeqPlatformGroup> findSeqPlatformGroupsForProjectAndSeqType(Project project, SeqType seqType, boolean sortOrder = true) {
         return SeqPlatformGroup.createCriteria().list {
@@ -146,6 +155,7 @@ class MergingCriteriaService {
         }
     }
 
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void removePlatformFromSeqPlatformGroup(SeqPlatformGroup group, SeqPlatform platform) {
         commentService.saveComment(group, group.seqPlatforms*.fullName.join("\n"))
@@ -153,6 +163,7 @@ class MergingCriteriaService {
         assert group.save(flush: true)
     }
 
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void addPlatformToExistingSeqPlatformGroup(SeqPlatformGroup group, SeqPlatform platform) {
         commentService.saveComment(group, group.seqPlatforms*.fullName.join("\n"))
@@ -160,6 +171,7 @@ class MergingCriteriaService {
         assert group.save(flush: true)
     }
 
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void createNewGroupAndAddPlatform(SeqPlatform platform, MergingCriteria mergingCriteria = null) {
         SeqPlatformGroup seqPlatformGroup = new SeqPlatformGroup(
@@ -169,6 +181,7 @@ class MergingCriteriaService {
         assert seqPlatformGroup.save(flush: true)
     }
 
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     // the group will not be deleted internally for reproducibility reasons, but the user will think the group is deleted
     void emptySeqPlatformGroup(SeqPlatformGroup group) {
@@ -188,6 +201,7 @@ class MergingCriteriaService {
         }
     }
 
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void copySeqPlatformGroup(SeqPlatformGroup seqPlatformGroup, MergingCriteria mergingCriteria) {
         SeqPlatformGroup newSpg = new SeqPlatformGroup(

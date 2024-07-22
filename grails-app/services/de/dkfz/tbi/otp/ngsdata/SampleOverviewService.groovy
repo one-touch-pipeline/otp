@@ -27,7 +27,6 @@ import groovy.transform.CompileDynamic
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.project.Project
 
-@CompileDynamic
 @Transactional
 class SampleOverviewService {
 
@@ -35,6 +34,7 @@ class SampleOverviewService {
      * @param project the project for filtering the result
      * @return all SeqTypes used in the project
      */
+    @CompileDynamic
     List<SeqType> seqTypeByProject(Project project) {
         List<Long> seqTypeIds = AggregateSequences.withCriteria {
             eq("projectId", project?.id)
@@ -53,6 +53,7 @@ class SampleOverviewService {
         return seqTypes
     }
 
+    @CompileDynamic
     List<String> sampleTypeByProject(Project project) {
         List<String> sampleTypes = AggregateSequences.withCriteria {
             eq("projectId", project?.id)
@@ -76,6 +77,7 @@ class SampleOverviewService {
      * @param project the project for filtering the result
      * @return all combination of  name of {@link Individual}(pid) and sampleTypeName with with the number of lanes depend of {@link SeqType}  as list
      */
+    @CompileDynamic
     List<Map> laneCountForSeqtypesPerPatientAndSampleType(Project project) {
         List lanes = AggregateSequences.withCriteria {
             eq("projectId", project?.id)
@@ -104,6 +106,7 @@ class SampleOverviewService {
         }
     }
 
+    @CompileDynamic
     List<Map> withdrawnLaneCountForSeqTypesPerPatientAndSampleType(Project project) {
         List lanes = Sequence.withCriteria {
             eq("projectId", project?.id)
@@ -133,6 +136,7 @@ class SampleOverviewService {
         }
     }
 
+    @CompileDynamic
     Collection<AbstractBamFile> abstractBamFilesInProjectFolder(Project project) {
         if (!project) {
             return []

@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 import java.nio.file.Path
 
-@CompileDynamic
 @Transactional
 class RoddyBamFileService extends AbstractAbstractBamFileService<RoddyBamFile> implements RoddyResultServiceTrait<RoddyBamFile> {
 
@@ -161,6 +160,7 @@ class RoddyBamFileService extends AbstractAbstractBamFileService<RoddyBamFile> i
         }
     }
 
+    @CompileDynamic
     private Map<SeqTrack, Path> getSingleLaneQAJsonFiles(RoddyBamFile bamFile, String workOrFinal) {
         return "get${workOrFinal}SingleLaneQADirectories"(bamFile).collectEntries { SeqTrack seqTrack, Path directory ->
             [(seqTrack): directory.resolve(QUALITY_CONTROL_JSON_FILE_NAME)]
@@ -175,6 +175,7 @@ class RoddyBamFileService extends AbstractAbstractBamFileService<RoddyBamFile> i
         return getLibraryQAJsonFiles(bamFile, 'Work')
     }
 
+    @CompileDynamic
     private Map<String, Path> getLibraryQAJsonFiles(RoddyBamFile bamFile, String workOrFinal) {
         return "get${workOrFinal}LibraryQADirectories"(bamFile).collectEntries { String lib, Path directory ->
             [(lib): directory.resolve(QUALITY_CONTROL_JSON_FILE_NAME)]

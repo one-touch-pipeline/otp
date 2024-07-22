@@ -27,10 +27,10 @@ import groovy.transform.CompileDynamic
 import de.dkfz.tbi.otp.ngsdata.ToolName
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-@CompileDynamic
 @Transactional
 class ToolNameService {
 
+    @CompileDynamic
     ToolName findToolNameByNameAndType(String name, ToolName.Type type) {
         return CollectionUtils.atMostOneElement(ToolName.findAllByNameAndType(name, type))
     }

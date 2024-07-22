@@ -29,13 +29,13 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflow.TriggerWorkflowService
 
-@CompileDynamic
 @Transactional
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
 class SearchSeqTrackService {
 
     TriggerWorkflowService triggerWorkflowService
 
+    @CompileDynamic
     Set<SeqTrack> getAllSeqTracksByProjectAndSeqTypes(Project project, Set<SeqType> seqTypes) {
         if (!(project && seqTypes)) {
             throw new IllegalArgumentException("Invalid inputs: project and seqTypes must be specified")
@@ -51,6 +51,7 @@ class SearchSeqTrackService {
         }
     }
 
+    @CompileDynamic
     Set<SeqTrack> getAllSeqTracksByIndividualsAndSeqTypes(Set<Individual> individuals, Set<SeqType> seqTypes) {
         if (!(individuals && seqTypes)) {
             throw new IllegalArgumentException("Invalid inputs: Pids and seqTypes must be specified")
@@ -64,6 +65,7 @@ class SearchSeqTrackService {
         }
     }
 
+    @CompileDynamic
     Set<SeqTrack> getAllSeqTracksByIlseSubmissions(Set<IlseSubmission> ilseSubmissions) {
         if (!ilseSubmissions) {
             throw new IllegalArgumentException("Invalid inputs: Ilse submissions must be specified")
@@ -74,6 +76,7 @@ class SearchSeqTrackService {
         }
     }
 
+    @CompileDynamic
     Set<SeqTrack> getAllSeqTracksByLaneIds(Set<Long> laneIds) {
         if (!laneIds) {
             throw new IllegalArgumentException("Invalid inputs: Lane Ids must be specified")

@@ -38,7 +38,6 @@ import java.nio.file.Path
 import static de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification.CONTIG
 import static de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification.UNDEFINED
 
-@CompileDynamic
 @Transactional
 class RoddyQualityAssessmentService {
 
@@ -98,6 +97,7 @@ class RoddyQualityAssessmentService {
      * Store values in the corresponding domain objects,
      * reusing them if they already exist (necessary for restarting workflows)
      */
+    @CompileDynamic
     private <T extends RoddyQualityAssessment> T storeValues(Class<T> qaClass, Map values, RoddyBamFile bamFile, String chromosome, Map selectors = [:]) {
         Map allSelectors = [abstractBamFile: bamFile, chromosome: chromosome] + selectors
         T qa = CollectionUtils.atMostOneElement(qaClass.findAllWhere(allSelectors))
@@ -111,6 +111,7 @@ class RoddyQualityAssessmentService {
         return qa
     }
 
+    @CompileDynamic
     private Map<String, Map> parseRoddyQaStatistics(RoddyBamFile roddyBamFile, Path qualityControlJsonFile, Path qualityControlTargetExtractJsonFile = null) {
         Map<String, Map> chromosomeInformation = [:]
 
@@ -160,6 +161,7 @@ class RoddyQualityAssessmentService {
         assert !missedElements: "Missed chromosomes: ${missedElements.join(', ')} (expected: ${expectedChromosomeNames}; found ${chromosomeNames})."
     }
 
+    @CompileDynamic
     void saveCoverageToRoddyBamFile(RoddyBamFile roddyBamFile) {
         RoddyMergedBamQa mergedQa = roddyBamFile.qualityAssessment
         roddyBamFile.coverage = mergedQa.genomeWithoutNCoverageQcBases

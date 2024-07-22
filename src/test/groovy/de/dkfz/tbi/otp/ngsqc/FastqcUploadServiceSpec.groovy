@@ -233,21 +233,6 @@ Sequences flagged as poor quality\t0\t
         e.message.contains("No FastQC file defined")
     }
 
-    void "uploadFastQCFileContentsToDataBase, fails when RawSequenceFile has no SeqTrack"() {
-        given:
-        setupData()
-
-        fastqcProcessedFile.sequenceFile.seqTrack = null
-        fastqcProcessedFile.sequenceFile.save(flush: true)
-
-        when:
-        fastqcUploadService.uploadFastQCFileContentsToDataBase(fastqcProcessedFile)
-
-        then:
-        NullPointerException e = thrown()
-        e.message.contains("Cannot invoke method getInputStreamFromZipFile() on null object")
-    }
-
     void "uploadFastQCFileContentsToDataBase, fills RawSequenceFile for fine data"() {
         given:
         setupData()

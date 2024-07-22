@@ -32,16 +32,17 @@ import de.dkfz.tbi.otp.project.Project
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
-@CompileDynamic
 @Transactional
 class ReferenceGenomeSelectorService {
 
     OtpWorkflowService otpWorkflowService
 
+    @CompileDynamic
     List<ReferenceGenomeSelector> findAllBySeqTypeAndWorkflowAndProject(SeqType seqType, Workflow workflow, Project project) {
         return ReferenceGenomeSelector.findAllBySeqTypeAndWorkflowAndProject(seqType, workflow, project)
     }
 
+    @CompileDynamic
     ReferenceGenomeSelector createOrUpdate(Project project, SeqType seqType, List<SpeciesWithStrain> species, Workflow workflow, ReferenceGenome refGenome) {
         Set<SpeciesWithStrain> speciesSet = species as Set
         ReferenceGenomeSelector existing = atMostOneElement(ReferenceGenomeSelector.findAllByProjectAndSeqTypeAndWorkflow(project, seqType, workflow)
@@ -65,6 +66,7 @@ class ReferenceGenomeSelectorService {
         return existing
     }
 
+    @CompileDynamic
     Map<Set<SpeciesWithStrain>, List<ReferenceGenome>> getMappingOfSpeciesCombinationsToReferenceGenomes(Project project) {
         Set<SpeciesWithStrain> projectSpecies = project.speciesWithStrains
         List<ReferenceGenome> referenceGenomes = ReferenceGenome.all
@@ -104,10 +106,12 @@ class ReferenceGenomeSelectorService {
         return result
     }
 
+    @CompileDynamic
     void deleteSelector(ReferenceGenomeSelector rgSelector) {
         rgSelector.delete(flush: true)
     }
 
+    @CompileDynamic
     boolean hasReferenceGenomeConfigForProjectAndSeqTypeAndSpecies(Project project, SeqType seqType, List<SpeciesWithStrain> speciesWithStrains) {
         if (speciesWithStrains.empty) {
             return false

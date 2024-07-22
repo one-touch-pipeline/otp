@@ -59,7 +59,6 @@ import static org.springframework.util.Assert.notNull
 /**
  * This class is written for scripts, so it needs the output in stdout.
  */
-@CompileDynamic
 @SuppressWarnings('Println')
 @Transactional
 class DeletionService {
@@ -81,6 +80,7 @@ class DeletionService {
     RawSequenceDataWorkFileService rawSequenceDataWorkFileService
     RawSequenceDataViewFileService rawSequenceDataViewFileService
 
+    @CompileDynamic
     void deleteProjectContent(Project project) {
         assert project.state != Project.State.ARCHIVED
 
@@ -111,6 +111,7 @@ class DeletionService {
         deleteProjectsExternalWorkflowConfigSelector(project)
     }
 
+    @CompileDynamic
     void deleteProject(Project project) {
         assert project.state != Project.State.ARCHIVED
 
@@ -124,6 +125,7 @@ class DeletionService {
     }
 
     @SuppressWarnings('JavaIoPackageAccess')
+    @CompileDynamic
     String deleteIndividual(Individual individual, boolean check = true) {
         assert individual.project.state != Project.State.ARCHIVED
 
@@ -168,6 +170,7 @@ class DeletionService {
         return deletionScript.toString()
     }
 
+    @CompileDynamic
     void deleteEmptyRun(Run run) {
         assert run: "The input run of the method deleteRun is null"
         deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(run.id.toString(), Run.name))
@@ -191,6 +194,7 @@ class DeletionService {
      * Return a list containing the affected seqTracks
      */
     @SuppressWarnings('JavaIoPackageAccess')
+    @CompileDynamic
     List<SeqTrack> deleteProcessingFilesOfProject(String projectName, Path scriptOutputDirectory, boolean everythingVerified = false,
                                                   boolean ignoreWithdrawn = false, List<SeqTrack> explicitSeqTracks = []) throws FileNotFoundException {
         Project project = CollectionUtils.atMostOneElement(Project.findAllByName(projectName))
@@ -342,6 +346,7 @@ class DeletionService {
      * !! Be aware that the run information and the seqTrack are not deleted.
      * !! If it is not needed to delete this information, this method can be used without pre-work.
      */
+    @CompileDynamic
     List<File> deleteAllProcessingInformationAndResultOfOneSeqTrack(SeqTrack seqTrack, boolean enableChecks = true) {
         notNull(seqTrack, "The input seqTrack of the method deleteAllProcessingInformationAndResultOfOneSeqTrack is null")
         assert seqTrack.project.state != Project.State.ARCHIVED
@@ -444,6 +449,7 @@ class DeletionService {
         return dirsToDelete
     }
 
+    @CompileDynamic
     void deleteProcessParameters(List<ProcessParameter> processParameters) {
         Set<ProcessParameter> processParametersSet = collectProcessParametersRecursively([] as Set<ProcessParameter>, processParameters)
         Set<Process> processSet = processParametersSet*.process
@@ -460,6 +466,7 @@ class DeletionService {
         }
     }
 
+    @CompileDynamic
     private void deleteProjectDependencies(Project project) {
         // Deletes the connection of the project to the reference genome
         ReferenceGenomeProjectSeqType.findAllByProject(project)*.delete(flush: true)
@@ -484,6 +491,7 @@ class DeletionService {
         DataTransferAgreement.findAllByProject(project)*.delete(flush: true)
     }
 
+    @CompileDynamic
     private void deleteProcess(Process process) {
         assert process.finished: "process with id ${process.id} not finished"
         assert !ProcessParameter.findAllByProcess(process): "process with id ${process.id} has ProcessParameter attached to it. Delete association first."
@@ -500,12 +508,14 @@ class DeletionService {
         }
     }
 
+    @CompileDynamic
     private void deleteProcessingStep(ProcessingStep processingStep) {
         deleteClusterJobs(ClusterJob.findAllByProcessingStep(processingStep))
         deleteProcessingStepUpdates(ProcessingStepUpdate.findAllByProcessingStep(processingStep))
         processingStep.delete(flush: true)
     }
 
+    @CompileDynamic
     private void deleteClusterJobs(List<ClusterJob> clusterJobs) {
         clusterJobs*.dependencies = [] as Set
         clusterJobs.each {
@@ -520,6 +530,7 @@ class DeletionService {
         }
     }
 
+    @CompileDynamic
     private void deleteProcessingStepUpdate(ProcessingStepUpdate processingStepUpdate) {
         ProcessingError error = processingStepUpdate.error
         if (error) {
@@ -529,6 +540,7 @@ class DeletionService {
         processingStepUpdate.delete(flush: true)
     }
 
+    @CompileDynamic
     private Set<ProcessParameter> collectProcessParametersRecursively(
             Set<ProcessParameter> processParametersRecursionSet,
             List<ProcessParameter> processParameters
@@ -551,6 +563,7 @@ class DeletionService {
      * There is always more than one seqTrack which belongs to one Run, which is why the run is not deleted.
      * !! If it is not needed to delete this information, this method can be used without pre-work.
      */
+    @CompileDynamic
     List<File> deleteSeqTrack(SeqTrack seqTrack, boolean check = true) {
         notNull(seqTrack, "The input seqTrack of the method deleteSeqTrack is null")
         assert seqTrack.project.state != Project.State.ARCHIVED
@@ -650,6 +663,7 @@ class DeletionService {
         return dirsToDelete
     }
 
+    @CompileDynamic
     private void deleteSample(Sample sample) {
         if (Sample.exists(sample.id)) {
             SampleIdentifier.findAllBySample(sample)*.delete(flush: true)
@@ -662,6 +676,7 @@ class DeletionService {
      *
      * The function should be called inside a transaction (DOMAIN.withTransaction{}) to roll back changes if an exception occurs or a check fails.
      */
+    @CompileDynamic
     private void deleteMetaDataEntryForRawSequenceFile(RawSequenceFile rawSequenceFile) {
         notNull(rawSequenceFile, "The input dataFiles is null")
         MetaDataEntry.findAllBySequenceFile(rawSequenceFile)*.delete(flush: true)
@@ -672,6 +687,7 @@ class DeletionService {
      *
      * The function should be called inside a transaction (DOMAIN.withTransaction{}) to roll back changes if an exception occurs or a check fails.
      */
+    @CompileDynamic
     private void deleteQualityAssessmentInfoForAbstractBamFile(AbstractBamFile abstractBamFile) {
         notNull(abstractBamFile, "The input AbstractBamFile is null")
         if (abstractBamFile instanceof RoddyBamFile) {
@@ -687,6 +703,7 @@ class DeletionService {
      * Deletes a sequenceFile and all corresponding information
      */
     @SuppressWarnings('JavaIoPackageAccess')
+    @CompileDynamic
     private List<File> deleteRawSequenceFile(RawSequenceFile rawSequenceFile) {
         notNull(rawSequenceFile, "The dataFile input of method deleteDataFile is null")
 
@@ -707,6 +724,7 @@ class DeletionService {
      * Removes all fastQC information about the sequenceFile
      */
     @SuppressWarnings('JavaIoPackageAccess')
+    @CompileDynamic
     private List<File> deleteFastQCInformationFromRawSequenceFile(RawSequenceFile rawSequenceFile) {
         notNull(rawSequenceFile, "The input dataFile is null")
         List<FastqcProcessedFile> fastqcProcessedFiles = FastqcProcessedFile.findAllBySequenceFile(rawSequenceFile)
@@ -730,6 +748,7 @@ class DeletionService {
      *
      * @param project which should be remove from the selectors.
      */
+    @CompileDynamic
     void deleteProjectsExternalWorkflowConfigSelector(Project project) {
         if (project) {
             ExternalWorkflowConfigSelector.withCriteria {

@@ -40,7 +40,6 @@ import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.util.regex.Matcher
 
-@CompileDynamic
 @Transactional
 class AlignmentInfoService {
 
@@ -65,6 +64,7 @@ class AlignmentInfoService {
     }
 
     @SuppressWarnings("Indentation")
+    @CompileDynamic
     Map<SeqType, AlignmentInfo> getAlignmentInformationForProject(Project project) {
         assert project: "No project provided"
 
@@ -199,6 +199,7 @@ class AlignmentInfoService {
      * Generates and returns String that holds what Merging have to be done
      * @return String with the generated tool
      */
+    @CompileDynamic
     private MergeTool getMergeTool(Map<String, String> config, SeqType seqType) {
         if (seqType.isRna()) {
             return MergeTool.SAMBAMBA_RNA

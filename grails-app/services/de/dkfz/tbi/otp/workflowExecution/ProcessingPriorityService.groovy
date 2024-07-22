@@ -24,22 +24,22 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
-import de.dkfz.tbi.otp.project.Project
-
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-@CompileDynamic
 @Transactional
 class ProcessingPriorityService {
 
     ProcessingOptionService processingOptionService
 
+    @CompileDynamic
     List<ProcessingPriority> allSortedByPriority() {
         return ProcessingPriority.list(sort: 'priority')
     }
 
+    @CompileDynamic
     ProcessingPriority getDefaultPriority() {
         return CollectionUtils.atMostOneElement(
                 ProcessingPriority.findAllByName(
@@ -48,27 +48,33 @@ class ProcessingPriorityService {
         )
     }
 
+    @CompileDynamic
     ProcessingPriority findByName(String name) {
         return CollectionUtils.atMostOneElement(ProcessingPriority.findAllByName(name))
     }
 
+    @CompileDynamic
     int getPriorityListCount() {
         return ProcessingPriority.count
     }
 
+    @CompileDynamic
     List<ProcessingPriority> getPriorityList() {
         return ProcessingPriority.all
     }
 
+    @CompileDynamic
     ProcessingPriority savePriority(ProcessingPriority processingPriority) {
         return processingPriority.save(flush: true)
     }
 
+    @CompileDynamic
     void deletePriority(Long id) {
         ProcessingPriority.get(id).delete(flush: true)
     }
 
     /** Map of domain objects (Projects and WorkflowRuns), where processingPriority is currently used and whether it is the default ProcessingPriority. */
+    @CompileDynamic
     Map getReferences(Long processingPriorityId) {
         Map references = [:]
         ProcessingPriority processingPriority = ProcessingPriority.get(processingPriorityId)

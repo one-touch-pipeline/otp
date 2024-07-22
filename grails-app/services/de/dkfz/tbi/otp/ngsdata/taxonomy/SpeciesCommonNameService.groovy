@@ -29,11 +29,11 @@ import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-@CompileDynamic
 @Transactional
 class SpeciesCommonNameService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     SpeciesCommonName findOrSaveSpeciesCommonName(String name) {
         return CollectionUtils.atMostOneElement(SpeciesCommonName.findAllByNameIlike(name)) ?: createAndGetSpeciesCommonName(name)
     }
@@ -49,6 +49,7 @@ class SpeciesCommonNameService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     SpeciesCommonName createAndGetSpeciesCommonName(String name) throws ValidationException {
         SpeciesCommonName speciesCommonName = new SpeciesCommonName(name: name)
         return speciesCommonName.save(flush: true)

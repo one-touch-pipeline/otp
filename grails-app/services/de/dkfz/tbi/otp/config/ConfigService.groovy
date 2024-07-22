@@ -38,7 +38,6 @@ import java.nio.file.FileSystem
 import java.nio.file.Path
 import java.time.*
 
-@CompileDynamic
 @Transactional
 class ConfigService implements ApplicationContextAware {
 
@@ -65,6 +64,7 @@ class ConfigService implements ApplicationContextAware {
         return properties
     }
 
+    @CompileDynamic
     ConfigService() {
         Properties properties = parsePropertiesFile()
         this.otpProperties = properties.collectEntries { key, value ->
@@ -74,6 +74,7 @@ class ConfigService implements ApplicationContextAware {
     }
 
     @Deprecated
+    @CompileDynamic
     static ConfigService getInstance() {
         return context.getBean("configService")
     }
@@ -146,7 +147,7 @@ class ConfigService implements ApplicationContextAware {
     }
 
     File getSshKeyFile() {
-        return new File(otpProperties.get(OtpProperty.SSH_KEY_FILE).toString() ?: OtpProperty.SSH_KEY_FILE.defaultValue.toString())
+        return getAndCheckPathFromProperty(OtpProperty.SSH_KEY_FILE)
     }
 
     boolean otpSendsMails() {

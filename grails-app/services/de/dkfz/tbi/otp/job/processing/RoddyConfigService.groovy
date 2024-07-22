@@ -31,7 +31,6 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
 
 import java.nio.file.Path
 
-@CompileDynamic
 class RoddyConfigService {
 
     final static String ANALYSIS_ID = "analysis"
@@ -226,7 +225,7 @@ class RoddyConfigService {
         Set<ValidationMessage> errors = SCHEMA_VALIDATOR.validate(node)
         Set<String> errorsString = errors.collect { error ->
             return "RODDY." + error.message.drop(DROP_CHAR_COUNT)
-        }
+        } as Set
         return errorsString
     }
 
@@ -236,10 +235,11 @@ class RoddyConfigService {
         Set<ValidationMessage> errors = FILENAMES_SCHEMA_VALIDATOR.validate(node)
         Set<String> errorsString = errors.collect { error ->
             return "RODDY_FILENAMES." + error.message.drop(DROP_CHAR_COUNT)
-        }
+        } as Set
         return errorsString
     }
 
+    @CompileDynamic
     @SuppressWarnings(["Indentation"])
     String createRoddyXmlConfig(
             String combinedConfig,

@@ -31,7 +31,6 @@ import java.util.regex.Matcher
 /**
  * Service providing methods to parse FastQC files and saving the parsed data to the database
  */
-@CompileDynamic
 @Transactional
 class FastqcUploadService {
 
@@ -46,6 +45,7 @@ class FastqcUploadService {
     /**
      * Uploads the fastQC file contents generated from the fastq file to the database
      */
+    @CompileDynamic
     void uploadFastQCFileContentsToDataBase(FastqcProcessedFile fastqc) {
         assert fastqc : "No FastQC file defined"
         Map parsedFastqcFile = parseFastQCFile(fastqc, PROPERTIES_REGEX_TO_BE_PARSED)

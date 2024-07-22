@@ -24,10 +24,10 @@ package de.dkfz.tbi.otp.job.processing
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
-@CompileDynamic
 @Transactional
 class ProcessParameterService {
 
+    @CompileDynamic
     List<ProcessParameter> findAllByProcess(Process process) {
         return ProcessParameter.findAllByProcess(process)
     }

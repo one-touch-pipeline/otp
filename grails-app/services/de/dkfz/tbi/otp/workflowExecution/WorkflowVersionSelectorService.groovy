@@ -29,12 +29,12 @@ import de.dkfz.tbi.otp.project.Project
 
 import java.time.LocalDate
 
-@CompileDynamic
 @Transactional
 class WorkflowVersionSelectorService {
 
     OtpWorkflowService otpWorkflowService
 
+    @CompileDynamic
     List<WorkflowVersionSelector> findAllByProjectAndWorkflow(Project project, Workflow workflow) {
         return WorkflowVersionSelector.createCriteria().list {
             isNull('deprecationDate')
@@ -47,6 +47,7 @@ class WorkflowVersionSelectorService {
         } as List<WorkflowVersionSelector>
     }
 
+    @CompileDynamic
     WorkflowVersionSelector findByProjectAndWorkflowAndSeqType(Project project, Workflow workflow, SeqType seqType) {
         return WorkflowVersionSelector.createCriteria().get {
             isNull('deprecationDate')
@@ -60,6 +61,7 @@ class WorkflowVersionSelectorService {
         } as WorkflowVersionSelector
     }
 
+    @CompileDynamic
     WorkflowVersionSelector createOrUpdate(Project project, SeqType seqType, WorkflowVersion version) {
         WorkflowVersionSelector previous = findByProjectAndWorkflowAndSeqType(project, version.apiVersion.workflow, seqType)
         if (previous) {
@@ -77,6 +79,7 @@ class WorkflowVersionSelectorService {
         return previous
     }
 
+    @CompileDynamic
     void deprecateSelectorIfUnused(WorkflowVersionSelector wvSelector) {
         assert wvSelector
         List<ReferenceGenomeSelector> existingLinkedRgSelectors = ReferenceGenomeSelector
@@ -87,6 +90,7 @@ class WorkflowVersionSelectorService {
         }
     }
 
+    @CompileDynamic
     boolean hasAlignmentConfigForProjectAndSeqType(Project project, SeqType seqType) {
         Set<String> otpWorkflows = otpWorkflowService.lookupAlignableOtpWorkflowBeans().keySet()
         return WorkflowVersionSelector.findAllByProjectAndSeqTypeAndDeprecationDateIsNull(project, seqType).find {

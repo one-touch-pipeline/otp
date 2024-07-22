@@ -30,14 +30,15 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-@CompileDynamic
 class ReferenceGenomeProjectSeqTypeService {
 
+    @CompileDynamic
     ReferenceGenomeProjectSeqType findReferenceGenomeProjectSeqTypeNoSampleType(Project project, SeqType seqType) {
         return CollectionUtils.atMostOneElement(
                 ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(project, seqType))
     }
 
+    @CompileDynamic
     List<ReferenceGenomeProjectSeqType> findReferenceGenomeProjectSeqTypesWithSampleType(Project project, SeqType seqType) {
         return ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNotNullAndDeprecatedDateIsNull(project, seqType)
     }
@@ -47,6 +48,7 @@ class ReferenceGenomeProjectSeqTypeService {
         return getConfiguredReferenceGenomeProjectSeqType(seqTrack.project, seqTrack.seqType, seqTrack.sampleType)
     }
 
+    @CompileDynamic
     static ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqType(Project project, SeqType seqType) {
         return CollectionUtils.atMostOneElement(
                 ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(project, seqType)
@@ -71,6 +73,7 @@ class ReferenceGenomeProjectSeqTypeService {
     }
 
     @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
+    @CompileDynamic
     static private ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqTypeUsingProjectDefault(
             Project project, SeqType seqType, SampleType sampleType) {
         assert SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT == sampleType.specificReferenceGenome
@@ -84,6 +87,7 @@ class ReferenceGenomeProjectSeqTypeService {
     }
 
     @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
+    @CompileDynamic
     static private ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqTypeUsingSampleTypeSpecific(
             Project project, SeqType seqType, SampleType sampleType) {
         assert SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC == sampleType.specificReferenceGenome

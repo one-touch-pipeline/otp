@@ -29,13 +29,13 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.security.AuditLog.Action
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-@CompileDynamic
 @Transactional
 class AuditLogService {
 
     ProcessingOptionService processingOptionService
     SecurityService securityService
 
+    @CompileDynamic
     private AuditLog createActionLog(User user, Action action, String description) {
         AuditLog actionLog = new AuditLog([
                 user       : user,
@@ -50,6 +50,7 @@ class AuditLogService {
         return createActionLog(securityService.userSwitchInitiator, action, description)
     }
 
+    @CompileDynamic
     AuditLog logActionWithSystemUser(Action action, String description) {
         String userName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_SYSTEM_USER)
         assert userName: "no system user is defined"

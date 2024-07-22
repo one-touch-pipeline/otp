@@ -30,11 +30,11 @@ import de.dkfz.tbi.otp.project.Project
 
 import static java.lang.ClassLoader.*
 
-@CompileDynamic
 @Transactional
 class RawSequenceFileService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
+    @CompileDynamic
     List<RawSequenceFile> getAllRawSequenceFilesOfProject(Project project) {
         return RawSequenceFile.withCriteria {
             seqTrack {
@@ -100,10 +100,12 @@ class RawSequenceFileService {
         } as List<RawSequenceFile>
     }
 
+    @CompileDynamic
     List<RawSequenceFile> findAllBySeqTrack(SeqTrack seqTrack) {
         return RawSequenceFile.findAllBySeqTrack(seqTrack)
     }
 
+    @CompileDynamic
     List<RawSequenceFile> findAllByFastqImportInstance(FastqImportInstance importInstance) {
         return RawSequenceFile.createCriteria().list {
             createAlias('run', 'r')

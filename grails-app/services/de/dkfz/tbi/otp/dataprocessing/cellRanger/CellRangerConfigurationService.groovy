@@ -41,7 +41,6 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.exceptions.FileAccessForProjectNotAllowedException
 
-@CompileDynamic
 @Transactional
 class CellRangerConfigurationService {
 
@@ -80,16 +79,19 @@ class CellRangerConfigurationService {
         return pipeline.seqTypes
     }
 
+    @CompileDynamic
     Pipeline getPipeline() {
         return CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.CELL_RANGER))
     }
 
+    @CompileDynamic
     MergingCriteria getMergingCriteria(Project project) {
         return CollectionUtils.atMostOneElement(
                 MergingCriteria.findAllByProjectAndSeqType(project, seqType)
         )
     }
 
+    @CompileDynamic
     List<CellRangerMergingWorkPackage> findCellRangerMergingWorkPackageByProject(Project project) {
         return CellRangerMergingWorkPackage.createCriteria().list {
             sample {
@@ -137,6 +139,7 @@ class CellRangerConfigurationService {
         return null
     }
 
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     List<Sample> getAllSamples(Project project, List<Individual> individuals, List<SampleType> sampleTypes) {
         return Sample.createCriteria().listDistinct {
@@ -156,6 +159,7 @@ class CellRangerConfigurationService {
         } as List<Sample>
     }
 
+    @CompileDynamic
     Map<PlatformGroupAndKit, List<SeqTrack>> getSeqTracksGroupedByPlatformGroupAndKit(Collection<SeqTrack> seqTracks) {
         return seqTracks.groupBy { SeqTrack seqTrack ->
             [
@@ -200,6 +204,7 @@ class CellRangerConfigurationService {
         ticket.save(flush: true)
     }
 
+    @CompileDynamic
     List<CellRangerMergingWorkPackage> findMergingWorkPackage(List<Sample> samples, Pipeline pipeline) {
         return samples ? CellRangerMergingWorkPackage.findAllBySampleInListAndPipeline(samples, pipeline) : []
     }
@@ -219,6 +224,7 @@ class CellRangerConfigurationService {
         }
     }
 
+    @CompileDynamic
     List<CellRangerMergingWorkPackage> findAllMergingWorkPackagesBySamplesAndPipeline(Sample sample, CellRangerMwpParameter parameter, User requester) {
         Map<PlatformGroupAndKit, List<SeqTrack>> map = getSeqTracksGroupedByPlatformGroupAndKit(sample.seqTracks.findAll { it.seqType == parameter.seqType })
         constrainSeqTracksGroupedByPlatformGroupAndKit(map)
@@ -243,6 +249,7 @@ class CellRangerConfigurationService {
         }
     }
 
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#mwpToKeep.project, 'OTP_READ_ACCESS')")
     void selectMwpAsFinal(CellRangerMergingWorkPackage mwpToKeep) {
         if (mwpToKeep.project.state == Project.State.ARCHIVED || mwpToKeep.project.state == Project.State.DELETED) {
@@ -276,6 +283,7 @@ class CellRangerConfigurationService {
         deleteMwps(getAllMwps(sample, seqType, programVersion, reference, CellRangerMergingWorkPackage.Status.FINAL), false)
     }
 
+    @CompileDynamic
     private List<CellRangerMergingWorkPackage> getAllMwps(Sample sample, SeqType seqType, String programVersion, ReferenceGenomeIndex reference,
                                                           CellRangerMergingWorkPackage.Status status) {
         return (CellRangerMergingWorkPackage.createCriteria().list {
@@ -289,6 +297,7 @@ class CellRangerConfigurationService {
         } as List<CellRangerMergingWorkPackage>)
     }
 
+    @CompileDynamic
     void deleteMwps(List<CellRangerMergingWorkPackage> mwpToDelete, boolean checkFinal = true) {
         mwpToDelete.each {
             if (checkFinal) {
@@ -308,6 +317,7 @@ class CellRangerConfigurationService {
         }
     }
 
+    @CompileDynamic
     void setInformedFlag(CellRangerMergingWorkPackage crmwp, Date date) {
         crmwp.informed = date
         crmwp.save(flush: true)

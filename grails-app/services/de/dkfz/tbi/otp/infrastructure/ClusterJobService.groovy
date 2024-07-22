@@ -43,7 +43,7 @@ import java.time.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 import static java.util.concurrent.TimeUnit.HOURS
 
-@CompileDynamic
+@SuppressWarnings("JdbcResultSetReference")
 @Transactional
 class ClusterJobService {
 
@@ -84,10 +84,12 @@ class ClusterJobService {
  AND job.exit_status != 'FAILED'
 """
 
+    @CompileDynamic
     List<ClusterJob> findAllByProcessingStep(ProcessingStep processingStep) {
         return ClusterJob.findAllByProcessingStep(processingStep)
     }
 
+    @CompileDynamic
     ClusterJob findById(long id) {
         return ClusterJob.get(id)
     }
@@ -95,6 +97,7 @@ class ClusterJobService {
     /**
      * The clusterJobId is not unique. Therefore the newest clusterJobId is fetched.
      */
+    @CompileDynamic
     ClusterJob findNewestClusterJobByClusterJobId(String id) {
         return CollectionUtils.atMostOneElement(ClusterJob.findAllByClusterJobId(id, [max: 1, sort: "dateCreated", order: "desc"]))
     }
@@ -103,6 +106,7 @@ class ClusterJobService {
      * creates a cluster job object with at this time known attributes
      */
     @SuppressWarnings(["ParameterCount"])
+    @CompileDynamic
     @Deprecated
     ClusterJob createClusterJob(String clusterJobId, String userName,
                                 ProcessingStep processingStep, SeqType seqType = null,
@@ -126,6 +130,7 @@ class ClusterJobService {
      * creates a cluster job object with at this time known attributes
      */
     @SuppressWarnings("ParameterCount")
+    @CompileDynamic
     ClusterJob createClusterJob(String clusterJobId, String userName,
                                 WorkflowStep workflowStep, String clusterJobName,
                                 String jobClass = workflowStep.class.simpleName) {
@@ -144,6 +149,7 @@ class ClusterJobService {
     /**
      * Stores values for statistics after the job has been sent
      */
+    @CompileDynamic
     void amendClusterJob(ClusterJob job, GenericJobInfo jobInfo) {
         job.with {
             requestedCores = jobInfo.askedResources?.cores
@@ -165,6 +171,7 @@ class ClusterJobService {
     /**
      * Stores values for statistics after the job has finished
      */
+    @CompileDynamic
     void completeClusterJob(ClusterJob job, ClusterJob.Status status, GenericJobInfo jobInfo) {
         job.with {
             exitStatus = status
@@ -235,6 +242,7 @@ class ClusterJobService {
      */
     // There are cases that xten and non xten are together, so the null as third value is needed
     @SuppressWarnings('BooleanMethodReturnsNull')
+    @CompileDynamic
     static Boolean isXten(ClusterJob job) {
         if (!job.oldSystem) {
             // new workflow system do not support access to seqtracks, which are needed to get that information
@@ -264,6 +272,7 @@ class ClusterJobService {
     /**
      * returns the sum of file sizes of all {@link RawSequenceFile} that belong to this job
      */
+    @CompileDynamic
     static Long getFileSizesSum(ClusterJob job) {
         if (!job.oldSystem) {
             // new workflow system do not support access to seqtracks, which are needed to get that information
@@ -295,6 +304,7 @@ class ClusterJobService {
      * for calculating properties of OTP-Objects per {@link ClusterJob} it is necessary to adjust these properties to
      * the count of Input-Objects used for this {@link ClusterJob}
      */
+    @CompileDynamic
     private static Long normalizePropertyToClusterJobs(ClusterJob clusterJob, Closure propertyToBeNormalized) {
         List<ClusterJob> clusterJobs = findAllClusterJobsToOtpJob(clusterJob)
         ProcessParameterObject workflowObject = findProcessParameterObjectByClusterJob(clusterJob)
@@ -309,6 +319,7 @@ class ClusterJobService {
      * in case a {@link ProcessingStep} belongs to {@link de.dkfz.tbi.otp.job.processing.RestartedProcessingStep} it
      * returns the top most {@link ProcessingStep} stored as original from ClusterJob
      */
+    @CompileDynamic
     static List<ClusterJob> findAllClusterJobsToOtpJob(ClusterJob job) {
         ProcessingStep processingStep = ProcessingStep.findTopMostProcessingStep(job.processingStep)
         return ClusterJob.findAllByProcessingStepAndJobClass(processingStep, job.jobClass)
@@ -319,6 +330,7 @@ class ClusterJobService {
      * sometimes the flowControl-API returns jobs with an elapsed walltime in the range zero but an exit Status 'COMPLETED'
      * this can result to misleading statistics
      */
+    @CompileDynamic
     void handleObviouslyFailedClusterJob(ClusterJob job) {
         Duration elapsedWalltime = clusterJobDetailService.calculateElapsedWalltime(job)
         if (elapsedWalltime && elapsedWalltime <= DURATION_JOB_OBVIOUSLY_FAILED) {
@@ -331,6 +343,7 @@ class ClusterJobService {
      * returns a List of Cluster Jobs in a specific time span
      * @return List [clusterJob1, clusterJob2, ...]
      */
+    @CompileDynamic
     List findAllClusterJobsByDateBetween(
             LocalDate startDate, LocalDate endDate, String filter, int offset, int displayedLines, String sortedColumn, String sortOrder) {
         DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
@@ -353,6 +366,7 @@ class ClusterJobService {
     /**
      * returns the number of Cluster Jobs in a specific time span
      */
+    @CompileDynamic
     int countAllClusterJobsByDateBetween(LocalDate startDate, LocalDate endDate, String filter) {
         DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
@@ -374,6 +388,7 @@ class ClusterJobService {
     /**
      * returns the number of cluster jobs for specified period and projects
      */
+    @CompileDynamic
     int getNumberOfClusterJobsForSpecifiedPeriodAndProjects(Date startDate = null, Date endDate = null, List<Project> projects) {
         return ClusterJob.createCriteria().count {
             individual {
@@ -389,6 +404,7 @@ class ClusterJobService {
      * returns a unique list of job classes in a specific time-span
      * existing in the Cluster Job table
      */
+    @CompileDynamic
     List findAllJobClassesByDateBetween(LocalDate startDate, LocalDate endDate) {
         DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
@@ -416,6 +432,7 @@ SELECT
      * returns a List of exit codes and their occurrence in a specific time span
      * @return List [[exitCode, number of occurrences], ...]
      */
+    @CompileDynamic
     List findAllExitCodesByDateBetween(LocalDate startDate, LocalDate endDate) {
         DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
@@ -445,6 +462,7 @@ SELECT
      * returns a List of exit statuses and their occurrence in a specific time span
      * @return List [[exitStatus, number of occurrences], ...]
      */
+    @CompileDynamic
     List findAllExitStatusesByDateBetween(LocalDate startDate, LocalDate endDate) {
         DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
@@ -474,6 +492,7 @@ SELECT
      * @return map [days: ['2000-01-01 00:00:00', ...], data: [4, ...]]
      * => at January 1st 2000, between 00:00:00 and 01:00:00, 4 jobs failed processing
      */
+    @CompileDynamic
     Map findAllFailedByDateBetween(LocalDate startDate, LocalDate endDate) {
         DateTimeIntervalWithHourBuckets startEndDateTimeWithHourBuckets = new DateTimeIntervalWithHourBuckets(startDate, endDate)
 
@@ -511,6 +530,7 @@ SELECT
      * @return map [days: ['2000-01-01 00:00:00', ...], data: ['queued': [0, ...], 'started': [1, ...], 'ended': [0, ...]]]
      * => at January 1st 2000, between 00:00:00 and 01:00:00, 0 jobs have been queued, 1 job has been started and 0 jobs have been ended
      */
+    @CompileDynamic
     Map findAllStatesByDateBetween(LocalDate startDate, LocalDate endDate) {
         DateTimeIntervalWithHourBuckets startEndDateTimeWithHourBuckets = new DateTimeIntervalWithHourBuckets(startDate, endDate)
 
@@ -549,6 +569,7 @@ SELECT
      * @return map [days: ['2000-01-01 00:00:00', ...], data: [4, ...]]
      * => at January 1st 2000, between 00:00:00 and 01:00:00, 4 cores were used to process the jobs
      */
+    @CompileDynamic
     Map findAllAvgCoreUsageByDateBetween(LocalDate startDate, LocalDate endDate) {
         DateTimeIntervalWithHourBuckets startEndDateTimeWithHourBuckets = new DateTimeIntervalWithHourBuckets(startDate, endDate)
 
@@ -595,6 +616,7 @@ SELECT
      * @return map [days: ['2000-01-01 00:00:00', ...], data: [2048, ...]]
      * => at January 1st 2000, between 00:00:00 and 01:00:00, 2048 mb memory was used to process the jobs
      */
+    @CompileDynamic
     Map findAllMemoryUsageByDateBetween(LocalDate startDate, LocalDate endDate) {
         DateTimeIntervalWithHourBuckets startEndDateTimeWithHourBuckets = new DateTimeIntervalWithHourBuckets(startDate, endDate)
 
@@ -640,6 +662,7 @@ SELECT
      * returns the average time in queue and average processing time, both as absolut and percentage values, for all jobs
      * @return map [queue: [percentageQueue, queuePeriod], process: [percentageProcess, processPeriod]]
      */
+    @CompileDynamic
     List findAllStatesTimeDistributionByDateBetween(LocalDate startDate, LocalDate endDate) {
         DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
@@ -675,6 +698,7 @@ SELECT
      * returns a unique list of sequencing types
      * existing in the Cluster Job table
      */
+    @CompileDynamic
     List findJobClassSpecificSeqTypesByDateBetween(String jobClass, LocalDate startDate, LocalDate endDate) {
         DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
@@ -707,6 +731,7 @@ SELECT
      * [0] = exitCode
      * [1] = count of exitCode
      */
+    @CompileDynamic
     List findJobClassAndSeqTypeSpecificExitCodesByDateBetween(String jobClass, SeqType seqType, LocalDate startDate, LocalDate endDate) {
         DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
@@ -739,6 +764,7 @@ SELECT
      * [0] = exitStatus
      * [1] = count of exitCode
      */
+    @CompileDynamic
     List findJobClassAndSeqTypeSpecificExitStatusesByDateBetween(String jobClass, SeqType seqType, LocalDate startDate, LocalDate endDate) {
         DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
@@ -769,6 +795,7 @@ SELECT
      * and array of all dates (per hour) existing in the given time span
      * @return ["days": [day1Hour0, day2Hour1, ...], "data": ["queued": [...], "started": [...], "ended":[...]]]
      */
+    @CompileDynamic
     Map findJobClassAndSeqTypeSpecificStatesByDateBetween(String jobClass, SeqType seqType, LocalDate startDate, LocalDate endDate) {
         DateTimeIntervalWithHourBuckets startEndDateTimeWithHourBuckets = new DateTimeIntervalWithHourBuckets(startDate, endDate)
 
@@ -809,6 +836,7 @@ SELECT
      * the maximum values for both, to align the graphics and
      * aligned labels for the graphic
      */
+    @CompileDynamic
     Map findJobClassAndSeqTypeSpecificWalltimesByDateBetween(String jobClass, SeqType seqType, LocalDate startDate, LocalDate endDate) {
         DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
@@ -841,6 +869,7 @@ SELECT
      * returns the average core usage of a specific jobclass and seq type
      * @return double
      */
+    @CompileDynamic
     double findJobClassAndSeqTypeSpecificAvgCoreUsageByDateBetween(String jobClass, SeqType seqType, LocalDate startDate, LocalDate endDate) {
         DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
@@ -871,6 +900,7 @@ SELECT
      * return the average memory usage of a specific jobclass and seqtype
      * @return int
      */
+    @CompileDynamic
     int findJobClassAndSeqTypeSpecificAvgMemoryByDateBetween(String jobClass, SeqType seqType, LocalDate startDate, LocalDate endDate) {
         DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
@@ -898,6 +928,7 @@ SELECT
      * returns the average time in queue and average processing time for a specific jobclass and seqtype
      * @return map ["avgQueue": avgQueue, "avgProcess": avgProcess]
      */
+    @CompileDynamic
     Map findSpecificAvgStatesTimeDistribution(String jobClass, SeqType seqType, LocalDate startDate, LocalDate endDate, Long basesToBeNormalized = null) {
         DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
@@ -938,6 +969,7 @@ SELECT
      * @param referenceGenomeSizeInBases used to recalculate the coverage from the selected amount of bases (inputcoverage = inputbases / referencegenomesize)
      * @return map ["minCov": minimumCoverage, "maxCov": maximumCoverage, "avgCov": averageCoverage, "medianCov": medianCoverage]
      */
+    @CompileDynamic
     Map findJobClassAndSeqTypeSpecificCoverages(String jobClass, SeqType seqType, LocalDate startDate, LocalDate endDate, Double referenceGenomeSizeInBases) {
         DateTimeInterval startEndDateTime = new DateTimeInterval(startDate, endDate)
 
@@ -1028,7 +1060,7 @@ WHERE
         Long queueMillis = Math.max(0, queue.toMillis())
 
         Long total = queueMillis + processMillis
-        Long percentageProcess = Math.round(FACTOR_100 / total * processMillis)
+        Long percentageProcess = (FACTOR_100 / total * processMillis).round() as Long
         Long percentageQueue = FACTOR_100 - percentageProcess
 
         return [
@@ -1047,6 +1079,7 @@ WHERE
      * returns the latest Job Date
      * @return latest Job Date (queued)
      */
+    @CompileDynamic
     ZonedDateTime getLatestJobDate() {
         Sql sql = new Sql(dataSource)
 
@@ -1081,6 +1114,7 @@ SELECT
         return [labelsAsString, labels]
     }
 
+    @CompileDynamic
     ClusterJob getClusterJobByIdentifier(ClusterJobIdentifier identifier, ProcessingStep processingStep) {
         return exactlyOneElement(ClusterJob.findAllWhere(
                 clusterJobId: identifier.clusterJobId,

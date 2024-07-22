@@ -40,7 +40,6 @@ import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.exceptions.UserDisabledException
 import de.dkfz.tbi.otp.utils.exceptions.UserRoleException
 
-@CompileDynamic
 @Transactional
 class UserProjectRoleService {
 
@@ -55,6 +54,7 @@ class UserProjectRoleService {
     UserProjectRoleService userProjectRoleService
     UserService userService
 
+    @CompileDynamic
     UserProjectRole createUserProjectRole(User user, Project project, Set<ProjectRole> projectRoles, Map<String, Boolean> flags = [:]) {
         assert user: "the user must not be null"
         assert project: "the project must not be null"
@@ -111,6 +111,7 @@ class UserProjectRoleService {
      * @param unixGroup a String, search target for the related projects
      * @param action closure to be called on each Project
      */
+    @CompileDynamic
     void applyToRelatedProjects(String unixGroup, Closure action) {
         Project.withTransaction {
             Project.findAllByUnixGroup(unixGroup).each { Project project ->
@@ -119,6 +120,7 @@ class UserProjectRoleService {
         }
     }
 
+    @CompileDynamic
     Map<User, List<Project>> projectsAssociatedToProjectAuthority(User user) {
         List<Project> allProjects = UserProjectRole.findAllByUser(user)*.project.unique().sort {
             it.name
@@ -136,11 +138,13 @@ class UserProjectRoleService {
         return projectAuthoritiesWithProjects
     }
 
+    @CompileDynamic
     List<UserProjectRole> findAllByUser(User user) {
         return UserProjectRole.findAllByUser(user)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'MANAGE_USERS')")
+    @CompileDynamic
     void addUserToProjectAndNotifyGroupManagementAuthority(Project project, Set<ProjectRole> projectRolesSet, String username, Map<String, Boolean> flags = [:])
             throws AssertionError {
         assert project: "project must not be null"
@@ -161,6 +165,7 @@ class UserProjectRoleService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'MANAGE_USERS')")
+    @CompileDynamic
     void addExternalUserToProject(Project project, String realName, String email, Set<ProjectRole> projectRoles) throws AssertionError {
         assert project: "project must not be null"
 
@@ -205,6 +210,7 @@ class UserProjectRoleService {
         mailHelperService.saveMail(subject, body, [user.email], ccs)
     }
 
+    @CompileDynamic
     private void notifyAdministration(UserProjectRole userProjectRole, OperatorAction action) {
         User requester = securityService.currentUser
         UserProjectRole requesterUserProjectRole = CollectionUtils.atMostOneElement(
@@ -319,6 +325,7 @@ class UserProjectRoleService {
      * @param userProjectRole an UserProjectRole with target unix group
      * @return all related UserProjectRole with same unix group
      */
+    @CompileDynamic
     List<UserProjectRole> getRelatedUserProjectRoles(UserProjectRole userProjectRole) {
         List<Project> projectsWithSharedUnixGroup = Project.findAllByUnixGroup(userProjectRole.project.unixGroup)
         return UserProjectRole.findAllByUserAndProjectInList(userProjectRole.user, projectsWithSharedUnixGroup)
@@ -330,6 +337,7 @@ class UserProjectRoleService {
      * @param userProjectRole an UserProjectRole for that related UserProjectRoles are searched
      * @param action Closure to be called on each UserProjectRole
      */
+    @CompileDynamic
     void applyToRelatedUserProjectRoles(UserProjectRole userProjectRole, Closure action) {
         UserProjectRole.withTransaction {
             getRelatedUserProjectRoles(userProjectRole).each { UserProjectRole relatedUpr ->
@@ -348,6 +356,7 @@ class UserProjectRoleService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
+    @CompileDynamic
     UserProjectRole setAccessToOtp(UserProjectRole userProjectRole, boolean accessToOtp) {
         if (checkRelatedUserProjectRolesFor(userProjectRole) { UserProjectRole upr -> upr.accessToOtp == accessToOtp }) {
             return userProjectRole
@@ -372,6 +381,7 @@ class UserProjectRoleService {
      * @return The changed UserProjectRole
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
+    @CompileDynamic
     UserProjectRole setAccessToFiles(UserProjectRole userProjectRole, boolean accessToFiles, boolean force = false) {
         if (checkRelatedUserProjectRolesFor(userProjectRole) { UserProjectRole upr -> upr.accessToFiles == accessToFiles }) {
             return userProjectRole
@@ -409,6 +419,7 @@ class UserProjectRoleService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'DELEGATE_USER_MANAGEMENT')")
+    @CompileDynamic
     UserProjectRole setManageUsers(UserProjectRole userProjectRole, boolean value) {
         if (checkRelatedUserProjectRolesFor(userProjectRole) { UserProjectRole upr -> upr.manageUsers == value }) {
             return userProjectRole
@@ -423,6 +434,7 @@ class UserProjectRoleService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     UserProjectRole setManageUsersAndDelegate(UserProjectRole userProjectRole, boolean value) {
         if (checkRelatedUserProjectRolesFor(userProjectRole) { UserProjectRole upr -> upr.manageUsersAndDelegate == value }) {
             return userProjectRole
@@ -437,6 +449,7 @@ class UserProjectRoleService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS') or #userProjectRole.user.username == principal.username")
+    @CompileDynamic
     UserProjectRole setReceivesNotifications(UserProjectRole userProjectRole, boolean value) {
         if (checkRelatedUserProjectRolesFor(userProjectRole) { UserProjectRole upr -> upr.receivesNotifications == value }) {
             return userProjectRole
@@ -488,6 +501,7 @@ class UserProjectRoleService {
         return userProjectRole
     }
 
+    @CompileDynamic
     void doSetEnabled(UserProjectRole userProjectRole, boolean value) {
         applyToRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.with {
@@ -504,6 +518,7 @@ class UserProjectRoleService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
+    @CompileDynamic
     UserProjectRole addProjectRolesToProjectUserRole(UserProjectRole userProjectRole, List<ProjectRole> newProjectRoles) {
         newProjectRoles.each { ProjectRole newProjectRole ->
             if (checkRelatedUserProjectRolesFor(userProjectRole) { UserProjectRole upr -> newProjectRole in upr.projectRoles }) {
@@ -518,6 +533,7 @@ class UserProjectRoleService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
+    @CompileDynamic
     UserProjectRole deleteProjectUserRole(UserProjectRole userProjectRole, ProjectRole currentProjectRole) {
         assert currentProjectRole in userProjectRole.projectRoles
         if (currentProjectRole.name == ProjectRole.Basic.PI.name() && !securityService.hasCurrentUserAdministrativeRoles()) {
@@ -533,6 +549,7 @@ class UserProjectRoleService {
         return userProjectRole
     }
 
+    @CompileDynamic
     void handleSharedUnixGroupOnProjectCreation(Project project, String unixGroup) {
         Project donorProject = (Project.findAllByUnixGroup(unixGroup) - [project]).find()
         if (!donorProject) {
@@ -548,6 +565,7 @@ class UserProjectRoleService {
      * given one.
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void applyUserProjectRolesOntoProject(List<UserProjectRole> sourceUserProjectRoles, Project targetProject) {
         List<UserProjectRole> sourceUserProjectRole = sourceUserProjectRoles
         List<UserProjectRole> targetUserProjectRoles = UserProjectRole.findAllByProject(targetProject)
@@ -577,10 +595,12 @@ class UserProjectRoleService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void applyUserProjectRolesOntoProject(Project sourceProject, Project targetProject) {
         applyUserProjectRolesOntoProject(UserProjectRole.findAllByProject(sourceProject), targetProject)
     }
 
+    @CompileDynamic
     List<UserProjectRole> getProjectUsersToBeNotified(List<Project> projects, boolean onlyNotificationsEnabled = true) {
         return UserProjectRole.withCriteria {
             'in'('project', projects)
@@ -603,6 +623,7 @@ class UserProjectRoleService {
      * If start and end date are set then only users which are created at given time period are returned for specified projects.
      * @return number of users
      */
+    @CompileDynamic
     int getNumberOfValidUsersForProjects(List<Project> projects, Date startDate = null, Date endDate = null) {
         return UserProjectRole.createCriteria().get {
             'in'("project", projects)
@@ -622,10 +643,12 @@ class UserProjectRoleService {
         return (getUserManagers(project) + getProjectAuthorities(project)).unique()
     }
 
+    @CompileDynamic
     private static List<User> getUserManagers(Project project) {
         return UserProjectRole.findAllByProjectAndManageUsersAndEnabled(project, true, true)*.user
     }
 
+    @CompileDynamic
     static List<User> getProjectAuthorities(Project project) {
         return UserProjectRole.createCriteria().list {
             eq("project", project)
@@ -639,6 +662,7 @@ class UserProjectRoleService {
         }*.user
     }
 
+    @CompileDynamic
     static List<User> getBioinformaticianUsers(Project project) {
         return UserProjectRole.createCriteria().list {
             eq("project", project)

@@ -31,7 +31,9 @@ import de.dkfz.tbi.otp.job.scheduler.ErrorLogService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-@CompileDynamic
+/**
+ * @deprecated class is part of the old workflow system
+ */
 @Transactional
 class RestartParseService {
 
@@ -43,12 +45,14 @@ class RestartParseService {
 
     SchedulerService schedulerService
 
+    @CompileDynamic
     JobErrorDefinition.Action handleTypeMessage(Job job, Collection<JobErrorDefinition> jobErrorDefinitions) {
         job.log.debug("Checking error message.")
         ProcessingError error = job.processingStep.latestProcessingStepUpdate.error
         return extractMatchingAction(job, 'error message', error.errorMessage, jobErrorDefinitions)
     }
 
+    @CompileDynamic
     JobErrorDefinition.Action handleTypeStackTrace(Job job, Collection<JobErrorDefinition> jobErrorDefinitions) {
         job.log.debug("Checking stacktrace.")
         ProcessingError error = job.processingStep.latestProcessingStepUpdate.error
@@ -60,6 +64,7 @@ class RestartParseService {
         return extractMatchingAction(job, 'stack trace', file.text, jobErrorDefinitions)
     }
 
+    @CompileDynamic
     JobErrorDefinition.Action handleTypeClusterLogs(Job job, Collection<JobErrorDefinition> jobErrorDefinitions) {
         job.log.debug("Checking cluster job log(s).")
         Collection<File> logFiles = job.failedOrNotFinishedClusterJobs().collect {
@@ -113,6 +118,7 @@ class RestartParseService {
         }
     }
 
+    @CompileDynamic
     JobErrorDefinition.Action extractMatchingAction(Job job, String it, String text, Collection<JobErrorDefinition> jobErrorDefinitions) {
         Collection<JobErrorDefinition> matching = jobErrorDefinitions.findAll {
             text =~ it.errorExpression

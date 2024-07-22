@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.job.processing
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -30,7 +29,6 @@ import de.dkfz.tbi.otp.ngsdata.Individual
 
 import java.nio.file.Path
 
-@CompileDynamic
 @Transactional
 class RoddyCommandService {
 
@@ -64,13 +62,13 @@ class RoddyCommandService {
         String featureTogglesConfigPath = processingOptionService.findOptionAsString(ProcessingOption.OptionName.RODDY_FEATURE_TOGGLES_CONFIG_PATH)
 
         return ([
-                "${roddyPath}/roddy.sh",
+                "${roddyPath}/roddy.sh" as String,
                 "rerun",
-                "${RoddyConfigService.CONFIGURATION_NAME}@${RoddyConfigService.ANALYSIS_ID}",
-                "${individual.pid}",
-                "--useconfig=${applicationIniPath}",
-                "--usefeaturetoggleconfig=${featureTogglesConfigPath}",
-                "--configurationDirectories=${confDir}",
+                "${RoddyConfigService.CONFIGURATION_NAME}@${RoddyConfigService.ANALYSIS_ID}" as String,
+                "${individual.pid}" as String,
+                "--useconfig=${applicationIniPath}" as String,
+                "--usefeaturetoggleconfig=${featureTogglesConfigPath}" as String,
+                "--configurationDirectories=${confDir}" as String,
         ] + additionalParams).join(" ")
     }
 }

@@ -217,7 +217,7 @@ class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<R
 
     void "test getWorkSingleLaneQADirectories, no seq tracks"() {
         given:
-        roddyBamFile.seqTracks = null
+        roddyBamFile.seqTracks = [] as Set
 
         expect:
         service.getWorkSingleLaneQADirectories(roddyBamFile).isEmpty()
@@ -263,7 +263,7 @@ class RoddyBamFileServiceSpec extends Specification implements ServiceUnitTest<R
 
     void "test getFinalRoddySingleLaneQADirectories, no seq tracks"() {
         given:
-        roddyBamFile.seqTracks = null
+        roddyBamFile.seqTracks = [] as Set
 
         expect:
         service.getFinalSingleLaneQADirectories(roddyBamFile).isEmpty()

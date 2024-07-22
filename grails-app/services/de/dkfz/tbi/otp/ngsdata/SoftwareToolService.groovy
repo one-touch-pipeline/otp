@@ -29,10 +29,10 @@ import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.SqlUtil
 
-@CompileDynamic
 @Transactional
 class SoftwareToolService {
 
+    @CompileDynamic
     static SoftwareToolIdentifier getBaseCallingTool(String name) {
         return (SoftwareToolIdentifier) SoftwareToolIdentifier.createCriteria().get {
             ilike('name', SqlUtil.replaceWildcardCharactersInLikeExpression(name))
@@ -43,21 +43,25 @@ class SoftwareToolService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     Map<SoftwareTool, List<SoftwareToolIdentifier>> identifiersPerSoftwareTool() {
         return SoftwareToolIdentifier.list(sort: "name", order: "asc").groupBy { it.softwareTool }
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     Map<String, List<SoftwareTool>> softwareToolsPerProgramName() {
         return SoftwareTool.findAllByType(SoftwareTool.Type.BASECALLING, [sort: "programVersion", order: "asc"]).groupBy { it.programName }
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     SoftwareTool getSoftwareTool(long id) {
         return SoftwareTool.get(id)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     SoftwareTool updateSoftwareTool(Long id, String version, boolean legacy = false) {
         SoftwareTool softwareTool = getSoftwareTool(id)
         softwareTool.programVersion = version
@@ -66,6 +70,7 @@ class SoftwareToolService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     Errors createSoftwareTool(String programName, String programVersion, SoftwareTool.Type type) {
         SoftwareTool softwareTool = new SoftwareTool(programName: programName, programVersion: programVersion, type: type)
         try {
@@ -77,6 +82,7 @@ class SoftwareToolService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void changeLegacyState(SoftwareTool softwareTool, boolean legacy = false) {
         SoftwareTool softwareToolUpdate = SoftwareTool.get(softwareTool.id)
         softwareToolUpdate.legacy = legacy
@@ -84,11 +90,13 @@ class SoftwareToolService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     SoftwareToolIdentifier getSoftwareToolIdentifier(long id) {
         return SoftwareToolIdentifier.get(id)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     SoftwareToolIdentifier updateSoftwareToolIdentifier(Long id, String alias) {
         SoftwareToolIdentifier softwareToolIdentifier = getSoftwareToolIdentifier(id)
         softwareToolIdentifier.name = alias
@@ -96,6 +104,7 @@ class SoftwareToolService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     SoftwareToolIdentifier createSoftwareToolIdentifier(SoftwareTool softwareTool, String alias) {
         SoftwareToolIdentifier softwareToolIdentifier = new SoftwareToolIdentifier(
                 name: alias,

@@ -37,7 +37,6 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 /**
  * Service providing methods to access information about Processes.
  */
-@CompileDynamic
 @Transactional
 class ProcessService {
 
@@ -53,6 +52,7 @@ class ProcessService {
 
     ConfigService configService
 
+    @CompileDynamic
     List<Process> findAllByRestarted(Process process) {
         return Process.findAllByRestarted(process)
     }
@@ -61,6 +61,7 @@ class ProcessService {
      * Security aware way to access a Process.
      * @param id The Process's id
      */
+    @CompileDynamic
     @PostAuthorize("hasRole('ROLE_OPERATOR')")
     Process getProcess(long id) {
         return Process.get(id)
@@ -75,6 +76,7 @@ class ProcessService {
      * @param order {@code true} for ascending ordering, {@code false} for descending, default {@code false}
      * @return List of all ProcessingSteps run for the Process filtered as requested
      */
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<ProcessingStep> getAllProcessingSteps(Process process, int max = 10, int offset = 0, String column = "id", boolean order = false) {
         return ProcessingStep.findAllByProcess(process, [max: max, offset: offset, sort: column, order: order ? "asc" : "desc"])
@@ -85,6 +87,7 @@ class ProcessService {
      * @param plan The Process for which the number of ProcessingSteps should be returned
      * @return The number of ProcessingSteps for the given Process
      */
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     int getNumberOfProcessingSteps(Process process) {
         return ProcessingStep.countByProcess(process)
@@ -94,6 +97,7 @@ class ProcessService {
      * Security aware way to access a ProcessingStep.
      * @param id The ProcessingStep's id
      */
+    @CompileDynamic
     @PostAuthorize("hasRole('ROLE_OPERATOR')")
     ProcessingStep getProcessingStep(long id) {
         return ProcessingStep.get(id)
@@ -146,6 +150,7 @@ class ProcessService {
      * @param order {@code true} for ascending ordering, {@code false} for descending, default {@code false}
      * @return List of all ProcessingStepUpdates for the Step filtered as requested
      */
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<ProcessingStepUpdate> getAllUpdates(ProcessingStep step, int max = 10, int offset = 0, String column = "id", boolean order = false) {
         return ProcessingStepUpdate.findAllByProcessingStep(step, [max: max, offset: offset, sort: column, order: order ? "asc" : "desc"])
@@ -156,6 +161,7 @@ class ProcessService {
      * @param step The ProcessingStep for which the number of Updates should be returned
      * @return The number of ProcessingStepUpdates for the given Step
      */
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     int getNumberOfUpdates(ProcessingStep step) {
         return ProcessingStepUpdate.countByProcessingStep(step)
@@ -167,6 +173,7 @@ class ProcessService {
      * @param process The Process for which the latest Processing step has to be retrieved.
      * @return The latest ProcessingStep of the Process
      */
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     ProcessingStep getLatestProcessingStep(Process process) {
         return CollectionUtils.atMostOneElement(ProcessingStep.findAllByProcessAndNextIsNull(process, [sort: "id", order: "desc", max: 1]))
@@ -247,6 +254,7 @@ class ProcessService {
     /**
      * Retrieves the first update date for the ProcessingStep
      */
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Date getFirstUpdate(ProcessingStep step) {
         return CollectionUtils.atMostOneElement(ProcessingStepUpdate.findAllByProcessingStep(step, [sort: "id", order: "asc", max: 1])).date
@@ -264,6 +272,7 @@ class ProcessService {
      * @param step The processing step for which the duration has to be calculated
      * @return The duration between the started and finished event for this ProcessingStep
      */
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Long getProcessingStepDuration(ProcessingStep step, Date date = new Date()) {
         List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step)?.sort { it.date }
@@ -299,6 +308,7 @@ class ProcessService {
      * @return Process Information in a JSON ready format
      * @see JobExecutionPlanService#planInformation(JobExecutionPlan)
      */
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     PlanInformation processInformation(Process process) {
         PlanInformation plan = jobExecutionPlanService.planInformation(process.jobExecutionPlan)
@@ -348,6 +358,7 @@ class ProcessService {
      * @param id The id of the ProcessingError
      * @return The stacktrace or throws an exception if not found
      */
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     String getProcessingErrorStackTrace(long id) {
@@ -364,6 +375,7 @@ class ProcessService {
     /**
      * Helper function to retrieve the last ProcessingStepUpdate for given Process.
      */
+    @CompileDynamic
     private ProcessingStepUpdate lastUpdate(Process process) {
         List<ProcessingStep> processingSteps = ProcessingStep.createCriteria().list {
             eq("process", process)

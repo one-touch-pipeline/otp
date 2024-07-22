@@ -39,7 +39,6 @@ import de.dkfz.tbi.otp.workflowExecution.wes.WesRun
 
 import java.time.LocalDateTime
 
-@CompileDynamic
 @Transactional
 class WorkflowRunService {
 
@@ -100,16 +99,19 @@ class WorkflowRunService {
 
     WorkflowStepService workflowStepService
 
+    @CompileDynamic
     int countOfRunningWorkflows() {
         return WorkflowRun.countByStateInList(STATES_COUNTING_AS_RUNNING)
     }
 
+    @CompileDynamic
     WorkflowRun nextWaitingWorkflow(int workflowCount) {
         return WorkflowRun.find(WAITING_WORKFLOW_QUERY, [
                 workflowCount: workflowCount,
         ])
     }
 
+    @CompileDynamic
     WorkflowRun getById(long id) {
         return WorkflowRun.get(id)
     }
@@ -129,6 +131,7 @@ class WorkflowRunService {
      * @return the created, saved but not flushed WorkflowRun
      */
     @SuppressWarnings('ParameterCount')
+    @CompileDynamic
     WorkflowRun buildWorkflowRun(Workflow workflow, ProcessingPriority priority, String workDirectory, Project project, List<String> displayNameLines,
                                  String shortName, WorkflowVersion workflowVersion = null) {
         String displayName = StringUtils.generateMultiLineDisplayName(displayNameLines)
@@ -149,6 +152,7 @@ class WorkflowRunService {
         ]).save(flush: false, deepValidate: false)
     }
 
+    @CompileDynamic
     void saveCombinedConfig(Long id, String combinedConfig) {
         WorkflowRun workflowRun = WorkflowRun.get(id)
         assert workflowRun: "No WorkflowRun with id '${id}' found"
@@ -159,6 +163,7 @@ class WorkflowRunService {
     /**
      * helper do get pessimistic lock for workflowRun and all its steps and wait therefor for 10 second
      */
+    @CompileDynamic
     void lockAndRefreshWorkflowRunWithSteps(WorkflowRun run) {
         WorkflowRun.withSession { Session s ->
             s.refresh(run, new LockOptions(LockMode.PESSIMISTIC_WRITE).setTimeOut(PESSIMISTIC_WRITE_TIME_OUT))
@@ -172,6 +177,7 @@ class WorkflowRunService {
      * Method to change {@link WorkflowRun#jobCanBeRestarted} to false using a separate transaction to ensure that this info doesn't get lost on
      * rollback of the current transaction.
      */
+    @CompileDynamic
     void markJobAsNotRestartableInSeparateTransaction(WorkflowRun workflowRun) {
         assert workflowRun
         TransactionUtils.withNewTransaction {
@@ -186,12 +192,14 @@ class WorkflowRunService {
     /**
      * Method to change {@link WorkflowRun#jobCanBeRestarted} to true, which should be rolled back in the current transaction if error occurs.
      */
+    @CompileDynamic
     void markJobAsRestartable(WorkflowRun workflowRun) {
         assert workflowRun
         workflowRun.jobCanBeRestarted = true
         workflowRun.save(flush: true)
     }
 
+    @CompileDynamic
     private Closure getCriteria(Workflow workflow, List<WorkflowRun.State> states, String name) {
         return {
             if (name) {
@@ -208,6 +216,7 @@ class WorkflowRunService {
     }
 
     @SuppressWarnings('AbcMetric')
+    @CompileDynamic
     WorkflowRunSearchResult workflowOverview(WorkflowRunSearchCriteria workflowRunSearchCriteria) {
         Closure criteria = getCriteria(workflowRunSearchCriteria.workflow, workflowRunSearchCriteria.states, workflowRunSearchCriteria.name)
         WorkflowRunSearchResult result = new WorkflowRunSearchResult()
@@ -284,10 +293,12 @@ class WorkflowRunService {
         return date.toInstant().atZone(configService.timeZoneId).toLocalDateTime()
     }
 
+    @CompileDynamic
     WorkflowRun findAllByRestartedFrom(WorkflowRun workflowRun) {
         return CollectionUtils.atMostOneElement(WorkflowRun.findAllByRestartedFrom(workflowRun))
     }
 
+    @CompileDynamic
     List<WorkflowRun> workflowRunList(Workflow workflow, List<WorkflowRun.State> states, String name) {
         Closure criteria = getCriteria(workflow, states, name,)
         List<WorkflowRun> data = WorkflowRun.createCriteria().list {
@@ -310,7 +321,7 @@ class WorkflowRunService {
         ]
 
         Map<ClusterJob.Status, Integer> mappingOfExitStates = [
-                (null)                       : 0,
+                (null as ClusterJob.Status)  : 0,
                 (ClusterJob.Status.COMPLETED): 0,
                 (ClusterJob.Status.FAILED)   : 1,
         ]
@@ -360,7 +371,7 @@ class WorkflowRunService {
                     wallTime: clusterJobDetailService.getElapsedWalltimeAsHhMmSs(clusterJob),
                     exitCode: clusterJob.exitCode ?: "-",
             ]
-        }
+        } as List<Map<String, Object>>
     }
 
     private List<Map<String, Object>> collectWesRunDetails(List<WesRun> wesRuns) {
@@ -373,7 +384,7 @@ class WorkflowRunService {
                     logName      : wesRun.wesRunLog?.runLog?.name,
                     exitCode     : wesRun.wesRunLog?.runLog?.exitCode ?: "-",
             ]
-        }
+        } as List<Map<String, Object>>
     }
 
     private static String mapCheckStatusAndExitStatusToState(ClusterJob.CheckStatus checkStatus, ClusterJob.Status exitStatus) {

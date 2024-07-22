@@ -35,7 +35,6 @@ import de.dkfz.tbi.otp.utils.LinkFileUtils
 import java.nio.file.FileSystem
 import java.nio.file.Path
 
-@CompileDynamic
 @Transactional
 class LinkFilesToFinalDestinationService {
 
@@ -49,6 +48,7 @@ class LinkFilesToFinalDestinationService {
      * Link files (replaces existing files)
      */
     @Deprecated
+    @CompileDynamic
     void linkNewResults(RoddyBamFile roddyBamFile) {
         assert roddyBamFile: "Input roddyBamFile must not be null"
         assert !roddyBamFile.isOldStructureUsed()
@@ -130,6 +130,7 @@ class LinkFilesToFinalDestinationService {
         return unexpectedFiles.collect { fileService.toPath(it, fs) }
     }
 
+    @CompileDynamic
     List<Path> getOldAdditionalResults(RoddyBamFile roddyBamFile) {
         assert roddyBamFile: "Input roddyBamFile must not be null"
         assert !roddyBamFile.isOldStructureUsed()

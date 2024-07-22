@@ -38,7 +38,6 @@ import de.dkfz.tbi.otp.job.plan.*
  *
  * The validation does not yet validate plans correctly containing DecisionJobs.
  */
-@CompileDynamic
 @Transactional
 class PlanValidatorService {
     static final String NO_STARTJOB = "No StartJob defined for JobExecutionPlan"
@@ -60,6 +59,7 @@ class PlanValidatorService {
      */
     def grailsApplication
 
+    @CompileDynamic
     List<String> validate(JobExecutionPlan plan) {
         List<String> foundErrors = []
         if (hasStartJob(plan)) {
@@ -179,6 +179,7 @@ class PlanValidatorService {
         return false
     }
 
+    @CompileDynamic
     private boolean allJobsAreLinked(JobExecutionPlan plan) {
         if (!plan.firstJob) {
             return true

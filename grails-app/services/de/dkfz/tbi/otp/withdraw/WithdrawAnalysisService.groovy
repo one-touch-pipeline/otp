@@ -29,13 +29,13 @@ import de.dkfz.tbi.otp.dataprocessing.BamFileAnalysisServiceFactoryService
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 
-@CompileDynamic
 @Transactional
 class WithdrawAnalysisService implements ProcessingWithdrawService<BamFilePairAnalysis, AbstractBamFile> {
     AnalysisDeletionService analysisDeletionService
     BamFileAnalysisServiceFactoryService bamFileAnalysisServiceFactoryService
 
     @Override
+    @CompileDynamic
     List<BamFilePairAnalysis> collectObjects(List<AbstractBamFile> entities) {
         return entities ? BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(
                 entities,
@@ -51,6 +51,7 @@ class WithdrawAnalysisService implements ProcessingWithdrawService<BamFilePairAn
     }
 
     @Override
+    @CompileDynamic
     void withdrawObjects(List<BamFilePairAnalysis> entities) {
         entities.each {
             it.withdrawn = true
@@ -59,6 +60,7 @@ class WithdrawAnalysisService implements ProcessingWithdrawService<BamFilePairAn
     }
 
     @Override
+    @CompileDynamic
     void unwithdrawObjects(List<BamFilePairAnalysis> entities) {
         entities.each {
             it.withdrawn = false

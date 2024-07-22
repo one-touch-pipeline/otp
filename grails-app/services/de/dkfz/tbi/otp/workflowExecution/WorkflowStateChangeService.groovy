@@ -27,12 +27,12 @@ import groovy.transform.CompileDynamic
 import de.dkfz.tbi.otp.utils.StackTraceUtils
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 
-@CompileDynamic
 @Transactional
 class WorkflowStateChangeService {
 
     OtpWorkflowService otpWorkflowService
 
+    @CompileDynamic
     void changeStateToSkipped(WorkflowStep step, WorkflowStepSkipMessage message) {
         assert step
         assert message
@@ -63,6 +63,7 @@ class WorkflowStateChangeService {
         }
     }
 
+    @CompileDynamic
     void changeStateToWaitingOnUser(WorkflowStep step) {
         assert step
         step.workflowRun.state = WorkflowRun.State.WAITING_FOR_USER
@@ -72,6 +73,7 @@ class WorkflowStateChangeService {
         step.save(flush: true)
     }
 
+    @CompileDynamic
     void changeStateToWaitingOnSystem(WorkflowStep step) {
         assert step
         step.workflowRun.state = WorkflowRun.State.RUNNING_WES
@@ -87,6 +89,7 @@ class WorkflowStateChangeService {
         }
     }
 
+    @CompileDynamic
     void toggleFailedWaitingState(WorkflowRun run) {
         assert run
         assert run.state in [WorkflowRun.State.FAILED, WorkflowRun.State.FAILED_WAITING]
@@ -95,6 +98,7 @@ class WorkflowStateChangeService {
         run.save(flush: true)
     }
 
+    @CompileDynamic
     void changeStateToFinalFailed(WorkflowStep step) {
         assert step
         step.workflowRun.state = WorkflowRun.State.FAILED_FINAL
@@ -124,6 +128,7 @@ class WorkflowStateChangeService {
         }
     }
 
+    @CompileDynamic
     void changeStateToFailedWithManualChangedError(WorkflowStep step, Throwable throwable) {
         assert step
         step.workflowRun.state = WorkflowRun.State.FAILED
@@ -134,6 +139,7 @@ class WorkflowStateChangeService {
         step.save(flush: true)
     }
 
+    @CompileDynamic
     void changeStateToFailedAfterRestart(WorkflowStep step) {
         assert step
         step.workflowRun.state = WorkflowRun.State.FAILED
@@ -162,6 +168,7 @@ class WorkflowStateChangeService {
         changeStateToFailedWithManualChangedError(step, throwable)
     }
 
+    @CompileDynamic
     void changeStateToSuccess(WorkflowStep step) {
         assert step
         step.state = WorkflowStep.State.SUCCESS
@@ -183,6 +190,7 @@ class WorkflowStateChangeService {
         }
     }
 
+    @CompileDynamic
     void changeStateToRunning(WorkflowStep step) {
         assert step
         step.workflowRun.state = WorkflowRun.State.RUNNING_OTP
@@ -192,6 +200,7 @@ class WorkflowStateChangeService {
         step.save(flush: true)
     }
 
+    @CompileDynamic
     private Collection<WorkflowRun> getDependingWorkflowRuns(WorkflowRun run) {
         assert run
         List<WorkflowRun> runs = run.outputArtefacts*.value ?

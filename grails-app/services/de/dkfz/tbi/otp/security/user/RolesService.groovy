@@ -29,11 +29,11 @@ import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserRole
 
-@CompileDynamic
 @Transactional
 class RolesService {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @CompileDynamic
     List<RolesWithUsers> rolesAndUsers() {
         List<RolesWithUsers> roles = Role.list().collect { Role role ->
             new RolesWithUsers(role: role)
@@ -46,6 +46,7 @@ class RolesService {
         return roles
     }
 
+    @CompileDynamic
     static void createUserRole(User user, Role role) {
         new UserRole(user: user, role: role).save(flush: true, insert: true)
     }

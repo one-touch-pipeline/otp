@@ -26,13 +26,13 @@ import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.project.Project
 
-@CompileDynamic
 @Transactional
 class SampleService {
 
     /**
      * returns the number of samples for specified period if given
      */
+    @CompileDynamic
     int getCountOfSamplesForSpecifiedPeriodAndProjects(Date startDate = null, Date endDate = null, List<Project> projects) {
         return Sample.createCriteria().count {
             individual {
@@ -44,10 +44,12 @@ class SampleService {
         }
     }
 
+    @CompileDynamic
     List<Sample> getSamplesByIndividual(Individual individual) {
         return Sample.findAllByIndividual(individual)
     }
 
+    @CompileDynamic
     List<Sample> getSamplesOfProject(Project project) {
         return Sample.withCriteria {
             individual {

@@ -36,7 +36,6 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.*
 
-@CompileDynamic
 @Transactional
 class UnwithdrawService {
 
@@ -52,6 +51,7 @@ class UnwithdrawService {
     @Autowired
     List<AbstractWithdrawBamFileService<?>> withdrawBamFileServices
 
+    @CompileDynamic
     void unwithdrawSeqTracks(UnwithdrawStateHolder unwithdrawStateHolder) {
         unwithdrawStateHolder.seqTracksWithComment.each { seqTrackWithComment ->
             unwithdrawStateHolder.summary << "\n\nUnwithdraw ${seqTrackWithComment.seqTrack}"
@@ -61,6 +61,7 @@ class UnwithdrawService {
         }
     }
 
+    @CompileDynamic
     private void unwithdrawRawSequenceFiles(final RawSequenceFile rawSequenceFile, String comment, UnwithdrawStateHolder unwithdrawStateHolder) {
         unwithdrawStateHolder.summary << "Unwithdrawing RawSequenceFile: ${rawSequenceFile}: ${rawSequenceFile.withdrawnComment}"
         unwithdrawStateHolder.linksToCreate.put(rawSequenceDataWorkFileService.getFilePath(rawSequenceFile),
@@ -91,9 +92,10 @@ class UnwithdrawService {
         rawSequenceFile.save(flush: true)
     }
 
+    @CompileDynamic
     void unwithdrawBamFiles(UnwithdrawStateHolder withdrawStateHolder) {
         Map<AbstractWithdrawBamFileService, List<AbstractBamFile>> bamFileMap = withdrawBamFileServices.collectEntries {
-            [(it), it.collectObjects(withdrawStateHolder.seqTracks).unique().findAll { bamFile ->
+            [(it), it.collectObjects(withdrawStateHolder.seqTracks).unique().findAll { AbstractBamFile bamFile ->
                 bamFile.fileOperationStatus == AbstractBamFile.FileOperationStatus.PROCESSED &&
                         !bamFile.containedSeqTracks.any { it.withdrawn } &&
                         Files.exists(abstractBamFileService.getBaseDirectory(bamFile).resolve(bamFile.bamFileName))
@@ -102,7 +104,7 @@ class UnwithdrawService {
         withdrawStateHolder.bamFiles = bamFileMap.values().flatten().unique()
         if (withdrawStateHolder.bamFiles.size() > 0) {
             withdrawStateHolder.bamFiles.each {
-                withdrawStateHolder.summary << "Unwithdrawing BAM file: ${it}"
+                withdrawStateHolder.summary << "Unwithdrawing BAM file: ${it}" as String
             }
         }
 
@@ -129,10 +131,10 @@ class UnwithdrawService {
             [withdrawAnalysisService.collectPaths([it]).first(), it.project.unixGroup]
         })
         if (analysis.size() > 0) {
-            withdrawStateHolder.summary << "Unwithdrawing analysis result: ${analysis}"
+            withdrawStateHolder.summary << ("Unwithdrawing analysis result: ${analysis}" as String)
             withdrawAnalysisService.unwithdrawObjects(analysis)
         } else {
-            withdrawStateHolder.summary << "Unwithdrawing analysis result: Nothing to do"
+            withdrawStateHolder.summary << 'Unwithdrawing analysis result: Nothing to do'
         }
     }
 
@@ -145,17 +147,17 @@ class UnwithdrawService {
                 FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION)
 
         withdrawStateHolder.summary << "\nScript Path:"
-        withdrawStateHolder.summary << outputFile
+        withdrawStateHolder.summary << outputFile.toString()
     }
 
     void createBashScript(UnwithdrawStateHolder withdrawStateHolder) {
         withdrawStateHolder.script << "\n#change group for links, files and directories"
         withdrawStateHolder.linksToCreate.each { target, link ->
-            withdrawStateHolder.script << "mkdir -p  ${link.parent}"
-            withdrawStateHolder.script << "ln -rs ${target} ${link}"
+            withdrawStateHolder.script << ("mkdir -p  ${link.parent}" as String)
+            withdrawStateHolder.script << ("ln -rs ${target} ${link}" as String)
         }
         withdrawStateHolder.pathsToChangeGroup.each { path, group ->
-            withdrawStateHolder.script << "chgrp --recursive --verbose ${group} ${path}"
+            withdrawStateHolder.script << ("chgrp --recursive --verbose ${group} ${path}" as String)
         }
 
         withdrawStateHolder.script << "\necho script has run till end\n"

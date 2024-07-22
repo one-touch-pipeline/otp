@@ -44,7 +44,6 @@ import de.dkfz.tbi.otp.workflowExecution.decider.DeciderResult
 
 import static de.dkfz.tbi.otp.dataprocessing.MergingCriteria.SpecificSeqPlatformGroups.*
 
-@CompileDynamic
 @Transactional(readOnly = true)
 class TriggerAlignmentService {
 
@@ -62,6 +61,7 @@ class TriggerAlignmentService {
 
     @Transactional(readOnly = false)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     TriggerAlignmentResult triggerAlignment(Collection<SeqTrack> seqTracks, boolean withdrawBamFiles = false, boolean ignoreSeqPlatformGroup = false) {
         // Mark the bam files as withdrawn
         if (withdrawBamFiles) {
@@ -104,6 +104,7 @@ class TriggerAlignmentService {
      * Count the given seqTracks that do not have the alignment workflow configured (deprecated)
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     List<Map<String, String>> createWarningsForMissingAlignmentConfig(Collection<SeqTrack> seqTracks) {
         Collection<SeqTrack> alignableSeqTracks = allDecider.findAlignableSeqTracks(seqTracks)
 
@@ -136,6 +137,7 @@ class TriggerAlignmentService {
      * C seqTracks that do not have the alignment workflow configured (deprecated)
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     List<Map<String, Object>> createWarningsForMissingSeqPlatformGroup(Collection<SeqTrack> seqTracks) {
         List<SeqPlatformGroup> defaultSeqPlatformGroups = mergingCriteriaService.findDefaultSeqPlatformGroupsOperator()
         List<SeqPlatform> configuredSeqPlatformsByDefault = defaultSeqPlatformGroups ? defaultSeqPlatformGroups.collectMany { it.seqPlatforms } : []
@@ -210,6 +212,7 @@ class TriggerAlignmentService {
      * check that the SeqTracks of a Sample seqType combination have compatible SeqPlatforms according the MergingCriteria
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     List<Map<String, Object>> createWarningsForSamplesHavingMultipleSeqPlatformGroups(Collection<SeqTrack> seqTracks) {
         return seqTracks.groupBy {
             [
@@ -261,6 +264,7 @@ class TriggerAlignmentService {
      * check that the SeqTracks of a Sample seqType combination have the same libraryPreparationKit in case it is part of the MergingCriteria
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     List<Map<String, Object>> createWarningsForSamplesHavingMultipleLibPrepKits(Collection<SeqTrack> seqTracks) {
         return seqTracks.groupBy {
             [
@@ -309,7 +313,7 @@ class TriggerAlignmentService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<Map<String, Object>> createWarningsForMissingLibPrepKits(Collection<SeqTrack> seqTracks) {
-        Set<SeqType> seqTypes = SeqTypeService.seqTypesRequiredLibPrepKit
+        Set<SeqType> seqTypes = SeqTypeService.seqTypesRequiredLibPrepKit as Set
         return seqTracks.findAll {
             !it.libraryPreparationKit && seqTypes.contains(it.seqType)
         }.collect {
@@ -338,6 +342,7 @@ class TriggerAlignmentService {
      */
     @SuppressWarnings("DuplicateNumberLiteral")
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     List<Map<String, String>> createWarningsForMissingReferenceGenomeConfiguration(Collection<SeqTrack> seqTracks) {
         Collection<SeqTrack> alignableSeqTracks = allDecider.findAlignableSeqTracks(seqTracks)
 
@@ -372,6 +377,7 @@ class TriggerAlignmentService {
      */
     @SuppressWarnings("DuplicateNumberLiteral")
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     List<Map<String, String>> createWarningsForWithdrawnSeqTracks(Collection<SeqTrack> seqTracks) {
         List<SeqTrack> seqTracksFiltered = RawSequenceFile.withCriteria {
             'in'('seqTrack', seqTracks)

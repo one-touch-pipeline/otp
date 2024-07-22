@@ -30,7 +30,6 @@ import de.dkfz.tbi.otp.project.Project
 
 import java.nio.file.Path
 
-@CompileDynamic
 @Transactional
 class AbstractBamFileService {
 
@@ -44,6 +43,7 @@ class AbstractBamFileService {
                 .resolve('merged-alignment')
     }
 
+    @CompileDynamic
     void updateSamplePairStatusToNeedProcessing(AbstractBamFile finishedBamFile) {
         assert finishedBamFile: "The input bam file must not be null"
         SamplePair.createCriteria().list {
@@ -101,6 +101,7 @@ class AbstractBamFileService {
      * @param seqType all seq types if missing
      * @return all the AbstractBamFile
      */
+    @CompileDynamic
     List<AbstractBamFile> findAllByIndividualSampleTypeSeqType(Individual individual, SampleType sampleType = null, SeqType seqType = null) {
         return AbstractBamFile.createCriteria().list {
             eq("withdrawn", false)
@@ -120,6 +121,7 @@ class AbstractBamFileService {
         }.findAll { it.isMostRecentBamFile() }
     }
 
+    @CompileDynamic
     List<AbstractBamFile> findAllByProjectAndSampleType(Project project, Set<SampleType> sampleTypes) {
         return AbstractBamFile.createCriteria().list {
             eq("withdrawn", false)
@@ -149,7 +151,7 @@ class AbstractBamFileService {
             length = referenceGenome.length
             basesMapped = bamFile.qualityAssessment.qcBasesMapped
 
-            return basesMapped / length
+            return basesMapped.doubleValue() / length.doubleValue()
         }
         // In case of sequencing types that need a BED file this value stays 'null' since there is no differentiation between 'with N' and 'without N'
         return null
@@ -159,6 +161,7 @@ class AbstractBamFileService {
      * @Deprecated methods accessing the database shouldn't be static, since then the transaction proxies does not work.
      */
     @Deprecated
+    @CompileDynamic
     static AbstractBamFile saveBamFile(AbstractBamFile bamFile) {
         return bamFile.save(flush: true)
     }

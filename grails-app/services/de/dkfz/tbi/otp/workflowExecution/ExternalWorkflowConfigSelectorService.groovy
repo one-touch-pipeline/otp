@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.gorm.transactions.Transactional
 import groovy.json.JsonSlurper
 import groovy.transform.CompileDynamic
+import groovy.transform.EqualsAndHashCode
 import groovy.util.logging.Slf4j
 import org.hibernate.sql.JoinType
 
@@ -31,7 +32,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-@CompileDynamic
 @Slf4j
 @Transactional(readOnly = true)
 class ExternalWorkflowConfigSelectorService {
@@ -43,6 +43,7 @@ class ExternalWorkflowConfigSelectorService {
      * The algorithms distinguishes only if the property (e.g. workflows) has value (bit = 1) or not (bit = 0).
      * The values themself don't change the bit.
      */
+    @CompileDynamic
     static int calculatePriority(CalculatePriorityDTO dto) {
         int prio = 0b0000000000000000
         CalculatePriorityDTO.PROPS_PRIORITY_MAP.each { String key, Integer value ->
@@ -54,6 +55,7 @@ class ExternalWorkflowConfigSelectorService {
         return prio
     }
 
+    @CompileDynamic
     ExternalWorkflowConfigSelector getById(long id) {
         return ExternalWorkflowConfigSelector.get(id)
     }
@@ -73,6 +75,7 @@ class ExternalWorkflowConfigSelectorService {
      * @param completeKey : When recursively searching though the json, this parameter saves the already visited nodes.
      * @return a map with key of the json argument as first parameter and an object that contains the currentValue and the otherValue as value.
      */
+    @CompileDynamic
     List<JsonConflictingParameters> getConflictingKeysForJson(Object json1, Object json2, String completeKey = '') {
         List<JsonConflictingParameters> conflictingKeys = []
         json1.each { String key, value ->
@@ -131,6 +134,7 @@ class ExternalWorkflowConfigSelectorService {
         )
     }
 
+    @CompileDynamic
     private List<NameValueAndConflictingKeysExternalWorkflowConfigSelector> getAllPotentiallyProblematicSelectors(
             List<Long> workflowIds, List<Long> workflowVersionIds, List<Long> projectIds,
             List<Long> referenceGenomeIds, List<Long> seqTypeIds, List<Long> libraryPreparationKitIds) {
@@ -195,6 +199,7 @@ class ExternalWorkflowConfigSelectorService {
         }
     }
 
+    @CompileDynamic
     ExternalWorkflowConfigSelectorLists searchExternalWorkflowConfigSelectors(ExternalWorkflowConfigSelectorSearchParameter searchParameter) {
         List<ExternalWorkflowConfigSelector> relatedSelectors, exactlyMatchingSelectors
         if (searchParameter.hasIds()) {
@@ -290,7 +295,7 @@ class NameValueAndConflictingKeysExternalWorkflowConfigSelector {
     }
 }
 
-@CompileDynamic
+@EqualsAndHashCode
 class JsonConflictingParameters {
     String conflictingKey
     String currentValue

@@ -35,7 +35,6 @@ import de.dkfz.tbi.otp.utils.TimeFormats
 
 import java.nio.file.Path
 
-@CompileDynamic
 @Transactional
 class IndividualService {
 
@@ -44,11 +43,13 @@ class IndividualService {
     ProjectService projectService
     CommentService commentService
 
+    @CompileDynamic
     @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(returnObject.project, 'OTP_READ_ACCESS')")
     Individual getIndividual(long id) {
         return Individual.get(id)
     }
 
+    @CompileDynamic
     @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(returnObject.project, 'OTP_READ_ACCESS')")
     Individual getIndividualByPid(String pid) {
         return CollectionUtils.atMostOneElement(Individual.findAllByPid(pid))
@@ -64,6 +65,7 @@ class IndividualService {
      * @param filter Filter restrictions
      * @return List of Individuals matching the criteria
      * */
+    @CompileDynamic
     List<Individual> listIndividuals(boolean sortOrder, IndividualColumn column, IndividualFiltering filtering, String filterString) {
         List projects = projectService.allProjects
         if (!projects) {
@@ -112,6 +114,7 @@ class IndividualService {
      * @param filter Restrict on this search filter if at least three characters
      * @return Number of Individuals matching the filtering
      */
+    @CompileDynamic
     int countIndividual(IndividualFiltering filtering, String filterString) {
         if (filtering.enabled || filterString.length() >= 3) {
             def c = Individual.createCriteria()
@@ -158,6 +161,7 @@ class IndividualService {
      * @return created Individual
      * @throws IndividualCreationException This method may throw an IndividualCreationException.
      */
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Individual createIndividual(IndividualCommand cmd) throws IndividualCreationException {
         Individual individual = new Individual(
@@ -175,6 +179,7 @@ class IndividualService {
      * @param pid The pid to check
      * @return true if there is already a Individual with the pid, false otherwise
      */
+    @CompileDynamic
     boolean individualExists(String pid) {
         return (CollectionUtils.atMostOneElement(Individual.findAllByPid(pid)) != null)
     }
@@ -183,6 +188,7 @@ class IndividualService {
      * Fetches all SampleTypes available
      * @return List of SampleTypes
      */
+    @CompileDynamic
     List<String> getSampleTypeNames() {
         return SampleType.list([sort: "name", order: "asc"])*.name
     }
@@ -195,6 +201,7 @@ class IndividualService {
      * @throws IndividualUpdateException In case the Individual could not be updated
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void updateField(Individual individual, String key, String value) throws IndividualUpdateException {
         individual[key] = value
         if (!individual.save(flush: true)) {
@@ -237,6 +244,7 @@ class IndividualService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     Sample createSample(Individual individual, SampleType sampleType) {
         Sample sample = CollectionUtils.atMostOneElement(Sample.findAllByIndividualAndSampleType(individual, sampleType))
         if (!sample) {
@@ -251,6 +259,7 @@ class IndividualService {
      * @param name Name of the new SampleType
      * @return the SampleType
      */
+    @CompileDynamic
     private SampleType createSampleType(String name) {
         SampleType sampleType = SampleTypeService.findSampleTypeByName(name)
         if (!sampleType) {
@@ -270,6 +279,7 @@ class IndividualService {
      * @param newProperties a Map that contains the new properties of the individual/sample/lane
      * @param additionalInformation a String with additional information that will be displayed between header and old/new properties
      */
+    @CompileDynamic
     void createComment(String operation, Map oldProperties, Map newProperties, String additionalInformation = null) {
         Closure<Individual> assertAndGetIndividual = { Map properties ->
             assert properties

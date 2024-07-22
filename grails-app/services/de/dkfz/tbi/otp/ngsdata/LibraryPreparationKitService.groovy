@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import java.nio.charset.StandardCharsets
 import java.nio.file.*
 
-@CompileDynamic
 @Transactional
 class LibraryPreparationKitService extends AbstractMetadataFieldsService<LibraryPreparationKit> {
 
@@ -40,6 +39,7 @@ class LibraryPreparationKitService extends AbstractMetadataFieldsService<Library
     FileService fileService
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     List<Map> displayableMetadata() {
         return LibraryPreparationKit.list(sort: "name", order: "asc").collect { LibraryPreparationKit it ->
             [
@@ -56,6 +56,7 @@ class LibraryPreparationKitService extends AbstractMetadataFieldsService<Library
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     LibraryPreparationKit addAdapterFileToLibraryPreparationKit(LibraryPreparationKit libraryPreparationKit, String adapterFile) {
         assert libraryPreparationKit: "libraryPreparationKit must not be null"
         assert adapterFile: "adapterFile must not be null"
@@ -65,6 +66,7 @@ class LibraryPreparationKitService extends AbstractMetadataFieldsService<Library
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     LibraryPreparationKit addAdapterSequenceToLibraryPreparationKit(LibraryPreparationKit libraryPreparationKit, String reverseComplementAdapterSequence) {
         assert libraryPreparationKit: "libraryPreparationKit must not be null"
         assert reverseComplementAdapterSequence: "reverseComplementAdapterSequence must not be null"
@@ -87,12 +89,13 @@ class LibraryPreparationKitService extends AbstractMetadataFieldsService<Library
     }
 
     @Override
+    @CompileDynamic
     protected LibraryPreparationKit findByName(String name, Map properties = [:]) {
         return CollectionUtils.atMostOneElement(clazz.findAllByNameIlike(name))
     }
 
     @Override
-    protected void checkProperties(Map properties) {
+    protected void checkProperties(Map<String, Object> properties) {
         properties.keySet().each { String key ->
             assert key in ["adapterFile", "reverseComplementAdapterSequence"]: "Invalid key ${key}"
         }
@@ -103,6 +106,7 @@ class LibraryPreparationKitService extends AbstractMetadataFieldsService<Library
         return LibraryPreparationKit
     }
 
+    @CompileDynamic
     List<LibraryPreparationKit> list() {
         return LibraryPreparationKit.list()
     }

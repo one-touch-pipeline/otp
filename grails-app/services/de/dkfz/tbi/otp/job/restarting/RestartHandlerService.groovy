@@ -28,7 +28,9 @@ import de.dkfz.tbi.otp.job.plan.JobErrorDefinition
 import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 
-@CompileDynamic
+/**
+ * @deprecated class is part of the old workflow system
+ */
 @Transactional
 class RestartHandlerService {
 
@@ -38,6 +40,7 @@ class RestartHandlerService {
 
     RestartActionService restartActionService
 
+    @CompileDynamic
     void handleRestart(Job job) {
         ProcessingStep step = job.processingStep
         step.attach()

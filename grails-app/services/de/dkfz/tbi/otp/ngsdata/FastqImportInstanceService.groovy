@@ -27,7 +27,6 @@ import groovy.transform.CompileDynamic
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.WorkflowCreateState
 
-@CompileDynamic
 @Transactional(readOnly = true)
 class FastqImportInstanceService {
 
@@ -59,12 +58,14 @@ class FastqImportInstanceService {
         order by fii.id asc
         """
 
+    @CompileDynamic
     FastqImportInstance waiting() {
         return CollectionUtils.atMostOneElement(
                 FastqImportInstance.executeQuery(QUERY_WAITING_AND_ALLOWED_FASTQ_IMPORT_INSTANCE, [:], [max: 1])
         )
     }
 
+    @CompileDynamic
     int countInstancesInWaitingState() {
         return FastqImportInstance.countByState(WorkflowCreateState.WAITING)
     }
@@ -85,6 +86,7 @@ class FastqImportInstanceService {
      * Change all FastqImportInstances with state processing to state wait. This is meant for the case, OTP is shutdown during an object is processed.
      * Should only be called during startup
      */
+    @CompileDynamic
     @Transactional(readOnly = false)
     void changeProcessToWait() {
         FastqImportInstance.findAllByState(WorkflowCreateState.PROCESSING).each { FastqImportInstance fastqImportInstance ->

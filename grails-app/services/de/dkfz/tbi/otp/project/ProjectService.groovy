@@ -66,7 +66,6 @@ import java.time.format.DateTimeFormatter
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-@CompileDynamic
 @Transactional
 class ProjectService {
 
@@ -114,6 +113,7 @@ class ProjectService {
      *
      * @return List of projects accessible by the current user
      */
+    @CompileDynamic
     List<Project> getAllProjects() {
         if (securityService.ifAllGranted(Role.ROLE_OPERATOR)) {
             return Project.withCriteria {
@@ -139,6 +139,7 @@ class ProjectService {
         } as List<Project>
     }
 
+    @CompileDynamic
     List<Project> getAllPublicProjects() {
         return Project.findAllByPubliclyAvailable(true, [sort: "name", order: "asc"])
     }
@@ -146,6 +147,7 @@ class ProjectService {
     /**
      * return the number of projects for specified period if given
      */
+    @CompileDynamic
     int getCountOfProjectsForSpecifiedPeriod(Date startDate = null, Date endDate = null, List<Project> projects) {
         return Project.createCriteria().count {
             'in'('id', projects*.id)
@@ -161,25 +163,30 @@ class ProjectService {
      * @return The Project
      */
     @PostAuthorize("hasRole('ROLE_OPERATOR') or returnObject == null or hasPermission(returnObject, 'OTP_READ_ACCESS')")
+    @CompileDynamic
     Project getProject(Long id) {
         return Project.get(id)
     }
 
     @PostAuthorize("hasRole('ROLE_OPERATOR') or returnObject == null or hasPermission(returnObject, 'OTP_READ_ACCESS')")
+    @CompileDynamic
     Project getProjectByName(String name) {
         return atMostOneElement(Project.findAllByName(name))
     }
 
     @PostFilter("hasRole('ROLE_OPERATOR') or hasPermission(filterObject, 'OTP_READ_ACCESS')")
+    @CompileDynamic
     List<Project> getProjectByNameAsList(String name) {
         return Project.findAllByName(name)
     }
 
+    @CompileDynamic
     List<Project> projectByProjectGroup(ProjectGroup projectGroup) {
         return Project.findAllByProjectGroup(projectGroup, [sort: "name", order: "asc"])
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     List<Project> getAllProjectsWithConfigFile(SeqType seqType, Pipeline pipeline) {
         return RoddyWorkflowConfig.findAllBySeqTypeAndPipelineAndObsoleteDateIsNullAndIndividualIsNull(seqType, pipeline)*.project.unique().sort {
             it.name.toUpperCase()
@@ -187,6 +194,7 @@ class ProjectService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     Project createProject(ProjectCreationCommand projectParams) {
         assert OtpPathValidator.isValidPathComponent(projectParams.unixGroup): "unixGroup '${projectParams.unixGroup}' contains invalid characters"
         Path rootPath = configService.rootPath.toPath()
@@ -277,6 +285,7 @@ class ProjectService {
         return project
     }
 
+    @CompileDynamic
     private void configureDefaultFastQc(Project project) {
         if (project.projectType == Project.ProjectType.SEQUENCING) {
             String defaultFastQcType = processingOptionService.findOptionAsString(OptionName.DEFAULT_FASTQC_TYPE)
@@ -293,6 +302,7 @@ class ProjectService {
         }
     }
 
+    @CompileDynamic
     void updateAllRelatedProjects(Project project) {
         List<Project> relatedProjectList = project.relatedProjects.split(',')*.trim().findAll().unique().collect { String relatedProjectName ->
             return atMostOneElement(Project.findAllByName(relatedProjectName))
@@ -305,6 +315,7 @@ class ProjectService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void saveAdditionalFieldValuesForProject(String fieldValue, String fieldId, Project project) {
         AbstractFieldDefinition afd = AbstractFieldDefinition.get(fieldId as Long)
         if (afd.projectFieldType == ProjectFieldType.TEXT) {
@@ -324,6 +335,7 @@ class ProjectService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void updateAdditionalFieldValuesForProject(String fieldValue, String fieldId, Project project) {
         project.projectFields.each { AbstractFieldValue afv ->
             if (afv.definition.id.toString() == fieldId) {
@@ -342,6 +354,7 @@ class ProjectService {
         }
     }
 
+    @CompileDynamic
     List<UserProjectRole> getUsersToCopyFromBaseProject(Project baseProject) {
         return UserProjectRole.withCriteria {
             eq("project", baseProject)
@@ -403,6 +416,7 @@ class ProjectService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     <T> void updateProjectField(T fieldValue, String fieldName, Project project) {
         assert fieldName && [
                 "description",
@@ -452,6 +466,7 @@ class ProjectService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void updateProjectFieldDate(String fieldValue, String fieldName, Project project) {
         assert fieldName && [
                 "endDate",
@@ -464,6 +479,7 @@ class ProjectService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void invalidateProjectConfig(Project project, SeqType seqType, Pipeline pipeline) {
         ConfigPerProjectAndSeqType config = atMostOneElement(ConfigPerProjectAndSeqType.findAllByProjectAndSeqTypeAndPipelineAndObsoleteDate(
                 project, seqType, pipeline, null))
@@ -476,6 +492,7 @@ class ProjectService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     Errors createOrUpdateRunYapsaConfig(Project project, SeqType seqType, String programVersion) {
         Pipeline pipeline = atMostOneElement(Pipeline.findAllByName(Pipeline.Name.RUN_YAPSA))
         ConfigPerProjectAndSeqType latest = getLatestRunYapsaConfig(project, seqType)
@@ -498,6 +515,7 @@ class ProjectService {
         return null
     }
 
+    @CompileDynamic
     void deprecateReferenceGenomeProjectSeqType(Project project, SeqType seqType) {
         ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType =
                 ReferenceGenomeProjectSeqTypeService.getConfiguredReferenceGenomeProjectSeqType(project, seqType)
@@ -509,6 +527,7 @@ class ProjectService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
+    @CompileDynamic
     void createOrUpdateCellRangerConfig(Project project, SeqType seqType, String programVersion, ReferenceGenomeIndex referenceGenomeIndex) {
         Pipeline pipeline = atMostOneElement(Pipeline.findAllByName(Pipeline.Name.CELL_RANGER))
         ConfigPerProjectAndSeqType latest = getLatestCellRangerConfig(project, seqType)
@@ -525,16 +544,19 @@ class ProjectService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
+    @CompileDynamic
     RunYapsaConfig getLatestRunYapsaConfig(Project project, SeqType seqType) {
         return atMostOneElement(RunYapsaConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType))
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
+    @CompileDynamic
     CellRangerConfig getLatestCellRangerConfig(Project project, SeqType seqType) {
         return atMostOneElement(CellRangerConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType))
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     RoddyWorkflowConfig configureSnvPipelineProject(RoddyConfiguration snvPipelineConfiguration) {
         RoddyWorkflowConfig roddyWorkflowConfig = configurePipelineProject(snvPipelineConfiguration, Pipeline.Name.RODDY_SNV.pipeline, RoddySnvConfigTemplate)
 
@@ -567,6 +589,7 @@ class ProjectService {
         return configurePipelineProject(aceseqPipelineConfiguration, Pipeline.Name.RODDY_ACESEQ.pipeline, RoddyAceseqConfigTemplate)
     }
 
+    @CompileDynamic
     private RoddyWorkflowConfig configurePipelineProject(RoddyConfiguration configuration, Pipeline pipeline, Class roddyConfigTemplate) {
         assert OtpPathValidator.isValidPathComponent(configuration.pluginName): "pluginName '${configuration.pluginName}' is an invalid path component"
         assert OtpPathValidator.isValidPathComponent(configuration.programVersion): "programVersion '${configuration.programVersion}' " +
@@ -613,6 +636,7 @@ class ProjectService {
         )
     }
 
+    @CompileDynamic
     Result<List<ReferenceGenome>, String> checkReferenceGenomeForAceseq(Project project, SeqType seqType) {
         return Result.ofNullable(project, "project must not be null")
                 .map { Project p ->
@@ -638,6 +662,7 @@ class ProjectService {
                 }, "No reference genome is compatible with ACESeq.")
     }
 
+    @CompileDynamic
     Result<List<ReferenceGenome>, String> checkReferenceGenomeForSophia(Project project, SeqType seqType) {
         return Result.ofNullable(project, "project must not be null")
                 .map { Project p ->
@@ -721,6 +746,7 @@ echo 'OK'
      * @param unixGroup to check
      * @throws UnixGroupException if a validation fails
      */
+    @CompileDynamic
     private void validateUnixGroup(String unixGroup) throws UnixGroupException {
         if (!OtpPathValidator.isValidPathComponent(unixGroup)) {
             throw new UnixGroupIsInvalidException("The unixGroup '${unixGroup}' contains invalid characters.")
@@ -747,6 +773,7 @@ echo 'OK'
      * @throws UnixGroupException when validation fails
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void updateUnixGroup(Project project, String unixGroup, boolean force = false) throws UnixGroupException {
         try {
             validateUnixGroup(unixGroup)
@@ -761,12 +788,14 @@ echo 'OK'
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void updateFingerPrinting(Project project, boolean value) {
         project.fingerPrinting = value
         assert project.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void updateAnalysisDirectory(Project project, String analysisDir, boolean force = false)
             throws FileSystemException, OtpFileSystemException, AssertionError {
         project.dirAnalysis = analysisDir
@@ -781,11 +810,13 @@ echo 'OK'
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void updateProcessingNotification(Project project, boolean value) {
         project.processingNotification = value
         assert project.save(flush: true)
     }
 
+    @CompileDynamic
     Map<String, List<Project>> getAllProjectsWithSharedUnixGroup() {
         return Project.findAllByStateNotInList([Project.State.DELETED]).groupBy { Project project ->
             project.unixGroup
@@ -795,12 +826,14 @@ echo 'OK'
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void addProjectToRelatedProjects(Project baseProject, Project newProject) {
         baseProject.relatedProjects = ("${baseProject.relatedProjects ?: ""},${newProject.name}").split(",").findAll().unique().sort().join(",")
         baseProject.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void updateState(Project project, Project.State state) {
         project.state = state
         assert project.save(flush: true)
@@ -817,6 +850,7 @@ echo 'OK'
         return getProjectDirectory(project).resolve('sequencing')
     }
 
+    @CompileDynamic
     String getLastReceivedDate(Project project) {
         Timestamp[] timestamps = SeqTrack.createCriteria().get {
             sample {
@@ -831,10 +865,12 @@ echo 'OK'
         return timestamps ? TimeFormats.DATE_TIME.getFormattedDate(timestamps[0] as Date) : ''
     }
 
+    @CompileDynamic
     Project findByProjectWithFetchedKeywords(Project project) {
         return atMostOneElement(Project.findAllByName(project?.name, [fetch: [keywords: 'join']]))
     }
 
+    @CompileDynamic
     Map<Project, List<User>> getExpiredProjectsWithPIs() {
         List<Project> projects = Project.findAllByStorageUntilLessThanAndStateNotInList(LocalDate.now(), [Project.State.DELETED, Project.State.ARCHIVED])
 
@@ -858,6 +894,7 @@ echo 'OK'
         }
     }
 
+    @CompileDynamic
     static Project findByNameOrNameInMetadataFiles(String name) {
         return name ? atMostOneElement(Project.findAllByNameOrNameInMetadataFiles(name, name)) : null
     }

@@ -339,7 +339,7 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         samplePair3.mergingWorkPackage1.bamFileInProjectFolder = RoddyPanCancerFactoryInstance.INSTANCE.createBamFile(
                 withdrawn: false,
                 fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
-                coverage : 19.0,
+                coverage: 19.0,
                 workPackage: samplePair3.mergingWorkPackage1,
         )
         samplePair3.mergingWorkPackage1.save(flush: true)
@@ -455,16 +455,10 @@ ${expectedAlign}"""
         given:
         DomainFactory.createAllAlignableSeqTypes()
         CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService()
-        ProcessingStatus status = Mock(ProcessingStatus) {
-            getSamplePairProcessingStatuses >> { return [] }
-        }
-        String message
+        ProcessingStatus status = new ProcessingStatus([])
 
-        when:
-        message = createNotificationTextService."${methodName}Notification"(status)
-
-        then:
-        message == ''
+        expect:
+        createNotificationTextService."${methodName}Notification"(status) == ''
 
         where:
         methodName     | _
@@ -590,7 +584,7 @@ ${expectedAlign}"""
                 alignments1,
                 alignments2,
         ]*.join('\n').sort()
-        String expectedPaths = createNotificationTextService.getMergingDirectories(seqTracks)
+        String expectedPaths = createNotificationTextService.getMergingDirectories([data1.bamFile, data2.bamFile])
         String expectedAlignment = alignmentsAll.join('\n\n').trim()
         String expectedVariantCallingRunning = samplePairWithVariantCalling ? """\n
             |run variant calling
@@ -750,7 +744,7 @@ ${expectedAlign}"""
             }
             alignments << createAlignmentInfoString(data2) + "\n" + createRoddyAlignmentInfoString(data2)
         }
-        String expectedPaths = createNotificationTextService.getMergingDirectories(seqTracks)
+        String expectedPaths = createNotificationTextService.getMergingDirectories([data1.bamFile, data2.bamFile])
         String expectedAlignment = alignments.join('\n').trim()
         String expectedVariantCallingRunning = samplePairWithVariantCalling ? """\n
             |run variant calling
@@ -977,7 +971,7 @@ ${expectedAlign}"""
                     1 * getMessageInternal("notification.template.references.alignment.cellRanger", [], _) >> ""
                     1 * getMessageInternal("notification.template.annotation.cellRanger.selfservice", [], _) >> ""
                     0 * _
-            }
+                }
         )
         createNotificationTextService.projectService = new ProjectService()
         createNotificationTextService.projectService.configService = configService
@@ -1151,8 +1145,8 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
                 seqType: seqType,
                 sample : DomainFactory.createSample([
                         individual: DomainFactory.createIndividual([
-                                project     : project,
-                                pid         : pid,
+                                project: project,
+                                pid    : pid,
                         ])
                 ]),
                 run    : run,
@@ -1236,6 +1230,7 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
                 seqTrackProcessingStatus: seqTrackProcessingStatus,
                 samplePair              : samplePair,
                 workflow                : workflow,
+                bamFile                 : abstractBamFile,
         ]
     }
 

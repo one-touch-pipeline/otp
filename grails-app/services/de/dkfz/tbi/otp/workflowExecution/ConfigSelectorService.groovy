@@ -35,13 +35,13 @@ import de.dkfz.tbi.otp.project.Project
 
 import java.time.LocalDate
 
-@CompileDynamic
 @Transactional
 class ConfigSelectorService {
 
     /**
      * Used to find Selectors similar to a given name.
      */
+    @CompileDynamic
     List<ExternalWorkflowConfigSelector> findRelatedSelectorsByName(String name) {
         if (!name) {
             return []
@@ -55,6 +55,7 @@ class ConfigSelectorService {
      * Used to find ExternalWorkflowConfigSelectors related to the attributes of an MultiSelectSelectorExtendedCriteria object.
      * Multi select option. Returns all ExternalWorkflowConfigSelectors matching any of the given attributes.
      */
+    @CompileDynamic
     List<ExternalWorkflowConfigSelector> findAllRelatedSelectors(MultiSelectSelectorExtendedCriteria relatedSelectorExtendedCriteria) {
         if (!relatedSelectorExtendedCriteria.anyValueSet()) {
             return []
@@ -100,6 +101,7 @@ class ConfigSelectorService {
      * @param propertyString refers to the Set-attributes of the MultiSelectSelectorExtendedCriteria.
      * @param connectNext indicates that the query is not finished yet and will be extended.
      */
+    @CompileDynamic
     private static String findExactSelectorQueryHelper(
             MultiSelectSelectorExtendedCriteria multiSelectSelectorExtendedCriteria, String propertyString, Map parameters, boolean connectNext
     ) {
@@ -135,6 +137,7 @@ class ConfigSelectorService {
     /**
      * Used to find all ExternalWorkflowConfigSelectors exactly matching the attributes of an MultiSelectSelectorExtendedCriteria object.
      */
+    @CompileDynamic
     List<ExternalWorkflowConfigSelector> findExactSelectors(MultiSelectSelectorExtendedCriteria multiSelectSelectorExtendedCriteria) {
         String hql = """
             select
@@ -160,6 +163,7 @@ class ConfigSelectorService {
      * Used to find a ExternalWorkflowConfigSelector exactly matching the attributes of an SingleSelectSelectorExtendedCriteria object.
      * Single select option.
      */
+    @CompileDynamic
     protected List<ExternalWorkflowConfigSelector> findAllSelectors(SingleSelectSelectorExtendedCriteria singleSelectSelectorExtendedCriteria) {
         if (!singleSelectSelectorExtendedCriteria.anyValueSet()) {
             return []
@@ -224,6 +228,7 @@ class ConfigSelectorService {
         return []
     }
 
+    @CompileDynamic
     List<ExternalWorkflowConfigSelector> getAll() {
         return ExternalWorkflowConfigSelector.all.sort { a, b ->
             String.CASE_INSENSITIVE_ORDER.compare(a.name, b.name)
@@ -231,6 +236,7 @@ class ConfigSelectorService {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @CompileDynamic
     ExternalWorkflowConfigSelector create(CreateCommand cmd) {
         assert cmd.type != SelectorType.DEFAULT_VALUES
         ExternalWorkflowConfigFragment fragment = new ExternalWorkflowConfigFragment(
@@ -253,6 +259,7 @@ class ConfigSelectorService {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @CompileDynamic
     ExternalWorkflowConfigSelector update(UpdateCommand cmd) {
         assert cmd.type != SelectorType.DEFAULT_VALUES
         ExternalWorkflowConfigFragment currentFragment = cmd.selector.externalWorkflowConfigFragment
@@ -286,6 +293,7 @@ class ConfigSelectorService {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @CompileDynamic
     void deprecate(ExternalWorkflowConfigSelector selector) {
         assert selector.selectorType != SelectorType.DEFAULT_VALUES
         selector.externalWorkflowConfigFragment.with {

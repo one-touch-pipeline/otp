@@ -29,12 +29,12 @@ import org.hibernate.sql.JoinType
 import de.dkfz.tbi.otp.dataprocessing.AbstractAnalysisResultsService
 import de.dkfz.tbi.otp.utils.FormatHelper
 
-@CompileDynamic
 @Transactional
 class AceseqResultsService extends AbstractAnalysisResultsService<AceseqInstance> {
 
     final Class<AceseqInstance> instanceClass = AceseqInstance
 
+    @CompileDynamic
     @Override
     void appendQcFetchingCriteria(Criteria criteria) {
         criteria.aceseqQcs(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
@@ -45,6 +45,7 @@ class AceseqResultsService extends AbstractAnalysisResultsService<AceseqInstance
         }
     }
 
+    @CompileDynamic
     @Override
     void appendQcProjectionCriteria(Criteria criteria) {
         criteria.aceseqQcs(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
@@ -57,6 +58,7 @@ class AceseqResultsService extends AbstractAnalysisResultsService<AceseqInstance
         }
     }
 
+    @CompileDynamic
     @Override
     Map mapQcData(Map data) {
         return [

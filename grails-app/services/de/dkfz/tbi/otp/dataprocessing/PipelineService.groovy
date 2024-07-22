@@ -29,10 +29,10 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 /**
  * @deprecated old workflow system
  */
-@CompileDynamic
 @Transactional
 class PipelineService {
 
+    @CompileDynamic
     Pipeline findByPipelineName(Pipeline.Name name) {
         return CollectionUtils.atMostOneElement(Pipeline.findAllByName(name))
     }

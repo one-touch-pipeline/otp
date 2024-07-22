@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackageService
@@ -34,7 +33,6 @@ import de.dkfz.tbi.otp.utils.spreadsheet.validation.ValueTuple
 /**
  * A helper service for {@link MergingPreventionValidator}. It should not be used elsewhere.
  */
-@CompileDynamic
 @Transactional(readOnly = true)
 class MergingPreventionService {
 
@@ -113,11 +111,11 @@ class MergingPreventionService {
                     } else {
                         List<String> warnings = []
                         if (!mergeableSeqPlatform) {
-                            warnings << "the new seq platform ${data.seqPlatform} is part of another seq platform group then the existing"
+                            warnings << ("the new seq platform ${data.seqPlatform} is part of another seq platform group then the existing" as String)
                         }
                         if (!mergeableLibPrepKit) {
-                            warnings << "the new library preparation kit ${data.libraryPreparationKit} differs from the old library preparation kit " +
-                                    "${libraryPreparationKit}"
+                            warnings << ("the new library preparation kit ${data.libraryPreparationKit} differs from the old library preparation kit " +
+                                    "${libraryPreparationKit}" as String)
                         }
                         context.addProblem(valueTuple.cells, LogLevel.WARNING,
                                 "For ${data.createMessagePrefix(true)} already data are registered in OTP, with are not compatble to merge, " +
@@ -160,12 +158,12 @@ class MergingPreventionService {
                 } else {
                     List<String> warnings = []
                     if (!mergeableSeqPlatform) {
-                        warnings << "the new seq platform ${data.seqPlatform} is part of group ${data.seqPlatformGroupImport}, but existing bam file use " +
-                                "group ${mergingWorkPackage.seqPlatformGroup}"
+                        warnings << ("the new seq platform ${data.seqPlatform} is part of group ${data.seqPlatformGroupImport}, but existing bam file use " +
+                                "group ${mergingWorkPackage.seqPlatformGroup}" as String)
                     }
                     if (!mergeableLibPrepKit) {
-                        warnings << "the new library preparation kit ${data.libraryPreparationKit} differs from the old library preparation kit " +
-                                "${mergingWorkPackage.libraryPreparationKit}"
+                        warnings << ("the new library preparation kit ${data.libraryPreparationKit} differs from the old library preparation kit " +
+                                "${mergingWorkPackage.libraryPreparationKit}" as String)
                     }
                     context.addProblem(valueTuple.cells, LogLevel.WARNING,
                             "${data.createMessagePrefix(false)} can not be merged with the existing bam file, " +

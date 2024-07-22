@@ -29,13 +29,13 @@ import de.dkfz.tbi.otp.dataprocessing.bamfiles.RoddyBamFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 
-@CompileDynamic
 @Transactional
 class RoddyResultServiceFactoryService {
 
     RnaRoddyBamFileService rnaRoddyBamFileService
     RoddyBamFileService roddyBamFileService
 
+    @CompileDynamic
     RoddyResultServiceTrait<? extends RoddyResult> getService(RoddyResult rr) {
         Map<Class<? extends RoddyResult>, RoddyResultServiceTrait<? extends RoddyResult>> map = [
                 (RnaRoddyBamFile)        : rnaRoddyBamFileService,

@@ -84,6 +84,9 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
     final static String TEST_UNIX_GROUP = "test"
     final static String TEST_BASE_FOLDER = "/tmp/target"
 
+    @TempDir
+    Path tempDir
+
     @Shared
     Path targetFolder = Paths.get(TEST_BASE_FOLDER)
 
@@ -91,9 +94,8 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
 
     void setup() {
         configService = new TestConfigService()
-        GroovyMock([global: true], SeqTypeService)
-        SeqTypeService.rnaSingleSeqType >> DomainFactory.createRnaSingleSeqType()
-        SeqTypeService.rnaPairedSeqType >> DomainFactory.createRnaPairedSeqType()
+        DomainFactory.createRnaSingleSeqType()
+        DomainFactory.createRnaPairedSeqType()
     }
 
     void cleanup() {
@@ -128,9 +130,8 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
     void "exportRawSequenceFiles, combination of different inputs, should return correct scripts"() {
         given:
         final DataExportInput dataExportInput = createDataFileInput(checkFileStatus, getFileList)
-        Path finalFile
-        GroovyMock([global: true], Files)
-        Files.exists(_) >> true
+        Path finalFile = tempDir.resolve('finalFile')
+        Files.createFile(finalFile)
 
         service.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService) {
             getFileFinalPathCount * getFilePath(_) >> finalFile
@@ -402,9 +403,6 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
     void "exportAnalyses, combination of different inputs, should return correct scripts"() {
         given:
         DataExportInput dataExportInput = createAnalysisInput(checkFileStatus, getFileList)
-
-        GroovyMock([global: true], Files)
-        Files.exists(_) >> true
 
         final String instancePath = TEST_BASE_FOLDER + "/instance/path"
         service.fileService = Mock(FileService) {

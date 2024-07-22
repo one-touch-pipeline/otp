@@ -26,7 +26,6 @@ import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
 
-@CompileDynamic
 @Transactional
 class WorkflowLogService {
 
@@ -35,6 +34,7 @@ class WorkflowLogService {
      *
      * The logs should always be shown in the creation order.
      */
+    @CompileDynamic
     List<WorkflowLog> findAllByWorkflowStepInCorrectOrder(WorkflowStep workflowStep) {
         return WorkflowLog.findAllByWorkflowStep(workflowStep, [sort: 'dateCreated'])
     }

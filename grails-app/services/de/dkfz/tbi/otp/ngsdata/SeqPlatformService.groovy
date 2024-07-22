@@ -27,7 +27,6 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-@CompileDynamic
 @Transactional
 class SeqPlatformService {
 
@@ -35,6 +34,7 @@ class SeqPlatformService {
 
     SequencingKitLabelService sequencingKitLabelService
 
+    @CompileDynamic
     static SeqPlatform findForNameAndModelAndSequencingKit(
             String platformName, SeqPlatformModelLabel seqPlatformModelLabel, SequencingKitLabel sequencingKitLabel) {
         assert platformName
@@ -42,6 +42,7 @@ class SeqPlatformService {
                 SeqPlatform.findAllByNameIlikeAndSeqPlatformModelLabelAndSequencingKitLabel(platformName, seqPlatformModelLabel, sequencingKitLabel))
     }
 
+    @CompileDynamic
     static SeqPlatform createNewSeqPlatform(String seqPlatformName,
                                             SeqPlatformModelLabel seqPlatformModelLabel = null,
                                             SequencingKitLabel sequencingKitLabel = null) {
@@ -79,6 +80,7 @@ class SeqPlatformService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     SeqPlatform createNewSeqPlatform(String seqPlatformName, String seqPlatformModelLabelName, String sequencingKitLabelName) {
         assert seqPlatformName: "the input seqplatformname '${seqPlatformName}' must not be null"
         SeqPlatformModelLabel seqPlatformModelLabel = null
@@ -119,6 +121,7 @@ class SeqPlatformService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     SeqPlatform changeLegacyState(SeqPlatform seqPlatform, boolean legacy) {
         seqPlatform.legacy = legacy
         assert seqPlatform.save(flush: true)

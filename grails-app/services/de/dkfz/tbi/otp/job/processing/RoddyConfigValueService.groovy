@@ -38,7 +38,6 @@ import java.nio.file.Path
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-@CompileDynamic
 @Transactional
 class RoddyConfigValueService {
 
@@ -69,7 +68,7 @@ class RoddyConfigValueService {
         cValues.put("INDEX_PREFIX", referenceGenomeFastaFile) // used for PanCancer pipeline
         cValues.put("GENOME_FA", referenceGenomeFastaFile) // used for RNA pipeline
 
-        cValues.put("possibleControlSampleNamePrefixes", "${roddyBamFile.sampleType.dirName}")
+        cValues.put("possibleControlSampleNamePrefixes", roddyBamFile.sampleType.dirName)
         cValues.put("possibleTumorSampleNamePrefixes", "")
 
         cValues.putAll(getAdapterTrimmingFileForPanCancer(roddyBamFile, combinedConfig))
@@ -84,6 +83,7 @@ class RoddyConfigValueService {
         return cValues
     }
 
+    @CompileDynamic
     boolean getRunArriba(WorkflowStep workflowStep) {
         JsonNode combinedConfigJson = MAPPER.readTree(workflowStep.workflowRun.combinedConfig)
         Boolean runArriba = combinedConfigJson?.RODDY?.cvalues?.fields()?.find { it.key == ProjectService.RUN_ARRIBA }?.value?.value?.asBoolean()
@@ -94,6 +94,7 @@ class RoddyConfigValueService {
     /**
      * This Method returns whether adapter trimming should be used for the PanCancer or WGBS Workflow.
      */
+    @CompileDynamic
     boolean isAdapterTrimmingUsedForPanCancer(String combinedConfig) {
         JsonNode combinedConfigJson = MAPPER.readTree(combinedConfig)
         return combinedConfigJson?.RODDY?.cvalues?.fields()?.find { it.key == "useAdaptorTrimming" }?.value?.value?.asBoolean()
@@ -111,7 +112,7 @@ class RoddyConfigValueService {
                     "There is not exactly one adapter available for BAM file ${roddyBamFile}"
             )
             assert adapterFile: "There is exactly one adapter available for BAM file ${roddyBamFile}, but it is null"
-            return ["CLIP_INDEX": "${adapterFile}"]
+            return ["CLIP_INDEX": adapterFile]
         }
         return [:]
     }
@@ -126,6 +127,7 @@ class RoddyConfigValueService {
         return ["fastq_list": vbpSequenceFiles.join(";")]
     }
 
+    @CompileDynamic
     Map<String, String> getChromosomeIndexParameterWithMitochondrion(ReferenceGenome referenceGenome) {
         assert referenceGenome
 
@@ -138,6 +140,7 @@ class RoddyConfigValueService {
         return ["CHROMOSOME_INDICES": "( ${sortedList.join(' ')} )"]
     }
 
+    @CompileDynamic
     Map<String, String> getChromosomeIndexParameterWithoutMitochondrion(ReferenceGenome referenceGenome) {
         assert referenceGenome
 
@@ -196,6 +199,7 @@ class RoddyConfigValueService {
         ]
     }
 
+    @CompileDynamic
     String createMetadataTable(List<SeqTrack> seqTracks) {
         StringBuilder builder = new StringBuilder()
         builder << "Sample\tLibrary\tPID\tReadLayout\tRun\tMate\tSequenceFile\n"

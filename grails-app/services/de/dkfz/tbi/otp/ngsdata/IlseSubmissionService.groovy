@@ -28,21 +28,23 @@ import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-@CompileDynamic
 @Transactional
 class IlseSubmissionService {
 
     CommentService commentService
 
+    @CompileDynamic
     IlseSubmission findById(long id) {
         return IlseSubmission.get(id)
     }
 
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<IlseSubmission> sortedBlacklistedIlseSubmissions() {
         return IlseSubmission.findAllByWarning(true, [sort: 'ilseNumber', order: 'desc'])
     }
 
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     boolean checkIfIlseNumberDoesNotExist(int ilseNumber) {
         return !CollectionUtils.atMostOneElement(IlseSubmission.findAllByIlseNumber(ilseNumber))
@@ -60,6 +62,7 @@ class IlseSubmissionService {
         }
     }
 
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void unBlacklistIlseSubmissions(IlseSubmission ilseSubmission) {
         ilseSubmission.warning = false

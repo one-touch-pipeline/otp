@@ -29,18 +29,19 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-@CompileDynamic
 @Transactional
 class ProcessingThresholdsService {
 
     /**
      * @return List of ProcessingThresholds for an project
      */
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     List<ProcessingThresholds> findByProject(Project project) {
         return ProcessingThresholds.findAllByProject(project)
     }
 
+    @CompileDynamic
     ProcessingThresholds findByAbstractBamFile(AbstractBamFile bamFile) {
         return CollectionUtils.atMostOneElement(ProcessingThresholds.createCriteria().list {
             eq('project', bamFile.project)
@@ -49,6 +50,7 @@ class ProcessingThresholdsService {
         } as List<ProcessingThresholds>)
     }
 
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     ProcessingThresholds createUpdateOrDelete(Project project, SampleType sampleType, SeqType seqType, Integer numberOfLanes, Double coverage) {
         ProcessingThresholds processingThresholds = CollectionUtils.atMostOneElement(
@@ -86,6 +88,7 @@ class ProcessingThresholdsService {
      * @param seqTracks with configured alignment
      * @return generated processing thresholds
      */
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<ProcessingThresholds> generateDefaultThresholds(List<SeqTrack> seqTracks) {
         if (!seqTracks) {

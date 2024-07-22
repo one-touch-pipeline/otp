@@ -34,7 +34,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.user.UserException
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-@CompileDynamic
 @Transactional
 class TicketService {
 
@@ -46,12 +45,14 @@ class TicketService {
     /**
      * helper do get pessimistic lock for ticket and wait till 10 seconds therefore
      */
+    @CompileDynamic
     private void lockTicket(Ticket ticket) {
         Ticket.withSession { Session s ->
             s.refresh(ticket, new LockOptions(LockMode.PESSIMISTIC_WRITE).setTimeOut(10000))
         }
     }
 
+    @CompileDynamic
     void saveStartTimeIfNeeded(Ticket ticket, Ticket.ProcessingStep step) {
         String property = "${step}Started"
         if (ticket[property] == null) {
@@ -63,6 +64,7 @@ class TicketService {
         }
     }
 
+    @CompileDynamic
     boolean saveEndTimeIfNeeded(Ticket ticket, Ticket.ProcessingStep step) {
         String property = "${step}Finished"
         if (ticket[property] == null) {
@@ -76,12 +78,14 @@ class TicketService {
         return false
     }
 
+    @CompileDynamic
     void markFinalNotificationSent(Ticket ticket) {
         lockTicket(ticket)
         ticket.finalNotificationSent = true
         ticket.save(flush: true)
     }
 
+    @CompileDynamic
     Ticket createTicket(String ticketNumber, String seqCenterComment, boolean automaticNotification) {
         Ticket ticket = new Ticket(
                 ticketNumber: ticketNumber,
@@ -92,6 +96,7 @@ class TicketService {
         return ticket
     }
 
+    @CompileDynamic
     Ticket createOrResetTicket(String ticketNumber, String seqCenterComment, boolean automaticNotification) {
         Ticket ticket = CollectionUtils.atMostOneElement(Ticket.findAllByTicketNumber(ticketNumber))
         if (ticket) {
@@ -122,6 +127,7 @@ class TicketService {
         resetAnalysisNotification(ticket)
     }
 
+    @CompileDynamic
     void resetAnalysisNotification(Ticket ticket) {
         ticket.with {
             snvFinished = null
@@ -134,6 +140,7 @@ class TicketService {
         }
     }
 
+    @CompileDynamic
     Set<Ticket> findAllTickets(Collection<SeqTrack> seqTracks) {
         if (!seqTracks) {
             return [] as Set
@@ -153,6 +160,7 @@ class TicketService {
         return (tickets ?: []) as Set
     }
 
+    @CompileDynamic
     Set<SeqTrack> findAllSeqTracks(Ticket ticket) {
         return new LinkedHashSet<SeqTrack>(SeqTrack.findAll(
                 'FROM SeqTrack st WHERE EXISTS (FROM RawSequenceFile df WHERE df.seqTrack = st AND df.fastqImportInstance.ticket = :ticket)',
@@ -161,6 +169,7 @@ class TicketService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void assignTicketToFastqImportInstance(String ticketNumber, Long fastqImportInstanceId) {
         FastqImportInstance fastqImportInstance = FastqImportInstance.get(fastqImportInstanceId)
         assert fastqImportInstance: "No FastqImportInstance found for ${fastqImportInstanceId}."
@@ -208,6 +217,7 @@ class TicketService {
         assert newTicket.save(flush: true)
     }
 
+    @CompileDynamic
     List<MetaDataFile> getMetaDataFilesOfTicket(Ticket ticket) {
         return MetaDataFile.createCriteria().list {
             fastqImportInstance {
@@ -216,15 +226,18 @@ class TicketService {
         } as List<MetaDataFile>
     }
 
+    @CompileDynamic
     List<FastqImportInstance> getAllFastqImportInstances(Ticket ticket) {
         return FastqImportInstance.findAllByTicket(ticket)
     }
 
+    @CompileDynamic
     void saveSeqCenterComment(Ticket ticket, String value) {
         ticket.seqCenterComment = value
         ticket.save(flush: true)
     }
 
+    @CompileDynamic
     List<FastqImportInstance> getFastqImportInstances(Ticket ticket) {
         // Doesn't work as a single Query, probably a Unit test problem
         return FastqImportInstance.withCriteria {

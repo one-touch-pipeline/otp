@@ -68,6 +68,7 @@ All the Rules that will be used for OTP
     rule("file:grails-app/codenarcRules/NoPathToFileRule.groovy") {
         doNotApplyToFileNames = TEST
     }
+    rule("file:grails-app/codenarcRules/DoNotUseCompileDynamicWithClasses.groovy")
 
     // rulesets/basic.xml
     AssertWithinFinallyBlock {

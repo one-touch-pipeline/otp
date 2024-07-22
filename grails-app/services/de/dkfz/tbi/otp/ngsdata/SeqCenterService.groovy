@@ -27,27 +27,30 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-@CompileDynamic
 @Transactional
 class SeqCenterService {
 
+    @CompileDynamic
     List<SeqCenter> getDisplayableMetadata() {
         return SeqCenter.list(sort: "name", order: "asc")
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void updateAutoImportDirectory(SeqCenter seqCenter, String autoImportDirectory) {
         seqCenter.autoImportDir = autoImportDirectory
         seqCenter.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void updateAutoImportable(SeqCenter seqCenter, boolean autoImportable) {
         seqCenter.autoImportable = autoImportable
         seqCenter.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void changeLegacyState(SeqCenter seqCenter, boolean legacy = false) {
         SeqCenter seqCenterUpdate = SeqCenter.get(seqCenter.id)
         seqCenterUpdate.legacy = legacy
@@ -55,6 +58,7 @@ class SeqCenterService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     SeqCenter createSeqCenter(String name, String dirName) {
         assert name: "the input name '${name}' must not be null"
         assert dirName: "the input dirname '${dirName}' must not be null"

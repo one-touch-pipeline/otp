@@ -23,25 +23,21 @@ package de.dkfz.tbi.otp.workflow.restartHandler
 
 import grails.gorm.transactions.Transactional
 import grails.web.mapping.LinkGenerator
-import groovy.transform.CompileDynamic
 
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobDetailService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.tracking.TicketService
-import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.utils.StackTraceUtils
-import de.dkfz.tbi.otp.workflowExecution.*
-import de.dkfz.tbi.otp.workflowExecution.wes.WesLog
-import de.dkfz.tbi.otp.workflowExecution.wes.WesRun
-import de.dkfz.tbi.otp.workflowExecution.wes.WesRunLog
 import de.dkfz.tbi.otp.utils.TimeFormats
+import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflowExecution.wes.*
 
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 
-@CompileDynamic
 @Transactional
 class ErrorNotificationService {
 
@@ -110,22 +106,22 @@ class ErrorNotificationService {
     protected String getRestartInformation(WorkflowJobErrorDefinition.Action action, String checkText, List<JobErrorDefinitionWithLogWithIdentifier> matches) {
         List<String> message = []
         message << header("Action")
-        message << "final action: ${action}"
-        message << "info to action: ${checkText}"
+        message << ("final action: ${action}" as String)
+        message << ("info to action: ${checkText}" as String)
 
         message << header("Error definitions")
-        message << "matching expression count: ${matches.size()}"
+        message << ("matching expression count: ${matches.size()}" as String)
         matches.each { JobErrorDefinitionWithLogWithIdentifier definition ->
-            message << "log identifier: ${definition.logWithIdentifier.identifier}"
-            message << "definition name: ${definition.errorDefinition.name}"
-            message << "type: ${definition.errorDefinition.sourceType}"
-            message << "action: ${definition.errorDefinition.action}"
+            message << ("log identifier: ${definition.logWithIdentifier.identifier}" as String)
+            message << ("definition name: ${definition.errorDefinition.name}" as String)
+            message << ("type: ${definition.errorDefinition.sourceType}" as String)
+            message << ("action: ${definition.errorDefinition.action}" as String)
             if (definition.errorDefinition.beanToRestart) {
-                message << "bean to restart: ${definition.errorDefinition.beanToRestart}"
+                message << ("bean to restart: ${definition.errorDefinition.beanToRestart}" as String)
             }
-            message << "expression: ${definition.errorDefinition.errorExpression}"
+            message << ("expression: ${definition.errorDefinition.errorExpression}" as String)
             if (definition.errorDefinition.mailText) {
-                message << "mail info: ${definition.errorDefinition.mailText}"
+                message << ("mail info: ${definition.errorDefinition.mailText}" as String)
             }
             message << ''
         }
@@ -140,24 +136,25 @@ class ErrorNotificationService {
         List<String> message = []
 
         message << header("Workflow")
-        message << "Name: ${workflowStep.workflowRun.workflow.name}"
-        message << "Bean name: ${workflowStep.workflowRun.workflow.beanName}"
+        message << ("Name: ${workflowStep.workflowRun.workflow.name}" as String)
+        message << ("Bean name: ${workflowStep.workflowRun.workflow.beanName}" as String)
 
         message << header("Workflow run")
-        message << "ID: ${workflowStep.workflowRun.id}, started at: ${dateString(workflowStep.workflowRun.dateCreated)}"
-        message << "DisplayName: ${workflowStep.workflowRun.displayName}"
-        message << "Restart count: ${workflowStep.workflowRun.restartCount}"
+        message << ("ID: ${workflowStep.workflowRun.id}, started at: ${dateString(workflowStep.workflowRun.dateCreated)}" as String)
+        message << ("DisplayName: ${workflowStep.workflowRun.displayName}" as String)
+        message << ("Restart count: ${workflowStep.workflowRun.restartCount}" as String)
         if (workflowStep.workflowRun.restartCount > 0) {
-            message << "Restarted from ID: ${workflowStep.workflowRun.restartedFrom?.id}, " +
-                    "started at: ${dateString(workflowStep.workflowRun.restartedFrom?.dateCreated)}"
+            message << ("Restarted from ID: ${workflowStep.workflowRun.restartedFrom?.id}, " +
+                    "started at: ${dateString(workflowStep.workflowRun.restartedFrom?.dateCreated)}" as String)
         }
         if (workflowStep.workflowRun.restartCount > 1) {
             WorkflowRun originalRun = workflowStep.workflowRun.originalRestartedFrom
-            message << "Original ID: ${originalRun.id}, started at: ${dateString(originalRun.dateCreated)}"
+            message << ("Original ID: ${originalRun.id}, started at: ${dateString(originalRun.dateCreated)}" as String)
         }
-        message << "Submission IDs (Ilse): ${getSubmissionIds(seqTracks) ?: "None"}"
-        message << "Tickets: ${getTicketUrls(seqTracks).join(', ') ?: "None"}"
-        message << "Link: ${grailsLinkGenerator.link(controller: 'workflowRunDetails', action: 'index', id: workflowStep.workflowRun.id, absolute: 'true')}"
+        message << ("Submission IDs (Ilse): ${getSubmissionIds(seqTracks) ?: "None"}" as String)
+        message << ("Tickets: ${getTicketUrls(seqTracks).join(', ') ?: "None"}" as String)
+        message << ("Link: " +
+                "${grailsLinkGenerator.link(controller: 'workflowRunDetails', action: 'index', id: workflowStep.workflowRun.id, absolute: 'true')}") as String
 
         return message.join("\n")
     }
@@ -170,7 +167,7 @@ class ErrorNotificationService {
         message << header("Input artefacts")
         if (workflowStep.workflowRun.inputArtefacts) {
             workflowStep.workflowRun.inputArtefacts.sort { it.key }.each { k, v ->
-                message << "- ${k}: ${v.displayName.replace('\n', '\n    ')}"
+                message << ("- ${k}: ${v.displayName.replace('\n', '\n    ')}" as String)
             }
         } else {
             message << "None"
@@ -179,7 +176,7 @@ class ErrorNotificationService {
         message << header("Output artefacts")
         if (workflowStep.workflowRun.outputArtefacts) {
             workflowStep.workflowRun.outputArtefacts.sort { it.key }.each { k, v ->
-                message << "- ${k}: ${v.displayName.replace('\n', '\n    ')}"
+                message << ("- ${k}: ${v.displayName.replace('\n', '\n    ')}" as String)
             }
         } else {
             message << "None"
@@ -194,15 +191,15 @@ class ErrorNotificationService {
         List<String> message = []
 
         message << header("Workflow step")
-        message << "Bean name: ${workflowStep.beanName}"
-        message << "ID: ${workflowStep.id}, started at: ${dateString(workflowStep.dateCreated)}, failed at: ${dateString(new Date())}"
-        message << "Restart count: ${workflowStep.restartCount}"
+        message << ("Bean name: ${workflowStep.beanName}" as String)
+        message << ("ID: ${workflowStep.id}, started at: ${dateString(workflowStep.dateCreated)}, failed at: ${dateString(new Date())}" as String)
+        message << ("Restart count: ${workflowStep.restartCount}" as String)
         if (workflowStep.restartCount > 0) {
-            message << "Restarted from ID: ${workflowStep.restartedFrom?.id}, started at: ${dateString(workflowStep.restartedFrom?.dateCreated)}"
+            message << ("Restarted from ID: ${workflowStep.restartedFrom?.id}, started at: ${dateString(workflowStep.restartedFrom?.dateCreated)}" as String)
         }
         if (workflowStep.restartCount > 1) {
             WorkflowStep originalStep = workflowStep.originalRestartedFrom
-            message << "Original ID: ${originalStep.id}, started at: ${dateString(originalStep.dateCreated)}"
+            message << ("Original ID: ${originalStep.id}, started at: ${dateString(originalStep.dateCreated)}" as String)
         }
 
         return message.join("\n")
@@ -215,10 +212,12 @@ class ErrorNotificationService {
 
         message << header("OTP message")
         message << workflowStep.workflowError.message ?: "None"
-        message << "Error page: ${grailsLinkGenerator.link(controller: 'workflowRunDetails', action: 'showError', id: workflowStep.id, absolute: 'true')}"
+        message << ("Error page: " +
+                "${grailsLinkGenerator.link(controller: 'workflowRunDetails', action: 'showError', id: workflowStep.id, absolute: 'true')}") as String
 
         message << header("Logs")
-        message << "Log page: ${grailsLinkGenerator.link(controller: 'workflowRunDetails', action: 'showLogs', id: workflowStep.id, absolute: 'true')}"
+        message << ("Log page: " +
+                "${grailsLinkGenerator.link(controller: 'workflowRunDetails', action: 'showLogs', id: workflowStep.id, absolute: 'true')}") as String
 
         message << header("Cluster jobs")
 
@@ -226,22 +225,23 @@ class ErrorNotificationService {
 
         if (prevRunningWorkflowStep?.clusterJobs) {
             prevRunningWorkflowStep.clusterJobs.sort { it.id }.each { ClusterJob clusterJob ->
-                message << "ID: ${clusterJob.clusterJobId}"
-                message << "Name: ${clusterJob.clusterJobName}"
-                message << "Queued time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime) clusterJob.queued)}"
-                message << "Eligible time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime) clusterJob.eligible)}"
-                message << "Start time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime) clusterJob.started)}"
-                message << "End time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime) clusterJob.ended)}"
+                message << ("ID: ${clusterJob.clusterJobId}" as String)
+                message << ("Name: ${clusterJob.clusterJobName}" as String)
+                message << ("Queued time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime) clusterJob.queued)}" as String)
+                message << ("Eligible time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime) clusterJob.eligible)}" as String)
+                message << ("Start time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime) clusterJob.started)}" as String)
+                message << ("End time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime) clusterJob.ended)}" as String)
                 String runningHour = clusterJob.started && clusterJob.ended ? clusterJobDetailService.calculateElapsedWalltime(clusterJob).toHours() : 'na'
-                message << "Running hours: ${runningHour}"
-                message << "Requested walltime: ${clusterJob.requestedWalltime}"
-                message << "Log file: ${clusterJob.jobLog}"
-                message << "Log page: ${grailsLinkGenerator.link(controller: 'clusterJobDetail', action: 'show', id: clusterJob.id, absolute: 'true')}"
-                message << "Exit status: ${clusterJob.exitStatus}"
-                message << "Exit code: ${clusterJob.exitCode}"
-                message << "Node: ${clusterJob.node}"
-                message << "Used memory: ${clusterJob.usedMemory}"
-                message << "Requested memory: ${clusterJob.requestedMemory}"
+                message << ("Running hours: ${runningHour}" as String)
+                message << ("Requested walltime: ${clusterJob.requestedWalltime}" as String)
+                message << ("Log file: ${clusterJob.jobLog}" as String)
+                message << ("Log page: " +
+                        "${grailsLinkGenerator.link(controller: 'clusterJobDetail', action: 'show', id: clusterJob.id, absolute: 'true')}") as String
+                message << ("Exit status: ${clusterJob.exitStatus}" as String)
+                message << ("Exit code: ${clusterJob.exitCode}" as String)
+                message << ("Node: ${clusterJob.node}" as String)
+                message << ("Used memory: ${clusterJob.usedMemory}" as String)
+                message << ("Requested memory: ${clusterJob.requestedMemory}" as String)
                 message << ""
             }
         } else {
@@ -251,22 +251,22 @@ class ErrorNotificationService {
         message << header("WES jobs")
         if (prevRunningWorkflowStep?.wesRuns) {
             prevRunningWorkflowStep.wesRuns.sort { it.id }.each { WesRun wesRun ->
-                message << "WES run ID: ${wesRun.id}"
-                message << "WES identifier: ${wesRun.wesIdentifier}"
-                message << "Work directory: ${wesRun.workflowStep.workflowRun.workDirectory}/${wesRun.subPath}"
+                message << ("WES run ID: ${wesRun.id}" as String)
+                message << ("WES identifier: ${wesRun.wesIdentifier}" as String)
+                message << ("Work directory: ${wesRun.workflowStep.workflowRun.workDirectory}/${wesRun.subPath}" as String)
 
                 WesRunLog wesRunLog = wesRun.wesRunLog
-                message << "State: ${wesRunLog.state}"
-                message << "Request: ${wesRunLog?.runRequest}"
+                message << ("State: ${wesRunLog.state}" as String)
+                message << ("Request: ${wesRunLog?.runRequest}" as String)
 
                 WesLog runLog = wesRunLog?.runLog
-                message << "Name: ${runLog?.name}"
-                message << "Start time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime) runLog?.startTime)}"
-                message << "End time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime) runLog?.endTime)}"
-                message << "Log file command: ${runLog?.cmd?.replaceAll('\n', '\n    ')}"
-                message << "Stdout: ${runLog?.stdout}"
-                message << "Stderr: ${runLog?.stderr}"
-                message << "ExitCode: ${runLog?.exitCode}"
+                message << ("Name: ${runLog?.name}" as String)
+                message << ("Start time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime) runLog?.startTime)}" as String)
+                message << ("End time: ${TimeFormats.DATE_TIME.getFormattedZonedDateTime((ZonedDateTime) runLog?.endTime)}" as String)
+                message << ("Log file command: ${runLog?.cmd?.replaceAll('\n', '\n    ')}" as String)
+                message << ("Stdout: ${runLog?.stdout}" as String)
+                message << ("Stderr: ${runLog?.stderr}" as String)
+                message << ("ExitCode: ${runLog?.exitCode}" as String)
                 message << ""
             }
         } else {
@@ -291,7 +291,7 @@ class ErrorNotificationService {
     String getTicketUrls(Set<SeqTrack> seqTracks) {
         Set<Ticket> tickets = seqTracks ? ticketService.findAllTickets(seqTracks).findAll { Ticket ticket ->
             !ticket.finalNotificationSent
-        } : []
+        } : [] as Set
         return tickets.collect {
             ticketService.buildTicketDirectLink(it)
         }.join(',')

@@ -30,7 +30,6 @@ import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.utils.exceptions.FieldAlreadyUsedException
 import de.dkfz.tbi.otp.project.additionalField.*
 
-@CompileDynamic
 @Transactional
 class ProjectFieldsService {
 
@@ -38,6 +37,7 @@ class ProjectFieldsService {
     GrailsApplication grailsApplication
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     List<AbstractFieldDefinition> listAndFetchValueLists() {
         return AbstractFieldDefinition.list().sort { a, b ->
             a.sortNumber <=> b.sortNumber ?: a.name.compareToIgnoreCase(b.name)
@@ -47,6 +47,7 @@ class ProjectFieldsService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     List<AbstractFieldDefinition> usedDefinitions() {
         return AbstractFieldValue.createCriteria().listDistinct {
             projections {
@@ -56,6 +57,7 @@ class ProjectFieldsService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     AbstractFieldDefinition create(AbstractProjectFieldsCreateCommand cmd) {
         assert cmd
         assert cmd.validate()
@@ -96,6 +98,7 @@ class ProjectFieldsService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void deleteFieldDefinition(AbstractFieldDefinition definition) {
         assert definition: "definition not given"
         long count = AbstractFieldValue.countByDefinition(definition)
@@ -106,6 +109,7 @@ class ProjectFieldsService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     Map<String, List<ProjectFieldReferenceAble>> fetchProjectFieldReferenceAble() {
         return DomainReferenceFieldDefinition.list()*.domainClassName.unique().collectEntries {
             Class<? extends ProjectFieldReferenceAble> clazz = DomainReferenceFieldValue.classLoader.loadClass(it)
@@ -117,6 +121,7 @@ class ProjectFieldsService {
         }
     }
 
+    @CompileDynamic
     List<ProjectFieldReferenceAble> findReferenceAbleDomains() {
         return grailsApplication.domainClasses.findAll {
             ProjectFieldReferenceAble.isAssignableFrom(it.clazz)

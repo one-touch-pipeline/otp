@@ -29,7 +29,6 @@ import org.hibernate.sql.JoinType
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.utils.FormatHelper
 
-@CompileDynamic
 @Transactional
 class IndelResultsService extends AbstractAnalysisResultsService<IndelCallingInstance> {
 
@@ -39,6 +38,7 @@ class IndelResultsService extends AbstractAnalysisResultsService<IndelCallingIns
     void appendQcFetchingCriteria(Criteria criteria) {
     }
 
+    @CompileDynamic
     @Override
     void appendQcProjectionCriteria(Criteria criteria) {
         criteria.indelQualityControl(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
@@ -78,7 +78,7 @@ class IndelResultsService extends AbstractAnalysisResultsService<IndelCallingIns
                 somaticSmallVarsInControlPass                   : data.somaticSmallVarsInControlPass ?: "",
                 tindaSomaticAfterRescue                         : data.tindaSomaticAfterRescue ?: "",
                 tindaSomaticAfterRescueMedianAlleleFreqInControl: data.tindaSomaticAfterRescueMedianAlleleFreqInControl ?
-                        FormatHelper.formatNumber(data.tindaSomaticAfterRescueMedianAlleleFreqInControl) : "",
+                        FormatHelper.formatNumber(data.tindaSomaticAfterRescueMedianAlleleFreqInControl as Number) : "",
         ]
     }
 }

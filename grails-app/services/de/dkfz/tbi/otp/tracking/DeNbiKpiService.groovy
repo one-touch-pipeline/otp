@@ -39,7 +39,6 @@ import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 /**
  * Service to provide different Key Performance Indicators (KPIs) for de.NBI
  */
-@CompileDynamic
 @Transactional
 class DeNbiKpiService {
 
@@ -50,6 +49,7 @@ class DeNbiKpiService {
      * @param to date
      * @return DeNbiKpi
      */
+    @CompileDynamic
     DeNbiKpi getPanCanKpi(Date from, Date to) {
         List<String> panCanProjects = RoddyBamFile.createCriteria().list {
             lt("dateCreated", to)
@@ -83,6 +83,7 @@ class DeNbiKpiService {
      * @param to date
      * @return DeNbiKpi
      */
+    @CompileDynamic
     DeNbiKpi getRnaAlignmentKpi(Date from, Date to) {
         List<String> rnaAlignmentProjects = RnaRoddyBamFile.createCriteria().list {
             lt("dateCreated", to)
@@ -116,6 +117,7 @@ class DeNbiKpiService {
      * @param to date
      * @return DeNbiKpi
      */
+    @CompileDynamic
     DeNbiKpi getCellRangerKpi(Date from, Date to) {
         List<String> cellRangerProjects = AbstractBamFile.createCriteria().list {
             lt("dateCreated", to)
@@ -148,6 +150,7 @@ class DeNbiKpiService {
      * @param to date
      * @return DeNbiKpi
      */
+    @CompileDynamic
     DeNbiKpi getSnvCallingKpi(Date from, Date to) {
         Closure searchClosure = getBamFilePairAnalysisProjectSearchClosure(from, to)
         List<String> snvCallingProjects = AbstractSnvCallingInstance.createCriteria().list(searchClosure) as List<String>
@@ -161,6 +164,7 @@ class DeNbiKpiService {
      * @param to date
      * @return DeNbiKpi
      */
+    @CompileDynamic
     DeNbiKpi getIndelKpi(Date from, Date to) {
         Closure searchClosure = getBamFilePairAnalysisProjectSearchClosure(from, to)
         List<String> indelProjects = IndelCallingInstance.createCriteria().list(searchClosure) as List<String>
@@ -174,6 +178,7 @@ class DeNbiKpiService {
      * @param to date
      * @return DeNbiKpi
      */
+    @CompileDynamic
     DeNbiKpi getSophiaKpi(Date from, Date to) {
         Closure searchClosure = getBamFilePairAnalysisProjectSearchClosure(from, to)
         List<String> sophiaProjects = SophiaInstance.createCriteria().list(searchClosure) as List<String>
@@ -187,6 +192,7 @@ class DeNbiKpiService {
      * @param to date
      * @return DeNbiKpi
      */
+    @CompileDynamic
     DeNbiKpi getAceseqKpi(Date from, Date to) {
         Closure searchClosure = getBamFilePairAnalysisProjectSearchClosure(from, to)
         List<String> aceseqProjects = AceseqInstance.createCriteria().list(searchClosure) as List<String>
@@ -200,6 +206,7 @@ class DeNbiKpiService {
      * @param to date
      * @return DeNbiKpi
      */
+    @CompileDynamic
     DeNbiKpi getRunYapsaKpi(Date from, Date to) {
         Closure searchClosure = getBamFilePairAnalysisProjectSearchClosure(from, to)
         List<String> runYapsaProjects = RunYapsaInstance.createCriteria().list(searchClosure) as List<String>
@@ -213,6 +220,7 @@ class DeNbiKpiService {
      * @param to date
      * @return DeNbiKpi
      */
+    @CompileDynamic
     DeNbiKpi getClusterJobKpi(Date from, Date to) {
         List<String> clusterJobProjects = [
                 // old system
@@ -262,6 +270,7 @@ class DeNbiKpiService {
      *
      * @return number of users
      */
+    @CompileDynamic
     int countUsersInProjects(List<String> projectNames) {
         if (!projectNames) {
             return 0
@@ -286,6 +295,7 @@ class DeNbiKpiService {
      * @param to Date
      * @return hibernate Criteria
      */
+    @CompileDynamic
     private Closure getBamFilePairAnalysisProjectSearchClosure(Date from, Date to) {
         return {
             lt("dateCreated", to)

@@ -27,11 +27,11 @@ import groovy.transform.CompileDynamic
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
-@CompileDynamic
 @Transactional
 class RoddyBamFileWithdrawService extends AbstractWithdrawBamFileService<RoddyBamFile> {
 
     @Override
+    @CompileDynamic
     List<RoddyBamFile> collectObjects(List<SeqTrack> seqTrackList) {
         List<RoddyBamFile> roddyBamFiles = RoddyBamFile.createCriteria().list {
             seqTracks {

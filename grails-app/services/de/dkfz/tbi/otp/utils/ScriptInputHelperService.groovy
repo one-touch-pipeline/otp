@@ -29,7 +29,6 @@ import de.dkfz.tbi.otp.project.Project
 /**
  * A service for parsing inputs and returning values.
  */
-@CompileDynamic
 class ScriptInputHelperService {
 
     private static final int INPUT_INDEX_SAMPLE_DEFINITION_PID = 0
@@ -102,6 +101,7 @@ class ScriptInputHelperService {
      *
      * It uses {@link #parseHelper(String)} for parsing the input.
      */
+    @CompileDynamic
     List<SeqTrackWithComment> seqTrackById(String input) {
         return parseAndSplitHelper(input).collect { List<String> values ->
             assert values.size() == 2: "A multi input for seqType by ID is defined by 2 columns"
@@ -140,6 +140,7 @@ class ScriptInputHelperService {
      *
      * It uses {@link #parseAndSplitHelper(String)} with the separator {@link #SPLIT_SEPARATOR} for parsing the input.
      */
+    @CompileDynamic
     List<SeqTrackWithComment> seqTracksBySampleDefinition(String input) {
         return parseAndSplitHelper(input).collectMany { List<String> values ->
             assert values.size() == INPUT_INDEX_SAMPLE_DEFINITION_COLUMN_COUNT: "A multi input for sample seqType is defined by 7 columns"
@@ -219,6 +220,7 @@ class ScriptInputHelperService {
      *
      * It uses {@link #parseAndSplitHelper(String)} with the separator {@link #SPLIT_SEPARATOR} for parsing the input.
      */
+    @CompileDynamic
     List<SeqTrackWithComment> seqTracksByLaneDefinition(String input) {
         return parseAndSplitHelper(input).collectMany { List<String> values ->
             assert values.size() == INPUT_INDEX_LANE_DEFINITION_COLUMN_COUNT: "A multi input for lane is defined by 5 columns"

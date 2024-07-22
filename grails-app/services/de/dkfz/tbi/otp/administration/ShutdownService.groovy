@@ -47,7 +47,6 @@ import java.util.concurrent.locks.ReentrantLock
  * running but resumable jobs. In case of non-resumable Jobs the service will log a warning
  * message.
  */
-@CompileDynamic
 @Transactional
 class ShutdownService implements DisposableBean {
     // service is not transactional as the database access has to be locked
@@ -65,6 +64,7 @@ class ShutdownService implements DisposableBean {
     private final ReentrantLock lock = new ReentrantLock()
     private static boolean shutdownSuccessful = false
 
+    @CompileDynamic
     @Override
     void destroy() {
         ShutdownInformation info = currentPlannedShutdown()
@@ -116,6 +116,7 @@ class ShutdownService implements DisposableBean {
      * The scheduler gets stopped, so that no new Processes or ProcessingSteps get started.
      * @param reason The reason why the server is being shut down. This is logged in the database.
      */
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     Errors planShutdown(String reason) {
         lock.lock()
@@ -138,6 +139,7 @@ class ShutdownService implements DisposableBean {
      * Cancels a currently running shutdown process.
      * The scheduler gets started again.
      */
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     Errors cancelShutdown() throws OtpException {
         lock.lock()
@@ -164,6 +166,7 @@ class ShutdownService implements DisposableBean {
      * Retrieves the shutdown information for the currently planned shutdown if any.
      * @return Currently planned shutdown information or null if there is no planned shutdown.
      */
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     ShutdownInformation currentPlannedShutdown() {
         return CollectionUtils.atMostOneElement(ShutdownInformation.findAllBySucceededIsNullAndCanceledIsNull())
@@ -218,6 +221,7 @@ class ShutdownService implements DisposableBean {
         }
     }
 
+    @CompileDynamic
     @Deprecated
     private void suspendProcessingStep(ProcessingStep step) {
         processService.setOperatorIsAwareOfFailure(step.process, false)

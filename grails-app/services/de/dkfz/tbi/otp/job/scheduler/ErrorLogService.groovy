@@ -40,7 +40,6 @@ import static org.springframework.util.Assert.notNull
  * with the point in time when the exception occurred is appended as exception itself
  * is by definition of the file name completely equivalent to the already stored.
  */
-@CompileDynamic
 @Transactional
 class ErrorLogService {
 
@@ -64,6 +63,7 @@ class ErrorLogService {
      * @param thrownException The thrown exception
      * @return Unique hash of caught exception.
      */
+    @CompileDynamic
     String log(Throwable thrownException) {
         String exceptionElements = thrownException.message
         thrownException.stackTrace.each {
@@ -79,6 +79,7 @@ class ErrorLogService {
      * @param identifier The stacktrace's identifier
      * @return The stacktrace if found otherwise an exception is thrown with the reason why the stacktrace can not be returned
      */
+    @CompileDynamic
     @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
     String loggedError(String identifier) {
         File stacktraceFile = getStackTracesFile(identifier)
@@ -134,6 +135,7 @@ class ErrorLogService {
      * @param thrownException The ThrownException to be stored
      * @return String with complete xml file.
      */
+    @CompileDynamic
     private void contentToXml(final Throwable thrownException, final File xmlFile) {
         StringWriter writer = new StringWriter()
         MarkupBuilder xml = new MarkupBuilder(writer)

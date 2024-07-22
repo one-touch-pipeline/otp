@@ -30,17 +30,18 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 
 import java.time.LocalDate
 
-@CompileDynamic
 @Transactional
 class WorkflowVersionService {
 
     CommentService commentService
     MergingCriteriaService mergingCriteriaService
 
+    @CompileDynamic
     List<WorkflowVersion> list() {
         return WorkflowVersion.list()
     }
 
+    @CompileDynamic
     List<WorkflowVersion> findAllByWorkflow(Workflow workflow) {
         return WorkflowVersion.createCriteria().list {
             apiVersion {
@@ -49,6 +50,7 @@ class WorkflowVersionService {
         }
     }
 
+    @CompileDynamic
     List<WorkflowVersion> findAllByWorkflows(List<Workflow> workflows) {
         if (!workflows) {
             return []
@@ -60,6 +62,7 @@ class WorkflowVersionService {
         } as List<WorkflowVersion>
     }
 
+    @CompileDynamic
     List<WorkflowVersion> findAllByWorkflowId(Long workflowId) {
         return WorkflowVersion.createCriteria().list {
             apiVersion {
@@ -70,6 +73,7 @@ class WorkflowVersionService {
         } as List<WorkflowVersion>
     }
 
+    @CompileDynamic
     List<WorkflowVersion> findAllByWorkflowSeqTypeAndReferenceGenome(Workflow workflow, SeqType seqType, ReferenceGenome referenceGenome) {
         return WorkflowVersion.createCriteria().list {
             if (workflow) {
@@ -90,6 +94,7 @@ class WorkflowVersionService {
         } as List<WorkflowVersion>
     }
 
+    @CompileDynamic
     WorkflowVersion updateWorkflowVersion(UpdateWorkflowVersionDto updateDto) {
         WorkflowVersion workflowVersion = WorkflowVersion.get(updateDto.workflowVersionId)
         commentService.saveComment(workflowVersion, updateDto.comment)

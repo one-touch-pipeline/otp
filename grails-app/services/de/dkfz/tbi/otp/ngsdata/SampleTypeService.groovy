@@ -31,10 +31,10 @@ import de.dkfz.tbi.otp.project.Project
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
-@CompileDynamic
 @Transactional
 class SampleTypeService {
 
+    @CompileDynamic
     SampleType findById(long it) {
         return SampleType.get(it)
     }
@@ -43,6 +43,7 @@ class SampleTypeService {
      * return the used sample types of the project
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
+    @CompileDynamic
     List findUsedSampleTypesForProject(Project project) {
         List<SeqType> allAnalysableSeqTypes = SeqTypeService.allAnalysableSeqTypes
 
@@ -71,6 +72,7 @@ class SampleTypeService {
         return sampleTypes.unique().sort { it.name }
     }
 
+    @CompileDynamic
     List<SeqTrack> getSeqTracksWithoutSampleCategory(List<SeqTrack> seqTracks) {
         List<SeqType> analysableSeqTypes = SeqTypeService.allAnalysableSeqTypes
         return seqTracks.findAll {
@@ -86,6 +88,7 @@ class SampleTypeService {
         }.values().flatten()
     }
 
+    @CompileDynamic
     static SampleType findSampleTypeByName(String name) {
         return atMostOneElement(SampleType.findAllByNameIlike(SqlUtil.replaceWildcardCharactersInLikeExpression(name)))
     }
@@ -93,15 +96,18 @@ class SampleTypeService {
     /**
      * @return The category of this sample type or <code>null</code> if it is not configured.
      */
+    @CompileDynamic
     static SampleTypePerProject.Category getCategory(final Project project, SampleType sampleType) {
         assert project
         return atMostOneElement(SampleTypePerProject.findAllWhere(project: project, sampleType: sampleType))?.category
     }
 
+    @CompileDynamic
     List<SampleType> findAllBySpecificReferenceGenome(SampleType.SpecificReferenceGenome specificReferenceGenome) {
         return SampleType.findAllBySpecificReferenceGenome(specificReferenceGenome)
     }
 
+    @CompileDynamic
     List<SampleType> findAllUsedOnceByProjectAndSeqType(Project project, SeqType seqType) {
         return SeqTrack.createCriteria().list {
             projections {

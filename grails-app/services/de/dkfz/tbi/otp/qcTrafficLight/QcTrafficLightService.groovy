@@ -37,7 +37,6 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import static de.dkfz.tbi.otp.qcTrafficLight.QcThreshold.ThresholdLevel.ERROR
 
-@CompileDynamic
 @Transactional
 class QcTrafficLightService {
 
@@ -99,6 +98,7 @@ class QcTrafficLightService {
         }
     }
 
+    @CompileDynamic
     private void setQcTrafficLightStatus(AbstractBamFile bamFile, AbstractBamFile.QcTrafficLightStatus qcTrafficLightStatus) {
         bamFile.qcTrafficLightStatus = qcTrafficLightStatus
         assert bamFile.save(flush: true)
@@ -122,6 +122,7 @@ class QcTrafficLightService {
         setQcTrafficLightStatus(bamFile, qcStatus)
     }
 
+    @CompileDynamic
     private boolean qcValuesExceedErrorThreshold(AbstractBamFile bamFile, QcTrafficLightValue qc) {
         List<String> properties = QcThreshold.getValidQcPropertyForQcClass(qc.class.name)
         Map<String, ?> qcMap = properties.collectEntries {

@@ -22,20 +22,18 @@
 package de.dkfz.tbi.otp.infrastructure
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 
 import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 
-import java.nio.file.*
+import java.nio.file.Path
 
 /**
  * File Service containing the methods for retrieving the files and directories in the work path for rawSequenceFiles.
  */
 @Slf4j
-@CompileDynamic
 @Transactional
 class RawSequenceDataWorkFileService implements RawSequenceDataFileService {
     FilestoreService filestoreService

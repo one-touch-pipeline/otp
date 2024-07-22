@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.dataprocessing.bamfiles
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
@@ -31,7 +30,6 @@ import de.dkfz.tbi.otp.filestore.PathOption
 
 import java.nio.file.Path
 
-@CompileDynamic
 @Transactional
 class SingleCellBamFileService<T extends AbstractBamFile> extends AbstractAbstractBamFileService<SingleCellBamFile> {
 
@@ -74,10 +72,7 @@ class SingleCellBamFileService<T extends AbstractBamFile> extends AbstractAbstra
             'analysis',
     ].asImmutable()
 
-    static final List<String> CREATED_RESULT_FILES_AND_DIRS = [
-            CREATED_RESULT_FILES,
-            CREATED_RESULT_DIRS,
-    ].flatten().asImmutable()
+    static final List<String> CREATED_RESULT_FILES_AND_DIRS = (CREATED_RESULT_FILES + CREATED_RESULT_DIRS).asImmutable()
 
     Path getWorkDirectory(SingleCellBamFile bamFile) {
         return abstractBamFileService.getBaseDirectory(bamFile).resolve(bamFile.workDirectoryName)

@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.utils.exceptions.FileAccessForProjectNotAllowedException
 import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
 import de.dkfz.tbi.otp.workflow.fastqc.WesFastQcWorkflow
 
-@CompileDynamic
 @Transactional
 class WorkflowService {
 
@@ -47,16 +46,19 @@ class WorkflowService {
             WesFastQcWorkflow.WORKFLOW,
     ].toSet().asImmutable()
 
+    @CompileDynamic
     Workflow getExactlyOneWorkflow(String name) {
         return CollectionUtils.exactlyOneElement(Workflow.findAllByNameAndDeprecatedDateIsNull(name), "Could not find workflow with name '${name}'")
     }
 
+    @CompileDynamic
     WorkflowRun getUniqueWorkflowFromWorkflowSteps(List<Long> stepIds) {
         List<WorkflowStep> steps = WorkflowStep.findAllByIdInList(stepIds)
         assert steps*.workflowRun.unique().size() == 1
         return CollectionUtils.atMostOneElement(steps*.workflowRun.unique())
     }
 
+    @CompileDynamic
     Set<SeqType> getSupportedSeqTypes(String name) {
         return getSupportedSeqTypesOfVersions(Workflow.findAllByName(name))
     }
@@ -67,6 +69,7 @@ class WorkflowService {
         }
     }
 
+    @CompileDynamic
     WorkflowRun createRestartedWorkflow(WorkflowStep step, boolean startDirectly = true) {
         assert step
         assert step.workflowRun.state in [WorkflowRun.State.FAILED, WorkflowRun.State.FAILED_WAITING]
@@ -94,6 +97,7 @@ class WorkflowService {
         return run
     }
 
+    @CompileDynamic
     private WorkflowRun createNewRunBasedOnOldRun(WorkflowRun oldRun) {
         return new WorkflowRun([
                 workflow        : oldRun.workflow,
@@ -108,6 +112,7 @@ class WorkflowService {
         ]).save(flush: true)
     }
 
+    @CompileDynamic
     private void createInputArtefactsForNewRun(WorkflowRun oldRun, WorkflowRun newRun) {
         oldRun.inputArtefacts.each { String role, WorkflowArtefact inputArtefact ->
             new WorkflowRunInputArtefact([
@@ -118,6 +123,7 @@ class WorkflowService {
         }
     }
 
+    @CompileDynamic
     private void createAndConnectOutputArtefactsForNewRun(WorkflowRun oldRun, WorkflowRun newRun) {
         OtpWorkflow otpWorkflow = otpWorkflowService.lookupOtpWorkflowBean(oldRun)
 
@@ -150,6 +156,7 @@ class WorkflowService {
         }
     }
 
+    @CompileDynamic
     List<SeqType> getSupportedSeqTypesOfVersions(List<Workflow> workflows) {
         if (!workflows) {
             return []
@@ -163,6 +170,7 @@ class WorkflowService {
         }.unique()
     }
 
+    @CompileDynamic
     List<SeqType> getSupportedSeqTypesOfVersions(Workflow workflow) {
         if (!workflow) {
             return []
@@ -177,6 +185,7 @@ class WorkflowService {
         }.unique()
     }
 
+    @CompileDynamic
     List<Workflow> findAllFastqcWorkflows() {
         return Workflow.createCriteria().list {
             isNull("deprecatedDate")
@@ -185,6 +194,7 @@ class WorkflowService {
         } as List<Workflow>
     }
 
+    @CompileDynamic
     List<Workflow> findAllAlignmentWorkflows() {
         List<String> alignmentWorkflowNameList = alignmentWorkflowNames
         return alignmentWorkflowNameList ? Workflow.findAllByBeanNameInListAndDeprecatedDateIsNull(alignmentWorkflowNameList).sort { it.name } : []
@@ -204,32 +214,38 @@ class WorkflowService {
         return workflowBeans.findAll { it.value.isAlignment() }*.key
     }
 
+    @CompileDynamic
     List<Workflow> findAllAnalysisWorkflows() {
         Map<String, OtpWorkflow> workflowBeans = applicationContext.getBeansOfType(OtpWorkflow)
         List<String> analysisWorkflowNames = workflowBeans.findAll { it.value.isAnalysis() }*.key
         return analysisWorkflowNames ? Workflow.findAllByBeanNameInListAndDeprecatedDateIsNull(analysisWorkflowNames).sort { it.name } : []
     }
 
+    @CompileDynamic
     void enableWorkflow(Workflow workflow) {
         assert workflow
         workflow.enabled = true
         workflow.save(flush: true)
     }
 
+    @CompileDynamic
     void disableWorkflow(Workflow workflow) {
         assert workflow
         workflow.enabled = false
         workflow.save(flush: true)
     }
 
+    @CompileDynamic
     List<Workflow> list() {
         return Workflow.list()
     }
 
+    @CompileDynamic
     List<Workflow> findAllByDeprecatedDateIsNull() {
         return Workflow.findAllByDeprecatedDateIsNull()
     }
 
+    @CompileDynamic
     Workflow updateWorkflow(UpdateWorkflowDto updateWorkflowDto) {
         Workflow workflow = Workflow.get(updateWorkflowDto.id)
         workflow.priority = updateWorkflowDto.priority

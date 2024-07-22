@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 /**
  * Service to retrieve information about Runs.
  */
-@CompileDynamic
 @Transactional
 class RunService {
 
@@ -42,6 +41,7 @@ class RunService {
     }
 
     @PostAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     Run getRun(String identifier) {
         if (!identifier) {
             return null
@@ -70,6 +70,7 @@ class RunService {
      * @return List of ProcessParameter
      * */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     List<ProcessParameter> retrieveProcessParameters(Run run) {
         if (!run) {
             return []
@@ -78,6 +79,7 @@ class RunService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     Collection<MetaDataFile> retrieveMetaDataFiles(Run run) {
         Collection<RawSequenceFile> rawSequenceFiles = RawSequenceFile.findAllByRun(run)
         return rawSequenceFiles ?
@@ -101,6 +103,7 @@ class RunService {
      * @return Data Structure as described above
      * */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     Map<SeqTrack, Map<String, Object>> retrieveSequenceTrackInformation(Run run) {
         Map<SeqTrack, Map<String, Object>> returnData = [:]
         if (!run) {
@@ -121,6 +124,7 @@ class RunService {
      * @return List of DataFiles with errors.
      * */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     List<RawSequenceFile> rawSequenceFilesWithError(Run run) {
         return RawSequenceFile.findAllByRunAndUsed(run, false, [sort: "fileName"])
     }
@@ -130,6 +134,7 @@ class RunService {
      * @param run to check.
      * @return boolean false or true.
      * */
+    @CompileDynamic
     boolean isRunEmpty(Run run) {
         assert run: "The input run of the method isRunEmpty is null"
         return !(RawSequenceFile.findAllByRun(run) || SeqTrack.findAllByRun(run))

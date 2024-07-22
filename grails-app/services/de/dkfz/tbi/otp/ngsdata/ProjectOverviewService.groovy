@@ -27,11 +27,11 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.project.Project
 
-@CompileDynamic
 @Transactional
 class ProjectOverviewService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
+    @CompileDynamic
     List overviewProjectQuery(Project project) {
         List seq = AggregateSequences.withCriteria {
             eq("projectId", project?.id)
@@ -72,6 +72,7 @@ class ProjectOverviewService {
         return queryList
     }
 
+    @CompileDynamic
     List patientsAndSamplesGBCountPerProject(Project project) {
         List seq = AggregateSequences.withCriteria {
             eq("projectId", project?.id)
@@ -88,6 +89,7 @@ class ProjectOverviewService {
         return seq
     }
 
+    @CompileDynamic
     Long individualCountByProject(Project project) {
         List seq = AggregateSequences.withCriteria {
             eq("projectId", project?.id)
@@ -96,6 +98,7 @@ class ProjectOverviewService {
         return seq[0]
     }
 
+    @CompileDynamic
     List sampleTypeNameCountBySample(Project project) {
         List seq = AggregateSequences.withCriteria {
             eq("projectId", project?.id)
@@ -107,6 +110,7 @@ class ProjectOverviewService {
         return seq
     }
 
+    @CompileDynamic
     List centerNameRunId(Project project) {
         List seq = Sequence.withCriteria {
             eq("projectId", project?.id)
@@ -119,6 +123,7 @@ class ProjectOverviewService {
         return seq
     }
 
+    @CompileDynamic
     List centerNameRunIdLastMonth(Project project) {
         Calendar cal = Calendar.instance
         cal.add(Calendar.MONTH, -6)

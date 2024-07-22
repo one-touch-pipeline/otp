@@ -37,7 +37,6 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  * This code was copied from the Grails Spring Security Core plugin
  * (grails.plugin.springsecurity.SpringSecurityService and grails.plugin.springsecurity.SpringSecurityUtils)
  */
-@CompileDynamic
 @Transactional
 class SecurityService {
 
@@ -49,6 +48,7 @@ class SecurityService {
         return authentication && !authenticationTrustResolver.isAnonymous(authentication)
     }
 
+    @CompileDynamic
     User getCurrentUser() {
         if (!loggedIn) {
             return null
@@ -85,6 +85,7 @@ class SecurityService {
      * Returns the true current user, so if the user is switched it returns not the switched user but
      * the user that switched to the current user.
      */
+    @CompileDynamic
     User getUserSwitchInitiator() {
         if (switched) {
             SwitchUserGrantedAuthority authority = authentication.authorities
@@ -102,7 +103,7 @@ class SecurityService {
     }
 
     private List<PseudoEnvironment> getWhitelistedEnvironments() {
-        return PseudoEnvironment.values() - PseudoEnvironment.PRODUCTION
+        return PseudoEnvironment.values().toList() - PseudoEnvironment.PRODUCTION
     }
 
     boolean isToBeBlockedBecauseOfSwitchedUser() {

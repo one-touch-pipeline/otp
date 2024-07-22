@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 import java.nio.file.*
 import java.nio.file.attribute.PosixFilePermission
 
-@CompileDynamic
 @Transactional
 class ProjectInfoService {
 
@@ -49,6 +48,7 @@ class ProjectInfoService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     ProjectInfo createProjectInfoAndUploadFile(Project project, AddProjectInfoCommand cmd) {
         cmd.validate()
         assert !cmd.errors.hasErrors()
@@ -68,6 +68,7 @@ class ProjectInfoService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     ProjectInfo createProjectInfoByPath(Project project, Path path) {
         ProjectInfo projectInfo = new ProjectInfo(
                 fileName: path.fileName.toString(),
@@ -84,6 +85,7 @@ class ProjectInfoService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void deleteProjectInfo(ProjectInfoCommand cmd) {
         cmd.validate()
         assert !cmd.errors.hasErrors()
@@ -117,6 +119,7 @@ class ProjectInfoService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     ProjectInfo updateProjectInfoComment(ProjectInfo projectInfo, String comment) {
         projectInfo.comment = comment
         return projectInfo.save(flush: true)

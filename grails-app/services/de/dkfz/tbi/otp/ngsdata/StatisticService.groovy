@@ -30,7 +30,6 @@ import de.dkfz.tbi.otp.utils.TimeFormats
 
 import java.time.*
 
-@CompileDynamic
 @Transactional
 class StatisticService {
 
@@ -40,6 +39,7 @@ class StatisticService {
 
     ProjectService projectService
 
+    @CompileDynamic
     List projectCountPerDay(ProjectGroup projectGroup) {
         String dateTimeFormatString = createDateTimeFormatString('project')
         String hql = """\
@@ -57,6 +57,7 @@ class StatisticService {
         return Project.findAll(hql)
     }
 
+    @CompileDynamic
     List sampleCountPerSequenceType(ProjectGroup projectGroup) {
         List seq = AggregateSequences.withCriteria {
             projections {
@@ -72,6 +73,7 @@ class StatisticService {
         return seq
     }
 
+    @CompileDynamic
     List patientsCountPerSequenceType(ProjectGroup projectGroup) {
         List seq = AggregateSequences.withCriteria {
             projections {
@@ -103,6 +105,7 @@ class StatisticService {
      * @param projectList whitelist for projects to use. Using null optimizes the query to use all projects.
      * @return a List of Lists, with [0] being the date and [1] being the grouped value
      */
+    @CompileDynamic
     private List seqTrackPropertyGroupedByDayAndFilteredByProjects(String selectAggregateHql, List<Project> projectList) {
         String dateTimeFormatString = createDateTimeFormatString('st')
         String hql = """\
@@ -129,6 +132,7 @@ class StatisticService {
         return RawSequenceFile.findAll(hql)
     }
 
+    @CompileDynamic
     List projectCountPerSequenceType(ProjectGroup projectGroup) {
         List seq = Sequence.withCriteria {
             projections {
@@ -144,6 +148,7 @@ class StatisticService {
         return seq
     }
 
+    @CompileDynamic
     List sampleTypeCountBySeqType(Project project) {
         List seq = AggregateSequences.withCriteria {
             eq("projectId", project?.id)
@@ -172,6 +177,7 @@ class StatisticService {
         return getCountPerDate(data)
     }
 
+    @CompileDynamic
     private Map getCountPerDate(List data) {
         if (!data) {
             return [data: []]

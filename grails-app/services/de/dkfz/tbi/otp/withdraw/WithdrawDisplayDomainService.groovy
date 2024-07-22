@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.withdraw
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
@@ -35,7 +34,6 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
  *
  * The service should used outside.
  */
-@CompileDynamic
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
 @Transactional
 class WithdrawDisplayDomainService {
@@ -84,8 +82,8 @@ class WithdrawDisplayDomainService {
                 rawSequenceFile.fileName,
         ]
         if (includeWithdrawnColumns) {
-            info << rawSequenceFile.fileWithdrawn
-            info << rawSequenceFile.withdrawnDate
+            info << rawSequenceFile.fileWithdrawn.toString()
+            info << rawSequenceFile.withdrawnDate.toString()
             info << rawSequenceFile.withdrawnComment?.replace('[\n\r]+', ' ')
         }
         return info.join('\t')

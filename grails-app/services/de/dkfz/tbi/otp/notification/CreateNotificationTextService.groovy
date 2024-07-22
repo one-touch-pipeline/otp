@@ -45,7 +45,6 @@ import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
 import static de.dkfz.tbi.otp.tracking.Ticket.ProcessingStep.*
 
-@CompileDynamic
 @Transactional
 class CreateNotificationTextService {
 
@@ -101,6 +100,7 @@ class CreateNotificationTextService {
      *
      * Only creates the notification for finished steps and omits others, even if provided.
      */
+    @CompileDynamic
     String buildStepNotifications(List<ProcessingStep> processingSteps, ProcessingStatus status) {
         Map<ProcessingStep, String> validNotifications = processingSteps.collectEntries { ProcessingStep processingStep ->
             [(processingStep): "${processingStep}Notification"(status).trim()]
@@ -179,8 +179,8 @@ class CreateNotificationTextService {
         }.sort().each { String sample, List<SeqTrackProcessingStatus> seqTracksOfSample ->
             seqTracksOfSample.groupBy {
                 it.alignmentProcessingStatus != NOTHING_DONE_WONT_DO
-            }.each { boolean willAlign, List<SeqTrackProcessingStatus> seqTracksOfAlign ->
-                samples.add("${willAlign ? '[A]' : '[-]'} ${sample} (${seqTracksOfAlign*.seqTrack.sampleIdentifier.unique().sort().join(", ")})")
+            }.each { Boolean willAlign, List<SeqTrackProcessingStatus> seqTracksOfAlign ->
+                samples.add("${willAlign ? '[A]' : '[-]'} ${sample} (${seqTracksOfAlign*.seqTrack.sampleIdentifier.unique().sort().join(", ")})" as String)
             }
         }
 
@@ -425,6 +425,7 @@ class CreateNotificationTextService {
         return variantCallingNotification(status, RUN_YAPSA, 'notification.template.references.runyapsa')
     }
 
+    @CompileDynamic
     String variantCallingNotification(ProcessingStatus status, ProcessingStep notificationStep, String additionalInfo = null) {
         assert status
 
@@ -499,6 +500,7 @@ class CreateNotificationTextService {
         return "${seqTrack.individual.displayName} ${seqTrack.sampleType.displayName} ${seqTrack.seqType.displayNameWithLibraryLayout}"
     }
 
+    @CompileDynamic
     String getSeqTypeDirectories(List<SeqTrack> seqTracks) {
         assert seqTracks
 
@@ -526,6 +528,7 @@ class CreateNotificationTextService {
         }.unique().sort().join('\n')
     }
 
+    @CompileDynamic
     String variantCallingDirectories(List<SamplePair> samplePairsFinished, ProcessingStep notificationStep) {
         assert samplePairsFinished
         assert notificationStep

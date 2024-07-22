@@ -39,7 +39,6 @@ import java.util.concurrent.Semaphore
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
-@CompileDynamic
 @Transactional
 class RoddyExecutionService {
 
@@ -67,6 +66,7 @@ class RoddyExecutionService {
 
     private Semaphore numberOfRoddyProcesses
 
+    @CompileDynamic
     void clearRoddyExecutionStoreDirectory(RoddyResult roddyResult) {
         if (roddyResult.roddyExecutionDirectoryNames && !roddyResult.workDirectory.exists()) {
             roddyResult.roddyExecutionDirectoryNames.clear()
@@ -131,6 +131,7 @@ class RoddyExecutionService {
         return submittedClusterJobs
     }
 
+    @CompileDynamic
     void saveRoddyExecutionStoreDirectory(RoddyResult roddyResult, String roddyOutput, FileSystem fileSystem) {
         assert roddyResult
 

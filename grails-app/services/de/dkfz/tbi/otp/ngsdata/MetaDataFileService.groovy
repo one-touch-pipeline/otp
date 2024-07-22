@@ -26,10 +26,10 @@ import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-@CompileDynamic
 @Transactional(readOnly = true)
 class MetaDataFileService {
 
+    @CompileDynamic
     MetaDataFile findByFastqImportInstance(FastqImportInstance fastqImportInstance) {
         return CollectionUtils.exactlyOneElement(MetaDataFile.findAllByFastqImportInstance(fastqImportInstance))
     }

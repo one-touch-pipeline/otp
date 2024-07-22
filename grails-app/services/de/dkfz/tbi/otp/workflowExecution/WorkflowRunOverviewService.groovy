@@ -26,8 +26,8 @@ import groovy.transform.CompileDynamic
 
 import java.sql.Timestamp
 
-@CompileDynamic
 class WorkflowRunOverviewService {
+    @CompileDynamic
     Map<Pair<WorkflowRun.State, Workflow>, Long> getNumberOfRunsPerWorkflowAndState() {
         return WorkflowRun.createCriteria().list {
             projections {
@@ -40,6 +40,7 @@ class WorkflowRunOverviewService {
         }
     }
 
+    @CompileDynamic
     Map<Workflow, Timestamp> getLastRuns() {
         return WorkflowRun.executeQuery("""
             SELECT run.workflow.id, max(step.dateCreated)
@@ -52,6 +53,7 @@ class WorkflowRunOverviewService {
         }
     }
 
+    @CompileDynamic
     Map<Workflow, Timestamp> getLastFailedRuns() {
         return WorkflowRun.executeQuery("""
             SELECT run.workflow.id, max(step.lastUpdated)

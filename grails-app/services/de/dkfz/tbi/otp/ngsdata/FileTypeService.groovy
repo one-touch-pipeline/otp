@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
-@CompileDynamic
 @Transactional
 class FileTypeService {
 
@@ -39,6 +38,7 @@ class FileTypeService {
         return rawSequenceFile.fileType.type == FileType.Type.SEQUENCE
     }
 
+    @CompileDynamic
     List<FileType> alignmentSequenceTypes() {
         List<String> extensions = ["bam", "bwt"]
         return FileType.findAllByTypeAndSubTypeInList(FileType.Type.ALIGNMENT, extensions)
@@ -51,6 +51,7 @@ class FileTypeService {
      *
      * @return FileType
      */
+    @CompileDynamic
     static FileType getFileType(String filename, FileType.Type type) {
         List<FileType> types = FileType.findAllByType(type, [sort: "id", order: "asc"])
         for (FileType subType in types) {

@@ -27,23 +27,26 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-@CompileDynamic
 @Transactional
 class JobErrorDefinitionService {
 
+    @CompileDynamic
     JobDefinition findByName(String name) {
         return CollectionUtils.atMostOneElement(JobDefinition.findAllByName(name)) ?: null
     }
 
+    @CompileDynamic
     List<JobDefinition> findAll() {
         return JobDefinition.findAll()
     }
 
+    @CompileDynamic
     JobDefinition findByjobDefinitionNameAndjobExecutionPlanName(String jobDefinitionName, String jobExecutionPlanName) {
         return CollectionUtils.atMostOneElement(JobDefinition.findAllByNameAndPlan(jobDefinitionName,
                 CollectionUtils.atMostOneElement(JobExecutionPlan.findAllByNameAndObsoleted(jobExecutionPlanName, false))))
     }
 
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     Map<Object, Object> allJobErrorDefinition() {
         List<JobErrorDefinition> jobErrorDefinitionList = JobErrorDefinition.list()
@@ -81,6 +84,7 @@ class JobErrorDefinitionService {
         return [(value): newValueMap]
     }
 
+    @CompileDynamic
     Map<Object, Object> findDuplicates(Map jobErrorDefinition) {
         List list = []
         jobErrorDefinition.each { key, value ->
@@ -96,6 +100,7 @@ class JobErrorDefinitionService {
         return jobErrorDefinition
     }
 
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     void addErrorExpressionFirstLevel(JobErrorDefinition.Type type, String action, String errorExpression) {
         JobErrorDefinition newJobErrorDefinition = new JobErrorDefinition(
@@ -106,6 +111,7 @@ class JobErrorDefinitionService {
         newJobErrorDefinition.save(flush: true)
     }
 
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     void addErrorExpression(String type, String action, String errorExpression, JobErrorDefinition jobErrorDefinition) {
         JobErrorDefinition newJobErrorDefinition = new JobErrorDefinition(
@@ -118,12 +124,14 @@ class JobErrorDefinitionService {
         jobErrorDefinition.save(flush: true)
     }
 
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     void updateErrorExpression(JobErrorDefinition jobErrorDefinition, String errorExpression) {
         jobErrorDefinition.errorExpression = errorExpression
         jobErrorDefinition.save(flush: true)
     }
 
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     void addNewJob(JobErrorDefinition jobErrorDefinition, JobDefinition jobDefinition) {
         jobErrorDefinition.jobDefinitions.add(jobDefinition)

@@ -28,7 +28,6 @@ import org.hibernate.sql.JoinType
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractAnalysisResultsService
 
-@CompileDynamic
 @Transactional
 class SophiaResultsService extends AbstractAnalysisResultsService<SophiaInstance> {
 
@@ -38,6 +37,7 @@ class SophiaResultsService extends AbstractAnalysisResultsService<SophiaInstance
     void appendQcFetchingCriteria(Criteria criteria) {
     }
 
+    @CompileDynamic
     @Override
     void appendQcProjectionCriteria(Criteria criteria) {
         criteria.sophiaQc(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {

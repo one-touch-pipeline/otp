@@ -28,7 +28,6 @@ import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-@CompileDynamic
 @Transactional
 class SampleTypePerProjectService {
 
@@ -36,11 +35,13 @@ class SampleTypePerProjectService {
      * @return SampleTypePerProject for a given Project
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
+    @CompileDynamic
     List<SampleTypePerProject> findByProject(Project project) {
         return SampleTypePerProject.findAllByProject(project)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     SampleTypePerProject createOrUpdate(Project project, SampleType sampleType, SampleTypePerProject.Category category) {
         SampleTypePerProject sampleTypePerProject = CollectionUtils.atMostOneElement(SampleTypePerProject.findAllByProjectAndSampleType(project, sampleType))
         if (sampleTypePerProject) {

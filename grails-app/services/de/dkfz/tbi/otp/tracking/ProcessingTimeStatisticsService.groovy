@@ -35,12 +35,12 @@ import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 
-@CompileDynamic
 @Transactional
 class ProcessingTimeStatisticsService {
 
     TicketService ticketService
 
+    @CompileDynamic
     List<Ticket> findAllTicketsByDateBetweenAndSearch(LocalDate dateFrom, LocalDate dateTo, String search) {
         assert dateFrom: "No date 'from' is defined."
         assert dateTo: "No date 'to' is defined."
@@ -82,13 +82,14 @@ ${search ? """
         return tickets
     }
 
+    @CompileDynamic
     List formatData(Ticket ticket) {
         assert ticket: "No ticket defined."
 
         List<SeqTrack> seqTracks = ticketService.findAllSeqTracks(ticket) as List
         List<String> ilseIds = seqTracks.collect { it.ilseSubmission?.ilseNumber as String }.unique().sort()
         List<String> projectNames = seqTracks.collect { it.sample.individual.project.name }.unique().sort()
-        List<String> sampleNames = seqTracks.collect { "${it.sample.individual.pid} ${it.sample.sampleType.name}" }.unique().sort()
+        List<String> sampleNames = seqTracks.collect { "${it.sample.individual.pid} ${it.sample.sampleType.name}" as String }.unique().sort()
         List<String> runs = seqTracks.collect { it.run.name }.unique().sort()
 
         List data = [
@@ -138,6 +139,7 @@ ${search ? """
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
     void editTimestampProperty(Ticket ticket, String property, String dateString) {
         if (dateString == "") {
             ticket."${property}" = null

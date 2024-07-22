@@ -43,7 +43,6 @@ import java.util.zip.ZipFile
  * Creates and updates "FastqcDataFile" object.
  * Serves content of fastqc zipped output file.
  */
-@CompileDynamic
 @Transactional
 class FastqcDataFilesService {
 
@@ -153,6 +152,7 @@ class FastqcDataFilesService {
         }
     }
 
+    @CompileDynamic
     void updateFastqcProcessedFile(FastqcProcessedFile fastqc) {
         Path path = fastqcOutputPath(fastqc)
         if (fileService.fileIsReadable(path)) {
@@ -170,6 +170,7 @@ class FastqcDataFilesService {
      */
     // zip file only works local, not remote
     @SuppressWarnings("JavaIoPackageAccess")
+    @CompileDynamic
     InputStream getInputStreamFromZipFile(FastqcProcessedFile fastqcProcessedFile, String withinZipPath) {
         Path zipPath = fastqcOutputPath(fastqcProcessedFile, PathOption.REAL_PATH)
 
@@ -198,6 +199,7 @@ class FastqcDataFilesService {
      * @Deprecated Please use {@link #fastqcFileNameWithoutZipSuffix(FastqcProcessedFile)}}
      */
     @Deprecated
+    @CompileDynamic
     InputStream getInputStreamFromZipFile(RawSequenceFile rawSequenceFile, String withinZipPath) {
         return getInputStreamFromZipFile(CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllBySequenceFile(rawSequenceFile)), withinZipPath)
     }
