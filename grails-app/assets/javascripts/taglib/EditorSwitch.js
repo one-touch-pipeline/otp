@@ -137,7 +137,7 @@ $(() => {
           success('Success', 'Data stored successfully');
           $('p.edit-switch-label span', outerContainer).text($('textarea', container).val());
           if (data.updateMap) {
-            data.updateMap.forEach((key) => {
+            Object.keys(data.updateMap).forEach((key) => {
               const el = $(`.${key}`, outerContainer);
               el.text(data.updateMap[key]);
             });

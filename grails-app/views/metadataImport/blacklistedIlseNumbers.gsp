@@ -24,7 +24,7 @@
 <%@ page import="de.dkfz.tbi.otp.utils.TimeFormats" %>
 <html>
 <head>
-    <meta name="layout" content="main"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title><g:message code="metadataImport.blackListedIlseNumbers.title"/></title>
     <asset:javascript src="taglib/EditorSwitch.js"/>
     <asset:javascript src="common/CommentBox.js"/>
@@ -32,47 +32,59 @@
 
 <body>
 <div class="body">
-    <g:render template="/templates/messages"/>
-
     <h1><g:message code="metadataImport.blackListedIlseNumbers.title"/></h1>
 
     <h2><g:message code="metadataImport.blackListedIlseNumbers.create.description"/></h2>
 
-    <g:form useToken="true" action="addBlacklistedIlseNumbers" method="POST">
-        <span class="tooltipIcon" title="${g.message(code: "metadataImport.blackListedIlseNumbers.ilses.info")}">
-            <g:message code="metadataImport.blackListedIlseNumbers.ilses"/>
-        </span>: <g:textField name="ilse" size="15" value="${command?.ilse}"/>
-        <br><br>
-        <g:message code="metadataImport.blackListedIlseNumbers.comment"/>:<br>
-        <g:textArea name="comment" rows="5" cols="80" value="${command?.comment}"/>
-        <br><br>
-        <g:submitButton name="addButton" value="Add"/>
+    <g:form useToken="true" action="addBlacklistedIlseNumbers" method="POST" class="my-3">
+
+        <div class="mb-3">
+            <label for="ilse" title="${g.message(code: "metadataImport.blackListedIlseNumbers.ilses.info")}">
+                <g:message code="metadataImport.blackListedIlseNumbers.ilses"/>
+                <i class="helper-icon bi bi-question-circle-fill"></i> :
+            </label>
+            <input name="ilse" id="ilse" class="form-control w-auto d-inline" type="text" value="${command?.ilse}">
+        </div>
+
+        <div class="mb-3">
+            <label for="comment">
+                <g:message code="metadataImport.blackListedIlseNumbers.comment"/>:
+            </label>
+            <g:textArea class="form-control form-control-sm w-auto" name="comment" rows="5" cols="80" value="${command?.comment}"/>
+        </div>
+
+        <button type="submit" name="addButton" id="addButton" value="Add" class="btn btn-primary">Add</button>
     </g:form>
 
     <h2><g:message code="metadataImport.blackListedIlseNumbers.table.description"/></h2>
-    <table class="table">
+    <table class="table table-sm table-striped table-hover table-bordered w-100" id="blacklistIlseTable">
+        <thead>
         <tr>
-            <th><g:message code="metadataImport.blackListedIlseNumbers.ilse"/></th>
-            <th>
-                <span class="tooltipIcon" title="${g.message(code: "metadataImport.blackListedIlseNumbers.remove.info")}">
-                    <g:message code="metadataImport.blackListedIlseNumbers.remove"/>
-                </span>
+            <th class="no-wrap"><g:message code="metadataImport.blackListedIlseNumbers.ilse"/></th>
+            <th class="no-wrap">
+                <g:message code="metadataImport.blackListedIlseNumbers.remove"/>
+                <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "metadataImport.blackListedIlseNumbers.remove.info")}"></i>
             </th>
             <th><g:message code="metadataImport.blackListedIlseNumbers.comment"/></th>
         </tr>
+        </thead>
 
+        <tbody>
         <g:each in="${ilseSubmissions}" var="ilseSubmission">
             <tr>
                 <td>
                     ${ilseSubmission.ilseNumber}
                 </td>
-                <td>
-                    <span title="${g.message(code: "metadataImport.blackListedIlseNumbers.remove.info")}">
-                        <g:form action="unBlacklistIlseSubmissions" method="POST" useToken="true" style="display:inline">
-                            <g:hiddenField name="ilseSubmission.id" value="${ilseSubmission.id}"/>
-                            <g:submitButton name="unBlacklist" value="-"/>
-                        </g:form>
-                    </span>
+                <td title="${g.message(code: "metadataImport.blackListedIlseNumbers.remove.info")}">
+                    <g:form action="unBlacklistIlseSubmissions" method="POST" useToken="true" style="display:inline">
+                        <g:hiddenField name="ilseSubmission.id" value="${ilseSubmission.id}"/>
+
+                        <button type="submit" name="unBlacklist" id="unBlacklist" value="-" class="btn btn-danger"
+                                title="${g.message(code: "metadataImport.blackListedIlseNumbers.remove.info")}"
+                                onclick="return confirm('${g.message(code: 'metadataImport.blackListedIlseNumbers.unBlacklist.confirm', args: [ilseSubmission.ilseNumber.toString()])}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </g:form>
                 </td>
                 <td>
                     <otp:editorSwitch
@@ -94,6 +106,7 @@
                 </td>
             </tr>
         </g:each>
+        </tbody>
     </table>
 </div>
 </body>

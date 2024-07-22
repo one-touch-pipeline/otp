@@ -456,32 +456,32 @@ class BlackListedIlseCommand implements Validateable {
     String comment
 
     static constraints = {
-        ilse nullable: false, blank: false, validator: { val, obj, errors ->
-            if (!val) {
+        ilse nullable: false, blank: false, validator: { ilse, obj, errors ->
+            if (!ilse) {
                 return
             }
             List<Integer> ilseToAdd = []
-            val.split(SEPARATOR).each {
-                if (it.isInteger()) {
-                    Integer integer = it.toInteger()
-                    if (integer < IlseSubmission.MIN_ILSE_VALUE) {
-                        errors.rejectValue('ilse', 'metadataImport.blackListedIlseNumbers.cmd.tooSmall',
-                                [it, IlseSubmission.MIN_ILSE_VALUE].toArray(), 'Ilse is to small')
-                    } else if (integer > IlseSubmission.MAX_ILSE_NUMBER) {
-                        errors.rejectValue('ilse', 'metadataImport.blackListedIlseNumbers.cmd.tooBig',
-                                [it, IlseSubmission.MAX_ILSE_NUMBER].toArray(), 'Ilse is to big')
-                    } else if (IlseSubmission.findAllByIlseNumber(integer)) {
-                        errors.rejectValue('ilse', 'metadataImport.blackListedIlseNumbers.cmd.alreadyExists',
-                                [it].toArray(), 'Ilse already exist')
-                    } else if (ilseToAdd.contains(integer)) {
-                        errors.rejectValue('ilse', 'metadataImport.blackListedIlseNumbers.cmd.duplicate',
-                                [it].toArray(), 'Ilse is twice in list')
-                    } else {
-                        ilseToAdd << integer
-                    }
-                } else {
+            ilse.split(SEPARATOR).each { String ilseNumber ->
+                if (!ilseNumber.isInteger()) {
                     errors.rejectValue('ilse', 'metadataImport.blackListedIlseNumbers.cmd.notANumber',
-                            [it].toArray(), 'Ilse is not a number')
+                            [ilseNumber].toArray(), 'Ilse is not a number')
+                    return
+                }
+                Integer ilseInteger = ilseNumber.toInteger()
+                if (ilseInteger < IlseSubmission.MIN_ILSE_VALUE) {
+                    errors.rejectValue('ilse', 'metadataImport.blackListedIlseNumbers.cmd.tooSmall',
+                            [ilseNumber, IlseSubmission.MIN_ILSE_VALUE].toArray(), 'Ilse is too small')
+                } else if (ilseInteger > IlseSubmission.MAX_ILSE_NUMBER) {
+                    errors.rejectValue('ilse', 'metadataImport.blackListedIlseNumbers.cmd.tooBig',
+                            [ilseNumber, IlseSubmission.MAX_ILSE_NUMBER.toInteger()].toArray(), 'Ilse is too big')
+                } else if (IlseSubmission.findAllByIlseNumber(ilseInteger)) {
+                    errors.rejectValue('ilse', 'metadataImport.blackListedIlseNumbers.cmd.alreadyExists',
+                            [ilseNumber].toArray(), 'Ilse already exist')
+                } else if (ilseToAdd.contains(ilseInteger)) {
+                    errors.rejectValue('ilse', 'metadataImport.blackListedIlseNumbers.cmd.duplicate',
+                            [ilseNumber].toArray(), 'Ilse is twice in list')
+                } else {
+                    ilseToAdd << ilseInteger
                 }
             }
             return
