@@ -33,12 +33,12 @@ describe('Click all menu items in the menu bar', () => {
       const menuBar = 'div.menuContainer';
       const menuBarItem = 'li:not(.nav_container)';
       cy.get(menuBar).find(menuBarItem)
-        .should('have.length', 27).and('contain', 'a');
+        .should('have.length', 26).and('contain', 'a');
     });
 
     it('should check the number of Project menu items', () => {
       cy.get('li.navigation').contains('Project').parent().find('li')
-        .should('have.length', 6);
+        .should('have.length', 5);
     });
 
     checkCommonMenuItems();
@@ -54,7 +54,7 @@ describe('Click all menu items in the menu bar', () => {
       const menuBar = 'div.menuContainer';
       const menuBarItem = 'li:not(.nav_container)';
       cy.get(menuBar).find(menuBarItem)
-        .should('have.length', 28).and('contain', 'a');
+        .should('have.length', 27).and('contain', 'a');
     });
 
     it('should check denied access and click common Project menu items', () => {
@@ -65,7 +65,7 @@ describe('Click all menu items in the menu bar', () => {
 
     it('should check the number of Project menu items and check links', () => {
       cy.get('li.navigation').contains('Project').parent().find('li')
-        .should('have.length', 7);
+        .should('have.length', 6);
       cy.checkNotFound('/projectOverview/index');
       cy.checkNotFound('/projectConfig/index');
       cy.checkNotFound('/workflowSelection/index');
@@ -76,8 +76,6 @@ describe('Click all menu items in the menu bar', () => {
 
       cy.get('.navigation li').contains('Project request').click({ force: true });
       cy.checkPage('/projectRequest/index');
-
-      cy.checkNotFound('/sampleIdentifierOverview/index');
     });
 
     it('should check the number of menu items and click all Results menu items', () => {
@@ -142,12 +140,12 @@ describe('Click all menu items in the menu bar', () => {
       const menuBar = 'div.menuContainer';
       const menuBarItem = 'li:not(.nav_container)';
       cy.get(menuBar).find(menuBarItem)
-        .should('have.length', 69).and('contain', 'a');
+        .should('have.length', 68).and('contain', 'a');
     });
 
     it('should check the number of menu items and click additional Project menu items', () => {
       cy.get('li.navigation').contains('Project').parent().find('li')
-        .should('have.length', 9);
+        .should('have.length', 8);
 
       cy.get('.navigation li').contains('Project Info').click({ force: true });
       cy.checkPage('/projectInfo/list');
@@ -316,9 +314,6 @@ function checkCommonMenuItems() {
 
     cy.get('.navigation li').contains('Project request').click({ force: true });
     cy.checkPage('/projectRequest/index');
-
-    cy.get('.navigation li').contains('Sample Name').click({ force: true });
-    cy.checkPage('/sampleIdentifierOverview/index');
   });
 
   it('should check the number of menu items and click all Results menu items', () => {

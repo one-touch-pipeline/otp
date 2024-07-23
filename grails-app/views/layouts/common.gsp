@@ -74,8 +74,6 @@
                                         </sec:access>
                                         <li><g:link controller="projectRequest" action="index"><g:message
                                                 code="otp.menu.projectRequest"/></g:link></li>
-                                        <li><g:link controller="sampleIdentifierOverview" action="index"><g:message
-                                                code="otp.menu.sampleNameOverview"/></g:link></li>
                                         <sec:ifAnyGranted roles="ROLE_OPERATOR">
                                             <li class="allGranted"><g:link controller="projectInfo" action="list"><g:message
                                                     code="projectOverview.projectInfos"/></g:link></li>
