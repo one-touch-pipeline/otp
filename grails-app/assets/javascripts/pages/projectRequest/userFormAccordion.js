@@ -23,12 +23,19 @@
 $(() => {
   'use strict';
 
+  $('input').on('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+    }
+  });
+
   // If username is changed in userForm also change the headers title
   $('.username-input').on('change', (e) => {
     const userNameInput = $(e.target);
-    const usernameInputId = userNameInput.attr('id').replace('].username', '').replace('users[', '');
+    const usernameInputId = userNameInput.attr('id').replace('piUsers[', '').replace('].username', '')
+      .replace('users[', '');
     const usernameInputValue = userNameInput.val();
-    const userFormTitle = $('.user-form').find(`#user-form-title-${usernameInputId}`);
+    const userFormTitle = userNameInput.closest('.card').find(`#user-form-title-${usernameInputId}`);
     if (usernameInputValue) {
       userFormTitle.html(usernameInputValue);
     }

@@ -25,7 +25,7 @@ describe('Check fastqc results page', () => {
 
   context('when user is an operator', () => {
     beforeEach(() => {
-      cy.loginAsOperator();
+      cy.loginAs('operator');
     });
 
     it('should visit some show pages via the sequence index page', () => {

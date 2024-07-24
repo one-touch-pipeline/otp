@@ -24,19 +24,16 @@
 <%@ page import="de.dkfz.tbi.otp.utils.TimeFormats" %>
 <html>
 <head>
-    <meta name="layout" content="main"/>
     <title><g:message code="metadataImport.details.title"/></title>
     <asset:javascript src="taglib/EditorSwitch.js"/>
 </head>
 
 <body>
 <div class="body">
-    <g:render template="/templates/messages"/>
-
-    <div class="basic-flex-box">
-        <div class="item basic-right-padding">
+    <div class="row">
+        <div class="col-3">
             <h2><g:message code="metadataImport.details.ticket"/></h2>
-            <table>
+            <table id="ticket-table" class="table table-sm table-striped display table-hover table-bordered">
                 <tr>
                     <td><g:message code="metadataImport.details.ticketNumber"/></td>
                     <td>
@@ -75,6 +72,8 @@
                         <td><g:message code="metadataImport.details.ticket.seqCenter.comment"/></td>
                         <td class="comment-td">
                             <otp:editorSwitch
+                                    rows="undefined"
+                                    cols="undefined"
                                     roles="ROLE_OPERATOR"
                                     template="textArea"
                                     link="${g.createLink(controller: "metadataImport", action: "updateSeqCenterComment", params: ["ticket.id": ticket.id])}"
@@ -85,22 +84,23 @@
             </table>
         </div>
         <g:if test="${ticket}">
-            <div class="item basic-right-padding">
+            <div class="col-2">
                 <h2><g:message code="notification.notificationSelection.notification"/></h2>
                 <g:form controller="notification" action="notificationPreview">
                     <g:render template="/notification/notificationSelection" model="[
-                            ticket         : ticket,
+                            ticket               : ticket,
                             fastqImportInstanceId: fastqImportInstanceId,
                     ]"/>
-                    <br><br>
-                    <g:submitButton name="notificationPreview" value="Prepare notification report"/>
+                    <g:submitButton class="btn btn-primary mt-3" name="notificationPreview" value="Prepare notification report"/>
                 </g:form>
             </div>
-            <div class="item basic-right-padding">
+
+            <div class="col-2">
                 <g:render template="/notification/notificationAnnotation"/>
             </div>
         </g:if>
     </div>
+
 
     <h2><g:message code="metadataImport.details.metadataFiles"/></h2>
     <ul>
@@ -133,7 +133,8 @@
                             seqTrack.seqTrack.ilseId ? "${g.message(code: "metadataImport.details.ilse")} ${seqTrack.seqTrack.ilseId}" : null,
                             seqTrack.seqTrack.project.name,
                     ].findAll().join(', ')},
-                    <g:link controller="individual" action="show" id="${seqTrack.seqTrack.individual.id}" params="[individual: seqTrack.seqTrack.individual]">${seqTrack.seqTrack.individual.displayName}</g:link>,
+                    <g:link controller="individual" action="show" id="${seqTrack.seqTrack.individual.id}"
+                            params="[individual: seqTrack.seqTrack.individual]">${seqTrack.seqTrack.individual.displayName}</g:link>,
                     ${[
                             seqTrack.seqTrack.sampleType.name,
                             "${seqTrack.seqTrack.seqType.name} ${seqTrack.seqTrack.seqType.libraryLayout}",
@@ -146,9 +147,9 @@
                     <ul>
                         <g:each in="${seqTrack.dataFiles}" var="dataFile">
                             <li>
-                                <g:message code="metadataImport.details.mateNumber" />
+                                <g:message code="metadataImport.details.mateNumber"/>
                                 <g:if test="${dataFile.indexFile}">
-                                    <g:message code="metadataImport.details.indexNumber" />
+                                    <g:message code="metadataImport.details.indexNumber"/>
                                 </g:if>
                                 ${dataFile.mateNumber}:
                                 <g:link controller="rawSequenceFile" action="showDetails" id="${dataFile.id}">

@@ -25,7 +25,7 @@ describe('Check trigger alignment page', () => {
 
   context('when user is an operator', () => {
     beforeEach(() => {
-      cy.loginAsOperator();
+      cy.loginAs('operator');
     });
 
     it('should search seq tracks by project and seqType and trigger alignment', () => {
@@ -342,7 +342,7 @@ describe('Check trigger alignment page', () => {
 
   context('when user is normal user', () => {
     beforeEach(() => {
-      cy.loginAsUser();
+      cy.loginAs('user');
     });
 
     it('should not be able to visit the page', () => {

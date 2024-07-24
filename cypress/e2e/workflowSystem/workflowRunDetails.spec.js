@@ -25,7 +25,7 @@ describe('Check workflow run details page', () => {
 
   context('when user is an operator', () => {
     beforeEach(() => {
-      cy.loginAsOperator('workflowRunDetails/index').as('workflowRunDetails');
+      cy.loginAs('operator');
     });
 
     it('should visit the error log of a restarted workflow run', () => {
@@ -234,7 +234,7 @@ describe('Check workflow run details page', () => {
 
   context('when user is normal user', () => {
     beforeEach(() => {
-      cy.loginAsUser();
+      cy.loginAs('user');
     });
 
     it('should not be able to visit the page', () => {

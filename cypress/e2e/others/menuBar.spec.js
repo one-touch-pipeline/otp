@@ -25,7 +25,7 @@ describe('Click all menu items in the menu bar', () => {
 
   context('when user is normal user', () => {
     beforeEach(() => {
-      cy.loginAsUser();
+      cy.loginAs('user');
       cy.visit('/');
     });
 
@@ -46,7 +46,7 @@ describe('Click all menu items in the menu bar', () => {
 
   context('when user is normal user which is a department head', () => {
     beforeEach(() => {
-      cy.loginAsDepartmentHeadUser();
+      cy.loginAs('departmentHead');
       cy.visit('/');
     });
 
@@ -132,7 +132,7 @@ describe('Click all menu items in the menu bar', () => {
 
   context('when user is an operator', () => {
     beforeEach(() => {
-      cy.loginAsOperator();
+      cy.loginAs('operator');
       cy.visit('/');
     });
 

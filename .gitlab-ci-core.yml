@@ -361,6 +361,7 @@ cypress tests:
     <<: *artifacts_template
     paths:
       - cypress/screenshots
+      - cypress/videos
       - cypressReport.txt
       - logs/
     when: always

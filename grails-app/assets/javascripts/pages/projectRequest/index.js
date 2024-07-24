@@ -184,12 +184,17 @@ $(() => {
           department
         },
         success(data) {
+          if (!data) {
+            return;
+          }
           piSelectors.append($('<option disabled selected></option>').val('')
             .html('Please choose a deputy PI from the list below'));
 
-          data.deputies.forEach((deputy) => {
-            piSelectors.append($('<option></option>').val(deputy.username).html(deputy.displayName));
-          });
+          if (data.deputies) {
+            data.deputies.forEach((deputy) => {
+              piSelectors.append($('<option></option>').val(deputy.username).html(deputy.displayName));
+            });
+          }
 
           piSelectors.each((index, piSelector) => {
             const selectElement = $(piSelector);
@@ -254,6 +259,13 @@ $(() => {
   function addEventHandlerToOU() {
     $('#organizationalunit').on('change', (e) => {
       setPossiblePIs($(e.target).val());
-    }).trigger('change');
+    });
+
+    $('#organizationalunit').on('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        setPossiblePIs($(e.target).val());
+      }
+    });
   }
 });

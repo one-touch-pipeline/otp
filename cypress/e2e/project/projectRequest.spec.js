@@ -25,7 +25,7 @@ describe('Check projectRequest page', () => {
 
   context('when user is a default user', () => {
     beforeEach(() => {
-      cy.loginAsUser();
+      cy.loginAs('user');
     });
 
     it('should add project request as draft', () => {
@@ -109,7 +109,7 @@ describe('Check projectRequest page', () => {
 
   context('when user is an operator', () => {
     beforeEach(() => {
-      cy.loginAsOperator();
+      cy.loginAs('operator');
     });
 
     it('should pass on the project request', () => {
@@ -134,7 +134,7 @@ describe('Check projectRequest page', () => {
 
   context('when user is a PI', () => {
     beforeEach(() => {
-      cy.loginAsUser();
+      cy.loginAs('user');
     });
 
     it('should edit and save the project request', () => {
@@ -188,7 +188,7 @@ describe('Check projectRequest page', () => {
 
   context('when user is a default user', () => {
     beforeEach(() => {
-      cy.loginAsUser();
+      cy.loginAs('user');
     });
 
     it('should submit a project request', () => {
@@ -227,7 +227,7 @@ describe('Check projectRequest page', () => {
 
   context('when user is an operator', () => {
     beforeEach(() => {
-      cy.loginAsOperator();
+      cy.loginAs('operator');
     });
 
     it('should pass on the project request', () => {
@@ -253,7 +253,7 @@ describe('Check projectRequest page', () => {
 
   context('when user is a PI', () => {
     beforeEach(() => {
-      cy.loginAsUser();
+      cy.loginAs('user');
     });
 
     it('should approve the project request', () => {
@@ -280,7 +280,7 @@ describe('Check projectRequest page', () => {
 
   context('when user is an operator', () => {
     beforeEach(() => {
-      cy.loginAsOperator();
+      cy.loginAs('operator');
     });
 
     it('should delete the project request', () => {
@@ -303,6 +303,134 @@ describe('Check projectRequest page', () => {
           cy.get('body').should('not.contain', request[0].projectName);
         });
       });
+    });
+  });
+
+  context('when department head feature is enabled and project request progressed until delete', () => {
+    before(() => {
+      cy.loginAs('operator');
+      cy.setProcessingOption('ENABLE_PROJECT_REQUEST_PI', 'true');
+
+      // Create Addition Field
+      cy.visit('/projectFields/create');
+      cy.intercept('/projectFields/createText*').as('createProjectField');
+
+      cy.get('input#name').type('Organizational Unit');
+      cy.get('textarea#descriptionRequest').type('Description');
+      cy.get('textarea#descriptionConfig').type('Description');
+      cy.get('select#fieldUseForSequencingProjects').select('OPTIONAL', { force: true });
+      cy.get('select#fieldUseForDataManagementProjects').select('OPTIONAL', { force: true });
+      cy.get('input#create').click();
+      cy.wait('@createProjectField').its('response.statusCode').should('eq', 302);
+    });
+
+    it('should submit project request with department deputy as a normal user', () => {
+      cy.loginAs('user');
+
+      cy.intercept('/projectRequest/index*').as('saveProjectRequest');
+      cy.intercept('/projectRequest/getPIs*').as('getPIs');
+      cy.visit('/projectRequest/index');
+
+      cy.fixture('projectRequest.json').then((request) => {
+        cy.get('select#projectType').select(request[3].projectType, { force: true });
+        cy.get('input#name').type(request[3].projectName);
+        cy.get('textarea#description').type(request[3].description);
+        cy.get('input#approxNoOfSamples').type(request[3].approximateNumberOfSamples);
+        cy.get('select#keywords').parent().find('input').type(request[3].keywords, { force: true });
+        cy.get('select#storagePeriod').select(request[3].storagePeriod, { force: true });
+        cy.get('select#speciesWithStrainList').select(request[3].speciesWithStrainList, { force: true });
+        cy.get('select#seqTypesList').select(0, { force: true });
+        cy.get('input#organizationalunit').type(request[3].organizationalUnit);
+        cy.wait('@getPIs').its('response.statusCode').should('eq', 200);
+
+        cy.get('a#pi-tab').click();
+        cy.get('.pi-user-form select.pi-selector').first().select('margarett (Margarett Mclaughin)', { force: true });
+        cy.get('.pi-user-form select.pi-role-select').first().select('BIOINFORMATICIAN', { force: true });
+
+        const operatorUsername = Cypress.env('operator_username');
+        cy.get('a#user-tab').click();
+        cy.get('.user-form input.username-input').first().clear().type(operatorUsername);
+        cy.get('.user-form select.project-role-select').first().select('SUBMITTER', { force: true });
+
+        cy.get('input[value="Submit"]').click();
+
+        cy.wait('@saveProjectRequest').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+          cy.location('pathname').should('match', /^\/projectRequest\/unresolved/);
+        });
+      });
+    });
+
+    it('should pass on the request as operator', () => {
+      cy.loginAs('operator');
+      cy.visit('/projectRequest/unresolved');
+
+      // select the project request in the table
+      cy.fixture('projectRequest.json').then((request) => {
+        cy.get('table tbody tr').contains(request[3].projectName).click();
+      });
+
+      // pass on the project request
+      cy.get('input#passOn-request-btn').click();
+    });
+
+    it('should not be able to approve the request as non department head nor deputy', () => {
+      cy.loginAs('operator');
+      cy.visit('/projectRequest/unresolved');
+
+      // select the project request in the table
+      cy.fixture('projectRequest.json').then((request) => {
+        cy.get('table tbody tr').contains(request[3].projectName).click();
+      });
+
+      // edit a field of the project request
+      cy.get('input#approve-request-btn').should('not.exist');
+    });
+
+    it('should approve the request as department deputy', () => {
+      cy.loginAs('departmentDeputy');
+      cy.intercept('/projectRequest/index*').as('projectRequestIndex');
+      cy.visit('/projectRequest/unresolved');
+
+      // select the project request in the table
+      cy.fixture('projectRequest.json').then((request) => {
+        cy.get('table tbody tr').contains(request[3].projectName).click();
+      });
+
+      cy.get('input#confirmConsent').check();
+      cy.get('input#confirmRecordOfProcessingActivities').check();
+      cy.get('input[name=_action_approve]').click();
+
+      cy.wait('@projectRequestIndex').then((interception) => {
+        expect(interception.response.statusCode).to.eq(302);
+        cy.location('pathname').should('match', /^\/projectRequest\/view\//);
+        cy.get('h3').contains('Approved').should('exist');
+      });
+    });
+
+    it('should delete the project request as operator', () => {
+      cy.loginAs('operator');
+      cy.intercept('/projectRequest/delete*').as('deleteProjectRequest');
+      cy.visit('/projectRequest/unresolved');
+
+      // select the project request in the table
+      cy.fixture('projectRequest.json').then((request) => {
+        cy.get('table tbody tr').contains(request[3].projectName).click();
+      });
+
+      // edit a field of the project request
+      cy.get('a#delete-request-btn').click();
+
+      cy.get('div#confirmationModal').should('be.visible').find('button#confirmModal').click();
+      cy.wait('@deleteProjectRequest').its('response.statusCode').should('eq', 200);
+      cy.fixture('projectRequest.json').then((request) => {
+        cy.contains(request[3].projectName).should('not.exist');
+      });
+    });
+
+    after(() => {
+      cy.loginAs('operator');
+      cy.setProcessingOption('ENABLE_PROJECT_REQUEST_PI', 'false');
     });
   });
 });

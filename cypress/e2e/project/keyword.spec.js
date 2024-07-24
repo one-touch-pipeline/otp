@@ -25,7 +25,7 @@ describe('test for keyword page', () => {
 
   context('when user is an operator', () => {
     beforeEach(() => {
-      cy.loginAsOperator();
+      cy.loginAs('operator');
     });
 
     it('should visit the keyword page and add a custom keyword', () => {
@@ -84,7 +84,7 @@ describe('test for keyword page', () => {
 
   context('when user is a user with project access', () => {
     beforeEach(() => {
-      cy.loginAsUser();
+      cy.loginAs('user');
     });
 
     it('should deny access to keyword page', () => {
@@ -94,7 +94,7 @@ describe('test for keyword page', () => {
 
   context('when user is a user without project access', () => {
     beforeEach(() => {
-      cy.loginAsDepartmentHeadUser();
+      cy.loginAs('departmentHead');
     });
 
     it('should deny access to keyword page', () => {

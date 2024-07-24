@@ -25,7 +25,7 @@ describe('Check error pages', () => {
 
   context('when user is an operator', () => {
     beforeEach(() => {
-      cy.loginAsOperator();
+      cy.loginAs('operator');
     });
 
     it('should visit the error403 page and expect a 403 HTTP Error', () => {

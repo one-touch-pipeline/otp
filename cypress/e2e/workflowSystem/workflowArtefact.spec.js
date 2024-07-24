@@ -25,7 +25,7 @@ describe('Check workflow artefact page', () => {
 
   context('when user is an operator', () => {
     beforeEach(() => {
-      cy.loginAsOperator();
+      cy.loginAs('operator');
     });
 
     it('should visit different workflow artefacts index pages for a succeeded workflow', () => {
@@ -53,7 +53,7 @@ describe('Check workflow artefact page', () => {
 
   context('when user is normal user', () => {
     beforeEach(() => {
-      cy.loginAsUser();
+      cy.loginAs('user');
     });
 
     it('should not be able to visit the page', () => {

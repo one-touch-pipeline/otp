@@ -25,7 +25,7 @@ describe('test for individual page', () => {
 
   context('when user is an operator', () => {
     beforeEach(() => {
-      cy.loginAsOperator();
+      cy.loginAs('operator');
     });
 
     it('should filter the table by project and identifier', () => {
@@ -166,7 +166,7 @@ describe('test for individual page', () => {
 
   context('when user is normal user', () => {
     beforeEach(() => {
-      cy.loginAsUser();
+      cy.loginAs('user');
     });
 
     it('should load data table on initialization and download csv file, when button is clicked', () => {

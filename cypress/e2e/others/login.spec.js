@@ -20,8 +20,25 @@
  * SOFTWARE.
  */
 
-describe('Check login', () => {
+describe('check login', () => {
   'use strict';
+
+  context('when user login data is correct', () => {
+    it('should redirect to requested page', () => {
+      const username = Cypress.env('user_username');
+      const password = Cypress.env('user_password');
+
+      cy.clearCookies();
+
+      cy.visit('/individual/list');
+      cy.url().should('contain', '/login?target=');
+      cy.get('#account').type(username);
+      cy.get('#password').type(password);
+      cy.get('#loginButton').click();
+
+      cy.url().should('contain', '/individual/list');
+    });
+  });
 
   context('when password is wrong', () => {
     it('should redirect to login page and show error message', () => {

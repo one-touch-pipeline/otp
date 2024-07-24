@@ -24,7 +24,6 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <meta name="layout" content="main"/>
     <title><g:message code="projectFields.create.title"/></title>
     <asset:javascript src="common/CommentBox.js"/>
     <asset:javascript src="taglib/EditorSwitch.js"/>
@@ -32,13 +31,12 @@
 
 <body>
 <div class="body">
-    <g:render template="/templates/messages"/>
     <g:render template="tabMenu"/>
 
-    <h1><g:message code="projectFields.create.title"/></h1>
+    <h1 class="pb-3"><g:message code="projectFields.create.title"/></h1>
 
     <g:form action="${cmd.projectFieldType.createActionName()}" method="POST" useToken="true">
-        <table class="key-value-table key-input">
+        <table class="table table-sm table-striped display table-hover table-bordered w-100">
             <tr>
                 <td>
                     <label for="name">
@@ -46,7 +44,7 @@
                     </label>
                 </td>
                 <td>
-                    <g:textField id="name" name="name" required="true"
+                    <g:textField class="form-control" id="name" name="name" required="true"
                                  value="${cmd.name}"/>
                 </td>
                 <td>
@@ -60,7 +58,8 @@
                     </label>
                 </td>
                 <td>
-                    <g:select id="projectFieldType" name="projectFieldType" class="use-select-2" required="true" from="${ProjectFieldType.supportedValues}"
+                    <g:select id="projectFieldType" name="projectFieldType" class="use-select-2 form-control" required="true"
+                              from="${ProjectFieldType.supportedValues}"
                               value="${cmd.projectFieldType}" onChange="submit();"/>
                 </td>
                 <td>
@@ -75,7 +74,8 @@
                     </label>
                 </td>
                 <td>
-                    <g:select id="cardinalityType" name="cardinalityType" class="use-select-2" required="true" from="${ProjectCardinalityType.values()}"
+                    <g:select id="cardinalityType" name="cardinalityType" class="use-select-2 form-control" required="true"
+                              from="${ProjectCardinalityType.values()}"
                               value="${cmd.cardinalityType}"/>
                 </td>
                 <td>
@@ -90,7 +90,7 @@
                     </label>
                 </td>
                 <td>
-                    <g:textArea id="descriptionConfig" name="descriptionConfig" class="resize-vertical" required="true"
+                    <g:textArea id="descriptionConfig" name="descriptionConfig" class="resize-vertical form-control" required="true"
                                 value="${cmd.descriptionConfig}"/>
                 </td>
                 <td>
@@ -104,7 +104,7 @@
                     </label>
                 </td>
                 <td>
-                    <g:textArea id="descriptionRequest" name="descriptionRequest" class="resize-vertical" required="true"
+                    <g:textArea id="descriptionRequest" name="descriptionRequest" class="resize-vertical form-control" required="true"
                                 value="${cmd.descriptionRequest}"/>
                 </td>
                 <td>
@@ -118,7 +118,7 @@
                     </label>
                 </td>
                 <td>
-                    <g:select id="fieldUseForSequencingProjects" name="fieldUseForSequencingProjects" class="use-select-2" required="true"
+                    <g:select id="fieldUseForSequencingProjects" name="fieldUseForSequencingProjects" class="use-select-2 form-control" required="true"
                               from="${FieldExistenceType.values()}"
                               value="${cmd.fieldUseForSequencingProjects}"/>
                 </td>
@@ -133,7 +133,7 @@
                     </label>
                 </td>
                 <td>
-                    <g:select id="fieldUseForDataManagementProjects" name="fieldUseForDataManagementProjects" class="use-select-2" required="true"
+                    <g:select id="fieldUseForDataManagementProjects" name="fieldUseForDataManagementProjects" class="use-select-2 form-control" required="true"
                               from="${FieldExistenceType.values()}"
                               value="${cmd.fieldUseForDataManagementProjects}"/>
                 </td>
@@ -148,7 +148,7 @@
                     </label>
                 </td>
                 <td>
-                    <g:select id="sourceOfData" name="sourceOfData" class="use-select-2" required="true" from="${ProjectSourceOfData.values()}"
+                    <g:select id="sourceOfData" name="sourceOfData" class="use-select-2 form-control" required="true" from="${ProjectSourceOfData.values()}"
                               value="${cmd.sourceOfData}"/>
                 </td>
                 <td>
@@ -162,7 +162,7 @@
                     </label>
                 </td>
                 <td>
-                    <g:select id="projectDisplayOnConfigPage" name="projectDisplayOnConfigPage" class="use-select-2" required="true"
+                    <g:select id="projectDisplayOnConfigPage" name="projectDisplayOnConfigPage" class="use-select-2 form-control" required="true"
                               from="${ProjectDisplayOnConfigPage.values()}"
                               value="${cmd.projectDisplayOnConfigPage}"/>
                 </td>
@@ -177,7 +177,7 @@
                     </label>
                 </td>
                 <td>
-                    <g:textField id="sortNumber" name="sortNumber" required="true" type="number"
+                    <g:textField class="form-control" id="sortNumber" name="sortNumber" required="true" type="number"
                                  value="${cmd.sortNumber}"/>
                 </td>
                 <td>
@@ -191,7 +191,7 @@
                     </label>
                 </td>
                 <td>
-                    <g:checkBox id="changeOnlyByOperator" name="changeOnlyByOperator" checked="${cmd.changeOnlyByOperator}"
+                    <g:checkBox class="form-check-input" id="changeOnlyByOperator" name="changeOnlyByOperator" checked="${cmd.changeOnlyByOperator}"
                                 value="true"/>
                 </td>
                 <td>
@@ -205,7 +205,7 @@
                     </label>
                 </td>
                 <td>
-                    <g:checkBox id="usedExternally" name="usedExternally" checked="${cmd.usedExternally}"
+                    <g:checkBox class="form-check-input" id="usedExternally" name="usedExternally" checked="${cmd.usedExternally}"
                                 value="true"/>
                 </td>
                 <td>
@@ -220,7 +220,7 @@
                         </label>
                     </td>
                     <td>
-                        <g:select id="domainClassName" name="domainClassName" class="use-select-2" required="true" from="${referenceAbleDomains}"
+                        <g:select id="domainClassName" name="domainClassName" class="use-select-2 form-control" required="true" from="${referenceAbleDomains}"
                                   value="${cmd.domainClassName}"/>
                     </td>
                     <td>
@@ -235,7 +235,7 @@
                         </label>
                     </td>
                     <td>
-                        <g:checkBox id="allowCustomValue" name="allowCustomValue" checked="${cmd.allowCustomValue}"
+                        <g:checkBox class="form-check-input" id="allowCustomValue" name="allowCustomValue" checked="${cmd.allowCustomValue}"
                                     value="true"/>
                     </td>
                     <td>
@@ -251,7 +251,7 @@
                 </td>
                 <td>
                     <g:if test="${cmd.projectFieldType == ProjectFieldType.TEXT}">
-                        <g:textArea id="defaultValue" name="defaultValue"
+                        <g:textArea class="form-control" id="defaultValue" name="defaultValue"
                                     value="${cmd.defaultValue}"/>
                     </g:if>
                     <g:if test="${cmd.projectFieldType == ProjectFieldType.FLAG}">
@@ -259,14 +259,14 @@
                                   noSelection="${[(""): "no default value"]}"
                                   from="[Boolean.TRUE, Boolean.FALSE]"
                                   value="${cmd.defaultValue}"
-                                  class="use-select-2"/>
+                                  class="use-select-2 form-control"/>
                     </g:if>
                     <g:if test="${cmd.projectFieldType == ProjectFieldType.INTEGER}">
-                        <g:textField id="defaultValue" name="defaultValue" type="number"
+                        <g:textField class="form-control" id="defaultValue" name="defaultValue" type="number"
                                      value="${cmd.defaultValue}"/>
                     </g:if>
                     <g:if test="${cmd.projectFieldType == ProjectFieldType.DECIMAL_NUMBER}">
-                        <g:textField id="defaultValue" name="defaultValue"
+                        <g:textField class="form-control" id="defaultValue" name="defaultValue"
                                      value="${cmd.defaultValue}"/>
 
                     </g:if>
@@ -303,7 +303,7 @@
                         </label>
                     </td>
                     <td>
-                        <g:select id="typeValidator" name="typeValidator" class="use-select-2" from="${validators}"
+                        <g:select id="typeValidator" name="typeValidator" class="use-select-2 form-control" from="${validators}"
                                   noSelection="${[(""): "No Filter"]}"
                                   value="${cmd instanceof ProjectFieldsCreateTextCommand ? ((ProjectFieldsCreateTextCommand) cmd).typeValidator : ""}"/>
                     </td>
@@ -318,7 +318,7 @@
                         </label>
                     </td>
                     <td>
-                        <g:textField id="regularExpression" name="regularExpression"
+                        <g:textField class="form-control" id="regularExpression" name="regularExpression"
                                      value="${cmd instanceof ProjectFieldsCreateTextCommand ? ((ProjectFieldsCreateTextCommand) cmd).regularExpression : ""}"/>
                     </td>
                     <td>
@@ -332,7 +332,7 @@
                         </label>
                     </td>
                     <td>
-                        <g:textField id="regularExpressionError" name="regularExpressionError"
+                        <g:textField class="form-control" id="regularExpressionError" name="regularExpressionError"
                                      value="${cmd instanceof ProjectFieldsCreateTextCommand ? ((ProjectFieldsCreateTextCommand) cmd).regularExpressionError : ""}"/>
                     </td>
                     <td>
@@ -341,8 +341,9 @@
                 </tr>
             </g:if>
         </table>
+
         <div>
-            <g:submitButton name="create" value="Create"/>
+            <g:submitButton class="btn btn-primary" name="create" value="Create"/>
         </div>
     </g:form>
 </div>

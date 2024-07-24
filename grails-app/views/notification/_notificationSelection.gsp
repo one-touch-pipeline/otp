@@ -27,14 +27,23 @@
 <div id="notification-selection-container">
     <h3><g:message code="notification.notificationSelection.notification.processing"/></h3>
     <g:each var="step" status="i" in="${Ticket.ProcessingStep.values() - Ticket.ProcessingStep.FASTQC}">
-        <label class="vertical-align-middle">
-            <g:checkBox name="steps[${i}]" value="${step.name()}" checked="${cmd ? ((step in cmd.steps) ? "true" : "false") : "true"}"/> ${step.displayName.capitalize()}
-        </label>
-        <br>
+        <div class="form-check">
+            <g:checkBox class="form-check-input" name="steps[${i}]" value="${step.name()}"
+                        checked="${cmd ? ((step in cmd.steps) ? "true" : "false") : "true"}"/>
+            <label class="form-check-label vertical-align-middle" for="steps[${i}]">
+                ${step.displayName.capitalize()}
+            </label>
+        </div>
     </g:each>
 
     <h3><g:message code="notification.notificationSelection.notification.other"/></h3>
-    <label class="vertical-align-middle">
-        <g:checkBox name="notifyQcThresholds" value="true" checked="${cmd ? cmd.notifyQcThresholds : "true"}"/> <g:message code="notification.notificationSelection.notification.other.qc"/>
-    </label>
+
+    <div class="form-check">
+        <g:checkBox class="form-check-input" name="notifyQcThresholds" value="true" checked="${cmd ? cmd.notifyQcThresholds : "true"}"/>
+
+        <label class="form-check-label vertical-align-middle" for="notifyQcThresholds">
+            <g:message code="notification.notificationSelection.notification.other.qc"/>
+        </label>
+    </div>
+
 </div>

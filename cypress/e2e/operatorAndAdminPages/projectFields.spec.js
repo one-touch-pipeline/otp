@@ -26,7 +26,7 @@ describe('Check projectFields page', () => {
   context('when user is an operator', () => {
     beforeEach(() => {
       cy.fixture('projectFields.json').as('projectFields');
-      cy.loginAsOperator();
+      cy.loginAs('operator');
     });
 
     context('when tab of create page is selected', () => {
@@ -282,7 +282,7 @@ describe('Check projectFields page', () => {
 
   context('when user is normal user', () => {
     beforeEach(() => {
-      cy.loginAsUser();
+      cy.loginAs('user');
     });
 
     it('should not be able to visit the page', () => {

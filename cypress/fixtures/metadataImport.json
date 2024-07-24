@@ -1,0 +1,11 @@
+{
+  "ticket": {
+    "number": 123,
+    "notify": "false",
+    "finalNotify": "false",
+    "comment": "This is a test comment"
+  },
+  "invalidTicket": {
+    "number": "invalid input"
+  }
+}

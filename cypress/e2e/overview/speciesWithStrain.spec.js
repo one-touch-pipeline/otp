@@ -25,7 +25,7 @@ describe('test for species with strain page', () => {
 
   context('when user is an operator', () => {
     beforeEach(() => {
-      cy.loginAsOperator();
+      cy.loginAs('operator');
       cy.fixture('speciesWithStrain').as('fixture');
       cy.visit('/speciesWithStrain/index');
       cy.intercept('/speciesWithStrain/index*').as('reload');

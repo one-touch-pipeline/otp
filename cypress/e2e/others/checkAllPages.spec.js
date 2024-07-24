@@ -25,7 +25,7 @@ describe('Test clicking and visiting through all pages', () => {
 
   context('when user is an operator', () => {
     beforeEach(() => {
-      cy.loginAsOperator();
+      cy.loginAs('operator');
       cy.visit('/home');
     });
 

@@ -61,29 +61,12 @@ const login = (username, password) => {
   });
 };
 
-Cypress.Commands.add('loginAsUser', () => {
+/** Logging in as user, departmentHead, operator, departmentDeputy */
+Cypress.Commands.add('loginAs', (type) => {
   'use strict';
 
-  const username = Cypress.env('user_username');
-  const password = Cypress.env('user_password');
-
-  login(username, password);
-});
-
-Cypress.Commands.add('loginAsDepartmentHeadUser', () => {
-  'use strict';
-
-  const username = Cypress.env('departmentHead_username');
-  const password = Cypress.env('departmentHead_password');
-
-  login(username, password);
-});
-
-Cypress.Commands.add('loginAsOperator', () => {
-  'use strict';
-
-  const username = Cypress.env('operator_username');
-  const password = Cypress.env('operator_password');
+  const username = Cypress.env(`${type}_username`);
+  const password = Cypress.env(`${type}_password`);
 
   login(username, password);
 });
@@ -205,6 +188,30 @@ Cypress.Commands.add('checkedTyping', (commandFn, input) => {
         cy.checkedTyping(commandFn, input);
       }
     });
+});
+
+/** Command to set a processing option for preparation of a test */
+Cypress.Commands.add('setProcessingOption', (optionName, value) => {
+  'use strict';
+
+  cy.visit('/processingOption/index');
+  cy.get('table tr').contains(optionName).parent().as('optionRow');
+
+  cy.get('@optionRow').find('.form-control').then((element) => {
+    if (element.val() !== value) {
+      cy.intercept('/processingOption/update*').as('updateProcessingOption');
+      cy.get('@optionRow').find('[title="Edit"]').click();
+
+      if (element.get(0).tagName === 'SELECT') {
+        cy.wrap(element).select(value, { force: true });
+      } else {
+        cy.wrap(element).type(value, { force: true });
+      }
+
+      cy.get('@optionRow').contains('Save').click({ force: true });
+      cy.wait('@updateProcessingOption').its('response.statusCode').should('eq', 200);
+    }
+  });
 });
 
 const validateSession = () => {

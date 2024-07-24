@@ -25,7 +25,7 @@ describe('Check cluster job general page', () => {
 
   context('when user is an operator', () => {
     beforeEach(() => {
-      cy.loginAsOperator();
+      cy.loginAs('operator');
     });
 
     it('should click through the pages of the table', () => {
@@ -120,7 +120,7 @@ describe('Check cluster job general page', () => {
 
   context('when user is normal user', () => {
     beforeEach(() => {
-      cy.loginAsUser();
+      cy.loginAs('user');
     });
 
     it('should not be able to visit the page', () => {

@@ -20,7 +20,15 @@
   - SOFTWARE.
   --}%
 
-<div class="tab-menu">
-    <g:link controller="projectFields" action="index" class="${actionName=="index" ? "active" : ""}"><g:message code="projectFields.overview.title"/></g:link>
-    <g:link controller="projectFields" action="create" class="${actionName=="create" ? "active" : ""}"><g:message code="projectFields.create.title"/></g:link>
-</div>
+<ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+        <g:link controller="projectFields" action="index" class="nav-link ${actionName == "index" ? "active" : ""}">
+            <g:message code="projectFields.overview.title"/>
+        </g:link>
+    </li>
+    <li class="nav-item" id="create-tab">
+        <g:link controller="projectFields" action="create" class="nav-link ${actionName == "create" ? "active" : ""}">
+            <g:message code="projectFields.create.title"/>
+        </g:link>
+    </li>
+</ul>

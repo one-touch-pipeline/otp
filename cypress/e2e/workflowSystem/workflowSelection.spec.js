@@ -25,7 +25,7 @@ describe('Check workflow selection page', () => {
 
   context('when user is an operator', () => {
     beforeEach(() => {
-      cy.loginAsOperator();
+      cy.loginAs('operator');
     });
 
     it('should be able to change merging criteria', () => {
@@ -184,7 +184,7 @@ describe('Check workflow selection page', () => {
 
   context('when user is normal user with project access', () => {
     beforeEach(() => {
-      cy.loginAsUser();
+      cy.loginAs('user');
     });
 
     it('should be able to see workflow versions and merging criteria, but no buttons to change them', () => {

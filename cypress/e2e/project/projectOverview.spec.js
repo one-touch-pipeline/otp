@@ -29,7 +29,7 @@ describe('Check statistics page', () => {
     });
 
     beforeEach(() => {
-      cy.loginAsOperator();
+      cy.loginAs('operator');
     });
 
     it('should visit the index page', () => {

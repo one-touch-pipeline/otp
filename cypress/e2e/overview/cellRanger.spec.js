@@ -25,7 +25,7 @@ describe('Check cell ranger page', () => {
 
   context('when user is an operator', () => {
     beforeEach(() => {
-      cy.loginAsOperator();
+      cy.loginAs('operator');
     });
 
     it('should visit the final run selection page', () => {

@@ -25,7 +25,7 @@ describe('Check rawSequenceFile pages', () => {
 
   context('when user is an operator', () => {
     beforeEach(() => {
-      cy.loginAsOperator();
+      cy.loginAs('operator');
     });
 
     it('should visit show details page by starting on project overview page and save a comment there', () => {

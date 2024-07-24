@@ -24,7 +24,6 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <meta name="layout" content="main"/>
     <title><g:message code="projectFields.overview.title"/></title>
     <asset:javascript src="common/CommentBox.js"/>
     <asset:javascript src="taglib/EditorSwitch.js"/>
@@ -33,13 +32,12 @@
 
 <body>
 <div class="body">
-    <g:render template="/templates/messages"/>
     <g:render template="tabMenu"/>
 
-    <h1><g:message code="projectFields.overview.title"/></h1>
+    <h1 class="pb-3"><g:message code="projectFields.overview.title"/></h1>
 
     <div class="additionalFields">
-        <table class="otpDataTables">
+        <table class="otpDataTables table table-sm table-striped display table-hover table-bordered w-100">
             <tr>
                 <th class="name">
                     <span title="${g.message(code: "projectFields.header.tooltip.name")}">
@@ -375,7 +373,7 @@
                         <g:if test="${!usedFieldDefinitionMap[fieldDefinition]}">
                             <g:form action="deleteFieldDefinition" method="POST" useToken="true">
                                 <g:hiddenField name="fieldDefinition.id" value="${fieldDefinition.id}"/>
-                                <g:submitButton name="deleteFieldDefinition" value="Delete"
+                                <g:submitButton name="deleteFieldDefinition" value="Delete" class="btn btn-danger"
                                                 onClick="if (confirm('${g.message(code: 'projectFields.confirm.trash', args: [fieldDefinition.name])}')) return true; else return false;"/>
                             </g:form>
                         </g:if>

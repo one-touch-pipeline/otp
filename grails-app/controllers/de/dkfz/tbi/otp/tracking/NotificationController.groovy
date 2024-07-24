@@ -66,6 +66,7 @@ class NotificationController implements CheckAndCall {
                     emptyNotification    : emptyNotification,
             ]
         } catch (AssertionError | RuntimeException e) {
+            log.error(e.message, e)
             flash.message = new FlashMessage(g.message(code: "notification.notificationPreview.failure") as String, e.message as String)
         }
         flash.cmd = cmd

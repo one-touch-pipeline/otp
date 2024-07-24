@@ -25,7 +25,7 @@ describe('test for department configuration page', () => {
 
   context('when user is a user which is a department head', () => {
     beforeEach(() => {
-      cy.loginAsDepartmentHeadUser();
+      cy.loginAs('departmentHead');
     });
 
     it('should redirect to index when deputy username doesnt exist and show errors message', () => {
@@ -37,17 +37,12 @@ describe('test for department configuration page', () => {
       cy.get('input#deputyUsername').type('nonExistentUser');
       cy.get('button#addDeputyBtn').click();
 
-      cy.wait('@addDeputy').then((interception) => {
-        expect(interception.response.statusCode).to.be.eq(302);
+      cy.wait('@addDeputy').its('response.statusCode').should('eq', 302);
+      cy.wait('@loadIndex').its('response.statusCode').should('eq', 200);
 
-        cy.wait('@loadIndex').then((interception2) => {
-          expect(interception2.response.statusCode).to.be.eq(200);
-        });
-
-        cy.get('#otpToastBox').should('exist').contains('can not be resolved');
-        cy.get('table#deputyTable tbody tr').should('have.length', 1);
-        cy.checkPage('/departmentConfiguration/index');
-      });
+      cy.get('#otpToastBox').should('exist').contains('can not be resolved');
+      cy.get('table#deputyTable tbody tr').should('have.length', 2);
+      cy.checkPage('/departmentConfiguration/index');
     });
 
     it('should add deputy and delete it afterwards', () => {
@@ -59,35 +54,26 @@ describe('test for department configuration page', () => {
       cy.get('input#deputyUsername').type('dave');
       cy.get('button#addDeputyBtn').click();
 
-      cy.wait('@addDeputy').then((interception) => {
-        expect(interception.response.statusCode).to.be.eq(302);
-      });
+      cy.wait('@addDeputy').its('response.statusCode').should('eq', 302);
+      cy.wait('@loadIndex').its('response.statusCode').should('eq', 200);
 
-      cy.wait('@loadIndex').then((interception2) => {
-        expect(interception2.response.statusCode).to.be.eq(200);
-      });
+      cy.get('table#deputyTable tbody tr').should('have.length', 3);
+      cy.checkPage('/departmentConfiguration/index');
+
+      cy.get('table#deputyTable').contains('dave').parent().find('button.deputy-remove-btn')
+        .click();
+
+      cy.wait('@removeDeputy').its('response.statusCode').should('eq', 302);
+      cy.wait('@loadIndex').its('response.statusCode').should('eq', 200);
 
       cy.get('table#deputyTable tbody tr').should('have.length', 2);
       cy.checkPage('/departmentConfiguration/index');
-
-      cy.get('button.deputy-remove-btn').first().click();
-
-      cy.wait('@removeDeputy').then((interception) => {
-        expect(interception.response.statusCode).to.be.eq(302);
-
-        cy.wait('@loadIndex').then((interception2) => {
-          expect(interception2.response.statusCode).to.be.eq(200);
-        });
-
-        cy.get('table#deputyTable tbody tr').should('have.length', 1);
-        cy.checkPage('/departmentConfiguration/index');
-      });
     });
   });
 
   context('when user is a normal user which is not a department head', () => {
     beforeEach(() => {
-      cy.loginAsUser();
+      cy.loginAs('user');
     });
 
     it('should deny access to department configuration pages', () => {
@@ -99,7 +85,7 @@ describe('test for department configuration page', () => {
 
   context('when user is operator which is not a department head', () => {
     beforeEach(() => {
-      cy.loginAsOperator();
+      cy.loginAs('operator');
     });
 
     it('should deny access to department configuration pages', () => {

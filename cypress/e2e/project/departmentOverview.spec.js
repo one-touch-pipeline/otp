@@ -25,7 +25,7 @@ describe('test for department overview page', () => {
 
   context('when user is an operator', () => {
     beforeEach(() => {
-      cy.loginAsOperator();
+      cy.loginAs('operator');
     });
 
     it('should visit the software page and download the csv', () => {
@@ -39,7 +39,7 @@ describe('test for department overview page', () => {
 
   context('when user is a normal user', () => {
     beforeEach(() => {
-      cy.loginAsUser();
+      cy.loginAs('user');
     });
 
     it('should deny access to department overview pages', () => {

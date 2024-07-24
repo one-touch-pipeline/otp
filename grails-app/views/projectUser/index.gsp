@@ -356,7 +356,7 @@
         </button>
     </sec:access>
     <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
-        <div class="otpDataTables projectUserTable">
+        <div class="otpDataTables projectUserTable" id="formerProjectMemberTable">
             <h5><strong><g:message code="projectUser.formerUsers"/></strong></h5>
             <g:if test="${disabledProjectUsers}">
             <table class="table table-sm table-striped table-hover fixed-table-header">

@@ -28,7 +28,7 @@
 <head>
     <title>${g.message(code: "projectRequest.title")}</title>
     <asset:javascript src="pages/projectRequest/index.js"/>
-    <asset:javascript src="pages/projectRequest/userFormAdd.js"/>
+    <asset:javascript src="pages/projectRequest/userFormAccordion.js"/>
     <asset:javascript src="common/CloneField.js"/>
     <asset:stylesheet src="pages/projectRequest/index.less"/>
 </head>

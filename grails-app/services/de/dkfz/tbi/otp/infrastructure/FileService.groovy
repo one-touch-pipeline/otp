@@ -413,7 +413,7 @@ class FileService {
                 stream?.close()
                 stream = null
             }
-            Files.exists(file) == shouldExist
+            return Files.exists(file) == shouldExist
         }, timeoutInMs, MILLIS_BETWEEN_RETRIES):
                 "${file} on ${file.fileSystem == FileSystems.default ? 'local' : 'remote'} filesystem " +
                         "${shouldExist ? 'is not accessible or does not exist' : 'still exists'}"

@@ -25,7 +25,7 @@ describe('Check alignment quality overview page', () => {
 
   context('when user is an operator', () => {
     beforeEach(() => {
-      cy.loginAsOperator();
+      cy.loginAs('operator');
     });
 
     it('should visit the index page', () => {

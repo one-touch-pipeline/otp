@@ -25,7 +25,7 @@ describe('Check metadata import page', () => {
 
   context('when user is an operator', () => {
     beforeEach(() => {
-      cy.loginAsOperator();
+      cy.loginAs('operator');
     });
 
     it('should create sample identifier on bulk sample creation page', () => {
@@ -43,6 +43,121 @@ describe('Check metadata import page', () => {
       cy.get('input#Submit').click();
 
       cy.get('div#infoBox').contains('Creation succeeded').should('exist');
+    });
+
+    it('should successfully edit ticket information on details page', () => {
+      cy.visit('/metadataImport/details/925');
+      cy.intercept('/metadataImport/updateSeqCenterComment*').as('saveComment');
+      cy.intercept('/metadataImport/updateFinalNotificationFlag*').as('updateFinalNotify');
+      cy.intercept('/metadataImport/updateAutomaticNotificationFlag*').as('updateNotify');
+      cy.intercept('/metadataImport/assignTicketToFastqImportInstance/*').as('assignTicketNumber');
+      const successMessageQuery = '#otpToastBox .otpSuccessToast';
+
+      cy.fixture('metadataImport.json').then((fixture) => {
+        const { ticket } = fixture;
+        cy.get('table#ticket-table tbody tr').as('ticketRows', { static: true });
+
+        cy.get('@ticketRows').filter(':contains("Number")').as('numberRow');
+        cy.get('@numberRow').find('button.js-edit').click();
+        cy.get('@numberRow').find('input[name="value"]').clear().type(ticket.number);
+        cy.get('@numberRow').find('button.save').click();
+        cy.wait('@assignTicketNumber').its('response.statusCode').should('eq', 200);
+        cy.get(successMessageQuery).should('exist').and('contain.text', 'Success');
+        cy.get('@numberRow').contains(ticket.number);
+
+        cy.get('@ticketRows').filter(':contains("Notify automatically")').as('notifyRow');
+        cy.get('@notifyRow').find('button.edit').click();
+        cy.get('@notifyRow').find('select').select(ticket.notify, { force: true });
+        cy.get('@notifyRow').find('button.save').click();
+        cy.wait('@updateNotify').its('response.statusCode').should('eq', 200);
+        cy.get(successMessageQuery).should('exist').and('contain.text', 'Success');
+        cy.get('@notifyRow').contains(ticket.notify);
+
+        cy.get('@ticketRows').filter(':contains("Final notification")').as('finalNotifyRow');
+        cy.get('@finalNotifyRow').find('button.edit').click();
+        cy.get('@finalNotifyRow').find('select').select(ticket.finalNotify, { force: true });
+        cy.get('@finalNotifyRow').find('button.save').click();
+        cy.wait('@updateFinalNotify').its('response.statusCode').should('eq', 200);
+        cy.get(successMessageQuery).should('exist').and('contain.text', 'Success');
+        cy.get('@finalNotifyRow').contains(ticket.finalNotify);
+
+        cy.get('@ticketRows').filter(':contains("comment")').as('commentRow');
+        cy.get('@commentRow').find('button.js-edit').click();
+        cy.get('@commentRow').find('textarea.edit-switch-input').type(ticket.comment);
+        cy.get('@commentRow').find('button.save').click();
+        cy.wait('@saveComment').its('response.statusCode').should('eq', 200);
+        cy.get(successMessageQuery).should('exist').and('contain.text', 'Success');
+        cy.get('@commentRow').contains(ticket.comment);
+      });
+    });
+
+    it('should fail edit ticket information with invalid data on details page', () => {
+      cy.visit('/metadataImport/details/925');
+      cy.intercept('/metadataImport/assignTicketToFastqImportInstance/*').as('assignTicketNumber');
+      const errorMessageQuery = '#otpToastBox .otpErrorToast';
+
+      cy.fixture('metadataImport.json').then((fixture) => {
+        const ticket = fixture.invalidTicket;
+
+        cy.get('table#ticket-table tbody tr').as('ticketRows', { static: true });
+
+        cy.get('@ticketRows').filter(':contains("Number")').as('numberRow');
+        cy.get('@numberRow').find('button.js-edit').click();
+        cy.get('@numberRow').find('input[name="value"]').clear().type(ticket.number);
+        cy.get('@numberRow').find('button.save').click();
+        cy.wait('@assignTicketNumber').its('response.statusCode').should('eq', 200);
+        cy.get(errorMessageQuery).should('exist').and('contain.text', 'not be stored');
+        cy.get('@numberRow').should('not.contain.text', ticket.number);
+      });
+    });
+
+    it('should successfully prepare and send notification report', () => {
+      cy.visit('/metadataImport/details/925');
+      cy.intercept('/notification/notificationPreview*').as('notifyPreview');
+      cy.intercept('/notification/index*').as('sendNotification');
+
+      cy.get('#notification-selection-container [value="ALIGNMENT"]').uncheck();
+      cy.get('#notification-selection-container [value="SNV"]').uncheck();
+      cy.get('#notification-selection-container [value="RUN_YAPSA"]').uncheck();
+      cy.get('#notification-selection-container [value="SOPHIA"]').uncheck();
+
+      cy.get('input#notificationPreview').click();
+      cy.wait('@notifyPreview').its('response.statusCode').should('eq', 200);
+      cy.url().should('contain', '/notification/notificationPreview');
+
+      // Send notification
+      cy.get('input#send-button').click();
+      cy.wait('@sendNotification').its('response.statusCode').should('eq', 302);
+
+      cy.get('#otpToastBox .otpSuccessToast').should('be.visible').and('contain.text', 'Notifications sent');
+      cy.url().should('contain', '/metadataImport/details');
+    });
+
+    it('should not be able to send invalid notification report', () => {
+      cy.visit('/metadataImport/details/925');
+      cy.intercept('/notification/notificationPreview*').as('notifyPreview');
+      cy.intercept('/notification/index*').as('sendNotification');
+
+      cy.get('#notification-selection-container [value="INSTALLATION"]').uncheck();
+      cy.get('#notification-selection-container [value="ALIGNMENT"]').uncheck();
+      cy.get('#notification-selection-container [value="SNV"]').uncheck();
+      cy.get('#notification-selection-container [value="INDEL"]').uncheck();
+      cy.get('#notification-selection-container [value="SOPHIA"]').uncheck();
+      cy.get('#notification-selection-container [value="ACESEQ"]').uncheck();
+      cy.get('#notification-selection-container [value="SOPHIA"]').uncheck();
+      cy.get('#notification-selection-container [name="notifyQcThresholds"]').uncheck();
+
+      cy.get('input#notificationPreview').click();
+      cy.wait('@notifyPreview').its('response.statusCode').should('eq', 200);
+      cy.url().should('contain', '/notification/notificationPreview');
+
+      // Send notification
+      cy.get('input#send-button').should('be.disabled').invoke('removeAttr', 'disabled')
+        .click({ force: true });
+      cy.wait('@sendNotification').its('response.statusCode').should('eq', 302);
+
+      cy.get('#otpToastBox .otpErrorToast ').should('be.visible').and('contain.text', 'Error when sending');
+      cy.url().should('contain', '/metadataImport/details');
     });
 
     it('should not import data with path, when md5 sum is changed between validation and import', () => {
@@ -162,7 +277,7 @@ describe('Check metadata import page', () => {
 
   context('when user is normal user', () => {
     beforeEach(() => {
-      cy.loginAsUser();
+      cy.loginAs('user');
     });
 
     it('should not be able to visit the page', () => {
@@ -173,6 +288,7 @@ describe('Check metadata import page', () => {
       cy.checkAccessDenied('/metadataImport/importByPathOrContent');
       cy.checkAccessDenied('/metadataImport/details');
       cy.checkAccessDenied('/metadataImport/multiDetails');
+      cy.checkAccessDenied('/metadataImport/updateSeqCenterComment');
     });
   });
 });

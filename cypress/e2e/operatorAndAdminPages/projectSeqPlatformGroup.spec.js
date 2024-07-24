@@ -26,7 +26,7 @@ describe('Check projectSeqPlatformGroup page', () => {
   context('when user is an operator', () => {
     beforeEach(() => {
       cy.intercept('/projectSeqPlatformGroup/update*').as('updateProjectSeqPlatformGroup');
-      cy.loginAsOperator();
+      cy.loginAs('operator');
       cy.visit('/workflowSelection/index');
       cy.get('table#mergingCriteriaTable tr td').find('a').first().click({ force: true });
     });

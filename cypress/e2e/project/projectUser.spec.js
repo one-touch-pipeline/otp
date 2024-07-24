@@ -25,7 +25,7 @@ describe('Check projectUser page', () => {
 
   context('when user is an operator', () => {
     beforeEach(() => {
-      cy.loginAsOperator();
+      cy.loginAs('operator');
       cy.visit('/projectUser/index');
     });
 
@@ -39,33 +39,27 @@ describe('Check projectUser page', () => {
       cy.wait('@addUserToProject').then((interception) => {
         expect(interception.response.statusCode).to.eq(302);
         cy.location('pathname').should('match', /^\/projectUser\/index/);
-        cy.get('.projectUserTable').filter(':contains("Project Members of")').parent()
-          .should('contain.text', 'Dori Development');
+        getProjectMemberRow('dori').should('exist');
       });
     });
 
-    it('should deactivate an user', () => {
+    it('should deactivate and reactivate a user', () => {
       cy.intercept('/projectUser/setEnabled*').as('setEnabled');
 
-      cy.get('.projectUserTable tr').filter(':contains("Dori Development")')
-        .find('button.changeProjectAccess').contains('Deactivate')
-        .click();
+      getProjectMemberRow('dori').find('button.changeProjectAccess').as('projectAccessCell');
 
-      cy.get('#confirmationModal').should('be.visible');
-      cy.get('button#confirmModal').click();
+      cy.get('@projectAccessCell').contains('Deactivate').click();
+
+      cy.get('#confirmationModal').should('be.visible').find('button#confirmModal').click();
       cy.get('#confirmationModal').should('not.be.visible');
 
       cy.wait('@setEnabled').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
         expect(interception.response.body.success).to.eq(true);
       });
-    });
 
-    it('should reactivate an user', () => {
-      cy.intercept('/projectUser/setEnabled*').as('setEnabled');
-
-      cy.get('.projectUserTable tr').filter(':contains("Dori Development")')
-        .find('button.changeProjectAccess').contains('Reactivate')
+      cy.get('#formerProjectMemberTable tbody tr').filter(':contains("dori")')
+        .find('button:contains("Reactivate")')
         .click();
 
       cy.get('#confirmationModal').should('be.visible').find('button#confirmModal').click();
@@ -81,94 +75,200 @@ describe('Check projectUser page', () => {
 
       cy.intercept('/projectUser/updateEmail*').as('updateEmail');
 
-      cy.get('.projectUserTable tr').contains('Dori Development').siblings().find('.edit-switch-text button.edit')
-        .click();
-      cy.get('.projectUserTable tr').contains('Dori Development').siblings().find('input[name=value][type=text]')
-        .clear()
-        .type(newMail);
+      getProjectMemberRow('dori').as('userRow');
 
-      cy.get('.projectUserTable tr').contains('Dori Development').siblings().find('input[name=value][type=text]')
-        .parent()
-        .find('button.save')
-        .click();
+      cy.get('@userRow').find('.edit-switch-text button.edit').click();
+      cy.get('@userRow').find('input[name=value][type=text]').clear().type(newMail);
+      cy.get('@userRow').find('button.save').click();
 
       cy.wait('@updateEmail').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
         expect(interception.response.body.success).to.eq(true);
-        cy.get('.projectUserTable').filter(':contains("Project Members of")').parent()
-          .should('contain.text', newMail);
+        cy.get('@userRow').should('contain.text', newMail);
       });
     });
 
-    it('should add a role', () => {
+    it('should add and remove a role', () => {
+      const role = 'BIOINFORMATICIAN';
       cy.intercept('/projectUser/addRoleToUserProjectRole*').as('addRoleToUserProjectRole');
 
-      cy.get('.projectUserTable tr').contains('Dori Development').siblings().find('select[name=newRoles]')
-        .select('BIOINFORMATICIAN', { force: true });
-      cy.get('.projectUserTable tr').contains('Dori Development').siblings().find('button.addRole')
-        .click();
+      getProjectMemberRow('dori').as('userRow');
+
+      cy.get('@userRow').find('select[name=newRoles]').select(role, { force: true });
+      cy.get('@userRow').find('button.addRole').click();
 
       cy.wait('@addRoleToUserProjectRole').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
         expect(interception.response.body.success).to.eq(true);
-        cy.get('.projectUserTable tr').contains('Dori Development').siblings().find('div[name=BIOINFORMATICIAN]')
-          .should('contain.text', 'BIOINFORMATICIAN');
+        cy.get('.projectUserTable tr').contains('Dori Development').siblings().find(`div[name=${role}]`)
+          .should('contain.text', role);
       });
-    });
 
-    it('should remove a role', () => {
       cy.intercept('/projectUser/deleteProjectRole*').as('deleteProjectRole');
 
-      cy.get('.projectUserTable tr').contains('Dori Development').siblings()
-        .find('div[name=BIOINFORMATICIAN]')
-        .find('button.remove')
-        .click();
-
-      cy.get('.projectUserTable tr').contains('Dori Development').siblings()
-        .find('div[name=BIOINFORMATICIAN]')
-        .find('button.delete')
-        .click();
+      cy.get('@userRow').find(`div[name=${role}] button.remove`).click();
+      cy.get('@userRow').find(`div[name=${role}] button.delete`).click();
 
       cy.wait('@deleteProjectRole').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
         expect(interception.response.body.success).to.eq(true);
-        cy.get('.projectUserTable tr').contains('Dori Development').siblings().find('.edit-switch-label')
-          .should('not.contain.text', 'BIOINFORMATICIAN');
+        cy.get('@userRow').find('.edit-switch-label').should('not.contain.text', role);
       });
     });
 
     it('should toggle access to OTP', () => {
       cy.intercept('/projectUser/setAccessToOtp*').as('setAccessToOtp');
 
-      cy.get('.projectUserTable tr').contains('Dori Development').parent()
-        .find('td.accessToOtp')
-        .find('button.edit')
-        .click();
+      getProjectMemberRow('dori').find('td.accessToOtp').as('accessToOtpCell');
 
-      cy.get('.projectUserTable tr').contains('Dori Development').parent()
-        .find('td.accessToOtp')
-        .find('button.toggle')
-        .click();
+      cy.get('@accessToOtpCell').find('button.edit').click();
+      cy.get('@accessToOtpCell').find('button.toggle').click();
 
       cy.wait('@setAccessToOtp').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
         expect(interception.response.body.success).to.eq(true);
       });
+
+      cy.get('@accessToOtpCell').find('.icon-true').should('exist');
     });
 
-    it('should toggle access to files', () => {
+    shouldBeAbleToToggleAccessToFiles();
+
+    shouldBeAbleToToggleManageUsers();
+
+    it('should toggle access to delegate management', () => {
+      cy.intercept('/projectUser/setManageUsersAndDelegate*').as('setManageUsersAndDelegate');
+
+      getProjectMemberRow('dori').find('td.delegateManagement').as('delegateManagementCell');
+
+      cy.get('@delegateManagementCell').find('button.edit').click();
+      cy.get('@delegateManagementCell').find('button.toggle').click();
+
+      cy.wait('@setManageUsersAndDelegate').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+        expect(interception.response.body.success).to.eq(true);
+      });
+    });
+
+    shouldBeAbleToToggleNotification('dori');
+
+  });
+
+  context('when user is normal user with user management rights', () => {
+    let manageUserRightsWhereGranted = true;
+
+    before('Add Manage User rights, when not already granted', () => {
+      cy.loginAs('operator');
+      cy.visit('/projectUser/index');
+
+      getProjectMemberRow('dave').as('userRow', { type: 'static' });
+
+      cy.get('@userRow').find('td.manageUsers').then((userRow) => {
+        if (userRow.find('.icon-false').length) {
+          manageUserRightsWhereGranted = false;
+          cy.get('@userRow').find('td.manageUsers button.edit').click();
+          cy.get('@userRow').find('td.manageUsers button.toggle').click();
+        }
+      });
+    });
+
+    beforeEach(() => {
+      cy.loginAs('user');
+      cy.visit('/projectUser/index');
+    });
+
+    it('should not be able to add or remove pi role', () => {
+      cy.intercept('/projectUser/addRoleToUserProjectRole*').as('addRole');
+      cy.intercept('/projectUser/deleteProjectRole*').as('removeRole');
+
+      getProjectMemberRow('dave').find('select[name="newRoles"] option:contains("PI")').should('not.exist');
+
+      getProjectMemberRow('dori').find('div[name="PI"]').as('piEntry');
+      cy.get('@piEntry').find('button.remove').click();
+      cy.get('@piEntry').find('button.delete').click();
+
+      cy.wait('@removeRole').its('response.body.success').should('eq', false);
+
+      cy.get('div[name="PI"]').should('exist');
+      cy.get('div[name="BIOINFORMATICIAN"]').should('exist');
+    });
+
+    it('should be able to add and remove non pi role', () => {
+      cy.intercept('/projectUser/addRoleToUserProjectRole*').as('addRole');
+      cy.intercept('/projectUser/deleteProjectRole*').as('removeRole');
+
+      getProjectMemberRow('dave').as('userRow');
+
+      cy.get('@userRow').find('select[name="newRoles"]').select('COORDINATOR', { force: true });
+      cy.get('@userRow').find('button.addRole').click();
+
+      cy.wait('@addRole').its('response.body.success').should('eq', true);
+
+      cy.get('@userRow').find('div[name="COORDINATOR"] button.remove').click();
+      cy.get('@userRow').find('div[name="COORDINATOR"] button.delete').click();
+      cy.wait('@removeRole').its('response.body.success').should('eq', true);
+    });
+
+    after('Remove Manage User rights when not granted before', () => {
+      if (!manageUserRightsWhereGranted) {
+        cy.loginAs('operator');
+        cy.visit('/projectUser/index');
+
+        getProjectMemberRow('dave').as('userRow');
+        cy.get('@userRow').find('td.manageUsers button.edit').click();
+        cy.get('@userRow').find('td.manageUsers button.toggle').click();
+      }
+    });
+  });
+
+  context('when user is normal user', () => {
+    beforeEach(() => {
+      cy.loginAs('user');
+      cy.visit('/projectUser/index');
+    });
+
+    shouldBeAbleToToggleNotification('dave');
+
+    it('should not be able to add pi role', () => {
+      cy.intercept('/projectUser/addRoleToUserProjectRole*').as('addRole');
+
+      cy.get('select[name="newRoles"]').should('not.exist');
+    });
+
+    it('should see own deactivate button', () => {
+      getProjectMemberRow('dave').find('button.changeProjectAccess:contains("Deactivate")').should('exist');
+      getProjectMemberRow('dori').find('button.changeProjectAccess:contains("Deactivate")').should('be.disabled');
+    });
+  });
+
+  function getProjectMemberRow(name) {
+    return cy.get('#projectMemberTable tbody tr').filter(`:contains("${name}")`);
+  }
+
+  function shouldBeAbleToToggleManageUsers() {
+    return it('should toggle access to manage users', () => {
+      cy.intercept('/projectUser/setManageUsers*').as('setManageUsers');
+
+      getProjectMemberRow('dori').find('td.manageUsers').as('manageUsersCell');
+
+      cy.get('@manageUsersCell').find('button.edit').click();
+      cy.get('@manageUsersCell').find('button.toggle').click();
+
+      cy.wait('@setManageUsers').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+        expect(interception.response.body.success).to.eq(true);
+      });
+    });
+  }
+
+  function shouldBeAbleToToggleAccessToFiles() {
+    return it('should toggle access to files', () => {
       cy.intercept('/projectUser/setAccessToFiles*').as('setAccessToFiles');
 
-      cy.get('.projectUserTable tr').contains('Dori Development').parent()
-        .find('td.accessToFiles')
-        .find('button.edit')
-        .click();
+      getProjectMemberRow('dori').find('td.accessToFiles').as('accessToFilesCell');
 
-      cy.get('.projectUserTable tr').contains('Dori Development').parent()
-        .find('td.accessToFiles')
-        .find('button')
-        .contains('Toggle')
-        .click();
+      cy.get('@accessToFilesCell').find('button.edit').click();
+      cy.get('@accessToFilesCell').find('button:contains("Toggle")').click();
 
       cy.get('#confirmationModal').should('be.visible').find('button#confirmModal').click();
 
@@ -177,97 +277,27 @@ describe('Check projectUser page', () => {
         expect(interception.response.body.success).to.eq(true);
       });
     });
+  }
 
-    it('should toggle access to manage users', () => {
-      cy.intercept('/projectUser/setManageUsers*').as('setManageUsers');
-
-      cy.get('.projectUserTable tr').contains('Dori Development').parent()
-        .find('td.manageUsers')
-        .find('button.edit')
-        .click();
-
-      cy.get('.projectUserTable tr').contains('Dori Development').parent()
-        .find('td.manageUsers')
-        .find('button.toggle')
-        .click();
-
-      cy.wait('@setManageUsers').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
-        expect(interception.response.body.success).to.eq(true);
-      });
-    });
-
-    it('should toggle access to delegate management', () => {
-      cy.intercept('/projectUser/setManageUsersAndDelegate*').as('setManageUsersAndDelegate');
-
-      cy.get('.projectUserTable tr').contains('Dori Development').parent()
-        .find('td.delegateManagement')
-        .find('button.edit')
-        .click();
-
-      cy.get('.projectUserTable tr').contains('Dori Development').parent()
-        .find('td.delegateManagement')
-        .find('button.toggle')
-        .click();
-
-      cy.wait('@setManageUsersAndDelegate').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
-        expect(interception.response.body.success).to.eq(true);
-      });
-    });
-
-    it('should toggle access to receive notifications', () => {
+  function shouldBeAbleToToggleNotification(user) {
+    return it(`should be able to toggle notification of user ${user}`, () => {
       cy.intercept('/projectUser/setReceivesNotifications*').as('setReceivesNotifications');
 
-      cy.get('.projectUserTable tr').contains('Dori Development').parent()
-        .find('td.receivesNotifications')
-        .find('button.edit')
-        .click();
+      getProjectMemberRow(user).find('td.receivesNotifications').as('notificationCell');
 
-      cy.get('.projectUserTable tr').contains('Dori Development').parent()
-        .find('td.receivesNotifications')
-        .find('button.toggle')
-        .click();
+      cy.get('@notificationCell').find('button.edit').click();
+      cy.get('@notificationCell').find('button.toggle').click();
+      cy.wait('@setReceivesNotifications').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+        expect(interception.response.body.success).to.eq(true);
+      });
 
+      cy.get('@notificationCell').find('button.edit').click();
+      cy.get('@notificationCell').find('button.toggle').click();
       cy.wait('@setReceivesNotifications').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
         expect(interception.response.body.success).to.eq(true);
       });
     });
-  });
-
-  context('when user is normal user', () => {
-    beforeEach(() => {
-      cy.loginAsUser();
-      cy.visit('/projectUser/index');
-    });
-
-    it('should toggle notification', () => {
-      cy.get('.projectUserTable tr').filter(':contains("Dave Development")')
-        .find('td.receivesNotifications .icon-true').should('exist');
-
-      cy.get('.projectUserTable tr').filter(':contains("Dave Development")')
-        .find('td.receivesNotifications button.edit').first()
-        .click();
-      cy.get('.projectUserTable tr').filter(':contains("Dave Development")')
-        .find('td.receivesNotifications button.toggle').first()
-        .click();
-      cy.get('.projectUserTable tr').filter(':contains("Dave Development")')
-        .find('td.receivesNotifications .icon-false').should('exist');
-
-      cy.get('.projectUserTable tr').filter(':contains("Dave Development")')
-        .find('td.receivesNotifications button.edit').first()
-        .click();
-      cy.get('.projectUserTable tr').filter(':contains("Dave Development")')
-        .find('td.receivesNotifications button.toggle').first()
-        .click();
-      cy.get('.projectUserTable tr').filter(':contains("Dave Development")')
-        .find('td.receivesNotifications .icon-true').should('exist');
-    });
-
-    it('should see deactivate button', () => {
-      cy.get('.projectUserTable tr').filter(':contains("Dave Development")')
-        .find('button.changeProjectAccess').contains('Deactivate');
-    });
-  });
+  }
 });

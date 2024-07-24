@@ -25,7 +25,7 @@ describe('Check seq track pages', () => {
 
   context('when user is an operator', () => {
     beforeEach(() => {
-      cy.loginAsOperator();
+      cy.loginAs('operator');
     });
 
     it('should visit the seq track set page by starting on project overview page', () => {

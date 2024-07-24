@@ -25,7 +25,7 @@ describe('Check indel pages', () => {
 
   context('when user is an operator', () => {
     beforeEach(() => {
-      cy.loginAsOperator();
+      cy.loginAs('operator');
       cy.fixture('bigProject.json').then((config) => {
         cy.visit(`/indel/results?project=${config[0].projectNameUsedForTables}`);
       });

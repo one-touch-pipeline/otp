@@ -25,7 +25,7 @@ describe('Check cell ranger configuration page', () => {
 
   context('when user is part of a project', () => {
     beforeEach(() => {
-      cy.loginAsUser();
+      cy.loginAs('user');
     });
 
     it('should visit the index page', () => {
@@ -139,7 +139,7 @@ describe('Check cell ranger configuration page', () => {
 
   context('when user is a operator', () => {
     beforeEach(() => {
-      cy.loginAsOperator();
+      cy.loginAs('operator');
     });
 
     it('should be able to visit the page', () => {
@@ -165,7 +165,7 @@ describe('Check cell ranger configuration page', () => {
 
   context('when user is not part of a project', () => {
     beforeEach(() => {
-      cy.loginAsDepartmentHeadUser();
+      cy.loginAs('departmentHead');
     });
 
     it('should not be able to visit the page', () => {

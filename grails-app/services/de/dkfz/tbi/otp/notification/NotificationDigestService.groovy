@@ -68,6 +68,7 @@ class NotificationDigestService {
     String buildNotificationDigest(NotificationCommand cmd, ProcessingStatus status) {
         List<String> content = []
         List<ProcessingStep> processingSteps = cmd.steps.findAll()
+
         if (processingSteps) {
             String stepContent = createNotificationTextService.buildStepNotifications(processingSteps, status)
             if (stepContent) {

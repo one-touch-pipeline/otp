@@ -25,7 +25,7 @@ describe('Check sampleOverview page', () => {
 
   context('when user is an operator', () => {
     beforeEach(() => {
-      cy.loginAsOperator();
+      cy.loginAs('operator');
     });
 
     it('should filter the table by Sample Type', () => {
@@ -58,7 +58,7 @@ describe('Check sampleOverview page', () => {
 
   context('when user is normal user', () => {
     beforeEach(() => {
-      cy.loginAsUser();
+      cy.loginAs('user');
     });
 
     it('should not be able to select a project user is not part of', () => {
