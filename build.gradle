@@ -60,7 +60,7 @@ plugins {
     // allow to create SBOM dependencies list as xml & json for gradle
     // https://cyclonedx.org/tool-center/
     // https://plugins.gradle.org/plugin/org.cyclonedx.bom
-    id 'org.cyclonedx.bom' version '1.8.2'
+    id 'org.cyclonedx.bom' version '1.9.0'
 }
 
 develocity {
