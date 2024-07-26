@@ -55,7 +55,7 @@ plugins {
     // http://www.asset-pipeline.com/manual/#getting-started
     // http://www.asset-pipeline.com/manual/#configuration
     // plugins for less / sass available
-    id "com.bertramlabs.asset-pipeline" version "4.4.0"
+    id "com.bertramlabs.asset-pipeline" version "4.5.1"
 
     // allow to create SBOM dependencies list as xml & json for gradle
     // https://cyclonedx.org/tool-center/
