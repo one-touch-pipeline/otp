@@ -91,7 +91,7 @@ class AlignmentInfoService {
 
     Map<String, String> extractCValuesMapFromJsonConfigString(String config) {
         JsonNode node = MAPPER.readTree(config)
-        return node.get('RODDY').get('cvalues').fields().collectEntries {
+        return node?.get('RODDY')?.get('cvalues')?.fields()?.collectEntries {
             [(it.key): it.value.get('value').asText()]
         }
     }
@@ -216,17 +216,19 @@ class AlignmentInfoService {
     private Map createAlignmentCommandOptionsMap(Map<String, String> config, Project project, SeqType seqType) {
         Map bwa = [:]
 
-        if (seqType.isRna()) {
-            bwa.command = config.get("STAR_VERSION") ? "STAR Version ${config.get("STAR_VERSION")}" : ""
-            bwa.options = ['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].collect { name ->
-                config.get("STAR_PARAMS_${name}".toString())
-            }.join(' ')
-        } else if (config.get("useAcceleratedHardware") == "true") {
-            bwa.command = config.get("BWA_ACCELERATED_VERSION") ? "bwa-bb Version ${config.get("BWA_ACCELERATED_VERSION")}" : ""
-            bwa.options = config.get("BWA_MEM_OPTIONS") + ' ' + config.get("BWA_MEM_CONVEY_ADDITIONAL_OPTIONS")
-        } else {
-            bwa.command = config.get("BWA_VERSION") ? "BWA Version ${config.get("BWA_VERSION")}" : ""
-            bwa.options = config.get("BWA_MEM_OPTIONS")
+        if (config) {
+            if (seqType.isRna()) {
+                bwa.command = config.get("STAR_VERSION") ? "STAR Version ${config.get("STAR_VERSION")}" : ""
+                bwa.options = ['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].collect { name ->
+                    config.get("STAR_PARAMS_${name}".toString())
+                }.join(' ')
+            } else if (config.get("useAcceleratedHardware") == "true") {
+                bwa.command = config.get("BWA_ACCELERATED_VERSION") ? "bwa-bb Version ${config.get("BWA_ACCELERATED_VERSION")}" : ""
+                bwa.options = config.get("BWA_MEM_OPTIONS") + ' ' + config.get("BWA_MEM_CONVEY_ADDITIONAL_OPTIONS")
+            } else {
+                bwa.command = config.get("BWA_VERSION") ? "BWA Version ${config.get("BWA_VERSION")}" : ""
+                bwa.options = config.get("BWA_MEM_OPTIONS")
+            }
         }
 
         if (!bwa.command) {
