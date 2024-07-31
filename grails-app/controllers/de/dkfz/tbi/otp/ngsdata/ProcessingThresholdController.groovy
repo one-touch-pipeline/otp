@@ -119,7 +119,7 @@ class ProcessingThresholdController {
         samplePairDeciderService.createSamplePairs(project, sampleTypesChanged)
         triggerWorkflowService.triggerWorkflowByProjectAndSampleTypes(project, sampleTypesChanged)
 
-        flash.message = new FlashMessage("success")
+        flash.message = new FlashMessage(g.message(code: "processingThresholds.edit.success") as String)
         redirect(action: "index")
     }
 }

@@ -27,7 +27,7 @@
 $.otp.toaster = {
   /**
    * Converts message arrays to a list of items and doesn't touch normal strings.
-   * @param message: Message as string or array string to convert
+   * @param message - Message as string or array string to convert
    * @returns {*|string}: converted message
    */
   convertMessageArray(message) {
@@ -39,8 +39,8 @@ $.otp.toaster = {
   /**
    * Fires an info toast message.
    *
-   * @param title: title of the toast
-   * @param message: the toasts message
+   * @param title - title of the toast
+   * @param message - the toasts message
    */
   // eslint-disable-next-line strict
   showInfoToast(title = 'Info', message = '') {
@@ -49,8 +49,8 @@ $.otp.toaster = {
   /**
    * Fires a success toast message.
    *
-   * @param title: title of the toast
-   * @param message: the toasts message
+   * @param title - title of the toast
+   * @param message - the toasts message
    */
   // eslint-disable-next-line strict
   showSuccessToast(title = 'Success', message = 'Operation has been successful.') {
@@ -59,8 +59,8 @@ $.otp.toaster = {
   /**
    * Fires a warning toast message.
    *
-   * @param title: title of the toast
-   * @param message: the toasts message
+   * @param title - title of the toast
+   * @param message - the toasts message
    */
   // eslint-disable-next-line strict
   showWarningToast(title = 'Warning', message = 'A warning occurred during the operation.') {
@@ -69,8 +69,8 @@ $.otp.toaster = {
   /**
    * Fires an error toast message.
    *
-   * @param title: title of the toast
-   * @param message: the toasts message
+   * @param title - title of the toast
+   * @param error - the toast's error message
    */
   // eslint-disable-next-line strict
   showErrorToast(title = 'Error', error = 'Unknown error. Please try again.') {
@@ -79,10 +79,10 @@ $.otp.toaster = {
   /**
    * Fires a toast message.
    *
-   * @param title: title of the toast
-   * @param message: the toasts message
-   * @param displayTime: time in ms to show the toast
-   * @param state: allowed states: info, success, warning, danger. default is info
+   * @param title - title of the toast
+   * @param message - the toasts message
+   * @param displayTime - time in ms to show the toast
+   * @param state - allowed states: info, success, warning, danger. default is info
    */
   // eslint-disable-next-line strict
   showToast(title, message, displayTime, state = 'info') {
@@ -143,7 +143,7 @@ $.otp.toaster = {
   /**
    * Convert the state into a css class name.
    *
-   * @param state: info, success, warning, danger
+   * @param state - info, success, warning, danger
    * @returns {string}: css class
    */
   getStateProps(state) {

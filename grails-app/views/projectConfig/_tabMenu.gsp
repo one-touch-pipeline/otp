@@ -28,3 +28,38 @@
     <g:link controller="qcThreshold" action="projectConfiguration" class="${controllerName == "qcThreshold" ? 'active' : ''}"><g:message code="config.tabMenu.qcThresholds"/></g:link>
     <g:link controller="cellRangerConfiguration" action="index" class="${controllerName == "cellRangerConfiguration" ? 'active' : ''}"><g:message code="config.tabMenu.cellRanger"/></g:link>
 </div>
+
+%{-- Can be used as soon as all the pages within the tab structure have been converted to bootstrap pages --}%
+%{--
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <g:link controller="workflowSelection" action="index" class="nav-link ${controllerName == "workflowSelection" ? 'active fw-bold' : ''}">
+            <g:message code="config.tabMenu.workflowSelection"/>
+        </g:link>
+    </li>
+    <li class="nav-item">
+        <g:link controller="alignmentConfigurationOverview" action="index" class="nav-link ${controllerName == "alignmentConfigurationOverview" ? 'active fw-bold' : ''}">
+            <g:message code="config.tabMenu.alignment"/>
+        </g:link>
+    </li>
+    <li class="nav-item">
+        <g:link controller="analysisConfigurationOverview" action="index" class="nav-link ${controllerName == "analysisConfigurationOverview" ? 'active fw-bold' : ''}">
+            <g:message code="config.tabMenu.analysis"/>
+        </g:link>
+    </li>
+    <li class="nav-item">
+        <g:link controller="processingThreshold" action="index" class="nav-link ${controllerName == "processingThreshold" ? 'active fw-bold' : ''}">
+            <g:message code="config.tabMenu.procThresholds"/>
+        </g:link>
+    </li>
+    <li class="nav-item">
+        <g:link controller="qcThreshold" action="projectConfiguration" class="nav-link ${controllerName == "qcThreshold" ? 'active fw-bold' : ''}">
+            <g:message code="config.tabMenu.qcThresholds"/>
+        </g:link>
+    </li>
+    <li class="nav-item">
+        <g:link controller="cellRangerConfiguration" action="index" class="nav-link ${controllerName == "cellRangerConfiguration" ? 'active fw-bold' : ''}">
+            <g:message code="config.tabMenu.cellRanger"/>
+        </g:link>
+    </li>
+</ul>--}%

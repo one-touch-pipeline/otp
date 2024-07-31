@@ -21,20 +21,18 @@
   --}%
 
 <div class="input-group mb-3" style="width: 500px;">
-    <div class="input-group-prepend">
-        <label class="input-group-text" for="project"><g:message code="projectSelection.project"/></label>
-    </div>
-    <div class="selected-project-value hidden">
-        <strong>${selectedProject.displayName}</strong>
-    </div>
-    %{-- variables are form ProjectSelectionInterceptor --}%
-    <select id="project" class="custom-select use-select-2" onChange='window.location = this.value;'>
-        <g:each in="${availableProjects}" var="project">
-            <option value="${g.createLink(controller: controllerName, action: actionName, params: [(projectParameter): project.name])}"
-                ${selectedProject == project ? "selected" : ""}>${project.displayName}</option>
-        </g:each>
-    </select>
-    <div class="input-group-append">
+    <div class="input-group">
+        <label class="input-group-prepend input-group-text" for="project"><g:message code="projectSelection.project"/></label>
+        <div class="selected-project-value hidden">
+            <strong>${selectedProject.displayName}</strong>
+        </div>
+        %{-- variables are from ProjectSelectionInterceptor --}%
+        <select id="project" class="form-select use-select-2" onChange='window.location = this.value;'>
+            <g:each in="${availableProjects}" var="project">
+                <option value="${g.createLink(controller: controllerName, action: actionName, params: [(projectParameter): project.name])}"
+                    ${selectedProject == project ? "selected" : ""}>${project.displayName}</option>
+            </g:each>
+        </select>
         <button class="btn btn-outline-secondary select2-appended-btn" type="button" onclick="$.otp.copyToClipboard('${selectedProject.displayName}')"
                 title="${g.message(code: 'projectSelection.clipboard')}" data-placement="bottom">
             <i class="bi bi-clipboard"></i>

@@ -49,10 +49,9 @@
         </div>
     </div>
 
-    <div>
+    <div class="mb-4">
         <g:render template="/projectConfig/tabMenu"/>
     </div>
-    <br>
 
     <h1>${g.message(code: "workflowSelection.title")}</h1>
 
