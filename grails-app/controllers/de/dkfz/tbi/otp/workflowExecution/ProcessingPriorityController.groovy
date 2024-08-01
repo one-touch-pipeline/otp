@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import grails.converters.JSON
 import grails.validation.ValidationException
+import org.apache.http.entity.ContentType
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 
@@ -49,7 +50,7 @@ class ProcessingPriorityController {
     JSON save(ProcessingPriority processingPriority) {
         try {
             ProcessingPriority savedProcessingPriority = processingPriorityService.savePriority(processingPriority)
-            response.contentType = "application/json"
+            response.contentType = ContentType.APPLICATION_JSON
             render(savedProcessingPriority as JSON)
         } catch (ValidationException e) {
             log.debug(e.localizedMessage)

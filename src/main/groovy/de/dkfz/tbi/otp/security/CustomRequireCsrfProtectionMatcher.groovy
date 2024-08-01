@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.security
 
+import org.apache.http.entity.ContentType
 import org.springframework.security.web.util.matcher.RequestMatcher
 
 import javax.servlet.http.HttpServletRequest
@@ -37,7 +38,7 @@ class CustomRequireCsrfProtectionMatcher implements RequestMatcher {
         if (request.isGet()) {
             return false
         }
-        if (request.contentType?.contains("multipart/form-data")) {
+        if (request.contentType?.contains(ContentType.MULTIPART_FORM_DATA.mimeType)) {
             return false
         }
         return (request.forwardURI - request.contextPath) != "/console/execute"

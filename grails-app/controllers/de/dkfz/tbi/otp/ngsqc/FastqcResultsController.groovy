@@ -29,6 +29,8 @@ import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 
+import static de.dkfz.tbi.otp.administration.Document.FormatType.PNG
+
 @PreAuthorize('isFullyAuthenticated()')
 class FastqcResultsController {
 
@@ -99,7 +101,7 @@ class FastqcResultsController {
             render(status: 404)
             return void
         }
-        render(file: stream, contentType: "image/png")
+        render(file: stream, contentType: PNG.mimeType)
     }
 }
 

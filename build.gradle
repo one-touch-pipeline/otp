@@ -475,6 +475,15 @@ dependencies {
 
     implementation 'org.codenarc:CodeNarc:3.4.0'
 
+    // needed for the wes swagger api @Nullable annotation
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'
+
+    // needed for LinkedHashMultimap support
+    implementation 'com.google.guava:guava:33.2.1-jre'
+
+    // for ContentType/MIME types
+    implementation 'org.apache.httpcomponents:httpcore:4.4.16'
+
     // JS and CSS libraries
     implementation 'org.webjars:jquery:3.7.1'
     implementation 'org.webjars:bootstrap:5.3.3'

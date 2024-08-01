@@ -31,6 +31,8 @@ import de.dkfz.tbi.otp.utils.TimeFormats
 
 import java.text.SimpleDateFormat
 
+import static de.dkfz.tbi.otp.administration.Document.FormatType.CSV
+
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
 class StatisticsController {
     ProjectService projectService
@@ -54,7 +56,7 @@ class StatisticsController {
             output << "\n"
         }
 
-        render(file: new ByteArrayInputStream(output.toString().getBytes("UTF-8")), fileName: 'directories.csv', contentType: 'text/csv')
+        render(file: new ByteArrayInputStream(output.toString().getBytes("UTF-8")), fileName: 'directories.csv', contentType: CSV.mimeType)
     }
 
     def kpi() {

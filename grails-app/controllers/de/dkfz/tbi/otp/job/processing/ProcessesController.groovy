@@ -38,6 +38,7 @@ import de.dkfz.tbi.otp.job.restarting.RestartActionService
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
+import static de.dkfz.tbi.otp.administration.Document.FormatType.*
 import static grails.async.Promises.task
 import static grails.async.Promises.waitAll
 
@@ -460,7 +461,7 @@ class ProcessesController {
     }
 
     def getProcessingErrorStackTrace() {
-        render(text: processService.getProcessingErrorStackTrace(params.id as long), contentType: "text/plain")
+        render(text: processService.getProcessingErrorStackTrace(params.id as long), contentType: TXT.mimeType)
     }
 
     private Map<String, String> processParameterData(Process process) {

@@ -34,6 +34,9 @@ import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 
 import java.nio.file.Path
 
+import static de.dkfz.tbi.otp.administration.Document.FormatType.TXT
+import static de.dkfz.tbi.otp.administration.Document.FormatType.XML
+
 @Slf4j
 @PreAuthorize('isFullyAuthenticated()')
 abstract class AbstractAnalysisController {
@@ -68,14 +71,14 @@ abstract class AbstractAnalysisController {
         Path configPath = abstractAnalysisService.fetchConfigPath(cmd.analysisInstance)
 
         if (!configPath) {
-            return render(text: "No config file available", contentType: "text/plain")
+            return render(text: "No config file available", contentType: TXT.mimeType)
         }
 
         byte[] content = configPath.bytes
         if (cmd.to == 'DOWNLOAD') {
             response.setHeader("Content-disposition", "attachment; filename=${configPath.fileName}")
         }
-        render(contentType: "text/xml", file: content)
+        render(contentType: XML.mimeType, file: content)
     }
 }
 

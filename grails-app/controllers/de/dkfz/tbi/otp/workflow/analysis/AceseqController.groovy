@@ -29,6 +29,8 @@ import de.dkfz.tbi.otp.utils.DataTableCommand
 
 import java.nio.file.Path
 
+import static de.dkfz.tbi.otp.administration.Document.FormatType.PNG
+
 class AceseqController extends AbstractAnalysisController {
 
     AceseqResultsService aceseqResultsService
@@ -82,9 +84,9 @@ class AceseqController extends AbstractAnalysisController {
         if (files.isEmpty()) {
             return response.sendError(404)
         } else if (cmd.plotType in [PlotType.ACESEQ_EXTRA, PlotType.ACESEQ_ALL]) {
-            render(file: files[cmd.index].bytes, contentType: "image/png")
+            render(file: files[cmd.index].bytes, contentType: PNG.mimeType)
         } else {
-            render(file: files.first().bytes, contentType: "image/png")
+            render(file: files.first().bytes, contentType: PNG.mimeType)
         }
     }
 }

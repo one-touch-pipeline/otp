@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.project
 
 import grails.converters.JSON
 import grails.validation.Validateable
+import org.apache.http.entity.ContentType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.multipart.MultipartFile
 
@@ -114,7 +115,7 @@ class ProjectInfoController implements CheckAndCall {
         byte[] outputFile = projectInfoService.getProjectInfoContent(cmd.projectInfo)
 
         if (outputFile) {
-            render(file: outputFile, contentType: "application/octet-stream", fileName: cmd.projectInfo.fileName)
+            render(file: outputFile, contentType: ContentType.APPLICATION_OCTET_STREAM.mimeType, fileName: cmd.projectInfo.fileName)
         } else {
             flash.message = new FlashMessage("File Not Found", "No file '${cmd.projectInfo.fileName}' found.")
             redirect(action: "list", fragment: "doc${cmd.projectInfo.id}")

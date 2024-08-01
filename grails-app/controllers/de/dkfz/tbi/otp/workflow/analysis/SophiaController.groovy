@@ -28,6 +28,8 @@ import de.dkfz.tbi.otp.utils.DataTableCommand
 
 import java.nio.file.Path
 
+import static de.dkfz.tbi.otp.administration.Document.FormatType.PDF
+
 class SophiaController extends AbstractAnalysisController {
 
     SophiaResultsService sophiaResultsService
@@ -64,6 +66,6 @@ class SophiaController extends AbstractAnalysisController {
         }
         List<Path> filePaths = sophiaResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
         Path file = filePaths.first()
-        render(file: file.bytes, contentType: "application/pdf")
+        render(file: file.bytes, contentType: PDF.mimeType)
     }
 }

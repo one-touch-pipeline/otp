@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.converters.JSON
 import groovy.json.JsonSlurper
 import groovy.transform.TupleConstructor
+import org.apache.http.entity.ContentType
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataCorrection.DataSwapService
@@ -187,7 +188,7 @@ class SequenceController {
                 .collect { g.message(code: it.message) }
                 .join(',').replaceAll("<br/?>", " ")
         String content = "${contentHeader}\n${contentBody}\n"
-        response.contentType = "application/octet-stream"
+        response.contentType = ContentType.APPLICATION_OCTET_STREAM.mimeType
         response.setHeader("Content-disposition", "filename=Sequence_Export_" + currentDate + ".csv")
         response.outputStream << content.toString().bytes
     }
@@ -223,7 +224,7 @@ class SequenceController {
         }.join("\n")
         String contentHeader = dataSwapService.dataSwapHeaders.join(',')
         String content = "${contentHeader}\n${contentBody}\n"
-        response.contentType = "application/octet-stream"
+        response.contentType = ContentType.APPLICATION_OCTET_STREAM.mimeType
         response.setHeader("Content-disposition", "filename=Sample_Swap_Template_" + currentDate + ".csv")
         response.outputStream << content.toString().bytes
     }

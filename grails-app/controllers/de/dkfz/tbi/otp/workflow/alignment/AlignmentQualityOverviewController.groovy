@@ -23,6 +23,8 @@ package de.dkfz.tbi.otp.workflow.alignment
 
 import grails.converters.JSON
 import grails.validation.Validateable
+import org.apache.http.Consts
+import org.apache.http.entity.ContentType
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 
@@ -54,6 +56,9 @@ import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
 import java.nio.file.*
+
+import static de.dkfz.tbi.otp.administration.Document.FormatType.TXT
+import static de.dkfz.tbi.otp.administration.Document.FormatType.PDF
 
 @PreAuthorize('isFullyAuthenticated()')
 class AlignmentQualityOverviewController implements CheckAndCall {
@@ -306,7 +311,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
                     content = cellRangerService.getWebSummaryResultFileContent(cmd.singleCellBamFile)
                     break
             }
-            render(text: content, contentType: "text/html", encoding: "UTF-8")
+            render(text: content, contentType: ContentType.TEXT_HTML, encoding: Consts.UTF_8)
         } catch (NoSuchFileException e) {
             flash.message = new FlashMessage(g.message(code: "alignment.quality.exception.noSuchFile") as String, e.message)
             redirect(action: "index")
@@ -339,9 +344,9 @@ class AlignmentQualityOverviewController implements CheckAndCall {
         Path file = rnaRoddyBamFileService.getWorkArribaFusionPlotPdf(rrbf)
 
         if (fileService.fileIsReadable(file)) {
-            render(file: file.bytes, contentType: "application/pdf")
+            render(file: file.bytes, contentType: PDF.mimeType)
         } else {
-            render(text: "no plot available", contentType: "text/plain")
+            render(text: "no plot available", contentType: TXT.mimeType)
         }
     }
 
@@ -351,11 +356,11 @@ class AlignmentQualityOverviewController implements CheckAndCall {
         if (content) {
             render(
                     file: content,
-                    contentType: "text/plain",
+                    contentType: TXT.mimeType,
                     fileName: (to == 'DOWNLOAD') ? "config.txt" : null,
             )
         } else {
-            render(text: "no config file available", contentType: "text/plain")
+            render(text: "no config file available", contentType: TXT.mimeType)
         }
     }
 }

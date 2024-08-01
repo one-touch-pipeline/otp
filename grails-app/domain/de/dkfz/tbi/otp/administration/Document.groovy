@@ -26,6 +26,8 @@ import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.utils.Entity
 
+import static org.apache.http.entity.ContentType.*
+
 @ManagedEntity
 class Document implements Entity {
 
@@ -38,7 +40,9 @@ class Document implements Entity {
         EXCEL_97("application/vnd.ms-excel", "xls"),
         CSV("text/csv", "csv"),
         TSV("text/tab-separated-values", "tsv"),
-        TXT("text/plain", "txt"),
+        TXT(TEXT_PLAIN.mimeType, "txt"),
+        PNG(IMAGE_PNG.mimeType, "png"),
+        XML(TEXT_XML.mimeType, "xml"),
         LINK("", ""),
 
         final String mimeType

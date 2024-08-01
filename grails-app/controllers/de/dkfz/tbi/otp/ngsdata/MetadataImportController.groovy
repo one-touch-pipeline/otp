@@ -62,6 +62,8 @@ import java.nio.file.Paths
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
+import static de.dkfz.tbi.otp.administration.Document.FormatType.TXT
+
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
 class MetadataImportController implements CheckAndCall, PlainResponseExceptionHandler {
 
@@ -280,7 +282,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
 
             boolean ignoreMd5sumError = "TRUE".equalsIgnoreCase(params.ignoreMd5sumError)
 
-            render(text: doAutoImport(params.ticketNumber as String, params.ilseNumbers as String, ignoreMd5sumError), contentType: "text/plain")
+            render(text: doAutoImport(params.ticketNumber as String, params.ilseNumbers as String, ignoreMd5sumError), contentType: TXT.mimeType)
         } catch (Throwable t) {
             throw new InternalServerErrorPlainResponseException(t.message, t)
         } finally {
