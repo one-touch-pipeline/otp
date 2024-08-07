@@ -85,7 +85,6 @@ class FindNewLicenses {
             "Public Domain, per Creative Commons CC0",
             "Revised BSD",
             "The (New) BSD License",
-            "Universal Permissive License, Version 1.0",
             "ISC",
             "The Unlicense",
             "Unlicense",
