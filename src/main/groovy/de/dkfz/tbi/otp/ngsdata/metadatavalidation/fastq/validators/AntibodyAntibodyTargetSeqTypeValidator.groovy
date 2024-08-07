@@ -82,9 +82,11 @@ class AntibodyAntibodyTargetSeqTypeValidator extends AbstractValueTuplesValidato
             boolean isSingleCell = SeqTypeService.isSingleCell(baseMaterial)
 
             SequencingReadType libraryLayout = SequencingReadType.getByName(valueTuple.getValue(SEQUENCING_READ_TYPE.name()))
+            if (!libraryLayout) {
+                return
+            }
 
             SeqType seqType = seqTypeService.findByNameOrImportAlias(seqTypeName, [libraryLayout: libraryLayout, singleCell: isSingleCell])
-
             if (!seqType) {
                 return
             }
