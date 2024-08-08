@@ -67,6 +67,11 @@ class CheckFileAccessInconsistenciesJob extends AbstractScheduledJob {
         if (mailContent) {
             mailHelperService.saveMail(SUBJECT, mailContent)
         }
+
+        String userInconsistencies = generateProjectUserReport()
+        if (userInconsistencies) {
+            mailHelperService.saveMail(SUBJECT, userInconsistencies)
+        }
     }
 
     String createMailContent() {
@@ -114,5 +119,59 @@ class CheckFileAccessInconsistenciesJob extends AbstractScheduledJob {
             }
         }
         return content.sort().join('\n')
+    }
+
+    String generateProjectUserReport() {
+        List<String> output = []
+        Map<String, IdpUserDetails> cache = [:]
+
+        Project.findAll().each { Project project ->
+            List<User> projectUsers = UserProjectRole.findAllByProject(project)*.user
+            List<String> nonDatabaseUsers = []
+            List<String> ldapGroupMembers = identityProvider.getGroupMembersByGroupName(project.unixGroup)
+
+            ldapGroupMembers.each { String username ->
+                User user = User.findAllByUsername(username).find { it }
+                if (user) {
+                    projectUsers << user
+                } else {
+                    nonDatabaseUsers << username
+                }
+            }
+
+            projectUsers = projectUsers.unique().sort { it.username }
+
+            List<User> usersWithoutUserProjectRole = projectUsers.findAll { User user ->
+                !UserProjectRole.findAllByUserAndProject(user, project).find { it }
+            }
+
+            if (usersWithoutUserProjectRole || nonDatabaseUsers) {
+                output << ("Project: ${project.name} (${project.unixGroup})" as String)
+                if (usersWithoutUserProjectRole) {
+                    output << "Following users have not been added to the project:"
+                    usersWithoutUserProjectRole.each { User user ->
+                        output << sprintf("%-15s | %-20s | %s", [user.username, user.realName, user.email])
+                    }
+                    output << "\n"
+                }
+                if (nonDatabaseUsers) {
+                    output << "Following Users could not be resolved to a user in the OTP database:"
+                    nonDatabaseUsers.each { String username ->
+                        IdpUserDetails details = cache.computeIfAbsent(username) {
+                            identityProvider.getIdpUserDetailsByUsername(username)
+                        }
+                        output << sprintf("%-15s | %-20s | %s", [details.username, details.realName, details.mail])
+                    }
+                    output << "\n"
+                }
+            }
+        }
+        if (output) {
+            output.add(
+                    0,
+                    "The following table lists users, which are in an OTP project group according LDAP, but in OTP are not connected to that project.\n"
+            )
+        }
+        return output.size() ? output.join('\n') : ""
     }
 }

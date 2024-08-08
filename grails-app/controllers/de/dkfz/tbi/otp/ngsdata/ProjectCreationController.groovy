@@ -184,8 +184,12 @@ class ProjectCreationController {
                     redirect(controller: "projectConfig", params: [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): project.name])
                     return
                 } catch (RuntimeException e) {
-                    log.error(e.message, e)
+                    log.error(g.message(code: 'projectCreation.store.mailBody', args: [cmd?.name ?: '']) + "\n\n" + e.message, e)
                     flash.message = new FlashMessage(g.message(code: "projectCreation.fieldstore.failure", args: [cmd?.name ?: '']) as String, e.message)
+                    mailHelperService.saveErrorMailInNewTransaction(
+                            g.message(code: 'projectCreation.store.failure'),
+                            g.message(code: 'projectCreation.store.mailBody', args: [cmd?.name ?: '']) + "\n\n" + e.message
+                    )
                 }
                 flash.cmd = cmd
                 redirect(action: "index", params: basisCommandProperties)

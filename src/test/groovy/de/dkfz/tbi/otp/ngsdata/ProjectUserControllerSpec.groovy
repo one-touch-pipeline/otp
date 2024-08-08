@@ -27,6 +27,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.ProjectSelectionService
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
@@ -156,6 +157,9 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
         }
         controller.projectSelectionService = Mock(ProjectSelectionService) {
             getRequestedProject() >> DomainFactory.createProject()
+        }
+        controller.mailHelperService = Mock(MailHelperService) {
+            saveErrorMailInNewTransaction(_, _) >> null
         }
         Set<ProjectRole> projectRoles = [createProjectRole(), createProjectRole()]
 

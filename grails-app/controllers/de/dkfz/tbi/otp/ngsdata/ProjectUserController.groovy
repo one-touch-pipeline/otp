@@ -30,6 +30,7 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.project.Project
@@ -53,6 +54,7 @@ class ProjectUserController implements CheckAndCall {
     SecurityService securityService
     ProcessingOptionService processingOptionService
     ProjectRoleService projectRoleService
+    MailHelperService mailHelperService
 
     static allowedMethods = [
             index                    : "GET",
@@ -157,6 +159,11 @@ class ProjectUserController implements CheckAndCall {
                 flash.message = new FlashMessage("Data stored successfully")
             } catch (LdapUserCreationException | AssertionError | AccessDeniedException | OtpRuntimeException e) {
                 flash.message = new FlashMessage("An error occurred", e.message)
+                log.error(g.message(code: 'projectUser.addUser.error', args: [cmd.username, project]) + "\n" + e.message, e)
+                mailHelperService.saveErrorMailInNewTransaction(
+                        "Error - Could not add user to project",
+                        g.message(code: 'projectUser.addUser.error', args: [cmd.username, project]) + "\n\n" + e.message
+                )
             }
         }
         redirect(controller: "projectUser")

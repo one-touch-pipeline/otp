@@ -26,6 +26,7 @@ import grails.gorm.transactions.Rollback
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
@@ -46,6 +47,14 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
     private static final String UNIX_GROUP_SECOND = 'OtherUnixGroup'
     private static final String UNIX_GROUP_PROJECT = 'UnixGroupProject'
     private static final String PROJECT_NAME_TEST = 'TestProject'
+
+    IdentityProvider identityProvider
+    CheckFileAccessInconsistenciesJob job
+
+    void setupData() {
+        identityProvider = Mock(IdentityProvider)
+        job = new CheckFileAccessInconsistenciesJob(identityProvider: identityProvider)
+    }
 
     @Unroll
     void "wrappedExecute, when #name, then #mailSending"() {
@@ -85,6 +94,7 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
                 identityProvider       : Mock(IdentityProvider) {
                     1 * getIdpUserDetailsByUserList(_) >> [idpUserDetails,]
                     1 * isUserDeactivated(_) >> ldapDisabled
+                    1 * getGroupMembersByGroupName(UNIX_GROUP_PROJECT) >> [USER_ACCOUNT]
                     0 * _
                 },
                 mailHelperService      : Mock(MailHelperService) {
@@ -160,6 +170,7 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
         CheckFileAccessInconsistenciesJob job = new CheckFileAccessInconsistenciesJob([
                 identityProvider       : Mock(IdentityProvider) {
                     1 * getIdpUserDetailsByUserList(_) >> [idpUserDetails]
+                    1 * getGroupMembersByGroupName(UNIX_GROUP_PROJECT) >> [USER_ACCOUNT]
                     0 * _
                 },
                 processingOptionService: new ProcessingOptionService(),
@@ -182,5 +193,110 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
 
         then:
         noExceptionThrown()
+    }
+
+    void "test generateProjectUserReport, report should be blank if no inconsistencies were found"() {
+        given:
+        setupData()
+        Project project = createProject([name: PROJECT_NAME_TEST, unixGroup: UNIX_GROUP_PROJECT])
+        User user = createUser([
+                username: USER_ACCOUNT,
+                realName: USER_REAL_NAME,
+                email   : USER_EMAIL,
+                enabled : true,
+        ])
+        createUserProjectRole(project: project, user: user)
+
+        identityProvider.getGroupMembersByGroupName(UNIX_GROUP_PROJECT) >> [USER_ACCOUNT]
+
+        when:
+        String report = job.generateProjectUserReport()
+
+        then:
+        report.isBlank()
+    }
+
+    void "test generateProjectUserReport - user without UserProjectRole"() {
+        given:
+        setupData()
+        Project project = createProject([name: PROJECT_NAME_TEST, unixGroup: UNIX_GROUP_PROJECT])
+        User user = createUser([
+                username: USER_ACCOUNT,
+                realName: USER_REAL_NAME,
+                email   : USER_EMAIL,
+                enabled : true,
+        ])
+
+        identityProvider.getGroupMembersByGroupName(UNIX_GROUP_PROJECT) >> [USER_ACCOUNT]
+
+        when:
+        String report = job.generateProjectUserReport()
+
+        then:
+        report.contains("The following table lists users, which are in an OTP project group according LDAP, but in OTP are not connected to that project.")
+        report.contains("Project: ${project.name} (${project.unixGroup})")
+        report.contains("Following users have not been added to the project:")
+        report.contains(user.username)
+        report.contains(user.realName)
+        report.contains(user.email)
+    }
+
+    void "test generateProjectUserReport - non-database user"() {
+        given:
+        setupData()
+        Project project = createProject([name: PROJECT_NAME_TEST, unixGroup: UNIX_GROUP_PROJECT])
+
+        identityProvider.getGroupMembersByGroupName(UNIX_GROUP_PROJECT) >> ['nonexistentuser']
+        identityProvider.getIdpUserDetailsByUsername('nonexistentuser') >> new IdpUserDetails(
+                username: 'nonexistentuser',
+                realName: 'Nonexistent User',
+                mail: 'nonexistentuser@test.de'
+        )
+
+        when:
+        String report = job.generateProjectUserReport()
+
+        then:
+        report.contains("The following table lists users, which are in an OTP project group according LDAP, but in OTP are not connected to that project.")
+        report.contains("Project: ${project.name} (${project.unixGroup})")
+        report.contains("Following Users could not be resolved to a user in the OTP database:")
+        report.contains('nonexistentuser')
+        report.contains('Nonexistent User')
+        report.contains('nonexistentuser@test.de')
+    }
+
+    void "test generateProjectUserReport - user with and without roles, plus non-database users"() {
+        given:
+        setupData()
+        Project project = createProject([name: PROJECT_NAME_TEST, unixGroup: UNIX_GROUP_PROJECT])
+        User user1 = createUser([
+                username: USER_ACCOUNT,
+                realName: USER_REAL_NAME,
+                email   : USER_EMAIL,
+                enabled : true,
+        ])
+        User user2 = createUser([username: 'testuser2', realName: 'Test User 2', email: 'testuser2@example.com'])
+        createUserProjectRole(project: project, user: user1)
+
+        identityProvider.getGroupMembersByGroupName(UNIX_GROUP_PROJECT) >> [USER_ACCOUNT, 'testuser2', 'nonexistentuser']
+        identityProvider.getIdpUserDetailsByUsername('nonexistentuser') >> new IdpUserDetails(
+                username: 'nonexistentuser',
+                realName: 'Nonexistent User',
+                mail: 'nonexistentuser@test.de'
+        )
+
+        when:
+        String report = job.generateProjectUserReport()
+
+        then:
+        report.trim() == """
+            |The following table lists users, which are in an OTP project group according LDAP, but in OTP are not connected to that project.\n
+            |Project: ${project.name} (${project.unixGroup})
+            |Following users have not been added to the project:
+            |${user2.username}       | ${user2.realName}          | ${user2.email}
+            |\n
+            |Following Users could not be resolved to a user in the OTP database:
+            |nonexistentuser | Nonexistent User     | nonexistentuser@test.de
+        """.stripMargin().trim().toString()
     }
 }
