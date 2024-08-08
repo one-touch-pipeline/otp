@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflowTest.fastqc
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import spock.lang.Ignore
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
@@ -43,6 +44,7 @@ import java.time.Duration
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
+@Ignore("This test requires a weskit setup")
 class WesFastqcWorkflowSpec extends AbstractDecidedWorkflowSpec {
 
     //@Slf4j does not work with Spock containing tests and produces problems in closures
