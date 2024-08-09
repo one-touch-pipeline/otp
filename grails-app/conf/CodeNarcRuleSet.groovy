@@ -69,6 +69,7 @@ All the Rules that will be used for OTP
         doNotApplyToFileNames = TEST
     }
     rule("file:grails-app/codenarcRules/DoNotUseCompileDynamicWithClasses.groovy")
+    rule("file:grails-app/codenarcRules/PreAuthorizeAnnotationForControllersRule.groovy")
 
     // rulesets/basic.xml
     AssertWithinFinallyBlock {

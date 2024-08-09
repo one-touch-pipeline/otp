@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.security.user.DepartmentService
 import de.dkfz.tbi.otp.security.user.DeputyRelationService
 import de.dkfz.tbi.otp.utils.exceptions.RightsNotGrantedException
 
+@SuppressWarnings("PreAuthorizeAnnotationForControllers")
 @PreAuthorize("hasPermission(null, 'IS_DEPARTMENT_HEAD')")
 class DepartmentConfigurationController implements CheckAndCall {
     DeputyRelationService deputyRelationService
