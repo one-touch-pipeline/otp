@@ -44,7 +44,9 @@
             <img class="institute-logo" src="${assetPath(src: logo)}" alt=""/>
         </g:if>
         <div></div>
-        <img class="otp-logo" src="${assetPath(src: 'non-free/header-otp.png')}" alt="OTP"/>
+        <g:link controller="home" action="index">
+            <img class="otp-logo" src="${assetPath(src: 'non-free/header-otp.png')}" alt="OTP"/>
+        </g:link>
         <g:if test="${otp.environmentName() != 'production'}">
             <p class="environmentName"><otp:environmentName/></p>
         </g:if>
