@@ -32,6 +32,8 @@ As both are publicly funded bodies, the code is made open source under the philo
 
 We, the OTP team, hope that it will help you manage your own petabytes of genome data!
 
+> NOTE: This software is for research-use only (RUO).
+
 ## Why OTP?
 
 We made OTP to help us manage _routine_ analysis in a scalable, automated way.
