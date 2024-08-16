@@ -70,56 +70,42 @@ class SoftwareToolController implements CheckAndCall {
     }
 
     JSON updateSoftwareTool(UpdateCommand cmd) {
-        if (cmd.hasErrors()) {
-            render(cmd.errors as JSON)
-            return
+        return checkErrorsAndCallMethod(cmd) {
+            softwareToolService.updateSoftwareTool(cmd.softwareTool, cmd.value.trim(), cmd.legacy)
+            render([:] as JSON)
         }
-        if (softwareToolService.getSoftwareTool(cmd.id) == null) {
-            Map data = [error: "requested software tool with id of ${cmd.id} could not be found"]
-            render(data as JSON)
-            return
-        }
-        Map data = [success: true, softwareTool: softwareToolService.updateSoftwareTool(cmd.id, cmd.value.trim(), cmd.legacy)]
-        return render(data as JSON)
     }
 
-    JSON updateSoftwareToolIdentifier(UpdateCommand cmd) {
-        if (cmd.hasErrors()) {
-            render(cmd.errors as JSON)
-            return
+    JSON updateSoftwareToolIdentifier(UpdateIdentifierCommand cmd) {
+        return checkErrorsAndCallMethod(cmd) {
+            softwareToolService.updateSoftwareToolIdentifier(cmd.softwareToolIdentifier, cmd.value.trim())
+            render([:] as JSON)
         }
-        if (softwareToolService.getSoftwareToolIdentifier(cmd.id) == null) {
-            Map data = [error: "requested software tool identifier with id of ${cmd.id} could not be found"]
-            render(data as JSON)
-            return
-        }
-        Map data = [success: true, softwareToolIdentifier: softwareToolService.updateSoftwareToolIdentifier(cmd.id, cmd.value.trim())]
-        return render(data as JSON)
     }
 
     JSON createSoftwareToolIdentifier(UpdateCommand cmd) {
-        if (cmd.hasErrors()) {
-            render(cmd.errors as JSON)
-            return
+        return checkErrorsAndCallMethod(cmd) {
+            softwareToolService.createSoftwareToolIdentifier(cmd.softwareTool, cmd.value.trim())
+            render([:] as JSON)
         }
-        if (softwareToolService.getSoftwareTool(cmd.id) == null) {
-            Map data = [error: "requested software tool with id of ${cmd.id} could not be found"]
-            render(data as JSON)
-            return
-        }
-        SoftwareTool softwareTool = softwareToolService.getSoftwareTool(cmd.id)
-        Map data = [success: true, softwareToolIdentifier: softwareToolService.createSoftwareToolIdentifier(softwareTool, cmd.value.trim())]
-        return render(data as JSON)
     }
 }
 
 class UpdateCommand implements Validateable {
-    Long id
+    SoftwareTool softwareTool
     String value
     boolean legacy
 
     static constraints = {
-        id(min: 0L)
+        value(blank: false)
+    }
+}
+
+class UpdateIdentifierCommand implements Validateable {
+    SoftwareToolIdentifier softwareToolIdentifier
+    String value
+
+    static constraints = {
         value(blank: false)
     }
 }

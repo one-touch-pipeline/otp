@@ -275,7 +275,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     }
 
     JSON selectSamplesCsvUpload(UploadCsvFileCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             Spreadsheet spreadsheet = checkAndReadCsvFile(cmd)
             if (spreadsheet) {
                 List<EgaSubmissionFileService.EgaColumnName> headers = [
@@ -572,8 +572,9 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     }
 
     JSON updateSubmissionState(UpdateSubmissionStateSubmitCommand cmd) {
-        return checkErrorAndCallMethod(cmd) {
-            return egaSubmissionService.updateSubmissionState(cmd.submission, cmd.state)
+        return checkErrorsAndCallMethod(cmd) {
+            egaSubmissionService.updateSubmissionState(cmd.submission, cmd.state)
+            render([:] as JSON)
         }
     }
 
@@ -605,10 +606,9 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     }
 
     def updatePubMedId(UpdatePubMedIdSubmitCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             egaSubmissionService.updatePubMedId(cmd.submission, cmd.pubMedId)
-            Map map = [success: true]
-            render(map as JSON)
+            render([:] as JSON)
         }
     }
 

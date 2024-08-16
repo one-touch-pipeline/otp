@@ -242,7 +242,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
      * @return render JSON response
      */
     def changeQcStatus(QcStatusCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             // if db version has changed after loading the page -> someone else has made changes
             // simplified way to resolve concurrent access, cheaper than explicit locking
             if (cmd.abstractBamFile.version > cmd.dbVersion) {

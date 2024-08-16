@@ -21,16 +21,14 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.OtpException
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
 /**
  * Exception to indicate that updating an Individual failed.
  */
-@Deprecated
-class IndividualUpdateException extends OtpException {
+class IndividualUpdateException extends OtpRuntimeException {
     Individual individual
 
-    @Deprecated
     IndividualUpdateException(Individual individual) {
         super("Updating the Individual with id ${individual.id} failed")
         this.individual = individual

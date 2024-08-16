@@ -212,7 +212,7 @@ class TicketServiceIntegrationSpec extends Specification implements DomainFactor
         FastqImportInstance fastqImportInstance = createFastqImportInstance(ticket: oldTicket)
 
         when:
-        ticketService.assignTicketToFastqImportInstance(newTicket.ticketNumber, fastqImportInstance.id)
+        ticketService.assignTicketToFastqImportInstance(newTicket.ticketNumber, fastqImportInstance)
 
         then:
         fastqImportInstance.ticket == newTicket
@@ -225,7 +225,7 @@ class TicketServiceIntegrationSpec extends Specification implements DomainFactor
         FastqImportInstance fastqImportInstance = createFastqImportInstance(ticket: oldTicket)
 
         when:
-        ticketService.assignTicketToFastqImportInstance(newTicketNumber, fastqImportInstance.id)
+        ticketService.assignTicketToFastqImportInstance(newTicketNumber, fastqImportInstance)
 
         then:
         fastqImportInstance.ticket == CollectionUtils.exactlyOneElement(Ticket.findAllByTicketNumber(newTicketNumber))
@@ -237,7 +237,7 @@ class TicketServiceIntegrationSpec extends Specification implements DomainFactor
         FastqImportInstance fastqImportInstance = createFastqImportInstance(ticket: ticket)
 
         when:
-        ticketService.assignTicketToFastqImportInstance(ticket.ticketNumber, fastqImportInstance.id)
+        ticketService.assignTicketToFastqImportInstance(ticket.ticketNumber, fastqImportInstance)
 
         then:
         fastqImportInstance.ticket == ticket
@@ -245,7 +245,7 @@ class TicketServiceIntegrationSpec extends Specification implements DomainFactor
 
     void "assignTicketToFastqImportInstance, no FastqImportInstance for runSegementId, throws AssertionError "() {
         when:
-        ticketService.assignTicketToFastqImportInstance("", 1)
+        ticketService.assignTicketToFastqImportInstance("", null)
 
         then:
         AssertionError error = thrown()
@@ -258,7 +258,7 @@ class TicketServiceIntegrationSpec extends Specification implements DomainFactor
         FastqImportInstance fastqImportInstance = createFastqImportInstance(ticket: ticket)
 
         when:
-        ticketService.assignTicketToFastqImportInstance('abc', fastqImportInstance.id)
+        ticketService.assignTicketToFastqImportInstance('abc', fastqImportInstance)
 
         then:
         UserException error = thrown()
@@ -272,7 +272,7 @@ class TicketServiceIntegrationSpec extends Specification implements DomainFactor
         createFastqImportInstance(ticket: ticket)
 
         when:
-        ticketService.assignTicketToFastqImportInstance('2000010112345679', fastqImportInstance.id)
+        ticketService.assignTicketToFastqImportInstance('2000010112345679', fastqImportInstance)
 
         then:
         UserException error = thrown()
@@ -286,7 +286,7 @@ class TicketServiceIntegrationSpec extends Specification implements DomainFactor
         Ticket newTicket = createTicket(ticketNumber: '2000010112345679', finalNotificationSent: true)
 
         when:
-        ticketService.assignTicketToFastqImportInstance(newTicket.ticketNumber, fastqImportInstance.id)
+        ticketService.assignTicketToFastqImportInstance(newTicket.ticketNumber, fastqImportInstance)
 
         then:
         UserException error = thrown()
@@ -334,7 +334,7 @@ class TicketServiceIntegrationSpec extends Specification implements DomainFactor
         }
 
         when:
-        ticketService.assignTicketToFastqImportInstance(newTicket.ticketNumber, fastqImportInstance.id)
+        ticketService.assignTicketToFastqImportInstance(newTicket.ticketNumber, fastqImportInstance)
         newTicket = Ticket.get(newTicket.id)
 
         then:

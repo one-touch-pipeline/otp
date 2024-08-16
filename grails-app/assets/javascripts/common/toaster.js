@@ -27,14 +27,25 @@
 $.otp.toaster = {
   /**
    * Converts message arrays to a list of items and doesn't touch normal strings.
-   * @param message - Message as string or array string to convert
+   * A string containing a JSON array (e.g. the validation errors sent by CheckAndCall) is treated as an array.
+   * @param message - Message as string, array or JSON array string to convert
    * @returns {*|string}: converted message
    */
   convertMessageArray(message) {
     'use strict';
 
-    if (Array.isArray(message)) {
-      return `<ul>${message.map((msgElement) => `<li>${msgElement}</li>`).join('')}</ul>`;
+    let messages = message;
+    if (typeof message === 'string' && message.trim().startsWith('[')) {
+      try {
+        messages = JSON.parse(message);
+      } catch {
+        messages = message;
+      }
+    }
+    if (Array.isArray(messages)) {
+      // list items are plain text (e.g. validation errors which may contain user input), so escape them
+      const items = messages.map((msgElement) => `<li>${$('<div></div>').text(msgElement).html()}</li>`);
+      return `<ul>${items.join('')}</ul>`;
     }
     return message;
   },

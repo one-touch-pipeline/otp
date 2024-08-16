@@ -53,8 +53,9 @@ class SpeciesWithStrainController implements CheckAndCall {
     }
 
     JSON createImportAlias(CreateSpeciesImportAliasCommand cmd) {
-        return checkErrorAndCallMethod(cmd) {
+        return checkErrorsAndCallMethod(cmd) {
             speciesWithStrainService.addNewAlias(cmd.id, cmd.importAlias)
+            render([:] as JSON)
         }
     }
 

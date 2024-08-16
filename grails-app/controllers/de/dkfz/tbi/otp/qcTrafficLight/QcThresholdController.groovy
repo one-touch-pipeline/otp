@@ -72,7 +72,7 @@ class QcThresholdController {
 
     @PreAuthorize("isFullyAuthenticated()")
     def create(CreateCommand cmd) {
-        checkErrorAndCallMethod(cmd, "qcThreshold.store.succ") {
+        callMethodAndRedirect(cmd, "qcThreshold.store.succ") {
             qcThresholdService.createThreshold(
                     cmd.forProject ? projectSelectionService.requestedProject : null,
                     cmd.className, cmd.property, cmd.seqType, cmd.condition,
@@ -85,7 +85,7 @@ class QcThresholdController {
 
     @PreAuthorize("isFullyAuthenticated()")
     def update(UpdateCommand cmd) {
-        checkErrorAndCallMethod(cmd, "qcThreshold.store.update") {
+        callMethodAndRedirect(cmd, "qcThreshold.store.update") {
             qcThresholdService.updateThreshold(cmd.qcThreshold, cmd.condition,
                     cmd.actualErrorThresholdLower, cmd.actualWarningThresholdLower,
                     cmd.actualWarningThresholdUpper, cmd.actualErrorThresholdUpper,
@@ -96,10 +96,10 @@ class QcThresholdController {
 
     @PreAuthorize("isFullyAuthenticated()")
     def delete(DeleteCommand cmd) {
-        checkErrorAndCallMethod(cmd, "qcThreshold.store.delete") { qcThresholdService.deleteThreshold(cmd.qcThreshold) }
+        callMethodAndRedirect(cmd, "qcThreshold.store.delete") { qcThresholdService.deleteThreshold(cmd.qcThreshold) }
     }
 
-    private void checkErrorAndCallMethod(Object cmd, String messageCode, Closure<Errors> method) {
+    private void callMethodAndRedirect(Object cmd, String messageCode, Closure<Errors> method) {
         if (cmd.hasErrors()) {
             flash.message = new FlashMessage(g.message(code: "qcThreshold.store.fail") as String, cmd.errors)
         } else {

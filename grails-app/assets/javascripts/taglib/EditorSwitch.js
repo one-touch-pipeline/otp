@@ -35,7 +35,25 @@ $(() => {
     if ($.otp.toaster) {
       $.otp.toaster.showErrorToast(title, message);
     } else {
-      $.otp.warningMessage(`${title}. ${message}`);
+      try {
+        const list = JSON.parse(message);
+        $.otp.warningMessage(title, list);
+      } catch {
+        if (message !== '') {
+          $.otp.warningMessage(title, [message]);
+        } else {
+          $.otp.warningMessage(title, message);
+        }
+      }
+    }
+  };
+
+  const error = function (jqXHR, textStatus, errorThrown) {
+    if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
+      failure('An error occurred while processing the data', jqXHR.responseJSON.message);
+    } else {
+      const reason = errorThrown || (textStatus !== 'error' ? textStatus : '');
+      failure('An error occurred while processing the data', reason ? `Reason: ${reason}` : '');
     }
   };
 
@@ -98,21 +116,12 @@ $(() => {
         dataType: 'json',
         type: 'POST',
         data: { value: inputField.val() },
-        success(data) {
-          if (data.success) {
-            success('Success', 'Data stored successfully');
-            $('p.edit-switch-label span', outerContainer).text($('input[name=value]', container).val());
-          } else {
-            failure('Data could not be stored', data.error);
-            $('input[name=value]', container).val($('p.edit-switch-label span', outerContainer).text());
-          }
+        success() {
+          success('Success', 'Data stored successfully');
+          $('p.edit-switch-label span', outerContainer).text($('input[name=value]', container).val());
         },
         error(jqXHR, textStatus, errorThrown) {
-          if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
-            failure('Request failed', jqXHR.responseJSON.message);
-          } else {
-            failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
-          }
+          error(jqXHR, textStatus, errorThrown);
           $('input[name=value]', container).val($('p.edit-switch-label span', outerContainer).text());
         }
       });
@@ -129,26 +138,17 @@ $(() => {
       type: 'POST',
       data: { value: $('textarea', container).val() },
       success(data) {
-        if (data.success) {
-          success('Success', 'Data stored successfully');
-          $('p.edit-switch-label span', outerContainer).text($('textarea', container).val());
-          if (data.updateMap) {
-            Object.keys(data.updateMap).forEach((key) => {
-              const el = $(`.${key}`, outerContainer);
-              el.text(data.updateMap[key]);
-            });
-          }
-        } else {
-          failure('Data could not be stored', data.error);
-          $('textarea', container).val($('p.edit-switch-label span', outerContainer).text());
+        success('Success', 'Data stored successfully');
+        $('p.edit-switch-label span', outerContainer).text($('textarea', container).val());
+        if (data.updateMap) {
+          Object.keys(data.updateMap).forEach((key) => {
+            const el = $(`.${key}`, outerContainer);
+            el.text(data.updateMap[key]);
+          });
         }
       },
       error(jqXHR, textStatus, errorThrown) {
-        if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
-          failure('Request failed', jqXHR.responseJSON.message);
-        } else {
-          failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
-        }
+        error(jqXHR, textStatus, errorThrown);
         $('textarea', container).val($('p.edit-switch-label span', outerContainer).text());
       }
     });
@@ -164,21 +164,12 @@ $(() => {
       dataType: 'json',
       type: 'POST',
       data: { value: $('input:text[name=value]', container).val() },
-      success(data) {
-        if (data.success) {
-          success('Success', 'Data stored successfully');
-          $('p.edit-switch-label span', outerContainer).text($('input:text[name=value]', container).val());
-        } else {
-          failure('Data could not be stored', data.error);
-          $('input:text[name=value]', container).val($('p.edit-switch-label span', outerContainer).text());
-        }
+      success() {
+        success('Success', 'Data stored successfully');
+        $('p.edit-switch-label span', outerContainer).text($('input:text[name=value]', container).val());
       },
       error(jqXHR, textStatus, errorThrown) {
-        if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
-          failure('Data could not be stored', jqXHR.responseJSON.message);
-        } else {
-          failure('Data could not be stored', `Reason: ${errorThrown}`);
-        }
+        error(jqXHR, textStatus, errorThrown);
       }
     });
     $('p.edit-switch-editor', outerContainer).hide();
@@ -205,24 +196,14 @@ $(() => {
       type: 'POST',
       data: { value: $('input:hidden[name=targetDeleteValue]', container).attr('value') },
       success(data) {
-        if (data.success) {
-          success('Success', 'Data stored successfully');
-          $(outerContainer).remove();
-          const submitContainer = $('div[class=submit-container]', outerOuterContainer);
-          const selectRoles = $('select[name=newRoles]', submitContainer);
-          selectRoles.append(`<option value="${data.currentRole}">${data.currentRole}</option>`);
-        } else {
-          failure('Data could not be stored', data.error);
-          $('p.edit-switch-editor', outerContainer).hide();
-          $('p.edit-switch-label', outerContainer).show();
-        }
+        success('Success', 'Data stored successfully');
+        $(outerContainer).remove();
+        const submitContainer = $('div[class=submit-container]', outerOuterContainer);
+        const selectRoles = $('select[name=newRoles]', submitContainer);
+        selectRoles.append(`<option value="${data.currentRole}">${data.currentRole}</option>`);
       },
       error(jqXHR, textStatus, errorThrown) {
-        if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
-          failure('Request failed', jqXHR.responseJSON.message);
-        } else {
-          failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
-        }
+        error(jqXHR, textStatus, errorThrown);
         $('p.edit-switch-editor', outerContainer).hide();
         $('p.edit-switch-label', outerContainer).show();
       }
@@ -257,40 +238,32 @@ $(() => {
       type: 'POST',
       data: { value: JSON.stringify(selectedNewRoles) },
       success(data) {
-        if (data.success) {
-          success('Success', 'Data stored successfully');
-          // Update drop down menue
-          for (let i = 0; i < selectNewRoles.length; i++) {
-            for (let j = 0; j < data.currentProjectRole.length; j++) {
-              if (selectNewRoles[i].value === data.currentProjectRole[j]) {
-                $(selectNewRoles[i]).remove();
-              }
+        success('Success', 'Data stored successfully');
+        // Update drop down menue
+        for (let i = 0; i < selectNewRoles.length; i++) {
+          for (let j = 0; j < data.currentProjectRole.length; j++) {
+            if (selectNewRoles[i].value === data.currentProjectRole[j]) {
+              $(selectNewRoles[i]).remove();
             }
           }
-          // Update Role-column
-          for (let j = 0; j < data.newProjectRolesNodes.length; j++) {
-            outerContainer.prepend(data.newProjectRolesNodes[j]);
-            // update event listener for added object only
-            $(outerContainer.children()[0]).find('button.js-remove').on('click', function () {
-              outerContainerSwitch($(this));
-            });
-            $(outerContainer.children()[0]).find('button.delete').on('click', function () {
-              deleteRole($(this));
-            });
-            $(outerContainer.children()[0]).find('button.cancel').on('click', function () {
-              cancelAddRoleCommand($(this));
-            });
-          }
-        } else {
-          failure('Data could not be stored', data.error);
+        }
+        // Update Role-column
+        for (let j = 0; j < data.newProjectRolesNodes.length; j++) {
+          outerContainer.prepend(data.newProjectRolesNodes[j]);
+          // update event listener for added object only
+          $(outerContainer.children()[0]).find('button.js-remove').on('click', function () {
+            outerContainerSwitch($(this));
+          });
+          $(outerContainer.children()[0]).find('button.delete').on('click', function () {
+            deleteRole($(this));
+          });
+          $(outerContainer.children()[0]).find('button.cancel').on('click', function () {
+            cancelAddRoleCommand($(this));
+          });
         }
       },
       error(jqXHR, textStatus, errorThrown) {
-        if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
-          failure('Request failed', jqXHR.responseJSON.message);
-        } else {
-          failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
-        }
+        error(jqXHR, textStatus, errorThrown);
       }
     });
   });
@@ -316,22 +289,14 @@ $(() => {
       type: 'POST',
       data: { value: $('select option:selected', container).attr('value') },
       success(data) {
-        if (data.success) {
-          success('Success', 'Data stored successfully');
-          $('p.edit-switch-label span', outerContainer).text($('select option:selected', container).text());
-          if (successCallback) {
-            window[successCallback](container, data.additionalData);
-          }
-        } else {
-          failure('Data could not be stored', data.error);
+        success('Success', 'Data stored successfully');
+        $('p.edit-switch-label span', outerContainer).text($('select option:selected', container).text());
+        if (successCallback) {
+          window[successCallback](container, data.additionalData);
         }
       },
       error(jqXHR, textStatus, errorThrown) {
-        if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
-          failure('Request failed', jqXHR.responseJSON.message);
-        } else {
-          failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
-        }
+        error(jqXHR, textStatus, errorThrown);
       }
     });
     $('p.edit-switch-editor', outerContainer).hide();
@@ -378,11 +343,7 @@ $(() => {
         $('p.edit-switch-label span', outerContainer).text(text);
       },
       error(jqXHR, textStatus, errorThrown) {
-        if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
-          failure('Request failed', jqXHR.responseJSON.message);
-        } else {
-          failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
-        }
+        error(jqXHR, textStatus, errorThrown);
       }
     });
     $('p.edit-switch-editor', outerContainer).hide();
@@ -397,20 +358,12 @@ $(() => {
       dataType: 'json',
       type: 'POST',
       data: { value: $('input[type="date"]', container).val() },
-      success(data) {
-        if (data.success) {
-          success('Success', 'Data stored successfully');
-          $('p.edit-switch-label span', outerContainer).text($('input[type="date"]', container).val());
-        } else {
-          failure('Data could not be stored', data.error);
-        }
+      success() {
+        success('Success', 'Data stored successfully');
+        $('p.edit-switch-label span', outerContainer).text($('input[type="date"]', container).val());
       },
       error(jqXHR, textStatus, errorThrown) {
-        if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
-          failure('Request failed', jqXHR.responseJSON.message);
-        } else {
-          failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
-        }
+        error(jqXHR, textStatus, errorThrown);
       }
     });
     $('p.edit-switch-editor', outerContainer).hide();
@@ -429,30 +382,21 @@ $(() => {
       dataType: 'json',
       type: 'POST',
       data: value,
-      success(data) {
-        if (data.success) {
-          success('Success', 'Data stored successfully');
-          const names = [];
-          $('input:checkbox', container).each(function () {
-            if (this.checked) {
-              names.push(this.name);
-              $(this).data('checked', true);
-            } else {
-              $(this).data('checked', false);
-            }
-          });
-          $('p.edit-switch-label span', outerContainer).text(names.join(', ') || '(None selected)');
-        } else {
-          failure('Data could not be stored', data.error);
-          resetCheckboxes(container);
-        }
+      success() {
+        success('Success', 'Data stored successfully');
+        const names = [];
+        $('input:checkbox', container).each(function () {
+          if (this.checked) {
+            names.push(this.name);
+            $(this).data('checked', true);
+          } else {
+            $(this).data('checked', false);
+          }
+        });
+        $('p.edit-switch-label span', outerContainer).text(names.join(', ') || '(None selected)');
       },
       error(jqXHR, textStatus, errorThrown) {
-        if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
-          failure('Request failed', jqXHR.responseJSON.message);
-        } else {
-          failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
-        }
+        error(jqXHR, textStatus, errorThrown);
         resetCheckboxes(container);
       }
     });
@@ -474,21 +418,12 @@ $(() => {
       dataType: 'json',
       type: 'POST',
       data: { value: $('select option:selected', container).text() },
-      success(data) {
-        if (data.success) {
-          success('Success', 'Data stored successfully');
-          $('p.edit-switch-label span', outerContainer).text($('input:text[name=value]', container).val());
-        } else {
-          failure('Data could not be stored', data.error);
-          $('input:text[name=value]', container).val($('p.edit-switch-label span', outerContainer).text());
-        }
+      success() {
+        success('Success', 'Data stored successfully');
+        $('p.edit-switch-label span', outerContainer).text($('input:text[name=value]', container).val());
       },
       error(jqXHR, textStatus, errorThrown) {
-        if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
-          failure('Request failed', jqXHR.responseJSON.message);
-        } else {
-          failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
-        }
+        error(jqXHR, textStatus, errorThrown);
         $('input:text[name=value]', container).val($('p.edit-switch-label span', outerContainer).text());
       }
     });
@@ -505,21 +440,12 @@ $(() => {
       dataType: 'json',
       type: 'POST',
       data: { value: $('input:text[name=value]', container).val() },
-      success(data) {
-        if (data.success) {
-          success('Success', 'Data stored successfully');
-          $('p.edit-switch-label span', outerContainer).text($('input:text[name=value]', container).val());
-        } else {
-          failure('Data could not be stored', data.error);
-          $('input:text[name=value]', container).val($('p.edit-switch-label span', outerContainer).text());
-        }
+      success() {
+        success('Success', 'Data stored successfully');
+        $('p.edit-switch-label span', outerContainer).text($('input:text[name=value]', container).val());
       },
       error(jqXHR, textStatus, errorThrown) {
-        if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
-          failure('Request failed', jqXHR.responseJSON.message);
-        } else {
-          failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
-        }
+        error(jqXHR, textStatus, errorThrown);
         $('input:text[name=value]', container).val($('p.edit-switch-label span', outerContainer).text());
       }
     });
@@ -546,20 +472,12 @@ $(() => {
       dataType: 'json',
       type: 'POST',
       data,
-      success(response) {
-        if (response.success) {
-          success('Success', 'Data stored successfully');
-          window.setTimeout(() => { window.location.reload(); }, 300);
-        } else {
-          failure('Data could not be stored', response.error);
-        }
+      success() {
+        success('Success', 'Data stored successfully');
+        window.setTimeout(() => { window.location.reload(); }, 300);
       },
       error(jqXHR, textStatus, errorThrown) {
-        if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
-          failure('Request failed', jqXHR.responseJSON.message);
-        } else {
-          failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
-        }
+        error(jqXHR, textStatus, errorThrown);
       }
     });
     $('span.edit-switch-editor', outerContainer).hide();
@@ -586,30 +504,22 @@ $(() => {
       type: 'POST',
       data: { value: invVal },
       success(data) {
-        if (data.success) {
-          success('Success', 'Data stored successfully');
-          $.each(['label', 'editor'], function () {
-            $(`p.edit-switch-${this} span`, outerContainer)
-              .removeClass(`icon-${orgVal}`).addClass(`icon-${invVal}`);
-          });
-          if (data.tooltip) {
-            $('p.edit-switch-label', outerContainer)[0].title = data.tooltip;
-          }
-          $('input:hidden[name=value]', container).attr('value', invVal);
-          const pageReload = $('button[data-pageReload]', container).attr('data-pageReload');
-          if (pageReload === 'true') {
-            window.setTimeout(() => { window.location.reload(); }, 100); // reloads page after 0.5 seconds
-          }
-        } else {
-          failure('Data could not be stored', data.error);
+        success('Success', 'Data stored successfully');
+        $.each(['label', 'editor'], function () {
+          $(`p.edit-switch-${this} span`, outerContainer)
+            .removeClass(`icon-${orgVal}`).addClass(`icon-${invVal}`);
+        });
+        if (data.tooltip) {
+          $('p.edit-switch-label', outerContainer)[0].title = data.tooltip;
+        }
+        $('input:hidden[name=value]', container).attr('value', invVal);
+        const pageReload = $('button[data-pageReload]', container).attr('data-pageReload');
+        if (pageReload === 'true') {
+          window.setTimeout(() => { window.location.reload(); }, 100); // reloads page after 0.5 seconds
         }
       },
       error(jqXHR, textStatus, errorThrown) {
-        if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
-          failure('Request failed', jqXHR.responseJSON.message);
-        } else {
-          failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
-        }
+        error(jqXHR, textStatus, errorThrown);
       }
     });
     $('p.edit-switch-editor', outerContainer).hide();
@@ -639,7 +549,7 @@ $(() => {
       const field = $('<div class="field"></div>');
       const clonedField = template.clone();
       clonedField.removeClass('inputTemplate');
-      clonedField.val(dataValues[key]);
+      clonedField.val(key);
       field.append(clonedField);
       if (first) {
         field.append(' <button class="add-field">+</button>');
@@ -663,9 +573,9 @@ $(() => {
   });
 
   $('div.edit-switch-multi-input .edit-switch-editor button.save').on('click', function () {
-    const dataValues = {};
+    const ajaxValues = {};
     let i = 0;
-    let displayValue = '';
+    const values = [];
     const container = $(this).parent();
     const outerContainer = container.parent();
     const multiInputField = $('.multi-input-field', outerContainer);
@@ -676,8 +586,8 @@ $(() => {
         valid = false;
         return;
       }
-      dataValues[`value[${i}]`] = $(this).val();
-      displayValue += `${$(this).val()}, `;
+      ajaxValues[`value[${i}]`] = $(this).val();
+      values.push($(this).val());
       i += 1;
     });
     if (!valid) {
@@ -687,22 +597,14 @@ $(() => {
       url: $('input:hidden[name=target]', container).val(),
       dataType: 'json',
       type: 'POST',
-      data: dataValues,
-      success(data) {
-        if (data.success) {
-          success('Success', 'Data stored successfully');
-          $('.edit-switch-label span', outerContainer).text(displayValue);
-          multiInputField.data('values', dataValues);
-        } else {
-          failure('Data could not be stored', data.error);
-        }
+      data: ajaxValues,
+      success() {
+        success('Success', 'Data stored successfully');
+        $('.edit-switch-label span', outerContainer).text(values.join(', '));
+        multiInputField.data('values', values);
       },
       error(jqXHR, textStatus, errorThrown) {
-        if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
-          failure('Request failed', jqXHR.responseJSON.message);
-        } else {
-          failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
-        }
+        error(jqXHR, textStatus, errorThrown);
       }
     });
     $('.edit-switch-editor', outerContainer).hide();

@@ -49,7 +49,6 @@ describe('Check metadata data fields page', () => {
 
         cy.wait('@createImportAlias').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
-          expect(interception.response.body).to.contain({ success: true });
         });
       });
 
@@ -66,7 +65,6 @@ describe('Check metadata data fields page', () => {
 
         cy.wait('@addAdaptFile').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
-          expect(interception.response.body).to.contain({ success: true });
         });
       });
 
@@ -83,7 +81,6 @@ describe('Check metadata data fields page', () => {
 
         cy.wait('@addAdapterSequence').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
-          expect(interception.response.body).to.contain({ success: true });
         });
       });
 
@@ -135,7 +132,6 @@ describe('Check metadata data fields page', () => {
 
       cy.wait('@createLibPrepKit').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
-        expect(interception.response.body).to.contain({ success: true });
       });
 
       cy.wait('@libraryPreparationKits').then((interception) => {
@@ -168,7 +164,6 @@ describe('Check metadata data fields page', () => {
 
         cy.wait('@createImportAlias').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
-          expect(interception.response.body).to.contain({ success: true });
         });
       });
 
@@ -213,7 +208,6 @@ describe('Check metadata data fields page', () => {
 
       cy.wait('@createAntibodyTarget').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
-        expect(interception.response.body).to.contain({ success: true });
       });
 
       cy.get('table#metadatafields-datatable tbody tr').as('tableRows');
@@ -273,7 +267,6 @@ describe('Check metadata data fields page', () => {
 
       cy.wait('@createSeqCenter').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
-        expect(interception.response.body).to.contain({ success: true });
       });
 
       cy.get('table#metadatafields-datatable tbody tr').as('tableRows');
@@ -311,7 +304,6 @@ describe('Check metadata data fields page', () => {
 
         cy.wait('@createModelImportAlias').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
-          expect(interception.response.body).to.contain({ success: true });
         });
       });
 
@@ -328,7 +320,6 @@ describe('Check metadata data fields page', () => {
 
         cy.wait('@createModelImportAlias').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
-          expect(interception.response.body).to.contain({ success: true });
         });
       });
 
@@ -378,7 +369,6 @@ describe('Check metadata data fields page', () => {
 
       cy.wait('@createSeqPlatform').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
-        expect(interception.response.body).to.contain({ success: true });
       });
 
       cy.get('table#metadatafields-datatable tbody tr').as('tableRows');
@@ -413,7 +403,6 @@ describe('Check metadata data fields page', () => {
 
         cy.wait('@toggleNeedsBedFile').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
-          expect(interception.response.body).to.contain({ success: true });
         });
       });
 
@@ -428,7 +417,6 @@ describe('Check metadata data fields page', () => {
 
       cy.wait('@createLayout').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
-        expect(interception.response.body).to.contain({ success: true });
       });
 
       // create import alias
@@ -444,7 +432,6 @@ describe('Check metadata data fields page', () => {
 
         cy.wait('@createImportAlias').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
-          expect(interception.response.body).to.contain({ success: true });
         });
       });
 

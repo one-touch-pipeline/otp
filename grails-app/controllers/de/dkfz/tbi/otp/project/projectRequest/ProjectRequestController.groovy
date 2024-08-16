@@ -269,7 +269,7 @@ class ProjectRequestController implements CheckAndCall {
     }
 
     def getAdditionalFields(AbstractFieldCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             try {
                 List<AbstractFieldDefinition> fieldDefinitions = projectRequestService
                         .listAndFetchAbstractFields(cmd.projectType, ProjectPageType.PROJECT_REQUEST)

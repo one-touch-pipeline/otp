@@ -40,7 +40,7 @@
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="urlValue"
-                                link="${g.createLink(controller: 'metadataImport', action: 'assignTicketToFastqImportInstance', id: fastqImportInstanceId)}"
+                                link="${g.createLink(controller: 'metadataImport', action: 'assignTicketToFastqImportInstance', params: ['fastqImportInstance.id': fastqImportInstanceId])}"
                                 url="${ticketUrl ?: "#"}"
                                 value="${ticket?.ticketNumber ?: g.message(code: "metadataImport.details.ticketless")}"/>
                     </td>

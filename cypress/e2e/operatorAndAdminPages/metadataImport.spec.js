@@ -47,7 +47,7 @@ describe('Check metadata import page', () => {
       cy.intercept('/metadataImport/updateSeqCenterComment*').as('saveComment');
       cy.intercept('/metadataImport/updateFinalNotificationFlag*').as('updateFinalNotify');
       cy.intercept('/metadataImport/updateAutomaticNotificationFlag*').as('updateNotify');
-      cy.intercept('/metadataImport/assignTicketToFastqImportInstance/*').as('assignTicketNumber');
+      cy.intercept('/metadataImport/assignTicketToFastqImportInstance*').as('assignTicketNumber');
       const successMessageQuery = '#otpToastBox .otpSuccessToast';
 
       cy.fixture('metadataImport.json').then((fixture) => {
@@ -90,7 +90,7 @@ describe('Check metadata import page', () => {
 
     it('should fail edit ticket information with invalid data on details page', () => {
       cy.visit('/metadataImport/details/925');
-      cy.intercept('/metadataImport/assignTicketToFastqImportInstance/*').as('assignTicketNumber');
+      cy.intercept('/metadataImport/assignTicketToFastqImportInstance*').as('assignTicketNumber');
       const errorMessageQuery = '#otpToastBox .otpErrorToast';
 
       cy.fixture('metadataImport.json').then((fixture) => {
@@ -102,8 +102,8 @@ describe('Check metadata import page', () => {
         cy.get('@numberRow').find('button.js-edit').click();
         cy.get('@numberRow').find('input[name="value"]').clear().type(ticket.number);
         cy.get('@numberRow').find('button.save').click();
-        cy.wait('@assignTicketNumber').its('response.statusCode').should('eq', 200);
-        cy.get(errorMessageQuery).should('exist').and('contain.text', 'not be stored');
+        cy.wait('@assignTicketNumber').its('response.statusCode').should('eq', 400);
+        cy.get(errorMessageQuery).should('exist').and('contain.text', 'An error occurred while processing the data');
         cy.get('@numberRow').should('not.contain.text', ticket.number);
       });
     });

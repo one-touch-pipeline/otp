@@ -170,9 +170,8 @@ class TicketService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     @CompileDynamic
-    void assignTicketToFastqImportInstance(String ticketNumber, Long fastqImportInstanceId) {
-        FastqImportInstance fastqImportInstance = FastqImportInstance.get(fastqImportInstanceId)
-        assert fastqImportInstance: "No FastqImportInstance found for ${fastqImportInstanceId}."
+    void assignTicketToFastqImportInstance(String ticketNumber, FastqImportInstance fastqImportInstance) {
+        assert fastqImportInstance: "No FastqImportInstance found."
 
         Ticket oldTicket = fastqImportInstance.ticket
 

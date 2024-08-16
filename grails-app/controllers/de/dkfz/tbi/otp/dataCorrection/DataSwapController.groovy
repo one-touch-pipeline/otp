@@ -50,7 +50,7 @@ class DataSwapController implements CheckAndCall {
     }
 
     def swapData(DataSwapCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             try {
                 ValidationContext context = dataSwapService.validate(cmd.dataSwapFile, cmd.delimiter)
                 return render([problems: context.problems*.toProblemDTO()] as JSON)

@@ -57,29 +57,33 @@ class JobErrorDefinitionController implements CheckAndCall {
     }
 
     JSON addJobErrorDefinition(UpdateJobErrorDefinitionCommand cmd) {
-        return checkErrorAndCallMethod(cmd) {
+        return checkErrorsAndCallMethod(cmd) {
             jobErrorDefinitionService.addErrorExpression(cmd.typeSelect, cmd.actionSelect, cmd.errorExpression, cmd.basedJobErrorDefinition)
+            render([:] as JSON)
         }
     }
 
     JSON addNewJobErrorDefinition(UpdateNewJobErrorDefinitionCommand cmd) {
-        return checkErrorAndCallMethod(cmd) {
+        return checkErrorsAndCallMethod(cmd) {
             jobErrorDefinitionService.addErrorExpressionFirstLevel(JobErrorDefinition.Type.MESSAGE, cmd.actionSelect, cmd.errorExpression)
+            render([:] as JSON)
         }
     }
 
     JSON updateErrorExpression(UpdateErrorExpressionCommand cmd) {
-        return checkErrorAndCallMethod(cmd) {
+        return checkErrorsAndCallMethod(cmd) {
             jobErrorDefinitionService.updateErrorExpression(cmd.jobErrorDefinition, cmd.errorExpression)
+            render([:] as JSON)
         }
     }
 
     JSON addNewJob(UpdateAddNewJobCommand cmd) {
-        return checkErrorAndCallMethod(cmd) {
+        return checkErrorsAndCallMethod(cmd) {
             String jobDefinitionName = cmd.jobDefinitionString.substring(0, cmd.jobDefinitionString.indexOf('-') - 1)
             String jobExecutionPlanName = cmd.jobDefinitionString.substring(cmd.jobDefinitionString.indexOf('-') + 2)
             JobDefinition jobDefinition = jobErrorDefinitionService.findByjobDefinitionNameAndjobExecutionPlanName(jobDefinitionName, jobExecutionPlanName)
             jobErrorDefinitionService.addNewJob(cmd.jobErrorDefinition, jobDefinition)
+            render([:] as JSON)
         }
     }
 

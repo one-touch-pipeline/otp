@@ -58,20 +58,16 @@ $.otp.userAdministration.editUser = {
       }),
       dataType: 'json',
       cache: 'false',
-      success(data) {
-        if (data.success) {
-          const tableRow = $(origin).parents('tr');
-          const { opposite } = labels[action];
-          $('a', tableRow).text(messages[`user.administration.role.${opposite}${type}`]);
-          $('a', tableRow).attr('class', opposite);
-          tableRow.detach();
-          tableRow.appendTo($('table tbody', $(`#${labels[action].appendToSection}${type}`)));
-        } else {
-          $.otp.warningMessage(data.error);
-        }
+      success() {
+        const tableRow = $(origin).parents('tr');
+        const { opposite } = labels[action];
+        $('a', tableRow).text(messages[`user.administration.role.${opposite}${type}`]);
+        $('a', tableRow).attr('class', opposite);
+        tableRow.detach();
+        tableRow.appendTo($('table tbody', $(`#${labels[action].appendToSection}${type}`)));
       },
-      error(jqXHR, textStatus, errorThrown) {
-        $.otp.warningMessage(`${textStatus} occurred while processing the data. Reason: ${errorThrown}`);
+      error(jqXHR) {
+        $.otp.warningMessage('An error occurred while processing the data', $.otp.getErrorMessages(jqXHR));
       }
     });
   }

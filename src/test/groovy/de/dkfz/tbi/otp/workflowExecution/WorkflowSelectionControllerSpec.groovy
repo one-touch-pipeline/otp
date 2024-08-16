@@ -36,6 +36,8 @@ import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesCommonName
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
 
+import static javax.servlet.http.HttpServletResponse.*
+
 class WorkflowSelectionControllerSpec extends Specification implements ControllerUnitTest<WorkflowSelectionController>, DataTest,
         DomainFactoryCore, WorkflowSystemDomainFactory, TaxonomyFactory {
 
@@ -165,5 +167,66 @@ class WorkflowSelectionControllerSpec extends Specification implements Controlle
         then:
         0 * controller.workflowDefaultGroupService._
         response.status == 406
+    }
+
+    private UpdateWorkflowVersionCommand createValidCommand() {
+        UpdateWorkflowVersionCommand cmd = new UpdateWorkflowVersionCommand(workflow: new Workflow(), value: '1')
+        cmd.validate()
+        return cmd
+    }
+
+    void "updateFastqcVersion, when project is selected, then update version and respond with OK"() {
+        given:
+        Project project = new Project()
+        UpdateWorkflowVersionCommand cmd = createValidCommand()
+        controller.projectSelectionService = Mock(ProjectSelectionService) {
+            _ * getRequestedProject() >> project
+        }
+        controller.workflowVersionSelectorService = Mock(WorkflowVersionSelectorService)
+
+        when:
+        request.method = 'POST'
+        controller.updateFastqcVersion(cmd)
+
+        then:
+        1 * controller.workflowVersionSelectorService.updateFastqcVersion(project, cmd.workflow, null)
+        response.status == SC_OK
+        response.json == [:]
+    }
+
+    void "updateFastqcVersion, when no project is selected, then respond with BAD_REQUEST"() {
+        given:
+        UpdateWorkflowVersionCommand cmd = createValidCommand()
+        controller.projectSelectionService = Mock(ProjectSelectionService) {
+            _ * getRequestedProject() >> null
+        }
+        controller.workflowVersionSelectorService = Mock(WorkflowVersionSelectorService)
+
+        when:
+        request.method = 'POST'
+        controller.updateFastqcVersion(cmd)
+
+        then:
+        0 * controller.workflowVersionSelectorService._
+        response.status == SC_BAD_REQUEST
+        response.json.message == "No project selected"
+    }
+
+    void "updateFastqcVersion, when update fails with an unexpected exception, then propagate it"() {
+        given:
+        UpdateWorkflowVersionCommand cmd = createValidCommand()
+        controller.projectSelectionService = Mock(ProjectSelectionService) {
+            _ * getRequestedProject() >> new Project()
+        }
+        controller.workflowVersionSelectorService = Mock(WorkflowVersionSelectorService) {
+            1 * updateFastqcVersion(_, _, _) >> { throw new IllegalStateException('failure') }
+        }
+
+        when:
+        request.method = 'POST'
+        controller.updateFastqcVersion(cmd)
+
+        then:
+        thrown(IllegalStateException)
     }
 }

@@ -141,7 +141,7 @@ class SoftwareToolServiceIntegrationSpec extends Specification implements UserAn
 
         when:
         doWithAuth(OPERATOR) {
-            softwareToolService.updateSoftwareTool(softwareTool.id, newVersion)
+            softwareToolService.updateSoftwareTool(softwareTool, newVersion)
         }
 
         then:
@@ -156,7 +156,7 @@ class SoftwareToolServiceIntegrationSpec extends Specification implements UserAn
 
         when:
         doWithAuth(OPERATOR) {
-            softwareToolService.updateSoftwareTool(softwareToolB.id, softwareToolA.programVersion)
+            softwareToolService.updateSoftwareTool(softwareToolB, softwareToolA.programVersion)
         }
 
         then:
@@ -189,7 +189,7 @@ class SoftwareToolServiceIntegrationSpec extends Specification implements UserAn
 
         when:
         doWithAuth(OPERATOR) {
-            softwareToolService.updateSoftwareToolIdentifier(softwareToolIdentifier.id, newIdentifier)
+            softwareToolService.updateSoftwareToolIdentifier(softwareToolIdentifier, newIdentifier)
         }
 
         then:

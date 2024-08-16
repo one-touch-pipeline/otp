@@ -36,17 +36,13 @@ $.otp.userAdministration.enableUser = function (userId, field) {
     type: 'POST',
     dataType: 'json',
     cache: 'false',
-    success(data) {
+    success() {
       // redraw the dataTable to reset all changes
       $('#userTable').dataTable().fnDraw();
-      if (data.success) {
-        $.otp.infoMessage('Data stored successfully');
-      } else {
-        $.otp.warningMessage(data.error);
-      }
+      $.otp.infoMessage('Data stored successfully');
     },
-    error(jqXHR, textStatus, errorThrown) {
-      $.otp.warningMessage(`${textStatus} occurred while processing the data. Reason: ${errorThrown}`);
+    error(jqXHR) {
+      $.otp.warningMessage('An error occurred while processing the data', $.otp.getErrorMessages(jqXHR));
     }
   });
 };

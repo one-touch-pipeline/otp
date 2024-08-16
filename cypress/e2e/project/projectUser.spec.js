@@ -62,7 +62,6 @@ describe('Check projectUser page', () => {
 
       cy.wait('@setEnabled').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
-        expect(interception.response.body.success).to.eq(true);
       });
 
       cy.get('#formerProjectMemberTable tbody tr').filter(':contains("dori")')
@@ -73,7 +72,6 @@ describe('Check projectUser page', () => {
 
       cy.wait('@setEnabled').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
-        expect(interception.response.body.success).to.eq(true);
       });
     });
 
@@ -90,9 +88,24 @@ describe('Check projectUser page', () => {
 
       cy.wait('@updateEmail').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
-        expect(interception.response.body.success).to.eq(true);
         cy.get('@userRow').should('contain.text', newMail);
       });
+    });
+
+    it('should show the validation error as list, when the mail address is invalid', () => {
+      cy.intercept('/projectUser/updateEmail*').as('updateEmail');
+
+      getProjectMemberRow('dori').as('userRow');
+
+      cy.get('@userRow').find('.edit-switch-text button.edit').click();
+      cy.get('@userRow').find('input[name=value][type=text]').clear().type('not-an-email');
+      cy.get('@userRow').find('button.save').click();
+
+      cy.wait('@updateEmail').its('response.statusCode').should('eq', 406);
+      cy.get('#otpToastBox .otpErrorToast').should('be.visible')
+        .find('.toast-body li')
+        .should('contain.text', 'is not a valid e-mail address')
+        .and('not.contain.text', '["');
     });
 
     it('should add and remove a role', () => {
@@ -106,7 +119,6 @@ describe('Check projectUser page', () => {
 
       cy.wait('@addRoleToUserProjectRole').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
-        expect(interception.response.body.success).to.eq(true);
         cy.get('.projectUserTable tr').contains('Dori Development').siblings().find(`div[name=${role}]`)
           .should('contain.text', role);
       });
@@ -118,7 +130,6 @@ describe('Check projectUser page', () => {
 
       cy.wait('@deleteProjectRole').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
-        expect(interception.response.body.success).to.eq(true);
         cy.get('@userRow').find('.edit-switch-label').should('not.contain.text', role);
       });
     });
@@ -133,7 +144,6 @@ describe('Check projectUser page', () => {
 
       cy.wait('@setAccessToOtp').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
-        expect(interception.response.body.success).to.eq(true);
       });
 
       cy.get('@accessToOtpCell').find('.icon-true').should('exist');
@@ -153,7 +163,6 @@ describe('Check projectUser page', () => {
 
       cy.wait('@setManageUsersAndDelegate').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
-        expect(interception.response.body.success).to.eq(true);
       });
     });
 
@@ -222,8 +231,8 @@ describe('Check projectUser page', () => {
       cy.get('@piEntry').find('button.delete').click();
 
       cy.wait('@removeRole').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
-      }).its('response.body.success').should('eq', false);
+        expect(interception.response.statusCode).to.eq(400);
+      });
 
       cy.get('div[name="PI"]').should('exist');
       cy.get('div[name="BIOINFORMATICIAN"]').should('exist');
@@ -240,13 +249,13 @@ describe('Check projectUser page', () => {
 
       cy.wait('@addRole').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
-      }).its('response.body.success').should('eq', true);
+      });
 
       cy.get('@userRow').find('div[name="OTHER"] button.remove').click();
       cy.get('@userRow').find('div[name="OTHER"] button.delete').click();
       cy.wait('@removeRole').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
-      }).its('response.body.success').should('eq', true);
+      });
     });
 
     after('Remove Manage User rights when not granted before', () => {
@@ -303,7 +312,6 @@ describe('Check projectUser page', () => {
 
       cy.wait('@setManageUsers').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
-        expect(interception.response.body.success).to.eq(true);
       });
     });
   }
@@ -324,8 +332,8 @@ describe('Check projectUser page', () => {
 
       cy.wait('@setAccessToFiles').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
-        expect(interception.response.body.success).to.eq(true);
       });
+      cy.get('#otpToastBox .otpErrorToast').should('not.exist');
     });
   }
 
@@ -339,14 +347,12 @@ describe('Check projectUser page', () => {
       cy.get('@notificationCell').find('button.toggle').click();
       cy.wait('@setReceivesNotifications').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
-        expect(interception.response.body.success).to.eq(true);
       });
 
       cy.get('@notificationCell').find('button.edit').click();
       cy.get('@notificationCell').find('button.toggle').click();
       cy.wait('@setReceivesNotifications').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
-        expect(interception.response.body.success).to.eq(true);
       });
     });
   }

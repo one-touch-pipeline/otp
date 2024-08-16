@@ -50,7 +50,6 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.metadatasource.MetaDataFileSou
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.tracking.TicketService
-import de.dkfz.tbi.otp.user.UserException
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.error.*
 import de.dkfz.tbi.otp.utils.exceptions.MetadataFileImportException
@@ -106,7 +105,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
     }
 
     def validatePathsOrFiles(MetadataImportControllerSubmitCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             List<ContentWithPathAndProblems> contentsWithPathAndProblems = null
             if (cmd.metadataFileSource == MetaDataFileSourceEnum.PATH && cmd.paths) {
                 FileSystem fs = fileSystemService.remoteFileSystem
@@ -140,7 +139,7 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
     }
 
     def importByPathOrContent(MetadataImportControllerSubmitCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             try {
                 withForm {
                     FileSystem fs = fileSystemService.remoteFileSystem
@@ -256,17 +255,11 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
         ])
     }
 
-    def assignTicketToFastqImportInstance() {
-        def dataToRender = [:]
-
-        try {
-            ticketService.assignTicketToFastqImportInstance(params.value, params.id as Long)
-            dataToRender.put("success", true)
-        } catch (UserException e) {
-            dataToRender.put("error", e.toString())
+    def assignTicketToFastqImportInstance(AssignTicketToFastqImportInstanceClass cmd) {
+        checkErrorsAndCallMethod(cmd) {
+            ticketService.assignTicketToFastqImportInstance(cmd.value, cmd.fastqImportInstance)
+            render([:] as JSON)
         }
-
-        render(dataToRender as JSON)
     }
 
     @PreAuthorize("permitAll()")
@@ -353,18 +346,15 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
     }
 
     JSON saveComment(CommentCommand cmd) {
-        Map retMap = [:]
-        return checkErrorAndCallMethod(cmd, {
+        return checkErrorsAndCallMethod(cmd) {
             IlseSubmission ilseSubmission = ilseSubmissionService.findById(cmd.id)
             commentService.saveComment(ilseSubmission, cmd.comment)
-            retMap << [
-                    updateMap: [
-                            author          : ilseSubmission.comment.author,
-                            modificationDate: TimeFormats.DATE.getFormattedDate(ilseSubmission.comment.modificationDate),
-                    ],
-            ]
-        }) {
-            retMap
+            render([updateMap:
+                            [
+                                    author          : ilseSubmission.comment.author,
+                                    modificationDate: TimeFormats.DATE.getFormattedDate(ilseSubmission.comment.modificationDate),
+                            ]
+            ] as JSON)
         }
     }
 
@@ -584,5 +574,15 @@ class MetadataImportControllerSubmitCommand implements Validateable {
             return matcher.group('number') ?: null
         }
         return ticketNumber
+    }
+}
+
+class AssignTicketToFastqImportInstanceClass implements Validateable {
+    String value
+    FastqImportInstance fastqImportInstance
+
+    static constraints = {
+        value blank: false
+        fastqImportInstance nullable: false
     }
 }

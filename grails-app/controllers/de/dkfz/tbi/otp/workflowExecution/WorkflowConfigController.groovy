@@ -162,7 +162,7 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
 
     def create(CreateCommand cmd) {
         log.debug("selector creating: ${cmd.selectorName}")
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             ExternalWorkflowConfigSelector selector = configSelectorService.create(cmd)
             render(transformToMap(selector) as JSON)
         }
@@ -170,7 +170,7 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
 
     def update(UpdateCommand cmd) {
         log.debug("selector updating: ${cmd.selector.name}")
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             ExternalWorkflowConfigSelector selector = configSelectorService.update(cmd)
 
             render(transformToMap(selector) as JSON)

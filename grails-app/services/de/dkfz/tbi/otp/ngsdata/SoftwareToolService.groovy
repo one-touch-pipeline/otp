@@ -56,14 +56,7 @@ class SoftwareToolService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     @CompileDynamic
-    SoftwareTool getSoftwareTool(long id) {
-        return SoftwareTool.get(id)
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    @CompileDynamic
-    SoftwareTool updateSoftwareTool(Long id, String version, boolean legacy = false) {
-        SoftwareTool softwareTool = getSoftwareTool(id)
+    SoftwareTool updateSoftwareTool(SoftwareTool softwareTool, String version, boolean legacy = false) {
         softwareTool.programVersion = version
         softwareTool.legacy = legacy
         return softwareTool.save(flush: true)
@@ -91,14 +84,7 @@ class SoftwareToolService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     @CompileDynamic
-    SoftwareToolIdentifier getSoftwareToolIdentifier(long id) {
-        return SoftwareToolIdentifier.get(id)
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    @CompileDynamic
-    SoftwareToolIdentifier updateSoftwareToolIdentifier(Long id, String alias) {
-        SoftwareToolIdentifier softwareToolIdentifier = getSoftwareToolIdentifier(id)
+    SoftwareToolIdentifier updateSoftwareToolIdentifier(SoftwareToolIdentifier softwareToolIdentifier, String alias) {
         softwareToolIdentifier.name = alias
         return softwareToolIdentifier.save(flush: true)
     }

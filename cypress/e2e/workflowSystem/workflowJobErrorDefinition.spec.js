@@ -118,7 +118,6 @@ describe('Check workflow job error definition page', () => {
           cy.wrap(errorColumns).eq(0).find('button.save').click();
           cy.wait('@updateErrorDefinition').then((interception) => {
             expect(interception.response.statusCode).to.eq(200);
-            expect(interception.response.body.success).to.eq(true);
           });
 
           cy.wrap(errorColumns).eq(1).find('button.edit').click();
@@ -126,7 +125,6 @@ describe('Check workflow job error definition page', () => {
           cy.wrap(errorColumns).eq(1).find('button.save').click();
           cy.wait('@updateErrorDefinition').then((interception) => {
             expect(interception.response.statusCode).to.eq(200);
-            expect(interception.response.body.success).to.eq(true);
           });
 
           cy.wrap(errorColumns).eq(2).find('button.edit').click();
@@ -134,7 +132,6 @@ describe('Check workflow job error definition page', () => {
           cy.wrap(errorColumns).eq(2).find('button.save').click();
           cy.wait('@updateErrorDefinition').then((interception) => {
             expect(interception.response.statusCode).to.eq(200);
-            expect(interception.response.body.success).to.eq(true);
           });
 
           cy.wrap(errorColumns).eq(4).find('button.edit').click();
@@ -142,7 +139,6 @@ describe('Check workflow job error definition page', () => {
           cy.wrap(errorColumns).eq(4).find('button.save').click();
           cy.wait('@updateErrorDefinition').then((interception) => {
             expect(interception.response.statusCode).to.eq(200);
-            expect(interception.response.body.success).to.eq(true);
           });
 
           cy.wrap(errorColumns).eq(3).find('button.edit').click();
@@ -150,7 +146,6 @@ describe('Check workflow job error definition page', () => {
           cy.wrap(errorColumns).eq(3).find('button.save').click();
           cy.wait('@updateActionFieldForErrorDefinition').then((interception) => {
             expect(interception.response.statusCode).to.eq(200);
-            expect(interception.response.body.success).to.eq(true);
           });
 
           cy.wrap(errorColumns).eq(5).find('button.edit').click();
@@ -158,7 +153,6 @@ describe('Check workflow job error definition page', () => {
           cy.wrap(errorColumns).eq(5).find('button.save').click();
           cy.wait('@updateErrorDefinition').then((interception) => {
             expect(interception.response.statusCode).to.eq(200);
-            expect(interception.response.body.success).to.eq(true);
           });
 
           cy.wrap(errorColumns).eq(6).find('button.edit').click();
@@ -166,7 +160,6 @@ describe('Check workflow job error definition page', () => {
           cy.wrap(errorColumns).eq(6).find('button.save').click();
           cy.wait('@updateErrorDefinition').then((interception) => {
             expect(interception.response.statusCode).to.eq(200);
-            expect(interception.response.body.success).to.eq(true);
           });
 
           cy.wrap(errorColumns).eq(7).find('button.edit-button-left').click();
@@ -174,7 +167,6 @@ describe('Check workflow job error definition page', () => {
           cy.wrap(errorColumns).eq(7).find('button.save').click();
           cy.wait('@updateErrorDefinition').then((interception) => {
             expect(interception.response.statusCode).to.eq(200);
-            expect(interception.response.body.success).to.eq(true);
           });
 
           // checkClusterLogOnSuccess additionally requires action RESTART_WORKFLOW
@@ -189,7 +181,6 @@ describe('Check workflow job error definition page', () => {
           cy.wrap(errorColumns).eq(3).find('button.save').click();
           cy.wait('@updateActionFieldForErrorDefinition').then((interception) => {
             expect(interception.response.statusCode).to.eq(200);
-            expect(interception.response.body.success).to.eq(true);
           });
 
           cy.wrap(errorColumns).eq(8).find('button.edit').should('not.have.css', 'display', 'none');
@@ -197,7 +188,6 @@ describe('Check workflow job error definition page', () => {
           cy.wrap(errorColumns).eq(8).find('button.toggle').click();
           cy.wait('@updateErrorDefinition').then((interception) => {
             expect(interception.response.statusCode).to.eq(200);
-            expect(interception.response.body.success).to.eq(true);
           });
         });
       });

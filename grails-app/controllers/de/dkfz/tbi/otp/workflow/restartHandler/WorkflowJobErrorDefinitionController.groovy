@@ -93,9 +93,9 @@ class WorkflowJobErrorDefinitionController extends AbstractGeneralDomainProperty
      * @return a JSON providing information about success or failure.
      */
     def updateActionField(WorkflowJobErrorDefinitionUpdateActionCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             WorkflowJobErrorDefinition definition = workflowJobErrorDefinitionService.updateAction(cmd.workflowJobErrorDefinition, cmd.value)
-            render([success: true, additionalData: ['restartBean': definition.beanToRestart]] as JSON)
+            render([additionalData: ['restartBean': definition.beanToRestart]] as JSON)
         }
     }
 

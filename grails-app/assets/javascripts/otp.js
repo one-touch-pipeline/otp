@@ -158,7 +158,7 @@ $.otp = {
 /**
  * @deprecated Use Bootstrap toasts instead, see toaster.js
  */
-$.otp.message = function (message, warning) {
+$.otp.message = function (message, warning, errors) {
   'use strict';
 
   if (!message) {
@@ -172,10 +172,49 @@ $.otp.message = function (message, warning) {
   $('button', button).on('click', function () {
     $(this).parent().parent().remove();
   });
-  const divCode = $(`<div class="${classes}"><p>${message}</p></div>`);
-  button.appendTo(divCode);
-  divCode.append($('<div style="clear: both;"></div>'));
+  let divCode;
+  if (!errors) {
+    divCode = $(`<div class="${classes}"><p>${message}</p></div>`);
+    button.appendTo(divCode);
+    divCode.append($('<div style="clear: both;"></div>'));
+  } else {
+    divCode = $('<div></div>').addClass(classes);
+    button.appendTo(divCode);
+    $('<div></div>').text(message).appendTo(divCode);
+    const list = $('<ul></ul>');
+    errors.forEach((msgElement) => {
+      $('<li></li>').text(msgElement).appendTo(list);
+    });
+    list.appendTo(divCode);
+    divCode.append($('<div style="clear: both;"></div>'));
+  }
   $('#infoBox').append(divCode);
+};
+
+/**
+ * Extracts the error messages of a failed AJAX request, e.g. sent by CheckAndCall.
+ * Validation errors are sent as JSON array string, other errors as plain text.
+ * Falls back to the HTTP status text, if the response contains no message.
+ *
+ * @param jqXHR the jQuery XHR object of the failed request
+ * @returns {string[]} the error messages
+ */
+$.otp.getErrorMessages = function (jqXHR) {
+  'use strict';
+
+  const message = jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message;
+  if (message) {
+    try {
+      const parsed = JSON.parse(message);
+      if (Array.isArray(parsed)) {
+        return parsed.map(String);
+      }
+    } catch {
+      // plain text message
+    }
+    return [String(message)];
+  }
+  return [(jqXHR && jqXHR.statusText) || 'Unknown error'];
 };
 /**
  * @deprecated Use Bootstrap toasts instead, see toaster.js
@@ -188,10 +227,10 @@ $.otp.infoMessage = function (message) {
 /**
  * @deprecated Use Bootstrap toasts instead, see toaster.js
  */
-$.otp.warningMessage = function (message) {
+$.otp.warningMessage = function (message, errors) {
   'use strict';
 
-  this.message(message, true);
+  this.message(message, true, errors);
 };
 
 /**

@@ -52,7 +52,7 @@
                             <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
-                                link="${g.createLink(controller: 'individual', action: 'updateField', id: individual.id, params: [key: 'type'])}"
+                                link="${g.createLink(controller: 'individual', action: 'updateField', params: ['individual.id': individual.id, key: 'type'])}"
                                 value="${individual.type}"
                                 values="${typeDropDown}"/>
                         </td>
@@ -106,7 +106,7 @@
                             <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="newValue"
-                                link="${g.createLink(controller: 'individual', action: 'newSampleType', id: individual.id)}"
+                                link="${g.createLink(controller: 'individual', action: 'newSampleType', params: ['individual.id': individual.id])}"
                                 values="${sampleTypeDropDown}"/>
                         </td>
                     </tr>

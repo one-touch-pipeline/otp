@@ -28,16 +28,13 @@ import groovy.json.JsonSlurper
 import groovy.transform.TupleConstructor
 import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.tbi.otp.CommentService
-import de.dkfz.tbi.otp.FlashMessage
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
-import de.dkfz.tbi.otp.utils.CommentCommand
-import de.dkfz.tbi.otp.utils.DataTableCommand
-import de.dkfz.tbi.otp.utils.TimeFormats
+import de.dkfz.tbi.otp.utils.*
 
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
-class IndividualController {
+class IndividualController implements CheckAndCall {
 
     IndividualService individualService
     SeqTrackService seqTrackService
@@ -153,37 +150,17 @@ class IndividualController {
     }
 
     def updateField(UpdateFieldCommand cmd) {
-        Individual individual = individualService.getIndividual(cmd.id)
-        if (!individual) {
-            Map data = [error: g.message(code: "individual.update.notFound", args: [cmd.id])]
-            render(data as JSON)
-            return
+        checkErrorsAndCallMethod(cmd) {
+            individualService.updateField(cmd.individual, cmd.key, cmd.value)
+            render([:] as JSON)
         }
-        Map data = [:]
-        try {
-            individualService.updateField(individual, cmd.key, cmd.value)
-            data.put("success", true)
-        } catch (IndividualUpdateException e) {
-            data.put("error", g.message(code: "individual.update.error"))
-        }
-        render(data as JSON)
     }
 
-    def newSampleType(UpdateFieldCommand cmd) {
-        Individual individual = individualService.getIndividual(cmd.id)
-        if (!individual) {
-            Map data = [error: g.message(code: "individual.update.notFound", args: [cmd.id])]
-            render(data as JSON)
-            return
+    def newSampleType(NewFieldCommand cmd) {
+        checkErrorsAndCallMethod(cmd) {
+            individualService.createSample(cmd.individual, cmd.value)
+            render([:] as JSON)
         }
-        Map data = [:]
-        try {
-            individualService.createSample(individual, cmd.value)
-            data.put("success", true)
-        } catch (Exception e) {
-            data = [error: e.message]
-        }
-        render(data as JSON)
     }
 
     def saveIndividualComment(CommentCommand cmd) {
@@ -262,19 +239,21 @@ class SampleCommand {
     List<String> sampleIdentifiers = []
 }
 
-class UpdateFieldCommand {
-    IndividualService individualService
-
-    Long id
-    String key
+class NewFieldCommand implements Validateable {
+    Individual individual
     String value
 
     static constraints = {
-        id(min: 0L, validator: { val, obj ->
-            return val && (obj.individualService.getIndividual(val) != null)
-        })
-        key(blank: false)
+        individual nullable: false
         value(blank: false)
+    }
+}
+
+class UpdateFieldCommand extends NewFieldCommand {
+    String key
+
+    static constraints = {
+        key(blank: false)
     }
 }
 

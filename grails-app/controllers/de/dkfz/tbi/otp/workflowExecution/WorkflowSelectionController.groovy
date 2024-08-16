@@ -37,6 +37,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.user.UserException
 import de.dkfz.tbi.otp.workflow.Version
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
@@ -164,7 +165,7 @@ class WorkflowSelectionController implements CheckAndCall {
     }
 
     def possibleAlignmentOptions(ConfigurationCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             boolean showAllSpecies = params.getBoolean('xenograft', false)
             WorkflowSelectionOptionsDTO options = workflowSelectionService.getPossibleAlignmentOptions(new WorkflowSelectionOptionDTO([
                     workflow       : cmd.workflow,
@@ -186,7 +187,7 @@ class WorkflowSelectionController implements CheckAndCall {
     }
 
     def saveAlignmentConfiguration(CreateAlignmentConfigurationCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             Project project = projectSelectionService.requestedProject
             ReferenceGenomeSelector rgSelector = referenceGenomeSelectorService.createOrUpdate(
                     project, cmd.seqType, cmd.speciesWithStrains, cmd.workflow, cmd.referenceGenome
@@ -205,7 +206,7 @@ class WorkflowSelectionController implements CheckAndCall {
     }
 
     def possibleAnalysisOptions(ConfigurationCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             WorkflowSelectionOptionsDTO options = workflowSelectionService.getPossibleAnalysisOptions(new WorkflowSelectionOptionDTO([
                     workflow       : cmd.workflow,
                     workflowVersion: cmd.workflowVersion,
@@ -221,7 +222,7 @@ class WorkflowSelectionController implements CheckAndCall {
     }
 
     def saveAnalysisConfiguration(CreateAnalysisConfigurationCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             Project project = projectSelectionService.requestedProject
             WorkflowVersionSelector wvSelector = workflowVersionSelectorService.createOrUpdate(
                     project, cmd.seqType, cmd.workflowVersion
@@ -236,14 +237,14 @@ class WorkflowSelectionController implements CheckAndCall {
     }
 
     def deleteConfiguration(DeleteConfigurationCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             workflowSelectionService.deleteAndDeprecateSelectors(cmd.workflowVersionSelector, cmd.referenceGenomeSelector)
             render([] as JSON)
         }
     }
 
     def searchWorkflowDefaultGroups(SearchWorkflowDefaultGroupsCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             List<WorkflowDefaultGroup> groups = cmd.seqType ?
                     workflowDefaultGroupService.findAllBySeqType(cmd.seqType) :
                     workflowDefaultGroupService.search(cmd.query ?: "")
@@ -254,7 +255,7 @@ class WorkflowSelectionController implements CheckAndCall {
     }
 
     def applyWorkflowDefaultGroup(ApplyWorkflowDefaultGroupCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             Project project = projectSelectionService.requestedProject
             List<AppliedDefaultEntry> applied = workflowDefaultGroupService.applyToProject(project, cmd.group)
             render(applied.collect { buildAppliedDefaultEntryOutputObject(it) } as JSON)
@@ -281,36 +282,27 @@ class WorkflowSelectionController implements CheckAndCall {
     }
 
     def updateFastqcVersion(UpdateWorkflowVersionCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
-            try {
-                Project project = projectSelectionService.requestedProject
-                if (!project) {
-                    response.status = 400
-                    render([success: false, error: "No project selected"] as JSON)
-                    return
-                }
-
-                workflowVersionSelectorService.updateFastqcVersion(project, cmd.workflow, cmd.workflowVersion)
-                render([success: true] as JSON)
-            } catch (Exception e) {
-                log.error("Error updating workflow version: ${e.message}", e)
-                response.status = 500
-                render([success: false, error: "Failed to update workflow version: ${e.message}"] as JSON)
+        checkErrorsAndCallMethod(cmd) {
+            Project project = projectSelectionService.requestedProject
+            if (!project) {
+                throw new UserException("No project selected")
             }
+            workflowVersionSelectorService.updateFastqcVersion(project, cmd.workflow, cmd.workflowVersion)
+            render([:] as JSON)
         }
     }
 
     def updateMergingCriteriaLPK(UpdateMergingCriteriaCommandLPK cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             mergingCriteriaService.updateMergingCriteria(cmd.mergingCriteria, cmd.value)
-            render([success: true] as JSON)
+            render([:] as JSON)
         }
     }
 
     def updateMergingCriteriaSPG(UpdateMergingCriteriaCommandSPG cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             mergingCriteriaService.updateMergingCriteria(cmd.mergingCriteria, cmd.value)
-            render([success: true] as JSON)
+            render([:] as JSON)
         }
     }
 }

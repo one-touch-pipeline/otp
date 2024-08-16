@@ -55,7 +55,7 @@ $(() => {
               asyncResults(result);
             },
             error(jqXHR, textStatus, errorThrown) {
-              failure(`${textStatus} occurred while processing the data.`, `Reason: ${errorThrown}`);
+              failure('An error occurred while processing the data.', `Reason: ${errorThrown}`);
             }
           });
         },

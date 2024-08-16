@@ -51,7 +51,7 @@ $(document).ready(() => {
           window.location.href = $.otp.createLink({ controller: 'projectRequest', action: 'unresolved' });
         },
         error(jqXHR, textStatus, errorThrown) {
-          $.otp.toaster.showErrorToast(`${textStatus} occurred while processing the data.`, errorThrown);
+          $.otp.toaster.showErrorToast('An error occurred while processing the data.', errorThrown);
         }
       });
     });

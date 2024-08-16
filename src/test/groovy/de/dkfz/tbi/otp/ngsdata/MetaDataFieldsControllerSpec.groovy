@@ -79,7 +79,6 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
 
         then:
         controller.response.status == SC_OK
-        controller.response.json.success
         CollectionUtils.atMostOneElement(LibraryPreparationKit.findAllByName('LibraryPreparationKit'))
     }
 
@@ -97,8 +96,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createLibraryPreparationKit()
 
         then:
-        controller.response.status == SC_OK
-        !controller.response.json.success
+        controller.response.status == SC_NOT_ACCEPTABLE
 
         where:
         name << [
@@ -123,7 +121,6 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
 
         then:
         controller.response.status == SC_OK
-        controller.response.json.success
         libraryPreparationKit.importAlias.contains('LibraryPreparationKitImportAlias')
     }
 
@@ -143,8 +140,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createLibraryPreparationKitImportAlias()
 
         then:
-        controller.response.status == SC_OK
-        !controller.response.json.success
+        controller.response.status == SC_NOT_ACCEPTABLE
 
         where:
         importAlias << ['', 'LibraryPreparationKit', 'LibraryPreparationKitImportAlias']
@@ -162,7 +158,6 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
 
         then:
         controller.response.status == SC_OK
-        controller.response.json.success
         CollectionUtils.atMostOneElement(AntibodyTarget.findAllByName('AntibodyTarget'))
     }
 
@@ -180,8 +175,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createAntibodyTarget()
 
         then:
-        controller.response.status == SC_OK
-        !controller.response.json.success
+        controller.response.status == SC_NOT_ACCEPTABLE
 
         where:
         name << ['', 'Antibody Target', 'AntibodyTarget', 'antibodytarget', 'ANTIBODYTARGET']
@@ -200,7 +194,6 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
 
         then:
         controller.response.status == SC_OK
-        controller.response.json.success
         CollectionUtils.atMostOneElement(SeqCenter.findAllByNameAndDirName('SEQCENTER', 'seqcenter'))
     }
 
@@ -219,8 +212,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createSeqCenter()
 
         then:
-        controller.response.status == SC_OK
-        !controller.response.json.success
+        controller.response.status == SC_NOT_ACCEPTABLE
 
         where:
         name         | dirName
@@ -250,7 +242,6 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
 
         then:
         controller.response.status == SC_OK
-        controller.response.json.success
         CollectionUtils.atMostOneElement(SeqPlatform.findAllByNameAndSeqPlatformModelLabelAndSequencingKitLabel(
                 platform,
                 controller.params.model ? seqPlatformModelLabel : null,
@@ -289,7 +280,6 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
 
         then:
         controller.response.status == SC_OK
-        controller.response.json.success
         CollectionUtils.atMostOneElement(SeqPlatform.findAllByNameAndSeqPlatformModelLabelAndSequencingKitLabel(
                 platform,
                 controller.params.model ? CollectionUtils.atMostOneElement(SeqPlatformModelLabel.findAllByName(model)) : null,
@@ -325,8 +315,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createSeqPlatform()
 
         then:
-        controller.response.status == SC_OK
-        !controller.response.json.success
+        controller.response.status == SC_NOT_ACCEPTABLE
 
         where:
         platform      | model                   | kit
@@ -352,7 +341,6 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
 
         then:
         controller.response.status == SC_OK
-        controller.response.json.success
         controller.seqPlatformService.seqPlatformModelLabelService.findByNameOrImportAlias('SeqPlatformModelLabelAlias')
     }
 
@@ -371,8 +359,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createSeqPlatformModelLabelImportAlias()
 
         then:
-        controller.response.status == SC_OK
-        !controller.response.json.success
+        controller.response.status == SC_NOT_ACCEPTABLE
 
         where:
         importAlias << ['', 'SeqPlatformModelLabel', 'SeqPlatformModelLabelAlias']
@@ -393,7 +380,6 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
 
         then:
         controller.response.status == SC_OK
-        controller.response.json.success
         controller.seqPlatformService.sequencingKitLabelService.findByNameOrImportAlias('SequencingKitLabelAlias')
     }
 
@@ -412,8 +398,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createSequencingKitLabelImportAlias()
 
         then:
-        controller.response.status == SC_OK
-        !controller.response.json.success
+        controller.response.status == SC_NOT_ACCEPTABLE
 
         where:
         importAlias << ['', 'SequencingKitLabel', 'SequencingKitLabelAlias']
@@ -566,7 +551,6 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
 
         then:
         controller.response.status == SC_OK
-        controller.response.json.success
         !single || CollectionUtils.atMostOneElement(SeqType.findAllByNameAndLibraryLayoutAndSingleCell(name, SequencingReadType.SINGLE, singleCell))
         !paired || CollectionUtils.atMostOneElement(SeqType.findAllByNameAndLibraryLayoutAndSingleCell(name, SequencingReadType.PAIRED, singleCell))
         !mate_pair || CollectionUtils.atMostOneElement(SeqType.findAllByNameAndLibraryLayoutAndSingleCell(name, SequencingReadType.MATE_PAIR, singleCell))
@@ -609,8 +593,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createLayout()
 
         then:
-        controller.response.status == SC_OK
-        !controller.response.json.success
+        controller.response.status == SC_NOT_ACCEPTABLE
 
         where:
         name       | single | paired | mate_pair | singleCell
@@ -670,8 +653,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createSeqTypeImportAlias()
 
         then:
-        controller.response.status == SC_OK
-        !controller.response.json.success
+        controller.response.status == SC_NOT_ACCEPTABLE
 
         where:
         suffix | importAlias
@@ -696,7 +678,6 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
 
         then:
         controller.response.status == SC_OK
-        controller.response.json.success
 
         where:
         importAlias << ['importAlias1', 'importAlias2']
@@ -717,8 +698,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createAntibodyTargetImportAlias()
 
         then:
-        controller.response.status == SC_OK
-        !controller.response.json.success
+        controller.response.status == SC_NOT_ACCEPTABLE
 
         where:
         importAliases                    | newAlias

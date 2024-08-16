@@ -66,8 +66,9 @@ describe('Check projectFields page', () => {
 
         cy.wait('@updateProjectField').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
-          expect(interception.response.body.success).to.eq(true);
         });
+        cy.get('#otpToastBox .otpSuccessToast').should('exist').and('contain.text', 'Data stored successfully');
+        cy.get('#otpToastBox .otpErrorToast').should('not.exist');
       });
 
       it('should update the config page tooltip', () => {
@@ -79,7 +80,6 @@ describe('Check projectFields page', () => {
 
         cy.wait('@updateProjectField').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
-          expect(interception.response.body.success).to.eq(true);
         });
       });
 
@@ -93,7 +93,6 @@ describe('Check projectFields page', () => {
 
         cy.wait('@updateProjectField').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
-          expect(interception.response.body.success).to.eq(true);
         });
       });
 
@@ -105,7 +104,6 @@ describe('Check projectFields page', () => {
 
         cy.wait('@updateProjectField').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
-          expect(interception.response.body.success).to.eq(true);
         });
       });
 
@@ -117,7 +115,6 @@ describe('Check projectFields page', () => {
 
         cy.wait('@updateProjectField').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
-          expect(interception.response.body.success).to.eq(true);
         });
       });
 
@@ -129,7 +126,6 @@ describe('Check projectFields page', () => {
 
         cy.wait('@updateProjectField').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
-          expect(interception.response.body.success).to.eq(true);
         });
       });
 
@@ -141,7 +137,6 @@ describe('Check projectFields page', () => {
 
         cy.wait('@updateProjectField').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
-          expect(interception.response.body.success).to.eq(true);
         });
       });
 
@@ -156,8 +151,9 @@ describe('Check projectFields page', () => {
 
         cy.wait('@updateProjectField').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
-          expect(interception.response.body.success).to.eq(true);
         });
+        cy.get('#otpToastBox .otpSuccessToast').should('exist').and('contain.text', 'Data stored successfully');
+        cy.get('#otpToastBox .otpErrorToast').should('not.exist');
       });
 
       it('should update the only changeable by operator flag', () => {
@@ -167,7 +163,6 @@ describe('Check projectFields page', () => {
 
         cy.wait('@updateProjectField').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
-          expect(interception.response.body.success).to.eq(true);
         });
       });
 
@@ -178,7 +173,6 @@ describe('Check projectFields page', () => {
 
         cy.wait('@updateProjectField').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
-          expect(interception.response.body.success).to.eq(true);
         });
       });
 
@@ -191,7 +185,6 @@ describe('Check projectFields page', () => {
 
         cy.wait('@updateProjectField').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
-          expect(interception.response.body.success).to.eq(true);
         });
       });
 
@@ -208,7 +201,6 @@ describe('Check projectFields page', () => {
 
         cy.wait('@updateMultiField').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
-          expect(interception.response.body.success).to.eq(true);
         });
       });
 
@@ -220,7 +212,6 @@ describe('Check projectFields page', () => {
 
         cy.wait('@updateProjectField').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
-          expect(interception.response.body.success).to.eq(true);
         });
       });
 
@@ -233,7 +224,6 @@ describe('Check projectFields page', () => {
 
         cy.wait('@updateProjectField').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
-          expect(interception.response.body.success).to.eq(true);
         });
       });
 
@@ -247,7 +237,6 @@ describe('Check projectFields page', () => {
 
         cy.wait('@updateProjectField').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
-          expect(interception.response.body.success).to.eq(true);
         });
       });
 
@@ -258,7 +247,6 @@ describe('Check projectFields page', () => {
 
         cy.wait('@updateProjectField').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
-          expect(interception.response.body.success).to.eq(true);
         });
       });
 

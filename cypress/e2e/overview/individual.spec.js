@@ -111,7 +111,7 @@ describe('test for individual page', () => {
 
     it('should add a new sample type', () => {
       cy.fixture('individual.json').then((fixture) => {
-        cy.intercept(`/individual/updateField/${fixture.individualId}*`).as('updateField');
+        cy.intercept('/individual/updateField*').as('updateField');
         cy.visit(`/individual/show/${fixture.individualId}`);
 
         cy.get('#individualSampleTbl .new-sample-type button.insert').click();
@@ -126,7 +126,7 @@ describe('test for individual page', () => {
 
     it('should edit type of individual', () => {
       cy.fixture('individual.json').then((fixture) => {
-        cy.intercept(`/individual/updateField/${fixture.individualId}*`).as('updateField');
+        cy.intercept('/individual/updateField*').as('updateField');
         cy.visit(`/individual/show/${fixture.individualId}`);
 
         cy.get(fixture.individualEditTypeButtonSelector).click();

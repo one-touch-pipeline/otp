@@ -87,7 +87,7 @@ class WorkflowSystemConfigController implements CheckAndCall {
     }
 
     def updateWorkflowVersion(WorkflowVersionUpdateCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             UpdateWorkflowVersionDto updateWorkflowVersionDto = new UpdateWorkflowVersionDto(
                     cmd.workflowVersionId,
                     cmd.comment,
@@ -101,7 +101,7 @@ class WorkflowSystemConfigController implements CheckAndCall {
     }
 
     def updateWorkflow(WorkflowUpdateCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             UpdateWorkflowDto updateWorkflowDto = new UpdateWorkflowDto(
                     cmd.id,
                     cmd.priority,
@@ -126,14 +126,14 @@ class WorkflowSystemConfigController implements CheckAndCall {
     }
 
     def saveWorkflowDefaultGroup(SaveWorkflowDefaultGroupCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             WorkflowDefaultGroup group = workflowDefaultGroupService.saveGroup(cmd.group, cmd.name, cmd.seqType, cmd.workflowVersions)
             render(buildWorkflowDefaultGroupOutputObject(group) as JSON)
         }
     }
 
     def deleteWorkflowDefaultGroup(DeleteWorkflowDefaultGroupCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             workflowDefaultGroupService.delete(cmd.group)
             render([] as JSON)
         }

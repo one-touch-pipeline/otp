@@ -28,7 +28,6 @@
         <title><g:message code="softwareTool.list.title"/></title>
         <asset:javascript src="taglib/EditorSwitch.js"/>
         <asset:javascript src="pages/metaDataFields/datatable.js"/>
-        <asset:javascript src="pages/metaDataFields/softwareTool/datatable.js"/>
     </head>
 <body>
     <div class="body metaDataFields">
@@ -68,14 +67,14 @@
                          <td>
                              <otp:editorSwitch
                                      roles="ROLE_OPERATOR"
-                                     link="${g.createLink(controller: 'softwareTool', action: 'updateSoftwareTool', id: softwareTool.id)}"
+                                     link="${g.createLink(controller: 'softwareTool', action: 'updateSoftwareTool', params: ['softwareTool.id': softwareTool.id])}"
                                      value="${softwareTool.programVersion}"/>
                          </td>
                          <td>
                              <g:each var="identifier" in="${identifierPerSoftwareTool[softwareTool]}">
                                  <otp:editorSwitch
                                          roles="ROLE_OPERATOR"
-                                         link="${g.createLink(controller: 'softwareTool', action: 'updateSoftwareToolIdentifier', id: identifier.id)}"
+                                         link="${g.createLink(controller: 'softwareTool', action: 'updateSoftwareToolIdentifier', params: ['softwareToolIdentifier.id': identifier.id])}"
                                          value="${identifier.name}"/>
                              </g:each>
                          </td>
@@ -83,7 +82,7 @@
                              <otp:editorSwitch
                                      roles="ROLE_OPERATOR"
                                      template="newFreeTextValue"
-                                     link="${g.createLink(controller: 'softwareTool', action: 'createSoftwareToolIdentifier', id: softwareTool.id)}"
+                                     link="${g.createLink(controller: 'softwareTool', action: 'createSoftwareToolIdentifier', params: ['softwareTool.id': softwareTool.id])}"
                                      value=""/>
                          </td>
                          <td>

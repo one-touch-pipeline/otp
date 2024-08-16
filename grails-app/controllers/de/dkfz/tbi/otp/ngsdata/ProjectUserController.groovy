@@ -180,9 +180,9 @@ class ProjectUserController implements CheckAndCall {
     }
 
     JSON addRoleToUserProjectRole(UpdateProjectRoleCommand cmd) {
-        return checkErrorAndCallMethod(cmd, {
+        return checkErrorsAndCallMethod(cmd) {
             userProjectRoleService.addProjectRolesToProjectUserRole(cmd.userProjectRole, ProjectRole.findAllByNameInList(cmd.newRoles))
-        }) {
+
             UserProjectRole currentUserProjectRole = UserProjectRole.get(cmd.userProjectRole.id)
             List<Project> projectsOfUnixGroup = Project.findAllByUnixGroup(currentUserProjectRole.project.unixGroup)
             List<String> currentProjectRoles = (currentUserProjectRole.projectRoles)*.name.sort()
@@ -203,70 +203,78 @@ class ProjectUserController implements CheckAndCall {
                         ) : '',
                 ]) as String)
             }
-            return [
+            render([
                     currentProjectRole  : currentProjectRoles,
                     newProjectRolesNodes: newProjectRolesNodes,
-            ]
+            ] as JSON)
         }
     }
 
     JSON deleteProjectRole(DeleteProjectRoleCommand cmd) {
-        return checkErrorAndCallMethod(cmd, {
+        return checkErrorsAndCallMethod(cmd) {
             userProjectRoleService.deleteProjectUserRole(cmd.userProjectRole, CollectionUtils.exactlyOneElement(ProjectRole.findAllByName(cmd.currentRole)))
-        }) {
-            return [currentRole: cmd.currentRole]
+            render([currentRole: cmd.currentRole] as JSON)
         }
     }
 
     JSON setAccessToOtp(SetFlagCommand cmd) {
-        return checkErrorAndCallMethod(cmd) {
+        return checkErrorsAndCallMethod(cmd) {
             userProjectRoleService.setAccessToOtp(cmd.userProjectRole, cmd.value)
+            render([:] as JSON)
         }
     }
 
     JSON setAccessToFiles(SetFlagCommand cmd) {
-        return checkErrorAndCallMethod(cmd, {
+        return checkErrorsAndCallMethod(cmd) {
             userProjectRoleService.setAccessToFilesWithUserNotification(cmd.userProjectRole, cmd.value)
-        }) {
             IdpUserDetails idpUserDetails = identityProvider.getIdpUserDetailsByUsername(cmd.userProjectRole.user.username)
             UserEntry userEntry = new UserEntry(cmd.userProjectRole.user, cmd.userProjectRole.project, idpUserDetails)
-            [tooltip: g.message(code: userEntry.fileAccess.toolTipKey), permissionState: userEntry.fileAccess]
+            render([
+                    tooltip        : g.message(code: userEntry.fileAccess.toolTipKey),
+                    permissionState: userEntry.fileAccess,
+            ] as JSON)
         }
     }
 
     JSON setManageUsers(SetFlagCommand cmd) {
-        return checkErrorAndCallMethod(cmd) {
+        return checkErrorsAndCallMethod(cmd) {
             userProjectRoleService.setManageUsers(cmd.userProjectRole, cmd.value)
+            render([:] as JSON)
         }
     }
 
     JSON setManageUsersAndDelegate(SetFlagCommand cmd) {
-        return checkErrorAndCallMethod(cmd) {
+        return checkErrorsAndCallMethod(cmd) {
             userProjectRoleService.setManageUsersAndDelegate(cmd.userProjectRole, cmd.value)
+            render([:] as JSON)
         }
     }
 
     JSON setReceivesNotifications(SetFlagCommand cmd) {
-        return checkErrorAndCallMethod(cmd) {
+        return checkErrorsAndCallMethod(cmd) {
             userProjectRoleService.setReceivesNotifications(cmd.userProjectRole, cmd.value)
+            render([:] as JSON)
         }
     }
 
     JSON setEnabled(SetFlagCommand cmd) {
-        return checkErrorAndCallMethod(cmd) {
+        return checkErrorsAndCallMethod(cmd) {
             userProjectRoleService.setEnabled(cmd.userProjectRole, cmd.value)
+            render([:] as JSON)
         }
     }
 
     JSON updateName(UpdateUserRealNameCommand cmd) {
-        return checkErrorAndCallMethod(cmd) {
+        return checkErrorsAndCallMethod(cmd) {
             userService.updateRealName(cmd.user, cmd.newName)
+            render([:] as JSON)
         }
     }
 
     JSON updateEmail(UpdateUserEmailCommand cmd) {
-        return checkErrorAndCallMethod(cmd) {
+        return checkErrorsAndCallMethod(cmd) {
             userService.updateEmail(cmd.user, cmd.newEmail)
+            render([:] as JSON)
         }
     }
 }

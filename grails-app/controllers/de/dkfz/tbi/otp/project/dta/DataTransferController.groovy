@@ -105,7 +105,7 @@ class DataTransferController implements CheckAndCall {
     }
 
     def addFilesToTransferAgreement(AddDataTransferAgreementDocumentsCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             try {
                 DataTransferAgreement dta = dataTransferAgreementService.addFilesToDta(cmd.dataTransferAgreement, cmd.files)
                 render(dta.dataTransferAgreementDocuments as JSON)
@@ -116,7 +116,7 @@ class DataTransferController implements CheckAndCall {
     }
 
     def addFilesToTransfer(AddDataTransferDocumentsCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             try {
                 DataTransfer transfer = dataTransferService.addFilesToDataTransfer(cmd.dataTransfer, cmd.files)
                 render(transfer.dataTransferDocuments as JSON)
@@ -243,15 +243,17 @@ class DataTransferController implements CheckAndCall {
     }
 
     JSON updateDataTransferAgreementComment(UpdateDataTransferAgreementCommentCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             dataTransferAgreementService.updateDataTransferAgreementComment(cmd.dataTransferAgreement, cmd.value)
+            return render([:] as JSON)
         }
         return [:] as JSON
     }
 
     JSON updateDataTransferComment(UpdateDataTransferCommentCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             dataTransferService.updateDataTransferComment(cmd.dataTransfer, cmd.value)
+            return render([:] as JSON)
         }
         return [:] as JSON
     }

@@ -114,8 +114,9 @@ class ProjectConfigController implements CheckAndCall {
     }
 
     def updateProjectField(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             projectService.updateProjectField(cmd.value, cmd.fieldName, projectSelectionService.requestedProject)
+            render([:] as JSON)
         }
     }
 
@@ -133,63 +134,72 @@ class ProjectConfigController implements CheckAndCall {
     }
 
     def updateAbstractField(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             projectService.updateAbstractFieldValueForProject(cmd.value, cmd.fieldName, projectSelectionService.requestedProject)
+            render([:] as JSON)
         }
     }
 
     def updateProjectFieldDate(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             projectService.updateProjectFieldDate(cmd.value, cmd.fieldName, projectSelectionService.requestedProject)
+            render([:] as JSON)
         }
     }
 
     def updateProcessingPriority(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             projectService.updateProjectField(processingPriorityService.findByName(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
+            render([:] as JSON)
         }
     }
 
     def updateSpeciesWithStrains(UpdateProjectSpeciesCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             projectService.updateProjectField(cmd.selectedValuesList, cmd.fieldName, projectSelectionService.requestedProject)
             render([:] as JSON)
         }
     }
 
     def updateTumorEntity(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             projectService.updateProjectField(tumorEntityService.findByName(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
+            render([:] as JSON)
         }
     }
 
     def updateProjectGroup(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             projectService.updateProjectField(projectGroupService.findByName(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
+            render([:] as JSON)
         }
     }
 
     def updateSampleIdentifierParserBeanName(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             projectService.updateProjectField(SampleIdentifierParserBeanName.valueOf(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
+            render([:] as JSON)
         }
     }
 
     def updateCopyFiles(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             projectService.updateProjectField(Boolean.valueOf(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
+            render([:] as JSON)
         }
     }
 
     def updatePubliclyAvailable(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             projectService.updateProjectField(Boolean.valueOf(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
+            render([:] as JSON)
         }
     }
 
     def updateRequestAvailable(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             projectService.updateProjectField(Boolean.valueOf(cmd.value), cmd.fieldName, projectSelectionService.requestedProject)
+            render([:] as JSON)
         }
     }
 
@@ -215,20 +225,17 @@ class ProjectConfigController implements CheckAndCall {
 
     def updateFingerPrinting(String value) {
         projectService.updateFingerPrinting(projectSelectionService.requestedProject, value.toBoolean())
-        Map map = [success: true]
-        render(map as JSON)
+        render([:] as JSON)
     }
 
     def updateProcessingNotification(String value) {
         projectService.updateProcessingNotification(projectSelectionService.requestedProject, value.toBoolean())
-        Map map = [success: true]
-        render(map as JSON)
+        render([:] as JSON)
     }
 
     def updateState(String value) {
         projectService.updateState(projectSelectionService.requestedProject, value as Project.State)
-        Map map = [success: true]
-        render(map as JSON)
+        render([:] as JSON)
     }
 }
 

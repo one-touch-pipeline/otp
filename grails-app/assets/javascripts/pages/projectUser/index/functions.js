@@ -66,25 +66,21 @@ function postFileAccessChange(context) {
     type: 'POST',
     data: { value: invVal },
     success(response) {
-      if (response.success) {
-        $.each(['label', 'editor'], function () {
-          $(`.modal-editor-switch-${this} span`, container)
-            .removeClass(`icon-${orgVal}`).addClass(`icon-${invVal}`);
-        });
-        if (response.tooltip) {
-          $('.modal-editor-switch-label', container).attr('data-original-title', response.tooltip);
-        }
-        $('input:hidden[name=hasFileAccess]', container).val(invVal);
-        $('input:hidden[name=permissionState]', container).val(response.permissionState);
-
-        $('.modal-editor-switch-editor .toggleButtonFileAccess', container)
-          .prop('disabled', false).attr('aria-disabled', 'false');
-      } else {
-        $.otp.toaster.showErrorToast('Saving failed.', response.error);
+      $.each(['label', 'editor'], function () {
+        $(`.modal-editor-switch-${this} span`, container)
+          .removeClass(`icon-${orgVal}`).addClass(`icon-${invVal}`);
+      });
+      if (response.tooltip) {
+        $('.modal-editor-switch-label', container).attr('data-original-title', response.tooltip);
       }
+      $('input:hidden[name=hasFileAccess]', container).val(invVal);
+      $('input:hidden[name=permissionState]', container).val(response.permissionState);
+
+      $('.modal-editor-switch-editor .toggleButtonFileAccess', container)
+        .prop('disabled', false).attr('aria-disabled', 'false');
     },
     error(jqXHR, textStatus, errorThrown) {
-      $.otp.toaster.showErrorToast(`${textStatus} occurred while processing the data.`, errorThrown);
+      $.otp.toaster.showErrorToast('An error occurred while processing the data.', errorThrown);
     },
     complete() {
       hideEditorAndShowLabel(context);
@@ -222,15 +218,11 @@ function submitChangeProjectAccess(postUrl) {
     url: postUrl,
     dataType: 'json',
     type: 'POST',
-    success(data) {
-      if (data.success) {
-        window.location.reload();
-      } else {
-        $.otp.toaster.showErrorToast('Saving failed.', data.error);
-      }
+    success() {
+      window.location.reload();
     },
     error(jqXHR, textStatus, errorThrown) {
-      $.otp.toaster.showErrorToast(`${textStatus} occurred while processing the data.`, errorThrown);
+      $.otp.toaster.showErrorToast('An error occurred while processing the data.', errorThrown);
     }
   });
 }

@@ -77,7 +77,7 @@ class CrashRepairController implements CheckAndCall {
      * @return error/success msg
      */
     def restartWorkflowStep(WorkflowStepCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             try {
                 jobService.createRestartedJobAfterSystemRestart(cmd.workflowStep)
                 render([:] as JSON)
@@ -94,7 +94,7 @@ class CrashRepairController implements CheckAndCall {
      * @return error/success msg
      */
     def restartWorkflowRun(WorkflowStepCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             try {
                 crashRepairService.restartWorkflowRun(cmd.workflowStep)
                 render([:] as JSON)
@@ -110,7 +110,7 @@ class CrashRepairController implements CheckAndCall {
      * @param cmd WorkflowStepCommand
      */
     def markWorkflowStepAsFailed(WorkflowStepCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             try {
                 workflowStateChangeService.changeStateToFailedWithManualChangedError(cmd.workflowStep)
                 render([:] as JSON)
@@ -127,7 +127,7 @@ class CrashRepairController implements CheckAndCall {
      * @return error/success msg
      */
     def markWorkflowRunAsFinalFailed(WorkflowStepCommand cmd) {
-        checkDefaultErrorsAndCallMethod(cmd) {
+        checkErrorsAndCallMethod(cmd) {
             try {
                 workflowStateChangeService.changeRunToFinalFailed(cmd.workflowStep)
                 render([:] as JSON)

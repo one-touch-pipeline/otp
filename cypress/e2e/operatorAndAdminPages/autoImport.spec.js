@@ -50,8 +50,7 @@ const requestJson = (options) => {
     ...options,
     form: true
   }).then((response) => {
-    expect(response.status).to.eq(200);
-    expect(response.body.success, JSON.stringify(response.body)).to.eq(true);
+    expect(response.status, JSON.stringify(response.body)).to.eq(200);
     return response;
   });
 };

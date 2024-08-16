@@ -31,7 +31,6 @@
 
 <body>
 <div class="container-fluid otp-main-container">
-    <g:render template="/templates/messages"/>
 
     <div class="mb-3">
         <g:render template="/templates/bootstrap/projectSelection"/>
