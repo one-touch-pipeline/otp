@@ -473,7 +473,10 @@ dependencies {
     }
     implementation 'org.liquibase:liquibase-core:4.19.0'
 
-    implementation 'org.codenarc:CodeNarc:3.4.0'
+    // codenarc
+    // https://codenarc.org/, https://github.com/CodeNarc/CodeNarc
+    // on updates check also for new rules
+    implementation 'org.codenarc:CodeNarc:3.5.0'
 
     // needed for the wes swagger api @Nullable annotation
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
