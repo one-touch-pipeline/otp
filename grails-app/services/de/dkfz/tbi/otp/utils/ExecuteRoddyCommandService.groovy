@@ -35,6 +35,9 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 
+import java.nio.file.FileSystem
+import java.nio.file.Path
+
 /**
  * @deprecated use {@link RoddyCommandService} for the new WF system
  */
@@ -49,6 +52,8 @@ class ExecuteRoddyCommandService {
 
     ConfigService configService
     ExecutionHelperService executionHelperService
+    FileService fileService
+    FileSystemService fileSystemService
     ProcessingOptionService processingOptionService
     IndividualService individualService
 
@@ -130,12 +135,13 @@ class ExecuteRoddyCommandService {
      */
     @Deprecated
     String commonRoddy(RoddyWorkflowConfig config, JobScheduler jobScheduler) {
-        File roddyBaseConfigsPath = processingOptionService.findOptionAsString(OptionName.RODDY_BASE_CONFIGS_PATH) as File
-        File applicationIniPath = processingOptionService.findOptionAsString(OptionName.RODDY_APPLICATION_INI) as File
+        FileSystem remoteFileSystem = fileSystemService.remoteFileSystem
+        Path roddyBaseConfigsPath = remoteFileSystem.getPath(processingOptionService.findOptionAsString(OptionName.RODDY_BASE_CONFIGS_PATH))
+        Path applicationIniPath = remoteFileSystem.getPath(processingOptionService.findOptionAsString(OptionName.RODDY_APPLICATION_INI))
 
         // ensure that needed input files are available on the file system
-        LsdfFilesService.ensureDirIsReadableAndNotEmpty(roddyBaseConfigsPath)
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(applicationIniPath)
+        fileService.ensureDirIsReadableAndNotEmpty(roddyBaseConfigsPath)
+        fileService.ensureFileIsReadableAndNotEmpty(applicationIniPath)
 
         String programVersion = config.programVersion
         File configFile = new File(config.configFilePath)

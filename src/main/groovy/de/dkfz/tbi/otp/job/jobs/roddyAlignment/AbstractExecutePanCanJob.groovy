@@ -89,10 +89,12 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
     protected String prepareAndReturnWorkflowSpecificCommand(R roddyResult) throws Throwable {
         assert roddyResult: "roddyResult must not be null"
 
+        FileSystem remoteFileSystem = fileSystemService.remoteFileSystem
+
         String analysisIDinConfigFile = executeRoddyCommandService.getAnalysisIDinConfigFile(roddyResult)
         String nameInConfigFile = roddyResult.config.nameUsedInConfig
 
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(new File(roddyResult.config.configFilePath))
+        fileService.ensureFileIsReadableAndNotEmpty(remoteFileSystem.getPath(roddyResult.config.configFilePath))
 
         return [
                 executeRoddyCommandService.defaultRoddyExecutionCommand(roddyResult, nameInConfigFile, analysisIDinConfigFile),

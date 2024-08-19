@@ -30,8 +30,8 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.job.processing.ExecutionHelperService
-import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
@@ -68,18 +68,18 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
     File roddyCommand
     File tmpOutputDir
     RoddyBamFile roddyBamFile
-    File roddyBaseConfigsPath
-    File applicationIniPath
-    File featureTogglesConfigPath
+    Path roddyBaseConfigsPath
+    Path applicationIniPath
+    Path featureTogglesConfigPath
     JobScheduler scheduler
 
     void setupData() {
         DomainFactory.createRoddyProcessingOptions(tempDir.toFile())
 
         DomainFactory.createProcessingOptionLazy([
-                name: OptionName.OTP_USER_LINUX_GROUP,
+                name : OptionName.OTP_USER_LINUX_GROUP,
                 value: configService.testingGroup,
-                type: null,
+                type : null,
         ])
 
         roddyPath = new File(processingOptionService.findOptionAsString(OptionName.RODDY_PATH))
@@ -88,14 +88,12 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         roddyBamFile = DomainFactory.createRoddyBamFile()
         configService.addOtpProperties(tempDir)
 
-        roddyBaseConfigsPath = new File(processingOptionService.findOptionAsString(OptionName.RODDY_BASE_CONFIGS_PATH))
-        roddyBaseConfigsPath.mkdirs()
-        new File(roddyBaseConfigsPath, "file name").write("file content")
-        applicationIniPath = new File(processingOptionService.findOptionAsString(OptionName.RODDY_APPLICATION_INI))
-        assert CreateFileHelper.createFile(applicationIniPath)
-        featureTogglesConfigPath = new File(processingOptionService.findOptionAsString(OptionName.RODDY_FEATURE_TOGGLES_CONFIG_PATH))
+        roddyBaseConfigsPath = Paths.get(processingOptionService.findOptionAsString(OptionName.RODDY_BASE_CONFIGS_PATH))
+        applicationIniPath = Paths.get(processingOptionService.findOptionAsString(OptionName.RODDY_APPLICATION_INI))
+        featureTogglesConfigPath = Paths.get(processingOptionService.findOptionAsString(OptionName.RODDY_FEATURE_TOGGLES_CONFIG_PATH))
         scheduler = JobScheduler.PBS
 
+        executeRoddyCommandService = new ExecuteRoddyCommandService()
         executeRoddyCommandService.processingOptionService = new ProcessingOptionService()
         executeRoddyCommandService.individualService = new IndividualService()
     }
@@ -142,7 +140,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         then:
         Throwable e = thrown(AssertionError)
         e.message.contains("analysisId is not allowed to be null")
-   }
+    }
 
     void "test roddyBaseCommand_AllFine"() {
         given:
@@ -255,6 +253,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
     @SuppressWarnings('ExplicitFlushForDeleteRule')
     void "test defaultRoddyExecutionCommand_ProcessingOptionRoddyApplicationIniDoesNotExistInFilesystem_ShouldFail"() {
         given:
+        final String error = "some error"
         setupData()
 
         executeRoddyCommandService = Spy(ExecuteRoddyCommandService)
@@ -268,19 +267,26 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         executeRoddyCommandService.configService = Mock(ConfigService) {
             getJobScheduler() >> JobScheduler.PBS
         }
-
-        assert applicationIniPath.delete()
+        executeRoddyCommandService.fileSystemService = new TestFileSystemService()
+        executeRoddyCommandService.fileService = Mock(FileService) {
+            1 * ensureFileIsReadableAndNotEmpty(applicationIniPath) >> {
+                throw new AssertionError(error)
+            }
+            _ * ensureDirIsReadableAndNotEmpty(roddyBaseConfigsPath)
+            0 * _
+        }
 
         when:
         executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID)
 
         then:
         Throwable e = thrown(AssertionError)
-        e.message.contains(applicationIniPath.path)
+        e.message.contains(error)
     }
 
     void "test defaultRoddyExecutionCommand_BaseConfigFolderDoesNotExistInFilesystem_ShouldFail"() {
         given:
+        final String error = "some error"
         setupData()
         executeRoddyCommandService = Spy(ExecuteRoddyCommandService)
         executeRoddyCommandService.createWorkOutputDirectory(_) >> { File file -> }
@@ -293,15 +299,21 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         executeRoddyCommandService.configService = Mock(ConfigService) {
             getJobScheduler() >> JobScheduler.PBS
         }
-
-        assert roddyBaseConfigsPath.deleteDir()
+        executeRoddyCommandService.fileSystemService = new TestFileSystemService()
+        executeRoddyCommandService.fileService = Mock(FileService) {
+            _ * ensureFileIsReadableAndNotEmpty(applicationIniPath)
+            1 * ensureDirIsReadableAndNotEmpty(roddyBaseConfigsPath) >> {
+                throw new AssertionError(error)
+            }
+            0 * _
+        }
 
         when:
         executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID)
 
         then:
         Throwable e = thrown(AssertionError)
-        e.message.contains(roddyBaseConfigsPath.path)
+        e.message.contains(error)
     }
 
     private String getExpectedCmd() {
@@ -330,6 +342,12 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         executeRoddyCommandService.processingOptionService = new ProcessingOptionService()
         executeRoddyCommandService.configService = Mock(ConfigService) {
             getJobScheduler() >> scheduler
+        }
+        executeRoddyCommandService.fileSystemService = new TestFileSystemService()
+        executeRoddyCommandService.fileService = Mock(FileService) {
+            1 * ensureFileIsReadableAndNotEmpty(applicationIniPath)
+            1 * ensureDirIsReadableAndNotEmpty(roddyBaseConfigsPath)
+            0 * _
         }
 
         when:
@@ -362,6 +380,12 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         executeRoddyCommandService.processingOptionService = new ProcessingOptionService()
         executeRoddyCommandService.configService = Mock(ConfigService) {
             getJobScheduler() >> scheduler
+        }
+        executeRoddyCommandService.fileSystemService = new TestFileSystemService()
+        executeRoddyCommandService.fileService = Mock(FileService) {
+            1 * ensureFileIsReadableAndNotEmpty(applicationIniPath)
+            1 * ensureDirIsReadableAndNotEmpty(roddyBaseConfigsPath)
+            0 * _
         }
 
         when:
@@ -396,6 +420,12 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         executeRoddyCommandService.configService = Mock(ConfigService) {
             getJobScheduler() >> scheduler
         }
+        executeRoddyCommandService.fileSystemService = new TestFileSystemService()
+        executeRoddyCommandService.fileService = Mock(FileService) {
+            1 * ensureFileIsReadableAndNotEmpty(applicationIniPath)
+            1 * ensureDirIsReadableAndNotEmpty(roddyBaseConfigsPath)
+            0 * _
+        }
 
         when:
         String actualCmd = LogThreadLocal.withThreadLog(System.out) {
@@ -411,13 +441,21 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         given:
         setupData()
         initRoddyModule()
+
+        executeRoddyCommandService.fileSystemService = new TestFileSystemService()
+        executeRoddyCommandService.fileService = Mock(FileService) {
+            1 * ensureFileIsReadableAndNotEmpty(applicationIniPath)
+            1 * ensureDirIsReadableAndNotEmpty(roddyBaseConfigsPath)
+            0 * _
+        }
+
         String expectedCmd =
                 INIT_MODULES +
-                "${roddyCommand} printidlessruntimeconfig ${CONFIG_NAME}.config@${ANALYSIS_ID} " +
-                "--useconfig=${applicationIniPath} " +
-                "--usefeaturetoggleconfig=${featureTogglesConfigPath} " +
-                "--usePluginVersion=${roddyBamFile.config.programVersion} " +
-                "--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath}"
+                        "${roddyCommand} printidlessruntimeconfig ${CONFIG_NAME}.config@${ANALYSIS_ID} " +
+                        "--useconfig=${applicationIniPath} " +
+                        "--usefeaturetoggleconfig=${featureTogglesConfigPath} " +
+                        "--usePluginVersion=${roddyBamFile.config.programVersion} " +
+                        "--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath}"
 
         when:
         String actualCmd = LogThreadLocal.withThreadLog(System.out) {
