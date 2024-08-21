@@ -27,6 +27,7 @@ import spock.lang.*
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.SingleCellBamFileService
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -165,21 +166,24 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         new TestConfigService()
 
         SingleCellBamFile singleCellBamFile = createBamFile()
-        Path outputDirectory = singleCellBamFile.outputDirectory.toPath()
 
         CellRangerService cellRangerService = new CellRangerService([
-                fileSystemService: Mock(FileSystemService) {
-                    1 * getRemoteFileSystem() >> FileSystems.default
+                fileSystemService       : Mock(FileSystemService) {
+                    _ * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
-                fileService      : Mock(FileService),
+                fileService             : Mock(FileService),
+                singleCellBamFileService: Mock(SingleCellBamFileService) {
+                    _ * getOutputDirectory(singleCellBamFile) >> null
+                    0 * _
+                },
         ])
 
         when:
         cellRangerService.deleteOutputDirectoryStructureIfExists(singleCellBamFile)
 
         then:
-        1 * cellRangerService.fileService.deleteDirectoryRecursively(outputDirectory)
+        1 * cellRangerService.fileService.deleteDirectoryRecursively(null)
     }
 
     void "validateFilesExistsInResultDirectory, if singleCellBamFile given and all files exist, then throw no exception"() {
@@ -187,23 +191,21 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         new TestConfigService(tempDir)
 
         SingleCellBamFile singleCellBamFile = createBamFile()
-        File result = singleCellBamFile.resultDirectory
-
-        SingleCellBamFile.CREATED_RESULT_FILES.each {
-            CreateFileHelper.createFile(new File(result, it))
-        }
-
-        SingleCellBamFile.CREATED_RESULT_DIRS.each {
-            CreateFileHelper.createFile(new File(new File(result, it), 'DummyFile'))
-        }
+        Path resultDirectory = tempDir.resolve('result')
 
         CellRangerService cellRangerService = new CellRangerService([
-                fileSystemService: Mock(FileSystemService) {
-                    1 * getRemoteFileSystem() >> FileSystems.default
+                fileSystemService       : Mock(FileSystemService) {
                     0 * _
                 },
-                fileService      : new FileService(),
+                fileService             : new FileService(),
+                singleCellBamFileService: Mock(SingleCellBamFileService) {
+                    _ * getResultDirectory(singleCellBamFile) >> resultDirectory
+                    0 * _
+                },
         ])
+
+        createResultFiles(resultDirectory)
+
         cellRangerService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
@@ -221,23 +223,24 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         new TestConfigService(tempDir)
 
         SingleCellBamFile singleCellBamFile = createBamFile()
-        File result = singleCellBamFile.resultDirectory
-
+        Path resultDirectory = tempDir.resolve('result')
+        CellRangerService cellRangerService = new CellRangerService([
+                fileSystemService       : Mock(FileSystemService) {
+                    0 * _
+                },
+                fileService             : new FileService(),
+                singleCellBamFileService: Mock(SingleCellBamFileService) {
+                    _ * getResultDirectory(singleCellBamFile) >> resultDirectory
+                    0 * _
+                },
+        ])
         (SingleCellBamFile.CREATED_RESULT_FILES - missingFile).each {
-            CreateFileHelper.createFile(new File(result, it))
+            CreateFileHelper.createFile(resultDirectory.resolve(it))
         }
 
         (SingleCellBamFile.CREATED_RESULT_DIRS - missingFile).each {
-            CreateFileHelper.createFile(new File(new File(result, it), 'DummyFile'))
+            CreateFileHelper.createFile(resultDirectory.resolve(it).resolve('DummyFile'))
         }
-
-        CellRangerService cellRangerService = new CellRangerService([
-                fileSystemService: Mock(FileSystemService) {
-                    1 * getRemoteFileSystem() >> FileSystems.default
-                    0 * _
-                },
-                fileService      : new FileService(),
-        ])
         cellRangerService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
@@ -284,7 +287,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         Map<String, String> map = cellRangerService.createCellRangerParameters(singleCellBamFile)
 
         then:
-        map[CellRangerParameters.ID.parameterName] == singleCellBamFile.singleCellSampleName
+        map[CellRangerParameters.ID.parameterName] == singleCellBamFile.id.toString()
         map[CellRangerParameters.FASTQ.parameterName] == new File(singleCellBamFile.sampleDirectory, "abc________________def").absolutePath
         map[CellRangerParameters.TRANSCRIPTOME.parameterName] == indexFile.absolutePath
         map[CellRangerParameters.SAMPLE.parameterName] == singleCellBamFile.singleCellSampleName
@@ -304,13 +307,12 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
     void "finishCellRangerWorkflow, if bam state is #state, then do necessary work and update database"() {
         given:
         new TestConfigService(tempDir)
+        Path resultDirectory = tempDir.resolve('result')
 
         String md5sum = HelperUtils.randomMd5sum
         SingleCellBamFile singleCellBamFile = createBamFile([
                 fileOperationStatus: state,
         ])
-
-        createResultFiles(singleCellBamFile)
 
         CellRangerService cellRangerService = new CellRangerService([
                 cellRangerWorkflowService : Mock(CellRangerWorkflowService) {
@@ -330,7 +332,12 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
                     _ * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
+                singleCellBamFileService  : Mock(SingleCellBamFileService) {
+                    _ * getResultDirectory(singleCellBamFile) >> resultDirectory
+                    0 * _
+                },
         ])
+        createResultFiles(resultDirectory)
 
         when:
         cellRangerService.finishCellRangerWorkflow(singleCellBamFile)
@@ -354,13 +361,11 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
     void "finishCellRangerWorkflow, if bam state is DECLARED, then throw assertion and do not change database"() {
         given:
         new TestConfigService(tempDir)
-
+        Path resultDirectory = tempDir.resolve('result')
         String md5sum = HelperUtils.randomMd5sum
         SingleCellBamFile singleCellBamFile = createBamFile([
                 fileOperationStatus: AbstractBamFile.FileOperationStatus.DECLARED,
         ])
-
-        createResultFiles(singleCellBamFile)
 
         CellRangerService cellRangerService = new CellRangerService([
                 cellRangerWorkflowService : Mock(CellRangerWorkflowService) {
@@ -382,7 +387,12 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
                     _ * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
+                singleCellBamFileService  : Mock(SingleCellBamFileService) {
+                    _ * getResultDirectory(singleCellBamFile) >> resultDirectory
+                    0 * _
+                },
         ])
+        createResultFiles(resultDirectory)
 
         when:
         cellRangerService.finishCellRangerWorkflow(singleCellBamFile)

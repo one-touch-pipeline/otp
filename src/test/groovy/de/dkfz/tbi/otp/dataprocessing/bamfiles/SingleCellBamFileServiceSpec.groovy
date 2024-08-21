@@ -87,17 +87,17 @@ class SingleCellBamFileServiceSpec extends Specification implements ServiceUnitT
 
     void "test getSampleDirectory"() {
         expect:
-        service.getSampleDirectory(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/cell-ranger-input/${bamFile.singleCellSampleName}"
+        service.getSampleDirectory(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/cell-ranger-input/${bamFile.id}"
     }
 
     void "test getOutputDirectory"() {
         expect:
-        service.getOutputDirectory(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.singleCellSampleName}"
+        service.getOutputDirectory(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.id}"
     }
 
     void "test getResultDirectory"() {
         expect:
-        service.getResultDirectory(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.singleCellSampleName}/outs"
+        service.getResultDirectory(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.id}/outs"
     }
 
     void "test getFileMappingForLinks"() {
@@ -167,11 +167,11 @@ class SingleCellBamFileServiceSpec extends Specification implements ServiceUnitT
     void "test getQualityAssessmentCsvFile"() {
         expect:
         service.getQualityAssessmentCsvFile(bamFile).toString() ==
-                "/base-dir/${bamFile.workDirectoryName}/${bamFile.singleCellSampleName}/outs/metrics_summary.csv"
+                "/base-dir/${bamFile.workDirectoryName}/${bamFile.id}/outs/metrics_summary.csv"
     }
 
     void "test getWebSummaryResultFile"() {
         expect:
-        service.getWebSummaryResultFile(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.singleCellSampleName}/outs/web_summary.html"
+        service.getWebSummaryResultFile(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.id}/outs/web_summary.html"
     }
 }

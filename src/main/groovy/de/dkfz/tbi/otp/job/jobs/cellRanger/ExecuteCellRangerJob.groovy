@@ -37,7 +37,6 @@ import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.processing.*
 
 import java.nio.file.Path
-import java.nio.file.Paths
 
 @CompileDynamic
 @Component
@@ -98,15 +97,17 @@ class ExecuteCellRangerJob extends AbstractOtpJob implements AutoRestartableJob 
         String moduleLoadPrefix = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_ENABLE_MODULE)
         String command = createCommand(singleCellBamFile)
 
+        Path path = singleCellBamFileService.getResultDirectory(singleCellBamFile)
+                .resolve("${singleCellBamFile.singleCellSampleName}_${SingleCellBamFile.CELL_RANGER_COMMAND_FILE_NAME}")
+
         String script = """\
             ${moduleLoader}
             ${moduleLoadPrefix} ${singleCellBamFile.mergingWorkPackage.config.programVersion}
 
-            cd ${singleCellBamFile.workDirectory}
+            cd ${singleCellBamFileService.getWorkDirectory(singleCellBamFile)}
             ${command}
 
-            echo \"${command}\" > ${Paths.get(singleCellBamFile.resultDirectory.toString(), "${singleCellBamFile.singleCellSampleName}_" +
-                "${SingleCellBamFile.CELL_RANGER_COMMAND_FILE_NAME}").toAbsolutePath()}
+            echo \"${command}\" > ${path}
 
             ${fixCellRangerChgrpProblem(singleCellBamFile)}
 
@@ -118,7 +119,7 @@ class ExecuteCellRangerJob extends AbstractOtpJob implements AutoRestartableJob 
 
     /**
      * There currently is a Problem with the cellranger workflow.
-     * The Analysis folder is created with a ACL that prevennts chgrp.
+     * The Analysis folder is created with a ACL that prevents chgrp.
      * To prevent this we replace the folder with a copy of itself where this problem does not occur.
      */
     private String fixCellRangerChgrpProblem(SingleCellBamFile singleCellBamFile) {
@@ -145,10 +146,10 @@ class ExecuteCellRangerJob extends AbstractOtpJob implements AutoRestartableJob 
     }
 
     private String createMd5SumCommand(SingleCellBamFile singleCellBamFile) {
-        File resultDirectory = singleCellBamFile.resultDirectory
-        File bamFile = new File(resultDirectory, SingleCellBamFile.ORIGINAL_BAM_FILE_NAME)
-        File md5sum = new File(resultDirectory, SingleCellBamFile.ORIGINAL_BAM_MD5SUM_FILE_NAME)
+        Path resultDirectory = singleCellBamFileService.getResultDirectory(singleCellBamFile)
+        Path bamFile = resultDirectory.resolve(SingleCellBamFile.ORIGINAL_BAM_FILE_NAME)
+        Path md5sum = resultDirectory.resolve(SingleCellBamFile.ORIGINAL_BAM_MD5SUM_FILE_NAME)
 
-        return "md5sum ${bamFile.path} | sed -e 's#  ${bamFile.path}##' > ${md5sum.path}"
+        return "md5sum ${bamFile} | sed -e 's#  ${bamFile}##' > ${md5sum}"
     }
 }

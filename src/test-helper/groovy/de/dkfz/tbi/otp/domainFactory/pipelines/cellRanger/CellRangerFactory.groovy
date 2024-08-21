@@ -23,13 +23,18 @@ package de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.SingleCellBamFileService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsAlignment
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 
+import java.nio.file.Path
+
 trait CellRangerFactory implements IsAlignment {
+
+    SingleCellBamFileService singleCellBamFileService
 
     @Override
     Pipeline findOrCreatePipeline() {
@@ -189,14 +194,12 @@ trait CellRangerFactory implements IsAlignment {
     }
 
     @SuppressWarnings('JavaIoPackageAccess')
-    void createResultFiles(SingleCellBamFile singleCellBamFile) {
-        File resultDir = singleCellBamFile.resultDirectory
-
+    void createResultFiles(Path resultDir) {
         SingleCellBamFile.CREATED_RESULT_FILES.each {
-            CreateFileHelper.createFile(new File(resultDir, it))
+            CreateFileHelper.createFile(resultDir.resolve(it))
         }
         SingleCellBamFile.CREATED_RESULT_DIRS.each {
-            CreateFileHelper.createFile(new File(new File(resultDir, it), 'dummyFile'))
+            CreateFileHelper.createFile(resultDir.resolve(it).resolve('dummyFile'))
         }
     }
 

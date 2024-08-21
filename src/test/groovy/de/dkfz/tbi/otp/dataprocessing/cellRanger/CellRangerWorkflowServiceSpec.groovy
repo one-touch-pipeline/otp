@@ -22,12 +22,11 @@
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
 import grails.testing.gorm.DataTest
-import spock.lang.Specification
-import spock.lang.TempDir
-import spock.lang.Unroll
+import spock.lang.*
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.bamfiles.SingleCellBamFileService
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -36,7 +35,9 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 
-import java.nio.file.*
+import java.nio.file.FileSystems
+import java.nio.file.Files
+import java.nio.file.Path
 
 class CellRangerWorkflowServiceSpec extends Specification implements CellRangerFactory, DataTest {
 
@@ -81,27 +82,34 @@ class CellRangerWorkflowServiceSpec extends Specification implements CellRangerF
         new TestConfigService(tempDir)
 
         SingleCellBamFile singleCellBamFile = createBamFile()
-        createResultFiles(singleCellBamFile)
+        Map map = [
+                link1: 'resultPathName',
+                link2: 'resultPathName2',
+        ]
 
         CellRangerWorkflowService service = new CellRangerWorkflowService([
-                fileSystemService: Mock(FileSystemService) {
+                singleCellBamFileService: Mock(SingleCellBamFileService) {
+                    1 * getWorkDirectory(singleCellBamFile) >> tempDir.resolve('work')
+                    1 * getResultDirectory(singleCellBamFile) >> tempDir.resolve('result')
+                    1 * getFileMappingForLinks(singleCellBamFile) >> map
+                    0 * _
+                },
+                fileSystemService       : Mock(FileSystemService) {
                     _ * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
-                fileService      : new FileService(),
+                fileService             : Mock(FileService) {
+                    1 * createLink(tempDir.resolve('work').resolve('link1'), tempDir.resolve('result').resolve('resultPathName'), singleCellBamFile.project.unixGroup)
+                    1 * createLink(tempDir.resolve('work').resolve('link2'), tempDir.resolve('result').resolve('resultPathName2'), singleCellBamFile.project.unixGroup)
+                    0 * _
+                },
         ])
 
         when:
         service.linkResultFiles(singleCellBamFile)
 
         then:
-        singleCellBamFile.linkedResultFiles.each {
-            Path path = it.toPath()
-            assert Files.exists(path, LinkOption.NOFOLLOW_LINKS)
-            assert Files.isSymbolicLink(path)
-            Path link = Files.readSymbolicLink(path)
-            assert !link.isAbsolute()
-        }
+        true
     }
 
     @Unroll
@@ -110,18 +118,26 @@ class CellRangerWorkflowServiceSpec extends Specification implements CellRangerF
         new TestConfigService(tempDir)
 
         SingleCellBamFile singleCellBamFile = createBamFile()
-        createResultFiles(singleCellBamFile)
+        Map map = [
+                link1: missingFile,
+        ]
+        Path workDirectory = tempDir.resolve('work')
+        Path resultDirectory = tempDir.resolve('result')
+        createResultFiles(resultDirectory)
 
-        Path result = singleCellBamFile.resultDirectory.toPath()
-
-        new FileService().deleteDirectoryRecursively(result.resolve(missingFile))
-
+        new FileService().deleteDirectoryRecursively(resultDirectory.resolve(missingFile))
         CellRangerWorkflowService service = new CellRangerWorkflowService([
-                fileSystemService: Mock(FileSystemService) {
+                singleCellBamFileService: Mock(SingleCellBamFileService) {
+                    1 * getWorkDirectory(singleCellBamFile) >> workDirectory
+                    1 * getResultDirectory(singleCellBamFile) >> resultDirectory
+                    1 * getFileMappingForLinks(singleCellBamFile) >> map
+                    0 * _
+                },
+                fileSystemService       : Mock(FileSystemService) {
                     _ * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
-                fileService      : new FileService(),
+                fileService             : new FileService(),
         ])
 
         when:
@@ -139,57 +155,64 @@ class CellRangerWorkflowServiceSpec extends Specification implements CellRangerF
         given:
         new TestConfigService(tempDir)
 
+        Path workDirectory = tempDir.resolve('work')
+        Path outputDirectory = Files.createDirectories(workDirectory.resolve('output'))
+        Path resultDirectory = Files.createDirectories(outputDirectory.resolve('result'))
+
         SingleCellBamFile singleCellBamFile = createBamFile()
 
-        File outputDirectory = singleCellBamFile.outputDirectory
-        File resultDirectory = singleCellBamFile.resultDirectory
-
         CellRangerWorkflowService service = new CellRangerWorkflowService([
-                fileSystemService: Mock(FileSystemService) {
+                singleCellBamFileService: Mock(SingleCellBamFileService) {
+                    1 * getOutputDirectory(singleCellBamFile) >> outputDirectory
+                    1 * getResultDirectory(singleCellBamFile) >> resultDirectory
+                    0 * _
+                },
+                fileSystemService       : Mock(FileSystemService) {
                     _ * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
-                fileService      : new FileService(),
+                fileService             : new FileService(),
         ])
 
         and: 'create result files/directories'
-        createResultFiles(singleCellBamFile)
+        createResultFiles(resultDirectory)
 
         and: 'create additional directory'
-        File subDir = new File(outputDirectory, 'subDir')
-        assert subDir.mkdir()
-
+        Path subDir = CreateFileHelper.createFile(outputDirectory.resolve('subDir'))
         and: 'create additional file'
-        File file = new File(outputDirectory, 'file')
-        CreateFileHelper.createFile(file)
+        Path file = CreateFileHelper.createFile(outputDirectory.resolve('file'))
 
         when:
         service.cleanupOutputDirectory(singleCellBamFile)
 
         then: 'additional files/directories deleted'
-        !subDir.exists()
-        !file.exists()
+        !Files.exists(subDir)
+        !Files.exists(file)
 
         and: 'result are not deleted'
-        singleCellBamFile.outputDirectory.exists()
+        Files.exists(outputDirectory)
         SingleCellBamFile.CREATED_RESULT_FILES_AND_DIRS.each {
-            assert new File(resultDirectory, it).exists()
+            assert Files.exists(resultDirectory.resolve(it))
         }
     }
 
     void "deleteOutputDirectory, call deleteDirectoryRecursively for the work directory"() {
         given:
         new TestConfigService(tempDir)
+        Path workDirectory = tempDir.resolve('work')
 
         SingleCellBamFile singleCellBamFile = createBamFile()
-        Path workDirectory = singleCellBamFile.workDirectory.toPath()
 
         CellRangerWorkflowService service = new CellRangerWorkflowService([
-                fileSystemService: Mock(FileSystemService) {
+                singleCellBamFileService: Mock(SingleCellBamFileService) {
+                    1 * getWorkDirectory(_) >> workDirectory
+                    0 * _
+                },
+                fileSystemService       : Mock(FileSystemService) {
                     _ * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
-                fileService      : Mock(FileService) {
+                fileService             : Mock(FileService) {
                     1 * deleteDirectoryRecursively(workDirectory)
                     0 * _
                 },
@@ -207,15 +230,18 @@ class CellRangerWorkflowServiceSpec extends Specification implements CellRangerF
         new TestConfigService(tempDir)
 
         SingleCellBamFile singleCellBamFile = createBamFile()
-        Path workDirectory = singleCellBamFile.workDirectory.toPath()
 
         CellRangerWorkflowService service = new CellRangerWorkflowService([
-                fileSystemService: Mock(FileSystemService) {
+                singleCellBamFileService: Mock(SingleCellBamFileService) {
+                    1 * getWorkDirectory(_) >> null
+                    0 * _
+                },
+                fileSystemService       : Mock(FileSystemService) {
                     _ * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
-                fileService      : Mock(FileService) {
-                    1 * correctPathPermissionAndGroupRecursive(workDirectory, _)
+                fileService             : Mock(FileService) {
+                    1 * correctPathPermissionAndGroupRecursive(null, _)
                     0 * _
                 },
         ])

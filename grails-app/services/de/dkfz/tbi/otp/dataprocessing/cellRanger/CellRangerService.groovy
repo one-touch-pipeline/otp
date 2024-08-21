@@ -109,14 +109,12 @@ class CellRangerService {
     }
 
     void deleteOutputDirectoryStructureIfExists(SingleCellBamFile singleCellBamFile) {
-        FileSystem fileSystem = fileSystemService.remoteFileSystem
-        Path outputDirectory = fileSystem.getPath(singleCellBamFile.outputDirectory.path)
+        Path outputDirectory = singleCellBamFileService.getOutputDirectory(singleCellBamFile)
         fileService.deleteDirectoryRecursively(outputDirectory)
     }
 
     void validateFilesExistsInResultDirectory(SingleCellBamFile singleCellBamFile) {
-        FileSystem fileSystem = fileSystemService.remoteFileSystem
-        Path resultDir = fileService.toPath(singleCellBamFile.resultDirectory, fileSystem)
+        Path resultDir = singleCellBamFileService.getResultDirectory(singleCellBamFile)
 
         SingleCellBamFile.CREATED_RESULT_FILES.each {
             fileService.ensureFileIsReadableAndNotEmpty(resultDir.resolve(it))
@@ -144,7 +142,7 @@ class CellRangerService {
         }.join(",")
 
         Map<String, String> parameters = [
-                (CellRangerParameters.ID.parameterName)           : singleCellBamFile.singleCellSampleName,
+                (CellRangerParameters.ID.parameterName)           : singleCellBamFile.id.toString(),
                 (CellRangerParameters.FASTQ.parameterName)        : fastqDirectories,
                 (CellRangerParameters.TRANSCRIPTOME.parameterName): indexFile.absolutePath,
                 (CellRangerParameters.SAMPLE.parameterName)       : singleCellBamFile.singleCellSampleName,
@@ -207,8 +205,7 @@ class CellRangerService {
 
     @CompileDynamic
     private void updateBamFile(SingleCellBamFile singleCellBamFile) {
-        FileSystem fileSystem = fileSystemService.remoteFileSystem
-        Path resultDirectory = fileSystem.getPath(singleCellBamFile.resultDirectory.path)
+        Path resultDirectory = singleCellBamFileService.getResultDirectory(singleCellBamFile)
 
         Path bamFile = resultDirectory.resolve(SingleCellBamFile.ORIGINAL_BAM_FILE_NAME)
         Path md5SumFileName = resultDirectory.resolve(SingleCellBamFile.ORIGINAL_BAM_MD5SUM_FILE_NAME)

@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.job.jobs.cellRanger
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -39,6 +40,9 @@ import de.dkfz.tbi.otp.project.Project
 import java.nio.file.Path
 
 class ExecuteCellRangerJobSpec extends Specification implements CellRangerFactory, DataTest {
+
+    @TempDir
+    Path tempDir
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -83,8 +87,8 @@ class ExecuteCellRangerJobSpec extends Specification implements CellRangerFactor
         final String parameterValue = 'value'
 
         SingleCellBamFile singleCellBamFile = createBamFile()
-        Path workDirectory = singleCellBamFile.workDirectory.toPath()
-        Path resultDirectory = singleCellBamFile.resultDirectory.toPath()
+        Path workDirectory = tempDir.resolve('work')
+        Path resultDirectory = tempDir.resolve('result')
 
         ExecuteCellRangerJob job = new ExecuteCellRangerJob([
                 cellRangerService         : Mock(CellRangerService),
@@ -100,8 +104,9 @@ class ExecuteCellRangerJobSpec extends Specification implements CellRangerFactor
                     0 * _
                 },
                 singleCellBamFileService   : Mock(SingleCellBamFileService) {
-                    1 * getWorkDirectory(_) >> workDirectory
-                    1 * getResultDirectory(_) >> resultDirectory
+                    _ * getWorkDirectory(singleCellBamFile) >> workDirectory
+                    _ * getResultDirectory(singleCellBamFile) >> resultDirectory
+                    0 * _
                 },
         ])
         job.metaClass.getProcessParameterObject = { ->
@@ -111,7 +116,7 @@ class ExecuteCellRangerJobSpec extends Specification implements CellRangerFactor
         String expectedSimplifiedScript = [
                 loadModul,
                 "${enableModul} ${singleCellBamFile.mergingWorkPackage.config.programVersion}",
-                "cd ${singleCellBamFile.workDirectory}",
+                "cd ${workDirectory}",
                 "cellranger count ${parameterKey}=${parameterValue} --disable-ui",
                 "echo \"cellranger count ${parameterKey}=${parameterValue} --disable-ui\" > ${resultDirectory.resolve("${singleCellBamFile.singleCellSampleName}_${SingleCellBamFile.CELL_RANGER_COMMAND_FILE_NAME}")}",
                 "cd ${resultDirectory}",

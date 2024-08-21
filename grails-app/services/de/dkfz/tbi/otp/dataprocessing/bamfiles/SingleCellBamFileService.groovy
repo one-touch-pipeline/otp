@@ -90,11 +90,11 @@ class SingleCellBamFileService<T extends AbstractBamFile> extends AbstractAbstra
     }
 
     Path getSampleDirectory(SingleCellBamFile bamFile) {
-        return getWorkDirectory(bamFile).resolve(INPUT_DIRECTORY_NAME).resolve(bamFile.singleCellSampleName)
+        return getWorkDirectory(bamFile).resolve(INPUT_DIRECTORY_NAME).resolve(bamFile.id.toString())
     }
 
     Path getOutputDirectory(SingleCellBamFile bamFile) {
-        return getWorkDirectory(bamFile).resolve(bamFile.singleCellSampleName)
+        return getWorkDirectory(bamFile).resolve(bamFile.id.toString())
     }
 
     Path getResultDirectory(SingleCellBamFile bamFile) {
