@@ -30,11 +30,15 @@ List<List<String>> c = new File("review/final.csv").readLines()*.split(";")
 
 List<String> header = c.head() as List
 List<List<String>> data = c.tail() as List
+int typeIdx = header.indexOf("TYPE")
 int themeIdx = header.indexOf("THEME")
+int epicIdx = header.indexOf("EPIC")
 int pointsIdx = header.indexOf("STORY_POINTS")
 int lastSprintIdx = header.indexOf("IS_LAST_SPRINT")
 int summaryIdx = header.indexOf("SUMMARY")
+int commitIdx = header.indexOf("COMMIT")
 int issueNoIdx = header.indexOf("OTP")
+
 final String LAST = "LAST"
 final String OTHER = "Other"
 
@@ -43,26 +47,29 @@ Closure<String> get = { String[] line, int index ->
         return ""
     }
     try {
-        line[index]
+        line[index].trim().replaceAll(/^"|"$/, '')
     } catch (ArrayIndexOutOfBoundsException e) {
         ""
     }
 }
 
-Map<String, List<String[]>> th = data.groupBy { get(it, themeIdx) }.sort { it.value.size() }
+Map<String, List<String[]>> th = data.groupBy {
+    get(it, themeIdx) ?: get(it, epicIdx) ?: (get(it, typeIdx)?.trim() == "Update" ? "Update" : "Other")
+}.sort { it.value.size() }
 
 // get sprint name, start and end dates
 Object json = new JsonSlurper().parse(new URL("https://one-touch-pipeline.myjetbrains.com/youtrack/api/agiles/106-4?fields=currentSprint(name,start,finish)"))
 
 String sprintName = json.currentSprint.name
 
-LocalDate startDate = Instant.ofEpochMilli(json.currentSprint.start).atZone(ZoneId.systemDefault()).toLocalDate()
-LocalDate finishDate = Instant.ofEpochMilli(json.currentSprint.finish).atZone(ZoneId.systemDefault()).toLocalDate()
+// the returned timestamp has no time offset, so don't use a time offset to get the correct date
+LocalDate startDate = Instant.ofEpochMilli(json.currentSprint.start).atOffset(ZoneOffset.ofHours(0)).toLocalDate()
+LocalDate finishDate = Instant.ofEpochMilli(json.currentSprint.finish).atOffset(ZoneOffset.ofHours(0)).toLocalDate()
 LocalDate startDateNext = finishDate
 LocalDate finishDateNext = startDateNext.plusDays(21)
 
-String duration = "${startDate} – ${finishDate}"
-String durationNext = "${startDateNext} – ${finishDateNext}"
+String duration = "${startDate} - ${finishDate}"
+String durationNext = "${startDateNext} - ${finishDateNext}"
 
 // get releases
 StringBuilder stdOut = new StringBuilder()
@@ -145,8 +152,11 @@ th.each { theme ->
             details << "## ${theme.key.trim() ?: OTHER}"
             details << ""
         }
-        int indent = (9 - get(issue, issueNoIdx).length()) * 2
-        details << " - [${get(issue, issueNoIdx)}]:${"&nbsp;" * indent}${get(issue, summaryIdx)} ${(get(issue, lastSprintIdx) == LAST) ? "*" : ""}"
+        String otpNumberSingle = get(issue, issueNoIdx)
+        String otpNumber = otpNumberSingle ? "[${otpNumberSingle}]:" : ""
+        String text = get(issue, summaryIdx) ?:get(issue, commitIdx)
+        int indent = otpNumber?(12 - otpNumber.length()) * 2:0
+        details << " - ${otpNumber}${"&nbsp;" * indent}${text} ${(get(issue, lastSprintIdx) == LAST) ? "*" : ""}"
         i++
         lastTheme = theme.key
     }
@@ -165,3 +175,5 @@ new File("review/presentation.html").text = new SimpleTemplateEngine()
                 RELEASES     : releases,
         ])
         .toString()
+
+println "report created at: review/presentation.html"
