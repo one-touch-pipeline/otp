@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.util.Pair
 import groovy.transform.CompileDynamic
 
-import java.sql.Timestamp
+import de.dkfz.tbi.otp.utils.TimeFormats
 
 class WorkflowRunOverviewService {
     @CompileDynamic
@@ -41,7 +41,7 @@ class WorkflowRunOverviewService {
     }
 
     @CompileDynamic
-    Map<Workflow, Timestamp> getLastRuns() {
+    Map<Workflow, String> getLatestRuns() {
         return WorkflowRun.executeQuery("""
             SELECT run.workflow.id, max(step.dateCreated)
             FROM WorkflowRun run
@@ -49,20 +49,28 @@ class WorkflowRunOverviewService {
             WHERE step.previous IS NULL
             GROUP BY run.workflow.id
         """).collectEntries {
-            [(Workflow.get(it[0])): it[1]]
+            [(Workflow.get(it[0])): TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(it[1])]
         }
     }
 
+    Map<Workflow, String> getLatestSuccessfulRuns() {
+        return  getLatestRunsByState(WorkflowRun.State.SUCCESS)
+    }
+
+    Map<Workflow, String> getLatestFailedRuns() {
+        return getLatestRunsByState(WorkflowRun.State.FAILED)
+    }
+
     @CompileDynamic
-    Map<Workflow, Timestamp> getLastFailedRuns() {
+    protected Map<Workflow, String> getLatestRunsByState(WorkflowRun.State state) {
         return WorkflowRun.executeQuery("""
             SELECT run.workflow.id, max(step.lastUpdated)
             FROM WorkflowRun run
             JOIN run.workflowSteps step
             WHERE run.state = :state
             GROUP BY run.workflow.id
-        """, [state: WorkflowRun.State.FAILED]).collectEntries {
-            [(Workflow.get(it[0])): it[1]]
+        """, [state: state]).collectEntries {
+            [(Workflow.get(it[0])): TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(it[1])]
         }
     }
 }

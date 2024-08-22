@@ -62,7 +62,7 @@
                         <th title="${subState.description}">${subState}</th>
                     </g:each>
                 </g:each>
-                <th>${g.message(code: "workflowRun.overview.lastRun")}</th>
+                <th>${g.message(code: "workflowRun.overview.lastSuccess")}</th>
                 <th>${g.message(code: "workflowRun.overview.lastFail")}</th>
             </tr>
         </thead>
@@ -92,7 +92,7 @@
                         </td>
                     </g:each>
                 </g:each>
-                <td>${lastRuns[workflow]}</td>
+                <td>${lastSuccesses[workflow]}</td>
                 <td>${lastFails[workflow]}</td>
             </tr>
         </g:each>

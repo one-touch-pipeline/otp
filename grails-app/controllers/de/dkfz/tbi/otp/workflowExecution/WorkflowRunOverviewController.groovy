@@ -24,10 +24,6 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.util.Pair
 import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.tbi.otp.utils.TimeFormats
-
-import java.sql.Timestamp
-
 @PreAuthorize("hasRole('ROLE_ADMIN')")
 class WorkflowRunOverviewController {
 
@@ -64,18 +60,17 @@ class WorkflowRunOverviewController {
         }
 
         Map<Pair<WorkflowRun.State, Workflow>, Long> runs = workflowRunOverviewService.numberOfRunsPerWorkflowAndState
-        Map<Workflow, Timestamp> lastRuns = workflowRunOverviewService.lastRuns
-        Map<Workflow, Timestamp> lastFails = workflowRunOverviewService.lastFailedRuns
-
-        lastRuns.each { it.value = TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(it.value) }
-        lastFails.each { it.value = TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(it.value) }
+        Map<Workflow, String> lastRuns = workflowRunOverviewService.latestRuns
+        Map<Workflow, String> lastFails = workflowRunOverviewService.latestFailedRuns
+        Map<Workflow, String> lastSuccesses = workflowRunOverviewService.latestSuccessfulRuns
 
         return [
-                states   : STATES,
-                workflows: workflows,
-                lastRuns : lastRuns,
-                lastFails: lastFails,
-                runs     : runs,
+                states       : STATES,
+                workflows    : workflows,
+                lastRuns     : lastRuns,
+                lastFails    : lastFails,
+                lastSuccesses: lastSuccesses,
+                runs         : runs,
         ]
     }
 }
