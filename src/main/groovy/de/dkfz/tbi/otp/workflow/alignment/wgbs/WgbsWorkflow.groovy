@@ -66,7 +66,7 @@ class WgbsWorkflow extends PanCancerWorkflow {
      * There is nothing to do in a single run workflow.
      */
     @Override
-    void reconnectDependencies(Artefact artefact, WorkflowArtefact newWorkflowArtefact) {
+    void reconnectDependencies(Artefact artefact, Artefact newArtefact, String role) {
     }
 
     final String userDocumentation = "notification.template.references.alignment.pancancer"

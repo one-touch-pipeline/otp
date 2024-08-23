@@ -66,7 +66,7 @@ class AceseqConditionalFailJobSpec extends AbstractAnalysisConditionalFailJobSpe
             1 * gcContentPath(bamFile1.mergingWorkPackage) >> gcContPath
         }
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            1 * getInputArtefact(workflowStep, "SOPHIA") >> sophiaInstance
+            1 * getInputArtefact(workflowStep, AceseqWorkflow.SOPHIA_INPUT) >> sophiaInstance
         }
         1 * job.sophiaLinkFileService.getFinalAceseqInputFile(_) >> aceseqPath
 
@@ -99,7 +99,7 @@ class AceseqConditionalFailJobSpec extends AbstractAnalysisConditionalFailJobSpe
     @Override
     void setupMocking() {
         super.setupMocking()
-        1 * job.concreteArtefactService.getInputArtefact(workflowStep, "SOPHIA") >> sophiaInstance
+        1 * job.concreteArtefactService.getInputArtefact(workflowStep, AceseqWorkflow.SOPHIA_INPUT) >> sophiaInstance
         1 * job.sophiaLinkFileService.getFinalAceseqInputFile(_) >> ACESEQ_INPUT_PATH
 
         1 * job.fileService.isFileReadableAndNotEmpty(CHROMOSOME_LEN_PATH) >> true

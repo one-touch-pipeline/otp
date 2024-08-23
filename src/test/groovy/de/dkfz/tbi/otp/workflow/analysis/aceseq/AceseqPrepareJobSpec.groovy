@@ -56,7 +56,7 @@ class AceseqPrepareJobSpec extends Specification implements DataTest, WorkflowSy
     AceseqPrepareJob job
 
     String analysisOutput = AbstractAnalysisWorkflow.ANALYSIS_OUTPUT
-    String sophiaInput = "SOPHIA"
+    String sophiaInput = AceseqWorkflow.SOPHIA_INPUT
 
     @Override
     Class[] getDomainClassesToMock() {

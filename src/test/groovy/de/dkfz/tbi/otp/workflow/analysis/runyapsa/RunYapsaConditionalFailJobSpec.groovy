@@ -87,7 +87,7 @@ class RunYapsaConditionalFailJobSpec extends AbstractAnalysisConditionalFailJobS
         given:
         setupWithSeqType(SeqTypeNames.EXOME.seqTypeName)
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            1 * getInputArtefact(workflowStep, "SNV") >> snvInstance
+            1 * getInputArtefact(workflowStep, RunYapsaWorkflow.SNV_INPUT) >> snvInstance
             0 * _
         }
         job.snvLinkFileService = Mock(SnvLinkFileService) {
@@ -117,7 +117,7 @@ class RunYapsaConditionalFailJobSpec extends AbstractAnalysisConditionalFailJobS
     @Override
     void setupMocking() {
         super.setupMocking()
-        1 * job.concreteArtefactService.getInputArtefact(workflowStep, "SNV") >> snvInstance
+        1 * job.concreteArtefactService.getInputArtefact(workflowStep, RunYapsaWorkflow.SNV_INPUT) >> snvInstance
         job.bedFileService = Mock(BedFileService) {
             _ * findBedFileByReferenceGenomeAndLibraryPreparationKit(_, _) >> bedFile
         }

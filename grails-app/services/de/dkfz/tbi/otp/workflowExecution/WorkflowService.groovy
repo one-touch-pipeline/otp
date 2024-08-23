@@ -148,7 +148,10 @@ class WorkflowService {
                 workflowRunInputArtefact.workflowArtefact = newWorkflowArtefact
                 workflowRunInputArtefact.save(flush: true)
 
-                otpWorkflowService.lookupOtpWorkflowBean(workflowRunInputArtefact.workflowRun).reconnectDependencies(newArtefact, newWorkflowArtefact)
+                OtpWorkflow nextWorkflow = otpWorkflowService.lookupOtpWorkflowBean(workflowRunInputArtefact.workflowRun)
+                workflowRunInputArtefact.workflowRun.outputArtefacts.each { Map.Entry<String, WorkflowArtefact> it ->
+                    nextWorkflow.reconnectDependencies(it.value.artefact.get(), newArtefact, workflowRunInputArtefact.role)
+                }
             }
 
             oldWorkflowArtefact.state = WorkflowArtefact.State.FAILED

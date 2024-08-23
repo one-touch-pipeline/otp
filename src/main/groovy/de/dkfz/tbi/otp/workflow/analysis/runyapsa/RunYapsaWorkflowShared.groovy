@@ -30,8 +30,8 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 trait RunYapsaWorkflowShared extends AnalysisWorkflowShared {
 
     private static final String WORKFLOW = RunYapsaWorkflow.WORKFLOW
-    private static final String SNV_INPUT = "SNV"
-    private static final String INDEL_INPUT = "INDEL"
+    private static final String SNV_INPUT = RunYapsaWorkflow.SNV_INPUT
+    private static final String INDEL_INPUT = RunYapsaWorkflow.INDEL_INPUT
     private static final String RUN_YAPSA_OUTPUT = RunYapsaWorkflow.ANALYSIS_OUTPUT
 
     RoddySnvCallingInstance getSnvInstance(WorkflowStep workflowStep) {

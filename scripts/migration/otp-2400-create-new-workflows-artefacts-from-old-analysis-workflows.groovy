@@ -267,7 +267,7 @@ void migrateToNewWorkflow(
 
             new WorkflowRunInputArtefact([
                     workflowRun     : workflowRun,
-                    role            : SophiaWorkflow.SOPHIA_INPUT,
+                    role            : AceseqWorkflow.SOPHIA_INPUT,
                     workflowArtefact: sophiaAnalysis.workflowArtefact,
             ]).save(flush: false)
         }
@@ -280,7 +280,7 @@ void migrateToNewWorkflow(
 
             new WorkflowRunInputArtefact([
                     workflowRun     : workflowRun,
-                    role            : SnvWorkflow.SNV_INPUT,
+                    role            : RunYapsaWorkflow.SNV_INPUT,
                     workflowArtefact: snvAnalysis.workflowArtefact,
             ]).save(flush: false)
         }

@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.domainFactory.pipelines.analysis
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryHelper
@@ -251,9 +252,11 @@ abstract class AbstractAnalysisDomainFactory<T extends BamFilePairAnalysis> impl
 
     T createInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
         Map map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
-        map += [
-                roddyExecutionDirectoryNames: [DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
-        ]
+        if (T instanceof RoddyResult) {
+            map += [
+                    roddyExecutionDirectoryNames: [DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
+            ]
+        }
         return createDomainObject(instanceClass, map, properties)
     }
 

@@ -21,6 +21,9 @@
  */
 package de.dkfz.tbi.otp.workflow.analysis
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
+import de.dkfz.tbi.otp.workflowExecution.Artefact
 import de.dkfz.tbi.otp.workflowExecution.LinearWorkflow
 
 /**
@@ -33,6 +36,18 @@ abstract class AbstractAnalysisWorkflow implements LinearWorkflow {
     static final String INPUT_TUMOR_BAM = "TUMOR_BAM"
 
     static final String INPUT_CONTROL_BAM = "CONTROL_BAM"
+
+    @Override
+    void reconnectDependencies(Artefact artefact, Artefact newArtefact, String role) {
+        BamFilePairAnalysis instance = artefact as BamFilePairAnalysis
+
+        if (role == INPUT_TUMOR_BAM) {
+            instance.sampleType1BamFile = newArtefact as AbstractBamFile
+        } else if (role == INPUT_CONTROL_BAM) {
+            instance.sampleType2BamFile = newArtefact as AbstractBamFile
+        }
+        instance.save(flush: true)
+    }
 
     @Override
     boolean isAlignment() {

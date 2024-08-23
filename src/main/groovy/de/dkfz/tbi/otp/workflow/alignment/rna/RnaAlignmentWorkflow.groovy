@@ -82,6 +82,6 @@ class RnaAlignmentWorkflow extends AlignmentWorkflow implements LinearWorkflow {
     }
 
     @Override
-    void reconnectDependencies(Artefact artefact, WorkflowArtefact newWorkflowArtefact) {
+    void reconnectDependencies(Artefact artefact, Artefact newArtefact, String role) {
     }
 }

@@ -41,8 +41,8 @@ class RunYapsaWorkflowSharedSpec extends Specification implements WorkflowSystem
     private IndelCallingInstance indelInstance
     private RunYapsaInstance runYapsaInstance
 
-    private static final String SNV_INPUT = "SNV"
-    private static final String INDEL_INPUT = "INDEL"
+    private static final String SNV_INPUT = RunYapsaWorkflow.SNV_INPUT
+    private static final String INDEL_INPUT = RunYapsaWorkflow.INDEL_INPUT
     private static final String RUNYAPSA_OUTPUT = AbstractAnalysisWorkflow.ANALYSIS_OUTPUT
 
     @Override

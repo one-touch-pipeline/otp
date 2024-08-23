@@ -31,7 +31,6 @@ import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaWorkFileService
 import de.dkfz.tbi.otp.workflow.analysis.*
 import de.dkfz.tbi.otp.workflow.jobs.*
 import de.dkfz.tbi.otp.workflowExecution.Artefact
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
 /**
  * represents the Sophia Workflow
@@ -41,7 +40,6 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 class SophiaWorkflow extends AbstractAnalysisWorkflow {
 
     public static final String WORKFLOW = "Roddy Sophia (structural variation calling)"
-    public static final String SOPHIA_INPUT = "SOPHIA_INPUT"
 
     @Autowired
     SophiaWorkFileService sophiaWorkFileService
@@ -82,10 +80,6 @@ class SophiaWorkflow extends AbstractAnalysisWorkflow {
         ]).save(flush: true)
 
         return outputSophiaInstance
-    }
-
-    @Override
-    void reconnectDependencies(Artefact artefact, WorkflowArtefact newWorkflowArtefact) {
     }
 
     final String userDocumentation = "notification.template.references.sophia"

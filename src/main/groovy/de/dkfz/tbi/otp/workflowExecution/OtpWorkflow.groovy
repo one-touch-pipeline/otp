@@ -45,12 +45,13 @@ trait OtpWorkflow {
     abstract Artefact createCopyOfArtefact(Artefact artefact)
 
     /**
-     * Reconnect the dependencies of an artefact to a concrete workflow artefact.
+     * Reconnect the dependencies of an artefact.
      *
-     * @param artefact with dependency connection as reference
-     * @param newWorkflowArtefact which should be reconnected to the dependencies
+     * @param artefact the artefact whose dependencies should be reconnected
+     * @param newArtefact the new artefact which should be reconnected as a dependency to the specified artefact
+     * @param role the role of newArtefact
      */
-    abstract void reconnectDependencies(Artefact artefact, WorkflowArtefact newWorkflowArtefact)
+    abstract void reconnectDependencies(Artefact artefact, Artefact newArtefact, String role)
 
     /**
      * Return message code for user documentation and code links,

@@ -31,7 +31,6 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.workflow.analysis.*
 import de.dkfz.tbi.otp.workflow.jobs.*
 import de.dkfz.tbi.otp.workflowExecution.Artefact
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
 /**
  * represents the ACESeq Workflow
@@ -41,6 +40,8 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 class AceseqWorkflow extends AbstractAnalysisWorkflow {
 
     public static final String WORKFLOW = "Roddy ACEseq (CNV calling)"
+
+    public static final String SOPHIA_INPUT = "SOPHIA_INPUT"
 
     @Autowired
     AceseqWorkFileService aceseqWorkFileService
@@ -81,10 +82,6 @@ class AceseqWorkflow extends AbstractAnalysisWorkflow {
         ]).save(flush: true)
 
         return outputAceseqInstance
-    }
-
-    @Override
-    void reconnectDependencies(Artefact artefact, WorkflowArtefact newWorkflowArtefact) {
     }
 
     final String userDocumentation = "notification.template.references.aceseq"

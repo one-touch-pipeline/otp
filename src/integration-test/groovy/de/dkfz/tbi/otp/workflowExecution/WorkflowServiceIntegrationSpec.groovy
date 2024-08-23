@@ -27,16 +27,22 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvWorkFileService
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaWorkFileService
+import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.*
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
+import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.aceseq.AceseqWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.indel.IndelWorkflow
+import de.dkfz.tbi.otp.workflow.analysis.runyapsa.RunYapsaWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.snv.SnvWorkflow
+import de.dkfz.tbi.otp.workflow.analysis.sophia.SophiaWorkflow
 import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
 import de.dkfz.tbi.otp.workflow.fastqc.WesFastQcWorkflow
 
@@ -371,5 +377,93 @@ class WorkflowServiceIntegrationSpec extends Specification implements WorkflowSy
         { it -> [createReferenceGenome(), createReferenceGenome()] } | { it -> [createSeqTypeSingle(), createSeqTypeSingle()] }
         { it -> [] }                                                 | { it -> [createSeqTypeSingle(), createSeqTypeSingle()] }
         { it -> [createReferenceGenome(), createReferenceGenome()] } | { it -> null }
+    }
+
+    void "test OtpWorkflow.reconnectDependencies, when current workflow is PanCancer and dependent workflow is Sophia"() {
+        given:
+        WorkflowService service = new WorkflowService()
+
+        SophiaInstance sophiaInstance = SophiaDomainFactory.INSTANCE.createInstanceWithRoddyBamFiles()
+
+        Workflow panCancer = createWorkflow()
+        WorkflowRun panCancerRun = createWorkflowRun(workflow: panCancer, state: WorkflowRun.State.FAILED)
+        WorkflowStep workflowStep = createWorkflowStep(workflowRun: panCancerRun)
+        WorkflowArtefact bamArtefact = createWorkflowArtefact(producedBy: panCancerRun)
+        getBamFile(sophiaInstance).workflowArtefact = bamArtefact
+        getBamFile(sophiaInstance).save(flush: true)
+
+        Workflow sophia = createWorkflow()
+        WorkflowRun sophiaRun = createWorkflowRun(workflow: sophia, state: WorkflowRun.State.FAILED)
+        createWorkflowRunInputArtefact(workflowRun: sophiaRun, workflowArtefact: bamArtefact, role: role)
+        WorkflowArtefact sophiaArtefact = createWorkflowArtefact(producedBy: sophiaRun)
+        sophiaInstance.workflowArtefact = sophiaArtefact
+        sophiaInstance.save(flush: true)
+
+        service.otpWorkflowService = Mock(OtpWorkflowService) {
+            lookupOtpWorkflowBean(panCancerRun) >> new PanCancerWorkflow()
+            lookupOtpWorkflowBean(sophiaRun) >> new SophiaWorkflow()
+        }
+
+        when:
+        WorkflowRun newRun = service.createRestartedWorkflow(workflowStep, false)
+
+        then:
+        newRun != panCancerRun
+        WorkflowArtefact newWorkflowArtefact = CollectionUtils.exactlyOneElement(WorkflowArtefact.findAllByProducedBy(newRun))
+        newWorkflowArtefact != bamArtefact
+        newWorkflowArtefact.artefact != bamArtefact.artefact
+        getBamFile(sophiaInstance) == newWorkflowArtefact.artefact.get()
+
+        where:
+        getBamFile                                                 | role
+        { SophiaInstance instance -> instance.sampleType1BamFile } | AbstractAnalysisWorkflow.INPUT_TUMOR_BAM
+        { SophiaInstance instance -> instance.sampleType2BamFile } | AbstractAnalysisWorkflow.INPUT_CONTROL_BAM
+    }
+
+    @SuppressWarnings('UnnecessaryGetter')
+    void "test OtpWorkflow.reconnectDependencies, when current workflow is #current and dependent workflow is #dependent"() {
+        given:
+        WorkflowService service = new WorkflowService()
+
+        BamFilePairAnalysis dependentInstance = getDependentInstance()
+
+        Workflow currentWorkflow = createWorkflow()
+        WorkflowRun currentRun = createWorkflowRun(workflow: currentWorkflow, state: WorkflowRun.State.FAILED)
+        WorkflowStep currentStep = createWorkflowStep(workflowRun: currentRun)
+        WorkflowArtefact currentArtefact = createWorkflowArtefact(producedBy: currentRun)
+        BamFilePairAnalysis currentInstance = getCurrentInstance(currentArtefact)
+
+        currentInstance.samplePair.mergingWorkPackage1.bamFileInProjectFolder = currentInstance.sampleType1BamFile
+        currentInstance.samplePair.mergingWorkPackage1.save(flush: true)
+        currentInstance.samplePair.mergingWorkPackage2.bamFileInProjectFolder = currentInstance.sampleType2BamFile
+        currentInstance.samplePair.mergingWorkPackage2.save(flush: true)
+
+        Workflow dependentWorkflow = createWorkflow()
+        WorkflowRun dependentRun = createWorkflowRun(workflow: dependentWorkflow, state: WorkflowRun.State.FAILED)
+        createWorkflowRunInputArtefact(workflowRun: dependentRun, workflowArtefact: currentArtefact, role: inputRole)
+        WorkflowArtefact dependentArtefact = createWorkflowArtefact(producedBy: dependentRun)
+        dependentInstance.workflowArtefact = dependentArtefact
+        dependentInstance.save(flush: true)
+
+        service.otpWorkflowService = Mock(OtpWorkflowService) {
+            lookupOtpWorkflowBean(currentRun) >> getCurrentOtpWorkflow()
+            lookupOtpWorkflowBean(dependentRun) >> getDependentOtpWorkflow()
+        }
+
+        when:
+        WorkflowRun newRun = service.createRestartedWorkflow(currentStep, false)
+
+        then:
+        newRun != currentRun
+        WorkflowArtefact newWorkflowArtefact = CollectionUtils.exactlyOneElement(WorkflowArtefact.findAllByProducedBy(newRun))
+        newWorkflowArtefact != dependentArtefact
+        newWorkflowArtefact.artefact != dependentArtefact.artefact
+        dependentRun.inputArtefacts.get(inputRole) == newWorkflowArtefact
+        dependentRun.inputArtefacts.get(inputRole).artefact.get() == newWorkflowArtefact.artefact.get()
+
+        where:
+        getCurrentInstance                                                                                                       | getDependentInstance                                                 | inputRole                   | getCurrentOtpWorkflow                                                                                             | getDependentOtpWorkflow    | current   | dependent
+        { workflowArtefact -> SophiaDomainFactory.INSTANCE.createInstanceWithRoddyBamFiles(workflowArtefact: workflowArtefact) } | { AceseqDomainFactory.INSTANCE.createInstanceWithRoddyBamFiles() }   | AceseqWorkflow.SOPHIA_INPUT | { new SophiaWorkflow(sophiaWorkFileService: Mock(SophiaWorkFileService) { constructInstanceName(_) >> "name" }) } | { new AceseqWorkflow() }   | "Sophia " | "ACEseq"
+        { workflowArtefact -> SnvDomainFactory.INSTANCE.createInstanceWithRoddyBamFiles(workflowArtefact: workflowArtefact) }    | { RunYapsaDomainFactory.INSTANCE.createInstanceWithRoddyBamFiles() } | RunYapsaWorkflow.SNV_INPUT  | { new SnvWorkflow(snvWorkFileService: Mock(SnvWorkFileService) { constructInstanceName(_) >> "name" }) }          | { new RunYapsaWorkflow() } | "SNV"     | "runYapsa"
     }
 }

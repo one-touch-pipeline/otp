@@ -29,7 +29,6 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.workflow.analysis.*
 import de.dkfz.tbi.otp.workflow.jobs.*
 import de.dkfz.tbi.otp.workflowExecution.Artefact
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
 /**
  * represents the SNV Workflow
@@ -39,7 +38,6 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 class SnvWorkflow extends AbstractAnalysisWorkflow {
 
     public static final String WORKFLOW = "Roddy SNV calling"
-    public static final String SNV_INPUT = "SNV_INPUT"
 
     @Autowired
     SnvWorkFileService snvWorkFileService
@@ -80,10 +78,6 @@ class SnvWorkflow extends AbstractAnalysisWorkflow {
         ]).save(flush: true)
 
         return outputSnvCallingInstance
-    }
-
-    @Override
-    void reconnectDependencies(Artefact artefact, WorkflowArtefact newWorkflowArtefact) {
     }
 
     final String userDocumentation = "notification.template.references.snv"

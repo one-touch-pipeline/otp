@@ -38,7 +38,7 @@ class AceseqWorkflowSharedSpec extends Specification implements WorkflowSystemDo
     private AceseqWorkflowShared aceseqWorkflowSharedInstance
     private SophiaInstance sophiaInstance
     private AceseqInstance aceseqInstance
-    private static final String SOPHIA_INPUT = "SOPHIA"
+    private static final String SOPHIA_INPUT = AceseqWorkflow.SOPHIA_INPUT
     private static final String ACESEQ_OUTPUT = AbstractAnalysisWorkflow.ANALYSIS_OUTPUT
 
     @Override

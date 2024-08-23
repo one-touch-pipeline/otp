@@ -31,7 +31,6 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.workflow.analysis.*
 import de.dkfz.tbi.otp.workflow.jobs.*
 import de.dkfz.tbi.otp.workflowExecution.Artefact
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
 /**
  * represents the Indel Workflow
@@ -81,10 +80,6 @@ class IndelWorkflow extends AbstractAnalysisWorkflow {
         ]).save(flush: true)
 
         return outputIndelCallingInstance
-    }
-
-    @Override
-    void reconnectDependencies(Artefact artefact, WorkflowArtefact newWorkflowArtefact) {
     }
 
     final String userDocumentation = "notification.template.references.indel"
