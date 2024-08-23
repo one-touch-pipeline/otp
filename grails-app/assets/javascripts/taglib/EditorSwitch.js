@@ -378,7 +378,8 @@ $(() => {
       },
       success() {
         success('Success', 'Data stored successfully');
-        $('p.edit-switch-label span', outerContainer).text($('select option:selected', container).text());
+        const text = $('select option:selected', container).map((i, el) => $(el).text()).get().join(', ');
+        $('p.edit-switch-label span', outerContainer).text(text);
       },
       error(jqXHR, textStatus, errorThrown) {
         if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {

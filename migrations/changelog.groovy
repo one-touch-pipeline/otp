@@ -181,5 +181,7 @@ databaseChangeLog = {
 
     include file: 'changelogs/2024/otp-2511.groovy'
 
+    include file: 'changelogs/2024/otp-2489-add-legacy-flag-to-referenceGenome.groovy'
+
     include file: 'changelogs/2024/otp-1372.groovy'
 }

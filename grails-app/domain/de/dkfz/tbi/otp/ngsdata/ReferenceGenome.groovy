@@ -26,10 +26,11 @@ import grails.gorm.hibernate.annotation.ManagedEntity
 import de.dkfz.tbi.otp.ngsdata.taxonomy.Species
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.utils.Legacy
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
 @ManagedEntity
-class ReferenceGenome implements Entity {
+class ReferenceGenome implements Entity, Legacy {
 
     /**
      * Name of a reference genome.

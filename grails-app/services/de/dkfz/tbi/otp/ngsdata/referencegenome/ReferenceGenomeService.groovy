@@ -363,6 +363,83 @@ class ReferenceGenomeService {
             LsdfFilesService.ensureDirIsReadableAndNotEmpty(it)
         }
     }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void changeLegacyState(ReferenceGenome referenceGenome, boolean legacy = false) {
+        ReferenceGenome referenceGenomeUpdate = ReferenceGenome.get(referenceGenome.id)
+        referenceGenomeUpdate.legacy = legacy
+        assert referenceGenomeUpdate.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateNameValue(Long id, String name) {
+        ReferenceGenome referenceGenomeUpdate = referenceGenome(id)
+        referenceGenomeUpdate.name = name
+        assert referenceGenomeUpdate.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateFileNamePrefixValue(Long id, String fileNamePrefix) {
+        ReferenceGenome referenceGenomeUpdate = referenceGenome(id)
+        referenceGenomeUpdate.fileNamePrefix = fileNamePrefix
+        assert referenceGenomeUpdate.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateSpeciesValue(Long id, Set<String> species) {
+        ReferenceGenome referenceGenomeUpdate = referenceGenome(id)
+        referenceGenomeUpdate.species = species*.toLong().collect { Species.get(it) } as Set<Species>
+        assert referenceGenomeUpdate.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateSpeciesWithStrainValue(Long id, Set<String> speciesWithStrain) {
+        ReferenceGenome referenceGenomeUpdate = referenceGenome(id)
+        referenceGenomeUpdate.speciesWithStrain = speciesWithStrain*.toLong().collect { SpeciesWithStrain.get(it) } as Set<SpeciesWithStrain>
+        assert referenceGenomeUpdate.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateLengthValue(Long id, long length) {
+        ReferenceGenome referenceGenomeUpdate = referenceGenome(id)
+        referenceGenomeUpdate.length = length
+        assert referenceGenomeUpdate.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateLengthWithoutNValue(Long id, long lengthWithoutN) {
+        ReferenceGenome referenceGenomeUpdate = referenceGenome(id)
+        referenceGenomeUpdate.lengthWithoutN = lengthWithoutN
+        assert referenceGenomeUpdate.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updatePathValue(Long id, String path) {
+        ReferenceGenome referenceGenomeUpdate = referenceGenome(id)
+        referenceGenomeUpdate.path = path
+        assert referenceGenomeUpdate.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateChromosomePrefixValue(Long id, String chromosomePrefix) {
+        ReferenceGenome referenceGenomeUpdate = referenceGenome(id)
+        referenceGenomeUpdate.chromosomePrefix = chromosomePrefix
+        assert referenceGenomeUpdate.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateChromosomeSuffixValue(Long id, String chromosomeSuffix) {
+        ReferenceGenome referenceGenomeUpdate = referenceGenome(id)
+        referenceGenomeUpdate.chromosomeSuffix = chromosomeSuffix
+        assert referenceGenomeUpdate.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateFingerPrintingFileNameValue(Long id, String fingerPrintingFileName) {
+        ReferenceGenome referenceGenomeUpdate = referenceGenome(id)
+        referenceGenomeUpdate.fingerPrintingFileName = fingerPrintingFileName
+        assert referenceGenomeUpdate.save(flush: true)
+    }
 }
 
 @TupleConstructor

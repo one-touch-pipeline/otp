@@ -393,7 +393,20 @@ $.otp.getDownloadButton = (columnSelector, fileName, beforeDownload = (callback)
     },
     footer: false,
     exportOptions: {
-      columns: columnSelector || ':visible'
+      columns: columnSelector || ':visible',
+      format: {
+        body: (html, row, col, node) => {
+          // if a table cell contains an EditorSwitch, return the label only
+          if (node.children.length) {
+            const i = $(node);
+            if (i.find('edit-switch')) {
+              return $('.edit-switch-label', i).text().trim();
+            }
+          }
+          // otherwise use the default method to extract text
+          return $.fn.DataTable.Buttons.stripData(html, null);
+        }
+      }
     }
   }];
 };

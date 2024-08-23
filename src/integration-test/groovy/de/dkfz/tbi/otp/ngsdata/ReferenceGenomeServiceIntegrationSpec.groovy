@@ -64,9 +64,9 @@ class ReferenceGenomeServiceIntegrationSpec extends Specification implements Use
 
     void setupData() {
         referenceGenomeService = new ReferenceGenomeService(
-                configService          : configService,
-                fileService            : new FileService(),
-                fileSystemService      : new TestFileSystemService(),
+                configService: configService,
+                fileService: new FileService(),
+                fileSystemService: new TestFileSystemService(),
                 processingOptionService: new ProcessingOptionService(),
         )
         referenceGenomeService.configService.processingOptionService = referenceGenomeService.processingOptionService
@@ -88,9 +88,9 @@ class ReferenceGenomeServiceIntegrationSpec extends Specification implements Use
         [1, 2, 3].each {
             DomainFactory.createReferenceGenomeEntry(
                     referenceGenome: referenceGenome,
-                    name           : "chr_${it}",
-                    length         : it,
-                    lengthWithoutN : it,
+                    name: "chr_${it}",
+                    length: it,
+                    lengthWithoutN: it,
             )
         }
 
@@ -201,6 +201,42 @@ class ReferenceGenomeServiceIntegrationSpec extends Specification implements Use
         e.message.contains('mergingWorkPackage')
     }
 
+    void "test updateValues, updates a old Referencegenome"() {
+        given:
+        createUserAndRoles()
+        String newName = "TestName"
+        String newFileNamePrefix = "TestFileNamePrefix"
+        long newLength = 123456789
+        long newLengthWithoutN = 123456789
+        String newPath = "TestPath"
+        String newChromosomePrefix = "TestChromosomePrefix"
+        String newChromosomeSuffix = "TestChromosomeSuffix"
+        String newFingerPrintingFileName = "TestFingerPrintingFileName"
+        ReferenceGenome referenceGenome = createReferenceGenome()
+
+        when:
+        doWithAuth(OPERATOR) {
+            referenceGenomeService.updateNameValue(referenceGenome.id, newName)
+            referenceGenomeService.updateFileNamePrefixValue(referenceGenome.id, newFileNamePrefix)
+            referenceGenomeService.updateLengthValue(referenceGenome.id, newLength)
+            referenceGenomeService.updateLengthWithoutNValue(referenceGenome.id, newLengthWithoutN)
+            referenceGenomeService.updatePathValue(referenceGenome.id, newPath)
+            referenceGenomeService.updateChromosomePrefixValue(referenceGenome.id, newChromosomePrefix)
+            referenceGenomeService.updateChromosomeSuffixValue(referenceGenome.id, newChromosomeSuffix)
+            referenceGenomeService.updateFingerPrintingFileNameValue(referenceGenome.id, newFingerPrintingFileName)
+        }
+
+        then:
+        referenceGenome.name == newName
+        referenceGenome.fileNamePrefix == newFileNamePrefix
+        referenceGenome.length == newLength
+        referenceGenome.lengthWithoutN == newLengthWithoutN
+        referenceGenome.path == newPath
+        referenceGenome.chromosomePrefix == newChromosomePrefix
+        referenceGenome.chromosomeSuffix == newChromosomeSuffix
+        referenceGenome.fingerPrintingFileName == newFingerPrintingFileName
+    }
+
     void testChromosomeLengthFile_ChromosomeLengthFileFileDoesNotExistAndExistenceIsChecked_ShouldFail() {
         given:
         MergingWorkPackage mergingWorkPackage = createDataForChromosomeSizeInformationFiles()
@@ -213,12 +249,12 @@ class ReferenceGenomeServiceIntegrationSpec extends Specification implements Use
         e.message.contains(DomainFactory.DEFAULT_CHROMOSOME_LENGTH_FILE_NAME)
     }
 
-    private MergingWorkPackage createDataForChromosomeSizeInformationFiles()  {
+    private MergingWorkPackage createDataForChromosomeSizeInformationFiles() {
         configService.addOtpProperties(tempDir)
         MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
                 statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
-                referenceGenome: DomainFactory.createReferenceGenome(chromosomeLengthFilePath: DomainFactory.DEFAULT_CHROMOSOME_LENGTH_FILE_NAME),
-                pipeline: DomainFactory.createPanCanPipeline(),
+                referenceGenome : DomainFactory.createReferenceGenome(chromosomeLengthFilePath: DomainFactory.DEFAULT_CHROMOSOME_LENGTH_FILE_NAME),
+                pipeline        : DomainFactory.createPanCanPipeline(),
         ])
 
         Path referenceGenomeDirectory = Files.createDirectory(configService.processingRootPath.toPath().resolve('reference_genomes'))

@@ -27,5 +27,6 @@
     <g:link controller="metaDataFields" action="seqPlatforms" class="${actionName=="seqPlatforms" ? "active" : ""}"><g:message code="dataFields.banner.seqPlatform"/></g:link>
     <g:link controller="metaDataFields" action="seqTypes" class="${actionName=="seqTypes" ? "active" : ""}"><g:message code="dataFields.banner.seqType"/></g:link>
     <g:link controller="speciesWithStrain" action="index" class="${controllerName=="speciesWithStrain" ? "active" : ""}"><g:message code="speciesWithStrain.title"/></g:link>
-    <g:link controller="softwareTool" action="list" class="${controllerName=="softwareTool" ? "active" : ""}"><g:message code="otp.menu.softwareTool"/></g:link>
+    <g:link controller="softwareTool" action="list" class="${controllerName=="softwareTool" ? "active" : ""}"><g:message code="dataFields.banner.softwareTool"/></g:link>
+    <g:link controller="referenceGenome" action="index" class="${controllerName=="referenceGenome" ? "active" : ""}"><g:message code="dataFields.banner.referenceGenome"/></g:link>
 </div>
