@@ -170,8 +170,17 @@ class CellRangerDataCleanupJob extends AbstractScheduledJob {
             default:
                 throw new InformationTypeException("Invalid state ${informationType} for informationType")
         }
-        mailHelperService.saveMail(subject, content, (userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([project]) +
-                cellRangerMwps*.requester*.email).unique())
+        Set<String> recipients = [] as Set
+        recipients.addAll(userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([project]))
+        recipients.addAll(cellRangerMwps*.requester*.email.findAll())
+        if (!recipients) {
+            recipients.addAll(userProjectRoleService.getProjectAuthorities(project)*.email)
+            recipients.addAll(userProjectRoleService.getBioinformaticianUsers(project)*.email)
+            String fallbackExtension = messageSourceService.createMessage("cellRanger.notification.fallbackExtension")
+            content += "\n\n\n${fallbackExtension}"
+        }
+
+        mailHelperService.saveMail(subject, content, recipients.toList())
     }
 
     String buildDeletionForFailedMergingWorkPackageMessageBody(List<CellRangerMergingWorkPackage> cellRangerMwps) {

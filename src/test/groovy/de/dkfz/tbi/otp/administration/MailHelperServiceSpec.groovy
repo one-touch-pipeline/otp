@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.administration
 
 import grails.plugins.mail.MailService
 import grails.testing.gorm.DataTest
-import grails.validation.ValidationException
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -35,6 +34,7 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.utils.exceptions.SaveMailException
 
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -128,7 +128,7 @@ class MailHelperServiceSpec extends Specification implements DataTest, DomainFac
     }
 
     @Unroll
-    void "saveEmail, when the email is invalid, then throw ValidationException and don't save it in database"() {
+    void "saveEmail, when the email is invalid, then throw SaveMailException and don't save it in database"() {
         given:
         setupData()
 
@@ -136,7 +136,7 @@ class MailHelperServiceSpec extends Specification implements DataTest, DomainFac
         mailHelperService.saveMail(SUBJECT, BODY, to, cc, bcc)
 
         then:
-        thrown(ValidationException)
+        thrown(SaveMailException)
         Mail.count() == 0
 
         where:
@@ -147,6 +147,12 @@ class MailHelperServiceSpec extends Specification implements DataTest, DomainFac
         [MAIL1, 'cd'] | []            | []
         []            | [MAIL1, 'cd'] | []
         []            | []            | [MAIL1, 'cd']
+        [null]        | []            | []
+        []            | [null]        | []
+        []            | []            | [null]
+        [MAIL1, null] | []            | []
+        []            | [MAIL1, null] | []
+        []            | []            | [MAIL1, null]
     }
 
     @Unroll

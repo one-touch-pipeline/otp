@@ -31,7 +31,9 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.utils.TimeFormats
+import de.dkfz.tbi.otp.utils.exceptions.SaveMailException
 
+import grails.validation.ValidationException
 import java.time.ZonedDateTime
 
 @Transactional
@@ -78,9 +80,18 @@ class MailHelperService {
                 bcc    : bcc,
         ])
 
-        mail.save(flush: true)
-
-        log.info("Save Mail: ${mail.id}, '${mail.subject}', to: '${mail.to.join("' & '")}', cc: '${mail.cc.join("' & '")}'")
+        try {
+            mail.save(flush: true)
+            log.info("Save Mail: ${mail.id}, '${mail.subject}', to: '${mail.to.join("' & '")}', cc: '${mail.cc.join("' & '")}'")
+        } catch (ValidationException e) {
+            String text = "Could not save mail: '${e.message}'" +
+                    "\n- subject: '${mail.subject}'" +
+                    "\n- to: '${mail.to?.join("' & '")}'" +
+                    "\n- cc: '${mail.cc?.join("' & '")}'" +
+                    "\n- body: '${mail.body?.replace('\n', '\n        ')}'"
+            log.error(text, e)
+            throw new SaveMailException("Could not save mail: '${mail.subject}'", e)
+        }
 
         return mail
     }

@@ -21,8 +21,8 @@
  */
 package de.dkfz.tbi.otp.cron
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -40,7 +40,7 @@ import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.MessageSourceService
 
 import java.time.LocalDate
 import java.time.ZoneId
@@ -98,74 +98,95 @@ class CellRangerDataCleanupJobIntegrationSpec extends Specification implements C
     }
 
     @Unroll
-    void "sendNotificationEmail, Type #type, the email should only be sent to requester, the ticket system and users with receivesNotifications='true'"() {
+    void "sendNotificationEmail, #name, email should sent to correct persons and the ticket system"() {
         given:
         setupData()
 
         User user = createUser()
-        User user2 = createUser()
-        User requester = createUser()
-        User requester2 = createUser()
+        User requester = createByImport ? null : createUser()
+        User requester2 = createByImport ? null : createUser()
+        User pi = createUser()
+        User bioinformatician = createUser()
+        Project project = createProject()
 
+        int piBioinformaticianCount = (!mailEnabled && createByImport) ? 1 : 0
+
+        String subject = "${type.templateName} subject"
+        String body = "${type.templateName} body"
+        String extension = "extension"
+
+        and: "create job"
         CellRangerDataCleanupJob cellRangerDataCleanupJob = new CellRangerDataCleanupJob([
                 processingOptionService      : new ProcessingOptionService(),
-                messageSourceService         : Stub(MessageSourceService) {
-                    _ * createMessage("cellRanger.notification.${type.templateName}.subject", _ as Map) >> "${type.templateName} subject"
-                    _ * createMessage("cellRanger.notification.${type.templateName}.body", _ as Map) >> "${type.templateName} body"
+                messageSourceService         : Mock(MessageSourceService) {
+                    1 * createMessage("cellRanger.notification.${type.templateName}.subject", _ as Map) >> subject
+                    1 * createMessage("cellRanger.notification.${type.templateName}.body", _ as Map) >> body
+                    piBioinformaticianCount * createMessage("cellRanger.notification.fallbackExtension") >> extension
+                    0 * _
                 },
                 mailHelperService            : Mock(MailHelperService),
                 createNotificationTextService: Mock(CreateNotificationTextService),
-                userProjectRoleService       : Stub(UserProjectRoleService) {
-                    getEmailsOfToBeNotifiedProjectUsers(_) >> [user.email, requester.email]
+                userProjectRoleService       : Mock(UserProjectRoleService) {
+                    1 * getEmailsOfToBeNotifiedProjectUsers([project]) >> (mailEnabled ? [user.email] : [])
+                    piBioinformaticianCount * getProjectAuthorities(project) >> [pi]
+                    piBioinformaticianCount * getBioinformaticianUsers(project) >> [bioinformatician]
+                    0 * _
                 },
         ])
 
-        Closure<CellRangerMergingWorkPackage> createMwpForProjectAsUser = { Project project, User req ->
+        and: "create CellRangerMergingWorkPackage"
+        Closure<CellRangerMergingWorkPackage> createMwpForProjectAsUser = { User req ->
             Sample sample = createSample(
                     individual: createIndividual(
-                            project: project ?: createProject()
+                            project: project
                     )
             )
             return createMergingWorkPackage(sample: sample, requester: req)
         }
 
-        Project project1 = createProject()
-        CellRangerMergingWorkPackage crmwp1 = createMwpForProjectAsUser(project1, requester)
-        CellRangerMergingWorkPackage crmwp2 = createMwpForProjectAsUser(project1, requester2)
+        CellRangerMergingWorkPackage crmwp1 = createMwpForProjectAsUser(requester)
+        CellRangerMergingWorkPackage crmwp2 = createMwpForProjectAsUser(requester2)
 
-        createUserProjectRole(
-                project: project1,
-                user: user,
-                receivesNotifications: true,
-        )
-        createUserProjectRole(
-                project: project1,
-                user: user2,
-                receivesNotifications: false,
-        )
-        createUserProjectRole(
-                project: project1,
-                user: requester,
-                receivesNotifications: true,
-        )
-        createUserProjectRole(
-                project: project1,
-                user: requester2,
-                receivesNotifications: false,
-        )
+        and: "list of expected recipients"
+        List<String> expectedMails = []
+
+        if (mailEnabled) {
+            expectedMails.add(user.email)
+        }
+        if (!createByImport) {
+            expectedMails.add(requester.email)
+            expectedMails.add(requester2.email)
+        }
+        if (piBioinformaticianCount) {
+            expectedMails.add(pi.email)
+            expectedMails.add(bioinformatician.email)
+        }
+
+        and: "expected mail body"
+        String expectedBody = piBioinformaticianCount ? "${body}\n\n\n${extension}" : body
 
         when:
-        cellRangerDataCleanupJob.sendNotificationEmail(project1, [crmwp1, crmwp2], type as CellRangerDataCleanupJob.InformationType)
+        cellRangerDataCleanupJob.sendNotificationEmail(project, [crmwp1, crmwp2], type)
 
         then:
         1 * cellRangerDataCleanupJob.mailHelperService.saveMail(
-                "${type.templateName} subject",
-                "${type.templateName} body",
-                [user.email, requester.email, requester2.email]
+                subject,
+                expectedBody,
+                expectedMails
         )
 
         where:
-        type << CellRangerDataCleanupJob.InformationType.findAll()
+        combination << [
+                CellRangerDataCleanupJob.InformationType.values(),
+                [true, false], // mailEnabled
+                [true, false], // createByImport
+        ].combinations()
+
+        type = combination[0]
+        mailEnabled = combination[1]
+        createByImport = combination[2]
+
+        name = "type: ${type}, mailEnabled: ${mailEnabled}, createByImport: ${createByImport}"
     }
 
     void "getResultsToDelete, only deletes too old mwps where the project is neither archived nor deleted"() {

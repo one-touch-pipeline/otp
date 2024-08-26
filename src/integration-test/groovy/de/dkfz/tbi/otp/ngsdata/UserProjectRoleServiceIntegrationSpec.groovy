@@ -1599,7 +1599,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         when:
-        List<User> projectBioinformaticians = UserProjectRoleService.getBioinformaticianUsers(project)
+        List<User> projectBioinformaticians = userProjectRoleService.getBioinformaticianUsers(project)
 
         then:
         TestCase.assertContainSame(projectBioinformaticians, expectedUsers)

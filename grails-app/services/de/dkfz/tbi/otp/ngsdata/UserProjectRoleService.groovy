@@ -639,17 +639,17 @@ class UserProjectRoleService {
         } as int
     }
 
-    private static List<User> getUniqueProjectAuthoritiesAndUserManagers(Project project) {
+    private List<User> getUniqueProjectAuthoritiesAndUserManagers(Project project) {
         return (getUserManagers(project) + getProjectAuthorities(project)).unique()
     }
 
     @CompileDynamic
-    private static List<User> getUserManagers(Project project) {
+    private List<User> getUserManagers(Project project) {
         return UserProjectRole.findAllByProjectAndManageUsersAndEnabled(project, true, true)*.user
     }
 
     @CompileDynamic
-    static List<User> getProjectAuthorities(Project project) {
+    List<User> getProjectAuthorities(Project project) {
         return UserProjectRole.createCriteria().list {
             eq("project", project)
             eq("enabled", true)
@@ -663,7 +663,7 @@ class UserProjectRoleService {
     }
 
     @CompileDynamic
-    static List<User> getBioinformaticianUsers(Project project) {
+    List<User> getBioinformaticianUsers(Project project) {
         return UserProjectRole.createCriteria().list {
             eq("project", project)
             eq("enabled", true)
