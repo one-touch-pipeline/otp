@@ -30,46 +30,57 @@ $.otp.resultsTable = {
     'use strict';
 
     const fileName = `${document.title.replaceAll(' ', '_')}-${$('.selected-project-value strong').text()}`;
-    const table = tableElement.DataTable({
-      dom: '<i> B rt<"clear">',
+    const oTable = tableElement.dataTable({
+      sDom: '<i> B rt<"clear">',
       buttons: $.otp.getDownloadButton('', fileName),
       columnDefs,
-      filter: true,
-      processing: true,
-      serverSide: false,
-      sort: true,
-      autoWidth: false,
-      scrollCollapse: true,
-      scrollY: 'auto',
-      scrollX: 'auto',
-      paginate: false,
-      deferRender: true,
-      ajax: (data, callback) => {
+      bFilter: true,
+      bProcessing: true,
+      bServerSide: false,
+      bSort: true,
+      bAutoWidth: false,
+      sAjaxSource: source,
+      bScrollCollapse: true,
+      sScrollY: 'auto',
+      sScrollX: 'auto',
+      bPaginate: false,
+      bDeferRender: true,
+      fnServerData(sSource, aoData, fnCallback) {
         $.ajax({
           dataType: 'json',
           type: 'POST',
-          url: source,
-          data,
+          url: sSource,
+          data: aoData,
           error() {
             // clear the table
-            callback({
+            fnCallback({
               aaData: [],
               iTotalRecords: 0,
               iTotalDisplayRecords: 0
             });
+            oTable.fnSettings().oFeatures.bServerSide = false;
           },
           success(json) {
             $.otp.resultsTable.projectArchived = json.archived;
             $.otp.resultsTable.projectDeleted = json.deleted;
-            callback({
-              ...json,
-              aaData: json.aaData.map(convertRowData)
-            });
+            const result = json;
+            let i;
+            for (i = 0; i < json.aaData.length; i += 1) {
+              result.aaData[i] = convertRowData(json.aaData[i]);
+            }
+            fnCallback(result);
+            oTable.fnSettings().oFeatures.bServerSide = false;
           }
+        });
+      },
+      fnInitComplete() {
+        // eslint-disable-next-line no-new
+        new $.fn.dataTable.FixedColumns(this, {
+          leftColumns: 2
         });
       }
     });
-    return table;
+    return oTable;
   },
 
   /**

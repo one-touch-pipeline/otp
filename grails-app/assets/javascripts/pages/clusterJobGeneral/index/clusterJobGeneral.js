@@ -38,33 +38,31 @@ $.otp.clusterJobGeneralTable = {
   register() {
     'use strict';
 
-    $('#clusterJobGeneralTable').DataTable({
+    $('#clusterJobGeneralTable').dataTable({
       dom: '<"row"<"col-sm-12"f>><"row"<"col-sm-12"tr>><"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-      filter: true,
-      processing: true,
-      serverSide: true,
-      sort: true,
-      autoWidth: false,
+      bFilter: true,
+      bProcessing: true,
+      bServerSide: true,
+      bSort: true,
+      bAutoWidth: false,
       pageLength: 10,
-      scrollY: 'auto',
-      sorting: [[3, 'desc']],
-      scrollX: 'auto',
-      scrollCollapse: false,
-      paginate: true,
-      deferRender: true,
-      ajax: (data, callback) => {
+      sAjaxSource: $.otp.createLink({
+        controller: 'clusterJobGeneral',
+        action: 'findAllClusterJobsByDateBetween',
+        parameters: { from: $('#dpFrom').val(), to: $('#dpTo').val() }
+      }),
+      sScrollY: 'auto',
+      aaSorting: [[3, 'desc']],
+      sScrollX: 'auto',
+      bScrollCollapse: false,
+      bPaginate: true,
+      bDeferRender: true,
+      fnServerData(sSource, aoData, fnCallback) {
         $.ajax({
           dataType: 'json',
           type: 'POST',
-          url: $.otp.createLink({
-            controller: 'clusterJobGeneral',
-            action: 'findAllClusterJobsByDateBetween',
-            parameters: {
-              from: $('#dpFrom').val(),
-              to: $('#dpTo').val()
-            }
-          }),
-          data,
+          url: sSource,
+          data: aoData,
           error() {
           },
           success(json) {
@@ -83,7 +81,7 @@ $.otp.clusterJobGeneralTable = {
               row[1] = row[1].substr(9);
               row.pop();
             }
-            callback(json);
+            fnCallback(json);
           }
         });
       }
@@ -238,12 +236,14 @@ $.otp.clusterJobGeneralGraph = {
               label: chartData.keys[0],
               backgroundColor: $.otp.chart.colorList[0],
               borderColor: $.otp.chart.colorList[0]
-            }, {
+            },
+            {
               data: chartData.data[1],
               label: chartData.keys[1],
               backgroundColor: $.otp.chart.colorList[1],
               borderColor: $.otp.chart.colorList[1]
-            }, {
+            },
+            {
               data: chartData.data[2],
               label: chartData.keys[2],
               backgroundColor: $.otp.chart.colorList[2],

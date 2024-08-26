@@ -33,38 +33,40 @@ $.otp.selectSamplesTable = {
   selectableSampleList(header, preSelectedSamples) {
     'use strict';
 
-    return $('#selectSamplesTable').DataTable({
-      dom: '<i> T rt<"clear">',
-      tableTools: $.otp.tableTools,
-      filter: true,
-      processing: true,
-      serverSide: false,
+    return $('#selectSamplesTable').dataTable({
+      sDom: '<i> T rt<"clear">',
+      oTableTools: $.otp.tableTools,
+      bFilter: true,
+      bProcessing: true,
+      bServerSide: false,
       columnDefs: [{
         targets: 'no-sort',
         orderable: false
       }],
       order: [[1, 'asc']],
-      sort: true,
-      autoWidth: false,
-      scrollCollapse: true,
-      scrollY: ($(window).height() - 480),
-      paginate: false,
-      deferRender: true,
-      ajax: (data, callback) => {
+      bSort: true,
+      bAutoWidth: false,
+      sAjaxSource: $.otp.createLink({
+        controller: 'egaSubmission',
+        action: 'dataTableSelectSamples'
+      }),
+      bScrollCollapse: true,
+      sScrollY: ($(window).height() - 480),
+      bPaginate: false,
+      bDeferRender: true,
+      fnServerData(sSource, aoData, fnCallback) {
+        aoData.push({
+          name: 'egaProject',
+          value: $('#sampleTable').data('project')
+        });
         $.ajax({
           dataType: 'json',
           type: 'POST',
-          url: $.otp.createLink({
-            controller: 'egaSubmission',
-            action: 'dataTableSelectSamples'
-          }),
-          data: {
-            ...data,
-            egaProject: $('#sampleTable').data('project')
-          },
+          url: sSource,
+          data: aoData,
           error() {
             // clear the table
-            callback({
+            fnCallback({
               aaData: [],
               iTotalRecords: 0,
               iTotalDisplayRecords: 0
@@ -93,7 +95,7 @@ $.otp.selectSamplesTable = {
                 result.aaData[i][c + 1] = entry[header[c]];
               }
             }
-            callback(result);
+            fnCallback(result);
           }
         });
       }
@@ -112,9 +114,9 @@ $.otp.selectSamplesTable = {
     $.otp.dataTableFilter.register($('#searchCriteriaTableSeqType'), () => {
       const select = $('#searchCriteriaTableSeqType').find('select')[0];
       if (select.selectedIndex !== 0) {
-        table.column(seqTypeColumnIndex).search(select.value).draw();
+        table.fnFilter(`^${select.value}$`, seqTypeColumnIndex, true);
       } else {
-        this.removeFilterOnColumn(table, seqTypeColumnIndex);
+        table.fnFilter('', seqTypeColumnIndex);
       }
     });
   },
@@ -122,6 +124,6 @@ $.otp.selectSamplesTable = {
   removeFilterOnColumn(table, seqTypeColumnIndex) {
     'use strict';
 
-    table.column(seqTypeColumnIndex).search('').draw();
+    table.fnFilter('', seqTypeColumnIndex);
   }
 };
