@@ -52,4 +52,7 @@ updates:
     open-pull-requests-limit: 10
     commit-message:
       prefix: "Update: "
+    ignore:
+      # the plugin eslint-config-airbnb-base use eslint, but is not compatible with newer versions of it
+      - dependency-name: "eslint"
     rebase-strategy: none
