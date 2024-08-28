@@ -30,6 +30,7 @@ describe('Check fastqc results page', () => {
 
     it('should visit some show pages via the sequence index page', () => {
       cy.visit('/sequence/index');
+      cy.get('#searchCriteriaTable td.search input[type=button]').click();
       cy.get('table#sequenceTable tbody').find('tr').eq(3)
         .find('td')
         .eq(14)
@@ -38,6 +39,7 @@ describe('Check fastqc results page', () => {
       cy.checkPage('/fastqcResults/show/');
 
       cy.visit('/sequence/index');
+      cy.get('#searchCriteriaTable td.search input[type=button]').click();
       cy.get('table#sequenceTable tbody').find('tr').eq(22)
         .find('td')
         .eq(14)
@@ -46,6 +48,7 @@ describe('Check fastqc results page', () => {
       cy.checkPage('/fastqcResults/show/');
 
       cy.visit('/sequence/index');
+      cy.get('#searchCriteriaTable td.search input[type=button]').click();
       cy.get('table#sequenceTable tbody').find('tr').eq(12)
         .find('td')
         .eq(14)

@@ -214,6 +214,24 @@ Cypress.Commands.add('setProcessingOption', (optionName, value) => {
   });
 });
 
+/**
+ * Intercept the number #index (1 based index) HTTP call with the same method and URL
+ * E.g.: 3 HTTP requests are sent, but you want to intercept the 2nd one, then specify: index = 2
+ * @param method can be GET, POST, PUT, DELETE, PATCH, default is GET
+ * @param index is 1 based index
+ */
+Cypress.Commands.add('interceptAt', (alias, url, index, method) => {
+  'use strict';
+
+  let intercepted = 0;
+  cy.intercept(method || 'GET', url, (req) => {
+    intercepted = intercepted + 1;
+    if (intercepted === index) {
+      req.alias = alias;
+    }
+  });
+});
+
 const validateSession = () => {
   'use strict';
 

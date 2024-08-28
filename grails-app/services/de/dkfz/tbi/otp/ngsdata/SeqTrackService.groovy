@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import java.text.MessageFormat
@@ -63,15 +64,17 @@ class SeqTrackService {
     List<Sequence> listSequences(int offset, int max, boolean sortOrder, SequenceColumn column, SequenceFiltering filtering) {
         if (filtering.enabled) {
             Closure filteringClosure = createSequenceFilteringClosure()
-            return Sequence.withCriteria {
-                filteringClosure.delegate = delegate
-                filteringClosure.resolveStrategy = Closure.DELEGATE_FIRST
-                filteringClosure(filtering)
-                if (max != -1) { // -1 indicate in jquery datatable, that no paging is used. Therefore in that case no maxResult are set
-                    maxResults(max)
+            return LogUsedTimeUtils.logUsedTimeStartEnd(log, "  Find sequences with offset ${offset}") {
+                return Sequence.withCriteria {
+                    filteringClosure.delegate = delegate
+                    filteringClosure.resolveStrategy = Closure.DELEGATE_FIRST
+                    filteringClosure(filtering)
+                    if (max != -1) { // -1 indicate in jquery datatable, that no paging is used. Therefore in that case no maxResult are set
+                        maxResults(max)
+                    }
+                    firstResult(offset)
+                    order(column.columnName, sortOrder ? "asc" : "desc")
                 }
-                firstResult(offset)
-                order(column.columnName, sortOrder ? "asc" : "desc")
             }
         }
         List<Project> projects = projectService.allProjects
@@ -115,6 +118,13 @@ class SeqTrackService {
                 or {
                     filtering.individual.each {
                         ilike('pid', "%${it}%")
+                    }
+                }
+            }
+            if (filtering.sampleName) {
+                or {
+                    filtering.sampleName.each {
+                        like('sampleName', "%${it}%")
                     }
                 }
             }

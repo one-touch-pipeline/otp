@@ -303,7 +303,7 @@ class IndividualFiltering {
                     }
                     break
                 case "pidSearch":
-                    if (it.value && it.value.length() >= 3) {
+                    if (it.value) {
                         filtering.pid << it.value
                         filtering.enabled = true
                     }

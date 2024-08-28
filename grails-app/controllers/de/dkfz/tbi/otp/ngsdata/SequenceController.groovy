@@ -32,9 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.taxonomy.*
 import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.SecurityService
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.DataTableCommand
-import de.dkfz.tbi.otp.utils.TimeFormats
+import de.dkfz.tbi.otp.utils.*
 
 @PreAuthorize('isFullyAuthenticated()')
 class SequenceController {
@@ -68,6 +66,8 @@ class SequenceController {
                          type : 'LIST', from: projectService.allProjects,
                          value: 'displayName', key: 'id'],
                         [name: 'individualSearch', msgcode: 'sequence.search.individual',
+                         type: 'TEXT'],
+                        [name: 'sampleNameSearch', msgcode: 'sequence.search.sampleName',
                          type: 'TEXT'],
                         [name : 'sampleTypeSelection', msgcode: 'sequence.search.sample',
                          type : 'LIST', from: SampleType.list(sort: "name", order: "asc"),
@@ -104,49 +104,59 @@ class SequenceController {
     }
 
     def dataTableSource(DataTableCommand cmd) {
-        Map dataToRender = cmd.dataToRender()
+        LogUsedTimeUtils.logUsedTimeStartEnd(log, "Fetching sequences") {
+            Map dataToRender = cmd.dataToRender()
 
-        SequenceFiltering filtering = SequenceFiltering.fromJSON(params.filtering)
+            SequenceFiltering filtering = SequenceFiltering.fromJSON(params.filtering)
 
-        dataToRender.iTotalRecords = seqTrackService.countSequences(filtering)
-        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
+            dataToRender.iTotalRecords = seqTrackService.countSequences(filtering)
+            dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
-        List<Sequence> sequences = seqTrackService.listSequences(cmd.iDisplayStart, cmd.iDisplayLength, cmd.sortOrder,
-                SequenceColumn.fromDataTable(cmd.iSortCol_0), filtering)
-        List<RawSequenceFile> rawSequenceFiles = sequences ? fastqcResultsService.fastQCFiles(sequences) : []
-        Map<Long, List<RawSequenceFile>> seqTrackIdRawSequenceFileMap = rawSequenceFiles.groupBy {
-            it.seqTrack.id
-        }
+            List<Sequence> sequences = seqTrackService.listSequences(cmd.iDisplayStart, cmd.iDisplayLength, cmd.sortOrder,
+                    SequenceColumn.fromDataTable(cmd.iSortCol_0), filtering)
 
-        // need to add an additional field to the sequences
-        // if added as dynamic property, it is not included during the JSON conversion
-        // because of that, we just copy all properties into a map
-        sequences.each { Sequence seq ->
-            Map data = [:]
-            seq.properties.each {
-                data.put(it.key, it.value)
+            Map<Long, List<RawSequenceFile>> seqTrackIdRawSequenceFileMap
+            List<RawSequenceFile> rawSequenceFiles
+            LogUsedTimeUtils.logUsedTimeStartEnd(log, "  Find fastQC files") {
+                rawSequenceFiles = sequences ? fastqcResultsService.fastQCFiles(sequences) : []
+                seqTrackIdRawSequenceFileMap = rawSequenceFiles.groupBy {
+                    it.seqTrack.id
+                }
             }
 
-            // format date
-            data.dateCreated = TimeFormats.DATE.getFormattedDate(data.dateCreated as Date)
+            // need to add an additional field to the sequences
+            // if added as dynamic property, it is not included during the JSON conversion
+            // because of that, we just copy all properties into a map
+            LogUsedTimeUtils.logUsedTimeStartEnd(log, "  Adding additional data to sequences") {
+                sequences.each { Sequence seq ->
+                    Map data = [:]
+                    seq.properties.each {
+                        data.put(it.key, it.value)
+                    }
 
-            data.withdrawn = SeqTrack.get(seq.seqTrackId).isWithdrawn()
+                    // format date
+                    data.dateCreated = TimeFormats.DATE.getFormattedDate(data.dateCreated as Date)
 
-            data.problemDescription = seq.problem?.description
+                    data.withdrawn = seq.fileWithdrawn
 
-            data.fastQCFiles = seqTrackIdRawSequenceFileMap[seq.seqTrackId]?.sort {
-                [!it.indexFile, it.mateNumber]
-            }?.collect {
-                [
-                        readName: it.readName,
-                        fastqId : it.id,
-                ]
-            } ?: []
-            List<String> dataFormats = seqTrackIdRawSequenceFileMap[seq.seqTrackId]?.dataFormat
-            data.dataFormat = dataFormats ? CollectionUtils.exactlyOneElement(dataFormats.unique()) : ' - '
-            dataToRender.aaData << data
+                    data.problemDescription = seq.problem?.description
+
+                    data.fastQCFiles = seqTrackIdRawSequenceFileMap[seq.seqTrackId]?.sort {
+                        [!it.indexFile, it.mateNumber]
+                    }?.collect {
+                        [
+                                readName: it.readName,
+                                fastqId : it.id,
+                        ]
+                    } ?: []
+                    List<String> dataFormats = seqTrackIdRawSequenceFileMap[seq.seqTrackId]?.dataFormat
+                    data.dataFormat = dataFormats ? CollectionUtils.exactlyOneElement(dataFormats.unique()) : ' - '
+                    dataToRender.aaData << data
+                }
+            }
+
+            return render(dataToRender as JSON)
         }
-        render(dataToRender as JSON)
     }
 
     def exportAll(DataTableCommand cmd) {
@@ -277,6 +287,7 @@ enum SequenceColumn {
 class SequenceFiltering {
     List<Long> project = []
     List<String> individual = []
+    List<String> sampleName = []
     List<Long> sampleType = []
     List<String> seqType = []
     List<String> libraryLayout = []
@@ -308,10 +319,14 @@ class SequenceFiltering {
                     break
                 case "individualSearch":
                     it.value.split(",").each {
-                        if (it && it.length() >= 3) {
-                            filtering.individual << it.trim()
-                            filtering.enabled = true
-                        }
+                        filtering.individual << it.trim()
+                        filtering.enabled = true
+                    }
+                    break
+                case "sampleNameSearch":
+                    it.value.split(",").each {
+                        filtering.sampleName << it.trim()
+                        filtering.enabled = true
                     }
                     break
                 case "sampleTypeSelection":
@@ -354,10 +369,8 @@ class SequenceFiltering {
                     break
                 case "runSearch":
                     it.value.split(",").each {
-                        if (it && it.length() >= 3) {
-                            filtering.run << it.trim()
-                            filtering.enabled = true
-                        }
+                        filtering.run << it.trim()
+                        filtering.enabled = true
                     }
                     break
                 case "libraryPreparationKitSelection":

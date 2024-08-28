@@ -84,6 +84,9 @@ To be used in conjunction with: common/DataTableFilter.js
             <td class="add" style="display: none">
                 <input type="button" value="+ ${g.message(code: "otp.filter.add")}"/>
             </td>
+            <td class="search">
+                <input type="button" value="${g.message(code: "otp.filter.search")}"/>
+            </td>
         </tr>
     </table>
 </div>

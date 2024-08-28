@@ -29,7 +29,8 @@ describe('test for individual page', () => {
     });
 
     it('should filter the table by project and identifier', () => {
-      cy.intercept('/individual/dataTableSource*').as('loadDataTable');
+      cy.intercept('POST', '/individual/dataTableSource*').as('loadDataTable');
+
       cy.visit('/individual/list');
 
       cy.fixture('individual.json').then((fixture) => {
@@ -40,15 +41,8 @@ describe('test for individual page', () => {
         cy.get('#searchCriteriaTable tr').eq(1).find('td.attribute select').select('Identifier', { force: true });
         cy.get('#searchCriteriaTable tr').eq(1).find('input[name=pidSearch]').type(fixture.filterIdentifier);
 
-        // Every character typed in pid search is sending one backend call.
-        cy.wait('@loadDataTable').wait('@loadDataTable').wait('@loadDataTable')
-          .wait('@loadDataTable')
-          .wait('@loadDataTable')
-          .wait('@loadDataTable')
-          .wait('@loadDataTable')
-          .wait('@loadDataTable')
-          .wait('@loadDataTable')
-          .wait('@loadDataTable')
+        cy.get('#searchCriteriaTable tr').eq(1).find('td.search input[type=button]').click();
+        cy.wait('@loadDataTable')
           .then((interception) => {
             expect(interception.response.statusCode).to.equal(200);
             expect(interception.response.body.aaData).to.have.length(2);
@@ -174,6 +168,7 @@ describe('test for individual page', () => {
 
       cy.visit('/individual/list');
 
+      cy.get('#searchCriteriaTable td.search input[type=button]').click();
       cy.wait('@loadDataTable').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
       });
@@ -193,7 +188,7 @@ describe('test for individual page', () => {
     });
 
     it('should filter by project and individual, when quick search is used', () => {
-      cy.intercept('/individual/dataTableSource*').as('loadDataTable');
+      cy.interceptAt('loadDataTable', '/individual/dataTableSource*', 3, 'POST');
       cy.visit('/individual/list');
 
       cy.fixture('individual.json').then((fixture) => {
@@ -201,11 +196,8 @@ describe('test for individual page', () => {
 
         cy.wait('@loadDataTable').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
-        });
-
-        cy.get('table#individualTable tbody tr').should('have.length', 1);
-        cy.get('table#individualTable tbody').find('tr').each((tableRow) => {
-          cy.wrap(tableRow).find('td').eq(0).should('contain', fixture.filterQuickSearch.toLowerCase());
+          expect(interception.response.body.aaData).to.have.length(1);
+          interception.response.body.aaData.forEach((seq) => expect(seq.pid).to.contains(fixture.filterQuickSearch.toLowerCase()));
         });
       });
     });
@@ -214,6 +206,7 @@ describe('test for individual page', () => {
       cy.intercept('/individual/dataTableSource*').as('loadDataTable');
       cy.visit('/individual/list');
 
+      cy.get('#searchCriteriaTable td.search input[type=button]').click();
       cy.wait('@loadDataTable');
 
       cy.get('#individualTable tbody tr').first().find('td a').eq(0)

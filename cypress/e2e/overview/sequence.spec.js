@@ -63,6 +63,8 @@ describe('Check statistics page', () => {
     });
 
     it('should filter the table by sample type', () => {
+      cy.intercept('POST', '/sequence/dataTableSource*').as('loadDataTable');
+
       const filterType = 'Sample Type';
       const filterToSelect = 'tumor01';
 
@@ -76,8 +78,38 @@ describe('Check statistics page', () => {
       cy.get('span#dtf_sampleTypeSelection').click();
       cy.get('li.select2-results__option').contains(filterToSelect).click();
 
-      cy.get('table#sequenceTable tbody tr td').contains('control01').should('not.exist');
-      cy.get('table#sequenceTable tbody tr td').should('contain', filterToSelect);
+      cy.get('#searchCriteriaTable td.search input[type=button]').click();
+      cy.wait('@loadDataTable')
+        .then((interception) => {
+          expect(interception.response.statusCode).to.equal(200);
+          expect(interception.response.body.aaData).to.have.length(171);
+          interception.response.body.aaData.forEach((seq) => expect(seq.sampleTypeName).to.equal(filterToSelect));
+        });
+    });
+
+    it('should filter the table by sample name', () => {
+      cy.intercept('POST', '/sequence/dataTableSource*').as('loadDataTable');
+
+      const filterType = 'Sample Name';
+      const filterToSelect = 'sample_20';
+
+      cy.visit('/sequence/index');
+
+      cy.get('#sequenceTable_processing').should('exist');
+      cy.get('div#data-table-filter-container').find('span#select2--container')
+        .contains('No Search Criteria')
+        .click();
+      cy.get('ul#select2--results').contains(filterType).click({ force: true });
+      cy.get('span#dtf_sampleNameSearch').click();
+      cy.get('#searchCriteriaTable tr').eq(0).find('input[name=sampleNameSearch]').type(`${filterToSelect}{enter}`);
+
+      cy.get('#searchCriteriaTable td.search input[type=button]').click();
+      cy.wait('@loadDataTable')
+        .then((interception) => {
+          expect(interception.response.statusCode).to.equal(200);
+          expect(interception.response.body.aaData).to.have.length(11);
+          interception.response.body.aaData.forEach((seq) => expect(seq.sampleName).to.contains(filterToSelect));
+        });
     });
   });
 });

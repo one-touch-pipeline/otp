@@ -60,6 +60,7 @@ $.otp.sequence = {
       iDisplayLength: 150,
       bDeferRender: true,
       scroller: true,
+      deferLoading: 0,
       columnDefs: [{
         targets: 23,
         visible: false

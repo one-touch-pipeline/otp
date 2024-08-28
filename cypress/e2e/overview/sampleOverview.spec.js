@@ -30,14 +30,17 @@ describe('Check sampleOverview page', () => {
 
     it('should filter the table by Sample Type', () => {
       cy.visit('/sampleOverview/index');
+      cy.intercept('POST', '/sampleOverview/dataTableSource*').as('loadDataTable');
 
       const sampleTypeName = 'tumor01';
       cy.get('span#select2--container').contains('Sample Type').click();
       cy.get('li').contains(sampleTypeName).click();
       cy.get('table#laneOverviewId td.dataTables_empty').should('not.exist');
 
-      cy.get('table#laneOverviewId tbody').find('tr').each((tableRow) => {
-        cy.wrap(tableRow).find('td').eq(1).should('contain', 'tumor01');
+      cy.wait('@loadDataTable').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+        expect(interception.response.body.aaData).to.have.length(8);
+        expect(interception.response.body.aaData[1][1]).to.contains('tumor01');
       });
     });
 

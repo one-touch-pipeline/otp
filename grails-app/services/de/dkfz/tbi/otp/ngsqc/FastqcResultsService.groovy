@@ -62,13 +62,10 @@ class FastqcResultsService {
      */
     @CompileDynamic
     List<RawSequenceFile> fastQCFiles(List<Sequence> sequences) {
-        return FastqcProcessedFile.createCriteria().list {
-            sequenceFile {
-                seqTrack {
-                    'in'('id', sequences*.seqTrackId)
-                    eq('fastqcState', SeqTrack.DataProcessingState.FINISHED)
-                }
-            }
-        }*.sequenceFile
+        return FastqcProcessedFile.executeQuery("""
+            select sequenceFile from FastqcProcessedFile fpf
+                where fpf.sequenceFile.seqTrack.id in (:seqTrackIds)
+                and fpf.sequenceFile.seqTrack.fastqcState = ${SeqTrack.DataProcessingState.FINISHED}
+        """, [seqTrackIds: sequences*.seqTrackId])
     }
 }

@@ -46,6 +46,7 @@ $.otp.individual = {
       bScrollCollapse: true,
       sScrollY: 'auto',
       bDeferRender: true,
+      deferLoading: 0,
       fnServerData(sSource, aoData, fnCallback) {
         aoData.push({
           name: 'filtering',

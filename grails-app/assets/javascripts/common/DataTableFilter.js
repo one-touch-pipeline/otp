@@ -73,6 +73,7 @@ $.otp.dataTableFilter = {
         tr.detach();
         if ($('td.remove', lastTr).is(':visible')) {
           $('td.add', lastTr).show();
+          $('td.search', lastTr).show();
         }
       } else {
         /* 'change.select2' is a limited 'changed'-event, that triggers only a sync between the
@@ -96,15 +97,17 @@ $.otp.dataTableFilter = {
         $(`td span[id='dtf_${attribute}']`, tr).show();
         $('td.add', tr).show();
         $('td.remove', tr).show();
+        $('td.search', tr).show();
       } else {
         $('td.add', tr).hide();
+        $('td.search', tr).hide();
         removeRowOrHideInputs(tr);
       }
-      updateSearchCriteria();
     };
     const searchCriteriaAddRow = function (event) {
       const tr = $(event.target).parents('.dtf_row');
       $('td.add', tr).hide();
+      $('td.search', tr).hide();
 
       // select2 doesn't take well to cloning, do the required voodoo dance.
       $('select.select2-hidden-accessible', tr).select2('destroy');
@@ -114,6 +117,7 @@ $.otp.dataTableFilter = {
       $('td.value span.dtf_value_span', cloned).hide();
       $('td.add', cloned).hide();
       $('td.remove', cloned).hide();
+      $('td.search', cloned).show();
 
       /* 'change.select2' is a limited 'changed'-event, that triggers only a sync between the
              * 'raw' select-tag and the select2 visuals.
@@ -136,15 +140,13 @@ $.otp.dataTableFilter = {
       const tr = $(event.target).parents('.dtf_row');
       $('td.value span.dtf_value_span', tr).hide();
       removeRowOrHideInputs(tr);
-      updateSearchCriteria();
     };
 
     searchCriteriaTable.on('change', 'select.dtf_criterium', searchCriteriaChangeHandler);
     searchCriteriaTable.on('click', 'td.add input[type=button]', searchCriteriaAddRow);
     searchCriteriaTable.on('click', 'td.remove input[type=button]', searchCriteriaRemoveRow);
-    searchCriteriaTable.on('change', 'td.value select', updateSearchCriteria);
-    searchCriteriaTable.on('change', 'td.value input', updateSearchCriteria);
-    searchCriteriaTable.on('keyup', 'td.value input[type=text]', updateSearchCriteria);
+    searchCriteriaTable.on('click', 'td.search input[type=button]', updateSearchCriteria);
+    searchCriteriaTable.on('keypress', 'td.search input[type=button]', updateSearchCriteria);
 
     return searchCriteria;
   }
