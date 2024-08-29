@@ -38,17 +38,19 @@ class AnalysisBamFileArtefactData extends ArtefactData<AbstractBamFile> {
     final SampleType sampleType
     final Sample sample
     final AbstractMergingWorkPackage mergingWorkPackage
+    final ReferenceGenome referenceGenome
     final SeqPlatformGroup seqPlatformGroup
 
     @SuppressWarnings("ParameterCount")
     AnalysisBamFileArtefactData(WorkflowArtefact workflowArtefact, AbstractBamFile artefact, Project project, SeqType seqType,
                                 Individual individual, SampleType sampleType, Sample sample, AbstractMergingWorkPackage mergingWorkPackage,
-                                SeqPlatformGroup seqPlatformGroup) {
+                                ReferenceGenome referenceGenome, SeqPlatformGroup seqPlatformGroup) {
         super(workflowArtefact, artefact, project, seqType)
         this.individual = individual
         this.sampleType = sampleType
         this.sample = sample
         this.mergingWorkPackage = mergingWorkPackage
+        this.referenceGenome = referenceGenome
         this.seqPlatformGroup = seqPlatformGroup
     }
 }

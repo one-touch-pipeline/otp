@@ -572,6 +572,11 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
         given:
         setupDataForCreateWorkflowRunsAndOutputArtefacts(variant)
 
+        // simulate that the reference genome is not supported
+        if (variant == CreateVariantInvalid.REF_GENOME_NOT_SUPPORTED) {
+            workflowVersion.allowedReferenceGenomes -= bamFileDisease.mergingWorkPackage.referenceGenome
+        }
+
         when:
         DeciderResult deciderResult = decider.createWorkflowRunsAndOutputArtefacts(
                 projectSeqTypeGroup, baseDeciderGroup,
@@ -584,6 +589,28 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
 
         where:
         variant << CreateVariantInvalid.values()
+    }
+
+    void "createWorkflowRunsAndOutputArtefacts, when both disease and control have wrong ref genomes, then do not create an analysis and create warnings"() {
+        given:
+        setupDataForCreateWorkflowRunsAndOutputArtefacts(CreateVariantInvalid.REF_GENOME_NOT_SUPPORTED)
+
+        // both disease and control samples have reference genomes which are not supported (not in the allowed list)
+        workflowVersion.allowedReferenceGenomes -= [
+                bamFileDisease.mergingWorkPackage.referenceGenome,
+                bamFileControl.mergingWorkPackage.referenceGenome,
+        ]
+
+        when:
+        DeciderResult deciderResult = decider.createWorkflowRunsAndOutputArtefacts(
+                projectSeqTypeGroup, baseDeciderGroup,
+                dataList, additionalDataList, additionalData, workflowVersion)
+
+        then:
+        deciderResult.newArtefacts.empty
+        deciderResult.warnings.size() == 2
+        deciderResult.warnings.first().contains(CreateVariantInvalid.REF_GENOME_NOT_SUPPORTED.message)
+        deciderResult.warnings.last().contains(CreateVariantInvalid.REF_GENOME_NOT_SUPPORTED.message)
     }
 
     void "createAnalysisWithoutFlush"() {
@@ -633,6 +660,7 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
                 bamFile.sampleType,
                 bamFile.sample,
                 mergingWorkPackage,
+                mergingWorkPackage.referenceGenome,
                 seqPlatformGroup
         )
     }
@@ -656,8 +684,6 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
 
     void setupDataForCreateWorkflowRunsAndOutputArtefacts(CreatePairVariant variant) {
         workflow = createWorkflow(name: decider.workflowName)
-        workflowApiVersion = createWorkflowApiVersion([workflow: workflow])
-        workflowVersion = createWorkflowVersion([apiVersion: workflowApiVersion])
         pipeline = findOrCreateAnalysisPipeline()
 
         // artefact data
@@ -667,6 +693,17 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
         bamFileControl = createCorrespondingBamFile(bamFileDisease, [
                 workflowArtefact: createWorkflowArtefact(),
         ])
+
+        workflowApiVersion = createWorkflowApiVersion([workflow: workflow])
+        workflowVersion = createWorkflowVersion([
+                apiVersion: workflowApiVersion,
+                allowedReferenceGenomes: [
+                        bamFileDisease.mergingWorkPackage.referenceGenome,
+                        bamFileControl.mergingWorkPackage.referenceGenome,
+                        createReferenceGenome(),
+                ],
+        ])
+
         if (variant == CreateVariantInvalid.DIFFERENT_SEQ_PLATFORM_GROUP) {
             bamFileControl.mergingWorkPackage.with {
                 it.seqPlatformGroup = createSeqPlatformGroup()
@@ -827,7 +864,8 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
         NO_DISEASE("since no sample pairs available"),
         NO_CONTROL("since no sample pairs available"),
         DIFFERENT_SEQ_PLATFORM_GROUP("since they use different seqPlatformGroups"),
-        EXISTING_ANALYSIS("since existing analysis")
+        EXISTING_ANALYSIS("since existing analysis"),
+        REF_GENOME_NOT_SUPPORTED("since the reference genome")
 
         String message
     }

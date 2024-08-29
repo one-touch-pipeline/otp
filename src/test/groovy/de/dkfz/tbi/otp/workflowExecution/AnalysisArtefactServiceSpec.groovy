@@ -252,7 +252,9 @@ class AnalysisArtefactServiceSpec<T> extends HibernateSpec implements WorkflowSy
         given:
         setupData()
 
-        WorkflowVersion workflowVersion = createWorkflowVersion()
+        WorkflowVersion workflowVersion = createWorkflowVersion([
+                allowedReferenceGenomes: [createReferenceGenome(), createReferenceGenome()],
+        ])
 
         WorkflowVersionSelector selector = createWorkflowVersionSelector([
                 workflowVersion: workflowVersion,
@@ -436,6 +438,7 @@ class AnalysisArtefactServiceSpec<T> extends HibernateSpec implements WorkflowSy
                 bamFile.sampleType,
                 bamFile.sample,
                 mergingWorkPackage,
+                mergingWorkPackage.referenceGenome,
                 seqPlatformGroup
         )
     }

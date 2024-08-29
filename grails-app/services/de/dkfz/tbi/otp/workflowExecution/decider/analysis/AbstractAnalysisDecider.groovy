@@ -224,6 +224,20 @@ abstract class AbstractAnalysisDecider<A extends BamFilePairAnalysis>
             return
         }
 
+        // reference genomes in both disease and control bam files should be in the list of allowed reference genomes of the workflow version
+        List<GString> warnings = [diseaseData, controlData].collect { AnalysisBamFileArtefactData analysisBamFileArtefactData ->
+            analysisBamFileArtefactData.referenceGenome in workflowVersion.allowedReferenceGenomes ? null :
+                "skip ${group} ${analysisBamFileArtefactData.sampleType.displayName}, " +
+                        "since the reference genome ${analysisBamFileArtefactData.referenceGenome} is not supported for the current workflow"
+        }.findAll { it }
+
+        if (warnings) {
+            warnings.each {
+                deciderResult.warnings << it.toString()
+            }
+            return
+        }
+
         AnalysisGroup analysisGroup = new AnalysisGroup(diseaseData.mergingWorkPackage, controlData.mergingWorkPackage)
         SamplePair samplePair = analysisAdditionalData.samplePairMap[analysisGroup] ?: new SamplePair(
                 mergingWorkPackage1: diseaseData.mergingWorkPackage,

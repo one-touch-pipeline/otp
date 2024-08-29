@@ -50,6 +50,7 @@ class AnalysisArtefactService {
                 sampleType,
                 sample,
                 wp,
+                referenceGenome,
                 seqPlatformGroup
             )
         from
@@ -61,6 +62,7 @@ class AnalysisArtefactService {
             join sample.individual individual
             join individual.project project
             join wp.seqType seqType
+            join wp.referenceGenome referenceGenome
             left outer join wp.seqPlatformGroup seqPlatformGroup
         where
             wa in (:workflowArtefacts)
@@ -90,6 +92,7 @@ class AnalysisArtefactService {
                 sampleType,
                 sample,
                 wp,
+                referenceGenome,
                 seqPlatformGroup
             )
         from
@@ -101,6 +104,7 @@ class AnalysisArtefactService {
             join sample.individual individual
             join individual.project project
             join wp.seqType seqType
+            join wp.referenceGenome referenceGenome
             left outer join wp.seqPlatformGroup seqPlatformGroup,
             AbstractBamFile bf2
             join bf2.workPackage wp2
@@ -170,7 +174,9 @@ class AnalysisArtefactService {
         select distinct
             selector
         from
-            WorkflowVersionSelector selector,
+            WorkflowVersionSelector selector
+            join fetch selector.workflowVersion wv
+            join fetch wv.allowedReferenceGenomes,
             AbstractBamFile bf
         where
             bf in (:bamFiles)
