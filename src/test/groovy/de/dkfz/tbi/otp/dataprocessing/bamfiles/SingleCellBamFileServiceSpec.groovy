@@ -174,4 +174,9 @@ class SingleCellBamFileServiceSpec extends Specification implements ServiceUnitT
         expect:
         service.getWebSummaryResultFile(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.id}/outs/web_summary.html"
     }
+
+    void "test getLinkedWebSummaryResultFile"() {
+        expect:
+        service.getLinkedWebSummaryResultFile(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/web_summary.html"
+    }
 }

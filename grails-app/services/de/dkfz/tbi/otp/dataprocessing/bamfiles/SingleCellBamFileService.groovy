@@ -153,4 +153,8 @@ class SingleCellBamFileService<T extends AbstractBamFile> extends AbstractAbstra
     Path getWebSummaryResultFile(SingleCellBamFile bamFile) {
         return getResultDirectory(bamFile).resolve(WEB_SUMMARY_HTML_FILE_NAME)
     }
+
+    Path getLinkedWebSummaryResultFile(SingleCellBamFile bamFile) {
+        return getWorkDirectory(bamFile).resolve(WEB_SUMMARY_HTML_FILE_NAME)
+    }
 }

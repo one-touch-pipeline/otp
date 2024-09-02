@@ -24,26 +24,19 @@ package de.dkfz.tbi.otp.job.jobs.cellRanger
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import org.springframework.beans.factory.annotation.Autowired
-import spock.lang.Specification
-import spock.lang.TempDir
-import spock.lang.Unroll
+import spock.lang.*
 
 import de.dkfz.tbi.otp.dataprocessing.bamfiles.SingleCellBamFileService
-import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
-import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerService
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
-import de.dkfz.tbi.otp.utils.CreateFileHelper
-import de.dkfz.tbi.otp.utils.HelperUtils
-import de.dkfz.tbi.otp.utils.LocalShellHelper
+import de.dkfz.tbi.otp.utils.*
 
-import java.nio.file.AccessDeniedException
-import java.nio.file.NoSuchFileException
-import java.nio.file.Path
+import java.nio.file.*
 
 @Rollback
 @Integration
@@ -58,6 +51,7 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
     SingleCellBamFile singleCellBamFile
     Path metricsSummaryFile
     Path webSummaryFile
+    Path linkedWebSummaryFile
 
     static final String USERNAME = "projectuser"
 
@@ -66,9 +60,11 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
         singleCellBamFile = createBamFile()
         metricsSummaryFile = tempDir.resolve("${HelperUtils.uniqueString}_metrics_summary.csv")
         webSummaryFile = tempDir.resolve("${HelperUtils.uniqueString}_web_summary.csv")
+        linkedWebSummaryFile = tempDir.resolve("${HelperUtils.uniqueString}_linked_web_summary.csv")
         cellRangerService.singleCellBamFileService = Mock(SingleCellBamFileService) {
             getQualityAssessmentCsvFile(_) >> { return metricsSummaryFile }
             getWebSummaryResultFile(_) >> { return webSummaryFile }
+            getLinkedWebSummaryResultFile(_) >> { return linkedWebSummaryFile }
         }
     }
 
@@ -145,6 +141,26 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
 
         where:
         username << [OPERATOR, USERNAME]
+    }
+
+    void "getWebSummaryResultFileContent, when mwp is in final, take it from the final location"() {
+        given:
+        setupData()
+        singleCellBamFile.mergingWorkPackage.status = CellRangerMergingWorkPackage.Status.FINAL
+        singleCellBamFile.mergingWorkPackage.save(flush: true)
+
+        cellRangerService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
+        webSummaryFile = CreateFileHelper.createFile(cellRangerService.singleCellBamFileService.getLinkedWebSummaryResultFile(singleCellBamFile), "content")
+
+        when:
+        String content = doWithAuth(OPERATOR) {
+            cellRangerService.getWebSummaryResultFileContent(singleCellBamFile)
+        }
+
+        then:
+        content == "content"
     }
 
     void "getWebSummaryResultFileContent, file has to be readable"() {
