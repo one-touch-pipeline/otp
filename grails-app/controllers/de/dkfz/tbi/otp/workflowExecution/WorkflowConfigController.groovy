@@ -71,29 +71,26 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
         return render([data: selectorData] as JSON)
     }
 
-    JSON fragments(Long id) {
-        if (id == null) {
-            response.sendError(HttpStatus.BAD_REQUEST.value(), g.message(code: "workflowConfig.backend.failed") as String)
-        }
-        try {
-            ExternalWorkflowConfigSelector selector = externalWorkflowConfigSelectorService.getById(id)
-            assert selector
-            render(selector?.fragments as JSON)
-        } catch (ObjectNotFoundException ex) {
-            response.sendError(HttpStatus.NOT_FOUND.value(), "${g.message(code: "workflowConfig.backend.failed")}: ${ex.message}")
-        } catch (AssertionError ex) {
-            response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "${g.message(code: "workflowConfig.backend.failed")}: ${ex.message}")
-        }
+    def fragments(Long id) {
+        fragmentsOrSelector(id, true)
     }
 
-    JSON selector(Long id) {
+    def selector(Long id) {
+        fragmentsOrSelector(id, false)
+    }
+
+    private void fragmentsOrSelector(Long id, boolean fragments) {
         if (id == null) {
             response.sendError(HttpStatus.BAD_REQUEST.value(), g.message(code: "workflowConfig.backend.failed") as String)
         }
         try {
             ExternalWorkflowConfigSelector selector = externalWorkflowConfigSelectorService.getById(id)
             assert selector
-            render(transformToMap(selector) as JSON)
+            if (fragments) {
+                render(selector?.fragments as JSON)
+            } else {
+                render(transformToMap(selector) as JSON)
+            }
         } catch (ObjectNotFoundException ex) {
             response.sendError(HttpStatus.NOT_FOUND.value(), "${g.message(code: "workflowConfig.backend.failed")}: ${ex.message}")
         } catch (AssertionError ex) {
