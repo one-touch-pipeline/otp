@@ -613,9 +613,9 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
 
         where:
         property           | value             || message
-        'projectName'      | 'otherProject'    || 'The sample name already exist, but is connected to project'
-        'pid'              | 'otherPid'        || 'The sample name already exist, but is connected to individual'
-        'sampleTypeDbName' | 'otherSampleType' || 'The sample name already exist, but is connected to sample type'
+        'projectName'      | 'otherProject'    || 'The sample name already exists, but is connected to project'
+        'pid'              | 'otherPid'        || 'The sample name already exists, but is connected to individual'
+        'sampleTypeDbName' | 'otherSampleType' || 'The sample name already exists, but is connected to sample type'
     }
 
     void "check if updateSampleIdentifierName, save new name of sample name"() {

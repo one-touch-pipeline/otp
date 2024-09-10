@@ -40,9 +40,9 @@ describe('Check metadata import page', () => {
 
       cy.get('input#createMissingSampleTypes').click();
 
-      cy.get('input#Submit').click();
+      cy.get('.btn').contains('Submit').click();
 
-      cy.get('div#infoBox').contains('Creation succeeded').should('exist');
+      cy.get('#otpToastBox .otpSuccessToast').should('exist').and('contain.text', 'Creation succeeded');
     });
 
     it('should successfully edit ticket information on details page', () => {

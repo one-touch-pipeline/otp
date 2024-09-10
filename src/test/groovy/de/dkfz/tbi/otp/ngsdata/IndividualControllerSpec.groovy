@@ -235,7 +235,7 @@ class IndividualControllerSpec extends Specification implements ControllerUnitTe
         controller.flash.message.message == "individual.update.create.success"
     }
 
-    void "editNewSampleIdentifier, when the sample name already exist, then show error message"() {
+    void "editNewSampleIdentifier, when the sample name already exists, then show error message"() {
         given:
         Sample sample = createSample()
         SampleIdentifier sampleIdentifier = createSampleIdentifier()

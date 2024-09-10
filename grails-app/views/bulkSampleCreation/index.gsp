@@ -24,46 +24,48 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <meta name="layout" content="main"/>
     <title><g:message code="bulk.sample.creation.title"/></title>
     <asset:javascript src="pages/bulkSampleCreation/index/bulkSampleCreation.js"/>
 </head>
 
 <body>
-<div class="body" id="bulk-sample-creation">
-    <g:render template="/templates/messages"/>
-    <g:render template="/templates/projectSelection"/>
+<div class="container-fluid otp-main-container" id="bulk-sample-creation">
+    <div class="project-selection-header-container mb-2">
+        <g:render template="/templates/bootstrap/projectSelection"/>
+    </div>
 
     <h1><g:message code="bulk.sample.creation.title"/></h1>
     <otp:annotation type="info">
         <g:message code="bulk.sample.creation.description"/>
     </otp:annotation>
 
-    <div>
-        <table>
-            <tbody>
+    <div class="mt-3">
+        <table class="table table-sm table-striped table-bordered">
+        <tbody>
             <tr>
-                <td><span class="table-column-header"><g:message code="individual.insert.project"/></span></td>
+                <td class="table-column-header"><g:message code="individual.insert.project"/></td>
                 <td>${selectedProject}</td>
                 <td><b><g:message code="bulk.sample.creation.multipleProjects"/></b></td>
             </tr>
+
             <tr>
-                <td><span class="table-column-header"><g:message code="bulk.sample.creation.file.upload"/></span></td>
+                <td class="table-column-header"><g:message code="bulk.sample.creation.file.upload"/></td>
                 <td>
-                <g:uploadForm action="upload">
-                    <input type="file" name="content"/>
-                      <g:submitButton name="upload"/>
-                </g:uploadForm>
+                    <g:uploadForm action="upload" class="d-flex">
+                        <input class="form-control me-2" type="file" name="content">
+                        <button type="submit" class="btn btn-primary">${g.message(code: "default.button.upload.label")}</button>
+                    </g:uploadForm>
                 </td>
                 <td>
-                    <g:message code='bulk.sample.creation.file.upload.info'
-                               args="${header}"/>
+                    <g:message code='bulk.sample.creation.file.upload.info' args="${header}"/>
                 </td>
             </tr>
+
             <tr><td colspan="3">&nbsp;</td></tr>
+
             <g:uploadForm action="submit">
                 <tr>
-                    <td><span class="table-column-header"><g:message code="bulk.sample.creation.delimiter"/></span></td>
+                    <td class="table-column-header"><g:message code="bulk.sample.creation.delimiter"/></td>
                     <td>
                         <g:select name="delimiter" class="use-select-2" style="width: 24ch;"
                                   from="${delimiters}" value="${delimiter}" optionValue="displayName"
@@ -72,25 +74,23 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td><span class="table-column-header"><g:message code="bulk.sample.creation.text.upload"/></span></td>
+                    <td class="table-column-header"><g:message code="bulk.sample.creation.text.upload"/></td>
                     <td>
-                        <g:textArea name="sampleText" id="sampleText" style="min-width: 500px;"
+                        <g:textArea name="sampleText" id="sampleText" class="form-control" style="min-width: 500px;"
                                     rows="25" cols="100" value="${sampleText}"/>
                     </td>
                     <td>
-                        <g:message code='bulk.sample.creation.text.upload.info'
-                                   args="${header}"/>
-                        <p><pre><g:message code='bulk.sample.creation.text.upload.example'
-                                           args="${header}"/></pre></p>
+                        <g:message code='bulk.sample.creation.text.upload.info' args="${header}"/>
+                        <pre class="mt-3"><g:message code='bulk.sample.creation.text.upload.example' args="${header}"/></pre>
                     </td>
                 </tr>
                 <tr>
-                    <td><span class="table-column-header"><g:message code="bulk.sample.creation.referenceGenomeSource"/></span></td>
+                    <td class="table-column-header"><g:message code="bulk.sample.creation.referenceGenomeSource"/></td>
                     <td>
-                        <label onclick="$.otp.bulkSampleCreation.toggleEnable('createMissingSampleTypes', 'referenceGenomeSource', false)">
-                            <g:checkBox checked="${createMissingSampleTypes}" name="createMissingSampleTypes" value="${createMissingSampleTypes}" style="vertical-align: middle"/>
-                            <g:message code="bulk.sample.creation.referenceGenomeSource.createSamples"/>
-                        </label><br>
+                        <label onclick="$.otp.bulkSampleCreation.toggleEnable('createMissingSampleTypes', 'referenceGenomeSource', false)" class="mb-2">
+                            <g:checkBox checked="${createMissingSampleTypes}" name="createMissingSampleTypes" value="${createMissingSampleTypes}"/>
+                            <label for="createMissingSampleTypes"><g:message code="bulk.sample.creation.referenceGenomeSource.createSamples"/></label>
+                        </label>
                         <g:select name="referenceGenomeSource" class="use-select-2"
                                   from="${referenceGenomeSources}" value="${referenceGenomeSource}"
                                   disabled="${!createMissingSampleTypes}"/>
@@ -99,11 +99,12 @@
                 </tr>
                 <tr>
                     <td colspan="3">
-                        <g:submitButton name="Submit"/>
+                        <button type="submit" class="btn btn-primary">${g.message(code: "default.button.submit.label")}</button>
                     </td>
                 </tr>
             </g:uploadForm>
-            </tbody>
+
+        </tbody>
         </table>
     </div>
 </div>
