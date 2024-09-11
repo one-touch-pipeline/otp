@@ -267,5 +267,6 @@ $(() => {
         setPossiblePIs($(e.target).val());
       }
     });
+    $('#organizationalunit').trigger('change');
   }
 });

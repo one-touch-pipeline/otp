@@ -23,7 +23,15 @@
 describe('Check projectRequest page', () => {
   'use strict';
 
+  const randomProject = new Date().toISOString();
+
   context('when user is a default user', () => {
+    before(() => {
+      cy.loginAs('operator');
+      // ensure ENABLE_PROJECT_REQUEST_PI is false
+      cy.setProcessingOption('ENABLE_PROJECT_REQUEST_PI', 'false');
+    });
+
     beforeEach(() => {
       cy.loginAs('user');
     });
@@ -34,7 +42,7 @@ describe('Check projectRequest page', () => {
 
       cy.fixture('projectRequest.json').then((request) => {
         cy.get('select#projectType').select(request[0].projectType, { force: true });
-        cy.get('input#name').type(request[0].projectName);
+        cy.get('input#name').type(`${request[0].projectName} ${randomProject}`);
         cy.get('textarea#description').type(request[0].description);
         cy.get('input#approxNoOfSamples').type(request[0].approximateNumberOfSamples);
         cy.get('select#keywords').parent().find('input').type(request[0].keywords, { force: true });
@@ -72,9 +80,9 @@ describe('Check projectRequest page', () => {
         expect(interception.response.statusCode).to.eq(200);
 
         // select the project request in the table
-        cy.get('table tbody tr').first().find('td').first()
-          .find('a')
-          .click();
+        cy.fixture('projectRequest.json').then((request) => {
+          cy.get('table tbody tr').contains(`${request[0].projectName} ${randomProject}`).click();
+        });
 
         // edit a field of the project request
         cy.get('input[value=Edit]').click();
@@ -93,16 +101,20 @@ describe('Check projectRequest page', () => {
       cy.visit('/projectRequest/unresolved');
 
       // select the project request in the table
-      cy.get('table tbody tr').first().find('td').first()
-        .find('a')
-        .click();
+      cy.fixture('projectRequest.json').then((request) => {
+        cy.get('table tbody tr').contains(`${request[0].projectName} ${randomProject}`).click();
+      });
 
       // edit a field of the project request
       cy.get('input#submitView-request-btn').click();
       cy.wait('@projectRequestIndex').then((interception) => {
         expect(interception.response.statusCode).to.eq(302);
         cy.location('pathname').should('eq', '/projectRequest/unresolved');
-        cy.get('table tbody tr').first().find('td').should('contain', 'Check by Data Manager needed');
+        cy.fixture('projectRequest.json').then((request) => {
+          cy.get('table tbody tr').contains(`${request[0].projectName} ${randomProject}`).parent().parent()
+            .find('td')
+            .should('contain', 'Check by Data Manager needed');
+        });
       });
     });
   });
@@ -118,8 +130,7 @@ describe('Check projectRequest page', () => {
 
       // select the project request in the table
       cy.fixture('projectRequest.json').then((request) => {
-        cy.get('table tbody tr').first().find('td').first()
-          .should('contain', request[0].projectName).click();
+        cy.get('table tbody tr').contains(`${request[0].projectName} ${randomProject}`).click();
       });
 
       cy.location('pathname').should('match', /^\/projectRequest\/view\//);
@@ -142,9 +153,9 @@ describe('Check projectRequest page', () => {
       cy.visit('/projectRequest/unresolved');
 
       // select the project request in the table
-      cy.get('table tbody tr').first().find('td').first()
-        .find('a')
-        .click();
+      cy.fixture('projectRequest.json').then((request) => {
+        cy.get('table tbody tr').contains(`${request[0].projectName} ${randomProject}`).click();
+      });
 
       cy.get('input#edit-request-btn').click();
       cy.location('pathname').should('match', /^\/projectRequest\/index/);
@@ -161,17 +172,17 @@ describe('Check projectRequest page', () => {
       cy.intercept('/projectRequest/delete*').as('deleteProjectRequest');
       cy.visit('/projectRequest/unresolved');
       // select the project request in the table
-      cy.get('table tbody tr').first().find('td').first()
-        .find('a')
-        .click();
+      cy.fixture('projectRequest.json').then((request) => {
+        cy.get('table tbody tr').contains(`${request[0].projectName} ${randomProject}`).click();
+      });
 
       cy.get('input#edit-request-btn').click();
 
       cy.visit('/projectRequest/unresolved');
       // select the project request in the table
-      cy.get('table tbody tr').first().find('td').first()
-        .find('a')
-        .click();
+      cy.fixture('projectRequest.json').then((request) => {
+        cy.get('table tbody tr').contains(`${request[0].projectName} ${randomProject}`).click();
+      });
 
       cy.get('#delete-request-btn').click();
       cy.get('#confirmModal').should('be.visible').click();
@@ -180,7 +191,7 @@ describe('Check projectRequest page', () => {
         expect(interception.response.statusCode).to.eq(200);
         cy.location('pathname').should('eq', '/projectRequest/unresolved');
         cy.fixture('projectRequest.json').then((request) => {
-          cy.get('body').should('not.contain', request[0].projectName);
+          cy.get('body').should('not.contain', `${request[0].projectName} ${randomProject}`);
         });
       });
     });
@@ -198,7 +209,7 @@ describe('Check projectRequest page', () => {
       cy.fixture('projectRequest.json').then((requests) => {
         const request = requests[2];
         cy.get('select#projectType').select(request.projectType, { force: true });
-        cy.get('input#name').type(request.projectName);
+        cy.get('input#name').type(`${request.projectName} ${randomProject}`);
         cy.get('textarea#description').type(request.description);
         cy.get('input#approxNoOfSamples').type(request.approximateNumberOfSamples);
         cy.get('select#keywords').parent().find('input').type(request.keywords, { force: true });
@@ -236,9 +247,7 @@ describe('Check projectRequest page', () => {
 
       // select the project request in the table
       cy.fixture('projectRequest.json').then((request) => {
-        cy.get('table tbody tr').first().find('td').first()
-          .should('contain', request[0].projectName)
-          .click();
+        cy.get('table tbody tr').contains(`${request[2].projectName} ${randomProject}`).click();
       });
 
       cy.location('pathname').should('match', /^\/projectRequest\/view\//);
@@ -261,9 +270,9 @@ describe('Check projectRequest page', () => {
       cy.visit('/projectRequest/unresolved');
 
       // select the project request in the table
-      cy.get('table tbody tr').first().find('td').first()
-        .find('a')
-        .click();
+      cy.fixture('projectRequest.json').then((request) => {
+        cy.get('table tbody tr').contains(`${request[2].projectName} ${randomProject}`).click();
+      });
 
       cy.location('pathname').should('match', /^\/projectRequest\/view\//);
       cy.get('input#confirmConsent').check();
@@ -288,9 +297,9 @@ describe('Check projectRequest page', () => {
       cy.visit('/projectRequest/unresolved');
 
       // select the project request in the table
-      cy.get('table tbody tr').first().find('td').first()
-        .find('a')
-        .click();
+      cy.fixture('projectRequest.json').then((request) => {
+        cy.get('table tbody tr').contains(`${request[2].projectName} ${randomProject}`).click();
+      });
 
       cy.location('pathname').should('match', /^\/projectRequest\/view\//);
       cy.get('#delete-request-btn').click();
@@ -300,7 +309,7 @@ describe('Check projectRequest page', () => {
         expect(interception.response.statusCode).to.eq(200);
         cy.location('pathname').should('eq', '/projectRequest/unresolved');
         cy.fixture('projectRequest.json').then((request) => {
-          cy.get('body').should('not.contain', request[0].projectName);
+          cy.get('body').should('not.contain', `${request[2].projectName} ${randomProject}`);
         });
       });
     });
@@ -327,13 +336,15 @@ describe('Check projectRequest page', () => {
     it('should submit project request with department deputy as a normal user', () => {
       cy.loginAs('user');
 
-      cy.intercept('/projectRequest/index*').as('saveProjectRequest');
+      cy.intercept('/projectRequest/index*').as('projectRequestIndex');
       cy.intercept('/projectRequest/getPIs*').as('getPIs');
+      cy.intercept('/projectRequest/unresolved*').as('routeToUnresolved');
+
       cy.visit('/projectRequest/index');
 
       cy.fixture('projectRequest.json').then((request) => {
         cy.get('select#projectType').select(request[3].projectType, { force: true });
-        cy.get('input#name').type(request[3].projectName);
+        cy.get('input#name').type(`${request[3].projectName} ${randomProject}`);
         cy.get('textarea#description').type(request[3].description);
         cy.get('input#approxNoOfSamples').type(request[3].approximateNumberOfSamples);
         cy.get('select#keywords').parent().find('input').type(request[3].keywords, { force: true });
@@ -343,8 +354,9 @@ describe('Check projectRequest page', () => {
         cy.get('input#organizationalunit').type(request[3].organizationalUnit);
         cy.wait('@getPIs').its('response.statusCode').should('eq', 200);
 
+        const pi = 'margarett (Margarett Mclaughin)';
         cy.get('a#pi-tab').click();
-        cy.get('.pi-user-form select.pi-selector').first().select('margarett (Margarett Mclaughin)', { force: true });
+        cy.get('.pi-user-form select.pi-selector').first().select(pi, { force: true });
         cy.get('.pi-user-form select.pi-role-select').first().select('BIOINFORMATICIAN', { force: true });
 
         const operatorUsername = Cypress.env('operator_username');
@@ -352,9 +364,38 @@ describe('Check projectRequest page', () => {
         cy.get('.user-form input.username-input').first().clear().type(operatorUsername);
         cy.get('.user-form select.project-role-select').first().select('SUBMITTER', { force: true });
 
+        cy.get('input[value="Save as Draft"]').click();
+
+        // save as draft
+        cy.wait('@projectRequestIndex').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+          cy.location('pathname').should('match', /^\/projectRequest\/view\//);
+        });
+
+        // navigate to the unresolved tab
+        cy.visit('/projectRequest/index');
+        cy.get('.nav-link').contains('Unresolved').click();
+        cy.wait('@routeToUnresolved').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+        });
+
+        // select the project request in the table
+        cy.get('table tbody tr').contains(`${request[3].projectName} ${randomProject}`).click();
+
+        cy.get('input[value="Edit"]').click();
+        cy.wait('@projectRequestIndex').then((interception) => {
+          expect(interception.response.statusCode).to.eq(302);
+          cy.location('pathname').should('match', /^\/projectRequest\/index/);
+        });
+
+        cy.wait('@getPIs').its('response.statusCode').should('eq', 200);
+
+        // wait till fetched pi were added to the form
+        cy.get('.pi-user-form select.pi-selector').first().contains(pi);
+
         cy.get('input[value="Submit"]').click();
 
-        cy.wait('@saveProjectRequest').then((interception) => {
+        cy.wait('@projectRequestIndex').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
           cy.location('pathname').should('match', /^\/projectRequest\/unresolved/);
         });
@@ -367,7 +408,7 @@ describe('Check projectRequest page', () => {
 
       // select the project request in the table
       cy.fixture('projectRequest.json').then((request) => {
-        cy.get('table tbody tr').contains(request[3].projectName).click();
+        cy.get('table tbody tr').contains(`${request[3].projectName} ${randomProject}`).click();
       });
 
       // pass on the project request
@@ -380,7 +421,7 @@ describe('Check projectRequest page', () => {
 
       // select the project request in the table
       cy.fixture('projectRequest.json').then((request) => {
-        cy.get('table tbody tr').contains(request[3].projectName).click();
+        cy.get('table tbody tr').contains(`${request[3].projectName} ${randomProject}`).click();
       });
 
       // edit a field of the project request
@@ -394,7 +435,7 @@ describe('Check projectRequest page', () => {
 
       // select the project request in the table
       cy.fixture('projectRequest.json').then((request) => {
-        cy.get('table tbody tr').contains(request[3].projectName).click();
+        cy.get('table tbody tr').contains(`${request[3].projectName} ${randomProject}`).click();
       });
 
       cy.get('input#confirmConsent').check();
@@ -415,7 +456,7 @@ describe('Check projectRequest page', () => {
 
       // select the project request in the table
       cy.fixture('projectRequest.json').then((request) => {
-        cy.get('table tbody tr').contains(request[3].projectName).click();
+        cy.get('table tbody tr').contains(`${request[3].projectName} ${randomProject}`).click();
       });
 
       // edit a field of the project request
@@ -424,7 +465,7 @@ describe('Check projectRequest page', () => {
       cy.get('div#confirmationModal').should('be.visible').find('button#confirmModal').click();
       cy.wait('@deleteProjectRequest').its('response.statusCode').should('eq', 200);
       cy.fixture('projectRequest.json').then((request) => {
-        cy.contains(request[3].projectName).should('not.exist');
+        cy.get('body').should('not.contain', `${request[3].projectName} ${randomProject}`);
       });
     });
 

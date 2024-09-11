@@ -60,7 +60,7 @@
                         <g:each in="${cmd?.piUsers}" var="piUser" status="i">
                             <g:if test="${piUser}">
                                 <div class="clone-remove-target-2">
-                                    <g:render template="templates/piUserFormAccordion" model="[index: i, piUser: piUser, availableRoles: availableRoles]"/>
+                                    <g:render template="templates/piUserFormAccordion" model="[index: i, piUser: piUser, availableRoles: availableRoles, departmentPiFeatureEnabled: departmentPiFeatureEnabled]"/>
                                 </div>
                             </g:if>
                         </g:each>
