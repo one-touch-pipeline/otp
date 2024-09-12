@@ -1,0 +1,81 @@
+{
+  "ABSOLUTE_PATH" :
+  {
+    "test": {
+      "right": "/abc/def",
+      "wrong": "abc/def",
+      "regex": "def"
+    },
+    "options": [
+      "BASE_PATH_REFERENCE_GENOME",
+      "RODDY_APPLICATION_INI",
+      "RODDY_FEATURE_TOGGLES_CONFIG_PATH",
+      "RODDY_SHARED_FILES_BASE_DIRECTORY"
+    ]
+  },
+  "MAIL" :
+  {
+    "test": {
+      "right": "user1@company.com",
+      "wrong": "user1-company#com",
+      "regex": "1"
+    },
+    "options": [
+      "EMAIL_TICKET_SYSTEM",
+      "EMAIL_SENDER",
+      "EMAIL_REPLY_TO",
+      "EMAIL_STORAGE_ADMINISTRATION"
+    ]
+  },
+  "SINGLE_WORD_TEXT" :
+  {
+    "test": {
+      "right": "abc",
+      "wrong": "abc def",
+      "regex": "c"
+    },
+    "options": [
+      "CLUSTER_SUBMISSIONS_FAST_TRACK_QUEUE",
+      "GUI_IGNORE_UNREGISTERED_OTP_USERS_FOUND",
+      "REGEX_PROJECT_NAME_NEW_PROJECT_REQUEST",
+      "ORGANIZATIONAL_UNIT_KEY_NAME",
+      "COST_CENTER_KEY_NAME",
+      "DEPARTMENT_HEAD_KEY_NAME"
+    ]
+  },
+  "JSON" :
+  {
+    "test": {
+      "right": "{{} \"key\": \"value\" }",
+      "wrong": "{{} \"key\": \"value\"",
+      "regex": "lue"
+    },
+    "options": [
+      "HIPO2_PARSER_MAPPING"
+    ]
+  },
+  "FLOAT" :
+  {
+    "test": {
+      "right": "1.23",
+      "wrong": "1,23",
+      "regex": "23"
+    },
+    "options": [
+      "WHOLE_GENOME_LOW_COVERAGE_THRESHOLD",
+      "STATISTICS_BASES_PER_BYTES_FASTQ"
+    ]
+  },
+  "POSITIVE_NUMBER" :
+  {
+    "test": {
+      "right": "123",
+      "wrong": "-123",
+      "regex": "123"
+    },
+    "options": [
+      "CELLRANGER_CLEANUP_WEEKS_TILL_DELETION_AFTER_REMINDER",
+      "CELLRANGER_CLEANUP_WEEKS_TILL_REMINDER"
+    ]
+  }
+}

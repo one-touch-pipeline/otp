@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.config
 
 import groovy.transform.CompileDynamic
 import org.apache.commons.validator.routines.EmailValidator
+import org.grails.web.converters.exceptions.ConverterException
 import org.springframework.context.ApplicationContext
 
 import de.dkfz.tbi.otp.cron.AbstractScheduledJob
@@ -105,6 +106,15 @@ enum TypeValidators {
 
     // toURI() needed to ensure that the URL is valid AND compliant with RC 2396
     URL_STRING({ try { new URL(it).toURI(); return true } catch (MalformedURLException ignored) { return false } catch (URISyntaxException ignored) { return false } }, null),
+
+    JSON({
+        try {
+            grails.converters.JSON.parse(it)
+        } catch (ConverterException ignored) {
+            return false
+        }
+        return true
+    }, null),
 
     private final Closure validator
     private final Closure<List<String>> allowedValues

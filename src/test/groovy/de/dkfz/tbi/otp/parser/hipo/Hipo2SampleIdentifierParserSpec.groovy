@@ -118,7 +118,6 @@ class Hipo2SampleIdentifierParserSpec extends AbstractHipo2SampleIdentifierParse
 
         where:
         identifier          || value
-        'H020-123ABC-N0-D1' || ''
         'H020-123ABC-N0-D1' || 'invalid'
         'H020-123ABC-N0-D1' || '{\n' +
                 '   "H021":"hipo_021",\n' +
