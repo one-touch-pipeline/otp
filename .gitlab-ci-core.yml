@@ -24,11 +24,10 @@
 image: registry.gitlab.com/one-touch-pipeline/otp/otp-ci-java-17:2024-04-09
 
 # notes:
-## recursive expansion of variables does not work
 ## having multiple commands in one variable does not work
-## putting the expire time to a variable does not work
+## putting the expiry time to a variable does not work
 variables:
-  GRADLE_OPTS: '-Xms1g -Xmx4g -Dorg.gradle.daemon=false'
+  GRADLE_OPTS: '-Xmx1g -Dorg.gradle.daemon=true'
   GRAILS_OPTS: '-Xmx4g'
   ARTIFACTS_BASE_DIRECTORY: 'artifacts'
   GRADLE_USER_HOME: $CI_PROJECT_DIR/cache/gradle # overrides GRADLE_USER_HOME default for caching
@@ -43,6 +42,8 @@ variables:
   RESTORE_CACHE_ATTEMPTS: "3"
   ENABLE_CYPRESS: "true"  #indicate, if cypress should run or not
   CACHE_COUNTER: "3" # a counter to change cache names
+  CI_DEBUG_TRACE: "false"
+  CI_DEBUG_SERVICES: "false"
 
 
 #----------------------------
@@ -65,7 +66,7 @@ stages:
 .shared:
   cache:
     gradle-wrapper:
-      #cache of gradle itself
+      #cache of gradle itself, used for all jobs
       key:
         prefix: gradle-wrapper-$CACHE_COUNTER
         files:
@@ -74,7 +75,7 @@ stages:
         - $GRADLE_WRAPPER_CACHE
       policy: pull
     gradle-cache:
-      #caches created by gradle
+      #caches created by gradle, used for specific job
       key:
         prefix: gradle-cache-$CACHE_COUNTER-$CI_JOB_NAME
         files:
@@ -83,7 +84,7 @@ stages:
       paths:
         - $GRADLE_CACHES_CACHE
     gradle-pipeline-cache:
-      #cache of gradle build cache
+      #cache of gradle build cache, used for pipeline
       key:
         prefix: gradle-build-cache-$CACHE_COUNTER-$CI_COMMIT_REF_NAME
         files:
@@ -92,7 +93,7 @@ stages:
         - $GRADLE_BUILD_CACHE
       policy: pull
     npm:
-      #cache of npm libraries
+      #cache of npm libraries, over all jobs
       key:
         prefix: npm-$CACHE_COUNTER
         files:
@@ -252,7 +253,6 @@ test coverage:
     - set -e
     - ./gradlew --build-cache classes
     - ./gradlew --build-cache --exclude-task test --exclude-task integrationTest --rerun-tasks jacocoAllTestReport jacocoToCobertura
-  when: always
   rules:
     - !reference [ .shared, rules-default ]
     - !reference [ .shared, rules-test ]
@@ -361,8 +361,8 @@ cypress tests:
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
+    DOCKER_DRIVER: overlay2
     HOST_IP: "0.0.0.0"
-    GRADLE_OPTS: '-Xms1g -Xmx4g -Dorg.gradle.daemon=true'
   services:
     - name: docker:dind
       alias: openssh-server
@@ -448,7 +448,7 @@ codenarc:
       metrics: metrics.txt
 
 eslint:
-  extends: .abstract_base_template
+  extends: .abstract_base_template_with_cache
   stage: codestyle
   script:
     - set -e
@@ -565,7 +565,7 @@ createTestIdentifierList:
 # ------------------------------------------------------
 
 create doc:
-  extends: .abstract_base_template
+  extends: .abstract_base_template_with_cache
   stage: doc
   script:
     - set -e

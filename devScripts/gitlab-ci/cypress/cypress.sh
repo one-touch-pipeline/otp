@@ -44,9 +44,13 @@ export spec="${SUITE_DIR}/**/*.spec.js"
 # disable spring dev-tools reload
 export DISABLE_RESTART=true
 
+# copy files given via variable
 cp $DOCKER_ENV ./.env
 cp $CYPRESS_ENV ./cypress.env.json
 cp $OTP_PROPERTIES_CYPRESS ~/.otp.properties
+
+# create info about gitlab
+docker info > logs/docker-info.log
 
 echo "===================================="
 docker compose -f docker-compose.yml up --build postgres > logs/postgres.log &
