@@ -420,11 +420,11 @@ dependencies {
     //assets
     // needed for gradle bootRun
     runtimeOnly "com.bertramlabs.plugins:asset-pipeline-grails:4.5.1"
-    runtimeOnly "com.bertramlabs.plugins:less-asset-pipeline:4.5.1"
+    runtimeOnly "com.bertramlabs.plugins:less-asset-pipeline:5.0.1"
     runtimeOnly "com.bertramlabs.plugins:sass-asset-pipeline:5.0.1"
 
     // needed for assetCompile
-    assets "com.bertramlabs.plugins:less-asset-pipeline:4.5.1"
+    assets "com.bertramlabs.plugins:less-asset-pipeline:5.0.1"
     //assets "com.bertramlabs.plugins:sass-asset-pipeline:4.4.0" // will fail the assertCompile task
 
     // JDBC
