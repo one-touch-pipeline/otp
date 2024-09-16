@@ -28,11 +28,13 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
+import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.SnvDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.TicketService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.otp.withdraw.RoddyBamFileWithdrawService
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
@@ -52,15 +54,17 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, Work
                 AbstractBamFile,
                 BamFilePairAnalysis,
                 ExternallyProcessedBamFile,
-                RawSequenceFile,
                 FastqFile,
                 Individual,
                 MergingWorkPackage,
+                ProcessingThresholds,
                 Project,
+                RawSequenceFile,
                 ReferenceGenomeSelector,
                 RoddyBamFile,
                 Sample,
                 SampleType,
+                SampleTypePerProject,
                 SeqTrack,
                 SeqType,
                 Workflow,
@@ -780,5 +784,41 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, Work
         ])
 
         return seqTracks
+    }
+
+    void "test createWarningsForMissingSampleTypePerProject"() {
+        given:
+        SeqTrack seqTrack1 = createSeqTrack()
+        SeqTrack seqTrack2 = createSeqTrack()
+        SnvDomainFactory.INSTANCE.createSampleTypePerProject(project: seqTrack1.project, sampleType: seqTrack1.sampleType)
+
+        when:
+        List<Map<String, String>> result = service.createWarningsForMissingSampleTypePerProject([seqTrack1, seqTrack2])
+
+        then:
+        Map<String, String> map = CollectionUtils.exactlyOneElement(result)
+        map["project"] == seqTrack2.project.name
+        map["sampleType"] == seqTrack2.sampleType.displayName
+    }
+
+    void "test createWarningsForMissingProcessingThresholds"() {
+        given:
+        SeqTrack seqTrack1 = createSeqTrack()
+        SeqTrack seqTrack2 = createSeqTrack()
+        SnvDomainFactory.INSTANCE.createProcessingThresholds(project: seqTrack1.project, seqType: seqTrack1.seqType, sampleType: seqTrack1.sampleType)
+
+        service.workflowService = Mock(WorkflowService) {
+            findAllAnalysisWorkflows() >> [new Workflow()]
+            getSupportedSeqTypesOfVersions(_) >> [seqTrack1.seqType, seqTrack2.seqType]
+        }
+
+        when:
+        List<Map<String, String>> result = service.createWarningsForMissingProcessingThresholds([seqTrack1, seqTrack2])
+
+        then:
+        Map<String, String> map = CollectionUtils.exactlyOneElement(result)
+        map["project"] == seqTrack2.project.name
+        map["seqType"] == seqTrack2.seqType.displayName
+        map["sampleType"] == seqTrack2.sampleType.displayName
     }
 }

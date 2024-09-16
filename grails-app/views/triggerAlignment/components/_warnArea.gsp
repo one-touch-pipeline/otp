@@ -64,7 +64,8 @@
         <div id="collapseOne" class="collapse" data-parent="#warnAreaAccordion">
             <div class="card-body">
                 <div class="alert alert-warning" role="alert">
-                    <p class="card-text"><g:message code="triggerAlignment.warn.missingAlignmentConfig"/></p>
+                    <p class="card-text"><g:message code="triggerAlignment.warn.missingAlignmentConfig"/>
+                        <g:link controller="workflowSelection">${g.message(code: 'triggerAlignment.warn.config.link')}</g:link></p>
                 </div>
 
                 <table id="missingAlignmentConfigsWarnings" class="table table-sm table-striped table-hover table-bordered">
@@ -102,7 +103,8 @@
         <div id="collapseFour" class="collapse" data-parent="#warnAreaAccordion">
             <div class="card-body">
                 <div class="alert alert-warning" role="alert">
-                    <p class="card-text"><g:message code="triggerAlignment.warn.missingReferenceGenomeConfig"/></p>
+                    <p class="card-text"><g:message code="triggerAlignment.warn.missingReferenceGenomeConfig"/>
+                        <g:link controller="workflowSelection">${g.message(code: 'triggerAlignment.warn.config.link')}</g:link></p>
                 </div>
 
                 <table id="missingReferenceGenomeWarnings" class="table table-sm table-striped table-hover table-bordered">
@@ -141,7 +143,8 @@
         <div id="collapse-1" class="collapse" data-parent="#warnAreaAccordion">
             <div class="card-body">
                 <div class="alert alert-warning" role="alert">
-                    <p class="card-text"><g:message code="triggerAlignment.warn.missingSeqPlatformGroups"/></p>
+                    <p class="card-text"><g:message code="triggerAlignment.warn.missingSeqPlatformGroups"/>
+                        <g:link controller="workflowSelection">${g.message(code: 'triggerAlignment.warn.config.link')}</g:link></p>
                 </div>
 
                 <table id="missingSeqPlatformGroupsTable" class="table table-sm table-striped table-hover table-bordered">
@@ -174,7 +177,8 @@
         <div id="collapseTwo" class="collapse" data-parent="#warnAreaAccordion">
             <div class="card-body">
                 <div class="alert alert-warning" role="alert">
-                    <p class="card-text"><g:message code="triggerAlignment.warn.mismatchedSeqPlatform"/></p>
+                    <p class="card-text"><g:message code="triggerAlignment.warn.mismatchedSeqPlatform"/>
+                        <g:link controller="workflowSelection">${g.message(code: 'triggerAlignment.warn.config.link')}</g:link></p>
                 </div>
 
                 <table id="seqPlatformWarnings" class="table table-sm table-striped table-hover table-bordered">
@@ -258,4 +262,64 @@
         </div>
     </div>
 
+    <div class="card d-none" id="warningsForMissingSampleTypePerProjectCard">
+        <div class="card-header">
+            <button class="btn btn-link w-100 text-left collapsed p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-2"
+                    aria-expanded="true" aria-controls="collapse-2">
+                <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerAlignment.warn.missingSampleTypePerProjectCard.title"/>
+            </button>
+        </div>
+
+        <div id="collapse-2" class="collapse" data-parent="#warnAreaAccordion">
+            <div class="card-body">
+                <div class="alert alert-warning" role="alert">
+                    <p class="card-text"><g:message code="triggerAlignment.warn.missingSampleTypePerProjectCard"/>
+                        <g:link controller="processingThreshold">${g.message(code: 'triggerAlignment.warn.config.link')}</g:link></p>
+                </div>
+
+                <table id="warningsForMissingSampleTypePerProject" class="table table-sm table-striped table-hover table-bordered">
+                    <thead>
+                    <tr>
+                        <th><g:message code="triggerAlignment.warn.table.project"/></th>
+                        <th><g:message code="triggerAlignment.warn.table.sampleTypeName"/></th>
+                    </tr>
+                    </thead>
+                    <tbody/>
+                </table>
+
+                <p class="card-text"><g:message code="triggerAlignment.warn.analysisWontBeStarted"/></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card d-none" id="warningsForMissingProcessingThresholdsCard">
+        <div class="card-header">
+            <button class="btn btn-link w-100 text-left collapsed p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-3"
+                    aria-expanded="true" aria-controls="collapse-3">
+                <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerAlignment.warn.missingProcessingThresholds.title"/>
+            </button>
+        </div>
+
+        <div id="collapse-3" class="collapse" data-parent="#warnAreaAccordion">
+            <div class="card-body">
+                <div class="alert alert-warning" role="alert">
+                    <p class="card-text"><g:message code="triggerAlignment.warn.missingProcessingThresholds"/>
+                        <g:link controller="processingThreshold">${g.message(code: 'triggerAlignment.warn.config.link')}</g:link></p>
+                </div>
+
+                <table id="warningsForMissingProcessingThresholds" class="table table-sm table-striped table-hover table-bordered">
+                    <thead>
+                    <tr>
+                        <th><g:message code="triggerAlignment.warn.table.project"/></th>
+                        <th><g:message code="triggerAlignment.warn.table.seqType"/></th>
+                        <th><g:message code="triggerAlignment.warn.table.sampleTypeName"/></th>
+                    </tr>
+                    </thead>
+                    <tbody/>
+                </table>
+
+                <p class="card-text"><g:message code="triggerAlignment.warn.analysisWontBeStarted"/></p>
+            </div>
+        </div>
+    </div>
 </div>

@@ -29,7 +29,6 @@ describe('Check processing threshold page', () => {
       cy.visit('/processingThreshold/index');
     });
 
-
     it('should display the processing threshold page', () => {
       cy.get('h1').should('have.text', 'Processing Thresholds for ExampleProject');
       cy.get('a.btn').contains('Edit thresholds').should('exist');
@@ -41,7 +40,6 @@ describe('Check processing threshold page', () => {
       cy.get('td').should('have.text', 'No processing thresholds exist for this project.');
       cy.get('.btn').contains('Edit thresholds').should('not.exist');
     });
-
 
     it('should edit the processing thresholds', () => {
       cy.get('a.btn').contains('Edit thresholds').click();
@@ -55,10 +53,10 @@ describe('Check processing threshold page', () => {
 
       cy.get('@editRow').within(() => {
         cy.get('td:nth-child(2) select').select('DISEASE', { force: true });
-        cy.get('input[name="sampleTypes[0].seqTypes[0].minNumberOfLanes"]').clear().type('2');
-        cy.get('input[name="sampleTypes[0].seqTypes[0].minCoverage"]').clear().type('10');
-        cy.get('input[name="sampleTypes[0].seqTypes[1].minNumberOfLanes"]').clear().type('2');
-        cy.get('input[name="sampleTypes[0].seqTypes[1].minCoverage"]').clear().type('10');
+        cy.get('input[name="sampleTypes[0].seqTypes[0].minNumberOfLanes"]').clear().type('5');
+        cy.get('input[name="sampleTypes[0].seqTypes[0].minCoverage"]').clear().type('50');
+        cy.get('input[name="sampleTypes[0].seqTypes[1].minNumberOfLanes"]').clear().type('5');
+        cy.get('input[name="sampleTypes[0].seqTypes[1].minCoverage"]').clear().type('50');
       });
       cy.get('.confirm > .btn-primary').click();
 
@@ -67,13 +65,12 @@ describe('Check processing threshold page', () => {
 
       cy.get('@editRow').within(() => {
         cy.get('td:nth-child(2)').should('contain.text', 'DISEASE');
-        cy.get('td:nth-child(3)').should('contain.text', '2');
-        cy.get('td:nth-child(4)').should('contain.text', '10');
-        cy.get('td:nth-child(5)').should('contain.text', '2');
-        cy.get('td:nth-child(6)').should('contain.text', '10');
+        cy.get('td:nth-child(3)').should('contain.text', '5');
+        cy.get('td:nth-child(4)').should('contain.text', '50');
+        cy.get('td:nth-child(5)').should('contain.text', '5');
+        cy.get('td:nth-child(6)').should('contain.text', '50');
       });
     });
-
 
     it('should remove the processing thresholds', () => {
       cy.get('a.btn').contains('Edit thresholds').click();
@@ -86,7 +83,7 @@ describe('Check processing threshold page', () => {
       cy.get('tbody tr:nth-child(2)').as('editRow');
 
       cy.get('@editRow').within(() => {
-        cy.get('td:nth-child(2) select').select('CONTROL', { force: true });
+        cy.get('td:nth-child(2) select').select('IGNORED', { force: true });
         cy.get('input[name="sampleTypes[0].seqTypes[0].minNumberOfLanes"]').clear();
         cy.get('input[name="sampleTypes[0].seqTypes[0].minCoverage"]').clear();
         cy.get('input[name="sampleTypes[0].seqTypes[1].minNumberOfLanes"]').clear();
@@ -98,15 +95,45 @@ describe('Check processing threshold page', () => {
         .and('contain.text', 'The processing thresholds were edited successfully');
 
       cy.get('@editRow').within(() => {
-        cy.get('td:nth-child(2)').should('contain.text', 'CONTROL');
+        cy.get('td:nth-child(2)').should('contain.text', 'IGNORED');
         cy.get('td:nth-child(3)').should('contain.text', '');
         cy.get('td:nth-child(4)').should('contain.text', '');
         cy.get('td:nth-child(5)').should('contain.text', '');
         cy.get('td:nth-child(6)').should('contain.text', '');
       });
     });
-  });
 
+    it('should add the processing thresholds', () => {
+      cy.get('a.btn').contains('Edit thresholds').click();
+      cy.url().should('include', 'edit');
+
+      cy.get('table tbody').should('exist').should('not.be.empty');
+      cy.get('button').contains('Submit').should('exist');
+      cy.get('.btn-outline-danger').contains('Cancel').should('exist');
+
+      cy.get('tbody tr:nth-child(2)').as('editRow');
+
+      cy.get('@editRow').within(() => {
+        cy.get('td:nth-child(2) select').select('CONTROL', { force: true });
+        cy.get('input[name="sampleTypes[0].seqTypes[0].minNumberOfLanes"]').clear().type('1');
+        cy.get('input[name="sampleTypes[0].seqTypes[0].minCoverage"]').clear().type('10');
+        cy.get('input[name="sampleTypes[0].seqTypes[1].minNumberOfLanes"]').clear().type('1');
+        cy.get('input[name="sampleTypes[0].seqTypes[1].minCoverage"]').clear().type('10');
+      });
+      cy.get('.confirm > .btn-primary').click();
+
+      cy.get('#otpToastBox .otpSuccessToast').should('exist')
+        .and('contain.text', 'The processing thresholds were edited successfully');
+
+      cy.get('@editRow').within(() => {
+        cy.get('td:nth-child(2)').should('contain.text', 'CONTROL');
+        cy.get('td:nth-child(3)').should('contain.text', '1');
+        cy.get('td:nth-child(4)').should('contain.text', '10');
+        cy.get('td:nth-child(5)').should('contain.text', '1');
+        cy.get('td:nth-child(6)').should('contain.text', '10');
+      });
+    });
+  });
 
   context('when user is normal user with project access', () => {
     beforeEach(() => {

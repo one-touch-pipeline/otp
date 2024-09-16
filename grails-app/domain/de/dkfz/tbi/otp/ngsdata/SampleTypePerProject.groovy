@@ -31,7 +31,6 @@ import de.dkfz.tbi.otp.utils.Entity
  * To receive more structure in the sample types it was decided to ask for the samples types which are expected to occur within a project.
  * These sample types are then stored in this domain per project.
  * Furthermore it is relevant to know if a sample type represents a DISEASE or a CONTROL.
- * This information will be requested via the SNV-GUI.
  */
 @ToString(excludes=['dateCreated', 'lastUpdated'], includePackage = false)
 @ManagedEntity

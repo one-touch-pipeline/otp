@@ -91,6 +91,10 @@ class TriggerAlignmentController {
                 triggerAlignmentService.createWarningsForSamplesHavingMultipleSeqPlatformGroups(seqTracks)
         List<Map<String, String>> warningsForSamplesHavingMultipleLibPrepKits =
                 triggerAlignmentService.createWarningsForSamplesHavingMultipleLibPrepKits(seqTracks)
+        List<Map<String, String>> warningsForMissingSampleTypePerProject =
+                triggerAlignmentService.createWarningsForMissingSampleTypePerProject(seqTracks)
+        List<Map<String, String>> warningsForMissingProcessingThresholds =
+                triggerAlignmentService.createWarningsForMissingProcessingThresholds(seqTracks)
 
         return render([
                 data    : seqTracks.collect { SeqTrack seqTrack ->
@@ -105,13 +109,15 @@ class TriggerAlignmentController {
                         }
                 ],
                 warnings: [
-                        withdrawnSeqTracks      : warningsForWithdrawnSeqTracks,
-                        missingAlignmentConfigs : warningsForMissingAlignmentConfig,
-                        missingLibPrepKits      : warningsForMissingLibPrepKits,
-                        missingReferenceGenomes : warningsForMissingReferenceGenomeConfiguration,
-                        missingSeqPlatformGroups: warningsForMissingSeqPlatformGroups,
-                        seqPlatformGroups       : warningsForSamplesHavingMultipleSeqPlatformGroups,
-                        libraryPreparationKits  : warningsForSamplesHavingMultipleLibPrepKits,
+                        withdrawnSeqTracks         : warningsForWithdrawnSeqTracks,
+                        missingAlignmentConfigs    : warningsForMissingAlignmentConfig,
+                        missingLibPrepKits         : warningsForMissingLibPrepKits,
+                        missingReferenceGenomes    : warningsForMissingReferenceGenomeConfiguration,
+                        missingSeqPlatformGroups   : warningsForMissingSeqPlatformGroups,
+                        seqPlatformGroups          : warningsForSamplesHavingMultipleSeqPlatformGroups,
+                        libraryPreparationKits     : warningsForSamplesHavingMultipleLibPrepKits,
+                        missingSampleTypePerProject: warningsForMissingSampleTypePerProject,
+                        missingProcessingThresholds: warningsForMissingProcessingThresholds,
                 ],
                 message : message,
         ] as JSON)

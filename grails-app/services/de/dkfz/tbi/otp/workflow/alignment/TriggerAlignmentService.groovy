@@ -410,4 +410,70 @@ class TriggerAlignmentService {
             ]
         }
     }
+
+    /**
+     * check for missing SampleTypePerProject.
+     */
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
+    List<Map<String, String>> createWarningsForMissingSampleTypePerProject(Collection<SeqTrack> seqTracks) {
+        return SeqTrack.findAll('''
+            FROM SeqTrack st
+            WHERE st in (:seqTracks)
+            AND NOT EXISTS (
+                FROM SampleTypePerProject spp
+                WHERE spp.project = st.sample.individual.project
+                AND spp.sampleType = st.sample.sampleType
+            )
+        ''', [
+                seqTracks: seqTracks,
+        ]).collect {
+            return [
+                    project   : it.project.name,
+                    sampleType: it.sampleType.displayName,
+            ]
+        }.unique().sort {
+            [
+                    it.project,
+                    it.sampleType,
+            ]
+        }
+    }
+
+    /**
+     * check for missing ProcessingThresholds.
+     */
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
+    List<Map<String, String>> createWarningsForMissingProcessingThresholds(Collection<SeqTrack> seqTracks) {
+        List<SeqType> supportedSeqTypes = workflowService.getSupportedSeqTypesOfVersions(workflowService.findAllAnalysisWorkflows())
+        Collection<SeqTrack> supportedSeqTracks = seqTracks.findAll {
+            it.seqType in supportedSeqTypes
+        }
+
+        return SeqTrack.findAll('''
+            FROM SeqTrack st
+            WHERE st in (:seqTracks)
+            AND NOT EXISTS (
+                FROM ProcessingThresholds p
+                WHERE p.project = st.sample.individual.project
+                AND p.seqType = st.seqType
+                AND p.sampleType = st.sample.sampleType
+            )
+        ''', [
+                seqTracks: supportedSeqTracks,
+        ]).collect {
+            return [
+                    project   : it.project.name,
+                    seqType   : it.seqType.displayName,
+                    sampleType: it.sampleType.displayName,
+            ]
+        }.unique().sort {
+            [
+                    it.project,
+                    it.seqType,
+                    it.sampleType,
+            ]
+        }
+    }
 }
