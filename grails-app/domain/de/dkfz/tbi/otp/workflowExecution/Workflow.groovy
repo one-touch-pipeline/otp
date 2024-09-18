@@ -79,6 +79,7 @@ class Workflow implements Commentable, Entity {
 
     static Closure mapping = {
         comment cascade: "all-delete-orphan"
+        enabled index: 'workflow_enabled_idx'
     }
 
     String getDisplayName() {

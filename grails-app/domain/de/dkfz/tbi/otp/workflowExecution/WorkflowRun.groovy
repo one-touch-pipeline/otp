@@ -138,11 +138,11 @@ class WorkflowRun implements Commentable, Entity {
 
     static Closure mapping = {
         combinedConfig type: "text"
-        project index: 'workflow_run_project_idx'
-        priority index: 'workflow_run_priority_idx'
-        workflow index: 'workflow_run_workflow_idx'
+        project index: 'workflow_run_project_idx,workflow_run_state_workflow_priority_project_idx'
+        priority index: 'workflow_run_priority_idx,workflow_run_state_workflow_priority_project_idx'
+        workflow index: 'workflow_run_workflow_idx,workflow_run_state_workflow_priority_project_idx'
         workflowVersion index: 'workflow_run_workflow_version_idx'
-        state index: 'workflow_run_state_idx'
+        state index: 'workflow_run_state_workflow_priority_project_idx'
         comment cascade: "all-delete-orphan"
         workDirectory type: 'text'
         notificationText type: 'text'

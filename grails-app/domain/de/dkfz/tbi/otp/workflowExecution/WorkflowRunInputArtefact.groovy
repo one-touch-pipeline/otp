@@ -46,7 +46,7 @@ class WorkflowRunInputArtefact implements Entity {
     }
 
     static Closure mapping = {
-        workflowRun index: 'workflow_run_input_workflow_run_idx'
-        workflowArtefact index: 'workflow_run_input_artefact_workflow_artefact_idx'
+        workflowRun index: 'workflow_run_input_artefact_workflow_run_workflow_artefact_idx'
+        workflowArtefact index: 'workflow_run_input_artefact_workflow_artefact_idx,workflow_run_input_artefact_workflow_run_workflow_artefact_idx'
     }
 }
