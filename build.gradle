@@ -482,7 +482,7 @@ dependencies {
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
 
     // needed for LinkedHashMultimap support
-    implementation 'com.google.guava:guava:33.3.0-jre'
+    implementation 'com.google.guava:guava:33.3.1-jre'
 
     // for ContentType/MIME types
     implementation 'org.apache.httpcomponents:httpcore:4.4.16'
