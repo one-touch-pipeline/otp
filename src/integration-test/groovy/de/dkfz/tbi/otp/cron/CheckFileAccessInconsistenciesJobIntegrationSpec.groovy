@@ -53,7 +53,7 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
 
     void setupData() {
         identityProvider = Mock(IdentityProvider)
-        job = new CheckFileAccessInconsistenciesJob(identityProvider: identityProvider)
+        job = new CheckFileAccessInconsistenciesJob(identityProvider: identityProvider, processingOptionService : new ProcessingOptionService(),)
     }
 
     @Unroll
@@ -265,7 +265,7 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
         report.contains('nonexistentuser@test.de')
     }
 
-    void "test generateProjectUserReport - user with and without roles, plus non-database users"() {
+    void "test generateProjectUserReport - user with and without roles, plus non-database users and ignored unregistered users"() {
         given:
         setupData()
         Project project = createProject([name: PROJECT_NAME_TEST, unixGroup: UNIX_GROUP_PROJECT])
@@ -277,8 +277,9 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
         ])
         User user2 = createUser([username: 'testuser2', realName: 'Test User 2', email: 'testuser2@example.com'])
         createUserProjectRole(project: project, user: user1)
+        findOrCreateProcessingOption(ProcessingOption.OptionName.GUI_IGNORE_UNREGISTERED_OTP_USERS_FOUND, 'nonexistentIgnoreduser')
 
-        identityProvider.getGroupMembersByGroupName(UNIX_GROUP_PROJECT) >> [USER_ACCOUNT, 'testuser2', 'nonexistentuser']
+        identityProvider.getGroupMembersByGroupName(UNIX_GROUP_PROJECT) >> [USER_ACCOUNT, 'testuser2', 'nonexistentuser', 'nonexistentIgnoreduser']
         identityProvider.getIdpUserDetailsByUsername('nonexistentuser') >> new IdpUserDetails(
                 username: 'nonexistentuser',
                 realName: 'Nonexistent User',

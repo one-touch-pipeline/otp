@@ -26,6 +26,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
@@ -128,7 +129,9 @@ class CheckFileAccessInconsistenciesJob extends AbstractScheduledJob {
         Project.findAll().each { Project project ->
             List<User> projectUsers = UserProjectRole.findAllByProject(project)*.user
             List<String> nonDatabaseUsers = []
-            List<String> ldapGroupMembers = identityProvider.getGroupMembersByGroupName(project.unixGroup)
+            List<String> ldapGroupMembers = identityProvider.getGroupMembersByGroupName(project.unixGroup) - processingOptionService.findOptionAsList(
+                    ProcessingOption.OptionName.GUI_IGNORE_UNREGISTERED_OTP_USERS_FOUND
+            )
 
             ldapGroupMembers.each { String username ->
                 User user = User.findAllByUsername(username).find { it }
