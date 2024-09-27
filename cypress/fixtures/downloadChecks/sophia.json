@@ -1,0 +1,52 @@
+{
+  "project": "ExampleProject",
+  "filename": "SV_Results_(from_SOPHIA)-ExampleProject",
+  "extension": ".csv",
+  "header": [
+    "Patient ID",
+    "Sample Types",
+    "Seq. Type",
+    "Control Massive inv Prefiltering Level",
+    "Tumor Massive inv Filtering Level",
+    "RNA Contaminated Genes Count",
+    "RNA Decontamination Applied",
+    "RNA Contaminated Genes >2 Intron",
+    "Link to Plots",
+    "Created with Version",
+    "Processing Date",
+    "Progress",
+    "Config File"
+  ],
+  "data": [
+    [
+      "example_2",
+      "tumor01 – control01",
+      "EXOME",
+      "10",
+      "20",
+      "30",
+      "true",
+      "arbitraryGeneName1,arbitraryGeneName2",
+      "Plots",
+      "programVersion:1.1.1",
+      "2022-08-26 11:36",
+      "FINISHED",
+      "N/A"
+    ],
+    [
+      "example_3",
+      "tumor02 – control01",
+      "EXOME",
+      "10",
+      "20",
+      "30",
+      "true",
+      "arbitraryGeneName1,arbitraryGeneName2",
+      "Plots",
+      "programVersion:1.1.1",
+      "2022-08-26 11:37",
+      "FINISHED",
+      "N/A"
+    ]
+  ]
+}

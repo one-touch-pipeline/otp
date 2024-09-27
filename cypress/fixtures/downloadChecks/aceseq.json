@@ -1,0 +1,49 @@
+{
+  "project": "ExampleProject",
+  "filename": "CNV_Results_(from_ACEseq)-ExampleProject",
+  "extension": ".csv",
+  "header": [
+    "Patient ID",
+    "Sample Types",
+    "Tumor Cell Content",
+    "Ploidy",
+    "Ploidy Factor",
+    "Goodness of Fit",
+    "Gender",
+    "Solution Possible",
+    "Link to Plots",
+    "Created with Version",
+    "Processing Date",
+    "Progress"
+  ],
+  "data": [
+    [
+      "example_2",
+      "tumor01 – control01",
+      "20.00",
+      "30.00",
+      "1.0",
+      "40.00",
+      "M",
+      "50",
+      "Plots",
+      "programVersion:1.1.1",
+      "2022-08-26 11:36",
+      "FINISHED"
+    ],
+    [
+      "example_2",
+      "tumor02 – control01",
+      "20.00",
+      "30.00",
+      "1.0",
+      "40.00",
+      "M",
+      "50",
+      "Plots",
+      "programVersion:1.1.1",
+      "2022-08-26 11:36",
+      "FINISHED"
+    ]
+  ]
+}

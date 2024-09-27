@@ -1,0 +1,24 @@
+{
+  "project": "ExampleProject",
+  "tableUrl": "dataTableSourceSampleTypeNameCountBySample",
+  "filename": "number_of_samples_by_sample_type-ExampleProject",
+  "extension": ".csv",
+  "header": [
+    "Sample Type",
+    "Number of Samples"
+  ],
+  "data": [
+    [
+      "control01",
+      "2"
+    ],
+    [
+      "tumor01",
+      "2"
+    ],
+    [
+      "tumor02",
+      "2"
+    ]
+  ]
+}

@@ -26,8 +26,12 @@ describe('Check snv pages', () => {
   context('when user is an operator', () => {
     beforeEach(() => {
       cy.loginAs('operator');
-      cy.fixture('bigProject.json').then((config) => {
-        cy.visit(`/snv/results?project=${config[0].projectNameUsedForTables}`);
+      cy.intercept('/snv/dataTableResults*').as('loadDataTable');
+      cy.fixture('downloadChecks/snv.json').then((config) => {
+        cy.visit(`/snv/results?project=${config.project}`);
+      });
+      cy.wait('@loadDataTable').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
       });
     });
 
@@ -46,12 +50,7 @@ describe('Check snv pages', () => {
       cy.get('table tbody tr').contains('Loading...').should('not.exist');
       cy.get('div#resultsTable_wrapper button').contains('Download').click();
 
-      cy.fixture('bigProject.json').then((config) => {
-        cy.checkDownloadByContent(`SNV_Results-${config[0].projectNameUsedForTables}`, '.csv', [
-          'Patient ID', 'Sample Types', 'Seq. Type', 'Library Prep. Kit(s)', 'Link to Plots',
-          'Created with Version', 'Processing Date', 'Progress'
-        ]);
-      });
+      cy.checkDownloadByContentOfFixture('snv.json');
     });
   });
 });

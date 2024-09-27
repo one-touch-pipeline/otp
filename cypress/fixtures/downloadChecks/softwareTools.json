@@ -1,0 +1,30 @@
+{
+  "filename": "Software_Tools",
+  "extension": ".csv",
+  "header": [
+    "Tool Name",
+    "Tool Version",
+    "Version Aliases",
+    "Legacy"
+  ],
+  "data": [
+    [
+      "bcl2fastq",
+      "1.8.2",
+      "bcl2fastq 1.8.2; bcl2fastq1.8.2",
+      "false"
+    ],
+    [
+      "ExampleSoftwareTool",
+      "1.2.3",
+      "",
+      "false"
+    ],
+    [
+      "unknown",
+      "0.0",
+      "unknown",
+      "false"
+    ]
+  ]
+}

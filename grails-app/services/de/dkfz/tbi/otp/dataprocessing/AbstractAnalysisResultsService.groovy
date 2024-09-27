@@ -140,7 +140,7 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
             }
             properties.with {
                 configFile = getConfigLinks(properties.instanceId as long, properties.runState as WorkflowRun.State)
-                libPrepKits = libPrepKitNames.unique().collect { it ?: 'unknown' }.join(", <br>")
+                libPrepKits = libPrepKitNames.unique().collect { it ?: 'unknown' }.sort().join(", <br>")
                 remove('libPrepKit1')
                 remove('libPrepKit2')
                 sampleTypes = "${properties.sampleType1} \u2013 ${properties.sampleType2}"

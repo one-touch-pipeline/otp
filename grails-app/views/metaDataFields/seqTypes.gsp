@@ -29,7 +29,6 @@
     <asset:javascript src="taglib/EditorSwitch.js"/>
     <asset:javascript src="common/MultiInputField.js"/>
     <asset:javascript src="pages/metaDataFields/datatable.js"/>
-    <asset:javascript src="pages/metaDataFields/seqTypes/datatable.js"/>
 </head>
 
 <body>

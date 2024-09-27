@@ -1,0 +1,40 @@
+{
+  "project": "ExampleProject",
+  "filename": "SNV_Results-ExampleProject",
+  "extension": ".csv",
+  "header": [
+    "Patient ID",
+    "Sample Types",
+    "Seq. Type",
+    "Library Prep. Kit(s)",
+    "Link to Plots",
+    "Created with Version",
+    "Processing Date",
+    "Progress",
+    "Config File"
+  ],
+  "data": [
+    [
+      "example_2",
+      "tumor01 – control01",
+      "EXOME",
+      "Agilent SureSelect V5",
+      "Plots",
+      "programVersion:1.1.1",
+      "2022-08-26 11:36",
+      "FINISHED",
+      "N/A"
+    ],
+    [
+      "example_3",
+      "tumor02 – control01",
+      "EXOME",
+      "Agilent SureSelect V5",
+      "Plots",
+      "programVersion:1.1.1",
+      "2022-08-26 11:37",
+      "FINISHED",
+      "N/A"
+    ]
+  ]
+}

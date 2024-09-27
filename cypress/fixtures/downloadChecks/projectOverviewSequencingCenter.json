@@ -1,0 +1,18 @@
+{
+  "project": "ExampleProject",
+  "tableUrl": "dataTableSourceCenterNameRunId",
+  "filename": "sequencing_center-ExampleProject",
+  "extension": ".csv",
+  "header": [
+    "Center",
+    "Total Registered Runs",
+    "Recent (6 months) Registered Runs"
+  ],
+  "data": [
+    [
+      "ExampleCenter",
+      "60",
+      "0"
+    ]
+  ]
+}

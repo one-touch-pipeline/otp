@@ -26,8 +26,12 @@ describe('Check Aceseq pages', () => {
   context('when user is an operator', () => {
     beforeEach(() => {
       cy.loginAs('operator');
-      cy.fixture('bigProject.json').then((config) => {
-        cy.visit(`/aceseq/results?project=${config[0].projectNameUsedForTables}`);
+      cy.intercept('/aceseq/dataTableResults*').as('loadDataTable');
+      cy.fixture('downloadChecks/aceseq.json').then((config) => {
+        cy.visit(`/aceseq/results?project=${config.project}`);
+      });
+      cy.wait('@loadDataTable').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
       });
     });
 
@@ -44,12 +48,7 @@ describe('Check Aceseq pages', () => {
       cy.get('table tbody tr').contains('Loading...').should('not.exist');
       cy.get('div#resultsTable_wrapper button').contains('Download').click();
 
-      cy.fixture('bigProject.json').then((config) => {
-        cy.checkDownloadByContent(`CNV_Results_(from_ACEseq)-${config[0].projectNameUsedForTables}`, '.csv', [
-          'Patient ID', 'Sample Types', 'Tumor Cell Content', 'Ploidy', 'Ploidy Factor', 'Goodness of Fit',
-          'Solution Possible', 'Link to Plots', 'Created with Version', 'Processing Date', 'Progress'
-        ]);
-      });
+      cy.checkDownloadByContentOfFixture('aceseq.json');
     });
   });
 });

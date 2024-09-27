@@ -182,9 +182,7 @@ describe('test for individual page', () => {
       // Download Csv file via Button
       cy.get('button.buttons-csv').click();
 
-      cy.checkDownloadByContent('List_of_Individuals', '.csv', [
-        'Identifier', 'Project', 'Type'
-      ]);
+      cy.checkDownloadByContentOfFixture('individual.json');
     });
 
     it('should filter by project and individual, when quick search is used', () => {

@@ -1,0 +1,63 @@
+{
+  "filterType": "Project",
+  "project": "ExampleProject",
+  "filename": "Sequence_Export",
+  "extension": ".csv",
+  "header": [
+    "Project","Patient ID","Sample Type","Seq. Type","Sequencing Read Type","Single Cell","Sample Name","Seq. Center","Library Prep. Kit","Antibody Target","Run","Lane","Library","Single Cell Well Label","ILSe","Known Issues","File Exists","File Archived","Date","Withdrawn","Species Common Name","Species Scientific Name","Species Strain","Mixed In Species"
+  ],
+  "data": [
+    [
+      "ExampleProject",
+      "example_2",
+      "tumor01",
+      "EXAMPLE",
+      "PAIRED",
+      "false",
+      "sample_195",
+      "ExampleCenter",
+      "Agilent SureSelect V5",
+      "",
+      "run_6",
+      "196",
+      "",
+      "",
+      "",
+      "",
+      "false",
+      "false",
+      "2022-08-26",
+      "false",
+      "Human",
+      "Homo sapiens",
+      "No strain available",
+      ""
+    ],
+    [
+      "ExampleProject",
+      "example_3",
+      "tumor02",
+      "EXOME",
+      "PAIRED",
+      "false",
+      "sample_39",
+      "ExampleCenter",
+      "Agilent SureSelect V5",
+      "",
+      "run_38",
+      "7",
+      "",
+      "",
+      "",
+      "",
+      "true",
+      "false",
+      "2022-08-26",
+      "false",
+      "Human",
+      "Homo sapiens",
+      "No strain available",
+      ""
+    ]
+  ]
+}

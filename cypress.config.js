@@ -28,14 +28,24 @@ module.exports = defineConfig({
     supportFile: 'cypress/support/index.js',
     experimentalRunAllSpecs: true,
     experimentalStudio: true,
-    testIsolation: false
+    testIsolation: false,
+    // eslint-disable-next-line strict
+    setupNodeEvents(on, config) {
+      on('task', {
+        log(message) {
+          // eslint-disable-no-console
+          console.log(message);
+          return null;
+        }
+      });
+    }
   },
   screenshotsFolder: 'cypress/screenshots',
   fixturesFolder: 'cypress/fixtures',
   downloadsFolder: 'cypress/downloads',
   pageLoadTimeout: 120000,
-  defaultCommandTimeout: 60000,
-  timeout: 60000,
+  defaultCommandTimeout: 120000,
+  timeout: 120000,
   responseTimeout: 120000,
   viewportHeight: 900,
   viewportWidth: 1440,

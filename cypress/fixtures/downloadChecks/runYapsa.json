@@ -1,0 +1,37 @@
+{
+  "project": "projectUsingCram",
+  "filename": "Mutational_Signatures_Results_(from_runYapsa)-projectUsingCram",
+  "extension": ".csv",
+  "header": [
+    "Patient ID",
+    "Sample Types",
+    "Seq. Type",
+    "Library Prep. Kit(s)",
+    "Created with Version",
+    "Processing Date",
+    "Progress",
+    "Config File"
+  ],
+  "data": [
+    [
+      "projectUsingCram_pid_6",
+      "tumor02 – control01",
+      "EXOME",
+      "Agilent SureSelect V5",
+      "yapsa-devel/b765fa8",
+      "2024-04-05 09:40",
+      "FINISHED",
+      "N/A"
+    ],
+    [
+      "projectUsingCram_pid_7",
+      "tumor02 – control01",
+      "EXOME",
+      "Agilent SureSelect V5",
+      "yapsa-devel/b765fa8",
+      "2024-04-05 09:41",
+      "FINISHED",
+      "N/A"
+    ]
+  ]
+}

@@ -39,27 +39,21 @@ describe('Check statistics page', () => {
     it('should download the csv file and verify the download', () => {
       cy.visit('/sequence/index');
 
+      filterForDownload('sequence.json');
+
       cy.get('#sequenceTable_processing').should('exist');
       cy.get('div#sequenceTable_wrapper button').contains('Download CSV').click();
-      cy.checkDownloadByContent('Sequence_Export', '.csv', [
-        'Project', 'Patient ID', 'Sample Type', 'Seq. Type', 'Sequencing Read Type', 'Single Cell', 'Sample Name',
-        'Seq. Center', 'Library Prep. Kit', 'Antibody Target,', 'Run,', 'Lane,', 'Library,',
-        'Single Cell Well Label', 'ILSe,', 'Known Issues', 'File Exists', 'File Archived', 'Date,',
-        'Withdrawn,', 'Species Common Name', 'Scientific Name', 'Strain,', 'Mixed In Species']);
+      cy.checkDownloadByContentOfFixture('sequence.json', '');
     });
 
     it('should download the sample swap template and verify the download', () => {
       cy.visit('/sequence/index');
 
-      cy.get('#sequenceTable_processing').should('exist');
+      filterForDownload('dataSwapTemplate.json');
+
       cy.get('div#sequenceTable_wrapper button').contains('Download Sample Swap Template').click();
-      cy.checkDownloadByContent('Sample_Swap_Template', '.csv', [
-        'Seq. Track ID', 'ILSe', 'Run', 'Lane', 'Single Cell Well Label',
-        'Project Old', 'Project New', 'Patient ID Old', 'Patient ID New',
-        'Sample Type Old', 'Sample Type New', 'Seq. Type Old', 'Seq. Type New',
-        'Sequencing Read Type', 'Single Cell',
-        'Sample Name Old', 'Sample Name New', 'Antibody Target Old', 'Antibody Target New'
-      ]);
+
+      cy.checkDownloadByContentOfFixture('dataSwapTemplate.json', '');
     });
 
     it('should filter the table by sample type', () => {
@@ -113,3 +107,23 @@ describe('Check statistics page', () => {
     });
   });
 });
+
+const filterForDownload = (fixtureFileName) => {
+  'use strict';
+
+  cy.intercept('POST', '/sequence/dataTableSource*').as('loadDataTable');
+
+  cy.fixture(`downloadChecks/${fixtureFileName}`).then((config) => {
+    cy.get('div#data-table-filter-container').find('span#select2--container')
+      .contains('No Search Criteria')
+      .click();
+
+    cy.get('ul#select2--results').contains(config.filterType).click({ force: true });
+    cy.get('#searchCriteriaTable td.search input[type=button]').click();
+
+    cy.wait('@loadDataTable')
+      .then((interception) => {
+        expect(interception.response.statusCode).to.equal(200);
+      });
+  });
+};

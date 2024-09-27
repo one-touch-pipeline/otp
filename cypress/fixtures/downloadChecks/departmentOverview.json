@@ -1,0 +1,24 @@
+{
+  "filename": "Department_Overview",
+  "extension": ".csv",
+  "header": [
+    "OU Number",
+    "Cost center",
+    "Department head",
+    "Department deputies"
+  ],
+  "data": [
+    [
+      "13623423",
+      "Cost_Center_1",
+      "goofy (goofy Wonderland)",
+      "margarett (Margarett Mclaughin)"
+    ],
+    [
+      "62187419",
+      "Cost_Center_2",
+      "goofy (goofy Wonderland)",
+      "margarett (Margarett Mclaughin)"
+    ]
+  ]
+}

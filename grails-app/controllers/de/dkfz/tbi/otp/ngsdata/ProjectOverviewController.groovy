@@ -39,7 +39,7 @@ class ProjectOverviewController {
     static allowedMethods = [
             index                                             : "GET",
             individualCountByProject                          : "GET",
-            dataTableSource                                   : "POST",
+            dataTableSourceSequencingSamples                  : "POST",
             dataTableSourcePatientsAndSamplesGBCountPerProject: "POST",
             dataTableSourceSampleTypeNameCountBySample        : "POST",
             dataTableSourceCenterNameRunId                    : "POST",
@@ -55,7 +55,7 @@ class ProjectOverviewController {
         return render(dataToRender as JSON)
     }
 
-    JSON dataTableSource(DataTableCommand cmd) {
+    JSON dataTableSourceSequencingSamples(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
         Project project = projectSelectionService.requestedProject
         List data = projectOverviewService.overviewProjectQuery(project)

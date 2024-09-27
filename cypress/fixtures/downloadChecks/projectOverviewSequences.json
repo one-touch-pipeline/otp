@@ -1,0 +1,41 @@
+{
+  "project": "ExampleProject",
+  "tableUrl": "dataTableSourceSequencingSamples",
+  "filename": "sequences_of_samples-ExampleProject",
+  "extension": ".csv",
+  "header": [
+    "Patient ID",
+    "Sample Type",
+    "Seq. Type",
+    "Sequencing Read Type",
+    "Single Cell",
+    "Center",
+    "Platform",
+    "Lanes",
+    "Giga Bases"
+  ],
+  "data": [
+    [
+      "example_2",
+      "control01",
+      "10x_scRNA",
+      "PAIRED",
+      "true",
+      "ExampleCenter",
+      "ExampleSeqPlatform ExampleModel ExampleKit",
+      "2",
+      ""
+    ],
+    [
+      "example_3",
+      "tumor01",
+      "10x_scRNA",
+      "PAIRED",
+      "true",
+      "ExampleCenter",
+      "ExampleSeqPlatform ExampleModel ExampleKit",
+      "2",
+      ""
+    ]
+  ]
+}

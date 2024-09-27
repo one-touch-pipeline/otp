@@ -41,6 +41,6 @@ RUN if [ "$GRADLE_PROXY_ENABLED" = "true" ] ; then \
     echo "systemProp.https.proxyPort=${GRADLE_PROXY_PORT}" >> $GRADLE_USER_HOME/gradle.properties \
     ; fi
 
-ENTRYPOINT ./gradlew $GRADLE_COMMAND
+ENTRYPOINT LANG=en_US.UTF-8 TZ=UTC ./gradlew $GRADLE_COMMAND
 
 EXPOSE 8080

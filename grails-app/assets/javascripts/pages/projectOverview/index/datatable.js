@@ -119,7 +119,7 @@ $.otp.projectOverviewTable = {
       '#projectOverviewTable',
       $.otp.createLink({
         controller: 'projectOverview',
-        action: 'dataTableSource'
+        action: 'dataTableSourceSequencingSamples'
       }),
       (json) => {
         for (let i = 0; i < json.aaData.length; i += 1) {

@@ -26,10 +26,10 @@ describe('Check sampleOverview page', () => {
   context('when user is an operator', () => {
     beforeEach(() => {
       cy.loginAs('operator');
+      cy.visit('/sampleOverview/index?project=ExampleProject');
     });
 
     it('should filter the table by Sample Type', () => {
-      cy.visit('/sampleOverview/index');
       cy.intercept('POST', '/sampleOverview/dataTableSource*').as('loadDataTable');
 
       const sampleTypeName = 'tumor01';
@@ -45,7 +45,6 @@ describe('Check sampleOverview page', () => {
     });
 
     it('should add and remove filters for Seq Type', () => {
-      cy.visit('/sampleOverview/index');
 
       const seqTypeName = 'WGS PAIRED bulk';
       cy.get('span#select2--container').contains('Seq. Type').click();
@@ -62,17 +61,17 @@ describe('Check sampleOverview page', () => {
   context('when user is normal user', () => {
     beforeEach(() => {
       cy.loginAs('user');
+      cy.visit('/sampleOverview/index?project=ExampleProject');
     });
 
     it('should not be able to select a project user is not part of', () => {
-      cy.visit('/sampleOverview/index');
       cy.get('select#project option').should('not.have.text', 'Example project 1');
     });
 
     it('should load data table on initialization and download csv file, when button is clicked', () => {
       cy.intercept('/sampleOverview/dataTableSourceLaneOverview*').as('loadDataTable');
 
-      cy.visit('/sampleOverview/index');
+      cy.visit('/sampleOverview/index?project=ExampleProject');
 
       cy.wait('@loadDataTable').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
@@ -83,11 +82,7 @@ describe('Check sampleOverview page', () => {
       // Download Csv file via Button
       cy.get('button.buttons-csv').click();
 
-      cy.checkDownloadByContent('Sample_Overview-ExampleProject', '.csv', [
-        'Patient ID', 'Sample Type', 'Registered Lanes', 'cell ranger',
-        '10x_scRNA PAIRED single cell', 'EXAMPLE PAIRED bulk', 'EXOME PAIRED bulk', 'WGS PAIRED bulk',
-        'WGBS PAIRED bulk', 'WGBS_TAG PAIRED bulk'
-      ]);
+      cy.checkDownloadByContentOfFixture('sampleOverview.json');
     });
   });
 });

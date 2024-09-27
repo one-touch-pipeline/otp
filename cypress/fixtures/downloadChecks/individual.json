@@ -1,0 +1,21 @@
+{
+  "filename": "List_of_Individuals",
+  "extension": ".csv",
+  "header": [
+    "Identifier",
+    "Project",
+    "Type"
+  ],
+  "data": [
+    [
+      "example_2",
+      "ExampleProject",
+      "REAL"
+    ],
+    [
+      "example_3",
+      "ExampleProject",
+      "REAL"
+    ]
+  ]
+}

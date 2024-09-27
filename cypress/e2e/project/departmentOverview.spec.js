@@ -33,7 +33,7 @@ describe('test for department overview page', () => {
 
       cy.get('#departmentOverview_wrapper').should('exist');
       cy.get('div#departmentOverview_wrapper button').contains('Download').click();
-      cy.checkDownloadByContent('Department_Overview', '.csv', ['OU Number','Cost center','Department head','Department deputies']);
+      cy.checkDownloadByContentOfFixture('departmentOverview.json');
     });
   });
 

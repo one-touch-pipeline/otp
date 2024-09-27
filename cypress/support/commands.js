@@ -122,8 +122,25 @@ Cypress.Commands.add('checkPage', (url) => {
   }
 });
 
+/**
+ * checks download files
+ *
+ * check that
+ * - a file exists with given name, the current date and the given ending
+ * - the file has all the given headers in given order
+ * - the files contains all the given lines, the order within the line needs to match (but not the order of all lines)
+ *   and file may contain more lines
+ *
+ * HEADER1,HEADER2,HEADER3
+ * v1a,v1b,v1c
+ * v2a,v2b,v2c
+ * v3a,v3b,v3c
+ *
+ * [[v3a,v3b,v3c],[v2a,v2b,v2c]]
+ *
+ */
 // eslint-disable-next-line strict
-Cypress.Commands.add('checkDownloadByContent', (filename, fileEnding, contentList) => {
+Cypress.Commands.add('checkDownloadByContent', (filename, fileEnding, headerList, contentListList, quote = '"') => {
   const downloadsFolder = Cypress.config('downloadsFolder');
   const today = new Date();
   const year = today.getFullYear();
@@ -134,10 +151,32 @@ Cypress.Commands.add('checkDownloadByContent', (filename, fileEnding, contentLis
   const filepath = path.join(downloadsFolder, `${filename}_${date}${fileEnding}`);
 
   cy.readFile(filepath, 'utf8', { timeout: 5000 }).then((content) => {
-    contentList.forEach((expectedContent) => {
-      cy.log(`Check ${expectedContent}`);
-      cy.wrap(content).should('contain', expectedContent);
+    cy.log(`content: ${content}`);
+    const lines = content.split('\n');
+    cy.log('rows:');
+    lines.forEach((line) => {
+      cy.log(`line: ${line}`);
     });
+
+    // check header
+    const headerLine = lines[0];
+    const headerLineExpected = `${quote}${headerList.join(`${quote},${quote}`)}${quote}`;
+    cy.log(`Check header: ${headerLineExpected}`);
+    cy.wrap(headerLine).should('equal', headerLineExpected);
+
+    // check for expected content
+    contentListList.forEach((contentList) => {
+      const expectedContentLine = `${quote}${contentList.join(`${quote},${quote}`)}${quote}`;
+      cy.log(`Check for content: ${expectedContentLine}`);
+      cy.wrap(lines).should('include', expectedContentLine);
+    });
+  });
+});
+
+// eslint-disable-next-line strict
+Cypress.Commands.add('checkDownloadByContentOfFixture', (fixtureFileName, quote = '"') => {
+  cy.fixture(`downloadChecks/${fixtureFileName}`).then((config) => {
+    cy.checkDownloadByContent(config.filename, config.extension, config.header, config.data, quote);
   });
 });
 
@@ -225,7 +264,7 @@ Cypress.Commands.add('interceptAt', (alias, url, index, method) => {
 
   let intercepted = 0;
   cy.intercept(method || 'GET', url, (req) => {
-    intercepted = intercepted + 1;
+    intercepted += 1;
     if (intercepted === index) {
       req.alias = alias;
     }
@@ -252,3 +291,16 @@ const validateSession = () => {
     });
   });
 };
+
+/**
+ * Command to log to cypress and to the console.
+ *
+ * It is helpful for dubbing in the ci, since there the cypress logs are only partly available in the screenshot,
+ * but not all before.
+ */
+Cypress.Commands.add('logBoth', (text) => {
+  'use strict';
+
+  cy.log(text);
+  cy.task('log', text);
+});

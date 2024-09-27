@@ -33,35 +33,47 @@ describe('Check statistics page', () => {
     });
 
     it('should visit the index page', () => {
+      cy.intercept('get', '/projectOverview/index*')
+        .as('index');
+
       cy.visit('/projectOverview/index');
+      cy.wait('@index')
+        .then((interception) => {
+          expect(interception.response.statusCode).to.equal(200);
+        });
     });
 
     // checks for download files
-    it('should download all csv files by clicking the buttons and verify the downloads', () => {
-      cy.visit('/projectOverview/index');
-
+    it('should download and check the sample type name table', () => {
+      loadPageAndWaitForTables('projectOverviewSampleType.json');
       cy.get('div#sampleTypeNameCountBySample_wrapper button')
         .contains('Download').click();
-      // eslint-disable-next-line max-len
-      cy.checkDownloadByContent('number_of_samples_by_sample_type-ExampleProject', '.csv', ['Sample Type', 'Number of Samples']);
+      cy.checkDownloadByContentOfFixture('projectOverviewSampleType.json');
+    });
 
+    // checks for download files
+    it('should download and check the sequencing center table', () => {
+      loadPageAndWaitForTables('projectOverviewSequencingCenter.json');
       cy.get('div#centerNameRunId_wrapper button')
         .contains('Download').click();
-      cy.checkDownloadByContent('sequencing_center-ExampleProject', '.csv', [
-        'Center', 'Total Registered Runs', 'Recent (6 months) Registered Runs'
-      ]);
+      cy.checkDownloadByContentOfFixture('projectOverviewSequencingCenter.json');
+    });
 
+    // checks for download files
+    it('should download and check the sequencing samples table', () => {
+      loadPageAndWaitForTables('projectOverviewSequences.json');
       cy.get('div#projectOverviewTable_wrapper button')
         .contains('Download').click();
-      cy.checkDownloadByContent('sequences_of_samples-ExampleProject', '.csv', [
-        'Patient ID', 'Sample Type', 'Seq. Type', 'Sequencing Read Type', 'Single Cell', 'Center', 'Platform', 'Lanes'
-      ]);
+      cy.checkDownloadByContentOfFixture('projectOverviewSequences.json');
+    });
+
+    // checks for download files
+    it('should download and check the sequencing type table', () => {
+      loadPageAndWaitForTables('projectOverviewSequencingTypes.json');
 
       cy.get('div#patientsAndSamplesGBCountPerProject_wrapper button')
         .contains('Download').click();
-      cy.checkDownloadByContent('sequencing_technologies-ExampleProject', '.csv', [
-        'Seq. Type', 'Library Layout', 'Single Cell', '#Sequenced Patients', '#Sequenced Samples', 'Giga Bases (total)'
-      ]);
+      cy.checkDownloadByContentOfFixture('projectOverviewSequencingTypes.json');
     });
 
     it('should check the length of the tables', () => {
@@ -74,3 +86,28 @@ describe('Check statistics page', () => {
     });
   });
 });
+
+const loadPageAndWaitForTables = (fixtureFileName) => {
+  'use strict';
+
+  cy.clearDownloadsFolder();
+
+  cy.fixture(`downloadChecks/${fixtureFileName}`).then((config) => {
+
+    cy.intercept('get', '/projectOverview/index*')
+      .as('index');
+    cy.intercept('POST', `/projectOverview/${config.tableUrl}*`)
+      .as('dataTable');
+
+    cy.visit(`/projectOverview/index?project=${config.project}`);
+
+    cy.wait('@index')
+      .then((interception) => {
+        expect(interception.response.statusCode).to.equal(200);
+      });
+    cy.wait('@dataTable')
+      .then((interception) => {
+        expect(interception.response.statusCode).to.equal(200);
+      });
+  });
+};

@@ -454,7 +454,10 @@ $.otp.getDownloadButton = (columnSelector, fileName, beforeDownload = (callback)
           // if a table cell contains an EditorSwitch, return the label only
           if (node.children.length) {
             const i = $(node);
-            if (i.find('edit-switch')) {
+            if (i.find('.edit-switch-toggle').length) {
+              return $('.icon-true', i).length ? 'true' : 'false';
+            }
+            if (i.find('.edit-switch-label').length) {
               return $('.edit-switch-label', i).text().trim();
             }
           }

@@ -26,8 +26,12 @@ describe('Check indel pages', () => {
   context('when user is an operator', () => {
     beforeEach(() => {
       cy.loginAs('operator');
-      cy.fixture('bigProject.json').then((config) => {
-        cy.visit(`/indel/results?project=${config[0].projectNameUsedForTables}`);
+      cy.intercept('/indel/dataTableResults*').as('loadDataTable');
+      cy.fixture('downloadChecks/indel.json').then((config) => {
+        cy.visit(`/indel/results?project=${config.project}`);
+      });
+      cy.wait('@loadDataTable').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
       });
     });
 
@@ -44,16 +48,7 @@ describe('Check indel pages', () => {
       cy.get('table tbody tr').contains('Loading...').should('not.exist');
       cy.get('div#resultsTable_wrapper button').contains('Download').click();
 
-      cy.fixture('bigProject.json').then((config) => {
-        cy.checkDownloadByContent(`Indel_Results-${config[0].projectNameUsedForTables}`, '.csv', [
-          'Patient ID','Sample Types','Seq. Type','Library Prep. Kit(s)','#Indels',
-          '#Insertion','#Deletions','#Size 1_3','#Size 4_10','Link to Plots',
-          'All Somatic Variants (T)','All Somatic Variants (C)','Somatic Common in gnomAD (T)',
-          'Somatic Common in gnomAD (C)','Somatic Pass (T)','Somatic Pass (C)',
-          '#Germline Variants','Somatic Rescue','Control VAF (median)','TiNDA Plot',
-          'Created with Version','Processing Date','Progress'
-        ]);
-      });
+      cy.checkDownloadByContentOfFixture('indel.json');
     });
   });
 });

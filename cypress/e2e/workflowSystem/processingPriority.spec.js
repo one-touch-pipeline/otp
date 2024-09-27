@@ -26,7 +26,11 @@ describe('Check processing priority page', () => {
   context('when user is an operator', () => {
     beforeEach(() => {
       cy.loginAs('operator');
+      cy.intercept('/processingPriority/index*').as('index');
       cy.visit('/processingPriority/index');
+      cy.wait('@index').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+      });
     });
 
     it('should display the processing priority page', () => {

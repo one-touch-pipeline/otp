@@ -1,0 +1,64 @@
+{
+  "project": "ExampleProject",
+  "tableUrl": "dataTableSourcePatientsAndSamplesGBCountPerProject",
+  "filename": "sequencing_technologies-ExampleProject",
+  "extension": ".csv",
+  "header": [
+    "Seq. Type",
+    "Library Layout",
+    "Single Cell",
+    "#Sequenced Patients",
+    "#Sequenced Samples",
+    "Giga Bases (total)"
+  ],
+  "data": [
+    [
+      "10x_scRNA",
+      "PAIRED",
+      "true",
+      "2",
+      "6",
+      ""
+    ],
+    [
+      "EXAMPLE",
+      "PAIRED",
+      "false",
+      "1",
+      "1",
+      ""
+    ],
+    [
+      "EXOME",
+      "PAIRED",
+      "false",
+      "2",
+      "6",
+      ""
+    ],
+    [
+      "WGBS",
+      "PAIRED",
+      "false",
+      "2",
+      "6",
+      ""
+    ],
+    [
+      "WGBS_TAG",
+      "PAIRED",
+      "false",
+      "2",
+      "6",
+      ""
+    ],
+    [
+      "WGS",
+      "PAIRED",
+      "false",
+      "2",
+      "6",
+      ""
+    ]
+  ]
+}

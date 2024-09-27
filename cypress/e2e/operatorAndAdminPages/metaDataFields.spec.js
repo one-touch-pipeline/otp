@@ -501,7 +501,7 @@ describe('Check metadata data fields page', () => {
 
       cy.get('#metadatafields-datatable').should('exist');
       cy.get('div#metadatafields-datatable_wrapper button').contains('Download').click();
-      cy.checkDownloadByContent('Software_Tools', '.csv', ['Tool Name','Tool Version','Version Aliases','Legacy']);
+      cy.checkDownloadByContentOfFixture('softwareTools.json');
     });
   });
 
