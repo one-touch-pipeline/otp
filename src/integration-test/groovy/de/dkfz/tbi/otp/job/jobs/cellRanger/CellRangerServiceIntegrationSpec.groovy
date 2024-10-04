@@ -124,7 +124,6 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
         cellRangerService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
-        String content = ""
         webSummaryFile = CreateFileHelper.createFile(cellRangerService.singleCellBamFileService.getWebSummaryResultFile(singleCellBamFile), "content")
         if (username == USERNAME) {
             User user = DomainFactory.createUser(username: username)
@@ -132,12 +131,12 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
         }
 
         when:
-        content = doWithAuth(username) {
+        byte[] content = doWithAuth(username) {
             cellRangerService.getWebSummaryResultFileContent(singleCellBamFile)
         }
 
         then:
-        content == "content"
+        content == "content".bytes
 
         where:
         username << [OPERATOR, USERNAME]
@@ -155,12 +154,12 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
         webSummaryFile = CreateFileHelper.createFile(cellRangerService.singleCellBamFileService.getLinkedWebSummaryResultFile(singleCellBamFile), "content")
 
         when:
-        String content = doWithAuth(OPERATOR) {
+        byte[] content = doWithAuth(OPERATOR) {
             cellRangerService.getWebSummaryResultFileContent(singleCellBamFile)
         }
 
         then:
-        content == "content"
+        content == "content".bytes
     }
 
     void "getWebSummaryResultFileContent, file has to be readable"() {

@@ -299,19 +299,23 @@ class AlignmentQualityOverviewController implements CheckAndCall {
 
     def viewCellRangerSummary(ViewCellRangerSummaryCommand cmd) {
         try {
-            String content
             switch (cmd.singleCellBamFile.project.state) {
                 case Project.State.ARCHIVED:
-                    content = g.message(code: "alignment.quality.projectArchived.warning")
+                    flash.message = new FlashMessage(
+                            g.message(code: "alignment.quality.projectArchived.warning", args: [cmd.singleCellBamFile.project.name]) as String)
+                    redirect(action: "index")
                     break
                 case Project.State.DELETED:
-                    content = g.message(code: "alignment.quality.projectDeleted.warning")
+                    flash.message = new FlashMessage(
+                            g.message(code: "alignment.quality.projectDeleted.warning", args: [cmd.singleCellBamFile.project.name]) as String)
+                    redirect(action: "index")
                     break
                 default:
-                    content = cellRangerService.getWebSummaryResultFileContent(cmd.singleCellBamFile)
+                    byte[] content = cellRangerService.getWebSummaryResultFileContent(cmd.singleCellBamFile)
+                    // cell ranger use utf_8 encoding, and not ISO_8859_1, which is used by grails as default encoding for html
+                    render(file: content, contentType: ContentType.TEXT_HTML.mimeType, encoding: Consts.UTF_8)
                     break
             }
-            render(text: content, contentType: ContentType.TEXT_HTML, encoding: Consts.UTF_8)
         } catch (NoSuchFileException e) {
             flash.message = new FlashMessage(g.message(code: "alignment.quality.exception.noSuchFile") as String, e.message)
             redirect(action: "index")
