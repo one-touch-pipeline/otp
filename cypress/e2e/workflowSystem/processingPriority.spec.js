@@ -23,6 +23,10 @@
 describe('Check processing priority page', () => {
   'use strict';
 
+  const randomDate = new Date().toISOString();
+  const randomNumber = new Date().getMilliseconds();
+  const randomNumberString = randomNumber.toString();
+
   context('when user is an operator', () => {
     beforeEach(() => {
       cy.loginAs('operator');
@@ -49,75 +53,74 @@ describe('Check processing priority page', () => {
       cy.get('button.btn-secondary').contains('Cancel').should('exist');
       cy.intercept('/ProcessingPriority/save*').as('createProcessingPriority');
 
-      cy.get('input#pp-name').clear().type('Test1');
-      cy.get('input#pp-priority').clear().type('244');
-      cy.get('input#pp-allowedParallelWorkflowRuns').clear().type('2');
-      cy.get('input#pp-queue').clear().type('queue');
-      cy.get('input#pp-roddyConfigSuffix').clear().type('Test2');
-      cy.get('input#pp-errorMailPrefix').clear().type('Test3');
+      cy.get('input#pp-name').clear().type(`prio ${randomDate}`, { force: true });
+      cy.get('input#pp-priority').clear().type(randomNumberString, { force: true });
+      cy.get('input#pp-allowedParallelWorkflowRuns').clear().type('2', { force: true });
+      cy.get('input#pp-queue').clear().type(`queue ${randomDate}`, { force: true });
+      cy.get('input#pp-roddyConfigSuffix').clear().type(`suffix ${randomDate}`, { force: true });
+      cy.get('input#pp-errorMailPrefix').clear().type(`mail ${randomDate}`, { force: true });
       cy.get('button#bt-save').click();
       cy.wait('@createProcessingPriority')
         .then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
         });
       cy.get('.otpSuccessToast').should('exist')
-        .and('contain.text', 'Processing Priority Test1 has been saved.');
-
-      cy.get('table tbody tr td:nth-child(1)').contains('Test1').siblings()
-        .should('contain.text', '244')
+        .and('contain.text', `Processing Priority prio ${randomDate} has been saved.`);
+      cy.get('table tbody tr td:nth-child(1)').contains(`prio ${randomDate}`).siblings()
+        .should('contain.text', randomNumberString)
         .should('contain.text', '2')
-        .should('contain.text', 'queue')
-        .should('contain.text', 'Test2')
-        .should('contain.text', 'Test3');
+        .should('contain.text', `queue ${randomDate}`)
+        .should('contain.text', `suffix ${randomDate}`)
+        .should('contain.text', `mail ${randomDate}`);
     });
 
     it('should update a processing priority', () => {
-      cy.get('table tbody tr td:nth-child(1)').contains('Test1').siblings().last()
+      cy.get('table tbody tr td:nth-child(1)').contains(`prio ${randomDate}`).siblings().last()
         .find('button#edit-row')
         .click();
       cy.get('button.btn-primary').contains('Save').should('exist');
       cy.get('button.btn-secondary').contains('Cancel').should('exist');
-      cy.get('input#pp-name').clear().type('Test4');
-      cy.get('input#pp-priority').clear().type('55');
-      cy.get('input#pp-allowedParallelWorkflowRuns').clear().type('4');
-      cy.get('input#pp-queue').clear().type('queue2');
-      cy.get('input#pp-roddyConfigSuffix').clear().type('Test5');
-      cy.get('input#pp-errorMailPrefix').clear().type('Test6');
+      cy.get('input#pp-name').clear().type(`prio2 ${randomDate}`, { force: true });
+      cy.get('input#pp-priority').clear().type((randomNumber + 1).toString(), { force: true });
+      cy.get('input#pp-allowedParallelWorkflowRuns').clear().type('4', { force: true });
+      cy.get('input#pp-queue').clear().type(`queue2 ${randomDate}`, { force: true });
+      cy.get('input#pp-roddyConfigSuffix').clear().type(`suffix2 ${randomDate}`, { force: true });
+      cy.get('input#pp-errorMailPrefix').clear().type(`mail2 ${randomDate}`, { force: true });
       cy.get('button#bt-save').click();
 
       cy.get('.otpSuccessToast').should('exist')
-        .and('contain.text', 'Processing Priority Test4 has been saved.');
+        .and('contain.text', `Processing Priority prio2 ${randomDate} has been saved.`);
       cy.get('table tbody tr td:nth-child(1)')
-        .should('not.contains.text', 'Test1');
+        .should('not.contains.text', `prio ${randomDate}`);
       cy.get('table tbody tr td:nth-child(1)')
-        .contains('Test4').siblings()
-        .should('contain.text', '55')
+        .contains(`prio2 ${randomDate}`).siblings()
+        .should('contain.text', (randomNumber + 1).toString())
         .should('contain.text', '4')
-        .should('contain.text', 'queue2')
-        .should('contain.text', 'Test5')
-        .should('contain.text', 'Test6');
+        .should('contain.text', `queue2 ${randomDate}`)
+        .should('contain.text', `suffix2 ${randomDate}`)
+        .should('contain.text', `mail2 ${randomDate}`);
     });
 
     it('should not be able to create a processing priority with invalid inputs', () => {
       cy.get('button.btn').contains('Create').click();
-      cy.get('input#pp-name').clear().type('Test4');
+      cy.get('input#pp-name').clear().type(`prio2 ${randomDate}`, { force: true });
       cy.get('input#pp-priority').clear().type('55');
-      cy.get('input#pp-allowedParallelWorkflowRuns').clear().type('2');
-      cy.get('input#pp-queue').clear().type('queue');
-      cy.get('input#pp-roddyConfigSuffix').clear().type('Test5');
-      cy.get('input#pp-errorMailPrefix').clear().type('Test6');
+      cy.get('input#pp-allowedParallelWorkflowRuns').clear().type('2', { force: true });
+      cy.get('input#pp-queue').clear().type('queue', { force: true });
+      cy.get('input#pp-roddyConfigSuffix').clear().type('suffix', { force: true });
+      cy.get('input#pp-errorMailPrefix').clear().type('mail', { force: true });
       cy.get('button#bt-save').should('be.disabled');
     });
 
     it('should delete a processing priority', () => {
-      cy.get('table tbody tr td:nth-child(1)').contains('Test4').siblings().last()
+      cy.get('table tbody tr td:nth-child(1)').contains(`prio2 ${randomDate}`).siblings().last()
         .find('button#delete-row')
         .click();
       cy.get('button#bt-delete').click();
       cy.get('.otpSuccessToast').should('exist')
-        .and('contain.text', 'Processing Priority Test4 has been deleted.');
+        .and('contain.text', `Processing Priority prio2 ${randomDate} has been deleted.`);
       cy.get('table tbody tr td:nth-child(1)')
-        .should('not.contains.text', 'Test4');
+        .should('not.contains.text', `prio2 ${randomDate}`);
     });
   });
 
