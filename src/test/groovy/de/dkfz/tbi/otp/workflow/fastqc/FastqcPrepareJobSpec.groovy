@@ -24,9 +24,13 @@ package de.dkfz.tbi.otp.workflow.fastqc
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.dataprocessing.FastQcProcessedFileService
+import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
+import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.FastqFile
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
@@ -36,13 +40,13 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class FastqcPrepareJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
+class FastqcPrepareJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, FastqcDomainFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
         return [
                 FastqFile,
-                RawSequenceFile,
+                FastqcProcessedFile,
                 WorkflowStep,
                 WorkflowRun,
         ]
@@ -50,18 +54,30 @@ class FastqcPrepareJobSpec extends Specification implements DataTest, WorkflowSy
 
     void "test doFurtherPreparation"() {
         given:
-        final WorkflowRun run = createWorkflowRun([workflow:
-                                                           createWorkflow([
-                                                                   name: BashFastQcWorkflow.WORKFLOW
-                                                           ])
+        final String directoryPath = "/workDirectory_${nextId}"
+        final WorkflowRun run = createWorkflowRun([
+                workflow:
+                        createWorkflow([
+                                name: BashFastQcWorkflow.WORKFLOW
+                        ])
         ])
         WorkflowStep workflowStep = createWorkflowStep([workflowRun: run])
         SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
+        List<FastqcProcessedFile> fastqcProcessedFiles = seqTrack.sequenceFiles.collect {
+            createFastqcProcessedFile([
+                    sequenceFile     : it,
+                    workDirectoryName: "",
+            ])
+        }
 
         FastqcPrepareJob job = new FastqcPrepareJob()
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            _ * getInputArtefact(workflowStep, BashFastQcWorkflow.INPUT_FASTQ) >> seqTrack
+            1 * getInputArtefact(workflowStep, BashFastQcWorkflow.INPUT_FASTQ) >> seqTrack
+            1 * getOutputArtefacts(workflowStep, BashFastQcWorkflow.OUTPUT_FASTQC) >> fastqcProcessedFiles
             0 * _
+        }
+        job.fastQcProcessedFileService = Mock(FastQcProcessedFileService) {
+            1 * buildWorkingPath(_) >> directoryPath
         }
         job.notificationCreator = Mock(NotificationCreator)
 
@@ -71,6 +87,9 @@ class FastqcPrepareJobSpec extends Specification implements DataTest, WorkflowSy
         then:
         1 * job.notificationCreator.setStartedForSeqTracks([seqTrack], Ticket.ProcessingStep.FASTQC)
         seqTrack.fastqcState == SeqTrack.DataProcessingState.IN_PROGRESS
+        fastqcProcessedFiles.each {
+            assert it.workDirectoryName == directoryPath
+        }
     }
 
     void "test buildWorkDirectoryPath"() {

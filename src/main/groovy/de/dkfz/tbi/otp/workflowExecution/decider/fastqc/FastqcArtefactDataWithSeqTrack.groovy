@@ -24,21 +24,26 @@ package de.dkfz.tbi.otp.workflowExecution.decider.fastqc
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.workflowExecution.Artefact
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
+import de.dkfz.tbi.otp.workflowExecution.decider.ArtefactData
 
-@ToString(includePackage = false, includeNames = true)
-@EqualsAndHashCode()
-class FastqcArtefactData<A extends Artefact> {
-    final WorkflowArtefact workflowArtefact
-    final A artefact
-    final Project project
+@ToString(includePackage = false, includeNames = true, includeSuper = true)
+@EqualsAndHashCode(callSuper = true, cache = true)
+class FastqcArtefactDataWithSeqTrack extends ArtefactData<SeqTrack> {
+    final Individual individual
+    final SampleType sampleType
+    final Sample sample
+    final Run run
 
     @SuppressWarnings("ParameterCount")
-    FastqcArtefactData(WorkflowArtefact workflowArtefact, A artefact, Project project) {
-        this.workflowArtefact = workflowArtefact
-        this.artefact = artefact
-        this.project = project
+    FastqcArtefactDataWithSeqTrack(WorkflowArtefact workflowArtefact, SeqTrack artefact, Project project, SeqType seqType, Individual individual,
+                                   SampleType sampleType, Sample sample, Run run) {
+        super(workflowArtefact, artefact, project, seqType)
+        this.individual = individual
+        this.sampleType = sampleType
+        this.sample = sample
+        this.run = run
     }
 }

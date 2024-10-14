@@ -63,7 +63,7 @@ class FastqcProcessedFile implements Artefact, PathInWorkFolder, Entity {
         workflowArtefact nullable: true
         pathInWorkFolder(nullable: true) // only used for wes fastqc
         workDirectoryName validator: { String value, FastqcProcessedFile obj ->
-            if (value && obj.sequenceFile && FastqcProcessedFile.withCriteria {
+            if (value && obj.sequenceFile && createCriteria().count {
                 sequenceFile {
                     eq('seqTrack', obj.sequenceFile.seqTrack)
                 }

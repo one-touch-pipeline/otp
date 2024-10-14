@@ -26,7 +26,8 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
+import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.FastqcWorkflowDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
@@ -35,9 +36,8 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
 import de.dkfz.tbi.otp.workflow.fastqc.WesFastQcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
-import de.dkfz.tbi.otp.workflowExecution.decider.fastqc.FastqcArtefactData
-
-import java.nio.file.Paths
+import de.dkfz.tbi.otp.workflowExecution.decider.fastqc.FastqcArtefactDataWithSeqTrack
+import de.dkfz.tbi.otp.workflowExecution.decider.fastqc.FastqcArtefactDataWithFastqcProcessedFile
 
 class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, FastqcDomainFactory, FastqcWorkflowDomainFactory {
 
@@ -76,7 +76,7 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
         SeqTrack seqTrack = createSeqTrackWithTwoFastqFile([
                 workflowArtefact: workflowArtefact
         ])
-        FastqcArtefactData<SeqTrack> fastqcArtefactData = new FastqcArtefactData<SeqTrack>(workflowArtefact, seqTrack, seqTrack.project)
+        FastqcArtefactDataWithSeqTrack fastqcArtefactData = createFastqcArtefactDataForSeqTrack(seqTrack)
 
         Map<SeqTrack, List<RawSequenceFile>> rawSequenceFileMap = seqTrack.sequenceFiles.groupBy {
             it.seqTrack
@@ -109,6 +109,8 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
         then:
         deciderResult.newArtefacts.size() == 2
         deciderResult.warnings.empty
+        FastqcProcessedFile.list().size() == 2
+        FastqcProcessedFile.list()*.workDirectoryName == ["", ""]
 
         where:
         name   | useWes
@@ -138,7 +140,7 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
         deciderResult.newArtefacts.empty
         deciderResult.warnings.empty
         deciderResult.infos.any {
-            it.contains('no data found for')
+            it.contains('no data found for nf-seq-qc / Bash FastQC, skip')
         }
 
         where:
@@ -158,7 +160,7 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
         SeqTrack seqTrack = createSeqTrackWithTwoFastqFile([
                 workflowArtefact: workflowArtefact
         ])
-        FastqcArtefactData<SeqTrack> fastqcArtefactData = new FastqcArtefactData<SeqTrack>(workflowArtefact, seqTrack, seqTrack.project)
+        FastqcArtefactDataWithSeqTrack fastqcArtefactData = createFastqcArtefactDataForSeqTrack(seqTrack)
 
         Map<SeqTrack, List<RawSequenceFile>> rawSequenceFileMap = seqTrack.sequenceFiles.groupBy {
             it.seqTrack
@@ -184,7 +186,7 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
         then:
         deciderResult.newArtefacts.empty
         deciderResult.warnings.size() == 1
-        deciderResult.warnings.first().contains('since no workflow version configured')
+        deciderResult.warnings.first().contains('since no workflow version is configured')
 
         where:
         name   | useWes
@@ -203,7 +205,7 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
         SeqTrack seqTrack = createSeqTrackWithTwoFastqFile([
                 workflowArtefact: workflowArtefact
         ])
-        FastqcArtefactData<SeqTrack> fastqcArtefactData = new FastqcArtefactData<SeqTrack>(workflowArtefact, seqTrack, seqTrack.project)
+        FastqcArtefactDataWithSeqTrack fastqcArtefactData = createFastqcArtefactDataForSeqTrack(seqTrack)
 
         Map<SeqTrack, List<RawSequenceFile>> rawSequenceFileMap = seqTrack.sequenceFiles.groupBy {
             it.seqTrack
@@ -258,20 +260,20 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
         SeqTrack seqTrack = createSeqTrackWithTwoFastqFile([
                 workflowArtefact: workflowArtefact
         ])
-        FastqcArtefactData<SeqTrack> fastqcArtefactDataSeqTrack = new FastqcArtefactData<SeqTrack>(workflowArtefact, seqTrack, seqTrack.project)
+        FastqcArtefactDataWithSeqTrack fastqcArtefactDataSeqTrack = createFastqcArtefactDataForSeqTrack(seqTrack)
 
         Map<SeqTrack, List<RawSequenceFile>> rawSequenceFileMap = seqTrack.sequenceFiles.groupBy {
             it.seqTrack
         }
 
-        List<FastqcArtefactData> fastqcArtefactDataFasqc = seqTrack.sequenceFiles.collect {
+        List<FastqcArtefactDataWithSeqTrack> fastqcArtefactDataFasqc = seqTrack.sequenceFiles.collect {
             FastqcProcessedFile fastqcProcessedFile = createFastqcProcessedFile([
                     sequenceFile    : it,
                     workflowArtefact: createWorkflowArtefact([
                             artefactType: ArtefactType.FASTQC,
                     ]),
             ])
-            new FastqcArtefactData<FastqcProcessedFile>(fastqcProcessedFile.workflowArtefact, fastqcProcessedFile, fastqcProcessedFile.sequenceFile.project)
+            new FastqcArtefactDataWithFastqcProcessedFile(fastqcProcessedFile.workflowArtefact, fastqcProcessedFile, it.project, it.seqType, it, seqTrack)
         }
 
         WorkflowVersionSelector selector = createWorkflowVersionSelector([
@@ -295,14 +297,7 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
     }
 
     private void createServicesForCreateWorkflowRunsAndOutputArtefacts(WorkflowVersion workflowVersion, SeqTrack seqTrack) {
-        boolean uuidUsed = (workflowVersion == wesWorkflowVersion)
-        decider.fastQcProcessedFileService = Mock(FastQcProcessedFileService) {
-            1 * buildWorkingPath(workflowVersion) >> "path"
-            1 * useUuid(workflowVersion) >> uuidUsed
-            0 * _
-        }
         decider.fastqcDataFilesService = Mock(FastqcDataFilesService) {
-            (uuidUsed ? 0 : 1) * fastqcOutputDirectory(_) >> Paths.get('output')
             0 * _
         }
         decider.workflowRunService = Mock(WorkflowRunService) {
@@ -340,5 +335,18 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
             }
             0 * _
         }
+    }
+
+    private FastqcArtefactDataWithSeqTrack createFastqcArtefactDataForSeqTrack(SeqTrack seqTrack) {
+        return new FastqcArtefactDataWithSeqTrack(
+                seqTrack.workflowArtefact,
+                seqTrack,
+                seqTrack.project,
+                seqTrack.seqType,
+                seqTrack.individual,
+                seqTrack.sampleType,
+                seqTrack.sample,
+                seqTrack.run
+        )
     }
 }

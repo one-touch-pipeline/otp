@@ -25,12 +25,11 @@ import grails.gorm.transactions.Transactional
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
-import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
-import de.dkfz.tbi.otp.workflowExecution.decider.fastqc.FastqcArtefactData
+import de.dkfz.tbi.otp.workflowExecution.decider.fastqc.FastqcArtefactDataWithSeqTrack
+import de.dkfz.tbi.otp.workflowExecution.decider.fastqc.FastqcArtefactDataWithFastqcProcessedFile
 
 @Slf4j
 @CompileStatic
@@ -39,25 +38,28 @@ class FastqcArtefactService {
 
     private static final int INDEX_0 = 0
     private static final int INDEX_1 = 1
-    private static final int INDEX_2 = 2
 
     private final static String HQL_FIND_SEQ_TRACKS_FOR_WORKFLOW_ARTEFACTS = """
         select
-            wa,
-            st,
-            project
+            new ${FastqcArtefactDataWithSeqTrack.name}(
+                wa,
+                st,
+                project,
+                seqType,
+                individual,
+                sampleType,
+                sample,
+                run
+            )
         from
             SeqTrack st
             join st.workflowArtefact wa
-            join fetch st.sample sample
-            join fetch sample.sampleType sampleType
-            join fetch sample.individual individual
+            join st.sample sample
+            join sample.sampleType sampleType
+            join sample.individual individual
             join individual.project project
-            join fetch st.seqType seqType
-            join fetch st.run run
-            join fetch run.seqPlatform seqPlatform
-            left outer join st.antibodyTarget antibodyTarget
-            left outer join st.libraryPreparationKit libraryPreparationKit
+            join st.seqType seqType
+            join st.run run
         where
             wa in (:workflowArtefacts)
             and wa.state <> '${WorkflowArtefact.State.FAILED}'
@@ -65,7 +67,7 @@ class FastqcArtefactService {
             and wa.withdrawnDate is null
             and not exists (
                 select
-                    id
+                    1
                 from
                     RawSequenceFile df
                 where
@@ -76,17 +78,23 @@ class FastqcArtefactService {
 
     private final static String HQL_FIND_RELATED_FAST_QC_FOR_SEQ_TRACKS = """
         select distinct
-            wa,
-            fastqc,
-            project
+            new ${FastqcArtefactDataWithFastqcProcessedFile.name}(
+                wa,
+                fastqc,
+                project,
+                seqType,
+                df,
+                st
+            )
         from
             FastqcProcessedFile fastqc
             join fastqc.workflowArtefact wa
-            join fetch fastqc.sequenceFile df
+            join fastqc.sequenceFile df
             join df.seqTrack st
             join st.sample sample
             join sample.individual individual
             join individual.project project
+            join st.seqType seqType
         where
             st in (:seqTracks)
             and df.fileWithdrawn = false
@@ -121,23 +129,23 @@ class FastqcArtefactService {
             st in (:seqTracks)
         """
 
-    List<FastqcArtefactData<SeqTrack>> fetchSeqTrackArtefacts(Collection<WorkflowArtefact> workflowArtefacts) {
+    List<FastqcArtefactDataWithSeqTrack> fetchSeqTrackArtefacts(Collection<WorkflowArtefact> workflowArtefacts) {
         return LogUsedTimeUtils.logUsedTime(log, "        fetchSeqTrackArtefacts") {
             if (!workflowArtefacts) {
                 return []
             }
 
-            return this.<SeqTrack> executeHelper(HQL_FIND_SEQ_TRACKS_FOR_WORKFLOW_ARTEFACTS, [
+            return SeqTrack.executeQuery(HQL_FIND_SEQ_TRACKS_FOR_WORKFLOW_ARTEFACTS, [
                     workflowArtefacts: workflowArtefacts
-            ])
+            ]) as List<FastqcArtefactDataWithSeqTrack>
         }
     }
 
-    List<FastqcArtefactData<FastqcProcessedFile>> fetchRelatedFastqcArtefactsForSeqTracks(Collection<SeqTrack> seqTracks) {
+    List<FastqcArtefactDataWithFastqcProcessedFile> fetchRelatedFastqcArtefactsForSeqTracks(Collection<SeqTrack> seqTracks) {
         return LogUsedTimeUtils.logUsedTime(log, "        fetchRelatedFastqcArtefactsForSeqTracks") {
-            return this.<FastqcProcessedFile> executeHelper(HQL_FIND_RELATED_FAST_QC_FOR_SEQ_TRACKS, [
+            return SeqTrack.executeQuery(HQL_FIND_RELATED_FAST_QC_FOR_SEQ_TRACKS, [
                     seqTracks: seqTracks,
-            ])
+            ]) as List<FastqcArtefactDataWithFastqcProcessedFile>
         }
     }
 
@@ -167,17 +175,4 @@ class FastqcArtefactService {
             } as Map<SeqTrack, List<RawSequenceFile>>
         }
     }
-
-    private <T extends Artefact> List<FastqcArtefactData<T>> executeHelper(String hql, Map<String, ?> parameters) {
-        return SeqTrack.executeQuery(hql, parameters).collect {
-            List<?> list = it as List<?>
-
-            new FastqcArtefactData<T>(
-                    list[INDEX_0] as WorkflowArtefact,
-                    list[INDEX_1] as T,
-                    list[INDEX_2] as Project
-            )
-        }
-    }
 }
-

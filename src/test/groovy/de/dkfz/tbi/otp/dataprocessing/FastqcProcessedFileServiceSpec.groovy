@@ -88,18 +88,4 @@ class FastqcProcessedFileServiceSpec extends Specification implements ServiceUni
         then:
         thrown(WorkflowException)
     }
-
-    @Unroll
-    void "useUuid, when called for #useWes, then return #useUuid"() {
-        given:
-        WorkflowVersion workflowVersion = useWes ? createWesFastqcWorkflowVersion() : createBashFastqcWorkflowVersion()
-
-        expect:
-        service.useUuid(workflowVersion) == useUuid
-
-        where:
-        useWes || useUuid
-        false  || false
-        true   || true
-    }
 }

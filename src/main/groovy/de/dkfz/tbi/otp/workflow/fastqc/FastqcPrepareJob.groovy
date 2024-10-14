@@ -21,11 +21,12 @@
  */
 package de.dkfz.tbi.otp.workflow.fastqc
 
+import grails.validation.ValidationException
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.tracking.Ticket
@@ -45,6 +46,9 @@ class FastqcPrepareJob extends AbstractPrepareJob implements FastqcShared {
     @Autowired
     FastqcDataFilesService fastqcDataFilesService
 
+    @Autowired
+    FastQcProcessedFileService fastQcProcessedFileService
+
     @Override
     protected boolean shouldWorkDirectoryBeProtected() {
         return false
@@ -53,9 +57,26 @@ class FastqcPrepareJob extends AbstractPrepareJob implements FastqcShared {
     @Override
     protected void doFurtherPreparation(WorkflowStep workflowStep) {
         SeqTrack seqTrack = getSeqTrack(workflowStep)
+        List<FastqcProcessedFile> fastqcProcessedFiles = getFastqcProcessedFiles(workflowStep)
         notificationCreator.setStartedForSeqTracks([seqTrack], Ticket.ProcessingStep.FASTQC)
         seqTrack.fastqcState = SeqTrack.DataProcessingState.IN_PROGRESS
         seqTrack.save(flush: true)
+
+        if (fastqcProcessedFiles.any {
+            !it.workDirectoryName
+        }) {
+            String workDirectory = fastQcProcessedFileService.buildWorkingPath(workflowStep.workflowRun.workflowVersion)
+            fastqcProcessedFiles.each {
+                it.workDirectoryName = workDirectory
+                // its necessary to update first the workDirectoryName value of all objects and save the change before the objects can be validated,
+                // since the validation includes a check, that the value of workDirectoryName is the same.
+                it.save(flush: true, validate: false)
+            }.each {
+                if (!it.validate()) {
+                    throw new ValidationException("Validation failed for FastqcProcessedFile with ID: ${it.id}", it.errors)
+                }
+            }
+        }
     }
 
     @Override

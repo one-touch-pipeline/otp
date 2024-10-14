@@ -30,7 +30,8 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflowExecution.decider.alignment.AlignmentArtefactData
-import de.dkfz.tbi.otp.workflowExecution.decider.fastqc.FastqcArtefactData
+import de.dkfz.tbi.otp.workflowExecution.decider.fastqc.FastqcArtefactDataWithSeqTrack
+import de.dkfz.tbi.otp.workflowExecution.decider.fastqc.FastqcArtefactDataWithFastqcProcessedFile
 
 import java.time.LocalDate
 
@@ -39,14 +40,10 @@ class FastqcArtefactServiceSpec extends HibernateSpec implements WorkflowSystemD
     private FastqcArtefactService fastqcArtefactService
 
     WorkflowArtefact workflowArtefactSeqTrack1
-    WorkflowArtefact workflowArtefactSeqTrack2
     WorkflowArtefact workflowArtefactFastqc1
-    WorkflowArtefact workflowArtefactFastqc2
 
     SeqTrack seqTrack1
-    SeqTrack seqTrack2
     FastqcProcessedFile fastqc1
-    FastqcProcessedFile fastqc2
 
     List<WorkflowArtefact> workflowArtefacts
     List<SeqType> seqTypes
@@ -90,21 +87,21 @@ class FastqcArtefactServiceSpec extends HibernateSpec implements WorkflowSystemD
         ]
     }
 
-    void "fetchSeqTrackArtefacts, when called for workflowArtefacts, then return FastqcArtefactData of expected SeqTrack"() {
+    void "fetchSeqTrackArtefacts, when called for workflowArtefacts, then return FastqcArtefactDataWithSeqTrack of expected SeqTrack"() {
         given:
         setupData()
 
-        FastqcArtefactData<SeqTrack> expected = createFastqcArtefactDataForSeqTrack(seqTrack1)
+        FastqcArtefactDataWithSeqTrack expected = createFastqcArtefactDataForSeqTrack(seqTrack1)
 
         when:
-        List<FastqcArtefactData<SeqTrack>> result = fastqcArtefactService.fetchSeqTrackArtefacts(workflowArtefacts)
+        List<FastqcArtefactDataWithSeqTrack> result = fastqcArtefactService.fetchSeqTrackArtefacts(workflowArtefacts)
 
         then:
         result.size() == 1
         result.first() == expected
     }
 
-    void "fetchRelatedFastqcArtefactsForSeqTracks, when called for seqTracks, then return AlignmentArtefactData of expected FastqcProcessedFile"() {
+    void "fetchRelatedFastqcArtefactsForSeqTracks, when called for seqTracks, then return FastqcArtefactDataWithFastqcProcessedFile of expected FastqcProcessedFile"() {
         given:
         setupData()
 
@@ -113,7 +110,7 @@ class FastqcArtefactServiceSpec extends HibernateSpec implements WorkflowSystemD
         ]
 
         when:
-        List<AlignmentArtefactData<FastqcProcessedFile>> result = fastqcArtefactService.fetchRelatedFastqcArtefactsForSeqTracks(seqTracks)
+        List<FastqcArtefactDataWithFastqcProcessedFile> result = fastqcArtefactService.fetchRelatedFastqcArtefactsForSeqTracks(seqTracks)
 
         then:
         result.size() == 1
@@ -205,20 +202,28 @@ class FastqcArtefactServiceSpec extends HibernateSpec implements WorkflowSystemD
         ] + parameters)
     }
 
-    private FastqcArtefactData<SeqTrack> createFastqcArtefactDataForSeqTrack(SeqTrack seqTrack) {
-        return new FastqcArtefactData<SeqTrack>(
+    private FastqcArtefactDataWithSeqTrack createFastqcArtefactDataForSeqTrack(SeqTrack seqTrack) {
+        return new FastqcArtefactDataWithSeqTrack(
                 seqTrack.workflowArtefact,
                 seqTrack,
                 seqTrack.project,
+                seqTrack.seqType,
+                seqTrack.individual,
+                seqTrack.sampleType,
+                seqTrack.sample,
+                seqTrack.run
         )
     }
 
-    private FastqcArtefactData<FastqcProcessedFile> createFastqcArtefactDataForFastqcProcessedFile(FastqcProcessedFile fastqcProcessedFile) {
+    private FastqcArtefactDataWithFastqcProcessedFile createFastqcArtefactDataForFastqcProcessedFile(FastqcProcessedFile fastqcProcessedFile) {
         SeqTrack seqTrack = fastqcProcessedFile.sequenceFile.seqTrack
-        return new FastqcArtefactData<FastqcProcessedFile>(
+        return new FastqcArtefactDataWithFastqcProcessedFile(
                 fastqcProcessedFile.workflowArtefact,
                 fastqcProcessedFile,
                 seqTrack.project,
+                seqTrack.seqType,
+                fastqcProcessedFile.sequenceFile,
+                seqTrack
         )
     }
 }

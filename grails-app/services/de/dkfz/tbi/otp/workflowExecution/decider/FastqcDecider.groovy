@@ -36,7 +36,8 @@ import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
 import de.dkfz.tbi.otp.workflow.fastqc.WesFastQcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
-import de.dkfz.tbi.otp.workflowExecution.decider.fastqc.FastqcArtefactData
+import de.dkfz.tbi.otp.workflowExecution.decider.fastqc.FastqcArtefactDataWithSeqTrack
+import de.dkfz.tbi.otp.workflowExecution.decider.fastqc.FastqcArtefactDataWithFastqcProcessedFile
 
 @Component
 @Transactional
@@ -45,9 +46,6 @@ class FastqcDecider implements Decider {
 
     @Autowired
     FastqcDataFilesService fastqcDataFilesService
-
-    @Autowired
-    FastQcProcessedFileService fastQcProcessedFileService
 
     @Autowired
     WorkflowArtefactService workflowArtefactService
@@ -68,7 +66,7 @@ class FastqcDecider implements Decider {
         final Workflow workflowBash = workflowService.getExactlyOneWorkflow(BashFastQcWorkflow.WORKFLOW)
         deciderResult.infos << "start decider for ${workflowWes} / ${workflowBash}".toString()
 
-        List<FastqcArtefactData<SeqTrack>> seqTrackData = fastqcArtefactService.fetchSeqTrackArtefacts(inputArtefacts)
+        List<FastqcArtefactDataWithSeqTrack> seqTrackData = fastqcArtefactService.fetchSeqTrackArtefacts(inputArtefacts)
         List<SeqTrack> seqTracks = seqTrackData*.artefact
 
         if (seqTracks.empty) {
@@ -79,7 +77,7 @@ class FastqcDecider implements Decider {
         }
 
         Map<SeqTrack, List<RawSequenceFile>> rawSequenceFilesMap = fastqcArtefactService.fetchRawSequenceFiles(seqTracks)
-        List<FastqcArtefactData<FastqcProcessedFile>> fastqcProcessedFileData = fastqcArtefactService.fetchRelatedFastqcArtefactsForSeqTracks(seqTracks)
+        List<FastqcArtefactDataWithFastqcProcessedFile> fastqcProcessedFileData = fastqcArtefactService.fetchRelatedFastqcArtefactsForSeqTracks(seqTracks)
 
         Map<Project, WorkflowVersionSelector> workflowVersionSelectorMap =
                 LogUsedTimeUtils.logUsedTime(log, "        fetch workflow selectors") {
@@ -90,33 +88,33 @@ class FastqcDecider implements Decider {
                     }
                 }
 
-        Map<SeqTrack, List<FastqcArtefactData<FastqcProcessedFile>>> groupedAdditionalDataPerSeqtrack =
+        Map<SeqTrack, List<FastqcArtefactDataWithFastqcProcessedFile>> groupedAdditionalDataPerSeqtrack =
                 LogUsedTimeUtils.logUsedTime(log, "        group additional Artefacts") {
                     fastqcProcessedFileData.groupBy {
-                        it.artefact.sequenceFile.seqTrack
+                        it.seqTrack
                     }
                 }
 
-        Map<Project, List<FastqcArtefactData<SeqTrack>>> groupSeqTrackPerProject =
+        Map<Project, List<FastqcArtefactDataWithSeqTrack>> groupSeqTrackPerProject =
                 LogUsedTimeUtils.logUsedTime(log, "        grouped per project") {
                     seqTrackData.groupBy {
-                        it.artefact.individual.project
+                        it.project
                     }
                 }
 
         LogUsedTimeUtils.logUsedTimeStartEnd(log, "        handle ${groupSeqTrackPerProject.size()} projects") {
-            groupSeqTrackPerProject.each { Project project, List<FastqcArtefactData<SeqTrack>> groups ->
+            groupSeqTrackPerProject.each { Project project, List<FastqcArtefactDataWithSeqTrack> groups ->
                 LogUsedTimeUtils.logUsedTimeStartEnd(log, "          handle project ${project} with ${groups.size()} groups") {
                     WorkflowVersionSelector matchingWorkflows = workflowVersionSelectorMap[project]
                     if (!matchingWorkflows) {
                         log.debug("            skip, since no workflow version is configured")
-                        deciderResult.warnings << "Fastqc: Ignore ${project}, since no workflow version configured".toString()
+                        deciderResult.warnings << "Fastqc: Ignore ${project}, since no workflow version is configured".toString()
                         return
                     }
                     deciderResult.infos << "Fastqc: Use ${matchingWorkflows.workflowVersion} for ${project}".toString()
 
-                    groups.each { FastqcArtefactData<SeqTrack> fastqcArtefactData ->
-                        List<FastqcArtefactData<FastqcProcessedFile>> additionalArtefacts = groupedAdditionalDataPerSeqtrack[fastqcArtefactData.artefact]
+                    groups.each { FastqcArtefactDataWithSeqTrack fastqcArtefactData ->
+                        List<FastqcArtefactDataWithFastqcProcessedFile> additionalArtefacts = groupedAdditionalDataPerSeqtrack[fastqcArtefactData.artefact]
                         deciderResult.add(createWorkflowRunsAndOutputArtefacts(
                                 fastqcArtefactData,
                                 additionalArtefacts,
@@ -134,8 +132,8 @@ class FastqcDecider implements Decider {
         return deciderResult
     }
 
-    protected DeciderResult createWorkflowRunsAndOutputArtefacts(FastqcArtefactData<SeqTrack> fastqcArtefactData,
-                                                                 List<FastqcArtefactData<FastqcProcessedFile>> additionalArtefacts,
+    protected DeciderResult createWorkflowRunsAndOutputArtefacts(FastqcArtefactDataWithSeqTrack fastqcArtefactData,
+                                                                 List<FastqcArtefactDataWithFastqcProcessedFile> additionalArtefacts,
                                                                  Map<SeqTrack, List<RawSequenceFile>> rawSequenceFilesMap,
                                                                  WorkflowVersionSelector matchingWorkflow) {
         DeciderResult deciderResult = new DeciderResult()
@@ -151,32 +149,28 @@ class FastqcDecider implements Decider {
         }
 
         Map<RawSequenceFile, FastqcProcessedFile> fastqcPerRawSequenceFile = additionalArtefacts ? additionalArtefacts.collectEntries {
-            [(it.artefact.sequenceFile): it.artefact]
+            [(it.rawSequenceFile): it.artefact]
         } : [:]
 
         WorkflowVersion workflowVersion = matchingWorkflow.workflowVersion
         Workflow workflow = workflowVersion.workflow
 
-        String workDirectory = fastQcProcessedFileService.buildWorkingPath(workflowVersion)
         Map<RawSequenceFile, FastqcProcessedFile> fastqcProcessedFiles = rawSequenceFiles.collectEntries {
             FastqcProcessedFile fastqcProcessedFile = fastqcPerRawSequenceFile[it] ?: new FastqcProcessedFile([
                     sequenceFile     : it,
-                    workDirectoryName: workDirectory,
-            ]).save(flush: false)
+                    workDirectoryName: "", //will be set in workflow, since validation requires query, which slow down the creation
+            ]).save(flush: false, deepValidate: false)
             [(it): fastqcProcessedFile]
         }
 
-        boolean useUuid = fastQcProcessedFileService.useUuid(workflowVersion)
-
-        List<String> displayName = generateWorkflowRunDisplayName(seqTrack)
-        String shortName = "${workflow}: ${seqTrack.individual.pid} " +
-                "${seqTrack.sampleType.displayName} ${seqTrack.seqType.displayNameWithLibraryLayout}"
-
+        List<String> displayName = generateWorkflowRunDisplayName(fastqcArtefactData)
+        String shortName = "${workflow}: ${fastqcArtefactData.individual.pid} " +
+                "${fastqcArtefactData.sampleType.displayName} ${fastqcArtefactData.seqType.displayNameWithLibraryLayout}"
         WorkflowRun run = workflowRunService.buildWorkflowRun(
                 workflow,
-                seqTrack.project.processingPriority,
-                useUuid ? null : fastqcDataFilesService.fastqcOutputDirectory(fastqcProcessedFiles.values().first()).toString(),
-                seqTrack.individual.project,
+                fastqcArtefactData.project.processingPriority,
+                null,
+                fastqcArtefactData.project,
                 displayName,
                 shortName,
                 workflowVersion,
@@ -186,7 +180,7 @@ class FastqcDecider implements Decider {
                 workflowRun: run,
                 role: BashFastQcWorkflow.INPUT_FASTQ,
                 workflowArtefact: fastqcArtefactData.workflowArtefact,
-        ).save(flush: false)
+        ).save(flush: false, deepValidate: false)
 
         List<WorkflowArtefact> result = []
 
@@ -196,11 +190,10 @@ class FastqcDecider implements Decider {
                     "${BashFastQcWorkflow.OUTPUT_FASTQC}_${i + 1}",
                     ArtefactType.FASTQC,
                     displayName,
-            )).save(flush: false)
-
+            )).save(flush: false, deepValidate: false)
             FastqcProcessedFile fastqcProcessedFile = fastqcProcessedFiles[it]
             fastqcProcessedFile.workflowArtefact = workflowArtefact
-            fastqcProcessedFile.save(flush: true)
+            fastqcProcessedFile.save(flush: false, deepValidate: false)
             result << workflowArtefact
             deciderResult.infos << "--> create fastqc file ${fastqcProcessedFile.toString().replaceAll('<br>', ', ')}".toString()
             deciderResult.newArtefacts << workflowArtefact
@@ -214,14 +207,14 @@ class FastqcDecider implements Decider {
      * @param seqTrack of the workflowRun
      * @return display name as list of strings
      */
-    private List<String> generateWorkflowRunDisplayName(SeqTrack seqTrack) {
+    private List<String> generateWorkflowRunDisplayName(FastqcArtefactDataWithSeqTrack fastqcArtefactData) {
         List<String> runDisplayName = [
-                "project: ${seqTrack.project.name}",
-                "individual: ${seqTrack.individual.displayName}",
-                "sampleType: ${seqTrack.sampleType.displayName}",
-                "seqType: ${seqTrack.seqType.displayNameWithLibraryLayout}",
-                "run: ${seqTrack.run.name}",
-                "lane: ${seqTrack.laneId}",
+                "project: ${fastqcArtefactData.project.name}",
+                "individual: ${fastqcArtefactData.individual.displayName}",
+                "sampleType: ${fastqcArtefactData.sampleType.displayName}",
+                "seqType: ${fastqcArtefactData.seqType.displayNameWithLibraryLayout}",
+                "run: ${fastqcArtefactData.run.name}",
+                "lane: ${fastqcArtefactData.artefact.laneId}",
         ]*.toString()
         return runDisplayName
     }
