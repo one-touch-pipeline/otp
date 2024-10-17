@@ -31,6 +31,7 @@ enum CellRangerParameters {
     SAMPLE('--sample', true),
     LOCAL_CORES('--localcores', true),
     LOCAL_MEM('--localmem', true),
+    CREATE_BAM('--create-bam', true), // required since v8
     EXPECT_CELLS('--expect-cells', false),
     FORCE_CELLS('--force-cells', false),
 

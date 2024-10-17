@@ -40,6 +40,7 @@ import de.dkfz.tbi.otp.utils.Md5SumService
 import de.dkfz.tbi.otp.utils.spreadsheet.*
 
 import java.nio.file.*
+import java.util.regex.Matcher
 
 @Transactional
 class CellRangerService {
@@ -150,6 +151,10 @@ class CellRangerService {
                 (CellRangerParameters.LOCAL_CORES.parameterName)  : localCores,
                 (CellRangerParameters.LOCAL_MEM.parameterName)    : localMem,
         ]
+        Matcher matcher = singleCellBamFile.mergingWorkPackage.config.programVersion =~ /cellranger\/(?<major>\d+)\.\d+\.\d+/
+        if (matcher.find() && (matcher.group("major") as int) >= 8) {
+            parameters[CellRangerParameters.CREATE_BAM.parameterName] = "true"
+        }
         if (workPackage.expectedCells) {
             parameters[CellRangerParameters.EXPECT_CELLS.parameterName] = workPackage.expectedCells.toString()
         }

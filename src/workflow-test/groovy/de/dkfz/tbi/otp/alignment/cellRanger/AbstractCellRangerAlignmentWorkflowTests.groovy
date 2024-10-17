@@ -61,7 +61,7 @@ abstract class AbstractCellRangerAlignmentWorkflowTests extends AbstractAlignmen
     void setup() {
         SessionUtils.withTransaction {
             Project project = createProject()
-            Individual individual = DomainFactory.createIndividual(project: project)
+            Individual individual = createIndividual(project: project)
             sample = createSample(individual: individual)
 
             seqType = createSeqType()
@@ -77,7 +77,7 @@ abstract class AbstractCellRangerAlignmentWorkflowTests extends AbstractAlignmen
             ConfigPerProjectAndSeqType conf = createConfig(
                     seqType         : seqType,
                     project         : project,
-                    programVersion  : "cellranger/7.1.0",
+                    programVersion  : "cellranger/8.0.1",
             )
 
             mwp = createMergingWorkPackage(
@@ -153,14 +153,14 @@ abstract class AbstractCellRangerAlignmentWorkflowTests extends AbstractAlignmen
         then:
         checkResults()
 
-        when: // check also setting mwp as final
+        when: 'setting the mwp as final'
         SessionUtils.withTransaction {
             doWithAuth(ADMIN) {
                 cellRangerConfigurationService.selectMwpAsFinal(CellRangerMergingWorkPackage.get(mwp.id))
             }
         }
 
-        then:
+        then: 'checking if mwp is final'
         SessionUtils.withTransaction {
             SingleCellBamFile singleCellBamFile = CollectionUtils.exactlyOneElement(SingleCellBamFile.all)
 
