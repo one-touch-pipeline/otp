@@ -20,7 +20,7 @@
 
 # Always use a .dump file, because all .sql files are automatically copied and executed, which will result in an error.
 
-FROM postgres:14.9-bullseye
+FROM postgres:15.8-bullseye
 
 MAINTAINER OTP Developers <otp-devel@dkfz-heidelberg.de>
 ADD dev_dump/apply-dev-dump.sh /docker-entrypoint-initdb.d/

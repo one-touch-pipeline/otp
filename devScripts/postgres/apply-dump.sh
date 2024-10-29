@@ -70,13 +70,18 @@ fi
 echo " .. found '${DUMP_TO_LOAD}'"
 du -hs "${DUMP_TO_LOAD}"
 
+PSQL="psql --username=otp  --dbname=otp --host=localhost --port=$PORT"
+${PSQL} --command "DROP SCHEMA public;"
+
 # Work around pg_restore failing due to an option set automatically by Postgres clients >= 9.3
 echo "Loading dump..."
 time pg_restore --username=postgres --host=localhost --port=$PORT --dbname=otp --jobs=$PRODUCTION_POSTGRES_JOB_COUNT --no-privileges "${DUMP_TO_LOAD}" || true
 
 echo "Dump loaded"
 
-PSQL="psql --username=otp --host=localhost --port=$PORT --dbname=otp"
+echo "correct owner"
+${PSQL} --username=postgres --command "ALTER SCHEMA public OWNER TO otp;"
+
 echo "Disabling workflows plans"
 ${PSQL} --command "update job_execution_plan set enabled='f' where enabled='t';"
 echo "Marking all not finished workflows as finished"
