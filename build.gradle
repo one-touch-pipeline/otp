@@ -481,7 +481,12 @@ dependencies {
     // needed for the wes swagger api @Nullable annotation
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
 
-    // needed for LinkedHashMultimap support
+    /**
+     * Guava is a set of core libraries that includes new collection types (such as multimap and multiset).
+     * Also it looks like its not used directly, in case a local BatchEuphoria version is used during build (use of gradle --include-build ../BatchEuphoria),
+     * the ast transformation fails if this library (com.google.guava:guava) is not added as direct dependency to OTP.
+     * The message says: <code>java.lang.RuntimeException: java.lang.NoClassDefFoundError: com.google.common.collect.LinkedHashMultimap</code>
+     */
     implementation 'com.google.guava:guava:33.3.1-jre'
 
     // for ContentType/MIME types
