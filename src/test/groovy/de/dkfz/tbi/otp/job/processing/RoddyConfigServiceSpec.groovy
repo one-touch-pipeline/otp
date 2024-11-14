@@ -110,21 +110,23 @@ class RoddyConfigServiceSpec extends Specification implements ServiceUnitTest<Ro
 
     void "test createRoddyXmlConfig"() {
         given:
+        service.roddyConfigValueService = new RoddyConfigValueService()
+
         String expected = """\
             <configuration name='config' configurationType='project' usedresourcessize='l'>
               <availableAnalyses>
                 <analysis id='analysis' configuration='ACONF' useplugin='WFNAME:1.2.3' killswitches='FilenameSection' />
               </availableAnalyses>
               <configurationvalues>
-                <cvalue name='ADAPTER_SEQ' value='ACGT' />
-                <cvalue name='BWA_VERSION' value='0.7.8' />
-                <cvalue name='inputBaseDirectory' value='/i' />
-                <cvalue name='INSERT_SIZE_LIMIT' value='1' />
-                <cvalue name='mergedBamSuffixList' value='asdf' />
-                <cvalue name='outputBaseDirectory' value='/o' />
-                <cvalue name='runSlimWorkflow' value='true' />
-                <cvalue name='UseBioBamBamSort' value='false' />
-                <cvalue name='useSingleEndProcessing' value='true' />
+                <cvalue name='ADAPTER_SEQ' value='ACGT' type='' />
+                <cvalue name='BWA_VERSION' value='0.7.8' type='' />
+                <cvalue name='inputBaseDirectory' value='/i' type='path' />
+                <cvalue name='INSERT_SIZE_LIMIT' value='1' type='integer' />
+                <cvalue name='mergedBamSuffixList' value='asdf' type='string' />
+                <cvalue name='outputBaseDirectory' value='/o' type='path' />
+                <cvalue name='runSlimWorkflow' value='true' type='boolean' />
+                <cvalue name='UseBioBamBamSort' value='false' type='boolean' />
+                <cvalue name='useSingleEndProcessing' value='true' type='' />
               </configurationvalues>
               <processingTools>
                 <tool name='alignAndPair' value='bwaMemSort.sh' basepath='qcPipeline' overrideresourcesets='true'>
@@ -151,7 +153,7 @@ class RoddyConfigServiceSpec extends Specification implements ServiceUnitTest<Ro
 
         when:
         String result = service.createRoddyXmlConfig(COMBINED_CONFIG,
-                [useSingleEndProcessing: "true", "ADAPTER_SEQ": "ACGT"],
+                [useSingleEndProcessing: [value: "true"], "ADAPTER_SEQ": [value: "ACGT"]],
                 "WFNAME", createWorkflowVersion(workflowVersion: "1.2.3"), "ACONF",
                 Paths.get("/i"), Paths.get("/o"),
                 "QNAME", true)
@@ -162,21 +164,30 @@ class RoddyConfigServiceSpec extends Specification implements ServiceUnitTest<Ro
 
     void "test createRoddyXmlConfig with overwriting defaults"() {
         given:
+        service.roddyConfigValueService = new RoddyConfigValueService()
+
         String expected = """\
             <configuration name='config' configurationType='project' usedresourcessize='l'>
               <availableAnalyses>
                 <analysis id='analysis' configuration='ACONF' useplugin='WFNAME:1.2.3' killswitches='FilenameSection' />
               </availableAnalyses>
               <configurationvalues>
-                <cvalue name='ADAPTER_SEQ' value='NNAAGGAANN' />
-                <cvalue name='BWA_VERSION' value='0.9.9' />
-                <cvalue name='inputBaseDirectory' value='/i' />
-                <cvalue name='INSERT_SIZE_LIMIT' value='5' />
-                <cvalue name='mergedBamSuffixList' value='asdf' />
-                <cvalue name='outputBaseDirectory' value='/o' />
-                <cvalue name='runSlimWorkflow' value='true' />
-                <cvalue name='UseBioBamBamSort' value='false' />
-                <cvalue name='useSingleEndProcessing' value='true' />
+                <cvalue name='ADAPTER_SEQ' value='NNAAGGAANN' type='' />
+                <cvalue name='BASH_ARRAY' value='( abc def ghi )' type='bashArray' />
+                <cvalue name='BOOLEAN' value='true' type='boolean' />
+                <cvalue name='BWA_VERSION' value='0.9.9' type='' />
+                <cvalue name='DOUBLE' value='5.7d' type='double' />
+                <cvalue name='FLOAT' value='5.6' type='float' />
+                <cvalue name='inputBaseDirectory' value='/i' type='path' />
+                <cvalue name='INSERT_SIZE_LIMIT' value='5' type='integer' />
+                <cvalue name='mergedBamSuffixList' value='asdf' type='string' />
+                <cvalue name='NO_TYPE' value='5' type='' />
+                <cvalue name='outputBaseDirectory' value='/o' type='path' />
+                <cvalue name='PATH' value='/tmp' type='path' />
+                <cvalue name='runSlimWorkflow' value='true' type='boolean' />
+                <cvalue name='STRING' value='5' type='string' />
+                <cvalue name='UseBioBamBamSort' value='false' type='boolean' />
+                <cvalue name='useSingleEndProcessing' value='true' type='' />
               </configurationvalues>
               <processingTools>
                 <tool name='alignAndPair' value='bwaMemSort.sh' basepath='qcPipeline' overrideresourcesets='true'>
@@ -204,10 +215,17 @@ class RoddyConfigServiceSpec extends Specification implements ServiceUnitTest<Ro
         when:
         String result = service.createRoddyXmlConfig(COMBINED_CONFIG,
                 [
-                        useSingleEndProcessing: "true",
-                        BWA_VERSION           : "0.9.9",
-                        ADAPTER_SEQ           : "NNAAGGAANN",
-                        INSERT_SIZE_LIMIT     : "5",
+                        useSingleEndProcessing: [value: "true", type: ''],
+                        BWA_VERSION           : [value: "0.9.9", type: ''],
+                        ADAPTER_SEQ           : [value: "NNAAGGAANN", type: ''],
+                        INSERT_SIZE_LIMIT     : [value: "5", type: 'integer'],
+                        NO_TYPE               : [value: "5"],
+                        BASH_ARRAY            : [value: "( abc def ghi )", type: 'bashArray'],
+                        STRING                : [value: "5", type: 'string'],
+                        BOOLEAN               : [value: "true", type: 'boolean'],
+                        FLOAT                 : [value: "5.6", type: 'float'],
+                        DOUBLE                : [value: "5.7d", type: 'double'],
+                        PATH                  : [value: "/tmp", type: 'path'],
                 ],
                 "WFNAME", createWorkflowVersion(workflowVersion: "1.2.3"), "ACONF",
                 Paths.get("/i"), Paths.get("/o"),
@@ -220,14 +238,16 @@ class RoddyConfigServiceSpec extends Specification implements ServiceUnitTest<Ro
     @Unroll
     void "test createRoddyXmlConfig with #name"() {
         given:
+        service.roddyConfigValueService = new RoddyConfigValueService()
+
         String expected = """\
             <configuration name='config' configurationType='project' usedresourcessize='l'>
               <availableAnalyses>
                 <analysis id='analysis' configuration='ACONF' useplugin='WFNAME:1.2.3' killswitches='FilenameSection' />
               </availableAnalyses>
               <configurationvalues>
-                <cvalue name='inputBaseDirectory' value='/i' />
-                <cvalue name='outputBaseDirectory' value='/o' />
+                <cvalue name='inputBaseDirectory' value='/i' type='path' />
+                <cvalue name='outputBaseDirectory' value='/o' type='path' />
               </configurationvalues>
               <processingTools />
               <filenames package='de.dkfz.b080.co.files' filestagesbase='de.dkfz.b080.co.files.COFileStage' />

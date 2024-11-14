@@ -48,8 +48,8 @@ class PanCancerExecuteJob extends RoddyAlignmentExecuteJob implements PanCancerS
     }
 
     @Override
-    protected final Map<String, String> getConfigurationValues(WorkflowStep workflowStep, String combinedConfig) {
-        Map<String, String> conf = super.getConfigurationValues(workflowStep, combinedConfig)
+    protected final Map<String, Map<String, String>> getConfigurationValues(WorkflowStep workflowStep, String combinedConfig) {
+        Map<String, Map<String, String>> conf = super.getConfigurationValues(workflowStep, combinedConfig)
 
         RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
 
@@ -58,8 +58,8 @@ class PanCancerExecuteJob extends RoddyAlignmentExecuteJob implements PanCancerS
         if (roddyBamFile.seqType.needsBedFile) {
             BedFile bedFile = roddyBamFile.bedFile
             File bedFilePath = bedFileService.filePath(bedFile) as File
-            conf.put("TARGET_REGIONS_FILE", bedFilePath.toString())
-            conf.put("TARGETSIZE", bedFile.targetSize.toString())
+            conf.put("TARGET_REGIONS_FILE", roddyConfigValueService.createPathValueMap(bedFilePath.toString()))
+            conf.put("TARGETSIZE", roddyConfigValueService.createValueMap(bedFile.targetSize.toString()))
         }
 
         return conf

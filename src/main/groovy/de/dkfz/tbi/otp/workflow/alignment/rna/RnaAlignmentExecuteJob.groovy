@@ -45,8 +45,8 @@ class RnaAlignmentExecuteJob extends RoddyAlignmentExecuteJob implements RnaAlig
     }
 
     @Override
-    protected final Map<String, String> getConfigurationValues(WorkflowStep workflowStep, String combinedConfig) {
-        Map<String, String> conf = super.getConfigurationValues(workflowStep, combinedConfig)
+    protected final Map<String, Map<String, String>> getConfigurationValues(WorkflowStep workflowStep, String combinedConfig) {
+        Map<String, Map<String, String>> conf = super.getConfigurationValues(workflowStep, combinedConfig)
 
         RnaRoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
 
@@ -56,10 +56,10 @@ class RnaAlignmentExecuteJob extends RoddyAlignmentExecuteJob implements RnaAlig
                 roddyBamFile.containedSeqTracks*.libraryPreparationKit*.reverseComplementAdapterSequence.unique().findAll(),
                 "There is not exactly one reverse complement adapter sequence available for fastq file(s) for the bam file ${roddyBamFile}")
         assert adapterSequence: "adapterSequence not found in the BAM file ${roddyBamFile}"
-        conf.put("ADAPTER_SEQ", adapterSequence)
+        conf.put("ADAPTER_SEQ", roddyConfigValueService.createValueMap(adapterSequence))
         // the following two variables need to be provided since Roddy does not use the normal path definition for RNA
-        conf.put("ALIGNMENT_DIR", getWorkDirectory(workflowStep).toString())
-        conf.put("outputBaseDirectory", getWorkDirectory(workflowStep).toString())
+        conf.put("ALIGNMENT_DIR", roddyConfigValueService.createPathValueMap(getWorkDirectory(workflowStep).toString()))
+        conf.put("outputBaseDirectory", roddyConfigValueService.createPathValueMap(getWorkDirectory(workflowStep).toString()))
 
         return conf
     }

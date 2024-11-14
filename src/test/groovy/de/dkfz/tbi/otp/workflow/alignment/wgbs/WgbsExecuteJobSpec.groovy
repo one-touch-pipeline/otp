@@ -25,6 +25,7 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.TempDir
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -167,21 +168,21 @@ class WgbsExecuteJobSpec extends Specification implements DataTest, WgbsAlignmen
         job.roddyConfigValueService.chromosomeIdentifierSortingService = new ChromosomeIdentifierSortingService()
 
         Map<String, String> expectedCommand = [
-                "sharedFilesBaseDirectory"         : null,
-                "INDEX_PREFIX"                     : "/fasta-path",
-                "GENOME_FA"                        : "/fasta-path",
-                "possibleControlSampleNamePrefixes": roddyBamFile.sampleType.dirName,
-                "possibleTumorSampleNamePrefixes"  : "",
-                "runFingerprinting"                : "false",
-                "CHROMOSOME_INDICES"               : "( adsf )",
-                "CYTOSINE_POSITIONS_INDEX"         : "/cytosine-position-index-path",
+                sharedFilesBaseDirectory         : [value: null, type: "path"],
+                INDEX_PREFIX                     : [value: "/fasta-path", type: "path"],
+                GENOME_FA                        : [value: "/fasta-path", type: "path"],
+                possibleControlSampleNamePrefixes: [value: roddyBamFile.sampleType.dirName],
+                possibleTumorSampleNamePrefixes  : [value: ""],
+                runFingerprinting                : [value: "false", type: "boolean"],
+                CHROMOSOME_INDICES               : [value: "( adsf )", type: "bashArray"],
+                CYTOSINE_POSITIONS_INDEX         : [value: "/cytosine-position-index-path", type: "path"],
         ]
 
         when:
         Map<String, String> actualCommand = job.getConfigurationValues(workflowStep, "{}")
 
         then:
-        new HashMap(expectedCommand) == new HashMap(actualCommand)
+        TestCase.assertContainSame(actualCommand, expectedCommand)
     }
 
     void "test getConfigurationValues, with fingerprinting"() {
@@ -198,22 +199,22 @@ class WgbsExecuteJobSpec extends Specification implements DataTest, WgbsAlignmen
         job.roddyConfigValueService.chromosomeIdentifierSortingService = new ChromosomeIdentifierSortingService()
 
         Map<String, String> expectedCommand = [
-                "sharedFilesBaseDirectory"         : null,
-                "INDEX_PREFIX"                     : "/fasta-path",
-                "GENOME_FA"                        : "/fasta-path",
-                "possibleControlSampleNamePrefixes": roddyBamFile.sampleType.dirName,
-                "possibleTumorSampleNamePrefixes"  : "",
-                "runFingerprinting"                : "true",
-                "fingerprintingSitesFile"          : "/fingerprint-path",
-                "CHROMOSOME_INDICES"               : "( adsf )",
-                "CYTOSINE_POSITIONS_INDEX"         : "/cytosine-position-index-path",
+                sharedFilesBaseDirectory         : [value: null, type: "path"],
+                INDEX_PREFIX                     : [value: "/fasta-path", type: "path"],
+                GENOME_FA                        : [value: "/fasta-path", type: "path"],
+                possibleControlSampleNamePrefixes: [value: roddyBamFile.sampleType.dirName],
+                possibleTumorSampleNamePrefixes  : [value: ""],
+                runFingerprinting                : [value: "true", type: "boolean"],
+                fingerprintingSitesFile          : [value: "/fingerprint-path", type: "path"],
+                CHROMOSOME_INDICES               : [value: "( adsf )", type: "bashArray"],
+                CYTOSINE_POSITIONS_INDEX         : [value: "/cytosine-position-index-path", type: "path"],
         ]
 
         when:
         Map<String, String> actualCommand = job.getConfigurationValues(workflowStep, "{}")
 
         then:
-        new HashMap(expectedCommand) == new HashMap(actualCommand)
+        TestCase.assertContainSame(actualCommand, expectedCommand)
     }
 
     void "test getAdditionalParameters"() {

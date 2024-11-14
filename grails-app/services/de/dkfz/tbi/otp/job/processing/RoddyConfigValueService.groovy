@@ -49,35 +49,37 @@ class RoddyConfigValueService {
 
     private static final ObjectMapper MAPPER = new ObjectMapper()
 
-    Map<String, String> getDefaultValues() {
+    Map<String, Map<String, String>> getDefaultValues() {
         return [
-                "BASE_REFERENCE_GENOME"   : processingOptionService.findOptionAsString(ProcessingOption.OptionName.BASE_PATH_REFERENCE_GENOME),
-                "sharedFilesBaseDirectory": processingOptionService.findOptionAsString(ProcessingOption.OptionName.RODDY_SHARED_FILES_BASE_DIRECTORY),
+                BASE_REFERENCE_GENOME   : createPathValueMap(processingOptionService.findOptionAsString(
+                        ProcessingOption.OptionName.BASE_PATH_REFERENCE_GENOME)),
+                sharedFilesBaseDirectory: createPathValueMap(processingOptionService.findOptionAsString(
+                        ProcessingOption.OptionName.RODDY_SHARED_FILES_BASE_DIRECTORY)),
         ]
     }
 
     /**
      * Generates configuration values that are common to all alignment workflows
      */
-    Map<String, String> getAlignmentValues(RoddyBamFile roddyBamFile, String combinedConfig) {
+    Map<String, Map<String, String>> getAlignmentValues(RoddyBamFile roddyBamFile, String combinedConfig) {
         assert roddyBamFile
 
-        Map<String, String> cValues = [:]
+        Map<String, Map<String, String>> cValues = [:]
 
         String referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome).absolutePath
-        cValues.put("INDEX_PREFIX", referenceGenomeFastaFile) // used for PanCancer pipeline
-        cValues.put("GENOME_FA", referenceGenomeFastaFile) // used for RNA pipeline
+        cValues.put("INDEX_PREFIX", createPathValueMap(referenceGenomeFastaFile)) // used for PanCancer pipeline
+        cValues.put("GENOME_FA", createPathValueMap(referenceGenomeFastaFile)) // used for RNA pipeline
 
-        cValues.put("possibleControlSampleNamePrefixes", roddyBamFile.sampleType.dirName)
-        cValues.put("possibleTumorSampleNamePrefixes", "")
+        cValues.put("possibleControlSampleNamePrefixes", createValueMap(roddyBamFile.sampleType.dirName))
+        cValues.put("possibleTumorSampleNamePrefixes", createValueMap(""))
 
         cValues.putAll(getAdapterTrimmingFileForPanCancer(roddyBamFile, combinedConfig))
 
         if (roddyBamFile.project.fingerPrinting && roddyBamFile.referenceGenome.fingerPrintingFileName) {
-            cValues.put("runFingerprinting", "true")
-            cValues.put("fingerprintingSitesFile", referenceGenomeService.fingerPrintingFile(roddyBamFile.referenceGenome).absolutePath)
+            cValues.put("runFingerprinting", createBooleanValueMap("true"))
+            cValues.put("fingerprintingSitesFile", createPathValueMap(referenceGenomeService.fingerPrintingFile(roddyBamFile.referenceGenome).absolutePath))
         } else {
-            cValues.put("runFingerprinting", "false")
+            cValues.put("runFingerprinting", createBooleanValueMap("false"))
         }
 
         return cValues
@@ -103,7 +105,7 @@ class RoddyConfigValueService {
     /**
      * This Method is used to get the Adapter trimming File for the PanCancer and WGBS Workflow.
      */
-    private Map<String, String> getAdapterTrimmingFileForPanCancer(RoddyBamFile roddyBamFile, String combinedConfig) {
+    protected Map<String, Map<String, String>> getAdapterTrimmingFileForPanCancer(RoddyBamFile roddyBamFile, String combinedConfig) {
         boolean adapterTrimming = isAdapterTrimmingUsedForPanCancer(combinedConfig)
 
         if (!roddyBamFile.seqType.isRna() && adapterTrimming) {
@@ -112,23 +114,23 @@ class RoddyConfigValueService {
                     "There is not exactly one adapter available for BAM file ${roddyBamFile}"
             )
             assert adapterFile: "There is exactly one adapter available for BAM file ${roddyBamFile}, but it is null"
-            return ["CLIP_INDEX": adapterFile]
+            return [CLIP_INDEX: createPathValueMap(adapterFile)]
         }
         return [:]
     }
 
-    Map<String, String> getFilesToMerge(RoddyBamFile roddyBamFile) {
+    Map<String, Map<String, String>> getFilesToMerge(RoddyBamFile roddyBamFile) {
         assert roddyBamFile
 
         List<Path> vbpSequenceFiles = roddyBamFile.seqTracks
                 .collectMany { SeqTrack seqTrack -> seqTrack.sequenceFilesWhereIndexFileIsFalse }
                 .sort { RawSequenceFile rawSequenceFile -> rawSequenceFile.mateNumber }
                 .collect { RawSequenceFile rawSequenceFile -> rawSequenceDataViewFileService.getFilePath(rawSequenceFile) }
-        return ["fastq_list": vbpSequenceFiles.join(";")]
+        return [fastq_list: createValueMap(vbpSequenceFiles.join(";"))]
     }
 
     @CompileDynamic
-    Map<String, String> getChromosomeIndexParameterWithMitochondrion(ReferenceGenome referenceGenome) {
+    Map<String, Map<String, String>> getChromosomeIndexParameterWithMitochondrion(ReferenceGenome referenceGenome) {
         assert referenceGenome
 
         List<String> chromosomeNames = ReferenceGenomeEntry.findAllByReferenceGenomeAndClassificationInList(referenceGenome,
@@ -137,11 +139,11 @@ class RoddyConfigValueService {
 
         List<String> sortedList = chromosomeIdentifierSortingService.sortIdentifiers(chromosomeNames)
 
-        return ["CHROMOSOME_INDICES": "( ${sortedList.join(' ')} )"]
+        return [CHROMOSOME_INDICES: createBashArrayValueMap("( ${sortedList.join(' ')} )")]
     }
 
     @CompileDynamic
-    Map<String, String> getChromosomeIndexParameterWithoutMitochondrion(ReferenceGenome referenceGenome) {
+    Map<String, Map<String, String>> getChromosomeIndexParameterWithoutMitochondrion(ReferenceGenome referenceGenome) {
         assert referenceGenome
 
         List<String> chromosomeNames = ReferenceGenomeEntry.findAllByReferenceGenomeAndClassificationInList(referenceGenome,
@@ -150,52 +152,45 @@ class RoddyConfigValueService {
 
         List<String> sortedList = chromosomeIdentifierSortingService.sortIdentifiers(chromosomeNames)
 
-        return [CHROMOSOME_INDICES: "( ${sortedList.join(' ')} )"]
+        return [CHROMOSOME_INDICES: createBashArrayValueMap("( ${sortedList.join(' ')} )")]
     }
 
-    Map<String, String> getAnalysisInputVersion1(BamFilePairAnalysis analysis) {
+    private Map<String, Map<String, String>> getAnalysisInputVersionCommon(BamFilePairAnalysis analysis, Closure<Path> extractPath) {
         AbstractBamFile bamFileDisease = analysis.sampleType1BamFile
         AbstractBamFile bamFileControl = analysis.sampleType2BamFile
 
-        Path bamFileDiseasePath = alignmentLinkFileServiceFactoryService.getService(bamFileDisease).getPathForFurtherProcessing(bamFileDisease)
-        Path bamFileControlPath = alignmentLinkFileServiceFactoryService.getService(bamFileControl).getPathForFurtherProcessing(bamFileControl)
+        Path bamFileDiseasePath = extractPath(bamFileDisease)
+        Path bamFileControlPath = extractPath(bamFileControl)
 
         return [
-                bamfile_list                     : "${bamFileControlPath};${bamFileDiseasePath}" as String,
-                sample_list                      : "${bamFileControl.sampleType.dirName};${bamFileDisease.sampleType.dirName}" as String,
-                possibleTumorSampleNamePrefixes  : bamFileDisease.sampleType.dirName,
-                possibleControlSampleNamePrefixes: bamFileControl.sampleType.dirName,
+                bamfile_list                     : createValueMap("${bamFileControlPath};${bamFileDiseasePath}" as String),
+                sample_list                      : createValueMap("${bamFileControl.sampleType.dirName};${bamFileDisease.sampleType.dirName}" as String),
+                possibleTumorSampleNamePrefixes  : createValueMap(bamFileDisease.sampleType.dirName),
+                possibleControlSampleNamePrefixes: createValueMap(bamFileControl.sampleType.dirName),
         ]
     }
 
-    Map<String, String> getAnalysisInputVersion2(BamFilePairAnalysis analysis, Path workDirectory) {
-        AbstractBamFile bamFileDisease = analysis.sampleType1BamFile
-        AbstractBamFile bamFileControl = analysis.sampleType2BamFile
-
-        Path bamFileDiseasePath = linkBamFileInWorkDirectory(bamFileDisease, workDirectory)
-        Path bamFileControlPath = linkBamFileInWorkDirectory(bamFileControl, workDirectory)
-
-        return sampleExtractionVersion2RoddyParameters + [
-                bamfile_list                     : "${bamFileControlPath};${bamFileDiseasePath}" as String,
-                sample_list                      : "${bamFileControl.sampleType.dirName};${bamFileDisease.sampleType.dirName}" as String,
-                possibleTumorSampleNamePrefixes  : bamFileDisease.sampleType.dirName,
-                possibleControlSampleNamePrefixes: bamFileControl.sampleType.dirName,
-        ]
+    Map<String, Map<String, String>> getAnalysisInputVersion1(BamFilePairAnalysis analysis) {
+        return getAnalysisInputVersionCommon(analysis) { AbstractBamFile bamFile ->
+            alignmentLinkFileServiceFactoryService.getService(bamFile).getPathForFurtherProcessing(bamFile)
+        }
     }
 
-    private Path linkBamFileInWorkDirectory(AbstractBamFile abstractBamFile, Path workDirectory) {
-        return workDirectory.resolve("${abstractBamFile.sampleType.dirName}_${abstractBamFile.individual.pid}_merged.mdup.bam")
+    Map<String, Map<String, String>> getAnalysisInputVersion2(BamFilePairAnalysis analysis, Path workDirectory) {
+        return sampleExtractionVersion2RoddyParameters + getAnalysisInputVersionCommon(analysis) { AbstractBamFile bamFile ->
+            workDirectory.resolve("${bamFile.sampleType.dirName}_${bamFile.individual.pid}_merged.mdup.bam")
+        }
     }
 
     /**
      * Parameters so Roddy properly parses sample type names containing '_'
      */
-    private Map<String, String> getSampleExtractionVersion2RoddyParameters() {
+    private Map<String, Map<String, String>> getSampleExtractionVersion2RoddyParameters() {
         return [
-                selectSampleExtractionMethod           : 'version_2',
-                matchExactSampleName                   : 'true',
-                allowSampleTerminationWithIndex        : 'false',
-                useLowerCaseFilenameForSampleExtraction: 'false',
+                selectSampleExtractionMethod           : createValueMap('version_2'),
+                matchExactSampleName                   : createBooleanValueMap('true'),
+                allowSampleTerminationWithIndex        : createBooleanValueMap('false'),
+                useLowerCaseFilenameForSampleExtraction: createBooleanValueMap('false'),
         ]
     }
 
@@ -215,5 +210,30 @@ class RoddyConfigValueService {
             ].join("\t")
         }.join("\n")
         return builder.toString()
+    }
+
+    Map<String, String> createValueMap(String value, RoddyConfigValueType type = RoddyConfigValueType.PLAIN) {
+        Map<String, String> map = [
+                value: value,
+        ]
+        if (type != RoddyConfigValueType.PLAIN) {
+            map.put("type", type.roddyType)
+            if (type == RoddyConfigValueType.BOOLEAN) {
+                assert value in ["true", "false"]: "Boolean value must be 'true' or 'false'"
+            }
+        }
+        return map
+    }
+
+    Map<String, String> createPathValueMap(String value) {
+        return createValueMap(value, RoddyConfigValueType.PATH)
+    }
+
+    Map<String, String> createBooleanValueMap(String value) {
+        return createValueMap(value, RoddyConfigValueType.BOOLEAN)
+    }
+
+    Map<String, String> createBashArrayValueMap(String value) {
+        return createValueMap(value, RoddyConfigValueType.BASH_ARRAY)
     }
 }

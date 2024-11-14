@@ -153,16 +153,16 @@ class SnvExecuteJobSpec extends Specification implements DataTest, WorkflowSyste
 
         expect:
         TestCase.assertContainSame(job.getConfigurationValues(workflowStep, "{}"), [
-                bamfile_list                     : "${tempDir.resolve('bam2')};${tempDir.resolve('bam1')}",
-                possibleControlSampleNamePrefixes: instance.sampleType2BamFile.sampleType.dirName,
-                possibleTumorSampleNamePrefixes  : instance.sampleType1BamFile.sampleType.dirName,
-                sample_list                      : "${instance.sampleType2BamFile.sampleType.dirName};${instance.sampleType1BamFile.sampleType.dirName}",
-                CHROMOSOME_LENGTH_FILE           : '/chr-length-path',
-                REFERENCE_GENOME                 : '/fasta-path',
-                CHR_SUFFIX                       : instance.referenceGenome.chromosomeSuffix,
-                CHR_PREFIX                       : instance.referenceGenome.chromosomePrefix,
-                CHROMOSOME_INDICES               : '( 1 2 3 4 5 X Y M )',
-                analysisMethodNameOnOutput       : 'work-dir',
+                bamfile_list                     : [value: "${tempDir.resolve('bam2')};${tempDir.resolve('bam1')}" as String],
+                possibleControlSampleNamePrefixes: [value: instance.sampleType2BamFile.sampleType.dirName],
+                possibleTumorSampleNamePrefixes  : [value: instance.sampleType1BamFile.sampleType.dirName],
+                sample_list                      : [value: "${instance.sampleType2BamFile.sampleType.dirName};${instance.sampleType1BamFile.sampleType.dirName}" as String],
+                CHROMOSOME_LENGTH_FILE           : [value: '/chr-length-path', type: "path"],
+                REFERENCE_GENOME                 : [value: '/fasta-path', type: "path"],
+                CHR_SUFFIX                       : [value: instance.referenceGenome.chromosomeSuffix],
+                CHR_PREFIX                       : [value: instance.referenceGenome.chromosomePrefix],
+                CHROMOSOME_INDICES               : [value: '( 1 2 3 4 5 X Y M )', type: "bashArray"],
+                analysisMethodNameOnOutput       : [value: 'work-dir'],
         ])
     }
 

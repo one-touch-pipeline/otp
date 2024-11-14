@@ -40,6 +40,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
+
 import java.nio.file.Path
 
 class RnaAlignmentExecuteJobSpec extends Specification implements DataTest, RnaAlignmentWorkflowDomainFactory, RoddyRnaFactory {
@@ -176,16 +177,16 @@ class RnaAlignmentExecuteJobSpec extends Specification implements DataTest, RnaA
         setupDataForGetConfigurationValues()
 
         Map<String, String> expectedCommand = [
-                "sharedFilesBaseDirectory"         : null,
-                "INDEX_PREFIX"                     : "/fasta-path",
-                "GENOME_FA"                        : "/fasta-path",
-                "possibleControlSampleNamePrefixes": roddyBamFile.sampleType.dirName,
-                "possibleTumorSampleNamePrefixes"  : "",
-                "runFingerprinting"                : "false",
-                "fastq_list"                       : fastqFilesAsString(roddyBamFile),
-                "ADAPTER_SEQ"                      : ADAPTER_SEQUENCE,
-                "ALIGNMENT_DIR"                    : tempDir.toString(),
-                "outputBaseDirectory"              : tempDir.toString(),
+                sharedFilesBaseDirectory         : [value: null, type: "path"],
+                INDEX_PREFIX                     : [value: "/fasta-path", type: "path"],
+                GENOME_FA                        : [value: "/fasta-path", type: "path"],
+                possibleControlSampleNamePrefixes: [value: roddyBamFile.sampleType.dirName],
+                possibleTumorSampleNamePrefixes  : [value: ""],
+                runFingerprinting                : [value: "false", type: "boolean"],
+                fastq_list                       : [value: fastqFilesAsString(roddyBamFile)],
+                ADAPTER_SEQ                      : [value: ADAPTER_SEQUENCE],
+                ALIGNMENT_DIR                    : [value: tempDir.toString(), type: "path"],
+                outputBaseDirectory              : [value: tempDir.toString(), type: "path"],
         ]
 
         when:

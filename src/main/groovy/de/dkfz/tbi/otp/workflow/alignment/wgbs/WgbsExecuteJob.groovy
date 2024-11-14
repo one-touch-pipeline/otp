@@ -62,15 +62,16 @@ class WgbsExecuteJob extends RoddyAlignmentExecuteJob implements PanCancerShared
     }
 
     @Override
-    protected final Map<String, String> getConfigurationValues(WorkflowStep workflowStep, String combinedConfig) {
-        Map<String, String> conf = super.getConfigurationValues(workflowStep, combinedConfig)
+    protected final Map<String, Map<String, String>> getConfigurationValues(WorkflowStep workflowStep, String combinedConfig) {
+        Map<String, Map<String, String>> conf = super.getConfigurationValues(workflowStep, combinedConfig)
 
         RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
 
         conf.putAll(roddyConfigValueService.getChromosomeIndexParameterWithMitochondrion(roddyBamFile.referenceGenome))
 
         if (roddyBamFile.referenceGenome.cytosinePositionsIndex) {
-            conf.put("CYTOSINE_POSITIONS_INDEX", referenceGenomeService.cytosinePositionIndexFilePath(roddyBamFile.referenceGenome).absolutePath)
+            File file = referenceGenomeService.cytosinePositionIndexFilePath(roddyBamFile.referenceGenome)
+            conf.put("CYTOSINE_POSITIONS_INDEX", roddyConfigValueService.createPathValueMap(file.absolutePath))
         } else {
             throw new JobFailedException("Cytosine position index for reference genome ${roddyBamFile.referenceGenome} is not defined.")
         }

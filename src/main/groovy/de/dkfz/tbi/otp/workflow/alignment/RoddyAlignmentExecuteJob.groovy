@@ -61,10 +61,11 @@ class RoddyAlignmentExecuteJob extends AbstractExecuteRoddyPipelineJob implement
     }
 
     @Override
-    protected Map<String, String> getConfigurationValues(WorkflowStep workflowStep, String combinedConfig) {
-        Map<String, String> conf = [:]
+    protected Map<String, Map<String, String>> getConfigurationValues(WorkflowStep workflowStep, String combinedConfig) {
+        Map<String, Map<String, String>> conf = [:]
 
-        conf.put("sharedFilesBaseDirectory", processingOptionService.findOptionAsString(ProcessingOption.OptionName.RODDY_SHARED_FILES_BASE_DIRECTORY))
+        conf.put("sharedFilesBaseDirectory", roddyConfigValueService.createPathValueMap(processingOptionService.findOptionAsString(
+                ProcessingOption.OptionName.RODDY_SHARED_FILES_BASE_DIRECTORY)))
 
         RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
         conf.putAll(roddyConfigValueService.getAlignmentValues(roddyBamFile, combinedConfig))

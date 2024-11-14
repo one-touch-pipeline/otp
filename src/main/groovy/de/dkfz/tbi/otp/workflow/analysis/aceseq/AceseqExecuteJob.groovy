@@ -66,7 +66,7 @@ class AceseqExecuteJob extends AbstractExecuteRoddyPipelineJob implements Aceseq
     }
 
     @Override
-    protected Map<String, String> getConfigurationValues(WorkflowStep workflowStep, String combinedConfig) {
+    protected Map<String, Map<String, String>> getConfigurationValues(WorkflowStep workflowStep, String combinedConfig) {
         AceseqInstance aceseqInstance = getAceseqInstance(workflowStep)
 
         Path workDirectory = aceseqWorkFileService.getDirectoryPath(aceseqInstance)
@@ -78,24 +78,26 @@ class AceseqExecuteJob extends AbstractExecuteRoddyPipelineJob implements Aceseq
         File chromosomeLengthFile = referenceGenomeService.chromosomeLengthFile(bamFileDisease.mergingWorkPackage)
         File gcContentFile = referenceGenomeService.gcContentFile(bamFileDisease.mergingWorkPackage)
 
-        return roddyConfigValueService.getAnalysisInputVersion1(aceseqInstance) + [
-                REFERENCE_GENOME              : referenceGenomeFastaFile.path,
-                CHROMOSOME_LENGTH_FILE        : chromosomeLengthFile.path,
-                CHR_SUFFIX                    : referenceGenome.chromosomeSuffix,
-                CHR_PREFIX                    : referenceGenome.chromosomePrefix,
+        Map<String, Map<String, String>> additionalValues = [
+                REFERENCE_GENOME              : roddyConfigValueService.createPathValueMap(referenceGenomeFastaFile.path),
+                CHROMOSOME_LENGTH_FILE        : roddyConfigValueService.createPathValueMap(chromosomeLengthFile.path),
+                CHR_SUFFIX                    : roddyConfigValueService.createValueMap(referenceGenome.chromosomeSuffix),
+                CHR_PREFIX                    : roddyConfigValueService.createValueMap(referenceGenome.chromosomePrefix),
 
-                aceseqOutputDirectory         : workDirectory.toString(),
-                svOutputDirectory             : workDirectory.toString(),
-                MAPPABILITY_FILE              : referenceGenome.mappabilityFile,
-                REPLICATION_TIME_FILE         : referenceGenome.replicationTimeFile,
-                GC_CONTENT_FILE               : gcContentFile.path,
-                GENETIC_MAP_FILE              : referenceGenome.geneticMapFile,
-                KNOWN_HAPLOTYPES_FILE         : referenceGenome.knownHaplotypesFile,
-                KNOWN_HAPLOTYPES_LEGEND_FILE  : referenceGenome.knownHaplotypesLegendFile,
-                GENETIC_MAP_FILE_X            : referenceGenome.geneticMapFileX,
-                KNOWN_HAPLOTYPES_FILE_X       : referenceGenome.knownHaplotypesFileX,
-                KNOWN_HAPLOTYPES_LEGEND_FILE_X: referenceGenome.knownHaplotypesLegendFileX,
+                aceseqOutputDirectory         : roddyConfigValueService.createPathValueMap(workDirectory.toString()),
+                svOutputDirectory             : roddyConfigValueService.createPathValueMap(workDirectory.toString()),
+                MAPPABILITY_FILE              : roddyConfigValueService.createPathValueMap(referenceGenome.mappabilityFile),
+                REPLICATION_TIME_FILE         : roddyConfigValueService.createPathValueMap(referenceGenome.replicationTimeFile),
+                GC_CONTENT_FILE               : roddyConfigValueService.createPathValueMap(gcContentFile.path),
+                GENETIC_MAP_FILE              : roddyConfigValueService.createPathValueMap(referenceGenome.geneticMapFile),
+                KNOWN_HAPLOTYPES_FILE         : roddyConfigValueService.createPathValueMap(referenceGenome.knownHaplotypesFile),
+                KNOWN_HAPLOTYPES_LEGEND_FILE  : roddyConfigValueService.createPathValueMap(referenceGenome.knownHaplotypesLegendFile),
+                GENETIC_MAP_FILE_X            : roddyConfigValueService.createPathValueMap(referenceGenome.geneticMapFileX),
+                KNOWN_HAPLOTYPES_FILE_X       : roddyConfigValueService.createPathValueMap(referenceGenome.knownHaplotypesFileX),
+                KNOWN_HAPLOTYPES_LEGEND_FILE_X: roddyConfigValueService.createPathValueMap(referenceGenome.knownHaplotypesLegendFileX),
         ]
+
+        return roddyConfigValueService.getAnalysisInputVersion1(aceseqInstance) + additionalValues
     }
 
     @Override

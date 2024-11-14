@@ -80,7 +80,7 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
         findOrCreateProcessingOption(name: ProcessingOption.OptionName.RODDY_SHARED_FILES_BASE_DIRECTORY, value: "/asdf")
 
         expect:
-        service.defaultValues == ["sharedFilesBaseDirectory": "/asdf", "BASE_REFERENCE_GENOME": "/qwertz"]
+        service.defaultValues == ["BASE_REFERENCE_GENOME": [value: "/qwertz", type: "path"], "sharedFilesBaseDirectory": [value: "/asdf", type: "path"]]
     }
 
     void "test getConfigurationValues, with whole genome seq. type, with fingerprinting"() {
@@ -95,12 +95,12 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
         }
 
         Map<String, String> expectedCommand = [
-                "INDEX_PREFIX"                     : "/fasta-path",
-                "GENOME_FA"                        : "/fasta-path",
-                "possibleControlSampleNamePrefixes": "${roddyBamFile.sampleType.dirName}",
-                "possibleTumorSampleNamePrefixes"  : "",
-                "runFingerprinting"                : "true",
-                "fingerprintingSitesFile"          : "/fingerprint-path",
+                INDEX_PREFIX                     : [value: "/fasta-path", type: "path"],
+                GENOME_FA                        : [value: "/fasta-path", type: "path"],
+                possibleControlSampleNamePrefixes: [value: "${roddyBamFile.sampleType.dirName}"],
+                possibleTumorSampleNamePrefixes  : [value: ""],
+                runFingerprinting                : [value: "true", type: "boolean"],
+                fingerprintingSitesFile          : [value: "/fingerprint-path", type: "path"],
         ]
 
         when:
@@ -119,11 +119,11 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
         }
 
         Map<String, String> expectedCommand = [
-                "INDEX_PREFIX"                     : "/fasta-path",
-                "GENOME_FA"                        : "/fasta-path",
-                "possibleControlSampleNamePrefixes": "${roddyBamFile.sampleType.dirName}",
-                "possibleTumorSampleNamePrefixes"  : "",
-                "runFingerprinting"                : "false",
+                INDEX_PREFIX                     : [value: "/fasta-path", type: "path"],
+                GENOME_FA                        : [value: "/fasta-path", type: "path"],
+                possibleControlSampleNamePrefixes: [value: "${roddyBamFile.sampleType.dirName}"],
+                possibleTumorSampleNamePrefixes  : [value: ""],
+                runFingerprinting                : [value: "false", type: "boolean"],
         ]
 
         when:
@@ -143,11 +143,11 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
         }
 
         Map<String, String> expectedCommand = [
-                "INDEX_PREFIX"                     : "/fasta-path",
-                "GENOME_FA"                        : "/fasta-path",
-                "possibleControlSampleNamePrefixes": "${roddyBamFile.sampleType.dirName}",
-                "possibleTumorSampleNamePrefixes"  : "",
-                "runFingerprinting"                : "false",
+                INDEX_PREFIX                     : [value: "/fasta-path", type: "path"],
+                GENOME_FA                        : [value: "/fasta-path", type: "path"],
+                possibleControlSampleNamePrefixes: [value: "${roddyBamFile.sampleType.dirName}"],
+                possibleTumorSampleNamePrefixes  : [value: ""],
+                runFingerprinting                : [value: "false", type: "boolean"],
         ]
 
         when:
@@ -162,7 +162,7 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
         RoddyBamFile roddyBamFile = createBamFile()
 
         expect:
-        [:] == service.getAdapterTrimmingFileForPanCancer(roddyBamFile, "{}")
+        service.getAdapterTrimmingFileForPanCancer(roddyBamFile, "{}") == [:]
     }
 
     void "test getAdapterTrimmingFileForPanCancer, adapter trimming enabled"() {
@@ -176,7 +176,7 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
         String config = '{"RODDY": {"cvalues": {"useAdaptorTrimming": {"value": "true"}}}}'
 
         expect:
-        ["CLIP_INDEX": path] == service.getAdapterTrimmingFileForPanCancer(roddyBamFile, config)
+        service.getAdapterTrimmingFileForPanCancer(roddyBamFile, config) == [CLIP_INDEX: [value: path, type: "path"]]
     }
 
     void "test getRunArriba returns true, when both RUN_ARRIBA and useSingleEndProcessing are null"() {
@@ -248,6 +248,61 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
         createBamFile()
 
         expect:
-        service.getFilesToMerge(roddyBamFile) == ["fastq_list": '/completePath/DataFileFileName_R1.gz;/completePath/DataFileFileName_R2.gz']
+        service.getFilesToMerge(roddyBamFile) == [fastq_list: [value: '/completePath/DataFileFileName_R1.gz;/completePath/DataFileFileName_R2.gz']]
+    }
+
+    void "createValueMap, when value given, return map without type"() {
+        given:
+        String value = "value"
+
+        expect:
+        service.createValueMap(value) == [value: value]
+    }
+
+    void "createPathValueMap, when value given, return map with type 'path'"() {
+        given:
+        String value = "path"
+
+        expect:
+        service.createPathValueMap(value) == [value: value, type: 'path']
+    }
+
+    @Unroll
+    void "createBooleanValueMap, when value is '#value', return map with type 'boolean'"() {
+        expect:
+        service.createBooleanValueMap(value) == [value: value, type: 'boolean']
+
+        where:
+        value << [
+                true,
+                false,
+        ]*.toString()
+    }
+
+    @Unroll
+    void "createBooleanValueMap, when value is '#value', throw assertion error"() {
+        when:
+        service.createBooleanValueMap(value)
+
+        then:
+        thrown(AssertionError)
+
+        where:
+        value << [
+                null,
+                '',
+                '0',
+                '1',
+                't',
+                'f',
+        ]
+    }
+
+    void "createBashArrayValueMap, when value given, return map with type 'bashArray'"() {
+        given:
+        String value = "bashArray"
+
+        expect:
+        service.createBashArrayValueMap(value) == [value: value, type: 'bashArray']
     }
 }

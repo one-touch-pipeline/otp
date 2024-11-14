@@ -259,7 +259,7 @@ GParsPool.withPool(parallel) {
 
                 // parameter
                 String combinedConfig = fragmentJson
-                Map<String, String> specificConfig = [:]
+                Map<String, Map<String, String>> specificConfig = [:]
                 Path inputDir = fileSystem.getPath('$USERHOME/temp/testproject/vbp')// value taken from roddy base config to have no difference
                 Path outputDir = fileSystem.getPath('$USERHOME/temp/testproject/rpp')// value taken from roddy base config to have no difference
                 String queue = 'devel'

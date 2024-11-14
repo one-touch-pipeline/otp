@@ -144,24 +144,24 @@ class SophiaExecuteJobSpec extends Specification implements DataTest, WorkflowSy
 
         expect:
         TestCase.assertContainSame(job.getConfigurationValues(workflowStep, "{}"), [
-                bamfile_list                           : "${tempDir.resolve("${instance.sampleType2BamFile.sampleType.dirName}_${instance.sampleType2BamFile.individual.pid}_merged.mdup.bam")};" +
-                        "${tempDir.resolve("${instance.sampleType1BamFile.sampleType.dirName}_${instance.sampleType1BamFile.individual.pid}_merged.mdup.bam")}",
-                possibleControlSampleNamePrefixes      : instance.sampleType2BamFile.sampleType.dirName,
-                possibleTumorSampleNamePrefixes        : instance.sampleType1BamFile.sampleType.dirName,
-                sample_list                            : "${instance.sampleType2BamFile.sampleType.dirName};${instance.sampleType1BamFile.sampleType.dirName}",
-                selectSampleExtractionMethod           : 'version_2',
-                matchExactSampleName                   : 'true',
-                allowSampleTerminationWithIndex        : 'false',
-                useLowerCaseFilenameForSampleExtraction: 'false',
-                controlDefaultReadLength               : '100',
-                controlMedianIsize                     : '3991.0',
-                controlProperPairPercentage            : '91.32632075',
-                controlStdIsizePercentage              : '231.0',
-                tumorDefaultReadLength                 : '100',
-                tumorMedianIsize                       : '3991.0',
-                tumorProperPairPercentage              : '91.32632075',
-                tumorStdIsizePercentage                : '231.0',
-                insertsizesfile_list                   : "${tempDir.resolve("insert-size-2")};${tempDir.resolve("insert-size-1")}",
+                bamfile_list                           : [value: "${tempDir.resolve("${instance.sampleType2BamFile.sampleType.dirName}_${instance.sampleType2BamFile.individual.pid}_merged.mdup.bam")};" +
+                        "${tempDir.resolve("${instance.sampleType1BamFile.sampleType.dirName}_${instance.sampleType1BamFile.individual.pid}_merged.mdup.bam")}" as String],
+                possibleControlSampleNamePrefixes      : [value: instance.sampleType2BamFile.sampleType.dirName],
+                possibleTumorSampleNamePrefixes        : [value: instance.sampleType1BamFile.sampleType.dirName],
+                sample_list                            : [value: "${instance.sampleType2BamFile.sampleType.dirName};${instance.sampleType1BamFile.sampleType.dirName}" as String],
+                selectSampleExtractionMethod           : [value: 'version_2'],
+                matchExactSampleName                   : [value: 'true', type: "boolean"],
+                allowSampleTerminationWithIndex        : [value: 'false', type: "boolean"],
+                useLowerCaseFilenameForSampleExtraction: [value: 'false', type: "boolean"],
+                controlDefaultReadLength               : [value: '100'],
+                controlMedianIsize                     : [value: '3991.0'],
+                controlProperPairPercentage            : [value: '91.32632075'],
+                controlStdIsizePercentage              : [value: '231.0'],
+                tumorDefaultReadLength                 : [value: '100'],
+                tumorMedianIsize                       : [value: '3991.0'],
+                tumorProperPairPercentage              : [value: '91.32632075'],
+                tumorStdIsizePercentage                : [value: '231.0'],
+                insertsizesfile_list                   : [value: "${tempDir.resolve("insert-size-2")};${tempDir.resolve("insert-size-1")}"],
         ])
     }
 

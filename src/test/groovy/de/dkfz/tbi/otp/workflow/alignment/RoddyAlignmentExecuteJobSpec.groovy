@@ -39,6 +39,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
+
 import java.nio.file.Path
 
 class RoddyAlignmentExecuteJobSpec extends Specification implements DataTest, PanCancerWorkflowDomainFactory, IsRoddy {
@@ -154,9 +155,9 @@ class RoddyAlignmentExecuteJobSpec extends Specification implements DataTest, Pa
 
         where:
         // created objects in where part are not deleted during cleanup (in integration tests), hence we use closures for consistency also in unit test
-        result          || seqTypeClosure
-        "qcAnalysis"    || { DomainFactory.createChipSeqType() }
-        "qcAnalysis"    || { DomainFactory.createWholeGenomeSeqType() }
+        result       || seqTypeClosure
+        "qcAnalysis" || { DomainFactory.createChipSeqType() }
+        "qcAnalysis" || { DomainFactory.createWholeGenomeSeqType() }
     }
 
     void "test getFileNamesKillSwitch"() {
@@ -169,12 +170,12 @@ class RoddyAlignmentExecuteJobSpec extends Specification implements DataTest, Pa
         setupDataForGetConfigurationValues()
 
         Map<String, String> expectedCommand = [
-                "sharedFilesBaseDirectory"         : null,
-                "INDEX_PREFIX"                     : "/fasta-path",
-                "GENOME_FA"                        : "/fasta-path",
-                "possibleControlSampleNamePrefixes": roddyBamFile.sampleType.dirName,
-                "possibleTumorSampleNamePrefixes"  : "",
-                "runFingerprinting"                : "false",
+                sharedFilesBaseDirectory         : [value: null, type: "path"],
+                INDEX_PREFIX                     : [value: "/fasta-path", type: "path"],
+                GENOME_FA                        : [value: "/fasta-path", type: "path"],
+                possibleControlSampleNamePrefixes: [value: roddyBamFile.sampleType.dirName],
+                possibleTumorSampleNamePrefixes  : [value: ""],
+                runFingerprinting                : [value: "false", type: "boolean"],
         ]
 
         when:

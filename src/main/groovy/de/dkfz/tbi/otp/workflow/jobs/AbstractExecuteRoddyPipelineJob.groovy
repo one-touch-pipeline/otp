@@ -132,7 +132,7 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
 
     protected abstract boolean getFilenameSectionKillSwitch()
 
-    protected abstract Map<String, String> getConfigurationValues(WorkflowStep workflowStep, String combinedConfig)
+    protected abstract Map<String, Map<String, String>> getConfigurationValues(WorkflowStep workflowStep, String combinedConfig)
 
     protected abstract List<String> getAdditionalParameters(WorkflowStep workflowStep)
 

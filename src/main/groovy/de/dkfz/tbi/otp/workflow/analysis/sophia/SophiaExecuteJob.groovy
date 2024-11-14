@@ -68,7 +68,7 @@ class SophiaExecuteJob extends AbstractExecuteRoddyPipelineJob implements Sophia
     }
 
     @Override
-    protected Map<String, String> getConfigurationValues(WorkflowStep workflowStep, String combinedConfig) {
+    protected Map<String, Map<String, String>> getConfigurationValues(WorkflowStep workflowStep, String combinedConfig) {
         SophiaInstance sophiaInstance = getSophiaInstance(workflowStep)
 
         Path workDirectory = sophiaWorkFileService.getDirectoryPath(sophiaInstance)
@@ -85,17 +85,19 @@ class SophiaExecuteJob extends AbstractExecuteRoddyPipelineJob implements Sophia
         SophiaWorkflowQualityAssessment bamFileDiseaseQualityAssessment = bamFileDisease.qualityAssessment as SophiaWorkflowQualityAssessment
         SophiaWorkflowQualityAssessment bamFileControlQualityAssessment = bamFileControl.qualityAssessment as SophiaWorkflowQualityAssessment
 
-        return roddyConfigValueService.getAnalysisInputVersion2(sophiaInstance, workDirectory) + [
-                insertsizesfile_list             : "${controlInsertSizeFile};${diseaseInsertSizeFile}" as String,
-                controlMedianIsize               : bamFileControlQualityAssessment.insertSizeMedian.toString(),
-                tumorMedianIsize                 : bamFileDiseaseQualityAssessment.insertSizeMedian.toString(),
-                controlStdIsizePercentage        : bamFileControlQualityAssessment.insertSizeCV.toString(),
-                tumorStdIsizePercentage          : bamFileDiseaseQualityAssessment.insertSizeCV.toString(),
-                controlProperPairPercentage      : bamFileControlQualityAssessment.percentProperlyPaired.toString(),
-                tumorProperPairPercentage        : bamFileDiseaseQualityAssessment.percentProperlyPaired.toString(),
-                controlDefaultReadLength         : controlDefaultReadLength.toString(),
-                tumorDefaultReadLength           : tumorDefaultReadLength.toString(),
+        Map<String, Map<String, String>> additionalValues = [
+                insertsizesfile_list       : roddyConfigValueService.createValueMap("${controlInsertSizeFile};${diseaseInsertSizeFile}" as String),
+                controlMedianIsize         : roddyConfigValueService.createValueMap(bamFileControlQualityAssessment.insertSizeMedian.toString()),
+                tumorMedianIsize           : roddyConfigValueService.createValueMap(bamFileDiseaseQualityAssessment.insertSizeMedian.toString()),
+                controlStdIsizePercentage  : roddyConfigValueService.createValueMap(bamFileControlQualityAssessment.insertSizeCV.toString()),
+                tumorStdIsizePercentage    : roddyConfigValueService.createValueMap(bamFileDiseaseQualityAssessment.insertSizeCV.toString()),
+                controlProperPairPercentage: roddyConfigValueService.createValueMap(bamFileControlQualityAssessment.percentProperlyPaired.toString()),
+                tumorProperPairPercentage  : roddyConfigValueService.createValueMap(bamFileDiseaseQualityAssessment.percentProperlyPaired.toString()),
+                controlDefaultReadLength   : roddyConfigValueService.createValueMap(controlDefaultReadLength.toString()),
+                tumorDefaultReadLength     : roddyConfigValueService.createValueMap(tumorDefaultReadLength.toString()),
         ]
+
+        return roddyConfigValueService.getAnalysisInputVersion2(sophiaInstance, workDirectory) + additionalValues as Map<String, Map<String, String>>
     }
 
     @Override

@@ -36,6 +36,8 @@ class RoddyConfigService {
     final static String ANALYSIS_ID = "analysis"
     final static String CONFIGURATION_NAME = "config"
 
+    RoddyConfigValueService roddyConfigValueService
+
     private static final String SCHEMA = '''
         {
           "$schema": "https://json-schema.org/draft/2019-09/schema",
@@ -241,7 +243,7 @@ class RoddyConfigService {
     @SuppressWarnings(["Indentation"])
     String createRoddyXmlConfig(
             String combinedConfig,
-            Map<String, String> specificConfig,
+            Map<String, Map<String, String>> specificConfig,
             String workflowName,
             WorkflowVersion workflowVersion,
             String analysisConfiguration,
@@ -262,13 +264,16 @@ class RoddyConfigService {
         JsonNode combinedConfigJson = MAPPER.readTree(combinedConfig)
         JsonNode roddy = combinedConfigJson.get("RODDY")
 
-        Map<String, String> cValues = [:]
+        Map<String, Map<String, String>> cValues = [:]
         roddy?.get("cvalues")?.fields()?.each {
-            cValues.put(it.key, it.value.get('value').asText())
+            cValues.put(it.key, [
+                    value: it.value.get('value')?.asText(),
+                    type : it.value.get('type')?.asText(),
+            ])
         }
         cValues.putAll(specificConfig)
-        cValues.put("inputBaseDirectory", inputDir)
-        cValues.put("outputBaseDirectory", outputDir)
+        cValues.put("inputBaseDirectory", roddyConfigValueService.createPathValueMap(inputDir.toString()))
+        cValues.put("outputBaseDirectory", roddyConfigValueService.createPathValueMap(outputDir.toString()))
 
         StringWriter writer = new StringWriter()
         MarkupBuilder xml = new MarkupBuilder(writer)
@@ -286,7 +291,13 @@ class RoddyConfigService {
                 cValues.sort { a, b ->
                     String.CASE_INSENSITIVE_ORDER.compare(a.key, b.key)
                 }.each { conf ->
-                    cvalue(name: conf.key, value: conf.value)
+                    if (conf.value instanceof Map) {
+                        String confValue = conf.value.value
+                        String confType = conf.value.type ?: ''
+                        cvalue(name: conf.key, value: confValue, type: confType)
+                    } else {
+                        throw new IllegalArgumentException("Invalid configuration value type: ${conf}")
+                    }
                 }
             }
             processingTools {

@@ -64,7 +64,7 @@ class SnvExecuteJob extends AbstractExecuteRoddyPipelineJob implements SnvWorkfl
     }
 
     @Override
-    protected Map<String, String> getConfigurationValues(WorkflowStep workflowStep, String combinedConfig) {
+    protected Map<String, Map<String, String>> getConfigurationValues(WorkflowStep workflowStep, String combinedConfig) {
         RoddySnvCallingInstance roddySnvCallingInstance = getSnvInstance(workflowStep)
 
         Path resultDirectory = snvWorkFileService.getDirectoryPath(roddySnvCallingInstance)
@@ -77,14 +77,16 @@ class SnvExecuteJob extends AbstractExecuteRoddyPipelineJob implements SnvWorkfl
 
         Path individualPath = individualService.getViewByPidPath(roddySnvCallingInstance.individual, roddySnvCallingInstance.seqType)
 
-        return roddyConfigValueService.getAnalysisInputVersion1(roddySnvCallingInstance) + [
-                REFERENCE_GENOME                 : referenceGenomeFastaFile.path,
-                CHROMOSOME_LENGTH_FILE           : chromosomeLengthFile.path,
-                CHR_SUFFIX                       : referenceGenome.chromosomeSuffix,
-                CHR_PREFIX                       : referenceGenome.chromosomePrefix,
+        Map<String, Map<String, String>> additionalValues = [
+                REFERENCE_GENOME          : roddyConfigValueService.createPathValueMap(referenceGenomeFastaFile.path.toString()),
+                CHROMOSOME_LENGTH_FILE    : roddyConfigValueService.createPathValueMap(chromosomeLengthFile.path.toString()),
+                CHR_SUFFIX                : roddyConfigValueService.createValueMap(referenceGenome.chromosomeSuffix),
+                CHR_PREFIX                : roddyConfigValueService.createValueMap(referenceGenome.chromosomePrefix),
+                analysisMethodNameOnOutput: roddyConfigValueService.createValueMap(individualPath.relativize(resultDirectory).toString()),
+        ]
 
-                analysisMethodNameOnOutput       : individualPath.relativize(resultDirectory).toString(),
-        ] + roddyConfigValueService.getChromosomeIndexParameterWithoutMitochondrion(roddySnvCallingInstance.referenceGenome)
+        return roddyConfigValueService.getAnalysisInputVersion1(roddySnvCallingInstance) + additionalValues +
+                roddyConfigValueService.getChromosomeIndexParameterWithoutMitochondrion(roddySnvCallingInstance.referenceGenome)
     }
 
     @Override

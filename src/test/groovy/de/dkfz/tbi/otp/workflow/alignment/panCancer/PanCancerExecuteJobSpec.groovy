@@ -39,6 +39,7 @@ import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.*
+
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -179,15 +180,15 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, PanCanc
         roddyBamFile.mergingWorkPackage.save(flush: true)
 
         Map<String, String> expectedCommand = [
-                "sharedFilesBaseDirectory"         : null,
-                "INDEX_PREFIX"                     : "/fasta-path",
-                "GENOME_FA"                        : "/fasta-path",
-                "possibleControlSampleNamePrefixes": roddyBamFile.sampleType.dirName,
-                "possibleTumorSampleNamePrefixes"  : "",
-                "runFingerprinting"                : "false",
-                "TARGET_REGIONS_FILE"              : "BedFilePath",
-                "TARGETSIZE"                       : "1",
-                "fastq_list"                       : fastqFilesAsString(roddyBamFile),
+                sharedFilesBaseDirectory         : [value: null, type: "path"],
+                INDEX_PREFIX                     : [value: "/fasta-path", type: "path"],
+                GENOME_FA                        : [value: "/fasta-path", type: "path"],
+                possibleControlSampleNamePrefixes: [value: roddyBamFile.sampleType.dirName],
+                possibleTumorSampleNamePrefixes  : [value: ""],
+                runFingerprinting                : [value: "false", type: "boolean"],
+                TARGET_REGIONS_FILE              : [value: "BedFilePath", type: "path"],
+                TARGETSIZE                       : [value: "1"],
+                fastq_list                       : [value: fastqFilesAsString(roddyBamFile)],
         ]
 
         when:
@@ -207,14 +208,14 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, PanCanc
         job.roddyConfigValueService.referenceGenomeService.fingerPrintingFile(roddyBamFile.referenceGenome) >> { new File("/fingerprint-path") }
 
         Map<String, String> expectedCommand = [
-                "sharedFilesBaseDirectory"         : null,
-                "INDEX_PREFIX"                     : "/fasta-path",
-                "GENOME_FA"                        : "/fasta-path",
-                "possibleControlSampleNamePrefixes": roddyBamFile.sampleType.dirName,
-                "possibleTumorSampleNamePrefixes"  : "",
-                "runFingerprinting"                : "true",
-                "fingerprintingSitesFile"          : "/fingerprint-path",
-                "fastq_list"                       : fastqFilesAsString(roddyBamFile),
+                sharedFilesBaseDirectory         : [value: null, type: "path"],
+                INDEX_PREFIX                     : [value: "/fasta-path", type: "path"],
+                GENOME_FA                        : [value: "/fasta-path", type: "path"],
+                possibleControlSampleNamePrefixes: [value: roddyBamFile.sampleType.dirName],
+                possibleTumorSampleNamePrefixes  : [value: ""],
+                runFingerprinting                : [value: "true", type: "boolean"],
+                fingerprintingSitesFile          : [value: "/fingerprint-path", type: "path"],
+                fastq_list                       : [value: fastqFilesAsString(roddyBamFile)],
         ]
 
         when:
@@ -229,13 +230,13 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, PanCanc
         setupDataForGetConfigurationValues()
 
         Map<String, String> expectedCommand = [
-                "sharedFilesBaseDirectory"         : null,
-                "INDEX_PREFIX"                     : "/fasta-path",
-                "GENOME_FA"                        : "/fasta-path",
-                "possibleControlSampleNamePrefixes": roddyBamFile.sampleType.dirName,
-                "possibleTumorSampleNamePrefixes"  : "",
-                "runFingerprinting"                : "false",
-                "fastq_list"                       : fastqFilesAsString(roddyBamFile),
+                sharedFilesBaseDirectory         : [value: null, type: "path"],
+                INDEX_PREFIX                     : [value: "/fasta-path", type: "path"],
+                GENOME_FA                        : [value: "/fasta-path", type: "path"],
+                possibleControlSampleNamePrefixes: [value: roddyBamFile.sampleType.dirName],
+                possibleTumorSampleNamePrefixes  : [value: ""],
+                runFingerprinting                : [value: "false", type: "boolean"],
+                fastq_list                       : [value: fastqFilesAsString(roddyBamFile)],
         ]
 
         when:

@@ -137,22 +137,22 @@ class IndelExecuteJobSpec extends Specification implements DataTest, WorkflowSys
 
         expect:
         TestCase.assertContainSame(job.getConfigurationValues(workflowStep, "{}"), [
-                bamfile_list                           : "${workDir.resolve("${instance.sampleType2BamFile.sampleType.dirName}_${instance.sampleType2BamFile.individual.pid}_merged.mdup.bam")};" +
-                        "${workDir.resolve("${instance.sampleType1BamFile.sampleType.dirName}_${instance.sampleType1BamFile.individual.pid}_merged.mdup.bam")}",
-                possibleControlSampleNamePrefixes      : instance.sampleType2BamFile.sampleType.dirName,
-                possibleTumorSampleNamePrefixes        : instance.sampleType1BamFile.sampleType.dirName,
-                sample_list                            : "${instance.sampleType2BamFile.sampleType.dirName};${instance.sampleType1BamFile.sampleType.dirName}",
-                selectSampleExtractionMethod           : 'version_2',
-                matchExactSampleName                   : 'true',
-                allowSampleTerminationWithIndex        : 'false',
-                useLowerCaseFilenameForSampleExtraction: 'false',
-                REFERENCE_GENOME                       : '/fasta-path',
-                CHR_SUFFIX                             : instance.referenceGenome.chromosomeSuffix,
-                CHR_PREFIX                             : instance.referenceGenome.chromosomePrefix,
-                VCF_NORMAL_HEADER_COL                  : instance.sampleType2BamFile.sampleType.dirName,
-                VCF_TUMOR_HEADER_COL                   : instance.sampleType1BamFile.sampleType.dirName,
-                SEQUENCE_TYPE                          : instance.sampleType1BamFile.seqType.roddyName,
-                analysisMethodNameOnOutput             : 'work-dir',
+                bamfile_list                           : [value: "${workDir.resolve("${instance.sampleType2BamFile.sampleType.dirName}_${instance.sampleType2BamFile.individual.pid}_merged.mdup.bam")};" +
+                        "${workDir.resolve("${instance.sampleType1BamFile.sampleType.dirName}_${instance.sampleType1BamFile.individual.pid}_merged.mdup.bam")}" as String],
+                possibleControlSampleNamePrefixes      : [value: instance.sampleType2BamFile.sampleType.dirName],
+                possibleTumorSampleNamePrefixes        : [value: instance.sampleType1BamFile.sampleType.dirName],
+                sample_list                            : [value: "${instance.sampleType2BamFile.sampleType.dirName};${instance.sampleType1BamFile.sampleType.dirName}" as String],
+                selectSampleExtractionMethod           : [value: 'version_2'],
+                matchExactSampleName                   : [value: 'true', type: "boolean"],
+                allowSampleTerminationWithIndex        : [value: 'false', type: "boolean"],
+                useLowerCaseFilenameForSampleExtraction: [value: 'false', type: "boolean"],
+                REFERENCE_GENOME                       : [value: '/fasta-path', type: "path"],
+                CHR_SUFFIX                             : [value: instance.referenceGenome.chromosomeSuffix],
+                CHR_PREFIX                             : [value: instance.referenceGenome.chromosomePrefix],
+                VCF_NORMAL_HEADER_COL                  : [value: instance.sampleType2BamFile.sampleType.dirName],
+                VCF_TUMOR_HEADER_COL                   : [value: instance.sampleType1BamFile.sampleType.dirName],
+                SEQUENCE_TYPE                          : [value: instance.sampleType1BamFile.seqType.roddyName],
+                analysisMethodNameOnOutput             : [value: 'work-dir'],
         ])
     }
 
@@ -170,23 +170,23 @@ class IndelExecuteJobSpec extends Specification implements DataTest, WorkflowSys
 
         expect:
         TestCase.assertContainSame(job.getConfigurationValues(workflowStep, "{}"), [
-                bamfile_list                           : "${workDir.resolve("${instance.sampleType2BamFile.sampleType.dirName}_${instance.sampleType2BamFile.individual.pid}_merged.mdup.bam")};" +
-                        "${workDir.resolve("${instance.sampleType1BamFile.sampleType.dirName}_${instance.sampleType1BamFile.individual.pid}_merged.mdup.bam")}",
-                possibleControlSampleNamePrefixes      : instance.sampleType2BamFile.sampleType.dirName,
-                possibleTumorSampleNamePrefixes        : instance.sampleType1BamFile.sampleType.dirName,
-                sample_list                            : "${instance.sampleType2BamFile.sampleType.dirName};${instance.sampleType1BamFile.sampleType.dirName}",
-                selectSampleExtractionMethod           : 'version_2',
-                matchExactSampleName                   : 'true',
-                allowSampleTerminationWithIndex        : 'false',
-                useLowerCaseFilenameForSampleExtraction: 'false',
-                REFERENCE_GENOME                       : '/fasta-path',
-                CHR_SUFFIX                             : instance.referenceGenome.chromosomeSuffix,
-                CHR_PREFIX                             : instance.referenceGenome.chromosomePrefix,
-                VCF_NORMAL_HEADER_COL                  : instance.sampleType2BamFile.sampleType.dirName,
-                VCF_TUMOR_HEADER_COL                   : instance.sampleType1BamFile.sampleType.dirName,
-                SEQUENCE_TYPE                          : instance.sampleType1BamFile.seqType.roddyName,
-                analysisMethodNameOnOutput             : 'work-dir',
-                EXOME_CAPTURE_KIT_BEDFILE              : '/bed-path',
+                "bamfile_list"                           : [value: "${workDir.resolve("${instance.sampleType2BamFile.sampleType.dirName}_${instance.sampleType2BamFile.individual.pid}_merged.mdup.bam")};" +
+                        "${workDir.resolve("${instance.sampleType1BamFile.sampleType.dirName}_${instance.sampleType1BamFile.individual.pid}_merged.mdup.bam")}" as String],
+                "possibleControlSampleNamePrefixes"      : [value: instance.sampleType2BamFile.sampleType.dirName],
+                "possibleTumorSampleNamePrefixes"        : [value: instance.sampleType1BamFile.sampleType.dirName],
+                "sample_list"                            : [value: "${instance.sampleType2BamFile.sampleType.dirName};${instance.sampleType1BamFile.sampleType.dirName}" as String],
+                "selectSampleExtractionMethod"           : [value: 'version_2'],
+                "matchExactSampleName"                   : [value: 'true', type: "boolean"],
+                "allowSampleTerminationWithIndex"        : [value: 'false', type: "boolean"],
+                "useLowerCaseFilenameForSampleExtraction": [value: 'false', type: "boolean"],
+                "REFERENCE_GENOME"                       : [value: '/fasta-path', type: "path"],
+                "CHR_SUFFIX"                             : [value: instance.referenceGenome.chromosomeSuffix],
+                "CHR_PREFIX"                             : [value: instance.referenceGenome.chromosomePrefix],
+                "VCF_NORMAL_HEADER_COL"                  : [value: instance.sampleType2BamFile.sampleType.dirName],
+                "VCF_TUMOR_HEADER_COL"                   : [value: instance.sampleType1BamFile.sampleType.dirName],
+                "SEQUENCE_TYPE"                          : [value: instance.sampleType1BamFile.seqType.roddyName],
+                "analysisMethodNameOnOutput"             : [value: 'work-dir'],
+                "EXOME_CAPTURE_KIT_BEDFILE"              : [value: '/bed-path', type: "path"],
         ])
     }
 
