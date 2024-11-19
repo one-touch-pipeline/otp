@@ -27,12 +27,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
-import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
 import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
+import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService.OperatorAction
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
+import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.SystemUserUtils
 
 @CompileDynamic
@@ -54,6 +55,7 @@ class CheckFileAccessInconsistenciesJob extends AbstractScheduledJob {
             "user",
             "project",
             "unix group",
+            "Command to add/remove user from group",
     ].join('\t')
 
     @Autowired
@@ -64,23 +66,23 @@ class CheckFileAccessInconsistenciesJob extends AbstractScheduledJob {
 
     @Override
     void wrappedExecute() {
-        String mailContent = createMailContent()
+        String mailContent = generateReportForUsersInOtpWithProjectRoleWithHeader()
         if (mailContent) {
             mailHelperService.saveMail(SUBJECT, mailContent)
         }
 
-        String userInconsistencies = generateProjectUserReport()
+        String userInconsistencies = generateReportForUsersOnlyInLdapOrInOtpWithoutProjectRole()
         if (userInconsistencies) {
             mailHelperService.saveMail(SUBJECT, userInconsistencies)
         }
     }
 
-    String createMailContent() {
-        String body = createTableBody()
+    String generateReportForUsersInOtpWithProjectRoleWithHeader() {
+        String body = generateReportForUsersInOtpWithProjectRole()
         return body ? HEADER + '\n' + body : ''
     }
 
-    String createTableBody() {
+    String generateReportForUsersInOtpWithProjectRole() {
         List<String> content = []
 
         List<User> userList = User.findAllByUsernameIsNotNull()
@@ -116,13 +118,14 @@ class CheckFileAccessInconsistenciesJob extends AbstractScheduledJob {
                         user.username,
                         project.name,
                         project.unixGroup,
+                        userProjectRoleService.getCommand(project.unixGroup, user.username, fileAccessInOtp ? OperatorAction.ADD : OperatorAction.REMOVE),
                 ].join('\t')
             }
         }
         return content.sort().join('\n')
     }
 
-    String generateProjectUserReport() {
+    String generateReportForUsersOnlyInLdapOrInOtpWithoutProjectRole() {
         List<String> output = []
         Map<String, IdpUserDetails> cache = [:]
 
@@ -153,7 +156,9 @@ class CheckFileAccessInconsistenciesJob extends AbstractScheduledJob {
                 if (usersWithoutUserProjectRole) {
                     output << "Following users have not been added to the project:"
                     usersWithoutUserProjectRole.each { User user ->
-                        output << sprintf("%-15s | %-20s | %s", [user.username, user.realName, user.email])
+                        String removeCommand = "Command to remove user from group: " +
+                                userProjectRoleService.getCommand(project.unixGroup, user.username, OperatorAction.REMOVE)
+                        output << sprintf("%-15s | %-20s | %-40s | %s", [user.username, user.realName, user.email, removeCommand])
                     }
                     output << "\n"
                 }
@@ -163,7 +168,9 @@ class CheckFileAccessInconsistenciesJob extends AbstractScheduledJob {
                         IdpUserDetails details = cache.computeIfAbsent(username) {
                             identityProvider.getIdpUserDetailsByUsername(username)
                         }
-                        output << sprintf("%-15s | %-20s | %s", [details.username, details.realName, details.mail])
+                        String removeCommand = "Command to remove user from group: " +
+                                userProjectRoleService.getCommand(project.unixGroup, username, OperatorAction.REMOVE)
+                        output << sprintf("%-15s | %-20s | %-40s | %s", [details.username, details.realName, details.mail, removeCommand])
                     }
                     output << "\n"
                 }

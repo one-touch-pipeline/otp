@@ -1663,14 +1663,14 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
     }
 
-    void "commandTemplate uses the correct processing option depending on the operator action"() {
+    void "getCommand uses the correct processing option depending on the operator action"() {
         given:
         setupData()
         setupAdGroupToolSnippetProcessingOptions()
         UserProjectRole userProjectRole = createUserProjectRole()
 
         when:
-        String scriptCommand = userProjectRoleService.commandTemplate(userProjectRole, operatorAction)
+        String scriptCommand = userProjectRoleService.getCommand(userProjectRole.project.unixGroup, userProjectRole.user.username, operatorAction)
 
         then:
         switch (operatorAction) {
@@ -1687,16 +1687,17 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     }
 
     @SuppressWarnings("GStringExpressionWithinString")
-    void "commandTemplate throws exception when not all parameters are mapped"() {
+    void "getCommand throws exception when not all parameters are mapped"() {
         given:
         setupData()
         DomainFactory.createProcessingOptionLazy(
                 name: ProcessingOption.OptionName.AD_GROUP_ADD_USER_SNIPPET,
                 value: "script.sh add \${unixGroup} \${some_other_property}",
         )
+        UserProjectRole upr = createUserProjectRole()
 
         when:
-        userProjectRoleService.commandTemplate(createUserProjectRole(), UserProjectRoleService.OperatorAction.ADD)
+        userProjectRoleService.getCommand(upr.project.unixGroup, upr.user.username, UserProjectRoleService.OperatorAction.ADD)
 
         then:
         thrown(MissingPropertyException)

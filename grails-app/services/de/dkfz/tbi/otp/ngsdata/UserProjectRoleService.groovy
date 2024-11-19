@@ -677,7 +677,7 @@ class UserProjectRoleService {
     }
 
     CommandAndResult executeOrNotify(UserProjectRole userProjectRole, OperatorAction action) {
-        String command = userProjectRoleService.commandTemplate(userProjectRole, action)
+        String command = userProjectRoleService.getCommand(userProjectRole.project.unixGroup, userProjectRole.user.username, action)
         if (processingOptionService.findOptionAsBoolean(ProcessingOption.OptionName.AD_GROUP_USER_SNIPPET_EXECUTE)) {
             ProcessOutput processOutput = remoteShellHelper.executeCommandReturnProcessOutput(command)
             return new CommandAndResult(command, processOutput)
@@ -685,11 +685,7 @@ class UserProjectRoleService {
         return new CommandAndResult(command, null)
     }
 
-    protected String commandTemplate(UserProjectRole userProjectRole, OperatorAction action) {
-        return commandTemplate(userProjectRole.project.unixGroup, userProjectRole.user.username, action)
-    }
-
-    protected String commandTemplate(String unixGroup, String username, OperatorAction action) {
+    String getCommand(String unixGroup, String username, OperatorAction action) {
         return new SimpleTemplateEngine()
                 .createTemplate(processingOptionService.findOptionAsString(action.commandTemplateOptionName))
                 .make([unixGroup: unixGroup, username: username])

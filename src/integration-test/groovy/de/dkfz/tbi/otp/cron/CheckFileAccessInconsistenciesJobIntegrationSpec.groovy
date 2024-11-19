@@ -21,21 +21,21 @@
  */
 package de.dkfz.tbi.otp.cron
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.ngsdata.UserProjectRole
-import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
-import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
+import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService.OperatorAction
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.administration.MailHelperService
+import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
+import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 
 @Rollback
 @Integration
@@ -107,6 +107,7 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
                 },
                 userProjectRoleService : Mock(UserProjectRoleService) {
                     accessCount * setAccessToFiles(_, false, true)
+                    mailCount * getCommand(UNIX_GROUP_PROJECT, testUser.username, commandOption)
                     0 * _
                 },
         ])
@@ -118,19 +119,19 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
         noExceptionThrown()
 
         where:
-        name                                                    | fileAcessOtp | fileAccessLdap | fileAccessChangeRequested | otpEnabled | projectEnabled | projectState       | ldapDisabled || mailCount | accessCount
-        'access in otp and ldap, no change request'             | true         | true           | true                      | true       | true           | Project.State.OPEN | false        || 0         | 0
-        'access in otp and ldap, but change request'            | true         | true           | false                     | true       | true           | Project.State.OPEN | false        || 0         | 0
-        'access in otp but not in ldap, no change request'      | true         | false          | true                      | true       | true           | Project.State.OPEN | false        || 1         | 0
-        'access in otp but not in ldap, but change request'     | true         | false          | false                     | true       | true           | Project.State.OPEN | false        || 0         | 1
-        'access in ldap and not in otp, no change request'      | false        | true           | true                      | true       | true           | Project.State.OPEN | false        || 1         | 0
-        'access in ldap and not in otp, but change request'     | false        | true           | false                     | true       | true           | Project.State.OPEN | false        || 1         | 0
-        'no file access in otp nor in ldap, no change request'  | false        | false          | true                      | true       | true           | Project.State.OPEN | false        || 0         | 0
-        'no file access in otp nor in ldap, but change request' | false        | false          | false                     | true       | true           | Project.State.OPEN | false        || 0         | 0
+        name                                                    | fileAcessOtp | fileAccessLdap | fileAccessChangeRequested | otpEnabled | projectEnabled | projectState       | ldapDisabled || mailCount | accessCount | commandOption
+        'access in otp and ldap, no change request'             | true         | true           | true                      | true       | true           | Project.State.OPEN | false        || 0         | 0           | { !(it in [OperatorAction.ADD, OperatorAction.REMOVE]) }
+        'access in otp and ldap, but change request'            | true         | true           | false                     | true       | true           | Project.State.OPEN | false        || 0         | 0           | { !(it in [OperatorAction.ADD, OperatorAction.REMOVE]) }
+        'access in otp but not in ldap, no change request'      | true         | false          | true                      | true       | true           | Project.State.OPEN | false        || 1         | 0           | OperatorAction.ADD
+        'access in otp but not in ldap, but change request'     | true         | false          | false                     | true       | true           | Project.State.OPEN | false        || 0         | 1           | OperatorAction.ADD
+        'access in ldap and not in otp, no change request'      | false        | true           | true                      | true       | true           | Project.State.OPEN | false        || 1         | 0           | OperatorAction.REMOVE
+        'access in ldap and not in otp, but change request'     | false        | true           | false                     | true       | true           | Project.State.OPEN | false        || 1         | 0           | OperatorAction.REMOVE
+        'no file access in otp nor in ldap, no change request'  | false        | false          | true                      | true       | true           | Project.State.OPEN | false        || 0         | 0           | { !(it in [OperatorAction.ADD, OperatorAction.REMOVE]) }
+        'no file access in otp nor in ldap, but change request' | false        | false          | false                     | true       | true           | Project.State.OPEN | false        || 0         | 0           | { !(it in [OperatorAction.ADD, OperatorAction.REMOVE]) }
         // some special cases
-        'send mail also if disabled in otp'                     | false        | true           | true                      | false      | true           | Project.State.OPEN | false        || 1         | 0
-        'send mail also if disabled in project'                 | false        | true           | true                      | true       | false          | Project.State.OPEN | false        || 1         | 0
-        'send mail also if disabled in ldap'                    | false        | true           | true                      | true       | true           | Project.State.OPEN | true         || 1         | 0
+        'send mail also if disabled in otp'                     | false        | true           | true                      | false      | true           | Project.State.OPEN | false        || 1         | 0           | OperatorAction.REMOVE
+        'send mail also if disabled in project'                 | false        | true           | true                      | true       | false          | Project.State.OPEN | false        || 1         | 0           | OperatorAction.REMOVE
+        'send mail also if disabled in ldap'                    | false        | true           | true                      | true       | true           | Project.State.OPEN | true         || 1         | 0           | OperatorAction.REMOVE
 
         mailSending = mailCount ? 'send mail' : 'do not send mail'
     }
@@ -195,7 +196,7 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
         noExceptionThrown()
     }
 
-    void "test generateProjectUserReport, report should be blank if no inconsistencies were found"() {
+    void "test generateReportForUsersOnlyInLdapOrInOtpWithoutProjectRole, report should be blank if no inconsistencies were found"() {
         given:
         setupData()
         Project project = createProject([name: PROJECT_NAME_TEST, unixGroup: UNIX_GROUP_PROJECT])
@@ -210,13 +211,13 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
         identityProvider.getGroupMembersByGroupName(UNIX_GROUP_PROJECT) >> [USER_ACCOUNT]
 
         when:
-        String report = job.generateProjectUserReport()
+        String report = job.generateReportForUsersOnlyInLdapOrInOtpWithoutProjectRole()
 
         then:
         report.isBlank()
     }
 
-    void "test generateProjectUserReport - user without UserProjectRole"() {
+    void "test generateReportForUsersOnlyInLdapOrInOtpWithoutProjectRole - user without UserProjectRole"() {
         given:
         setupData()
         Project project = createProject([name: PROJECT_NAME_TEST, unixGroup: UNIX_GROUP_PROJECT])
@@ -228,9 +229,12 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
         ])
 
         identityProvider.getGroupMembersByGroupName(UNIX_GROUP_PROJECT) >> [USER_ACCOUNT]
+        job.userProjectRoleService = Mock(UserProjectRoleService) {
+            getCommand(UNIX_GROUP_PROJECT, user.username, OperatorAction.REMOVE) >> "cmd"
+        }
 
         when:
-        String report = job.generateProjectUserReport()
+        String report = job.generateReportForUsersOnlyInLdapOrInOtpWithoutProjectRole()
 
         then:
         report.contains("The following table lists users, which are in an OTP project group according LDAP, but in OTP are not connected to that project.")
@@ -239,9 +243,10 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
         report.contains(user.username)
         report.contains(user.realName)
         report.contains(user.email)
+        report.contains("Command to remove user from group: cmd")
     }
 
-    void "test generateProjectUserReport - non-database user"() {
+    void 'test generateReportForUsersOnlyInLdapOrInOtpWithoutProjectRole - non-database user'() {
         given:
         setupData()
         Project project = createProject([name: PROJECT_NAME_TEST, unixGroup: UNIX_GROUP_PROJECT])
@@ -252,9 +257,12 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
                 realName: 'Nonexistent User',
                 mail: 'nonexistentuser@test.de'
         )
+        job.userProjectRoleService = Mock(UserProjectRoleService) {
+            getCommand(UNIX_GROUP_PROJECT, 'nonexistentuser', OperatorAction.REMOVE) >> "cmd"
+        }
 
         when:
-        String report = job.generateProjectUserReport()
+        String report = job.generateReportForUsersOnlyInLdapOrInOtpWithoutProjectRole()
 
         then:
         report.contains("The following table lists users, which are in an OTP project group according LDAP, but in OTP are not connected to that project.")
@@ -263,9 +271,10 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
         report.contains('nonexistentuser')
         report.contains('Nonexistent User')
         report.contains('nonexistentuser@test.de')
+        report.contains("Command to remove user from group: cmd")
     }
 
-    void "test generateProjectUserReport - user with and without roles, plus non-database users and ignored unregistered users"() {
+    void "test generateReportForUsersOnlyInLdapOrInOtpWithoutProjectRole - user with and without roles, plus non-database users and ignored unregistered users"() {
         given:
         setupData()
         Project project = createProject([name: PROJECT_NAME_TEST, unixGroup: UNIX_GROUP_PROJECT])
@@ -276,28 +285,35 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
                 enabled : true,
         ])
         User user2 = createUser([username: 'testuser2', realName: 'Test User 2', email: 'testuser2@example.com'])
+        User user3 = createUser([username: 'testuser3', realName: 'Test User 3', email: 'testuser3@example.com'])
         createUserProjectRole(project: project, user: user1)
         findOrCreateProcessingOption(ProcessingOption.OptionName.GUI_IGNORE_UNREGISTERED_OTP_USERS_FOUND, 'nonexistentIgnoreduser')
 
-        identityProvider.getGroupMembersByGroupName(UNIX_GROUP_PROJECT) >> [USER_ACCOUNT, 'testuser2', 'nonexistentuser', 'nonexistentIgnoreduser']
+        identityProvider.getGroupMembersByGroupName(UNIX_GROUP_PROJECT) >> [USER_ACCOUNT, 'testuser2', 'testuser3', 'nonexistentuser', 'nonexistentIgnoreduser']
         identityProvider.getIdpUserDetailsByUsername('nonexistentuser') >> new IdpUserDetails(
                 username: 'nonexistentuser',
                 realName: 'Nonexistent User',
                 mail: 'nonexistentuser@test.de'
         )
+        job.userProjectRoleService = Mock(UserProjectRoleService) {
+            getCommand(UNIX_GROUP_PROJECT, 'nonexistentuser', OperatorAction.REMOVE) >> "cmd"
+            getCommand(UNIX_GROUP_PROJECT, user2.username, OperatorAction.REMOVE) >> "cmd"
+            getCommand(UNIX_GROUP_PROJECT, user3.username, OperatorAction.REMOVE) >> "cmd"
+        }
 
         when:
-        String report = job.generateProjectUserReport()
+        String report = job.generateReportForUsersOnlyInLdapOrInOtpWithoutProjectRole()
 
         then:
         report.trim() == """
             |The following table lists users, which are in an OTP project group according LDAP, but in OTP are not connected to that project.\n
             |Project: ${project.name} (${project.unixGroup})
             |Following users have not been added to the project:
-            |${user2.username}       | ${user2.realName}          | ${user2.email}
+            |${user2.username}       | ${user2.realName}          | ${user2.email}                    | Command to remove user from group: cmd
+            |${user3.username}       | ${user3.realName}          | ${user3.email}                    | Command to remove user from group: cmd
             |\n
             |Following Users could not be resolved to a user in the OTP database:
-            |nonexistentuser | Nonexistent User     | nonexistentuser@test.de
+            |nonexistentuser | Nonexistent User     | nonexistentuser@test.de                  | Command to remove user from group: cmd
         """.stripMargin().trim().toString()
     }
 }
