@@ -126,7 +126,7 @@ abstract class AbstractWorkflowDecider<ADL extends ArtefactDataList, G extends B
         }
 
         if (inputArtefactDataList.empty) {
-            String msg = "no data found for ${workflow}, skipp"
+            String msg = "no data found for ${workflow}, skip"
             log.debug("        ${msg}")
             deciderResult.infos << msg.toString()
             return deciderResult
