@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
+import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.security.access.prepost.PreAuthorize
@@ -64,7 +65,7 @@ class SeqTrackService {
     List<Sequence> listSequences(int offset, int max, boolean sortOrder, SequenceColumn column, SequenceFiltering filtering) {
         if (filtering.enabled) {
             Closure filteringClosure = createSequenceFilteringClosure()
-            return LogUsedTimeUtils.logUsedTimeStartEnd(log, "  Find sequences with offset ${offset}") {
+            return LogUsedTimeUtils.logUsedTimeStartEnd(log as Logger, "  Find sequences with offset ${offset}") {
                 return Sequence.withCriteria {
                     filteringClosure.delegate = delegate
                     filteringClosure.resolveStrategy = Closure.DELEGATE_FIRST
@@ -75,7 +76,7 @@ class SeqTrackService {
                     firstResult(offset)
                     order(column.columnName, sortOrder ? "asc" : "desc")
                 }
-            }
+            } as List<Sequence>
         }
         List<Project> projects = projectService.allProjects
         return projects ? Sequence.findAllByProjectIdInList(projects*.id, [
@@ -100,7 +101,7 @@ class SeqTrackService {
                 filteringClosure.resolveStrategy = Closure.DELEGATE_FIRST
                 filteringClosure(filtering)
                 projections { count('pid') }
-            }
+            } as int
         }
         // shortcut for unfiltered results
         List<Project> projects = projectService.allProjects

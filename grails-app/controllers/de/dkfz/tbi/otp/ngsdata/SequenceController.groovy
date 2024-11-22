@@ -135,7 +135,7 @@ class SequenceController {
                     }
 
                     // format date
-                    data.dateCreated = TimeFormats.DATE.getFormattedDate(data.dateCreated as Date)
+                    data.importDate = TimeFormats.DATE.getFormattedDate(data.importDate as Date)
 
                     data.withdrawn = seq.fileWithdrawn
 
@@ -185,7 +185,7 @@ class SequenceController {
                     row.problem?.name() ?: "",
                     row.fileExists ?: "false",
                     row.fileArchived ?: "false",
-                    TimeFormats.DATE.getFormattedDate(row.dateCreated),
+                    TimeFormats.DATE.getFormattedDate(row.importDate),
                     row.fileWithdrawn ?: "false",
                     row.speciesCommonName,
                     row.scientificName,
@@ -261,7 +261,7 @@ enum SequenceColumn {
     KNOWN_ISSUES("sequence.list.headers.warning", "problem"),
     FILE_EXISTS("sequence.list.headers.fileExists", "fileExists"),
     FILE_ARCHIVED("sequence.list.headers.fileArchived", "fileArchived"),
-    DATE("sequence.list.headers.date", "dateCreated"),
+    IMPORT_DATE("sequence.list.headers.importDate", "importDate"),
     WITHDRAWN("sequence.list.headers.withdrawn", "withdrawn"),
     SPECIES_COMMON_NAME("sequence.list.headers.speciesCommonName", "speciesCommonName"),
     SCIENTIFIC_NAME("sequence.list.headers.scientificName", "scientificName"),

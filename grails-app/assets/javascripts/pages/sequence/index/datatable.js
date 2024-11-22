@@ -151,7 +151,7 @@ $.otp.sequence = {
                   `<span title="${row.problemDescription}">${row.problem}</span>` : '',
                 row.fileExists,
                 row.fileArchived,
-                row.dateCreated,
+                row.importDate,
                 row.speciesCommonName,
                 row.scientificName,
                 row.strain,

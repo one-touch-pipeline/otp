@@ -2073,6 +2073,7 @@ class DomainFactory {
                 seqTypeName        : "seqTypeName_${counter++}",
                 singleCellWellLabel: "singleCellWellLabel_${counter++}",
                 type               : Individual.Type.UNDEFINED,
+                importDate         : new Date(),
         ], properties)
     }
 }

@@ -76,6 +76,7 @@ class Sequence implements Serializable {
     SeqTrack.Problem problem
     String singleCellWellLabel
     String sampleName
+    Date importDate
 
     /** fields from {@link IlseSubmission} */
     /** actually ilseNumber */
@@ -176,6 +177,7 @@ class Sequence implements Serializable {
                 'projectId',
         ]
         dayCreated formula: 'DATE(date_created)'
+        importDate column: 'import_date'
     }
 
     static constraints = {
