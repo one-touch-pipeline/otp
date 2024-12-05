@@ -44,6 +44,9 @@ class WorkflowDeletionService {
             deleteWorkflowStep(it)
         }
 
+        WorkflowStepSkipMessage skipMessage = workflowRun.skipMessage
+        WorkFolder workFolder = workflowRun.workFolder
+
         WorkflowArtefact.findAllByProducedBy(workflowRun).each {
             deleteWorkflowArtefact(it)
         }
@@ -52,9 +55,10 @@ class WorkflowDeletionService {
             it.delete(flush: true)
         }
 
-        WorkflowStepSkipMessage skipMessage = workflowRun.skipMessage
-        WorkFolder workFolder = workflowRun.workFolder
-        workflowRun.delete(flush: true)
+        WorkflowRun workflowRunToDelete = WorkflowRun.get(workflowRun.id)
+        if (workflowRunToDelete) {
+            workflowRunToDelete.delete(flush: true)
+        }
 
         deleteSkipMessage(skipMessage)
         deleteWorkFolder(workFolder)
@@ -139,7 +143,17 @@ class WorkflowDeletionService {
 
     @CompileDynamic
     void deleteWorkflowRun(Project project) {
-        WorkflowRun.findAllByProject(project, [sort: 'id', order: 'desc'])
-                .each { deleteWorkflowRun(it) }
+        WorkflowRun.createCriteria().list {
+            eq('project', project)
+            projections {
+                property('id')
+            }
+            order('id', 'desc')
+        }.each { long id ->
+            WorkflowRun workflowRun = WorkflowRun.get(id)
+            if (workflowRun) {
+                deleteWorkflowRun(workflowRun)
+            }
+        }
     }
 }
