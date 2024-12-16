@@ -96,7 +96,7 @@ CommentService commentService = ctx.commentService
 
 SeqTrack.withTransaction {
     seqTrackList.each { SeqTrack seqTrack ->
-        if (!seqTrack.libraryPreparationKit || (seqTrack.libraryPreparationKit && overrideLibPrepKit)) {
+        if (!seqTrack.libraryPreparationKit || (seqTrack.libraryPreparationKit !=libraryPreparationKit && overrideLibPrepKit)) {
             println "Change:\t$seqTrack  ${seqTrack.libraryPreparationKit}"
             seqTrack.libraryPreparationKit = libraryPreparationKit
             seqTrack.kitInfoReliability = InformationReliability.KNOWN
@@ -104,7 +104,7 @@ SeqTrack.withTransaction {
                 MetaDataEntry entry = CollectionUtils.atMostOneElement(MetaDataEntry.findAllBySequenceFileAndKey(it, key))
 
                 String oldComment = it.comment?.comment ?: ''
-                String newComment = "Correct ${entry?.value} to ${libPrepKit},\n${commentInfo}".trim()
+                String newComment = "Correct ${seqTrack.libraryPreparationKit.name} to ${libPrepKit},\n${commentInfo}".trim()
                 String combinedComment = (oldComment ? "$oldComment\n\n" : '') + newComment
                 println "    MetaDataEntry: $entry"
                 println "    added comment: ${newComment.replaceAll('\n','\n\t')}"
