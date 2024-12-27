@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.egaSubmission
 
 import grails.testing.gorm.DataTest
+import grails.validation.*
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -155,12 +156,32 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
         }
 
         where:
-        name                                        | aliases                       || hasError | message
-        'all fine'                                  | ['a', 'b']                    || false    | ''
-        'alias missing'                             | ['a', '', '']                 || true     | 'For some samples no alias is configured'
-        'alias not unique'                          | ['a', 'a', 'b', 'b']          || true     | 'The following aliases are not unique'
-        'alias already exist for raw sequence file' | ['a', 'existingRSFAlias']     || true     | 'The following aliases already exist'
-        'alias already exist for bam file'          | ['a', 'existingBamFileAlias'] || true     | 'The following aliases already exist'
+        name                                              | aliases                       || hasError | message
+        'all fine'                                        | ['a', 'b']                    || false    | ''
+        'alias missing'                                   | ['a', '', '']                 || true     | 'For some samples no alias is configured'
+        'alias not unique'                                | ['a', 'a', 'b', 'b']          || true     | 'The following aliases are not unique'
+        'alias already exist for raw sequence file, fine' | ['a', 'existingRSFAlias']     || false    | ''
+        'alias already exist for bam file, fine'          | ['a', 'existingBamFileAlias'] || false    | ''
+    }
+
+    void "test validation for sameAlias in same Submission"() {
+        given:
+        RawSequenceFileSubmissionObject a = createRawSequenceFileSubmissionObject([
+                egaAliasName: 'sameAlias',
+        ])
+        RawSequenceFileSubmissionObject b = createRawSequenceFileSubmissionObject([
+                egaAliasName: 'sameAlias',
+        ])
+        EgaSubmission c = createEgaSubmission()
+
+        when:
+        c.addToRawSequenceFilesToSubmit(a)
+        c.addToRawSequenceFilesToSubmit(b)
+        c.save(flush: true)
+
+        then:
+        ValidationException e = thrown()
+        e.message.contains("duplicated alias")
     }
 
     @Unroll
@@ -196,7 +217,7 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
         ["a", "b"]         | [EgaSubmissionService.FileType.BAM, EgaSubmissionService.FileType.FASTQ] || false     | ""
         ["a", "a"]         | [EgaSubmissionService.FileType.BAM, EgaSubmissionService.FileType.FASTQ] || true      | "Not all aliases are unique:"
         ["a", ""]          | [EgaSubmissionService.FileType.BAM, EgaSubmissionService.FileType.FASTQ] || true      | "no alias is set."
-        ["a", "testAlias"] | [EgaSubmissionService.FileType.BAM, EgaSubmissionService.FileType.FASTQ] || true      | "The following aliases are already registered in the database: testAlias"
+        ["a", "testAlias"] | [EgaSubmissionService.FileType.BAM, EgaSubmissionService.FileType.FASTQ] || false     | ""
         ["a", "b"]         | [EgaSubmissionService.FileType.BAM, null]                                || true      | "no file type is selected."
     }
 }

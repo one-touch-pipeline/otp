@@ -56,13 +56,25 @@ class EgaSubmission implements Entity {
     static constraints = {
         pubMedId nullable: true
         samplesToSubmit validator: { val, obj ->
-            return (val || obj.state == State.SELECTION)
+            List<String> egaAliasNames = val*.egaAliasName?.findAll()
+            if (egaAliasNames?.size() != egaAliasNames?.unique()?.size()) {
+                return "duplicated alias"
+            }
+            return val || obj.state == State.SELECTION
         }
         bamFilesToSubmit validator: { val, obj ->
-            return (val || obj.state == State.SELECTION || !obj.rawSequenceFilesToSubmit?.empty)
+            List<String> egaAliasNames = val*.egaAliasName?.findAll()
+            if (egaAliasNames?.size() != egaAliasNames?.unique()?.size()) {
+                return "duplicated alias"
+            }
+            return val || obj.state == State.SELECTION || !obj.rawSequenceFilesToSubmit?.empty
         }
         rawSequenceFilesToSubmit validator: { val, obj ->
-            return (val || obj.state == State.SELECTION || !obj.bamFilesToSubmit?.empty)
+            List<String> egaAliasNames = val*.egaAliasName?.findAll()
+            if (egaAliasNames?.size() != egaAliasNames?.unique()?.size()) {
+                return "duplicated alias"
+            }
+            return val || obj.state == State.SELECTION || !obj.bamFilesToSubmit?.empty
         }
     }
 

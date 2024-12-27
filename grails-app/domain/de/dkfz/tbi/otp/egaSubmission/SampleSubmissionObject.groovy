@@ -41,7 +41,7 @@ class SampleSubmissionObject implements Entity, SubmissionObject {
     ]
 
     static constraints = {
-        egaAliasName nullable: true, unique: true
+        egaAliasName nullable: true
     }
 
     static mapping = {

@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.egaSubmission
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.utils.spreadsheet.Spreadsheet
 
@@ -124,11 +123,6 @@ class EgaSubmissionValidationService {
             errors << message.join('\n    ')
         }
 
-        List<SampleSubmissionObject> aliasesInDatabase = findAllAliasesInDatabase(sampleAliases.values().toList())
-        if (aliasesInDatabase) {
-            errors << "The following aliases are already registered in the database: ${aliasesInDatabase*.egaAliasName.sort().join(', ')}"
-        }
-
         return [
                 hasErrors    : !errors.empty,
                 errors       : errors.unique().sort(),
@@ -136,11 +130,6 @@ class EgaSubmissionValidationService {
                 bams         : bams,
                 sampleAliases: sampleAliases,
         ]
-    }
-
-    @CompileDynamic
-    private List<SampleSubmissionObject> findAllAliasesInDatabase(List<String> aliases) {
-        return aliases ? SampleSubmissionObject.findAllByEgaAliasNameInList(aliases) : []
     }
 
     Map validateAliases(List<String> alias) {
@@ -160,23 +149,10 @@ class EgaSubmissionValidationService {
             errors += "The following aliases are not unique: ${duplicateList.join(', ')}"
         }
 
-        List<String> existingAliases = findAlreadyUsedAliases(alias)
-        if (existingAliases) {
-            errors += "The following aliases already exist: ${existingAliases.join(', ')}"
-        }
-
         return [
                 hasErrors: !errors.empty,
                 errors   : errors.unique(),
         ]
-    }
-
-    @CompileDynamic
-    private List<String> findAlreadyUsedAliases(List<String> alias) {
-        List<String> existingAliases = []
-        existingAliases.addAll(RawSequenceFileSubmissionObject.findAllByEgaAliasNameInList(alias)*.egaAliasName)
-        existingAliases.addAll(BamFileSubmissionObject.findAllByEgaAliasNameInList(alias)*.egaAliasName)
-        return existingAliases.unique().sort()
     }
 
     EgaMapKey getIdentifierKeyFromSampleSubmissionObject(SampleSubmissionObject sampleSubmissionObject) {
