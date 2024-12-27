@@ -188,7 +188,7 @@ $(() => {
             return;
           }
           piSelectors.append($('<option disabled selected></option>').val('')
-            .html('Please choose a deputy PI from the list below'));
+            .html('Please choose a PI from the list of department heads or deputies'));
 
           if (data.deputies) {
             data.deputies.forEach((deputy) => {

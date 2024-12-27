@@ -185,7 +185,7 @@
                     <tr>
                         <td>${g.message(code: "projectRequest.users")}</td>
                         <td>
-                            <g:render template="/projectRequest/templates/projectRequestUserTable" model="[users: projectRequest.piUsers + projectRequest.users, departmentHeads: departmentHeads]"/>
+                            <g:render template="/projectRequest/templates/projectRequestUserTable" model="[users: projectRequest.piUsers + projectRequest.users, departmentHeads: departmentHeads - projectRequest.piUsers*.user]"/>
                         </td>
                     </tr>
                     </tbody>
