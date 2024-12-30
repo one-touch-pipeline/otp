@@ -47,11 +47,9 @@ parameter to set:
                                       class="use-select-2 form-control" autocomplete="off"
                                       from="${allSeqPlatformsWithoutGroup}" optionKey="id"
                                       noSelection="${[null: 'Select to add to group']}"/>
-                            <div class="input-group-append">
-                                <button class="btn btn-outline-primary select2-appended-btn" type="submit" disabled>
-                                    <i class="bi bi-plus"></i>
-                                </button>
-                            </div>
+                            <button class="btn btn-primary select2-appended-btn" type="submit" disabled>
+                                <i class="bi bi-plus"></i>
+                            </button>
                         </div>
                     </g:form>
                 </sec:ifAllGranted>
@@ -68,7 +66,7 @@ parameter to set:
                         <g:hiddenField name="selectedSeqTypeToCopyFrom.id" value="${selectedSeqTypeToCopyFrom?.id}"/>
                     </g:if>
                     <g:hiddenField name="seqPlatformGroup.id" value="${seqPlatformGroup.id}"/>
-                    <div class="row justify-content-end pr-3">
+                    <div class="d-flex justify-content-end pr-3">
                         <button class="btn btn-danger" type="submit">
                             <i class="bi bi-trash"></i>
                         </button>

@@ -191,6 +191,10 @@ Cypress.Commands.add('clearDownloadsFolder', () => {
   });
 });
 
+Cypress.Commands.add('checkAccessDenied', (url) => {
+  cy.checkAccessDenied(url, 403);
+});
+
 Cypress.Commands.add('checkAccessDenied', (url, statusCode) => {
   'use strict';
 

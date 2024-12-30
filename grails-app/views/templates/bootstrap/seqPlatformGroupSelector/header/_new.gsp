@@ -47,11 +47,9 @@ parameter to set:
                                   from="${allSeqPlatformsWithoutGroup}" optionKey="id"
                                   noSelection="${[null: 'Select to add new group']}"
                                   disabled="${disabled}"/>
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-primary select2-appended-btn" id="addSeqPlatformGroup" type="submit" disabled>
-                                <i class="bi bi-plus"></i>
-                            </button>
-                        </div>
+                        <button class="btn btn-primary select2-appended-btn" id="addSeqPlatformGroup" type="submit" disabled>
+                            <i class="bi bi-plus"></i>
+                        </button>
                     </div>
                 </g:form>
             </sec:ifAllGranted>

@@ -34,29 +34,33 @@
 
     <g:render template="/templates/messages"/>
 
-    <h1>${g.message(code: "mergingCriteria.seqPlatformDefinition")}</h1>
+    <h1 class="my-3">${g.message(code: "mergingCriteria.seqPlatformDefinition")}</h1>
 
-    <h5>${g.message(code: "mergingCriteria.createNewGroup")}</h5>
-    <g:render template="/templates/bootstrap/seqPlatformGroupSelector/seqPlatformGroupSelector"
-              model="${[allSeqPlatformsWithoutGroup: allSeqPlatformsWithoutGroup,
-                        selectorState              : SelectorViewState.CREATE,
-              ]}"/>
+    <div id="createNewSeqPlatformGroup" class="mb-5">
+        <h4>${g.message(code: "mergingCriteria.createNewGroup")}</h4>
+        <g:render template="/templates/bootstrap/seqPlatformGroupSelector/seqPlatformGroupSelector"
+                  model="${[allSeqPlatformsWithoutGroup: allSeqPlatformsWithoutGroup,
+                            selectorState              : SelectorViewState.CREATE,
+                  ]}"/>
+    </div>
 
-    <h5>${g.message(code: "mergingCriteria.currentConfigTitle")}</h5>
-    <g:if test="${seqPlatformGroups}">
-        <g:each in="${seqPlatformGroups}" var="seqPlatformGroup">
-            <g:render template="/templates/bootstrap/seqPlatformGroupSelector/seqPlatformGroupSelector"
-                      model="${[seqPlatformGroup           : seqPlatformGroup,
-                                allSeqPlatformsWithoutGroup: allSeqPlatformsWithoutGroup,
-                                selectorState              : SelectorViewState.EDIT,
-                      ]}"/>
-        </g:each>
-    </g:if>
-    <g:else>
-        <div class="alert alert-info text-center" role="alert">
-            ${g.message(code: "seqPlatformGroup.seqPlatforms.noDefault")}
-        </div>
-    </g:else>
+    <div id="currentSeqPlatformGroup">
+        <h4>${g.message(code: "mergingCriteria.currentConfigTitle")}</h4>
+        <g:if test="${seqPlatformGroups}">
+            <g:each in="${seqPlatformGroups}" var="seqPlatformGroup">
+                <g:render template="/templates/bootstrap/seqPlatformGroupSelector/seqPlatformGroupSelector"
+                          model="${[seqPlatformGroup           : seqPlatformGroup,
+                                    allSeqPlatformsWithoutGroup: allSeqPlatformsWithoutGroup,
+                                    selectorState              : SelectorViewState.EDIT,
+                          ]}"/>
+            </g:each>
+        </g:if>
+        <g:else>
+            <div class="alert alert-info text-center" role="alert">
+                ${g.message(code: "seqPlatformGroup.seqPlatforms.noDefault")}
+            </div>
+        </g:else>
+    </div>
 </div>
 </body>
 </html>

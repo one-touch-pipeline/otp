@@ -33,11 +33,11 @@ parameter to set:
     <g:each in="${seqPlatformGroup.seqPlatforms.sort { it.fullName }}" var="seqPlatform">
         <div class="list-group-item">
             <div class="row">
-                <div class="col-10">
+                <div class="col">
                     ${seqPlatform}
                 </div>
 
-                <div class="col-2">
+                <div class="col-1">
                     <g:if test="${editable}">
                         <sec:ifAllGranted roles="ROLE_OPERATOR">
                             <g:form action="removePlatformFromSeqPlatformGroup">
@@ -47,9 +47,11 @@ parameter to set:
                                 <g:hiddenField name="seqPlatformGroup.id" value="${seqPlatformGroup?.id}"/>
                                 <g:hiddenField name="seqPlatform.id" value="${seqPlatform?.id}"/>
 
-                                <button type="submit" class="close" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
+                                <div class="d-flex justify-content-center pr-3">
+                                    <button type="submit" class="btn btn-outline-danger" aria-label="Close">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
 
                             </g:form>
                         </sec:ifAllGranted>

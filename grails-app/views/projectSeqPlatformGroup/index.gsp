@@ -197,48 +197,48 @@
 
         <div class="row">
             <div class="col-6 seqPlatformGroups">
-        <g:if test="${selectedSeqPlatformGroups != null && !selectedSeqPlatformGroups.empty}">
-            <g:each in="${selectedSeqPlatformGroups}" var="seqPlatformGroup">
-                <g:render template="/templates/bootstrap/seqPlatformGroupSelector/seqPlatformGroupSelector"
-                          model="${[mergingCriteria            : mergingCriteria,
-                                    seqPlatformGroup           : seqPlatformGroup,
-                                    allSeqPlatformsWithoutGroup: allSeqPlatformsWithoutGroup,
-                                    selectorState              : useDefaultGroups ? SelectorViewState.SHOW : SelectorViewState.EDIT,
-                                    selectedProjectToCopyForm  : selectedProjectToCopyForm,
-                                    selectedSeqTypeToCopyFrom  : selectedSeqTypeToCopyFrom,
-                          ]}"/>
-            </g:each>
-        </g:if>
-        <g:else>
-            <div class="alert alert-info text-center" role="alert">
-                ${g.message(code: "mergingCriteria.noGroupConfigured", args: [selectedProject.name, seqType])}
-            </div>
-        </g:else>
-        </div>
-        <sec:ifAllGranted roles="ROLE_OPERATOR">
-            <div class="col-6">
-            <g:if test="${mergingCriteria.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC}">
-                <g:if test="${seqPlatformGroups && !seqPlatformGroups.empty}">
-                    <g:each in="${seqPlatformGroups}" var="seqPlatformGroup">
+                <g:if test="${selectedSeqPlatformGroups != null && !selectedSeqPlatformGroups.empty}">
+                    <g:each in="${selectedSeqPlatformGroups}" var="seqPlatformGroup">
                         <g:render template="/templates/bootstrap/seqPlatformGroupSelector/seqPlatformGroupSelector"
-                                  model="${[mergingCriteria             : mergingCriteria,
-                                            seqPlatformGroup            : seqPlatformGroup,
-                                            selectorState               : SelectorViewState.COPY,
-                                            seqPlatformGroupAlreadyInUse: allUsedSpecificSeqPlatforms.intersect(seqPlatformGroup.seqPlatforms),
-                                            selectedProjectToCopyForm   : selectedProjectToCopyForm,
-                                            selectedSeqTypeToCopyFrom   : selectedSeqTypeToCopyFrom
+                                  model="${[mergingCriteria            : mergingCriteria,
+                                            seqPlatformGroup           : seqPlatformGroup,
+                                            allSeqPlatformsWithoutGroup: allSeqPlatformsWithoutGroup,
+                                            selectorState              : useDefaultGroups ? SelectorViewState.SHOW : SelectorViewState.EDIT,
+                                            selectedProjectToCopyForm  : selectedProjectToCopyForm,
+                                            selectedSeqTypeToCopyFrom  : selectedSeqTypeToCopyFrom,
                                   ]}"/>
                     </g:each>
                 </g:if>
                 <g:else>
                     <div class="alert alert-info text-center" role="alert">
-                        ${g.message(code: "mergingCriteria.noGroupFound")}
+                        ${g.message(code: "mergingCriteria.noGroupConfigured", args: [selectedProject.name, seqType])}
                     </div>
                 </g:else>
-                </div>
-            </g:if>
             </div>
-        </sec:ifAllGranted>
+            <sec:ifAllGranted roles="ROLE_OPERATOR">
+                <div class="col-6">
+                    <g:if test="${mergingCriteria.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC}">
+                        <g:if test="${seqPlatformGroups && !seqPlatformGroups.empty}">
+                            <g:each in="${seqPlatformGroups}" var="seqPlatformGroup">
+                                <g:render template="/templates/bootstrap/seqPlatformGroupSelector/seqPlatformGroupSelector"
+                                          model="${[mergingCriteria             : mergingCriteria,
+                                                    seqPlatformGroup            : seqPlatformGroup,
+                                                    selectorState               : SelectorViewState.COPY,
+                                                    seqPlatformGroupAlreadyInUse: allUsedSpecificSeqPlatforms.intersect(seqPlatformGroup.seqPlatforms),
+                                                    selectedProjectToCopyForm   : selectedProjectToCopyForm,
+                                                    selectedSeqTypeToCopyFrom   : selectedSeqTypeToCopyFrom
+                                          ]}"/>
+                            </g:each>
+                        </g:if>
+                        <g:else>
+                            <div class="alert alert-info text-center" role="alert">
+                                ${g.message(code: "mergingCriteria.noGroupFound")}
+                            </div>
+                        </g:else>
+                    </g:if>
+                </div>
+            </sec:ifAllGranted>
+        </div>
     </g:else>
 </div>
 </body>
