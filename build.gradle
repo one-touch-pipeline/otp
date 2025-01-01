@@ -34,7 +34,7 @@ buildscript {
         classpath "org.grails:grails-gradle-plugin:$grailsVersion"
         classpath "org.grails.plugins:hibernate5:8.1.1"
 
-        classpath 'org.grails.plugins:database-migration:4.2.1'
+        classpath 'org.grails.plugins:database-migration:5.0.0'
     }
 }
 
@@ -468,7 +468,7 @@ dependencies {
     implementation "org.grails.plugins:grails-console:2.1.1"
     implementation "org.grails.plugins:mail:4.0.0"
 
-    implementation("org.grails.plugins:database-migration:4.2.1") {
+    implementation("org.grails.plugins:database-migration:5.0.0") {
         exclude group: "org.grails", module: "grails-shell"
     }
     implementation 'org.liquibase:liquibase-core:4.19.0'
