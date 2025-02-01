@@ -46,7 +46,7 @@ plugins {
     id 'jacoco'
     // plugin to convert the jacoco report in the the cobertura format, needed by gitlab.com
     // https://github.com/razvn/jacoco-to-cobertura-gradle-plugin
-    id "net.razvan.jacoco-to-cobertura" version "1.3.1"
+    id "net.razvan.jacoco-to-cobertura" version "1.3.2"
     // plugin to show total jacoco coverage on the console
     // https://gitlab.com/barfuin/gradle-jacoco-log
     id 'org.barfuin.gradle.jacocolog' version '3.1.0'
