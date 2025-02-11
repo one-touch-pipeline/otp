@@ -236,7 +236,7 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         then:
         scripts.size() == 2
         scripts.each { String it ->
-            assert it.contains(cmd_activation_fastqc + ' fastqc/' + version.workflowVersion)
+            assert it.contains(cmd_activation_fastqc + ' FastQC/' + version.workflowVersion)
             assert it.contains(cmd_fastqc)
         }
 

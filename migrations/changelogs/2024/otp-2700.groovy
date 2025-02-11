@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2026 The OTP authors
+ * Copyright 2011-2025 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,19 +19,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.analysis.pair.runyapsa
 
-import spock.lang.Ignore
+databaseChangeLog = {
+    changeSet(author: "-", id: "otp-2700-1") {
+        sql("""
+UPDATE workflow_version
+SET workflow_version = REPLACE(workflow_version, 'cellranger', 'CellRanger')
+WHERE api_version_id =
+      (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id =
+            (SELECT id FROM workflow WHERE name = 'Cell Ranger'));
+""")
+    }
 
-import de.dkfz.tbi.otp.analysis.pair.bamfiles.SeqTypeAndInputBamFilesHCC1187Div128
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.SeqTypeService
+    changeSet(author: "-", id: "otp-2700-2") {
+        sql("""
+UPDATE processing_option
+SET value = REPLACE(value, 'cellranger', 'CellRanger')
+WHERE name IN ('PIPELINE_CELLRANGER_DEFAULT_VERSION', 'PIPELINE_CELLRANGER_AVAILABLE_VERSIONS')
+""")
+    }
 
-@Ignore
-class WesRunYapsaWorkflowTests extends AbstractRunYapsaWorkflowTests implements SeqTypeAndInputBamFilesHCC1187Div128 {
-
-    @Override
-    SeqType seqTypeToUse() {
-        return SeqTypeService.exomePairedSeqType
+    changeSet(author: "-", id: "otp-2700-3") {
+        sql("""
+UPDATE config_per_project_and_seq_type
+SET program_version = REPLACE(program_version, 'cellranger', 'CellRanger')
+WHERE class = 'de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfig';
+""")
     }
 }

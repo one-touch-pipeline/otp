@@ -12,7 +12,7 @@
       "1KGRef_PhiX"
     ],
     "versions": [
-      "Cell Ranger cellranger/4.0.0",
+      "Cell Ranger CellRanger/7.1.0",
       "PanCancer alignment 1.2.51-2"
     ],
     "seqType": [
@@ -48,7 +48,7 @@
       "1KGRef_PhiX"
     ],
     "versions": [
-      "Cell Ranger cellranger/4.0.0"
+      "Cell Ranger CellRanger/7.1.0"
     ],
     "seqType": [
       "ChIP SINGLE bulk",

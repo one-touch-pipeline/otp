@@ -132,7 +132,7 @@ ON CONFLICT DO NOTHING;
 INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
 VALUES (NEXTVAL('hibernate_sequence'), 0,
         (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'Cell Ranger') AND wav.identifier = 1),
-        'cellranger/8.0.1', NOW(),
+        'CellRanger/8.0.1', NOW(),
         NOW())
 ON CONFLICT DO NOTHING;
 

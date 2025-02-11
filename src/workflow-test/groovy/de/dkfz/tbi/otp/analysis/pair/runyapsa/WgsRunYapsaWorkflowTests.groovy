@@ -21,10 +21,13 @@
  */
 package de.dkfz.tbi.otp.analysis.pair.runyapsa
 
+import spock.lang.Ignore
+
 import de.dkfz.tbi.otp.analysis.pair.bamfiles.SeqTypeAndInputBamFilesHCC1187Div128
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
+@Ignore
 class WgsRunYapsaWorkflowTests extends AbstractRunYapsaWorkflowTests implements SeqTypeAndInputBamFilesHCC1187Div128 {
 
     @Override

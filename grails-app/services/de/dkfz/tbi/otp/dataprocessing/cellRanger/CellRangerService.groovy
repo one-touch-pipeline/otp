@@ -156,7 +156,7 @@ class CellRangerService {
                 (CellRangerParameters.LOCAL_CORES.parameterName)  : localCores,
                 (CellRangerParameters.LOCAL_MEM.parameterName)    : localMem,
         ]
-        Matcher matcher = singleCellBamFile.mergingWorkPackage.config.programVersion =~ /cellranger\/(?<major>\d+)\.\d+\.\d+/
+        Matcher matcher = singleCellBamFile.mergingWorkPackage.config.programVersion =~ /CellRanger\/(?<major>\d+)\.\d+\.\d+/
         if (matcher.find() && (matcher.group("major") as int) >= CELLRANGER_VERSION_WITH_CREATE_BAM) {
             parameters[CellRangerParameters.CREATE_BAM.parameterName] = "true"
         }

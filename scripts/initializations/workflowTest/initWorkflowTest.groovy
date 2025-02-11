@@ -23,7 +23,6 @@
 import groovy.transform.Field
 
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.roddy.rna.RnaAlignmentWorkflow
@@ -72,24 +71,26 @@ Map<WorkflowTestProperty, String> workflowTestProperties = [
  * configure apptainer for roddy
  */
 void configureApptainer() {
+    if (Workflow.count == 0) {
+        println "Skip Apptainer configuration, since no workflows in new system initialized"
+        return
+    }
     println "configure Apptainer"
-    List<Workflow> roddyWorkflows = """
-        #alignment
-        ${PanCancerWorkflow.WORKFLOW}
-        ${WgbsWorkflow.WORKFLOW}
-        ${RnaAlignmentWorkflow.WORKFLOW}
+    List<Workflow> roddyWorkflows = [
+            // alignment
+            PanCancerWorkflow.WORKFLOW,
+            WgbsWorkflow.WORKFLOW,
+            RnaAlignmentWorkflow.WORKFLOW,
 
-        # analysis
-        ${SnvWorkflow.WORKFLOW}
-        ${IndelWorkflow.WORKFLOW}
-        ${SophiaWorkflow.WORKFLOW}
-        ${AceseqWorkflow.WORKFLOW}
+            // analysis
+            SnvWorkflow.WORKFLOW,
+            IndelWorkflow.WORKFLOW,
+            SophiaWorkflow.WORKFLOW,
+            AceseqWorkflow.WORKFLOW,
 
-    """.split('\n')*.trim().findAll {
-        it && !it.startsWith('#')
-    }.collect {
+    ].collect {
         println "- ${it}"
-        CollectionUtils.exactlyOneElement(Workflow.findAllByName(it), "Could not find '${it}")
+        CollectionUtils.exactlyOneElement(Workflow.findAllByName(it), "Could not find '${it}'")
     }
 
     println configSelectorService.create(new CreateCommand([

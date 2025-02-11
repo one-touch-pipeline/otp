@@ -220,4 +220,6 @@ databaseChangeLog = {
     include file: 'changelogs/2026/otp-2852.groovy'
 
     include file: 'changelogs/2026/otp-2929-improve-workflow-step-index.groovy'
+
+    include file: 'changelogs/2024/otp-2700.groovy'
 }
