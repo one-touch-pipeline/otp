@@ -35,12 +35,16 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.INDEX
 @Component
 class BarcodeValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
 
-    final static String MUST_REGEX = /^[ACGTN\-,]*$/
+    final static String MUST_REGEX = /^[0-9a-zA-Z\-\+\.\,]*$/
+    final static String SHOULD_REGEX = /^[ACGTN\-,]*$/
 
     @CompileDynamic
     @Override
     Collection<String> getDescriptions() {
-        return ["Barcodes must match the regular expression '${MUST_REGEX}'."]
+        return [
+                "Barcodes must match the regular expression '${MUST_REGEX}'.",
+                "Barcodes should match the regular expression '${SHOULD_REGEX}'.",
+        ]
     }
 
     @Override
@@ -56,7 +60,9 @@ class BarcodeValidator extends AbstractSingleValueValidator<MetadataValidationCo
     @Override
     void validateValue(MetadataValidationContext context, String barcode, Set<Cell> cells) {
         if (!(barcode ==~ MUST_REGEX)) {
-            context.addProblem(cells, LogLevel.ERROR, "'${barcode}' is not a well-formed barcode. It must match the regular expression '${MUST_REGEX}'.", "At least one barcode is not a well-formed barcode.")
+            context.addProblem(cells, LogLevel.ERROR, "'${barcode}' is not a well-formed barcode. It must match the regular expression '${MUST_REGEX}'. It should match the regular expression '${SHOULD_REGEX}'.", "At least one barcode is not a well-formed barcode.")
+        } else if (!(barcode ==~ SHOULD_REGEX) && !barcode.empty) {
+            context.addProblem(cells, LogLevel.WARNING, "The barcode '${barcode}' has an unusual format. It should match the regular expression '${SHOULD_REGEX}'.", "At least one barcode has an unusual format.")
         }
     }
 }
