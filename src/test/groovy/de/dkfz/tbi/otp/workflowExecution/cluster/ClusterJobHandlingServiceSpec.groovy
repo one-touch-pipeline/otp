@@ -164,12 +164,34 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
     void "sendJobs, when submit fail on first, then call killJobs only for first and throw SubmitClusterJobException"() {
         given:
         setupJobData()
-
+        job2 = createBeJobs(null)
         BEJobResult jobResult1 = createBEJobResult(job1, false)
 
         BatchEuphoriaJobManager jobManager = Mock(BatchEuphoriaJobManager) {
             1 * submitJob(job1) >> jobResult1
             1 * killJobs([job1])
+            0 * _
+        }
+
+        service.logService = Mock(LogService)
+
+        when:
+        service.sendJobs(jobManager, workflowStep, [job1, job2])
+
+        then:
+        SubmitClusterJobException e = thrown()
+        !e.message.contains(ClusterJobHandlingService.NESTED_FAIL_MESSAGE_FOR_KILL)
+    }
+
+    void "sendJobs, when result is there but id is UnkownJobID, then dont call killJobs and throw SubmitClusterJobException"() {
+        given:
+        setupJobData()
+        job1 = createBeJobs(null)
+        BEJobResult jobResult1 = createBEJobResult(job1, false)
+
+        BatchEuphoriaJobManager jobManager = Mock(BatchEuphoriaJobManager) {
+            1 * submitJob(job1) >> jobResult1
+            1 * killJobs([])
             0 * _
         }
 
@@ -407,9 +429,9 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
         }
     }
 
-    private BEJob createBeJobs() {
+    private BEJob createBeJobs(String id = "valid") {
         return new BEJob(
-                null,
+                id ? new BEJobID(id) : null,
                 "job name ${nextId}",
                 null,
                 "script ${nextId}",

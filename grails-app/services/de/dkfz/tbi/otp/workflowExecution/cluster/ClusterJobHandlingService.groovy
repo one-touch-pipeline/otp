@@ -118,7 +118,7 @@ class ClusterJobHandlingService {
     @SuppressWarnings("CatchException")
     private void killFailedClusterJobs(WorkflowStep workflowStep, BEJob job, List<BEJob> beJobs, BatchEuphoriaJobManager jobManager) {
         List<BEJob> startedBeJobs = beJobs.findAll {
-            it.runResult
+            it.runResult && !it.jobID?.id?.startsWith(/UnkownJobID-/)
         }
         logService.addSimpleLogEntry(workflowStep, "Try killing associated cluster jobs: ${jobToString(startedBeJobs)}")
         try {
