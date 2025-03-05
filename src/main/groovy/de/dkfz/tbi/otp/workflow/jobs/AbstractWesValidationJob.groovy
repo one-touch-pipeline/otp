@@ -59,7 +59,7 @@ abstract class AbstractWesValidationJob extends AbstractValidationJob {
         if (errorMessages.empty) {
             logService.addSimpleLogEntry(workflowStep, "All WES jobs have finished successfully.")
         } else {
-            String message = "${errorMessages.size()} WES errors occured in the Workflowstep {workflowStep}:\n${errorMessages.join('\n')}."
+            String message = "${errorMessages.size()} WES errors occured in the Workflowstep ${workflowStep}:\n${errorMessages.join('\n')}."
             logService.addSimpleLogEntry(workflowStep, message)
             throw new ValidationJobFailedException(message)
         }

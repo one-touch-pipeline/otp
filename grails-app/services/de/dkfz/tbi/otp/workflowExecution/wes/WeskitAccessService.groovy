@@ -29,6 +29,8 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Mono
 
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.FileService
 
 import java.nio.file.Files
@@ -54,6 +56,8 @@ class WeskitAccessService {
     WeskitApiService weskitApiService
 
     FileService fileService
+
+    ProcessingOptionService processingOptionService
 
     /**
      * return the server info.
@@ -185,10 +189,11 @@ class WeskitAccessService {
 
     private void checkWesWorkflowEngineParameter(WesWorkflowEngineParameter parameter) {
         assert parameter
-        assert parameter.accountingName
+        assert !processingOptionService.findOptionAsBoolean(ProcessingOption.OptionName.ENABLE_ACCOUNTING_FOR_WESKIT) || parameter.accountingName
         assert parameter.jobName
         assert parameter.queue
         assert parameter.maxMemory
         assert parameter.maxRuntime
+        assert parameter.profile
     }
 }

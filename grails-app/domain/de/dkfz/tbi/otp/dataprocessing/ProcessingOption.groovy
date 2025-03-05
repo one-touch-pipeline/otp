@@ -644,6 +644,10 @@ class ProcessingOption implements Entity {
                 "This option depends on the additional field & it has to be named as 'Organizational Unit' in order for this feature to function correctly.",
                 Necessity.OPTIONAL, "false", TypeValidators.BOOLEAN,
         ),
+        ENABLE_ACCOUNTING_FOR_WESKIT(
+                "Whether or not WESKit should use the accounting feature",
+                Necessity.OPTIONAL, "false", TypeValidators.BOOLEAN,
+        ),
 
         private final String description
         private final Necessity necessity

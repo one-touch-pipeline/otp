@@ -32,6 +32,7 @@ import spock.lang.Specification
 import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
@@ -65,6 +66,7 @@ class WeskitAccessServiceIntegrationSpec extends Specification implements Domain
         service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
+        service.processingOptionService = new ProcessingOptionService()
     }
 
     /**
@@ -101,7 +103,7 @@ class WeskitAccessServiceIntegrationSpec extends Specification implements Domain
                 "queue",
                 "1G",
                 "24:00",
-
+                "singularity",
         )
         WesWorkflowParameter wesWorkflowParameter = new WesWorkflowParameter(workflowParamsJson, engineParameter, WesWorkflowType.NEXTFLOW, workDir, workflow)
 

@@ -82,7 +82,7 @@ abstract class AbstractRoddyClusterValidationJob extends AbstractValidationJob {
         if (errorMessages.empty) {
             logService.addSimpleLogEntry(workflowStep, "All cluster jobs have finished successfully.")
         } else {
-            String message = "${errorMessages.size()} errors occured in the Workflowstep {workflowStep}:\n${errorMessages.join('\n')}."
+            String message = "${errorMessages.size()} errors occured in the Workflowstep ${workflowStep}:\n${errorMessages.join('\n')}."
             logService.addSimpleLogEntry(workflowStep, message)
             throw new ValidationJobFailedException(message)
         }

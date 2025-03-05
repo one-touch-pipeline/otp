@@ -27,6 +27,8 @@ import io.swagger.client.wes.model.RunId
 import spock.lang.Specification
 import spock.lang.TempDir
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -49,6 +51,7 @@ class AbstractExecuteWesPipelineJobSpec extends Specification implements DataTes
     @Override
     Class[] getDomainClassesToMock() {
         return [
+                ProcessingOption,
                 WorkflowArtefact,
                 WorkflowStep,
         ]
@@ -122,6 +125,7 @@ class AbstractExecuteWesPipelineJobSpec extends Specification implements DataTes
         job = new TestAbstractExecuteWesPipelineJob(true)
         job.configFragmentService = new ConfigFragmentService()
         job.mapUtilService = new MapUtilService()
+        job.processingOptionService = new ProcessingOptionService()
 
         job.workflowStateChangeService = Mock(WorkflowStateChangeService) {
             1 * changeStateToWaitingOnSystem(workflowStep)

@@ -28,6 +28,8 @@ import org.grails.web.json.JSONObject
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.MapUtilService
 import de.dkfz.tbi.otp.workflowExecution.*
@@ -40,6 +42,8 @@ import java.nio.file.Path
 abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob {
 
     final static String DISALLOWED_CHARS = '[^a-zA-Z0-9\\-]'
+
+    final static String PROFILES = 'singularity,slurm'
 
     @Autowired
     WorkflowRunService workflowRunService
@@ -55,6 +59,9 @@ abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob 
 
     @Autowired
     MapUtilService mapUtilService
+
+    @Autowired
+    ProcessingOptionService processingOptionService
 
     /**
      * Return the used execution system, values needs to be known by Weskit, currently possible: NFL for Nextflow and SMK for Snakemake
@@ -147,8 +154,9 @@ abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob 
 
     private WesWorkflowEngineParameter createWesWorkflowEngineParameter(WorkflowStep workflowStep) {
         Project project = workflowStep.workflowRun.project
-        ProcessingPriority processingPriority = workflowStep.workflowRun.project.processingPriority
-        String accountName = replaceDisallowedChars(project.name)
+        String accountName = processingOptionService.findOptionAsBoolean(ProcessingOption.OptionName.ENABLE_ACCOUNTING_FOR_WESKIT) ?
+                replaceDisallowedChars(project.name) : null
+        ProcessingPriority processingPriority = project.processingPriority
         String jobName = createJobName(workflowStep)
 
         return new WesWorkflowEngineParameter(
@@ -157,6 +165,7 @@ abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob 
                 processingPriority.queue,
                 "512M",
                 "24:00",
+                PROFILES,
         )
     }
 
@@ -177,5 +186,4 @@ abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob 
     String replaceDisallowedChars(String input) {
         return input.replaceAll(DISALLOWED_CHARS, '-')
     }
-
 }

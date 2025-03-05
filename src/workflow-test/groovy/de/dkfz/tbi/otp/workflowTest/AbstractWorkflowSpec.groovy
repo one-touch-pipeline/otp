@@ -52,6 +52,7 @@ import de.dkfz.tbi.otp.workflow.shared.WorkflowTestException
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowLog
+import de.dkfz.tbi.otp.workflowExecution.wes.WesRun
 
 import javax.sql.DataSource
 import java.nio.file.*
@@ -376,6 +377,25 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                                 node             : clusterJob.node,
                                 accountName      : clusterJob.accountName,
                                 dependencies     : clusterJob.dependencies*.id.join(","),
+                        ].each { key, value ->
+                            logEntries << "      - ${key}: ${value}"
+                        }
+                    }
+                    workflowStep.wesRuns.eachWithIndex { WesRun wesRun, int weskitIndex ->
+                        logEntries << "    - weskit log ${runIndex}.${stepIndex}.${weskitIndex}:"
+                        [
+                                id           : wesRun.id,
+                                wesIdentifier: wesRun.wesIdentifier,
+                                subPath      : wesRun.subPath,
+                                state        : wesRun.wesRunLog.state,
+                                runRequest   : wesRun.wesRunLog.runRequest,
+                                name         : wesRun.wesRunLog.runLog.name,
+                                cmd          : wesRun.wesRunLog.runLog.cmd,
+                                startTime    : wesRun.wesRunLog.runLog.startTime,
+                                endTime      : wesRun.wesRunLog.runLog.endTime,
+                                exitCode     : wesRun.wesRunLog.runLog.exitCode,
+                                stdout       : wesRun.wesRunLog.runLog.stdout,
+                                stderr       : wesRun.wesRunLog.runLog.stderr,
                         ].each { key, value ->
                             logEntries << "      - ${key}: ${value}"
                         }

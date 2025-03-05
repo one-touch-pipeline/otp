@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowSystemService
 import de.dkfz.tbi.otp.workflowExecution.wes.*
 
 import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 @Component
@@ -66,10 +67,10 @@ class WesMonitor {
             return // job system is inactive
         }
 
-        List<WesRun> wesRuns = LogUsedTimeUtils.logUsedTime(log, "fetch wesRuns to monitor from database") {
+        List<WesRun> wesRuns = LogUsedTimeUtils.logUsedTime(log, "Fetching WESKit runs to monitor from database") {
             wesRunService.monitoredRuns()
         }
-        LogUsedTimeUtils.logUsedTimeStartEnd(log, "Check ${wesRuns.size()} WesRuns") {
+        LogUsedTimeUtils.logUsedTimeStartEnd(log, "Checking ${wesRuns.size()} WesRuns") {
             wesRuns.each { WesRun wesRun ->
                 checkJob(wesRun)
             }
@@ -81,11 +82,11 @@ class WesMonitor {
         try {
             runStatus = weskitAccessService.getRunStatus(wesRun.wesIdentifier)
         } catch (AbstractWeskitException e) {
-            log.debug("Fail to fetch state for ${wesRun.wesIdentifier} (${e.message}), retry next round")
+            log.debug("Failed to fetch state for ${wesRun.wesIdentifier}: ${e.message}. Retrying in the next attempt.")
             return
         }
         boolean endState = runStatusService.isInEndState(runStatus)
-        log.debug("state for ${wesRun.wesIdentifier}: ${endState ? 'Finished' : 'Running'} (${runStatus.state})")
+        log.debug("WESKit run ${wesRun.id} with ${wesRun.wesIdentifier} is ${endState ? 'Finished' : 'Running'} (${runStatus.state})")
         if (endState) {
             handleFinishedJob(wesRun)
         }
@@ -103,7 +104,7 @@ class WesMonitor {
         if (wesRuns.every {
             it.state == WesRun.MonitorState.FINISHED
         }) {
-            log.debug("all WesRuns finished for ${wesRun.workflowStep}")
+            log.debug("All WESKit runs have been completed for ${wesRun.workflowStep}.")
             jobService.createNextJob(wesRun.workflowStep.workflowRun)
         }
     }
@@ -113,8 +114,8 @@ class WesMonitor {
             new WesLog([
                     name     : it.name,
                     cmd      : it.cmd.join('\n'),
-                    startTime: LocalDateTime.parse(it.startTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME).atZone(configService.timeZoneId),
-                    endTime  : LocalDateTime.parse(it.endTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME).atZone(configService.timeZoneId),
+                    startTime: parseISOTime(it.startTime),
+                    endTime  : parseISOTime(it.endTime),
                     stdout   : it.stdout,
                     stderr   : it.stderr,
                     exitCode : it.exitCode,
@@ -125,8 +126,8 @@ class WesMonitor {
         WesLog wesLog = new WesLog([
                 name     : logLog.name,
                 cmd      : logLog.cmd.join('\n'),
-                startTime: LocalDateTime.parse(logLog.startTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME).atZone(configService.timeZoneId),
-                endTime  : LocalDateTime.parse(logLog.endTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME).atZone(configService.timeZoneId),
+                startTime: parseISOTime(logLog.startTime),
+                endTime  : parseISOTime(logLog.endTime),
                 stdout   : logLog.stdout,
                 stderr   : logLog.stderr,
                 exitCode : logLog.exitCode,
@@ -140,5 +141,9 @@ class WesMonitor {
         ]).save(flush: true)
 
         return wesRunLog
+    }
+
+    private ZonedDateTime parseISOTime(String time) {
+        return time ? LocalDateTime.parse(time, DateTimeFormatter.ISO_LOCAL_DATE_TIME).atZone(configService.timeZoneId) : null
     }
 }
