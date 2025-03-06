@@ -71,14 +71,14 @@ class AnalysisArtefactService {
             and wa.state <> '${WorkflowArtefact.State.FAILED}'
             and wa.state <> '${WorkflowArtefact.State.SKIPPED}'
             and wa.withdrawnDate is null
-            and bf.identifier = (
+            and (bf.identifier = (
                 select
                     max(identifier)
                 from
                     AbstractBamFile bf2
                 where
                     bf2.workPackage = bf.workPackage
-            )
+            ) OR bf.class = '${ExternallyProcessedBamFile.name}')
         """
 
     private final static String HQL_FIND_RELATED_BAM_FILES_FOR_BAM_FILES = """
@@ -117,14 +117,14 @@ class AnalysisArtefactService {
             and wa.state <> '${WorkflowArtefact.State.SKIPPED}'
             and wa.withdrawnDate is null
             and bf.withdrawn = false
-            and bf.identifier = (
+            and (bf.identifier = (
                 select
                     max(bf2.identifier)
                 from
                     AbstractBamFile bf2
                 where
                     bf2.workPackage = bf.workPackage
-            )
+            ) OR bf.class = '${ExternallyProcessedBamFile.name}')
         """
 
     private final static String HQL_FIND_RELATED_ANALYSIS_FOR_BAM_FILES = """
@@ -264,7 +264,7 @@ class AnalysisArtefactService {
             return (AbstractBamFile.executeQuery(HQL_FETCH_SAMPLE_PAIRS, [
                     bamFiles: bamFiles,
             ]) as List<List<?>>).collectEntries {
-                AnalysisGroup analysisGroup = new AnalysisGroup(it[INDEX_0] as MergingWorkPackage, it[INDEX_1] as MergingWorkPackage)
+                AnalysisGroup analysisGroup = new AnalysisGroup(it[INDEX_0] as AbstractMergingWorkPackage, it[INDEX_1] as AbstractMergingWorkPackage)
                 [(analysisGroup): it[INDEX_2] as SamplePair]
             } as Map<AnalysisGroup, SamplePair>
         }

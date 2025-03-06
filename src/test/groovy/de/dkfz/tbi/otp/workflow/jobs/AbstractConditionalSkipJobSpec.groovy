@@ -80,13 +80,12 @@ class AbstractConditionalSkipJobSpec extends Specification implements DataTest, 
         0 * _
     }
 
-    void "execute, should run through without changing state when no exception is thrown"() {
+    void "execute, when no exception is thrown, should change state to success"() {
         when:
         job.execute(workflowStep)
 
         then:
-        1 * job.checkRequirements(workflowStep) >> {
-        }
-        0 * _
+        1 * job.checkRequirements(workflowStep) >> { }
+        1 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
     }
 }

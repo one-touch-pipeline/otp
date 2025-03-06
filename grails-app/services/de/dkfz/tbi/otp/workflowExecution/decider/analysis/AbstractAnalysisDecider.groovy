@@ -260,6 +260,7 @@ abstract class AbstractAnalysisDecider<A extends BamFilePairAnalysis>
                 sampleType2BamFile: controlData.artefact,
                 instanceName      : workFileService.constructInstanceName(workflowVersion),
         ])
+        run.save(flush: true, deepValidate: false)
 
         deciderResult.infos << "--> create analysis ${analysis}".toString()
         deciderResult.newArtefacts << workflowOutputArtefact

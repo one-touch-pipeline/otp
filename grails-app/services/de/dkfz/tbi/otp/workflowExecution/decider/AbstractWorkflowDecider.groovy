@@ -146,7 +146,7 @@ abstract class AbstractWorkflowDecider<ADL extends ArtefactDataList, G extends B
                         assert it.project.state != Project.State.ARCHIVED
                         assert it.project.state != Project.State.DELETED
                         [(new ProjectSeqTypeGroup(it.project, it.seqType)): it]
-                    }
+                    } as Map<ProjectSeqTypeGroup, WorkflowVersionSelector>
                 }
 
         Map<G, ADL> groupedInputData = LogUsedTimeUtils.logUsedTime(log, "        group given Artefacts") {

@@ -282,27 +282,6 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
         ])
     }
 
-    protected void createFragmentAndSelector(String name, String json, Map selectors) {
-        ExternalWorkflowConfigFragment fragment = createExternalWorkflowConfigFragment([
-                name        : name,
-                configValues: json.replaceAll('[ \n]+', ' '),
-        ])
-        log.info("Create fragment ${name} ${fragment}")
-
-        ExternalWorkflowConfigSelector selector = createExternalWorkflowConfigSelector([
-                name                          : name,
-                workflowVersions              : [],
-                workflows                     : [],
-                referenceGenomes              : [],
-                libraryPreparationKits        : [],
-                seqTypes                      : [],
-                projects                      : [],
-                externalWorkflowConfigFragment: fragment,
-                selectorType                  : SelectorType.GENERIC,
-        ] + selectors)
-        log.info("Create selector ${name} ${selector}")
-    }
-
     protected void setUpFingerPrintingFile() {
         referenceGenome.refresh()
         referenceGenome.fingerPrintingFileName = fingerPrintingFileName

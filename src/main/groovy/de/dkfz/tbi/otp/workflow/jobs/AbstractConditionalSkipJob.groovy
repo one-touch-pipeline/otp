@@ -32,7 +32,9 @@ abstract class AbstractConditionalSkipJob extends AbstractJob {
             checkRequirements(workflowStep)
         } catch (SkipWorkflowStepException e) {
             workflowStateChangeService.changeStateToSkipped(workflowStep, e.skipMessage)
+            return
         }
+        workflowStateChangeService.changeStateToSuccess(workflowStep)
     }
 
     /** Should throw SkipWorkflowStepException when WorkflowStep should be skipped  */

@@ -84,10 +84,6 @@ VALUES (nextval('hibernate_sequence'), 0, now(), now(), 0, 'Default cvalue value
         '                "value": "workflowEnvironment_tbiLsf",' ||
         '                "type": "string"' ||
         '            },' ||
-        '            "tbiLsfVirtualEnvDir": {' ||
-        '                "value": "/odcf/cluster/virtualenvs/warsow/python_2.7.9_SNVCalling_1.2.166-1",' ||
-        '                "type": "path"' ||
-        '            },' ||
         '            "mpileupOutputDirectory": {' ||
         '                "value": "./"' ||
         '            },' ||

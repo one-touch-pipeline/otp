@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2025 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,30 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataprocessing
+package de.dkfz.tbi.otp.workflowTest.analysis.roddy.snvcalling
 
-import org.springframework.beans.factory.annotation.Autowired
+import de.dkfz.tbi.otp.analysis.pair.bamfiles.SeqTypeAndInputBamFilesHCC1187Div32
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
-import de.dkfz.tbi.otp.ngsdata.IndividualService
+class SnvCallingExomeWorkflowSpec extends AbstractSnvCallingWorkflowSpec implements SeqTypeAndInputBamFilesHCC1187Div32 {
 
-import java.nio.file.Path
-
-abstract class AbstractAnalysisLinkFileService<T extends BamFilePairAnalysis> implements ArtefactFileService<T> {
-
-    @Autowired
-    IndividualService individualService
-
-    Path getDirectoryPath(T instance) {
-        return getSamplePairPath(instance.samplePair).resolve(instance.instanceName)
+    @Override
+    SeqType seqTypeToUse() {
+        return SeqTypeService.exomePairedSeqType
     }
-
-    Path getSamplePairPath(SamplePair samplePair) {
-        return individualService.getViewByPidPath(samplePair.individual, samplePair.seqType)
-                .resolve(resultsDirectoryName)
-                .resolve(samplePair.seqType.libraryLayoutDirName)
-                .resolve("${samplePair.sampleType1.dirName}_${samplePair.sampleType2.dirName}")
-    }
-
-    abstract String getResultsDirectoryName()
 }

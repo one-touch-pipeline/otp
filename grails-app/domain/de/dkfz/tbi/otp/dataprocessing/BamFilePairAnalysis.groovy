@@ -130,6 +130,9 @@ abstract class BamFilePairAnalysis implements Artefact, CommentableWithProject, 
      */
     @Deprecated
     File getWorkDirectory() {
+        if (workflowArtefact?.producedBy?.workFolder) {
+            return new File(workflowArtefact?.producedBy?.workDirectory)
+        }
         return instancePath.absoluteDataManagementPath
     }
 

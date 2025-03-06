@@ -46,20 +46,19 @@ class SnvWorkflow extends AbstractAnalysisWorkflow {
     List<Class<? extends Job>> getJobList() {
         return [
                 AnalysisConditionalSkipJob,
-//                SnvFragmentJob,
-//                SnvCheckFragmentKeysJob,
+                RoddyAnalysisFragmentJob,
+                SnvCheckFragmentKeysJob,
                 SnvConditionalFailJob,
 //                SnvCreateNotificationJob,
                 AttachUuidJob,
                 SnvPrepareJob,
-//                SnvExecuteJob,
-//                SnvValidationJob,
-//                SnvParseJob,
+                SnvExecuteJob,
+                SnvValidationJob,
 //                SnvCleanupJob,
                 SetCorrectPermissionJob,
                 CalculateSizeJob,
                 AnalysisLinkJob,
-//                SnvFinishJob,
+                AnalysisFinishJob,
         ]
     }
 

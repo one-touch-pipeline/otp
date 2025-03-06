@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflow.analysis.snv
 
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
@@ -40,7 +41,10 @@ import java.nio.file.Path
 @Slf4j
 class SnvExecuteJob extends AbstractExecuteRoddyPipelineJob implements SnvWorkflowShared {
 
+    @Autowired
     ReferenceGenomeService referenceGenomeService
+
+    @Autowired
     SnvWorkFileService snvWorkFileService
 
     @Override

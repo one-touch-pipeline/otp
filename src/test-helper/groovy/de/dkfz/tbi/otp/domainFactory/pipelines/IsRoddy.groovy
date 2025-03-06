@@ -52,6 +52,43 @@ trait IsRoddy implements IsPipeline {
         ], properties, saveAndValidate)
     }
 
+    /**
+     * Creates a {@link MergingWorkPackage} with the same properties as the specified one but a different {@link SampleType}.
+     */
+    MergingWorkPackage createMergingWorkPackageWithSameProperties(MergingWorkPackage base) {
+        return createMergingWorkPackageWithSameProperties(base, createSampleType())
+    }
+
+    /**
+     * Creates a {@link MergingWorkPackage} with the same properties as the specified one but a different {@link SampleType}.
+     */
+    MergingWorkPackage createMergingWorkPackageWithSameProperties(MergingWorkPackage base, SampleType sampleType) {
+        Sample sample = createSample(
+                individual: base.individual,
+                sampleType: sampleType,
+        )
+
+        List<String> mergingProperties = [
+                "seqType",
+                "seqPlatformGroup",
+                'referenceGenome',
+                'statSizeFileName',
+                'pipeline',
+        ]
+        if (!base.seqType.isWgbs()) {
+            mergingProperties.add("libraryPreparationKit")
+        }
+        if (base.seqType.hasAntibodyTarget) {
+            mergingProperties.add("antibodyTarget")
+        }
+
+        return createDomainObject(MergingWorkPackage, mergingProperties.collectEntries {
+            [it, base."${it}"]
+        } + [
+                sample: sample,
+        ], [:])
+    }
+
     @Override
     RoddyBamFile createBamFile(Map properties = [:]) {
         return createRoddyBamFile(properties, RoddyBamFile)

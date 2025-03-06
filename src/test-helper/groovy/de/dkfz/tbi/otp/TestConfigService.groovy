@@ -202,6 +202,10 @@ class TestConfigService extends ConfigService {
         return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_RODDY_SHARED_FILES_BASE_DIRECTORY))
     }
 
+    String getWorkflowTestRoddyVirtualEnvsBaseDir() {
+        return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_RODDY_VIRTUAL_ENVS_DIRECTORY))
+    }
+
     String getWorkflowTestQueue() {
         return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_QUEUE))
     }

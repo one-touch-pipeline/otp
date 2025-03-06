@@ -23,6 +23,8 @@ package de.dkfz.tbi.otp.domainFactory.pipelines.externalBam
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsAlignment
+import de.dkfz.tbi.otp.ngsdata.Individual
+import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SequencingReadType
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.exceptions.NotSupportedException
@@ -48,6 +50,18 @@ trait ExternalBamFactory implements IsAlignment {
         ], properties, saveAndValidate)
     }
 
+    ExternalMergingWorkPackage createMergingWorkPackage(AbstractMergingWorkPackage mwp, Map properties = [:], boolean saveAndValidate = true) {
+        Pipeline pipeline = properties.pipeline ?: mwp.pipeline
+        return createDomainObject(ExternalMergingWorkPackage, [
+                sample         : { createSample([individual: mwp.sample.individual]) },
+                seqType        : mwp.seqType,
+                pipeline       : pipeline,
+                referenceGenome: mwp.referenceGenome,
+                antibodyTarget : mwp.antibodyTarget,
+
+        ], properties, saveAndValidate)
+    }
+
     @Override
     ExternallyProcessedBamFile createBamFile(Map properties = [:]) {
         return createDomainObject(ExternallyProcessedBamFile, [
@@ -57,6 +71,20 @@ trait ExternalBamFactory implements IsAlignment {
                 importedFrom       : "/importFrom_${nextId}",
                 furtherFiles       : [],
         ], properties)
+    }
+
+    /**
+     * Create another bam file for the same {@link Individual} and {@link SeqType}
+     */
+    ExternallyProcessedBamFile createCorrespondingBamFile(ExternallyProcessedBamFile bamFile, Map properties = [:]) {
+        return createBamFile([
+                workPackage: createMergingWorkPackage([
+                        sample : createSample([
+                                individual: bamFile.individual,
+                        ]),
+                        seqType: bamFile.seqType,
+                ]),
+        ] + properties)
     }
 
     ExternallyProcessedBamFile createFinishedBamFile(Map properties = [:]) {

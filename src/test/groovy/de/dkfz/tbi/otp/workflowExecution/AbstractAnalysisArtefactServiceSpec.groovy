@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
-import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsPipeline
 import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.*
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
@@ -41,21 +41,7 @@ import de.dkfz.tbi.otp.workflowExecution.decider.analysis.*
 
 import java.time.LocalDate
 
-class AnalysisArtefactServiceSpec<T> extends HibernateSpec implements WorkflowSystemDomainFactory, RoddyPanCancerFactory {
-
-    private AnalysisArtefactService analysisArtefactService
-
-    private WorkflowArtefact workflowArtefact1
-    private WorkflowArtefact workflowArtefact2
-    private WorkflowArtefact workflowArtefactRelated
-
-    private WorkflowArtefact workflowArtefactAnalysis
-
-    private RoddyBamFile bamFile1
-    private RoddyBamFile bamFile2
-    private RoddyBamFile bamFileRelated
-
-    private BamFilePairAnalysis analysisRelated
+abstract class AbstractAnalysisArtefactServiceSpec<T> extends HibernateSpec implements WorkflowSystemDomainFactory, IsPipeline {
 
     @Override
     List<Class> getDomainClasses() {
@@ -64,8 +50,10 @@ class AnalysisArtefactServiceSpec<T> extends HibernateSpec implements WorkflowSy
                 FastqFile,
                 IndelCallingInstance,
                 MergingWorkPackage,
+                ExternalMergingWorkPackage,
                 ReferenceGenomeProjectSeqType,
                 RoddyBamFile,
+                ExternallyProcessedBamFile,
                 RoddySnvCallingInstance,
                 RunYapsaInstance,
                 SampleTypePerProject,
@@ -75,6 +63,20 @@ class AnalysisArtefactServiceSpec<T> extends HibernateSpec implements WorkflowSy
                 WorkflowVersionSelector,
         ]
     }
+
+    protected AnalysisArtefactService analysisArtefactService
+
+    protected WorkflowArtefact workflowArtefact1
+    protected WorkflowArtefact workflowArtefact2
+    protected WorkflowArtefact workflowArtefactRelated
+
+    protected WorkflowArtefact workflowArtefactAnalysis
+
+    protected AbstractBamFile bamFile1
+    protected AbstractBamFile bamFile2
+    protected AbstractBamFile bamFileRelated
+
+    protected BamFilePairAnalysis analysisRelated
 
     void setup() {
         analysisArtefactService = new AnalysisArtefactService()
@@ -320,12 +322,18 @@ class AnalysisArtefactServiceSpec<T> extends HibernateSpec implements WorkflowSy
 
         SamplePair samplePair2 = SnvDomainFactory.INSTANCE.createSamplePair([
                 mergingWorkPackage1: bamFile1.workPackage,
+                mergingWorkPackage2: createMergingWorkPackage(bamFile1.workPackage),
         ])
 
         SamplePair samplePair3 = SnvDomainFactory.INSTANCE.createSamplePair([
+                mergingWorkPackage1: createMergingWorkPackage(bamFileRelated.workPackage),
                 mergingWorkPackage2: bamFileRelated.workPackage,
         ])
-        SnvDomainFactory.INSTANCE.createSamplePair()
+        AbstractMergingWorkPackage mwp = createMergingWorkPackage()
+        SnvDomainFactory.INSTANCE.createSamplePair(
+                mergingWorkPackage1: mwp,
+                mergingWorkPackage2: createMergingWorkPackage(mwp),
+        )
 
         AnalysisGroup analysisGroup1 = new AnalysisGroup(samplePair1.mergingWorkPackage1, samplePair1.mergingWorkPackage2)
         AnalysisGroup analysisGroup2 = new AnalysisGroup(samplePair2.mergingWorkPackage1, samplePair2.mergingWorkPackage2)
@@ -364,8 +372,8 @@ class AnalysisArtefactServiceSpec<T> extends HibernateSpec implements WorkflowSy
         given:
         setupData()
 
-        RoddyBamFile bamFile3 = createBamFile()
-        RoddyBamFile bamFile4 = createBamFile()
+        AbstractBamFile bamFile3 = createBamFile()
+        AbstractBamFile bamFile4 = createBamFile()
 
         SampleTypePerProject category1 = SnvDomainFactory.INSTANCE.createSampleTypePerProject([
                 project   : bamFile1.project,

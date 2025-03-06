@@ -662,7 +662,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                 throw new WorkflowTestException("The count of existing workfowRuns is incorrect: found ${oldWorkflowCount}, but expected ${existingRuns}")
             }
             if (newWorkflowCount != requiredWorkflowRunCount) {
-                throw new WorkflowTestException("The count of new workfowRuns is incorrect: found ${newWorkflowCount}, but expected ${existingRuns}")
+                throw new WorkflowTestException("The count of new workfowRuns is incorrect: found ${newWorkflowCount}, but expected ${requiredWorkflowRunCount}")
             }
             updateDomainValuesForTesting()
             workflowSystemService.startWorkflowSystem()
@@ -801,6 +801,30 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                 }
             }
         }
+    }
+
+    /**
+     * Creates Fragments and Selector for Workflow
+     */
+    protected void createFragmentAndSelector(String name, String json, Map selectors) {
+        ExternalWorkflowConfigFragment fragment = createExternalWorkflowConfigFragment([
+                name        : name,
+                configValues: json.replaceAll('[ \n]+', ' '),
+        ])
+        log.info("Create fragment ${name} ${fragment}")
+
+        ExternalWorkflowConfigSelector selector = createExternalWorkflowConfigSelector([
+                name                          : name,
+                workflowVersions              : [],
+                workflows                     : [],
+                referenceGenomes              : [],
+                libraryPreparationKits        : [],
+                seqTypes                      : [],
+                projects                      : [],
+                externalWorkflowConfigFragment: fragment,
+                selectorType                  : SelectorType.GENERIC,
+        ] + selectors)
+        log.info("Create selector ${name} ${selector}")
     }
 
     /**

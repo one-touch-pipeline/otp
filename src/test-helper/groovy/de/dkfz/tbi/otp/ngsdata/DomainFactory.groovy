@@ -441,7 +441,7 @@ class DomainFactory {
     }
 
     /**
-     * @deprecated use {@link IsPipeline#createMergingWorkPackage}
+     * @deprecated use {@link IsRoddy#createMergingWorkPackageWithSameProperties(MergingWorkPackage base)}
      *
      * Creates a {@link MergingWorkPackage} with the same properties as the specified one but a different
      * {@link SampleType}.
@@ -451,7 +451,7 @@ class DomainFactory {
     }
 
     /**
-     * @deprecated use {@link IsPipeline#createMergingWorkPackage}
+     * @deprecated use {@link IsRoddy#createMergingWorkPackageWithSameProperties(MergingWorkPackage base, SampleType sampleType)}
      *
      * Creates a {@link MergingWorkPackage} with the same properties as the specified one but a different
      * {@link SampleType}.
