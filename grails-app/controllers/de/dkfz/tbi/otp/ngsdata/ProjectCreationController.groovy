@@ -28,6 +28,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.multipart.MultipartFile
 
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
@@ -55,6 +56,7 @@ class ProjectCreationController {
             save : "POST",
     ]
 
+    MailHelperService mailHelperService
     ProjectService projectService
     ProjectRequestService projectRequestService
     ProjectGroupService projectGroupService
