@@ -53,6 +53,11 @@ class AnalysisConditionalSkipJob extends AbstractConditionalSkipJob implements A
 
         checkCoverageForProcessingThresholds(tumorBamFile)
         checkCoverageForProcessingThresholds(controlBamFile)
+        checkBamFiles(tumorBamFile, controlBamFile)
+    }
+
+    @SuppressWarnings(['UnusedMethodParameter', 'EmptyMethod'])
+    protected void checkBamFiles(AbstractBamFile bamFileDisease, AbstractBamFile bamFileControl) throws SkipWorkflowStepException {
     }
 
     private void checkCoverageForProcessingThresholds(AbstractBamFile bamFile) throws SkipWorkflowStepException {

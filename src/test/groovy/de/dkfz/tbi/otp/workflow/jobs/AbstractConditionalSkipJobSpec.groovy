@@ -52,7 +52,7 @@ class AbstractConditionalSkipJobSpec extends Specification implements DataTest, 
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
     }
 
-    void "execute, should change the state to skipped, when SkipWorkflowStepException exception is thrown"() {
+    void "execute, should change the state to skipped, when SkipWorkflowStepException exception is thrown by checkRequirements"() {
         given:
         WorkflowStepSkipMessage skipMessage = new WorkflowStepSkipMessage([
                 message: 'test',

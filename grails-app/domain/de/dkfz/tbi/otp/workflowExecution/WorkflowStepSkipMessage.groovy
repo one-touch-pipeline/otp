@@ -29,6 +29,8 @@ import de.dkfz.tbi.otp.utils.Entity
 class WorkflowStepSkipMessage implements Entity {
 
     enum Category {
+        MAXIMAL_READ_LENGTH_MISSING,
+        SOPHIA_WORKFLOW_COMPATIBLE_QUALITY_ASSESSMENT_MISSING,
         PREREQUISITE_WORKFLOW_RUN_NOT_SUCCESSFUL,
         PROJECT_THRESHOLD_REJECTION,
         WORKFLOW_COVERAGE_REJECTION,

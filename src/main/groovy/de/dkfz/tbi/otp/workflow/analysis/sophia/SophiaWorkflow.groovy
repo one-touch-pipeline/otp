@@ -47,7 +47,7 @@ class SophiaWorkflow extends AbstractAnalysisWorkflow {
     @Override
     List<Class<? extends Job>> getJobList() {
         return [
-                AnalysisConditionalSkipJob,
+                SophiaConditionalSkipJob,
                 RoddyAnalysisFragmentJob,
 //                SophiaCheckFragmentKeysJob,
                 SophiaConditionalFailJob,
