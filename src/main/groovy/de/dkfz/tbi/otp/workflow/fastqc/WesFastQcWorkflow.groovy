@@ -42,6 +42,7 @@ class WesFastQcWorkflow implements LinearWorkflow {
     List<Class<? extends Job>> getJobList() {
         return [
                 FastqcFragmentJob,
+                WeskitCheckFragmentKeysJob,
                 FastqcConditionalFailJob,
                 AttachUuidJob,
                 FastqcWesPrepareJob,

@@ -129,16 +129,17 @@ class ExternalWorkflowConfigFragment implements Commentable, Deprecateable<Exter
     @TupleConstructor
     @SuppressWarnings("Indentation")
     enum Type {
+
         /** used for jobs that are submitted directly to cluster by OTP */
         OTP_CLUSTER({ String s ->
             String validation = ClusterJobSubmissionOptionsService.validateJsonObjectString(s)
             if (validation) {
-                Set<String> validationSet = []
-                validationSet.add(validation)
-                return validationSet
+                return [validation] as Set
             }
             return Collections.<String> emptySet()
         }),
+        /** used for jobs that are submitted via WESKit */
+        WESKIT({ Collections.<String> emptySet() }),
         WORKFLOWS({ Collections.<String> emptySet() }),
         /**
          * Contains cvalue and resource sets for roddy workflows

@@ -19,41 +19,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution.wes
+package de.dkfz.tbi.otp.workflow.jobs
 
-import grails.converters.JSON
-import groovy.transform.TupleConstructor
+import groovy.util.logging.Slf4j
+import org.springframework.stereotype.Component
 
-@TupleConstructor
-class WesWorkflowEngineParameter {
-    final String accountingName
-    final String jobName
-    final String queue
-    final String maxMemory
-    final String maxRuntime
-    final String profiles
-
-    JSON asJson() {
-        return [
-                "accounting-name": accountingName,
-                "job-name"       : jobName,
-                "queue"          : queue,
-                "max-memory"     : maxMemory,
-                "max-runtime"    : maxRuntime,
-                "profiles"        : profiles,
-        ] as JSON
-    }
+/**
+ * Checks the required fragment keys for Weskit workflows,
+ * currently we only have nextflow workflows.
+ * Maybe this will have to be adapted later for other workflow engines
+ */
+@Component
+@Slf4j
+class WeskitCheckFragmentKeysJob extends AbstractCheckFragmentKeysJob {
 
     @Override
-    String toString() {
+    Set<String> getKeyPaths() {
         return [
-                "WesWorkflowEngineParameter:",
-                "accounting-name: ${accountingName}",
-                "job-name: ${jobName}",
-                "queue: ${queue}",
-                "max-memory: ${maxMemory}",
-                "max-runtime: ${maxRuntime}",
-                "profiles: ${profiles}",
-        ].join('\n- ')
+                "WESKIT/MAX_MEMORY",
+                "WESKIT/MAX_RUNTIME",
+                "WESKIT/PROFILES",
+        ] as Set
     }
 }

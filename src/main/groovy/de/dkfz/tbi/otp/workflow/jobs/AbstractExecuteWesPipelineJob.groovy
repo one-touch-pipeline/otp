@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflow.jobs
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.util.logging.Slf4j
 import io.swagger.client.wes.model.RunId
+import grails.converters.JSON
 import org.grails.web.json.JSONObject
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -42,8 +43,6 @@ import java.nio.file.Path
 abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob {
 
     final static String DISALLOWED_CHARS = '[^a-zA-Z0-9\\-]'
-
-    final static String PROFILES = 'singularity,slurm'
 
     @Autowired
     WorkflowRunService workflowRunService
@@ -153,6 +152,7 @@ abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob 
     }
 
     private WesWorkflowEngineParameter createWesWorkflowEngineParameter(WorkflowStep workflowStep) {
+        JSONObject config = JSON.parse(workflowStep.workflowRun.combinedConfig)[ExternalWorkflowConfigFragment.Type.WESKIT.name()] as JSONObject
         Project project = workflowStep.workflowRun.project
         String accountName = processingOptionService.findOptionAsBoolean(ProcessingOption.OptionName.ENABLE_ACCOUNTING_FOR_WESKIT) ?
                 replaceDisallowedChars(project.name) : null
@@ -163,9 +163,9 @@ abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob 
                 accountName,
                 jobName,
                 processingPriority.queue,
-                "512M",
-                "24:00",
-                PROFILES,
+                config.get("MAX_MEMORY") as String,
+                config.get("MAX_RUNTIME") as String,
+                config.get("PROFILES") as String,
         )
     }
 

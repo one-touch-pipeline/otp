@@ -19,41 +19,68 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution.wes
+package de.dkfz.tbi.otp.workflow.jobs
 
-import grails.converters.JSON
-import groovy.transform.TupleConstructor
+abstract class WeskitCheckFragmentKeysJobSpec extends AbstractCheckFragmentKeysJobSpec {
 
-@TupleConstructor
-class WesWorkflowEngineParameter {
-    final String accountingName
-    final String jobName
-    final String queue
-    final String maxMemory
-    final String maxRuntime
-    final String profiles
-
-    JSON asJson() {
+    @Override
+    Set<String> getRequiredKeys() {
         return [
-                "accounting-name": accountingName,
-                "job-name"       : jobName,
-                "queue"          : queue,
-                "max-memory"     : maxMemory,
-                "max-runtime"    : maxRuntime,
-                "profiles"        : profiles,
-        ] as JSON
+                "WESKIT/MAX_MEMORY",
+                "WESKIT/MAX_RUNTIME",
+                "WESKIT/PROFILES",
+        ] as Set
     }
 
     @Override
-    String toString() {
+    Set<String> getMissingKeys() {
         return [
-                "WesWorkflowEngineParameter:",
-                "accounting-name: ${accountingName}",
-                "job-name: ${jobName}",
-                "queue: ${queue}",
-                "max-memory: ${maxMemory}",
-                "max-runtime: ${maxRuntime}",
-                "profiles: ${profiles}",
-        ].join('\n- ')
+                "WESKIT/PROFILES",
+        ] as Set
+    }
+
+    @Override
+    protected WeskitCheckFragmentKeysJob createJob() {
+        return new WeskitCheckFragmentKeysJob()
+    }
+
+    @SuppressWarnings("GetterMethodCouldBeProperty")
+    @Override
+    protected String getCombinedConfig() {
+        return """
+{
+  "WESKIT": {
+    "MAX_MEMORY": {
+        "value": "20"
+    },
+    "MAX_RUNTIME": {
+        "value": "100"
+    },
+    "PROFILES": {
+        "value": "slurm,singularity"
+    },
+  }
+}
+"""
+    }
+
+    @SuppressWarnings("GetterMethodCouldBeProperty")
+    @Override
+    protected String getCombinedConfigMissingKeys() {
+        return """
+{
+  "WESKIT": {
+    "MAX_MEMORY": {
+        "value": "20"
+    },
+    "MAX_RUNTIME": {
+        "value": "100"
+    },
+    "DUMMY": {
+        "value": "dummy"
+    }
+  }
+}
+"""
     }
 }

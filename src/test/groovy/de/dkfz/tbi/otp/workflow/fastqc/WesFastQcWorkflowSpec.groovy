@@ -48,6 +48,7 @@ class WesFastQcWorkflowSpec extends Specification implements DataTest, DomainFac
         expect:
         wesFastQcWorkflow.jobList == [
                 FastqcFragmentJob,
+                WeskitCheckFragmentKeysJob,
                 FastqcConditionalFailJob,
                 AttachUuidJob,
                 FastqcWesPrepareJob,

@@ -94,7 +94,7 @@ class AbstractExecuteWesPipelineJobSpec extends Specification implements DataTes
 
     private void setupData() {
         workflowStep = createWorkflowStep()
-        workflowStep.workflowRun.combinedConfig = '{"config":"combined"}'
+        workflowStep.workflowRun.combinedConfig = '{"WESKIT": {"MAX_MEMORY": "50", "MAX_RUNTIME": "100", "PROFILES": "slurm,singularity"}}'
         workflowStep.workflowRun.workDirectory = tempDir.resolve("workDir").toString()
     }
 
