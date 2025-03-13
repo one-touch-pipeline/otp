@@ -207,19 +207,23 @@ class TestConfigService extends ConfigService {
     }
 
     String getWorkflowTestQueue() {
-        return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_QUEUE))
+        return getAndAssertValue(OtpProperty.TEST_WORKFLOW_QUEUE)
     }
 
     String getWorkflowTestConfigSuffix() {
-        return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_CONFIG_SUFFIX))
+        return getAndAssertValue(OtpProperty.TEST_WORKFLOW_CONFIG_SUFFIX)
     }
 
     String getWorkflowTestFasttrackQueue() {
-        return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_FASTTRACK_QUEUE))
+        return getAndAssertValue(OtpProperty.TEST_WORKFLOW_FASTTRACK_QUEUE)
     }
 
     String getWorkflowTestFasttrackConfigSuffix() {
-        return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_FASTTRACK_CONFIG_SUFFIX))
+        return getAndAssertValue(OtpProperty.TEST_WORKFLOW_FASTTRACK_CONFIG_SUFFIX)
+    }
+
+    File getWorkflowTestInitScript() {
+        return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_INIT_SCRIPT))
     }
 
     private String getAndAssertValue(OtpProperty property) {

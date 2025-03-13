@@ -188,6 +188,12 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
                 }
             }
 
+            File script = configService.workflowTestInitScript
+            if (script.isFile()) {
+                doWithAuth(ADMIN) {
+                    runScript(script)
+                }
+            }
             findOrCreateProcessingOption(
                     name: OptionName.RODDY_APPLICATION_INI,
                     value: new File(inputRootDirectory, "applicationProperties-test.ini").absolutePath

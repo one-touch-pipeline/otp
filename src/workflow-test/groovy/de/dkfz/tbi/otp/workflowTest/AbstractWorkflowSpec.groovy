@@ -231,6 +231,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
             initBaseFolder()
             createUserAndRoles()
             loadInitialisationScripts()
+            loadCustomInitialisationScript()
             initProcessingOption()
             initSubmissionOptions()
 
@@ -591,6 +592,20 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                 log.debug("  - Load ${script}")
                 runScript(script)
             }
+        }
+    }
+    /**
+     * loads the script provided by OtpProperty.TEST_WORKFLOW_INTI_SCRIPT'
+     */
+    private void loadCustomInitialisationScript() {
+        File script = configService.workflowTestInitScript
+        if (script.isFile()) {
+            doWithAuth(ADMIN) {
+                log.debug("Loading custom init script: ${script}")
+                runScript(script)
+            }
+        } else {
+            log.debug("Skipping custom init script")
         }
     }
 

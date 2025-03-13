@@ -63,13 +63,13 @@ class ExecuteRoddyCommandService {
     @Deprecated
     String activateModulesForRoddyCommand() {
         String loadModule = processingOptionService.findOptionAsString(OptionName.COMMAND_LOAD_MODULE_LOADER)
-        String activateJava = processingOptionService.findOptionAsString(OptionName.COMMAND_ACTIVATION_JAVA)
         String activateGroovy = processingOptionService.findOptionAsString(OptionName.COMMAND_ACTIVATION_GROOVY)
+        String activateJava = processingOptionService.findOptionAsString(OptionName.COMMAND_ACTIVATION_JAVA)
 
         return [
                 loadModule,
-                activateJava,
                 activateGroovy,
+                activateJava,
         ].findAll().join('\n')
     }
 

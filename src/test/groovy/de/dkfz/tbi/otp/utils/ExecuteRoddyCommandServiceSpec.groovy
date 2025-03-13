@@ -40,20 +40,20 @@ class ExecuteRoddyCommandServiceSpec extends Specification implements DataTest {
     void "check activateModulesForRoddyCommand with modules, should return activation commands"() {
         given:
         String loadModule = "LOAD MODULE"
-        String activateJava = "ACTIVATE JAVA"
         String activateGroovy = "ACTIVATE_Groovy"
+        String activateJava = "ACTIVATE JAVA"
         ExecuteRoddyCommandService service = new ExecuteRoddyCommandService([
                 processingOptionService: new ProcessingOptionService(),
         ])
 
         DomainFactory.createProcessingOptionLazy(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER, loadModule)
-        DomainFactory.createProcessingOptionLazy(ProcessingOption.OptionName.COMMAND_ACTIVATION_JAVA, activateJava)
         DomainFactory.createProcessingOptionLazy(ProcessingOption.OptionName.COMMAND_ACTIVATION_GROOVY, activateGroovy)
+        DomainFactory.createProcessingOptionLazy(ProcessingOption.OptionName.COMMAND_ACTIVATION_JAVA, activateJava)
 
         String expected = [
                 loadModule,
-                activateJava,
                 activateGroovy,
+                activateJava,
         ].join('\n')
 
         when:

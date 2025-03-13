@@ -43,11 +43,11 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
 
     static final private String LOAD_MODULE = "LOAD MODULE"
 
-    static final private String ACTIVATE_JAVA = "ACTIVATE JAVA"
-
     static final private String ACTIVATE_GROOVY = "ACTIVATE GROOVY"
 
-    static final private String INIT_MODULES = "${LOAD_MODULE}\n${ACTIVATE_JAVA}\n${ACTIVATE_GROOVY}\n"
+    static final private String ACTIVATE_JAVA = "ACTIVATE JAVA"
+
+    static final private String INIT_MODULES = "${LOAD_MODULE}\n${ACTIVATE_GROOVY}\n${ACTIVATE_JAVA}\n"
 
     ExecuteRoddyCommandService executeRoddyCommandService
 

@@ -73,16 +73,16 @@ class RoddyCommandServiceSpec extends Specification implements ServiceUnitTest<R
     void "check activateModulesForRoddyCommand with modules, should return activation commands"() {
         given:
         String loadModule = "LOAD MODULE"
-        String activateJava = "ACTIVATE JAVA"
         String activateGroovy = "ACTIVATE_Groovy"
+        String activateJava = "ACTIVATE JAVA"
         findOrCreateProcessingOption(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER, loadModule)
-        findOrCreateProcessingOption(ProcessingOption.OptionName.COMMAND_ACTIVATION_JAVA, activateJava)
         findOrCreateProcessingOption(ProcessingOption.OptionName.COMMAND_ACTIVATION_GROOVY, activateGroovy)
+        findOrCreateProcessingOption(ProcessingOption.OptionName.COMMAND_ACTIVATION_JAVA, activateJava)
 
         String expected = [
                 loadModule,
-                activateJava,
                 activateGroovy,
+                activateJava,
         ].join('\n')
 
         when:
