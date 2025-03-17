@@ -203,7 +203,10 @@ class WorkflowRunService {
     private Closure getCriteria(Workflow workflow, List<WorkflowRun.State> states, String name) {
         return {
             if (name) {
-                ilike("displayName", "%${SqlUtil.replaceWildcardCharactersInLikeExpression(name)}%")
+                or {
+                    ilike("shortDisplayName", "%${SqlUtil.replaceWildcardCharactersInLikeExpression(name)}%")
+                    ilike("displayName", "%${SqlUtil.replaceWildcardCharactersInLikeExpression(name)}%")
+                }
             }
             if (states) {
                 'in'("state", states)
@@ -296,17 +299,6 @@ class WorkflowRunService {
     @CompileDynamic
     WorkflowRun findAllByRestartedFrom(WorkflowRun workflowRun) {
         return CollectionUtils.atMostOneElement(WorkflowRun.findAllByRestartedFrom(workflowRun))
-    }
-
-    @CompileDynamic
-    List<WorkflowRun> workflowRunList(Workflow workflow, List<WorkflowRun.State> states, String name) {
-        Closure criteria = getCriteria(workflow, states, name,)
-        List<WorkflowRun> data = WorkflowRun.createCriteria().list {
-            criteria.delegate = delegate
-            criteria()
-        } as List<WorkflowRun>
-        data.sort { -it.id }
-        return data
     }
 
     String getCumulatedClusterJobsStatus(List<ClusterJobStateDto> clusterJobStates) {
