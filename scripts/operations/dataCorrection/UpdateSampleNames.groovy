@@ -34,16 +34,16 @@
  * Change @param preView to false to do the actual update.
  */
 
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.*
 
 // =============================================
 // input area
 
-// The map of old sample name to the new one.
+// The map of seqTrack id, old sample name and the new one.
 // Two columns, separated by space, tab, comma or semicolon
 String mapping = """
-#oldSampleName1, newSampleName1
-#oldSampleName2, newSampleName2
+#seqTrackID1,oldSampleName1,newSampleName1
+#seqTrackID2,oldSampleName2,newSampleName2
 
 """
 
@@ -53,8 +53,8 @@ boolean preView = true
 // =============================================
 // work area
 
-List<String> oldSampleNameNotFound = []
-List<String> oldSampleNameMultipleFound = []
+List<String> seqTrackIdNotFound = []
+List<String> seqTrackAndSampleIdentifierDontMatch = []
 List<String> newSampleNameFound = []
 List<String> changes = []
 
@@ -62,40 +62,42 @@ List<Map> workList = mapping.split('\n')*.trim().findAll { String line ->
     line && !line.startsWith('#')
 }.collect { String line ->
     List<String> split = line.split(/ *[,; \t] */)
-    assert split.size() == 2: "The line '${split}' consist of ${split.size()} elements instead of two"
-    String oldSampleName = split[0]
-    String newSampleName = split[1]
+    assert split.size() == 3: "The line '${split}' consist of ${split.size()} elements instead of three"
+    String id = split[0]
+    String oldSampleName = split[1]
+    String newSampleName = split[2]
 
-    List<SeqTrack> seqTracks = SeqTrack.findAllBySampleIdentifier(oldSampleName)
-    if (!seqTracks) {
-        oldSampleNameNotFound << oldSampleName
+    SeqTrack seqTrack = SeqTrack.get(id)
+    if (!seqTrack) {
+        seqTrackIdNotFound << id
         return [:]
-    } else if (seqTracks.size() > 1) {
-        oldSampleNameMultipleFound << "${oldSampleName}: ${seqTracks.size()}"
+    } else if (seqTrack.sampleIdentifier != oldSampleName) {
+        seqTrackAndSampleIdentifierDontMatch << "${id}: ${oldSampleName}"
+        return [:]
     }
     List<SeqTrack> seqTracksForNewSampleName = SeqTrack.findAllBySampleIdentifier(newSampleName)
     if (seqTracksForNewSampleName.size()) {
         newSampleNameFound << "${newSampleName}: ${seqTracksForNewSampleName.size()}"
     }
 
-    changes << "${oldSampleName} --> ${newSampleName}"
+    changes << "${id}: ${oldSampleName} --> ${newSampleName}"
 
-    [
-            seqTracks    : seqTracks,
+    return [
+            seqTrack     : seqTrack,
             newSampleName: newSampleName,
     ]
 }.findAll()
 
-if (oldSampleNameNotFound) {
-    println "\nThe following old SampleNames could not be found:\n${oldSampleNameNotFound.join('\n')}"
+if (seqTrackIdNotFound) {
+    println "\nThe following seqtrack ids could not be found and will be ignored:\n${seqTrackIdNotFound.join('\n')}"
 }
 
-if (oldSampleNameMultipleFound) {
-    println "\nFor the following old SampleNames multiple lanes could be found:\n${oldSampleNameMultipleFound.join('\n')}"
+if (seqTrackAndSampleIdentifierDontMatch) {
+    println "\nThe following seqtrack ids and old SampleNames do not match and will be ignored:\n${seqTrackAndSampleIdentifierDontMatch.join('\n')}"
 }
 
 if (newSampleNameFound) {
-    println "\nFor the following new SampleNames already lanes could be found:\n${newSampleNameFound.join('\n')}"
+    println "\nThe following new SampleNames already exist:\n${newSampleNameFound.join('\n')}"
 }
 
 println "\n\nThe following changes will be done:\n${changes.join('\n')}"
@@ -104,13 +106,11 @@ if (preView) {
     println "\n\nStop, since preview mode is active. Nothing has changed. Change flag preView to false to do the changes"
 } else {
     SeqTrack.withTransaction {
-        workList.each { Map map->
-            List<SeqTrack> seqTracks = map.seqTracks
+        workList.each { Map map ->
+            SeqTrack seqTrack = map.seqTrack
             String newSampleName= map.newSampleName
-            seqTracks.each {SeqTrack seqTrack->
-                seqTrack.sampleIdentifier = newSampleName
-                seqTrack.save(flush: true)
-            }
+            seqTrack.sampleIdentifier = newSampleName
+            seqTrack.save(flush: true)
         }
     }
     println "\n\nSample names of all effected lanes have been changed"
