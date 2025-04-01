@@ -992,6 +992,13 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
                           exitStatus: ClusterJob.Status.COMPLETED,
         ])
 
+        createClusterJob([queued    : START_DATE_TIME,
+                          started   : START_DATE_TIME.plusHours(2),
+                          ended     : START_DATE_TIME.plusHours(2).plusMinutes(30),
+                          usedMemory: null,
+                          exitStatus: ClusterJob.Status.COMPLETED,
+        ])
+
         expect:
         [2, 1] + [0] * 23 == clusterJobService.findAllMemoryUsageByDateBetween(START_DATE, START_DATE).data
     }

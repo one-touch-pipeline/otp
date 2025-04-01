@@ -626,7 +626,7 @@ SELECT
 SELECT
  job.started / $HOURS_TO_MILLIS AS hourStarted,
  job.ended / $HOURS_TO_MILLIS AS hourEnded,
- SUM(job.used_memory) AS sumAvgMemoryUsed
+ COALESCE(SUM(job.used_memory), 0) AS sumAvgMemoryUsed
  FROM cluster_job AS job
  WHERE
  ${QUERY_BY_TIMESPAN_NOTFAILED}
