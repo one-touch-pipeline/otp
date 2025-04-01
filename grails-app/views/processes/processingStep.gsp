@@ -101,7 +101,7 @@
                 <th><g:message code="otp.blank"/></th>
                 <th><g:message code="workflow.paramater.table.headers.clusterJobName"/></th>
                 <th>
-                    <span onclick="$.otp.workflows.processingStep.promptClusterJobIds('${clusterJobsWrapper*.clusterJobId.join(" ")}')">
+                    <span onclick="$.otp.workflows.processingStep.promptClusterJobIds('${clusterJobsWrapper*.job*.clusterJobId.join(" ")}')">
                         <u><g:message code="workflow.paramater.table.headers.clusterJob"/></u>
                     </span>
                 </th>
