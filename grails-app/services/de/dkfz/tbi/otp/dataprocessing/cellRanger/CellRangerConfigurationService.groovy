@@ -226,7 +226,11 @@ class CellRangerConfigurationService {
 
     @CompileDynamic
     List<CellRangerMergingWorkPackage> findAllMergingWorkPackagesBySamplesAndPipeline(Sample sample, CellRangerMwpParameter parameter, User requester) {
-        Map<PlatformGroupAndKit, List<SeqTrack>> map = getSeqTracksGroupedByPlatformGroupAndKit(sample.seqTracks.findAll { it.seqType == parameter.seqType })
+        List<SeqTrack> seqTrackList = SeqTrack.createCriteria().list {
+            eq('sample', sample)
+            eq('seqType', parameter.seqType)
+        } as List<SeqTrack>
+        Map<PlatformGroupAndKit, List<SeqTrack>> map = getSeqTracksGroupedByPlatformGroupAndKit(seqTrackList)
         constrainSeqTracksGroupedByPlatformGroupAndKit(map)
         return map.collect { PlatformGroupAndKit platformGroupAndKit, List<SeqTrack> seqTracks ->
             return new CellRangerMergingWorkPackage([
