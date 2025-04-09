@@ -27,6 +27,7 @@ import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileService
+import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
@@ -67,6 +68,19 @@ class TriggerWorkflowService {
             FROM AbstractBamFile bf
             WHERE bf.id IN (:bamFileIds)
         ''', [bamFileIds: bamFileIds]) as List<SeqTrack>
+    }
+
+    @CompileDynamic
+    List<ExternallyProcessedBamFile> getExternalBamFiles(Collection<Long> bamFileIds) {
+        if (!bamFileIds) {
+            return []
+        }
+
+        return ExternallyProcessedBamFile.executeQuery('''
+            SELECT DISTINCT bf
+            FROM ExternallyProcessedBamFile bf
+            WHERE bf.id IN (:bamFileIds)
+        ''', [bamFileIds: bamFileIds]) as List<ExternallyProcessedBamFile>
     }
 
     @CompileDynamic

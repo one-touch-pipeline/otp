@@ -59,13 +59,15 @@ $.otp.triggerAlignment = {
   trigger: () => {
     const inputdata = {
       withdrawBamFiles: false,
-      seqTracks: []
+      seqTracks: [],
+      bamFiles: []
     };
     inputdata.ignoreSeqPlatformGroup = $('#ignoreSeqPlatformGroup').prop('checked');
     inputdata.withdrawBamFiles = $('input[name="withdrawBamFiles"]:checked').val();
     inputdata.seqTracks = $.otp.triggerAlignment.getSeqTrackTable().column(0).data().toArray();
+    inputdata.bamFiles = $.otp.triggerAlignment.getBamTable().column(0).data().toArray();
 
-    if (inputdata.seqTracks.length) {
+    if (inputdata.seqTracks.length || inputdata.bamFiles.length) {
       $('#triggerAlignmentButton').prop('disabled', true);
       $.ajax({
         url: $.otp.createLink({
@@ -590,7 +592,8 @@ $(document).ready(() => {
             );
           }
 
-          if (!outputdata.data.data || !outputdata.data.data.length) {
+          if ((!outputdata.data.data && !outputdata.data.bamData) ||
+            (!outputdata.data.data.length && !outputdata.data.bamData.length)) {
             $.otp.toaster.showWarningToast(
               $.otp.triggerAlignment.TOAST_TITLE.SEARCH_WARNING,
               'No SeqTracks can be found. Make sure the search inputs are correct'

@@ -26,6 +26,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.SearchSeqTrackService
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
@@ -36,6 +37,7 @@ import de.dkfz.tbi.otp.workflow.WorkflowVersionAndReferenceGenomeSelector
 class TriggerAlignmentController {
 
     private static final String PARAM_KEY_SEQ_TRACKS = 'seqTracks[]'
+    private static final String PARAM_KEY_BAM_FILES = 'bamFiles[]'
     private static final String PARAM_KEY_IGNORE_SEQ_GROUP = 'ignoreSeqPlatformGroup'
     private static final String PARAM_KEY_WITHDRAW_BAMFILES = 'withdrawBamFiles'
 
@@ -71,9 +73,10 @@ class TriggerAlignmentController {
      */
     JSON generateWarnings() {
         List<SeqTrack> seqTracks = SeqTrack.getAll(flash.seqTrackIds)
+        List<ExternallyProcessedBamFile> extBamFiles = ExternallyProcessedBamFile.getAll(flash.extBamFileIds)
         Set<String> message = flash.message as Set<String>
 
-        if (!seqTracks || !seqTracks.size()) {
+        if (!seqTracks && !extBamFiles || !seqTracks.size() && !extBamFiles.size()) {
             return render([
                     data    : [],
                     warnings: EMPTY_WARNINGS,
@@ -100,7 +103,7 @@ class TriggerAlignmentController {
                 data    : seqTracks.collect { SeqTrack seqTrack ->
                     searchSeqTrackService.projectSeqTrack(seqTrack)
                 },
-                bamData : triggerWorkflowService.getBamFiles(seqTracks*.id).collect { AbstractBamFile bamFile ->
+                bamData : (triggerWorkflowService.getBamFiles(seqTracks*.id) + extBamFiles).collect { AbstractBamFile bamFile ->
                     getBamValue(bamFile)
                 },
                 info    : [
@@ -127,12 +130,14 @@ class TriggerAlignmentController {
      * Trigger the alignment workflow
      */
     JSON triggerAlignment() {
-        Set<Long> seqTracksIds = (params[PARAM_KEY_SEQ_TRACKS].getClass().isArray() ? params[PARAM_KEY_SEQ_TRACKS] :
-                [params[PARAM_KEY_SEQ_TRACKS]]).collect { it as long }
+        Set<Long> seqTracksIds = getIdsFromParams(PARAM_KEY_SEQ_TRACKS)
+        Set<Long> bamFilesIds = getIdsFromParams(PARAM_KEY_BAM_FILES)
 
-        Set<SeqTrack> seqTracks = SeqTrack.findAll {
-            id in seqTracksIds
-        }
+        Set<SeqTrack> seqTracks = SeqTrack.getAll(seqTracksIds)
+
+        List<ExternallyProcessedBamFile> externalBamFiles = triggerWorkflowService.getExternalBamFiles(bamFilesIds)
+
+        log.debug("ignoreing ${externalBamFiles} for now")
 
         boolean ignoreSeqPlatformGroup = Boolean.parseBoolean(params[PARAM_KEY_IGNORE_SEQ_GROUP])
         boolean withdrawBamFiles = Boolean.parseBoolean(params[PARAM_KEY_WITHDRAW_BAMFILES])
@@ -154,11 +159,12 @@ class TriggerAlignmentController {
                 individual      : bamFile.individual.displayName,
                 sampleType      : bamFile.sampleType.displayName,
                 withdrawn       : bamFile.withdrawn,
-                libPrepKit      : bamFile.workPackage.libraryPreparationKit,
+                libPrepKit      : bamFile.workPackage.libraryPreparationKit?.name ?: '',
                 species         : bamFile.individual.species.displayName,
                 mixedInSpecies  : bamFile.sample.mixedInSpecies*.displayName.join(', '),
                 referenceGenome : bamFile.referenceGenome.name,
-                seqPlatformGroup: (bamFile.workPackage as MergingWorkPackage).seqPlatformGroup?.toString(),
+                seqPlatformGroup: (bamFile.workPackage instanceof MergingWorkPackage) ?
+                        (bamFile.workPackage as MergingWorkPackage).seqPlatformGroup?.toString() : '',
         ]
     }
 
@@ -175,5 +181,10 @@ class TriggerAlignmentController {
                     ]
                 },
         ]
+    }
+
+    private Set<Long> getIdsFromParams(String key) {
+        return params[key] ? (params[key].getClass().isArray() ? params[key] :
+                [params[key]]).collect { it as long } : []
     }
 }

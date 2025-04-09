@@ -26,7 +26,9 @@ import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ProjectSelectionService
+import de.dkfz.tbi.otp.SearchExternallyProcessedBamFileService
 import de.dkfz.tbi.otp.SearchSeqTrackService
+import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflow.TriggerWorkflowService
@@ -52,6 +54,7 @@ class SearchSeqTrackController {
     SearchSeqTrackService searchSeqTrackService
     SeqTrackService seqTrackService
     TriggerWorkflowService triggerWorkflowService
+    SearchExternallyProcessedBamFileService searchExternallyProcessedBamFileService
 
     static final String PARAM_KEY_PIDS = 'pids[]'
     static final String PARAM_KEY_SEQTYPES = 'seqTypes[]'
@@ -80,7 +83,10 @@ class SearchSeqTrackController {
 
         Set<SeqTrack> seqTracks = searchSeqTrackService.getAllSeqTracksByProjectAndSeqTypes(project, seqTypes)
 
-        return redirectHelper(params, seqTracks, null)
+        Set<ExternallyProcessedBamFile> extBamFiles = searchExternallyProcessedBamFileService.
+                getAllExternallyProcessedBamFilesByProjectAndSeqTypes(project, seqTypes)
+
+        return redirectHelper(params, seqTracks, extBamFiles, null)
     }
 
     JSON searchSeqTrackByPidSeqType() {
@@ -100,9 +106,11 @@ class SearchSeqTrackController {
         Set<SeqType> seqTypes = SeqType.getAll(seqTypeIds)
 
         Set<SeqTrack> seqTracks = searchSeqTrackService.getAllSeqTracksByIndividualsAndSeqTypes(individuals, seqTypes)
+        Set<ExternallyProcessedBamFile> extBamFiles = searchExternallyProcessedBamFileService.
+                getAllExternallyProcessedBamFilesByIndividualsAndSeqTypes(individuals, seqTypes)
 
         Set<String> missingItems = (pids as Set) - individuals*.pid
-        return redirectHelper(params, seqTracks, missingItems ?: null)
+        return redirectHelper(params, seqTracks, extBamFiles, missingItems ?: null)
     }
 
     JSON searchSeqTrackBySeqTrackId() {
@@ -122,7 +130,7 @@ class SearchSeqTrackController {
         Set<SeqTrack> seqTracks = SeqTrack.getAll(seqTrackIds).findAll()
 
         Set<String> missingItems = (seqTrackIds - seqTracks*.id)*.toString()
-        return redirectHelper(params, seqTracks, missingItems ?: null)
+        return redirectHelper(params, seqTracks, [], missingItems ?: null)
     }
 
     JSON searchSeqTrackByBamId() {
@@ -140,9 +148,10 @@ class SearchSeqTrackController {
         }
 
         Set<SeqTrack> seqTracks = triggerWorkflowService.getSeqTracks(bamIds)
+        Set<ExternallyProcessedBamFile> extBamFiles = triggerWorkflowService.getExternalBamFiles(bamIds)
 
-        Set<String> missingItems = (bamIds - triggerWorkflowService.getBamFiles(seqTracks*.id)*.id)*.toString()
-        return redirectHelper(params, seqTracks, missingItems ?: null)
+        Set<String> missingItems = (bamIds - triggerWorkflowService.getBamFiles(seqTracks*.id)*.id - extBamFiles*.id)*.toString()
+        return redirectHelper(params, seqTracks, extBamFiles, missingItems ?: null)
     }
 
     JSON searchSeqTrackByIlseNumber() {
@@ -166,7 +175,7 @@ class SearchSeqTrackController {
         Set<SeqTrack> seqTracks = searchSeqTrackService.getAllSeqTracksByIlseSubmissions(ilseSubmissions)
 
         Set<String> missingItems = (ilseNumbers - ilseSubmissions*.ilseNumber)*.toString()
-        return redirectHelper(params, seqTracks, missingItems ?: null)
+        return redirectHelper(params, seqTracks, [], missingItems ?: null)
     }
 
     JSON searchSeqTrackByMultiInput() {
@@ -178,16 +187,21 @@ class SearchSeqTrackController {
 
         Set<String> errorMessages = []
         Set<String> missingItems = []
+        Set<ExternallyProcessedBamFile> extBamFiles = []
 
         Set<SeqTrack> seqTracks = [pids, sampleTypes, seqTypes, readTypes, singleCells].transpose().collectMany { multiInput ->
             try {
                 def (String pid, String sampleTypeName, String seqTypeName, String readTypeName, Boolean singleCell) = multiInput
 
                 List<SeqTrack> foundSeqTracks = seqTrackService.getSeqTracksByMultiInput(pid, sampleTypeName, seqTypeName, readTypeName, singleCell)
+                List<ExternallyProcessedBamFile> foundExternallyProcessedBamFiles = searchExternallyProcessedBamFileService.
+                        getExternallyProcessedBamFilesByMultiInput(pid, sampleTypeName, seqTypeName, readTypeName, singleCell)
 
-                if (!foundSeqTracks) {
+                if (!foundSeqTracks && !foundExternallyProcessedBamFiles) {
                     missingItems.add((multiInput as List<String>).join(' '))
                 }
+
+                extBamFiles.addAll(foundExternallyProcessedBamFiles)
 
                 return foundSeqTracks
             } catch (AssertionError e) {
@@ -201,10 +215,11 @@ class SearchSeqTrackController {
             return render([error: HttpStatus.BAD_REQUEST.reasonPhrase, message: errorMessages] as JSON)
         }
 
-        return redirectHelper(params, seqTracks, missingItems.size() > 0 ? missingItems : null)
+        return redirectHelper(params, seqTracks, extBamFiles.findAll(), missingItems.size() > 0 ? missingItems : null)
     }
 
-    private def redirectHelper(Map params, Collection<SeqTrack> seqTracks, Set<String> message) {
+    private def redirectHelper(Map params, Collection<SeqTrack> seqTracks, Collection<ExternallyProcessedBamFile> extBamFiles, Set<String> message) {
+        flash.extBamFileIds = extBamFiles*.id
         flash.seqTrackIds = seqTracks*.id
         flash.message = message
 
