@@ -21,7 +21,7 @@
 # This file contains gitlab ci jobs running in all repositories.
 # The jobs shouldn't have dependencies to jobs running not in all repositories
 
-image: registry.gitlab.com/one-touch-pipeline/otp/otp-ci-java-17:2024-04-09
+image: registry.gitlab.com/one-touch-pipeline/otp/otp-ci-java-17:2025-04-04
 
 # notes:
 ## having multiple commands in one variable does not work

@@ -18,45 +18,72 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-FROM azul/zulu-openjdk-centos:17-latest
-MAINTAINER OTP Developers <otp-devel@dkfz-heidelberg.de>
+FROM ubuntu:24.04
+LABEL maintainer="OTP Developers <otp-devel@dkfz-heidelberg.de>"
 
-RUN rpm -ivh http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+# The Java Version that we want to install
+ARG JAVA_VERSION=17.0.13-tem
 
-# Install dependencies
-RUN yum -y update && \
-    yum -y install \
-        alsa-lib \
-        GConf2 \
+# Update package lists and install dependencies
+RUN ln -fs /usr/share/zoneinfo/UTC /etc/localtime && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+        alsa-utils \
         git \
-        gtk2-devel  \
-        gtk3-devel  \
+        libgtk2.0-dev \
+        libgtk-3-dev \
         jq \
-        libnotify-devel \
-        libXScrnSaver  \
-        nss  \
-        postgresql.x86_64 \
-        python-mako.noarch \
+        libnotify-bin \
+        libxss1 \
+        libnss3 \
+        postgresql \
+        python3-mako \
+        python3 \
+        python3-venv \
+        python3-pip \
         unzip \
-        which \
-        xorg-x11-server-Xvfb  \
-        yum-utils && \
-    yum-config-manager \
-        --add-repo \
-        https://download.docker.com/linux/centos/docker-ce.repo && \
-    yum -y install docker-ce docker-ce-cli containerd.io docker-compose-plugin && \
-    yum clean all
+        zip \
+        xvfb \
+        apt-transport-https \
+        ca-certificates \
+        curl \
+        gnupg \
+        coreutils \
+        lsb-release \
+        openssl && \
+    ln -s /usr/bin/python3 /usr/bin/python && \
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg && \
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends docker-ce docker-ce-cli containerd.io docker-compose-plugin && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Configure system via environment variables
-ENV GRADLE_USER_HOME /home/otp/.gradle
+ENV GRADLE_USER_HOME=/home/otp/.gradle
 
-# User management
-RUN useradd -u 911 --system --create-home --shell /bin/bash otp
-RUN groupadd othergroup
-RUN usermod --append --groups othergroup otp
+# Create and configure user `otp`
+RUN useradd -u 911 --system --create-home --shell /bin/bash otp && \
+    groupadd othergroup && \
+    usermod --append --groups othergroup otp
 
 USER otp
 WORKDIR /home/otp
 
+# Install SDKMAN and Java
+RUN curl -s "https://get.sdkman.io" | bash && \
+    bash -c "source /home/otp/.sdkman/bin/sdkman-init.sh && sdk install java $JAVA_VERSION"
+
+# Set Java environment variables since they are not set automatically by SDKMAN in non-interactive mode
+# This does also not work when the bashrc is sourced
+ENV JAVA_HOME=/home/otp/.sdkman/candidates/java/current
+ENV PATH="$JAVA_HOME/bin:$PATH"
+
+# Fix Cypress output
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
+
 # OTP needs the USER environment variable to be defined.
-ENV USER otp
+ENV USER=otp
+
+# fix git dubious ownership error
+RUN git config --global --add safe.directory /builds/one-touch-pipeline/otp
