@@ -20,7 +20,7 @@
 
 # This Docker image is for the default development case.
 
-FROM registry.gitlab.com/one-touch-pipeline/otp/otp-ci-java-17:2025-04-04
+FROM registry.gitlab.com/one-touch-pipeline/otp/otp-ci-java-17:2025-04-15
 
 ARG APP_HOME=/home/otp/app
 RUN mkdir -p $GRADLE_USER_HOME $APP_HOME

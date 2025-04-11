@@ -86,4 +86,4 @@ ENV LANG=C.UTF-8
 ENV USER=otp
 
 # fix git dubious ownership error
-RUN git config --global --add safe.directory /builds/one-touch-pipeline/otp
+RUN git config --global --add safe.directory '*'

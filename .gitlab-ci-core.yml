@@ -21,7 +21,7 @@
 # This file contains gitlab ci jobs running in all repositories.
 # The jobs shouldn't have dependencies to jobs running not in all repositories
 
-image: registry.gitlab.com/one-touch-pipeline/otp/otp-ci-java-17:2025-04-04
+image: registry.gitlab.com/one-touch-pipeline/otp/otp-ci-java-17:2025-04-15
 
 # notes:
 ## having multiple commands in one variable does not work
@@ -595,10 +595,7 @@ generate_changelog:
   stage: doc
   script:
     - mkdir -p $ARTIFACTS_BASE_DIRECTORY
-    - set +e
     - LATEST_TAG=$(git describe --abbrev=0 --tags --match "v*.*.*" HEAD^)
-    - set -e
-    - 'if [[ -z "${LATEST_TAG}" ]]; then git fetch --unshallow --tags ; LATEST_TAG=$(git describe --abbrev=0 --tags --match "v*.*.*" HEAD^) ; fi'
     - echo $LATEST_TAG
     - git config gitchangelog.rc-path scripts/gitchangelog/gitchangelog.rc.reference
     - scripts/gitchangelog/gitchangelog.py ^$LATEST_TAG HEAD >> $ARTIFACTS_BASE_DIRECTORY/CHANGELOG.txt
@@ -611,6 +608,8 @@ generate_changelog:
     paths:
       - $ARTIFACTS_BASE_DIRECTORY
     when: on_success
+  variables:
+    GIT_DEPTH: "0" # clone the complete history
 
 
 # ------------------------------------------------------
