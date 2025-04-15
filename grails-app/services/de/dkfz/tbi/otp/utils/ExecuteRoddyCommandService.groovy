@@ -283,7 +283,7 @@ class ExecuteRoddyCommandService {
             echo ""
             echo "correct group permission to" \$groupname
 
-            find -not -group \$groupname -print -exec chgrp -h \$groupname '{}' \\; | wc -l
+            find "${roddyResult.workDirectory}" -not -group \$groupname -print -exec chgrp -h \$groupname '{}' \\; | wc -l
             """.stripIndent()
         remoteShellHelper.executeCommandReturnProcessOutput(cmd).assertExitCodeZeroAndStderrEmpty()
     }
