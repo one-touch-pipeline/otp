@@ -62,8 +62,6 @@ class CopyOrLinkFastqsOfLaneJob extends AbstractExecuteClusterPipelineJob implem
                 |fi
                 |cp ${source} ${destination}
                 |md5sum ${destination.fileName} > ${md5SumFileName}
-                |chgrp -h ${seqTrack.project.unixGroup} ${destination} ${md5SumFileName}
-                |chmod 440 ${destination} ${md5SumFileName}
                 |""".stripMargin()
         }
     }

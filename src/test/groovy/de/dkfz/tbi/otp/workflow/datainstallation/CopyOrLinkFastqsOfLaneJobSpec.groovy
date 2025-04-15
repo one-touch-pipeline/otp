@@ -136,8 +136,6 @@ class CopyOrLinkFastqsOfLaneJobSpec extends Specification implements DataTest, W
                 |fi
                 |cp .* .*
                 |md5sum .* > .*
-                |chgrp -h ${seqTrack.project.unixGroup} .* .*
-                |chmod 440 .* .*
                 |""".stripMargin()
         }
     }
