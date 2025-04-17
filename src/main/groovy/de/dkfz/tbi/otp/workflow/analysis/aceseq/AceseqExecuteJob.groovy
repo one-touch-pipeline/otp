@@ -41,8 +41,13 @@ import java.nio.file.Path
 @Slf4j
 class AceseqExecuteJob extends AbstractExecuteRoddyPipelineJob implements AceseqWorkflowShared {
 
+    @Autowired
     AceseqWorkFileService aceseqWorkFileService
+
+    @Autowired
     ReferenceGenomeService referenceGenomeService
+
+    @Autowired
     SnvCallingService snvCallingService
 
     @Override

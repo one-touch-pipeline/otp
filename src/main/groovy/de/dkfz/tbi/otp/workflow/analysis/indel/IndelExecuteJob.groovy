@@ -39,8 +39,13 @@ import java.nio.file.Path
 @Slf4j
 class IndelExecuteJob extends AbstractExecuteRoddyPipelineJob implements IndelWorkflowShared {
 
+    @Autowired
     BedFileService bedFileService
+
+    @Autowired
     IndelWorkFileService indelWorkFileService
+
+    @Autowired
     ReferenceGenomeService referenceGenomeService
 
     @Override

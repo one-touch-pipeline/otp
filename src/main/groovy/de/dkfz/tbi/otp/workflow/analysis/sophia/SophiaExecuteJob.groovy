@@ -42,9 +42,16 @@ import java.nio.file.Path
 @Slf4j
 class SophiaExecuteJob extends AbstractExecuteRoddyPipelineJob implements SophiaWorkflowShared {
 
+    @Autowired
     AlignmentLinkFileServiceFactoryService alignmentLinkFileServiceFactoryService
+
+    @Autowired
     ReferenceGenomeService referenceGenomeService
+
+    @Autowired
     SnvCallingService snvCallingService
+
+    @Autowired
     SophiaWorkFileService sophiaWorkFileService
 
     @Override

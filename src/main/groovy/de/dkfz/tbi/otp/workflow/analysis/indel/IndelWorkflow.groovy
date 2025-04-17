@@ -49,19 +49,19 @@ class IndelWorkflow extends AbstractAnalysisWorkflow {
         return [
                 AnalysisConditionalSkipJob,
                 RoddyAnalysisFragmentJob,
-//                IndelCheckFragmentKeysJob,
+                IndelCheckFragmentKeysJob,
                 IndelConditionalFailJob,
 //                IndelCreateNotificationJob,
                 AttachUuidJob,
                 IndelPrepareJob,
-//                IndelExecuteJob,
-//                IndelValidationJob,
-//                IndelParseJob,
+                IndelExecuteJob,
+                IndelValidationJob,
+                IndelParseJob,
 //                IndelCleanupJob,
                 SetCorrectPermissionJob,
                 CalculateSizeJob,
                 AnalysisLinkJob,
-//                IndelFinishJob,
+                AnalysisFinishJob,
         ]
     }
 
