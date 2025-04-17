@@ -72,7 +72,9 @@ class SophiaExecuteJobSpec extends Specification implements DataTest, WorkflowSy
         instance = SophiaDomainFactory.INSTANCE.createInstanceWithRoddyBamFiles()
         workflowStep = createWorkflowStep([
                 workflowRun: createWorkflowRun([
-                        workflowVersion: null,
+                        workflowVersion: createWorkflowVersion([
+                                workflowVersion: "2.2.3",
+                        ]),
                         workflow       : SophiaDomainFactory.INSTANCE.findOrCreateWorkflow(),
                 ]),
         ])
@@ -90,12 +92,6 @@ class SophiaExecuteJobSpec extends Specification implements DataTest, WorkflowSy
             getService(_) >> Mock(AbstractAlignmentLinkFileService) {
                 getPathForFurtherProcessing(instance.sampleType1BamFile) >> tempDir.resolve('bam1')
                 getPathForFurtherProcessing(instance.sampleType2BamFile) >> tempDir.resolve('bam2')
-            }
-        }
-        job.alignmentLinkFileServiceFactoryService = Mock(AlignmentLinkFileServiceFactoryService) {
-            getService(_) >> Mock(AbstractAlignmentLinkFileService) {
-                getInsertSizeFile(instance.sampleType1BamFile) >> tempDir.resolve('insert-size-1')
-                getInsertSizeFile(instance.sampleType2BamFile) >> tempDir.resolve('insert-size-2')
             }
         }
     }
@@ -161,7 +157,6 @@ class SophiaExecuteJobSpec extends Specification implements DataTest, WorkflowSy
                 tumorMedianIsize                       : [value: '3991.0'],
                 tumorProperPairPercentage              : [value: '91.32632075'],
                 tumorStdIsizePercentage                : [value: '231.0'],
-                insertsizesfile_list                   : [value: "${tempDir.resolve("insert-size-2")};${tempDir.resolve("insert-size-1")}"],
         ])
     }
 

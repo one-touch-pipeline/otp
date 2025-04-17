@@ -49,19 +49,19 @@ class SophiaWorkflow extends AbstractAnalysisWorkflow {
         return [
                 SophiaConditionalSkipJob,
                 RoddyAnalysisFragmentJob,
-//                SophiaCheckFragmentKeysJob,
+                SophiaCheckFragmentKeysJob,
                 SophiaConditionalFailJob,
 //                SophiaCreateNotificationJob,
                 AttachUuidJob,
                 SophiaPrepareJob,
-//                SophiaExecuteJob,
-//                SophiaValidationJob,
-//                SophiaParseJob,
+                SophiaExecuteJob,
+                SophiaValidationJob,
+                SophiaParseJob,
 //                SophiaCleanupJob,
                 SetCorrectPermissionJob,
                 CalculateSizeJob,
                 AnalysisLinkJob,
-//                SophiaFinishJob,
+                AnalysisFinishJob,
         ]
     }
 

@@ -83,9 +83,6 @@ class SophiaExecuteJob extends AbstractExecuteRoddyPipelineJob implements Sophia
         AbstractBamFile bamFileDisease = sophiaInstance.sampleType1BamFile
         AbstractBamFile bamFileControl = sophiaInstance.sampleType2BamFile
 
-        Path diseaseInsertSizeFile = alignmentLinkFileServiceFactoryService.getService(bamFileDisease).getInsertSizeFile(bamFileDisease)
-        Path controlInsertSizeFile = alignmentLinkFileServiceFactoryService.getService(bamFileControl).getInsertSizeFile(bamFileControl)
-
         Integer tumorDefaultReadLength = bamFileDisease.maximalReadLength
         Integer controlDefaultReadLength = bamFileControl.maximalReadLength
 
@@ -93,7 +90,6 @@ class SophiaExecuteJob extends AbstractExecuteRoddyPipelineJob implements Sophia
         SophiaWorkflowQualityAssessment bamFileControlQualityAssessment = bamFileControl.qualityAssessment as SophiaWorkflowQualityAssessment
 
         Map<String, Map<String, String>> additionalValues = [
-                insertsizesfile_list       : roddyConfigValueService.createValueMap("${controlInsertSizeFile};${diseaseInsertSizeFile}" as String),
                 controlMedianIsize         : roddyConfigValueService.createValueMap(bamFileControlQualityAssessment.insertSizeMedian.toString()),
                 tumorMedianIsize           : roddyConfigValueService.createValueMap(bamFileDiseaseQualityAssessment.insertSizeMedian.toString()),
                 controlStdIsizePercentage  : roddyConfigValueService.createValueMap(bamFileControlQualityAssessment.insertSizeCV.toString()),
@@ -104,6 +100,14 @@ class SophiaExecuteJob extends AbstractExecuteRoddyPipelineJob implements Sophia
                 tumorDefaultReadLength     : roddyConfigValueService.createValueMap(tumorDefaultReadLength.toString()),
         ]
 
+        if (workflowStep.workflowRun.workflowVersion.workflowVersion.startsWith("1")) {
+            Path diseaseInsertSizeFile = alignmentLinkFileServiceFactoryService.getService(bamFileDisease).getInsertSizeFile(bamFileDisease)
+            Path controlInsertSizeFile = alignmentLinkFileServiceFactoryService.getService(bamFileControl).getInsertSizeFile(bamFileControl)
+
+            additionalValues << [
+                insertsizesfile_list       : roddyConfigValueService.createValueMap("${controlInsertSizeFile};${diseaseInsertSizeFile}" as String),
+            ]
+        }
         return roddyConfigValueService.getAnalysisInputVersion2(sophiaInstance, workDirectory) + additionalValues as Map<String, Map<String, String>>
     }
 
