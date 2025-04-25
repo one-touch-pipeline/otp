@@ -152,7 +152,7 @@ class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, Sa
      */
     @CompileDynamic
     private Swap<SampleType> getSampleTypeSwap(SampleSwapParameters parameters) {
-        return new Swap(
+        return new Swap<SampleType>(
                 CollectionUtils.exactlyOneElement(SampleType.findAllByName(parameters.sampleTypeSwap.old),
                         "old sample type ${parameters.sampleTypeSwap.old} not found"),
                 CollectionUtils.exactlyOneElement(SampleType.findAllByName(parameters.sampleTypeSwap.new),

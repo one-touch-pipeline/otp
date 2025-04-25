@@ -188,4 +188,6 @@ databaseChangeLog = {
     include file: 'changelogs/2024/otp-2625-improve-workflow-scheduling.groovy'
 
     include file: 'changelogs/2024/otp-2607.groovy'
+
+    include file: 'changelogs/2025/otp-2666.groovy'
 }

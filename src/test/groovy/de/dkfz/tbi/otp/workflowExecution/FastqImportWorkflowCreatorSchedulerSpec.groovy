@@ -124,8 +124,9 @@ class FastqImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSch
                     workflowArtefact: workflowArtefacts.first(),
                     workPackage     : createMergingWorkPackage([
                             seqType: analysableSeqType ? seqTypes.first() : createSeqType([
-                                    name    : "OtherName",
-                                    dirName : "dummy"
+                                    name       : "OtherName",
+                                    dirName    : "dummy",
+                                    displayName: "OtherName",
                             ])
                     ]),
             ])

@@ -444,9 +444,9 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
             }
             // was the value omitted?
             if ((swap.old.size() != 0) && !swap.new) {
-                newSwap = new Swap(swap.old, swap.old)
+                newSwap = new Swap<String>(swap.old, swap.old)
             } else {
-                newSwap = new Swap(swap.old, swap.new)
+                newSwap = new Swap<String>(swap.old, swap.new)
             }
             newSwapList.add(newSwap)
             log << "\n    - ${newSwap.old} --> ${newSwap.new}"

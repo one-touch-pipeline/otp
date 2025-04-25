@@ -80,13 +80,13 @@ try {
         laneSwapService.swap(
                 new LaneSwapParameters(
                         [
-                                projectNameSwap       : new Swap('oldProjectName', 'newProjectName'),
-                                pidSwap               : new Swap('oldPid', 'newPid'),
-                                sampleTypeSwap        : new Swap('oldSampleTypeName', 'newSampleTypeName'),
-                                seqTypeSwap           : new Swap('oldSeqTypeName', 'newSeqTypeName'),
-                                singleCellSwap        : new Swap('oldSingleCell', 'newSingleCell'),
-                                sequencingReadTypeSwap: new Swap('sequencingReadType', 'sequencingReadType'),
-                                wellLabelSwap         : new Swap('oldWellLabel', 'newWellLabel'),
+                                projectNameSwap       : new Swap<String>('oldProjectName', 'newProjectName'),
+                                pidSwap               : new Swap<String>('oldPid', 'newPid'),
+                                sampleTypeSwap        : new Swap<String>('oldSampleTypeName', 'newSampleTypeName'),
+                                seqTypeSwap           : new Swap<String>('oldSeqTypeName', 'newSeqTypeName'),
+                                singleCellSwap        : new Swap<Boolean>('oldSingleCell', 'newSingleCell'), // use true/false without quotes
+                                sequencingReadTypeSwap: new Swap<String>('sequencingReadType', 'sequencingReadType'),
+                                wellLabelSwap         : new Swap<String>('oldWellLabel', 'newWellLabel'),
                                 runName               : 'runName',
                                 lanes                 : [
                                         'lane1',
@@ -95,10 +95,10 @@ try {
                                 ],
                                 sampleNeedsToBeCreated: 'sampleNeedsToBeCreated',
                                 rawSequenceFileSwaps: [
-                                        new Swap('oldFileName1', 'newFileName1'),
-                                        new Swap('oldFileName2', 'newFileName2'),
-                                        new Swap('oldFileName3', ''),
-                                        new Swap('oldFileName4', ''),
+                                        new Swap<String>('oldFileName1', 'newFileName1'),
+                                        new Swap<String>('oldFileName2', 'newFileName2'),
+                                        new Swap<String>('oldFileName3', ''),
+                                        new Swap<String>('oldFileName4', ''),
                                 ],
                                 bashScriptName        : 'uniqueScriptName',
                                 log                   : outputStringBuilder,

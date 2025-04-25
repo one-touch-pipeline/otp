@@ -45,6 +45,9 @@ class LaneSwapParameters extends DataSwapParameters {
             if ((it.old == null) || (it.new == null)) {
                 return "neither the old nor the new singleCell may be null"
             }
+            if (!(it.old instanceof Boolean) || !(it.new instanceof Boolean)) {
+                return  "both the old and the new singleCell have to be boolean"
+            }
         }
         sequencingReadTypeSwap nullable: false, validator: {
             if (!it.old || !it.new) {

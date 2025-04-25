@@ -63,26 +63,26 @@ class SearchExternallyProcessedBamFileServiceSpec extends HibernateSpec implemen
 
         final ExternallyProcessedBamFile externallyProcessedBamFile1 = createBamFile(
                 workPackage: createMergingWorkPackage([
-                sample: createSample(individual: individual),
-                seqType: st1,
-        ]))
+                        sample : createSample(individual: individual),
+                        seqType: st1,
+                ]))
         final ExternallyProcessedBamFile externallyProcessedBamFile2 = createBamFile(
                 workPackage: createMergingWorkPackage([
-                sample: createSample(individual: individual),
-                seqType: st2,
-        ]))
+                        sample : createSample(individual: individual),
+                        seqType: st2,
+                ]))
 
         createBamFile(
                 workPackage: createMergingWorkPackage([
-                sample: createSample(),
-                seqType: st2,
-        ]))
+                        sample : createSample(),
+                        seqType: st2,
+                ]))
 
         final ExternallyProcessedBamFile externallyProcessedBamFile4 = createBamFile(
                 workPackage: createMergingWorkPackage([
-                sample: createSample(individual: individual),
-                seqType: st3,
-        ]))
+                        sample : createSample(individual: individual),
+                        seqType: st3,
+                ]))
 
         Set<ExternallyProcessedBamFile> result = [externallyProcessedBamFile1, externallyProcessedBamFile2, externallyProcessedBamFile4] as Set
 
@@ -104,33 +104,33 @@ class SearchExternallyProcessedBamFileServiceSpec extends HibernateSpec implemen
         Project project = createProject()
         Individual individual1 = createIndividual([
                 project: project,
-                pid: 'ind_1',
+                pid    : 'ind_1',
         ])
         Individual individual2 = createIndividual([
                 project: project,
-                pid: 'ind_2',
+                pid    : 'ind_2',
         ])
         Individual individual3 = createIndividual([
                 project: project,
-                pid: 'ind_3',
+                pid    : 'ind_3',
         ])
         final ExternallyProcessedBamFile externallyProcessedBamFile1 = createBamFile(
                 workPackage: createMergingWorkPackage([
-                sample: createSample(individual: individual1),
-                seqType: st1,
-        ]))
+                        sample : createSample(individual: individual1),
+                        seqType: st1,
+                ]))
         final ExternallyProcessedBamFile externallyProcessedBamFile2 = createBamFile(
                 workPackage: createMergingWorkPackage([
-                sample: createSample(individual: individual2),
-                seqType: st2,
-        ]))
+                        sample : createSample(individual: individual2),
+                        seqType: st2,
+                ]))
 
         // this bamFile below shouldn't be in the found list
         createBamFile(
                 workPackage: createMergingWorkPackage([
-                sample: createSample(individual: individual3),
-                seqType: st2,
-        ]))
+                        sample : createSample(individual: individual3),
+                        seqType: st2,
+                ]))
 
         when:
         Set<ExternallyProcessedBamFile> externallyProcessedBamFiles = service.getAllExternallyProcessedBamFilesByIndividualsAndSeqTypes(
@@ -156,11 +156,13 @@ class SearchExternallyProcessedBamFileServiceSpec extends HibernateSpec implemen
         SampleType sampleType = createSampleType()
         String sampleTypeName = sampleType.name
         Sample sample = createSample([individual: individual, sampleType: sampleType])
+        String name1 = "name1"
+        String name2 = "name2"
+        String name3 = "name3"
 
-        SeqType seqType1 = DomainFactory.createSeqType([libraryLayout: readType, singleCell: singleCell])
-        String seqTypeName = seqType1.name
-        SeqType seqType2 = DomainFactory.createSeqType([displayName: seqTypeName, libraryLayout: readType, singleCell: singleCell])
-        SeqType seqType3 = DomainFactory.createSeqType([importAlias: [seqTypeName, 'alias2'], libraryLayout: readType, singleCell: singleCell])
+        SeqType seqType1 = DomainFactory.createSeqType([name: name1, libraryLayout: readType, singleCell: singleCell])
+        SeqType seqType2 = DomainFactory.createSeqType([displayName: name2, libraryLayout: readType, singleCell: singleCell])
+        SeqType seqType3 = DomainFactory.createSeqType([importAlias: [name3, 'alias2'], libraryLayout: readType, singleCell: singleCell])
 
         SeqType seqType4 = DomainFactory.createSeqType([libraryLayout: SequencingReadType.SINGLE, singleCell: singleCell])
 
@@ -173,9 +175,21 @@ class SearchExternallyProcessedBamFileServiceSpec extends HibernateSpec implemen
         createBamFile(workPackage: createMergingWorkPackage([sample: sample, seqType: seqType4]))
 
         when:
-        Set<ExternallyProcessedBamFile> result = service.getExternallyProcessedBamFilesByMultiInput(pid, sampleTypeName, seqTypeName, readTypeName, singleCell)
+        Set<ExternallyProcessedBamFile> result1 = service.getExternallyProcessedBamFilesByMultiInput(pid, sampleTypeName, name1, readTypeName, singleCell)
 
         then:
-        TestCase.assertContainSame(result, [externallyProcessedBamFile1, externallyProcessedBamFile2, externallyProcessedBamFile3])
+        TestCase.assertContainSame(result1, [externallyProcessedBamFile1])
+
+        when:
+        Set<ExternallyProcessedBamFile> result2 = service.getExternallyProcessedBamFilesByMultiInput(pid, sampleTypeName, name2, readTypeName, singleCell)
+
+        then:
+        TestCase.assertContainSame(result2, [externallyProcessedBamFile2])
+
+        when:
+        Set<ExternallyProcessedBamFile> result3 = service.getExternallyProcessedBamFilesByMultiInput(pid, sampleTypeName, name3, readTypeName, singleCell)
+
+        then:
+        TestCase.assertContainSame(result3, [externallyProcessedBamFile3])
     }
 }

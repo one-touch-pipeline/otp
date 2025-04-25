@@ -73,17 +73,17 @@ try {
     Individual.withTransaction {
         individualSwapService.swap(
                 new IndividualSwapParameters(
-                        projectNameSwap: new Swap('oldProjectName', 'newProjectName'),
-                        pidSwap: new Swap('oldPid', 'newPid'),
+                        projectNameSwap: new Swap<String>('oldProjectName', 'newProjectName'),
+                        pidSwap: new Swap<String>('oldPid', 'newPid'),
                         sampleTypeSwaps: [
-                                new Swap('oldSampleType1', 'newSampleType1'),
-                                new Swap('oldSampleType2', 'newSampleType2'),
+                                new Swap<String>('oldSampleType1', 'newSampleType1'),
+                                new Swap<String>('oldSampleType2', 'newSampleType2'),
                         ],
                         rawSequenceFileSwaps: [
-                                new Swap('oldFileName1', 'newFileName1'),
-                                new Swap('oldFileName2', 'newFileName2'),
-                                new Swap('oldFileName3', ''),
-                                new Swap('oldFileName4', ''),
+                                new Swap<String>('oldFileName1', 'newFileName1'),
+                                new Swap<String>('oldFileName2', 'newFileName2'),
+                                new Swap<String>('oldFileName3', ''),
+                                new Swap<String>('oldFileName4', ''),
                         ],
                         bashScriptName: 'uniqueScriptName',
                         log: log,

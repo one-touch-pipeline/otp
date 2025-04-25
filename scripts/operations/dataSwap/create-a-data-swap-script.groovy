@@ -136,14 +136,14 @@ Closure<Integer> newSampleSwapScript = { ScriptBuilder builder, Project newProje
 
     builder.addGroovyCommand("\n\tsampleSwapService.swap( \n" +
             "\t\tnew SampleSwapParameters(\n" +
-            "\t\tprojectNameSwap: new Swap('${oldIndividual.project.name}', '${newProject.name}'),\n" +
-            "\t\tpidSwap: new Swap('${oldIndividual.pid}', '${newIndividualName}'),\n" +
-            "\t\tsampleTypeSwap: new Swap('${oldSample.sampleType.name}', '${newSampleType.name}'),\n" +
+            "\t\tprojectNameSwap: new Swap<String>('${oldIndividual.project.name}', '${newProject.name}'),\n" +
+            "\t\tpidSwap: new Swap<String>('${oldIndividual.pid}', '${newIndividualName}'),\n" +
+            "\t\tsampleTypeSwap: new Swap<String>('${oldSample.sampleType.name}', '${newSampleType.name}'),\n" +
             "\t\trawSequenceFileSwaps        : [\n")
 
     SeqTrack.findAllBySample(oldSample, [sort: 'id']).each { SeqTrack seqTrack ->
         RawSequenceFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { rawSequenceFile ->
-            builder.addGroovyCommand("\t\tnew Swap('${rawSequenceFile.fileName}', '${newRawSequenceFileNameClosure(rawSequenceFile, oldIndividual.pid, newIndividualName)}'), \n")
+            builder.addGroovyCommand("\t\tnew Swap<String>('${rawSequenceFile.fileName}', '${newRawSequenceFileNameClosure(rawSequenceFile, oldIndividual.pid, newIndividualName)}'), \n")
         }
     }
 
@@ -357,19 +357,19 @@ private int renamePatient(String newIndividualName, Individual oldIndividual,
 
     builder.addGroovyCommand("\n\t individualSwapService.swap(\n" +
             "\t\tnew IndividualSwapParameters(\n" +
-            "\t\tprojectNameSwap : new Swap('${oldIndividual.project.name}', '${newProject.name}'),\n" +
-            "\t\tpidSwap: new Swap('${oldIndividual.pid}', '${newIndividualName}'),\n" +
+            "\t\tprojectNameSwap : new Swap<String>('${oldIndividual.project.name}', '${newProject.name}'),\n" +
+            "\t\tpidSwap: new Swap<String>('${oldIndividual.pid}', '${newIndividualName}'),\n" +
             "\t\tsampleTypeSwaps : [\n")
 
     samples.each { sample ->
-        builder.addGroovyCommand("\t\tnew Swap('${sample.sampleType.name}', '${newSampleTypeClosure(sample.sampleType).name}'), \n")
+        builder.addGroovyCommand("\t\tnew Swap<String>('${sample.sampleType.name}', '${newSampleTypeClosure(sample.sampleType).name}'), \n")
     }
     builder.addGroovyCommand("\t\t],\n" +
             "\t\trawSequenceFileSwaps : [\n")
     samples.each { sample ->
         SeqTrack.findAllBySample(sample, [sort: 'id']).each { SeqTrack seqTrack ->
             RawSequenceFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { rawSequenceFile ->
-                builder.addGroovyCommand("\t\tnew Swap('${rawSequenceFile.fileName}', '${newRawSequenceFileNameClosure(rawSequenceFile, oldIndividual.pid, newIndividualName)}'),\n")
+                builder.addGroovyCommand("\t\tnew Swap<String>('${rawSequenceFile.fileName}', '${newRawSequenceFileNameClosure(rawSequenceFile, oldIndividual.pid, newIndividualName)}'),\n")
             }
         }
     }
@@ -465,19 +465,19 @@ class Snippets {
 
         snippet << "\n\tlaneSwapService.swap( \n" +
                 "\t\tnew LaneSwapParameters(\n" +
-                "\t\tprojectNameSwap: new Swap('${oldIndividual.project.name}', '${newProject.name}'),\n" +
-                "\t\tpidSwap: new Swap('${oldIndividual.pid}', '${newIndividual}'),\n" +
-                "\t\tsampleTypeSwap: new Swap('${oldSampleType.name}', '${newSampleType.name}'),\n" +
-                "\t\tseqTypeSwap: new Swap('${seqTrack.seqType.name}', '${seqTrack.seqType.name}'),\n" +
-                "\t\tsingleCellSwap: new Swap('${seqTrack.seqType.singleCell}', '${seqTrack.seqType.singleCell}'),\n" +
-                "\t\tsequencingReadTypeSwap: new Swap('${seqTrack.seqType.libraryLayout}', '${seqTrack.seqType.libraryLayout}'),\n" +
+                "\t\tprojectNameSwap: new Swap<String>('${oldIndividual.project.name}', '${newProject.name}'),\n" +
+                "\t\tpidSwap: new Swap<String>('${oldIndividual.pid}', '${newIndividual}'),\n" +
+                "\t\tsampleTypeSwap: new Swap<String>('${oldSampleType.name}', '${newSampleType.name}'),\n" +
+                "\t\tseqTypeSwap: new Swap<String>('${seqTrack.seqType.name}', '${seqTrack.seqType.name}'),\n" +
+                "\t\tsingleCellSwap: new Swap<Boolean>(${seqTrack.seqType.singleCell}, ${seqTrack.seqType.singleCell}),\n" +
+                "\t\tsequencingReadTypeSwap: new Swap<String>('${seqTrack.seqType.libraryLayout}', '${seqTrack.seqType.libraryLayout}'),\n" +
                 "\t\trunName: '${seqTrack.run.name}',\n" +
                 "\t\tlanes: ['${seqTrack.laneId}',],\n" +
                 "\t\tsampleNeedsToBeCreated: false,\n" +
                 "\t\trawSequenceFileSwaps        : [\n"
 
         RawSequenceFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { rawSequenceFile ->
-            snippet << "\t\t\tnew Swap('${rawSequenceFile.fileName}', '${newRawSequenceFileNameClosure(rawSequenceFile, oldIndividual.pid, newIndividual)}'),\n"
+            snippet << "\t\t\tnew Swap<String>('${rawSequenceFile.fileName}', '${newRawSequenceFileNameClosure(rawSequenceFile, oldIndividual.pid, newIndividual)}'),\n"
         }
 
         snippet << "\t\t],\n" +

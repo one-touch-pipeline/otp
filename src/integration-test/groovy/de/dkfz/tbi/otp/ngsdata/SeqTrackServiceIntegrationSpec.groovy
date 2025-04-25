@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
@@ -34,6 +35,10 @@ import de.dkfz.tbi.otp.security.UserAndRoles
 class SeqTrackServiceIntegrationSpec extends Specification implements DomainFactoryCore, UserAndRoles {
 
     SeqTrackService seqTrackService
+
+    static final String NAME = "seqTypeName"
+    static final String DISPLAY = "seqTypeDisplayName"
+    static final String ALIAS = "seqTypeAlias"
 
     void setupData() {
         createUserAndRoles()
@@ -76,7 +81,8 @@ class SeqTrackServiceIntegrationSpec extends Specification implements DomainFact
         } == []
     }
 
-    void "getSeqTracksByMultiInput, should return all fitting seqTracks, when fitting seqTrack exist"() {
+    @Unroll
+    void "getSeqTracksByMultiInput filter by #seqTypeInput, should return all fitting seqTracks, when fitting seqTrack exist"() {
         given:
         setupData()
         SequencingReadType readType = SequencingReadType.PAIRED
@@ -90,26 +96,30 @@ class SeqTrackServiceIntegrationSpec extends Specification implements DomainFact
         SampleType sampleType = createSampleType()
         String sampleTypeName = sampleType.name
         Sample sample = createSample([individual: individual, sampleType: sampleType])
+        SeqType seqType = createSeqType([
+                libraryLayout: readType,
+                singleCell   : singleCell,
+                name         : NAME,
+                displayName  : DISPLAY,
+                importAlias  : [ALIAS],
+        ])
 
-        SeqType seqType1 = createSeqType([libraryLayout: readType, singleCell: singleCell])
-        String seqTypeName = seqType1.name
-        SeqType seqType2 = createSeqType([displayName: seqTypeName, libraryLayout: readType, singleCell: singleCell])
-        SeqType seqType3 = createSeqType([importAlias: [seqTypeName, 'alias2'], libraryLayout: readType, singleCell: singleCell])
+        SeqType otherSeqType = createSeqType([libraryLayout: SequencingReadType.SINGLE, singleCell: singleCell])
 
-        SeqType seqType4 = createSeqType([libraryLayout: SequencingReadType.SINGLE, singleCell: singleCell])
-
-        SeqTrack seqTrack1 = createSeqTrack([sample: sample, seqType: seqType1])
-        SeqTrack seqTrack2 = createSeqTrack([sample: sample, seqType: seqType2])
-        SeqTrack seqTrack3 = createSeqTrack([sample: sample, seqType: seqType3])
-        createSeqTrack([sample: sample, seqType: seqType4])
+        SeqTrack seqTrack1 = createSeqTrack([sample: sample, seqType: seqType])
+        SeqTrack seqTrack2 = createSeqTrack([sample: sample, seqType: seqType])
+        createSeqTrack([sample: sample, seqType: otherSeqType])
 
         when:
         List<SeqTrack> result = doWithAuth(ADMIN) {
-            seqTrackService.getSeqTracksByMultiInput(pid, sampleTypeName, seqTypeName, readTypeName, singleCell)
+            seqTrackService.getSeqTracksByMultiInput(pid, sampleTypeName, seqTypeInput, readTypeName, singleCell)
         }
 
         then:
-        TestCase.assertContainSame(result, [seqTrack1, seqTrack2, seqTrack3])
+        TestCase.assertContainSame(result, [seqTrack1, seqTrack2])
+
+        where:
+        seqTypeInput << [NAME, DISPLAY, ALIAS]
     }
 
     void "getSeqTracksByMultiInput, should return an empty list, when no fitting seqTracks exist"() {

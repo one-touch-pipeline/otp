@@ -19,31 +19,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.dataswap
-
-/**
- * Simplified Tuple2<T1, T2> where T1 and T2 are always the same Type <T>.
- * A swap represents a swap between an old and a new value of the same type.
- *
- * It is used in the DTOs of {@link AbstractDataSwapService} and simplifies the the
- * handling of data swaps.
- *
- * @param <T>  - Type of the old and corresponding new value
- */
-class Swap<T> {
-
-    private final Tuple2<T, T> tuple2
-
-    Swap(T current, T substitute) {
-        tuple2 = new Tuple2<T, T>(current, substitute)
-    }
-
-    T getOld() {
-        return tuple2.v1
-    }
-
-    T getNew() {
-        return tuple2.v2
+databaseChangeLog = {
+    changeSet(author: "-", id: "1743759954779-94") {
+        addUniqueConstraint(columnNames: "single_cell, library_layout, display_name", constraintName: "UKe950cfea807a01ddf24aba2f07bb", tableName: "seq_type")
     }
 }
-

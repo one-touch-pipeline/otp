@@ -73,14 +73,14 @@ try {
 
         sampleSwapService.swap(
                 new SampleSwapParameters([
-                        projectNameSwap      : new Swap('oldProjectName', 'newProjectName'),
-                        pidSwap              : new Swap('oldPid', substitute: 'newPid'),
-                        sampleTypeSwap       : new Swap('oldSampleTypeName', 'newSampleTypeName'),
+                        projectNameSwap      : new Swap<String>('oldProjectName', 'newProjectName'),
+                        pidSwap              : new Swap<String>('oldPid', substitute: 'newPid'),
+                        sampleTypeSwap       : new Swap<String>('oldSampleTypeName', 'newSampleTypeName'),
                         rawSequenceFileSwaps: [
-                                new Swap('oldFileName1', 'newFileName1'),
-                                new Swap('oldFileName2', 'newFileName2'),
-                                new Swap('oldFileName3', ''),
-                                new Swap('oldFileName4', ''),
+                                new Swap<String>('oldFileName1', 'newFileName1'),
+                                new Swap<String>('oldFileName2', 'newFileName2'),
+                                new Swap<String>('oldFileName3', ''),
+                                new Swap<String>('oldFileName4', ''),
                         ],
                         bashScriptName       : 'uniqueScriptName',
                         log                  : outputStringBuilder,

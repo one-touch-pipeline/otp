@@ -152,19 +152,19 @@ seqTracks.each { seqTrack ->
     builder.addGroovyCommand("\n{\n" +
             "\n\tlaneSwapService.swap( \n" +
             "\t\tnew LaneSwapParameters(\n" +
-            "\t\tprojectNameSwap: new Swap('${seqTrack.project.name}', '${newValues.newProjectName}'),\n" +
-            "\t\tpidSwap: new Swap('${seqTrack.individual.pid}', '${newValues.newPid}'),\n" +
-            "\t\tsampleTypeSwap: new Swap('${seqTrack.sampleType.name}', '${newValues.newSampleTypeName}'),\n" +
-            "\t\tseqTypeSwap: new Swap('${seqTrack.seqType.name}', '${newValues.newSeqTypeName}'),\n" +
-            "\t\tsingleCellSwap: new Swap('${seqTrack.seqType.singleCell}', '${newValues.newSingleCell}'),\n" +
-            "\t\tsequencingReadTypeSwap: new Swap('${seqTrack.seqType.libraryLayout}', '${newValues.newLibraryLayout}'),\n" +
+            "\t\tprojectNameSwap: new Swap<String>('${seqTrack.project.name}', '${newValues.newProjectName}'),\n" +
+            "\t\tpidSwap: new Swap<String>('${seqTrack.individual.pid}', '${newValues.newPid}'),\n" +
+            "\t\tsampleTypeSwap: new Swap<String>('${seqTrack.sampleType.name}', '${newValues.newSampleTypeName}'),\n" +
+            "\t\tseqTypeSwap: new Swap<String>('${seqTrack.seqType.name}', '${newValues.newSeqTypeName}'),\n" +
+            "\t\tsingleCellSwap: new Swap<Boolean>(${seqTrack.seqType.singleCell}, ${newValues.newSingleCell}),\n" +
+            "\t\tsequencingReadTypeSwap: new Swap<String>('${seqTrack.seqType.libraryLayout}', '${newValues.newLibraryLayout}'),\n" +
             "\t\trunName: '${seqTrack.run.name}',\n" +
             "\t\tlanes: ['${seqTrack.laneId}',],\n" +
             "\t\tsampleNeedsToBeCreated: false,\n" +
             "\t\trawSequenceFileSwaps        : [\n")
 
     seqTrack.sequenceFiles.each { rawSequenceFile ->
-        builder.addGroovyCommand( "\t\t\tnew Swap('${rawSequenceFile.fileName}', ''),\n")
+        builder.addGroovyCommand( "\t\t\tnew Swap<String>('${rawSequenceFile.fileName}', ''),\n")
     }
 
     builder.addGroovyCommand("\t\t],\n" +

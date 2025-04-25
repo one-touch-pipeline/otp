@@ -100,7 +100,7 @@ class SeqType implements Entity, MetadataField, ProjectFieldReferenceAble {
                 }
             }
         })
-        displayName(blank: false)
+        displayName(blank: false, unique: tables)
         roddyName(nullable: true, blank: false, validator: {
             !it?.contains('_')  // Roddy has problems with underscores
         })

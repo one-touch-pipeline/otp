@@ -407,7 +407,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         setupData()
         CellRangerMwpParameter parameter = createCellRangerMwpParameter(seqType: seqType)
 
-        SeqType otherSeqType = createSeqType(name: "otherSeqTypeA", dirName: "otherDir")
+        SeqType otherSeqType = createSeqType(name: "otherSeqTypeA", dirName: "otherDir", displayName: "otherSeqTypeA")
         Closure<SeqTrack> createSeqTrackHelper = { Map properties = [:] ->
             return createSeqTrack([
                     sample               : sampleA,

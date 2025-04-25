@@ -292,7 +292,8 @@ class SamplePairCheckerIntegrationSpec extends Specification implements IsRoddy 
 
         and: 'bam has not supported seq type'
         AbstractBamFile unsupportedSeqType = createBamFile(
-                seqTracks: [createSeqTrack(seqType: createSeqType(name: "unsupported seq type", dirName: "unsupported_seq_type"))])
+                seqTracks: [createSeqTrack(seqType:
+                        createSeqType(name: "unsupported seq type", dirName: "unsupported_seq_type", displayName: "unsupported_seq_type"))])
 
         and: 'sample type has no disease state'
         AbstractBamFile unknownDiseaseStatus = createRoddyBamFile()

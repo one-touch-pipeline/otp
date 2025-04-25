@@ -314,19 +314,19 @@ class Snippets {
 
         snippet << "\n\tlaneSwapService.swap( \n" +
                 "\t\tnew LaneSwapParameters(\n" +
-                "\t\tprojectNameSwap: new Swap('${seqTrack.sample.individual.project.name}', '${seqTrack.sample.individual.project.name}'),\n" +
-                "\t\tpidSwap: new Swap('${seqTrack.sample.individual.pid}', '${newSample.individual.pid}'),\n" +
-                "\t\tsampleTypeSwap: new Swap('${seqTrack.sample.sampleType.name}', '${newSample.sampleType.name}'),\n" +
-                "\t\tseqTypeSwap: new Swap('${seqTrack.seqType.name}', '${seqTrack.seqType.name}'),\n" +
-                "\t\tsingleCellSwap: new Swap('${seqTrack.seqType.singleCell.toString()}', '${seqTrack.seqType.singleCell.toString()}'),\n" +
-                "\t\tsequencingReadTypeSwap: new Swap('${seqTrack.seqType.libraryLayout}', '${seqTrack.seqType.libraryLayout}'),\n" +
+                "\t\tprojectNameSwap: new Swap<String>('${seqTrack.sample.individual.project.name}', '${seqTrack.sample.individual.project.name}'),\n" +
+                "\t\tpidSwap: new Swap<String>('${seqTrack.sample.individual.pid}', '${newSample.individual.pid}'),\n" +
+                "\t\tsampleTypeSwap: new Swap<String>('${seqTrack.sample.sampleType.name}', '${newSample.sampleType.name}'),\n" +
+                "\t\tseqTypeSwap: new Swap<String>('${seqTrack.seqType.name}', '${seqTrack.seqType.name}'),\n" +
+                "\t\tsingleCellSwap: new Swap<Boolean>(${seqTrack.seqType.singleCell}, ${seqTrack.seqType.singleCell}),\n" +
+                "\t\tsequencingReadTypeSwap: new Swap<String>('${seqTrack.seqType.libraryLayout}', '${seqTrack.seqType.libraryLayout}'),\n" +
                 "\t\trunName: '${seqTrack.run.name}',\n" +
                 "\t\tlanes: ['${seqTrack.laneId}',],\n" +
                 "\t\tsampleNeedsToBeCreated: false,\n" +
                 "\t\trawSequenceFileSwaps        : [\n"
 
         RawSequenceFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { rawSequenceFile ->
-            snippet << "\t\t\tnew Swap('${rawSequenceFile.fileName}', ''),\n"
+            snippet << "\t\t\tnew Swap<String>('${rawSequenceFile.fileName}', ''),\n"
         }
 
         snippet << "\t\t],\n" +

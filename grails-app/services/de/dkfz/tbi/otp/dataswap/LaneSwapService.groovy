@@ -242,7 +242,7 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
      */
     @CompileDynamic
     private Swap<SampleType> getSampleTypeSwap(LaneSwapParameters parameters) {
-        return new Swap(
+        return new Swap<SampleType>(
                 CollectionUtils.exactlyOneElement(SampleType.findAllByName(parameters.sampleTypeSwap.old),
                         "old sample type ${parameters.sampleTypeSwap.old} not found"),
                 CollectionUtils.exactlyOneElement(SampleType.findAllByName(parameters.sampleTypeSwap.new),
@@ -274,16 +274,29 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
     @CompileDynamic
     private Swap<SeqType> getSeqTypeSwap(LaneSwapParameters parameters, Swap<SequencingReadType> sequencingReadTypeSwap) {
         return new Swap<SeqType>(
-                CollectionUtils.exactlyOneElement(SeqType.findAllByNameAndLibraryLayoutAndSingleCell(
-                        parameters.seqTypeSwap.old, sequencingReadTypeSwap.old, parameters.singleCellSwap.old),
+                CollectionUtils.exactlyOneElement(
+                        findSeqType(parameters.seqTypeSwap.old, sequencingReadTypeSwap.old, parameters.singleCellSwap.old),
                         "The old seqtype ${parameters.seqTypeSwap.old} ${parameters.sequencingReadTypeSwap.old} " +
                                 "${parameters.singleCellSwap.old} does not exist"),
-                CollectionUtils.exactlyOneElement(SeqType.findAllByNameAndLibraryLayoutAndSingleCell(
-                        parameters.seqTypeSwap.new, sequencingReadTypeSwap.new, parameters.singleCellSwap.new),
+                CollectionUtils.exactlyOneElement(
+                        findSeqType(parameters.seqTypeSwap.new, sequencingReadTypeSwap.new, parameters.singleCellSwap.new),
                         "The new seqtype ${parameters.seqTypeSwap.new} ${parameters.sequencingReadTypeSwap.old}  " +
-                                "${parameters.singleCellSwap.old} does not exist"
-                )
+                                "${parameters.singleCellSwap.old} does not exist")
         )
+    }
+
+    /**
+     * Helper method for getSeqTypeSwap
+     */
+    private Set<SeqType> findSeqType(String seqTypeValue, SequencingReadType libraryLayoutValue, boolean singleCellValue) {
+        return SeqType.createCriteria().list {
+            or {
+                eq("name", seqTypeValue)
+                eq("displayName", seqTypeValue)
+            }
+            eq("libraryLayout", libraryLayoutValue)
+            eq("singleCell", singleCellValue)
+        } as Set<SeqType>
     }
 
     /**
