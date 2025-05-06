@@ -34,7 +34,7 @@ import java.util.regex.Matcher
 @Component
 class HipoSampleIdentifierParser implements SampleIdentifierParser {
 
-    private final static String REGEX = /^(${PIDREGEX})-([${HipoTissueType.values()*.key.join("")}])(\d{1,2})-(([BDRPACWY])(\d{1,2}))(-V8)?$/
+    private final static String REGEX = /^(${PIDREGEX})-([${HipoTissueType.values()*.key.join("")}])(\d{1,2})-(([BDRPACWY])(\d{1,2}))(-RE|-V8)?$/
     private final static String PIDREGEX = "([A-Z])(\\d\\d\\w)-(?:\\w\\w)?\\w\\w\\w(\\w)+"
 
     @Override
@@ -84,12 +84,16 @@ class HipoSampleIdentifierParser implements SampleIdentifierParser {
             return null
         }
 
+        boolean repetition = matcher.group(10) == '-RE'
+        boolean v8 = matcher.group(10) == '-V8'
+
         return new HipoSampleIdentifier(
                 /* projectNumber: */ projectNumber,
                 /* pid: */ matcher.group(1),
                 /* tissueType: */ tissueType,
                 /* sampleNumber: */ sampleNumber,
-                /* v8 */ matcher.group(10) as boolean,
+                /* repetition: */ repetition,
+                /* v8 */ v8,
                 /* experiment: */ matcher.group(7),
                 tissueType.specificReferenceGenome,
         )
@@ -130,6 +134,10 @@ class HipoSampleIdentifier implements ParsedSampleIdentifier {
     final String sampleNumber
 
     /**
+     * if new samples arrive with the same sample name as existing one
+     */
+    final boolean repetition
+    /**
      * Info if the Library Prep Kit Version 8 is used
      * Example: V8
      */
@@ -155,7 +163,7 @@ class HipoSampleIdentifier implements ParsedSampleIdentifier {
      */
     @Override
     String getFullSampleName() {
-        return "${pid}-${tissueType.key}${sampleNumber}-${analyteTypeAndNumber}${v8 ? "-V8" : ""}"
+        return "${pid}-${tissueType.key}${sampleNumber}-${analyteTypeAndNumber}${repetition ? "-RE" : ""}${v8 ? "-V8" : ""}"
     }
 
     @Override
@@ -184,7 +192,7 @@ class HipoSampleIdentifier implements ParsedSampleIdentifier {
             }
         }
 
-        return dbName + (v8 ? "-v8" : "")
+        return dbName + (repetition ? "-rep1" : "") + (v8 ? "-v8" : "")
     }
 
     @Override

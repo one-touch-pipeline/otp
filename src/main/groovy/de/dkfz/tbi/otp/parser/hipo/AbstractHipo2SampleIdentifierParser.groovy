@@ -55,13 +55,13 @@ abstract class AbstractHipo2SampleIdentifierParser implements SampleIdentifierPa
     private final static String ANALYTE_PATTERN_SINGLE_CELL_DEMULTIPLEX =
             "[0-9]+(?<analyteSingleCellDemultiplex>[${ANALYTE_CHARS_SINGLE_CELL}])[0-9]{1,2}"
 
-    // Info if the Library Prep Kit Version 8 is used
-    private final static String V8 = "(-(?<v8>V8))?"
+    // Info if the Library Prep Kit Version 8 is used or if new samples arrive with the same sample name as existing
+    private final static String V8_REP = "(-((?<v8>V8)|(?<rep>RE)))?"
 
     private final static String ANALYTE_PATTERN =
             "(?<analyte>${ANALYTE_PATTERN_NO_DIGIT_BEFORE}|${ANALYTE_PATTERN_SKIP_ANALYTE}|${ANALYTE_PATTERN_SINGLE_CELL_DEMULTIPLEX})"
 
-    static final String REGEX = /^${PID}-${TISSUE}-${ANALYTE_PATTERN}${V8}$/
+    static final String REGEX = /^${PID}-${TISSUE}-${ANALYTE_PATTERN}${V8_REP}$/
 
     @Override
     boolean tryParsePid(String pid) {
@@ -87,7 +87,7 @@ abstract class AbstractHipo2SampleIdentifierParser implements SampleIdentifierPa
             String analyteDigit = matcher.group('analyteDigit')
             String analyteChar = matcher.group('analyteChar')
 
-            String realSampleTypeName
+            String realSampleTypeName = ''
             if (analyteCharOnlyNumber && ANALYTE_CHARS_NO_DIGIT_BEFORE.contains(analyteCharOnlyNumber)) {
                 NumberFormat numberFormat = NumberFormat.integerInstance
                 numberFormat.minimumIntegerDigits = 2
@@ -105,6 +105,8 @@ abstract class AbstractHipo2SampleIdentifierParser implements SampleIdentifierPa
             }
             if (matcher.group('v8')) {
                 realSampleTypeName += '-v8'
+            } else if (matcher.group('rep')) {
+                realSampleTypeName += "-rep1"
             }
             return new DefaultParsedSampleIdentifier(
                     projectName,
