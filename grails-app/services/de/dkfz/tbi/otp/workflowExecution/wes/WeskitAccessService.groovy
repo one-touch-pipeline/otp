@@ -194,6 +194,6 @@ class WeskitAccessService {
         assert parameter.queue
         assert parameter.maxMemory
         assert parameter.maxRuntime
-        assert parameter.profiles
+        assert parameter.profile
     }
 }

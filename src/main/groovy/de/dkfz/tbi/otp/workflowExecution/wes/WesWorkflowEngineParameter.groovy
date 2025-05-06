@@ -31,7 +31,7 @@ class WesWorkflowEngineParameter {
     final String queue
     final String maxMemory
     final String maxRuntime
-    final String profiles
+    final String profile
 
     JSON asJson() {
         return [
@@ -40,7 +40,7 @@ class WesWorkflowEngineParameter {
                 "queue"          : queue,
                 "max-memory"     : maxMemory,
                 "max-runtime"    : maxRuntime,
-                "profiles"        : profiles,
+                "profile"        : profile,
         ] as JSON
     }
 
@@ -53,7 +53,7 @@ class WesWorkflowEngineParameter {
                 "queue: ${queue}",
                 "max-memory: ${maxMemory}",
                 "max-runtime: ${maxRuntime}",
-                "profiles: ${profiles}",
+                "profile: ${profile}",
         ].join('\n- ')
     }
 }

@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.workflow.jobs
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.util.logging.Slf4j
 import io.swagger.client.wes.model.RunId
-import grails.converters.JSON
 import org.grails.web.json.JSONObject
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -131,7 +130,10 @@ abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob 
                 Map<String, String> config = mapper.readValue(workflowStep.workflowRun.combinedConfig, HashMap)
                 JSONObject mergedParameter = mapUtilService.mergeSortedMaps([config, parameter]) as JSONObject
 
-                WesWorkflowEngineParameter engineParameter = createWesWorkflowEngineParameter(workflowStep)
+                WesWorkflowEngineParameter engineParameter = createWesWorkflowEngineParameter(
+                        workflowStep,
+                        mergedParameter.get(WeskitCheckFragmentKeysJob.WESKIT) as Map<String, String>)
+                mergedParameter.remove(WeskitCheckFragmentKeysJob.WESKIT)
                 WesWorkflowParameter wesParameter = new WesWorkflowParameter(mergedParameter, engineParameter, workflowType, path, workflowUrl)
                 logService.addSimpleLogEntry(workflowStep, "Call Weskit with ${wesParameter}")
                 logService.addSimpleLogEntry(workflowStep, "Work directory ${path}")
@@ -151,8 +153,7 @@ abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob 
         }
     }
 
-    private WesWorkflowEngineParameter createWesWorkflowEngineParameter(WorkflowStep workflowStep) {
-        JSONObject config = JSON.parse(workflowStep.workflowRun.combinedConfig)[ExternalWorkflowConfigFragment.Type.WESKIT.name()] as JSONObject
+    private WesWorkflowEngineParameter createWesWorkflowEngineParameter(WorkflowStep workflowStep, Map<String, String> weskit) {
         Project project = workflowStep.workflowRun.project
         String accountName = processingOptionService.findOptionAsBoolean(ProcessingOption.OptionName.ENABLE_ACCOUNTING_FOR_WESKIT) ?
                 replaceDisallowedChars(project.name) : null
@@ -163,9 +164,9 @@ abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob 
                 accountName,
                 jobName,
                 processingPriority.queue,
-                config.get("MAX_MEMORY") as String,
-                config.get("MAX_RUNTIME") as String,
-                config.get("PROFILES") as String,
+                weskit.get(WeskitCheckFragmentKeysJob.MAX_MEMORY) as String,
+                weskit.get(WeskitCheckFragmentKeysJob.MAX_RUNTIME) as String,
+                weskit.get(WeskitCheckFragmentKeysJob.PROFILE) as String,
         )
     }
 

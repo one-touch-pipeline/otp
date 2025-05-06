@@ -33,12 +33,17 @@ import org.springframework.stereotype.Component
 @Slf4j
 class WeskitCheckFragmentKeysJob extends AbstractCheckFragmentKeysJob {
 
+    static final String WESKIT = "WESKIT"
+    static final String MAX_MEMORY = "MAX_MEMORY"
+    static final String MAX_RUNTIME = "MAX_RUNTIME"
+    static final String PROFILE = "PROFILE"
+
     @Override
     Set<String> getKeyPaths() {
         return [
-                "WESKIT/MAX_MEMORY",
-                "WESKIT/MAX_RUNTIME",
-                "WESKIT/PROFILES",
+                "${WESKIT}/${MAX_MEMORY}",
+                "${WESKIT}/${MAX_RUNTIME}",
+                "${WESKIT}/${PROFILE}",
         ] as Set
     }
 }

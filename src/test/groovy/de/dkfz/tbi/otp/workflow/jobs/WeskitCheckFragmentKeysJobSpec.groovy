@@ -28,14 +28,14 @@ abstract class WeskitCheckFragmentKeysJobSpec extends AbstractCheckFragmentKeysJ
         return [
                 "WESKIT/MAX_MEMORY",
                 "WESKIT/MAX_RUNTIME",
-                "WESKIT/PROFILES",
+                "WESKIT/PROFILE",
         ] as Set
     }
 
     @Override
     Set<String> getMissingKeys() {
         return [
-                "WESKIT/PROFILES",
+                "WESKIT/PROFILE",
         ] as Set
     }
 
@@ -56,7 +56,7 @@ abstract class WeskitCheckFragmentKeysJobSpec extends AbstractCheckFragmentKeysJ
     "MAX_RUNTIME": {
         "value": "100"
     },
-    "PROFILES": {
+    "PROFILE": {
         "value": "slurm,singularity"
     },
   }
