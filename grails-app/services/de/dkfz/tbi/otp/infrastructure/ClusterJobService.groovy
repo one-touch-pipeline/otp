@@ -225,7 +225,8 @@ class ClusterJobService {
             FileSystem fs = fileSystemService.remoteFileSystem
             return fs.getPath(clusterJob.jobLog).text
         } catch (IOException e) {
-            return e.message
+            log.error(e.message, e)
+            return "Error accessing the file: ${e.message}"
         }
     }
 
