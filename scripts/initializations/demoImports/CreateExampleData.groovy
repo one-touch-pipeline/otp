@@ -233,6 +233,10 @@ class ExampleData {
 
     PanCancerWorkFileService panCancerWorkFileService
 
+    WgbsAlignmentLinkFileService wgbsAlignmentLinkFileService
+
+    WgbsAlignmentWorkFileService wgbsAlignmentWorkFileService
+
     RnaAlignmentLinkFileService rnaAlignmentLinkFileService
 
     RnaAlignmentWorkFileService rnaAlignmentWorkFileService
@@ -534,10 +538,10 @@ class ExampleData {
             dirs.addAll(panCancerWorkFileService.getSingleLaneQADirectories(bam).values())
 
             if (bam.seqType.isWgbs()) {
-                filesMap[panCancerLinkFileService.getMetadataTableFile(bam)] = panCancerWorkFileService.getMetadataTableFile(bam)
+                filesMap[wgbsAlignmentLinkFileService.getMetadataTableFile(bam)] = wgbsAlignmentWorkFileService.getMetadataTableFile(bam)
                 if (bam.containedSeqTracks*.libraryDirectoryName.unique().size() > 1) {
-                    dirs.addAll(panCancerWorkFileService.getLibraryQADirectories(bam).values())
-                    dirs.addAll(panCancerWorkFileService.getLibraryMethylationDirectories(bam).values())
+                    dirs.addAll(wgbsAlignmentLinkFileService.getLibraryQADirectories(bam).values())
+                    dirs.addAll(wgbsAlignmentLinkFileService.getLibraryMethylationDirectories(bam).values())
                 }
             }
 
@@ -1847,7 +1851,7 @@ class ExampleData {
         }
         RunYapsaConfig config = getOrCreateRunYapsaConfig(samplePair, Pipeline.Name.RUN_YAPSA)
 
-        String instanceName = "runYapsa_${config.programVersion.replaceAll("/", "-")}_${TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date())}"
+        String instanceName = "results_${config.programVersion.replaceAll("/", "-")}_${TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date())}"
         BamFilePairAnalysis analysis = new RunYapsaInstance([
                 samplePair        : samplePair,
                 instanceName      : instanceName,
@@ -1940,24 +1944,30 @@ enum MixedInSpecies {
 Project.withTransaction {
     ExampleData exampleData = new ExampleData([
             abstractBamFileService           : ctx.abstractBamFileService,
-            fastqcDataFilesService           : ctx.fastqcDataFilesService,
-            fileService                      : ctx.fileService,
-            fileSystemService                : ctx.fileSystemService,
-            snvCallingService                : ctx.snvCallingService,
-            indelCallingService              : ctx.indelCallingService,
-            sophiaService                    : ctx.sophiaService,
             aceseqService                    : ctx.aceseqService,
             cellRangerConfigurationService   : ctx.cellRangerConfigurationService,
             cellRangerWorkFileService        : ctx.cellRangerWorkFileService,
             cellRangerWorkflowService        : ctx.cellRangerWorkflowService,
-            singleCellMappingFileService     : ctx.singleCellMappingFileService,
+            fastqcDataFilesService           : ctx.fastqcDataFilesService,
             documentService                  : ctx.documentService,
-            runYapsaService                  : ctx.runYapsaService,
-            seqTypeService                   : ctx.seqTypeService,
-            roddyConfigService               : ctx.roddyConfigService,
+            fileService                      : ctx.fileService,
+            fileSystemService                : ctx.fileSystemService,
+            indelCallingService              : ctx.indelCallingService,
+            panCancerLinkFileService         : ctx.panCancerLinkFileService,
+            panCancerWorkFileService         : ctx.panCancerWorkFileService,
             rawSequenceDataWorkFileService   : ctx.rawSequenceDataWorkFileService,
             rawSequenceDataViewFileService   : ctx.rawSequenceDataViewFileService,
             rawSequenceDataAllWellFileService: ctx.rawSequenceDataAllWellFileService,
+            rnaAlignmentLinkFileService      : ctx.rnaAlignmentLinkFileService,
+            rnaAlignmentWorkFileService      : ctx.rnaAlignmentWorkFileService,
+            roddyConfigService               : ctx.roddyConfigService,
+            runYapsaService                  : ctx.runYapsaService,
+            seqTypeService                   : ctx.seqTypeService,
+            singleCellMappingFileService     : ctx.singleCellMappingFileService,
+            snvCallingService                : ctx.snvCallingService,
+            sophiaService                    : ctx.sophiaService,
+            wgbsAlignmentLinkFileService     : ctx.wgbsAlignmentLinkFileService,
+            wgbsAlignmentWorkFileService     : ctx.wgbsAlignmentWorkFileService,
     ])
 
     exampleData.init()

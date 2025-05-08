@@ -65,11 +65,22 @@ class DataExportInput implements Validateable {
     // ************ Select the permissions of the files. If true group can read/execute. If false group/others can read/execute ************//
     boolean external = true
 
-    // ************ adds COPY_TARGET_BASE and COPY_CONNECTION environment variables to mkdir and rsync ************//
-    boolean copyExternal = false
+    // ************ if mode = COPY_EXTERNAL: adds COPY_TARGET_BASE and COPY_CONNECTION environment variables to mkdir and rsync ************//
+    Mode mode = Mode.COPY_INTERNAL
 
     // ************ Data to be exported ************//
     List<SeqTrack> seqTrackList
     List<AbstractBamFile> bamFileList
     Map<PipelineType, List<BamFilePairAnalysis>> analysisListMap = [:]
+
+    // ************ How data to be exported ************//
+    enum Mode {
+        // Copy files from the same file system to the target folder
+        COPY_INTERNAL,
+        // Link files from the same file system to the target folder
+        LINK_INTERNAL,
+        // Copy files from a remote file system to the target folder
+        // adds COPY_TARGET_BASE and COPY_CONNECTION environment variables to mkdir and rsync
+        COPY_EXTERNAL,
+    }
 }

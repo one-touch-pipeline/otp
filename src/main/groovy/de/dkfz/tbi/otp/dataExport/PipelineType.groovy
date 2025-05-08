@@ -21,50 +21,73 @@
  */
 package de.dkfz.tbi.otp.dataExport
 
+import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
+import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
+
 enum PipelineType {
     FASTQ {
+        Class<? extends BamFilePairAnalysis> analysisClass = null
+
         @Override
         String toString() {
             return "FastQ"
         }
     },
     BAM {
+        Class<? extends BamFilePairAnalysis> analysisClass = null
+
         @Override
         String toString() {
             return "Bam"
         }
     },
     INDEL {
+        Class<? extends BamFilePairAnalysis> analysisClass = IndelCallingInstance
+
         @Override
         String toString() {
             return "Indel"
         }
     },
     SOPHIA {
+        Class<? extends BamFilePairAnalysis> analysisClass = SophiaInstance
+
         @Override
         String toString() {
             return "Sophia"
         }
     },
     ACESEQ {
+        Class<? extends BamFilePairAnalysis> analysisClass = AceseqInstance
+
         @Override
         String toString() {
             return "ACEseq"
         }
     },
     SNV {
+        Class<? extends BamFilePairAnalysis> analysisClass = RoddySnvCallingInstance
+
         @Override
         String toString() {
             return "SNV"
         }
     },
     RUN_YAPSA {
+        Class<? extends BamFilePairAnalysis> analysisClass = RunYapsaInstance
+
         @Override
         String toString() {
             return "RunYapsa"
         }
     },
-    RNA_ANALYSIS {
+    RNA_ANALYSIS() {
+        Class<? extends BamFilePairAnalysis> analysisClass = null
+
         @Override
         String toString() {
             return "RNA Analysis"

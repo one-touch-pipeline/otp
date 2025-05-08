@@ -39,9 +39,9 @@ import java.nio.file.Path
  *
  *      - scriptOutputFile: absolute path to the desired script file
  *      - targetOutputFolder: absolute path to the desired output location
- *      - copyFastqFiles: enable to copy fastq files
- *      - copyBamFiles: enable to copy bam files
- *      - copyAnalyses: enable to copy the analysis files for each analysis instance individually
+ *      - exportFastqFiles: enable to export fastq files
+ *      - exportBamFiles: enable to export bam files
+ *      - exportAnalyses: enable to export the analysis files for each analysis instance individually
  *      - checkFileStatus: if enabled script only checks files and prints information. To get an output script disable this option.
  *      - getFileList: if enabled a list of files is additionally provided
  *      - unixGroup: set a new unix group for the copied data
@@ -84,26 +84,26 @@ String scriptOutputFile = ""
 // ************ Path to copy files. Underneath, 'PID folders' will be created. (absolute path) ************//
 String targetOutputFolder = ""
 
-// ************ Select whether FASTQ files should be copied (true/false) ************//
-boolean copyFastqFiles = false
+// ************ Select whether FASTQ files should be exported (true/false) ************//
+boolean exportFastqFiles = false
 
-// ************ Select whether BAM files should be copied (true/false) ************//
-boolean copyBamFiles = false
+// ************ Select whether BAM files should be exported (true/false) ************//
+boolean exportBamFiles = false
 
-// ************ Select whether withdrawn data should be copied (true/false) ************//
-boolean copyWithdrawnData = false
+// ************ Select whether withdrawn data should be exported (true/false) ************//
+boolean exportWithdrawnData = false
 
-// ************ Select whether analyses should be copied (true/false) ************//
-Map<PipelineType, Boolean> copyAnalyses = [:]
+// ************ Select whether analyses should be exported (true/false) ************//
+Map<PipelineType, Boolean> exportAnalyses = [:]
 
-copyAnalyses.put(PipelineType.INDEL, false)
-copyAnalyses.put(PipelineType.SOPHIA, false)
-copyAnalyses.put(PipelineType.ACESEQ, false)
-copyAnalyses.put(PipelineType.SNV, false)
-copyAnalyses.put(PipelineType.RUN_YAPSA, false)
+exportAnalyses.put(PipelineType.INDEL, false)
+exportAnalyses.put(PipelineType.SOPHIA, false)
+exportAnalyses.put(PipelineType.ACESEQ, false)
+exportAnalyses.put(PipelineType.SNV, false)
+exportAnalyses.put(PipelineType.RUN_YAPSA, false)
 
-// ! Note: RNA_ANALYSIS will be exported only if copyBamFile is also set to be true !//
-copyAnalyses.put(PipelineType.RNA_ANALYSIS, false)
+// ! Note: RNA_ANALYSIS will be exported only if exportBamFile is also set to be true !//
+exportAnalyses.put(PipelineType.RNA_ANALYSIS, false)
 
 // ************ Check if and which files exist (true/false) ************//
 boolean checkFileStatus = true
@@ -117,12 +117,23 @@ String unixGroup = ""
 // ************ Select the permissions of the files. If true group can read/execute. If false group/others can read/execute************//
 boolean external = true
 
-// ************ adds COPY_TARGET_BASE and COPY_CONNECTION environment variables to mkdir and rsync************//
-boolean copyExternal = false
+/**
+ * Specify how files/folders are copied or linked
+ *
+ * Three modes exist:
+ * DataExportInput.Mode.COPY_INTERNAL :
+ *   Copy files from the same file system to the target folder
+ * DataExportInput.Mode.LINK_INTERNAL :
+ *   Link files from the same file system to the target folder, no files are copied.
+ * DataExportInput.Mode.COPY_EXTERNAL :
+ *   Copy files from a remote file system to the local target folder.
+ *   Adds COPY_TARGET_BASE and COPY_CONNECTION environment variables to mkdir and rsync
+ */
+DataExportInput.Mode mode = DataExportInput.Mode.LINK_INTERNAL
 
 // work area
 assert scriptOutputFile: "scriptOutputPath should not be empty"
-if(!copyExternal) {
+if(mode != DataExportInput.Mode.COPY_EXTERNAL) {
     assert targetOutputFolder: "targetOutputFolder should not be empty"
     assert unixGroup         : "no group given"
 }
@@ -234,7 +245,7 @@ scriptInputHelperService.parseAndSplitHelper([selectByIndividual, multiColumnInp
     )
 
     // FastQ files
-    if (copyFastqFiles) {
+    if (exportFastqFiles) {
         seqTracks.collect { SeqTrack seqTrack ->
             [seqTrack.individual, seqTrack.sampleType, seqTrack.seqType]
         }.unique().each {
@@ -259,7 +270,7 @@ scriptInputHelperService.parseAndSplitHelper([selectByIndividual, multiColumnInp
     }
 
     // Bam Files
-    if (copyBamFiles) {
+    if (exportBamFiles) {
         if (bamFiles) {
             bamFileList.addAll(bamFiles)
             bamFiles.collect { AbstractBamFile bam ->
@@ -279,9 +290,9 @@ scriptInputHelperService.parseAndSplitHelper([selectByIndividual, multiColumnInp
     }
 
     // Analysis Files
-    copyAnalyses.findAll { Map.Entry<PipelineType, Boolean> entry ->
+    exportAnalyses.findAll { Map.Entry<PipelineType, Boolean> entry ->
         entry.value
-    }.each { Map.Entry<PipelineType, Boolean> instance ->
+    }.each { PipelineType pipelineType, Boolean used ->
         samplePairService.findAllByIndividualSampleTypeSeqType(
                 individual,
                 sampleType,
@@ -292,18 +303,19 @@ scriptInputHelperService.parseAndSplitHelper([selectByIndividual, multiColumnInp
             }.collect {
                 it.sampleType
             }.unique()
-            if (sampleTypeOfIndividual.containsAll([samplePair.sampleType1, samplePair.sampleType2])) {
-                List<BamFilePairAnalysis> bamFilePairAnalyses = BamFilePairAnalysis.withCriteria {
+            if (pipelineType != PipelineType.RNA_ANALYSIS &&
+                    sampleTypeOfIndividual.containsAll([samplePair.sampleType1, samplePair.sampleType2])) {
+                assert pipelineType.analysisClass : "The PipelineType.analysisClass (${pipelineType}) should not be null"
+                List<BamFilePairAnalysis> bamFilePairAnalyses = pipelineType.analysisClass.withCriteria {
                     eq('samplePair', samplePair)
                     eq('processingState', AnalysisProcessingStates.FINISHED)
-                    like('instanceName', "%${instance.key}%")
                     order("id", "desc")
                 }
                 if (!bamFilePairAnalyses.isEmpty()) {
                     BamFilePairAnalysis analysis = bamFilePairAnalyses.first()
-                    analysisListMap[instance.key].add(analysis)
+                    analysisListMap[pipelineType].add(analysis)
                     dataExportOverview.add(new DataExportOverviewItem(
-                            pipelineType: instance.key,
+                            pipelineType: pipelineType,
                             individual: analysis.individual,
                             sampleType: analysis.sampleType1BamFile.sampleType,
                             sampleType2: analysis.sampleType2BamFile.sampleType,
@@ -320,11 +332,11 @@ DataExportInput dataExportParameters = new DataExportInput([
         targetFolder        : targetFolder,
         checkFileStatus     : checkFileStatus,
         getFileList         : getFileList,
-        copyWithdrawnData   : copyWithdrawnData,
+        copyWithdrawnData   : exportWithdrawnData,
         unixGroup           : unixGroup,
         external            : external,
-        copyExternal        : copyExternal,
-        copyAnalyses        : copyAnalyses,
+        mode                : mode,
+        copyAnalyses        : exportAnalyses,
         // preprocessed data for export
         seqTrackList   : seqTrackList,
         bamFileList    : bamFileList,
@@ -339,9 +351,9 @@ List<DataExportOutput> outputList = [
         // Output header information
         headerInfoOutput = dataExportService.exportHeaderInfo(dataExportParameters),
         // Processing FASTQ Files
-        seqTrackOutput = copyFastqFiles ? dataExportService.exportRawSequenceFiles(dataExportParameters) : emptyOutput,
+        seqTrackOutput = exportFastqFiles ? dataExportService.exportRawSequenceFiles(dataExportParameters) : emptyOutput,
         // Processing BAM Files
-        bamFileOutput = copyBamFiles ? dataExportService.exportBamFiles(dataExportParameters) : emptyOutput,
+        bamFileOutput = exportBamFiles ? dataExportService.exportBamFiles(dataExportParameters) : emptyOutput,
         // Processing Analysis Files
         analysisOutput = dataExportService.exportAnalysisFiles(dataExportParameters),
 ]

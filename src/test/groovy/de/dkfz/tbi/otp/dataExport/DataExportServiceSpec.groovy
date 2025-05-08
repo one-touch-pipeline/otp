@@ -34,9 +34,7 @@ import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
+import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -84,6 +82,8 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
     final static String TEST_UNIX_GROUP = "test"
     final static String TEST_BASE_FOLDER = "/tmp/target"
 
+    final static String LINK_PATTERN = "for file in [\$]\\(ls -d ([^()])*\\); do base=[\$]\\(basename [\$]file\\) ln -sf [\$]file (\\/[a-zA-Z0-9\\-+_.]*)*[\$]base; done;"
+
     @TempDir
     Path tempDir
 
@@ -94,15 +94,16 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
 
     void setup() {
         configService = new TestConfigService()
-        DomainFactory.createRnaSingleSeqType()
+
         DomainFactory.createRnaPairedSeqType()
+        DomainFactory.createExomeSeqType()
     }
 
     void cleanup() {
         configService.clean()
     }
 
-    private DataExportInput createDataFileInput(boolean checkFileStatus, boolean getFileList) {
+    private DataExportInput createDataFileInput(boolean checkFileStatus, boolean getFileList, DataExportInput.Mode mode = DataExportInput.Mode.COPY_INTERNAL) {
         // two seqTracks
         List<SeqTrack> seqTrackList = TEST_PID_LIST.collect {
             createSeqTrackWithOneFastqFile(sample: createSample(
@@ -119,7 +120,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
                 getFileList    : getFileList,
                 unixGroup      : TEST_UNIX_GROUP,
                 external       : false,
-                copyExternal   : false,
+                mode           : mode,
                 seqTrackList   : seqTrackList,
                 bamFileList    : [],
                 analysisListMap: [:],
@@ -129,7 +130,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
     @Unroll
     void "exportRawSequenceFiles, combination of different inputs, should return correct scripts"() {
         given:
-        final DataExportInput dataExportInput = createDataFileInput(checkFileStatus, getFileList)
+        final DataExportInput dataExportInput = createDataFileInput(checkFileStatus, getFileList, mode)
         Path finalFile = tempDir.resolve('finalFile')
         Files.createFile(finalFile)
 
@@ -152,51 +153,49 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
         then:
         switch (cases) {
             case 1:
-                assert output.bashScript.contains("mkdir -p")
-                assert output.bashScript.contains('rsync ${RSYNC_LOG} -upL') /* codenarc-disable-line GStringExpressionWithinString */
-
+                assert ["echo", "mkdir -p", "rsync \${RSYNC_LOG} -upL"].every { output.bashScript.contains(it) } /* codenarc-disable-line GStringExpressionWithinString */
                 assert output.listScript.contains("ls -l")
-
                 assert output.consoleLog.empty
                 break
             case 2:
-                assert output.bashScript.contains("mkdir -p")
-                assert output.bashScript.contains('rsync ${RSYNC_LOG} -upL') /* codenarc-disable-line GStringExpressionWithinString */
-
+                assert ["echo", "mkdir -p", "rsync \${RSYNC_LOG} -upL"].every { output.bashScript.contains(it) } /* codenarc-disable-line GStringExpressionWithinString */
                 assert output.listScript.empty
-
                 assert output.consoleLog.empty
                 break
             case 3:
-                assert !["echo", "mkdir", "rsync"].every { output.bashScript.contains(it) }
-
+                assert !["echo", "mkdir", "rsync", "ln -s"].every { output.bashScript.contains(it) }
                 assert output.listScript.empty
-
                 assert output.consoleLog.contains('** FASTQ **')
                 TEST_PID_LIST.each {
                     assert output.consoleLog.contains(it)
                 }
                 break
             case 4:
-                assert !["echo", "mkdir", "rsync"].every { output.bashScript.contains(it) }
+                assert !["echo", "mkdir", "rsync", "ln -s"].every { output.bashScript.contains(it) }
                 assert output.listScript.empty
-
                 assert output.consoleLog.contains('** FASTQ **')
                 TEST_PID_LIST.each {
                     assert output.consoleLog.contains(it)
                 }
                 break
+            case 5:
+                assert ["echo", "mkdir", "ln -s"].every { output.bashScript.contains(it) }
+                assert output.listScript.contains("ls -l")
+                assert output.consoleLog.empty
+                break
         }
 
         where:
-        checkFileStatus | getFileList | getFileFinalPathCount | getFilePathInViewByPidCount || cases
-        false           | true        | 2                     | 2                           || 1
-        false           | false       | 2                     | 2                           || 2
-        true            | true        | 2                     | 0                           || 3
-        true            | false       | 2                     | 0                           || 4
+        checkFileStatus | getFileList | getFileFinalPathCount | getFilePathInViewByPidCount | mode                               || cases
+        false           | true        | 2                     | 2                           | DataExportInput.Mode.COPY_INTERNAL || 1
+        false           | false       | 2                     | 2                           | DataExportInput.Mode.COPY_INTERNAL || 2
+        true            | true        | 2                     | 0                           | DataExportInput.Mode.COPY_INTERNAL || 3
+        true            | false       | 2                     | 0                           | DataExportInput.Mode.COPY_INTERNAL || 4
+        false           | true        | 2                     | 2                           | DataExportInput.Mode.LINK_INTERNAL || 5
     }
 
-    private DataExportInput createBamFileInput(boolean checkFileStatus, boolean getFileList, boolean external = false, boolean copyExternal = false) {
+    private DataExportInput createBamFileInput(boolean checkFileStatus, boolean getFileList, boolean external = false,
+                                               DataExportInput.Mode mode = DataExportInput.Mode.COPY_INTERNAL) {
         List<AbstractBamFile> bamFileList = [
                 // RoddyBamFile:
                 DomainFactory.createRoddyBamFile([
@@ -220,7 +219,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
                 getFileList    : getFileList,
                 unixGroup      : TEST_UNIX_GROUP,
                 external       : external,
-                copyExternal   : copyExternal,
+                mode           : mode,
                 copyAnalyses   : [:],
                 seqTrackList   : [],
                 bamFileList    : bamFileList,
@@ -232,19 +231,25 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
     @Unroll
     void "exportBamFiles, combination of different inputs, should return correct scripts"() {
         given:
-        DataExportInput dataExportInput = createBamFileInput(checkFileStatus, getFileList, external, copyExternal)
+        DataExportInput dataExportInput = createBamFileInput(checkFileStatus, getFileList, external, mode)
 
         GroovyMock([global: true], Files)
         Files.exists(_) >> fileExists
-
         service.fileSystemService = Mock(FileSystemService) {
             getRemoteFileSystem() >> new TestFileSystemService().remoteFileSystem
         }
 
-        String copyConnection = copyExternal ? /\$\{COPY_CONNECTION\}/ : ""
-        String copyTargetBase = copyExternal ? /\$\{COPY_TARGET_BASE\}/ : ""
+        String copyConnection = dataExportInput.mode == DataExportInput.Mode.COPY_EXTERNAL ? /\$\{COPY_CONNECTION\}/ : ""
+        String copyTargetBase = dataExportInput.mode == DataExportInput.Mode.COPY_EXTERNAL ? /\$\{COPY_TARGET_BASE\}/ : ""
 
-        Pattern bashScriptPattern = ~/\[\[ -n "(.{2}ECHO_LOG.)" \]\] && echo (\/[a-zA-Z0-9\-+_.]*)*\n(mkdir -p (.{2}COPY_TARGET_BASE.)?(\/[a-zA-Z0-9\-+_.]*)*\n)?rsync (.{2}RSYNC_LOG.) -u(r)?pL ${copyConnection}(\/[a-zA-Z0-9\-+_.*]*)* ${copyTargetBase}(\/[a-zA-Z0-9\-+_.*]*)*/
+        String bashScriptBase = "\\[\\[ -n \"(.{2}ECHO_LOG.)\" \\]\\] && echo (/[a-zA-Z0-9\\-+_.]*)*\\n(mkdir -p (.{2}COPY_TARGET_BASE.)?(/[a-zA-Z0-9\\-+_.]*)*\\n)"
+        String bashScriptRsync = "rsync (.{2}RSYNC_LOG.) -u(r)?pL ${copyConnection}(\\/[a-zA-Z0-9\\-+_.*]*)* ${copyTargetBase}(\\/[a-zA-Z0-9\\-+_.*]*)*"
+        String bashScriptLink = LINK_PATTERN
+
+        String bashScriptPatternStr = bashScriptBase + '?' +
+                (mode == DataExportInput.Mode.LINK_INTERNAL ? bashScriptLink : bashScriptRsync)
+
+        Pattern bashScriptPattern = Pattern.compile(bashScriptPatternStr)
         Pattern listScriptPattern = ~/ls -l (\/[a-zA-Z0-9\-+_.]*)*/
         Pattern consoleLogPattern = fileExists ?
                 ~/Found BAM files \d\n\n([a-zA-Z0-9\(\)-_ ]*){${dataExportInput.bamFileList.size()}}/ :
@@ -283,79 +288,56 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
                 assert consoleLogMatcher.find()
                 assert consoleLogMatcher.size() == fileExists ? 1 : dataExportInput.bamFileList.size()
                 break
-            case 4:
-                assert !bashScriptMatcher.find()
-
-                assert output.listScript.empty
-
-                assert consoleLogMatcher.find()
-                assert consoleLogMatcher.size() == fileExists ? 1 : dataExportInput.bamFileList.size()
-                break
         }
 
         where:
-        checkFileStatus | getFileList | external | copyExternal | fileExists || cases
-        false           | true        | false    | false        | true       || 1
-        false           | true        | true     | true         | true       || 1
-        false           | false       | false    | false        | true       || 2
-        false           | false       | true     | true         | true       || 2
-        true            | true        | false    | false        | true       || 3
-        true            | true        | true     | true         | true       || 3
-        true            | false       | false    | false        | false      || 3
-        true            | false       | false    | false        | true       || 4
-        true            | false       | true     | true         | true       || 4
-        true            | false       | false    | false        | false      || 4
+        checkFileStatus | getFileList | external | fileExists | mode                               || cases
+        false           | true        | false    | true       | DataExportInput.Mode.COPY_INTERNAL || 1
+        false           | true        | true     | true       | DataExportInput.Mode.COPY_EXTERNAL || 1
+        false           | true        | false    | true       | DataExportInput.Mode.LINK_INTERNAL || 1
+        false           | true        | true     | true       | DataExportInput.Mode.LINK_INTERNAL || 1
+        false           | false       | false    | true       | DataExportInput.Mode.COPY_INTERNAL || 2
+        false           | false       | true     | true       | DataExportInput.Mode.COPY_EXTERNAL || 2
+        false           | false       | true     | true       | DataExportInput.Mode.LINK_INTERNAL || 2
+        true            | true        | false    | true       | DataExportInput.Mode.COPY_INTERNAL || 3
+        true            | true        | true     | true       | DataExportInput.Mode.COPY_EXTERNAL || 3
+        true            | false       | false    | false      | DataExportInput.Mode.COPY_INTERNAL || 3
+        true            | false       | false    | false      | DataExportInput.Mode.LINK_INTERNAL || 3
     }
 
+    @Unroll
     void "exportBamFiles, if checkFileStatus=false && getFileList=true && is RNA, should return correct scripts"() {
         given:
-        DataExportInput dataExportInput = createBamFileInput(false, true)
-        dataExportInput.copyAnalyses.put(PipelineType.RNA_ANALYSIS, true)
+        DataExportInput dataExportInput = createBamFileInput(false, true, false, mode)
+        dataExportInput.copyAnalyses.put(pipeline, true)
 
         GroovyMock([global: true], Files)
         Files.exists(_) >> true
 
-        service.fileSystemService = Mock(FileSystemService) {
-            getRemoteFileSystem() >> new TestFileSystemService().remoteFileSystem
-        }
+        service.fileSystemService = new TestFileSystemService()
 
         when:
         DataExportOutput output = service.exportBamFiles(dataExportInput)
 
         then:
         output.bashScript.contains("mkdir -p")
-        output.bashScript.contains('rsync ${RSYNC_LOG} -urpL --exclude=*roddyExec* --exclude=.*') /* codenarc-disable-line GStringExpressionWithinString */
+        output.bashScript.contains(pattern)
 
         output.listScript.contains("ls -l")
 
         output.consoleLog.empty
+
+        where:
+        mode                               | pipeline                   || pattern
+        DataExportInput.Mode.COPY_INTERNAL | PipelineType.INDEL         || 'rsync ${RSYNC_LOG} -upL' /* codenarc-disable-line GStringExpressionWithinString */
+        DataExportInput.Mode.COPY_INTERNAL | PipelineType.RNA_ANALYSIS  || 'rsync ${RSYNC_LOG} -urpL --exclude=*roddyExec* --exclude=.*' /* codenarc-disable-line GStringExpressionWithinString */
+        DataExportInput.Mode.COPY_EXTERNAL | PipelineType.INDEL         || 'rsync ${RSYNC_LOG} -upL' /* codenarc-disable-line GStringExpressionWithinString */
+        DataExportInput.Mode.COPY_EXTERNAL | PipelineType.RNA_ANALYSIS  || 'rsync ${RSYNC_LOG} -urpL --exclude=*roddyExec* --exclude=.*' /* codenarc-disable-line GStringExpressionWithinString */
+        DataExportInput.Mode.LINK_INTERNAL | PipelineType.INDEL         || 'do base=$(basename $file) ln -sf $file'
+        DataExportInput.Mode.LINK_INTERNAL | PipelineType.RNA_ANALYSIS  || 'do base=$(basename $file) ln -sf $file'
     }
 
-    void "exportBamFiles, if external bam = true, should return correct scripts"() {
-        given:
-        DataExportInput dataExportInput = createBamFileInput(false, true)
-        dataExportInput.copyAnalyses.put(PipelineType.RNA_ANALYSIS, true)
-
-        GroovyMock([global: true], Files)
-        Files.exists(_) >> true
-
-        service.fileSystemService = Mock(FileSystemService) {
-            getRemoteFileSystem() >> new TestFileSystemService().remoteFileSystem
-        }
-
-        when:
-        DataExportOutput output = service.exportBamFiles(dataExportInput)
-
-        then:
-        output.bashScript.contains("mkdir -p")
-        output.bashScript.contains('rsync ${RSYNC_LOG} -urpL --exclude=*roddyExec* --exclude=.*') /* codenarc-disable-line GStringExpressionWithinString */
-
-        output.listScript.contains("ls -l")
-
-        output.consoleLog.empty
-    }
-
-    private DataExportInput createAnalysisInput(boolean checkFileStatus, boolean getFileList) {
+    private DataExportInput createAnalysisInput(boolean checkFileStatus, boolean getFileList, DataExportInput.Mode mode = DataExportInput.Mode.COPY_INTERNAL) {
         Map<PipelineType, List<BamFilePairAnalysis>> analysisListMap = [
                 (PipelineType.INDEL)    : [
                         DomainFactory.createIndelCallingInstanceWithRoddyBamFiles(),
@@ -385,7 +367,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
                 getFileList    : getFileList,
                 unixGroup      : TEST_UNIX_GROUP,
                 external       : false,
-                copyExternal   : false, // not relevant
+                mode           : mode,
                 copyAnalyses   : [
                         (PipelineType.INDEL)    : true,
                         (PipelineType.SNV)      : true,
@@ -402,7 +384,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
     @Unroll
     void "exportAnalyses, combination of different inputs, should return correct scripts"() {
         given:
-        DataExportInput dataExportInput = createAnalysisInput(checkFileStatus, getFileList)
+        DataExportInput dataExportInput = createAnalysisInput(checkFileStatus, getFileList, mode)
 
         final String instancePath = TEST_BASE_FOLDER + "/instance/path"
         service.fileService = Mock(FileService) {
@@ -414,14 +396,21 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
         service.bamFileAnalysisServiceFactoryService = Mock(BamFileAnalysisServiceFactoryService)
         service.bamFileAnalysisServiceFactoryService.getService(_) >> abstractBamFileAnalysisService
 
-        Pattern bashScriptPattern = ~/\[\[ -n "(.{2}ECHO_LOG.)" \]\] && echo ${instancePath}\nmkdir -p (.{2}COPY_TARGET_BASE.)?[a-zA-Z0-9-_\/]*\nrsync (.{2}RSYNC_LOG.) -urpL --exclude=\*roddyExec\* --exclude=\*bam\*/
+        String copyConnection = dataExportInput.mode == DataExportInput.Mode.COPY_EXTERNAL ? /[\$]\{COPY_CONNECTION\}/ : ""
+        String copyTargetBase = dataExportInput.mode == DataExportInput.Mode.COPY_EXTERNAL ? /[\$]\{COPY_TARGET_BASE\}/ : ""
+
+        String bashScriptBase = "\\[\\[ -n \"(.{2}ECHO_LOG.)\" \\]\\] && echo (\\/[^\\/ \\n]*)+\\nmkdir -p ${copyTargetBase}(\\/[^\\/ \\n]*)+\\n"
+
+        String bashScriptRsyncPattern = "rsync (.{2}RSYNC_LOG.) -urpL --exclude=\\*roddyExec\\* --exclude=\\*bam\\* ${copyConnection}(\\/[^\\/ \\n]*)+ ${copyTargetBase}(\\/[^\\/ \\n]*)+\\n"
+        String bashScriptLnPattern = LINK_PATTERN
         Pattern listScriptPattern = ~/ls -l --ignore=\"\*roddyExec\*\" ${instancePath}\n/
+
         Pattern consoleLogPattern = ~/Found following [a-zA-Z]* analyses:\n(\s*pid_\d\s*[a-zA-Z0-9-\s]*:\s*instance-\d*\n){2}/
 
         when:
         DataExportOutput output = service.exportAnalysisFiles(dataExportInput)
 
-        Matcher bashScriptMatcher = output.bashScript =~ bashScriptPattern
+        Matcher bashScriptMatcher = output.bashScript =~ Pattern.compile(bashScriptBase + (mode == DataExportInput.Mode.LINK_INTERNAL ? bashScriptLnPattern : bashScriptRsyncPattern))
         Matcher listScriptMatcher = output.listScript =~ listScriptPattern
         Matcher consoleLogMatcher = output.consoleLog =~ consoleLogPattern
 
@@ -452,21 +441,21 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
                 assert consoleLogMatcher.find()
                 assert consoleLogMatcher.size() == dataExportInput.analysisListMap.size()
                 break
-            case 4:
-                assert !["echo", "mkdir", "rsync"].every { output.bashScript.contains(it) }
-
-                assert output.listScript.empty
-
-                assert consoleLogMatcher.find()
-                assert consoleLogMatcher.size() == dataExportInput.analysisListMap.size()
-                break
         }
 
         where:
-        checkFileStatus | getFileList || cases
-        false           | true        || 1
-        false           | false       || 2
-        true            | true        || 3
-        true            | false       || 4
+        checkFileStatus | getFileList | mode                               | cases
+        false           | true        | DataExportInput.Mode.COPY_INTERNAL | 1
+        false           | true        | DataExportInput.Mode.COPY_EXTERNAL | 1
+        false           | true        | DataExportInput.Mode.LINK_INTERNAL | 1
+        false           | false       | DataExportInput.Mode.COPY_INTERNAL | 2
+        false           | false       | DataExportInput.Mode.LINK_INTERNAL | 2
+        false           | false       | DataExportInput.Mode.COPY_EXTERNAL | 2
+        true            | true        | DataExportInput.Mode.COPY_INTERNAL | 3
+        true            | true        | DataExportInput.Mode.COPY_EXTERNAL | 3
+        true            | true        | DataExportInput.Mode.LINK_INTERNAL | 3
+        true            | false       | DataExportInput.Mode.COPY_INTERNAL | 3
+        true            | false       | DataExportInput.Mode.COPY_EXTERNAL | 3
+        true            | false       | DataExportInput.Mode.LINK_INTERNAL | 3
     }
 }
