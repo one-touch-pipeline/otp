@@ -23,9 +23,7 @@ package de.dkfz.tbi.otp.job.restarting
 
 import grails.testing.gorm.DataTest
 import org.slf4j.Logger
-import spock.lang.Specification
-import spock.lang.TempDir
-import spock.lang.Unroll
+import spock.lang.*
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
@@ -42,6 +40,10 @@ class RestartParseServiceSpec extends Specification implements DataTest {
 
     @TempDir
     Path tempDir
+
+    private static final String NO_OBJECT = "no object"
+
+    private static final String NO_FILE = "no file"
 
     @Unroll
     void "extractMatchingAction, when text is '#text', matches (#match) JobErrorDefinition with errorExpression '#errorExpression'"() {
@@ -207,12 +209,15 @@ class RestartParseServiceSpec extends Specification implements DataTest {
                 return text.collect { String content ->
                     new ClusterJob(
                             jobLog: {
-                                if (content) {
-                                    Path fileName = tempDir.resolve(HelperUtils.randomMd5sum)
-                                    Path file = CreateFileHelper.createFile(fileName, content)
-                                    return file.toString()
+                                if (content == NO_OBJECT) {
+                                    return null
                                 }
-                                return TestCase.uniqueNonExistentPath.absolutePath
+                                if (content == NO_FILE) {
+                                    return TestCase.uniqueNonExistentPath.absolutePath
+                                }
+                                Path fileName = tempDir.resolve(HelperUtils.randomMd5sum)
+                                Path file = CreateFileHelper.createFile(fileName, content)
+                                return file.toString()
                             }()
                     )
                 }
@@ -231,20 +236,23 @@ class RestartParseServiceSpec extends Specification implements DataTest {
         expectedAction == service.handleTypeClusterLogs(job, jobErrorDefinitions)
 
         where:
-        name                                         | text                                            || expectedAction
-        'no log file'                                | []                                              || JobErrorDefinition.Action.STOP
-        'one file, not existing'                     | [null]                                          || null
-        'one file, not matching'                     | ['abc']                                         || null
-        'one file, match case wf'                    | ['Test2']                                       || JobErrorDefinition.Action.RESTART_WF
-        'one file, match case job'                   | ['Test3']                                       || JobErrorDefinition.Action.RESTART_JOB
-        'one file, match both cases'                 | ['Test2 Test3']                                 || JobErrorDefinition.Action.STOP
-        'two files, no matches'                      | ['abc', 'def']                                  || null
-        'two files, one matching, case 1'            | ['Test1', 'def']                                || JobErrorDefinition.Action.RESTART_WF
-        'two files, one matching, case 2'            | ['abc', 'Test3']                                || JobErrorDefinition.Action.RESTART_JOB
-        'two files, both matches case 1'             | ['Test1', 'Test2']                              || JobErrorDefinition.Action.RESTART_WF
-        'two files, both matches both cases'         | ['Test2', 'Test3']                              || JobErrorDefinition.Action.STOP
-        'two files, only one exist and match'        | ['Test1', null]                                 || JobErrorDefinition.Action.RESTART_WF
-        'many files, some exist, matching one cases' | [null, 'abc', null, 'Test1', null, 'abc', null] || JobErrorDefinition.Action.RESTART_WF
+        name                                         | text                                                        || expectedAction
+        'no log file'                                | []                                                          || JobErrorDefinition.Action.STOP
+        'one job, but no file object'                | [NO_OBJECT]                                                 || null
+        'one file, not existing'                     | [NO_FILE]                                                   || null
+        'one file, not matching'                     | ['abc']                                                     || null
+        'one file, match case wf'                    | ['Test2']                                                   || JobErrorDefinition.Action.RESTART_WF
+        'one file, match case job'                   | ['Test3']                                                   || JobErrorDefinition.Action.RESTART_JOB
+        'one file, match both cases'                 | ['Test2 Test3']                                             || JobErrorDefinition.Action.STOP
+        'two files, no objects'                      | [NO_OBJECT, NO_OBJECT]                                      || null
+        'two files, no files'                        | [NO_FILE, NO_FILE]                                          || null
+        'two files, no matches'                      | ['abc', 'def']                                              || null
+        'two files, one matching, case 1'            | ['Test1', 'def']                                            || JobErrorDefinition.Action.RESTART_WF
+        'two files, one matching, case 2'            | ['abc', 'Test3']                                            || JobErrorDefinition.Action.RESTART_JOB
+        'two files, both matches case 1'             | ['Test1', 'Test2']                                          || JobErrorDefinition.Action.RESTART_WF
+        'two files, both matches both cases'         | ['Test2', 'Test3']                                          || JobErrorDefinition.Action.STOP
+        'two files, only one exist and match'        | ['Test1', NO_FILE]                                          || JobErrorDefinition.Action.RESTART_WF
+        'many files, some exist, matching one cases' | [NO_FILE, 'abc', NO_FILE, 'Test1', NO_FILE, 'abc', NO_FILE] || JobErrorDefinition.Action.RESTART_WF
     }
 
     @Unroll

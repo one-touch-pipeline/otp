@@ -24,9 +24,9 @@ package de.dkfz.tbi.otp.job.restarting
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.plan.JobErrorDefinition
-import de.dkfz.tbi.otp.job.processing.Job
-import de.dkfz.tbi.otp.job.processing.ProcessingError
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.ErrorLogService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -39,7 +39,9 @@ class RestartParseService {
 
     static final int MEGABYTE = 1000 * 1000
 
-    static int threshold = 10 * MEGABYTE
+    static final int THRESHOLD_IN_MB = 10
+
+    static final int THRESHOLD_IN_BYTE = THRESHOLD_IN_MB * MEGABYTE
 
     ErrorLogService errorLogService
 
@@ -67,20 +69,25 @@ class RestartParseService {
     @CompileDynamic
     JobErrorDefinition.Action handleTypeClusterLogs(Job job, Collection<JobErrorDefinition> jobErrorDefinitions) {
         job.log.debug("Checking cluster job log(s).")
-        Collection<File> logFiles = job.failedOrNotFinishedClusterJobs().collect {
-            it.jobLog as File
-        }
-        if (logFiles.empty) {
+        Collection<ClusterJob> clusterJobs = job.failedOrNotFinishedClusterJobs()
+
+        if (clusterJobs.empty) {
             job.log.debug("Could not find any cluster job log.")
             return JobErrorDefinition.Action.STOP
         }
 
-        List<JobErrorDefinition.Action> actions = logFiles.collect { File file ->
-            if (!file.exists()) {
-                job.log.debug("Log file '${file}' does not exist in file system, will be skipped.")
+        List<JobErrorDefinition.Action> actions = clusterJobs.collect { ClusterJob clusterJob ->
+            File file = clusterJob.jobLog as File
+            if (!file) {
+                job.log.debug("Log file for '${clusterJob.clusterJobId}' is null, will be skipped.")
                 return null
-            } else if (file.size() > threshold) {
-                job.log.debug("Stopping, because log file '${file}' is too big with ${(int) (file.size() / MEGABYTE)} MB for processing.")
+            }
+            if (!file.exists()) {
+                job.log.debug("Log file '${file}' for '${clusterJob.clusterJobId}' does not exist in file system, will be skipped.")
+                return null
+            } else if (file.size() > THRESHOLD_IN_BYTE) {
+                job.log.debug("Stopping because log file '${file}' for '${clusterJob.clusterJobId}' is too big for processing " +
+                        "(file size: ${(int) (file.size() / MEGABYTE)} MB, threshold: ${THRESHOLD_IN_MB} MB).")
                 return JobErrorDefinition.Action.STOP
             }
             return extractMatchingAction(job, file.path, file.text, jobErrorDefinitions)
@@ -99,7 +106,8 @@ class RestartParseService {
         }
     }
 
-    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
+    @SuppressWarnings("ThrowRuntimeException")
+    // ignored: will be removed with the old workflow system
     JobErrorDefinition.Action detectAndHandleType(Job job, Collection<JobErrorDefinition> jobErrorDefinitions) {
         JobErrorDefinition.Type type = CollectionUtils.exactlyOneElement(jobErrorDefinitions*.type.unique())
 
