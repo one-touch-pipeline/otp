@@ -112,9 +112,11 @@
                         </g:link>
                     </td>
                     <td>
-                        <g:link controller="alignmentQualityOverview" action="index" params="${[seqType: mwps.seqType.id, sample: mwps.sample.id]}">
-                            ${g.message(code: "cellRanger.selection.showDetails")}
-                        </g:link>
+                        <g:if test="${mwps.anyFinal}">
+                            <g:link controller="alignmentQualityOverview" action="index" params="${[seqType: mwps.seqType.id, sample: mwps.sample.id]}">
+                                ${g.message(code: "cellRanger.selection.showDetails")}
+                            </g:link>
+                        </g:if>
                     </td>
                     <td>
                         <g:if test="${!mwps.anyUnsetAndNoneFinal && mwps.anyFinal}">
