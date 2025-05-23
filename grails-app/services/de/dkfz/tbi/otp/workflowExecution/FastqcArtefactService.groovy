@@ -44,6 +44,7 @@ class FastqcArtefactService {
             new ${FastqcArtefactDataWithSeqTrack.name}(
                 wa,
                 st,
+                version.workflowVersion,
                 project,
                 seqType,
                 individual,
@@ -60,6 +61,8 @@ class FastqcArtefactService {
             join individual.project project
             join st.seqType seqType
             join st.run run
+            left outer join wa.producedBy workflowRun
+            left outer join workflowRun.workflowVersion version
         where
             wa in (:workflowArtefacts)
             and wa.state <> '${WorkflowArtefact.State.FAILED}'
@@ -81,6 +84,7 @@ class FastqcArtefactService {
             new ${FastqcArtefactDataWithFastqcProcessedFile.name}(
                 wa,
                 fastqc,
+                workflowVersion.workflowVersion,
                 project,
                 seqType,
                 df,
@@ -95,6 +99,8 @@ class FastqcArtefactService {
             join sample.individual individual
             join individual.project project
             join st.seqType seqType
+            left outer join wa.producedBy run
+            left outer join run.workflowVersion workflowVersion
         where
             st in (:seqTracks)
             and df.fileWithdrawn = false

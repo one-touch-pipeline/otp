@@ -44,6 +44,7 @@ class AnalysisArtefactService {
             new ${AnalysisBamFileArtefactData.name}(
                 wa,
                 bf,
+                COALESCE(version.workflowVersion, bamfileConfig.programVersion),
                 project,
                 seqType,
                 individual,
@@ -64,6 +65,9 @@ class AnalysisArtefactService {
             join wp.seqType seqType
             join wp.referenceGenome referenceGenome
             left outer join wp.seqPlatformGroup seqPlatformGroup
+            left outer join bf.config bamfileConfig
+            left outer join wa.producedBy run
+            left outer join run.workflowVersion version
         where
             wa in (:workflowArtefacts)
             and bf.withdrawn = false
@@ -86,6 +90,7 @@ class AnalysisArtefactService {
             new ${AnalysisBamFileArtefactData.name}(
                 wa,
                 bf,
+                COALESCE(version.workflowVersion, bamfileConfig.programVersion),
                 project,
                 seqType,
                 individual,
@@ -108,6 +113,9 @@ class AnalysisArtefactService {
             left outer join wp.seqPlatformGroup seqPlatformGroup,
             AbstractBamFile bf2
             join bf2.workPackage wp2
+            left outer join bf2.config bamfileConfig
+            left outer join wa.producedBy run
+            left outer join run.workflowVersion version
         where
             bf2 in (:bamFiles)
             and bf not in (:bamFiles)
@@ -132,6 +140,7 @@ class AnalysisArtefactService {
             new ${AnalysisAnalysisArtefactData.name}(
                 wa,
                 analysis,
+                COALESCE(version.workflowVersion, analysisConfig.programVersion),
                 project,
                 seqType,
                 samplePair,
@@ -158,6 +167,9 @@ class AnalysisArtefactService {
             join sample1.individual individual
             join individual.project project
             join wp1.seqType seqType
+            left outer join analysis.config analysisConfig
+            left outer join wa.producedBy run
+            left outer join run.workflowVersion version
         where
             (
                 bf1 in (:bamFiles)

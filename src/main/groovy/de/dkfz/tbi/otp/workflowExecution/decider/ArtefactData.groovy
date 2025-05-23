@@ -34,13 +34,26 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 class ArtefactData<A extends Artefact> {
     final WorkflowArtefact workflowArtefact
     final A artefact
+    final String version
     final Project project
     final SeqType seqType
 
-    ArtefactData(WorkflowArtefact workflowArtefact, A artefact, Project project, SeqType seqType) {
+    ArtefactData(WorkflowArtefact workflowArtefact, A artefact, String version, Project project, SeqType seqType) {
         this.workflowArtefact = workflowArtefact
         this.artefact = artefact
+        this.version = versionHelper(version)
         this.project = project
         this.seqType = seqType
+    }
+
+    /**
+     * Helper to get the version number for roddy plugins in the old workflow system.
+     *
+     * In the old workflow system, the plugin version was saved together with the plugin name, seperated by column.
+     * In the new system only the version is saved.
+     * For correct handling of version comparison, the workflow name is removed, so that only the version is saved.
+     */
+    static private String versionHelper(String version) {
+        return version && version.contains(':') ? version.split(':')[1] : version
     }
 }

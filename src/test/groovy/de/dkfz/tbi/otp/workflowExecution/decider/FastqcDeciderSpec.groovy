@@ -273,7 +273,8 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
                             artefactType: ArtefactType.FASTQC,
                     ]),
             ])
-            new FastqcArtefactDataWithFastqcProcessedFile(fastqcProcessedFile.workflowArtefact, fastqcProcessedFile, it.project, it.seqType, it, seqTrack)
+            new FastqcArtefactDataWithFastqcProcessedFile(fastqcProcessedFile.workflowArtefact, fastqcProcessedFile,
+                    fastqcProcessedFile.workflowArtefact?.producedBy?.workflowVersion?.workflowVersion, it.project, it.seqType, it, seqTrack)
         }
 
         WorkflowVersionSelector selector = createWorkflowVersionSelector([
@@ -341,6 +342,7 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
         return new FastqcArtefactDataWithSeqTrack(
                 seqTrack.workflowArtefact,
                 seqTrack,
+                seqTrack.workflowArtefact?.producedBy?.workflowVersion?.workflowVersion,
                 seqTrack.project,
                 seqTrack.seqType,
                 seqTrack.individual,

@@ -42,10 +42,10 @@ class AlignmentArtefactData<A extends Artefact> extends ArtefactData<A> {
     final SeqPlatformGroup seqPlatformGroup
 
     @SuppressWarnings("ParameterCount")
-    AlignmentArtefactData(WorkflowArtefact workflowArtefact, A artefact, Project project, SeqType seqType, Individual individual, SampleType sampleType,
-                          Sample sample, AntibodyTarget antibodyTarget, LibraryPreparationKit libraryPreparationKit, SeqPlatform seqPlatform,
-                          SeqPlatformGroup seqPlatformGroup) {
-        super(workflowArtefact, artefact, project, seqType)
+    AlignmentArtefactData(WorkflowArtefact workflowArtefact, A artefact, String version, Project project, SeqType seqType, Individual individual,
+                          SampleType sampleType, Sample sample, AntibodyTarget antibodyTarget, LibraryPreparationKit libraryPreparationKit,
+                          SeqPlatform seqPlatform, SeqPlatformGroup seqPlatformGroup) {
+        super(workflowArtefact, artefact, version, project, seqType)
         this.individual = individual
         this.sampleType = sampleType
         this.sample = sample

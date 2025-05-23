@@ -21,13 +21,14 @@
  */
 package de.dkfz.tbi.otp.domainFactory.pipelines.analysis
 
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelQualityControl
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.indel.IndelWorkflow
 
-class IndelDomainFactory extends AbstractAnalysisQcDomainFactory<IndelCallingInstance, IndelQualityControl> {
+class IndelDomainFactory extends AbstractAnalysisQcDomainFactory<IndelCallingInstance, IndelQualityControl> implements RoddyWorkflowConfig {
 
     static final IndelDomainFactory INSTANCE = new IndelDomainFactory()
 
@@ -42,6 +43,8 @@ class IndelDomainFactory extends AbstractAnalysisQcDomainFactory<IndelCallingIns
     }
 
     final Class<AceseqInstance> instanceClass = IndelCallingInstance
+
+    final Pipeline.Name pipelineName = Pipeline.Name.RODDY_INDEL
 
     @Override
     protected Class<IndelQualityControl> getQcClass() {

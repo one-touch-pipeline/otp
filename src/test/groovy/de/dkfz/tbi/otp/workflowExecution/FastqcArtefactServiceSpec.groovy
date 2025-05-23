@@ -206,6 +206,7 @@ class FastqcArtefactServiceSpec extends HibernateSpec implements WorkflowSystemD
         return new FastqcArtefactDataWithSeqTrack(
                 seqTrack.workflowArtefact,
                 seqTrack,
+                seqTrack.workflowArtefact?.producedBy?.workflowVersion?.workflowVersion,
                 seqTrack.project,
                 seqTrack.seqType,
                 seqTrack.individual,
@@ -220,6 +221,7 @@ class FastqcArtefactServiceSpec extends HibernateSpec implements WorkflowSystemD
         return new FastqcArtefactDataWithFastqcProcessedFile(
                 fastqcProcessedFile.workflowArtefact,
                 fastqcProcessedFile,
+                fastqcProcessedFile.workflowArtefact?.producedBy?.workflowVersion?.workflowVersion,
                 seqTrack.project,
                 seqTrack.seqType,
                 fastqcProcessedFile.sequenceFile,

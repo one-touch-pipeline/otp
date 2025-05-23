@@ -19,25 +19,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution.decider.alignment
+package de.dkfz.tbi.otp.workflowExecution.decider
 
-import groovy.transform.ToString
-import groovy.transform.TupleConstructor
+import spock.lang.Specification
+import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.workflowExecution.decider.ArtefactDataList
+class ArtefactDataSpec extends Specification {
 
-@ToString(includePackage = false, includeNames = true)
-@TupleConstructor
-class AlignmentArtefactDataList implements ArtefactDataList {
-    final Collection<AlignmentArtefactData<SeqTrack>> seqTrackData
-    final Collection<AlignmentArtefactData<FastqcProcessedFile>> fastqcProcessedFileData
-    final Collection<AlignmentArtefactData<AbstractBamFile>> bamData
+    @Unroll
+    void "constructor, check that version extraction for roddy in old system worksis correct (#givenVersion -->  #expectedVersion ) "() {
+        when:
+        ArtefactData data = new ArtefactData(null, null, givenVersion, null, null)
 
-    @Override
-    boolean isEmpty() {
-        return !seqTrackData && !fastqcProcessedFileData && !bamData
+        then:
+        data.version == expectedVersion
+
+        where:
+        givenVersion        || expectedVersion
+        '1.2.3'             || '1.2.3'
+        '1.2.3-4'           || '1.2.3-4'
+        'PanCancer:1.2.3'   || '1.2.3'
+        'PanCancer:1.2.3-4' || '1.2.3-4'
     }
 }

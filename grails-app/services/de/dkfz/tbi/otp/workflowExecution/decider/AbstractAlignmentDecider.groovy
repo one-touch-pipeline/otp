@@ -108,7 +108,7 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
                 alignmentArtefactService.fetchRelatedFastqcArtefactsForSeqTracks(seqTracks) : []
         dataFastqcs.removeAll(inputArtefactDataList.fastqcProcessedFileData)
 
-        List<AlignmentArtefactData<RoddyBamFile>> dataBamFiles =
+        List<AlignmentArtefactData<AbstractBamFile>> dataBamFiles =
                 alignmentArtefactService.fetchRelatedBamFileArtefactsForSeqTracks(seqTracks)
         dataBamFiles.removeAll(inputArtefactDataList.bamData)
 
@@ -204,7 +204,7 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
                 givenArtefacts.bamData + additionalArtefacts.bamData,
         )
 
-        RoddyBamFile existingBamFile = allArtefacts.bamData.find()?.artefact
+        AbstractBamFile existingBamFile = allArtefacts.bamData.find()?.artefact
         List<SeqTrack> seqTracks = allArtefacts.seqTrackData*.artefact
 
         if (seqTracks.empty) {

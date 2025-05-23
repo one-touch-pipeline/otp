@@ -21,12 +21,13 @@
  */
 package de.dkfz.tbi.otp.domainFactory.pipelines.analysis
 
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqQc
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.aceseq.AceseqWorkflow
 
-class AceseqDomainFactory extends AbstractAnalysisQcDomainFactory<AceseqInstance, AceseqQc> {
+class AceseqDomainFactory extends AbstractAnalysisQcDomainFactory<AceseqInstance, AceseqQc> implements RoddyWorkflowConfig {
 
     static final AceseqDomainFactory INSTANCE = new AceseqDomainFactory()
 
@@ -41,6 +42,8 @@ class AceseqDomainFactory extends AbstractAnalysisQcDomainFactory<AceseqInstance
     }
 
     final Class<AceseqInstance> instanceClass = AceseqInstance
+
+    final Pipeline.Name pipelineName = Pipeline.Name.RODDY_ACESEQ
 
     @Override
     protected Class<AceseqQc> getQcClass() {

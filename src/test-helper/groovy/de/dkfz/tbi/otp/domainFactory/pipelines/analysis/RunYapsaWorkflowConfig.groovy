@@ -19,25 +19,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution.decider.alignment
+package de.dkfz.tbi.otp.domainFactory.pipelines.analysis
 
-import groovy.transform.ToString
-import groovy.transform.TupleConstructor
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.workflowExecution.decider.ArtefactDataList
-
-@ToString(includePackage = false, includeNames = true)
-@TupleConstructor
-class AlignmentArtefactDataList implements ArtefactDataList {
-    final Collection<AlignmentArtefactData<SeqTrack>> seqTrackData
-    final Collection<AlignmentArtefactData<FastqcProcessedFile>> fastqcProcessedFileData
-    final Collection<AlignmentArtefactData<AbstractBamFile>> bamData
+trait RunYapsaWorkflowConfig extends WorkflowConfig {
 
     @Override
-    boolean isEmpty() {
-        return !seqTrackData && !fastqcProcessedFileData && !bamData
+    Map getConfigProperties(Map properties = [:]) {
+        return [
+                pipeline      : DomainFactory.createRunYapsaPipelineLazy(),
+                seqType       : { properties.seqType ?: createSeqType() },
+                project       : { properties.project ?: createProject() },
+                programVersion: "programmVersion${nextId}",
+                dateCreated   : { new Date() },
+                lastUpdated   : { new Date() },
+        ]
     }
+
+    Class configPerProjectAndSeqTypeClass = RunYapsaConfig
 }

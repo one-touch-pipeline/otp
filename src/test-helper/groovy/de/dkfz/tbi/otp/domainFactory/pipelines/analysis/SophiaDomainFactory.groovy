@@ -21,12 +21,13 @@
  */
 package de.dkfz.tbi.otp.domainFactory.pipelines.analysis
 
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.sophia.SophiaWorkflow
 
-class SophiaDomainFactory extends AbstractAnalysisQcDomainFactory<SophiaInstance, SophiaQc> {
+class SophiaDomainFactory extends AbstractAnalysisQcDomainFactory<SophiaInstance, SophiaQc> implements RoddyWorkflowConfig {
 
     static final SophiaDomainFactory INSTANCE = new SophiaDomainFactory()
 
@@ -41,6 +42,8 @@ class SophiaDomainFactory extends AbstractAnalysisQcDomainFactory<SophiaInstance
     }
 
     final Class<SophiaInstance> instanceClass = SophiaInstance
+
+    final Pipeline.Name pipelineName = Pipeline.Name.RODDY_SOPHIA
 
     @Override
     protected Class<SophiaQc> getQcClass() {

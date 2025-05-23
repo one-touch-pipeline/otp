@@ -25,7 +25,10 @@ import grails.test.hibernate.HibernateSpec
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
@@ -36,7 +39,7 @@ import de.dkfz.tbi.otp.workflowExecution.decider.alignment.AlignmentWorkPackageG
 
 import java.time.LocalDate
 
-class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSystemDomainFactory, RoddyPanCancerFactory, FastqcDomainFactory {
+class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSystemDomainFactory, RoddyPanCancerFactory, FastqcDomainFactory, AlignmentPipelineFactory {
 
     private AlignmentArtefactService alignmentArtefactService
 
@@ -47,8 +50,14 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
     WorkflowArtefact workflowArtefactFastqc2
     WorkflowArtefact workflowArtefactFastqcRelated
     WorkflowArtefact workflowArtefactBam1
+    WorkflowArtefact workflowArtefactBamNew
     WorkflowArtefact workflowArtefactBam2
     WorkflowArtefact workflowArtefactBamRelated
+    WorkflowArtefact workflowArtefactBamRelatedNew
+    WorkflowArtefact workflowArtefactSingleCellBam
+    WorkflowArtefact workflowArtefactSingleCellBamRelated
+    WorkflowArtefact workflowArtefactSingleCellBamNew
+    WorkflowArtefact workflowArtefactSingleCellBamRelatedNew
 
     SeqTrack seqTrack1
     SeqTrack seqTrack2
@@ -58,11 +67,19 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
     FastqcProcessedFile fastqcRelated
     RoddyBamFile bamFile1
     RoddyBamFile bamFile2
+    RoddyBamFile bamFileNew
     RoddyBamFile bamFileRelated
+    RoddyBamFile bamFileRelatedNew
+    SingleCellBamFile singleCellBamFile1
+    SingleCellBamFile singleCellBamFile1New
+    SingleCellBamFile singleCellBamFileRelated
+    SingleCellBamFile singleCellBamFileRelatedNew
 
     List<WorkflowArtefact> workflowArtefacts
     List<SeqType> seqTypes
     List<SeqTrack> seqTracks
+    List<SeqTrack> seqTracksNew
+    List<SeqTrack> seqTracksCellRanger
 
     @Override
     List<Class> getDomainClasses() {
@@ -76,6 +93,8 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
                 RoddyBamFile,
                 WorkflowArtefact,
                 WorkflowVersionSelector,
+                CellRangerMergingWorkPackage,
+                SingleCellBamFile,
         ]
     }
 
@@ -87,16 +106,29 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
         // artefact in input and seqType in input
         workflowArtefactSeqTrack1 = createWorkflowArtefact([artefactType: ArtefactType.FASTQ])
         seqTrack1 = createSeqTrackWithTwoFastqFileAndSpecies([workflowArtefact: workflowArtefactSeqTrack1])
+
         workflowArtefactFastqc1 = createWorkflowArtefact([artefactType: ArtefactType.FASTQC])
         fastqc1 = createFastqcProcessedFileWithSpecies([workflowArtefact: workflowArtefactFastqc1])
+
         workflowArtefactBam1 = createWorkflowArtefact([artefactType: ArtefactType.BAM])
         bamFile1 = createBamFileWithSpecies([workflowArtefact: workflowArtefactBam1])
+
+        workflowArtefactBamNew = createWorkflowArtefact([artefactType: ArtefactType.BAM, producedBy: createWorkflowRun()])
+        bamFileNew = createBamFileWithSpecies([workflowArtefact: workflowArtefactBamNew, config: null])
+
+        workflowArtefactSingleCellBam = createWorkflowArtefact([artefactType: ArtefactType.BAM])
+        singleCellBamFile1 = CellRangerFactoryInstance.INSTANCE.createBamFile([workflowArtefact: workflowArtefactSingleCellBam])
+
+        workflowArtefactSingleCellBamNew = createWorkflowArtefact([artefactType: ArtefactType.BAM, producedBy: createWorkflowRun()])
+        singleCellBamFile1New = CellRangerFactoryInstance.INSTANCE.createBamFile([workflowArtefact: workflowArtefactSingleCellBamNew])
 
         // artefact in input, but seqType not in input
         workflowArtefactSeqTrack2 = createWorkflowArtefact([artefactType: ArtefactType.FASTQ])
         seqTrack2 = createSeqTrackWithTwoFastqFileAndSpecies([workflowArtefact: workflowArtefactSeqTrack2])
+
         workflowArtefactFastqc2 = createWorkflowArtefact([artefactType: ArtefactType.FASTQC])
         fastqc2 = createFastqcProcessedFileWithSpecies([workflowArtefact: workflowArtefactFastqc2])
+
         workflowArtefactBam2 = createWorkflowArtefact([artefactType: ArtefactType.BAM])
         bamFile2 = createBamFileWithSpecies([workflowArtefact: workflowArtefactBam2])
 
@@ -108,17 +140,29 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
                 workflowArtefactSeqTrack2,
                 workflowArtefactFastqc2,
                 workflowArtefactBam2,
+                workflowArtefactSingleCellBam,
+                workflowArtefactBamNew,
+                workflowArtefactSingleCellBamNew,
         ]
         seqTypes = [
                 seqTrack1.seqType,
                 fastqc1.sequenceFile.seqType,
                 bamFile1.seqType,
+                bamFileNew.seqType,
+                singleCellBamFile1.seqType,
         ]
 
         seqTracks = [
                 seqTrack1,
                 fastqc1.sequenceFile.seqTrack,
         ] + bamFile1.containedSeqTracks
+
+        seqTracksNew = [
+                seqTrack1,
+                fastqc1.sequenceFile.seqTrack,
+        ] + bamFileNew.containedSeqTracks
+
+        seqTracksCellRanger = singleCellBamFile1.containedSeqTracks as List
     }
 
     void setupDataWithRelated() {
@@ -131,6 +175,7 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
                 sample          : seqTrack1.sample,
                 seqType         : seqTrack1.seqType,
         ])
+
         workflowArtefactFastqcRelated = createWorkflowArtefact([artefactType: ArtefactType.FASTQC])
         fastqcRelated = createFastqcProcessedFile([
                 workflowArtefact: workflowArtefactFastqcRelated,
@@ -141,10 +186,30 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
                         ]),
                 ]),
         ])
+
         workflowArtefactBamRelated = createWorkflowArtefact([artefactType: ArtefactType.BAM])
         bamFileRelated = createBamFile([
                 workflowArtefact: workflowArtefactBamRelated,
                 workPackage     : bamFile1.workPackage,
+        ])
+
+        workflowArtefactBamRelatedNew = createWorkflowArtefact([artefactType: ArtefactType.BAM, producedBy: createWorkflowRun()])
+        bamFileRelatedNew = createBamFile([
+                workflowArtefact: workflowArtefactBamRelatedNew,
+                workPackage     : bamFileNew.workPackage,
+                config: null,
+        ])
+
+        workflowArtefactSingleCellBamRelated = createWorkflowArtefact([artefactType: ArtefactType.BAM])
+        singleCellBamFileRelated = CellRangerFactoryInstance.INSTANCE.createBamFile([
+                workflowArtefact: workflowArtefactSingleCellBamRelated,
+                workPackage     : singleCellBamFile1.workPackage,
+        ])
+
+        workflowArtefactSingleCellBamRelatedNew = createWorkflowArtefact([artefactType: ArtefactType.BAM, producedBy: createWorkflowRun()])
+        singleCellBamFileRelatedNew = CellRangerFactoryInstance.INSTANCE.createBamFile([
+                workflowArtefact: workflowArtefactSingleCellBamRelatedNew,
+                workPackage     : singleCellBamFile1New.workPackage,
         ])
     }
 
@@ -160,6 +225,7 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
         then:
         result.size() == 1
         result.first() == expected
+        result.first().version == null
     }
 
     void "fetchFastqcProcessedFileArtefacts, when called for workflowArtefacts and seqTypes, then return AlignmentArtefactData of expected FastqcProcessedFile"() {
@@ -174,6 +240,7 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
         then:
         result.size() == 1
         result.first() == expected
+        result.first().version == null
     }
 
     void "fetchRelatedSeqTrackArtefactsForSeqTracks, when called for workflowArtefacts and seqTypes, then return AlignmentArtefactData of expected SeqTrack"() {
@@ -191,6 +258,7 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
         then:
         result.size() == 2
         TestCase.assertContainSame(result, expected)
+        result.first().version == null
     }
 
     void "fetchRelatedFastqcArtefactsForSeqTracks, when called for seqTracks, then return AlignmentArtefactData of expected FastqcProcessedFile"() {
@@ -208,9 +276,10 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
         then:
         result.size() == 2
         TestCase.assertContainSame(result, expected)
+        result.first().version == null
     }
 
-    void "fetchRelatedBamFileArtefactsForSeqTracks, when called for seqTracks, then return AlignmentArtefactData of expected BamFile"() {
+    void "fetchRelatedBamFileArtefactsForSeqTracks, for roddy when called for seqTracks in old system, then return AlignmentArtefactData of expected BamFile"() {
         given:
         setupDataWithRelated()
 
@@ -224,6 +293,55 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
         then:
         result.size() == 1
         TestCase.assertContainSame(result, expected)
+        result.first().version == bamFileRelated.config.programVersion.split(':')[1]
+    }
+
+    void "fetchRelatedBamFileArtefactsForSeqTracks, for roddy when called for seqTracks in new system, then return AlignmentArtefactData of expected BamFile"() {
+        given:
+        setupDataWithRelated()
+        List<AlignmentArtefactData<RoddyBamFile>> expected = [
+                createAlignmentArtefactDataForRoddyBamFile(bamFileRelatedNew),
+        ]
+
+        when:
+        List<AlignmentArtefactData<AbstractBamFile>> result = alignmentArtefactService.fetchRelatedBamFileArtefactsForSeqTracks(seqTracksNew)
+
+        then:
+        result.size() == 1
+        TestCase.assertContainSame(result, expected)
+        result.first().version == bamFileRelatedNew.workflowArtefact.producedBy.workflowVersion.workflowVersion
+    }
+
+    void "fetchRelatedBamFileArtefactsForSeqTracks, for cellRanger when called for seqTracks in old system, then return AlignmentArtefactData of expected BamFile"() {
+        given:
+        setupDataWithRelated()
+        List<AlignmentArtefactData<SingleCellBamFile>> expected = [
+                createAlignmentArtefactDataForSingleCellBamFile(singleCellBamFileRelated),
+        ]
+
+        when:
+        List<AlignmentArtefactData<SingleCellBamFile>> result = alignmentArtefactService.fetchRelatedBamFileArtefactsForSeqTracks(seqTracksCellRanger)
+
+        then:
+        result.size() == 1
+        TestCase.assertContainSame(result, expected)
+        result.first().version == singleCellBamFileRelated.workPackage.config.programVersion
+    }
+
+    void "fetchRelatedBamFileArtefactsForSeqTracks, for cellRanger when called for seqTracks in new system, then return AlignmentArtefactData of expected BamFile"() {
+        given:
+        setupDataWithRelated()
+        List<AlignmentArtefactData<SingleCellBamFile>> expected = [
+                createAlignmentArtefactDataForSingleCellBamFile(singleCellBamFileRelatedNew),
+        ]
+
+        when:
+        List<AlignmentArtefactData<SingleCellBamFile>> result = alignmentArtefactService.fetchRelatedBamFileArtefactsForSeqTracks(singleCellBamFile1New.containedSeqTracks)
+
+        then:
+        result.size() == 1
+        TestCase.assertContainSame(result, expected)
+        result.first().version == singleCellBamFileRelatedNew.workflowArtefact.producedBy.workflowVersion.workflowVersion
     }
 
     void "fetchWorkflowVersionSelectorForSeqTracks, when called for workflow and seqTracks, then return WorkflowVersionSelector"() {
@@ -583,6 +701,7 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
         return new AlignmentArtefactData<SeqTrack>(
                 seqTrack.workflowArtefact,
                 seqTrack,
+                seqTrack.workflowArtefact?.producedBy?.workflowVersion?.workflowVersion,
                 seqTrack.project,
                 seqTrack.seqType,
                 seqTrack.individual,
@@ -600,6 +719,7 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
         return new AlignmentArtefactData<FastqcProcessedFile>(
                 fastqcProcessedFile.workflowArtefact,
                 fastqcProcessedFile,
+                fastqcProcessedFile.workflowArtefact?.producedBy?.workflowVersion?.workflowVersion,
                 seqTrack.project,
                 seqTrack.seqType,
                 seqTrack.individual,
@@ -617,6 +737,25 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
         return new AlignmentArtefactData<RoddyBamFile>(
                 bamFile.workflowArtefact,
                 bamFile,
+                bamFile.workflowArtefact?.producedBy?.workflowVersion?.workflowVersion ?: bamFile.config?.programVersion,
+                workPackage.project,
+                workPackage.seqType,
+                workPackage.individual,
+                workPackage.sampleType,
+                workPackage.sample,
+                workPackage.antibodyTarget,
+                workPackage.libraryPreparationKit,
+                null,
+                workPackage.seqPlatformGroup
+        )
+    }
+
+    private AlignmentArtefactData<SingleCellBamFile> createAlignmentArtefactDataForSingleCellBamFile(SingleCellBamFile bamFile) {
+        MergingWorkPackage workPackage = bamFile.workPackage
+        return new AlignmentArtefactData<SingleCellBamFile>(
+                bamFile.workflowArtefact,
+                bamFile,
+                bamFile.workflowArtefact?.producedBy?.workflowVersion?.workflowVersion ?: bamFile.workPackage.config?.programVersion,
                 workPackage.project,
                 workPackage.seqType,
                 workPackage.individual,

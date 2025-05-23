@@ -42,10 +42,10 @@ class AnalysisBamFileArtefactData extends ArtefactData<AbstractBamFile> {
     final SeqPlatformGroup seqPlatformGroup
 
     @SuppressWarnings("ParameterCount")
-    AnalysisBamFileArtefactData(WorkflowArtefact workflowArtefact, AbstractBamFile artefact, Project project, SeqType seqType,
+    AnalysisBamFileArtefactData(WorkflowArtefact workflowArtefact, AbstractBamFile artefact, String version, Project project, SeqType seqType,
                                 Individual individual, SampleType sampleType, Sample sample, AbstractMergingWorkPackage mergingWorkPackage,
                                 ReferenceGenome referenceGenome, SeqPlatformGroup seqPlatformGroup) {
-        super(workflowArtefact, artefact, project, seqType)
+        super(workflowArtefact, artefact, version, project, seqType)
         this.individual = individual
         this.sampleType = sampleType
         this.sample = sample

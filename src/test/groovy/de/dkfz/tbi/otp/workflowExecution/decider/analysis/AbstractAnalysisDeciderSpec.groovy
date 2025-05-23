@@ -654,6 +654,7 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
         return new AnalysisBamFileArtefactData(
                 bamFile.workflowArtefact,
                 bamFile,
+                bamFile.config?.programVersion ?: bamFile.workflowArtefact?.producedBy?.workflowVersion?.workflowVersion,
                 bamFile.project,
                 bamFile.seqType,
                 bamFile.individual,
@@ -669,6 +670,7 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
         return new AnalysisAnalysisArtefactData(
                 analysis.workflowArtefact,
                 analysis,
+                analysis.sampleType1BamFile?.config?.programVersion ?: analysis.workflowArtefact?.producedBy?.workflowVersion?.workflowVersion,
                 analysis.project,
                 analysis.seqType,
                 analysis.samplePair,

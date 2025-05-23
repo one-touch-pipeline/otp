@@ -37,9 +37,9 @@ class FastqcArtefactDataWithFastqcProcessedFile extends ArtefactData<FastqcProce
     final SeqTrack seqTrack
 
     @SuppressWarnings("ParameterCount")
-    FastqcArtefactDataWithFastqcProcessedFile(WorkflowArtefact workflowArtefact, FastqcProcessedFile artefact, Project project, SeqType seqType,
+    FastqcArtefactDataWithFastqcProcessedFile(WorkflowArtefact workflowArtefact, FastqcProcessedFile artefact, String version, Project project, SeqType seqType,
                                               RawSequenceFile rawSequenceFile, SeqTrack seqTrack) {
-        super(workflowArtefact, artefact, project, seqType)
+        super(workflowArtefact, artefact, version, project, seqType)
         this.rawSequenceFile = rawSequenceFile
         this.seqTrack = seqTrack
     }

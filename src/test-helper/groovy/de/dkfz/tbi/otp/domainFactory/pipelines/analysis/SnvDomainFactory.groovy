@@ -21,11 +21,12 @@
  */
 package de.dkfz.tbi.otp.domainFactory.pipelines.analysis
 
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.snv.SnvWorkflow
 
-class SnvDomainFactory extends AbstractAnalysisDomainFactory<RoddySnvCallingInstance> {
+class SnvDomainFactory extends AbstractAnalysisDomainFactory<RoddySnvCallingInstance> implements RoddyWorkflowConfig {
 
     static final SnvDomainFactory INSTANCE = new SnvDomainFactory()
 
@@ -40,4 +41,6 @@ class SnvDomainFactory extends AbstractAnalysisDomainFactory<RoddySnvCallingInst
     }
 
     final Class<RoddySnvCallingInstance> instanceClass = RoddySnvCallingInstance
+
+    final Pipeline.Name pipelineName = Pipeline.Name.RODDY_SNV
 }

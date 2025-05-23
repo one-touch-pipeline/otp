@@ -28,6 +28,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
@@ -36,7 +37,6 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.IsPipeline
 import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.*
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.workflowExecution.decider.alignment.AlignmentArtefactData
 import de.dkfz.tbi.otp.workflowExecution.decider.analysis.*
 
 import java.time.LocalDate
@@ -47,14 +47,15 @@ abstract class AbstractAnalysisArtefactServiceSpec<T> extends HibernateSpec impl
     List<Class> getDomainClasses() {
         return [
                 AceseqInstance,
+                ExternallyProcessedBamFile,
+                ExternalMergingWorkPackage,
                 FastqFile,
                 IndelCallingInstance,
                 MergingWorkPackage,
-                ExternalMergingWorkPackage,
                 ReferenceGenomeProjectSeqType,
                 RoddyBamFile,
-                ExternallyProcessedBamFile,
                 RoddySnvCallingInstance,
+                RunYapsaConfig,
                 RunYapsaInstance,
                 SampleTypePerProject,
                 SeqTrack,
@@ -69,14 +70,20 @@ abstract class AbstractAnalysisArtefactServiceSpec<T> extends HibernateSpec impl
     protected WorkflowArtefact workflowArtefact1
     protected WorkflowArtefact workflowArtefact2
     protected WorkflowArtefact workflowArtefactRelated
+    protected WorkflowArtefact workflowArtefactNew
+    protected WorkflowArtefact workflowArtefactRelatedNew
 
     protected WorkflowArtefact workflowArtefactAnalysis
+    protected WorkflowArtefact workflowArtefactAnalysisNew
 
     protected AbstractBamFile bamFile1
     protected AbstractBamFile bamFile2
     protected AbstractBamFile bamFileRelated
+    protected AbstractBamFile bamFileNew
+    protected AbstractBamFile bamFileRelatedNew
 
     protected BamFilePairAnalysis analysisRelated
+    protected BamFilePairAnalysis analysisRelatedNew
 
     void setup() {
         analysisArtefactService = new AnalysisArtefactService()
@@ -95,6 +102,18 @@ abstract class AbstractAnalysisArtefactServiceSpec<T> extends HibernateSpec impl
                         seqType: createSeqTypePaired(),
                 ]),
         ])
+
+        workflowArtefactNew = createWorkflowArtefact([artefactType: ArtefactType.BAM, producedBy: createWorkflowRun(workflowVersion: createWorkflowVersion())])
+        bamFileNew = createBamFile([
+                workflowArtefact: workflowArtefactNew,
+                workPackage     : createMergingWorkPackage([
+                        seqType: createSeqTypePaired(),
+                ]),
+        ])
+        if (!(bamFileNew instanceof ExternallyProcessedBamFile)) {
+            bamFileNew.config = null
+            bamFileNew.save(flush: true)
+        }
     }
 
     void setupDataWithRelated() {
@@ -105,9 +124,18 @@ abstract class AbstractAnalysisArtefactServiceSpec<T> extends HibernateSpec impl
         bamFileRelated = createCorrespondingBamFile(bamFile1, [
                 workflowArtefact: workflowArtefactRelated,
         ])
+        workflowArtefactRelatedNew = createWorkflowArtefact([artefactType: ArtefactType.BAM, producedBy: createWorkflowRun(workflowVersion: createWorkflowVersion())])
+        bamFileRelatedNew = createCorrespondingBamFile(bamFileNew, [
+                workflowArtefact: workflowArtefactRelatedNew,
+        ])
+
+        if (!(bamFileRelatedNew instanceof ExternallyProcessedBamFile)) {
+            bamFileRelatedNew.config = null
+            bamFileRelatedNew.save(flush: true)
+        }
     }
 
-    void setupDataWithAnalysis(AbstractAnalysisDomainFactory<?> factory, ArtefactType analysisArtefactType) {
+    void setupDataWithAnalysis(AbstractAnalysisDomainFactory<? extends BamFilePairAnalysis> factory, ArtefactType analysisArtefactType) {
         setupDataWithRelated()
 
         workflowArtefactAnalysis = createWorkflowArtefact([artefactType: analysisArtefactType])
@@ -119,10 +147,25 @@ abstract class AbstractAnalysisArtefactServiceSpec<T> extends HibernateSpec impl
                 ]),
                 sampleType1BamFile: bamFile1,
                 sampleType2BamFile: bamFileRelated,
+                config            : factory.createConfig([
+                        seqType: bamFile1.seqType,
+                        project: bamFile1.project,
+                ]),
+        ])
+
+        workflowArtefactAnalysisNew = createWorkflowArtefact([artefactType: ArtefactType.BAM, producedBy: createWorkflowRun(workflowVersion: createWorkflowVersion())])
+        analysisRelatedNew = factory.createInstance([
+                workflowArtefact  : workflowArtefactAnalysisNew,
+                samplePair        : factory.createSamplePair([
+                        mergingWorkPackage1: bamFileNew.workPackage,
+                        mergingWorkPackage2: bamFileRelatedNew.workPackage,
+                ]),
+                sampleType1BamFile: bamFileNew,
+                sampleType2BamFile: bamFileRelatedNew,
         ])
     }
 
-    void "fetchBamFileArtefacts, when called for workflowArtefacts and seqTypes, then return AnalysisBamFileArtefactData of expected BamFile"() {
+    void "fetchBamFileArtefacts, when called for workflowArtefacts and seqTypes in old system, then return AnalysisBamFileArtefactData of expected BamFile"() {
         given:
         setupData()
 
@@ -133,6 +176,24 @@ abstract class AbstractAnalysisArtefactServiceSpec<T> extends HibernateSpec impl
                 workflowArtefact1,
                 workflowArtefact2,
         ], [bamFile1.seqType])
+
+        then:
+        result.size() == 1
+        result.first() == expected
+    }
+
+    void "fetchBamFileArtefacts, when called for workflowArtefacts and seqTypes in new system, then return AnalysisBamFileArtefactData of expected BamFile"() {
+        given:
+        setupData()
+
+        AnalysisBamFileArtefactData expected = createAnalysisBamFileArtefactData(bamFileNew)
+
+        when:
+        List<AnalysisBamFileArtefactData> result = analysisArtefactService.fetchBamFileArtefacts([
+                workflowArtefactNew,
+        ], [
+                bamFileNew.seqType,
+        ])
 
         then:
         result.size() == 1
@@ -178,7 +239,7 @@ abstract class AbstractAnalysisArtefactServiceSpec<T> extends HibernateSpec impl
         result.empty
     }
 
-    void "fetchRelatedBamFilesArtefactsForBamFiles, when called for bamFiles, then return AnalysisBamFileArtefactData of expected BamFiles"() {
+    void "fetchRelatedBamFilesArtefactsForBamFiles, when called for bamFiles in old system, then return AnalysisBamFileArtefactData of expected BamFiles"() {
         given:
         setupDataWithRelated()
 
@@ -188,6 +249,22 @@ abstract class AbstractAnalysisArtefactServiceSpec<T> extends HibernateSpec impl
 
         when:
         List<AnalysisBamFileArtefactData> result = analysisArtefactService.fetchRelatedBamFilesArtefactsForBamFiles([bamFile1])
+
+        then:
+        result.size() == 1
+        TestCase.assertContainSame(result, expected)
+    }
+
+    void "fetchRelatedBamFilesArtefactsForBamFiles, when called for bamFiles in new system, then return AnalysisBamFileArtefactData of expected BamFiles"() {
+        given:
+        setupDataWithRelated()
+
+        List<AnalysisBamFileArtefactData> expected = [
+                createAnalysisBamFileArtefactData(bamFileRelatedNew),
+        ]
+
+        when:
+        List<AnalysisBamFileArtefactData> result = analysisArtefactService.fetchRelatedBamFilesArtefactsForBamFiles([bamFileNew])
 
         then:
         result.size() == 1
@@ -206,16 +283,43 @@ abstract class AbstractAnalysisArtefactServiceSpec<T> extends HibernateSpec impl
     }
 
     @Unroll
-    void "fetchRelatedAnalysisArtefactsForBamFiles, when called #artefactType for bamFiles, then return AnalysisAnalysisArtefactData of expected analysis"() {
+    void "fetchRelatedAnalysisArtefactsForBamFiles, when called #artefactType for bamFiles in old system, then return AnalysisAnalysisArtefactData of expected analysis"() {
         given:
         setupDataWithAnalysis(factory, artefactType)
 
-        List<AlignmentArtefactData<RoddyBamFile>> expected = [
+        List<AnalysisAnalysisArtefactData<? extends BamFilePairAnalysis>> expected = [
                 createAnalysisAnalysisArtefactData(analysisRelated),
         ]
 
         when:
-        List<AlignmentArtefactData<RoddyBamFile>> result = analysisArtefactService.fetchRelatedAnalysisArtefactsForBamFiles([bamFile1], factory.instanceClass)
+        List<AnalysisAnalysisArtefactData<? extends BamFilePairAnalysis>> result =
+                analysisArtefactService.fetchRelatedAnalysisArtefactsForBamFiles([bamFile1], factory.instanceClass)
+
+        then:
+        result.size() == 1
+        TestCase.assertContainSame(result, expected)
+
+        where:
+        factory                        | artefactType
+        SnvDomainFactory.INSTANCE      | ArtefactType.SNV
+        IndelDomainFactory.INSTANCE    | ArtefactType.INDEL
+        SophiaDomainFactory.INSTANCE   | ArtefactType.SOPHIA
+        AceseqDomainFactory.INSTANCE   | ArtefactType.ACESEQ
+        RunYapsaDomainFactory.INSTANCE | ArtefactType.RUN_YAPSA
+    }
+
+    @Unroll
+    void "fetchRelatedAnalysisArtefactsForBamFiles, when called #artefactType for bamFiles in new system, then return AnalysisAnalysisArtefactData of expected analysis"() {
+        given:
+        setupDataWithAnalysis(factory, artefactType)
+
+        List<AnalysisAnalysisArtefactData<? extends BamFilePairAnalysis>> expected = [
+                createAnalysisAnalysisArtefactData(analysisRelatedNew),
+        ]
+
+        when:
+        List<AnalysisAnalysisArtefactData<? extends BamFilePairAnalysis>> result =
+                analysisArtefactService.fetchRelatedAnalysisArtefactsForBamFiles([bamFileNew], factory.instanceClass)
 
         then:
         result.size() == 1
@@ -236,7 +340,7 @@ abstract class AbstractAnalysisArtefactServiceSpec<T> extends HibernateSpec impl
         setupDataWithAnalysis(factory, artefactType)
 
         when:
-        List<AlignmentArtefactData<RoddyBamFile>> result = analysisArtefactService.fetchRelatedAnalysisArtefactsForBamFiles([], factory.instanceClass)
+        List<AnalysisAnalysisArtefactData<? extends BamFilePairAnalysis>> result = analysisArtefactService.fetchRelatedAnalysisArtefactsForBamFiles([], factory.instanceClass)
 
         then:
         result.empty
@@ -437,9 +541,13 @@ abstract class AbstractAnalysisArtefactServiceSpec<T> extends HibernateSpec impl
         AbstractMergingWorkPackage mergingWorkPackage = bamFile.mergingWorkPackage
         SeqPlatformGroup seqPlatformGroup = mergingWorkPackage.class.isAssignableFrom(MergingWorkPackage) ?
                 ((MergingWorkPackage) mergingWorkPackage).seqPlatformGroup : null
+        String workflowVersion = bamFile.workflowArtefact?.producedBy?.workflowVersion?.workflowVersion ?:
+                (bamFile instanceof ExternallyProcessedBamFile ? null : bamFile.config?.programVersion)
+
         return new AnalysisBamFileArtefactData(
                 bamFile.workflowArtefact,
                 bamFile,
+                workflowVersion,
                 bamFile.project,
                 bamFile.seqType,
                 bamFile.individual,
@@ -452,9 +560,12 @@ abstract class AbstractAnalysisArtefactServiceSpec<T> extends HibernateSpec impl
     }
 
     protected <T extends BamFilePairAnalysis> AnalysisAnalysisArtefactData<T> createAnalysisAnalysisArtefactData(T analysis) {
+        String workflowVersion = analysis.workflowArtefact?.producedBy?.workflowVersion?.workflowVersion ?:
+                analysis.config?.programVersion?.split(':')?.last()
         return new AnalysisAnalysisArtefactData(
                 analysis.workflowArtefact,
                 analysis,
+                workflowVersion,
                 analysis.project,
                 analysis.seqType,
                 analysis.samplePair,

@@ -854,13 +854,14 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
     }
 
     protected <T extends Artefact> AlignmentArtefactData<T> createAlignmentArtefactData(T t = null) {
-        return new AlignmentArtefactData<>(createWorkflowArtefact(), t, null, null, null, null, null, null, null, null, null)
+        return new AlignmentArtefactData<>(createWorkflowArtefact(), t, null, null, null, null, null, null, null, null, null, null)
     }
 
     protected AlignmentArtefactData<SeqTrack> createAlignmentArtefactDataForSeqTrack(SeqTrack seqTrack) {
         return new AlignmentArtefactData<SeqTrack>(
                 seqTrack.workflowArtefact,
                 seqTrack,
+                seqTrack.workflowArtefact?.producedBy?.workflowVersion?.workflowVersion,
                 seqTrack.project,
                 seqTrack.seqType,
                 seqTrack.individual,
@@ -878,6 +879,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         return new AlignmentArtefactData<FastqcProcessedFile>(
                 fastqcProcessedFile.workflowArtefact,
                 fastqcProcessedFile,
+                seqTrack.workflowArtefact?.producedBy?.workflowVersion?.workflowVersion,
                 seqTrack.project,
                 seqTrack.seqType,
                 seqTrack.individual,
@@ -895,6 +897,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         return new AlignmentArtefactData<RoddyBamFile>(
                 bamFile.workflowArtefact,
                 bamFile,
+                bamFile.config?.programVersion ?: bamFile.workflowArtefact?.producedBy?.workflowVersion?.workflowVersion,
                 workPackage.project,
                 workPackage.seqType,
                 workPackage.individual,

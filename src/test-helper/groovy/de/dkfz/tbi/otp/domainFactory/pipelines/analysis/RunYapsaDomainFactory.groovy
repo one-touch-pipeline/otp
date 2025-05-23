@@ -25,7 +25,7 @@ import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.runyapsa.RunYapsaWorkflow
 
-class RunYapsaDomainFactory extends AbstractAnalysisDomainFactory<RunYapsaInstance> {
+class RunYapsaDomainFactory extends AbstractAnalysisDomainFactory<RunYapsaInstance> implements RunYapsaWorkflowConfig {
 
     static final RunYapsaDomainFactory INSTANCE = new RunYapsaDomainFactory()
 

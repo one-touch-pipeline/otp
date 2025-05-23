@@ -38,9 +38,9 @@ class FastqcArtefactDataWithSeqTrack extends ArtefactData<SeqTrack> {
     final Run run
 
     @SuppressWarnings("ParameterCount")
-    FastqcArtefactDataWithSeqTrack(WorkflowArtefact workflowArtefact, SeqTrack artefact, Project project, SeqType seqType, Individual individual,
-                                   SampleType sampleType, Sample sample, Run run) {
-        super(workflowArtefact, artefact, project, seqType)
+    FastqcArtefactDataWithSeqTrack(WorkflowArtefact workflowArtefact, SeqTrack artefact, String version, Project project, SeqType seqType,
+                                   Individual individual, SampleType sampleType, Sample sample, Run run) {
+        super(workflowArtefact, artefact, version, project, seqType)
         this.individual = individual
         this.sampleType = sampleType
         this.sample = sample

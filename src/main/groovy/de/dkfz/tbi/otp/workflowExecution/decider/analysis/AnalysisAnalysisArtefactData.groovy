@@ -45,10 +45,10 @@ class AnalysisAnalysisArtefactData<A extends BamFilePairAnalysis> extends Artefa
     final AbstractBamFile abstractBamFile2
 
     @SuppressWarnings("ParameterCount")
-    AnalysisAnalysisArtefactData(WorkflowArtefact workflowArtefact, A artefact, Project project, SeqType seqType,
+    AnalysisAnalysisArtefactData(WorkflowArtefact workflowArtefact, A artefact, String version, Project project, SeqType seqType,
                                  SamplePair samplePair, Individual individual, SampleType sampleType1, SampleType sampleType2, Sample sample1, Sample sample2,
                                  AbstractBamFile abstractBamFile1, AbstractBamFile abstractBamFile2) {
-        super(workflowArtefact, artefact, project, seqType)
+        super(workflowArtefact, artefact, version, project, seqType)
         this.samplePair = samplePair
         this.individual = individual
         this.sampleType1 = sampleType1

@@ -19,25 +19,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution.decider.alignment
+package de.dkfz.tbi.otp.domainFactory.pipelines.analysis
 
-import groovy.transform.ToString
-import groovy.transform.TupleConstructor
+import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.workflowExecution.decider.ArtefactDataList
+trait WorkflowConfig extends DomainFactoryCore {
 
-@ToString(includePackage = false, includeNames = true)
-@TupleConstructor
-class AlignmentArtefactDataList implements ArtefactDataList {
-    final Collection<AlignmentArtefactData<SeqTrack>> seqTrackData
-    final Collection<AlignmentArtefactData<FastqcProcessedFile>> fastqcProcessedFileData
-    final Collection<AlignmentArtefactData<AbstractBamFile>> bamData
+    abstract Map getConfigProperties(Map properties = [:])
 
-    @Override
-    boolean isEmpty() {
-        return !seqTrackData && !fastqcProcessedFileData && !bamData
+    abstract Class getConfigPerProjectAndSeqTypeClass()
+
+    ConfigPerProjectAndSeqType createConfig(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(configPerProjectAndSeqTypeClass, getConfigProperties(properties), properties, saveAndValidate)
+    }
+
+    ConfigPerProjectAndSeqType findOrCreateConfig(Map properties = [:], boolean saveAndValidate = true) {
+        return findOrCreateDomainObject(configPerProjectAndSeqTypeClass, getConfigProperties(properties), properties, saveAndValidate)
     }
 }

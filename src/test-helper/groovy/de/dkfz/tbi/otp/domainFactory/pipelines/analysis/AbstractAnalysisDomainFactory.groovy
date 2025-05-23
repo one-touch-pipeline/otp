@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 
-abstract class AbstractAnalysisDomainFactory<T extends BamFilePairAnalysis> implements DomainFactoryHelper, DomainFactoryCore {
+abstract class AbstractAnalysisDomainFactory<T extends BamFilePairAnalysis> implements DomainFactoryHelper, DomainFactoryCore, WorkflowConfig {
 
     static final String DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY = 'exec_123456_123456789_test_test'
     static final double DEFAULT_COVERAGE = 30.0

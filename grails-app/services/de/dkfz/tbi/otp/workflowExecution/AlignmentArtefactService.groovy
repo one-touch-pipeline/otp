@@ -47,11 +47,13 @@ class AlignmentArtefactService {
     private static final int INDEX_7 = 7
     private static final int INDEX_8 = 8
     private static final int INDEX_9 = 9
+    private static final int INDEX_10 = 10
 
     private final static String HQL_FIND_SEQ_TRACKS_FOR_WORKFLOW_ARTEFACTS = """
         select
             wa,
             st,
+            version.workflowVersion,
             project,
             seqType,
             individual,
@@ -73,6 +75,8 @@ class AlignmentArtefactService {
             join run.seqPlatform seqPlatform
             left outer join st.antibodyTarget antibodyTarget
             left outer join st.libraryPreparationKit libraryPreparationKit
+            left outer join wa.producedBy run
+            left outer join run.workflowVersion version
         where
             wa in (:workflowArtefacts)
             and st.seqType in (:seqTypes)
@@ -94,6 +98,7 @@ class AlignmentArtefactService {
         select
             wa,
             fastqc,
+            version.workflowVersion,
             project,
             seqType,
             individual,
@@ -116,6 +121,8 @@ class AlignmentArtefactService {
             join run.seqPlatform seqPlatform
             left outer join st.antibodyTarget antibodyTarget
             left outer join st.libraryPreparationKit libraryPreparationKit
+            left outer join wa.producedBy run
+            left outer join run.workflowVersion version
         where
             wa in (:workflowArtefacts)
             and st.seqType in (:seqTypes)
@@ -129,6 +136,7 @@ class AlignmentArtefactService {
         select distinct
             wa,
             st,
+            version.workflowVersion,
             project,
             seqType,
             individual,
@@ -147,6 +155,8 @@ class AlignmentArtefactService {
             join st.seqType seqType
             join st.run run
             join run.seqPlatform seqPlatform
+            left outer join wa.producedBy run
+            left outer join run.workflowVersion version
             left outer join st.antibodyTarget antibodyTarget
             left outer join st.libraryPreparationKit libraryPreparationKit,
             SeqTrack st2
@@ -172,6 +182,7 @@ class AlignmentArtefactService {
         select distinct
             wa,
             fastqc,
+            version.workflowVersion,
             project,
             seqType,
             individual,
@@ -194,6 +205,8 @@ class AlignmentArtefactService {
             join st.seqType seqType
             join st.run run
             join run.seqPlatform seqPlatform
+            left outer join wa.producedBy run
+            left outer join run.workflowVersion version
             left outer join st.antibodyTarget antibodyTarget
             left outer join st.libraryPreparationKit libraryPreparationKit,
             SeqTrack st2
@@ -211,6 +224,7 @@ class AlignmentArtefactService {
         select distinct
             wa,
             bamFile,
+            COALESCE(version.workflowVersion, bamFileConfig.programVersion, cellRangerConfig.programVersion),
             project,
             seqType,
             individual,
@@ -230,6 +244,10 @@ class AlignmentArtefactService {
             join mergingWorkPackage.seqType seqType
             left outer join mergingWorkPackage.seqPlatformGroup seqPlatformGroup
             left outer join mergingWorkPackage.antibodyTarget antibodyTarget
+            left outer join bamFile.config bamFileConfig
+            left outer join mergingWorkPackage.config cellRangerConfig
+            left outer join wa.producedBy run
+            left outer join run.workflowVersion version
             left outer join mergingWorkPackage.libraryPreparationKit libraryPreparationKit,
             SeqTrack st
         where
@@ -382,9 +400,9 @@ class AlignmentArtefactService {
         }
     }
 
-    List<AlignmentArtefactData<RoddyBamFile>> fetchRelatedBamFileArtefactsForSeqTracks(Collection<SeqTrack> seqTracks) {
+    List<AlignmentArtefactData<AbstractBamFile>> fetchRelatedBamFileArtefactsForSeqTracks(Collection<SeqTrack> seqTracks) {
         return LogUsedTimeUtils.logUsedTime(log, "          fetchRelatedBamFileArtefactsForSeqTracks") {
-            return this.<RoddyBamFile> executeHelper(HQL_FIND_RELATED_BAM_FILES_FOR_SEQ_TRACKS, seqTracks, true)
+            return this.<AbstractBamFile> executeHelper(HQL_FIND_RELATED_BAM_FILES_FOR_SEQ_TRACKS, seqTracks, true)
         }
     }
 
@@ -502,15 +520,16 @@ class AlignmentArtefactService {
             new AlignmentArtefactData<T>(
                     list[INDEX_0] as WorkflowArtefact,
                     list[INDEX_1] as T,
-                    list[INDEX_2] as Project,
-                    list[INDEX_3] as SeqType,
-                    list[INDEX_4] as Individual,
-                    list[INDEX_5] as SampleType,
-                    list[INDEX_6] as Sample,
-                    list[INDEX_7] as AntibodyTarget,
-                    list[INDEX_8] as LibraryPreparationKit,
-                    (haveGroup ? null : list[INDEX_9]) as SeqPlatform,
-                    (haveGroup ? list[INDEX_9] : null) as SeqPlatformGroup
+                    list[INDEX_2] as String,
+                    list[INDEX_3] as Project,
+                    list[INDEX_4] as SeqType,
+                    list[INDEX_5] as Individual,
+                    list[INDEX_6] as SampleType,
+                    list[INDEX_7] as Sample,
+                    list[INDEX_8] as AntibodyTarget,
+                    list[INDEX_9] as LibraryPreparationKit,
+                    (haveGroup ? null : list[INDEX_10]) as SeqPlatform,
+                    (haveGroup ? list[INDEX_10] : null) as SeqPlatformGroup
             )
         }
     }
