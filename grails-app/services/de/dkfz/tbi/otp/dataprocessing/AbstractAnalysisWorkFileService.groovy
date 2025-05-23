@@ -39,9 +39,12 @@ abstract class AbstractAnalysisWorkFileService<T extends BamFilePairAnalysis> im
     FilestoreService filestoreService
     RoddyConfigService roddyConfigService
     FileService fileService
+    AnalysisLinkFileServiceFactoryService analysisLinkFileServiceFactoryService
 
     Path getDirectoryPath(T instance) {
-        return filestoreService.getWorkFolderPath(instance.workflowArtefact.producedBy)
+        return instance.workflowArtefact?.producedBy ?
+                filestoreService.getWorkFolderPath(instance.workflowArtefact.producedBy) :
+                analysisLinkFileServiceFactoryService.getService(instance).getDirectoryPath(instance)
     }
 
     /**

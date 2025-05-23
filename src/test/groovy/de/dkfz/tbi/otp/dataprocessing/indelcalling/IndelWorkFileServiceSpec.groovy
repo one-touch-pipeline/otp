@@ -21,15 +21,14 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.indelcalling
 
-import spock.lang.Specification
+import grails.testing.services.ServiceUnitTest
 
-class IndelWorkFileServiceSpec extends Specification {
+import de.dkfz.tbi.otp.dataprocessing.AbstractAnalysisWorkFileServiceSpec
+import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.AbstractAnalysisDomainFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.IndelDomainFactory
 
-    void "getWorkflowDirectoryName returns correct directory name"() {
-        given:
-        IndelWorkFileService indelWorkFileService = new IndelWorkFileService()
+class IndelWorkFileServiceSpec extends AbstractAnalysisWorkFileServiceSpec<IndelWorkFileService> implements ServiceUnitTest<IndelWorkFileService> {
 
-        expect:
-        indelWorkFileService.workflowDirectoryName == 'IndelCallingWorkflow'
-    }
+    String workflowDirName = 'IndelCallingWorkflow'
+    AbstractAnalysisDomainFactory factory = IndelDomainFactory.INSTANCE
 }

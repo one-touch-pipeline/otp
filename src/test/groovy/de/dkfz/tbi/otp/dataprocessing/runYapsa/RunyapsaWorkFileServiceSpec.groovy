@@ -21,15 +21,14 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.runYapsa
 
-import spock.lang.Specification
+import grails.testing.services.ServiceUnitTest
 
-class RunyapsaWorkFileServiceSpec extends Specification {
+import de.dkfz.tbi.otp.dataprocessing.AbstractAnalysisWorkFileServiceSpec
+import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.AbstractAnalysisDomainFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.RunYapsaDomainFactory
 
-    void "getWorkflowDirectoryName returns correct directory name"() {
-        given:
-        RunYapsaWorkFileService yapsaWorkFileService = new RunYapsaWorkFileService()
+class RunyapsaWorkFileServiceSpec extends AbstractAnalysisWorkFileServiceSpec<RunYapsaWorkFileService> implements ServiceUnitTest<RunYapsaWorkFileService> {
 
-        expect:
-        yapsaWorkFileService.workflowDirectoryName == 'runYapsa'
-    }
+    String workflowDirName = 'runYapsa'
+    AbstractAnalysisDomainFactory factory = RunYapsaDomainFactory.INSTANCE
 }

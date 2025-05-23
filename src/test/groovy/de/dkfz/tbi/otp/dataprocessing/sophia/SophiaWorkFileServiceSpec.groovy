@@ -21,15 +21,14 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.sophia
 
-import spock.lang.Specification
+import grails.testing.services.ServiceUnitTest
 
-class SophiaWorkFileServiceSpec extends Specification {
+import de.dkfz.tbi.otp.dataprocessing.AbstractAnalysisWorkFileServiceSpec
+import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.AbstractAnalysisDomainFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.SophiaDomainFactory
 
-    void "getWorkflowDirectoryName returns correct directory name"() {
-        given:
-        SophiaWorkFileService sophiaWorkFileService = new SophiaWorkFileService()
+class SophiaWorkFileServiceSpec extends AbstractAnalysisWorkFileServiceSpec<SophiaWorkFileService> implements ServiceUnitTest<SophiaWorkFileService> {
 
-        expect:
-        sophiaWorkFileService.workflowDirectoryName == 'SophiaWorkflow'
-    }
+    String workflowDirName = 'SophiaWorkflow'
+    AbstractAnalysisDomainFactory factory = SophiaDomainFactory.INSTANCE
 }

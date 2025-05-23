@@ -31,7 +31,6 @@ import java.nio.file.Path
 abstract trait AbstractSnvFileService implements ArtefactFileService<AbstractSnvCallingInstance>, RoddyResultServiceTrait<RoddySnvCallingInstance> {
 
     FileService fileService
-    IndividualService individualService
 
     private final static String SNV_RESULTS_PREFIX = 'snvs_'
 
@@ -51,7 +50,7 @@ abstract trait AbstractSnvFileService implements ArtefactFileService<AbstractSnv
         final Path workDirectory = getDirectoryPath(bamFilePairAnalysis.samplePair.findLatestSnvCallingInstance())
         final String minConfScore = /[0-9]/
         final String matcherForFileRequiredForRunYapsa =
-                /.*${SNV_RESULTS_PREFIX}${individualService.getEscapedPid(bamFilePairAnalysis.individual)}_somatic_snvs_conf_${minConfScore}_to_10.vcf/
+                /.*${SNV_RESULTS_PREFIX}${IndividualService.getEscapedPid(bamFilePairAnalysis.individual)}_somatic_snvs_conf_${minConfScore}_to_10.vcf/
         return fileService.findFileInPath(workDirectory, matcherForFileRequiredForRunYapsa)
     }
 }

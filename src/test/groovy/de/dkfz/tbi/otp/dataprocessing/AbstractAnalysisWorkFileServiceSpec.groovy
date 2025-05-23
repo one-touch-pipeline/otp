@@ -22,20 +22,55 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.testing.gorm.DataTest
-import spock.lang.Specification
+import grails.testing.services.ServiceUnitTest
+import spock.lang.*
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
+import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqLinkFileService
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelLinkFileService
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaLinkFileService
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvLinkFileService
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaLinkFileService
+import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.AbstractAnalysisDomainFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.filestore.FilestoreService
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
 
-class AbstractAnalysisWorkFileServiceSpec extends Specification implements DataTest {
+import java.nio.file.Path
 
-    static final protected String EXPECTED_WORKFLOW_DIRECTORY_NAME = 'workflowDirectoryName'
+abstract class AbstractAnalysisWorkFileServiceSpec<T extends AbstractAnalysisWorkFileService> extends Specification implements ServiceUnitTest<T>, DataTest, WorkflowSystemDomainFactory {
 
-    private final AbstractAnalysisWorkFileService service = new MockAbstractAnalysisWorkFileService()
+    @Override
+    Class[] getDomainClassesToMock() {
+        return [
+                AceseqInstance,
+                FastqFile,
+                FastqImportInstance,
+                FileType,
+                IndelCallingInstance,
+                MergingWorkPackage,
+                RoddyBamFile,
+                RoddySnvCallingInstance,
+                RoddyWorkflowConfig,
+                RunYapsaInstance,
+                SampleTypePerProject,
+                SophiaInstance,
+        ]
+    }
+
+    @TempDir
+    Path tempDir
 
     void "getWorkflowDirectoryName returns correct directory name"() {
         expect:
-        service.workflowDirectoryName == 'workflowDirectoryName'
+        service.workflowDirectoryName == workflowDirName
     }
 
     void "constructInstanceName returns correct instance name"() {
@@ -55,7 +90,7 @@ class AbstractAnalysisWorkFileServiceSpec extends Specification implements DataT
         String expected = [
                 "results",
                 "_",
-                EXPECTED_WORKFLOW_DIRECTORY_NAME,
+                workflowDirName,
                 "-",
                 workflowVersion.workflowVersion,
                 "_",
@@ -66,8 +101,43 @@ class AbstractAnalysisWorkFileServiceSpec extends Specification implements DataT
         service.constructInstanceName(workflowVersion) == expected
     }
 
-    static class MockAbstractAnalysisWorkFileService extends AbstractAnalysisWorkFileService {
+    @Unroll
+    void "test getDirectoryPath for newWorkflowSystem #newWorkflowSystem"() {
+        given:
+        service.filestoreService = Mock(FilestoreService) {
+            _ * getWorkFolderPath(_) >> tempDir.resolve("uuid")
+        }
+        IndividualService individualService = Mock(IndividualService) {
+            _ * getViewByPidPath(_, _) >> tempDir.resolve("view-by-pid")
+        }
+        service.analysisLinkFileServiceFactoryService = new AnalysisLinkFileServiceFactoryService([
+                aceseqLinkFileService  : new AceseqLinkFileService(individualService: individualService),
+                indelLinkFileService   : new IndelLinkFileService(individualService: individualService),
+                runYapsaLinkFileService: new RunYapsaLinkFileService(individualService: individualService),
+                snvLinkFileService     : new SnvLinkFileService(individualService: individualService),
+                sophiaLinkFileService  : new SophiaLinkFileService(individualService: individualService),
+        ])
+        BamFilePairAnalysis instance = getInstance(newWorkflowSystem)
 
-        final String workflowDirectoryName = EXPECTED_WORKFLOW_DIRECTORY_NAME
+        expect:
+        service.getDirectoryPath(instance) == newWorkflowSystem ?
+                tempDir.resolve("uuid") :
+                tempDir.resolve("view-by-pid")
+
+        where:
+        newWorkflowSystem << [true, false]
     }
+
+    protected BamFilePairAnalysis getInstance(boolean newWorkflowSystem) {
+        return factory.createInstanceWithRoddyBamFiles(
+                [workflowArtefact: createWorkflowArtefact(newWorkflowSystem ?
+                        [producedBy: createWorkflowRun(workFolder: createWorkFolder())] :
+                        [:])
+                ]
+        )
+    }
+
+    abstract protected String getWorkflowDirName()
+
+    abstract protected AbstractAnalysisDomainFactory getFactory()
 }

@@ -21,15 +21,14 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import spock.lang.Specification
+import grails.testing.services.ServiceUnitTest
 
-class SnvWorkFileServiceSpec extends Specification {
+import de.dkfz.tbi.otp.dataprocessing.AbstractAnalysisWorkFileServiceSpec
+import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.AbstractAnalysisDomainFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.SnvDomainFactory
 
-    void "getWorkflowDirectoryName returns correct directory name"() {
-        given:
-        SnvWorkFileService snvWorkFileService = new SnvWorkFileService()
+class SnvWorkFileServiceSpec extends AbstractAnalysisWorkFileServiceSpec<SnvWorkFileService> implements ServiceUnitTest<SnvWorkFileService> {
 
-        expect:
-        snvWorkFileService.workflowDirectoryName == 'SNVCallingWorkflow'
-    }
+    String workflowDirName = 'SNVCallingWorkflow'
+    AbstractAnalysisDomainFactory factory = SnvDomainFactory.INSTANCE
 }

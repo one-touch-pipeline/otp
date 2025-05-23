@@ -21,15 +21,14 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.aceseq
 
-import spock.lang.Specification
+import grails.testing.services.ServiceUnitTest
 
-class AceseqWorkFileServiceSpec extends Specification {
+import de.dkfz.tbi.otp.dataprocessing.AbstractAnalysisWorkFileServiceSpec
+import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.AbstractAnalysisDomainFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.AceseqDomainFactory
 
-    void "getWorkflowDirectoryName returns correct directory name"() {
-        given:
-        AceseqWorkFileService aceseqWorkFileService = new AceseqWorkFileService()
+class AceseqWorkFileServiceSpec extends AbstractAnalysisWorkFileServiceSpec<AceseqWorkFileService> implements ServiceUnitTest<AceseqWorkFileService> {
 
-        expect:
-        aceseqWorkFileService.workflowDirectoryName == 'ACEseqWorkflow'
-    }
+    String workflowDirName = 'ACEseqWorkflow'
+    AbstractAnalysisDomainFactory factory = AceseqDomainFactory.INSTANCE
 }

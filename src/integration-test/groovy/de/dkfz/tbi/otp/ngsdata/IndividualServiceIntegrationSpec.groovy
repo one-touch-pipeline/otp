@@ -316,7 +316,7 @@ a: 2
         !(individual ==~ notEscapedPid)
 
         when:
-        String escapedPid = individualService.getEscapedPid(individual)
+        String escapedPid = IndividualService.getEscapedPid(individual)
 
         then:
         individual.pid ==~ escapedPid
