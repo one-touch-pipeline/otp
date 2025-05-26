@@ -27,6 +27,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.project.ProjectRequest
+import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.security.User
 
 import javax.naming.OperationNotSupportedException
@@ -48,8 +49,9 @@ class PiEdit implements ProjectRequestState {
     @Override
     List<ProjectRequestAction> getViewActions(ProjectRequest projectRequest) {
         User currentUser = securityService.currentUser
-        return currentUser == projectRequest?.state?.currentOwner ?
-                [ProjectRequestAction.SAVE_VIEW, ProjectRequestAction.EDIT, ProjectRequestAction.DELETE] : []
+        boolean currentUserIsOperator = securityService.ifAllGranted(Role.ROLE_OPERATOR)
+        return (currentUser == projectRequest?.state?.currentOwner) ? [ProjectRequestAction.SAVE_VIEW, ProjectRequestAction.EDIT, ProjectRequestAction.DELETE] :
+                (currentUserIsOperator ? [ProjectRequestAction.DELETE] : [])
     }
 
     @Override
@@ -86,7 +88,7 @@ class PiEdit implements ProjectRequestState {
     }
 
     @Override
-    @PreAuthorize("hasPermission(#projectRequest, 'PROJECT_REQUEST_CURRENT_OWNER')")
+    @PreAuthorize("hasPermission(#projectRequest, 'PROJECT_REQUEST_CURRENT_OWNER') or hasRole('ROLE_OPERATOR')")
     void delete(ProjectRequest projectRequest) {
         projectRequestService.deleteProjectRequest(projectRequest)
         projectRequestService.sendDeleteEmail(projectRequest)
