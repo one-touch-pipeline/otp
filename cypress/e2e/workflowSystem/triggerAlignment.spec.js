@@ -49,7 +49,7 @@ describe('Check trigger alignment page', () => {
 
         // Wait until table is rendered
         cy.get('div#seqTrackTable_processing').should('not.be.visible');
-        cy.get('#warnAreaAccordion').should('not.be.visible');
+        cy.get('#warnAreaAccordion > div').should('not.be.visible');
 
         cy.get('table#seqTrackTable').find('tbody tr').should('have.length', 12)
           .each((row) => {
@@ -174,7 +174,7 @@ describe('Check trigger alignment page', () => {
         expect(interception.response.statusCode).to.eq(200);
       });
 
-      cy.get('#warnAreaAccordion').should('not.be.visible');
+      cy.get('#warnAreaAccordion > div').should('not.be.visible');
       cy.get('#infos li').should('not.be.empty');
       cy.get('#resultWarning li').should('have.length', 2)
         .each((row) => {
@@ -219,7 +219,7 @@ describe('Check trigger alignment page', () => {
           expect(interception.response.statusCode).to.eq(200);
         });
 
-        cy.get('#warnAreaAccordion').should('not.be.visible');
+        cy.get('#warnAreaAccordion > div').should('not.be.visible');
         cy.get('div.otpWarningToast').should('be.visible').contains('No alignment workflow has been started');
         cy.get('#infos li').should('not.be.empty');
         cy.get('#resultWarning li').should('have.length', 1).should('have.text', 'none');
@@ -329,7 +329,7 @@ describe('Check trigger alignment page', () => {
           expect(interception.response.statusCode).to.eq(200);
         });
 
-        cy.get('#warnAreaAccordion').should('not.be.visible');
+        cy.get('#warnAreaAccordion > div').should('not.be.visible');
         cy.get('#infos li').should('not.be.empty');
         cy.get('#resultWarning li').should('have.length', 2)
           .each((row) => {
