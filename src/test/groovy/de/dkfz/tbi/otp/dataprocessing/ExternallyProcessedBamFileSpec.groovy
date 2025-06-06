@@ -41,7 +41,6 @@ class ExternallyProcessedBamFileSpec extends Specification implements DataTest {
         return [
                 fileName           : 'bamfile.bam',
                 importedFrom       : '/tmp/bamfile',
-                insertSizeFile     : null,
                 fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
                 md5sum             : HelperUtils.randomMd5sum,
                 maximumReadLength  : 5,
@@ -79,8 +78,6 @@ class ExternallyProcessedBamFileSpec extends Specification implements DataTest {
         where:
         property              | value
         'importedFrom'        | null
-        'insertSizeFile'      | null
-        'insertSizeFile'      | 'tmp/tmp'
         'fileOperationStatus' | AbstractBamFile.FileOperationStatus.DECLARED
         'maximumReadLength'   | null
     }
@@ -96,12 +93,6 @@ class ExternallyProcessedBamFileSpec extends Specification implements DataTest {
 
         where:
         property            | constraint                 | value
-        'insertSizeFile'    | 'blank'                    | ''
-        'insertSizeFile'    | 'maxSize.exceeded'         | '0'.padRight(2000, '0')
-        'insertSizeFile'    | 'validator.relative.path'  | '/tmp'
-        'insertSizeFile'    | 'validator.relative.path'  | 'tmp//tmp'
-        'insertSizeFile'    | 'validator.relative.path'  | 'tmp&tmp'
-
         'fileName'          | 'nullable'                 | null
         'fileName'          | 'blank'                    | ''
         'fileName'          | 'validator.path.component' | '/tmp'

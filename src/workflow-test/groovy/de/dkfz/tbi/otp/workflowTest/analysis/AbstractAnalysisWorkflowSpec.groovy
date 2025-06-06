@@ -186,13 +186,11 @@ abstract class AbstractAnalysisWorkflowSpec extends AbstractDecidedWorkflowSpec 
 
         bamFileTumor = ExternalBamFactoryInstance.INSTANCE.createBamFile([
                 workPackage      : tumorMwp,
-                insertSizeFile   : 'tumor_insertsize_plot.png_qcValues.txt',
                 maximumReadLength: 101,
         ] + createBamFileProperties())
 
         bamFileControl = ExternalBamFactoryInstance.INSTANCE.createBamFile(createBamFileProperties() + [
                 workPackage      : controlMwp,
-                insertSizeFile   : 'control_insertsize_plot.png_qcValues.txt',
                 maximumReadLength: 101,
         ])
         commonBamFileSetup()

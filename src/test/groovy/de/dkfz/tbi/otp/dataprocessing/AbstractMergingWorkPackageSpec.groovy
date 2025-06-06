@@ -79,8 +79,6 @@ class AbstractMergingWorkPackageSpec extends Specification implements DataTest {
 
         final AbstractQualityAssessment qualityAssessment = null
 
-        final File finalInsertSizeFile = null
-
         final Integer maximalReadLength = null
 
         @Override

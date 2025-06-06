@@ -153,14 +153,6 @@ class CreateRoddyFileHelper {
         CreateFileHelper.createFile(service.getFinalAceseqInputFile(sophiaInstance))
     }
 
-    static void createInsertSizeFiles(SophiaInstance sophiaInstance) {
-        RoddyBamFile tumorBam = sophiaInstance.sampleType1BamFile
-        RoddyBamFile controlBam = sophiaInstance.sampleType2BamFile
-
-        CreateFileHelper.createFile(tumorBam.finalInsertSizeFile)
-        CreateFileHelper.createFile(controlBam.finalInsertSizeFile)
-    }
-
     static void createAceseqResultFiles(AceseqInstance aceseqInstance, IndividualService individualService) {
         AceseqService service = new AceseqService(individualService: individualService)
         CreateFileHelper.createFile(new File(aceseqInstance.workExecutionStoreDirectory, 'someFile'))

@@ -21,12 +21,12 @@
  */
 package de.dkfz.tbi.otp.infrastructure.alignment
 
+import de.dkfz.tbi.otp.dataprocessing.ArtefactFileService
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 
 import java.nio.file.Path
 
-@SuppressWarnings('AbstractClassWithoutAbstractMethod')
-abstract trait AbstractCellRangerFileService implements AbstractAlignmentFileService<SingleCellBamFile> {
+trait AbstractCellRangerFileService implements ArtefactFileService<SingleCellBamFile> {
 
     Path getSampleDirectory(SingleCellBamFile bamFile) {
         return getDirectoryPath(bamFile).resolve(CellRangerFileNames.INPUT_DIRECTORY_NAME).resolve(bamFile.id.toString())
@@ -81,10 +81,5 @@ abstract trait AbstractCellRangerFileService implements AbstractAlignmentFileSer
 
     Path getWebSummaryResultFile(SingleCellBamFile bamFile) {
         return getResultDirectory(bamFile).resolve(CellRangerFileNames.WEB_SUMMARY_HTML_FILE_NAME)
-    }
-
-    @Override
-    Path getInsertSizeFile(SingleCellBamFile bamFile) {
-        throw new UnsupportedOperationException("Insert size file is not implemented for single cell BAM files (${bamFile})")
     }
 }

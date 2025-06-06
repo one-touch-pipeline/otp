@@ -219,15 +219,6 @@ class SingleCellBamFile extends AbstractBamFile implements HasIdentifier, Proces
         return new File(new File(workDirectory, INPUT_DIRECTORY_NAME), singleCellSampleName)
     }
 
-    /**
-     * @deprecated use {@link CellRangerLinkFileService#getInsertSizeFile} instead
-     */
-    @Deprecated
-    @Override
-    File getFinalInsertSizeFile() {
-        throw new MissingPropertyException("Final insert size file is not implemented for single cell BAM files")
-    }
-
     @Override
     Integer getMaximalReadLength() {
         throw new MissingPropertyException("Maximal read length is not implemented for single cell BAM files")

@@ -63,11 +63,6 @@ class ExecuteRoddySophiaJob extends AbstractExecutePanCanJob<SophiaInstance> imp
         Path bamFileDiseasePath = linkBamFileInWorkDirectory(bamFileDisease, workDirectory)
         Path bamFileControlPath = linkBamFileInWorkDirectory(bamFileControl, workDirectory)
 
-        File diseaseInsertSizeFile = bamFileDisease.finalInsertSizeFile
-        File controlInsertSizeFile = bamFileControl.finalInsertSizeFile
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(diseaseInsertSizeFile)
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(controlInsertSizeFile)
-
         Integer tumorDefaultReadLength = bamFileDisease.maximalReadLength
         Integer controlDefaultReadLength = bamFileControl.maximalReadLength
 
@@ -93,7 +88,6 @@ class ExecuteRoddySophiaJob extends AbstractExecutePanCanJob<SophiaInstance> imp
 
         cValues.add("bamfile_list:${bamFileControlPath};${bamFileDiseasePath}")
         cValues.add("sample_list:${bamFileControl.sampleType.dirName};${bamFileDisease.sampleType.dirName}")
-        cValues.add("insertsizesfile_list:${controlInsertSizeFile};${diseaseInsertSizeFile}")
         cValues.add("possibleTumorSampleNamePrefixes:${bamFileDisease.sampleType.dirName}")
         cValues.add("possibleControlSampleNamePrefixes:${bamFileControl.sampleType.dirName}")
         cValues.add("controlDefaultReadLength:${controlDefaultReadLength}")

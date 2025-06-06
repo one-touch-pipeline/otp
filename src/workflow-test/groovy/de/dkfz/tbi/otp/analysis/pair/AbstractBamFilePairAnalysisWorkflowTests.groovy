@@ -125,13 +125,11 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
 
         bamFileTumor = DomainFactory.createExternallyProcessedBamFile([
                 workPackage      : tumorMwp,
-                insertSizeFile   : 'tumor_insertsize_plot.png_qcValues.txt',
                 maximumReadLength: 101,
         ] + createBamFileProperties())
 
         bamFileControl = DomainFactory.createExternallyProcessedBamFile(createBamFileProperties() + [
                 workPackage      : controlMwp,
-                insertSizeFile   : 'control_insertsize_plot.png_qcValues.txt',
                 maximumReadLength: 101,
         ])
         commonBamFileSetup()

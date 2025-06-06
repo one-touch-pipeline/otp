@@ -98,14 +98,6 @@ class ExternalAlignmentLinkFileServiceSpec extends Specification implements Serv
         service.getDirectoryPath(bamFile).toString() == "/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}"
     }
 
-    void "test getInsertSizeFile"() {
-        given:
-        bamFile.insertSizeFile = "insert-size-file"
-
-        expect:
-        service.getInsertSizeFile(bamFile).toString() == "/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}/insert-size-file"
-    }
-
     void "test getPathForFurtherProcessing, should return final directory"() {
         given:
         bamFile.fileOperationStatus = AbstractBamFile.FileOperationStatus.PROCESSED

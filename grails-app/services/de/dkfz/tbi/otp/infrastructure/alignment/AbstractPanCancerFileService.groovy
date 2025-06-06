@@ -21,14 +21,14 @@
  */
 package de.dkfz.tbi.otp.infrastructure.alignment
 
+import de.dkfz.tbi.otp.dataprocessing.ArtefactFileService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.RoddyResultServiceTrait
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 import java.nio.file.Path
 
-@SuppressWarnings('AbstractClassWithoutAbstractMethod')
-abstract trait AbstractPanCancerFileService<T extends RoddyBamFile> implements AbstractAlignmentFileService<T>, RoddyResultServiceTrait<T> {
+trait AbstractPanCancerFileService<T extends RoddyBamFile> implements ArtefactFileService<T>, RoddyResultServiceTrait<T> {
 
     Path getQADirectory(T bamFile) {
         return getDirectoryPath(bamFile).resolve(RoddyBamFileNames.QUALITY_CONTROL_DIR)
@@ -82,14 +82,5 @@ abstract trait AbstractPanCancerFileService<T extends RoddyBamFile> implements A
     // Example: blood_somePid_merged.mdup.bam.md5
     Path getMd5sumFile(T bamFile) {
         return getDirectoryPath(bamFile).resolve("${bamFile.bamFileName}.md5")
-    }
-
-    Path getInsertSizeDirectory(T bamFile) {
-        return getMergedQADirectory(bamFile).resolve(RoddyBamFileNames.INSERT_SIZE_FILE_DIRECTORY)
-    }
-
-    @Override
-    Path getInsertSizeFile(T bamFile) {
-        return getInsertSizeDirectory(bamFile).resolve("${bamFile.sampleType.dirName}_${bamFile.individual.pid}_${RoddyBamFileNames.INSERT_SIZE_FILE_SUFFIX}")
     }
 }

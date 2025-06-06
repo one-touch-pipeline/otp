@@ -79,17 +79,6 @@ class CellRangerWorkFileServiceSpec extends Specification implements ServiceUnit
         }
     }
 
-    void "test getInsertSizeFile"() {
-        given:
-        setupNonUuid()
-
-        when:
-        service.getInsertSizeFile(bamFile)
-
-        then:
-        thrown(UnsupportedOperationException)
-    }
-
     void "test getDirectoryPath"() {
         given:
         setupNonUuid()

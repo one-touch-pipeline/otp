@@ -23,6 +23,5 @@ package de.dkfz.tbi.otp.dataprocessing.runYapsa
 
 import de.dkfz.tbi.otp.dataprocessing.ArtefactFileService
 
-@SuppressWarnings('AbstractClassWithoutAbstractMethod')
-abstract trait AbstractRunYapsaFileService implements ArtefactFileService<RunYapsaInstance> {
+trait AbstractRunYapsaFileService implements ArtefactFileService<RunYapsaInstance> {
 }

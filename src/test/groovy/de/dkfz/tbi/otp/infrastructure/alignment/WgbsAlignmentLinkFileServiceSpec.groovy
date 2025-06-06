@@ -61,29 +61,6 @@ class WgbsAlignmentLinkFileServiceSpec extends Specification implements ServiceU
         }
     }
 
-    void "test getInsertSizeDirectory"() {
-        given:
-        setupData()
-
-        Path expectedPath = Paths.get("/base-dir/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/${RoddyBamFileNames.MERGED_DIR}/" +
-                "${RoddyBamFileNames.INSERT_SIZE_FILE_DIRECTORY}")
-
-        expect:
-        expectedPath == service.getInsertSizeDirectory(bamFile)
-    }
-
-    void "test getInsertSizeFile"() {
-        given:
-        setupData()
-
-        Path expectedPath = Paths.get("/base-dir/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/${RoddyBamFileNames.MERGED_DIR}/" +
-                "${RoddyBamFileNames.INSERT_SIZE_FILE_DIRECTORY}/${bamFile.sampleType.dirName}_${bamFile.individual.pid}_" +
-                "${RoddyBamFileNames.INSERT_SIZE_FILE_SUFFIX}")
-
-        expect:
-        expectedPath == service.getInsertSizeFile(bamFile)
-    }
-
     void "test getQADirectory"() {
         given:
         setupData()

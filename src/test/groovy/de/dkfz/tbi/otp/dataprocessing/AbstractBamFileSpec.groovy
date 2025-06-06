@@ -84,7 +84,6 @@ class MockAbstractBamFile extends AbstractBamFile implements DomainClass, GormEn
     final String bamFileName = null
     final String baiFileName = null
     final AlignmentConfig alignmentConfig = null
-    final File finalInsertSizeFile = null
     final Integer maximalReadLength = null
 
     @Override

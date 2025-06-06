@@ -25,8 +25,7 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 
 import java.nio.file.Path
 
-@SuppressWarnings('AbstractClassWithoutAbstractMethod')
-abstract trait AbstractWgbsAlignmentFileService extends AbstractPanCancerFileService<RoddyBamFile> {
+trait AbstractWgbsAlignmentFileService extends AbstractPanCancerFileService<RoddyBamFile> {
 
     static final String METADATATABLE_FILE = 'metadataTable.tsv'
 

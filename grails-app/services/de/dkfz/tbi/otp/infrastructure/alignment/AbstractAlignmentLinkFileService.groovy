@@ -40,6 +40,4 @@ abstract class AbstractAlignmentLinkFileService<T extends AbstractBamFile> imple
     }
 
     abstract protected Path getPathForFurtherProcessingNoCheck(T bamFile)
-
-    abstract Path getInsertSizeFile(T bamFile)
 }

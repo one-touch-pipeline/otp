@@ -92,8 +92,6 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
 
         File baiFile
 
-        File insertSizeFile
-
         File qualityControlFile
 
         Map<BamMetadataColumn, String> metaData
@@ -106,7 +104,6 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
 
             bamFile = Files.createFile(bamFilesDir.resolve("bamFile.bam")).toFile()
             baiFile = Files.createFile(bamFilesDir.resolve("bamFile.bai")).toFile()
-            insertSizeFile = Files.createFile(bamFilesDir.resolve("insertSize.txt")).toFile()
 
             qualityControlFile = Files.createFile(bamFilesDir.resolve("qualityControl.json")).toFile()
             qualityControlFile.text = """\
@@ -125,7 +122,6 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
                     (MD5)                    : HelperUtils.randomMd5sum as String,
                     (COVERAGE)               : nextId as String,
                     (MAXIMAL_READ_LENGTH)    : nextId as String,
-                    (INSERT_SIZE_FILE)       : insertSizeFile.name,
                     (QUALITY_CONTROL_FILE)   : qualityControlFile.name,
             ] + metaDataChanges
         }
@@ -257,7 +253,6 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
         'no md5sum'                  | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.MD5): null]
         'no coverage'                | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.COVERAGE): null]
         'no maximal read length'     | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.MAXIMAL_READ_LENGTH): null]
-        'no insert size file'        | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.INSERT_SIZE_FILE): null]
         'no quality control file'    | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.QUALITY_CONTROL_FILE): null]
         'no library preperation kit' | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.LIBRARY_PREPARATION_KIT): null]
         // copy and link
@@ -265,13 +260,11 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
         'no md5sum'                  | BamImportInstance.LinkOperation.COPY_AND_LINK | [(BamMetadataColumn.MD5): null]
         'no coverage'                | BamImportInstance.LinkOperation.COPY_AND_LINK | [(BamMetadataColumn.COVERAGE): null]
         'no maximal read length'     | BamImportInstance.LinkOperation.COPY_AND_LINK | [(BamMetadataColumn.MAXIMAL_READ_LENGTH): null]
-        'no insert size file'        | BamImportInstance.LinkOperation.COPY_AND_LINK | [(BamMetadataColumn.INSERT_SIZE_FILE): null]
         'no quality control file'    | BamImportInstance.LinkOperation.COPY_AND_LINK | [(BamMetadataColumn.QUALITY_CONTROL_FILE): null]
         'no library preperation kit' | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.LIBRARY_PREPARATION_KIT): null]
         // link source
         'all given'                  | BamImportInstance.LinkOperation.LINK_SOURCE   | [:]
         'no coverage'                | BamImportInstance.LinkOperation.LINK_SOURCE   | [(BamMetadataColumn.COVERAGE): null]
-        'no insert size file'        | BamImportInstance.LinkOperation.LINK_SOURCE   | [(BamMetadataColumn.INSERT_SIZE_FILE): null]
         'no quality control file'    | BamImportInstance.LinkOperation.LINK_SOURCE   | [(BamMetadataColumn.QUALITY_CONTROL_FILE): null]
         'no library preperation kit' | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.LIBRARY_PREPARATION_KIT): null]
     }
@@ -296,9 +289,9 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
         name                                   | linkOperation                                 | updateMap                                                                                                                                         || errorText
         'no md5sum given'                      | BamImportInstance.LinkOperation.LINK_SOURCE   | [(BamMetadataColumn.MD5): null,]                                                                                                                  || ["The md5sum is required, if the files should only be linked"]
         'no maximal read length given'         | BamImportInstance.LinkOperation.LINK_SOURCE   | [(BamMetadataColumn.MAXIMAL_READ_LENGTH): null,]                                                                                                  || ["The maximalReadLength is required, if the files should only be linked"]
-        'bam file does not ends with bam'      | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.BAM_FILE_PATH): 'test', (BamMetadataColumn.INSERT_SIZE_FILE): null, (BamMetadataColumn.QUALITY_CONTROL_FILE): null,]          || ["Filename 'test' does not end with '.bam'.", "The path 'test' is no absolute path."]
-        'bam file path is no absolute path'    | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.BAM_FILE_PATH): 'test.bam', (BamMetadataColumn.INSERT_SIZE_FILE): null, (BamMetadataColumn.QUALITY_CONTROL_FILE): null,]      || ["The path 'test.bam' is no absolute path."]
-        'bam file does not exist'              | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.BAM_FILE_PATH): '/tmp/test.bam', (BamMetadataColumn.INSERT_SIZE_FILE): null, (BamMetadataColumn.QUALITY_CONTROL_FILE): null,] || ["'/tmp/test.bam' does not exist or cannot be accessed by OTP."]
+        'bam file does not ends with bam'      | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.BAM_FILE_PATH): 'test', (BamMetadataColumn.QUALITY_CONTROL_FILE): null,]          || ["Filename 'test' does not end with '.bam'.", "The path 'test' is no absolute path."]
+        'bam file path is no absolute path'    | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.BAM_FILE_PATH): 'test.bam', (BamMetadataColumn.QUALITY_CONTROL_FILE): null,]      || ["The path 'test.bam' is no absolute path."]
+        'bam file does not exist'              | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.BAM_FILE_PATH): '/tmp/test.bam', (BamMetadataColumn.QUALITY_CONTROL_FILE): null,] || ["'/tmp/test.bam' does not exist or cannot be accessed by OTP."]
         'no project given'                     | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.PROJECT): null,]                                                                                                              || ["The project '' is not registered in OTP."]
         'no individual and sample type  given' | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.INDIVIDUAL): null, (BamMetadataColumn.SAMPLE_TYPE): null,]                                                                    || ["The individual '' is not registered in OTP.", "The sample as combination of the individual '' and the sample type '' is not registered in OTP.", "The sample type '' is not registered in OTP."]
         'no sequencing type given'             | BamImportInstance.LinkOperation.COPY_AND_KEEP | [(BamMetadataColumn.SEQUENCING_TYPE): null,]                                                                                                      || ["No seqType is given."]
@@ -334,7 +327,6 @@ class BamMetadataImportServiceIntegrationSpec extends Specification implements R
         List<String> expected = [
                 qualityDirExistAndCopy,
                 qualityFileExistAndCopy,
-                dataBamImportRow.insertSizeFile.name,
                 dataBamImportRow.qualityControlFile.name,
         ]
 

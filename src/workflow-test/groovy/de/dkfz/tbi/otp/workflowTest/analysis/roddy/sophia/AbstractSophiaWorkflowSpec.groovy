@@ -39,29 +39,6 @@ abstract class AbstractSophiaWorkflowSpec extends AbstractRoddyAnalysisWorkflowS
     SophiaWorkFileService sophiaWorkFileService
 
     @Override
-    void setupData() {
-        super.setupData()
-        if (workflowVersionAnalysis.workflowVersion.startsWith("1")) {
-            linkQualityControlFiles()
-        }
-    }
-
-    /**
-     * Only for Version 1.x of the Sophia Workflow.
-     */
-    private void linkQualityControlFiles() {
-        log.debug("Link Quality Control Files")
-        Path tumorInsertSizeFile = referenceDataDirectory.resolve("sophia").resolve("tumor_HCC1187-div128_insertsize_plot.png_qcValues.txt")
-        Path controlInsertSizeFile = referenceDataDirectory.resolve("sophia").resolve("blood_HCC1187-div128_insertsize_plot.png_qcValues.txt")
-
-        Path finalTumorInsertSizeFile = remoteFileSystem.getPath(bamFileTumor.finalInsertSizeFile.absolutePath)
-        Path finalControlInsertSizeFile = remoteFileSystem.getPath(bamFileControl.finalInsertSizeFile.absolutePath)
-
-        fileService.createLink(finalTumorInsertSizeFile, tumorInsertSizeFile)
-        fileService.createLink(finalControlInsertSizeFile, controlInsertSizeFile)
-    }
-
-    @Override
     List<Path> filesToCheck(SophiaInstance instance) {
         return [
                 sophiaLinkFileService.getFinalAceseqInputFile(instance),

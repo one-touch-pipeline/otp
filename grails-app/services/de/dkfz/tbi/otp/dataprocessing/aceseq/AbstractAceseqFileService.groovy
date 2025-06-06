@@ -34,8 +34,7 @@ import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.util.stream.Collectors
 
-@SuppressWarnings('AbstractClassWithoutAbstractMethod')
-abstract trait AbstractAceseqFileService implements ArtefactFileService<AceseqInstance>, RoddyResultServiceTrait<AceseqInstance> {
+trait AbstractAceseqFileService implements ArtefactFileService<AceseqInstance>, RoddyResultServiceTrait<AceseqInstance> {
 
     /**
      * Example

@@ -688,7 +688,6 @@ class DomainFactory {
                     randomBamFileProperties + [
                             workPackage      : it,
                             coverage         : 30.0,
-                            insertSizeFile   : 'insertSize.txt',
                             maximumReadLength: 101,
                     ] + bamFileProperties,
             )

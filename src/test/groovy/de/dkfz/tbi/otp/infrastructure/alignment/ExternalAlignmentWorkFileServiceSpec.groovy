@@ -138,15 +138,6 @@ class ExternalAlignmentWorkFileServiceSpec extends Specification
         service.getDirectoryPath(bamFile).toString() == "/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}"
     }
 
-    void "test getInsertSizeFile"() {
-        given:
-        setupNonUuid()
-        bamFile.insertSizeFile = "insert-size-file"
-
-        expect:
-        service.getInsertSizeFile(bamFile).toString() == "/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}/insert-size-file"
-    }
-
     void "test getBamFile for uuid structure"() {
         given:
         setupUuid()
@@ -204,15 +195,5 @@ class ExternalAlignmentWorkFileServiceSpec extends Specification
 
         expect:
         service.getDirectoryPath(bamFile).toString() == "/base-dir-uuid"
-    }
-
-    void "test getInsertSizeFile for uuid structure"() {
-        given:
-        setupUuid()
-
-        bamFile.insertSizeFile = "insert-size-file"
-
-        expect:
-        service.getInsertSizeFile(bamFile).toString() == "/base-dir-uuid/insert-size-file"
     }
 }

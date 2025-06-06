@@ -28,7 +28,6 @@ import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
-import de.dkfz.tbi.otp.infrastructure.alignment.RoddyBamFileNames
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
@@ -127,24 +126,6 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
         then:
         AssertionError e = thrown()
         e.message.contains('At least one seqTrack has no value for number of reads')
-    }
-
-    void "test getFinalInsertSizeDirectory method"() {
-        given:
-        File expectedPath = new File("${roddyBamFile.baseDirectory}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/${RoddyBamFileNames.MERGED_DIR}/${RoddyBamFileNames.INSERT_SIZE_FILE_DIRECTORY}")
-
-        expect:
-        expectedPath == roddyBamFile.finalInsertSizeDirectory
-    }
-
-    void "test getFinalInsertSizeFile method"() {
-        given:
-        File expectedPath = new File("${roddyBamFile.baseDirectory}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/${RoddyBamFileNames.MERGED_DIR}/" +
-                "${RoddyBamFileNames.INSERT_SIZE_FILE_DIRECTORY}/${roddyBamFile.sampleType.dirName}_${roddyBamFile.individual.pid}_" +
-                "${RoddyBamFileNames.INSERT_SIZE_FILE_SUFFIX}")
-
-        expect:
-        expectedPath == roddyBamFile.finalInsertSizeFile
     }
 
     void "test getMaximalReadLength method, when sequenceLength is not set, should fail"() {

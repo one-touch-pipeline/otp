@@ -176,13 +176,6 @@ class BamExportImport {
         inputData.bamFile = bamFile
     }
 
-    private String finalInsertSizeFile(RoddyBamFile bamFile) {
-        Path absoluteInsertSizePath = panCancerLinkFileService.getInsertSizeFile(bamFile)
-        Path bamFileDirectory = panCancerLinkFileService.getDirectoryPath(bamFile)
-        Path relativeInsertSizePath = bamFileDirectory.relativize(absoluteInsertSizePath)
-        return relativeInsertSizePath.toString()
-    }
-
     private String qualityControlPath(RoddyBamFile bamFile) {
         return 'qualitycontrol/merged/qualitycontrol.json'
     }
@@ -201,7 +194,6 @@ class BamExportImport {
                 (COVERAGE)               : bamFile.coverage?.toString(),
                 (REFERENCE_GENOME)       : bamFile.referenceGenome.name,
                 (MAXIMAL_READ_LENGTH)    : bamFile.maximalReadLength,
-                (INSERT_SIZE_FILE)       : finalInsertSizeFile(bamFile),
                 (QUALITY_CONTROL_FILE)   : qualityControlPath(bamFile),
                 OLD_PROJECT              : bamFile.individual.project.name,
                 OLD_INDIVIDUAL           : bamFile.individual.pid,

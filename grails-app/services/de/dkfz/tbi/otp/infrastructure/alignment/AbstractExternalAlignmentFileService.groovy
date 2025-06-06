@@ -22,11 +22,12 @@
 package de.dkfz.tbi.otp.infrastructure.alignment
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileService
+import de.dkfz.tbi.otp.dataprocessing.ArtefactFileService
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 
 import java.nio.file.Path
 
-abstract trait AbstractExternalAlignmentFileService extends AbstractAlignmentFileService<ExternallyProcessedBamFile> {
+trait AbstractExternalAlignmentFileService implements ArtefactFileService<ExternallyProcessedBamFile> {
 
     AbstractBamFileService abstractBamFileService
 
@@ -46,10 +47,5 @@ abstract trait AbstractExternalAlignmentFileService extends AbstractAlignmentFil
 
     Path getBamMaxReadLengthFile(ExternallyProcessedBamFile bamFile) {
         return getDirectoryPath(bamFile).resolve("${bamFile.bamFileName}.maxReadLength")
-    }
-
-    @Override
-    Path getInsertSizeFile(ExternallyProcessedBamFile bamFile) {
-        return getDirectoryPath(bamFile).resolve(bamFile.insertSizeFile)
     }
 }

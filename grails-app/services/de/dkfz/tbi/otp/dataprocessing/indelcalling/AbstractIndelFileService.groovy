@@ -26,8 +26,7 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyResultServiceTrait
 
 import java.nio.file.Path
 
-@SuppressWarnings('AbstractClassWithoutAbstractMethod')
-abstract trait AbstractIndelFileService implements ArtefactFileService<IndelCallingInstance>, RoddyResultServiceTrait<IndelCallingInstance> {
+trait AbstractIndelFileService implements ArtefactFileService<IndelCallingInstance>, RoddyResultServiceTrait<IndelCallingInstance> {
 
     private final static String INDEL_RESULTS_PREFIX = 'indel_'
 

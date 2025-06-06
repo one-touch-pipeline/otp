@@ -253,12 +253,6 @@ abstract class AbstractBamFile implements Artefact, CommentableWithProject, Enti
     @Deprecated
     abstract AlignmentConfig getAlignmentConfig()
 
-    /**
-     * @deprecated use {@link AbstractAlignmentFileService#getInsertSizeFile()} and {@link AlignmentLinkFileServiceFactoryService#getService()}
-     */
-    @Deprecated
-    abstract File getFinalInsertSizeFile()
-
     abstract Integer getMaximalReadLength()
 
     /**

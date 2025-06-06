@@ -56,12 +56,6 @@ class ExternallyProcessedBamFile extends AbstractBamFile {
     String importedFrom
 
     /**
-     * The relative path of insert sizeFile.
-     * The file is needed for sophia workflow.
-     */
-    String insertSizeFile
-
-    /**
      * The maximal read length, needed for sophia
      */
     Integer maximumReadLength
@@ -172,15 +166,6 @@ class ExternallyProcessedBamFile extends AbstractBamFile {
         return new File(nonOtpFolder, "analysisImport_${referenceGenome}")
     }
 
-    /**
-     * @deprecated use {@link ExternalAlignmentLinkFileService#getInsertSizeFile}
-     */
-    @Override
-    @Deprecated
-    File getFinalInsertSizeFile() {
-        return new File(importFolder, insertSizeFile)
-    }
-
     @Override
     Integer getMaximalReadLength() {
         return maximumReadLength
@@ -205,7 +190,6 @@ class ExternallyProcessedBamFile extends AbstractBamFile {
             return (val == AbstractBamFile.FileOperationStatus.PROCESSED) ? (obj.md5sum != null) : true
         }
         furtherFiles nullable: true
-        insertSizeFile nullable: true, blank: false, maxSize: 1000, shared: "relativePath"
         maximumReadLength nullable: true, min: 0
     }
 }

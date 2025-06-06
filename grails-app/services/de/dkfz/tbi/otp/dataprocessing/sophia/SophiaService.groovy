@@ -66,7 +66,6 @@ class SophiaService extends AbstractBamFileAnalysisService<SophiaInstance> imple
             ambf${number}.class = de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
             OR (
                 ambf${number}.class = de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
-                AND ambf${number}.insertSizeFile IS NOT NULL
                 AND ambf${number}.maximumReadLength IS NOT NULL
                 AND EXISTS (
                     FROM ExternallyProcessedBamFileQualityAssessment epmbfqa

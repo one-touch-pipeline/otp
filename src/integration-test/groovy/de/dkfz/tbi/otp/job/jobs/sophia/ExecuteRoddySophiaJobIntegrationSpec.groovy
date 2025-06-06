@@ -89,7 +89,6 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
 
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(bamFileDisease)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(bamFileControl)
-        CreateRoddyFileHelper.createInsertSizeFiles(sophiaInstance)
 
         bamFileDisease.mergingWorkPackage.bamFileInProjectFolder = bamFileDisease
         assert bamFileDisease.mergingWorkPackage.save(flush: true)
@@ -109,7 +108,6 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
                 "tumorProperPairPercentage:${bamFileDiseaseMergedBamQa.percentProperlyPaired}",
                 "bamfile_list:${finalBamFileControlPath};${finalBamFileDiseasePath}",
                 "sample_list:${bamFileControl.sampleType.dirName};${bamFileDisease.sampleType.dirName}",
-                "insertsizesfile_list:${bamFileControl.finalInsertSizeFile};${bamFileDisease.finalInsertSizeFile}",
                 "possibleTumorSampleNamePrefixes:${bamFileDisease.sampleType.dirName}",
                 "possibleControlSampleNamePrefixes:${bamFileControl.sampleType.dirName}",
                 "controlDefaultReadLength:${bamFileControl.maximalReadLength}",

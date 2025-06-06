@@ -26,8 +26,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 import java.nio.file.Path
 
-@SuppressWarnings('AbstractClassWithoutAbstractMethod')
-abstract trait AbstractRnaAlignmentFileService extends AbstractPanCancerFileService<RnaRoddyBamFile> {
+trait AbstractRnaAlignmentFileService extends AbstractPanCancerFileService<RnaRoddyBamFile> {
 
     static final String CHIMERIC_BAM_SUFFIX = 'chimeric_merged.mdup.bam'
     static final String ARRIBA_FOLDER = 'fusions_arriba'

@@ -27,8 +27,7 @@ import de.dkfz.tbi.otp.ngsdata.IndividualService
 
 import java.nio.file.Path
 
-@SuppressWarnings('AbstractClassWithoutAbstractMethod')
-abstract trait AbstractSnvFileService implements ArtefactFileService<AbstractSnvCallingInstance>, RoddyResultServiceTrait<RoddySnvCallingInstance> {
+trait AbstractSnvFileService implements ArtefactFileService<AbstractSnvCallingInstance>, RoddyResultServiceTrait<RoddySnvCallingInstance> {
 
     FileService fileService
 

@@ -26,8 +26,7 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyResultServiceTrait
 
 import java.nio.file.Path
 
-@SuppressWarnings('AbstractClassWithoutAbstractMethod')
-abstract trait AbstractSophiaFileService implements ArtefactFileService<SophiaInstance>, RoddyResultServiceTrait<SophiaInstance> {
+trait AbstractSophiaFileService implements ArtefactFileService<SophiaInstance>, RoddyResultServiceTrait<SophiaInstance> {
 
     private final static String SOPHIA_OUTPUT_FILE_SUFFIX = "filtered_somatic_minEventScore3.tsv"
     private final static String QUALITY_CONTROL_JSON_FILE_NAME = "qualitycontrol.json"

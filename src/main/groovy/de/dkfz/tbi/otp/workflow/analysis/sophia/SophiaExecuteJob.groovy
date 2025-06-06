@@ -100,14 +100,6 @@ class SophiaExecuteJob extends AbstractExecuteRoddyPipelineJob implements Sophia
                 tumorDefaultReadLength     : roddyConfigValueService.createValueMap(tumorDefaultReadLength.toString()),
         ]
 
-        if (workflowStep.workflowRun.workflowVersion.workflowVersion.startsWith("1")) {
-            Path diseaseInsertSizeFile = alignmentLinkFileServiceFactoryService.getService(bamFileDisease).getInsertSizeFile(bamFileDisease)
-            Path controlInsertSizeFile = alignmentLinkFileServiceFactoryService.getService(bamFileControl).getInsertSizeFile(bamFileControl)
-
-            additionalValues << [
-                insertsizesfile_list       : roddyConfigValueService.createValueMap("${controlInsertSizeFile};${diseaseInsertSizeFile}" as String),
-            ]
-        }
         return roddyConfigValueService.getAnalysisInputVersion2(sophiaInstance, workDirectory) + additionalValues as Map<String, Map<String, String>>
     }
 

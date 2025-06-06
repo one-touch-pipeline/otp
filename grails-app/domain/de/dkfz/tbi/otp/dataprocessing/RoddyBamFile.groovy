@@ -238,23 +238,6 @@ class RoddyBamFile extends AbstractBamFile implements HasIdentifier, ProcessPara
     }
 
     /**
-     * @deprecated use {@link PanCancerLinkFileService#getInsertSizeDirectory} instead
-     */
-    @Deprecated
-    File getFinalInsertSizeDirectory() {
-        return new File(finalMergedQADirectory, RoddyBamFileNames.INSERT_SIZE_FILE_DIRECTORY)
-    }
-
-    /**
-     * @deprecated use {@link PanCancerLinkFileService#getInsertSizeFile} instead
-     */
-    @Deprecated
-    @Override
-    File getFinalInsertSizeFile() {
-        return new File(finalInsertSizeDirectory, "${this.sampleType.dirName}_${this.individual.pid}_${RoddyBamFileNames.INSERT_SIZE_FILE_SUFFIX}")
-    }
-
-    /**
      * returns whether the old or the new file structure is used.
      * <ul>
      *     <li>old file structure: in the old structure the processing was done in a temporary work directory. After

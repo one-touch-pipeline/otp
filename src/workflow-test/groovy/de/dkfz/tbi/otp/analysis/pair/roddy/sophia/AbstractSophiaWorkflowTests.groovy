@@ -29,8 +29,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.project.RoddyConfiguration
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.SessionUtils
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import java.nio.file.Path
 import java.time.Duration
@@ -41,14 +39,6 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
     ProjectService projectService
     SophiaService sophiaService
-
-    @Override
-    void setupData() {
-        SessionUtils.withTransaction {
-            linkQualityControlFiles()
-            super.setupData()
-        }
-    }
 
     @Override
     ConfigPerProjectAndSeqType createConfig() {
@@ -93,21 +83,6 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
         }
 
         return referenceGenome
-    }
-
-    void linkQualityControlFiles() {
-        File tumorInsertSizeFile = new File(workflowData, "tumor_HCC1187-div128_insertsize_plot.png_qcValues.txt")
-        File controlInsertSizeFile = new File(workflowData, "blood_HCC1187-div128_insertsize_plot.png_qcValues.txt")
-
-        File finalTumorInsertSizeFile = bamFileTumor.finalInsertSizeFile
-        File finalControlInsertSizeFile = bamFileControl.finalInsertSizeFile
-
-        LogThreadLocal.withThreadLog(System.out) {
-            linkFileUtils.createAndValidateLinks([
-                    (tumorInsertSizeFile)  : finalTumorInsertSizeFile,
-                    (controlInsertSizeFile): finalControlInsertSizeFile,
-            ])
-        }
     }
 
     @Override

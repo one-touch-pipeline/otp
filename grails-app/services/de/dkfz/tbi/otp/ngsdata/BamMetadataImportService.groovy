@@ -131,7 +131,6 @@ class BamMetadataImportService {
                 String _project = uniqueColumnValue(row, BamMetadataColumn.PROJECT)
                 String coverage = uniqueColumnValue(row, BamMetadataColumn.COVERAGE)
                 String md5sum = uniqueColumnValue(row, BamMetadataColumn.MD5)
-                String insertSizeFile = uniqueColumnValue(row, BamMetadataColumn.INSERT_SIZE_FILE)
                 String qualityControlFile = uniqueColumnValue(row, BamMetadataColumn.QUALITY_CONTROL_FILE)
                 String libraryPreparationKit = uniqueColumnValue(row, BamMetadataColumn.LIBRARY_PREPARATION_KIT)
                 String maximalReadLength = uniqueColumnValue(row, BamMetadataColumn.MAXIMAL_READ_LENGTH)
@@ -171,24 +170,13 @@ class BamMetadataImportService {
                         coverage: coverage ? Double.parseDouble(coverage) : null,
                         md5sum: md5sum ?: null,
                         maximumReadLength: maximalReadLength ? Integer.parseInt(maximalReadLength) : null,
-                        furtherFiles: [] as Set,
-                        insertSizeFile: insertSizeFile).save(flush: true)
+                        furtherFiles: [] as Set).save(flush: true)
 
                 Path bamFileParent = fileSystem.getPath(epmbf.importedFrom).parent
 
                 furtherFiles.findAll().findAll { String path -> Files.exists(bamFileParent.resolve(path))
                 }.each {
                     epmbf.furtherFiles.add(it)
-                }
-
-                if (insertSizeFile) {
-                    Path insertSizeFilePath = bamFileParent.resolve(insertSizeFile)
-                    if (!epmbf.furtherFiles.find {
-                        Path furtherPath = bamFileParent.resolve(it)
-                        insertSizeFilePath.startsWith(furtherPath)
-                    }) {
-                        epmbf.furtherFiles.add(insertSizeFile)
-                    }
                 }
 
                 if (qualityControlFile) {

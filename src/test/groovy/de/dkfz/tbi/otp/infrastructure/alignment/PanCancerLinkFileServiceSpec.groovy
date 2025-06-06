@@ -88,25 +88,6 @@ class PanCancerLinkFileServiceSpec extends Specification implements ServiceUnitT
         }
     }
 
-    void "test getInsertSizeDirectory"() {
-        given:
-        Path expectedPath = Paths.get("${baseDir}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/${RoddyBamFileNames.MERGED_DIR}/" +
-                "${RoddyBamFileNames.INSERT_SIZE_FILE_DIRECTORY}")
-
-        expect:
-        expectedPath == service.getInsertSizeDirectory(roddyBamFile)
-    }
-
-    void "test getInsertSizeFile"() {
-        given:
-        Path expectedPath = Paths.get("${baseDir}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/${RoddyBamFileNames.MERGED_DIR}/" +
-                "${RoddyBamFileNames.INSERT_SIZE_FILE_DIRECTORY}/${roddyBamFile.sampleType.dirName}_${roddyBamFile.individual.pid}_" +
-                "${RoddyBamFileNames.INSERT_SIZE_FILE_SUFFIX}")
-
-        expect:
-        expectedPath == service.getInsertSizeFile(roddyBamFile)
-    }
-
     void "test getQADirectory"() {
         expect:
         Paths.get("${baseDir}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}") ==

@@ -58,7 +58,6 @@ class SophiaServiceIntegrationSpec extends Specification {
         where:
         property             | value
         'coverage'           | 5
-        'insertSizeFile'     | null
         'maximumReadLength'  | null
     }
 
@@ -83,7 +82,6 @@ class SophiaServiceIntegrationSpec extends Specification {
         property             | value
         'coverage'           | 30
         'coverage'           | null
-        'insertSizeFile'     | 'insertSize.txt'
         'maximumReadLength'  | 5
         'maximumReadLength'  | 200
     }

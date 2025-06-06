@@ -214,7 +214,6 @@ abstract class AbstractAnalysisDomainFactory<T extends BamFilePairAnalysis> impl
                     DomainFactory.randomBamFileProperties + [
                             workPackage      : it,
                             coverage         : DEFAULT_COVERAGE,
-                            insertSizeFile   : 'insertSize.txt',
                             maximumReadLength: 101,
                     ] + bamFileProperties,
             )

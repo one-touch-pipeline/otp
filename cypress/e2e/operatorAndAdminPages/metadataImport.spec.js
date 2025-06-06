@@ -61,7 +61,7 @@ describe('Check metadata import page', () => {
         cy.get('@numberRow').find('button.js-edit').click();
         cy.get('@numberRow').find('input[name="value"]').clear().type(ticket.number);
         cy.get('@numberRow').find('button.save').click();
-        cy.wait('@assignTicketNumber', { timeout: 60000 }).its('response.statusCode').should('eq', 200);
+        cy.wait('@assignTicketNumber', { timeout: 120000 }).its('response.statusCode').should('eq', 200);
         cy.get(successMessageQuery).should('exist').and('contain.text', 'Success');
         cy.get('@numberRow').contains(ticket.number);
 

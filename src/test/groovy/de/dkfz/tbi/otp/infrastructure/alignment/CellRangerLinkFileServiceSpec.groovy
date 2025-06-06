@@ -64,14 +64,6 @@ class CellRangerLinkFileServiceSpec extends Specification implements ServiceUnit
         }
     }
 
-    void "test getInsertSizeFile"() {
-        when:
-        service.getInsertSizeFile(bamFile)
-
-        then:
-        thrown(UnsupportedOperationException)
-    }
-
     void "test getSampleDirectory"() {
         expect:
         service.getSampleDirectory(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/cell-ranger-input/${bamFile.id}"

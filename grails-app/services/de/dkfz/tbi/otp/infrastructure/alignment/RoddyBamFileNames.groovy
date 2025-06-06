@@ -31,8 +31,5 @@ final class RoddyBamFileNames {
 
     static final String MERGED_DIR = 'merged'
 
-    static final String INSERT_SIZE_FILE_SUFFIX = 'insertsize_plot.png_qcValues.txt'
-    static final String INSERT_SIZE_FILE_DIRECTORY = 'insertsize_distribution'
-
     private RoddyBamFileNames() { }
 }
