@@ -101,6 +101,8 @@ class MetadataImportService {
 
     static final String MATE_NUMBER_EXPRESSION = /^(?<index>i|I)?(?<number>[1-9]\d*)$/
 
+    static final String DISALLOWED_CHARS = '[^a-zA-Z0-9\\.\\-_\\+]'
+
     /**
      * @return A collection of descriptions of the validations which are performed
      */
@@ -210,7 +212,7 @@ class MetadataImportService {
         Path targetDir = metadataStorage.resolve(yearMonth).resolve(ticketNumber)
 
         int position = oldName.lastIndexOf('.')
-        String newName = "${oldName.substring(0, position)}-${timeStamp}${oldName.substring(position)}"
+        String newName = "${oldName.substring(0, position)}-${timeStamp}${oldName.substring(position)}".replaceAll(DISALLOWED_CHARS, "_")
 
         return targetDir.resolve(newName)
     }

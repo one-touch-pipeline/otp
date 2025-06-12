@@ -46,8 +46,8 @@ class MetaDataFile implements Entity {
     ]
 
     static constraints = {
-        fileNameSource(blank: false, shared: "pathComponent")
-        filePathSource(blank: true, shared: "absolutePath")
+        fileNameSource(blank: false)
+        filePathSource(blank: true)
         filePathTarget(nullable: true, shared: "absolutePath")
         md5sum(nullable: true, matches: /^[0-9a-f]{32}$/)
     }
