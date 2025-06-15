@@ -58,12 +58,12 @@ class ExternalAlignmentLinkFileServiceSpec extends Specification implements Serv
 
     void "test getBamFile"() {
         expect:
-        service.getBamFile(bamFile).toString() == "/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}/${bamFile.bamFileName}"
+        service.getBamFile(bamFile) == Paths.get("/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}").resolve(bamFile.bamFileName)
     }
 
     void "test getBaiFile"() {
         expect:
-        service.getBaiFile(bamFile).toString() == "/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}/${bamFile.baiFileName}"
+        service.getBaiFile(bamFile) == Paths.get("/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}").resolve(bamFile.baiFileName)
     }
 
     void "test getFurtherFiles"() {
@@ -75,7 +75,7 @@ class ExternalAlignmentLinkFileServiceSpec extends Specification implements Serv
         bamFile.furtherFiles = files as Set
 
         List<Path> expected = files.collect {
-            Paths.get("/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}/${it}")
+            Paths.get("/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}").resolve(it)
         }
 
         expect:
@@ -84,18 +84,18 @@ class ExternalAlignmentLinkFileServiceSpec extends Specification implements Serv
 
     void "test getBamMaxReadLengthFile"() {
         expect:
-        service.getBamMaxReadLengthFile(bamFile).toString() ==
-                "/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}/${bamFile.bamFileName}.maxReadLength"
+        service.getBamMaxReadLengthFile(bamFile) ==
+                Paths.get("/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}").resolve("${bamFile.bamFileName}.maxReadLength")
     }
 
     void "test getNonOtpFolder"() {
         expect:
-        service.getNonOtpFolder(bamFile).toString() == "/base-dir/nonOTP"
+        service.getNonOtpFolder(bamFile) == Paths.get("/base-dir/nonOTP")
     }
 
     void "test getImportFolder"() {
         expect:
-        service.getDirectoryPath(bamFile).toString() == "/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}"
+        service.getDirectoryPath(bamFile) == Paths.get("/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}")
     }
 
     void "test getPathForFurtherProcessing, should return final directory"() {
@@ -108,7 +108,8 @@ class ExternalAlignmentLinkFileServiceSpec extends Specification implements Serv
         bamFile.mergingWorkPackage.save(flush: true)
 
         expect:
-        service.getPathForFurtherProcessing(bamFile).toString() == "/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}/${bamFile.bamFileName}"
+        service.getPathForFurtherProcessing(bamFile) ==
+                Paths.get("/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}").resolve(bamFile.bamFileName)
     }
 
     void "test getPathForFurtherProcessing, when not set in mergingWorkPackage, should throw exception"() {

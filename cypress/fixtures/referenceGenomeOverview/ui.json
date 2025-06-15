@@ -1,0 +1,36 @@
+{
+  "buttons": [
+    "Show Edit Switch",
+    "Show Auxiliary Columns",
+    "Show Legacy Data",
+    "Download CSV"
+  ],
+  "allColumns": [
+    "Name",
+    "File name prefix",
+    "Species",
+    "Length",
+    "Length without N",
+    "Folder",
+    "Chromosome prefix",
+    "Chromosome suffix",
+    "Finger printing file name",
+    "Date created",
+    "Legacy"
+  ],
+  "defaultColumns": [
+    "Name",
+    "Species",
+    "Folder",
+    "Date created",
+    "Legacy"
+  ],
+  "auxiliaryColumns": [
+    "File name prefix",
+    "Length",
+    "Length without N",
+    "Chromosome prefix",
+    "Chromosome suffix",
+    "Finger printing file name"
+  ]
+}

@@ -70,64 +70,72 @@ class ReferenceGenomeController implements CheckAndCall {
     }
 
     def updateName(UpdateReferenceGenomeCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        checkDefaultErrorsAndCallMethod(cmd) {
             referenceGenomeService.updateNameValue(cmd.id, cmd.value)
+            render([success: true] as JSON)
         }
     }
 
     def updateFileNamePrefix(UpdateReferenceGenomeCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        checkDefaultErrorsAndCallMethod(cmd) {
             referenceGenomeService.updateFileNamePrefixValue(cmd.id, cmd.value)
+            render([success: true] as JSON)
         }
     }
 
     def updateSpecies(UpdateReferenceGenomeListCommand cmd) {
-        checkErrorAndCallMethodReturns(cmd) {
+        checkDefaultErrorsAndCallMethod(cmd) {
             referenceGenomeService.updateSpeciesValue(cmd.id, cmd.selectedValuesList as Set)
             render([:] as JSON)
         }
     }
 
     def updateSpeciesWithStrain(UpdateReferenceGenomeListCommand cmd) {
-        checkErrorAndCallMethodReturns(cmd) {
+        checkDefaultErrorsAndCallMethod(cmd) {
             referenceGenomeService.updateSpeciesWithStrainValue(cmd.id, cmd.selectedValuesList as Set)
             render([:] as JSON)
         }
     }
 
     def updateLength(UpdateReferenceGenomeLongCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        checkDefaultErrorsAndCallMethod(cmd) {
             referenceGenomeService.updateLengthValue(cmd.id, cmd.value)
+            render([success: true] as JSON)
         }
     }
 
     def updateLengthWithoutN(UpdateReferenceGenomeLongCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        checkDefaultErrorsAndCallMethod(cmd) {
             referenceGenomeService.updateLengthWithoutNValue(cmd.id, cmd.value)
+            render([success: true] as JSON)
         }
     }
 
     def updatePath(UpdateReferenceGenomeCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        checkDefaultErrorsAndCallMethod(cmd) {
             referenceGenomeService.updatePathValue(cmd.id, cmd.value)
+            render([success: true] as JSON)
         }
     }
 
     def updateChromosomePrefix(UpdateReferenceGenomeCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        checkDefaultErrorsAndCallMethod(cmd) {
             referenceGenomeService.updateChromosomePrefixValue(cmd.id, cmd.value)
+            render([success: true] as JSON)
         }
     }
 
     def updateChromosomeSuffix(UpdateReferenceGenomeCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        checkDefaultErrorsAndCallMethod(cmd) {
             referenceGenomeService.updateChromosomeSuffixValue(cmd.id, cmd.value)
+            render([success: true] as JSON)
         }
     }
 
     def updateFingerPrintingFileName(UpdateReferenceGenomeCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
+        checkDefaultErrorsAndCallMethod(cmd) {
             referenceGenomeService.updateFingerPrintingFileNameValue(cmd.id, cmd.value)
+            render([success: true] as JSON)
         }
     }
 }

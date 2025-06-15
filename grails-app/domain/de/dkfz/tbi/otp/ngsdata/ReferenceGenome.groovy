@@ -175,6 +175,6 @@ class ReferenceGenome implements Entity, Legacy {
 
     @Override
     String toString() {
-        return name
+        return name + (legacy ? " (legacy)" : "")
     }
 }

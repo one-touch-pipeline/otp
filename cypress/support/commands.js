@@ -308,3 +308,38 @@ Cypress.Commands.add('logBoth', (text) => {
   cy.log(text);
   cy.task('log', text);
 });
+
+/**
+ * Command for logging when a switch is turned on to avoid logging too much in the CI pipeline.
+ *
+ * The environment variable CYPRESS_LOG_DEBUG_ENABLED must be set to true to enable it.
+ * This could be useful for performing local cypress test.
+ */
+Cypress.Commands.add('logDebug', (message, ...args) => {
+  if (Cypress.env('LOG_DEBUG_ENABLED')) {
+    return cy.log(`debug: ${message}`, args);
+  }
+  return undefined;
+});
+
+/**
+ * Command to toggle a button and check the expected result
+ * @param {string} buttonText - The text content of the button to find
+ * @param {string} expectedSelector - The selector to verify after clicking
+ * @param {(currentSubject: JQuery<HTMLElement>) => void} assertionCallback - Callback for assertions
+ * @example
+ * cy.toggleButton('Show Edit', '.edit-switches', ($el) => {
+ *   expect($el).to.be.visible;
+ * });
+ */
+Cypress.Commands.add('toggleButton', (buttonText, expectedSelector, assertionCallback) => {
+  'use strict';
+
+  return cy.contains('button', buttonText)
+    .should('exist')
+    .click()
+    .then(() => {
+      cy.get(expectedSelector)
+        .should('exist').should(assertionCallback);
+    });
+});

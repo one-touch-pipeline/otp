@@ -44,6 +44,9 @@ updates:
         update-types: ["version-update:semver-major", "version-update:semver-minor"]
       - dependency-name: "org.liquibase:liquibase-core"
         update-types: [ "version-update:semver-major", "version-update:semver-minor" ]
+      # Grails 6 requires asset pipeline major version 4, while Grails 7 requires version 5
+      - dependency-name: "com.bertramlabs.plugins:*"
+        update-types: [ "version-update:semver-major", "version-update:semver-minor" ]
     rebase-strategy: none
   - package-ecosystem: npm
     directory: /

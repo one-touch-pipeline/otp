@@ -163,7 +163,7 @@ class ExternallyProcessedBamFile extends AbstractBamFile {
      */
     @Deprecated
     File getImportFolder() {
-        return new File(nonOtpFolder, "analysisImport_${referenceGenome}")
+        return new File(nonOtpFolder, "analysisImport_${referenceGenome.name}")
     }
 
     @Override

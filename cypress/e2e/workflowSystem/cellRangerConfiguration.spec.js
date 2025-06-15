@@ -104,13 +104,13 @@ describe('Check cell ranger configuration page', () => {
               expect(interception.response.statusCode).to.equal(200);
               const amountOfSamplesSend = (interception.request.body.match(/samples/g) || []).length;
               expect(amountOfSamplesSend).to.equal(samplesSubmitted);
-            });
 
-            /** The created mwps should be contained in the table for the existing runs */
-            cy.get('#mwpTable_processing').should('not.be.visible');
-            cy.get('.otpSuccessToast').should('be.visible').and('contain.text', 'successfully created');
-            cy.get('table#mwpTable tbody tr').then((mwpTableRowsAfter) => {
-              expect(mwpTableRowsAfter.length).to.eq(cellRunsBefore + samplesSubmitted);
+              /** The created mwps should be contained in the table for the existing runs */
+              cy.get('#mwpTable_processing').should('not.be.visible');
+              cy.get('.otpSuccessToast').should('be.visible').and('contain.text', 'successfully created');
+              cy.get('table#mwpTable tbody tr').then((mwpTableRowsAfter) => {
+                expect(mwpTableRowsAfter.length).to.eq(cellRunsBefore + samplesSubmitted);
+              });
             });
           });
         });

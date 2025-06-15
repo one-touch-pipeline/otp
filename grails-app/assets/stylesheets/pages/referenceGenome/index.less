@@ -19,43 +19,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-@import "../../colors";
 
-.submit-area {
-  display: flex;
-  flex-direction: column;
+div.otpDataTables #referenceGenome-datatable {
+    th.sorting_asc, th.sorting_desc {
+        background-color: #FFFFFF;
+    }
 
-  .actions {
-    display: flex;
-    flex-direction: row;
-  }
-}
+    th {
+        white-space: collapse;
+        padding: 0.5em 1.3em 0.5em 0.4em;
+    }
 
-.user-add-button, .pi-user-add-button {
-  float: right;
-  margin: 17px;
-}
-
-.user-delete-button {
-  float: right;
-}
-
-.list-group {
-  max-height: 300px;
-  margin-bottom: 10px;
-  overflow-y: scroll;
-  -webkit-overflow-scrolling: touch;
-}
-
-.wrap-line-breaks {
-  white-space: pre-wrap;
-}
-
-// Should hide remove button for pi option in pi selection
-.pi-role-select-row li[title="PI"] {
-  padding-left: 0.75rem !important;
-
-  .select2-selection__choice__remove {
-    display: none;
-  }
+    // Make the header sticky/fixed by scrolling vertically
+    // The datatables option with fixedHeader: true has an issue with the alignment
+    thead tr:has(> th) {
+        position: sticky;
+        z-index: 3;
+        top: 0;
+        background: white;
+        vertical-align: middle;
+    }
 }

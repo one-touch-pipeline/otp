@@ -433,8 +433,7 @@ $.otp.getDownloadButton = (columnSelector, fileName, beforeDownload = (callback)
   const defaultFileName = document.title.replaceAll(' ', '_');
   const date = new Date();
   const formattedDate = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1)
-    .padStart(2, '0')}-${String(date.getUTCDate())
-    .padStart(2, '0')}`;
+    .padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
 
   return [{
     extend: 'csvHtml5',

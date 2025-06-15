@@ -1,0 +1,98 @@
+{
+  "filterType": "Project",
+  "project": "ExampleProject",
+  "filename": "Reference_Genomes",
+  "extension": ".csv",
+  "full": {
+    "header": [
+      "Name",
+      "File name prefix",
+      "Species",
+      "Length",
+      "Length without N",
+      "Folder",
+      "Chromosome prefix",
+      "Chromosome suffix",
+      "Fingerprinting file name",
+      "Date created",
+      "Legacy"
+    ],
+    "data": [
+      [
+        "1KGRef_PhiX",
+        "1KGRef_PhiX",
+        "Human (Homo sapiens) [No strain available]",
+        "100",
+        "100",
+        "1KGRef_PhiX",
+        "",
+        "",
+        "",
+        "2022-08-26",
+        "false"
+      ],
+      [
+        "hg_GRCh38",
+        "hg_GRCh38",
+        "Human (Homo sapiens) [No strain available]",
+        "100",
+        "100",
+        "hg_GRCh38",
+        "",
+        "",
+        "",
+        "2022-08-26",
+        "false"
+      ]
+    ],
+    "data_legacy": [
+      [
+        "1KGRef_PhiX_OLD",
+        "hs37d5_PhiX",
+        "",
+        "3137459891",
+        "2900439805",
+        "bwa06_1KGRef_PhiX",
+        "",
+        "",
+        "snp138Common.n1000.vh20140318.bed",
+        "2021-01-21",
+        "true"
+      ]
+    ]
+  },
+  "compact": {
+    "header": [
+      "Name",
+      "Species",
+      "Folder",
+      "Date created",
+      "Legacy"
+    ],
+    "data": [
+      [
+        "1KGRef_PhiX",
+        "Human (Homo sapiens) [No strain available]",
+        "1KGRef_PhiX",
+        "2022-08-26",
+        "false"
+      ],
+      [
+        "hs37d5_GRCm38mm",
+        "Mouse (Mus musculus); Human (Homo sapiens) [No strain available]",
+        "bwa06_hs37d5_GRCm38mm",
+        "2021-01-21",
+        "false"
+      ]
+    ],
+    "data_legacy": [
+      [
+        "1KGRef_PhiX_OLD",
+        "",
+        "bwa06_1KGRef_PhiX",
+        "2021-01-21",
+        "true"
+      ]
+    ]
+  }
+}

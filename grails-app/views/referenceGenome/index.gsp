@@ -25,6 +25,7 @@
     <title><g:message code="referenceGenome.title"/></title>
     <asset:javascript src="pages/referenceGenome/datatable.js"/>
     <asset:javascript src="taglib/EditorSwitch.js"/>
+    <asset:stylesheet src="pages/referenceGenome/index.less"/>
 </head>
 
 <body>
@@ -35,23 +36,94 @@
     <h3><g:message code="referenceGenome.title"/></h3>
         <table id="referenceGenome-datatable" class="table table-sm table-striped table-hover table-bordered" style="width:100%">
             <thead>
-            <tr>
-                <th title="${g.message(code: "referenceGenome.name")}">
-                    ${g.message(code: "referenceGenome.name")}
+            <tr class="flex-row">
+                <th>
+                    <div class="d-sm-flex">
+                        ${g.message(code: "referenceGenome.name")}
+                        <div class="px-1">
+                            <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "referenceGenome.name.tooltip")}"></i>
+                        </div>
+                    </div>
+                <th>
+                    <div class="d-sm-flex">
+                        ${g.message(code: "referenceGenome.fileNamePrefix")}
+                        <div class="px-1">
+                            <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "referenceGenome.fileNamePrefix.tooltip")}"></i>
+                        </div>
+                    </div>
                 </th>
-                <th title="${g.message(code: "referenceGenome.fileNamePrefix")}">
-                    ${g.message(code: "referenceGenome.fileNamePrefix")}
+                <th>
+                    <div class="d-sm-flex">
+                        <g:message code="referenceGenome.species"/>
+                        <div class="px-1">
+                            <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "referenceGenome.species.tooltip")}"></i>
+                        </div>
+                    </div>
                 </th>
-                <th><g:message code="referenceGenome.species"/></th>
-                <th><g:message code="referenceGenome.speciesWithStrain"/></th>
-                <th><g:message code="referenceGenome.length"/></th>
-                <th><g:message code="referenceGenome.lengthWithoutN"/></th>
-                <th><g:message code="referenceGenome.path"/></th>
-                <th><g:message code="referenceGenome.chromosomePrefix"/></th>
-                <th><g:message code="referenceGenome.chromosomeSuffix"/></th>
-                <th><g:message code="referenceGenome.fingerPrintingFileName"/></th>
-                <th><g:message code="referenceGenome.dateCreated"/></th>
-                <th><g:message code="referenceGenome.legacy"/></th>
+                <th>
+                    <div class="d-sm-flex">
+                        <g:message code="referenceGenome.length"/>
+                        <div class="px-1">
+                            <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "referenceGenome.length.tooltip")}"></i>
+                        </div>
+                    </div>
+                </th>
+                <th>
+                    <div class="d-sm-flex">
+                    <g:message code="referenceGenome.lengthWithoutN"/>
+                        <div class="px-1">
+                            <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "referenceGenome.lengthWithoutN.tooltip")}"></i>
+                        </div>
+                    </div>
+                </th>
+                <th>
+                    <div class="d-sm-flex">
+                    <g:message code="referenceGenome.folder"/>
+                        <div class="px-1">
+                            <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "referenceGenome.folder.tooltip")}"></i>
+                        </div>
+                    </div>
+                </th>
+                <th>
+                    <div class="d-sm-flex">
+                    <g:message code="referenceGenome.chromosomePrefix"/>
+                        <div class="px-1">
+                            <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "referenceGenome.chromosomePrefix.tooltip")}"></i>
+                        </div>
+                    </div>
+                </th>
+                <th>
+                    <div class="d-sm-flex">
+                    <g:message code="referenceGenome.chromosomeSuffix"/>
+                        <div class="px-1">
+                            <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "referenceGenome.chromosomeSuffix.tooltip")}"></i>
+                        </div>
+                    </div>
+                </th>
+                <th>
+                    <div class="d-sm-flex">
+                        <g:message code="referenceGenome.fingerPrintingFileName"/>
+                        <div class="px-1">
+                            <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "referenceGenome.fingerPrintingFileName.tooltip")}"></i>
+                        </div>
+                    </div>
+                </th>
+                <th>
+                    <div class="d-sm-flex">
+                        <g:message code="referenceGenome.dateCreated"/>
+                        <div class="px-1">
+                            <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "referenceGenome.dateCreated.tooltip")}"></i>
+                        </div>
+                    </div>
+                </th>
+                <th>
+                    <div class="d-sm-flex">
+                        <g:message code="referenceGenome.legacy"/>
+                        <div class="px-1">
+                            <i class="helper-icon bi bi-question-circle-fill" title="${g.message(code: "referenceGenome.legacy.tooltip")}"></i>
+                        </div>
+                    </div>
+                </th>
             </tr>
             </thead>
             <tbody>
@@ -78,9 +150,6 @@
                                 value="${referenceGenome.species}"
                                 optionKey="id"
                         />
-
-                    </td>
-                    <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDownMulti"
@@ -126,7 +195,7 @@
                                 link="${g.createLink(controller: 'referenceGenome', action: 'updateFingerPrintingFileName', id: referenceGenome.id)}"
                                 value="${referenceGenome.fingerPrintingFileName}"/>
                     </td>
-                <td>${referenceGenome.dateCreated}</td>
+                    <td>${referenceGenome.dateCreated}</td>
                     <td>
                         <g:render template="/templates/slider" model="[
                                 targetAction: 'changeReferenceGenomeLegacyState',
