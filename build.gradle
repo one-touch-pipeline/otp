@@ -428,7 +428,7 @@ dependencies {
     assets "com.bertramlabs.plugins:sass-asset-pipeline:4.5.1"
 
     // JDBC
-    runtimeOnly 'org.postgresql:postgresql:42.7.6'
+    runtimeOnly 'org.postgresql:postgresql:42.7.7'
 
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
