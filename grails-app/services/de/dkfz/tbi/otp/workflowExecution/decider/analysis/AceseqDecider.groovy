@@ -28,35 +28,38 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.workflow.analysis.snv.SnvWorkflow
+import de.dkfz.tbi.otp.dataprocessing.aceseq.*
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
+import de.dkfz.tbi.otp.workflow.analysis.aceseq.AceseqWorkflow
 import de.dkfz.tbi.otp.workflowExecution.ArtefactType
 
 @Component
 @Transactional
 @Slf4j
-class SnvDecider extends AbstractAnalysisDecider<AbstractSnvCallingInstance> {
+class AceseqDecider extends AbstractAnalysisDecider<AceseqInstance> {
 
     @Autowired
-    SnvWorkFileService snvWorkFileService
+    AceseqWorkFileService aceseqWorkFileService
 
     @Override
-    SnvWorkFileService getWorkFileService() {
-        return snvWorkFileService
+    AceseqWorkFileService getWorkFileService() {
+        return aceseqWorkFileService
     }
 
-    final String workflowName = SnvWorkflow.WORKFLOW
+    final String workflowName = AceseqWorkflow.WORKFLOW
 
-    final Class<AbstractSnvCallingInstance> instanceClass = AbstractSnvCallingInstance
+    final Class<AceseqInstance> instanceClass = AceseqInstance
 
-    final Map<String, Class<? extends BamFilePairAnalysis>> dependingAnalysisInstanceClass = Collections.emptyMap()
+    final Map<String, Class<? extends BamFilePairAnalysis>> dependingAnalysisInstanceClass = [
+            (AceseqWorkflow.SOPHIA_INPUT): SophiaInstance,
+    ].asImmutable()
 
-    final ArtefactType artefactType = ArtefactType.SNV
+    final ArtefactType artefactType = ArtefactType.ACESEQ
 
-    final Pipeline.Name pipelineName = Pipeline.Name.RODDY_SNV
+    final Pipeline.Name pipelineName = Pipeline.Name.RODDY_ACESEQ
 
     @Override
     BamFilePairAnalysis createAnalysisWithoutFlush(Map properties) {
-        return new RoddySnvCallingInstance(properties).save(flush: false, deepValidate: false)
+        return new AceseqInstance(properties).save(flush: false, deepValidate: false)
     }
 }

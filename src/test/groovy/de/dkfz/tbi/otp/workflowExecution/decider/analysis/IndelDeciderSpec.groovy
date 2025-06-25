@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.IndelDomainFactory
 import de.dkfz.tbi.otp.workflow.analysis.indel.IndelWorkflow
 import de.dkfz.tbi.otp.workflowExecution.ArtefactType
 
-class IndelDeciderSpec extends AbstractAnalysisDeciderSpec<IndelCallingInstance> {
+class IndelDeciderSpec extends AbstractAnalysisDeciderNoAnalysisDependencySpec<IndelCallingInstance> {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -39,26 +39,34 @@ class IndelDeciderSpec extends AbstractAnalysisDeciderSpec<IndelCallingInstance>
 
     void setup() {
         decider = new IndelDecider([
-                indelWorkFileService: new IndelWorkFileService(),
+                indelWorkFileService: Mock(IndelWorkFileService) {
+                    0 * _
+                    _ * constructInstanceName(_) >> "instance"
+                },
         ])
     }
 
-    void "getWorkflowName"() {
+    void "getWorkflowName, should return IndelWorkflow.WORKFLOW"() {
         expect:
         decider.workflowName == IndelWorkflow.WORKFLOW
     }
 
-    void "getInstanceClass"() {
+    void "getInstanceClass, should return IndelCallingInstance"() {
         expect:
         decider.instanceClass == IndelCallingInstance
     }
 
-    void "getArtefactType"() {
+    void "getDependingAnalysisInstanceClass, should return empty map"() {
+        expect:
+        decider.dependingAnalysisInstanceClass == [:]
+    }
+
+    void "getArtefactType, should return ArtefactType.INDEL"() {
         expect:
         decider.artefactType == ArtefactType.INDEL
     }
 
-    void "getPipelineName"() {
+    void "getPipelineName, should return Pipeline.Name.RODDY_INDEL"() {
         expect:
         decider.pipelineName == Pipeline.Name.RODDY_INDEL
     }

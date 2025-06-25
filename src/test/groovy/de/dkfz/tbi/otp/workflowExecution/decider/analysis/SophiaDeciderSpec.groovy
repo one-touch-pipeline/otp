@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.SophiaDomainFactory
 import de.dkfz.tbi.otp.workflow.analysis.sophia.SophiaWorkflow
 import de.dkfz.tbi.otp.workflowExecution.ArtefactType
 
-class SophiaDeciderSpec extends AbstractAnalysisDeciderSpec<SophiaInstance> {
+class SophiaDeciderSpec extends AbstractAnalysisDeciderNoAnalysisDependencySpec<SophiaInstance> {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -39,26 +39,34 @@ class SophiaDeciderSpec extends AbstractAnalysisDeciderSpec<SophiaInstance> {
 
     void setup() {
         decider = new SophiaDecider([
-                sophiaWorkFileService: new SophiaWorkFileService(),
+                sophiaWorkFileService: Mock(SophiaWorkFileService) {
+                    0 * _
+                    _ * constructInstanceName(_) >> "instance"
+                },
         ])
     }
 
-    void "getWorkflowName"() {
+    void "getWorkflowName, should return SophiaWorkflow.WORKFLOW"() {
         expect:
         decider.workflowName == SophiaWorkflow.WORKFLOW
     }
 
-    void "getInstanceClass"() {
+    void "getInstanceClass, should return SophiaInstance"() {
         expect:
         decider.instanceClass == SophiaInstance
     }
 
-    void "getArtefactType"() {
+    void "getDependingAnalysisInstanceClass, should return empty map"() {
+        expect:
+        decider.dependingAnalysisInstanceClass == [:]
+    }
+
+    void "getArtefactType, should return ArtefactType.SOPHIA"() {
         expect:
         decider.artefactType == ArtefactType.SOPHIA
     }
 
-    void "getPipelineName"() {
+    void "getPipelineName, should return Pipeline.Name.RODDY_SOPHIA"() {
         expect:
         decider.pipelineName == Pipeline.Name.RODDY_SOPHIA
     }

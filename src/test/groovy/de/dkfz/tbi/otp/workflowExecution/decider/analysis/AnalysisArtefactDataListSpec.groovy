@@ -22,38 +22,25 @@
 package de.dkfz.tbi.otp.workflowExecution.decider.analysis
 
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class AnalysisArtefactDataListSpec extends Specification {
 
-    void "isEmpty should return true if both lists are empty"() {
+    @Unroll
+    void "isEmpty, when #caseName, then should return #expectedValue"() {
         given:
-        AnalysisArtefactDataList analysisArtefactDataList = new AnalysisArtefactDataList([], [])
+        AnalysisArtefactDataList analysisArtefactDataList = new AnalysisArtefactDataList(bamFileDataList, alreadyRunAnalysisDataList, dependingAnalysisDataList)
 
         expect:
-        analysisArtefactDataList.isEmpty()
-    }
+        analysisArtefactDataList.isEmpty() == expectedValue
 
-    void "isEmpty should return false if bamFileDataList is not empty"() {
-        given:
-        AnalysisArtefactDataList analysisArtefactDataList = new AnalysisArtefactDataList([Mock(AnalysisBamFileArtefactData)], [])
-
-        expect:
-        !analysisArtefactDataList.isEmpty()
-    }
-
-    void "isEmpty should return false if alreadyRunAnalysisDataList is not empty"() {
-        given:
-        AnalysisArtefactDataList analysisArtefactDataList = new AnalysisArtefactDataList([], [Mock(AnalysisAnalysisArtefactData)])
-
-        expect:
-        !analysisArtefactDataList.isEmpty()
-    }
-
-    void "isEmpty should return false if both lists are not empty"() {
-        given:
-        AnalysisArtefactDataList analysisArtefactDataList = new AnalysisArtefactDataList([Mock(AnalysisBamFileArtefactData)], [Mock(AnalysisAnalysisArtefactData)])
-
-        expect:
-        !analysisArtefactDataList.isEmpty()
+        where:
+        caseName                                                       | bamFileDataList                     | alreadyRunAnalysisDataList           | dependingAnalysisDataList                        || expectedValue
+        "list and map are empty"                                       | []                                  | []                                   | [:]                                              || true
+        "list are empty and mapContains only empty list"               | []                                  | []                                   | [a: [], b: []]                                   || true
+        "bamFileDataList is not empty"                                 | [Mock(AnalysisBamFileArtefactData)] | []                                   | [a: [], b: []]                                   || false
+        "alreadyRunAnalysisDataList is not empty"                      | []                                  | [Mock(AnalysisAnalysisArtefactData)] | [a: [], b: []]                                   || false
+        "dependingAnalysisDataList contains not empty list"            | []                                  | []                                   | [a: [Mock(AnalysisAnalysisArtefactData)], b: []] || false
+        "bamFileDataList and alreadyRunAnalysisDataList are not empty" | [Mock(AnalysisBamFileArtefactData)] | [Mock(AnalysisAnalysisArtefactData)] | [a: [], b: []]                                   || false
     }
 }

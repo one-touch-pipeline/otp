@@ -43,17 +43,17 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
 
     protected AbstractAnalysisDecider decider
 
-    private Workflow workflow
-    private WorkflowApiVersion workflowApiVersion
-    private WorkflowVersion workflowVersion
-    private Pipeline pipeline
-    private RoddyBamFile bamFileDisease
-    private RoddyBamFile bamFileControl
-    private AnalysisArtefactDataList dataList
-    private AnalysisArtefactDataList additionalDataList
-    private AnalysisAdditionalData additionalData
-    private ProjectSeqTypeGroup projectSeqTypeGroup
-    private BaseDeciderGroup baseDeciderGroup
+    protected Workflow workflow
+    protected WorkflowApiVersion workflowApiVersion
+    protected WorkflowVersion workflowVersion
+    protected Pipeline pipeline
+    protected RoddyBamFile bamFileDisease
+    protected RoddyBamFile bamFileControl
+    protected AnalysisArtefactDataList dataList
+    protected AnalysisArtefactDataList additionalDataList
+    protected AnalysisAdditionalData additionalData
+    protected ProjectSeqTypeGroup projectSeqTypeGroup
+    protected BaseDeciderGroup baseDeciderGroup
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -126,48 +126,6 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
         dataList.alreadyRunAnalysisDataList == []
     }
 
-    void "fetchAdditionalArtefacts"() {
-        given:
-        RoddyBamFile bamFile1 = createBamFile()
-        AnalysisBamFileArtefactData artefactData1 = createAnalysisBamFileArtefactData(bamFile1)
-        AnalysisArtefactDataList dataList = new AnalysisArtefactDataList([artefactData1], [])
-
-        RoddyBamFile bamFile2 = createBamFile()
-        AnalysisBamFileArtefactData artefactData2 = createAnalysisBamFileArtefactData(bamFile2)
-        AnalysisAnalysisArtefactData<T> analysisArtefactData = createAnalysisAnalysisArtefactData(createAnalysisInstance())
-
-        decider.analysisArtefactService = Mock(AnalysisArtefactService) {
-            0 * _
-            1 * fetchRelatedBamFilesArtefactsForBamFiles([bamFile1]) >> [artefactData2]
-            1 * fetchRelatedAnalysisArtefactsForBamFiles([bamFile1], decider.instanceClass) >> [analysisArtefactData]
-        }
-
-        when:
-        AnalysisArtefactDataList dataList2 = decider.fetchAdditionalArtefacts(dataList)
-
-        then:
-        dataList2.bamFileDataList == [artefactData2]
-        dataList2.alreadyRunAnalysisDataList == [analysisArtefactData]
-    }
-
-    void "fetchAdditionalArtefacts, if input is empty, then return object with empty list"() {
-        given:
-        AnalysisArtefactDataList dataList = new AnalysisArtefactDataList([], [])
-
-        decider.analysisArtefactService = Mock(AnalysisArtefactService) {
-            0 * _
-            1 * fetchRelatedBamFilesArtefactsForBamFiles([]) >> []
-            1 * fetchRelatedAnalysisArtefactsForBamFiles([], decider.instanceClass) >> []
-        }
-
-        when:
-        AnalysisArtefactDataList dataList2 = decider.fetchAdditionalArtefacts(dataList)
-
-        then:
-        dataList2.bamFileDataList == []
-        dataList2.alreadyRunAnalysisDataList == []
-    }
-
     void "fetchAdditionalData"() {
         given:
         Workflow workflow = createWorkflow(name: decider.workflowName)
@@ -182,7 +140,7 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
         ])
         AnalysisBamFileArtefactData artefactData1 = createAnalysisBamFileArtefactData(bamFile1)
         AnalysisBamFileArtefactData artefactData2 = createAnalysisBamFileArtefactData(bamFile2)
-        AnalysisArtefactDataList dataList = new AnalysisArtefactDataList([artefactData1, artefactData2], [])
+        AnalysisArtefactDataList dataList = new AnalysisArtefactDataList([artefactData1, artefactData2], [], [:])
 
         Pipeline pipeline = findOrCreateAnalysisPipeline()
 
@@ -228,7 +186,7 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
     void "fetchAdditionalData, if input is empty, then return object with empty maps"() {
         given:
         Workflow workflow = createWorkflow(name: decider.workflowName)
-        AnalysisArtefactDataList dataList = new AnalysisArtefactDataList([], [])
+        AnalysisArtefactDataList dataList = new AnalysisArtefactDataList([], [], [:])
 
         and: 'mocked services'
         decider.analysisArtefactService = Mock(AnalysisArtefactService) {
@@ -256,7 +214,7 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
         and: 'input objects'
         RoddyBamFile bamFile1 = createBamFile()
         AnalysisBamFileArtefactData artefactData = createAnalysisBamFileArtefactData(bamFile1)
-        AnalysisArtefactDataList dataList = new AnalysisArtefactDataList([artefactData], [])
+        AnalysisArtefactDataList dataList = new AnalysisArtefactDataList([artefactData], [], [:])
 
         and: 'mocked services'
         decider.analysisArtefactService = Mock(AnalysisArtefactService) {
@@ -275,7 +233,7 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
         given:
         Workflow workflow = createWorkflow(name: decider.workflowName)
 
-        AnalysisArtefactDataList dataList = new AnalysisArtefactDataList([], [])
+        AnalysisArtefactDataList dataList = new AnalysisArtefactDataList([], [], [:])
 
         and: 'mocked services'
         decider.analysisArtefactService = Mock(AnalysisArtefactService) {
@@ -296,7 +254,7 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
 
         and: 'AnalysisArtefactDataList'
         AnalysisBamFileArtefactData artefactData1 = createAnalysisBamFileArtefactData(bamFile1)
-        AnalysisArtefactDataList dataList = new AnalysisArtefactDataList([artefactData1], [])
+        AnalysisArtefactDataList dataList = new AnalysisArtefactDataList([artefactData1], [], [:])
 
         and: 'AnalysisAdditionalData'
         AnalysisAdditionalData additionalData = new AnalysisAdditionalData([:], [:], findOrCreatePipeline())
@@ -331,7 +289,7 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
         and: 'AnalysisArtefactDataList'
         AnalysisBamFileArtefactData artefactData1 = createAnalysisBamFileArtefactData(bamFile1)
         AnalysisBamFileArtefactData artefactData2 = createAnalysisBamFileArtefactData(bamFile2)
-        AnalysisArtefactDataList dataList = new AnalysisArtefactDataList([artefactData1, artefactData2], [])
+        AnalysisArtefactDataList dataList = new AnalysisArtefactDataList([artefactData1, artefactData2], [], [:])
 
         and: 'AnalysisAdditionalData'
         AnalysisAdditionalData additionalData = new AnalysisAdditionalData([:], [:], findOrCreatePipeline())
@@ -359,11 +317,11 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
         and: 'AnalysisArtefactDataList'
         AnalysisBamFileArtefactData artefactData1 = createAnalysisBamFileArtefactData(bamFile1)
         AnalysisBamFileArtefactData artefactData2 = createAnalysisBamFileArtefactData(bamFile2)
-        AnalysisArtefactDataList dataList1 = new AnalysisArtefactDataList([artefactData1], [])
-        AnalysisArtefactDataList dataList2 = new AnalysisArtefactDataList([artefactData2], [])
+        AnalysisArtefactDataList dataList1 = new AnalysisArtefactDataList([artefactData1], [], [:])
+        AnalysisArtefactDataList dataList2 = new AnalysisArtefactDataList([artefactData2], [], [:])
 
         and: 'AnalysisArtefactDataList together'
-        AnalysisArtefactDataList dataListTogether = new AnalysisArtefactDataList([artefactData1, artefactData2], [])
+        AnalysisArtefactDataList dataListTogether = new AnalysisArtefactDataList([artefactData1, artefactData2], [], [:])
 
         and: 'AnalysisAdditionalData'
         AnalysisAdditionalData additionalData = new AnalysisAdditionalData([:], [:], findOrCreatePipeline())
@@ -431,7 +389,7 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
         List<AnalysisBamFileArtefactData> bamFileData = bamFiles.collect { RoddyBamFile bamFile ->
             createAnalysisBamFileArtefactData(bamFile)
         }
-        AnalysisArtefactDataList dataList = new AnalysisArtefactDataList(bamFileData, [])
+        AnalysisArtefactDataList dataList = new AnalysisArtefactDataList(bamFileData, [], [:])
 
         and: 'additional data'
         AnalysisAdditionalData additionalData = new AnalysisAdditionalData([:], [:], findOrCreatePipeline())
@@ -462,9 +420,9 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
         and: 'AnalysisArtefactDataList'
         AnalysisBamFileArtefactData artefactDataBamFile = createAnalysisBamFileArtefactData(bamFile)
         AnalysisAnalysisArtefactData<T> artefactDataAnalysis = createAnalysisAnalysisArtefactData(analysis)
-        AnalysisArtefactDataList dataList = new AnalysisArtefactDataList([artefactDataBamFile], [artefactDataAnalysis])
-        AnalysisArtefactDataList dataListBam = new AnalysisArtefactDataList([artefactDataBamFile], [])
-        AnalysisArtefactDataList dataListAnalysis = new AnalysisArtefactDataList([], [artefactDataAnalysis])
+        AnalysisArtefactDataList dataList = new AnalysisArtefactDataList([artefactDataBamFile], [artefactDataAnalysis], [:])
+        AnalysisArtefactDataList dataListBam = new AnalysisArtefactDataList([artefactDataBamFile], [], [:])
+        AnalysisArtefactDataList dataListAnalysis = new AnalysisArtefactDataList([], [artefactDataAnalysis], [:])
 
         and: 'AnalysisAdditionalData'
         AnalysisAdditionalData additionalData = new AnalysisAdditionalData([:], [:], findOrCreatePipeline())
@@ -698,7 +656,7 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
 
         workflowApiVersion = createWorkflowApiVersion([workflow: workflow])
         workflowVersion = createWorkflowVersion([
-                apiVersion: workflowApiVersion,
+                apiVersion             : workflowApiVersion,
                 allowedReferenceGenomes: [
                         bamFileDisease.mergingWorkPackage.referenceGenome,
                         bamFileControl.mergingWorkPackage.referenceGenome,
@@ -719,10 +677,10 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
         AnalysisBamFileArtefactData artefactDataControl = createAnalysisBamFileArtefactData(bamFileControl)
         AnalysisBamFileArtefactData artefactDataAdditional = createAnalysisBamFileArtefactData(bamFileAdditional)
 
-        dataList = new AnalysisArtefactDataList([], [])
+        dataList = new AnalysisArtefactDataList([], [], [:])
 
         // additional artefact data
-        additionalDataList = new AnalysisArtefactDataList([], [])
+        additionalDataList = new AnalysisArtefactDataList([], [], [:])
 
         // additional data: sample pair
         Map<AnalysisGroup, SamplePair> samplePairMap = [:]
@@ -817,7 +775,6 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
         TestConfigService configService = new TestConfigService()
         configService.fixClockTo()
 
-        decider.workFileService.configService = configService
         decider.workflowRunService = new WorkflowRunService()
         decider.workflowArtefactService = new WorkflowArtefactService()
         decider.configService = new TestConfigService()
@@ -834,7 +791,7 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
     /**
      * Helper to define the variants for the unroll
      */
-    static private interface CreatePairVariant {
+    static protected interface CreatePairVariant {
         abstract String getMessage()
     }
 
@@ -842,7 +799,7 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
      * Defines valid variants for the unroll
      */
     @TupleConstructor
-    private enum CreateVariantValidPair implements CreatePairVariant {
+    protected enum CreateVariantValidPair implements CreatePairVariant {
         BOTH_GIVEN(''),
         DISEASES_GIVEN(''),
         CONTROL_GIVEN(''),
@@ -861,7 +818,7 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
      * Defines invalid variants for the unroll
      */
     @TupleConstructor
-    private enum CreateVariantInvalid implements CreatePairVariant {
+    protected enum CreateVariantInvalid implements CreatePairVariant {
         NO_DISEASE_CONTROL("since no BAM files with category DISEASE or CONTROL"),
         NO_DISEASE("since no sample pairs available"),
         NO_CONTROL("since no sample pairs available"),

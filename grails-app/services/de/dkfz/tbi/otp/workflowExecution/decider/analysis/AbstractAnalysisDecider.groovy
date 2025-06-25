@@ -73,6 +73,11 @@ abstract class AbstractAnalysisDecider<A extends BamFilePairAnalysis>
     abstract Class<A> getInstanceClass()
 
     /**
+     * Returns the map of additional analysis with role name and analysis this workflow depends on.
+     */
+    abstract Map<String, Class<? extends BamFilePairAnalysis>> getDependingAnalysisInstanceClass()
+
+    /**
      * Returns the artefact type of the analysis that is created by the decider.
      */
     abstract ArtefactType getArtefactType()
@@ -101,7 +106,8 @@ abstract class AbstractAnalysisDecider<A extends BamFilePairAnalysis>
     protected AnalysisArtefactDataList fetchInputArtefacts(Collection<WorkflowArtefact> inputArtefacts, Set<SeqType> seqTypes) {
         return new AnalysisArtefactDataList(
                 analysisArtefactService.fetchBamFileArtefacts(inputArtefacts, seqTypes),
-                []
+                [],
+                [:]
         )
     }
 
@@ -114,7 +120,12 @@ abstract class AbstractAnalysisDecider<A extends BamFilePairAnalysis>
         List<AnalysisAnalysisArtefactData<BamFilePairAnalysis>> analysisData =
                 analysisArtefactService.fetchRelatedAnalysisArtefactsForBamFiles(bamFiles, instanceClass)
 
-        return new AnalysisArtefactDataList(dataBamFiles, analysisData)
+        Map<String, List<AnalysisAnalysisArtefactData<BamFilePairAnalysis>>> dependingAnalysisData =
+                dependingAnalysisInstanceClass.collectEntries {
+                    [(it.key): analysisArtefactService.fetchRelatedAnalysisArtefactsForBamFiles(bamFiles, it.value)]
+                }
+
+        return new AnalysisArtefactDataList(dataBamFiles, analysisData, dependingAnalysisData)
     }
 
     @Override
@@ -142,13 +153,18 @@ abstract class AbstractAnalysisDecider<A extends BamFilePairAnalysis>
                                                                         Map<String, String> userParams) {
 
         Map<BaseDeciderGroup, AnalysisArtefactDataList> map = [:].withDefault {
-            new AnalysisArtefactDataList([], [])
+            new AnalysisArtefactDataList([], [], [:].withDefault { [] })
         }
         inputArtefactDataList.bamFileDataList.each {
             map[createAnalysisDeciderGroup(it)].bamFileDataList << it
         }
         inputArtefactDataList.alreadyRunAnalysisDataList.each {
             map[createAnalysisDeciderGroup(it)].alreadyRunAnalysisDataList << it
+        }
+        dependingAnalysisInstanceClass.each { String role, Class<?> dependingAnalysis ->
+            inputArtefactDataList.dependingAnalysisDataList.getOrDefault(role, []).each {
+                map[createAnalysisDeciderGroup(it)].dependingAnalysisDataList[role] << it
+            }
         }
         return map
     }
@@ -157,7 +173,7 @@ abstract class AbstractAnalysisDecider<A extends BamFilePairAnalysis>
         return new BaseDeciderGroup(data.individual, data.seqType)
     }
 
-    protected BaseDeciderGroup createAnalysisDeciderGroup(AnalysisAnalysisArtefactData<?> data) {
+    protected BaseDeciderGroup createAnalysisDeciderGroup(AnalysisAnalysisArtefactData<? extends BamFilePairAnalysis> data) {
         return new BaseDeciderGroup(data.individual, data.seqType)
     }
 
@@ -181,6 +197,12 @@ abstract class AbstractAnalysisDecider<A extends BamFilePairAnalysis>
         AnalysisArtefactDataList allArtefacts = new AnalysisArtefactDataList(
                 givenArtefacts.bamFileDataList + additionalArtefacts.bamFileDataList,
                 givenArtefacts.alreadyRunAnalysisDataList + additionalArtefacts.alreadyRunAnalysisDataList,
+                dependingAnalysisInstanceClass.collectEntries {
+                    Collection<? extends AnalysisAnalysisArtefactData<? extends BamFilePairAnalysis>> list = []
+                    list.addAll(givenArtefacts.dependingAnalysisDataList.getOrDefault(it.key, []))
+                    list.addAll(additionalArtefacts.dependingAnalysisDataList.getOrDefault(it.key, []))
+                    [(it.key): list]
+                },
         )
         Map<SampleTypePerProject.Category, Map<SampleType, List<AnalysisBamFileArtefactData>>> allDataGrouped =
                 groupByCategoryAndSampleType(allArtefacts, analysisAdditionalData)
@@ -205,16 +227,29 @@ abstract class AbstractAnalysisDecider<A extends BamFilePairAnalysis>
         return deciderResult
     }
 
-    @SuppressWarnings("ParameterCount")
+    // codenarc thinks, the method would return a boolean and therefore report the return statements
+    @SuppressWarnings(["ParameterCount", "AbcMetric", "BooleanMethodReturnsNull"])
     private void createSingleAnalysis(BaseDeciderGroup group, AnalysisBamFileArtefactData diseaseData, AnalysisBamFileArtefactData controlData,
                                       AnalysisArtefactDataList allArtefacts, AnalysisAdditionalData analysisAdditionalData,
                                       WorkflowVersion workflowVersion, DeciderResult deciderResult) {
 
-        BamFilePairAnalysis existingAnalysis = findExistingAnalysis(allArtefacts, diseaseData, controlData)
+        BamFilePairAnalysis existingAnalysis = findExistingAnalysis(allArtefacts.alreadyRunAnalysisDataList, diseaseData, controlData)?.artefact
 
         if (existingAnalysis) {
             deciderResult.warnings << ("skip ${group} ${diseaseData.sampleType.displayName} ${controlData.sampleType.displayName}, " +
                     "since existing analysis ${workflowName} for the same bam file pair exist").toString()
+            return
+        }
+
+        Map<String, AnalysisAnalysisArtefactData> additionalAnalysis = dependingAnalysisInstanceClass.collectEntries {
+            Collection<? extends AnalysisAnalysisArtefactData<? extends BamFilePairAnalysis>> analysis = allArtefacts.dependingAnalysisDataList?.get(it.key)
+            [(it.key): analysis ? findExistingAnalysis(analysis, diseaseData, controlData) : null]
+        }
+
+        List<String> missingDependencies = additionalAnalysis.findAll { !it.value }*.key
+        if (missingDependencies) {
+            deciderResult.warnings << ("skip ${group} ${diseaseData.sampleType.displayName} ${controlData.sampleType.displayName}, " +
+                    "since depending analysis ${missingDependencies.join(' and ')} ${missingDependencies.size() == 1 ? 'is' : 'are'} not available").toString()
             return
         }
 
@@ -227,8 +262,8 @@ abstract class AbstractAnalysisDecider<A extends BamFilePairAnalysis>
         // reference genomes in both disease and control bam files should be in the list of allowed reference genomes of the workflow version
         List<GString> warnings = [diseaseData, controlData].collect { AnalysisBamFileArtefactData analysisBamFileArtefactData ->
             analysisBamFileArtefactData.referenceGenome in workflowVersion.allowedReferenceGenomes ? null :
-                "skip ${group} ${analysisBamFileArtefactData.sampleType.displayName}, " +
-                        "since the reference genome ${analysisBamFileArtefactData.referenceGenome} is not supported for the current workflow"
+                    "skip ${group} ${analysisBamFileArtefactData.sampleType.displayName}, " +
+                            "since the reference genome ${analysisBamFileArtefactData.referenceGenome} is not supported for the current workflow"
         }.findAll { it }
 
         if (warnings) {
@@ -244,7 +279,7 @@ abstract class AbstractAnalysisDecider<A extends BamFilePairAnalysis>
                 mergingWorkPackage2: controlData.mergingWorkPackage,
         ).save(flush: true, deepValidate: false)
 
-        WorkflowRun run = createWorkflowRun(workflowVersion, diseaseData, controlData)
+        WorkflowRun run = createWorkflowRun(workflowVersion, diseaseData, controlData, additionalAnalysis)
 
         WorkflowArtefact workflowOutputArtefact = workflowArtefactService.buildWorkflowArtefact(new WorkflowArtefactValues(
                 run,
@@ -266,7 +301,8 @@ abstract class AbstractAnalysisDecider<A extends BamFilePairAnalysis>
         deciderResult.newArtefacts << workflowOutputArtefact
     }
 
-    private WorkflowRun createWorkflowRun(WorkflowVersion workflowVersion, AnalysisBamFileArtefactData diseaseData, AnalysisBamFileArtefactData controlData) {
+    private WorkflowRun createWorkflowRun(WorkflowVersion workflowVersion, AnalysisBamFileArtefactData diseaseData, AnalysisBamFileArtefactData controlData,
+                                          Map<String, AnalysisAnalysisArtefactData> additionalAnalysis) {
         List<String> displayName = createDisplayName(diseaseData, controlData)
         String shortName = createShortDisplayName(diseaseData, controlData)
 
@@ -280,10 +316,13 @@ abstract class AbstractAnalysisDecider<A extends BamFilePairAnalysis>
                 workflowVersion,
         )
 
-        [
+        Map<String, ArtefactData<? extends Artefact>> inputArtefact = [
                 (AbstractAnalysisWorkflow.INPUT_TUMOR_BAM)  : diseaseData,
                 (AbstractAnalysisWorkflow.INPUT_CONTROL_BAM): controlData,
-        ].each {
+        ]
+        inputArtefact.putAll(additionalAnalysis)
+
+        inputArtefact.each {
             new WorkflowRunInputArtefact(
                     workflowRun: run,
                     role: it.key,
@@ -309,12 +348,12 @@ abstract class AbstractAnalysisDecider<A extends BamFilePairAnalysis>
         ]*.toString()
     }
 
-    private BamFilePairAnalysis findExistingAnalysis(AnalysisArtefactDataList allArtefacts,
-                                                     AnalysisBamFileArtefactData diseaseData, AnalysisBamFileArtefactData controlData) {
-        return allArtefacts.alreadyRunAnalysisDataList.find {
+    private AnalysisAnalysisArtefactData findExistingAnalysis(Collection<AnalysisAnalysisArtefactData<BamFilePairAnalysis>> analysisData,
+                                                              AnalysisBamFileArtefactData diseaseData, AnalysisBamFileArtefactData controlData) {
+        return analysisData.find {
             BamFilePairAnalysis analysis = it.artefact
             analysis.sampleType1BamFile == diseaseData.artefact && analysis.sampleType2BamFile == controlData.artefact
-        }?.artefact
+        }
     }
 
     private Map<SampleTypePerProject.Category, Map<SampleType, List<AnalysisBamFileArtefactData>>> groupAndFilter(

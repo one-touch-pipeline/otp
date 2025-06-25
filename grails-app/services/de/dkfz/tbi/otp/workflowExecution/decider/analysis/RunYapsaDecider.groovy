@@ -28,35 +28,41 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.workflow.analysis.snv.SnvWorkflow
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaWorkFileService
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.workflow.analysis.runyapsa.RunYapsaWorkflow
 import de.dkfz.tbi.otp.workflowExecution.ArtefactType
 
 @Component
 @Transactional
 @Slf4j
-class SnvDecider extends AbstractAnalysisDecider<AbstractSnvCallingInstance> {
+class RunYapsaDecider extends AbstractAnalysisDecider<RunYapsaInstance> {
 
     @Autowired
-    SnvWorkFileService snvWorkFileService
+    RunYapsaWorkFileService runYapsaWorkFileService
 
     @Override
-    SnvWorkFileService getWorkFileService() {
-        return snvWorkFileService
+    RunYapsaWorkFileService getWorkFileService() {
+        return runYapsaWorkFileService
     }
 
-    final String workflowName = SnvWorkflow.WORKFLOW
+    final String workflowName = RunYapsaWorkflow.WORKFLOW
 
-    final Class<AbstractSnvCallingInstance> instanceClass = AbstractSnvCallingInstance
+    final Class<RunYapsaInstance> instanceClass = RunYapsaInstance
 
-    final Map<String, Class<? extends BamFilePairAnalysis>> dependingAnalysisInstanceClass = Collections.emptyMap()
+    final Map<String, Class<? extends BamFilePairAnalysis>> dependingAnalysisInstanceClass = [
+            (RunYapsaWorkflow.SNV_INPUT)  : RoddySnvCallingInstance,
+            (RunYapsaWorkflow.INDEL_INPUT): IndelCallingInstance,
+    ].asImmutable()
 
-    final ArtefactType artefactType = ArtefactType.SNV
+    final ArtefactType artefactType = ArtefactType.RUN_YAPSA
 
-    final Pipeline.Name pipelineName = Pipeline.Name.RODDY_SNV
+    final Pipeline.Name pipelineName = Pipeline.Name.RUN_YAPSA
 
     @Override
     BamFilePairAnalysis createAnalysisWithoutFlush(Map properties) {
-        return new RoddySnvCallingInstance(properties).save(flush: false, deepValidate: false)
+        return new RunYapsaInstance(properties).save(flush: false, deepValidate: false)
     }
 }

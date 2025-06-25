@@ -50,6 +50,8 @@ class SophiaDecider extends AbstractAnalysisDecider<SophiaInstance> {
 
     final Class<SophiaInstance> instanceClass = SophiaInstance
 
+    final Map<String, Class<? extends BamFilePairAnalysis>> dependingAnalysisInstanceClass = Collections.emptyMap()
+
     final ArtefactType artefactType = ArtefactType.SOPHIA
 
     final Pipeline.Name pipelineName = Pipeline.Name.RODDY_SOPHIA

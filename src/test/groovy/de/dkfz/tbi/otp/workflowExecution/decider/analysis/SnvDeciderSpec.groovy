@@ -27,7 +27,7 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.SnvDomainFactory
 import de.dkfz.tbi.otp.workflow.analysis.snv.SnvWorkflow
 import de.dkfz.tbi.otp.workflowExecution.ArtefactType
 
-class SnvDeciderSpec extends AbstractAnalysisDeciderSpec<AbstractSnvCallingInstance> {
+class SnvDeciderSpec extends AbstractAnalysisDeciderNoAnalysisDependencySpec<AbstractSnvCallingInstance> {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -38,26 +38,34 @@ class SnvDeciderSpec extends AbstractAnalysisDeciderSpec<AbstractSnvCallingInsta
 
     void setup() {
         decider = new SnvDecider([
-                snvWorkFileService: new SnvWorkFileService(),
+                snvWorkFileService: Mock(SnvWorkFileService) {
+                    0 * _
+                    _ * constructInstanceName(_) >> "instance"
+                },
         ])
     }
 
-    void "getWorkflowName"() {
+    void "getWorkflowName, should return SnvWorkflow.WORKFLOW"() {
         expect:
         decider.workflowName == SnvWorkflow.WORKFLOW
     }
 
-    void "getInstanceClass"() {
+    void "getInstanceClass, should return AbstractSnvCallingInstance"() {
         expect:
         decider.instanceClass == AbstractSnvCallingInstance
     }
 
-    void "getArtefactType"() {
+    void "getDependingAnalysisInstanceClass, should return empty map"() {
+        expect:
+        decider.dependingAnalysisInstanceClass == [:]
+    }
+
+    void "getArtefactType, should return ArtefactType.SNV"() {
         expect:
         decider.artefactType == ArtefactType.SNV
     }
 
-    void "getPipelineName"() {
+    void "getPipelineName, should return Pipeline.Name.RODDY_SNV"() {
         expect:
         decider.pipelineName == Pipeline.Name.RODDY_SNV
     }

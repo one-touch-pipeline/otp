@@ -50,6 +50,8 @@ class IndelDecider extends AbstractAnalysisDecider<IndelCallingInstance> {
 
     final Class<IndelCallingInstance> instanceClass = IndelCallingInstance
 
+    final Map<String, Class<? extends BamFilePairAnalysis>> dependingAnalysisInstanceClass = Collections.emptyMap()
+
     final ArtefactType artefactType = ArtefactType.INDEL
 
     final Pipeline.Name pipelineName = Pipeline.Name.RODDY_INDEL

@@ -249,7 +249,7 @@ class AnalysisArtefactService {
 
     List<AnalysisAnalysisArtefactData> fetchRelatedAnalysisArtefactsForBamFiles(
             Collection<AbstractBamFile> bamFiles, Class<? extends BamFilePairAnalysis> clazz) {
-        return LogUsedTimeUtils.logUsedTime(log, "          fetchRelatedAnalysisArtefactsForBamFile") {
+        return LogUsedTimeUtils.logUsedTime(log, "          fetchRelatedAnalysisArtefactsForBamFiles (${clazz.simpleName})") {
             return this.<BamFilePairAnalysis> executeHelperAnalysis(HQL_FIND_RELATED_ANALYSIS_FOR_BAM_FILES, bamFiles, clazz)
         }
     }

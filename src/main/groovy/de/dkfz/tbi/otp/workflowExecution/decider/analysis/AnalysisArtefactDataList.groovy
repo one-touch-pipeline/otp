@@ -33,8 +33,13 @@ class AnalysisArtefactDataList implements ArtefactDataList {
     final Collection<AnalysisBamFileArtefactData> bamFileDataList
     final Collection<AnalysisAnalysisArtefactData<BamFilePairAnalysis>> alreadyRunAnalysisDataList
 
+    /**
+     * holds analysis this analysis is depending on
+     */
+    final Map<String, ? extends Collection<? extends AnalysisAnalysisArtefactData<? extends BamFilePairAnalysis>>> dependingAnalysisDataList = [:]
+
     @Override
     boolean isEmpty() {
-        return !bamFileDataList && !alreadyRunAnalysisDataList
+        return !bamFileDataList && !alreadyRunAnalysisDataList && !dependingAnalysisDataList.values().any()
     }
 }
