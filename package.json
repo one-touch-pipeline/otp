@@ -1,4 +1,5 @@
 {
+  "license": "MIT",
   "scripts": {
     "lint": "eslint ./grails-app/assets/javascripts",
     "lint-fix": "npm run lint -- --fix --rule \"prefer-template: 0\" --rule \"strict: 0\"",

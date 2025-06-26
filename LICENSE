@@ -1,6 +1,6 @@
-OTP is licensed under the MIT license, with the exception of the files listed below.
+MIT License
 
-Copyright 2011-2025 The OTP authors
+Copyright (c) 2011-2025 The OTP authors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,30 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-
-Some files in the following folders might not have a license header for
-technical reasons, however they are also licensed under this license.
- - migrations/
- - src/docs/
- - package.json
- - package-lock.json
- - cypress/fixtures
- - docker/keycloak/realm-export.json
-
-Different licenses may apply to the following folders and files therein,
- - grails-app/assets/lib
- - scripts/gitchangelog
-
-The following folders contain proprietary images which are exempted from this license.
-Their exclusive copyright remains with their respective holders.
-
-please see the respective licenses in the files themselves:
- - gradle
- - gradlew
- - gradlew.bat
- - gradle-wrapper.jar
- - grailsw
- - grailsw.bat
- - grails-app/assets/images
- - misc/logo
