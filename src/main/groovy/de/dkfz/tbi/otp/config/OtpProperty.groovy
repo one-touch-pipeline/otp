@@ -84,6 +84,18 @@ enum OtpProperty {
     DATABASE_SCHEMA('otp.database.database', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
     DATABASE_USERNAME('otp.database.username', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
     DATABASE_PASSWORD('otp.database.password', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
+    /**
+     * The count of maximum active connections to the database. Default to 100.
+     */
+    DATABASE_MAX_ACTIVE_CONNECTION('otp.database.max.active.connection', TypeValidators.POSITIVE_NUMBER, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT),
+            "100"),
+    /**
+     * The time in seconds to wait for a connection from the database pool.
+     * If the connection is not available within this time, an exception is thrown.
+     * Default to 10 seconds.
+     */
+    DATABASE_MAX_WAIT_FOR_CONNECTION('otp.database.max.wait.for.connection', TypeValidators.POSITIVE_NUMBER, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT),
+            "10"),
 
     CONFIG_EMAIL_ENABLED('otp.mail.allowOtpToSendMails', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.PRODUCTION), 'false'),
     CONFIG_EMAIL_SERVER('otp.mail.server', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION), 'localhost'),

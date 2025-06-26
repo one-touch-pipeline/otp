@@ -45,6 +45,8 @@ String port = otpProperties.getProperty(OtpProperty.DATABASE_PORT.key)
 String database = otpProperties.getProperty(OtpProperty.DATABASE_SCHEMA.key)
 String databaseUsername = otpProperties.getProperty(OtpProperty.DATABASE_USERNAME.key)
 String databasePassword = otpProperties.getProperty(OtpProperty.DATABASE_PASSWORD.key)
+long databaseMaxConnection = (otpProperties.getProperty(OtpProperty.DATABASE_MAX_ACTIVE_CONNECTION.key) ?: OtpProperty.DATABASE_MAX_ACTIVE_CONNECTION.defaultValue) as long
+long databaseMaxWaitForConnection = (otpProperties.getProperty(OtpProperty.DATABASE_MAX_WAIT_FOR_CONNECTION.key) ?: OtpProperty.DATABASE_MAX_WAIT_FOR_CONNECTION.defaultValue) as long
 
 // set per-environment serverURL stem for creating absolute links
 environments {
@@ -86,13 +88,13 @@ environments {
         dataSource {
             // the properties are described on http://tomcat.apache.org/tomcat-7.0-doc/jdbc-pool.html
             properties {
-                maxActive = 100                                         // max parallel connection
+                maxActive = databaseMaxConnection                                         // max parallel connection
                 maxIdle = 50                                            // max parallel idle connection
                 minIdle = 25                                            // min idle connection
                 maxAge = HOURS.toMillis(1)                              // the time after which a connection will be closed
                 minEvictableIdleTimeMillis = MINUTES.toMillis(5)        // minimum time a connection need to be idle before remove
 
-                maxWait = SECONDS.toMillis(10)                          // max time a request wait for a free connection
+                maxWait = SECONDS.toMillis(databaseMaxWaitForConnection)                          // max time a request wait for a free connection
 
                 testWhileIdle = true                                    // test idle connection
                 timeBetweenEvictionRunsMillis = MINUTES.toMillis(1)     // how often idle connections are checked
