@@ -122,14 +122,14 @@ boolean external = true
  *
  * Three modes exist:
  * DataExportInput.Mode.COPY_INTERNAL :
- *   Copy files from the same file system to the target folder
+ *   Copy files from the same file system to the target folder (default)
  * DataExportInput.Mode.LINK_INTERNAL :
  *   Link files from the same file system to the target folder, no files are copied.
  * DataExportInput.Mode.COPY_EXTERNAL :
  *   Copy files from a remote file system to the local target folder.
  *   Adds COPY_TARGET_BASE and COPY_CONNECTION environment variables to mkdir and rsync
  */
-DataExportInput.Mode mode = DataExportInput.Mode.LINK_INTERNAL
+DataExportInput.Mode mode = DataExportInput.Mode.COPY_INTERNAL
 
 // work area
 assert scriptOutputFile: "scriptOutputPath should not be empty"
