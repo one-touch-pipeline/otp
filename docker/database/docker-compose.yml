@@ -22,6 +22,7 @@ version: '3.0'
 services:
   postgres:
     build: .
+    shm_size: 1g
     ports:
       - "127.0.0.1:${PRODUCTION_POSTGRES_PORT:-5432}:5432"
     environment:
