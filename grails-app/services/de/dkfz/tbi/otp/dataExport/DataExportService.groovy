@@ -163,6 +163,7 @@ class DataExportService {
 
             if (Files.exists(sourceBam)) {
                 if (!dataExportInput.checkFileStatus) {
+                    boolean processedEntireDirectory = false
                     if ((bamFile.seqType == SeqTypeService.rnaSingleSeqType || bamFile.seqType == SeqTypeService.rnaPairedSeqType) &&
                             dataExportInput.copyAnalyses.get(PipelineType.RNA_ANALYSIS)) {
                         scriptFileBuilder.append("[[ -n \"\${ECHO_LOG}\" ]] && echo ${basePath}\n")
@@ -170,9 +171,11 @@ class DataExportService {
                         if (dataExportInput.mode == DataExportInput.Mode.LINK_INTERNAL) {
                             String search = "\$(ls -d ${basePath}/* | grep -v roddyExec)"
                             linkFilesHelper(scriptFileBuilder, search, copyTargetBase + targetBamFolder)
+                            processedEntireDirectory = true
                         } else {
                             scriptFileBuilder.append("rsync \${RSYNC_LOG} -urpL --exclude=*roddyExec* --exclude=.* ${copyConnection}${basePath} ")
                             scriptFileBuilder.append("${copyTargetBase}${targetBamFolder}\n")
+                            processedEntireDirectory = true
                         }
                         if (dataExportInput.getFileList) {
                             scriptListBuilder.append("ls -l --ignore=\"*roddyExec*\" ${basePath}\n")
@@ -190,7 +193,8 @@ class DataExportService {
                             scriptListBuilder.append("ls -l ${sourceBam}*\n")
                         }
                     }
-                    if (Files.exists(qcFolder)) {
+                    // Only handle individual subdirectories if we haven't already processed the entire directory
+                    if (!processedEntireDirectory && Files.exists(qcFolder)) {
                         scriptFileBuilder.append("[[ -n \"\${ECHO_LOG}\" ]] && echo ${qcFolder}\n")
                         if (dataExportInput.mode == DataExportInput.Mode.LINK_INTERNAL) {
                             scriptFileBuilder.append("mkdir -p ${copyTargetBase}${qcTargetFolder}\n")
@@ -298,4 +302,3 @@ class DataExportService {
         scriptFileBuilder.append("for file in ${searchPattern}; do base=\$(basename \$file) ln -sf \$file ${targetFolder}/\$base; done;\n")
     }
 }
-

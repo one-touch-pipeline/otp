@@ -33,7 +33,7 @@ import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
-import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
@@ -43,7 +43,7 @@ import java.nio.file.*
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
-class DataExportServiceSpec extends Specification implements DataTest, DomainFactoryCore {
+class DataExportServiceSpec extends Specification implements DataTest, IsRoddy {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -96,11 +96,20 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
         configService = new TestConfigService()
 
         DomainFactory.createRnaPairedSeqType()
+        DomainFactory.createRnaSingleSeqType()
         DomainFactory.createExomeSeqType()
     }
 
     void cleanup() {
         configService.clean()
+    }
+
+    /**
+     * Helper method to set up Files.exists() mock consistently across tests
+     */
+    private void setupFilesMock(boolean fileExists) {
+        GroovyMock([global: true], Files)
+        Files.exists(_ as Path) >> fileExists
     }
 
     private DataExportInput createDataFileInput(boolean checkFileStatus, boolean getFileList, DataExportInput.Mode mode = DataExportInput.Mode.COPY_INTERNAL) {
@@ -233,8 +242,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
         given:
         DataExportInput dataExportInput = createBamFileInput(checkFileStatus, getFileList, external, mode)
 
-        GroovyMock([global: true], Files)
-        Files.exists(_) >> fileExists
+        setupFilesMock(fileExists)
         service.fileSystemService = Mock(FileSystemService) {
             getRemoteFileSystem() >> new TestFileSystemService().remoteFileSystem
         }
@@ -252,8 +260,8 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
         Pattern bashScriptPattern = Pattern.compile(bashScriptPatternStr)
         Pattern listScriptPattern = ~/ls -l (\/[a-zA-Z0-9\-+_.]*)*/
         Pattern consoleLogPattern = fileExists ?
-                ~/Found BAM files \d\n\n([a-zA-Z0-9\(\)-_ ]*){${dataExportInput.bamFileList.size()}}/ :
-                ~/WARNING: BAM File ([a-zA-Z0-9\(\)-_ ]*)/
+                ~/Found BAM files \d\n\n([a-zA-Z0-9()-_ ]*){${dataExportInput.bamFileList.size()}}/ :
+                ~/WARNING: BAM File ([a-zA-Z0-9()-_ ]*)/
 
         when:
         DataExportOutput output = service.exportBamFiles(dataExportInput)
@@ -286,7 +294,8 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
                 assert output.listScript.empty
 
                 assert consoleLogMatcher.find()
-                assert consoleLogMatcher.size() == fileExists ? 1 : dataExportInput.bamFileList.size()
+                int expectedMatches = fileExists ? 1 : dataExportInput.bamFileList.size()
+                assert consoleLogMatcher.size() == expectedMatches
                 break
         }
 
@@ -311,9 +320,7 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
         DataExportInput dataExportInput = createBamFileInput(false, true, false, mode)
         dataExportInput.copyAnalyses.put(pipeline, true)
 
-        GroovyMock([global: true], Files)
-        Files.exists(_) >> true
-
+        setupFilesMock(true)
         service.fileSystemService = new TestFileSystemService()
 
         when:
@@ -457,5 +464,139 @@ class DataExportServiceSpec extends Specification implements DataTest, DomainFac
         true            | false       | DataExportInput.Mode.COPY_INTERNAL | 3
         true            | false       | DataExportInput.Mode.COPY_EXTERNAL | 3
         true            | false       | DataExportInput.Mode.LINK_INTERNAL | 3
+    }
+
+    void "exportBamFiles, when linking entire directory for RNA analysis, should not create individual qualitycontrol links"() {
+        given: "RNA BAM file with RNA_ANALYSIS enabled and LINK_INTERNAL mode"
+        RoddyBamFile rnaBamFile = createBamFile([
+                workPackage: createMergingWorkPackage([
+                        seqType : DomainFactory.createRnaPairedSeqType(),
+                ])
+        ])
+
+        DataExportInput dataExportInput = new DataExportInput([
+                targetFolder   : targetFolder,
+                checkFileStatus: false,
+                getFileList    : false,
+                unixGroup      : TEST_UNIX_GROUP,
+                external       : false,
+                mode           : DataExportInput.Mode.LINK_INTERNAL,
+                copyAnalyses   : [(PipelineType.RNA_ANALYSIS): true],
+                seqTrackList   : [],
+                bamFileList    : [rnaBamFile],
+                analysisListMap: [:],
+        ])
+
+        and: "Files exist for both BAM and qualitycontrol"
+        setupFilesMock(true)
+
+        and: "Mock file system service"
+        service.fileSystemService = new TestFileSystemService()
+
+        when: "Export BAM files"
+        DataExportOutput output = service.exportBamFiles(dataExportInput)
+
+        then: "Script should link entire directory but NOT link qualitycontrol individually"
+        // Should contain linking for entire basePath
+        output.bashScript.contains('$(ls -d /') && output.bashScript.contains('/* | grep -v roddyExec)')
+        output.bashScript.contains('for file in $(ls -d')
+
+        // Should NOT contain individual qualitycontrol linking
+        !output.bashScript.contains('qualitycontrol/*')
+
+        // Count the number of link operations - should only be 1 (for entire directory)
+        (output.bashScript =~ /for file in \$\(ls -d/).size() == 1
+
+        and: "No console output for non-check mode"
+        output.consoleLog.empty
+    }
+
+    void "exportBamFiles, when NOT linking entire directory, should create individual qualitycontrol links"() {
+        given: "Non-RNA BAM file with LINK_INTERNAL mode (regular BAM export)"
+        RoddyBamFile wgsBamFile = createBamFile([
+                workPackage: createMergingWorkPackage([
+                        seqType : DomainFactory.createWholeGenomeSeqType(),
+                ])
+        ])
+
+        DataExportInput dataExportInput = new DataExportInput([
+                targetFolder   : targetFolder,
+                checkFileStatus: false,
+                getFileList    : false,
+                unixGroup      : TEST_UNIX_GROUP,
+                external       : false,
+                mode           : DataExportInput.Mode.LINK_INTERNAL,
+                copyAnalyses   : [:],
+                seqTrackList   : [],
+                bamFileList    : [wgsBamFile],
+                analysisListMap: [:],
+        ])
+
+        and: "Files exist for both BAM and qualitycontrol"
+        setupFilesMock(true)
+
+        and: "Mock file system service"
+        service.fileSystemService = new TestFileSystemService()
+
+        when: "Export BAM files"
+        DataExportOutput output = service.exportBamFiles(dataExportInput)
+
+        then: "Script should link individual files AND qualitycontrol separately"
+        // Should contain linking for individual BAM files
+        output.bashScript.contains('$(ls -d /')
+        output.bashScript.contains('.bam*)')
+
+        // Should ALSO contain individual qualitycontrol linking
+        output.bashScript.contains('qualitycontrol/*')
+
+        // Count the number of link operations - should be 2 (BAM file + qualitycontrol)
+        (output.bashScript =~ /for file in \$\(ls -d/).size() == 2
+
+        and: "No console output for non-check mode"
+        output.consoleLog.empty
+    }
+
+    void "exportBamFiles, when using COPY mode for RNA analysis, should handle qualitycontrol correctly"() {
+        given: "RNA BAM file with RNA_ANALYSIS enabled and COPY_INTERNAL mode"
+        RoddyBamFile rnaBamFile = createBamFile([
+                workPackage: createMergingWorkPackage([
+                        seqType : DomainFactory.createRnaPairedSeqType(),
+                ])
+        ])
+
+        DataExportInput dataExportInput = new DataExportInput([
+                targetFolder   : targetFolder,
+                checkFileStatus: false,
+                getFileList    : false,
+                unixGroup      : TEST_UNIX_GROUP,
+                external       : false,
+                mode           : DataExportInput.Mode.COPY_INTERNAL,
+                copyAnalyses   : [(PipelineType.RNA_ANALYSIS): true],
+                seqTrackList   : [],
+                bamFileList    : [rnaBamFile],
+                analysisListMap: [:],
+        ])
+
+        and: "Files exist for both BAM and qualitycontrol"
+        setupFilesMock(true)
+
+        and: "Mock file system service"
+        service.fileSystemService = new TestFileSystemService()
+
+        when: "Export BAM files"
+        DataExportOutput output = service.exportBamFiles(dataExportInput)
+
+        then: "Script should use rsync for entire directory AND qualitycontrol separately (COPY mode behavior)"
+        // Should contain rsync for entire basePath
+        output.bashScript.contains('rsync ${RSYNC_LOG} -urpL --exclude=*roddyExec* --exclude=.*') /* codenarc-disable-line GStringExpressionWithinString */
+
+        // Should NOT contain rsync for qualitycontrol (already copied with above command)
+        !output.bashScript.contains('qualitycontrol/*')
+
+        // Should NOT contain any linking operations
+        !output.bashScript.contains('for file in $(ls -d')
+
+        and: "No console output for non-check mode"
+        output.consoleLog.empty
     }
 }
