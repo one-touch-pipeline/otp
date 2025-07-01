@@ -751,7 +751,7 @@ I2
 i1
 i2
 abc
-
+\t
 """)
 
         List<RowWithExtractedValues> rows = context.spreadsheet.dataRows.collect {

@@ -47,7 +47,7 @@ class FastqGeneratorValidatorSpec extends Specification implements DataTest {
 
     static final String METADATA_CONTENT =
             "${MetaDataColumn.FASTQ_GENERATOR}\n" +
-            "\n" +
+            "\t\n" +
             "${FASTQ_GENERATOR}\n"
 
     void 'validate, when metadata file contains valid fastq generator, succeeds'() {

@@ -43,7 +43,7 @@ class LaneNumberValidatorSpec extends Specification {
                         "9\n" +
                         "001\n" +
                         "1a\n" +
-                        "\n" +
+                        "\t\n" +
                         "1_ABC")
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.WARNING,
@@ -54,7 +54,7 @@ class LaneNumberValidatorSpec extends Specification {
                         "'001' is not a well-formed lane number. It should be a single digit in the range from 1 to 8.", "At least one lane number is not well-formed."),
                 new Problem(context.spreadsheet.dataRows[5].cells as Set, LogLevel.WARNING,
                         "'1a' is not a well-formed lane number. It should be a single digit in the range from 1 to 8.", "At least one lane number is not well-formed."),
-                new Problem(context.spreadsheet.dataRows[6].cells as Set, LogLevel.ERROR,
+                new Problem(context.spreadsheet.dataRows[6].cells[0..0] as Set, LogLevel.ERROR,
                         "The lane number must not be empty."),
                 new Problem(context.spreadsheet.dataRows[7].cells as Set, LogLevel.ERROR,
                         "'1_ABC' is not a well-formed lane number. It must contain only digits (0 to 9) and/or letters (a to z, A to Z). It should be a single digit in the range from 1 to 8.", "At least one lane number is not well-formed."),

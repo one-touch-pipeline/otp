@@ -53,8 +53,7 @@ class SeqTypeBamValidatorSpec extends Specification implements DataTest {
     void 'validate, when column SEQUENCING_TYPE missing, then add expected problem'() {
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
-                "SomeColumn\n"
-                        +
+                "SomeColumn\n" +
                         "SomeValue"
         )
         Collection<Problem> expectedProblems = [
@@ -126,6 +125,7 @@ class SeqTypeBamValidatorSpec extends Specification implements DataTest {
         service.validate(context)
 
         then:
+        context.problems.size() == 1
         Problem problem = exactlyOneElement(context.problems)
         problem.level == LogLevel.ERROR
         containSame(problem.affectedCells*.cellAddress, ['A2'])
@@ -136,13 +136,14 @@ class SeqTypeBamValidatorSpec extends Specification implements DataTest {
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
                 "${SEQUENCING_TYPE}\n" +
-                        "\n"
+                        "\t\n"
         )
 
         when:
         service.validate(context)
 
         then:
+        context.problems.size() == 1
         Problem problem = exactlyOneElement(context.problems)
         problem.level == LogLevel.ERROR
         containSame(problem.affectedCells*.cellAddress, ['A2'])

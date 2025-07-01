@@ -68,13 +68,13 @@ ${MetaDataColumn.READ}\t${MetaDataColumn.SEQUENCING_READ_TYPE}
 1\t${SequencingReadType.SINGLE}
 i1\t${SequencingReadType.PAIRED}
 i2\t${SequencingReadType.PAIRED}
-i3\\t${SequencingReadType.PAIRED}
+i3\t${SequencingReadType.PAIRED}
 i1\t${SequencingReadType.MATE_PAIR}
 i2\t${SequencingReadType.MATE_PAIR}
-i3\\t${SequencingReadType.MATE_PAIR}
+i3\t${SequencingReadType.MATE_PAIR}
 i1\t${SequencingReadType.SINGLE}
-i2\\t${SequencingReadType.SINGLE}
-i3\\t${SequencingReadType.SINGLE}
+i2\t${SequencingReadType.SINGLE}
+i3\t${SequencingReadType.SINGLE}
 """)
 
         when:

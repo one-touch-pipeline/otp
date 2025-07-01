@@ -25,6 +25,7 @@ import grails.testing.gorm.DataTest
 import org.junit.ClassRule
 import spock.lang.*
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.FastqFile
@@ -37,6 +38,8 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContex
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.Problem
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 import java.nio.file.Path
@@ -86,11 +89,17 @@ class FastqMetadataValidationServiceSpec extends Specification implements Domain
                 "2 Undetermined_1.fastq.gz Undetermined_1 x x\n" +
                 "3 Undetermined_1.fastq.gz Undetermined_1 Undetermined x\n" +
                 "4 x x x x\n" +
+                "\n" +
                 "5 x x Undetermined x\n" +
                 "6 x Undetermined_1 x x\n" +
                 "7 x Undetermined_1 Undetermined x\n" +
                 "8 fastq x x ${md5sum}\n" +
                 "").replaceAll(' ', '\t').getBytes(MetadataValidationContext.CHARSET)
+
+        Collection<Problem> expectedProblems = [
+                new Problem(Collections.emptySet(), LogLevel.INFO,
+                        "The file contains empty lines.")
+        ]
 
         when:
         MetadataValidationContext context = metadataValidationFileService.createFromFile(file, directoryStructure, "", ignoreMd5sum)
@@ -109,6 +118,7 @@ class FastqMetadataValidationServiceSpec extends Specification implements Domain
         if (!ignoreMd5sum) {
             assert (context.spreadsheet.dataRows[4].cells[0].text == '8')
         }
+        TestCase.assertContainSame(context.problems, expectedProblems)
 
         where:
         ignoreMd5sum || numRows

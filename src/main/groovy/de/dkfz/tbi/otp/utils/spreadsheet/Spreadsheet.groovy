@@ -41,6 +41,7 @@ import de.dkfz.tbi.otp.utils.StringUtils
 class Spreadsheet {
     final Row header
     final Delimiter delimiter
+    final boolean containsEmptyRows
     private final Map<String, Column> columnsByTitle
     private final List<Row> dataRows
 
@@ -55,6 +56,10 @@ class Spreadsheet {
                 Delimiter delimiter = Delimiter.TAB,
                 @ClosureParams(value = SimpleType, options = ['java.lang.String']) Closure<String> renameHeader = Closure.IDENTITY) {
         this.delimiter = delimiter
+        this.containsEmptyRows = document.split('\n').any {
+            it.empty
+        }
+
         Map<String, Column> columnsByTitle = [:]
         List<Row> dataRows = []
         int rowIndex = 0
@@ -71,13 +76,16 @@ class Spreadsheet {
             csvReader = new CSVReaderBuilder(rawReader).
                     withCSVParser(new RFC4180ParserBuilder().withSeparator(delimiter.delimiter).build()).build()
             csvReader.errorLocale = Locale.ENGLISH
-            String[] line
-            while ((line = csvReader.readNext()) != null) {
-                if (header) { // normal lines are kept without processing.
-                    dataRows.add(new Row(this, rowIndex++, line as List<String>))
+
+            Row headerCache
+            int minLength = 0
+
+            csvReader.readAll().each { String[] line ->
+                if (headerCache) { // normal lines are kept without processing.
+                    dataRows.add(new Row(this, rowIndex++, line as List<String>, minLength))
                 } else { // intercept first line as header
-                    header = new Row(this, rowIndex++, line.collect(renameHeader))
-                    for (Cell cell : header.cells) {
+                    headerCache = new Row(this, rowIndex++, line.collect(renameHeader), 0)
+                    for (Cell cell : headerCache.cells) {
                         if (cell.text.empty) {
                             throw new EmptyHeaderException(cell.columnAddress)
                         }
@@ -86,8 +94,10 @@ class Spreadsheet {
                         }
                         columnsByTitle.put(cell.text, new Column(cell))
                     }
+                    minLength = line.size()
                 }
             }
+            header = headerCache
         } finally {
             if (rawReader != null) {
                 rawReader.close()
@@ -123,16 +133,14 @@ class Row {
     final int rowIndex
     final List<Cell> cells
 
-    protected Row(Spreadsheet spreadsheet, int rowIndex, List<String> line) {
+    protected Row(Spreadsheet spreadsheet, int rowIndex, List<String> line, int minLength) {
         this.spreadsheet = spreadsheet
         this.rowIndex = rowIndex
         int columnIndex = 0
         List<Cell> cells = line.collect { new Cell(this, columnIndex++, it) }
-        if (spreadsheet.header) {
-            // Make sure that this row has at least as many cells as the header
-            while (columnIndex < spreadsheet.header.cells.size()) {
-                cells.add(new Cell(this, columnIndex++, ''))
-            }
+        // Make sure that this row has at least as many cells as the header
+        while (columnIndex < minLength) {
+            cells.add(new Cell(this, columnIndex++, ''))
         }
         this.cells = cells.asImmutable()
     }

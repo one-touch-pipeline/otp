@@ -28,9 +28,11 @@ class SpreadsheetSpec extends Specification {
 
     Spreadsheet spreadsheet = new Spreadsheet(
             'A1\tB1\tC1\n' +
-            'A2\tB2\n' +
-            '\n' +
-            'A4\tB4\tC4\tD4')
+                    'A2\tB2\n' +
+                    '\n' +
+                    'A4\tB4\tC4\tD4\n' +
+                    '\t\n' +
+                    'A6\tB6\tC6')
 
     void test_header() {
         expect:
@@ -42,7 +44,8 @@ class SpreadsheetSpec extends Specification {
     void test_dataRows() {
         expect:
 
-        spreadsheet.dataRows.size() == 3
+        // the empty row is not counted and but the row containing only empty cells
+        spreadsheet.dataRows.size() == 4
 
         spreadsheet.dataRows[0].spreadsheet == spreadsheet
         spreadsheet.dataRows[0].rowIndex == 1
@@ -50,11 +53,15 @@ class SpreadsheetSpec extends Specification {
 
         spreadsheet.dataRows[1].spreadsheet == spreadsheet
         spreadsheet.dataRows[1].rowIndex == 2
-        spreadsheet.dataRows[1].cells*.text == ['', '', '']
+        spreadsheet.dataRows[1].cells*.text == ['A4', 'B4', 'C4', 'D4']
 
         spreadsheet.dataRows[2].spreadsheet == spreadsheet
         spreadsheet.dataRows[2].rowIndex == 3
-        spreadsheet.dataRows[2].cells*.text == ['A4', 'B4', 'C4', 'D4']
+        spreadsheet.dataRows[2].cells*.text == ['', '', '']
+
+        spreadsheet.dataRows[3].spreadsheet == spreadsheet
+        spreadsheet.dataRows[3].rowIndex == 4
+        spreadsheet.dataRows[3].cells*.text == ['A6', 'B6', 'C6']
     }
 
     void test_getColumn_WithExistingTitle_ShouldReturnColumn() {
@@ -143,8 +150,9 @@ class SpreadsheetSpec extends Specification {
         expect:
         spreadsheet.header.cells*.cellAddress == ['A1', 'B1', 'C1']
         spreadsheet.dataRows[0].cells*.cellAddress == ['A2', 'B2', 'C2']
-        spreadsheet.dataRows[1].cells*.cellAddress == ['A3', 'B3', 'C3']
-        spreadsheet.dataRows[2].cells*.cellAddress == ['A4', 'B4', 'C4', 'D4']
+        spreadsheet.dataRows[1].cells*.cellAddress == ['A3', 'B3', 'C3', 'D3']
+        spreadsheet.dataRows[2].cells*.cellAddress == ['A4', 'B4', 'C4']
+        spreadsheet.dataRows[3].cells*.cellAddress == ['A5', 'B5', 'C5']
     }
 
     @Unroll('column index #index maps to column address #address')

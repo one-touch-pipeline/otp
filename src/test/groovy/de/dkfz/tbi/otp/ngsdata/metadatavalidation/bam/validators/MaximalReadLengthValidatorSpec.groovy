@@ -66,13 +66,14 @@ class MaximalReadLengthValidatorSpec extends Specification {
                 [
                         MAXIMAL_READ_LENGTH,
                         '123',
-                        '',
+                        '\t',
                         INVALID_DOUBLE,
                         INVALID_CHARS,
                 ].join('\n'), [
                 linkSourceFiles: linksource
         ]
         )
+
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[2].cells as Set, LogLevel.ERROR,
                         "The maximalReadLength '${INVALID_DOUBLE}' should be an integer number.", "At least one maximalReadLength is not an integer number."),
@@ -80,7 +81,7 @@ class MaximalReadLengthValidatorSpec extends Specification {
                         "The maximalReadLength '${INVALID_CHARS}' should be an integer number.", "At least one maximalReadLength is not an integer number."),
         ]
         if (linksource) {
-            expectedProblems << new Problem(context.spreadsheet.dataRows[1].cells as Set, LogLevel.ERROR,
+            expectedProblems << new Problem(context.spreadsheet.dataRows[1].cells[0..0] as Set, LogLevel.ERROR,
                     "The maximalReadLength is required, if the files should only be linked")
         }
 

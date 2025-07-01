@@ -122,6 +122,9 @@ class MetadataValidationService {
             }
             spreadsheet = new FilteredSpreadsheet(document.replaceFirst(/[\t\r\n]+$/, ''), Delimiter.AUTO_DETECT,
                     renameHeader, dataRowFilter)
+            if (spreadsheet.containsEmptyRows) {
+                problems.addProblem(Collections.emptySet(), LogLevel.INFO, "The file contains empty lines.")
+            }
             if (spreadsheet.dataRows.size() < 1) {
                 spreadsheet = null
                 problems.addProblem(Collections.emptySet(), LogLevel.ERROR, "The file contains less than two lines.")

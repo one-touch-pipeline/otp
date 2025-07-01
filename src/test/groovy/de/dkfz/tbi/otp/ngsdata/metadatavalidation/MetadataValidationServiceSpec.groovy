@@ -108,6 +108,7 @@ class MetadataValidationServiceSpec extends Specification implements DomainFacto
         }
 
         and:
+        infoMetadata.problems.problems.size() == 1
         Problem problem = exactlyOneElement(infoMetadata.problems.problems)
         problem.affectedCells.isEmpty()
         problem.level == LogLevel.ERROR
@@ -121,6 +122,7 @@ class MetadataValidationServiceSpec extends Specification implements DomainFacto
         Map infoMetadata = metadataValidationFileService.checkContent(bytes)
 
         then:
+        infoMetadata.problems.problems.size() == 1
         Problem problem = exactlyOneElement(infoMetadata.problems.problems)
         problem.affectedCells.isEmpty()
         problem.level == LogLevel.WARNING
@@ -139,6 +141,7 @@ class MetadataValidationServiceSpec extends Specification implements DomainFacto
         Map infoMetadata = metadataValidationFileService.checkContent(bytes)
 
         then:
+        infoMetadata.problems.problems.size() == 1
         Problem problem = exactlyOneElement(infoMetadata.problems.problems)
         problem.affectedCells.isEmpty()
         problem.level == LogLevel.ERROR
@@ -185,6 +188,7 @@ class MetadataValidationServiceSpec extends Specification implements DomainFacto
         Map infoMetadata = metadataValidationFileService.checkContent(bytes)
 
         then:
+        infoMetadata.problems.problems.size() == 1
         Problem problem = exactlyOneElement(infoMetadata.problems.problems)
         problem.affectedCells.isEmpty()
         problem.level == LogLevel.ERROR

@@ -62,7 +62,7 @@ class InstrumentModelValidatorSpec extends Specification implements DataTest {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${MetaDataColumn.INSTRUMENT_MODEL}
-
+\t
 """)
 
         when:

@@ -87,7 +87,7 @@ class SeqTypeValidatorSpec extends Specification implements DataTest {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.SEQUENCING_TYPE}\n" +
-                        "\n"
+                        "\t\n"
         )
 
         when:

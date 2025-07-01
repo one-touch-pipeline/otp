@@ -91,7 +91,7 @@ ${value}
         when:
         new MateNumberValidator().validate(context)
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.ERROR, message, summaryMessage),
+                new Problem(context.spreadsheet.dataRows[0].cells[0..0] as Set, LogLevel.ERROR, message, summaryMessage),
         ]
 
         then:
@@ -99,7 +99,7 @@ ${value}
 
         where:
         value  || message                                                                 | summaryMessage
-        ''     || MateNumberValidator.ERROR_NOT_PROVIDED                                  | MateNumberValidator.ERROR_NOT_PROVIDED
+        '\t'   || MateNumberValidator.ERROR_NOT_PROVIDED                                  | MateNumberValidator.ERROR_NOT_PROVIDED
         '-1'   || "The mate number ('-1') ${MateNumberValidator.ALLOWED_VALUE_POSTFIX}"   | MateNumberValidator.ERROR_INVALID_VALUE_SUMMARY
         '0'    || "The mate number ('0') ${MateNumberValidator.ALLOWED_VALUE_POSTFIX}"    | MateNumberValidator.ERROR_INVALID_VALUE_SUMMARY
         'abc'  || "The mate number ('abc') ${MateNumberValidator.ALLOWED_VALUE_POSTFIX}"  | MateNumberValidator.ERROR_INVALID_VALUE_SUMMARY

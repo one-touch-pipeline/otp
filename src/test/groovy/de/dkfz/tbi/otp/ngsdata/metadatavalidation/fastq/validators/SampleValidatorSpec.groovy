@@ -178,6 +178,7 @@ class SampleValidatorSpec extends Specification implements DataTest, DomainFacto
         validator.validate(context)
 
         then:
+        context.problems.size() == 1
         Problem problem = exactlyOneElement(context.problems)
         problem.level == LogLevel.INFO
         problem.message == "${PARSED_SAMPLETYPE_PID}X\tY\tz\t${SAMPLE_Z}"
@@ -199,6 +200,7 @@ class SampleValidatorSpec extends Specification implements DataTest, DomainFacto
         validator.validate(context)
 
         then:
+        context.problems.size() == 1
         Problem problem = exactlyOneElement(context.problems)
         problem.level == LogLevel.WARNING
         problem.message == "Sample name '${SAMPLE_Z}' looks like it belongs to project 'X', but it is already registered in OTP with project '${projectName}'. If you ignore this warning, OTP will keep the assignment of the sample name to project '${projectName}'."
@@ -221,6 +223,7 @@ class SampleValidatorSpec extends Specification implements DataTest, DomainFacto
         validator.validate(context)
 
         then:
+        context.problems.size() == 1
         Problem problem = exactlyOneElement(context.problems)
         problem.level == LogLevel.WARNING
         problem.message == "Sample name '${SAMPLE_Z}' looks like it belongs to individual 'Y', but it is already registered in OTP with individual 'B'. If you ignore this warning, OTP will keep the assignment of the sample name to individual 'B'."
@@ -243,6 +246,7 @@ class SampleValidatorSpec extends Specification implements DataTest, DomainFacto
         validator.validate(context)
 
         then:
+        context.problems.size() == 1
         Problem problem = exactlyOneElement(context.problems)
         problem.level == LogLevel.WARNING
         problem.message == "Sample name '${SAMPLE_Z}' looks like it belongs to sample type 'z', but it is already registered in OTP with sample type 'c'. If you ignore this warning, OTP will keep the assignment of the sample name to sample type 'c'."

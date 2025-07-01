@@ -121,12 +121,12 @@ ${BamMetadataColumn.MD5}
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext("""\
 ${BamMetadataColumn.MD5}
-
+\t
 """, [
                 linkSourceFiles: true,
         ])
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.ERROR,
+                new Problem(context.spreadsheet.dataRows[0].cells[0..0] as Set, LogLevel.ERROR,
                         "The md5sum is required, if the files should only be linked"),
         ]
 
