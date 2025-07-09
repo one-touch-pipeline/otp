@@ -38,16 +38,16 @@ import java.time.temporal.ChronoUnit
 @Integration
 class WorkflowRunServiceIntegrationSpec extends Specification implements WorkflowSystemDomainFactory, DomainFactoryProcessingPriority {
 
+    WorkflowRunService workflowRunService
     AutoTimestampEventListener autoTimestampEventListener
 
     void "nextWaitingWorkflow, if more workflows allowed and state is PENDING, then return workflowRun"() {
         given:
         WorkflowRun workflowRun = createWorkflowRunHelper()
         createWorkflowRunHelper(WorkflowRun.State.RUNNING_OTP, WorkflowArtefact.State.SUCCESS, workflowRun.workflow)
-        WorkflowRunService service = new WorkflowRunService()
 
         when:
-        WorkflowRun ret = service.nextWaitingWorkflow(0)
+        WorkflowRun ret = workflowRunService.nextWaitingWorkflow(0)
 
         then:
         ret == workflowRun
@@ -56,10 +56,9 @@ class WorkflowRunServiceIntegrationSpec extends Specification implements Workflo
     void "nextWaitingWorkflow, when workflow is disabled, then return null"() {
         given:
         createWorkflowRunHelper(WorkflowRun.State.RUNNING_OTP, WorkflowArtefact.State.SUCCESS, createWorkflow(enabled: false))
-        WorkflowRunService service = new WorkflowRunService()
 
         when:
-        WorkflowRun ret = service.nextWaitingWorkflow(0)
+        WorkflowRun ret = workflowRunService.nextWaitingWorkflow(0)
 
         then:
         ret == null
@@ -71,10 +70,9 @@ class WorkflowRunServiceIntegrationSpec extends Specification implements Workflo
 
         createWorkflowRunHelper(WorkflowRun.State.RUNNING_OTP, WorkflowArtefact.State.SUCCESS, workflowRun.workflow)
         createWorkflowRunHelper(WorkflowRun.State.RUNNING_WES, WorkflowArtefact.State.SUCCESS, workflowRun.workflow)
-        WorkflowRunService service = new WorkflowRunService()
 
         when:
-        WorkflowRun ret = service.nextWaitingWorkflow(0)
+        WorkflowRun ret = workflowRunService.nextWaitingWorkflow(0)
 
         then:
         ret == null
@@ -84,10 +82,9 @@ class WorkflowRunServiceIntegrationSpec extends Specification implements Workflo
     void "nextWaitingWorkflow, if more workflows are allowed and state is #state, then return null"() {
         given:
         createWorkflowRunHelper(state as WorkflowRun.State)
-        WorkflowRunService service = new WorkflowRunService()
 
         when:
-        WorkflowRun ret = service.nextWaitingWorkflow(0)
+        WorkflowRun ret = workflowRunService.nextWaitingWorkflow(0)
 
         then:
         ret == null
@@ -99,10 +96,9 @@ class WorkflowRunServiceIntegrationSpec extends Specification implements Workflo
     void "nextWaitingWorkflow, if not more workflows are allowed, then return null"() {
         given:
         createWorkflowRunHelper()
-        WorkflowRunService service = new WorkflowRunService()
 
         when:
-        WorkflowRun ret = service.nextWaitingWorkflow(Integer.MAX_VALUE)
+        WorkflowRun ret = workflowRunService.nextWaitingWorkflow(Integer.MAX_VALUE)
 
         then:
         ret == null
@@ -112,10 +108,9 @@ class WorkflowRunServiceIntegrationSpec extends Specification implements Workflo
     void "nextWaitingWorkflow, if more workflows are allowed and state is PENDING and state of artefact is #state, then return null"() {
         given:
         createWorkflowRunHelper(WorkflowRun.State.RUNNING_OTP, state as WorkflowArtefact.State)
-        WorkflowRunService service = new WorkflowRunService()
 
         when:
-        WorkflowRun ret = service.nextWaitingWorkflow(0)
+        WorkflowRun ret = workflowRunService.nextWaitingWorkflow(0)
 
         then:
         ret == null
@@ -132,10 +127,8 @@ class WorkflowRunServiceIntegrationSpec extends Specification implements Workflo
         createWorkflowRunWithPriority(3, 0)
         createWorkflowRunWithPriority(3, 8)
 
-        WorkflowRunService service = new WorkflowRunService()
-
         when:
-        WorkflowRun ret = service.nextWaitingWorkflow(0)
+        WorkflowRun ret = workflowRunService.nextWaitingWorkflow(0)
 
         then:
         ret == workflowRun
@@ -149,10 +142,8 @@ class WorkflowRunServiceIntegrationSpec extends Specification implements Workflo
         createWorkflowRunWithPriority(5, 0)
         createWorkflowRunWithPriority(5, 8)
 
-        WorkflowRunService service = new WorkflowRunService()
-
         when:
-        WorkflowRun ret = service.nextWaitingWorkflow(0)
+        WorkflowRun ret = workflowRunService.nextWaitingWorkflow(0)
 
         then:
         ret == workflowRun
@@ -170,10 +161,8 @@ class WorkflowRunServiceIntegrationSpec extends Specification implements Workflo
 
         WorkflowRun workflowRun3 = createWorkflowRunWithPriority(4, 0)
 
-        WorkflowRunService service = new WorkflowRunService()
-
         when:
-        WorkflowRun ret = service.nextWaitingWorkflow(0)
+        WorkflowRun ret = workflowRunService.nextWaitingWorkflow(0)
 
         then:
         ret == workflowRun3
@@ -187,10 +176,8 @@ class WorkflowRunServiceIntegrationSpec extends Specification implements Workflo
         WorkflowRun workflowRun =
                 createWorkflowRunWithPriority(5, 8, createWorkflow(), Date.from(Instant.now().minus(5, ChronoUnit.DAYS)))
 
-        WorkflowRunService service = new WorkflowRunService()
-
         when:
-        WorkflowRun ret = service.nextWaitingWorkflow(0)
+        WorkflowRun ret = workflowRunService.nextWaitingWorkflow(0)
 
         then:
         ret == workflowRun
@@ -201,10 +188,9 @@ class WorkflowRunServiceIntegrationSpec extends Specification implements Workflo
         WorkflowRun workflowRun = createWorkflowRunHelper()
         workflowRun.project.state = Project.State.ARCHIVED
         workflowRun.project.save(flush: true)
-        WorkflowRunService service = new WorkflowRunService()
 
         when:
-        WorkflowRun ret = service.nextWaitingWorkflow(0)
+        WorkflowRun ret = workflowRunService.nextWaitingWorkflow(0)
 
         then:
         ret == null

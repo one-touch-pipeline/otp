@@ -22,6 +22,8 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
+import groovy.sql.GroovyRowResult
+import groovy.sql.Sql
 import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 import org.hibernate.*
@@ -37,78 +39,96 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.workflowExecution.wes.WesRun
 
+import javax.sql.DataSource
 import java.time.LocalDateTime
 
 @Transactional
 class WorkflowRunService {
 
+    DataSource dataSource
     ClusterJobDetailService clusterJobDetailService
-
     WorkflowLogService workflowLogService
+    ClusterJobService clusterJobService
+    ConfigFragmentService configFragmentService
+    ConfigService configService
+    WorkflowStepService workflowStepService
 
     public static final int PESSIMISTIC_WRITE_TIME_OUT = 10000
 
-    public final static List<WorkflowRun.State> STATES_COUNTING_AS_RUNNING = [
+    public static final List<WorkflowRun.State> STATES_COUNTING_AS_RUNNING = [
             WorkflowRun.State.RUNNING_OTP,
             WorkflowRun.State.RUNNING_WES,
     ].asImmutable()
 
-    private final static String WAITING_WORKFLOW_QUERY = """
-        from
-            WorkflowRun wr
-        where
-            wr.state = '${WorkflowRun.State.PENDING}'
-            and wr.workflow.enabled = true
-            and wr.project.state != '${Project.State.ARCHIVED}'
-            and wr.project.state != '${Project.State.DELETED}'
-            and wr.priority in (
-                select
-                    pp
-                from
-                    ProcessingPriority pp
-                where
-                    pp.allowedParallelWorkflowRuns > :workflowCount
+    public static final List<WorkflowRun.State> PENDING_STATES = [
+            WorkflowRun.State.PENDING,
+    ].asImmutable()
+
+    public static final List<WorkflowRun.State> SUCCESS_STATES = [
+            WorkflowRun.State.SUCCESS,
+    ].asImmutable()
+
+    private static String buildWaitingWorkflowQuery(Map<String, String> placeholders) {
+        return """
+            WITH running_counts AS (
+                SELECT workflow_id, COUNT(*) AS running_count
+                FROM workflow_run
+                WHERE state IN (${placeholders.runningStates})
+                GROUP BY workflow_id
             )
-            and not exists (
-                from
-                    WorkflowRunInputArtefact wia
-                where
-                    wia.workflowRun = wr
-                    and wia.workflowArtefact.state != '${WorkflowArtefact.State.SUCCESS}'
-            )
-            and wr.workflow.maxParallelWorkflows > (
-                select
-                    count(id)
-                from
-                    WorkflowRun wr2
-                where
-                    wr2.workflow = wr.workflow
-                    and wr2.state in ('${STATES_COUNTING_AS_RUNNING.join('\',\'')}')
-            )
-        order by
-            wr.priority.priority desc,
-            wr.workflow.priority desc,
-            wr.dateCreated
+            SELECT wr.id
+            FROM workflow_run wr
+            JOIN project p ON p.id = wr.project_id
+            JOIN workflow w ON w.id = wr.workflow_id
+            JOIN processing_priority pp ON pp.id = wr.priority_id
+            LEFT JOIN running_counts rc ON rc.workflow_id = wr.workflow_id
+            WHERE wr.state IN (${placeholders.pendingStates})
+              AND w.enabled = true
+              AND p.state NOT IN (${placeholders.excludedStates})
+              AND pp.allowed_parallel_workflow_runs > ?
+              AND COALESCE(rc.running_count, 0) < w.max_parallel_workflows
+              AND NOT EXISTS (
+                SELECT 1
+                FROM workflow_run_input_artefact wia
+                JOIN workflow_artefact wa ON wa.id = wia.workflow_artefact_id
+                WHERE wia.workflow_run_id = wr.id
+                  AND wa.state NOT IN (${placeholders.successStates})
+              )
+            ORDER BY pp.priority DESC, w.priority DESC, wr.date_created
+            LIMIT 1
         """
-
-    ClusterJobService clusterJobService
-
-    ConfigFragmentService configFragmentService
-
-    ConfigService configService
-
-    WorkflowStepService workflowStepService
+    }
 
     @CompileDynamic
     int countOfRunningWorkflows() {
         return WorkflowRun.countByStateInList(STATES_COUNTING_AS_RUNNING)
     }
 
-    @CompileDynamic
-    WorkflowRun nextWaitingWorkflow(int workflowCount) {
-        return WorkflowRun.find(WAITING_WORKFLOW_QUERY, [
-                workflowCount: workflowCount,
-        ])
+    WorkflowRun nextWaitingWorkflow(int allowedRunLimit) {
+        Map<String, List<String>> params = [
+                runningStates  : STATES_COUNTING_AS_RUNNING*.name(),
+                pendingStates  : PENDING_STATES*.name(),
+                excludedStates : [Project.State.ARCHIVED, Project.State.DELETED]*.name(),
+                successStates  : SUCCESS_STATES*.name(),
+        ]
+
+        Map<String, String> placeholders = params.collectEntries { k, v ->
+            [k, v.collect { '?' }.join(', ')]
+        }
+
+        String sqlQuery = buildWaitingWorkflowQuery(placeholders)
+
+        List<Object> queryParams = []
+        queryParams.addAll(params.runningStates)
+        queryParams.addAll(params.pendingStates)
+        queryParams.addAll(params.excludedStates)
+        queryParams.add(allowedRunLimit)
+        queryParams.addAll(params.successStates)
+
+        return new Sql(dataSource).withCloseable { Sql sql ->
+            GroovyRowResult result = sql.firstRow(sqlQuery, queryParams)
+            return result ? getById(result.id as Long) : null
+        }
     }
 
     @CompileDynamic
