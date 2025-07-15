@@ -55,7 +55,7 @@ abstract class AbstractRoddyAnalysisWorkflowSpec<I extends BamFilePairAnalysis> 
         SessionUtils.withTransaction {
             setupRoddyBamFile()
             setupData()
-            decide(2, 1)
+            decide(expectedExistingWorkflowArtefactCount, expectedNewWorkflowArtefactCount)
         }
 
         when:
@@ -71,7 +71,7 @@ abstract class AbstractRoddyAnalysisWorkflowSpec<I extends BamFilePairAnalysis> 
         SessionUtils.withTransaction {
             setupExternalBamFile()
             setupData()
-            decide(2, 1)
+            decide(expectedExistingWorkflowArtefactCount, expectedNewWorkflowArtefactCount)
         }
 
         when:
@@ -98,4 +98,7 @@ abstract class AbstractRoddyAnalysisWorkflowSpec<I extends BamFilePairAnalysis> 
     abstract List<Path> filesToCheck(I instance)
 
     abstract void checkQc(I instance)
+
+    int expectedExistingWorkflowArtefactCount = 2
+    int expectedNewWorkflowArtefactCount = 1
 }

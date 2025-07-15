@@ -109,18 +109,28 @@ class AceseqValidationJobSpec extends Specification implements DataTest, Workflo
 
     void "getExpectedFiles, should get all files"() {
         given:
-        Path file1 = tempDir.resolve('file1')
-        Path file2 = tempDir.resolve('file2')
+        Map<PlotType, Path> plotFiles = [
+                (PlotType.ACESEQ_GC_CORRECTED): tempDir.resolve('gcCorrectedPlot'),
+                (PlotType.ACESEQ_QC_GC_CORRECTED): tempDir.resolve('qcGcCorrectedPlot'),
+                (PlotType.ACESEQ_TCN_DISTANCE_COMBINED_STAR): tempDir.resolve('tcnDistancePlot'),
+                (PlotType.ACESEQ_WG_COVERAGE): tempDir.resolve('wgCoveragePlot'),
+        ]
+        Path qcJsonFile = tempDir.resolve('qcJsonFile')
+        List<Path> allPlots = [tempDir.resolve('allPlot1'), tempDir.resolve('allPlot2')]
 
         when:
         List<Path> resultPaths = job.getExpectedFiles(workflowStep)
 
         then:
-        resultPaths == [file1, file2]
+        resultPaths == plotFiles.values() + [qcJsonFile] + allPlots
 
         and:
-        1  * job.concreteArtefactService.getOutputArtefact(workflowStep, analysisOutput) >> instance
-        1 * job.aceseqWorkFileService.getAllFiles(instance) >> [file1, file2]
+        1 * job.concreteArtefactService.getOutputArtefact(workflowStep, analysisOutput) >> instance
+        plotFiles.each { plotType, file ->
+            1 * job.aceseqWorkFileService.getPlot(instance, plotType) >> file
+        }
+        1 * job.aceseqWorkFileService.getQcJsonFile(instance) >> qcJsonFile
+        1 * job.aceseqWorkFileService.getPlots(instance, PlotType.ACESEQ_ALL) >> allPlots
     }
 
     void "getExpectedDirectories, should return expected directories"() {

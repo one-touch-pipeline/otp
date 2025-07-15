@@ -25,6 +25,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.dataprocessing.PlotType
 import de.dkfz.tbi.otp.dataprocessing.aceseq.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.workflow.jobs.AbstractRoddyClusterValidationJob
@@ -50,7 +51,13 @@ class AceseqValidationJob extends AbstractRoddyClusterValidationJob implements A
     @Override
     protected List<Path> getExpectedFiles(WorkflowStep workflowStep) {
         AceseqInstance instance = getAceseqInstance(workflowStep)
-        return aceseqWorkFileService.getAllFiles(instance)
+        return [
+                aceseqWorkFileService.getPlot(instance, PlotType.ACESEQ_GC_CORRECTED),
+                aceseqWorkFileService.getPlot(instance, PlotType.ACESEQ_QC_GC_CORRECTED),
+                aceseqWorkFileService.getPlot(instance, PlotType.ACESEQ_TCN_DISTANCE_COMBINED_STAR),
+                aceseqWorkFileService.getPlot(instance, PlotType.ACESEQ_WG_COVERAGE),
+                aceseqWorkFileService.getQcJsonFile(instance),
+        ] + aceseqWorkFileService.getPlots(instance, PlotType.ACESEQ_ALL)
     }
 
     @Override
