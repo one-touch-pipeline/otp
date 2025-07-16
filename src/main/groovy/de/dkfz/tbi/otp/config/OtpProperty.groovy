@@ -97,6 +97,12 @@ enum OtpProperty {
     DATABASE_MAX_WAIT_FOR_CONNECTION('otp.database.max.wait.for.connection', TypeValidators.POSITIVE_NUMBER, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT),
             "10"),
 
+    /**
+     * The time in minutes after which a connection will be closed.
+     * Default to 60 minutes.
+     */
+    DATABASE_MAX_AGE_IN_MINUTES('otp.database.max.age.in.minutes', TypeValidators.POSITIVE_NUMBER, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT), "60"),
+
     CONFIG_EMAIL_ENABLED('otp.mail.allowOtpToSendMails', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.PRODUCTION), 'false'),
     CONFIG_EMAIL_SERVER('otp.mail.server', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION), 'localhost'),
     CONFIG_EMAIL_PORT('otp.mail.port', TypeValidators.POSITIVE_NUMBER, EnumSet.of(UsedIn.PRODUCTION), '25'),

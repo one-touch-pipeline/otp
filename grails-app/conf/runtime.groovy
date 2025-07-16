@@ -47,6 +47,7 @@ String databaseUsername = otpProperties.getProperty(OtpProperty.DATABASE_USERNAM
 String databasePassword = otpProperties.getProperty(OtpProperty.DATABASE_PASSWORD.key)
 long databaseMaxConnection = (otpProperties.getProperty(OtpProperty.DATABASE_MAX_ACTIVE_CONNECTION.key) ?: OtpProperty.DATABASE_MAX_ACTIVE_CONNECTION.defaultValue) as long
 long databaseMaxWaitForConnection = (otpProperties.getProperty(OtpProperty.DATABASE_MAX_WAIT_FOR_CONNECTION.key) ?: OtpProperty.DATABASE_MAX_WAIT_FOR_CONNECTION.defaultValue) as long
+long databaseMaxAgeInMinutes = (otpProperties.getProperty(OtpProperty.DATABASE_MAX_AGE_IN_MINUTES.key) ?: OtpProperty.DATABASE_MAX_AGE_IN_MINUTES.defaultValue) as long
 
 // set per-environment serverURL stem for creating absolute links
 environments {
@@ -91,7 +92,7 @@ environments {
                 maxActive = databaseMaxConnection                                         // max parallel connection
                 maxIdle = 50                                            // max parallel idle connection
                 minIdle = 25                                            // min idle connection
-                maxAge = HOURS.toMillis(1)                              // the time after which a connection will be closed
+                maxAge = MINUTES.toMillis(databaseMaxAgeInMinutes)      // the time after which a connection will be closed
                 minEvictableIdleTimeMillis = MINUTES.toMillis(5)        // minimum time a connection need to be idle before remove
 
                 maxWait = SECONDS.toMillis(databaseMaxWaitForConnection)                          // max time a request wait for a free connection
