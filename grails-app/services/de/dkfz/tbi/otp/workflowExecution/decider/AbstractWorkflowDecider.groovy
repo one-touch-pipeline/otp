@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.workflowExecution.*
  * knows all requirements
  * is called with a list of new/changed workflow artefacts
  */
+@SuppressWarnings('AbcMetric')
 @Transactional
 @Slf4j
 abstract class AbstractWorkflowDecider<ADL extends ArtefactDataList, G extends BaseDeciderGroup, AD extends AdditionalData> implements Decider {
@@ -112,13 +113,24 @@ abstract class AbstractWorkflowDecider<ADL extends ArtefactDataList, G extends B
     abstract protected DeciderResult createWorkflowRunsAndOutputArtefacts(
             ProjectSeqTypeGroup projectSeqTypeGroup, G group,
             ADL givenArtefacts, ADL additionalArtefacts,
-            AD additionalData, WorkflowVersion version)
+            AD additionalData, WorkflowVersion version, Map<Class<? extends Decider>, DeciderCreateWorkflowActions> deciderAction)
 
     @Override
-    final DeciderResult decide(Collection<WorkflowArtefact> inputWorkflowArtefacts, Map<String, String> userParams = [:]) {
+    final DeciderResult decide(Collection<WorkflowArtefact> inputWorkflowArtefacts, Map<String, String> userParams = [:],
+                               Map<Class<? extends Decider>, DeciderCreateWorkflowActions> deciderAction) {
         DeciderResult deciderResult = new DeciderResult()
         Workflow w = workflow
         deciderResult.infos << "start decider for ${w}".toString()
+        String decider = getClass().simpleName
+
+        // skip always, use correct action
+        if (deciderAction[decider] == DeciderCreateWorkflowActions.SKIP.toString()) {
+            String msg = "Skipping creating runs for ${w}"
+            log.debug("        ${msg}")
+            deciderResult.infos << msg.toString()
+            return deciderResult
+        }
+
         Set<SeqType> supportedSeqTypes = (workflowService.getSupportedSeqTypesOfVersions(w) ?: SeqType.list()) as Set
 
         ADL inputArtefactDataList = LogUsedTimeUtils.logUsedTimeStartEnd(log, "        fetch concrete Artefacts") {
@@ -181,7 +193,8 @@ abstract class AbstractWorkflowDecider<ADL extends ArtefactDataList, G extends B
                                     baseGroup, group,
                                     givenArtefacts, additionalArtefacts,
                                     additionalData,
-                                    matchingWorkflows.workflowVersion))
+                                    matchingWorkflows.workflowVersion,
+                                    deciderAction))
                         }
                     }
                 }

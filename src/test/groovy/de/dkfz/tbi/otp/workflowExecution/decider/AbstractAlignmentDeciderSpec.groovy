@@ -55,6 +55,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
     protected ReferenceGenome referenceGenome
     protected RoddyBamFile bamFile
     protected Workflow workflow
+    protected WorkflowVersion workflowVersionOld
     protected WorkflowVersion workflowVersion
 
     protected ProjectSeqTypeGroup projectSeqTypeGroup
@@ -835,6 +836,46 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         'wrong referenceGenome'                 | true      | 'wrongReferenceGenome'         | true  | 0         || "since existing MergingWorkPackage uses ReferenceGenome"
     }
 
+    @Unroll
+    void "createWorkflowRunsAndOutputArtefacts, when #deciderActionName, existsAndSameVersion=#sameVersion, bamFileCreated=#created, then correct warning is added"() {
+        given:
+        createDataForCreateWorkflowRunsAndOutputArtefacts(true, [sameVersion: sameVersion, existingBamFileSameSeqTracks: created])
+
+        Map<Class<? extends Decider>, DeciderCreateWorkflowActions> deciderAction = [
+                (PanCancerDecider)   : deciderActionName,
+                (WgbsDecider)        : deciderActionName,
+                (RnaAlignmentDecider): deciderActionName,
+        ]
+
+        and: 'services'
+        if (newArtefactCreated) {
+            createServicesForCreateWorkflowRunsAndOutputArtefacts(workflowVersion, seqTrack1)
+        } else {
+            createEmptyServicesForCreateWorkflowRunsAndOutputArtefacts(0)
+        }
+
+        when:
+        DeciderResult deciderResult = decider.createWorkflowRunsAndOutputArtefacts(projectSeqTypeGroup, alignmentDeciderGroup,
+                dataList, additionalDataList, additionalData, workflowVersion, deciderAction)
+
+        then:
+        !deciderResult.newArtefacts.empty == newArtefactCreated
+        (deciderResult?.warnings?.size() > 0 && deciderResult?.warnings?.first()?.contains(expectedWarningOrInfo)) ||
+                (deciderResult?.infos?.size() > 0 && deciderResult?.infos[1]?.contains(expectedWarningOrInfo))
+
+        where:
+        deciderActionName                                                | sameVersion | created || expectedWarningOrInfo                                                                                       | newArtefactCreated
+        DeciderCreateWorkflowActions.CREATE_ALWAYS.toString()            | true        | true    || "action is CREATE_ALWAYS"                                                                                   | true
+        DeciderCreateWorkflowActions.CREATE_ALWAYS.toString()            | false       | true    || "action is CREATE_ALWAYS"                                                                                   | true
+        DeciderCreateWorkflowActions.CREATE_ALWAYS.toString()            | false       | false   || "create bam file"                                                                                           | true
+        DeciderCreateWorkflowActions.CREATE_MISSING_AND_NEWER.toString() | true        | true    || "since existing BAM file with the same seqTracks and version found, and action is CREATE_MISSING_AND_NEWER" | false
+        DeciderCreateWorkflowActions.CREATE_MISSING_AND_NEWER.toString() | false       | true    || "since existing BAM file with the same seqTracks has other version, and action is CREATE_MISSING_AND_NEWER" | true
+        DeciderCreateWorkflowActions.CREATE_MISSING_AND_NEWER.toString() | false       | false   || "create bam file"                                                                                           | true
+        DeciderCreateWorkflowActions.CREATE_MISSING.toString()           | true        | true    || "since existing BAM file with the same seqTracks found and action is CREATE_MISSING"                        | false
+        DeciderCreateWorkflowActions.CREATE_MISSING.toString()           | false       | true    || "since existing BAM file with the same seqTracks found and action is CREATE_MISSING"                        | false
+        DeciderCreateWorkflowActions.CREATE_MISSING.toString()           | false       | false   || "create bam file"                                                                                           | true
+    }
+
     private Pipeline findOrCreatePanCanPipeline() {
         return findOrCreateDomainObject(Pipeline, [:], [
                 name: Pipeline.Name.PANCAN_ALIGNMENT,
@@ -973,6 +1014,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         }
 
         workflow = createWorkflow([name: decider.workflowName])
+        workflowVersionOld = createWorkflowVersion([apiVersion: createWorkflowApiVersion(workflow: workflow)])
         workflowVersion = createWorkflowVersion([apiVersion: createWorkflowApiVersion(workflow: workflow)])
         createMergingCriteria([
                 project: seqTrack1.project,
@@ -984,7 +1026,6 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         createDataForCreateWorkflowRunsAndOutputArtefactsDomains(adaption)
 
         Map<String, ?> values = createDefaultMapForCreateWorkflowRunsAndOutputArtefactsDomains() + adaption
-
         // dto objects
         projectSeqTypeGroup = new ProjectSeqTypeGroup(seqTrack1.project, seqTrack1.seqType)
 
@@ -1033,9 +1074,14 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
                 bamFile = createBamFile([
                         workflowArtefact: createWorkflowArtefact([
                                 artefactType: ArtefactType.BAM,
+                                producedBy  : createWorkflowRun([
+                                        workflowVersion: values.sameVersion ? workflowVersion : workflowVersionOld,
+                                        project        : seqTrack1.project,
+                                ])
                         ]),
                         workPackage     : baseMergingWorkPackage,
                         seqTracks       : values.existingBamFileSameSeqTracks ? seqTracks : [seqTrack1],
+                        config          : null,
                 ])
                 additionalDataList.bamData << createAlignmentArtefactDataForRoddyBamFile(bamFile)
             }

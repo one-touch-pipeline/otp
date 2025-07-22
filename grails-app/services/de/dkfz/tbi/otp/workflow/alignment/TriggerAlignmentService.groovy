@@ -40,6 +40,8 @@ import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.otp.withdraw.RoddyBamFileWithdrawService
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
+import de.dkfz.tbi.otp.workflowExecution.decider.Decider
+import de.dkfz.tbi.otp.workflowExecution.decider.DeciderCreateWorkflowActions
 import de.dkfz.tbi.otp.workflowExecution.decider.DeciderResult
 
 import static de.dkfz.tbi.otp.dataprocessing.MergingCriteria.SpecificSeqPlatformGroups.*
@@ -62,7 +64,8 @@ class TriggerAlignmentService {
     @Transactional(readOnly = false)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     @CompileDynamic
-    TriggerAlignmentResult triggerAlignment(Collection<SeqTrack> seqTracks, boolean withdrawBamFiles = false, boolean ignoreSeqPlatformGroup = false) {
+    TriggerAlignmentResult triggerAlignment(Collection<SeqTrack> seqTracks, boolean withdrawBamFiles = false, boolean ignoreSeqPlatformGroup = false,
+                                            Map<Class<? extends Decider>, DeciderCreateWorkflowActions> deciderAction) {
         // Mark the bam files as withdrawn
         if (withdrawBamFiles) {
             LogUsedTimeUtils.logUsedTimeStartEnd(log, "withdrawn existing bamFiles") {
@@ -84,7 +87,7 @@ class TriggerAlignmentService {
         }
         DeciderResult deciderResult = allDecider.decide(alignableSeqTracks*.workflowArtefact, [
                 ignoreSeqPlatformGroup: ignoreSeqPlatformGroup.toString()
-        ])
+        ], deciderAction)
         Collection<MergingWorkPackage> mergingWorkPackages = deciderResult.newArtefacts.findAll {
             it.artefactType == ArtefactType.BAM
         }*.artefact*.get()*.workPackage

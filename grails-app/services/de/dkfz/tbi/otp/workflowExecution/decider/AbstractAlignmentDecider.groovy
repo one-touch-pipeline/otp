@@ -27,14 +27,15 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.infrastructure.alignment.RoddyBamFileNames
 import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.RoddyBamFileNames
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.decider.alignment.*
 
+@SuppressWarnings('AbcMetric')
 @Transactional
 @Slf4j
 abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<AlignmentArtefactDataList, AlignmentDeciderGroup, AlignmentAdditionalData> {
@@ -194,7 +195,8 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
     @Override
     protected DeciderResult createWorkflowRunsAndOutputArtefacts(ProjectSeqTypeGroup projectSeqTypeGroup, AlignmentDeciderGroup group,
                                                                  AlignmentArtefactDataList givenArtefacts, AlignmentArtefactDataList additionalArtefacts,
-                                                                 AlignmentAdditionalData additionalData, WorkflowVersion version) {
+                                                                 AlignmentAdditionalData additionalData, WorkflowVersion version,
+                                                                 Map<Class<? extends Decider>, DeciderCreateWorkflowActions> deciderAction = [:]) {
         DeciderResult deciderResult = new DeciderResult()
         deciderResult.infos << "process group ${group}".toString()
 
@@ -204,17 +206,33 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
                 givenArtefacts.bamData + additionalArtefacts.bamData,
         )
 
-        AbstractBamFile existingBamFile = allArtefacts.bamData.find()?.artefact
+        AlignmentArtefactData<RoddyBamFile> existingBamFileData = allArtefacts.bamData.find() as AlignmentArtefactData<RoddyBamFile>
+        RoddyBamFile existingBamFile = existingBamFileData?.artefact
         List<SeqTrack> seqTracks = allArtefacts.seqTrackData*.artefact
 
         if (seqTracks.empty) {
             deciderResult.warnings << "skip ${group}, since no seqTracks found".toString()
             return deciderResult
         }
-
         if (seqTracks as Set == existingBamFile?.seqTracks) {
-            deciderResult.warnings << "skip ${group}, since existing BAM file with the same seqTracks found".toString()
-            return deciderResult
+            DeciderCreateWorkflowActions action = deciderAction[getClass()]
+            switch (action) {
+                case DeciderCreateWorkflowActions.CREATE_ALWAYS:
+                    deciderResult.warnings << "recreate ${group}, since action is CREATE_ALWAYS".toString()
+                    break
+                case DeciderCreateWorkflowActions.CREATE_MISSING_AND_NEWER:
+                    if (existingBamFileData.version == version.workflowVersion) {
+                        deciderResult.warnings << ("skip ${group}, since existing BAM file with the same seqTracks and version found, " +
+                        "and action is CREATE_MISSING_AND_NEWER").toString()
+                        return deciderResult
+                    }
+                    deciderResult.warnings << ("recreate ${group}, since existing BAM file with the same seqTracks has other version, " +
+                        "and action is CREATE_MISSING_AND_NEWER").toString()
+                    break
+                default: // case DeciderCreateWorkflowActions.CREATE_MISSING: (default)
+                    deciderResult.warnings << "skip ${group}, since existing BAM file with the same seqTracks found and action is CREATE_MISSING".toString()
+                    return deciderResult
+            }
         }
 
         Set<SeqTrack> seqTrackSet = seqTracks as Set
@@ -350,11 +368,11 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
 
         int identifier = RoddyBamFile.nextIdentifier(workPackage)
         RoddyBamFile bamFile = createBamFileWithoutFlush([
-                workflowArtefact: workflowOutputArtefact,
-                workPackage: workPackage,
-                identifier: identifier,
-                workDirectoryName: "${RoddyBamFileNames.WORK_DIR_PREFIX}_${identifier}",
-                seqTracks: seqTrackSet,
+                workflowArtefact   : workflowOutputArtefact,
+                workPackage        : workPackage,
+                identifier         : identifier,
+                workDirectoryName  : "${RoddyBamFileNames.WORK_DIR_PREFIX}_${identifier}",
+                seqTracks          : seqTrackSet,
                 numberOfMergedLanes: seqTrackSet.size(),
         ])
 

@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
 import de.dkfz.tbi.otp.workflow.fastqc.WesFastQcWorkflow
+import de.dkfz.tbi.otp.workflow.shared.DeciderCreateWorkflowActionsException
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.decider.fastqc.FastqcArtefactDataWithSeqTrack
 import de.dkfz.tbi.otp.workflowExecution.decider.fastqc.FastqcArtefactDataWithFastqcProcessedFile
@@ -60,12 +61,18 @@ class FastqcDecider implements Decider {
     FastqcArtefactService fastqcArtefactService
 
     @Override
-    DeciderResult decide(Collection<WorkflowArtefact> inputArtefacts, Map<String, String> userParams = [:]) {
+    DeciderResult decide(Collection<WorkflowArtefact> inputArtefacts, Map<String, String> userParams = [:],
+                         Map<Class<? extends Decider>, DeciderCreateWorkflowActions> deciderAction) {
         DeciderResult deciderResult = new DeciderResult()
         final Workflow workflowWes = workflowService.getExactlyOneWorkflow(WesFastQcWorkflow.WORKFLOW)
         final Workflow workflowBash = workflowService.getExactlyOneWorkflow(BashFastQcWorkflow.WORKFLOW)
         deciderResult.infos << "start decider for ${workflowWes} / ${workflowBash}".toString()
-
+        if (deciderAction[getClass()] == DeciderCreateWorkflowActions.SKIP) {
+            String msg = "Skipping creating runs for ${workflowWes} / ${workflowBash}"
+            log.debug("        ${msg}")
+            deciderResult.infos << msg
+            return deciderResult
+        }
         List<FastqcArtefactDataWithSeqTrack> seqTrackData = fastqcArtefactService.fetchSeqTrackArtefacts(inputArtefacts)
         List<SeqTrack> seqTracks = seqTrackData*.artefact
 
@@ -119,7 +126,8 @@ class FastqcDecider implements Decider {
                                 fastqcArtefactData,
                                 additionalArtefacts,
                                 rawSequenceFilesMap,
-                                matchingWorkflows)
+                                matchingWorkflows,
+                                deciderAction)
                         )
                     }
                 }
@@ -135,7 +143,8 @@ class FastqcDecider implements Decider {
     protected DeciderResult createWorkflowRunsAndOutputArtefacts(FastqcArtefactDataWithSeqTrack fastqcArtefactData,
                                                                  List<FastqcArtefactDataWithFastqcProcessedFile> additionalArtefacts,
                                                                  Map<SeqTrack, List<RawSequenceFile>> rawSequenceFilesMap,
-                                                                 WorkflowVersionSelector matchingWorkflow) {
+                                                                 WorkflowVersionSelector matchingWorkflow,
+                                                                 Map<Class<? extends Decider>, DeciderCreateWorkflowActions> deciderAction = [:]) {
         DeciderResult deciderResult = new DeciderResult()
         SeqTrack seqTrack = fastqcArtefactData.artefact
         String seqTrackString = seqTrack.toString().replaceAll('<br>', ', ')
@@ -144,8 +153,16 @@ class FastqcDecider implements Decider {
         List<RawSequenceFile> rawSequenceFiles = rawSequenceFilesMap[seqTrack]
 
         if (additionalArtefacts && additionalArtefacts.size() == rawSequenceFiles.size()) {
-            deciderResult.warnings << "skip ${seqTrackString}, since fastqc already exist".toString()
-            return deciderResult
+            DeciderCreateWorkflowActions action = deciderAction[getClass()]
+            switch (action) {
+                case DeciderCreateWorkflowActions.CREATE_ALWAYS:
+                    throw new DeciderCreateWorkflowActionsException("The action CREATE_ALWAYS is not supported for fastqc")
+                case DeciderCreateWorkflowActions.CREATE_MISSING_AND_NEWER:
+                    throw new DeciderCreateWorkflowActionsException("The action CREATE_MISSING_AND_NEWER is not supported for fastqc")
+                default: // case DeciderCreateWorkflowActions.CREATE_MISSING: //(default)
+                    deciderResult.warnings << "skip ${seqTrackString}, since fastqc already exist".toString()
+                    return deciderResult
+            }
         }
 
         Map<RawSequenceFile, FastqcProcessedFile> fastqcPerRawSequenceFile = additionalArtefacts ? additionalArtefacts.collectEntries {

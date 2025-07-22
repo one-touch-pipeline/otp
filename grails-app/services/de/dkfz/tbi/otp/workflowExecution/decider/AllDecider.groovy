@@ -52,22 +52,27 @@ class AllDecider implements Decider {
     WorkflowService workflowService
 
     /** list of Deciders in the correct order */
-    List<Class<Decider>> deciders = [
+    List<Class<? extends Decider>> deciders = [
             FastqcDecider,
             PanCancerDecider,
             WgbsDecider,
             RnaAlignmentDecider,
     ]
 
+    Class<? extends Decider> getDeciderClassByName(String name) {
+        return deciders.find { it.simpleName == name }
+    }
+
     @Override
-    DeciderResult decide(Collection<WorkflowArtefact> allWorkflowArtefacts, Map<String, String> userParams = [:]) {
+    DeciderResult decide(Collection<WorkflowArtefact> allWorkflowArtefacts, Map<String, String> userParams = [:],
+                         Map<Class<? extends Decider>, DeciderCreateWorkflowActions> deciderAction = [:]) {
         DeciderResult deciderResultAll = new DeciderResult()
         LogUsedTimeUtils.logUsedTimeStartEnd(log, "    AllDecider for ${allWorkflowArtefacts.size()} workflow artefacts") {
             deciders.each { deciderClass ->
                 Decider decider = Holders.grailsApplication.mainContext.getBean(deciderClass)
                 DeciderResult deciderResult = LogUsedTimeUtils.logUsedTimeStartEnd(log,
                         "      Decider ${deciderClass.simpleName} with ${allWorkflowArtefacts.size()} artefacts") {
-                    decider.decide(allWorkflowArtefacts, userParams)
+                    decider.decide(allWorkflowArtefacts, userParams, deciderAction)
                 }
                 deciderResultAll.add(deciderResult)
                 allWorkflowArtefacts += deciderResult.newArtefacts

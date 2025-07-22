@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2025 The OTP authors
+ * Copyright 2011-2024 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,9 +21,13 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.decider
 
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
-
-interface Decider {
-    abstract DeciderResult decide(Collection<WorkflowArtefact> inputArtefacts, Map<String, String> userParams,
-                                  Map<Class<? extends Decider>, DeciderCreateWorkflowActions> deciderAction)
+enum DeciderCreateWorkflowActions {
+    // default: create a workflow run if no run exists yet
+    CREATE_MISSING,
+    // create a workflow run if no run exists yet or if one of an older version exists, if run has same version then skip
+    CREATE_MISSING_AND_NEWER,
+    // create a workflow run always
+    CREATE_ALWAYS,
+    // skip creation of workflows runs for the workflow completely
+    SKIP,
 }

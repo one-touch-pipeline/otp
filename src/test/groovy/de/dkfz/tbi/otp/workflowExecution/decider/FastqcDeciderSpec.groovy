@@ -35,9 +35,10 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
 import de.dkfz.tbi.otp.workflow.fastqc.WesFastQcWorkflow
+import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.otp.workflowExecution.*
-import de.dkfz.tbi.otp.workflowExecution.decider.fastqc.FastqcArtefactDataWithSeqTrack
 import de.dkfz.tbi.otp.workflowExecution.decider.fastqc.FastqcArtefactDataWithFastqcProcessedFile
+import de.dkfz.tbi.otp.workflowExecution.decider.fastqc.FastqcArtefactDataWithSeqTrack
 
 class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, FastqcDomainFactory, FastqcWorkflowDomainFactory {
 
@@ -104,7 +105,7 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
         }
 
         when:
-        DeciderResult deciderResult = decider.decide([workflowArtefact], [:])
+        DeciderResult deciderResult = decider.decide([workflowArtefact], [:], [:])
 
         then:
         deciderResult.newArtefacts.size() == 2
@@ -134,7 +135,7 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
         }
 
         when:
-        DeciderResult deciderResult = decider.decide([], [:])
+        DeciderResult deciderResult = decider.decide([], [:], [:])
 
         then:
         deciderResult.newArtefacts.empty
@@ -181,7 +182,7 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
         }
 
         when:
-        DeciderResult deciderResult = decider.decide([workflowArtefact], [:])
+        DeciderResult deciderResult = decider.decide([workflowArtefact], [:], [:])
 
         then:
         deciderResult.newArtefacts.empty
@@ -192,6 +193,36 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
         name   | useWes
         'bash' | false
         'wes'  | true
+    }
+
+    @Unroll
+    void "decide, when deciderAction=SKIP, then no artefacts are created and a skip info is added"() {
+        given:
+        setupData(true)
+
+        WorkflowArtefact workflowArtefact = createWorkflowArtefact([
+                artefactType: ArtefactType.FASTQ,
+        ])
+
+        and: 'services'
+        decider.fastqcArtefactService = Mock(FastqcArtefactService) {
+            0 * _
+        }
+        decider.workflowService = Mock(WorkflowService) {
+            1 * getExactlyOneWorkflow(WesFastQcWorkflow.WORKFLOW) >> wesWorkflowVersion.workflow
+            1 * getExactlyOneWorkflow(BashFastQcWorkflow.WORKFLOW) >> bashWorkflowVersion.workflow
+            0 * _
+        }
+
+        when:
+        DeciderResult deciderResult = decider.decide([workflowArtefact], [:], [(FastqcDecider): DeciderCreateWorkflowActions.SKIP])
+
+        then:
+        deciderResult.newArtefacts.empty
+        deciderResult.warnings.empty
+        deciderResult.infos.any {
+            it.contains('Skipping creating runs for nf-seq-qc / Bash FastQC')
+        }
     }
 
     @Unroll
@@ -266,7 +297,7 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
             it.seqTrack
         }
 
-        List<FastqcArtefactDataWithSeqTrack> fastqcArtefactDataFasqc = seqTrack.sequenceFiles.collect {
+        List<FastqcArtefactDataWithFastqcProcessedFile> fastqcArtefactDataFasqc = seqTrack.sequenceFiles.collect {
             FastqcProcessedFile fastqcProcessedFile = createFastqcProcessedFile([
                     sequenceFile    : it,
                     workflowArtefact: createWorkflowArtefact([
@@ -284,7 +315,7 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
         ])
 
         when:
-        DeciderResult deciderResult = decider.createWorkflowRunsAndOutputArtefacts(fastqcArtefactDataSeqTrack, fastqcArtefactDataFasqc, rawSequenceFileMap, selector)
+        DeciderResult deciderResult = decider.createWorkflowRunsAndOutputArtefacts(fastqcArtefactDataSeqTrack, fastqcArtefactDataFasqc, rawSequenceFileMap, selector, [:])
 
         then:
         deciderResult.newArtefacts.empty
@@ -295,6 +326,56 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
         name   | useWes
         'bash' | false
         'wes'  | true
+    }
+
+    @Unroll
+    void "createWorkflowRunsAndOutputArtefacts, when deciderAction=#deciderAction, then throw exception"() {
+        given:
+        setupData(true)
+
+        WorkflowArtefact workflowArtefact = createWorkflowArtefact([
+                artefactType: ArtefactType.FASTQ,
+        ])
+        SeqTrack seqTrack = createSeqTrackWithTwoFastqFile([
+                workflowArtefact: workflowArtefact
+        ])
+        WorkflowArtefact fastqcArtefact1 = createWorkflowArtefact([
+                artefactType: ArtefactType.FASTQC,
+        ])
+        WorkflowArtefact fastqcArtefact2 = createWorkflowArtefact([
+                artefactType: ArtefactType.FASTQC,
+        ])
+        FastqcProcessedFile fastqcProcessedFile1 = createFastqcProcessedFile([
+                sequenceFile    : seqTrack.sequenceFiles[0],
+                workflowArtefact: fastqcArtefact1,
+        ])
+        FastqcProcessedFile fastqcProcessedFile2 = createFastqcProcessedFile([
+                sequenceFile    : seqTrack.sequenceFiles[1],
+                workflowArtefact: fastqcArtefact2,
+        ])
+        FastqcArtefactDataWithSeqTrack fastqcArtefactData = createFastqcArtefactDataForSeqTrack(seqTrack)
+        Map<SeqTrack, List<RawSequenceFile>> rawSequenceFileMap = seqTrack.sequenceFiles.groupBy { it.seqTrack }
+        WorkflowVersionSelector selector = createWorkflowVersionSelector([
+                workflowVersion: usedVersion,
+                project        : seqTrack.project,
+                seqType        : null,
+        ])
+        List<FastqcArtefactDataWithFastqcProcessedFile> additionalArtefacts = [createFastqcArtefactDataWithFastqcProcessedFile(fastqcProcessedFile1), createFastqcArtefactDataWithFastqcProcessedFile(fastqcProcessedFile2)]
+        Map<Class<? extends Decider>, DeciderCreateWorkflowActions> deciderActionMap = [
+                (FastqcDecider): deciderAction
+        ]
+
+        when:
+        decider.createWorkflowRunsAndOutputArtefacts(fastqcArtefactData, additionalArtefacts, rawSequenceFileMap, selector, deciderActionMap)
+
+        then:
+        WorkflowException e = thrown()
+        e.message.contains(expectedMessage)
+
+        where:
+        deciderAction                                         || expectedMessage
+        DeciderCreateWorkflowActions.CREATE_ALWAYS            || 'The action CREATE_ALWAYS is not supported for fastqc'
+        DeciderCreateWorkflowActions.CREATE_MISSING_AND_NEWER || 'The action CREATE_MISSING_AND_NEWER is not supported for fastqc'
     }
 
     private void createServicesForCreateWorkflowRunsAndOutputArtefacts(WorkflowVersion workflowVersion, SeqTrack seqTrack) {
@@ -336,6 +417,18 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
             }
             0 * _
         }
+    }
+
+    private FastqcArtefactDataWithFastqcProcessedFile createFastqcArtefactDataWithFastqcProcessedFile(FastqcProcessedFile fastqcProcessedFile) {
+        return new FastqcArtefactDataWithFastqcProcessedFile(
+                fastqcProcessedFile.workflowArtefact,
+                fastqcProcessedFile,
+                fastqcProcessedFile.workflowArtefact?.producedBy?.workflowVersion?.workflowVersion,
+                fastqcProcessedFile.sequenceFile.project,
+                fastqcProcessedFile.sequenceFile.seqType,
+                fastqcProcessedFile.sequenceFile,
+                fastqcProcessedFile.sequenceFile.seqTrack
+        )
     }
 
     private FastqcArtefactDataWithSeqTrack createFastqcArtefactDataForSeqTrack(SeqTrack seqTrack) {

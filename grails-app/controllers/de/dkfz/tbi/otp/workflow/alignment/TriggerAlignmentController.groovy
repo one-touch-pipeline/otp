@@ -25,13 +25,14 @@ import grails.converters.JSON
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.SearchSeqTrackService
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import de.dkfz.tbi.otp.workflow.TriggerWorkflowService
 import de.dkfz.tbi.otp.workflow.WorkflowVersionAndReferenceGenomeSelector
+import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
+import de.dkfz.tbi.otp.workflowExecution.decider.Decider
+import de.dkfz.tbi.otp.workflowExecution.decider.DeciderCreateWorkflowActions
 
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
 class TriggerAlignmentController {
@@ -40,6 +41,7 @@ class TriggerAlignmentController {
     private static final String PARAM_KEY_BAM_FILES = 'bamFiles[]'
     private static final String PARAM_KEY_IGNORE_SEQ_GROUP = 'ignoreSeqPlatformGroup'
     private static final String PARAM_KEY_WITHDRAW_BAMFILES = 'withdrawBamFiles'
+    private static final String PARAM_KEY_DECIDER_ACTION = 'deciderAction'
 
     TriggerAlignmentService triggerAlignmentService
     TriggerWorkflowService triggerWorkflowService
@@ -142,7 +144,24 @@ class TriggerAlignmentController {
         boolean ignoreSeqPlatformGroup = Boolean.parseBoolean(params[PARAM_KEY_IGNORE_SEQ_GROUP])
         boolean withdrawBamFiles = Boolean.parseBoolean(params[PARAM_KEY_WITHDRAW_BAMFILES])
 
-        TriggerAlignmentResult triggerAlignmentResult = triggerAlignmentService.triggerAlignment(seqTracks, withdrawBamFiles, ignoreSeqPlatformGroup)
+        Map<Class<? extends Decider>, DeciderCreateWorkflowActions> deciderAction = [:]
+        if (params[PARAM_KEY_DECIDER_ACTION].getClass().isArray()) {
+            params[PARAM_KEY_DECIDER_ACTION].each { String deciderName, String actionName ->
+                try {
+                    Class<? extends Decider> deciderClass = AllDecider.getDeciderClassByName(deciderName)
+                    if (!deciderClass) {
+                        throw new IllegalArgumentException("Unknown decider: ${deciderName}")
+                    }
+                    DeciderCreateWorkflowActions action = DeciderCreateWorkflowActions.valueOf(actionName)
+                    deciderAction.put(deciderClass, action)
+                } catch (ClassNotFoundException | IllegalArgumentException e) {
+                    log.warn("Invalid decider action: ${deciderName}=${actionName}", e)
+                }
+            }
+        }
+
+        TriggerAlignmentResult triggerAlignmentResult = triggerAlignmentService.triggerAlignment(seqTracks, withdrawBamFiles,
+                ignoreSeqPlatformGroup, deciderAction)
 
         return render([
                 success        : !triggerAlignmentResult.mergingWorkPackages.empty,

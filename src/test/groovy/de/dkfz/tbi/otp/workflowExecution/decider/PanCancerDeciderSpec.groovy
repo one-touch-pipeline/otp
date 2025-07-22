@@ -60,6 +60,11 @@ class PanCancerDeciderSpec extends AbstractAlignmentDeciderSpec {
         decider.outputBamRole == PanCancerWorkflow.OUTPUT_BAM
     }
 
+    void "getPipelineName"() {
+        expect:
+        decider.pipelineName == de.dkfz.tbi.otp.dataprocessing.Pipeline.Name.PANCAN_ALIGNMENT
+    }
+
     void "getWorkflow"() {
         given:
         decider.workflowService = new WorkflowService()
@@ -80,6 +85,9 @@ class PanCancerDeciderSpec extends AbstractAlignmentDeciderSpec {
     @Unroll
     void "createWorkflowRunsAndOutputArtefacts, PanCancer cases, when #name, then do not create a new bam file and create a warning"() {
         given:
+        Map<Class<? extends Decider>, DeciderCreateWorkflowActions> deciderAction = [
+                (PanCancerDecider): DeciderCreateWorkflowActions.CREATE_MISSING.toString(),
+        ]
         createDataForCreateWorkflowRunsAndOutputArtefacts(createMwp, [(key): value])
 
         and: 'services'
@@ -87,7 +95,7 @@ class PanCancerDeciderSpec extends AbstractAlignmentDeciderSpec {
 
         when:
         DeciderResult deciderResult = decider.createWorkflowRunsAndOutputArtefacts(projectSeqTypeGroup, alignmentDeciderGroup,
-                dataList, additionalDataList, additionalData, workflowVersion)
+                dataList, additionalDataList, additionalData, workflowVersion, deciderAction)
 
         then:
         deciderResult.newArtefacts.empty

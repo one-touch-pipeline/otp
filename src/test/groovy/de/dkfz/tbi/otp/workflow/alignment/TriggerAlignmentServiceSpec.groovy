@@ -39,8 +39,7 @@ import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.otp.withdraw.RoddyBamFileWithdrawService
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
-import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
-import de.dkfz.tbi.otp.workflowExecution.decider.DeciderResult
+import de.dkfz.tbi.otp.workflowExecution.decider.*
 
 import java.time.LocalDate
 
@@ -83,7 +82,12 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, Work
         final SeqType st1 = createSeqTypePaired()
         final SeqType st2 = createSeqTypePaired()
         final SeqType st3 = createSeqTypePaired()
-
+        Map<Class<? extends Decider>, DeciderCreateWorkflowActions> deciderAction = [
+                (FastqcDecider)      : DeciderCreateWorkflowActions.SKIP,
+                (PanCancerDecider)   : DeciderCreateWorkflowActions.CREATE_ALWAYS,
+                (WgbsDecider)        : DeciderCreateWorkflowActions.SKIP,
+                (RnaAlignmentDecider): DeciderCreateWorkflowActions.SKIP,
+        ]
         Project project = createProject()
         Individual individual = createIndividual(project: project)
 
@@ -134,7 +138,7 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, Work
 
         // Mock service for workflow system
         service.allDecider = Mock(AllDecider) {
-            1 * decide(_, _) >> deciderResultToReturn
+            1 * decide(_, _, _) >> deciderResultToReturn
             1 * findAlignableSeqTracks(_) >> [seqTrack1, seqTrack2]
             0 * _
         }
@@ -157,7 +161,8 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, Work
         }
 
         when:
-        TriggerAlignmentResult triggerAlignmentResult = service.triggerAlignment([seqTrack1, seqTrack2, seqTrack3] as Set, true, true)
+        TriggerAlignmentResult triggerAlignmentResult = service.triggerAlignment([seqTrack1, seqTrack2, seqTrack3] as Set, true,
+                true, deciderAction)
 
         then:
         triggerAlignmentResult.newArtefacts.size() == 1
@@ -386,10 +391,10 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, Work
 
         SeqTrack seqTrackWithDefined1 = createSeqTrack([
                 laneId: 'seqTrackWithDefined1',
-                run: createRun([seqPlatform: seqPlatform1]),
+                run   : createRun([seqPlatform: seqPlatform1]),
         ])
         SeqTrack seqTrackWithDefined2 = createSeqTrack([
-                laneId: 'seqTrackWithDefined1',
+                laneId : 'seqTrackWithDefined1',
                 sample : seqTrackWithDefined1.sample,
                 seqType: seqTrackWithDefined1.seqType,
                 run    : createRun([seqPlatform: seqPlatform2]),
@@ -406,10 +411,10 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, Work
 
         SeqTrack seqTrackWithoutDefined1 = createSeqTrack([
                 laneId: 'seqTrackWithoutDefined1',
-                run: createRun([seqPlatform: createSeqPlatform()]),
+                run   : createRun([seqPlatform: createSeqPlatform()]),
         ])
         SeqTrack seqTrackWithoutDefined2 = createSeqTrack([
-                laneId: 'seqTrackWithoutDefined2',
+                laneId : 'seqTrackWithoutDefined2',
                 sample : seqTrackWithoutDefined1.sample,
                 seqType: seqTrackWithoutDefined1.seqType,
                 run    : createRun([seqPlatform: seqPlatform2]),
@@ -426,10 +431,10 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, Work
 
         SeqTrack seqTrackWithDefined3 = createSeqTrack([
                 laneId: 'seqTrackWithDefined3',
-                run: createRun([seqPlatform: seqPlatform2]),
+                run   : createRun([seqPlatform: seqPlatform2]),
         ])
         SeqTrack seqTrackWithoutDefined3 = createSeqTrack([
-                laneId: 'seqTrackWithoutDefined3',
+                laneId : 'seqTrackWithoutDefined3',
                 sample : seqTrackWithDefined3.sample,
                 seqType: seqTrackWithDefined3.seqType,
                 run    : createRun([seqPlatform: seqPlatform1]),

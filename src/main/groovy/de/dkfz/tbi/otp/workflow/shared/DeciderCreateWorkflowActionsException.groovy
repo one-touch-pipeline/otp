@@ -19,11 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution.decider
+package de.dkfz.tbi.otp.workflow.shared
 
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
-
-interface Decider {
-    abstract DeciderResult decide(Collection<WorkflowArtefact> inputArtefacts, Map<String, String> userParams,
-                                  Map<Class<? extends Decider>, DeciderCreateWorkflowActions> deciderAction)
+class DeciderCreateWorkflowActionsException extends WorkflowException {
+    DeciderCreateWorkflowActionsException(String message) {
+        super(message)
+    }
 }
