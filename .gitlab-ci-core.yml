@@ -86,7 +86,7 @@ stages:
     gradle-pipeline-cache:
       #cache of gradle build cache, used for pipeline
       key:
-        prefix: gradle-build-cache-$CACHE_COUNTER-$CI_COMMIT_REF_NAME
+        prefix: gradle-build-cache-$CACHE_COUNTER-$CI_COMMIT_REF_SLUG
         files:
           - $CI_PROJECT_DIR/gradle/wrapper/gradle-wrapper.properties
       paths:
