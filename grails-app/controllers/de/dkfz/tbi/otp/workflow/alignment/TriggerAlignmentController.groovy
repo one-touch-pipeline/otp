@@ -30,9 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import de.dkfz.tbi.otp.workflow.TriggerWorkflowService
 import de.dkfz.tbi.otp.workflow.WorkflowVersionAndReferenceGenomeSelector
-import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
-import de.dkfz.tbi.otp.workflowExecution.decider.Decider
-import de.dkfz.tbi.otp.workflowExecution.decider.DeciderCreateWorkflowActions
+import de.dkfz.tbi.otp.workflowExecution.decider.*
 
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
 class TriggerAlignmentController {
@@ -88,7 +86,7 @@ class TriggerAlignmentController {
 
         List<Map<String, String>> warningsForMissingLibPrepKits = triggerAlignmentService.createWarningsForMissingLibPrepKits(seqTracks)
         List<Map<String, String>> warningsForWithdrawnSeqTracks = triggerAlignmentService.createWarningsForWithdrawnSeqTracks(seqTracks)
-        List<Map<String, String>> warningsForMissingAlignmentConfig = triggerAlignmentService.createWarningsForMissingAlignmentConfig(seqTracks)
+        List<Map<String, String>> warningsForMissingWorkflowConfig = triggerAlignmentService.createWarningsForMissingWorkflowConfig(seqTracks)
         List<Map<String, String>> warningsForMissingSeqPlatformGroups = triggerAlignmentService.createWarningsForMissingSeqPlatformGroup(seqTracks)
         List<Map<String, String>> warningsForMissingReferenceGenomeConfiguration =
                 triggerAlignmentService.createWarningsForMissingReferenceGenomeConfiguration(seqTracks)
@@ -115,7 +113,7 @@ class TriggerAlignmentController {
                 ],
                 warnings: [
                         withdrawnSeqTracks         : warningsForWithdrawnSeqTracks,
-                        missingAlignmentConfigs    : warningsForMissingAlignmentConfig,
+                        missingWorkflowConfigs     : warningsForMissingWorkflowConfig,
                         missingLibPrepKits         : warningsForMissingLibPrepKits,
                         missingReferenceGenomes    : warningsForMissingReferenceGenomeConfiguration,
                         missingSeqPlatformGroups   : warningsForMissingSeqPlatformGroups,

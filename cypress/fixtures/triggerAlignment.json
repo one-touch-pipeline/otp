@@ -1,7 +1,8 @@
 [
   {
     "project": "ExampleProject",
-    "seqType": "WGS PAIRED bulk"
+    "seqType": "WGS PAIRED bulk",
+    "seqTypes": ["EXOME PAIRED bulk", "WGS PAIRED bulk", "WGBS PAIRED bulk", "WGBS TAG PAIRED bulk"]
   },
   {
     "pid": [
@@ -54,5 +55,13 @@
       "1018",
       "6039"
     ]
+  },
+  {
+    "project": "ExampleProject",
+    "workflow": "PanCancer alignment",
+    "seqType": "EXOME PAIRED bulk",
+    "version": "PanCancer alignment: 1.2.73-204 (default)",
+    "referenceGenome": "1KGRef_PhiX",
+    "species": "Human (Homo sapiens) [No strain available]"
   }
 ]

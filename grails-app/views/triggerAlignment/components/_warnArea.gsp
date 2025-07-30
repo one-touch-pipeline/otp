@@ -53,24 +53,25 @@
         </div>
     </div>
 
-    <div class="card d-none" id="missingAlignmentConfigWarningsCard">
+    <div class="card d-none" id="missingWorkflowConfigWarningsCard">
         <div class="card-header">
             <button class="btn btn-link w-100 text-left collapsed p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true"
                     aria-controls="collapseOne">
-                <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerAlignment.warn.missingAlignmentConfig.title"/>
+                <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerAlignment.warn.missingWorkflowConfig.title"/>
             </button>
         </div>
 
         <div id="collapseOne" class="collapse" data-parent="#warnAreaAccordion">
             <div class="card-body">
                 <div class="alert alert-warning" role="alert">
-                    <p class="card-text"><g:message code="triggerAlignment.warn.missingAlignmentConfig"/>
+                    <p class="card-text"><g:message code="triggerAlignment.warn.missingWorkflowConfig"/>
                         <g:link controller="workflowSelection">${g.message(code: 'triggerAlignment.warn.config.link')}</g:link></p>
                 </div>
 
-                <table id="missingAlignmentConfigsWarnings" class="table table-sm table-striped table-hover table-bordered">
+                <table id="missingWorkflowConfigsWarnings" class="table table-sm table-striped table-hover table-bordered">
                     <thead>
                     <tr>
+                        <th><g:message code="triggerAlignment.warn.table.workflow"/></th>
                         <th><g:message code="triggerAlignment.warn.table.project"/></th>
                         <th><g:message code="triggerAlignment.warn.table.seqType"/></th>
                         <th><g:message code="triggerAlignment.warn.table.effectedLaneCount"/></th>

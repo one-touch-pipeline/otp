@@ -26,6 +26,7 @@ import grails.util.Holders
 import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
@@ -50,6 +51,9 @@ class AllDecider implements Decider {
 
     @Autowired
     WorkflowService workflowService
+
+    @Autowired
+    ApplicationContext applicationContext
 
     /** list of Deciders in the correct order */
     List<Class<? extends Decider>> deciders = [
@@ -92,5 +96,17 @@ class AllDecider implements Decider {
         return seqTracks.findAll {
             supportedSeqTypes.contains(it.seqType)
         }
+    }
+
+    /**
+     * Returns the names of workflows enabled by AllDecider.
+     * Each decider is responsible for its own workflow.
+     *
+     * @return List of unique workflow names
+     */
+    Set<String> getEnabledWorkflowNames() {
+        return deciders.collectMany {
+            applicationContext.getBeansOfType(it).values()*.workflowName
+        } as Set<String>
     }
 }

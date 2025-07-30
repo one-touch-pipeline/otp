@@ -39,10 +39,7 @@ import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.otp.withdraw.RoddyBamFileWithdrawService
 import de.dkfz.tbi.otp.workflowExecution.*
-import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
-import de.dkfz.tbi.otp.workflowExecution.decider.Decider
-import de.dkfz.tbi.otp.workflowExecution.decider.DeciderCreateWorkflowActions
-import de.dkfz.tbi.otp.workflowExecution.decider.DeciderResult
+import de.dkfz.tbi.otp.workflowExecution.decider.*
 
 import static de.dkfz.tbi.otp.dataprocessing.MergingCriteria.SpecificSeqPlatformGroups.*
 
@@ -60,6 +57,44 @@ class TriggerAlignmentService {
     MergingCriteriaService mergingCriteriaService
     WorkflowService workflowService
     MessageSourceService messageSourceService
+
+    /**
+     * HQL query to find SeqTracks that are missing the configuration for the given workflows.
+     * It returns the workflow name, project name, seqType name, and the count of SeqTracks for each combination.
+     *
+     * Note: The supported seqTypes are specified in the WorkflowVersion.
+     */
+    final static String HQL_WORKFLOWS_MISSING_CONFIG = """
+        SELECT w.name AS workflow,
+               p.name AS project,
+               CONCAT(s.displayName, ' ', s.libraryLayout, ' ', CASE s.singleCell WHEN 'TRUE' THEN 'single cell' ELSE 'bulk' END) AS seqType,
+               COUNT(DISTINCT st.id) AS count
+        FROM SeqTrack st
+               JOIN st.sample.individual.project p
+               JOIN st.seqType s,
+             WorkflowVersion wv
+               JOIN wv.supportedSeqTypes supportedSeqTypes
+               JOIN wv.apiVersion.workflow w
+        WHERE w.name IN (:workflowNames)
+            AND w.deprecatedDate IS NULL
+            AND st IN (:seqTracks)
+            AND s IN supportedSeqTypes
+            AND NOT EXISTS (
+                SELECT 1
+                FROM WorkflowVersionSelector wvs
+                WHERE wvs.project = p
+                  AND wvs.seqType = s
+                  AND wvs.workflowVersion.apiVersion.workflow = w
+                  AND wvs.deprecationDate IS NULL
+            )
+        GROUP BY workflow, project, seqType
+    """
+
+    // The result indexes for the above HQL query
+    private static final int IDX_WORKFLOW = 0
+    private static final int IDX_PROJECT  = 1
+    private static final int IDX_SEQTYPE  = 2
+    private static final int IDX_COUNT    = 3
 
     @Transactional(readOnly = false)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -101,39 +136,6 @@ class TriggerAlignmentService {
         log.debug(deciderResult.toString())
 
         return new TriggerAlignmentResult(deciderResult, mergingWorkPackages)
-    }
-
-    /**
-     * Count the given seqTracks that do not have the alignment workflow configured (deprecated)
-     */
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    @CompileDynamic
-    List<Map<String, String>> createWarningsForMissingAlignmentConfig(Collection<SeqTrack> seqTracks) {
-        Collection<SeqTrack> alignableSeqTracks = allDecider.findAlignableSeqTracks(seqTracks)
-
-        List<Map<String, String>> entries = alignableSeqTracks.countBy {
-            [
-                    it.project,
-                    it.seqType,
-            ]
-        }.findAll {
-            !WorkflowVersionSelector.findAllByProjectAndSeqTypeAndDeprecationDateIsNull(it.key[0], it.key[1]).findAll {
-                workflowService.isAlignment(it.workflowVersion.workflow)
-            }
-        }.collect {
-            [
-                    project: ((Project) it.key[0]).name,
-                    seqType: ((SeqType) it.key[1]).displayNameWithLibraryLayout,
-                    count  : it.value as String,
-            ]
-        }
-
-        return entries.sort {
-            [
-                    it.project,
-                    it.seqType,
-            ]
-        }
     }
 
     /**
@@ -478,5 +480,30 @@ class TriggerAlignmentService {
                     it.sampleType,
             ]
         }
+    }
+
+    /**
+     * Count the given seqTracks that do not have the alignment/analysis workflow configured
+     *
+     * It compares the combined keys of workflow, project, and seqType from the given seqTracks
+     * with the keys in the WorkflowVersionSelector table and
+     * returns seqTrack counts not found in the WorkflowVersionSelector,
+     *
+     * The constrains are the workflow names and the seqTrack ids.
+     */
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @CompileDynamic
+    List<Map<String, String>> createWarningsForMissingWorkflowConfig(Collection<SeqTrack> seqTracks) {
+        return SeqTrack.executeQuery(HQL_WORKFLOWS_MISSING_CONFIG, [
+                seqTracks    : seqTracks,
+                workflowNames: allDecider.enabledWorkflowNames,
+        ]).collect {
+            [
+                    workflow: it[IDX_WORKFLOW],
+                    project : it[IDX_PROJECT],
+                    seqType : it[IDX_SEQTYPE],
+                    count   : it[IDX_COUNT].toString(),
+            ]
+        } as List<Map<String, String>>
     }
 }

@@ -338,6 +338,42 @@ describe('Check trigger alignment page', () => {
         cy.get('#resultWorkPackageList li').should('have.length', 1);
       });
     });
+
+    it('should show warnings for missing workflow config when appropriate', () => {
+      const MISSING_CONFIG_COUNT = 1; // might be adapted if analysis workflows are activated
+
+      // Ensure the config is deleted before starting the test
+      deleteConfig();
+
+      cy.visit('/triggerAlignment/index');
+
+      cy.intercept('/searchSeqTrack/searchSeqTrackByProjectSeqType*').as('search');
+      cy.intercept('/triggerAlignment/generateWarnings*').as('warnings');
+
+      cy.fixture('triggerAlignment.json').then((alignment) => {
+        cy.get('select#project').select(alignment[0].project, { force: true });
+        cy.get('select#seqTypeProject').select(alignment[0].seqTypes, { force: true });
+        cy.get('button#searchSeqTrackButton').click();
+
+        cy.wait('@search').then((interception) => {
+          expect(interception.response.statusCode).to.eq(302);
+        });
+
+        cy.wait('@warnings').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+        });
+
+        cy.get('div#missingWorkflowConfigWarningsCard button:contains("Missing workflow configuration")')
+          .should('be.visible').click();
+
+        cy.get('table#missingWorkflowConfigsWarnings > tbody > tr').should('have.length', MISSING_CONFIG_COUNT)
+          .and('contain.text', alignment[6].workflow)
+          .and('contain.text', alignment[6].seqType);
+
+        // Add the missing config back so that subsequent tests can run correctly (idempotent)
+        addConfig();
+      });
+    });
   });
 
   context('when user is normal user', () => {
@@ -357,3 +393,48 @@ describe('Check trigger alignment page', () => {
     });
   });
 });
+
+function addConfig() {
+  cy.visit('/workflowSelection/index?project=ExampleProject');
+
+  cy.intercept('/workflowSelection/saveAlignmentConfiguration?project=ExampleProject').as('saveConfig');
+
+  cy.get('div.tab-menu a:contains("Workflow selection")').click();
+  cy.get('h2.accordion-header button.accordion-button:contains("Alignment workflows")').click();
+  cy.get('table#alignmentTable > tfoot > tr').within(() => {
+    cy.fixture('triggerAlignment.json').then((alignment) => {
+      cy.get('td:first-child > select').select(alignment[6].workflow, { force: true })
+        .should('have.value', '18');
+      cy.get('td:nth-child(2) > select').select(alignment[6].seqType, { force: true })
+        .should('have.value', '71');
+      cy.get('td:nth-child(3) > select').select(alignment[6].version, { force: true })
+        .should('have.value', '695');
+      cy.get('td:nth-child(4) > select').select(alignment[6].referenceGenome, { force: true })
+        .should('have.value', '914');
+      cy.get('td:nth-child(5) > select').select(alignment[6].species, { force: true });
+    });
+    cy.get('td:nth-child(6) > button').click();
+  });
+
+  cy.wait('@saveConfig').then((interception) => {
+    expect(interception.response.statusCode).to.eq(200);
+  });
+}
+
+function deleteConfig() {
+  cy.visit('/workflowSelection/index?project=ExampleProject');
+
+  cy.intercept('/workflowSelection/deleteConfiguration?project=ExampleProject').as('deleteConfig');
+
+  cy.fixture('triggerAlignment.json').then((alignment) => {
+    cy.get('div.tab-menu a:contains("Workflow selection")').click();
+    cy.get('h2.accordion-header button.accordion-button:contains("Alignment workflows")').click();
+    cy.get(`table#alignmentTable > tbody > tr > td:first-child:contains("${alignment[6].workflow}")`)
+      .parent().find(`td:nth-child(2):contains("${alignment[6].seqType}")`)
+      .parent().find('td > button.remove-config-btn').should('exist').click();
+  });
+
+  cy.wait('@deleteConfig').then((interception) => {
+    expect(interception.response.statusCode).to.eq(200);
+  });
+}

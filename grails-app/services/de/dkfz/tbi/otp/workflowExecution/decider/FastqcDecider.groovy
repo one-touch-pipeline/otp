@@ -27,7 +27,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.springframework.transaction.TransactionStatus
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
+import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.project.Project
@@ -37,8 +38,8 @@ import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
 import de.dkfz.tbi.otp.workflow.fastqc.WesFastQcWorkflow
 import de.dkfz.tbi.otp.workflow.shared.DeciderCreateWorkflowActionsException
 import de.dkfz.tbi.otp.workflowExecution.*
-import de.dkfz.tbi.otp.workflowExecution.decider.fastqc.FastqcArtefactDataWithSeqTrack
 import de.dkfz.tbi.otp.workflowExecution.decider.fastqc.FastqcArtefactDataWithFastqcProcessedFile
+import de.dkfz.tbi.otp.workflowExecution.decider.fastqc.FastqcArtefactDataWithSeqTrack
 
 @Component
 @Transactional
@@ -234,5 +235,9 @@ class FastqcDecider implements Decider {
                 "lane: ${fastqcArtefactData.artefact.laneId}",
         ]*.toString()
         return runDisplayName
+    }
+
+    final String getWorkflowName() {
+        return BashFastQcWorkflow.WORKFLOW
     }
 }

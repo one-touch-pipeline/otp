@@ -38,6 +38,13 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.otp.withdraw.RoddyBamFileWithdrawService
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
+import de.dkfz.tbi.otp.workflow.analysis.aceseq.AceseqWorkflow
+import de.dkfz.tbi.otp.workflow.analysis.indel.IndelWorkflow
+import de.dkfz.tbi.otp.workflow.analysis.runyapsa.RunYapsaWorkflow
+import de.dkfz.tbi.otp.workflow.analysis.snv.SnvWorkflow
+import de.dkfz.tbi.otp.workflow.analysis.sophia.SophiaWorkflow
+import de.dkfz.tbi.otp.workflow.fastqc.WesFastQcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.decider.*
 
@@ -171,22 +178,118 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, Work
         bamFile1.withdrawn
     }
 
-    void "createWarningsForMissingAlignmentConfig, when run, then return the expected warnings"() {
+    void "createWarningsForMissingWorkflowConfig returns the expected warnings with correct counts"() {
         given:
+        final int COUNT = 3
+        final Project project = createProject(name: "TestProject")
+        final SeqType seqType = createSeqType(name: "TestSeqType", displayName: "TestSeqTypeDisplay")
+        final List<String> enabledWorkflows = [
+                WesFastQcWorkflow.WORKFLOW,
+                PanCancerWorkflow.WORKFLOW,
+                RnaAlignmentWorkflow.WORKFLOW,
+                IndelWorkflow.WORKFLOW,
+                SnvWorkflow.WORKFLOW,
+                SophiaWorkflow.WORKFLOW,
+                AceseqWorkflow.WORKFLOW,
+                RunYapsaWorkflow.WORKFLOW,
+        ].asImmutable()
+
+        List<WorkflowVersion> workflowVersions = []
+        List<Map<String, String>> expected = []
+
+        enabledWorkflows.each { String workflowName ->
+            workflowVersions.add(createWorkflowVersion([
+                    apiVersion       : createWorkflowApiVersion(workflow: createWorkflow(name: workflowName)),
+                    supportedSeqTypes: [seqType],
+            ]))
+            expected.add([
+                    workflow: workflowName,
+                    project : project.name,
+                    seqType : seqType.displayNameWithLibraryLayout,
+                    count   : COUNT.toString(),
+            ])
+        }
+
+        List<SeqTrack> seqTracks = []
+        for (int i = 0; i < COUNT; i++) {
+            seqTracks.add(createSeqTrack([
+                    sample : createSample([
+                            individual: createIndividual([
+                                    project: project,
+                            ]),
+                    ]),
+                    seqType: seqType,
+            ]))
+        }
+
+        if (createSelector) {
+            createWorkflowVersionSelector([
+                    project        : createProject(),
+                    seqType        : createSeqType(),
+                    workflowVersion: workflowVersions[0],
+            ])
+        }
+
+        service.allDecider = Mock(AllDecider) {
+            1 * getEnabledWorkflowNames() >> enabledWorkflows
+            0 * _
+        }
+
+        service.workflowService = Mock(WorkflowService) {
+            _ * isAlignment(_) >> true
+        }
+
+        when:
+        List<Map<String, String>> seqTracksNotConfigured = service.createWarningsForMissingWorkflowConfig(seqTracks)
+
+        then:
+        TestCase.assertContainSame(seqTracksNotConfigured, expected)
+
+        where:
+        type  || createSelector
+        1     || true
+        2     || false
+    }
+
+    void "createWarningsForMissingWorkflowConfig returns the expected warnings"() {
+        given:
+        List<SeqType> supportedSeqTypes = [createSeqType(), createSeqType(),]
         WorkflowVersion workflowVersion = createWorkflowVersion([
-                apiVersion: createWorkflowApiVersion(workflow: createWorkflow(name: PanCancerWorkflow.WORKFLOW)),
+                apiVersion       : createWorkflowApiVersion(workflow: createWorkflow(name: PanCancerWorkflow.WORKFLOW)),
+                supportedSeqTypes: supportedSeqTypes,
         ])
 
-        SeqTrack seqTrackWithoutConfig = createSeqTrackWithProjectName("seqTrackWithoutConfig")
+        SeqTrack seqTrackWithoutConfig = createSeqTrack([
+                sample: createSample([
+                        individual    : createIndividual([
+                                project: createProject(name: "seqTrackWithoutConfig"),
+                        ]),
+                ]),
+                seqType: supportedSeqTypes[0],
+        ])
 
-        SeqTrack seqTrackWithConfig = createSeqTrackWithProjectName("seqTrackWithConfig")
+        SeqTrack seqTrackWithConfig = createSeqTrack([
+                sample: createSample([
+                        individual    : createIndividual([
+                                project: createProject(name: "seqTrackWithConfig"),
+                        ]),
+                ]),
+                seqType: supportedSeqTypes[0],
+        ])
         createWorkflowVersionSelector([
                 project        : seqTrackWithConfig.project,
                 seqType        : seqTrackWithConfig.seqType,
                 workflowVersion: workflowVersion,
         ])
 
-        SeqTrack seqTrackWithDeprecatedConfig = createSeqTrackWithProjectName("seqTrackWithDeprecatedConfig")
+        SeqTrack seqTrackWithDeprecatedConfig = createSeqTrack([
+                sample: createSample([
+                        individual    : createIndividual([
+                                project: createProject(name: "seqTrackWithDeprecatedConfig"),
+                        ]),
+                ]),
+                seqType: supportedSeqTypes[1],
+        ])
         createWorkflowVersionSelector([
                 project        : seqTrackWithDeprecatedConfig.project,
                 seqType        : seqTrackWithDeprecatedConfig.seqType,
@@ -194,7 +297,9 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, Work
                 workflowVersion: workflowVersion,
         ])
 
-        SeqTrack seqTrackWithDeprecatedAndValidConfig = createSeqTrackWithProjectName("seqTrackWithDeprecatedAndValidConfig")
+        SeqTrack seqTrackWithDeprecatedAndValidConfig = createSeqTrack([
+                seqType: supportedSeqTypes[1],
+        ])
         createWorkflowVersionSelector([
                 project        : seqTrackWithDeprecatedAndValidConfig.project,
                 seqType        : seqTrackWithDeprecatedAndValidConfig.seqType,
@@ -217,25 +322,26 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, Work
         assert seqTracks.size() == SeqTrack.count(): "Not all created seqTracks are in the list"
 
         service.allDecider = Mock(AllDecider) {
-            1 * findAlignableSeqTracks(_) >> [
-                    seqTrackWithoutConfig,
-                    seqTrackWithConfig,
-                    seqTrackWithDeprecatedConfig,
-                    seqTrackWithDeprecatedAndValidConfig,
+            1 * getEnabledWorkflowNames() >> [
+                    PanCancerWorkflow.WORKFLOW,
+                    WesFastQcWorkflow.WORKFLOW,
             ]
             0 * _
         }
+
         service.workflowService = Mock(WorkflowService) {
-            2 * isAlignment(_) >> true
+            _ * isAlignment(_) >> true
         }
 
         List<Map<String, String>> expected = [
                 [
+                        workflow: PanCancerWorkflow.WORKFLOW,
                         project: seqTrackWithoutConfig.project.name,
                         seqType: seqTrackWithoutConfig.seqType.displayNameWithLibraryLayout,
                         count  : "1",
                 ],
                 [
+                        workflow: PanCancerWorkflow.WORKFLOW,
                         project: seqTrackWithDeprecatedConfig.project.name,
                         seqType: seqTrackWithDeprecatedConfig.seqType.displayNameWithLibraryLayout,
                         count  : "1",
@@ -243,7 +349,7 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, Work
         ]
 
         when:
-        List<Map<String, String>> seqTracksNotConfigured = service.createWarningsForMissingAlignmentConfig(seqTracks)
+        List<Map<String, String>> seqTracksNotConfigured = service.createWarningsForMissingWorkflowConfig(seqTracks)
 
         then:
         TestCase.assertContainSame(seqTracksNotConfigured, expected)
