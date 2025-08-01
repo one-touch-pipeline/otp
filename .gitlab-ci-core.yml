@@ -83,15 +83,6 @@ stages:
           - $CI_PROJECT_DIR/gradle.properties
       paths:
         - $GRADLE_CACHES_CACHE
-    gradle-pipeline-cache:
-      #cache of gradle build cache, used for pipeline
-      key:
-        prefix: gradle-build-cache-$CACHE_COUNTER-$CI_COMMIT_REF_SLUG
-        files:
-          - $CI_PROJECT_DIR/gradle/wrapper/gradle-wrapper.properties
-      paths:
-        - $GRADLE_BUILD_CACHE
-      policy: pull
     npm:
       #cache of npm libraries, over all jobs
       key:
@@ -155,7 +146,6 @@ stages:
     - build gradle
   cache:
     - !reference [ .shared, cache, gradle-wrapper ]
-    - !reference [ .shared, cache, gradle-pipeline-cache ]
     - !reference [ .shared, cache, gradle-cache ]
 
 
@@ -188,14 +178,15 @@ build gradle:
     - key: !reference [ .shared, cache, gradle-wrapper, key ]
       paths: !reference [ .shared, cache, gradle-wrapper, paths ]
       policy: pull-push
-    - key: !reference [ .shared, cache, gradle-pipeline-cache, key ]
-      paths: !reference [ .shared, cache, gradle-pipeline-cache, paths ]
-      policy: pull-push
     - !reference [ .shared, cache, gradle-cache ]
   script:
     - set -e
     # compile also all tests
     - ./gradlew --build-cache classes testHelperClasses testClasses integrationTestClasses workflowTestClasses
+  artifacts:
+    <<: *artifacts_template
+    paths:
+      - $GRADLE_BUILD_CACHE
 
 
 # ------------------------------------------------------
@@ -379,7 +370,6 @@ cypress tests:
     when: always
   cache:
     - !reference [ .shared, cache, gradle-wrapper ]
-    - !reference [ .shared, cache, gradle-pipeline-cache ]
     - !reference [ .shared, cache, gradle-cache ]
     - !reference [ .shared, cache, npm ]
   parallel:
@@ -477,7 +467,6 @@ eslint:
     when: always
   cache:
     - !reference [ .shared, cache, gradle-wrapper ]
-    - !reference [ .shared, cache, gradle-pipeline-cache ]
     - !reference [ .shared, cache, gradle-cache ]
     - !reference [ .shared, cache, npm ]
 
