@@ -31,7 +31,7 @@ updates:
     commit-message:
       prefix: "Update: "
     ignore:
-      - # The following dependencies will be upgraded to v2.1 from v1.10, see youtrack issue otp-2590
+      # The following dependencies will be upgraded to v2.1 from v1.10, see youtrack issue otp-2590
       - dependency-name: "org.webjars:datatables"
         update-types: [ "version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch" ]
       - dependency-name: "org.webjars:datatables-plugins"
