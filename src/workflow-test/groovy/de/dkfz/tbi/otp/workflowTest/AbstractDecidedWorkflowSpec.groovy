@@ -48,7 +48,7 @@ abstract class AbstractDecidedWorkflowSpec extends AbstractWorkflowSpec {
             log.debug("- ${it} (${it.artefactType}) for ${it.artefact}")
         }
         log.debug("Run decider:")
-        DeciderResult deciderResult = decider.decide(WorkflowArtefact.list())
+        DeciderResult deciderResult = decider.decide(WorkflowArtefact.list(), [:], [:])
         log.debug("Decide result ${deciderResult}")
         List<WorkflowArtefact> newWorkflowArtefact = deciderResult.newArtefacts
         log.debug("Decide output artefacts ${newWorkflowArtefact.size()}:")

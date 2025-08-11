@@ -128,7 +128,7 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
             setupWorkflow('gz')
             Path initialPath = lsdfFilesService.getFileInitialPathAsPath(rawSequenceFile).parent
             fileService.createLink(initialPath.resolve(expectedFastqc.fileName), expectedFastqc)
-            fastqcDecider.decide([workflowArtefact])
+            fastqcDecider.decide([workflowArtefact], [:], [:])
         }
 
         when:
@@ -145,7 +145,7 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
         given:
         SessionUtils.withTransaction {
             setupWorkflow(extension)
-            fastqcDecider.decide([workflowArtefact])
+            fastqcDecider.decide([workflowArtefact], [:], [:])
         }
 
         when:
