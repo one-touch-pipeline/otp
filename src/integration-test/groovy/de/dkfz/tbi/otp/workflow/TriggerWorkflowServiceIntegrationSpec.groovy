@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflow
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
@@ -37,10 +38,8 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
-import de.dkfz.tbi.otp.workflowExecution.ReferenceGenomeSelector
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
-import de.dkfz.tbi.otp.workflowExecution.WorkflowVersionSelector
-import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
+import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflowExecution.decider.*
 
 @Rollback
 @Integration
@@ -48,6 +47,9 @@ class TriggerWorkflowServiceIntegrationSpec extends Specification implements Dom
 
     @Autowired
     TriggerWorkflowService service
+
+    @Autowired
+    ApplicationContext applicationContext
 
     void "test getBamFiles, with empty input"() {
         when:
@@ -231,5 +233,26 @@ class TriggerWorkflowServiceIntegrationSpec extends Specification implements Dom
 
         then:
         1 * service.allDecider.decide { data -> data.toSet() == [workflowArtefact1, workflowArtefact2, workflowArtefact3] as Set }
+    }
+
+    void "test getAllDecidersWithActions"() {
+        given:
+        service.allDecider = new AllDecider()
+        service.allDecider.applicationContext = applicationContext
+
+        when:
+        List<DeciderWithActions> result = service.allDecidersWithActions
+
+        then:
+        result.size() == service.allDecider.deciders.size()
+
+        result.each { DeciderWithActions deciderWithActions ->
+            // Only the FastqcDecider needs to be checked specifically: having only two actions
+            if (deciderWithActions.name == FastqcDecider.simpleName) {
+                assert(deciderWithActions.createActions == [DeciderCreateWorkflowAction.CREATE_MISSING, DeciderCreateWorkflowAction.SKIP])
+            } else {
+                assert(deciderWithActions.createActions == DeciderCreateWorkflowAction.values() as List)
+            }
+        }
     }
 }

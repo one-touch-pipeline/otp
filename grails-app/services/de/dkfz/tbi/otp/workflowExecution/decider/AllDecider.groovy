@@ -69,7 +69,7 @@ class AllDecider implements Decider {
 
     @Override
     DeciderResult decide(Collection<WorkflowArtefact> allWorkflowArtefacts, Map<String, String> userParams = [:],
-                         Map<Class<? extends Decider>, DeciderCreateWorkflowActions> deciderAction = [:]) {
+                         Map<Class<? extends Decider>, DeciderCreateWorkflowAction> deciderAction = [:]) {
         DeciderResult deciderResultAll = new DeciderResult()
         LogUsedTimeUtils.logUsedTimeStartEnd(log, "    AllDecider for ${allWorkflowArtefacts.size()} workflow artefacts") {
             deciders.each { deciderClass ->
@@ -108,5 +108,21 @@ class AllDecider implements Decider {
         return deciders.collectMany {
             applicationContext.getBeansOfType(it).values()*.workflowName
         } as Set<String>
+    }
+
+    @Override
+    List<DeciderCreateWorkflowAction> getSupportedActions() {
+        return DeciderCreateWorkflowAction.values() as List<DeciderCreateWorkflowAction>
+    }
+
+    /**
+     * Get all deciders with their supported actions for workflow creation
+     * @return all deciders with actions as a Map
+     */
+    Map<Class, List<DeciderCreateWorkflowAction>> getAllDeciderActionsMap() {
+        return deciders.collectEntries {
+            Decider decider = applicationContext.getBean(it)
+            return [(it), decider.supportedActions]
+        }
     }
 }

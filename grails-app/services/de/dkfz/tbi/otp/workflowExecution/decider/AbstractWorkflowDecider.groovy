@@ -113,18 +113,17 @@ abstract class AbstractWorkflowDecider<ADL extends ArtefactDataList, G extends B
     abstract protected DeciderResult createWorkflowRunsAndOutputArtefacts(
             ProjectSeqTypeGroup projectSeqTypeGroup, G group,
             ADL givenArtefacts, ADL additionalArtefacts,
-            AD additionalData, WorkflowVersion version, Map<Class<? extends Decider>, DeciderCreateWorkflowActions> deciderAction)
+            AD additionalData, WorkflowVersion version, Map<Class<? extends Decider>, DeciderCreateWorkflowAction> deciderAction)
 
     @Override
     final DeciderResult decide(Collection<WorkflowArtefact> inputWorkflowArtefacts, Map<String, String> userParams = [:],
-                               Map<Class<? extends Decider>, DeciderCreateWorkflowActions> deciderAction) {
+                               Map<Class<? extends Decider>, DeciderCreateWorkflowAction> deciderAction) {
         DeciderResult deciderResult = new DeciderResult()
         Workflow w = workflow
         deciderResult.infos << "start decider for ${w}".toString()
-        String decider = getClass().simpleName
 
         // skip always, use correct action
-        if (deciderAction[decider] == DeciderCreateWorkflowActions.SKIP.toString()) {
+        if (deciderAction[getClass()] == DeciderCreateWorkflowAction.SKIP) {
             String msg = "Skipping creating runs for ${w}"
             log.debug("        ${msg}")
             deciderResult.infos << msg.toString()
@@ -202,5 +201,10 @@ abstract class AbstractWorkflowDecider<ADL extends ArtefactDataList, G extends B
         }
         deciderResult.infos << "end decider for ${w}".toString()
         return deciderResult
+    }
+
+    @Override
+    List<DeciderCreateWorkflowAction> getSupportedActions() {
+        return DeciderCreateWorkflowAction.values() as List
     }
 }

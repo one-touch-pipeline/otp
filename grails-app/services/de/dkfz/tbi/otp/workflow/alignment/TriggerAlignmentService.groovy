@@ -100,7 +100,7 @@ class TriggerAlignmentService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     @CompileDynamic
     TriggerAlignmentResult triggerAlignment(Collection<SeqTrack> seqTracks, boolean withdrawBamFiles = false, boolean ignoreSeqPlatformGroup = false,
-                                            Map<Class<? extends Decider>, DeciderCreateWorkflowActions> deciderAction) {
+                                            Map<Class<? extends Decider>, DeciderCreateWorkflowAction> deciderAction) {
         // Mark the bam files as withdrawn
         if (withdrawBamFiles) {
             LogUsedTimeUtils.logUsedTimeStartEnd(log, "withdrawn existing bamFiles") {

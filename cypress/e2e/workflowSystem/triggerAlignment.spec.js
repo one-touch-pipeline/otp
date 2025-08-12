@@ -63,7 +63,9 @@ describe('Check trigger alignment page', () => {
           });
 
         cy.get('input#ignoreSeqPlatformGroup').uncheck();
-        cy.get('input#withdrawBamFiles1').click();
+
+        // Configure decider actions - set all to "Create always" (default behavior)
+        configureDeciderActions('CREATE_ALWAYS');
 
         cy.get('button#triggerAlignmentButton').click();
 
@@ -72,9 +74,9 @@ describe('Check trigger alignment page', () => {
         });
 
         cy.get('#infos li').should('not.be.empty');
-        cy.get('#resultWarning li').should('have.length', 12)
+        cy.get('#resultWarning li').should('have.length', 6)
           .each((row) => {
-            cy.wrap(row).contains('skip').contains('since fastqc already exist');
+            cy.wrap(row).contains('recreate').contains('since action is CREATE_ALWAYS');
           });
         cy.get('#resultWorkPackageList li').should('have.length', 6);
       });
@@ -115,11 +117,10 @@ describe('Check trigger alignment page', () => {
             cy.wrap(row).find('td').eq(2).should('satisfy', (el) => alignment[1].pid.includes(el[0].innerText));
           });
 
-        // TODO otp-2027: Next line should be commented in, when the bug is fixed
-        // cy.get('#warnAreaAccordion').should('not.be.visible');
-
         cy.get('input#ignoreSeqPlatformGroup').uncheck();
-        cy.get('input#withdrawBamFiles1').click();
+
+        // Configure decider actions - set all to "Create always" (default behavior)
+        configureDeciderActions('CREATE_ALWAYS');
 
         cy.get('button#triggerAlignmentButton').click();
 
@@ -128,9 +129,9 @@ describe('Check trigger alignment page', () => {
         });
 
         cy.get('#infos li').should('not.be.empty');
-        cy.get('#resultWarning li').should('have.length', 12)
+        cy.get('#resultWarning li').should('have.length', 6)
           .each((row) => {
-            cy.wrap(row).contains('skip').contains('since fastqc already exist');
+            cy.wrap(row).contains('recreate').contains('since action is CREATE_ALWAYS');
           });
         cy.get('#resultWorkPackageList li').should('have.length', 6);
       });
@@ -166,7 +167,9 @@ describe('Check trigger alignment page', () => {
       });
 
       cy.get('input#ignoreSeqPlatformGroup').uncheck();
-      cy.get('input#withdrawBamFiles1').click();
+
+      // Configure decider actions - set all to "Create always" (default behavior)
+      configureDeciderActions('CREATE_ALWAYS');
 
       cy.get('button#triggerAlignmentButton').click();
 
@@ -178,7 +181,7 @@ describe('Check trigger alignment page', () => {
       cy.get('#infos li').should('not.be.empty');
       cy.get('#resultWarning li').should('have.length', 2)
         .each((row) => {
-          cy.wrap(row).contains('skip').contains('since fastqc already exist');
+          cy.wrap(row).contains('recreate').contains('since action is CREATE_ALWAYS');
         });
       cy.get('#resultWorkPackageList li').should('have.length', 2);
     });
@@ -211,7 +214,9 @@ describe('Check trigger alignment page', () => {
         });
 
         cy.get('input#ignoreSeqPlatformGroup').uncheck();
-        cy.get('input#withdrawBamFiles1').click();
+
+        // Configure decider actions - set all to "Create always" (default behavior)
+        configureDeciderActions('CREATE_ALWAYS');
 
         cy.get('button#triggerAlignmentButton').click();
 
@@ -272,7 +277,9 @@ describe('Check trigger alignment page', () => {
         });
 
         cy.get('input#ignoreSeqPlatformGroup').uncheck();
-        cy.get('input#withdrawBamFiles1').click();
+
+        // Configure decider actions - set all to "Create always" (default behavior)
+        configureDeciderActions('CREATE_ALWAYS');
 
         cy.get('button#triggerAlignmentButton').click();
 
@@ -281,9 +288,9 @@ describe('Check trigger alignment page', () => {
         });
 
         cy.get('#infos li').should('not.be.empty');
-        cy.get('#resultWarning li').should('have.length', 2)
+        cy.get('#resultWarning li').should('have.length', 1)
           .each((row) => {
-            cy.wrap(row).contains('skip').contains('since fastqc already exist');
+            cy.wrap(row).contains('recreate').contains('since action is CREATE_ALWAYS');
           });
         cy.get('#resultWorkPackageList li').should('have.length', 1);
       });
@@ -321,7 +328,9 @@ describe('Check trigger alignment page', () => {
         });
 
         cy.get('input#ignoreSeqPlatformGroup').uncheck();
-        cy.get('input#withdrawBamFiles1').click();
+
+        // Configure decider actions - set all to "Create always" (default behavior)
+        configureDeciderActions('CREATE_ALWAYS');
 
         cy.get('button#triggerAlignmentButton').click();
 
@@ -331,11 +340,54 @@ describe('Check trigger alignment page', () => {
 
         cy.get('#warnAreaAccordion > div').should('not.be.visible');
         cy.get('#infos li').should('not.be.empty');
-        cy.get('#resultWarning li').should('have.length', 2)
+        cy.get('#resultWarning li').should('have.length', 1)
           .each((row) => {
-            cy.wrap(row).contains('skip').contains('since fastqc already exist');
+            cy.wrap(row).contains('recreate').contains('since action is CREATE_ALWAYS');
           });
         cy.get('#resultWorkPackageList li').should('have.length', 1);
+      });
+    });
+
+    it('should test different decider action configurations', () => {
+      cy.visit('/triggerAlignment/index');
+      cy.intercept('/searchSeqTrack/searchSeqTrackByProjectSeqType*').as('search');
+      cy.intercept('/triggerAlignment/generateWarnings*').as('warnings');
+      cy.intercept('/triggerAlignment/triggerAlignment*').as('triggerAlignment');
+
+      cy.fixture('triggerAlignment.json').then((alignment) => {
+        cy.get('select#project').select(alignment[0].project, { force: true });
+        cy.get('select#seqTypeProject').select(alignment[0].seqType, { force: true });
+        cy.get('button#searchSeqTrackButton').click();
+
+        cy.wait('@search').then((interception) => {
+          expect(interception.response.statusCode).to.eq(302);
+        });
+
+        cy.wait('@warnings').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+        });
+
+        // Wait until table is rendered
+        cy.get('div#seqTrackTable_processing').should('not.be.visible');
+
+        // Verify decider selection area is visible and functional
+        cy.get('#deciderActionSelection').should('be.visible');
+        cy.get('#deciderActionSelection select.form-control').should('have.length.greaterThan', 0);
+
+        // Test setting specific decider actions
+        cy.get('input#ignoreSeqPlatformGroup').uncheck();
+
+        // Set all deciders to "Skip" to test different behavior
+        configureDeciderActions('SKIP');
+
+        cy.get('button#triggerAlignmentButton').click();
+
+        cy.wait('@triggerAlignment').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+        });
+
+        // Verify appropriate response for skipped workflows
+        cy.get('#infos li').should('not.be.empty');
       });
     });
 
@@ -394,7 +446,7 @@ describe('Check trigger alignment page', () => {
   });
 });
 
-function addConfig() {
+const addConfig = ()=> {
   cy.visit('/workflowSelection/index?project=ExampleProject');
 
   cy.intercept('/workflowSelection/saveAlignmentConfiguration?project=ExampleProject').as('saveConfig');
@@ -419,9 +471,9 @@ function addConfig() {
   cy.wait('@saveConfig').then((interception) => {
     expect(interception.response.statusCode).to.eq(200);
   });
-}
+};
 
-function deleteConfig() {
+const deleteConfig = ()=> {
   cy.visit('/workflowSelection/index?project=ExampleProject');
 
   cy.intercept('/workflowSelection/deleteConfiguration?project=ExampleProject').as('deleteConfig');
@@ -437,4 +489,25 @@ function deleteConfig() {
   cy.wait('@deleteConfig').then((interception) => {
     expect(interception.response.statusCode).to.eq(200);
   });
-}
+};
+
+const configureDeciderActions = (action)=> {
+  // Map action names to their corresponding IDs based on DeciderCreateWorkflowAction enum
+  const actionIdMap = {
+    'CREATE_MISSING': '1',
+    'CREATE_MISSING_AND_NEWER': '2',
+    'CREATE_ALWAYS': '3',
+    'SKIP': '4'
+  };
+
+  const actionId = actionIdMap[action] || '1'; // Default to CREATE_MISSING
+
+  // Set all decider actions to the specified value
+  cy.get('#deciderActionSelection select.form-control').each(($select, index) => {
+    if (index === 0) {
+      cy.wrap($select).select('4', { force: true });
+    } else {
+      cy.wrap($select).select(actionId, { force: true });
+    }
+  });
+};

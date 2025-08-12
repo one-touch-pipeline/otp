@@ -837,14 +837,14 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
     }
 
     @Unroll
-    void "createWorkflowRunsAndOutputArtefacts, when #deciderActionName, existsAndSameVersion=#sameVersion, bamFileCreated=#created, then correct warning is added"() {
+    void "createWorkflowRunsAndOutputArtefacts, when #deciderCreateWorkflowAction, existsAndSameVersion=#sameVersion, bamFileCreated=#created, then correct warning is added"() {
         given:
         createDataForCreateWorkflowRunsAndOutputArtefacts(true, [sameVersion: sameVersion, existingBamFileSameSeqTracks: created])
 
-        Map<Class<? extends Decider>, DeciderCreateWorkflowActions> deciderAction = [
-                (PanCancerDecider)   : deciderActionName,
-                (WgbsDecider)        : deciderActionName,
-                (RnaAlignmentDecider): deciderActionName,
+        Map<Class<? extends Decider>, DeciderCreateWorkflowAction> deciderAction = [
+                (PanCancerDecider)   : deciderCreateWorkflowAction,
+                (WgbsDecider)        : deciderCreateWorkflowAction,
+                (RnaAlignmentDecider): deciderCreateWorkflowAction,
         ]
 
         and: 'services'
@@ -864,16 +864,16 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
                 (deciderResult?.infos?.size() > 0 && deciderResult?.infos[1]?.contains(expectedWarningOrInfo))
 
         where:
-        deciderActionName                                                | sameVersion | created || expectedWarningOrInfo                                                                                       | newArtefactCreated
-        DeciderCreateWorkflowActions.CREATE_ALWAYS.toString()            | true        | true    || "action is CREATE_ALWAYS"                                                                                   | true
-        DeciderCreateWorkflowActions.CREATE_ALWAYS.toString()            | false       | true    || "action is CREATE_ALWAYS"                                                                                   | true
-        DeciderCreateWorkflowActions.CREATE_ALWAYS.toString()            | false       | false   || "create bam file"                                                                                           | true
-        DeciderCreateWorkflowActions.CREATE_MISSING_AND_NEWER.toString() | true        | true    || "since existing BAM file with the same seqTracks and version found, and action is CREATE_MISSING_AND_NEWER" | false
-        DeciderCreateWorkflowActions.CREATE_MISSING_AND_NEWER.toString() | false       | true    || "since existing BAM file with the same seqTracks has other version, and action is CREATE_MISSING_AND_NEWER" | true
-        DeciderCreateWorkflowActions.CREATE_MISSING_AND_NEWER.toString() | false       | false   || "create bam file"                                                                                           | true
-        DeciderCreateWorkflowActions.CREATE_MISSING.toString()           | true        | true    || "since existing BAM file with the same seqTracks found and action is CREATE_MISSING"                        | false
-        DeciderCreateWorkflowActions.CREATE_MISSING.toString()           | false       | true    || "since existing BAM file with the same seqTracks found and action is CREATE_MISSING"                        | false
-        DeciderCreateWorkflowActions.CREATE_MISSING.toString()           | false       | false   || "create bam file"                                                                                           | true
+        deciderCreateWorkflowAction                          | sameVersion | created || expectedWarningOrInfo                                                                                       | newArtefactCreated
+        DeciderCreateWorkflowAction.CREATE_ALWAYS            | true        | true    || "action is CREATE_ALWAYS"                                                                                   | true
+        DeciderCreateWorkflowAction.CREATE_ALWAYS            | false       | true    || "action is CREATE_ALWAYS"                                                                                   | true
+        DeciderCreateWorkflowAction.CREATE_ALWAYS            | false       | false   || "create bam file"                                                                                           | true
+        DeciderCreateWorkflowAction.CREATE_MISSING_AND_NEWER | true        | true    || "since existing BAM file with the same seqTracks and version found, and action is CREATE_MISSING_AND_NEWER" | false
+        DeciderCreateWorkflowAction.CREATE_MISSING_AND_NEWER | false       | true    || "since existing BAM file with the same seqTracks has other version, and action is CREATE_MISSING_AND_NEWER" | true
+        DeciderCreateWorkflowAction.CREATE_MISSING_AND_NEWER | false       | false   || "create bam file"                                                                                           | true
+        DeciderCreateWorkflowAction.CREATE_MISSING           | true        | true    || "since existing BAM file with the same seqTracks found and action is CREATE_MISSING"                        | false
+        DeciderCreateWorkflowAction.CREATE_MISSING           | false       | true    || "since existing BAM file with the same seqTracks found and action is CREATE_MISSING"                        | false
+        DeciderCreateWorkflowAction.CREATE_MISSING           | false       | false   || "create bam file"                                                                                           | true
     }
 
     private Pipeline findOrCreatePanCanPipeline() {

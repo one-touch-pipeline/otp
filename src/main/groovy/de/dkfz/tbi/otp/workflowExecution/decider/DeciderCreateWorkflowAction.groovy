@@ -21,13 +21,32 @@
  */
 package de.dkfz.tbi.otp.workflowExecution.decider
 
-enum DeciderCreateWorkflowActions {
-    // default: create a workflow run if no run exists yet
-    CREATE_MISSING,
-    // create a workflow run if no run exists yet or if one of an older version exists, if run has same version then skip
-    CREATE_MISSING_AND_NEWER,
-    // create a workflow run always
-    CREATE_ALWAYS,
-    // skip creation of workflows runs for the workflow completely
-    SKIP,
+import groovy.transform.TupleConstructor
+
+/**
+ * Actions that deciders can take when creating a specific workflow.
+ *
+ * Names and descriptions of the actions are defined in the resource bundle, which are used to show in the UI.
+ * All texts are prefixed with 'deciderCreateWorkflowAction'.
+ *
+ * @see "The messages.properties file with key prefix: deciderCreateWorkflowAction"
+ */
+@TupleConstructor
+enum DeciderCreateWorkflowAction {
+
+    CREATE_MISSING(1),
+    CREATE_MISSING_AND_NEWER(2),
+    CREATE_ALWAYS(3),
+    SKIP(4)
+
+    final int id
+
+    /**
+     * Returns the DeciderCreateWorkflowAction enum value for the given id
+     * @param id the id of the DeciderCreateWorkflowAction
+     * @return the DeciderCreateWorkflowAction enum value or null if not found
+     */
+    static DeciderCreateWorkflowAction getById(int id) {
+        return values().find { it.id == id }
+    }
 }

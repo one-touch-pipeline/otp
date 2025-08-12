@@ -48,30 +48,9 @@
         <g:render template="/triggerAlignment/components/infoArea" model="[info: info]"/>
     </div>
 
-    <nav class="navbar navbar-light bg-light mt-3">
-        <div>
-            <div class="form-check">
-                <input type="checkbox" id="ignoreSeqPlatformGroup">
-            <label for="ignoreSeqPlatformGroup"><g:message code="triggerAlignment.input.checkbox.ignoreSeqPlatformGroup"/></label>
-            </div>
-
-            <div class="form-check">
-                <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="withdrawBamFiles" checked id="withdrawBamFiles2" value="false">
-            <label class="form-check-label" for="withdrawBamFiles2">
-                        <g:message code="triggerAlignment.input.radio.missingAlignments"/>
-                    </label>
-                </div>
-
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="withdrawBamFiles" id="withdrawBamFiles1" value="true">
-                    <label class="form-check-label" for="withdrawBamFiles1">
-                        <g:message code="triggerAlignment.input.radio.allAlignments"/>
-                    </label>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <div class="mt-3">
+        <g:render template="/triggerAlignment/components/optionArea" model="[deciders: deciders]"/>
+    </div>
     <nav class="navbar navbar-light bg-light mt-3">
         <div class="nav-item">
             <button id="triggerAlignmentButton" class="btn btn-primary nav-item mr-2" onclick="$.otp.triggerAlignment.trigger(this)">

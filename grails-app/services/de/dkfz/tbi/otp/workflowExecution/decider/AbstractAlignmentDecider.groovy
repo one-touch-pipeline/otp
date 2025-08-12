@@ -196,7 +196,7 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
     protected DeciderResult createWorkflowRunsAndOutputArtefacts(ProjectSeqTypeGroup projectSeqTypeGroup, AlignmentDeciderGroup group,
                                                                  AlignmentArtefactDataList givenArtefacts, AlignmentArtefactDataList additionalArtefacts,
                                                                  AlignmentAdditionalData additionalData, WorkflowVersion version,
-                                                                 Map<Class<? extends Decider>, DeciderCreateWorkflowActions> deciderAction = [:]) {
+                                                                 Map<Class<? extends Decider>, DeciderCreateWorkflowAction> deciderAction = [:]) {
         DeciderResult deciderResult = new DeciderResult()
         deciderResult.infos << "process group ${group}".toString()
 
@@ -215,21 +215,21 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
             return deciderResult
         }
         if (seqTracks as Set == existingBamFile?.seqTracks) {
-            DeciderCreateWorkflowActions action = deciderAction[getClass()]
+            DeciderCreateWorkflowAction action = deciderAction[getClass()]
             switch (action) {
-                case DeciderCreateWorkflowActions.CREATE_ALWAYS:
+                case DeciderCreateWorkflowAction.CREATE_ALWAYS:
                     deciderResult.warnings << "recreate ${group}, since action is CREATE_ALWAYS".toString()
                     break
-                case DeciderCreateWorkflowActions.CREATE_MISSING_AND_NEWER:
+                case DeciderCreateWorkflowAction.CREATE_MISSING_AND_NEWER:
                     if (existingBamFileData.version == version.workflowVersion) {
                         deciderResult.warnings << ("skip ${group}, since existing BAM file with the same seqTracks and version found, " +
-                        "and action is CREATE_MISSING_AND_NEWER").toString()
+                            "and action is CREATE_MISSING_AND_NEWER").toString()
                         return deciderResult
                     }
                     deciderResult.warnings << ("recreate ${group}, since existing BAM file with the same seqTracks has other version, " +
                         "and action is CREATE_MISSING_AND_NEWER").toString()
                     break
-                default: // case DeciderCreateWorkflowActions.CREATE_MISSING: (default)
+                default: // case DeciderCreateWorkflowAction.CREATE_MISSING: (default)
                     deciderResult.warnings << "skip ${group}, since existing BAM file with the same seqTracks found and action is CREATE_MISSING".toString()
                     return deciderResult
             }

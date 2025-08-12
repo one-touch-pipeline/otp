@@ -63,12 +63,21 @@ $(() => {
       const inputdata = {
         withdrawBamFiles: false,
         seqTracks: [],
-        bamFiles: []
+        bamFiles: [],
+        deciderActions: []
       };
       inputdata.ignoreSeqPlatformGroup = $('#ignoreSeqPlatformGroup').prop('checked');
       inputdata.withdrawBamFiles = $('input[name="withdrawBamFiles"]:checked').val();
       inputdata.seqTracks = $.otp.triggerAlignment.getSeqTrackTable().column(0).data().toArray();
       inputdata.bamFiles = $.otp.triggerAlignment.getBamTable().column(0).data().toArray();
+
+      // prepare the selected parameters of deciders for the backend call
+      $('#deciderActionSelection select.form-control').each((idx, elm) => {
+        inputdata.deciderActions.push(JSON.stringify({
+          name: $(elm).attr('name'),
+          createAction: $($(elm).select2('data')).attr('id')
+        }));
+      });
 
       if (inputdata.seqTracks.length || inputdata.bamFiles.length) {
         $('#triggerAlignmentButton').prop('disabled', true);

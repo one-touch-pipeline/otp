@@ -41,7 +41,7 @@
                         <th><g:message code="triggerAlignment.warn.table.project"/></th>
                         <th><g:message code="triggerAlignment.warn.table.individual"/></th>
                         <th><g:message code="triggerAlignment.warn.table.seqType"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.sampleTypeName"/></th>
+                        <th><g:message code="triggerAlignment.warn.table.sampleType"/></th>
                         <th><g:message code="triggerAlignment.warn.table.effectedLaneCount"/></th>
                     </tr>
                     </thead>
@@ -154,7 +154,7 @@
                         <th><g:message code="triggerAlignment.warn.table.project"/></th>
                         <th><g:message code="triggerAlignment.warn.table.individual"/></th>
                         <th><g:message code="triggerAlignment.warn.table.seqType"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.sampleTypeName"/></th>
+                        <th><g:message code="triggerAlignment.warn.table.sampleType"/></th>
                         <th><g:message code="triggerAlignment.warn.table.seqPlatforms"/></th>
                         <th><g:message code="triggerAlignment.warn.table.link"/></th>
                     </tr>
@@ -188,7 +188,7 @@
                         <th><g:message code="triggerAlignment.warn.table.project"/></th>
                         <th><g:message code="triggerAlignment.warn.table.individual"/></th>
                         <th><g:message code="triggerAlignment.warn.table.seqType"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.sampleTypeName"/></th>
+                        <th><g:message code="triggerAlignment.warn.table.sampleType"/></th>
                         <th><g:message code="triggerAlignment.warn.table.seqPlatformGroupSubTable"/></th>
                     </tr>
                     </thead>
@@ -220,7 +220,7 @@
                         <th><g:message code="triggerAlignment.warn.table.project"/></th>
                         <th><g:message code="triggerAlignment.warn.table.individual"/></th>
                         <th><g:message code="triggerAlignment.warn.table.seqType"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.sampleTypeName"/></th>
+                        <th><g:message code="triggerAlignment.warn.table.sampleType"/></th>
                         <th><g:message code="triggerAlignment.warn.table.libraryPreparationKitSubTable"/></th>
                     </tr>
                     </thead>
@@ -252,7 +252,7 @@
                         <th><g:message code="triggerAlignment.warn.table.project"/></th>
                         <th><g:message code="triggerAlignment.warn.table.individual"/></th>
                         <th><g:message code="triggerAlignment.warn.table.seqType"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.sampleTypeName"/></th>
+                        <th><g:message code="triggerAlignment.warn.table.sampleType"/></th>
                         <th><g:message code="triggerAlignment.warn.table.lane"/></th>
                         <th><g:message code="triggerAlignment.warn.table.run"/></th>
                     </tr>
@@ -282,7 +282,7 @@
                     <thead>
                     <tr>
                         <th><g:message code="triggerAlignment.warn.table.project"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.sampleTypeName"/></th>
+                        <th><g:message code="triggerAlignment.warn.table.sampleType"/></th>
                     </tr>
                     </thead>
                     <tbody/>
@@ -313,7 +313,7 @@
                     <tr>
                         <th><g:message code="triggerAlignment.warn.table.project"/></th>
                         <th><g:message code="triggerAlignment.warn.table.seqType"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.sampleTypeName"/></th>
+                        <th><g:message code="triggerAlignment.warn.table.sampleType"/></th>
                     </tr>
                     </thead>
                     <tbody/>

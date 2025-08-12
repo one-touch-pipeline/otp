@@ -22,14 +22,14 @@
 package de.dkfz.tbi.otp.workflow.alignment
 
 import grails.converters.JSON
+import org.grails.web.json.JSONObject
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.SearchSeqTrackService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
-import de.dkfz.tbi.otp.workflow.TriggerWorkflowService
-import de.dkfz.tbi.otp.workflow.WorkflowVersionAndReferenceGenomeSelector
+import de.dkfz.tbi.otp.workflow.*
 import de.dkfz.tbi.otp.workflowExecution.decider.*
 
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -39,12 +39,15 @@ class TriggerAlignmentController {
     private static final String PARAM_KEY_BAM_FILES = 'bamFiles[]'
     private static final String PARAM_KEY_IGNORE_SEQ_GROUP = 'ignoreSeqPlatformGroup'
     private static final String PARAM_KEY_WITHDRAW_BAMFILES = 'withdrawBamFiles'
-    private static final String PARAM_KEY_DECIDER_ACTION = 'deciderAction'
+    private static final String PARAM_KEY_DECIDER_ACTIONS = 'deciderActions[]'
+
+    private static final String MEESAGE_CODE_OPTION_NOTE = 'triggerAlignment.option.decider.notes'
 
     TriggerAlignmentService triggerAlignmentService
     TriggerWorkflowService triggerWorkflowService
     SearchSeqTrackService searchSeqTrackService
     SeqTypeService seqTypeService
+    AllDecider allDecider
 
     static allowedMethods = [
             index           : "GET",
@@ -60,11 +63,21 @@ class TriggerAlignmentController {
     ].asImmutable()
 
     def index() {
+        List<DeciderWithActions> deciders = triggerWorkflowService.allDecidersWithActions
+
         return [
                 seqTypes: seqTypeService.list().sort {
                     it.displayNameWithLibraryLayout
                 },
                 warnings: EMPTY_WARNINGS,
+                deciders: deciders,
+                deciderActions: DeciderCreateWorkflowAction.values(),
+                deciderNotes: [
+                        General  : g.message(code: "${MEESAGE_CODE_OPTION_NOTE}.general") as String,
+                        Fastqc   : g.message(code: "${MEESAGE_CODE_OPTION_NOTE}.fastqc") as String,
+                        Alignment: g.message(code: "${MEESAGE_CODE_OPTION_NOTE}.alignment") as String,
+                        Analysis : g.message(code: "${MEESAGE_CODE_OPTION_NOTE}.analysis") as String,
+                ],
         ]
     }
 
@@ -142,18 +155,26 @@ class TriggerAlignmentController {
         boolean ignoreSeqPlatformGroup = Boolean.parseBoolean(params[PARAM_KEY_IGNORE_SEQ_GROUP])
         boolean withdrawBamFiles = Boolean.parseBoolean(params[PARAM_KEY_WITHDRAW_BAMFILES])
 
-        Map<Class<? extends Decider>, DeciderCreateWorkflowActions> deciderAction = [:]
-        if (params[PARAM_KEY_DECIDER_ACTION].getClass().isArray()) {
-            params[PARAM_KEY_DECIDER_ACTION].each { String deciderName, String actionName ->
+        Map<Class<? extends Decider>, DeciderCreateWorkflowAction> deciderAction = [:]
+        if (params[PARAM_KEY_DECIDER_ACTIONS].getClass().isArray()) {
+            params[PARAM_KEY_DECIDER_ACTIONS].each { String deciderActionJsonString ->
+                JSONObject deciderActionJsonObject = JSON.parse(deciderActionJsonString)
+                String deciderName = deciderActionJsonObject.name
+                String actionId = deciderActionJsonObject.createAction
                 try {
-                    Class<? extends Decider> deciderClass = AllDecider.getDeciderClassByName(deciderName)
+                    Class<? extends Decider> deciderClass = allDecider.getDeciderClassByName(deciderName)
                     if (!deciderClass) {
                         throw new IllegalArgumentException("Unknown decider: ${deciderName}")
                     }
-                    DeciderCreateWorkflowActions action = DeciderCreateWorkflowActions.valueOf(actionName)
+                    DeciderCreateWorkflowAction action = DeciderCreateWorkflowAction.getById(Integer.valueOf(actionId))
+                    if (!action) {
+                        throw new IllegalArgumentException("Unknown action ID: ${actionId}")
+                    }
+                    log.debug("Decider and its action: ${deciderName}: ${action}")
                     deciderAction.put(deciderClass, action)
                 } catch (ClassNotFoundException | IllegalArgumentException e) {
-                    log.warn("Invalid decider action: ${deciderName}=${actionName}", e)
+                    log.warn("Invalid decider action: ${deciderName}: ${actionId}", e)
+                    return render(g.message(code: "triggerAlignment.warn.deciderAction.invalid"))
                 }
             }
         }

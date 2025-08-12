@@ -181,7 +181,7 @@ abstract class AbstractAnalysisDecider<A extends BamFilePairAnalysis>
     protected DeciderResult createWorkflowRunsAndOutputArtefacts(ProjectSeqTypeGroup projectSeqTypeGroup, BaseDeciderGroup group,
                                                                  AnalysisArtefactDataList givenArtefacts, AnalysisArtefactDataList additionalArtefacts,
                                                                  AnalysisAdditionalData analysisAdditionalData, WorkflowVersion workflowVersion,
-                                                                 Map<Class<? extends Decider>, DeciderCreateWorkflowActions> deciderAction = [:]) {
+                                                                 Map<Class<? extends Decider>, DeciderCreateWorkflowAction> deciderAction = [:]) {
         DeciderResult deciderResult = new DeciderResult()
         deciderResult.infos << "process group ${group}".toString()
 

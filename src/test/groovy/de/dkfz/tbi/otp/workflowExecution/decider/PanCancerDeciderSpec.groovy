@@ -85,8 +85,8 @@ class PanCancerDeciderSpec extends AbstractAlignmentDeciderSpec {
     @Unroll
     void "createWorkflowRunsAndOutputArtefacts, PanCancer cases, when #name, then do not create a new bam file and create a warning"() {
         given:
-        Map<Class<? extends Decider>, DeciderCreateWorkflowActions> deciderAction = [
-                (PanCancerDecider): DeciderCreateWorkflowActions.CREATE_MISSING.toString(),
+        Map<Class<? extends Decider>, DeciderCreateWorkflowAction> deciderAction = [
+                (PanCancerDecider): DeciderCreateWorkflowAction.CREATE_MISSING,
         ]
         createDataForCreateWorkflowRunsAndOutputArtefacts(createMwp, [(key): value])
 

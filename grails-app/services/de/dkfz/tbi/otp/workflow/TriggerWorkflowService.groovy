@@ -25,17 +25,13 @@ import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileService
-import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.workflowExecution.ReferenceGenomeSelector
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
-import de.dkfz.tbi.otp.workflowExecution.WorkflowVersionSelector
+import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
+import de.dkfz.tbi.otp.workflowExecution.decider.DeciderCreateWorkflowAction
 
 @Transactional
 class TriggerWorkflowService {
@@ -110,10 +106,22 @@ class TriggerWorkflowService {
         List<WorkflowArtefact> artefacts = abstractBamFileService.findAllByProjectAndSampleType(project, sampleTypes)*.workflowArtefact
         allDecider.decide(artefacts)
     }
+
+    List<DeciderWithActions> getAllDecidersWithActions() {
+        return allDecider.allDeciderActionsMap.collect { k, v ->
+            return new DeciderWithActions(k.simpleName, v)
+        }
+    }
 }
 
 @TupleConstructor
 class WorkflowVersionAndReferenceGenomeSelector {
     WorkflowVersionSelector workflowVersionSelector
     List<ReferenceGenomeSelector> referenceGenomeSelectors
+}
+
+@TupleConstructor
+class DeciderWithActions {
+    String name
+    List<DeciderCreateWorkflowAction> createActions
 }

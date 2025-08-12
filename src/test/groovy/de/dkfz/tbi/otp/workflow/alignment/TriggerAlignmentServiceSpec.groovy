@@ -89,11 +89,11 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, Work
         final SeqType st1 = createSeqTypePaired()
         final SeqType st2 = createSeqTypePaired()
         final SeqType st3 = createSeqTypePaired()
-        Map<Class<? extends Decider>, DeciderCreateWorkflowActions> deciderAction = [
-                (FastqcDecider)      : DeciderCreateWorkflowActions.SKIP,
-                (PanCancerDecider)   : DeciderCreateWorkflowActions.CREATE_ALWAYS,
-                (WgbsDecider)        : DeciderCreateWorkflowActions.SKIP,
-                (RnaAlignmentDecider): DeciderCreateWorkflowActions.SKIP,
+        Map<Class<? extends Decider>, DeciderCreateWorkflowAction> deciderAction = [
+                (FastqcDecider)      : DeciderCreateWorkflowAction.SKIP,
+                (PanCancerDecider)   : DeciderCreateWorkflowAction.CREATE_ALWAYS,
+                (WgbsDecider)        : DeciderCreateWorkflowAction.SKIP,
+                (RnaAlignmentDecider): DeciderCreateWorkflowAction.SKIP,
         ]
         Project project = createProject()
         Individual individual = createIndividual(project: project)

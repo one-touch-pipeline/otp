@@ -26,9 +26,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
-import de.dkfz.tbi.otp.workflowExecution.ArtefactType
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
-import de.dkfz.tbi.otp.workflowExecution.WorkflowService
+import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.decider.*
 
 class AbstractWorkflowDeciderSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
@@ -52,7 +50,8 @@ class AbstractWorkflowDeciderSpec extends Specification implements DataTest, Wor
         }
 
         when:
-        DeciderResult deciderResult = decider.decide([workflowArtefact], ['PanCancerDecider': DeciderCreateWorkflowActions.SKIP.toString()])
+        DeciderResult deciderResult = decider.decide([workflowArtefact], [:],
+                [(decider.class): DeciderCreateWorkflowAction.SKIP])
 
         then:
         deciderResult.newArtefacts.empty

@@ -25,5 +25,6 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 
 interface Decider {
     abstract DeciderResult decide(Collection<WorkflowArtefact> inputArtefacts, Map<String, String> userParams,
-                                  Map<Class<? extends Decider>, DeciderCreateWorkflowActions> deciderAction)
+                                  Map<Class<? extends Decider>, DeciderCreateWorkflowAction> deciderAction)
+    abstract List<DeciderCreateWorkflowAction> getSupportedActions()
 }

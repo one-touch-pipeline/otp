@@ -21,8 +21,8 @@
  */
 package de.dkfz.tbi.otp.workflow.shared
 
-class DeciderCreateWorkflowActionsException extends WorkflowException {
-    DeciderCreateWorkflowActionsException(String message) {
+class DeciderCreateWorkflowActionException extends WorkflowException {
+    DeciderCreateWorkflowActionException(String message) {
         super(message)
     }
 }

@@ -215,7 +215,7 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
         }
 
         when:
-        DeciderResult deciderResult = decider.decide([workflowArtefact], [:], [(FastqcDecider): DeciderCreateWorkflowActions.SKIP])
+        DeciderResult deciderResult = decider.decide([workflowArtefact], [:], [(FastqcDecider): DeciderCreateWorkflowAction.SKIP])
 
         then:
         deciderResult.newArtefacts.empty
@@ -361,7 +361,7 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
                 seqType        : null,
         ])
         List<FastqcArtefactDataWithFastqcProcessedFile> additionalArtefacts = [createFastqcArtefactDataWithFastqcProcessedFile(fastqcProcessedFile1), createFastqcArtefactDataWithFastqcProcessedFile(fastqcProcessedFile2)]
-        Map<Class<? extends Decider>, DeciderCreateWorkflowActions> deciderActionMap = [
+        Map<Class<? extends Decider>, DeciderCreateWorkflowAction> deciderActionMap = [
                 (FastqcDecider): deciderAction
         ]
 
@@ -374,8 +374,8 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
 
         where:
         deciderAction                                         || expectedMessage
-        DeciderCreateWorkflowActions.CREATE_ALWAYS            || 'The action CREATE_ALWAYS is not supported for fastqc'
-        DeciderCreateWorkflowActions.CREATE_MISSING_AND_NEWER || 'The action CREATE_MISSING_AND_NEWER is not supported for fastqc'
+        DeciderCreateWorkflowAction.CREATE_ALWAYS            || 'The action CREATE_ALWAYS is not supported for fastqc'
+        DeciderCreateWorkflowAction.CREATE_MISSING_AND_NEWER || 'The action CREATE_MISSING_AND_NEWER is not supported for fastqc'
     }
 
     private void createServicesForCreateWorkflowRunsAndOutputArtefacts(WorkflowVersion workflowVersion, SeqTrack seqTrack) {
