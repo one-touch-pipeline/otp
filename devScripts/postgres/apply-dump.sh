@@ -71,7 +71,6 @@ echo " .. found '${DUMP_TO_LOAD}'"
 du -hs "${DUMP_TO_LOAD}"
 
 PSQL="psql --username=otp  --dbname=otp --host=localhost --port=$PORT"
-${PSQL} --command "DROP SCHEMA public;"
 
 # Work around pg_restore failing due to an option set automatically by Postgres clients >= 9.3
 echo "Loading dump..."
