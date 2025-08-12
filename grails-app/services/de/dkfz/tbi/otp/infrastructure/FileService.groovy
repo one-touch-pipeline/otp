@@ -616,6 +616,21 @@ class FileService {
     }
 
     /**
+     * Create the requested file with the given content as list of strings and permission.
+     *
+     * The path must be absolute and may not exist yet. Missing parent directories will be created automatically using
+     * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
+     */
+    void createFileWithContent(Path path,
+                               List<String> content,
+                               Set<PosixFilePermission> filePermission = DEFAULT_FILE_PERMISSION,
+                               boolean overwrite = false) {
+        createFileWithContentCommonPartHelper(path, filePermission, overwrite) {
+            Files.write(path, content)
+        }
+    }
+
+    /**
      * Create the requested file with the given byte content and permission.
      *
      * The path have to be absolute and may not exist yet. Missing parent directories are created automatically with the

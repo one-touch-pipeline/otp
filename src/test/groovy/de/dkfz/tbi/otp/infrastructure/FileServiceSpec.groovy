@@ -37,7 +37,50 @@ class FileServiceSpec extends Specification implements DataTest {
 
     static final String SOME_CONTENT = 'SomeContent'
 
-    static final byte[] SOME_BYTE_CONTENT = "SomeByteContent".bytes
+    static final String SOME_BYTE_CONTENT_EXPECTED = "SomeByteContent"
+
+    static final byte[] SOME_BYTE_CONTENT = SOME_BYTE_CONTENT_EXPECTED.bytes
+
+    static final List<String> SOME_CONTENT_LIST = [
+            'SomeContent1',
+            'SomeContent2',
+            'SomeContent3',
+    ].asImmutable()
+
+    static final String SOME_CONTENT_LIST_EXPECTED = SOME_CONTENT_LIST.collect { "${it}\n" }.join()
+
+    static final List<List<?>> TABLE = [
+            [
+                    "String",
+                    SOME_CONTENT,
+                    SOME_CONTENT,
+            ].asImmutable(),
+            [
+                    "byte array",
+                    SOME_BYTE_CONTENT,
+                    SOME_BYTE_CONTENT_EXPECTED,
+            ].asImmutable(),
+            [
+                    "List of String",
+                    SOME_CONTENT_LIST,
+                    SOME_CONTENT_LIST_EXPECTED,
+            ].asImmutable(),
+    ].asImmutable()
+
+    static final List<List<?>> TABLE2 = [
+            [
+                    'path is null',
+                    null,
+            ].asImmutable(),
+            [
+                    'only one component',
+                    new File('path').toPath(),
+            ].asImmutable(),
+            [
+                    'relative path',
+                    new File('relative/path').toPath(),
+            ].asImmutable(),
+    ].asImmutable()
 
     static private final Set<PosixFilePermission> POSIX_DIRECTORY_PERMISSION_PART = [
             PosixFilePermission.OWNER_READ,
@@ -450,49 +493,55 @@ class FileServiceSpec extends Specification implements DataTest {
     // ----------------------------------------------------------------------------------------------------
     // test for createFileWithContent using characters
 
-    void "createFileWithContent, if file does not exist, then create file with given context"() {
+    @Unroll
+    void "createFileWithContent (#name), if file does not exist, then create file with given context"() {
         given:
         Path newFile = tempDir.resolve('newFile')
 
         when:
-        fileService.createFileWithContent(newFile, SOME_CONTENT)
+        fileService.createFileWithContent(newFile, content)
 
         then:
         assertFile(newFile)
-        newFile.text == SOME_CONTENT
+        newFile.text == expected
+
+        where:
+        [name, content, expected] << TABLE
     }
 
-    void "createFileWithContent, if parent directory and file do not exist, then create directory and file"() {
+    @Unroll
+    void "createFileWithContent (#name), if parent directory and file do not exist, then create directory and file"() {
         given:
         mockRemoteShellHelper()
         Path newFile = tempDir.resolve('newFolder/newFile')
 
         when:
-        fileService.createFileWithContent(newFile, SOME_CONTENT)
+        fileService.createFileWithContent(newFile, content)
 
         then:
         assertDirectory(newFile.parent)
         assertFile(newFile)
-        newFile.text == SOME_CONTENT
+        newFile.text == expected
+
+        where:
+        [name, content, expected] << TABLE
     }
 
     @Unroll
-    void "createFileWithContent, if parameter is #cases, throw assertion"() {
+    void "createFileWithContent (#name, #cases), if parameter is #cases, throw assertion"() {
         when:
         mockRemoteShellHelper()
-        fileService.createFileWithContent(path, SOME_CONTENT)
+        fileService.createFileWithContent(path, content)
 
         then:
         thrown(AssertionError)
 
         where:
-        cases                | path
-        'null'               | null
-        'only one component' | new File('path').toPath()
-        'relative path'      | new File('relative/path').toPath()
+        [[name, content, _], [cases , path]] << [TABLE, TABLE2].combinations()
     }
 
-    void "createFileWithContent, if file already exists and overwrite is false, then throw assertion"() {
+    @Unroll
+    void "createFileWithContent (#name), if file already exists and overwrite is false, then throw assertion"() {
         given:
         mockRemoteShellHelper()
         Path path = CreateFileHelper.createFile(tempDir.resolve("test.txt"))
@@ -500,13 +549,17 @@ class FileServiceSpec extends Specification implements DataTest {
         assert Files.isRegularFile(path)
 
         when:
-        fileService.createFileWithContent(path, SOME_CONTENT)
+        fileService.createFileWithContent(path, content)
 
         then:
         thrown(AssertionError)
+
+        where:
+        [name, content, expected] << TABLE
     }
 
-    void "createFileWithContent, if file already exists and overwrite is true, then overwrite file content"() {
+    @Unroll
+    void "createFileWithContent (#name), if file already exists and overwrite is true, then overwrite file content"() {
         given:
         String oldContent = "OLD CONTENT"
         mockRemoteShellHelper()
@@ -516,13 +569,17 @@ class FileServiceSpec extends Specification implements DataTest {
         assert path.text == oldContent
 
         when:
-        fileService.createFileWithContent(path, SOME_CONTENT, FileService.DEFAULT_FILE_PERMISSION, true)
+        fileService.createFileWithContent(path, content, FileService.DEFAULT_FILE_PERMISSION, true)
 
         then:
-        path.text == SOME_CONTENT
+        path.text == expected
+
+        where:
+        [name, content, expected] << TABLE
     }
 
-    void "createFileWithContent, if a parent of path is a file, then throw CreateDirectoryException"() {
+    @Unroll
+    void "createFileWithContent (#name), if a parent of path is a file, then throw CreateDirectoryException"() {
         given:
         mockRemoteShellHelper()
         Path filePath = CreateFileHelper.createFile(tempDir.resolve("test.txt"))
@@ -531,10 +588,13 @@ class FileServiceSpec extends Specification implements DataTest {
         Path newFile = filePath.resolve('newDirectory')
 
         when:
-        fileService.createFileWithContent(newFile, SOME_CONTENT)
+        fileService.createFileWithContent(newFile, content)
 
         then:
         thrown(CreateDirectoryException)
+
+        where:
+        [name, content, expected] << TABLE
     }
 
     private void assertFile(Path path) {
@@ -554,96 +614,6 @@ class FileServiceSpec extends Specification implements DataTest {
         assert !permissions.contains(PosixFilePermission.OTHERS_READ)
         assert !permissions.contains(PosixFilePermission.OTHERS_WRITE)
         assert !permissions.contains(PosixFilePermission.OTHERS_EXECUTE)
-    }
-
-    // ----------------------------------------------------------------------------------------------------
-    // test for createFileWithContent using bytes
-
-    void "createFileWithContent (byte), if file does not exist, then create file with given context"() {
-        given:
-        mockRemoteShellHelper()
-        Path newFile = tempDir.resolve('newFile')
-
-        when:
-        fileService.createFileWithContent(newFile, SOME_BYTE_CONTENT)
-
-        then:
-        assertFile(newFile)
-        newFile.bytes == SOME_BYTE_CONTENT
-    }
-
-    void "createFileWithContent (byte), if parent directory and file do not exist, then create directory and file"() {
-        given:
-        mockRemoteShellHelper()
-        Path newFile = tempDir.resolve('newFolder/newFile')
-
-        when:
-        fileService.createFileWithContent(newFile, SOME_BYTE_CONTENT)
-
-        then:
-        assertDirectory(newFile.parent)
-        assertFile(newFile)
-        newFile.bytes == SOME_BYTE_CONTENT
-    }
-
-    @Unroll
-    void "createFileWithContent (byte), if parameter is #cases, throw assertion"() {
-        when:
-        mockRemoteShellHelper()
-        fileService.createFileWithContent(path, SOME_BYTE_CONTENT)
-
-        then:
-        thrown(AssertionError)
-
-        where:
-        cases                | path
-        'null'               | null
-        'only one component' | new File('path').toPath()
-        'relative path'      | new File('relative/path').toPath()
-    }
-
-    void "createFileWithContent (byte), if file already exists, then throw assertion"() {
-        given:
-        mockRemoteShellHelper()
-        Path path = CreateFileHelper.createFile(tempDir.resolve("test.txt"))
-        assert Files.exists(path)
-        assert Files.isRegularFile(path)
-
-        when:
-        fileService.createFileWithContent(path, SOME_BYTE_CONTENT)
-
-        then:
-        thrown(AssertionError)
-    }
-
-    void "createFileWithContent (byte), if file already exists and overwrite is true, then overwrite file content"() {
-        given:
-        mockRemoteShellHelper()
-        Path path = CreateFileHelper.createFile(tempDir.resolve("test.txt"))
-        assert Files.exists(path)
-        assert Files.isRegularFile(path)
-        assert path.bytes != SOME_BYTE_CONTENT
-
-        when:
-        fileService.createFileWithContent(path, SOME_BYTE_CONTENT, FileService.DEFAULT_FILE_PERMISSION, true)
-
-        then:
-        path.bytes == SOME_BYTE_CONTENT
-    }
-
-    void "createFileWithContent (byte), if a parent of path is a file, then throw CreateDirectoryException"() {
-        given:
-        mockRemoteShellHelper()
-        Path filePath = CreateFileHelper.createFile(tempDir.resolve("test.txt"))
-        assert Files.exists(filePath)
-        assert Files.isRegularFile(filePath)
-        Path newFile = filePath.resolve('newDirectory')
-
-        when:
-        fileService.createFileWithContent(newFile, SOME_BYTE_CONTENT)
-
-        then:
-        thrown(CreateDirectoryException)
     }
 
     // ----------------------------------------------------------------------------------------------------

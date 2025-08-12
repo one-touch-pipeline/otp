@@ -310,15 +310,15 @@ class MolgenisExporter {
 
     ApplicationContext ctx
 
-    String exportRawSequenceFiles(List<RawSequenceFile> rawSequenceFiles) {
+    List<String> exportRawSequenceFiles(List<RawSequenceFile> rawSequenceFiles) {
         MolgenisRawSequenceFile.properties["rawSequenceDataWorkFileService"] = ctx.rawSequenceDataWorkFileService
         MolgenisRawSequenceFile.properties["fastqcDataFilesService"] = ctx.fastqcDataFilesService
-        return ([new MolgenisRawSequenceFile().headerAsCsv] + rawSequenceFiles.collect { RawSequenceFile df -> MolgenisRawSequenceFile.export(df).toCsvLine() }).join("\n")
+        return [new MolgenisRawSequenceFile().headerAsCsv] + rawSequenceFiles.collect { RawSequenceFile df -> MolgenisRawSequenceFile.export(df).toCsvLine() }
     }
 
-    String exportBams(List<AbstractBamFile> bams) {
+    List<String> exportBams(List<AbstractBamFile> bams) {
         MolgenisBam.properties["abstractBamFileService"] = ctx.abstractBamFileService
-        return ([new MolgenisBam().headerAsCsv] + bams.collect { AbstractBamFile bam -> MolgenisBam.export(bam).toCsvLine() }).join("\n")
+        return [new MolgenisBam().headerAsCsv] + bams.collect { AbstractBamFile bam -> MolgenisBam.export(bam).toCsvLine() }
     }
 
     static RoddyMergedBamQa getRoddyMergedBamQaAll(AbstractBamFile bamFile) {
