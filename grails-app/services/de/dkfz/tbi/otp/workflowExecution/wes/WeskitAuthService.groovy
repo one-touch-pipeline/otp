@@ -34,6 +34,8 @@ import org.springframework.web.reactive.function.client.WebClient
 
 import de.dkfz.tbi.otp.config.ConfigService
 
+import java.time.Duration
+
 /**
  * Helper service for {@link WeskitAccessService} and {@link WeskitApiService} to get the access token from keycloak.
  */
@@ -62,12 +64,14 @@ class WeskitAuthService {
 
             String accessTokenJsonString = requestBuilder.retrieve()
                     .bodyToMono(String)
-                    .block()
+                    .block(Duration.ofMinutes(1))
+
             JSONElement accessTokenJson = JSON.parse(accessTokenJsonString)
             assert accessTokenJson['access_token']
+
             return accessTokenJson['access_token']
         } catch (RuntimeException e) {
-            throw new WeskitRequestAccessTokenFailedException("Failed to get weskit access token", e)
+            throw new WeskitRequestAccessTokenFailedException("Failed to get WESKit access token", e)
         }
     }
 

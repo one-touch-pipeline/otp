@@ -73,7 +73,7 @@ class WeskitAuthServiceSpec extends Specification {
         1 * requestBuilder.body(_) >> requestBuilder
         1 * requestBuilder.retrieve() >> responseSpec
         1 * responseSpec.bodyToMono(String) >> mono
-        1 * mono.block() >> tokenJson
+        1 * mono.block(_) >> tokenJson
 
         accessToken == token
     }

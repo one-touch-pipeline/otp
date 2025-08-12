@@ -21,9 +21,13 @@
  */
 package de.dkfz.tbi.otp
 
+import io.netty.channel.ChannelOption
+import io.netty.handler.timeout.ReadTimeoutHandler
+import io.netty.handler.timeout.WriteTimeoutHandler
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy
@@ -46,13 +50,15 @@ import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInit
 import org.springframework.security.oauth2.client.registration.*
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction
 import org.springframework.security.oauth2.core.AuthorizationGrantType
-import org.springframework.security.oauth2.core.oidc.*
+import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames
+import org.springframework.security.oauth2.core.oidc.OidcIdToken
 import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.*
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler
 import org.springframework.security.web.authentication.switchuser.SwitchUserFilter
 import org.springframework.web.reactive.function.client.WebClient
+import reactor.netty.http.client.HttpClient
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.security.*
@@ -64,6 +70,8 @@ import de.dkfz.tbi.otp.workflowExecution.wes.WeskitAuthService
 import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
+import java.time.Duration
+import java.util.concurrent.TimeUnit
 
 import static org.springframework.security.config.Customizer.withDefaults
 
@@ -293,7 +301,16 @@ class SecurityConfiguration {
                 new AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager(clientRegistrations, clientService)
         ServerOAuth2AuthorizedClientExchangeFilterFunction oauth = new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
 
+        HttpClient httpClient = HttpClient.create()
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 30000)
+                .responseTimeout(Duration.ofSeconds(60))
+                .doOnConnected { conn ->
+                    conn.addHandlerLast(new ReadTimeoutHandler(60, TimeUnit.SECONDS))
+                        .addHandlerLast(new WriteTimeoutHandler(60, TimeUnit.SECONDS))
+                }
+
         return WebClient.builder()
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .filter(oauth)
                 .build()
     }

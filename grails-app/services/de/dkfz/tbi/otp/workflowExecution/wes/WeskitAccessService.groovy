@@ -73,6 +73,7 @@ class WeskitAccessService {
      */
     RunStatus getRunStatus(String runId) {
         assert runId
+        log.info("Getting run status for runId: ${runId}")
         return doApiCall { WorkflowExecutionServiceApi api ->
             api.getRunStatus(runId)
         }
