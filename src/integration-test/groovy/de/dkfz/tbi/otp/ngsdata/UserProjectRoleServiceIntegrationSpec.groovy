@@ -1064,6 +1064,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         Project project = createProject(dirAnalysis: "/dev/null")
         UserProjectRole userProjectRole = createUserProjectRole(
                 project: project,
+                accessToFiles: true
         )
 
         List<UserProjectRole> toBeNotified = [
@@ -1092,6 +1093,43 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         then:
         1 * userProjectRoleService.mailHelperService.saveMail(
                 'fileAccessChange\n' + projectName,
+                expectedBody,
+                [userProjectRole.user.email],
+                toBeNotified*.user*.email.sort(),
+        )
+    }
+
+    void "notifyUsersAboutFileAccessChange when the fileAccess was removed, builds correct content"() {
+        given:
+        setupData()
+
+        Project project = createProject(dirAnalysis: "/dev/null")
+        UserProjectRole userProjectRole = createUserProjectRole(
+                project: project,
+                accessToFiles: false
+        )
+
+        List<UserProjectRole> toBeNotified = [
+                createUserProjectRole(project: project, manageUsers: true),
+                createUserProjectRole(project: project, projectRoles: [pi]),
+        ]
+
+        String projectName = project.name
+        String expectedBody = """\
+            fileAccessChange
+            ${userProjectRole.user.realName}
+            ${EMAIL_SENDER_NAME}
+            ${projectName}
+            ${EMAIL_SENDER_SALUTATION}""".stripIndent()
+
+        when:
+        doWithAuth(OPERATOR) {
+            userProjectRoleService.notifyUsersAboutFileAccessChange(userProjectRole)
+        }
+
+        then:
+        1 * userProjectRoleService.mailHelperService.saveMail(
+                'fileAccessChange removed\n' + projectName,
                 expectedBody,
                 [userProjectRole.user.email],
                 toBeNotified*.user*.email.sort(),
@@ -1858,6 +1896,10 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                     '''fileAccessChange
                     |${projectName}'''.stripMargin()
 
+            _ * getMessageInternal("projectUser.notification.fileAccessChange.subject.removed", [], _) >>
+                    '''fileAccessChange removed
+                    |${projectName}'''.stripMargin()
+
             _ * getMessageInternal("projectUser.notification.fileAccessChange.body", [], _) >>
                     '''fileAccessChange
                     |${username}
@@ -1867,6 +1909,13 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                     |${clusterName}
                     |${clusterAdministrationEmail}
                     |${linkProjectDirectory}
+                    |${supportTeamSalutation}'''.stripMargin()
+
+            _ * getMessageInternal("projectUser.notification.fileAccessChange.body.removed", [], _) >>
+                    '''fileAccessChange
+                    |${username}
+                    |${requester}
+                    |${projectName}
                     |${supportTeamSalutation}'''.stripMargin()
         }
     }

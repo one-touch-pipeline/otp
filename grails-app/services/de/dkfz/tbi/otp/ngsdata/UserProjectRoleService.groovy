@@ -40,6 +40,8 @@ import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.exceptions.UserDisabledException
 import de.dkfz.tbi.otp.utils.exceptions.UserRoleException
 
+import java.nio.file.*
+
 @Transactional
 class UserProjectRoleService {
 
@@ -186,28 +188,35 @@ class UserProjectRoleService {
     private void notifyUsersAboutFileAccessChange(UserProjectRole userProjectRole) {
         Project project = userProjectRole.project
         User user = userProjectRole.user
+        Boolean accessToFiles = userProjectRole.accessToFiles
 
-        String subject = messageSourceService.createMessage("projectUser.notification.fileAccessChange.subject", [
-                projectName: project.name,
-        ])
+        String subject = messageSourceService.createMessage("projectUser.notification.fileAccessChange.subject", [projectName: project.name])
+        String subjectRemoved = messageSourceService.createMessage("projectUser.notification.fileAccessChange.subject.removed", [projectName: project.name])
+        String subjectWithSuffix = accessToFiles ? subject : subjectRemoved
 
         String clusterAdministrationEmail = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_CLUSTER_ADMINISTRATION)
         String clusterName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.CLUSTER_NAME)
         String supportTeamName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME)
-        String body = messageSourceService.createMessage("projectUser.notification.fileAccessChange.body", [
+
+        Map sharedParams =  [
                 username                  : user.realName,
                 requester                 : mailHelperService.senderName,
                 projectName               : project.name,
+                supportTeamSalutation     : supportTeamName,
+        ]
+        Map mailParams = [
                 dirAnalysis               : project.dirAnalysis ?: "-",
                 clusterName               : clusterName,
                 clusterAdministrationEmail: clusterAdministrationEmail,
-                supportTeamSalutation     : supportTeamName,
-                linkProjectDirectory      : LsdfFilesService.getPath(configService.rootPath.path, project.dirName),
-        ])
+                linkProjectDirectory      : Paths.get(configService.rootPath.path, project.dirName).toString(),
+        ]
+        String body = accessToFiles
+                ? messageSourceService.createMessage("projectUser.notification.fileAccessChange.body", sharedParams + mailParams)
+                : messageSourceService.createMessage("projectUser.notification.fileAccessChange.body.removed", sharedParams)
 
         List<String> ccs = getUniqueProjectAuthoritiesAndUserManagers(project)*.email.sort()
 
-        mailHelperService.saveMail(subject, body, [user.email], ccs)
+        mailHelperService.saveMail(subjectWithSuffix, body, [user.email], ccs)
     }
 
     @CompileDynamic
@@ -412,9 +421,7 @@ class UserProjectRoleService {
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
     UserProjectRole setAccessToFilesWithUserNotification(UserProjectRole userProjectRole, boolean accessToFiles) {
         setAccessToFiles(userProjectRole, accessToFiles)
-        if (userProjectRole.accessToFiles) {
-            notifyUsersAboutFileAccessChange(userProjectRole)
-        }
+        notifyUsersAboutFileAccessChange(userProjectRole)
         return userProjectRole
     }
 

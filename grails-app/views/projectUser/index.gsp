@@ -56,6 +56,7 @@
             </g:if>
         </div>
     </div>
+
     <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
         <h5><strong><g:message code="projectUser.addMember.action" args="[selectedProject?.name]"/></strong></h5>
         <h6><strong><g:message code="projectUser.addMember.unix" args="[selectedProject?.unixGroup]"/></strong></h6>
@@ -134,8 +135,8 @@
                     </div>
                 </div>
             </sec:access>
-            <div class="submit-container">
-                <div style="padding-right: 10px;">
+            <div class="submit-container mb-4">
+                <div class="pe-2">
                     <input type="submit" class="btn btn-primary" value="${g.message(code: 'projectUser.addMember.action', args: [selectedProject?.name])}"/>
                 </div>
 
@@ -150,17 +151,17 @@
         <g:if test="${usersWithoutUserProjectRole || unknownUsersWithFileAccess}">
             <h5><strong><g:message code="projectUser.additionalUsers.header" args="[selectedProject.unixGroup]"/></strong></h5>
             <h6><strong><g:message code="projectUser.additionalUsers.notConnected"/></strong></h6>
-            ${usersWithoutUserProjectRole.join(", ") ?: 'None'}
+            <p>${usersWithoutUserProjectRole.join(", ") ?: 'None'}</p>
 
             <h6><strong><g:message code="projectUser.additionalUsers.unregisteredUsers"/></strong></h6>
-            ${unknownUsersWithFileAccess.join(", ") ?: 'None'}
+            <p>${unknownUsersWithFileAccess.join(", ") ?: 'None'}</p>
         </g:if>
     </sec:access>
 
     <div class="otpDataTables projectUserTable fixed-table-header">
         <h5><strong><g:message code="projectUser.activeUsers" args="[selectedProject.displayName]"/></strong></h5>
         <g:if test="${enabledProjectUsers}">
-        <table class="table table-sm table-striped table-hover" id="projectMemberTable">
+        <table class="table table-sm table-striped table-hover dataTable" id="projectMemberTable">
             <g:render template="userListingTableHeaderRow" model="[mode: 'enabled', project: selectedProject, showProjectAccess: currentUser.id in enabledProjectUsers*.user*.id]"/>
             <tbody>
             <g:each in="${enabledProjectUsers}" var="userEntry">
@@ -185,8 +186,7 @@
                         <div class="loader"></div>
 
                         <div class="loaded-content bootstrapped" style="display: none">
-                            <sec:access
-                                    expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
+                            <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
                                 <g:each in="${userEntry.projectRoleNames}" var="projectRoleName">
                                     <otp:editorSwitch template="remove" value="${projectRoleName}" confirmation="${confirmationText}" name="${projectRoleName}"
                                                       link="${g.createLink(controller: "projectUser", action: "deleteProjectRole", params: ['userProjectRole.id': userEntry.userProjectRole.id, 'currentRole': projectRoleName])}"/>
@@ -201,8 +201,10 @@
                                               data-placeholder="${g.message(code: "projectUser.addMember.roleSelection")}"/>
                                     <input type="hidden" name="targetAddRole"
                                            value="${g.createLink(controller: "projectUser", action: "addRoleToUserProjectRole", params: ['userProjectRole.id': userEntry.userProjectRole.id, 'currentRole': null])}"/>
-                                    <button class="btn btn-primary addRole js-add" data-confirmation="${confirmationText}"><g:message
-                                            code="projectUser.addRoleToUserProjectRole"/></button>
+                                    <button class="btn btn-primary addRole mt-1" data-confirmation="${confirmationText}">
+                                        %{--<i class="bi bi-plus-square-fill"></i>--}%
+                                        <g:message code="projectUser.addRoleToUserProjectRole"/>
+                                    </button>
                                 </div>
                             </sec:access>
                         </div>
@@ -247,11 +249,15 @@
                                                    value="${g.createLink(controller: "projectUser", action: "setAccessToFiles", params: ['userProjectRole.id': userEntry.userProjectRole.id])}"/>
                                             <input type="hidden" name="hasFileAccess" value="${userEntry.fileAccess.toBoolean()}">
                                             <input type="hidden" name="permissionState" value="${userEntry.fileAccess}">
-                                            <span class="icon-${userEntry.fileAccess}"></span><br>
-                                            <button class="btn btn-primary" onclick="onToggleAccessToFiles(this)"><g:message
-                                                    code="default.button.toggle.label"/></button><br>
-                                            <button class="btn btn-primary" onclick="hideEditorAndShowLabel(this)"><g:message
-                                                    code="default.button.cancel.label"/></button>
+                                            <span class="icon-${userEntry.fileAccess}"></span>
+                                            <br>
+                                            <button class="btn btn-primary" onclick="onToggleAccessToFiles(this)">
+                                                <g:message code="default.button.toggle.label"/>
+                                            </button>
+                                            <br>
+                                            <button class="btn btn-primary mt-1" onclick="hideEditorAndShowLabel(this)">
+                                                <g:message code="default.button.cancel.label"/>
+                                            </button>
                                         </div>
 
                                         <p class="modal-editor-switch-label" data-placement="top"
@@ -328,7 +334,7 @@
                         <div class="submit-container">
                             <input type="hidden" name="changeProjectAccessButton"
                                    value="${g.createLink(controller: "projectUser", action: "setEnabled", params: ["userProjectRole.id": userEntry.userProjectRole.id, "value": false])}"/>
-                            <button class="btn btn-primary changeProjectAccess js-add" ${disabled} data-confirmation="${confirmationTextHtml ?:
+                            <button class="btn btn-primary changeProjectAccess mt-1" ${disabled} data-confirmation="${confirmationTextHtml ?:
                                     g.message(code: "projectUser.deactivateConfirmation", args: [userEntry.user.username, selectedProject.name])}">
                                 <g:message code="projectUser.table.deactivateUser"/>
                             </button>
@@ -356,7 +362,7 @@
         </button>
     </sec:access>
     <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
-        <div class="otpDataTables projectUserTable" id="formerProjectMemberTable">
+        <div class="otpDataTables projectUserTable mt-3" id="formerProjectMemberTable">
             <h5><strong><g:message code="projectUser.formerUsers"/></strong></h5>
             <g:if test="${disabledProjectUsers}">
             <table class="table table-sm table-striped table-hover fixed-table-header">
@@ -394,7 +400,7 @@
                                 <div class="submit-container">
                                     <input type="hidden" name="changeProjectAccessButton"
                                            value="${g.createLink(controller: "projectUser", action: "setEnabled", params: ["userProjectRole.id": userEntry.userProjectRole.id, "value": true])}"/>
-                                    <button class="btn btn-primary changeProjectAccess js-add" data-confirmation="${confirmationTextHtml}"><g:message
+                                    <button class="btn btn-primary changeProjectAccess mt-1" data-confirmation="${confirmationTextHtml}"><g:message
                                             code="projectUser.table.reactivateUser"/></button>
                                 </div>
                             </td>
