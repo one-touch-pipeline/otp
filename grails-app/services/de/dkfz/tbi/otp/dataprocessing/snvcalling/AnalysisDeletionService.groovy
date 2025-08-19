@@ -39,7 +39,8 @@ import java.nio.file.Path
 class AnalysisDeletionService {
 
     FileService fileService
-    BamFileAnalysisServiceFactoryService bamFileAnalysisServiceFactoryService
+    AnalysisLinkFileServiceFactoryService analysisLinkFileServiceFactoryService
+    AnalysisWorkFileServiceFactoryService analysisWorkFileServiceFactoryService
 
     static final List<Class<?>> ANALYSIS_CLASSES = [
             RoddySnvCallingInstance,
@@ -53,8 +54,7 @@ class AnalysisDeletionService {
      * Delete all subclasses of BamFilePairAnalysis (such as SnvCallingInstance, IndelCallingInstance, etc) from the database.
      */
     @CompileDynamic
-    File deleteInstance(BamFilePairAnalysis analysisInstance) {
-        Path directory = bamFileAnalysisServiceFactoryService.getService(analysisInstance).getWorkDirectory(analysisInstance)
+    Collection<Path> deleteInstance(BamFilePairAnalysis analysisInstance) {
         switch (analysisInstance) {
             case { it instanceof IndelCallingInstance }:
                 ((IndelCallingInstance)analysisInstance).indelQualityControl = null
@@ -88,7 +88,10 @@ class AnalysisDeletionService {
                 break
         }
         analysisInstance.delete(flush: true)
-        return fileService.toFile(directory)
+        return [
+                analysisWorkFileServiceFactoryService.getService(analysisInstance).getDirectoryPath(analysisInstance),
+                analysisLinkFileServiceFactoryService.getService(analysisInstance).getDirectoryPath(analysisInstance),
+        ]
     }
 
     /**
@@ -115,7 +118,7 @@ class AnalysisDeletionService {
                     }
                 }
                 if (!foundAnalysis) {
-                    directoriesToDelete << bamFileAnalysisServiceFactoryService.getService(clazz).getSamplePairPath(paramSamplePair)
+                    directoriesToDelete << analysisLinkFileServiceFactoryService.getService(clazz).getSamplePairPath(paramSamplePair)
                 }
             }
             if (!BamFilePairAnalysis.findAllBySamplePair(paramSamplePair)) {

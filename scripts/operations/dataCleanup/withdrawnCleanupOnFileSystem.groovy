@@ -21,13 +21,16 @@
  */
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-import java.nio.file.*
+import java.nio.file.Files
+import java.nio.file.Path
 
 /**
  * script to change group of all withdrawn data on file system to withdrawn.
@@ -49,14 +52,20 @@ RawSequenceDataViewFileService rawSequenceDataViewFileService = ctx.rawSequenceD
 FileService fileService = ctx.fileService
 FileSystemService fileSystemService = ctx.fileSystemService
 FastqcDataFilesService fastqcDataFilesService = ctx.fastqcDataFilesService
-BamFileAnalysisServiceFactoryService bamFileAnalysisServiceFactoryService = ctx.bamFileAnalysisServiceFactoryService
+AnalysisWorkFileServiceFactoryService analysisWorkFileServiceFactoryService = ctx.analysisWorkFileServiceFactoryService
+AnalysisLinkFileServiceFactoryService analysisLinkFileServiceFactoryService = ctx.analysisLinkFileServiceFactoryService
+FilestoreService filestoreService = ctx.filestoreService
 
 String withdrawnGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.WITHDRAWN_UNIX_GROUP)
 String chgrp = "chgrp --recursive --verbose ${withdrawnGroup}"
 
-String bamFiles = AbstractBamFile.findAllByWithdrawn(true).findAll {
+// Handle BAM files with both link paths and UUID work folder paths
+List<AbstractBamFile> withdrawnBamFiles = AbstractBamFile.findAllByWithdrawn(true).findAll {
     it.isMostRecentBamFile()
-}.collect {
+}
+
+// Collect link paths
+List<String> bamFileLinkPaths = withdrawnBamFiles.collect {
     abstractBamFileService.getBaseDirectory(it)
 }.findAll {
     Files.exists(it)
@@ -66,15 +75,37 @@ String bamFiles = AbstractBamFile.findAllByWithdrawn(true).findAll {
     !it.toString().endsWith('nonOTP')
 }.collect {
     "${chgrp} ${it}" as String
-}.sort().join('\n')
+}
 
-String analysis = BamFilePairAnalysis.findAllByWithdrawn(true).collect {
-    bamFileAnalysisServiceFactoryService.getService(it).getWorkDirectory(it)
+// Collect UUID work folder paths for BAM files with workflowArtefact
+List<String> bamFileUuidPaths = withdrawnBamFiles.findAll { bamFile ->
+    bamFile.workflowArtefact?.producedBy?.workFolder
+}.collect { bamFile ->
+    filestoreService.getWorkFolderPath(bamFile.workflowArtefact.producedBy)
+}.findAll {
+    Files.exists(it)
+}.collect {
+    "${chgrp} ${it}" as String
+}
+
+String bamFiles = (bamFileLinkPaths + bamFileUuidPaths).sort().join('\n')
+
+// Handle analysis with both traditional linked view paths and UUID work folder paths
+List<BamFilePairAnalysis> withdrawnAnalysis = BamFilePairAnalysis.findAllByWithdrawn(true)
+
+// Collect both linked view analysis paths and uuid paths
+List<String> analysisPaths = withdrawnAnalysis.collectMany {
+    [
+            analysisWorkFileServiceFactoryService.getService(it).getDirectoryPath(),
+            analysisLinkFileServiceFactoryService.getService(it).getDirectoryPath(),
+    ]
 }.findAll { path ->
     path && Files.exists(path)
 }.collect {
     "${chgrp} ${it}" as String
-}.sort().join('\n')
+}
+
+String analysis = analysisPaths.sort().join('\n')
 
 String rawSequenceFiles = RawSequenceFile.findAllBySeqTrackIsNotNullAndFileWithdrawn(true).collect {
     rawSequenceDataWorkFileService.getFilePath(it)

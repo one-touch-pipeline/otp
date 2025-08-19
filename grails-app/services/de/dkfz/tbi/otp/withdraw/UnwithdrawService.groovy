@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.filestore.FilestoreService
 
 import java.nio.file.*
 
@@ -47,6 +48,7 @@ class UnwithdrawService {
     WithdrawAnalysisService withdrawAnalysisService
     RawSequenceDataWorkFileService rawSequenceDataWorkFileService
     RawSequenceDataViewFileService rawSequenceDataViewFileService
+    FilestoreService filestoreService
 
     @Autowired
     List<AbstractWithdrawBamFileService<?>> withdrawBamFileServices
@@ -98,7 +100,9 @@ class UnwithdrawService {
             [(it), it.collectObjects(withdrawStateHolder.seqTracks).unique().findAll { AbstractBamFile bamFile ->
                 bamFile.fileOperationStatus == AbstractBamFile.FileOperationStatus.PROCESSED &&
                         !bamFile.containedSeqTracks.any { it.withdrawn } &&
-                        Files.exists(abstractBamFileService.getBaseDirectory(bamFile).resolve(bamFile.bamFileName))
+                        (Files.exists(abstractBamFileService.getBaseDirectory(bamFile).resolve(bamFile.bamFileName)) ||
+                         (bamFile.workflowArtefact?.producedBy?.workFolder &&
+                          Files.exists(filestoreService.getWorkFolderPath(bamFile.workflowArtefact.producedBy))))
             },]
         }
         withdrawStateHolder.bamFiles = bamFileMap.values().flatten().unique()
@@ -128,7 +132,7 @@ class UnwithdrawService {
         }
 
         withdrawStateHolder.pathsToChangeGroup.putAll(analysis.collectEntries {
-            [withdrawAnalysisService.collectPaths([it]).first(), it.project.unixGroup]
+            [withdrawAnalysisService.collectPaths([it]).first().toString(), it.project.unixGroup]
         })
         if (analysis.size() > 0) {
             withdrawStateHolder.summary << ("Unwithdrawing analysis result: ${analysis}" as String)

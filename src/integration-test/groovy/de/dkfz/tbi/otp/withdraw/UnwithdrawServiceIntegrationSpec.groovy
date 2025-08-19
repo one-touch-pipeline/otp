@@ -28,8 +28,18 @@ import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqLinkFileService
+import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqWorkFileService
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingService
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelLinkFileService
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelWorkFileService
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaLinkFileService
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaWorkFileService
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvLinkFileService
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvWorkFileService
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaLinkFileService
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaWorkFileService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -70,21 +80,59 @@ class UnwithdrawServiceIntegrationSpec extends Specification implements DomainFa
         indelService.individualService.projectService.fileSystemService = new TestFileSystemService()
 
         FileSystemService fileSystemService = new TestFileSystemService()
+
+        IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles(
+                processingState: AnalysisProcessingStates.FINISHED, withdrawn: true)
+
+        Path linkDir = indelService.getWorkDirectory(indelCallingInstance)
+        CreateFileHelper.createFile(linkDir)
+
+        // Create properly configured AnalysisLinkFileServiceFactoryService with all required services
+        AnalysisLinkFileServiceFactoryService analysisLinkFileServiceFactory = new AnalysisLinkFileServiceFactoryService(
+                aceseqLinkFileService: Mock(AceseqLinkFileService) {
+                    getDirectoryPath(_) >> linkDir
+                },
+                indelLinkFileService: Mock(IndelLinkFileService) {
+                    getDirectoryPath(_) >> linkDir
+                },
+                runYapsaLinkFileService: Mock(RunYapsaLinkFileService) {
+                    getDirectoryPath(_) >> linkDir
+                },
+                snvLinkFileService: Mock(SnvLinkFileService) {
+                    getDirectoryPath(_) >> linkDir
+                },
+                sophiaLinkFileService: Mock(SophiaLinkFileService) {
+                    getDirectoryPath(_) >> linkDir
+                },
+        )
+
+        // Create properly configured AnalysisWorkFileServiceFactoryService with all required services
+        AnalysisWorkFileServiceFactoryService analysisWorkFileServiceFactory = new AnalysisWorkFileServiceFactoryService(
+                aceseqWorkFileService: Mock(AceseqWorkFileService) {
+                    getDirectoryPath(_) >> tempDir
+                },
+                indelWorkFileService: Mock(IndelWorkFileService) {
+                    getDirectoryPath(_) >> tempDir
+                },
+                runYapsaWorkFileService: Mock(RunYapsaWorkFileService) {
+                    getDirectoryPath(_) >> tempDir
+                },
+                snvWorkFileService: Mock(SnvWorkFileService) {
+                    getDirectoryPath(_) >> tempDir
+                },
+                sophiaWorkFileService: Mock(SophiaWorkFileService) {
+                    getDirectoryPath(_) >> tempDir
+                },
+        )
+
         WithdrawAnalysisService withdrawAnalysisService = new WithdrawAnalysisService(
-                bamFileAnalysisServiceFactoryService: new BamFileAnalysisServiceFactoryService(
-                        indelCallingService: indelService
-                )
+                analysisLinkFileServiceFactoryService: analysisLinkFileServiceFactory,
+                analysisWorkFileServiceFactoryService: analysisWorkFileServiceFactory
         )
         UnwithdrawService service = new UnwithdrawService([
                 fileSystemService      : fileSystemService,
                 withdrawAnalysisService: withdrawAnalysisService,
         ])
-
-        IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles(
-                processingState: AnalysisProcessingStates.FINISHED, withdrawn: true)
-
-        Path workDir = indelService.getWorkDirectory(indelCallingInstance)
-        CreateFileHelper.createFile(workDir)
 
         List<AbstractBamFile> bamFiles = [indelCallingInstance.sampleType1BamFile, indelCallingInstance.sampleType2BamFile]
         state.bamFiles = bamFiles
@@ -94,7 +142,7 @@ class UnwithdrawServiceIntegrationSpec extends Specification implements DomainFa
 
         then:
         state.linksToCreate == [:]
-        state.pathsToChangeGroup == [(workDir.toString()): indelCallingInstance.project.unixGroup]
+        state.pathsToChangeGroup == [(linkDir.toString()): indelCallingInstance.project.unixGroup]
         state.bamFiles == bamFiles
         [indelCallingInstance].every { !it.withdrawn }
     }

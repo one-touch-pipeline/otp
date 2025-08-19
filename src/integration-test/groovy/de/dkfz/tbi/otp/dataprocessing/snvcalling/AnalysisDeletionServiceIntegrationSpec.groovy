@@ -89,18 +89,18 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification implements Is
         )
 
         analysisInstancesDirectories = [
-                aceseqService.getWorkDirectory(aceseqInstance),
-                snvCallingService.getWorkDirectory(snvCallingInstance),
-                sophiaService.getWorkDirectory(sophiaInstance),
-                indelCallingService.getWorkDirectory(indelCallingInstance),
-                runYapsaService.getWorkDirectory(runYapsaInstance),
+                analysisDeletionService.analysisWorkFileServiceFactoryService.getService(AceseqInstance).getDirectoryPath(aceseqInstance),
+                analysisDeletionService.analysisWorkFileServiceFactoryService.getService(RoddySnvCallingInstance).getDirectoryPath(snvCallingInstance),
+                analysisDeletionService.analysisWorkFileServiceFactoryService.getService(SophiaInstance).getDirectoryPath(sophiaInstance),
+                analysisDeletionService.analysisWorkFileServiceFactoryService.getService(IndelCallingInstance).getDirectoryPath(indelCallingInstance),
+                analysisDeletionService.analysisWorkFileServiceFactoryService.getService(RunYapsaInstance).getDirectoryPath(runYapsaInstance),
         ].collect { analysisDeletionService.fileService.toFile(it) }
         analysisSamplePairsDirectories = [
-                aceseqService.getSamplePairPath(aceseqInstance.samplePair),
-                snvCallingService.getSamplePairPath(snvCallingInstance.samplePair),
-                sophiaService.getSamplePairPath(sophiaInstance.samplePair),
-                indelCallingService.getSamplePairPath(indelCallingInstance.samplePair),
-                runYapsaService.getSamplePairPath(runYapsaInstance.samplePair),
+                analysisDeletionService.analysisLinkFileServiceFactoryService.getService(AceseqInstance).getSamplePairPath(aceseqInstance.samplePair),
+                analysisDeletionService.analysisLinkFileServiceFactoryService.getService(RoddySnvCallingInstance).getSamplePairPath(snvCallingInstance.samplePair),
+                analysisDeletionService.analysisLinkFileServiceFactoryService.getService(SophiaInstance).getSamplePairPath(sophiaInstance.samplePair),
+                analysisDeletionService.analysisLinkFileServiceFactoryService.getService(IndelCallingInstance).getSamplePairPath(indelCallingInstance.samplePair),
+                analysisDeletionService.analysisLinkFileServiceFactoryService.getService(RunYapsaInstance).getSamplePairPath(runYapsaInstance.samplePair),
         ].collect { analysisDeletionService.fileService.toFile(it) }
         samplePairs = [
                 snvCallingInstance.samplePair,
@@ -120,15 +120,15 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification implements Is
 
         when:
         BamFilePairAnalysis.findAll().each {
-            instancesDirectories.add(analysisDeletionService.deleteInstance(it))
+            instancesDirectories.addAll(analysisDeletionService.deleteInstance(it))
         }
 
         and:
         samplePairsDirectories = analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(samplePairs)
 
         then:
-        TestCase.assertContainSame(instancesDirectories, analysisInstancesDirectories)
-        TestCase.assertContainSame(samplePairsDirectories, analysisSamplePairsDirectories)
+        TestCase.assertContainSame(instancesDirectories*.toString(), analysisInstancesDirectories*.toString())
+        TestCase.assertContainSame(samplePairsDirectories*.toString(), analysisSamplePairsDirectories*.toString())
         !RoddySnvCallingInstance.count()
         !IndelCallingInstance.count()
         !SophiaInstance.count()
@@ -157,40 +157,40 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification implements Is
         List<File> samplePairsDirectories
 
         analysisInstancesDirectories.addAll([
-                aceseqService.getWorkDirectory(aceseqInstance2),
-                snvCallingService.getWorkDirectory(snvCallingInstance2),
-                sophiaService.getWorkDirectory(sophiaInstance2),
-                indelCallingService.getWorkDirectory(indelCallingInstance2),
-                runYapsaService.getWorkDirectory(runYapsaInstance2),
+                analysisDeletionService.analysisWorkFileServiceFactoryService.getService(AceseqInstance).getDirectoryPath(aceseqInstance2),
+                analysisDeletionService.analysisWorkFileServiceFactoryService.getService(RoddySnvCallingInstance).getDirectoryPath(snvCallingInstance2),
+                analysisDeletionService.analysisWorkFileServiceFactoryService.getService(SophiaInstance).getDirectoryPath(sophiaInstance2),
+                analysisDeletionService.analysisWorkFileServiceFactoryService.getService(IndelCallingInstance).getDirectoryPath(indelCallingInstance2),
+                analysisDeletionService.analysisWorkFileServiceFactoryService.getService(RunYapsaInstance).getDirectoryPath(runYapsaInstance2),
         ].collect { analysisDeletionService.fileService.toFile(it) }
         )
         analysisSamplePairsDirectories.addAll([
-                aceseqService.getSamplePairPath(aceseqInstance2.samplePair),
-                snvCallingService.getSamplePairPath(snvCallingInstance2.samplePair),
-                sophiaService.getSamplePairPath(sophiaInstance2.samplePair),
-                indelCallingService.getSamplePairPath(indelCallingInstance2.samplePair),
-                runYapsaService.getSamplePairPath(runYapsaInstance2.samplePair),
+                analysisDeletionService.analysisLinkFileServiceFactoryService.getService(AceseqInstance).getSamplePairPath(aceseqInstance2.samplePair),
+                analysisDeletionService.analysisLinkFileServiceFactoryService.getService(RoddySnvCallingInstance).getSamplePairPath(snvCallingInstance2.samplePair),
+                analysisDeletionService.analysisLinkFileServiceFactoryService.getService(SophiaInstance).getSamplePairPath(sophiaInstance2.samplePair),
+                analysisDeletionService.analysisLinkFileServiceFactoryService.getService(IndelCallingInstance).getSamplePairPath(indelCallingInstance2.samplePair),
+                analysisDeletionService.analysisLinkFileServiceFactoryService.getService(RunYapsaInstance).getSamplePairPath(runYapsaInstance2.samplePair),
         ].collect { analysisDeletionService.fileService.toFile(it) }
         )
-        samplePairs.addAll(
+        samplePairs.addAll([
                 snvCallingInstance2.samplePair,
                 indelCallingInstance2.samplePair,
                 sophiaInstance2.samplePair,
                 aceseqInstance2.samplePair,
                 runYapsaInstance2.samplePair,
-        )
+        ])
 
         when:
         BamFilePairAnalysis.findAll().each {
-            instancesDirectories.add(analysisDeletionService.deleteInstance(it))
+            instancesDirectories.addAll(analysisDeletionService.deleteInstance(it))
         }
 
         and:
         samplePairsDirectories = analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(samplePairs)
 
         then:
-        TestCase.assertContainSame(instancesDirectories, analysisInstancesDirectories)
-        TestCase.assertContainSame(samplePairsDirectories, analysisSamplePairsDirectories)
+        TestCase.assertContainSame(instancesDirectories*.toString(), analysisInstancesDirectories*.toString())
+        TestCase.assertContainSame(samplePairsDirectories*.toString(), analysisSamplePairsDirectories*.toString())
         !RoddySnvCallingInstance.count()
         !IndelCallingInstance.count()
         !SophiaInstance.count()

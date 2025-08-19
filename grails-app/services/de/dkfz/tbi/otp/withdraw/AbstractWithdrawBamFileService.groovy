@@ -26,13 +26,13 @@ import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileService
+import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.DeletionService
 
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.stream.Stream
 
 @CompileDynamic
 @Transactional
@@ -43,27 +43,46 @@ abstract class AbstractWithdrawBamFileService<E extends AbstractBamFile> impleme
     AbstractBamFileService abstractBamFileService
     DeletionService deletionService
     FileSystemService fileSystemService
+    FilestoreService filestoreService
 
     @Override
     abstract List<E> collectObjects(List<SeqTrack> entities)
 
     @Override
     List<String> collectPaths(List<E> entities) {
-        return entities.collectMany {
-            Path path = abstractBamFileService.getBaseDirectory(it)
-            if (Files.exists(path)) {
-                Stream<Path> stream
-                try {
-                    stream = Files.list(path)
-                    return stream.findAll { it.fileName.toString() != NON_OTP }
-                } catch (IOException e) {
-                    throw new WithdrawnException(e)
-                } finally {
-                    stream?.close()
-                }
-            }
-            return []
+        return entities.collectMany { bamFile ->
+            Path vbpFolder = abstractBamFileService.getBaseDirectory(bamFile)
+            Path uuidFolder = bamFile.workflowArtefact?.producedBy?.workFolder ? filestoreService.getWorkFolderPath(bamFile.workflowArtefact.producedBy) : null
+
+            return [
+                    // ViewByPid folder: collect only its subfolders & files at the first level
+                    listSubfoldersAndFiles(vbpFolder),
+                    // Uuid folder: collect its root folder
+                    uuidFolder,
+            ].flatten()
+        }.findAll { Path path ->
+            // Do not collect the nonOTP folder
+            path != null && Files.exists(path) && path.fileName.toString() != NON_OTP
         }.unique()*.toString()
+    }
+
+    /**
+     * A helper method that returns all subfolders and files in the given folder, not recursively.
+     * Note: This method uses withCloseable() to ensure that the directory stream is closed properly.
+     *
+     * @param the parent folder
+     * @return a list of paths including directories and files
+     */
+    static List<Path> listSubfoldersAndFiles(Path folder) {
+        if (!Files.isDirectory(folder)) {
+            throw new IllegalArgumentException("Path is not a directory: $folder")
+        }
+
+        try {
+            return Files.newDirectoryStream(folder).withCloseable { it.toList() }
+        } catch (IOException e) {
+            throw new WithdrawnException(e)
+        }
     }
 
     @Override

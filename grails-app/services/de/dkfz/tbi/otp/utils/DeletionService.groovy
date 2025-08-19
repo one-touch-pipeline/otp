@@ -319,7 +319,7 @@ class DeletionService {
             }
             deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, false).each {
                 if (it) {
-                    dirsToDelete.add(it.path)
+                    dirsToDelete.add(it)
                 }
             }
         }
@@ -426,7 +426,7 @@ class DeletionService {
             Path baseDirectory = abstractBamFileService.getBaseDirectory(bamFile)
             if (Files.exists(baseDirectory)) {
                 Files.list(baseDirectory).findAll {
-                    it.fileName != ExternallyProcessedBamFile.NON_OTP
+                    it.fileName.toString() != ExternallyProcessedBamFile.NON_OTP
                 }.each {
                     dirsToDelete << new File(it.toString())
                 }

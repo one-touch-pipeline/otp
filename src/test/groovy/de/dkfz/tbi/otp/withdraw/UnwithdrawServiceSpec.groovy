@@ -30,6 +30,8 @@ import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfig
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingService
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelWorkFileService
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelLinkFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
@@ -48,6 +50,7 @@ import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 import java.nio.file.Path
+import java.nio.file.Paths
 
 class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, IsRoddy, DataTest, FastqcDomainFactory {
 
@@ -81,6 +84,11 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
     Path tempDir
 
     TestConfigService configService
+
+    // Add the missing service property needed by the test with proper mock behavior
+    IndelLinkFileService indelLinkFileService = Mock(IndelLinkFileService) {
+        getDirectoryPath(_) >> Paths.get("/tmp/test-analysis-path")
+    }
 
     void setup() {
         configService = new TestConfigService(tempDir)
@@ -266,9 +274,20 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
         indelService.individualService.projectService.fileSystemService = new TestFileSystemService()
 
         FileSystemService fileSystemService = new TestFileSystemService()
+
+        // Set up the new analysisLinkFileServiceFactoryService with proper dependencies
+        AnalysisLinkFileServiceFactoryService analysisLinkFileServiceFactory = new AnalysisLinkFileServiceFactoryService(
+                indelLinkFileService: indelLinkFileService
+        )
+
+        // Create IndelWorkFileService with proper dependencies
+        IndelWorkFileService indelWorkFileService = new IndelWorkFileService()
+        indelWorkFileService.analysisLinkFileServiceFactoryService = analysisLinkFileServiceFactory
+
         WithdrawAnalysisService withdrawAnalysisService = new WithdrawAnalysisService(
-                bamFileAnalysisServiceFactoryService: new BamFileAnalysisServiceFactoryService(
-                        indelCallingService: indelService
+                analysisLinkFileServiceFactoryService: analysisLinkFileServiceFactory,
+                analysisWorkFileServiceFactoryService: new AnalysisWorkFileServiceFactoryService(
+                        indelWorkFileService: indelWorkFileService
                 )
         )
         UnwithdrawService service = new UnwithdrawService([

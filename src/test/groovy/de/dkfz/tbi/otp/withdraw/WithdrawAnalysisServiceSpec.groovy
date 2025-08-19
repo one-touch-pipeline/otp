@@ -35,7 +35,6 @@ import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
 
 import java.nio.file.Paths
@@ -116,9 +115,10 @@ class WithdrawAnalysisServiceSpec extends Specification implements ServiceUnitTe
         given:
         List<BamFilePairAnalysis> analyses = createAnalysisList()
         createFactoryService(service)
-        service.analysisDeletionService = new AnalysisDeletionService()
-        service.analysisDeletionService.bamFileAnalysisServiceFactoryService = service.bamFileAnalysisServiceFactoryService
-        service.analysisDeletionService.fileService = new FileService()
+        service.analysisDeletionService = new AnalysisDeletionService(
+                analysisLinkFileServiceFactoryService: service.analysisLinkFileServiceFactoryService,
+                analysisWorkFileServiceFactoryService: service.analysisWorkFileServiceFactoryService,
+        )
 
         when:
         service.deleteObjects(analyses)
@@ -143,11 +143,33 @@ class WithdrawAnalysisServiceSpec extends Specification implements ServiceUnitTe
         IndividualService individualService = Mock(IndividualService) {
             getViewByPidPath(_, _) >> Paths.get("/")
         }
-        service.bamFileAnalysisServiceFactoryService = new BamFileAnalysisServiceFactoryService()
-        service.bamFileAnalysisServiceFactoryService.aceseqService = new AceseqService(individualService: individualService)
-        service.bamFileAnalysisServiceFactoryService.indelCallingService = new IndelCallingService(individualService: individualService)
-        service.bamFileAnalysisServiceFactoryService.runYapsaService = new RunYapsaService(individualService: individualService)
-        service.bamFileAnalysisServiceFactoryService.snvCallingService = new SnvCallingService(individualService: individualService)
-        service.bamFileAnalysisServiceFactoryService.sophiaService = new SophiaService(individualService: individualService)
+
+        // Set up the new analysisLinkFileServiceFactoryService
+        service.analysisLinkFileServiceFactoryService = new AnalysisLinkFileServiceFactoryService(
+                aceseqLinkFileService: new AceseqLinkFileService(individualService: individualService),
+                indelLinkFileService: new IndelLinkFileService(individualService: individualService),
+                runYapsaLinkFileService: new RunYapsaLinkFileService(individualService: individualService),
+                snvLinkFileService: new SnvLinkFileService(individualService: individualService),
+                sophiaLinkFileService: new SophiaLinkFileService(individualService: individualService),
+        )
+
+        // Set up the new analysisWorkFileServiceFactoryService with proper dependencies
+        service.analysisWorkFileServiceFactoryService = new AnalysisWorkFileServiceFactoryService(
+                aceseqWorkFileService: new AceseqWorkFileService(
+                        analysisLinkFileServiceFactoryService: service.analysisLinkFileServiceFactoryService
+                ),
+                indelWorkFileService: new IndelWorkFileService(
+                        analysisLinkFileServiceFactoryService: service.analysisLinkFileServiceFactoryService
+                ),
+                runYapsaWorkFileService: new RunYapsaWorkFileService(
+                        analysisLinkFileServiceFactoryService: service.analysisLinkFileServiceFactoryService
+                ),
+                snvWorkFileService: new SnvWorkFileService(
+                        analysisLinkFileServiceFactoryService: service.analysisLinkFileServiceFactoryService
+                ),
+                sophiaWorkFileService: new SophiaWorkFileService(
+                        analysisLinkFileServiceFactoryService: service.analysisLinkFileServiceFactoryService
+                ),
+        )
     }
 }

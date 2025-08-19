@@ -24,15 +24,14 @@ package de.dkfz.tbi.otp.withdraw
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.dataprocessing.BamFileAnalysisServiceFactoryService
-import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 
 @Transactional
 class WithdrawAnalysisService implements ProcessingWithdrawService<BamFilePairAnalysis, AbstractBamFile> {
     AnalysisDeletionService analysisDeletionService
-    BamFileAnalysisServiceFactoryService bamFileAnalysisServiceFactoryService
+    AnalysisLinkFileServiceFactoryService analysisLinkFileServiceFactoryService
+    AnalysisWorkFileServiceFactoryService analysisWorkFileServiceFactoryService
 
     @Override
     @CompileDynamic
@@ -45,9 +44,14 @@ class WithdrawAnalysisService implements ProcessingWithdrawService<BamFilePairAn
 
     @Override
     List<String> collectPaths(List<BamFilePairAnalysis> entities) {
-        return entities.collect {
-            bamFileAnalysisServiceFactoryService.getService(it).getWorkDirectory(it).toString()
-        }
+        return entities.collectMany {
+            [
+                    // Collect traditional analysis paths (existing logic)
+                    analysisLinkFileServiceFactoryService.getService(it).getDirectoryPath(it).toString(),
+                    // Collect UUID work folder paths for analysis with workflowArtefact
+                    analysisWorkFileServiceFactoryService.getService(it).getDirectoryPath(it).toString(),
+            ]
+        }.unique()
     }
 
     @Override
