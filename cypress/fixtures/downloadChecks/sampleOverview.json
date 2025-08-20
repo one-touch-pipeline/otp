@@ -5,16 +5,16 @@
     "Patient ID",
     "Sample Type",
     "10x_scRNA PAIRED single cell: Registered Lanes (thereof withdrawn)",
-    "10x_scRNA PAIRED single cell: cell ranger Lanes | Cov.",
+    "10x_scRNA PAIRED single cell: cell ranger Lanes | Cov.",
     "EXAMPLE PAIRED bulk: Registered Lanes (thereof withdrawn)",
     "EXOME PAIRED bulk: Registered Lanes (thereof withdrawn)",
-    "EXOME PAIRED bulk: bwa mem Lanes | Cov.",
+    "EXOME PAIRED bulk: bwa mem Lanes | Cov.",
     "WGS PAIRED bulk: Registered Lanes (thereof withdrawn)",
-    "WGS PAIRED bulk: bwa mem Lanes | Cov.",
+    "WGS PAIRED bulk: bwa mem Lanes | Cov.",
     "WGBS PAIRED bulk: Registered Lanes (thereof withdrawn)",
-    "WGBS PAIRED bulk: bwa mem Lanes | Cov.",
+    "WGBS PAIRED bulk: bwa mem Lanes | Cov.",
     "WGBS_TAG PAIRED bulk: Registered Lanes (thereof withdrawn)",
-    "WGBS_TAG PAIRED bulk: bwa mem Lanes | Cov."
+    "WGBS_TAG PAIRED bulk: bwa mem Lanes | Cov."
   ],
   "data": [
     [

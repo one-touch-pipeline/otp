@@ -30,7 +30,9 @@
 
 <body>
 <div class="container-fluid otp-main-container">
-    <g:render template="/templates/bootstrap/projectSelection"/>
+    <div class="mb-3">
+        <g:render template="/templates/bootstrap/projectSelection"/>
+    </div>
 
     <g:if test="${seqType}">
         <form>

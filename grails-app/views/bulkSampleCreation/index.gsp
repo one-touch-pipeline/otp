@@ -30,7 +30,7 @@
 
 <body>
 <div class="container-fluid otp-main-container" id="bulk-sample-creation">
-    <div class="project-selection-header-container mb-2">
+    <div class="project-selection-header-container mb-4">
         <g:render template="/templates/bootstrap/projectSelection"/>
     </div>
 

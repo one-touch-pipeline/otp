@@ -28,6 +28,8 @@
   -
   - Usage example: <g:render template="/templates/bootstrap/seqTrackSelectionTabBar/tabs/projectAndSeqTypeTab" model="[seqTypes: seqTypes]"/>
   --}%
-<g:render template="/templates/bootstrap/projectSelection"/>
+<div class="mb-3">
+    <g:render template="/templates/bootstrap/projectSelection"/>
+</div>
 
 <g:render template="/templates/bootstrap/seqTypeSelection" model="[seqTypes: seqTypes, id: id]"/>

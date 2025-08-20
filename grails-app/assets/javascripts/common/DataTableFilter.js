@@ -64,16 +64,10 @@ $.otp.dataTableFilter = {
       // if there's more than one filter row, remove it, otherwise reset it
       if (tr.siblings('tr').length > 0) {
         // remove row and determine whether to show an add button
-        let lastTr;
-        if (tr.is(':last-child')) {
-          lastTr = tr.prev();
-        } else {
-          lastTr = tr.nextAll().last();
-        }
+        const lastTableRow = tr.is(':last-child') ? tr.prev() : tr.nextAll().last();
         tr.detach();
-        if ($('td.remove', lastTr).is(':visible')) {
-          $('td.add', lastTr).show();
-          $('td.search', lastTr).show();
+        if ($('td.remove', lastTableRow).is(':visible')) {
+          $('td.add, td.search', lastTableRow).show();
         }
       } else {
         /* 'change.select2' is a limited 'changed'-event, that triggers only a sync between the
@@ -84,8 +78,7 @@ $.otp.dataTableFilter = {
                  * see also: https://select2.org/programmatic-control/events#limiting-the-scope-of-the-change-event
                  *     and:  https://github.com/select2/select2/issues/3620 */
         $('td.attribute select', tr).val('none').trigger('change.select2');
-        $('td.add', tr).hide();
-        $('td.remove', tr).hide();
+        $('td.add, td.remove', tr).hide();
       }
     };
 
@@ -95,19 +88,19 @@ $.otp.dataTableFilter = {
       const attribute = $(event.target).val();
       if (attribute !== 'none') {
         $(`td span[id='dtf_${attribute}']`, tr).show();
-        $('td.add', tr).show();
         $('td.remove', tr).show();
-        $('td.search', tr).show();
+        if (tr.is(':last-child')) {
+          $('td.add, td.search', tr).show();
+        }
       } else {
-        $('td.add', tr).hide();
-        $('td.search', tr).hide();
+        $('td.add, td.search', tr).hide();
         removeRowOrHideInputs(tr);
       }
     };
+
     const searchCriteriaAddRow = function (event) {
       const tr = $(event.target).parents('.dtf_row');
-      $('td.add', tr).hide();
-      $('td.search', tr).hide();
+      $('td.add, td.search', tr).hide();
 
       // select2 doesn't take well to cloning, do the required voodoo dance.
       $('select.select2-hidden-accessible', tr).select2('destroy');
@@ -115,8 +108,7 @@ $.otp.dataTableFilter = {
       $.otp.applySelect2($('select.use-select-2', tr));
 
       $('td.value span.dtf_value_span', cloned).hide();
-      $('td.add', cloned).hide();
-      $('td.remove', cloned).hide();
+      $('td.add, td.remove', cloned).hide();
       $('td.search', cloned).show();
 
       /* 'change.select2' is a limited 'changed'-event, that triggers only a sync between the
@@ -145,6 +137,7 @@ $.otp.dataTableFilter = {
     searchCriteriaTable.on('change', 'select.dtf_criterium', searchCriteriaChangeHandler);
     searchCriteriaTable.on('click', 'td.add input[type=button]', searchCriteriaAddRow);
     searchCriteriaTable.on('click', 'td.remove input[type=button]', searchCriteriaRemoveRow);
+    searchCriteriaTable.on('change', 'td.value select', updateSearchCriteria);
     searchCriteriaTable.on('click', 'td.search input[type=button]', updateSearchCriteria);
     searchCriteriaTable.on('keypress', 'td.search input[type=button]', updateSearchCriteria);
 

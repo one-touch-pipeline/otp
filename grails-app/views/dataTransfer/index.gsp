@@ -33,7 +33,9 @@
 <div class="container-fluid otp-main-container">
     <g:render template="/templates/messages"/>
 
-    <g:render template="/templates/bootstrap/projectSelection"/>
+    <div class="mb-3">
+        <g:render template="/templates/bootstrap/projectSelection"/>
+    </div>
 
     <g:render template="templates/addDtaForm" bean="${docDtaCmd}"/>
 

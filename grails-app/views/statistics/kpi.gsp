@@ -27,7 +27,9 @@
 </head>
 <body>
     <div class="body container">
-        <g:render template="/templates/bootstrap/projectSelection"/>
+        <div class="mb-3">
+            <g:render template="/templates/bootstrap/projectSelection"/>
+        </div>
         <div class="col-xs-12">
             <h2>${g.message(code: "start.numbers.title")}</h2>
             <hr>

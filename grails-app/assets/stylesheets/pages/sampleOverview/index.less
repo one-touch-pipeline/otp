@@ -1,0 +1,83 @@
+/*
+ * Copyright 2011-2025 The OTP authors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+div.otpDataTables #laneOverviewId_wrapper {
+  th {
+    white-space: normal;
+    vertical-align: middle;
+  }
+
+  position: relative;
+
+  // Handle DataTables sticky header interaction
+  .dataTables_scrollHead {
+    table.fixed-columns-table {
+      thead th:nth-child(1) {
+        position: sticky;
+        left: 0;
+        z-index: 15;
+      }
+
+      thead th:nth-child(2) {
+        position: sticky;
+        z-index: 14;
+      }
+    }
+  }
+}
+
+// Fixed columns implementation
+#laneOverviewId.fixed-columns-table {
+  td:nth-child(1), td:nth-child(2) {
+    position: sticky;
+    z-index: 3;
+  }
+
+  // First column (PID) - dynamic width
+  td:nth-child(1) {
+    left: 0;
+    min-width: 100px;
+    z-index: 3;
+  }
+
+  // Second column (Sample Type) - position will be set dynamically
+  td:nth-child(2) {
+    min-width: 100px;
+    z-index: 3;
+  }
+
+  // Shadow effect when scrolled horizontally
+  .custom-shadow::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    box-shadow: 3px 0 2px -1px rgba(0, 0, 0, 0.15);
+    z-index: -1; /* Place the shadow behind the content */
+  }
+
+  td:nth-child(n+3) {
+    min-width: 80px;
+  }
+}

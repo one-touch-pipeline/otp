@@ -115,9 +115,9 @@ $.otp = {
     return link;
   },
   /**
-   * Creates the HTML markup for an a element from the passed in options.
+   * Creates the HTML markup for an \<a\> element from the passed in options.
    * For the actual link (href) the same attributes in options are supported
-   * as in {@link $.otp.createLink}. In addition the following attributes in
+   * as in {@link $.otp.createLink}. In addition, the following attributes in
    * options are supported:
    * <ul>
    * <li>title</li>
@@ -133,27 +133,15 @@ $.otp = {
   createLinkMarkup(options) {
     'use strict';
 
-    let link;
-    let text;
-    let title;
-    let target;
-    link = `<a href="${$.otp.createLink(options)}"`;
-    text = '';
-    if (options !== undefined && options) {
-      if (options.text !== undefined && options.text) {
-        text = options.text;
-      }
-      if (options.title !== undefined && options.title) {
-        title = options.title;
-      }
-      if (options.target !== undefined && options.target) {
-        target = options.target;
-      }
-    }
-    if (title !== undefined) {
+    let link = `<a href="${$.otp.createLink(options)}"`;
+    const text = (options && options.text) || '';
+    const title = options && options.title;
+    const target = options && options.target;
+
+    if (title) {
       link += ` title="${title}"`;
     }
-    if (target !== undefined) {
+    if (target) {
       link += ` target="${target}"`;
     }
     return `${link}>${text}</a>`;
