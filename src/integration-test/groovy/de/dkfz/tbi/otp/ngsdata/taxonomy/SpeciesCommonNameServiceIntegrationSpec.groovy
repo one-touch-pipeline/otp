@@ -35,7 +35,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback
 @Integration
-class SpeciesCommonNameServiceSpec extends Specification implements UserAndRoles, TaxonomyFactory {
+class SpeciesCommonNameServiceIntegrationSpec extends Specification implements UserAndRoles, TaxonomyFactory {
 
     private static final String NAME = "Mouse"
 

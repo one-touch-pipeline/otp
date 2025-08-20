@@ -21,11 +21,10 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
-import org.junit.Test
+import grails.testing.mixin.integration.Integration
+import spock.lang.Specification
 
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
@@ -34,7 +33,7 @@ import de.dkfz.tbi.otp.project.Project
 
 @Rollback
 @Integration
-class RoddyWorkflowConfigIntegrationTests {
+class RoddyWorkflowConfigIntegrationSpec extends Specification {
 
     static final String TEST_RODDY_SEQ_TYPE_RODDY_NAME = 'roddyName'
 
@@ -45,47 +44,61 @@ class RoddyWorkflowConfigIntegrationTests {
         service.fileSystemService = new TestFileSystemService()
     }
 
-    @Test
-    void testGetLatestForProject_ProjectIsNull_ShouldFail() {
+    void "test getLatestForProject with null project should fail"() {
+        given:
         setupData()
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
-        TestCase.shouldFailWithMessageContaining(AssertionError, 'The project is not allowed to be null') {
-            RoddyWorkflowConfig.getLatestForProject(null, seqType, pipeline)
-        }
+
+        when:
+        RoddyWorkflowConfig.getLatestForProject(null, seqType, pipeline)
+
+        then:
+        AssertionError e = thrown()
+        e.message.contains('The project is not allowed to be null')
     }
 
-    @Test
-    void testGetLatestForProject_SeqTypeIsNull_ShouldFail() {
+    void "test getLatestForProject with null seqType should fail"() {
+        given:
         setupData()
         Project project = DomainFactory.createProject()
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
-        TestCase.shouldFailWithMessageContaining(AssertionError, 'The seqType is not allowed to be null') {
-            RoddyWorkflowConfig.getLatestForProject(project, null, pipeline)
-        }
+
+        when:
+        RoddyWorkflowConfig.getLatestForProject(project, null, pipeline)
+
+        then:
+        AssertionError e = thrown()
+        e.message.contains('The seqType is not allowed to be null')
     }
 
-    @Test
-    void testGetLatestForProject_PipelineIsNull_ShouldFail() {
+    void "test getLatestForProject with null pipeline should fail"() {
+        given:
         setupData()
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
-        TestCase.shouldFailWithMessageContaining(AssertionError, 'The pipeline is not allowed to be null') {
-            RoddyWorkflowConfig.getLatestForProject(project, seqType, null)
-        }
+
+        when:
+        RoddyWorkflowConfig.getLatestForProject(project, seqType, null)
+
+        then:
+        AssertionError e = thrown()
+        e.message.contains('The pipeline is not allowed to be null')
     }
 
-    @Test
-    void testGetLatestForProject_ThereIsNoConfigFileInTheDatabase() {
+    void "test getLatestForProject when no config file exists in database"() {
+        given:
         setupData()
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
-        assert !RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)
+
+        expect:
+        !RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)
     }
 
-    @Test
-    void testGetLatestForProject_OneRoddyWorkflowConfigExists() {
+    void "test getLatestForProject when one RoddyWorkflowConfig exists"() {
+        given:
         setupData()
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
@@ -95,11 +108,13 @@ class RoddyWorkflowConfigIntegrationTests {
                 seqType : seqType,
                 pipeline: pipeline,
         ])
-        assert RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline) == roddyWorkflowConfig
+
+        expect:
+        RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline) == roddyWorkflowConfig
     }
 
-    @Test
-    void testGetLatestForProject_OneActiveAndOneObsoleteRoddyWorkflowConfigExists() {
+    void "test getLatestForProject when one active and one obsolete RoddyWorkflowConfig exists"() {
+        given:
         setupData()
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
@@ -116,11 +131,13 @@ class RoddyWorkflowConfigIntegrationTests {
                 pipeline: pipeline,
                 previousConfig: roddyWorkflowConfig1,
         )
-        assert RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline) == roddyWorkflowConfig2
+
+        expect:
+        RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline) == roddyWorkflowConfig2
     }
 
-    @Test
-    void testGetLatest_ConfigForIndividualAndDefaultConfigExists() {
+    void "test getLatest when config for individual and default config exists"() {
+        given:
         setupData()
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
@@ -139,11 +156,12 @@ class RoddyWorkflowConfigIntegrationTests {
                 individual: individual,
         ])
 
-        assert RoddyWorkflowConfig.getLatest(project, individual, seqType, pipeline) == roddyWorkflowConfigIndividual
+        expect:
+        RoddyWorkflowConfig.getLatest(project, individual, seqType, pipeline) == roddyWorkflowConfigIndividual
     }
 
-    @Test
-    void testGetLatest_ConfigForTwoDifferentIndividualsExists() {
+    void "test getLatest when config for two different individuals exists"() {
+        given:
         setupData()
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
@@ -163,11 +181,12 @@ class RoddyWorkflowConfigIntegrationTests {
                 individual: individual,
         ])
 
-        assert RoddyWorkflowConfig.getLatest(project, individual, seqType, pipeline) == roddyWorkflowConfigIndividual
+        expect:
+        RoddyWorkflowConfig.getLatest(project, individual, seqType, pipeline) == roddyWorkflowConfigIndividual
     }
 
-    @Test
-    void testGetLatest_TwoConfigForOneDifferentIndividualExists() {
+    void "test getLatest when two configs for one different individual exists"() {
+        given:
         setupData()
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
@@ -188,11 +207,12 @@ class RoddyWorkflowConfigIntegrationTests {
                 individual: individual,
         ])
 
-        assert RoddyWorkflowConfig.getLatest(project, individual, seqType, pipeline) == roddyWorkflowConfigIndividual
+        expect:
+        RoddyWorkflowConfig.getLatest(project, individual, seqType, pipeline) == roddyWorkflowConfigIndividual
     }
 
-    @Test
-    void testGetLatestForIndividual_ConfigForIndividualExists() {
+    void "test getLatestForIndividual when config for individual exists"() {
+        given:
         setupData()
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
@@ -206,11 +226,12 @@ class RoddyWorkflowConfigIntegrationTests {
                 individual: individual,
         ])
 
-        assert RoddyWorkflowConfig.getLatestForIndividual(individual, seqType, pipeline) == roddyWorkflowConfigIndividual
+        expect:
+        RoddyWorkflowConfig.getLatestForIndividual(individual, seqType, pipeline) == roddyWorkflowConfigIndividual
     }
 
-    @Test
-    void testGetLatestForIndividual_ConfigForIndividualAndDefaultConfigExists() {
+    void "test getLatestForIndividual when config for individual and default config exists"() {
+        given:
         setupData()
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
@@ -229,11 +250,12 @@ class RoddyWorkflowConfigIntegrationTests {
                 individual: individual,
         ])
 
-        assert RoddyWorkflowConfig.getLatestForIndividual(individual, seqType, pipeline) == roddyWorkflowConfigIndividual
+        expect:
+        RoddyWorkflowConfig.getLatestForIndividual(individual, seqType, pipeline) == roddyWorkflowConfigIndividual
     }
 
-    @Test
-    void testGetLatestForIndividual_OnlyDefaultConfigExists() {
+    void "test getLatestForIndividual when only default config exists"() {
+        given:
         setupData()
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
@@ -245,11 +267,12 @@ class RoddyWorkflowConfigIntegrationTests {
                 pipeline: pipeline,
         ])
 
-        assert RoddyWorkflowConfig.getLatestForIndividual(individual, seqType, pipeline) == roddyWorkflowConfig
+        expect:
+        RoddyWorkflowConfig.getLatestForIndividual(individual, seqType, pipeline) == roddyWorkflowConfig
     }
 
-    @Test
-    void testCreateConfigPerProject_PreviousConfigExists() {
+    void "test createConfigPerProject when previous config exists"() {
+        given:
         setupData()
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
@@ -267,31 +290,44 @@ class RoddyWorkflowConfigIntegrationTests {
                 previousConfig: firstConfigPerProject,
         ], false)
 
-        assert !firstConfigPerProject.obsoleteDate
+        expect:
+        !firstConfigPerProject.obsoleteDate
 
+        when:
         service.createConfigPerProjectAndSeqType(newConfigPerProject)
 
-        assert ConfigPerProjectAndSeqType.findAllByProject(project).size() == 2
-        assert firstConfigPerProject.obsoleteDate
+        then:
+        ConfigPerProjectAndSeqType.findAllByProject(project).size() == 2
+        firstConfigPerProject.obsoleteDate
     }
 
-    @Test
-    void testCreateConfigPerProject_PreviousConfigDoesNotExist() {
+    void "test createConfigPerProject when previous config does not exist"() {
+        given:
         setupData()
         Project project = DomainFactory.createProject()
         ConfigPerProjectAndSeqType configPerProject = DomainFactory.createRoddyWorkflowConfig(
                 project: project,
         )
+
+        when:
         service.createConfigPerProjectAndSeqType(configPerProject)
-        assert ConfigPerProjectAndSeqType.findAllByProject(project).size() == 1
+
+        then:
+        ConfigPerProjectAndSeqType.findAllByProject(project).size() == 1
     }
 
-    @Test
-    void testMakeObsolete() {
+    void "test makeObsolete"() {
+        given:
         setupData()
         ConfigPerProjectAndSeqType configPerProject = DomainFactory.createRoddyWorkflowConfig()
-        assert !configPerProject.obsoleteDate
+
+        expect:
+        !configPerProject.obsoleteDate
+
+        when:
         service.makeObsolete(configPerProject)
-        assert configPerProject.obsoleteDate
+
+        then:
+        configPerProject.obsoleteDate
     }
 }

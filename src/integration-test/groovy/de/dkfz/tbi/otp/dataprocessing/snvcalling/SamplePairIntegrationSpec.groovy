@@ -24,9 +24,8 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import grails.validation.ValidationException
-import org.junit.Test
+import spock.lang.Specification
 
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
@@ -36,20 +35,20 @@ import de.dkfz.tbi.otp.ngsdata.SampleTypePerProject
 
 @Rollback
 @Integration
-class SamplePairIntegrationTests {
+class SamplePairIntegrationSpec extends Specification {
 
-    @Test
-    void testSetProcessingStatusNeedsProcessing() {
+    void "test setProcessingStatus with NEEDS_PROCESSING"() {
+        expect:
         testSetNeedsProcessing(ProcessingStatus.NEEDS_PROCESSING)
     }
 
-    @Test
-    void testSetProcessingStatusNoProcessingNeeded() {
+    void "test setProcessingStatus with NO_PROCESSING_NEEDED"() {
+        expect:
         testSetNeedsProcessing(ProcessingStatus.NO_PROCESSING_NEEDED)
     }
 
-    @Test
-    void testSetProcessingStatusDisabled() {
+    void "test setProcessingStatus with DISABLED"() {
+        expect:
         testSetNeedsProcessing(ProcessingStatus.DISABLED)
     }
 
@@ -77,73 +76,84 @@ class SamplePairIntegrationTests {
         assert persistedSamplePair.snvProcessingStatus == processingStatus
     }
 
-    @Test
-    void testConstraints_DifferentIndividual_shouldFail() {
+    void "test constraints with different individual should fail"() {
+        given:
         SamplePair samplePair = DomainFactory.createSamplePair()
-
         MergingWorkPackage mergingWorkPackage1 = samplePair.mergingWorkPackage1
         mergingWorkPackage1.sample.individual = DomainFactory.createIndividual()
         assert mergingWorkPackage1.sample.save(flush: true)
 
-        TestCase.shouldFailWithMessageContaining(ValidationException, "individual") {
-            samplePair.save(flush: true)
-        }
+        when:
+        samplePair.save(flush: true)
+
+        then:
+        ValidationException e = thrown()
+        e.message.contains("individual")
     }
 
-    @Test
-    void testConstraints_DifferentSeqType_ShouldFail() {
+    void "test constraints with different seqType should fail"() {
+        given:
         SamplePair samplePair = DomainFactory.createSamplePair()
         MergingWorkPackage mergingWorkPackage1 = samplePair.mergingWorkPackage1
         mergingWorkPackage1.seqType = DomainFactory.createSeqType()
-        assert mergingWorkPackage1.save(flush: true)
+        mergingWorkPackage1.save(flush: true)
 
-        TestCase.shouldFailWithMessageContaining(ValidationException, "seqType") {
-            samplePair.save(flush: true)
-        }
+        when:
+        samplePair.save(flush: true)
+
+        then:
+        ValidationException e = thrown()
+        e.message.contains("seqType")
     }
 
-    @Test
-    void testFindLatestSnvCallingInstance_whenNoSnvCallingInstanceExists_ShouldReturnNull() {
+    void "test findLatestSnvCallingInstance when no SnvCallingInstance exists should return null"() {
+        given:
         SamplePair sp = DomainFactory.createSamplePair()
 
-        assert null == sp.findLatestSnvCallingInstance()
+        expect:
+        null == sp.findLatestSnvCallingInstance()
     }
 
-    @Test
-    void testFindLatestSnvCallingInstance_whenSnvCallingInstanceExists_ShouldReturnLatest() {
+    void "test findLatestSnvCallingInstance when SnvCallingInstance exists should return latest"() {
+        given:
         AbstractSnvCallingInstance first = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
         AbstractSnvCallingInstance latest = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles([samplePair: first.samplePair, instanceName: '2015-08-25_15h32'])
 
-        assert latest == latest.samplePair.findLatestSnvCallingInstance()
+        expect:
+        latest == latest.samplePair.findLatestSnvCallingInstance()
     }
 
-    @Test
-    void testFindLatestIndelCallingInstance_whenNoIndelCallingInstanceExists_ShouldReturnNull() {
+    void "test findLatestIndelCallingInstance when no IndelCallingInstance exists should return null"() {
+        given:
         SamplePair sp = DomainFactory.createSamplePair()
 
-        assert null == sp.findLatestIndelCallingInstance()
+        expect:
+        null == sp.findLatestIndelCallingInstance()
     }
 
-    @Test
-    void testFindLatestIndelCallingInstance_whenIndelCallingInstanceExists_ShouldReturnLatest() {
+    void "test findLatestIndelCallingInstance when IndelCallingInstance exists should return latest"() {
+        given:
         IndelCallingInstance first = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles([instanceName: 'instance1'])
         IndelCallingInstance latest = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles([samplePair: first.samplePair, instanceName: 'instance2'])
 
-        assert latest == latest.samplePair.findLatestIndelCallingInstance()
+        expect:
+        latest == latest.samplePair.findLatestIndelCallingInstance()
     }
 
-    @Test
-    void testFindLatestSophiaInstance_whenSophiaInstanceExists_ShouldReturnNull() {
+    void "test findLatestSophiaInstance when SophiaInstance exists should return null"() {
+        given:
         SamplePair sp = DomainFactory.createSamplePair()
 
-        assert null == sp.findLatestSophiaInstance()
+        expect:
+        null == sp.findLatestSophiaInstance()
     }
 
-    @Test
-    void testFindLatestSophiaCallingInstance_whenSophiaInstancesExists_ShouldReturnLatest() {
+    void "test findLatestSophiaCallingInstance when SophiaInstances exists should return latest"() {
+        given:
         SophiaInstance first = DomainFactory.createSophiaInstanceWithRoddyBamFiles([instanceName: 'instance1'])
         SophiaInstance latest = DomainFactory.createSophiaInstanceWithRoddyBamFiles([samplePair: first.samplePair, instanceName: 'instance2'])
 
-        assert latest == latest.samplePair.findLatestSophiaInstance()
+        expect:
+        latest == latest.samplePair.findLatestSophiaInstance()
     }
 }

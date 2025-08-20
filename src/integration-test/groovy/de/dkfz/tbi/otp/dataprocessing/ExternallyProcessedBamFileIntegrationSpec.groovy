@@ -23,17 +23,15 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
-import org.junit.Test
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
-import static org.junit.Assert.assertNotNull
-
 @Rollback
 @Integration
-class ExternallyProcessedBamFileIntegrationTests {
+class ExternallyProcessedBamFileIntegrationSpec extends Specification {
 
     ExternallyProcessedBamFile bamFile
     Project project
@@ -41,9 +39,6 @@ class ExternallyProcessedBamFileIntegrationTests {
     SampleType sampleType
     Sample sample
     SeqType seqType
-    SeqPlatform seqPlatform
-    SeqCenter seqCenter
-    Run run
     ReferenceGenome referenceGenome
     ExternalMergingWorkPackage externalMergingWorkPackage
 
@@ -51,35 +46,30 @@ class ExternallyProcessedBamFileIntegrationTests {
 
     void setupData() {
         project = DomainFactory.createProject(
-                        name: "project",
-                        dirName: "project-dir",
-                        )
-        assertNotNull(project.save([flush: true]))
+                name: "project",
+                dirName: "project-dir",
+        )
 
         individual = DomainFactory.createIndividual(
-                        pid: "patient",
-                        type: Individual.Type.UNDEFINED,
-                        project: project
-                        )
-        assertNotNull(individual.save([flush: true]))
+                pid: "patient",
+                type: Individual.Type.UNDEFINED,
+                project: project
+        )
 
         sampleType = DomainFactory.createSampleType(
-                        name: "sample-type"
-                        )
-        assertNotNull(sampleType.save([flush: true]))
+                name: "sample-type"
+        )
 
         sample = DomainFactory.createSample(
-                        individual: individual,
-                        sampleType: sampleType
-                        )
-        assertNotNull(sample.save([flush: true]))
+                individual: individual,
+                sampleType: sampleType
+        )
 
         seqType = DomainFactory.createSeqType(
-                        name: "seq-type",
-                        libraryLayout: SequencingReadType.PAIRED,
-                        dirName: "seq-type-dir"
-                        )
-        assertNotNull(seqType.save([flush: true]))
+                name: "seq-type",
+                libraryLayout: SequencingReadType.PAIRED,
+                dirName: "seq-type-dir"
+        )
         seqType.refresh()
 
         referenceGenome = DomainFactory.createReferenceGenome(
@@ -99,11 +89,15 @@ class ExternallyProcessedBamFileIntegrationTests {
         )
     }
 
-    @Test
-    void testGetFile() {
+    void "test getFile returns correct file path"() {
+        given:
         setupData()
-        String otpFile = bamFile.bamFile.absolutePath
         String expectedFile = "${configService.rootPath}/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/paired/merged-alignment/nonOTP/analysisImport_REF_GEN/FILE_NAME"
-        assert otpFile == expectedFile
+
+        when:
+        String otpFile = bamFile.bamFile.absolutePath
+
+        then:
+        otpFile == expectedFile
     }
 }

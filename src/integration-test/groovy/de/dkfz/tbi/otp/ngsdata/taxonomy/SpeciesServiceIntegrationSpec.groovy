@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.utils.SessionUtils
 
 @Rollback
 @Integration
-class SpeciesServiceSpec extends Specification implements UserAndRoles, TaxonomyFactory {
+class SpeciesServiceIntegrationSpec extends Specification implements UserAndRoles, TaxonomyFactory {
 
     private static final String MUS = "mus musculus"
     private static final String MOUSE = "Mouse"

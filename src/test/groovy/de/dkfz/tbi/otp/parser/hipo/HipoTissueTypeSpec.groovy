@@ -19,22 +19,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.utils.logging
+package de.dkfz.tbi.otp.parser.hipo
 
-import org.junit.Test
+import spock.lang.Specification
 
-class LogThreadLocalUnitTests {
+class HipoTissueTypeSpec extends Specification {
 
-    @Test
-    void testWithThreadLog() {
-        String message = 'Test log message'
-        StringBuilder out = new StringBuilder()
-
-        LogThreadLocal.withThreadLog(out) {
-            LogThreadLocal.threadLog.info(message)
-        }
-
-        assert out.toString() == "${message}\n"
-        assert LogThreadLocal.threadLog == null
+    void "test fromKey"() {
+        expect:
+        HipoTissueType.fromKey("B") == HipoTissueType.BLOOD
+        HipoTissueType.fromKey("-") == null
     }
 }

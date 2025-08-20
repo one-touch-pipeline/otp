@@ -24,7 +24,95 @@ package de.dkfz.tbi.otp.utils
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import static de.dkfz.tbi.otp.utils.StringUtils.commonPrefixLength
+import static de.dkfz.tbi.otp.utils.StringUtils.longestCommonPrefix
+
 class StringUtilsSpec extends Specification {
+
+    void "test commonPrefixLength with same length and no common prefix"() {
+        expect:
+        commonPrefixLength('ab', 'bc') == 0
+    }
+
+    void "test commonPrefixLength with same length and common prefix"() {
+        expect:
+        commonPrefixLength('ab', 'ac') == 1
+    }
+
+    void "test commonPrefixLength with same length and full match"() {
+        expect:
+        commonPrefixLength('ab', 'ab') == 2
+    }
+
+    void "test commonPrefixLength with different lengths and no common prefix"() {
+        expect:
+        commonPrefixLength('bc', 'abc') == 0
+        commonPrefixLength('abc', 'bc') == 0
+    }
+
+    void "test commonPrefixLength with different lengths and common prefix"() {
+        expect:
+        commonPrefixLength('ac', 'abc') == 1
+        commonPrefixLength('abc', 'ac') == 1
+    }
+
+    void "test commonPrefixLength with different lengths where one is prefix of the other"() {
+        expect:
+        commonPrefixLength('ab', 'abc') == 2
+        commonPrefixLength('abc', 'ab') == 2
+    }
+
+    void "test longestCommonPrefix with first string null should fail"() {
+        when:
+        longestCommonPrefix(null, "second")
+
+        then:
+        thrown(AssertionError)
+    }
+
+    void "test longestCommonPrefix with second string null should fail"() {
+        when:
+        longestCommonPrefix("first", null)
+
+        then:
+        thrown(AssertionError)
+    }
+
+    void "test longestCommonPrefix with first string empty should fail"() {
+        when:
+        longestCommonPrefix("", "second")
+
+        then:
+        thrown(AssertionError)
+    }
+
+    void "test longestCommonPrefix with second string empty should fail"() {
+        when:
+        longestCommonPrefix("first", "")
+
+        then:
+        thrown(AssertionError)
+    }
+
+    void "test longestCommonPrefix when first string equals second string"() {
+        expect:
+        "equal" == longestCommonPrefix("equal", "equal")
+    }
+
+    void "test longestCommonPrefix when first string is substring"() {
+        expect:
+        "String" == longestCommonPrefix("String", "StringExtended")
+    }
+
+    void "test longestCommonPrefix when second string is substring"() {
+        expect:
+        "String" == longestCommonPrefix("StringExtended", "String")
+    }
+
+    void "test longestCommonPrefix with different strings"() {
+        expect:
+        "" == longestCommonPrefix("OneString", "AnotherString")
+    }
 
     void 'extractDistinguishingCharacter, when only one string is provided, throws IllegalArgumentException'() {
         when:
@@ -49,8 +137,8 @@ class StringUtilsSpec extends Specification {
         StringUtils.extractDistinguishingCharacter(strings) == [:]
 
         where:
-        strings | _
-        ['abc', 'ade'] | _
+        strings               | _
+        ['abc', 'ade']        | _
         ['abd', 'acd', 'ace'] | _
     }
 
@@ -59,8 +147,8 @@ class StringUtilsSpec extends Specification {
         StringUtils.extractDistinguishingCharacter(strings) == [:]
 
         where:
-        strings | _
-        ['abc', 'abc'] | _
+        strings               | _
+        ['abc', 'abc']        | _
         ['abd', 'acd', 'acd'] | _
         ['abd', 'acd', 'abd'] | _
     }
@@ -87,14 +175,14 @@ class StringUtilsSpec extends Specification {
         StringUtils.blankToNull(s) == expected
 
         where:
-        s     || expected
-        ''    || null
-        null  || null
-        'foo' || 'foo'
-        ' '   || ' '
-        '\t'  || '\t'
-        '\n'  || '\n'
-        'OTP is awesome, even with trailing spaces   ' ||  'OTP is awesome, even with trailing spaces   '
+        s                                              || expected
+        ''                                             || null
+        null                                           || null
+        'foo'                                          || 'foo'
+        ' '                                            || ' '
+        '\t'                                           || '\t'
+        '\n'                                           || '\n'
+        'OTP is awesome, even with trailing spaces   ' || 'OTP is awesome, even with trailing spaces   '
     }
 
     void 'trimAndShortenWhitespace, trims leading and trailing whitespace, shortens whitespace in the middle'() {

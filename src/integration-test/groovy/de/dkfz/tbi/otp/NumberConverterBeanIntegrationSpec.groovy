@@ -19,41 +19,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata.taxonomy
+package de.dkfz.tbi.otp
 
+import grails.converters.JSON
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.validation.Errors
+import org.grails.web.json.JSONElement
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
-import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqQc
 
 @Rollback
 @Integration
-class StrainServiceSpec extends Specification implements UserAndRoles, TaxonomyFactory {
+class NumberConverterBeanIntegrationSpec extends Specification {
 
-    private static final String NAME = "strain"
-
-    @Autowired
-    StrainService strainService
-
-    void setupData() {
-        createUserAndRoles()
-    }
-
-    void "createStrain, all fine"() {
+    void "test conversion of double"() {
         given:
-        setupData()
-        Errors errors
+        String jsonString = """
+{
+"gender":"male",
+"solutionPossible":"3",
+"tcc":"0.5",
+"goodnessOfFit":"0.904231625835189",
+"ploidyFactor":"2.27",
+"ploidy":"2",
+}"""
+
+        JSONElement json = JSON.parse(jsonString)
 
         when:
-        errors = doWithAuth(OPERATOR) {
-            strainService.createStrain(NAME)
-        }
+        AceseqQc qc = new AceseqQc(json)
 
         then:
-        errors == null
+        qc.tcc == 0.5d
     }
 }

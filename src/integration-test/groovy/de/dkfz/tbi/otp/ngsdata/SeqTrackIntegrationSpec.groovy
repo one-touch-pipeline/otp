@@ -23,13 +23,13 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
-import org.junit.Test
+import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 
 @Rollback
 @Integration
-class SeqTrackTests {
+class SeqTrackIntegrationSpec extends Specification {
 
     ReferenceGenomeProjectSeqType referenceGenomeProjectSeqTypeWithoutSampleType
     ReferenceGenomeProjectSeqType referenceGenomeProjectSeqTypeWithSampleType
@@ -48,37 +48,51 @@ class SeqTrackTests {
         ).save(flush: true)
     }
 
-    @Test
-    void testGetConfiguredReferenceGenome_ProjectDefault() {
+    void "test getConfiguredReferenceGenome with project default"() {
+        given:
         setupData()
         seqTrack.sampleType.specificReferenceGenome = SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
+        when:
         ReferenceGenome referenceGenome = seqTrack.configuredReferenceGenome
-        assert referenceGenomeProjectSeqTypeWithoutSampleType.referenceGenome == referenceGenome
+
+        then:
+        referenceGenomeProjectSeqTypeWithoutSampleType.referenceGenome == referenceGenome
     }
 
-    @Test
-    void testGetConfiguredReferenceGenome_SampleTypeSpecific() {
+    void "test getConfiguredReferenceGenome with sample type specific"() {
+        given:
         setupData()
         seqTrack.sampleType.specificReferenceGenome = SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
 
+        when:
         ReferenceGenome referenceGenome = seqTrack.configuredReferenceGenome
-        assert referenceGenomeProjectSeqTypeWithSampleType.referenceGenome == referenceGenome
+
+        then:
+        referenceGenomeProjectSeqTypeWithSampleType.referenceGenome == referenceGenome
     }
 
-    @Test
-    void testLog() {
+    void "test log"() {
+        given:
         setupData()
+
+        when:
         SeqTrackService.logToSeqTrack(seqTrack, "Test")
+
+        then:
         TestCase.assertContainSame(seqTrack.logMessages*.message, ["Test"])
     }
 
-    @Test
-    void testLog_Twice() {
+    void "test log twice"() {
+        given:
         setupData()
+
+        when:
         SeqTrackService.logToSeqTrack(seqTrack, "Test")
         SeqTrackService.logToSeqTrack(seqTrack, "Test2")
+
+        then:
         // fixed order
-        assert seqTrack.logMessages*.message == ["Test", "Test2"]
+        seqTrack.logMessages*.message == ["Test", "Test2"]
     }
 }

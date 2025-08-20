@@ -19,30 +19,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.ngsdata.taxonomy
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
-import org.junit.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.validation.Errors
+import spock.lang.Specification
 
-import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-
-import static org.junit.Assert.assertEquals
+import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
+import de.dkfz.tbi.otp.security.UserAndRoles
 
 @Rollback
 @Integration
-class MergedAlignmentDataFileServiceTests implements DomainFactoryCore {
+class StrainServiceIntegrationSpec extends Specification implements UserAndRoles, TaxonomyFactory {
 
-    MergedAlignmentDataFileService mergedAlignmentDataFileService
+    private static final String NAME = "strain"
 
-    @Test
-    void testBuildRelativePath() {
-        SeqType seqType = DomainFactory.createRnaPairedSeqType()
-        Sample sample = createSample()
+    @Autowired
+    StrainService strainService
 
-        String expectedPath = "${sample.project.dirName}/sequencing/rna_sequencing/view-by-pid/${sample.individual.pid}/${sample.sampleType.dirName}/paired/merged-alignment/"
-        String actualPath = mergedAlignmentDataFileService.buildRelativePath(seqType, sample)
+    void setupData() {
+        createUserAndRoles()
+    }
 
-        assertEquals(expectedPath, actualPath)
+    void "createStrain, all fine"() {
+        given:
+        setupData()
+        Errors errors
+
+        when:
+        errors = doWithAuth(OPERATOR) {
+            strainService.createStrain(NAME)
+        }
+
+        then:
+        errors == null
     }
 }

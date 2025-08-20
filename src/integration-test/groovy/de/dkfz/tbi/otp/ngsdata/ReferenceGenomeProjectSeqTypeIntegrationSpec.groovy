@@ -23,14 +23,14 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
-import org.junit.Test
+import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.project.Project
 
 @Rollback
 @Integration
-class ReferenceGenomeProjectSeqTypeTests {
+class ReferenceGenomeProjectSeqTypeIntegrationSpec extends Specification {
 
     Project project
     SeqType seqType
@@ -57,109 +57,142 @@ class ReferenceGenomeProjectSeqTypeTests {
         return domain
     }
 
-    @Test
-    void testUnique_NoDuplication_WithDifferentProjects() {
+    void "test unique constraint allows no duplication with different projects"() {
+        given:
         setupData()
         createReferenceGenomeProjectSeqType(null)
         project = DomainFactory.createProject()
 
+        when:
         ReferenceGenomeProjectSeqType newDomain = createReferenceGenomeProjectSeqType(null, false)
-        assert newDomain.validate()
+
+        then:
+        newDomain.validate()
     }
 
-    @Test
-    void testUnique_NoDuplication_WithDifferentSeqType() {
+    void "test unique constraint allows no duplication with different seqType"() {
+        given:
         setupData()
         createReferenceGenomeProjectSeqType(null)
         seqType = DomainFactory.createSeqType()
 
+        when:
         ReferenceGenomeProjectSeqType newDomain = createReferenceGenomeProjectSeqType(null, false)
-        assert newDomain.validate()
+
+        then:
+        newDomain.validate()
     }
 
-    @Test
-    void testUnique_NoDuplication_WithAndWithoutSampleType() {
+    void "test unique constraint allows no duplication with and without sampleType"() {
+        given:
         setupData()
         createReferenceGenomeProjectSeqType(null)
         sampleType = DomainFactory.createSampleType()
 
+        when:
         ReferenceGenomeProjectSeqType newDomain = createReferenceGenomeProjectSeqType(null, false)
-        assert newDomain.validate()
+
+        then:
+        newDomain.validate()
     }
 
-    @Test
-    void testUnique_NoDuplication_WithDifferentSampleType() {
+    void "test unique constraint allows no duplication with different sampleType"() {
+        given:
         setupData()
         sampleType = DomainFactory.createSampleType()
         createReferenceGenomeProjectSeqType(null)
         sampleType = DomainFactory.createSampleType()
 
+        when:
         ReferenceGenomeProjectSeqType newDomain = createReferenceGenomeProjectSeqType(null, false)
-        assert newDomain.validate()
+
+        then:
+        newDomain.validate()
     }
 
-    @Test
-    void testUnique_NoDuplication_WithDeprecatedDateAndWithoutSampleType() {
+    void "test unique constraint allows no duplication with deprecated date and without sampleType"() {
+        given:
         setupData()
         createReferenceGenomeProjectSeqType(new Date())
 
+        when:
         ReferenceGenomeProjectSeqType newDomain = createReferenceGenomeProjectSeqType(null, false)
-        assert newDomain.validate()
+
+        then:
+        newDomain.validate()
     }
 
-    @Test
-    void testUnique_NoDuplication_WithDeprecatedDateAndSampleType() {
+    void "test unique constraint allows no duplication with deprecated date and sampleType"() {
+        given:
         setupData()
         sampleType = DomainFactory.createSampleType()
         createReferenceGenomeProjectSeqType(new Date())
 
+        when:
         ReferenceGenomeProjectSeqType newDomain = createReferenceGenomeProjectSeqType(null, false)
-        assert newDomain.validate()
+
+        then:
+        newDomain.validate()
     }
 
-    @Test
-    void testUnique_HasDuplication_WithoutSampleType() {
+    void "test unique constraint detects duplication without sampleType"() {
+        given:
         setupData()
         createReferenceGenomeProjectSeqType(null)
 
+        when:
         ReferenceGenomeProjectSeqType newDomain = createReferenceGenomeProjectSeqType(null, false)
+
+        then:
         TestCase.assertValidateError(newDomain, "referenceGenome", "validator.invalid", referenceGenome)
     }
 
-    @Test
-    void testUnique_HasDuplication_WithSampleType() {
+    void "test unique constraint detects duplication with sampleType"() {
+        given:
         setupData()
         sampleType = DomainFactory.createSampleType()
         createReferenceGenomeProjectSeqType(null)
 
+        when:
         ReferenceGenomeProjectSeqType newDomain = createReferenceGenomeProjectSeqType(null, false)
+
+        then:
         TestCase.assertValidateError(newDomain, "referenceGenome", "validator.invalid", referenceGenome)
     }
 
-    @Test
-    void testProjectIsNull() {
+    void "test validation fails when project is null"() {
+        given:
         setupData()
         project = null
 
+        when:
         ReferenceGenomeProjectSeqType newDomain = createReferenceGenomeProjectSeqType(null, false)
+
+        then:
         TestCase.assertValidateError(newDomain, "project", "nullable", project)
     }
 
-    @Test
-    void testSeqTypeIsNull() {
+    void "test validation fails when seqType is null"() {
+        given:
         setupData()
         seqType = null
 
+        when:
         ReferenceGenomeProjectSeqType newDomain = createReferenceGenomeProjectSeqType(null, false)
+
+        then:
         TestCase.assertValidateError(newDomain, "seqType", "nullable", seqType)
     }
 
-    @Test
-    void testReferenceGenomeIsNull() {
+    void "test validation fails when referenceGenome is null"() {
+        given:
         setupData()
         referenceGenome = null
 
+        when:
         ReferenceGenomeProjectSeqType newDomain = createReferenceGenomeProjectSeqType(null, false)
+
+        then:
         TestCase.assertValidateError(newDomain, "referenceGenome", "nullable", referenceGenome)
     }
 }

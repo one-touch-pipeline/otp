@@ -40,7 +40,7 @@ import java.nio.file.Path
 
 @Rollback
 @Integration
-class ParseAceseqQcJobSpec extends Specification {
+class ParseAceseqQcJobIntegrationSpec extends Specification {
 
     TestConfigService configService
 

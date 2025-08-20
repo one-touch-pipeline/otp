@@ -37,7 +37,7 @@ import de.dkfz.tbi.otp.utils.exceptions.SecurityContextAlreadyExistsException
 
 @Rollback
 @Integration
-class SystemUserUtilsSpec extends Specification implements UserDomainFactory {
+class SystemUserUtilsIntegrationSpec extends Specification implements UserDomainFactory {
 
     void "useSystemUser, if called, it use the system user"() {
         given:

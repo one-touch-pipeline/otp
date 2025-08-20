@@ -23,35 +23,39 @@ package de.dkfz.tbi.otp.utils
 
 import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
-import org.junit.Test
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.PlanValidatorService
 
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.plan
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertFalse
 
 @Rollback
 @Integration
-class JobExecutionPlanDSLIntegrationTests {
+class JobExecutionPlanDSLIntegrationSpec extends Specification {
 
     PlanValidatorService planValidatorService
 
-    @Test
-    void testEmptyPlan() {
-        assertEquals(0, JobExecutionPlan.count())
-        plan("test") {
-        }
-        JobExecutionPlan jep = JobExecutionPlan.list().last()
-        assertFalse(planValidatorService.validate(jep).isEmpty())
+    void "test empty plan"() {
+        expect:
+        JobExecutionPlan.count() == 0
 
-        assertEquals(1, JobExecutionPlan.count())
+        when:
+        plan("test") { }
+
+        then:
+        JobExecutionPlan.count() == 1
+        JobExecutionPlan jep = JobExecutionPlan.list().last()
+        !planValidatorService.validate(jep).isEmpty()
+
+        when:
         plan("test2") {
             start("startJob", "testStartJob")
         }
-        assertEquals(2, JobExecutionPlan.count())
-        jep = JobExecutionPlan.list().last()
-        assertFalse(planValidatorService.validate(jep).isEmpty())
+
+        then:
+        JobExecutionPlan.count() == 2
+        JobExecutionPlan jep2 = JobExecutionPlan.list().last()
+        !planValidatorService.validate(jep2).isEmpty()
     }
 }

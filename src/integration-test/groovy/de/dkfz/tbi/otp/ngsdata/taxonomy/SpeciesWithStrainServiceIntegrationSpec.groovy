@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.security.UserAndRoles
 
 @Rollback
 @Integration
-class SpeciesWithStrainServiceSpec extends Specification implements UserAndRoles, TaxonomyFactory {
+class SpeciesWithStrainServiceIntegrationSpec extends Specification implements UserAndRoles, TaxonomyFactory {
 
     @Autowired
     SpeciesWithStrainService speciesWithStrainService

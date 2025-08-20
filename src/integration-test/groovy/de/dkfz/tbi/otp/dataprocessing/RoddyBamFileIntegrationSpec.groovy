@@ -23,13 +23,20 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import org.springframework.validation.Errors
+import org.springframework.validation.FieldError
 import spock.lang.Specification
 
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 @Rollback
 @Integration
-class RoddyBamFileIntegrationSpec extends Specification {
+class RoddyBamFileIntegrationSpec extends Specification implements RoddyPanCancerFactory {
 
     static final Long ARBITRARY_UNUSED_VALUE = 1
 
@@ -113,5 +120,191 @@ class RoddyBamFileIntegrationSpec extends Specification {
 
         expect:
         mergedQa == bamFile.qualityAssessment
+    }
+
+    void "test constraints when all is fine"() {
+        given:
+        RoddyBamFile bamFile = createRBF()
+
+        expect:
+        bamFile.save(flush: true)
+    }
+
+    void "test that seqtracks connection is saved to database"() {
+        when:
+        createBamFile()
+
+        then:
+        RoddyBamFile.withCriteria {
+            seqTracks {
+                isNotNull('id')
+            }
+        }
+    }
+
+    void "test constraints with no seqTracks should fail"() {
+        given:
+        RoddyBamFile bamFile = createBamFile()
+        bamFile.seqTracks = [] as Set
+
+        when:
+        bamFile.validate()
+
+        then:
+        TestCase.assertAtLeastExpectedValidateError(bamFile, 'seqTracks', 'minSize.notmet', bamFile.seqTracks)
+    }
+
+    void "test constraints with not Roddy pipeline name should fail"() {
+        given:
+        RoddyBamFile bamFile = createBamFile()
+        bamFile.workPackage.pipeline.name = Pipeline.Name.DEFAULT_OTP
+        bamFile.config.pipeline.name = Pipeline.Name.DEFAULT_OTP
+
+        when:
+        boolean isValid = bamFile.validate()
+
+        then:
+        !isValid
+        Errors errors = bamFile.errors
+        errors.errorCount == 2
+        errors.fieldErrorCount == 2
+        List<FieldError> fieldErrors = errors.fieldErrors
+        fieldErrors*.field == ['config.pipeline', 'workPackage']
+        fieldErrors*.rejectedValue == [bamFile.config.pipeline, bamFile.workPackage]
+    }
+
+    void "test constraints when pipeline in config and workPackage inconsistent should fail"() {
+        given:
+        RoddyBamFile bamFile = createBamFile()
+        bamFile.config.pipeline = DomainFactory.createDefaultOtpPipeline()
+
+        expect:
+        TestCase.assertValidateError(bamFile, 'config', 'validator.invalid', bamFile.config)
+    }
+
+    void "test constraints with not unique identifier for workPackage should fail"() {
+        given:
+        RoddyBamFile bamFile = createRBF()
+        RoddyBamFile bamFile2 = createBamFile(workPackage: bamFile.workPackage)
+        bamFile.identifier = bamFile2.identifier
+
+        expect:
+        TestCase.assertValidateError(bamFile, 'identifier', 'validator.invalid', bamFile.identifier)
+    }
+
+    void "test constraints when workPackage is null should fail"() {
+        given:
+        RoddyBamFile bamFile = createBamFile()
+        bamFile.workPackage = null
+
+        expect:
+        TestCase.assertAtLeastExpectedValidateError(bamFile, 'workPackage', 'nullable', bamFile.workPackage)
+    }
+
+    void "test isConsistentAndContainsNoWithdrawnData when seqTrack does not belong to bamFile workPackage is also valid"() {
+        given:
+        RoddyBamFile bamFile = createBamFile()
+        SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
+        seqTrack.seqType = DomainFactory.createSeqType()
+
+        expect:
+        bamFile.isConsistentAndContainsNoWithdrawnData().empty
+    }
+
+    void "test isConsistentAndContainsNoWithdrawnData with withdrawn bamFile succeeds"() {
+        given:
+        RoddyBamFile bamFile = createRBF()
+        bamFile.withdrawn = true
+
+        expect:
+        bamFile.isConsistentAndContainsNoWithdrawnData().empty
+    }
+
+    void "test isConsistentAndContainsNoWithdrawnData with withdrawn bamFile with withdrawn seqTracks succeeds"() {
+        given:
+        RoddyBamFile bamFile = createBamFile([withdrawn: true])
+        List<RawSequenceFile> rawSequenceFiles = RawSequenceFile.findAll()
+        rawSequenceFiles*.fileWithdrawn = true
+        rawSequenceFiles*.save(flush: true)
+
+        expect:
+        [] == bamFile.isConsistentAndContainsNoWithdrawnData()
+    }
+
+    void "test isConsistentAndContainsNoWithdrawnData with withdrawn bamFile with not withdrawn seqTracks succeeds"() {
+        given:
+        RoddyBamFile bamFile = createBamFile([withdrawn: true])
+
+        expect:
+        [] == bamFile.isConsistentAndContainsNoWithdrawnData()
+    }
+
+    void "test isConsistentAndContainsNoWithdrawnData with not withdrawn bamFile with withdrawn seqTracks should return error message"() {
+        given:
+        RoddyBamFile bamFile = createBamFile()
+        List<RawSequenceFile> rawSequenceFiles = RawSequenceFile.findAll()
+        rawSequenceFiles*.fileWithdrawn = true
+        rawSequenceFiles*.save(flush: true)
+
+        expect:
+        ["not withdrawn bam file has withdrawn seq tracks"] == bamFile.isConsistentAndContainsNoWithdrawnData()
+    }
+
+    void "test isConsistentAndContainsNoWithdrawnData when numberOfMergedLanes not equal to numberOfContainedLanes should return error message"() {
+        given:
+        RoddyBamFile bamFile = createBamFile()
+        bamFile.numberOfMergedLanes = 5
+
+        expect:
+        ["total number of merged lanes is not equal to number of contained seq tracks: 5 vs 1"] == bamFile.isConsistentAndContainsNoWithdrawnData()
+    }
+
+    void "test isMostRecentBamFile"() {
+        given:
+        RoddyBamFile bamFile = createRBF()
+
+        expect:
+        bamFile.isMostRecentBamFile()
+    }
+
+    void "test maxIdentifier when no RoddyBamFile exists for workPackage"() {
+        given:
+        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage()
+
+        expect:
+        RoddyBamFile.maxIdentifier(workPackage) == null
+    }
+
+    void "test maxIdentifier when RoddyBamFile exists for workPackage"() {
+        given:
+        RoddyBamFile bamFile = createRBF()
+
+        expect:
+        RoddyBamFile.maxIdentifier(bamFile.workPackage) == 0
+    }
+
+    void "test withdraw single file should set to withdrawn"() {
+        given:
+        RoddyBamFile roddyBamFile = createBamFile()
+
+        expect:
+        !roddyBamFile.withdrawn
+
+        when:
+        LogThreadLocal.withThreadLog(System.out) {
+            roddyBamFile.withdraw()
+        }
+
+        then:
+        roddyBamFile.withdrawn
+    }
+
+    private RoddyBamFile createRBF() {
+        return createBamFile([
+                md5sum: null,
+                fileOperationStatus: AbstractBamFile.FileOperationStatus.DECLARED,
+                fileSize: -1,
+        ])
     }
 }

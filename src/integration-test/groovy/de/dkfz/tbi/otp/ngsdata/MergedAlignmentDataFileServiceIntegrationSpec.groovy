@@ -19,38 +19,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp
+package de.dkfz.tbi.otp.ngsdata
 
-import grails.converters.JSON
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
-import org.grails.web.json.JSONElement
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqQc
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 
 @Rollback
 @Integration
-class NumberConverterBeanSpec extends Specification {
+class MergedAlignmentDataFileServiceIntegrationSpec extends Specification implements DomainFactoryCore {
 
-    void "test conversion of double"() {
+    MergedAlignmentDataFileService mergedAlignmentDataFileService
+
+    void "test buildRelativePath"() {
         given:
-        String jsonString = """
-{
-"gender":"male",
-"solutionPossible":"3",
-"tcc":"0.5",
-"goodnessOfFit":"0.904231625835189",
-"ploidyFactor":"2.27",
-"ploidy":"2",
-}"""
-
-        JSONElement json = JSON.parse(jsonString)
+        SeqType seqType = DomainFactory.createRnaPairedSeqType()
+        Sample sample = createSample()
+        String expectedPath = "${sample.project.dirName}/sequencing/rna_sequencing/view-by-pid/${sample.individual.pid}/${sample.sampleType.dirName}/paired/merged-alignment/"
 
         when:
-        AceseqQc qc = new AceseqQc(json)
+        String actualPath = mergedAlignmentDataFileService.buildRelativePath(seqType, sample)
 
         then:
-        qc.tcc == 0.5d
+        expectedPath == actualPath
     }
 }
