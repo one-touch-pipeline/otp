@@ -46,6 +46,11 @@ module.exports = defineConfig({
   pageLoadTimeout: 120000,
   defaultCommandTimeout: 30000,
   timeout: 30000,
+  reporter: 'cypress-multi-reporters',
+  reporterOptions: {
+    configFile: 'cypress/reporter-config.json',
+    toConsole: true
+  },
   responseTimeout: 30000,
   viewportHeight: 900,
   viewportWidth: 1440,

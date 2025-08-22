@@ -1,0 +1,10 @@
+{
+  "reporterEnabled": "mochawesome, mocha-junit-reporter",
+  "mochawesomeReporterOptions": {
+    "reportDir": "build/reports/tests/cypressTest",
+    "reportFilename": "report-[name]-[datetime]-[status]"
+  },
+  "mochaJunitReporterReporterOptions": {
+    "mochaFile": "build/test-results/cypressTest/results-[hash].xml"
+  }
+}

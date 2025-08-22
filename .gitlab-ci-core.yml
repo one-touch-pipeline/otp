@@ -363,10 +363,13 @@ cypress tests:
   artifacts:
     <<: *artifacts_template
     paths:
+      - build/test-results/*/*.xml
+      - build/reports/tests
       - cypress/screenshots
-      - cypress/videos
       - cypressReport.txt
       - logs/
+    reports:
+      junit: build/test-results/*/*.xml
     when: always
   cache:
     - !reference [ .shared, cache, gradle-wrapper ]
