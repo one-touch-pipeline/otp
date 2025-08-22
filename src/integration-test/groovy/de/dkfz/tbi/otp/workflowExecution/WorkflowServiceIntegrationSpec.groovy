@@ -372,11 +372,11 @@ class WorkflowServiceIntegrationSpec extends Specification implements WorkflowSy
         workflow.defaultSeqTypesForWorkflowVersions == (supportedSeqTypes?.size() && supportedSeqTypes.size() > 0 ? supportedSeqTypes : null)
 
         where:
-        allowedRefGenomesClosure                                     | supportedSeqTypesClosure
-        { it -> null }                                               | { it -> [] }
-        { it -> [createReferenceGenome(), createReferenceGenome()] } | { it -> [createSeqTypeSingle(), createSeqTypeSingle()] }
-        { it -> [] }                                                 | { it -> [createSeqTypeSingle(), createSeqTypeSingle()] }
-        { it -> [createReferenceGenome(), createReferenceGenome()] } | { it -> null }
+        _ | allowedRefGenomesClosure                                     | supportedSeqTypesClosure
+        _ | { it -> null }                                               | { it -> [] }
+        _ | { it -> [createReferenceGenome(), createReferenceGenome()] } | { it -> [createSeqTypeSingle(), createSeqTypeSingle()] }
+        _ | { it -> [] }                                                 | { it -> [createSeqTypeSingle(), createSeqTypeSingle()] }
+        _ | { it -> [createReferenceGenome(), createReferenceGenome()] } | { it -> null }
     }
 
     void "test OtpWorkflow.reconnectDependencies, when current workflow is PanCancer and dependent workflow is Sophia"() {
@@ -415,9 +415,9 @@ class WorkflowServiceIntegrationSpec extends Specification implements WorkflowSy
         getBamFile(sophiaInstance) == newWorkflowArtefact.artefact.get()
 
         where:
-        getBamFile                                                 | role
-        { SophiaInstance instance -> instance.sampleType1BamFile } | AbstractAnalysisWorkflow.INPUT_TUMOR_BAM
-        { SophiaInstance instance -> instance.sampleType2BamFile } | AbstractAnalysisWorkflow.INPUT_CONTROL_BAM
+        _ | getBamFile                                                 | role
+        _ | { SophiaInstance instance -> instance.sampleType1BamFile } | AbstractAnalysisWorkflow.INPUT_TUMOR_BAM
+        _ | { SophiaInstance instance -> instance.sampleType2BamFile } | AbstractAnalysisWorkflow.INPUT_CONTROL_BAM
     }
 
     @SuppressWarnings('UnnecessaryGetter')
@@ -462,8 +462,8 @@ class WorkflowServiceIntegrationSpec extends Specification implements WorkflowSy
         dependentRun.inputArtefacts.get(inputRole).artefact.get() == newWorkflowArtefact.artefact.get()
 
         where:
-        getCurrentInstance                                                                                                       | getDependentInstance                                                 | inputRole                   | getCurrentOtpWorkflow                                                                                             | getDependentOtpWorkflow    | current   | dependent
-        { workflowArtefact -> SophiaDomainFactory.INSTANCE.createInstanceWithRoddyBamFiles(workflowArtefact: workflowArtefact) } | { AceseqDomainFactory.INSTANCE.createInstanceWithRoddyBamFiles() }   | AceseqWorkflow.SOPHIA_INPUT | { new SophiaWorkflow(sophiaWorkFileService: Mock(SophiaWorkFileService) { constructInstanceName(_) >> "name" }) } | { new AceseqWorkflow() }   | "Sophia " | "ACEseq"
-        { workflowArtefact -> SnvDomainFactory.INSTANCE.createInstanceWithRoddyBamFiles(workflowArtefact: workflowArtefact) }    | { RunYapsaDomainFactory.INSTANCE.createInstanceWithRoddyBamFiles() } | RunYapsaWorkflow.SNV_INPUT  | { new SnvWorkflow(snvWorkFileService: Mock(SnvWorkFileService) { constructInstanceName(_) >> "name" }) }          | { new RunYapsaWorkflow() } | "SNV"     | "runYapsa"
+        _ | getCurrentInstance                                                                                                       | getDependentInstance                                                 | inputRole                   | getCurrentOtpWorkflow                                                                                             | getDependentOtpWorkflow    | current   | dependent
+        _ | { workflowArtefact -> SophiaDomainFactory.INSTANCE.createInstanceWithRoddyBamFiles(workflowArtefact: workflowArtefact) } | { AceseqDomainFactory.INSTANCE.createInstanceWithRoddyBamFiles() }   | AceseqWorkflow.SOPHIA_INPUT | { new SophiaWorkflow(sophiaWorkFileService: Mock(SophiaWorkFileService) { constructInstanceName(_) >> "name" }) } | { new AceseqWorkflow() }   | "Sophia " | "ACEseq"
+        _ | { workflowArtefact -> SnvDomainFactory.INSTANCE.createInstanceWithRoddyBamFiles(workflowArtefact: workflowArtefact) }    | { RunYapsaDomainFactory.INSTANCE.createInstanceWithRoddyBamFiles() } | RunYapsaWorkflow.SNV_INPUT  | { new SnvWorkflow(snvWorkFileService: Mock(SnvWorkFileService) { constructInstanceName(_) >> "name" }) }          | { new RunYapsaWorkflow() } | "SNV"     | "runYapsa"
     }
 }
