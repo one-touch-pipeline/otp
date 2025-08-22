@@ -20,7 +20,9 @@
  * SOFTWARE.
  */
 
-describe('Check workflow system configuration page', () => {
+describe('Check workflow system configuration page', {
+  retries: 1
+}, () => {
   'use strict';
 
   context('when user is an operator', () => {

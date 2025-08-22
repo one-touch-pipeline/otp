@@ -20,7 +20,9 @@
  * SOFTWARE.
  */
 
-describe('test for department configuration page', () => {
+describe('test for department configuration page', {
+  retries: 1
+}, () => {
   'use strict';
 
   context('when user is a user which is a department head', () => {

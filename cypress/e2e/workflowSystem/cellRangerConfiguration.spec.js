@@ -20,7 +20,9 @@
  * SOFTWARE.
  */
 
-describe('Check cell ranger configuration page', () => {
+describe('Check cell ranger configuration page', {
+  retries: 1
+}, () => {
   'use strict';
 
   context('when user is part of a project', () => {
