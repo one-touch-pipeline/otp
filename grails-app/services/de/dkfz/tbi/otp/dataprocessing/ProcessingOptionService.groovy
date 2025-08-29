@@ -27,7 +27,6 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.processing.ProcessingException
-import de.dkfz.tbi.otp.project.Project
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.singleElement
 
@@ -35,8 +34,8 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.singleElement
 class ProcessingOptionService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    ProcessingOption createOrUpdate(OptionName name, String value, String type = null, Project project = null) {
-        ProcessingOption option = findOption(name, type, project)
+    ProcessingOption createOrUpdate(OptionName name, String value, String type = null) {
+        ProcessingOption option = findOption(name, type)
         if (option) {
             if (option.value == value) {
                 return option
@@ -46,7 +45,6 @@ class ProcessingOptionService {
         option = new ProcessingOption(
             name: name,
             type: type,
-            project: project,
             value: value,
         )
         assert(option.save(flush: true))
@@ -54,8 +52,8 @@ class ProcessingOptionService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void obsoleteOptionByName(OptionName name, String type = null, Project project = null) {
-        ProcessingOption option = findOption(name, type, project)
+    void obsoleteOptionByName(OptionName name, String type = null) {
+        ProcessingOption option = findOption(name, type)
         if (option) {
             if (option.name.necessity == Necessity.REQUIRED && !option.name.deprecated) {
                 throw new ProcessingException("Required options can't be obsoleted")
@@ -65,11 +63,10 @@ class ProcessingOptionService {
     }
 
     @CompileDynamic
-    static ProcessingOption findOption(OptionName name, String type = null, Project project = null) {
+    static ProcessingOption findOption(OptionName name, String type = null) {
         return singleElement(ProcessingOption.findAllWhere(
                 name: name,
                 type: type,
-                project: project,
                 dateObsoleted: null
         ), true)
     }
@@ -105,8 +102,8 @@ class ProcessingOptionService {
     }
 
     @Deprecated
-    static String findOptionSafe(OptionName name, String type, Project project) {
-        ProcessingOption option = findOption(name, type, project)
+    static String findOptionSafe(OptionName name, String type) {
+        ProcessingOption option = findOption(name, type)
         return option?.value != null ? option?.value : name.defaultValue
     }
 
@@ -115,8 +112,8 @@ class ProcessingOptionService {
      * can not be cast to a number.
      */
     @Deprecated
-    static long findOptionAsNumber(OptionName name, String type, Project project) {
-        String value = findOptionSafe(name, type, project)
+    static long findOptionAsNumber(OptionName name, String type) {
+        String value = findOptionSafe(name, type)
         return value.toLong()
     }
 

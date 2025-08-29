@@ -259,7 +259,7 @@ class TicketService {
 
     static String buildTicketDirectLink(String ticketNumber) {
         return new SimpleTemplateEngine().createTemplate(
-                ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.TICKET_SYSTEM_URL, null, null) ?: "")
+                ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.TICKET_SYSTEM_URL, null) ?: "")
                 .make([ticketNumber: ticketNumber])
                 .toString()
     }

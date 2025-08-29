@@ -342,7 +342,6 @@ class DomainFactory {
         return createProcessingOptionLazy(
                 name: OptionName.TICKET_SYSTEM_NUMBER_PREFIX,
                 type: null,
-                project: null,
                 value: prefix,
         )
     }
@@ -351,7 +350,6 @@ class DomainFactory {
         return createProcessingOptionLazy(
                 name: OptionName.EMAIL_TICKET_SYSTEM,
                 type: null,
-                project: null,
                 value: ticketSystemEmail,
         )
     }
@@ -360,7 +358,6 @@ class DomainFactory {
         return createProcessingOptionLazy(
                 name: OptionName.HELP_DESK_TEAM_NAME,
                 type: null,
-                project: null,
                 value: message,
         )
     }
@@ -369,7 +366,6 @@ class DomainFactory {
         return createProcessingOptionLazy(
                 name: OptionName.BASE_PATH_REFERENCE_GENOME,
                 type: null,
-                project: null,
                 value: fileName,
         )
     }
@@ -655,7 +651,6 @@ class DomainFactory {
         createProcessingOptionLazy(
                 name: OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
                 type: null,
-                project: null,
                 value: 'hs37d5, hs37d5_PhiX, hs37d5_GRCm38mm_PhiX, hs37d5+mouse, hs37d5_GRCm38mm',
         )
 
@@ -768,7 +763,6 @@ class DomainFactory {
             createProcessingOptionLazy(
                     name: it,
                     type: null,
-                    project: null,
                     value: value ?: createReferenceGenome().name,
             )
         }

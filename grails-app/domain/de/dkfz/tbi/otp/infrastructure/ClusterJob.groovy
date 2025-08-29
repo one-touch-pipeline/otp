@@ -297,7 +297,7 @@ class ClusterJob implements Entity {
      */
     void beforeValidate() {
         if (fileSize && !nBases) {
-            basesPerBytesFastq = ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, null, null) as float
+            basesPerBytesFastq = ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.STATISTICS_BASES_PER_BYTES_FASTQ, null) as float
             nBases = fileSize * basesPerBytesFastq
         }
     }

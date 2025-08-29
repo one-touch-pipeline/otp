@@ -123,9 +123,9 @@ class MonitorOutputCollector {
             List<JobExecutionPlan> jobExecutionPlans = JobExecutionPlan.findAllByName(workflowName)
             if (jobExecutionPlans) {
                 long occupiedSlots = Process.countByFinishedAndJobExecutionPlanInList(false, jobExecutionPlans)
-                long totalSlots = ProcessingOptionService.findOptionAsNumber(ProcessingOption.OptionName.MAXIMUM_NUMBER_OF_JOBS, workflowName, null)
+                long totalSlots = ProcessingOptionService.findOptionAsNumber(ProcessingOption.OptionName.MAXIMUM_NUMBER_OF_JOBS, workflowName)
                 long fastTrackSlots = ProcessingOptionService.findOptionAsNumber(
-                        ProcessingOption.OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, workflowName, null
+                        ProcessingOption.OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, workflowName
                 )
                 long normalSlots = totalSlots - fastTrackSlots
                 output << "${INDENT}Used Slots: ${occupiedSlots}, Normal priority slots: ${normalSlots}, additional fasttrack slots: ${fastTrackSlots}"

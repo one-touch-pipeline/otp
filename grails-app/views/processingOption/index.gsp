@@ -42,7 +42,6 @@
             <th scope="col"><g:message code="processingOption.list.headers.type"/></th>
             <th scope="col"><g:message code="processingOption.list.headers.value"/></th>
             <th scope="col"><g:message code="processingOption.list.headers.dateCreated"/></th>
-            <th scope="col"><g:message code="processingOption.list.headers.project"/></th>
         </tr>
         </thead>
         <tbody>
@@ -76,21 +75,20 @@
                         </g:else>
                         <g:set var="oldValue" value="123" />
                         <div class="input-group-append">
-                            <button class="btn btn-success btn-sm" type="button" id="button-save-${rowIndex}" onclick="onSave(${rowIndex}, '${option.name.value}', '${option.value.value.replace('\n', '&#10;')}', '${option.type.value}', '${option.project?.id}')" style="display: none;">
+                            <button class="btn btn-success btn-sm" type="button" id="button-save-${rowIndex}" onclick="onSave(${rowIndex}, '${option.name.value}', '${option.value.value.replace('\n', '&#10;')}', '${option.type.value}')" style="display: none;">
                                 <i class="bi bi-save"></i>
                                 <g:message code="processingOption.button.save"/>
                             </button>
                             <button class="btn btn-outline-secondary btn-sm otp-background-white" type="button" id="button-edit-${rowIndex}" onclick="onEdit(${rowIndex})" title="${g.message(code: "processingOption.button.edit")}">
                                 <i class="bi bi-pencil"></i>
                             </button>
-                            <button class="btn btn-outline-danger btn-sm otp-background-white" type="button" onclick="onObsolete('${rowIndex}', '${option.name.value}', '${option.type.value}', '${option.project?.id}')" title="${g.message(code: "processingOption.button.obsolete")}">
+                            <button class="btn btn-outline-danger btn-sm otp-background-white" type="button" onclick="onObsolete('${rowIndex}', '${option.name.value}', '${option.type.value}')" title="${g.message(code: "processingOption.button.obsolete")}">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </div>
                     </div>
                 </td>
                 <td>${option.dateCreated}</td>
-                <td>${option.project?.name}</td>
             </tr>
         </g:each>
         </tbody>

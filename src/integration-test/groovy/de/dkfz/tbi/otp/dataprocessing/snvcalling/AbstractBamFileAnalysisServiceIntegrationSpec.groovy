@@ -97,13 +97,11 @@ class AbstractBamFileAnalysisServiceIntegrationSpec extends Specification {
         DomainFactory.createProcessingOptionLazy([
                 name   : ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
                 type   : null,
-                project: null,
                 value  : samplePair1.mergingWorkPackage1.referenceGenome.name,
         ])
         DomainFactory.createProcessingOptionLazy([
                 name   : ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
                 type   : null,
-                project: null,
                 value  : samplePair1.mergingWorkPackage1.referenceGenome.name,
         ])
     }

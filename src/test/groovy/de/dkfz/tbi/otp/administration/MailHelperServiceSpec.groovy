@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.exceptions.SaveMailException
@@ -62,6 +63,7 @@ class MailHelperServiceSpec extends Specification implements DataTest, DomainFac
         return [
                 Mail,
                 ProcessingOption,
+                Project,
         ]
     }
 

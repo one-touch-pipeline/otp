@@ -59,7 +59,6 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
         DomainFactory.createProcessingOptionLazy([
                 name   : PIPELINE_MIN_COVERAGE,
                 type   : Pipeline.Type.ACESEQ.toString(),
-                project: null,
                 value  : "20",
         ])
         DomainFactory.createAceseqPipelineLazy()

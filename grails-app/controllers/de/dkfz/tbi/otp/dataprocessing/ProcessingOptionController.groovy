@@ -30,7 +30,6 @@ import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.processing.ProcessingException
-import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
 import de.dkfz.tbi.otp.utils.TimeFormats
 
@@ -71,7 +70,7 @@ class ProcessingOptionController {
 
     JSON update(ProcessingOptionCommand cmd) {
         try {
-            ProcessingOption processingOption = processingOptionService.createOrUpdate(cmd.optionName, cmd.value, cmd.type, cmd.specificProject)
+            ProcessingOption processingOption = processingOptionService.createOrUpdate(cmd.optionName, cmd.value, cmd.type)
             render(generateOptionRow(processingOption) as JSON)
         } catch (ValidationException ignored) {
             response.sendError(HttpStatus.BAD_REQUEST.value(), g.message(code: "processingOption.store.failure") as String)
@@ -81,7 +80,7 @@ class ProcessingOptionController {
 
     def obsolete(ProcessingOptionCommand cmd) {
         try {
-            processingOptionService.obsoleteOptionByName(cmd.optionName, cmd.type, cmd.specificProject)
+            processingOptionService.obsoleteOptionByName(cmd.optionName, cmd.type)
         } catch (ValidationException | ProcessingException ignored) {
             response.sendError(HttpStatus.BAD_REQUEST.value(), g.message(code: "processingOption.obsolete.failure") as String)
         }
@@ -122,7 +121,6 @@ class ProcessingOptionController {
                         tooltip: processingOption?.value,
                 ),
                 allowedValues: processingOption.name.validatorForValue.allowedValues?.sort(),
-                project: processingOption?.project,
                 dateCreated: TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(processingOption?.dateCreated),
                 multiline: processingOption.name.validatorForValue == TypeValidators.MULTI_LINE_TEXT,
                 defaultValue: processingOption.name?.defaultValue
@@ -134,14 +132,12 @@ class ProcessingOptionCommand {
     OptionName optionName
     String value
     String type
-    Project specificProject
 
     void setType(String type) {
         this.type = type ?: null
     }
 
     static constraints = {
-        specificProject nullable: true
         value nullable: true
     }
 }
@@ -152,7 +148,6 @@ class OptionRow {
     TableCellValue type
     TableCellValue value
     List<String> allowedValues
-    Project project
     String dateCreated
     boolean multiline
     String defaultValue

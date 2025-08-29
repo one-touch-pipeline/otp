@@ -1659,7 +1659,6 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         return DomainFactory.createProcessingOptionLazy(
                 name: ProcessingOption.OptionName.BLACKLIST_IMPORT_SOURCE_NOTIFICATION,
                 type: null,
-                project: null,
                 value: blacklist,
         )
     }

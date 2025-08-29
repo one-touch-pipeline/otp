@@ -21,7 +21,7 @@
  */
 
 // eslint-disable-next-line no-unused-vars
-function onObsolete(rowIndex, name, type, specificProject) {
+function onObsolete(rowIndex, name, type) {
   'use strict';
 
   const inputField = $(`#value-${rowIndex}`);
@@ -36,8 +36,7 @@ function onObsolete(rowIndex, name, type, specificProject) {
     type: 'POST',
     data: {
       optionName: name,
-      type,
-      specificProject
+      type
     },
     success() {
       inputField.val('');
@@ -72,7 +71,7 @@ function onEdit(rowIndex) {
 }
 
 // eslint-disable-next-line no-unused-vars
-function onSave(rowIndex, name, oldValue, type, specificProject) {
+function onSave(rowIndex, name, oldValue, type) {
   'use strict';
 
   const optionNumber = parseInt(rowIndex, 10) + 1;
@@ -97,8 +96,7 @@ function onSave(rowIndex, name, oldValue, type, specificProject) {
     data: {
       optionName: name,
       value: newValue,
-      type,
-      specificProject
+      type
     },
     success(result) {
       inputField.val(result.value.value);

@@ -95,7 +95,6 @@ class AceseqServiceIntegrationSpec extends Specification {
         DomainFactory.createProcessingOptionLazy([
                 name   : ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE,
                 type   : Pipeline.Type.ACESEQ.toString(),
-                project: null,
                 value  : "40",
         ])
 
@@ -109,7 +108,6 @@ class AceseqServiceIntegrationSpec extends Specification {
         DomainFactory.createProcessingOptionLazy([
                 name   : ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
                 type   : null,
-                project: null,
                 value  : samplePair1.mergingWorkPackage1.referenceGenome.name,
         ])
         DomainFactory.createRoddyWorkflowConfig(

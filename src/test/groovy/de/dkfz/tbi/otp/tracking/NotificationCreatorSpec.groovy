@@ -379,7 +379,6 @@ ILSe 5678, runA, lane 1, ${sampleText}
         return DomainFactory.createProcessingOptionLazy(
                 name: ProcessingOption.OptionName.BLACKLIST_IMPORT_SOURCE_NOTIFICATION,
                 type: null,
-                project: null,
                 value: blacklist,
         )
     }

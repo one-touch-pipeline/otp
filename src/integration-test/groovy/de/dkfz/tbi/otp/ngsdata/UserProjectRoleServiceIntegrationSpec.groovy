@@ -108,25 +108,21 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         findOrCreateProcessingOption(
                 name: ProcessingOption.OptionName.HELP_DESK_TEAM_NAME,
                 type: null,
-                project: null,
                 value: EMAIL_SENDER_SALUTATION,
         )
         findOrCreateProcessingOption(
                 name: ProcessingOption.OptionName.CLUSTER_NAME,
                 type: null,
-                project: null,
                 value: CLUSTER_NAME,
         )
         findOrCreateProcessingOption(
                 name: ProcessingOption.OptionName.EMAIL_CLUSTER_ADMINISTRATION,
                 type: null,
-                project: null,
                 value: EMAIL_CLUSTER_ADMINISTRATION,
         )
         findOrCreateProcessingOption(
                 name: ProcessingOption.OptionName.OTP_SYSTEM_USER,
                 type: null,
-                project: null,
                 value: SYSTEM_USER,
         )
         findOrCreateProcessingOption(

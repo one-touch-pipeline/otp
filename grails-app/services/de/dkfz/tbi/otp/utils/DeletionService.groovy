@@ -489,9 +489,6 @@ class DeletionService {
 
         SampleTypePerProject.findAllByProject(project)*.delete(flush: true)
 
-        // Deletes the ProcessingOptions of the project
-        ProcessingOption.findAllByProject(project)*.delete(flush: true)
-
         List configPerProjectAndSeqTypes = ConfigPerProjectAndSeqType.findAllByProject(project)
         configPerProjectAndSeqTypes*.previousConfig = null
         configPerProjectAndSeqTypes*.delete(flush: true)

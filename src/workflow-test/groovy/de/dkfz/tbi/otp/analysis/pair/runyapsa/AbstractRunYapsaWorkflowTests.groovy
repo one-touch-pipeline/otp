@@ -52,7 +52,6 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
         DomainFactory.createProcessingOptionLazy([
                 name   : OptionName.PIPELINE_MIN_COVERAGE,
                 type   : Pipeline.Type.MUTATIONAL_SIGNATURE.toString(),
-                project: null,
                 value  : "20",
         ])
         DomainFactory.createRunYapsaPipelineLazy()

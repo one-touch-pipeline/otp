@@ -492,12 +492,6 @@ class ProcessingOption implements Entity {
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_WORD_TEXT, null, true
         ),
 
-        // validator
-        VALIDATOR_SAMPLE_IDENTIFIER_REGEX(
-                "regular expression for the sample id",
-                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
-        ),
-
         // systemConfiguration
         TIME_ZONE(
                 "Local time zone",
@@ -710,12 +704,7 @@ class ProcessingOption implements Entity {
 
     @SuppressWarnings("GrailsDomainReservedSqlKeywordName")
     String value
-    Project project
     Date dateObsoleted
-
-    static belongsTo = [
-            project: Project,
-    ]
 
     static mapping = {
         value type: 'text'
@@ -732,7 +721,6 @@ class ProcessingOption implements Entity {
             }
             return (val == null)
         })
-        project(nullable: true)
         dateObsoleted(nullable: true)
         value(validator: { val, obj ->
             (val != null && obj.name && obj.name.validatorForValue.validate(val)) || obj.dateObsoleted

@@ -19,26 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.job.jobs.AbstractBamFilePairAnalysis
-
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-
-trait WithReferenceGenomeRestrictionSpec implements StartJobIntegrationSpec {
-
-    @Override
-    SamplePair setupSamplePair() {
-        SamplePair samplePair = super.setupSamplePair()
-
-        DomainFactory.createProcessingOptionLazy([
-                name: processingOptionNameForReferenceGenome,
-                type: null,
-                value: samplePair.mergingWorkPackage1.referenceGenome.name,
-        ])
-
-        return samplePair
+databaseChangeLog = {
+    changeSet(author: "-", id: "otp-2755a") {
+        sql("""
+DELETE
+FROM processing_option
+WHERE name = 'VALIDATOR_SAMPLE_IDENTIFIER_REGEX'
+        """)
     }
 
-    abstract ProcessingOption.OptionName getProcessingOptionNameForReferenceGenome()
+    changeSet(author: "-", id: "otp-2755b") {
+        dropColumn(columnName: "project_id", tableName: "processing_option")
+    }
 }

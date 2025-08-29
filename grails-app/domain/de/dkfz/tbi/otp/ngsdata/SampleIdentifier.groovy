@@ -23,12 +23,9 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.hibernate.annotation.ManagedEntity
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.parser.SampleIdentifierParser
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
-import de.dkfz.tbi.otp.utils.SessionUtils
 
 /**
  * RENAMED TO SAMPLE NAME.
@@ -58,15 +55,6 @@ class SampleIdentifier implements Entity {
             // should neither start nor end with a space
             if (val.startsWith(' ') || val.endsWith(' ')) {
                 return 'untrimmed'
-            }
-            String regexFromProcessingOption
-            // Using a new session prevents Hibernate from trying to auto-flush this object, which would fail
-            // because it is still in validation.
-            SessionUtils.withNewSession { session ->
-                regexFromProcessingOption = ProcessingOptionService.findOptionSafe(OptionName.VALIDATOR_SAMPLE_IDENTIFIER_REGEX, null, obj.sample?.project)
-            }
-            if (!(val ==~ (regexFromProcessingOption ?: '.+'))) {
-                return 'unmatching'
             }
         }
     }
