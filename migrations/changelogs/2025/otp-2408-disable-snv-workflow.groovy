@@ -19,31 +19,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package migration
 
-import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
-
-// input
-// List of projects to update the config paths
-Map<String, String> projects = [
-]
-
-Boolean dryRun = true
-
-// script
-ConfigPerProjectAndSeqType.withTransaction {
-    projects.each { Map.Entry<String, String> p ->
-        ConfigPerProjectAndSeqType.withCriteria() {
-            project {
-                eq("name", p.key)
-            }
-        }.each { ConfigPerProjectAndSeqType config ->
-            println "Updating config path for project ${config.project.name} and seq type ${config.seqType.name}"
-            config.configFilePath = config.configFilePath.replace("/omics/odcf/project/external/", "/omics/odcf/project/${p.value}/")
-            config.save(flush: true)
-            println "New config path: ${config.configFilePath}"
-        }
+databaseChangeLog = {
+    changeSet(author: "-", id: "otp-2408") {
+        sql("""
+            UPDATE job_execution_plan
+            SET enabled = false
+            WHERE name = 'Roddy SNV calling';
+        """)
     }
-    assert !dryRun: "This is a dry run, w/o modification of database."
 }
-''
