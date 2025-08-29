@@ -49,7 +49,7 @@ describe('Check trigger alignment page', () => {
 
         // Wait until table is rendered
         cy.get('div#seqTrackTable_processing').should('not.be.visible');
-        //cy.get('#warnAreaAccordion > div').should('not.be.visible'); // reactivate once underlying problem is fixed
+        cy.get('#warnAreaAccordion > div').should('not.be.visible'); // reactivate once underlying problem is fixed
 
         cy.get('table#seqTrackTable').find('tbody tr').should('have.length', 12)
           .each((row) => {
@@ -177,11 +177,15 @@ describe('Check trigger alignment page', () => {
         expect(interception.response.statusCode).to.eq(200);
       });
 
-      //cy.get('#warnAreaAccordion > div').should('not.be.visible'); // reactivate once underlying problem is fixed
+      cy.get('#warnAreaAccordion > div').should('not.be.visible'); // reactivate once underlying problem is fixed
       cy.get('#infos li').should('not.be.empty');
-      cy.get('#resultWarning li').should('have.length', 2)
-        .each((row) => {
-          cy.wrap(row).contains('recreate').contains('since action is CREATE_ALWAYS');
+      cy.get('#resultWarning li').should('have.length', 10)
+        .each((row, i) => {
+          if (i < 2) {
+            cy.wrap(row).contains('recreate').contains('since action is CREATE_ALWAYS');
+          } else {
+            cy.wrap(row).contains('skip').contains('since no sample pairs available');
+          }
         });
       cy.get('#resultWorkPackageList li').should('have.length', 2);
     });
@@ -392,7 +396,8 @@ describe('Check trigger alignment page', () => {
     });
 
     it('should show warnings for missing workflow config when appropriate', () => {
-      const MISSING_CONFIG_COUNT = 8; // the backend should be improved to only return relevant configs EXOME in this case
+      // the backend should be improved to only return relevant configs EXOME in this case
+      const MISSING_CONFIG_COUNT = 1;
 
       // Ensure the config is deleted before starting the test
       deleteConfig();
@@ -446,7 +451,7 @@ describe('Check trigger alignment page', () => {
   });
 });
 
-const addConfig = ()=> {
+const addConfig = () => {
   cy.visit('/workflowSelection/index?project=ExampleProject');
 
   cy.intercept('/workflowSelection/saveAlignmentConfiguration?project=ExampleProject').as('saveConfig');
@@ -473,7 +478,7 @@ const addConfig = ()=> {
   });
 };
 
-const deleteConfig = ()=> {
+const deleteConfig = () => {
   cy.visit('/workflowSelection/index?project=ExampleProject');
 
   cy.intercept('/workflowSelection/deleteConfiguration?project=ExampleProject').as('deleteConfig');
@@ -491,7 +496,7 @@ const deleteConfig = ()=> {
   });
 };
 
-const configureDeciderActions = (action)=> {
+const configureDeciderActions = (action) => {
   // Map action names to their corresponding IDs based on DeciderCreateWorkflowAction enum
   const actionIdMap = {
     'CREATE_MISSING': '1',
