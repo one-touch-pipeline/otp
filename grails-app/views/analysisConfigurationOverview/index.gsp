@@ -51,42 +51,6 @@
         <h1>${g.message(code: 'projectOverview.analysis.title', args: [selectedProject?.name])}</h1>
 
         <div>
-            <h2>${g.message(code: 'projectOverview.sophia.title')}</h2>
-            <sec:ifAllGranted roles="ROLE_OPERATOR">
-                <g:message code="projectOverview.sophia.configure"/>
-                <ul>
-                    <g:each in="${sophiaSeqTypes}" var="seqType">
-                        <li>
-                            <g:if test="${!checkSophiaReferenceGenome[seqType]}">
-                                <g:link controller='ConfigureSophiaPipeline' params='["seqType.id": seqType.id]' class="configure">
-                                    ${seqType.displayNameWithLibraryLayout}
-                                </g:link>
-                            </g:if>
-                            <g:else>
-                                ${seqType.displayNameWithLibraryLayout}: ${checkSophiaReferenceGenome[seqType]}
-                            </g:else>
-                        </li>
-                    </g:each>
-                </ul>
-            </sec:ifAllGranted>
-            <table>
-                <g:each var="row" in="${sophiaConfigTable}" status="i">
-                    <tr>
-                        <g:each var="cell" in="${row}">
-                            <g:if test="${i == 0}">
-                                <th>${cell}</th>
-                            </g:if>
-                            <g:else>
-                                <td class="tableEntry">${cell}</td>
-                            </g:else>
-                        </g:each>
-                    </tr>
-                </g:each>
-            </table>
-            <br>
-        </div>
-
-        <div>
             <h2>${g.message(code: 'projectOverview.aceseq.title')}</h2>
             <sec:ifAllGranted roles="ROLE_OPERATOR">
                 <g:message code="projectOverview.aceseq.configure"/>

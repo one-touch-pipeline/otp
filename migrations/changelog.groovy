@@ -202,4 +202,6 @@ databaseChangeLog = {
     include file: 'changelogs/2025/otp-2408-disable-snv-workflow.groovy'
 
     include file: 'changelogs/2025/otp-2409-disable-indel-workflow.groovy'
+
+    include file: 'changelogs/2025/otp-2411-disable-sophia-workflow.groovy'
 }
