@@ -200,4 +200,6 @@ databaseChangeLog = {
     include file: 'changelogs/2025/otp-2737-processing-option-delete-email-storage-admin.groovy'
 
     include file: 'changelogs/2025/otp-2408-disable-snv-workflow.groovy'
+
+    include file: 'changelogs/2025/otp-2409-disable-indel-workflow.groovy'
 }
