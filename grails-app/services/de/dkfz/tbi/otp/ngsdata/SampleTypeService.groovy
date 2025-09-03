@@ -103,11 +103,6 @@ class SampleTypeService {
     }
 
     @CompileDynamic
-    List<SampleType> findAllBySpecificReferenceGenome(SampleType.SpecificReferenceGenome specificReferenceGenome) {
-        return SampleType.findAllBySpecificReferenceGenome(specificReferenceGenome)
-    }
-
-    @CompileDynamic
     List<SampleType> findAllUsedOnceByProjectAndSeqType(Project project, SeqType seqType) {
         return SeqTrack.createCriteria().list {
             projections {
@@ -116,9 +111,6 @@ class SampleTypeService {
                 }
             }
             sample {
-                sampleType {
-                    eq('specificReferenceGenome', SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC)
-                }
                 individual {
                     eq('project', project)
                 }

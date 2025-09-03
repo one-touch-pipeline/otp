@@ -80,17 +80,6 @@ class SampleTypeSpec extends Specification implements DataTest, DomainFactoryCor
         'sample&type' | 'validator.path.component'
     }
 
-    void "validate, when specificReferenceGenome is null, then validation should fail"() {
-        when:
-        SampleType sampleType = new SampleType(
-                name: 'sample-type',
-                specificReferenceGenome: null,
-        )
-
-        then:
-        TestCase.assertValidateError(sampleType, 'specificReferenceGenome', 'nullable', null)
-    }
-
     void "validate, when name already exist with underscore, then validation should pass"() {
         // Some legacy objects has already underscore and needs therefore pass the revalidation
         given:

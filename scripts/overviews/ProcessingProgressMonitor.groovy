@@ -218,7 +218,7 @@ Closure showSeqTracks = { Collection<SeqTrack> seqTracks ->
     output << "\n"
 
     Collection<RoddyBamFile> bamFilesFinishedAlignment =
-            new AllAlignmentsChecker().handle(seqTracksNotWithdrawnFinishedFastqcWorkflow, output)
+            new AllAlignmentsChecker(ctx.referenceGenomeSelectorService).handle(seqTracksNotWithdrawnFinishedFastqcWorkflow, output)
 
     if (!bamFilesFinishedAlignment) {
         return

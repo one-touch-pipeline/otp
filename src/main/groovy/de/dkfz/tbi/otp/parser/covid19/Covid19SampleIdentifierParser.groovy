@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.parser.covid19
 import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
 import de.dkfz.tbi.otp.parser.SampleIdentifierParser
 
@@ -45,7 +44,6 @@ class Covid19SampleIdentifierParser implements SampleIdentifierParser {
                     matcher.group('projectAndCenter') + matcher.group('lifeStatus'),
                     buildSampleTypeDbName(matcher),
                     sampleIdentifier,
-                    SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT,
                     null,
             )
         }

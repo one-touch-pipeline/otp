@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.parser.hipo
 import groovy.transform.TupleConstructor
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SampleTypePerProject
 import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
 import de.dkfz.tbi.otp.parser.SampleIdentifierParser
@@ -95,7 +94,6 @@ class HipoSampleIdentifierParser implements SampleIdentifierParser {
                 /* repetition: */ repetition,
                 /* v8 */ v8,
                 /* experiment: */ matcher.group(7),
-                tissueType.specificReferenceGenome,
         )
     }
 
@@ -149,8 +147,6 @@ class HipoSampleIdentifier implements ParsedSampleIdentifier {
      * Example: D1 (DNA, attempt 1)
      */
     final String analyteTypeAndNumber
-
-    final SpecificReferenceGenome useSpecificReferenceGenome
 
     @Override
     String getProjectName() {

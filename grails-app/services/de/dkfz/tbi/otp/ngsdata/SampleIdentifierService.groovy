@@ -97,7 +97,7 @@ class SampleIdentifierService {
         return sampleIdentifierParser.tryParseSingleCellWellLabel(sampleIdentifier)
     }
 
-    List<String> createBulkSamples(String sampleText, Delimiter delimiter, Project project, SampleType.SpecificReferenceGenome specificReferenceGenome) {
+    List<String> createBulkSamples(String sampleText, Delimiter delimiter, Project project) {
         Spreadsheet spreadsheet = new Spreadsheet(sampleText, delimiter)
         List<String> output = []
         ValidationContext context = new ValidationContext(spreadsheet)
@@ -117,7 +117,6 @@ class SampleIdentifierService {
                         pid: getCell(BulkSampleCreationHeader.PID),
                         sampleTypeDbName: getCell(BulkSampleCreationHeader.SAMPLE_TYPE),
                         fullSampleName: getCell(BulkSampleCreationHeader.SAMPLE_IDENTIFIER),
-                        useSpecificReferenceGenome: specificReferenceGenome,
                 )
                 SampleIdentifier sampleIdentifier = findOrSaveSampleIdentifier(identifier)
                 checkSampleIdentifier(identifier, sampleIdentifier)
@@ -207,13 +206,8 @@ class SampleIdentifierService {
         if (sanitizedSampleType) {
             return sanitizedSampleType
         }
-        if (identifier.useSpecificReferenceGenome == null) {
-            throw new SampleTypeDoesNotExistException("Sample type '${identifier.sampleTypeDbName}' " +
-                    "does not exist and useSpecificReferenceGenome is not defined")
-        }
         return new SampleType(
                 name: sanitizedSampleTypeDbName,
-                specificReferenceGenome: identifier.useSpecificReferenceGenome,
         ).save(flush: true)
     }
 

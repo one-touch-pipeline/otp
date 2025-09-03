@@ -24,8 +24,6 @@ package de.dkfz.tbi.otp.parser.hipo
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.ngsdata.SampleType
-
 class HipoSampleIdentifierParserSpec extends Specification {
 
     HipoSampleIdentifierParser parser = new HipoSampleIdentifierParser()
@@ -44,7 +42,6 @@ class HipoSampleIdentifierParserSpec extends Specification {
         identifier.sampleNumber == sampleNumber
         identifier.sampleTypeDbName == "tumor${sampleNumber}" + (identifier.repetition ? 'rep1' : "")
         identifier.fullSampleName == fullSampleName
-        identifier.useSpecificReferenceGenome == SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
         where:
         sampleNumber << ['0', '00', '1', '01', '2', '02', '10', '11']
@@ -64,7 +61,6 @@ class HipoSampleIdentifierParserSpec extends Specification {
         identifier.sampleNumber == sampleNumber
         identifier.sampleTypeDbName == "tumor${sampleTypeDbName}".toString()
         identifier.fullSampleName == fullSampleName
-        identifier.useSpecificReferenceGenome == SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
         where:
         sampleNumber || sampleTypeDbName

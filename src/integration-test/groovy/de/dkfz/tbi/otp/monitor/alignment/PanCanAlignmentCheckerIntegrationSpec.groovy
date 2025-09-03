@@ -30,13 +30,14 @@ import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflowExecution.ReferenceGenomeSelectorService
 
 @Rollback
 class PanCanAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerIntegrationSpec {
 
     @Override
     AbstractAlignmentChecker createAlignmentChecker() {
-        return new PanCanAlignmentChecker()
+        return new PanCanAlignmentChecker(Mock(ReferenceGenomeSelectorService))
     }
 
     @Override
@@ -83,12 +84,9 @@ class PanCanAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerInte
         MonitorOutputCollector output = Mock(MonitorOutputCollector)
         checker = Spy(PanCanAlignmentChecker)
 
-        SeqTrack wgs = DomainFactory.createSeqTrack(seqType: DomainFactory.createWholeGenomeSeqType())
-
+        SeqTrack wgs = DomainFactory.createSeqTrack([seqType: DomainFactory.createWholeGenomeSeqType(), sample: createSample(individual: createIndividual(species: findOrCreateHumanSpecies()))])
         SeqTrack wesFine = createExomeSeqTrack(true, true)
-
         SeqTrack wesNoLibraryPreparationKit = createExomeSeqTrack(false, false)
-
         SeqTrack wesNoBedFile = createExomeSeqTrack(true, false)
 
         List<SeqTrack> seqTracks = [
@@ -124,6 +122,7 @@ class PanCanAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerInte
         DomainFactory.createReferenceGenomeProjectSeqType([
                 project: exomeSeqTrack.project,
                 seqType: exomeSeqTrack.seqType,
+                sampleType: exomeSeqTrack.sampleType,
         ])
         if (createBedFile) {
             DomainFactory.createBedFile([

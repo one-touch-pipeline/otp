@@ -34,8 +34,7 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTes
 
     static final String PROJECT_NAME = "project"
     static final String SEQ_TYPE_NAME = "seqType"
-    static final String PROJECT_DEFAULT_SAMPLE_TYPE_NAME = "project-default-sample-type"
-    static final String SAMPLE_TYPE_SPECIFIC_SAMPLE_TYPE_NAME = "sample-type-specific-sample-type"
+    static final String SAMPLE_TYPE_NAME = "sample-type"
 
     static final String OTHER_PROJECT_NAME = "otherProject"
     static final String OTHER_SEQ_TYPE_NAME = "otherSeqType"
@@ -130,13 +129,8 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTes
         given:
         Project project = DomainFactory.createProject(name: PROJECT_NAME)
         SeqType seqType = DomainFactory.createSeqType(name: SEQ_TYPE_NAME)
-        DomainFactory.createSampleType(
-                name: PROJECT_DEFAULT_SAMPLE_TYPE_NAME,
-                specificReferenceGenome: SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        )
-        SampleType sampleTypeSpecificSampleType = DomainFactory.createSampleType(
-                name: SAMPLE_TYPE_SPECIFIC_SAMPLE_TYPE_NAME,
-                specificReferenceGenome: SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
+        SampleType sampleType = DomainFactory.createSampleType(
+                name: SAMPLE_TYPE_NAME,
         )
         ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome()
 
@@ -149,14 +143,13 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTes
                 referenceGenome: referenceGenome,
                 project        : project,
                 seqType        : seqType,
-                sampleType     : sampleTypeSpecificSampleType,
+                sampleType     : sampleType,
         ])
 
         DomainFactory.createProject(name: OTHER_PROJECT_NAME)
         DomainFactory.createSeqType(name: OTHER_SEQ_TYPE_NAME)
         DomainFactory.createSampleType(
                 name: OTHER_SAMPLE_TYPE_NAME,
-                specificReferenceGenome: SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC,
         )
 
         when:
@@ -171,15 +164,11 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTes
         expectValue == (referenceGenomeProjectSeqType != null)
 
         where:
-        projectName        | seqTypeName         | sampleTypeName                        || expectValue
-        PROJECT_NAME       | SEQ_TYPE_NAME       | PROJECT_DEFAULT_SAMPLE_TYPE_NAME      || true
-        PROJECT_NAME       | SEQ_TYPE_NAME       | SAMPLE_TYPE_SPECIFIC_SAMPLE_TYPE_NAME || true
-
-        OTHER_PROJECT_NAME | SEQ_TYPE_NAME       | PROJECT_DEFAULT_SAMPLE_TYPE_NAME      || false
-        OTHER_PROJECT_NAME | SEQ_TYPE_NAME       | SAMPLE_TYPE_SPECIFIC_SAMPLE_TYPE_NAME || false
-        PROJECT_NAME       | OTHER_SEQ_TYPE_NAME | PROJECT_DEFAULT_SAMPLE_TYPE_NAME      || false
-        PROJECT_NAME       | OTHER_SEQ_TYPE_NAME | SAMPLE_TYPE_SPECIFIC_SAMPLE_TYPE_NAME || false
-        PROJECT_NAME       | SEQ_TYPE_NAME       | OTHER_SAMPLE_TYPE_NAME                || false
+        projectName        | seqTypeName         | sampleTypeName         || expectValue
+        PROJECT_NAME       | SEQ_TYPE_NAME       | SAMPLE_TYPE_NAME       || true
+        OTHER_PROJECT_NAME | SEQ_TYPE_NAME       | SAMPLE_TYPE_NAME       || false
+        PROJECT_NAME       | OTHER_SEQ_TYPE_NAME | SAMPLE_TYPE_NAME       || false
+        PROJECT_NAME       | SEQ_TYPE_NAME       | OTHER_SAMPLE_TYPE_NAME || false
     }
 
     void "test getConfiguredReferenceGenomeProjectSeqType for seqTrack"() {
@@ -191,6 +180,7 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTes
                 referenceGenome: referenceGenome,
                 project        : seqTrack.project,
                 seqType        : seqTrack.seqType,
+                sampleType     : seqTrack.sampleType,
         ])
 
         when:
@@ -205,8 +195,7 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTes
         given:
         SeqType seqType = DomainFactory.createSeqType(name: SEQ_TYPE_NAME)
         SampleType sampleType = DomainFactory.createSampleType(
-                name: PROJECT_DEFAULT_SAMPLE_TYPE_NAME,
-                specificReferenceGenome: SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+                name: SAMPLE_TYPE_NAME,
         )
 
         when:
@@ -225,8 +214,7 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTes
         given:
         Project project = DomainFactory.createProject(name: PROJECT_NAME)
         SampleType sampleType = DomainFactory.createSampleType(
-                name: PROJECT_DEFAULT_SAMPLE_TYPE_NAME,
-                specificReferenceGenome: SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+                name: SAMPLE_TYPE_NAME,
         )
 
         when:
@@ -256,26 +244,5 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTes
         then:
         AssertionError e = thrown()
         e.message.contains('sampleType')
-    }
-
-    void "test getConfiguredReferenceGenomeProjectSeqType should fail for sampleType.specificReferenceGenome is unknown"() {
-        given:
-        Project project = DomainFactory.createProject(name: PROJECT_NAME)
-        SeqType seqType = DomainFactory.createSeqType(name: SEQ_TYPE_NAME)
-        SampleType sampleType = DomainFactory.createSampleType(
-                name: OTHER_SAMPLE_TYPE_NAME,
-                specificReferenceGenome: SampleType.SpecificReferenceGenome.UNKNOWN
-        )
-
-        when:
-        ReferenceGenomeProjectSeqTypeService.getConfiguredReferenceGenomeProjectSeqType(
-                project,
-                seqType,
-                sampleType,
-        )
-
-        then:
-        RuntimeException e = thrown()
-        e.message.contains('the way to fetch the reference genome is not defined')
     }
 }

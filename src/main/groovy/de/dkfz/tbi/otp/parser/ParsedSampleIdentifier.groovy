@@ -46,10 +46,5 @@ interface ParsedSampleIdentifier {
      */
     String getFullSampleName()
 
-    /**
-     * in case the sample type is created, should it use the project reference genome or an specific
-     */
-    SampleType.SpecificReferenceGenome getUseSpecificReferenceGenome()
-
     SampleTypePerProject.Category getSampleTypeCategory()
 }

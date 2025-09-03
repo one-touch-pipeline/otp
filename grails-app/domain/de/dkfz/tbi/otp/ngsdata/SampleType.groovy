@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.hibernate.annotation.ManagedEntity
 
-import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.Legacy
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
@@ -32,31 +31,8 @@ import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 @ManagedEntity
 class SampleType implements Entity, Legacy {
 
-    /**
-     * enum to define, if the {@link Project} default or a {@link SampleType}-specific {@link ReferenceGenome} should be used.
-     */
-    @Deprecated
-    enum SpecificReferenceGenome {
-        /**
-         * For this {@link SampleType} the {@link Project} {@link SeqType} default {@link ReferenceGenome} should be used.
-         */
-        USE_PROJECT_DEFAULT,
-        /**
-         * For this {@link SampleType} the {@link Project} {@link SeqType} {@link SampleType} specific {@link ReferenceGenome} should be used.
-         */
-        USE_SAMPLE_TYPE_SPECIFIC,
-        /**
-         * For this {@link SampleType} it is not defined yet. It should be used only for automatically created {@link SampleType}s
-         * and needs to be changed later.
-         */
-        UNKNOWN
-    }
-
     /** This attribute is used externally. Please discuss a change in the team */
     String name
-
-    @Deprecated
-    SpecificReferenceGenome specificReferenceGenome = SpecificReferenceGenome.UNKNOWN
 
     static constraints = {
         name(unique: true, blank: false, validator: { val, obj ->

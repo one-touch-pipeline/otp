@@ -553,7 +553,6 @@ class MetadataImportService {
 
             SeqTrack seqTrack = new SeqTrack(properties)
             seqTrack.save(flush: false)
-
             if (seqTrack.individual.species) {
                 assert seqTrack.individual.species == individualSpecies: "Individual contains value (${seqTrack.individual.species}) " +
                         "that differs from sheet (${individualSpecies})"

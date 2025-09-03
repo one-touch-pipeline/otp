@@ -37,9 +37,6 @@ describe('Check metadata import page', () => {
       cy.fixture('bulkSampleCreation.txt').then((text) => {
         cy.get('textarea#sampleText').clear().type(text);
       });
-
-      cy.get('input#createMissingSampleTypes').click();
-
       cy.get('.btn').contains('Submit').click();
 
       cy.get('#otpToastBox .otpSuccessToast').should('exist').and('contain.text', 'Creation succeeded');

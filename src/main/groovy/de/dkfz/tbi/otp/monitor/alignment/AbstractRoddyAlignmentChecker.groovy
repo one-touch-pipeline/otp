@@ -21,12 +21,20 @@
  */
 package de.dkfz.tbi.otp.monitor.alignment
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
-import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
+import de.dkfz.tbi.otp.workflowExecution.ReferenceGenomeSelectorService
 
 abstract class AbstractRoddyAlignmentChecker extends AbstractAlignmentChecker {
+
+    ReferenceGenomeSelectorService referenceGenomeSelectorService
+
+    protected AbstractRoddyAlignmentChecker(ReferenceGenomeSelectorService referenceGenomeSelectorService) {
+        this.referenceGenomeSelectorService = referenceGenomeSelectorService
+    }
 
     @Override
     List<AbstractBamFile> getBamFileForMergingWorkPackage(List<MergingWorkPackage> mergingWorkPackages, boolean showFinished, boolean showWithdrawn) {
@@ -65,22 +73,20 @@ abstract class AbstractRoddyAlignmentChecker extends AbstractAlignmentChecker {
 
     @Override
     List<SeqTrack> filterWithoutReferenceGenome(List<SeqTrack> seqTracks, MonitorOutputCollector output) {
-        Map<Boolean, List<SeqTrack>> mapSpecificReferenceGenomeType = seqTracks.groupBy {
-            return it.sampleType.specificReferenceGenome == SampleType.SpecificReferenceGenome.UNKNOWN
+        // Group seqTracks by whether they have a reference genome configuration for their project, seqType, and species
+        Map<Boolean, List<SeqTrack>> mapNoReferenceGenome = seqTracks.groupBy { seqTrack ->
+            List<SpeciesWithStrain> speciesWithStrains = [seqTrack.individual.species]
+            return referenceGenomeSelectorService.hasReferenceGenomeConfigForProjectAndSeqTypeAndSpecies(
+                    seqTrack.project,
+                    seqTrack.seqType,
+                    speciesWithStrains
+            )
         }
-        if (mapSpecificReferenceGenomeType[true]) {
-            output << "${MonitorOutputCollector.INDENT}${mapSpecificReferenceGenomeType[true].size()} lanes removed, " +
-                    "because the used sampleType has not defined the type of reference genome (Project or sample type specific): " +
-                    "${mapSpecificReferenceGenomeType[true]*.sampleType*.name.unique().sort()}}"
-        }
-        Map<Boolean, List<SeqTrack>> mapNoReferenceGenome = (mapSpecificReferenceGenomeType[false] ?: []).groupBy {
-            return !it.configuredReferenceGenome
-        }
-        if (mapNoReferenceGenome[true]) {
-            output << "${MonitorOutputCollector.INDENT}${mapNoReferenceGenome[true].size()} lanes removed, " +
+        if (mapNoReferenceGenome[false]) {
+            output << "${MonitorOutputCollector.INDENT}${mapNoReferenceGenome[false]?.size()} lanes removed, " +
                     "because the used project(s) has/have no reference genome(s): " +
-                    "${mapNoReferenceGenome[true]*.project.unique().sort { it.name }}"
+                    "${mapNoReferenceGenome[false]*.project.unique().sort { it.name }}"
         }
-        return mapNoReferenceGenome[false] ?: []
+        return mapNoReferenceGenome[true] ?: []
     }
 }

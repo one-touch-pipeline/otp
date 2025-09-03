@@ -113,7 +113,6 @@ abstract class AbstractHipo2SampleIdentifierParser implements SampleIdentifierPa
                     matcher.group('pid'),
                     realSampleTypeName,
                     sampleIdentifier,
-                    hipoTissueType.specificReferenceGenome,
                     null,
             )
         }

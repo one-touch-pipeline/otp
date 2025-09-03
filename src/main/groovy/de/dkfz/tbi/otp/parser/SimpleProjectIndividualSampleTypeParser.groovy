@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.parser
 
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.ngsdata.SampleTypePerProject
 
 import java.util.regex.Matcher
@@ -45,7 +44,6 @@ class SimpleProjectIndividualSampleTypeParser implements SampleIdentifierParser 
                 matcher.group('pid'),
                 sampleType,
                 matcher.group('displayedSampleIdentifier'),
-                getSpecificReferenceGenomeFromSampleType(sampleType),
                 matcher.group('sampleTypeCategory') as SampleTypePerProject.Category,
         )
     }
@@ -84,13 +82,6 @@ class SimpleProjectIndividualSampleTypeParser implements SampleIdentifierParser 
 
     private static String getDisplayedSampleTypeCategory() {
         return "(UNDEFINED|DISEASE|CONTROL|IGNORED)?"
-    }
-
-    private static SampleType.SpecificReferenceGenome getSpecificReferenceGenomeFromSampleType(String sampleType) {
-        if (sampleType.toLowerCase().endsWith("-x")) {
-            return SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
-        }
-        return SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
     }
 
     private static String getDisplayedSampleIdentifier() {

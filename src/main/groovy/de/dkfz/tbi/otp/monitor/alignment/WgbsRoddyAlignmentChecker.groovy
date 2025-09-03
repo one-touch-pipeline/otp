@@ -26,11 +26,16 @@ import groovy.transform.CompileDynamic
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflowExecution.ReferenceGenomeSelectorService
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 
 class WgbsRoddyAlignmentChecker extends AbstractRoddyAlignmentChecker {
 
     final String workflowName = 'WgbsAlignmentWorkflow'
+
+    WgbsRoddyAlignmentChecker(ReferenceGenomeSelectorService referenceGenomeSelectorService) {
+        super(referenceGenomeSelectorService)
+    }
 
     @Override
     Pipeline.Name getPipeLineName() {

@@ -24,8 +24,6 @@ package de.dkfz.tbi.otp.parser
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.ngsdata.SampleType
-
 class DeepSampleIdentifierParserSpec extends Specification {
 
     DeepSampleIdentifierParser deepSampleIdentifierParser = new DeepSampleIdentifierParser()
@@ -103,7 +101,6 @@ class DeepSampleIdentifierParserSpec extends Specification {
         defaultParsedSampleIdentifier.pid == pid
         defaultParsedSampleIdentifier.sampleTypeDbName == sampleTypeDbName
         defaultParsedSampleIdentifier.fullSampleName == fullSampleName
-        defaultParsedSampleIdentifier.useSpecificReferenceGenome == SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
         where:
         input                           || pid                   | sampleTypeDbName  | fullSampleName

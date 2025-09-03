@@ -32,10 +32,12 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflowExecution.ReferenceGenomeSelectorService
+import de.dkfz.tbi.otp.workflowExecution.Workflow
 
 @Rollback
 @Integration
@@ -44,8 +46,13 @@ class AllAlignmentsCheckerIntegrationSpec extends Specification implements Workf
     void "handle, if SeqTracks given, then return finished RoddyBamFile, call Roddy alignments workflows with correct seqTracks and output SeqTypes not supported by any workflow"() {
         given:
         MonitorOutputCollector output = Mock(MonitorOutputCollector)
-        AllAlignmentsChecker checker = new AllAlignmentsChecker()
+        ReferenceGenomeSelectorService referenceGenomeSelectorService = Mock(ReferenceGenomeSelectorService) {
+            _ * hasReferenceGenomeConfigForProjectAndSeqTypeAndSpecies(_, _, _) >> true
+        }
 
+        AllAlignmentsChecker checker = new AllAlignmentsChecker(referenceGenomeSelectorService)
+
+        SpeciesWithStrain human = findOrCreateHumanSpecies()
         SeqTrack wrongSeqType = DomainFactory.createSeqTrack()
 
         List<SeqTrack> panCanSeqTracks = DomainFactory.createRoddyAlignableSeqTypes().collect {
@@ -53,22 +60,23 @@ class AllAlignmentsCheckerIntegrationSpec extends Specification implements Workf
                     DomainFactory.createMergingWorkPackage(
                             seqType: it,
                             pipeline: DomainFactory.createPanCanPipeline(),
-                    )
+                    ),
+                    [sample: createSample(individual: createIndividual(species: human))]
             )
         }
         DomainFactory.createCellRangerAlignableSeqTypes().collect {
-                DomainFactory.createSeqTrack(
-                        DomainFactory.proxyCellRanger.createMergingWorkPackage(
+            DomainFactory.createSeqTrack(
+                    DomainFactory.proxyCellRanger.createMergingWorkPackage(
                             seqType: it,
                             pipeline: AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.findOrCreatePipeline(),
-                    )
+                    ), [sample: createSample(individual: createIndividual(species: human))]
             )
         }
 
-        createWorkflow(name: PanCancerWorkflow.WORKFLOW, defaultSeqTypesForWorkflowVersions: [DomainFactory.createWholeGenomeSeqType(), DomainFactory.createExomeSeqType(),
-                                                                             DomainFactory.createChipSeqType(),] as Set)
+        Workflow pancan = createWorkflow(name: PanCancerWorkflow.WORKFLOW, defaultSeqTypesForWorkflowVersions: [DomainFactory.createWholeGenomeSeqType(), DomainFactory.createExomeSeqType(),
+                                                                                                                DomainFactory.createChipSeqType(),] as Set)
         createWorkflow(name: WgbsWorkflow.WORKFLOW, defaultSeqTypesForWorkflowVersions: [DomainFactory.createWholeGenomeBisulfiteSeqType(),
-                                                                        DomainFactory.createWholeGenomeBisulfiteTagmentationSeqType(),] as Set)
+                                                                                         DomainFactory.createWholeGenomeBisulfiteTagmentationSeqType(),] as Set)
 
         RnaRoddyBamFile rnaRoddyBamFile = createBamFile([
                 fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
@@ -81,6 +89,15 @@ class AllAlignmentsCheckerIntegrationSpec extends Specification implements Workf
         ].flatten()
 
         List<RoddyBamFile> finishedRoddyBamFiles = [rnaRoddyBamFile]
+        ReferenceGenome referenceGenome = createReferenceGenome(species: [findOrCreateMouseSpecies().species] as Set, speciesWithStrain: [human] as Set)
+        panCanSeqTracks.each { seqTrack ->
+            createReferenceGenomeSelector([
+                    project        : seqTrack.project,
+                    seqType        : seqTrack.seqType,
+                    referenceGenome: referenceGenome,
+                    workflow       : pancan,
+            ])
+        }
 
         when:
         List<RoddyBamFile> result = checker.handle(seqTracks, output)
@@ -99,6 +116,7 @@ class AllAlignmentsCheckerIntegrationSpec extends Specification implements Workf
     }
 
     void "handle, if no SeqTracks given, then return empty list and do not create output"() {
+        given:
         MonitorOutputCollector output = Mock(MonitorOutputCollector)
         AllAlignmentsChecker checker = new AllAlignmentsChecker()
 

@@ -315,6 +315,12 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification imp
         MonitorOutputCollector output = Mock(MonitorOutputCollector)
         checker = Spy(checker.class)
 
+        if (!(checker instanceof CellRangerAlignmentChecker)) {
+            checker.referenceGenomeSelectorService = Mock(ReferenceGenomeSelectorService) {
+                _ * hasReferenceGenomeConfigForProjectAndSeqTypeAndSpecies(_, _, _) >> true
+            }
+        }
+
         SeqTrack wrongSeqType = DomainFactory.createSeqTrack()
 
         List<SeqTrack> noConfigs = createSeqTracks()

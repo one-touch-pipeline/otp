@@ -23,8 +23,6 @@ package de.dkfz.tbi.otp.parser
 
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.SampleType
-
 import java.util.regex.Matcher
 
 @Component
@@ -40,7 +38,6 @@ class DeepSampleIdentifierParser implements SampleIdentifierParser {
                     matcher.group('pid'),
                     "Replicate${replicateNumber}",
                     sampleIdentifier,
-                    SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT,
                     null
             )
         }

@@ -19,26 +19,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-import de.dkfz.tbi.otp.ngsdata.*
-
-// ************ List of Sample Types (one Type per line) ************//
-List sampleTypeNames = """
-#SampleType1
-#SampleType2
-
-""".split("\n").findAll {
-    it && !it.startsWith('#')
-}
-
-SampleType.withTransaction {
-    sampleTypeNames.each {
-        println "create: " + new SampleType (
-                name: it.toString().toLowerCase(),
-        ).save(flush: true)
+databaseChangeLog = {
+    changeSet(author: "-", id: "1753946722313-129") {
+        dropColumn(columnName: "specific_reference_genome", tableName: "sample_type")
     }
-
-    assert false: "DEBUG: transaction intentionally failed to rollback changes"
 }
-
-""

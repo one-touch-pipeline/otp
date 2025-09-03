@@ -85,19 +85,6 @@
                     </td>
                 </tr>
                 <tr>
-                    <td class="table-column-header"><g:message code="bulk.sample.creation.referenceGenomeSource"/></td>
-                    <td>
-                        <label onclick="$.otp.bulkSampleCreation.toggleEnable('createMissingSampleTypes', 'referenceGenomeSource', false)" class="mb-2">
-                            <g:checkBox checked="${createMissingSampleTypes}" name="createMissingSampleTypes" value="${createMissingSampleTypes}"/>
-                            <label for="createMissingSampleTypes"><g:message code="bulk.sample.creation.referenceGenomeSource.createSamples"/></label>
-                        </label>
-                        <g:select name="referenceGenomeSource" class="use-select-2"
-                                  from="${referenceGenomeSources}" value="${referenceGenomeSource}"
-                                  disabled="${!createMissingSampleTypes}"/>
-                    </td>
-                    <td><g:message code="bulk.sample.creation.referenceGenomeSource.info"/></td>
-                </tr>
-                <tr>
                     <td colspan="3">
                         <button type="submit" class="btn btn-primary">${g.message(code: "default.button.submit.label")}</button>
                     </td>

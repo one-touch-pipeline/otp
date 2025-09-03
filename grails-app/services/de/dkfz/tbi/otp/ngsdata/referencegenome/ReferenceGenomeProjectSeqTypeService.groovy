@@ -23,10 +23,7 @@ package de.dkfz.tbi.otp.ngsdata.referencegenome
 
 import groovy.transform.CompileDynamic
 
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType
-import de.dkfz.tbi.otp.ngsdata.SampleType
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -55,48 +52,35 @@ class ReferenceGenomeProjectSeqTypeService {
         )
     }
 
-    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
+    @SuppressWarnings("ThrowRuntimeException")
+    // ignored: will be removed with the old workflow system
     static ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqType(Project project, SeqType seqType, SampleType sampleType) {
         assert project
         assert seqType
         assert sampleType
-        switch (sampleType.specificReferenceGenome) {
-            case SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT:
-                return getConfiguredReferenceGenomeProjectSeqTypeUsingProjectDefault(project, seqType, sampleType)
-            case SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC:
-                return getConfiguredReferenceGenomeProjectSeqTypeUsingSampleTypeSpecific(project, seqType, sampleType)
-            case SampleType.SpecificReferenceGenome.UNKNOWN:
-                throw new RuntimeException("For sample type '${sampleType} the way to fetch the reference genome is not defined.")
-            default:
-                throw new RuntimeException("The value ${sampleType.specificReferenceGenome} for specific reference genome is not known")
+        if (sampleType) {
+            return getConfiguredReferenceGenomeProjectSeqTypeUsingSampleType(project, seqType, sampleType)
         }
+        return getConfiguredReferenceGenomeProjectSeqTypeWithoutSampleType(project, seqType)
     }
 
-    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
+    @SuppressWarnings("ThrowRuntimeException")
+    // ignored: will be removed with the old workflow system
     @CompileDynamic
-    static private ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqTypeUsingProjectDefault(
-            Project project, SeqType seqType, SampleType sampleType) {
-        assert SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT == sampleType.specificReferenceGenome
-        try {
-            return CollectionUtils.atMostOneElement(
-                    ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(project, seqType)
-            )
-        } catch (AssertionError e) {
-            throw new RuntimeException("Could not find a reference genome for project '${project}' and '${seqType}'", e)
-        }
+    static private ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqTypeWithoutSampleType(
+            Project project, SeqType seqType) {
+        return CollectionUtils.atMostOneElement(
+                ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(project, seqType)
+        )
     }
 
-    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
+    @SuppressWarnings("ThrowRuntimeException")
+    // ignored: will be removed with the old workflow system
     @CompileDynamic
-    static private ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqTypeUsingSampleTypeSpecific(
+    static private ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqTypeUsingSampleType(
             Project project, SeqType seqType, SampleType sampleType) {
-        assert SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC == sampleType.specificReferenceGenome
-        try {
-            return CollectionUtils.atMostOneElement(
-                    ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeAndDeprecatedDateIsNull(project, seqType, sampleType)
-            )
-        } catch (AssertionError e) {
-            throw new RuntimeException("Could not find a reference genome for project '${project}' and '${seqType}' and '${sampleType}'", e)
-        }
+        return CollectionUtils.atMostOneElement(
+                ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeAndDeprecatedDateIsNull(project, seqType, sampleType)
+        )
     }
 }

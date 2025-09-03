@@ -767,7 +767,6 @@ class ExampleData {
     SampleType findOrCreateSampleType(String name) {
         return CollectionUtils.atMostOneElement(SampleType.findAllByName(name)) ?: new SampleType([
                 name                   : name,
-                specificReferenceGenome: SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT,
         ]).save(flush: false)
     }
 

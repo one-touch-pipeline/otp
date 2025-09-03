@@ -177,7 +177,7 @@ class MetadataImportServiceIntegrationSpec extends Specification implements Doma
 
         Project project = createProject([speciesWithStrains: [speciesWithStrain] as Set])
 
-        SampleIdentifier sampleIdentifier = DomainFactory.createSampleIdentifier()
+        SampleIdentifier sampleIdentifier = DomainFactory.createSampleIdentifier(sample: createSample(individual: createIndividual(species: speciesWithStrain)))
         sampleIdentifier.individual.project = project
         sampleIdentifier.individual.save(flush: true)
 

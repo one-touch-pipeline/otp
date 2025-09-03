@@ -24,11 +24,16 @@ package de.dkfz.tbi.otp.monitor.alignment
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.workflowExecution.ReferenceGenomeSelectorService
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 
 class RnaRoddyAlignmentChecker extends AbstractRoddyAlignmentChecker {
 
     final String workflowName = 'RnaAlignmentWorkflow'
+
+    RnaRoddyAlignmentChecker(ReferenceGenomeSelectorService referenceGenomeSelectorService) {
+        super(referenceGenomeSelectorService)
+    }
 
     // delete this method when the RNA workflow is migrated to the new system
     @Override

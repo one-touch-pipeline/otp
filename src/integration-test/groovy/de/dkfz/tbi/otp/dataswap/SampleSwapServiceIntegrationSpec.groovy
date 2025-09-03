@@ -39,8 +39,8 @@ import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
 
-import java.nio.file.Path
 import java.nio.file.Files
+import java.nio.file.Path
 
 @Rollback
 @Integration
@@ -77,7 +77,8 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
         ])
         String script = "TEST-MOVE_SAMPLE"
         Individual individual = DomainFactory.createIndividual(project: bamFile.project)
-
+        individual.species = null
+        individual.save(flush: true)
         SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
         seqTrack.sample.mixedInSpecies = [
                 TaxonomyFactoryInstance.INSTANCE.createSpeciesWithStrain(),
@@ -101,7 +102,6 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
 
         Individual oldIndividual = bamFile.individual
         oldIndividual.species = TaxonomyFactoryInstance.INSTANCE.createSpeciesWithStrain()
-
         Path cleanupPath = oldIndividual.getViewByPidPath(seqType).absoluteDataManagementPath.toPath()
 
         SampleType sampleType = bamFile.sampleType

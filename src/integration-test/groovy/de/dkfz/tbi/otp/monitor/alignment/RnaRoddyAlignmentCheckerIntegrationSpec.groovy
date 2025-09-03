@@ -27,13 +27,14 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.workflowExecution.ReferenceGenomeSelectorService
 
 @Rollback
 class RnaRoddyAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerIntegrationSpec implements RoddyRnaFactory {
 
     @Override
     AbstractAlignmentChecker createAlignmentChecker() {
-        return new RnaRoddyAlignmentChecker()
+        return new RnaRoddyAlignmentChecker(Mock(ReferenceGenomeSelectorService))
     }
 
     @Override

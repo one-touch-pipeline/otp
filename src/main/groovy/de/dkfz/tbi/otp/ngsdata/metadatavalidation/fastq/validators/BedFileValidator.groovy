@@ -52,6 +52,9 @@ class BedFileValidator extends AbstractValueTuplesValidator<MetadataValidationCo
     @Autowired
     WorkflowVersionSelectorService workflowVersionSelectorService
 
+    @Autowired
+    ReferenceGenomeProjectSeqTypeService referenceGenomeProjectSeqTypeService
+
     @Override
     Collection<String> getDescriptions() {
         return ["If the sequencing type needs a BED file, the correct BED file for the used library preparation kit should be configured in OTP."]
@@ -110,11 +113,12 @@ class BedFileValidator extends AbstractValueTuplesValidator<MetadataValidationCo
             return
         }
 
-        ReferenceGenome referenceGenome = ReferenceGenomeProjectSeqTypeService.getConfiguredReferenceGenomeProjectSeqType(
+        ReferenceGenomeProjectSeqType rgps = referenceGenomeProjectSeqTypeService.getConfiguredReferenceGenomeProjectSeqType(
                 project,
                 seqType,
                 sampleType,
-        )?.referenceGenome
+        )
+        ReferenceGenome referenceGenome = rgps?.referenceGenome
         if (!referenceGenome) {
             return
         }
@@ -129,7 +133,7 @@ class BedFileValidator extends AbstractValueTuplesValidator<MetadataValidationCo
             String sampleName = valueTuple.getValue(SAMPLE_NAME.name())
             context.addProblem(valueTuple.cells, LogLevel.WARNING, "No BED file is configured for sample '${sampleName}' " +
                     "(reference genome '${referenceGenome.name}') with library preparation kit '${libraryPreparationKitName}'.",
-                    "No BED file is configured for at least on sample.")
+                    "No BED file is configured for at least one sample.")
         }
     }
 }

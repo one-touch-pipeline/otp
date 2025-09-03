@@ -45,9 +45,6 @@ class BulkSampleCreationController {
                 delimiter               : flash.delimiter,
                 header                  : SampleIdentifierService.BulkSampleCreationHeader.values(),
                 sampleText              : flash.sampleText ?: SampleIdentifierService.BulkSampleCreationHeader.getHeaders(Delimiter.COMMA),
-                createMissingSampleTypes: flash.createMissingSampleTypes,
-                referenceGenomeSources  : SampleType.SpecificReferenceGenome.values(),
-                referenceGenomeSource   : flash.referenceGenomeSource,
         ]
     }
 
@@ -59,8 +56,6 @@ class BulkSampleCreationController {
     def submit(CreateBulkSampleCreationCommand cmd) {
         flash.sampleText = cmd.sampleText
         flash.delimiter = cmd.delimiter
-        flash.createMissingSampleTypes = cmd.createMissingSampleTypes
-        flash.referenceGenomeSource = cmd.referenceGenomeSource
 
         if (cmd.hasErrors()) {
             flash.message = new FlashMessage("Error", cmd.errors)
@@ -70,7 +65,6 @@ class BulkSampleCreationController {
                         sampleIdentifierService.removeExcessWhitespaceFromCharacterDelimitedText(cmd.sampleText, cmd.delimiter),
                         cmd.delimiter,
                         projectSelectionService.requestedProject,
-                        cmd.referenceGenomeSource,
                 )
 
                 if (errors) {
@@ -88,16 +82,6 @@ class BulkSampleCreationController {
 class CreateBulkSampleCreationCommand {
     Delimiter delimiter
     String sampleText
-    Boolean createMissingSampleTypes
-    SampleType.SpecificReferenceGenome referenceGenomeSource
-
-    static constraints = {
-        referenceGenomeSource(nullable: true, validator: { val, obj ->
-            if (!(obj.createMissingSampleTypes ^ val == null)) {
-                return "missing"
-            }
-        })
-    }
 }
 
 class UploadCSVCommand {

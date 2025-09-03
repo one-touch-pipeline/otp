@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.parser
 
 import groovy.transform.Immutable
 
-import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.ngsdata.SampleTypePerProject
 
 @Immutable
@@ -34,6 +33,5 @@ class DefaultParsedSampleIdentifier implements ParsedSampleIdentifier {
     String sampleTypeDbName
     String fullSampleName
 
-    SampleType.SpecificReferenceGenome useSpecificReferenceGenome
     SampleTypePerProject.Category sampleTypeCategory
 }

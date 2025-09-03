@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflowExecution.ReferenceGenomeSelectorService
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 
 class PanCanAlignmentChecker extends AbstractRoddyAlignmentChecker {
@@ -39,6 +40,10 @@ class PanCanAlignmentChecker extends AbstractRoddyAlignmentChecker {
             'The following SeqTracks have no bedfile kit'
 
     final String workflowName = 'PanCanWorkflow'
+
+    PanCanAlignmentChecker(ReferenceGenomeSelectorService referenceGenomeSelectorService) {
+        super(referenceGenomeSelectorService)
+    }
 
     @Override
     Pipeline.Name getPipeLineName() {

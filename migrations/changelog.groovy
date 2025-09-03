@@ -193,5 +193,7 @@ databaseChangeLog = {
 
     include file: 'changelogs/2025/otp-2675.groovy'
 
+    include file: 'changelogs/2025/otp-2631.groovy'
+
     include file: 'changelogs/2025/otp-2755-processing-option.groovy'
 }

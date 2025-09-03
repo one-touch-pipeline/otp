@@ -25,7 +25,6 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
 
 class Hipo2SamplePreparationLabSampleIdentifierParserSpec extends AbstractHipo2SampleIdentifierParserSpec {
@@ -67,7 +66,6 @@ class Hipo2SamplePreparationLabSampleIdentifierParserSpec extends AbstractHipo2S
         parsed.pid == identifier.split("-")[0, 1].join("-")
         parsed.sampleTypeDbName == sampleTypeDbName
         parsed.fullSampleName == identifier
-        parsed.useSpecificReferenceGenome == SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
         where:
         identifier             || sampleTypeDbName

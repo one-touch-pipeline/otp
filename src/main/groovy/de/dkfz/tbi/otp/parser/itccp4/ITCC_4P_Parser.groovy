@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.parser.itccp4
 
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
 import de.dkfz.tbi.otp.parser.SampleIdentifierParser
 
@@ -95,15 +94,12 @@ class ITCC_4P_Parser implements SampleIdentifierParser {
             String project = "OE0290_${matcher.group('project')}"
             String pid = "${matcher.group('project')}_${matcher.group('disease')}"
             String sampleType = "${matcher.group('sampleType')}-${matcher.group('materialType')}-${matcher.group('isolateType')}"
-            SampleType.SpecificReferenceGenome specificReferenceGenome = sampleType.startsWith("P") ?
-                    SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC : SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
             return new DefaultParsedSampleIdentifier(
                     project,
                     pid,
                     sampleType,
                     sampleIdentifier,
-                    specificReferenceGenome,
                     null,
             )
         }

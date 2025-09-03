@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.parser.pedion
 import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
 import de.dkfz.tbi.otp.parser.SampleIdentifierParser
 
@@ -100,14 +99,12 @@ class PedionParser implements SampleIdentifierParser {
             String pid = matcher.group(PID_KEY)
             String sampleType = convertToOtpSampleType(matcher)
             String fullIdentifier = matcher.group(SAMPLE_IDENTIFIER_KEY)
-            SampleType.SpecificReferenceGenome specificReferenceGenome = SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
             return new DefaultParsedSampleIdentifier(
                     project,
                     pid,
                     sampleType,
                     fullIdentifier,
-                    specificReferenceGenome,
                     null,
             )
         }

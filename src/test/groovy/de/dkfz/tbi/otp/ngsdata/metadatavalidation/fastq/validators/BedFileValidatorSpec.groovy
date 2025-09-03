@@ -33,10 +33,10 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContex
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.parser.TestSampleIdentifierParser
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
-import de.dkfz.tbi.otp.workflowExecution.WorkflowVersionSelectorService
 import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.otp.utils.spreadsheet.validation.Problem
+import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
+import de.dkfz.tbi.otp.workflowExecution.WorkflowVersionSelectorService
 
 import static de.dkfz.tbi.TestCase.assertContainSame
 
@@ -82,11 +82,11 @@ class BedFileValidatorSpec extends Specification implements DataTest, DomainFact
         SeqType seqType = DomainFactory.createExomeSeqType()
         LibraryPreparationKit libraryPreparationKit = createLibraryPreparationKit(name: LIB_PREP_KIT_NAME)
         Project project
+        SampleType sampleType = createSampleType(name: PARSE_SAMPLE_TYPE)
         if (createSample) {
-            project = DomainFactory.createSampleIdentifier(name: sampleName).project
+            project = DomainFactory.createSampleIdentifier(name: sampleName, sample: DomainFactory.createSample(sampleType: sampleType)).project
         } else {
             project = createProject(name: PARSE_PROJECT)
-            createSampleType(name: PARSE_SAMPLE_TYPE)
         }
         project.sampleIdentifierParserBeanName = SampleIdentifierParserBeanName.DEEP
         project.save(flush: true)
@@ -94,9 +94,10 @@ class BedFileValidatorSpec extends Specification implements DataTest, DomainFact
         ReferenceGenome referenceGenome = createReferenceGenome()
         if (connectProjectToReferenceGenome) {
             DomainFactory.createReferenceGenomeProjectSeqType([
-                    referenceGenome: referenceGenome,
                     project        : project,
                     seqType        : seqType,
+                    referenceGenome: referenceGenome,
+                    sampleType: sampleType,
             ])
         }
         if (createBedFile) {
@@ -113,7 +114,7 @@ class BedFileValidatorSpec extends Specification implements DataTest, DomainFact
 
         Collection<Problem> expectedProblems = expectError ? [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, LogLevel.WARNING,
-                        "No BED file is configured for sample '${sampleName}' (reference genome '${referenceGenome.name}') with library preparation kit '${libraryPreparationKit.name}'.", "No BED file is configured for at least on sample."),
+                        "No BED file is configured for sample '${sampleName}' (reference genome '${referenceGenome.name}') with library preparation kit '${libraryPreparationKit.name}'.", "No BED file is configured for at least one sample."),
         ] : []
 
         when:

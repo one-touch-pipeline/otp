@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.parser.itccp4
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
 
 class ITCC_4P_ParserSpec extends Specification {
@@ -48,73 +47,72 @@ class ITCC_4P_ParserSpec extends Specification {
         defaultParsedSampleIdentifier.pid == pid
         defaultParsedSampleIdentifier.sampleTypeDbName == sampleTypeDbName
         defaultParsedSampleIdentifier.fullSampleName == input
-        defaultParsedSampleIdentifier.useSpecificReferenceGenome == useSpecificReferenceGenome
 
         where:
-        input                                 || pid              | sampleTypeDbName | useSpecificReferenceGenome
-        'ITCC-P4_s01_MB0001_TP01_F01_D01'     || 'ITCC-P4_MB0001' | 'TP01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        input                                 || pid              | sampleTypeDbName
+        'ITCC-P4_s01_MB0001_TP01_F01_D01'     || 'ITCC-P4_MB0001' | 'TP01-F01-D01'
         // different source numbers
-        'ITCC-P4_s02_MB0001_TP01_F01_D01'     || 'ITCC-P4_MB0001' | 'TP01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s21_MB0001_TP01_F01_D01'     || 'ITCC-P4_MB0001' | 'TP01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'ITCC-P4_s02_MB0001_TP01_F01_D01'     || 'ITCC-P4_MB0001' | 'TP01-F01-D01'
+        'ITCC-P4_s21_MB0001_TP01_F01_D01'     || 'ITCC-P4_MB0001' | 'TP01-F01-D01'
         // different disease chars
-        'ITCC-P4_s01_NB0001_TP01_F01_D01'     || 'ITCC-P4_NB0001' | 'TP01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_NS0001_TP01_F01_D01'     || 'ITCC-P4_NS0001' | 'TP01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_RS0001_TP01_F01_D01'     || 'ITCC-P4_RS0001' | 'TP01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_SS0001_TP01_F01_D01'     || 'ITCC-P4_SS0001' | 'TP01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_ES0001_TP01_F01_D01'     || 'ITCC-P4_ES0001' | 'TP01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_OS0001_TP01_F01_D01'     || 'ITCC-P4_OS0001' | 'TP01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_RT0001_TP01_F01_D01'     || 'ITCC-P4_RT0001' | 'TP01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_HG0001_TP01_F01_D01'     || 'ITCC-P4_HG0001' | 'TP01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_EP0001_TP01_F01_D01'     || 'ITCC-P4_EP0001' | 'TP01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_XT0001_TP01_F01_D01'     || 'ITCC-P4_XT0001' | 'TP01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_XX0001_TP01_F01_D01'     || 'ITCC-P4_XX0001' | 'TP01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'ITCC-P4_s01_NB0001_TP01_F01_D01'     || 'ITCC-P4_NB0001' | 'TP01-F01-D01'
+        'ITCC-P4_s01_NS0001_TP01_F01_D01'     || 'ITCC-P4_NS0001' | 'TP01-F01-D01'
+        'ITCC-P4_s01_RS0001_TP01_F01_D01'     || 'ITCC-P4_RS0001' | 'TP01-F01-D01'
+        'ITCC-P4_s01_SS0001_TP01_F01_D01'     || 'ITCC-P4_SS0001' | 'TP01-F01-D01'
+        'ITCC-P4_s01_ES0001_TP01_F01_D01'     || 'ITCC-P4_ES0001' | 'TP01-F01-D01'
+        'ITCC-P4_s01_OS0001_TP01_F01_D01'     || 'ITCC-P4_OS0001' | 'TP01-F01-D01'
+        'ITCC-P4_s01_RT0001_TP01_F01_D01'     || 'ITCC-P4_RT0001' | 'TP01-F01-D01'
+        'ITCC-P4_s01_HG0001_TP01_F01_D01'     || 'ITCC-P4_HG0001' | 'TP01-F01-D01'
+        'ITCC-P4_s01_EP0001_TP01_F01_D01'     || 'ITCC-P4_EP0001' | 'TP01-F01-D01'
+        'ITCC-P4_s01_XT0001_TP01_F01_D01'     || 'ITCC-P4_XT0001' | 'TP01-F01-D01'
+        'ITCC-P4_s01_XX0001_TP01_F01_D01'     || 'ITCC-P4_XX0001' | 'TP01-F01-D01'
         // different disease numbers
-        'ITCC-P4_s01_MB0002_TP01_F01_D01'     || 'ITCC-P4_MB0002' | 'TP01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_MB0023_TP01_F01_D01'     || 'ITCC-P4_MB0023' | 'TP01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_MB0432_TP01_F01_D01'     || 'ITCC-P4_MB0432' | 'TP01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_MB2345_TP01_F01_D01'     || 'ITCC-P4_MB2345' | 'TP01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'ITCC-P4_s01_MB0002_TP01_F01_D01'     || 'ITCC-P4_MB0002' | 'TP01-F01-D01'
+        'ITCC-P4_s01_MB0023_TP01_F01_D01'     || 'ITCC-P4_MB0023' | 'TP01-F01-D01'
+        'ITCC-P4_s01_MB0432_TP01_F01_D01'     || 'ITCC-P4_MB0432' | 'TP01-F01-D01'
+        'ITCC-P4_s01_MB2345_TP01_F01_D01'     || 'ITCC-P4_MB2345' | 'TP01-F01-D01'
         // different sample type chars
-        'ITCC-P4_s01_MB0001_NB01_F01_D01'     || 'ITCC-P4_MB0001' | 'NB01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_MB0001_NT01_F01_D01'     || 'ITCC-P4_MB0001' | 'NT01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_MB0001_TR01_F01_D01'     || 'ITCC-P4_MB0001' | 'TR01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_MB0001_TM01_F01_D01'     || 'ITCC-P4_MB0001' | 'TM01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_MB0001_TT01_F01_D01'     || 'ITCC-P4_MB0001' | 'TT01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_MB0001_PP01_F01_D01'     || 'ITCC-P4_MB0001' | 'PP01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
-        'ITCC-P4_s01_MB0001_PR01_F01_D01'     || 'ITCC-P4_MB0001' | 'PR01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
-        'ITCC-P4_s01_MB0001_PM01_F01_D01'     || 'ITCC-P4_MB0001' | 'PM01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
-        'ITCC-P4_s01_MB0001_PT01_F01_D01'     || 'ITCC-P4_MB0001' | 'PT01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
-        'ITCC-P4_s01_MB0001_OP01_F01_D01'     || 'ITCC-P4_MB0001' | 'OP01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_MB0001_OR01_F01_D01'     || 'ITCC-P4_MB0001' | 'OR01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_MB0001_OM01_F01_D01'     || 'ITCC-P4_MB0001' | 'OM01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_MB0001_OT01_F01_D01'     || 'ITCC-P4_MB0001' | 'OT01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_MB0001_CP01_F01_D01'     || 'ITCC-P4_MB0001' | 'CP01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_MB0001_CR01_F01_D01'     || 'ITCC-P4_MB0001' | 'CR01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_MB0001_CM01_F01_D01'     || 'ITCC-P4_MB0001' | 'CM01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_MB0001_CT01_F01_D01'     || 'ITCC-P4_MB0001' | 'CT01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_MB0001_GE01_F01_D01'     || 'ITCC-P4_MB0001' | 'GE01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_MB0001_XU01_F01_D01'     || 'ITCC-P4_MB0001' | 'XU01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_MB0001_PU01_F01_D01'     || 'ITCC-P4_MB0001' | 'PU01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
-        'ITCC-P4_s01_MB0001_OU01_F01_D01'     || 'ITCC-P4_MB0001' | 'OU01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_MB0001_CU01_F01_D01'     || 'ITCC-P4_MB0001' | 'CU01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'ITCC-P4_s01_MB0001_NB01_F01_D01'     || 'ITCC-P4_MB0001' | 'NB01-F01-D01'
+        'ITCC-P4_s01_MB0001_NT01_F01_D01'     || 'ITCC-P4_MB0001' | 'NT01-F01-D01'
+        'ITCC-P4_s01_MB0001_TR01_F01_D01'     || 'ITCC-P4_MB0001' | 'TR01-F01-D01'
+        'ITCC-P4_s01_MB0001_TM01_F01_D01'     || 'ITCC-P4_MB0001' | 'TM01-F01-D01'
+        'ITCC-P4_s01_MB0001_TT01_F01_D01'     || 'ITCC-P4_MB0001' | 'TT01-F01-D01'
+        'ITCC-P4_s01_MB0001_PP01_F01_D01'     || 'ITCC-P4_MB0001' | 'PP01-F01-D01'
+        'ITCC-P4_s01_MB0001_PR01_F01_D01'     || 'ITCC-P4_MB0001' | 'PR01-F01-D01'
+        'ITCC-P4_s01_MB0001_PM01_F01_D01'     || 'ITCC-P4_MB0001' | 'PM01-F01-D01'
+        'ITCC-P4_s01_MB0001_PT01_F01_D01'     || 'ITCC-P4_MB0001' | 'PT01-F01-D01'
+        'ITCC-P4_s01_MB0001_OP01_F01_D01'     || 'ITCC-P4_MB0001' | 'OP01-F01-D01'
+        'ITCC-P4_s01_MB0001_OR01_F01_D01'     || 'ITCC-P4_MB0001' | 'OR01-F01-D01'
+        'ITCC-P4_s01_MB0001_OM01_F01_D01'     || 'ITCC-P4_MB0001' | 'OM01-F01-D01'
+        'ITCC-P4_s01_MB0001_OT01_F01_D01'     || 'ITCC-P4_MB0001' | 'OT01-F01-D01'
+        'ITCC-P4_s01_MB0001_CP01_F01_D01'     || 'ITCC-P4_MB0001' | 'CP01-F01-D01'
+        'ITCC-P4_s01_MB0001_CR01_F01_D01'     || 'ITCC-P4_MB0001' | 'CR01-F01-D01'
+        'ITCC-P4_s01_MB0001_CM01_F01_D01'     || 'ITCC-P4_MB0001' | 'CM01-F01-D01'
+        'ITCC-P4_s01_MB0001_CT01_F01_D01'     || 'ITCC-P4_MB0001' | 'CT01-F01-D01'
+        'ITCC-P4_s01_MB0001_GE01_F01_D01'     || 'ITCC-P4_MB0001' | 'GE01-F01-D01'
+        'ITCC-P4_s01_MB0001_XU01_F01_D01'     || 'ITCC-P4_MB0001' | 'XU01-F01-D01'
+        'ITCC-P4_s01_MB0001_PU01_F01_D01'     || 'ITCC-P4_MB0001' | 'PU01-F01-D01'
+        'ITCC-P4_s01_MB0001_OU01_F01_D01'     || 'ITCC-P4_MB0001' | 'OU01-F01-D01'
+        'ITCC-P4_s01_MB0001_CU01_F01_D01'     || 'ITCC-P4_MB0001' | 'CU01-F01-D01'
         // different sample type numbers
-        'ITCC-P4_s01_MB0001_TP02_F01_D01'     || 'ITCC-P4_MB0001' | 'TP02-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_MB0001_TP45_F01_D01'     || 'ITCC-P4_MB0001' | 'TP45-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'ITCC-P4_s01_MB0001_TP02_F01_D01'     || 'ITCC-P4_MB0001' | 'TP02-F01-D01'
+        'ITCC-P4_s01_MB0001_TP45_F01_D01'     || 'ITCC-P4_MB0001' | 'TP45-F01-D01'
         // different material type chars
-        'ITCC-P4_s01_MB0001_TP01_E01_D01'     || 'ITCC-P4_MB0001' | 'TP01-E01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'ITCC-P4_s01_MB0001_TP01_E01_D01'     || 'ITCC-P4_MB0001' | 'TP01-E01-D01'
         // different material type numbers
-        'ITCC-P4_s01_MB0001_TP01_F02_D01'     || 'ITCC-P4_MB0001' | 'TP01-F02-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_MB0001_TP01_F32_D01'     || 'ITCC-P4_MB0001' | 'TP01-F32-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'ITCC-P4_s01_MB0001_TP01_F02_D01'     || 'ITCC-P4_MB0001' | 'TP01-F02-D01'
+        'ITCC-P4_s01_MB0001_TP01_F32_D01'     || 'ITCC-P4_MB0001' | 'TP01-F32-D01'
         // different isolate type chars
-        'ITCC-P4_s01_MB0001_TP01_F01_R01'     || 'ITCC-P4_MB0001' | 'TP01-F01-R01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_MB0001_TP01_F01_P01'     || 'ITCC-P4_MB0001' | 'TP01-F01-P01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'ITCC-P4_s01_MB0001_TP01_F01_R01'     || 'ITCC-P4_MB0001' | 'TP01-F01-R01'
+        'ITCC-P4_s01_MB0001_TP01_F01_P01'     || 'ITCC-P4_MB0001' | 'TP01-F01-P01'
         // different isolate type numbers
-        'ITCC-P4_s01_MB0001_TP01_F01_D02'     || 'ITCC-P4_MB0001' | 'TP01-F01-D02'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_MB0001_TP01_F01_D23'     || 'ITCC-P4_MB0001' | 'TP01-F01-D23'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'ITCC-P4_s01_MB0001_TP01_F01_D02'     || 'ITCC-P4_MB0001' | 'TP01-F01-D02'
+        'ITCC-P4_s01_MB0001_TP01_F01_D23'     || 'ITCC-P4_MB0001' | 'TP01-F01-D23'
         // with analyse type
-        'ITCC-P4_s01_MB0001_TP01_F01_D01_01'  || 'ITCC-P4_MB0001' | 'TP01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_MB0001_TP01_F01_D01_02'  || 'ITCC-P4_MB0001' | 'TP01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_MB0001_TP01_F01_D01_23'  || 'ITCC-P4_MB0001' | 'TP01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        'ITCC-P4_s01_MB0001_TP01_F01_D01_a45' || 'ITCC-P4_MB0001' | 'TP01-F01-D01'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'ITCC-P4_s01_MB0001_TP01_F01_D01_01'  || 'ITCC-P4_MB0001' | 'TP01-F01-D01'
+        'ITCC-P4_s01_MB0001_TP01_F01_D01_02'  || 'ITCC-P4_MB0001' | 'TP01-F01-D01'
+        'ITCC-P4_s01_MB0001_TP01_F01_D01_23'  || 'ITCC-P4_MB0001' | 'TP01-F01-D01'
+        'ITCC-P4_s01_MB0001_TP01_F01_D01_a45' || 'ITCC-P4_MB0001' | 'TP01-F01-D01'
     }
 
     @Unroll

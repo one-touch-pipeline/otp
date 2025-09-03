@@ -348,8 +348,9 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         SeqPlatform seqPlatform = createSeqPlatform()
         String speciesImportAlias = "SpeciesImportAlias"
         SpeciesWithStrain speciesWithStrain = createSpeciesWithStrain([importAlias: [speciesImportAlias] as Set])
-        SampleIdentifier sampleIdentifier1 = DomainFactory.createSampleIdentifier()
-        SampleIdentifier sampleIdentifier2 = DomainFactory.createSampleIdentifier()
+
+        SampleIdentifier sampleIdentifier1 = DomainFactory.createSampleIdentifier(sample: createSample(individual: createIndividual(species: speciesWithStrain)))
+        SampleIdentifier sampleIdentifier2 = DomainFactory.createSampleIdentifier(sample: createSample(individual: createIndividual(species: speciesWithStrain)))
         SoftwareToolIdentifier softwareToolIdentifier = createSoftwareToolIdentifier([
                 softwareTool: createSoftwareTool([
                         type: SoftwareTool.Type.BASECALLING,
@@ -711,7 +712,7 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
         SeqType chipSeqSingle = DomainFactory.createChipSeqType(SequencingReadType.SINGLE)
         SeqType chipSeqPaired = DomainFactory.createChipSeqType(SequencingReadType.PAIRED)
         SeqType scExomeSingle = DomainFactory.createExomeSeqType(SequencingReadType.SINGLE)
-        Sample sample1 = DomainFactory.createSampleIdentifier(name: 'in_db').sample
+        Sample sample1 = DomainFactory.createSampleIdentifier(name: 'in_db', sample: createSample(individual: createIndividual(species: mouseSpecies))).sample
         Sample sample2
         def (SoftwareTool pipeline1, SoftwareTool pipeline2, SoftwareTool unknownPipeline) =
         ['pipeline1', 'pipeline2', 'unknown'].collect {
@@ -733,12 +734,11 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
 
         Closure<SampleIdentifier> createSampleIdentifierForSample2 = { String identifierName ->
             if (sample2 == null) {
-                sample2 = createSample()
+                sample2 = createSample(individual: createIndividual(species: humanSpecies))
             }
             SampleIdentifier identifier = DomainFactory.createSampleIdentifier(name: identifierName, sample: sample2)
             return identifier
         }
-
         MetadataImportService service = Spy(MetadataImportService) {
             notifyAboutUnsetConfig(_, _, _) >> null
         }
@@ -1130,7 +1130,7 @@ ${ILSE_NO}                      -                           1234          1234  
         ])
         SeqCenter seqCenter = createSeqCenter()
         SeqPlatform seqPlatform = createSeqPlatform()
-        SampleIdentifier sampleIdentifier = DomainFactory.createSampleIdentifier()
+        SampleIdentifier sampleIdentifier = DomainFactory.createSampleIdentifier(sample: createSample(individual: createIndividual(species: humanSpecies)))
         AntibodyTarget antibodyTarget = createAntibodyTarget()
         SoftwareToolIdentifier softwareToolIdentifier = createSoftwareToolIdentifier([
                 softwareTool: createSoftwareTool([
@@ -1311,7 +1311,7 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         SeqType seqType = DomainFactory.createSeqTypePaired()
         SeqCenter seqCenter = createSeqCenter()
         SeqPlatform seqPlatform = createSeqPlatform()
-        SampleIdentifier sampleIdentifier = DomainFactory.createSampleIdentifier()
+        SampleIdentifier sampleIdentifier = DomainFactory.createSampleIdentifier(sample: createSample(individual: createIndividual(species: humanSpecies)))
         SoftwareToolIdentifier softwareToolIdentifier = createSoftwareToolIdentifier([
                 softwareTool: createSoftwareTool([
                         type: SoftwareTool.Type.BASECALLING,

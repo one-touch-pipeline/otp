@@ -28,13 +28,14 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflowExecution.ReferenceGenomeSelectorService
 
 @Rollback
 class WgbsRoddyAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerIntegrationSpec {
 
     @Override
     AbstractAlignmentChecker createAlignmentChecker() {
-        return new WgbsRoddyAlignmentChecker()
+        return new WgbsRoddyAlignmentChecker(Mock(ReferenceGenomeSelectorService))
     }
 
     @Override

@@ -31,45 +31,27 @@ import de.dkfz.tbi.TestCase
 @Integration
 class SeqTrackIntegrationSpec extends Specification {
 
-    ReferenceGenomeProjectSeqType referenceGenomeProjectSeqTypeWithoutSampleType
-    ReferenceGenomeProjectSeqType referenceGenomeProjectSeqTypeWithSampleType
+    ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType
     SeqTrack seqTrack
 
     void setupData() {
         seqTrack = DomainFactory.createSeqTrack().save(flush: true)
-        referenceGenomeProjectSeqTypeWithSampleType = DomainFactory.createReferenceGenomeProjectSeqType(
+        referenceGenomeProjectSeqType = DomainFactory.createReferenceGenomeProjectSeqType(
                 project: seqTrack.project,
                 seqType: seqTrack.seqType,
                 sampleType: seqTrack.sampleType,
         ).save(flush: true)
-        referenceGenomeProjectSeqTypeWithoutSampleType = DomainFactory.createReferenceGenomeProjectSeqType(
-                project: seqTrack.project,
-                seqType: seqTrack.seqType,
-        ).save(flush: true)
     }
 
-    void "test getConfiguredReferenceGenome with project default"() {
+    void "test getConfiguredReferenceGenome"() {
         given:
         setupData()
-        seqTrack.sampleType.specificReferenceGenome = SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
         when:
         ReferenceGenome referenceGenome = seqTrack.configuredReferenceGenome
 
         then:
-        referenceGenomeProjectSeqTypeWithoutSampleType.referenceGenome == referenceGenome
-    }
-
-    void "test getConfiguredReferenceGenome with sample type specific"() {
-        given:
-        setupData()
-        seqTrack.sampleType.specificReferenceGenome = SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
-
-        when:
-        ReferenceGenome referenceGenome = seqTrack.configuredReferenceGenome
-
-        then:
-        referenceGenomeProjectSeqTypeWithSampleType.referenceGenome == referenceGenome
+        referenceGenomeProjectSeqType.referenceGenome == referenceGenome
     }
 
     void "test log"() {

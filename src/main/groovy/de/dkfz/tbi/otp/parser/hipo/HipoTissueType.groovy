@@ -21,8 +21,6 @@
  */
 package de.dkfz.tbi.otp.parser.hipo
 
-import de.dkfz.tbi.otp.ngsdata.SampleType
-
 /**
  * Tissue types as defined by the HIPO project.
  */
@@ -30,12 +28,12 @@ enum HipoTissueType {
     TUMOR                               ('T'),
     METASTASIS                          ('M'),
     SPHERE                              ('S'),
-    XENOGRAFT                           ('X', SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC),
+    XENOGRAFT                           ('X'),
     BLOOD                               ('B'),
     CONTROL                             ('N'),
     CELL                                ('C'),
     INVASIVE_MARGINS                    ('I'),
-    PATIENT_DERIVED_CULTURE             ('P', SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC),
+    PATIENT_DERIVED_CULTURE             ('P'),
     CULTURE_DERIVED_XENOGRAFT           ('Q'),
     PLASMA                              ('L'),
     BUFFY_COAT                          ('F'),
@@ -47,11 +45,8 @@ enum HipoTissueType {
 
     final char key
 
-    final SampleType.SpecificReferenceGenome specificReferenceGenome
-
-    private HipoTissueType(String key, SampleType.SpecificReferenceGenome specificReferenceGenome = SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT) {
+    private HipoTissueType(String key) {
         this.key = key as char
-        this.specificReferenceGenome = specificReferenceGenome
     }
 
     /**

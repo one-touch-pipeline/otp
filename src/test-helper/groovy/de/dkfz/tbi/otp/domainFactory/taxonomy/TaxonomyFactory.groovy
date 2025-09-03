@@ -21,10 +21,10 @@
  */
 package de.dkfz.tbi.otp.domainFactory.taxonomy
 
-import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryHelper
 import de.dkfz.tbi.otp.ngsdata.taxonomy.*
 
-trait TaxonomyFactory implements DomainFactoryCore {
+trait TaxonomyFactory implements DomainFactoryHelper {
 
     Species createSpecies(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(Species, [
@@ -76,7 +76,7 @@ trait TaxonomyFactory implements DomainFactoryCore {
 
     SpeciesWithStrain findOrCreateHumanSpecies() {
         SpeciesCommonName human = findOrCreateSpeciesCommonName("Human")
-        Species homoSapiens = findOrCreateSpecies(human, "homo sapiens")
+        Species homoSapiens = findOrCreateSpecies(human, "Homo sapiens")
         Strain strain = findOrCreateStrain("No strain available")
         Set<String> importAlias = ["human"]
 

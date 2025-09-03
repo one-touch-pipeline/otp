@@ -27,11 +27,29 @@ import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
 import de.dkfz.tbi.otp.monitor.PipelinesChecker
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.workflowExecution.ReferenceGenomeSelectorService
 
 class AllAlignmentsChecker extends PipelinesChecker<SeqTrack> {
 
     static final String HEADER_NOT_SUPPORTED_SEQTYPES =
             'The following SeqTypes are unsupported by any alignment workflow supported by OTP'
+
+    List<AbstractAlignmentChecker> checkers
+
+    AllAlignmentsChecker(ReferenceGenomeSelectorService referenceGenomeSelectorService) {
+        // Initialize checkers with proper service injection for AbstractRoddyAlignmentChecker subclasses
+        PanCanAlignmentChecker panCanChecker = new PanCanAlignmentChecker(referenceGenomeSelectorService)
+        WgbsRoddyAlignmentChecker wgbsChecker = new WgbsRoddyAlignmentChecker(referenceGenomeSelectorService)
+        RnaRoddyAlignmentChecker rnaChecker = new RnaRoddyAlignmentChecker(referenceGenomeSelectorService)
+        CellRangerAlignmentChecker cellRangerChecker = new CellRangerAlignmentChecker()
+
+        checkers = [
+                panCanChecker,
+                wgbsChecker,
+                rnaChecker,
+                cellRangerChecker,
+        ]
+    }
 
     @CompileDynamic
     @Override
@@ -44,13 +62,6 @@ class AllAlignmentsChecker extends PipelinesChecker<SeqTrack> {
         Map<SeqType, List<SeqTrack>> seqTracksBySeqType = seqTracks.groupBy {
             it.seqType
         }
-
-        List<AbstractAlignmentChecker> checkers = [
-                new PanCanAlignmentChecker(),
-                new WgbsRoddyAlignmentChecker(),
-                new RnaRoddyAlignmentChecker(),
-                new CellRangerAlignmentChecker(),
-        ]
 
         Map<AbstractAlignmentChecker, List<SeqTrack>> seqTracksPerChecker = checkers.collectEntries { AbstractAlignmentChecker checker ->
             [

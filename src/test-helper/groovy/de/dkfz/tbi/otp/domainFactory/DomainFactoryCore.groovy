@@ -26,6 +26,7 @@ import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.administration.Mail
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactoryInstance
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactoryInstance
 import de.dkfz.tbi.otp.ngsdata.*
@@ -41,7 +42,7 @@ import de.dkfz.tbi.otp.workflowExecution.Workflow
 import java.time.LocalDate
 import java.time.ZoneId
 
-trait DomainFactoryCore implements DomainFactoryHelper {
+trait DomainFactoryCore implements DomainFactoryHelper, TaxonomyFactory {
 
     ProcessingPriority createProcessingPriority(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(ProcessingPriority, [
@@ -78,13 +79,13 @@ trait DomainFactoryCore implements DomainFactoryHelper {
                 pid    : "pid_${nextId}",
                 type   : Individual.Type.REAL,
                 project: { createProject() },
+                species: { createSpeciesWithStrain() }
         ], properties, saveAndValidate)
     }
 
     SampleType createSampleType(Map properties = [:]) {
         return createDomainObject(SampleType, [
                 name                   : "sample-type-name-${nextId}",
-                specificReferenceGenome: SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT,
         ], properties)
     }
 

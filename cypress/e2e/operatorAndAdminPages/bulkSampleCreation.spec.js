@@ -55,7 +55,6 @@ describe('Check bulk sample creation page', () => {
       });
 
       cy.get('select#delimiter').select(',', { force: true });
-      cy.get('#createMissingSampleTypes').check();
       cy.get('.btn').contains('Submit').click();
 
       cy.wait('@bulkSampleCreation').its('response.statusCode').should('eq', 302);
@@ -93,14 +92,6 @@ describe('Check bulk sample creation page', () => {
 
       cy.get('#sampleText').clear().type('PID,SAMPLE_TYPE,SAMPLE_IDENTIFIER\npid1,tumor1,identifier1');
       cy.get('select#delimiter').select(',', { force: true });
-      cy.get('.btn').contains('Submit').click();
-
-      cy.get('#otpToastBox .otpErrorToast').should('exist')
-        .and('contain.text', 'Creation failed')
-        .and('contain.text', 'Sample type \'tumor1\' does not exist and useSpecificReferenceGenome is not defined');
-
-      // Making sure the missing sample types are created
-      cy.get('#createMissingSampleTypes').check();
       cy.get('.btn').contains('Submit').click();
 
       cy.wait('@bulkSampleCreation').its('response.statusCode').should('eq', 302);

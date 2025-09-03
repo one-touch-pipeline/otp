@@ -45,7 +45,6 @@ class InformSampleIdentifierParser implements SampleIdentifierParser {
                     matcher.group('pid'),
                     buildSampleTypeDbName(matcher),
                     sampleIdentifier,
-                    InformTissueType.fromKey(matcher.group('tissueTypeKey')).specificReferenceGenome,
                     null,
             )
         }
