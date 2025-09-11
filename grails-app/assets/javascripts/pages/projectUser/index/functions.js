@@ -49,12 +49,28 @@ function onToggleAccessToFiles(context) {
   hideLabelAndShowEditor(context);
 }
 
+// eslint-disable-next-line no-unused-vars
+function indicateFileAccessChange(button) {
+  'use strict';
+
+  // eslint-disable-next-line no-param-reassign
+  button.disabled = true;
+  $(button).find('#file-access-spinner').removeClass('d-none');
+  $.otp.toaster.showInfoToast('Info', 'This request may take some time. Please wait a moment.');
+  button.form.submit();
+  return false;
+}
+
 function postFileAccessChange(context) {
   'use strict';
 
   const container = $(context).closest('.modal-editor-switch');
   const orgVal = $('input:hidden[name=hasFileAccess]', container).val();
   const invVal = (orgVal === 'true' ? 'false' : 'true');
+
+  $.otp.toaster.showInfoToast('Info', 'This request may take some time. Please wait a moment.');
+  $('.modal-editor-switch-editor .toggleButtonFileAccess', container)
+    .prop('disabled', true).attr('aria-disabled', 'true');
 
   $.ajax({
     url: $('input:hidden[name=target]', container).val(),
@@ -72,6 +88,9 @@ function postFileAccessChange(context) {
         }
         $('input:hidden[name=hasFileAccess]', container).val(invVal);
         $('input:hidden[name=permissionState]', container).val(response.permissionState);
+
+        $('.modal-editor-switch-editor .toggleButtonFileAccess', container)
+          .prop('disabled', false).attr('aria-disabled', 'false');
       } else {
         $.otp.toaster.showErrorToast('Saving failed.', response.error);
       }

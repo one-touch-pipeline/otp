@@ -34,7 +34,7 @@ describe('Check projectUser page', () => {
 
       cy.get('form .ldap-user').find('input#username').type('dori');
       cy.get('form .ldap-user').find('#projectRoles').select('PI', { force: true });
-      cy.get('.submit-container').find('input[type=submit]').click();
+      cy.get('.submit-container').find('button[type=submit]').click();
 
       cy.wait('@addUserToProject').then((interception) => {
         expect(interception.response.statusCode).to.eq(302);
@@ -151,7 +151,6 @@ describe('Check projectUser page', () => {
     });
 
     shouldBeAbleToToggleNotification('dori');
-
   });
 
   context('when user is normal user with user management rights', () => {
@@ -268,9 +267,12 @@ describe('Check projectUser page', () => {
       getProjectMemberRow('dori').find('td.accessToFiles').as('accessToFilesCell');
 
       cy.get('@accessToFilesCell').find('button.edit').click();
-      cy.get('@accessToFilesCell').find('button:contains("Toggle")').click();
+      cy.get('@accessToFilesCell').find('button.toggleButtonFileAccess').click();
 
       cy.get('#confirmationModal').should('be.visible').find('button#confirmModal').click();
+
+      cy.get('#otpToastBox .otpInfoToast').should('exist')
+        .and('contain.text', 'This request may take some time. Please wait a moment.');
 
       cy.wait('@setAccessToFiles').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);

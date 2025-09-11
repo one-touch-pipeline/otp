@@ -137,7 +137,10 @@
             </sec:access>
             <div class="submit-container mb-4">
                 <div class="pe-2">
-                    <input type="submit" class="btn btn-primary" value="${g.message(code: 'projectUser.addMember.action', args: [selectedProject?.name])}"/>
+                    <button class="btn btn-primary no-wrap" type="submit" id="addUserWithLdapSubmitButton" onclick="indicateFileAccessChange(this);">
+                        <span id="file-access-spinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                        ${g.message(code: 'projectUser.addMember.action', args: [selectedProject?.name])}
+                    </button>
                 </div>
 
                 <div>
@@ -251,7 +254,7 @@
                                             <input type="hidden" name="permissionState" value="${userEntry.fileAccess}">
                                             <span class="icon-${userEntry.fileAccess}"></span>
                                             <br>
-                                            <button class="btn btn-primary" onclick="onToggleAccessToFiles(this)">
+                                            <button class="btn btn-primary toggleButtonFileAccess" onclick="onToggleAccessToFiles(this)">
                                                 <g:message code="default.button.toggle.label"/>
                                             </button>
                                             <br>
