@@ -23,15 +23,15 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
 import groovy.json.JsonSlurper
-import groovy.transform.CompileDynamic
-import groovy.transform.ToString
-import groovy.transform.TupleConstructor
+import groovy.transform.*
 import org.grails.datastore.mapping.query.api.BuildableCriteria
 import org.hibernate.sql.JoinType
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.workflowExecution.commands.CreateCommand
+import de.dkfz.tbi.otp.workflowExecution.commands.UpdateCommand
 
 import java.time.LocalDate
 
@@ -238,7 +238,9 @@ class ConfigSelectorService {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @CompileDynamic
     ExternalWorkflowConfigSelector create(CreateCommand cmd) {
-        assert cmd.type != SelectorType.DEFAULT_VALUES
+        if (cmd.type == SelectorType.DEFAULT_VALUES) {
+            throw new IllegalArgumentException("Cannot create selector with DEFAULT_VALUES type")
+        }
         ExternalWorkflowConfigFragment fragment = new ExternalWorkflowConfigFragment(
                 name: "${cmd.selectorName}-fragment",
                 configValues: cmd.value,
@@ -261,7 +263,9 @@ class ConfigSelectorService {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @CompileDynamic
     ExternalWorkflowConfigSelector update(UpdateCommand cmd) {
-        assert cmd.type != SelectorType.DEFAULT_VALUES
+        if (cmd.type == SelectorType.DEFAULT_VALUES) {
+            throw new IllegalArgumentException("Cannot update selector with DEFAULT_VALUES type")
+        }
         ExternalWorkflowConfigFragment currentFragment = cmd.selector.externalWorkflowConfigFragment
 
         cmd.selector.workflows = cmd.workflows as Set
@@ -295,7 +299,9 @@ class ConfigSelectorService {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @CompileDynamic
     void deprecate(ExternalWorkflowConfigSelector selector) {
-        assert selector.selectorType != SelectorType.DEFAULT_VALUES
+        if (selector.selectorType == SelectorType.DEFAULT_VALUES) {
+            throw new IllegalArgumentException("Cannot deprecate selector with DEFAULT_VALUES type")
+        }
         selector.externalWorkflowConfigFragment.with {
             it.deprecationDate = LocalDate.now()
             it.save(flush: true)

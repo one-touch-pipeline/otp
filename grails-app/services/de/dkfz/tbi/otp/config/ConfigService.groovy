@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.config
 import grails.gorm.transactions.Transactional
 import grails.util.Environment
 import groovy.transform.CompileDynamic
+import groovy.util.logging.Slf4j
 import org.springframework.beans.BeansException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
@@ -39,6 +40,7 @@ import java.nio.file.Path
 import java.time.*
 
 @Transactional
+@Slf4j
 class ConfigService implements ApplicationContextAware {
 
     @Autowired

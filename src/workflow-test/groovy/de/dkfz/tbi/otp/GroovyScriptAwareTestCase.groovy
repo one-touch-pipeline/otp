@@ -23,6 +23,8 @@ package de.dkfz.tbi.otp
 
 import grails.core.GrailsApplication
 
+import java.nio.file.Path
+
 /**
  * This is a trait helping to call groovy scripts from integration tests.
  * The tests that need such functionality must extend this class.
@@ -75,5 +77,14 @@ trait GroovyScriptAwareTestCase {
      */
     void runScript(List scripts) {
         scripts?.each { runScript(it) }
+    }
+
+    /**
+     * Wrapper method to use path instead of file, calling {@link #runScript(File)}.
+     * @param script the path to the script file
+     * @param properties additional properties to set before running the script
+     */
+    void runScript(Path script, Map<String, String> properties = [:]) {
+        runScript(script.toFile(), properties)
     }
 }

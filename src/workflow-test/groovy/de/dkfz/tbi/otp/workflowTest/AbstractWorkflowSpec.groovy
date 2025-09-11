@@ -225,13 +225,13 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
             preCheck()
 
             loadDefaultValuesScripts()
-            createProcessingPriorityObject()
             initFastqImportInstance()
-            initFileSystem()
-            initBaseFolder()
             createUserAndRoles()
             loadInitialisationScripts()
             loadCustomInitialisationScript()
+            createProcessingPriorityObject()
+            initFileSystem()
+            initBaseFolder()
             initProcessingOption()
             initSubmissionOptions()
 
@@ -494,8 +494,8 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                 (Math.abs(HelperUtils.random.nextLong()) % 1000000).toString().padLeft(6, '0'),
         ].join('_')
 
-        referenceDataDirectory = remoteFileSystem.getPath(configService.workflowTestInputRootDir.absolutePath)
-        workingDirectory = remoteFileSystem.getPath(configService.workflowTestResultRootDir.absolutePath).resolve(workSubDirectory)
+        referenceDataDirectory = configService.workflowTestInputRootDir
+        workingDirectory = configService.workflowTestResultRootDir.resolve(workSubDirectory)
         referenceGenomeDirectory = workingDirectory.resolve("reference-genomes")
         additionalDataDirectory = workingDirectory.resolve('additional-data')
 
@@ -540,7 +540,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
 
         // roddy and other paths
         findOrCreateProcessingOption(name: OptionName.RODDY_APPLICATION_INI, value: roddyApplicationPropertyFile.toString())
-        findOrCreateProcessingOption(name: OptionName.RODDY_SHARED_FILES_BASE_DIRECTORY, value: configService.workflowTestRoddySharedFilesBaseDir)
+        findOrCreateProcessingOption(name: OptionName.RODDY_SHARED_FILES_BASE_DIRECTORY, value: configService.workflowTestRoddySharedFilesBaseDir.toString())
         findOrCreateProcessingOption(name: OptionName.BASE_PATH_REFERENCE_GENOME, value: referenceGenomeDirectory.toString())
 
         // cluster and file system
@@ -598,14 +598,21 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      * loads the script provided by OtpProperty.TEST_WORKFLOW_INTI_SCRIPT'
      */
     private void loadCustomInitialisationScript() {
-        File script = configService.workflowTestInitScript
-        if (script.isFile()) {
+        Path script = configService.workflowTestInitScript
+        if (Files.isRegularFile(script)) {
             doWithAuth(ADMIN) {
                 log.debug("Loading custom init script: ${script}")
                 runScript(script)
+                log.debug("Custom init script executed successfully")
+
+                log.debug("Validating workflow test properties")
+                configService.validateWorkflowTestProperties()
+                log.debug("Workflow test properties are valid")
             }
         } else {
-            log.debug("Skipping custom init script")
+            String msg = "Custom init script configured but not found: ${script}"
+            log.error(msg)
+            throw new WorkflowTestException(msg)
         }
     }
 

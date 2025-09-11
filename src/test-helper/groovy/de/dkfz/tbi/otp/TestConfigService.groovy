@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp
 
 import grails.util.Environment
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.ApplicationContext
 
@@ -29,18 +30,26 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.utils.LocalShellHelper
+import de.dkfz.tbi.otp.workflow.shared.WorkflowTestException
+import de.dkfz.tbi.otp.workflowTest.WorkflowTestProperty
 
-import java.nio.file.Files
-import java.nio.file.Path
+import java.nio.file.*
 import java.time.*
 
 @SuppressWarnings('JavaIoPackageAccess')
+@Slf4j
 @Qualifier('TestConfigService')
 class TestConfigService extends ConfigService {
 
     Clock fixedClock
 
     static Map cleanProperties
+
+    /**
+     * Properties set by workflow test initialization scripts
+     * @see WorkflowTestProperty
+     */
+    protected Map<WorkflowTestProperty, String> workflowTestProperties = [:]
 
     /**
      * Do no use the constructor in integration and workflow tests, but use the autowired config service instead
@@ -126,6 +135,7 @@ class TestConfigService extends ConfigService {
 
     void clean() {
         this.otpProperties = new HashMap<>(cleanProperties)
+        this.workflowTestProperties = [:]
         this.fixedClock = null
     }
 
@@ -190,40 +200,105 @@ class TestConfigService extends ConfigService {
                         "OTP needs the primary/'default' group and the 'project' group to differ, in order to test if data re-owning works."
     }
 
-    File getWorkflowTestInputRootDir() {
-        return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_INPUT_DIR))
+    // ==================================================
+    // Getters for script-based workflow test properties
+    // ==================================================
+
+    /**
+     * Store workflow test properties into TestConfig.workflowTestProperties
+     * Note: This method just adds properties and no validation is done.
+     * @see #validateWorkflowTestProperties for validation.
+     */
+    void storeWorkflowTestProperties(Map<WorkflowTestProperty, String> properties) {
+        // Store in TestConfig if configService is available (when running in test context)
+        log.info("Storing ${properties.size()} properties in TestConfig.workflowTestProperties")
+        workflowTestProperties.putAll(properties)
+
+        // Log each property for debugging
+        properties.each { key, value ->
+            log.info("  TestConfig stored: ${key} = ${value}")
+        }
     }
 
-    File getWorkflowTestResultRootDir() {
-        return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_RESULT_DIR))
+    /**
+     * Validate workflow test properties and ensure all required properties exist in WORKFLOW_TEST environment
+     * In addition, all property values are checked with their validator for validity.
+     * Throws WorkflowTestException if any required property is missing or invalid.
+     */
+    void validateWorkflowTestProperties() {
+        // Check for missing required properties
+        Set<WorkflowTestProperty> missingProperties = WorkflowTestProperty.values().findAll { !workflowTestProperties.containsKey(it) }
+        if (missingProperties) {
+            String message = "Required properties are missing: ${missingProperties*.key.join(', ')}"
+            log.error(message)
+            throw new WorkflowTestException(message)
+        }
+
+        // Validate each property using its validator
+        List<String> invalidProperties = workflowTestProperties.collect { WorkflowTestProperty property, String value ->
+            return property.validator && !property.validator.validate(String.valueOf(value))
+                    ? "The value '${value}' for the key '${property.key}' is not valid for the check '${property.validator}'"
+                    : null
+        }.findAll { it != null } as List<String>
+        if (invalidProperties) {
+            String message = "Invalid properties found:\n ${invalidProperties.join('\n')}"
+            log.error(message)
+            throw new WorkflowTestException(message)
+        }
     }
 
-    File getWorkflowTestRoddySharedFilesBaseDir() {
-        return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_RODDY_SHARED_FILES_BASE_DIRECTORY))
+    /**
+     * Get workflow test input directory from script-based properties
+     */
+    Path getWorkflowTestInputRootDir() {
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
+        return fileSystem.getPath(workflowTestProperties.get(WorkflowTestProperty.TEST_WORKFLOW_INPUT_DIR))
     }
 
-    String getWorkflowTestRoddyVirtualEnvsBaseDir() {
-        return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_RODDY_VIRTUAL_ENVS_DIRECTORY))
+    /**
+     * Get workflow test result directory from script-based properties
+     */
+    Path getWorkflowTestResultRootDir() {
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
+        return fileSystem.getPath(workflowTestProperties.get(WorkflowTestProperty.TEST_WORKFLOW_RESULT_DIR))
     }
 
+    /**
+     * Get Roddy shared files base directory from script-based properties
+     */
+    Path getWorkflowTestRoddySharedFilesBaseDir() {
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
+        return fileSystem.getPath(workflowTestProperties.get(WorkflowTestProperty.TEST_WORKFLOW_RODDY_SHARED_FILES_BASE_DIRECTORY))
+    }
+
+    /**
+     * Get Roddy virtual environments directory from script-based properties
+     */
+    Path getWorkflowTestRoddyVirtualEnvsBaseDir() {
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
+        return fileSystem.getPath(workflowTestProperties.get(WorkflowTestProperty.TEST_WORKFLOW_RODDY_VIRTUAL_ENVS_DIRECTORY))
+    }
+
+    /**
+     * Get workflow test queue from script-based properties
+     */
     String getWorkflowTestQueue() {
-        return getAndAssertValue(OtpProperty.TEST_WORKFLOW_QUEUE)
+        return workflowTestProperties.get(WorkflowTestProperty.TEST_WORKFLOW_QUEUE)
     }
 
+    /**
+     * Get workflow test config suffix from script-based properties
+     */
     String getWorkflowTestConfigSuffix() {
-        return getAndAssertValue(OtpProperty.TEST_WORKFLOW_CONFIG_SUFFIX)
+        return workflowTestProperties.get(WorkflowTestProperty.TEST_WORKFLOW_CONFIG_SUFFIX)
     }
 
-    String getWorkflowTestFasttrackQueue() {
-        return getAndAssertValue(OtpProperty.TEST_WORKFLOW_FASTTRACK_QUEUE)
-    }
-
-    String getWorkflowTestFasttrackConfigSuffix() {
-        return getAndAssertValue(OtpProperty.TEST_WORKFLOW_FASTTRACK_CONFIG_SUFFIX)
-    }
-
-    File getWorkflowTestInitScript() {
-        return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_INIT_SCRIPT))
+    /**
+     * Get the workflow test initialization script file.
+     * @return the Path object representing the init script
+     */
+    Path getWorkflowTestInitScript() {
+        return Paths.get(getAndAssertValue(OtpProperty.TEST_WORKFLOW_INIT_SCRIPT))
     }
 
     private String getAndAssertValue(OtpProperty property) {

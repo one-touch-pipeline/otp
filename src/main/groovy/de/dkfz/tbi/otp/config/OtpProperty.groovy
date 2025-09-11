@@ -138,20 +138,6 @@ enum OtpProperty {
 
     TEST_TESTING_GROUP('otp.testing.group', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.WORKFLOW_TEST, UsedIn.TEST)),
     TEST_TESTING_PROJECT_UNIX_GROUP('otp.testing.project.unix.group', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.WORKFLOW_TEST, UsedIn.TEST)),
-    /**
-     * Directory holding the reference data for workflow tests
-     */
-    TEST_WORKFLOW_INPUT_DIR('otp.testing.workflows.input', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.WORKFLOW_TEST)),
-    /**
-     * Base Directory for running the workflow test. Each test creates inside its own sub directory.
-     */
-    TEST_WORKFLOW_RESULT_DIR('otp.testing.workflows.result', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.WORKFLOW_TEST)),
-    TEST_WORKFLOW_RODDY_SHARED_FILES_BASE_DIRECTORY('otp.testing.workflows.roddy.sharedFiles', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.WORKFLOW_TEST)),
-    TEST_WORKFLOW_RODDY_VIRTUAL_ENVS_DIRECTORY('otp.testing.workflows.roddy.virtualEnvs', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.WORKFLOW_TEST)),
-    TEST_WORKFLOW_QUEUE('otp.testing.workflows.queue', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.WORKFLOW_TEST)),
-    TEST_WORKFLOW_CONFIG_SUFFIX('otp.testing.workflows.config.suffix', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.WORKFLOW_TEST)),
-    TEST_WORKFLOW_FASTTRACK_QUEUE('otp.testing.workflows.roddy.fasttrack.queue', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.WORKFLOW_TEST)),
-    TEST_WORKFLOW_FASTTRACK_CONFIG_SUFFIX('otp.testing.workflows.config.fasttrack.suffix', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.WORKFLOW_TEST)),
     TEST_WORKFLOW_INIT_SCRIPT("otp.testing.workflows.init.script", TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.WORKFLOW_TEST)),
 
     /**

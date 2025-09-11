@@ -22,15 +22,13 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import grails.converters.JSON
-import grails.validation.Validateable
 import groovy.transform.TupleConstructor
 import groovy.util.logging.Slf4j
 import org.hibernate.ObjectNotFoundException
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.workflowExecution.commands.*
 
 @Slf4j
 @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -278,38 +276,4 @@ class WorkflowConfigController implements BaseWorkflowConfigController {
         final String orderColumn
         final String renderer
     }
-}
-
-class CreateCommand extends SelectorCommand {
-    String selectorName
-    SelectorType type
-    String value
-
-    Set<ExternalWorkflowConfigSelector> matchingSelectors
-
-    static constraints = {
-        type(blank: false, validator: { val, obj ->
-            if (val == SelectorType.DEFAULT_VALUES) {
-                return 'workflowConfig.validation.check'
-            }
-        })
-    }
-}
-
-class CheckCommand extends SelectorCommand {
-    String fragmentValue
-    SelectorType type
-}
-
-class UpdateCommand extends CreateCommand {
-    ExternalWorkflowConfigSelector selector
-}
-
-class SelectorCommand implements Validateable {
-    List<Workflow> workflows
-    List<WorkflowVersion> workflowVersions
-    List<Project> projects
-    List<SeqType> seqTypes
-    List<ReferenceGenome> referenceGenomes
-    List<LibraryPreparationKit> libraryPreparationKits
 }
