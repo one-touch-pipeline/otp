@@ -196,4 +196,7 @@ databaseChangeLog = {
     include file: 'changelogs/2025/otp-2631.groovy'
 
     include file: 'changelogs/2025/otp-2755-processing-option.groovy'
+
+    include file: 'changelogs/2025/otp-2737-processing-option-delete-email-storage-admin.groovy'
+
 }

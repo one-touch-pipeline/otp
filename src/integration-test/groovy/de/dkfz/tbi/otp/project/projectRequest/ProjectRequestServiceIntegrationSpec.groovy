@@ -473,7 +473,6 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         then:
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_TICKET_SYSTEM) >> ticketingSystemMail
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_CLUSTER_ADMINISTRATION) >> clusterTicketingSystemMail
-        1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_STORAGE_ADMINISTRATION) >> ""
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_PROJECT_CREATION_FREETEXT) >> additionalText
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.CLUSTER_NAME) >> clusterName
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME) >> emailSenderSalutation
@@ -508,7 +507,6 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         ])
         final String ticketingSystemMail = "ticketingSystemMail"
         final String clusterTicketingSystemMail = "clusterTicketingSystemMail"
-        final String storageAdministrationMail = "storageAdministrationMail"
         final String additionalText = "additionalText"
         final String clusterName = "clusterName"
 
@@ -518,7 +516,6 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         then:
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_TICKET_SYSTEM) >> ticketingSystemMail
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_CLUSTER_ADMINISTRATION) >> clusterTicketingSystemMail
-        1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_STORAGE_ADMINISTRATION) >> storageAdministrationMail
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_PROJECT_CREATION_FREETEXT) >> additionalText
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.CLUSTER_NAME) >> clusterName
         1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME) >> emailSenderSalutation
@@ -537,7 +534,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
                 ticketingSystemMail       : ticketingSystemMail,
                 teamSignature             : emailSenderSalutation,
         ]) >> body
-        1 * projectRequestService.mailHelperService.saveMail(subject, body, recipients, ccs + storageAdministrationMail)
+        1 * projectRequestService.mailHelperService.saveMail(subject, body, recipients, ccs)
         0 * _
     }
 

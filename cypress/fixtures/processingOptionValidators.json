@@ -23,8 +23,7 @@
     "options": [
       "EMAIL_TICKET_SYSTEM",
       "EMAIL_SENDER",
-      "EMAIL_REPLY_TO",
-      "EMAIL_STORAGE_ADMINISTRATION"
+      "EMAIL_REPLY_TO"
     ]
   },
   "SINGLE_WORD_TEXT" :
