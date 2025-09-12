@@ -191,6 +191,9 @@ class SecurityConfiguration {
                                     "/impersonate",
                             ).hasRole("SWITCH_USER")
                             .mvcMatchers(
+                                    "/actuator/**",
+                            ).access("hasRole('ROLE_ADMIN')")
+                            .mvcMatchers(
                                     "/",
                                     "/auth/**",
                                     "/info/about",
@@ -256,7 +259,7 @@ class SecurityConfiguration {
 
             authorities.forEach { authority ->
                 if (OidcUserAuthority.isInstance(authority)) {
-                    OidcUserAuthority oidcUserAuthority = (OidcUserAuthority)authority
+                    OidcUserAuthority oidcUserAuthority = (OidcUserAuthority) authority
 
                     OidcIdToken idToken = oidcUserAuthority.idToken
 
@@ -264,7 +267,7 @@ class SecurityConfiguration {
                         User user = userService.findOrCreateUserWithLdapData(idToken.preferredUsername)
 
                         userService.getAuthorities(user).each { Role role ->
-                                mappedAuthorities.add(new SimpleGrantedAuthority(role.authority))
+                            mappedAuthorities.add(new SimpleGrantedAuthority(role.authority))
                         }
 
                         if (keycloakService.isUserDeactivated(user)) {
@@ -306,7 +309,7 @@ class SecurityConfiguration {
                 .responseTimeout(Duration.ofSeconds(60))
                 .doOnConnected { conn ->
                     conn.addHandlerLast(new ReadTimeoutHandler(60, TimeUnit.SECONDS))
-                        .addHandlerLast(new WriteTimeoutHandler(60, TimeUnit.SECONDS))
+                            .addHandlerLast(new WriteTimeoutHandler(60, TimeUnit.SECONDS))
                 }
 
         return WebClient.builder()

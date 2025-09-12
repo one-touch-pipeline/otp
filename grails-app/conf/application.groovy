@@ -36,11 +36,9 @@ spring {
         }
     }
 }
-management {
-    endpoints {
-        enabledByDefault = false
-    }
-}
+
+management.endpoints.enabledByDefault = true
+management.endpoints.web.exposure.include = '*'
 
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
 grails.mime.file.extensions = true // enables the parsing of file extensions from URLs into the request format
