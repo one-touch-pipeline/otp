@@ -34,11 +34,6 @@ class TestSampleIdentifierParser implements SampleIdentifierParser {
     }
 
     @Override
-    boolean tryParsePid(String pid) {
-        return true
-    }
-
-    @Override
     String tryParseSingleCellWellLabel(String sampleIdentifier) {
         return null
     }

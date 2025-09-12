@@ -58,10 +58,8 @@ class Hipo2SamplePreparationLabSampleIdentifierParserSpec extends AbstractHipo2S
 
         when:
         ParsedSampleIdentifier parsed = parser.tryParse(identifier)
-        boolean validPid = parser.tryParsePid(identifier.split("-")[0, 1].join("-"))
 
         then:
-        validPid
         parsed.projectName == "hipo_${identifier.substring(1, 4)}"
         parsed.pid == identifier.split("-")[0, 1].join("-")
         parsed.sampleTypeDbName == sampleTypeDbName

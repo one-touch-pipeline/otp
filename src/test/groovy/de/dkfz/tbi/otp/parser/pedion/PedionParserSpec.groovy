@@ -34,7 +34,6 @@ class PedionParserSpec extends Specification {
     void "parse valid input"() {
         when:
         DefaultParsedSampleIdentifier defaultParsedSampleIdentifier = parser.tryParse(input)
-        boolean validPid = parser.tryParsePid(pid)
 
         then:
         defaultParsedSampleIdentifier
@@ -42,7 +41,6 @@ class PedionParserSpec extends Specification {
         defaultParsedSampleIdentifier.pid == pid
         defaultParsedSampleIdentifier.sampleTypeDbName == sampleTypeDbName
         defaultParsedSampleIdentifier.fullSampleName == input
-        validPid
 
         where:
         input                  || project | pid           | sampleTypeDbName

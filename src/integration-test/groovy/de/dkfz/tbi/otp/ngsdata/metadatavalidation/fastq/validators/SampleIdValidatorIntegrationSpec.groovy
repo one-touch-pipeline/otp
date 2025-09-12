@@ -59,12 +59,6 @@ class SampleIdValidatorIntegrationSpec extends Specification implements DomainFa
                 return null
             }
 
-            @SuppressWarnings("UnusedMethodParameter")
-            @Override
-            boolean tryParsePid(String pid) {
-                return true
-            }
-
             @Override
             String tryParseSingleCellWellLabel(String sampleIdentifier) {
                 return null

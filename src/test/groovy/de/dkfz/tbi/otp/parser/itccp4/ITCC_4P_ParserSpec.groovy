@@ -34,14 +34,11 @@ class ITCC_4P_ParserSpec extends Specification {
     void "parse valid input"() {
         given:
         DefaultParsedSampleIdentifier defaultParsedSampleIdentifier
-        boolean validPid
 
         when:
         defaultParsedSampleIdentifier = itcc4PParser.tryParse(input)
-        validPid = itcc4PParser.tryParsePid(pid)
 
         then:
-        validPid
         defaultParsedSampleIdentifier
         defaultParsedSampleIdentifier.projectName == 'OE0290_ITCC-P4'
         defaultParsedSampleIdentifier.pid == pid

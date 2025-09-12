@@ -38,14 +38,11 @@ class IlpParserSpec extends Specification {
     void "test parse valid input"() {
         given:
         DefaultParsedSampleIdentifier defaultParsedSampleIdentifier
-        boolean validPid
 
         when:
         defaultParsedSampleIdentifier = ilpParser.tryParse(input)
-        validPid = ilpParser.tryParsePid(pid)
 
         then:
-        validPid
         defaultParsedSampleIdentifier.projectName == project
         defaultParsedSampleIdentifier.pid == pid
         defaultParsedSampleIdentifier.sampleTypeDbName == sampleTypeDbName

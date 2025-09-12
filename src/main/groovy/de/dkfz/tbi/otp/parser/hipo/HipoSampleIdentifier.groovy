@@ -36,11 +36,6 @@ class HipoSampleIdentifierParser implements SampleIdentifierParser {
     private final static String REGEX = /^(${PIDREGEX})-([${HipoTissueType.values()*.key.join("")}])(\d{1,2})-(([BDRPACWY])(\d{1,2}))(-RE|-V8)?$/
     private final static String PIDREGEX = "([A-Z])(\\d\\d\\w)-(?:\\w\\w)?\\w\\w\\w(\\w)+"
 
-    @Override
-    boolean tryParsePid(String pid) {
-        return pid =~ "^" + PIDREGEX + /$/
-    }
-
     /**
      * Tries to parse a HIPO sample name.
      * @return A {@link HipoSampleIdentifier} if the supplied string is a valid HIPO sample name,

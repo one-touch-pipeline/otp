@@ -83,11 +83,6 @@ class ITCC_4P_Parser implements SampleIdentifierParser {
     static final String REGEX = /^${PROJECT}_${SOURCE}_${DISEASE}_${SAMPLE_TYPE}_${MATERIAL_TYPE}_${ISOLATE_TYPE}(?:_${ANALYSE_TYPE})?$/
 
     @Override
-    boolean tryParsePid(String pid) {
-        return pid =~ PID
-    }
-
-    @Override
     DefaultParsedSampleIdentifier tryParse(String sampleIdentifier) {
         Matcher matcher = sampleIdentifier =~ REGEX
         if (matcher) {

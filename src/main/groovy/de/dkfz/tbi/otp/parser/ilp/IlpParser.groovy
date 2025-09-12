@@ -74,14 +74,6 @@ class IlpParser implements SampleIdentifierParser {
     }
 
     @Override
-    boolean tryParsePid(String pid) {
-        if (!pid) {
-            return false
-        }
-        return pid ==~ "^${PID}\$"
-    }
-
-    @Override
     String tryParseSingleCellWellLabel(String sampleIdentifier) {
         return null
     }

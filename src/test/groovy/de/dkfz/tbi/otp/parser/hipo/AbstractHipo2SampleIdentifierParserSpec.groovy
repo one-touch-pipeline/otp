@@ -59,10 +59,8 @@ abstract class AbstractHipo2SampleIdentifierParserSpec extends Specification imp
 
         when:
         ParsedSampleIdentifier parsed = parser.tryParse(fullIdentifier)
-        boolean validPid = parser.tryParsePid(fullIdentifier.split("-")[0, 1].join("-"))
 
         then:
-        validPid
         parsed.projectName == projectName
         parsed.pid == fullIdentifier.split("-")[0, 1].join("-")
         parsed.sampleTypeDbName == sampleTypeDbName
@@ -214,22 +212,6 @@ abstract class AbstractHipo2SampleIdentifierParserSpec extends Specification imp
                 '123ABC-N0-1G123',
                 'ABCDEF-B1-D1-RE-RE',
         ]
-    }
-
-    @Unroll
-    void "test parsePid invalid input #pid"() {
-        when:
-        boolean validPid = parser.tryParsePid(pid)
-
-        then:
-        !validPid
-
-        where:
-        pid           | _
-        ''            | _
-        null          | _
-        and: 'Input with invalid pid'
-        'INVALID_PID' | _
     }
 
     @Unroll

@@ -87,11 +87,6 @@ class PedionParser implements SampleIdentifierParser {
     static final String SAMPLE_IDENTIFIER = "(?<${SAMPLE_IDENTIFIER_KEY}>${SAMPLE}${BIH_GEN_FACILITY})"
 
     @Override
-    boolean tryParsePid(String pid) {
-        return pid =~ PID
-    }
-
-    @Override
     DefaultParsedSampleIdentifier tryParse(String sampleIdentifier) {
         Matcher matcher = sampleIdentifier =~ SAMPLE_IDENTIFIER
         if (matcher) {

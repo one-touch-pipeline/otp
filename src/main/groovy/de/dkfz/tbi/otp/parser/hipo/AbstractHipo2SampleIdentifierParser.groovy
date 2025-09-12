@@ -63,11 +63,6 @@ abstract class AbstractHipo2SampleIdentifierParser implements SampleIdentifierPa
 
     static final String REGEX = /^${PID}-${TISSUE}-${ANALYTE_PATTERN}${V8_REP}$/
 
-    @Override
-    boolean tryParsePid(String pid) {
-        return pid =~ "^" + PID + /$/
-    }
-
     @SuppressWarnings('ConstantAssertExpression')
     @Override
     DefaultParsedSampleIdentifier tryParse(String sampleIdentifier) {

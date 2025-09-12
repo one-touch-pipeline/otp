@@ -44,14 +44,11 @@ class SimpleProjectIndividualSampleTypeParserSpec extends Specification {
     void "test parse valid input"() {
         given:
         DefaultParsedSampleIdentifier defaultParsedSampleIdentifier
-        boolean validPid
 
         when:
         defaultParsedSampleIdentifier = simpleProjectIndividualSampleTypeParser.tryParse(input)
-        validPid = simpleProjectIndividualSampleTypeParser.tryParsePid(pid)
 
         then:
-        validPid
         defaultParsedSampleIdentifier.projectName == project
         defaultParsedSampleIdentifier.pid == pid
         defaultParsedSampleIdentifier.sampleTypeDbName == sampleType
@@ -72,14 +69,11 @@ class SimpleProjectIndividualSampleTypeParserSpec extends Specification {
     void "test parse valid input2"() {
         given:
         DefaultParsedSampleIdentifier defaultParsedSampleIdentifier
-        boolean validPid
 
         when:
         defaultParsedSampleIdentifier = simpleProjectIndividualSampleTypeParser.tryParse(input)
-        validPid = simpleProjectIndividualSampleTypeParser.tryParsePid(pid)
 
         then:
-        validPid
         defaultParsedSampleIdentifier.projectName == project
         defaultParsedSampleIdentifier.pid == pid
         defaultParsedSampleIdentifier.sampleTypeDbName == sampleType

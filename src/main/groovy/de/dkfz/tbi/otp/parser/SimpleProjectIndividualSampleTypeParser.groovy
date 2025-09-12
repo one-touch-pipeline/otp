@@ -49,11 +49,6 @@ class SimpleProjectIndividualSampleTypeParser implements SampleIdentifierParser 
     }
 
     @Override
-    boolean tryParsePid(String pid) {
-        return pid =~ "^" + pidRegex + /$/
-    }
-
-    @Override
     String tryParseSingleCellWellLabel(String sampleIdentifier) {
         return null
     }

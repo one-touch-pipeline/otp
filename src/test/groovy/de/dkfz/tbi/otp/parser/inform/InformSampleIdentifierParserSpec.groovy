@@ -34,14 +34,11 @@ class InformSampleIdentifierParserSpec extends Specification {
     void "test parse valid input"() {
         given:
         DefaultParsedSampleIdentifier defaultParsedSampleIdentifier
-        boolean validPid
 
         when:
         defaultParsedSampleIdentifier = informSampleIdentifierParser.tryParse(input)
-        validPid = informSampleIdentifierParser.tryParsePid(pid)
 
         then:
-        validPid
         defaultParsedSampleIdentifier.projectName == 'INFORM1'
         defaultParsedSampleIdentifier.pid == pid
         defaultParsedSampleIdentifier.sampleTypeDbName == sampleTypeDbName

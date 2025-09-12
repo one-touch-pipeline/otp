@@ -35,14 +35,11 @@ class Covid19SampleIdentifierParserSpec extends Specification implements DomainF
     void "test parse valid input"() {
         given:
         DefaultParsedSampleIdentifier defaultParsedSampleIdentifier
-        boolean validPid
 
         when:
         defaultParsedSampleIdentifier = covid19SampleIdentifierParser.tryParse(input)
-        validPid = covid19SampleIdentifierParser.tryParsePid(pid)
 
         then:
-        validPid
         defaultParsedSampleIdentifier.projectName == project
         defaultParsedSampleIdentifier.pid == pid
         defaultParsedSampleIdentifier.sampleTypeDbName == sampleTypeDbName
