@@ -630,6 +630,10 @@ class ProcessingOption implements Entity {
                 "Hipo Parser mapping",
                 Necessity.OPTIONAL, "", TypeValidators.JSON,
         ),
+        ILP_PARSER_MAPPING(
+                "Ilp Parser mapping",
+                Necessity.OPTIONAL, "", TypeValidators.JSON,
+        ),
         ENABLE_PROJECT_REQUEST_PI(
                 "This option depends on the additional field & it has to be named as 'Organizational Unit' in order for this feature to function correctly.",
                 Necessity.OPTIONAL, "false", TypeValidators.BOOLEAN,

@@ -36,6 +36,7 @@ enum SampleIdentifierParserBeanName {
     ITCC_4P('iTCC_4P_Parser', 'ITCC-4P'),
     PEDION('pedionParser', 'PeDiOn'),
     COVID19('covid19SampleIdentifierParser', 'Covid-19'),
+    ILP('ilpParser', 'ILP'),
 
     final String beanName
     final String displayName
