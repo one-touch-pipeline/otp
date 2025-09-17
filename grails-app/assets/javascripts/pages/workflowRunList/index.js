@@ -81,10 +81,16 @@ $(() => {
           return '';
         }
       },
-      { data: 'step', orderable: false },
+      {
+        data: 'step',
+        orderable: false
+      },
       { data: 'dateCreated' },
       { data: 'lastUpdated' },
-      { data: 'duration', orderable: false },
+      {
+        data: 'duration',
+        orderable: false
+      },
       { data: 'id' },
       {
         data(row, type) {
@@ -97,7 +103,8 @@ $(() => {
 
           const failedFinalButton = button(
             $.otp.createLink({
-              controller: 'workflowRunList', action: 'setFailedFinal'
+              controller: 'workflowRunList',
+              action: 'setFailedFinal'
             }),
             row.stepId,
             'Set failed final',
@@ -107,7 +114,8 @@ $(() => {
           );
           const restartStepButton = button(
             $.otp.createLink({
-              controller: 'workflowRunList', action: 'restartStep'
+              controller: 'workflowRunList',
+              action: 'restartStep'
             }),
             row.stepId,
             `Restart ${row.step} step`,
@@ -117,7 +125,8 @@ $(() => {
           );
           const restartRunButton = button(
             $.otp.createLink({
-              controller: 'workflowRunList', action: 'restartRun'
+              controller: 'workflowRunList',
+              action: 'restartRun'
             }),
             row.stepId,
             'Restart run',
@@ -181,7 +190,24 @@ $(() => {
   });
 
   table.on('draw', () => {
-    $('[title]').tooltip({ html: true });
+    $('.tooltip').remove();
+
+    const $els = $('#runs').find('[title], [data-bs-original-title]');
+
+    $els.each((_, el) => {
+      if (!el.getAttribute('title') && el.getAttribute('data-bs-original-title')) {
+        el.setAttribute('title', el.getAttribute('data-bs-original-title'));
+      }
+
+      if (!bootstrap.Tooltip.getInstance(el)) {
+        // eslint-disable-next-line
+        new bootstrap.Tooltip(el, {
+          html: true,
+          container: 'body',
+          trigger: 'hover focus'
+        });
+      }
+    });
   });
 
   const setCount = function (values) {
