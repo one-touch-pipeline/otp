@@ -51,7 +51,7 @@ final class CellRangerFileNames {
             'raw_feature_bc_matrix.h5',
             'molecule_info.h5',
             'cloupe.cloupe',
-    ]
+    ].asImmutable()
 
     static final List<String> CREATED_RESULT_DIRS = [
             'filtered_feature_bc_matrix',

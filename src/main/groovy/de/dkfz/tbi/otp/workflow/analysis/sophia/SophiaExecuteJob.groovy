@@ -27,7 +27,6 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.SophiaWorkflowQualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaWorkFileService
 import de.dkfz.tbi.otp.infrastructure.alignment.AlignmentLinkFileServiceFactoryService
@@ -47,9 +46,6 @@ class SophiaExecuteJob extends AbstractExecuteRoddyPipelineJob implements Sophia
 
     @Autowired
     ReferenceGenomeService referenceGenomeService
-
-    @Autowired
-    SnvCallingService snvCallingService
 
     @Autowired
     SophiaWorkFileService sophiaWorkFileService

@@ -150,6 +150,11 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     protected FastqImportInstance fastqImportInstance
 
     /**
+     * a input base folder for uuid
+     */
+    protected BaseFolder baseFolderInput
+
+    /**
      * a base folder for uuid
      */
     protected BaseFolder baseFolder
@@ -516,6 +521,10 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      */
     private void initBaseFolder() {
         log.debug("creating base folder object")
+        baseFolderInput = createBaseFolder([
+                path    : workingDirectory.resolve('baseFolderInput'),
+                writable: false,
+        ])
         baseFolder = createBaseFolder([
                 path    : workingDirectory.resolve('baseFolder'),
                 writable: true,

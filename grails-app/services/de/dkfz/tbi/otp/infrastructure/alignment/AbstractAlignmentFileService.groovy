@@ -23,15 +23,16 @@ package de.dkfz.tbi.otp.infrastructure.alignment
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.ArtefactFileService
-import de.dkfz.tbi.otp.filestore.FilestoreService
-import de.dkfz.tbi.otp.filestore.WorkFolder
 
-@SuppressWarnings('AbstractClassWithoutAbstractMethod')
-abstract class AbstractAlignmentWorkFileService<T extends AbstractBamFile> implements ArtefactFileService<T>, AbstractAlignmentFileService<T> {
+import java.nio.file.Path
 
-    FilestoreService filestoreService
+trait AbstractAlignmentFileService<T extends AbstractBamFile> implements ArtefactFileService<T> {
 
-    WorkFolder getWorkFolder(T bamFile) {
-        return bamFile.workflowArtefact?.producedBy?.workFolder
+    Path getBamFile(T bamFile) {
+        return getDirectoryPath(bamFile).resolve(bamFile.bamFileName)
+    }
+
+    Path getBaiFile(T bamFile) {
+        return getDirectoryPath(bamFile).resolve(bamFile.baiFileName)
     }
 }

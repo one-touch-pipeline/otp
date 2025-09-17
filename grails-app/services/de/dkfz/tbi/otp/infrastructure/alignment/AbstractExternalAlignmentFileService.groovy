@@ -21,23 +21,14 @@
  */
 package de.dkfz.tbi.otp.infrastructure.alignment
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileService
-import de.dkfz.tbi.otp.dataprocessing.ArtefactFileService
-import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
+import de.dkfz.tbi.otp.dataprocessing.*
 
 import java.nio.file.Path
 
-trait AbstractExternalAlignmentFileService implements ArtefactFileService<ExternallyProcessedBamFile> {
+trait AbstractExternalAlignmentFileService
+        implements ArtefactFileService<ExternallyProcessedBamFile>, AbstractAlignmentFileService<ExternallyProcessedBamFile> {
 
     AbstractBamFileService abstractBamFileService
-
-    Path getBamFile(ExternallyProcessedBamFile bamFile) {
-        return getDirectoryPath(bamFile).resolve(bamFile.bamFileName)
-    }
-
-    Path getBaiFile(ExternallyProcessedBamFile bamFile) {
-        return getDirectoryPath(bamFile).resolve(bamFile.baiFileName)
-    }
 
     List<Path> getFurtherFiles(ExternallyProcessedBamFile bamFile) {
         return bamFile.furtherFiles.collect {

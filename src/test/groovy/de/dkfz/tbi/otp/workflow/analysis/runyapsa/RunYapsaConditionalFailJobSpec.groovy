@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflow.analysis.runyapsa
 
+import spock.lang.Shared
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
@@ -32,17 +33,19 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisConditionalFailJobSpec
 
-import java.nio.file.Path
-import java.nio.file.Paths
+import java.nio.file.*
 
 class RunYapsaConditionalFailJobSpec extends AbstractAnalysisConditionalFailJobSpec {
 
-    final static Path RESULT_LINK_DIR = Paths.get("result/linkDir")
     final static String BEDFILE_FILE_NAME = "bed_file"
 
     BedFile bedFile
     RoddySnvCallingInstance snvInstance
 
+    @Shared
+    Path snvResultLinkDir
+
+    @Override
     void setup() {
         workflowStep = createWorkflowStep([
                 workflowRun: createWorkflowRun([
@@ -54,6 +57,8 @@ class RunYapsaConditionalFailJobSpec extends AbstractAnalysisConditionalFailJobS
                 fileName: BEDFILE_FILE_NAME,
         ])
 
+        snvResultLinkDir = tmpDir.resolve("result/linkDir")
+
         job = new RunYapsaConditionalFailJob()
     }
 
@@ -61,18 +66,17 @@ class RunYapsaConditionalFailJobSpec extends AbstractAnalysisConditionalFailJobS
     void setupWithSeqType(String seqTypeName) {
         super.setupWithSeqType(seqTypeName)
         instance = DomainFactory.createRunYapsaInstanceWithRoddyBamFiles([
-                processingState: AnalysisProcessingStates.IN_PROGRESS,
-                samplePair     : DomainFactory.createSamplePair([
+                processingState   : AnalysisProcessingStates.IN_PROGRESS,
+                samplePair        : DomainFactory.createSamplePair([
                         mergingWorkPackage1: bamFile1.mergingWorkPackage,
                         mergingWorkPackage2: bamFile2.mergingWorkPackage,
                 ]),
+                sampleType1BamFile: bamFile1,
+                sampleType2BamFile: bamFile2,
         ])
         snvInstance = DomainFactory.createRoddySnvCallingInstance([
-                samplePair: DomainFactory.createSamplePair([
-                        mergingWorkPackage1: bamFile1.mergingWorkPackage,
-                        mergingWorkPackage2: bamFile2.mergingWorkPackage,
-                ]),
-                config: DomainFactory.createRoddyWorkflowConfig(
+                samplePair        : instance.samplePair,
+                config            : DomainFactory.createRoddyWorkflowConfig(
                         project: bamFile1.project,
                         seqType: bamFile1.seqType,
                         pipeline: DomainFactory.createRoddySnvPipelineLazy()
@@ -80,6 +84,27 @@ class RunYapsaConditionalFailJobSpec extends AbstractAnalysisConditionalFailJobS
                 sampleType1BamFile: bamFile1,
                 sampleType2BamFile: bamFile2,
         ])
+    }
+
+    @Override
+    void setupMocking() {
+        super.setupMocking()
+        1 * job.concreteArtefactService.getInputArtefact(workflowStep, RunYapsaWorkflow.SNV_INPUT) >> snvInstance
+        job.bedFileService = Mock(BedFileService) {
+            _ * findBedFileByReferenceGenomeAndLibraryPreparationKit(_, _) >> bedFile
+            _ * filePath(_) >> null
+            0 * _
+        }
+        job.snvLinkFileService = Mock(SnvLinkFileService) {
+            1 * getResultRequiredForRunYapsa(_) >> snvResultLinkDir
+            0 * _
+        }
+    }
+
+    @Override
+    void setupFileSystem() {
+        Files.createDirectories(snvResultLinkDir.parent)
+        Files.createFile(snvResultLinkDir)
     }
 
     @Unroll
@@ -91,40 +116,37 @@ class RunYapsaConditionalFailJobSpec extends AbstractAnalysisConditionalFailJobS
             0 * _
         }
         job.snvLinkFileService = Mock(SnvLinkFileService) {
-            1 * getResultRequiredForRunYapsa(_) >> RESULT_LINK_DIR
+            1 * getResultRequiredForRunYapsa(_) >> snvResultLinkDir
+            0 * _
         }
 
         job.fileService = Mock(FileService) {
-            1 * fileIsReadable(RESULT_LINK_DIR) >> link
+            _ * fileIsReadable(_) >> { Path path ->
+                Files.isReadable(path)
+            }
+            0 * _
         }
+
         job.bedFileService = Mock(BedFileService) {
             1 * findBedFileByReferenceGenomeAndLibraryPreparationKit(_, _) >> bedFile
             1 * filePath(bedFile) >> { bedfile() }
+            0 * _
+        }
+
+        if (link) {
+            Files.createDirectories(snvResultLinkDir.parent)
+            Files.createFile(snvResultLinkDir)
         }
 
         when:
-        List<String> expectedErrorMessages = job.doFurtherCheck(workflowStep, bamFile1, bamFile2)
+        List<String> foundErrorMessage = job.doFurtherCheck(workflowStep, bamFile1, bamFile2)
 
         then:
-        TestCase.assertContainSame(expectedErrorMessages, errmsgs)
+        TestCase.assertContainSame(foundErrorMessage, errmsgs())
 
         where:
-        name                   | bedfile                                                   | link  || errmsgs
-        "snv link missing"     | { Paths.get(BEDFILE_FILE_NAME) }                          | false || ["SNV result file ${RESULT_LINK_DIR} cannot be found in linked view-by-pid folder."]
-        "bed file missing"     | { throw new FileNotReadableException(BEDFILE_FILE_NAME) } | true  || ["Required BED file is missing or not readable.\ncan not read file: ${BEDFILE_FILE_NAME}"]
-    }
-
-    @Override
-    void setupMocking() {
-        super.setupMocking()
-        1 * job.concreteArtefactService.getInputArtefact(workflowStep, RunYapsaWorkflow.SNV_INPUT) >> snvInstance
-        job.bedFileService = Mock(BedFileService) {
-            _ * findBedFileByReferenceGenomeAndLibraryPreparationKit(_, _) >> bedFile
-        }
-        job.snvLinkFileService = Mock(SnvLinkFileService) {
-            1 * getResultRequiredForRunYapsa(_) >> RESULT_LINK_DIR
-        }
-
-        1 * job.fileService.fileIsReadable(RESULT_LINK_DIR) >> true
+        name               | bedfile                                                   | link  || errmsgs
+        "snv link missing" | { Paths.get(BEDFILE_FILE_NAME) }                          | false || { ["SNV result file ${snvResultLinkDir} cannot be found in linked view-by-pid folder."] }
+        "bed file missing" | { throw new FileNotReadableException(BEDFILE_FILE_NAME) } | true  || { ["Required BED file is missing or not readable.\ncan not read file: ${BEDFILE_FILE_NAME}"] }
     }
 }

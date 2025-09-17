@@ -87,6 +87,22 @@ class CellRangerWorkFileServiceSpec extends Specification implements ServiceUnit
         service.getDirectoryPath(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}"
     }
 
+    void "test getBamFile"() {
+        given:
+        setupNonUuid()
+
+        expect:
+        service.getBamFile(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.bamFileName}"
+    }
+
+    void "test getBaiFile"() {
+        given:
+        setupNonUuid()
+
+        expect:
+        service.getBaiFile(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.baiFileName}"
+    }
+
     void "test buildWorkDirectoryName"() {
         given:
         setupNonUuid()
@@ -194,6 +210,22 @@ class CellRangerWorkFileServiceSpec extends Specification implements ServiceUnit
 
         expect:
         service.getDirectoryPath(bamFile).toString() == "/base-dir-uuid"
+    }
+
+    void "test getBamFile for uuid structure"() {
+        given:
+        setupUuid()
+
+        expect:
+        service.getBamFile(bamFile).toString() == "/base-dir-uuid/${bamFile.bamFileName}"
+    }
+
+    void "test getBaiFile for uuid structure"() {
+        given:
+        setupUuid()
+
+        expect:
+        service.getBaiFile(bamFile).toString() == "/base-dir-uuid/${bamFile.baiFileName}"
     }
 
     @Unroll

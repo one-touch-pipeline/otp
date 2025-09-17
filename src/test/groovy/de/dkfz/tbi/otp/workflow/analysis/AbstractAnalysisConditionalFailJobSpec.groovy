@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflow.analysis
 
 import grails.testing.gorm.DataTest
+import groovy.transform.TupleConstructor
 import spock.lang.*
 
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -32,6 +33,8 @@ import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.alignment.AlignmentWorkFileServiceFactoryService
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
@@ -39,8 +42,8 @@ import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.otp.workflowExecution.*
 
+import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.Paths
 
 abstract class AbstractAnalysisConditionalFailJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, IsRoddy {
 
@@ -56,8 +59,15 @@ abstract class AbstractAnalysisConditionalFailJobSpec extends Specification impl
 
     Map<String, SeqType> seqTypeMap
 
-    final static Path BASE_DIR = Paths.get("/baseDir")
-    final static Path FASTA_DIR = Paths.get("fasta.fa")
+    @TempDir
+    Path tmpDir
+
+    Path baseDir
+    Path bamFile1Path
+    Path bamFile2Path
+
+    @Shared
+    Path fastaDir
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -102,18 +112,28 @@ abstract class AbstractAnalysisConditionalFailJobSpec extends Specification impl
         Individual individual = createIndividual()
 
         bamFile1 = createBamFile([
-                seqTracks: [createSeqTrack(seqType: seqType), createSeqTrack(seqType: seqType)],
+                seqTracks  : [createSeqTrack(seqType: seqType), createSeqTrack(seqType: seqType)],
                 workPackage: createMergingWorkPackage([
                         seqType: seqType,
-                        sample: createSample([individual: individual]),
+                        sample : createSample([
+                                individual: individual,
+                                sampleType: createSampleType([
+                                        name: "tumor",
+                                ]),
+                        ]),
                 ]),
 
         ])
         bamFile2 = createBamFile([
-                seqTracks: [createSeqTrack(seqType: seqType), createSeqTrack(seqType: seqType)],
+                seqTracks  : [createSeqTrack(seqType: seqType), createSeqTrack(seqType: seqType)],
                 workPackage: createMergingWorkPackage([
                         seqType: seqType,
-                        sample: createSample([individual: individual]),
+                        sample : createSample([
+                                individual: individual,
+                                sampleType: createSampleType([
+                                        name: "control",
+                                ]),
+                        ]),
                 ]),
         ])
 
@@ -128,31 +148,58 @@ abstract class AbstractAnalysisConditionalFailJobSpec extends Specification impl
     }
 
     void setupMocking() {
+        baseDir = tmpDir.resolve("baseDir")
+        bamFile1Path = tmpDir.resolve("bam1.bam")
+        bamFile2Path = tmpDir.resolve("bam2.bam")
+        fastaDir = tmpDir.resolve("fasta.fa")
+
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
             1 * getInputArtefact(workflowStep, "TUMOR_BAM") >> bamFile1
             1 * getInputArtefact(workflowStep, "CONTROL_BAM") >> bamFile2
             1 * getOutputArtefact(workflowStep, "ANALYSIS_OUTPUT") >> instance
             0 * _
         }
-        job.abstractBamFileService = Mock(AbstractBamFileService) {
-            1 * getBaseDirectory(bamFile1) >> BASE_DIR
-            1 * getBaseDirectory(bamFile2) >> BASE_DIR
+        job.alignmentWorkFileServiceFactoryService = Mock(AlignmentWorkFileServiceFactoryService) {
+            1 * getService(bamFile1) >> Mock(PanCancerWorkFileService) {
+                1 * getBamFile(bamFile1) >> bamFile1Path
+                0 * _
+            }
+            1 * getService(bamFile2) >> Mock(PanCancerWorkFileService) {
+                1 * getBamFile(bamFile2) >> bamFile2Path
+                0 * _
+            }
             0 * _
         }
         job.referenceGenomeService = Mock(ReferenceGenomeService) {
-            1 * fastaFilePath(_) >> FASTA_DIR.toFile()
+            1 * fastaFilePath(_) >> fastaDir.toFile()
             0 * _
         }
-        job.fileService = Mock(FileService)
+        job.fileService = Mock(FileService) {
+            _ * fileIsReadable(_) >> { Path path ->
+                Files.isReadable(path)
+            }
+            0 * _
+        }
+    }
+
+    /**
+     * Allows subclass to do needed additional file system setup
+     */
+    // most subclasses do not need this, therefore an empty implementation is provided
+    @SuppressWarnings("EmptyMethodInAbstractClass")
+    void setupFileSystem() {
     }
 
     void "check seqType: #desc, everything is ok, then no exception shall be thrown"() {
         given:
         setupWithSeqType(seqTypeName)
         setupMocking()
-        1 * job.fileService.isFileReadableAndNotEmpty(BASE_DIR.resolve(bamFile1.bamFileName)) >> true
-        1 * job.fileService.isFileReadableAndNotEmpty(BASE_DIR.resolve(bamFile2.bamFileName)) >> true
-        1 * job.fileService.isFileReadableAndNotEmpty(FASTA_DIR) >> true
+        setupFileSystem()
+
+        Files.createDirectories(baseDir)
+        Files.createFile(bamFile1Path)
+        Files.createFile(bamFile2Path)
+        Files.createFile(fastaDir)
 
         when:
         job.check(workflowStep)
@@ -171,24 +218,51 @@ abstract class AbstractAnalysisConditionalFailJobSpec extends Specification impl
         given:
         setupWithSeqType(SeqTypeNames.WHOLE_GENOME.seqTypeName)
         setupMocking()
+        setupFileSystem()
 
-        1 * job.fileService.isFileReadableAndNotEmpty(BASE_DIR.resolve(bamFile1.bamFileName)) >> bam1
-        1 * job.fileService.isFileReadableAndNotEmpty(BASE_DIR.resolve(bamFile2.bamFileName)) >> bam2
-        1 * job.fileService.isFileReadableAndNotEmpty(FASTA_DIR) >> fasta
+        Files.createDirectories(baseDir)
+        bam1.closure(bamFile1Path)
+        bam2.closure(bamFile2Path)
+        fasta.closure(fastaDir)
 
         when:
         job.check(workflowStep)
 
         then:
         final WorkflowException exception = thrown()
-        exception.message.contains(errmsg())
+        exception.message.contains(errmsg1()) && exception.message.contains(errmsg2)
         exception.message.split('\n').size() == errsize
 
         where:
-        name                       | bam1  | bam2  | fasta || errsize | errmsg
-        "tumor bam file missing"   | false | true  | true  || 1       | { bamFile1.bamFileName }
-        "control bam file missing" | true  | false | true  || 1       | { bamFile2.bamFileName }
-        "ref genome missing"       | true  | true  | false || 1       | { "reference genome file" }
-        "all missing"              | false | false | false || 3       | { "reference genome file" }
+        name                               | bam1                              | bam2                              | fasta                             || errsize | errmsg1                  | errmsg2
+        "tumor bam file missing"           | FilePreparation.NONE_EXISTENCE    | FilePreparation.FILE              | FilePreparation.FILE              || 1       | { bamFile1.bamFileName } | "does not exist"
+        "tumor bam file is a directory"    | FilePreparation.DIRECTORY         | FilePreparation.FILE              | FilePreparation.FILE              || 1       | { bamFile1.bamFileName } | "is not a regular file"
+        "tumor bam file is not readable"   | FilePreparation.NOT_READABLE_FILE | FilePreparation.FILE              | FilePreparation.FILE              || 1       | { bamFile1.bamFileName } | "is not readable"
+        "control bam file missing"         | FilePreparation.FILE              | FilePreparation.NONE_EXISTENCE    | FilePreparation.FILE              || 1       | { bamFile2.bamFileName } | "does not exist"
+        "control bam file is a directory"  | FilePreparation.FILE              | FilePreparation.DIRECTORY         | FilePreparation.FILE              || 1       | { bamFile2.bamFileName } | "is not a regular file"
+        "control bam file is not readable" | FilePreparation.FILE              | FilePreparation.NOT_READABLE_FILE | FilePreparation.FILE              || 1       | { bamFile2.bamFileName } | "is not readable"
+        "ref genome missing"               | FilePreparation.FILE              | FilePreparation.FILE              | FilePreparation.NONE_EXISTENCE    || 1       | { fastaDir.toString() }  | "does not exist"
+        "ref genome is a file"             | FilePreparation.FILE              | FilePreparation.FILE              | FilePreparation.DIRECTORY         || 1       | { fastaDir.toString() }  | "is not a regular file"
+        "ref genome is not readable"       | FilePreparation.FILE              | FilePreparation.FILE              | FilePreparation.NOT_READABLE_FILE || 1       | { fastaDir.toString() }  | "is not readable"
+    }
+
+    @TupleConstructor
+    enum FilePreparation {
+        NONE_EXISTENCE({ Path path ->
+            // do nothing
+            path
+        }),
+        FILE({ Path path ->
+            Files.createFile(path)
+        }),
+        DIRECTORY({ Path path ->
+            Files.createDirectory(path)
+        }),
+        NOT_READABLE_FILE({ Path path ->
+            Files.createFile(path)
+            Files.setPosixFilePermissions(path, [] as Set)
+        }),
+
+        final Closure<Path> closure
     }
 }

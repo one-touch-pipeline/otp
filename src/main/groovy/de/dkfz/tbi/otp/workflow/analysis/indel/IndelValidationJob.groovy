@@ -25,7 +25,8 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.indelcalling.*
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelWorkFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.workflow.jobs.AbstractRoddyClusterValidationJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -39,15 +40,14 @@ class IndelValidationJob extends AbstractRoddyClusterValidationJob implements In
     @Autowired
     IndelWorkFileService indelWorkFileService
 
-    @Autowired
-    IndelCallingService indelCallingService
-
     @Override
     protected List<Path> getExpectedFiles(WorkflowStep workflowStep) {
         IndelCallingInstance instance = getIndelInstance(workflowStep)
-        return [indelWorkFileService.getCombinedPlotPath(instance),
+        return [
+                indelWorkFileService.getCombinedPlotPath(instance),
                 indelWorkFileService.getIndelQcJsonFile(instance),
-                indelWorkFileService.getSampleSwapJsonFile(instance)] + indelWorkFileService.getResultFilePathsToValidate(instance)
+                indelWorkFileService.getSampleSwapJsonFile(instance),
+        ] + indelWorkFileService.getResultFilePathsToValidate(instance)
     }
 
     @Override
@@ -69,7 +69,6 @@ class IndelValidationJob extends AbstractRoddyClusterValidationJob implements In
     @Override
     protected void doFurtherValidation(WorkflowStep workflowStep) {
         IndelCallingInstance instance = getIndelInstance(workflowStep)
-
-        indelCallingService.validateInputBamFiles(instance)
+        indelWorkFileService.validateInputBamFiles(instance)
     }
 }

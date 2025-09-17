@@ -24,21 +24,24 @@ package de.dkfz.tbi.otp.workflow.analysis
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.alignment.AlignmentWorkFileServiceFactoryService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractConditionalFailJob
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
+import java.nio.file.Files
 import java.nio.file.Path
 
 @Slf4j
 abstract class AbstractAnalysisConditionalFailJob extends AbstractConditionalFailJob implements AnalysisWorkflowShared {
 
     @Autowired
-    AbstractBamFileService abstractBamFileService
+    AlignmentWorkFileServiceFactoryService alignmentWorkFileServiceFactoryService
 
     @Autowired
     FileService fileService
@@ -84,18 +87,27 @@ abstract class AbstractAnalysisConditionalFailJob extends AbstractConditionalFai
             }
 
             // Ensure all the files exist and readable
-            if (!fileService.isFileReadableAndNotEmpty(abstractBamFileService.getBaseDirectory(it).resolve(it.bamFileName))) {
-                errorMessages.push("Path to bam file of ${it.bamFileName} is either null or not readable." as String)
+            Path path = alignmentWorkFileServiceFactoryService.getService(it).getBamFile(it)
+            if (!Files.exists(path)) {
+                errorMessages.push("Path of ${it.bamFileName} does not exist." as String)
+            } else if (!Files.isRegularFile(path)) {
+                errorMessages.push("Path of ${it.bamFileName} is not a regular file." as String)
+            } else if (!fileService.fileIsReadable(path)) {
+                errorMessages.push("Path of ${it.bamFileName} is not readable." as String)
             }
         }
 
         // Check the reference genome
         ReferenceGenome referenceGenome = bamFileDisease.referenceGenome
-        Path referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(referenceGenome).toPath()
+        Path referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(referenceGenome)?.toPath()
         if (!referenceGenomeFastaFile) {
             errorMessages.push("Reference genome file ${referenceGenomeFastaFile} can not be found." as String)
-        } else if (!fileService.isFileReadableAndNotEmpty(referenceGenomeFastaFile)) {
-            errorMessages.push("Path to the reference genome file ${referenceGenomeFastaFile} is either not readable or empty." as String)
+        } else if (!Files.exists(referenceGenomeFastaFile)) {
+            errorMessages.push("Path to the reference genome file ${referenceGenomeFastaFile} does not exist." as String)
+        } else if (!Files.isRegularFile(referenceGenomeFastaFile)) {
+            errorMessages.push("Path to the reference genome file ${referenceGenomeFastaFile} is not a regular file." as String)
+        } else if (!fileService.fileIsReadable(referenceGenomeFastaFile)) {
+            errorMessages.push("Path to the reference genome file ${referenceGenomeFastaFile} is not readable." as String)
         }
 
         // Some other checks to make

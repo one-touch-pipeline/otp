@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqWorkFileService
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
-import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaWorkFileService
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaLinkFileService
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.jobs.AbstractPrepareJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -42,7 +42,7 @@ class AceseqPrepareJob extends AbstractPrepareJob implements AceseqWorkflowShare
     AceseqWorkFileService aceseqWorkFileService
 
     @Autowired
-    SophiaWorkFileService sophiaWorkFileService
+    SophiaLinkFileService sophiaLinkFileService
 
     @Override
     protected Path buildWorkDirectoryPath(WorkflowStep workflowStep) {
@@ -53,7 +53,7 @@ class AceseqPrepareJob extends AbstractPrepareJob implements AceseqWorkflowShare
     protected Collection<LinkEntry> generateMapForLinking(WorkflowStep workflowStep) {
         AceseqInstance aceseqInstance = getAceseqInstance(workflowStep)
         SophiaInstance sophiaInstance = getSophiaInstance(workflowStep)
-        Path finalAceseqInputPath = sophiaWorkFileService.getFinalAceseqInputFile(sophiaInstance)
+        Path finalAceseqInputPath = sophiaLinkFileService.getFinalAceseqInputFile(sophiaInstance)
 
         return [new LinkEntry([
                 link  : aceseqWorkFileService.getDirectoryPath(aceseqInstance).resolve(finalAceseqInputPath.fileName),

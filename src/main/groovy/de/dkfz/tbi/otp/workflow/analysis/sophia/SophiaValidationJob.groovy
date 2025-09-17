@@ -39,9 +39,6 @@ class SophiaValidationJob extends AbstractRoddyClusterValidationJob implements S
     @Autowired
     SophiaWorkFileService sophiaWorkFileService
 
-    @Autowired
-    SophiaService sophiaService
-
     @Override
     protected List<Path> getExpectedFiles(WorkflowStep workflowStep) {
         SophiaInstance instance = getSophiaInstance(workflowStep)
@@ -66,6 +63,6 @@ class SophiaValidationJob extends AbstractRoddyClusterValidationJob implements S
     @Override
     protected void doFurtherValidation(WorkflowStep workflowStep) {
         SophiaInstance instance = getSophiaInstance(workflowStep)
-        sophiaService.validateInputBamFiles(instance)
+        sophiaWorkFileService.validateInputBamFiles(instance)
     }
 }

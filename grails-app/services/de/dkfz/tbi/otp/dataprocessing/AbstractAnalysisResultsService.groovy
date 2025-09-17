@@ -31,20 +31,20 @@ import org.hibernate.sql.JoinType
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
-import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqService
+import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqLinkFileService
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingService
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelLinkFileService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AbstractSnvCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvLinkFileService
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
-import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaService
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaLinkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.otp.utils.TimeFormats
 import de.dkfz.tbi.otp.utils.exceptions.NotSupportedException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
-import de.dkfz.tbi.otp.utils.TimeFormats
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -54,12 +54,12 @@ import java.nio.file.Path
 @Slf4j
 abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
 
-    AceseqService aceseqService
+    AceseqLinkFileService aceseqLinkFileService
     FileSystemService fileSystemService
-    IndelCallingService indelCallingService
+    IndelLinkFileService indelLinkFileService
     ProjectService projectService
-    SnvCallingService snvCallingService
-    SophiaService sophiaService
+    SnvLinkFileService snvLinkFileService
+    SophiaLinkFileService sophiaLinkFileService
     LinkGenerator grailsLinkGenerator
 
     List getCallingInstancesForProject(Project proj) {
@@ -189,7 +189,6 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
         if (!callingInstance) {
             return []
         }
-
         List<Path> filePaths = []
 
         switch (plotType) {
@@ -197,23 +196,23 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
             case PlotType.ACESEQ_QC_GC_CORRECTED:
             case PlotType.ACESEQ_TCN_DISTANCE_COMBINED_STAR:
             case PlotType.ACESEQ_WG_COVERAGE:
-                filePaths.add(aceseqService.getPlot(callingInstance as AceseqInstance, plotType))
+                filePaths.add(aceseqLinkFileService.getPlot(callingInstance as AceseqInstance, plotType))
                 break
             case PlotType.ACESEQ_ALL:
             case PlotType.ACESEQ_EXTRA:
-                filePaths.addAll(aceseqService.getPlots(callingInstance as AceseqInstance, plotType))
+                filePaths.addAll(aceseqLinkFileService.getPlots(callingInstance as AceseqInstance, plotType))
                 break
             case PlotType.SOPHIA:
-                filePaths.add(sophiaService.getCombinedPlotPath(callingInstance as SophiaInstance))
+                filePaths.add(sophiaLinkFileService.getCombinedPlotPath(callingInstance as SophiaInstance))
                 break
             case PlotType.SNV:
-                filePaths.add(snvCallingService.getCombinedPlotPath(callingInstance as AbstractSnvCallingInstance))
+                filePaths.add(snvLinkFileService.getCombinedPlotPath(callingInstance as AbstractSnvCallingInstance))
                 break
             case PlotType.INDEL:
-                filePaths.add(indelCallingService.getCombinedPlotPath(callingInstance as IndelCallingInstance))
+                filePaths.add(indelLinkFileService.getCombinedPlotPath(callingInstance as IndelCallingInstance))
                 break
             case PlotType.INDEL_TINDA:
-                filePaths.add(indelCallingService.getCombinedPlotPathTiNDA(callingInstance as IndelCallingInstance))
+                filePaths.add(indelLinkFileService.getCombinedPlotPathTiNDA(callingInstance as IndelCallingInstance))
                 break
             default:
                 throw new NotSupportedException("${callingInstance.class.name} is not a valid calling instance")

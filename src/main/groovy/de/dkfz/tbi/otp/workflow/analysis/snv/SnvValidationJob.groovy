@@ -39,9 +39,6 @@ class SnvValidationJob extends AbstractRoddyClusterValidationJob implements SnvW
     @Autowired
     SnvWorkFileService snvWorkFileService
 
-    @Autowired
-    SnvCallingService snvCallingService
-
     @Override
     protected List<Path> getExpectedFiles(WorkflowStep workflowStep) {
         RoddySnvCallingInstance instance = getSnvInstance(workflowStep)
@@ -71,7 +68,6 @@ class SnvValidationJob extends AbstractRoddyClusterValidationJob implements SnvW
     @Override
     protected void doFurtherValidation(WorkflowStep workflowStep) {
         RoddySnvCallingInstance instance = getSnvInstance(workflowStep)
-
-        snvCallingService.validateInputBamFiles(instance)
+        snvWorkFileService.validateInputBamFiles(instance)
     }
 }

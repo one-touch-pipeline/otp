@@ -394,14 +394,11 @@ class DataExportServiceSpec extends Specification implements DataTest, IsRoddy {
         DataExportInput dataExportInput = createAnalysisInput(checkFileStatus, getFileList, mode)
 
         final String instancePath = TEST_BASE_FOLDER + "/instance/path"
-        service.fileService = Mock(FileService) {
-            toFile(_) >> new File(instancePath)
-        }
-        AbstractBamFileAnalysisService<? extends BamFilePairAnalysis> abstractBamFileAnalysisService =
-                Mock(AbstractBamFileAnalysisService)
-        abstractBamFileAnalysisService.getWorkDirectory(_) >> targetFolder
-        service.bamFileAnalysisServiceFactoryService = Mock(BamFileAnalysisServiceFactoryService)
-        service.bamFileAnalysisServiceFactoryService.getService(_) >> abstractBamFileAnalysisService
+        AbstractAnalysisWorkFileService<? extends BamFilePairAnalysis> abstractBamFileAnalysisService =
+                Mock(AbstractAnalysisWorkFileService)
+        _ * abstractBamFileAnalysisService.getDirectoryPath(_) >> Paths.get(instancePath)
+        service.analysisWorkFileServiceFactoryService = Mock(AnalysisWorkFileServiceFactoryService)
+        _ * service.analysisWorkFileServiceFactoryService.getService(_) >> abstractBamFileAnalysisService
 
         String copyConnection = dataExportInput.mode == DataExportInput.Mode.COPY_EXTERNAL ? /[\$]\{COPY_CONNECTION\}/ : ""
         String copyTargetBase = dataExportInput.mode == DataExportInput.Mode.COPY_EXTERNAL ? /[\$]\{COPY_TARGET_BASE\}/ : ""

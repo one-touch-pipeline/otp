@@ -38,10 +38,8 @@ import java.nio.file.*
 @CompileDynamic
 class DataExportService {
 
-    AbstractAnalysisWorkFileService abstractAnalysisWorkFileService
-    FileService fileService
     FileSystemService fileSystemService
-    BamFileAnalysisServiceFactoryService bamFileAnalysisServiceFactoryService
+    AnalysisWorkFileServiceFactoryService analysisWorkFileServiceFactoryService
     IndividualService individualService
     RawSequenceDataWorkFileService rawSequenceDataWorkFileService
     RawSequenceDataViewFileService rawSequenceDataViewFileService
@@ -238,7 +236,7 @@ class DataExportService {
                 } else {
                     analyses.each {
                         Path resultFolder = constructTargetFolder(dataExportInput, it)
-                        File instancePath = fileService.toFile(bamFileAnalysisServiceFactoryService.getService(it).getWorkDirectory(it))
+                        Path instancePath = analysisWorkFileServiceFactoryService.getService(it).getDirectoryPath(it)
                         scriptFileBuilder.append("[[ -n \"\${ECHO_LOG}\" ]] && echo ${instancePath}\n")
                         scriptFileBuilder.append("mkdir -p ${copyTargetBase}${resultFolder}\n")
                         if (dataExportInput.mode == DataExportInput.Mode.LINK_INTERNAL) {

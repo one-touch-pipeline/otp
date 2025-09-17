@@ -40,9 +40,13 @@ import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaLinkFileService
 import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.AbstractAnalysisDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.filestore.FilestoreService
+import de.dkfz.tbi.otp.infrastructure.alignment.AlignmentWorkFileServiceFactoryService
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.exceptions.FileInconsistencyException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
 
+import java.nio.file.Files
 import java.nio.file.Path
 
 abstract class AbstractAnalysisWorkFileServiceSpec<T extends AbstractAnalysisWorkFileService> extends Specification implements ServiceUnitTest<T>, DataTest, WorkflowSystemDomainFactory {
@@ -128,6 +132,48 @@ abstract class AbstractAnalysisWorkFileServiceSpec<T extends AbstractAnalysisWor
         newWorkflowSystem << [true, false]
     }
 
+    void "validateInputBamFiles, when all fine, then do not throw exception"() {
+        given:
+        BamFilePairAnalysis analysis = setUpForValidateInputBamFiles(true)
+
+        when:
+        service.validateInputBamFiles(analysis)
+
+        then:
+        noExceptionThrown()
+    }
+
+    @Unroll
+    void "validateInputBamFiles, when #name, then throw exception"() {
+        given:
+        BamFilePairAnalysis analysis = setUpForValidateInputBamFiles(!firstBamFile)
+        changeClosure(analysis, tempDir)
+        String bamFileWithProblem = firstBamFile ? analysis.sampleType1BamFile : analysis.sampleType2BamFile
+
+        when:
+        service.validateInputBamFiles(analysis)
+
+        then:
+        FileInconsistencyException e = thrown()
+        e.message.contains(bamFileWithProblem)
+        e.cause.message.contains(assertMessagePart)
+
+        where:
+        name                           | changeClosure                                                                                                                      || firstBamFile | assertMessagePart
+        'md5sum changed of bam 1'      | { BamFilePairAnalysis analysis2, Path tempDir2 -> analysis2.sampleType1BamFile.md5sum = "0" }                                                     || true         | "bamFile.md5sum"
+        'md5sum changed of bam 2'      | { BamFilePairAnalysis analysis2, Path tempDir2 -> analysis2.sampleType2BamFile.md5sum = "0" }                                                     || false        | "bamFile.md5sum"
+        'file size of bam 1 is 0'      | { BamFilePairAnalysis analysis2, Path tempDir2 -> analysis2.sampleType1BamFile.fileSize = 0 }                                                     || true         | "bamFile.fileSize"
+        'file size of bam 2 is 0'      | { BamFilePairAnalysis analysis2, Path tempDir2 -> analysis2.sampleType2BamFile.fileSize = 0 }                                                     || false        | "bamFile.fileSize"
+        'file size of bam 1 is wrong'  | { BamFilePairAnalysis analysis2, Path tempDir2 -> analysis2.sampleType1BamFile.fileSize = 1 }                                                     || true         | "Files.size"
+        'file size of bam 2 is wrong'  | { BamFilePairAnalysis analysis2, Path tempDir2 -> analysis2.sampleType2BamFile.fileSize = 1 }                                                     || false        | "Files.size"
+        'file of bam 1 is not a file' | { BamFilePairAnalysis analysis2, Path tempDir2 -> Files.delete(tempDir2.resolve("bam1.bam")); Files.createDirectory(tempDir2.resolve("bam1.bam")) } || true         | "Files.isRegularFile" // codenarc-disable-line ExplicitFlushForDeleteRule
+        'file of bam 2 is not a file' | { BamFilePairAnalysis analysis2, Path tempDir2 -> Files.delete(tempDir2.resolve("bam2.bam")); Files.createDirectory(tempDir2.resolve("bam2.bam")) } || false        | "Files.isRegularFile" // codenarc-disable-line ExplicitFlushForDeleteRule
+        'file of bam 1 is not a file' | { BamFilePairAnalysis analysis2, Path tempDir2 -> Files.setPosixFilePermissions(tempDir2.resolve("bam1.bam"), [] as Set) }                          || true         | "Files.isReadable"
+        'file of bam 2 is not a file' | { BamFilePairAnalysis analysis2, Path tempDir2 -> Files.setPosixFilePermissions(tempDir2.resolve("bam2.bam"), [] as Set) }                          || false        | "Files.isReadable"
+        'file of bam 1 does not exist' | { BamFilePairAnalysis analysis2, Path tempDir2 -> Files.delete(tempDir2.resolve("bam1.bam")) }                                                     || true         | "Files.exists" // codenarc-disable-line ExplicitFlushForDeleteRule
+        'file of bam 2 does not exist' | { BamFilePairAnalysis analysis2, Path tempDir2 -> Files.delete(tempDir2.resolve("bam2.bam")) }                                                     || false        | "Files.exists" // codenarc-disable-line ExplicitFlushForDeleteRule
+    }
+
     protected BamFilePairAnalysis getInstance(boolean newWorkflowSystem) {
         return factory.createInstanceWithRoddyBamFiles(
                 [workflowArtefact: createWorkflowArtefact(newWorkflowSystem ?
@@ -135,6 +181,31 @@ abstract class AbstractAnalysisWorkFileServiceSpec<T extends AbstractAnalysisWor
                         [:])
                 ]
         )
+    }
+
+    private BamFilePairAnalysis setUpForValidateInputBamFiles(boolean calledForBoth) {
+        BamFilePairAnalysis analysis = getInstance(false)
+
+        service.alignmentWorkFileServiceFactoryService = Mock(AlignmentWorkFileServiceFactoryService) {
+            0 * _
+        }
+
+        [
+                1: analysis.sampleType1BamFile,
+                2: analysis.sampleType2BamFile,
+        ].collect { int i, AbstractBamFile bamFile ->
+            Path file = tempDir.resolve("bam${i}.bam")
+            file.text = "file${i}"
+            bamFile.fileSize = Files.size(file)
+
+            if (i == 1 || calledForBoth) {
+                1 * service.alignmentWorkFileServiceFactoryService.getService(bamFile) >> Mock(PanCancerWorkFileService) {
+                    1 * getBamFile(bamFile) >> file
+                    0 * _
+                }
+            }
+        }
+        return analysis
     }
 
     abstract protected String getWorkflowDirName()

@@ -26,39 +26,13 @@ import spock.lang.Specification
 import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
-import de.dkfz.tbi.otp.dataprocessing.ExternalMergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
-import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholds
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvWorkFileService
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.SnvDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.ngsdata.FastqFile
-import de.dkfz.tbi.otp.ngsdata.FastqImportInstance
-import de.dkfz.tbi.otp.ngsdata.Individual
-import de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType
-import de.dkfz.tbi.otp.ngsdata.Run
-import de.dkfz.tbi.otp.ngsdata.Sample
-import de.dkfz.tbi.otp.ngsdata.SampleType
-import de.dkfz.tbi.otp.ngsdata.SampleTypePerProject
-import de.dkfz.tbi.otp.ngsdata.SeqCenter
-import de.dkfz.tbi.otp.ngsdata.SeqPlatform
-import de.dkfz.tbi.otp.ngsdata.SeqPlatformGroup
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
@@ -113,9 +87,8 @@ class SnvValidationJobSpec extends Specification implements DataTest, WorkflowSy
     void setup() {
         workflowStep = createWorkflowStep([workflowRun: createWorkflowRun([workflow: findOrCreateWorkflow(SnvWorkflow.WORKFLOW)])])
         job = new SnvValidationJob([
-                snvWorkFileService        : Mock(SnvWorkFileService),
-                concreteArtefactService   : Mock(ConcreteArtefactService),
-                snvCallingService         : Mock(SnvCallingService),
+                snvWorkFileService     : Mock(SnvWorkFileService),
+                concreteArtefactService: Mock(ConcreteArtefactService),
         ])
         instance = SnvDomainFactory.INSTANCE.createInstance(SnvDomainFactory.INSTANCE.createSamplePairWithExternallyProcessedBamFiles(), [
                 processingState: AnalysisProcessingStates.IN_PROGRESS,
@@ -184,6 +157,6 @@ class SnvValidationJobSpec extends Specification implements DataTest, WorkflowSy
 
         then:
         1 * job.concreteArtefactService.getOutputArtefact(workflowStep, analysisOutput) >> instance
-        1 * job.snvCallingService.validateInputBamFiles(instance)
+        1 * job.snvWorkFileService.validateInputBamFiles(instance)
     }
 }

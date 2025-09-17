@@ -24,10 +24,14 @@ package de.dkfz.tbi.otp.dataprocessing
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.alignment.AbstractAlignmentFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.AlignmentWorkFileServiceFactoryService
 import de.dkfz.tbi.otp.job.processing.RoddyConfigService
-import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
 import de.dkfz.tbi.otp.utils.TimeFormats
+import de.dkfz.tbi.otp.utils.exceptions.FileInconsistencyException
+import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
 
+import java.nio.file.Files
 import java.nio.file.Path
 import java.time.ZonedDateTime
 
@@ -40,6 +44,7 @@ abstract class AbstractAnalysisWorkFileService<T extends BamFilePairAnalysis> im
     RoddyConfigService roddyConfigService
     FileService fileService
     AnalysisLinkFileServiceFactoryService analysisLinkFileServiceFactoryService
+    AlignmentWorkFileServiceFactoryService alignmentWorkFileServiceFactoryService
 
     Path getDirectoryPath(T instance) {
         return instance.workflowArtefact?.producedBy ?
@@ -69,5 +74,24 @@ abstract class AbstractAnalysisWorkFileService<T extends BamFilePairAnalysis> im
         ZonedDateTime zonedDateTime = configService.zonedDateTime
         String formattedDate = TimeFormats.DATE_TIME_DASHES.getFormattedZonedDateTime(zonedDateTime)
         return "results_${workflowDirectoryName}-${workflowVersion.workflowVersion}_${formattedDate}"
+    }
+
+    void validateInputBamFiles(T analysis) throws Throwable {
+        [
+                analysis.sampleType1BamFile,
+                analysis.sampleType2BamFile,
+        ].each { AbstractBamFile bamFile ->
+            try {
+                Path path = ((AbstractAlignmentFileService) alignmentWorkFileServiceFactoryService.getService(bamFile)).getBamFile(bamFile)
+                assert bamFile.md5sum ==~ /^[0-9a-f]{32}$/
+                assert bamFile.fileSize > 0L
+                assert Files.exists(path)
+                assert Files.isRegularFile(path)
+                assert Files.isReadable(path)
+                assert Files.size(path) == bamFile.fileSize
+            } catch (final AssertionError | IOException e) {
+                throw new FileInconsistencyException("The input BAM file ${bamFile} has changed on the file system while this job processed them.", e)
+            }
+        }
     }
 }

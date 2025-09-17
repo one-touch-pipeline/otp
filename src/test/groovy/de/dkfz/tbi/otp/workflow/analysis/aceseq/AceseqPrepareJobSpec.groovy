@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqWorkFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
-import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaWorkFileService
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaLinkFileService
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.AceseqDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.SophiaDomainFactory
@@ -87,7 +87,7 @@ class AceseqPrepareJobSpec extends Specification implements DataTest, WorkflowSy
         workflowStep = createWorkflowStep([workflowRun: createWorkflowRun([workflow: findOrCreateWorkflow(AceseqWorkflow.WORKFLOW)])])
         job = new AceseqPrepareJob([
                 aceseqWorkFileService  : Mock(AceseqWorkFileService),
-                sophiaWorkFileService  : Mock(SophiaWorkFileService),
+                sophiaLinkFileService  : Mock(SophiaLinkFileService),
                 concreteArtefactService: Mock(ConcreteArtefactService),
         ])
     }
@@ -123,7 +123,7 @@ class AceseqPrepareJobSpec extends Specification implements DataTest, WorkflowSy
         1 * job.aceseqWorkFileService.getDirectoryPath(aceseqInstance) >> workDirectoryPath
         1 * job.concreteArtefactService.getOutputArtefact(workflowStep, analysisOutput) >> aceseqInstance
         1 * job.concreteArtefactService.getInputArtefact(workflowStep, sophiaInput) >> sophiaInstance
-        1 * job.sophiaWorkFileService.getFinalAceseqInputFile(sophiaInstance) >> finalAceseqInputFile
+        1 * job.sophiaLinkFileService.getFinalAceseqInputFile(sophiaInstance) >> finalAceseqInputFile
     }
 
     void "doFurtherPreparation, should do nothing"() {

@@ -35,6 +35,10 @@ class AbstractBamFileService {
 
     IndividualService individualService
 
+    /**
+     * @deprecated  Old workflow system
+     */
+    @Deprecated
     Path getBaseDirectory(AbstractBamFile bamFile) {
         String antiBodyTarget = bamFile.seqType.hasAntibodyTarget ? "-${((MergingWorkPackage) bamFile.mergingWorkPackage).antibodyTarget.name}" : ''
         Path viewByPid = individualService.getViewByPidPath(bamFile.individual, bamFile.seqType)
@@ -77,6 +81,10 @@ class AbstractBamFileService {
         }
     }
 
+    /**
+     * @deprecated  Old workflow system
+     */
+    @Deprecated
     File getExistingBamFilePath(final AbstractBamFile bamFile) {
         final File file = bamFile.pathForFurtherProcessing
         assert bamFile.md5sum ==~ /^[0-9a-f]{32}$/

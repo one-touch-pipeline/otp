@@ -65,6 +65,7 @@ class RunYapsaConditionalFailJob extends AbstractAnalysisConditionalFailJob impl
         RoddySnvCallingInstance snvInstance = getSnvInstance(workflowStep)
         if (!snvInstance) {
             errorMessages.push("Required SNV instance ${snvInstance} is null." as String)
+            return errorMessages
         }
 
         Path resultPathForRunYapsa = snvLinkFileService.getResultRequiredForRunYapsa(snvInstance)

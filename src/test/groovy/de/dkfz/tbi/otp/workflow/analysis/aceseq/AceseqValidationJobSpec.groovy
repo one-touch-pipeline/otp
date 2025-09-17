@@ -22,12 +22,12 @@
 package de.dkfz.tbi.otp.workflow.analysis.aceseq
 
 import grails.testing.gorm.DataTest
-import spock.lang.*
+import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
-import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqService
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqWorkFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
@@ -38,7 +38,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
-import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
 
@@ -89,9 +89,8 @@ class AceseqValidationJobSpec extends Specification implements DataTest, Workflo
     void setup() {
         workflowStep = createWorkflowStep([workflowRun: createWorkflowRun([workflow: findOrCreateWorkflow(AceseqWorkflow.WORKFLOW)])])
         job = new AceseqValidationJob([
-                aceseqWorkFileService     : Mock(AceseqWorkFileService),
-                aceseqService             : Mock(AceseqService),
-                concreteArtefactService   : Mock(ConcreteArtefactService),
+                aceseqWorkFileService  : Mock(AceseqWorkFileService),
+                concreteArtefactService: Mock(ConcreteArtefactService),
         ])
         instance = AceseqDomainFactory.INSTANCE.createInstance(AceseqDomainFactory.INSTANCE.createSamplePairWithExternallyProcessedBamFiles(), [
                 processingState: AnalysisProcessingStates.IN_PROGRESS,
@@ -110,10 +109,10 @@ class AceseqValidationJobSpec extends Specification implements DataTest, Workflo
     void "getExpectedFiles, should get all files"() {
         given:
         Map<PlotType, Path> plotFiles = [
-                (PlotType.ACESEQ_GC_CORRECTED): tempDir.resolve('gcCorrectedPlot'),
-                (PlotType.ACESEQ_QC_GC_CORRECTED): tempDir.resolve('qcGcCorrectedPlot'),
+                (PlotType.ACESEQ_GC_CORRECTED)              : tempDir.resolve('gcCorrectedPlot'),
+                (PlotType.ACESEQ_QC_GC_CORRECTED)           : tempDir.resolve('qcGcCorrectedPlot'),
                 (PlotType.ACESEQ_TCN_DISTANCE_COMBINED_STAR): tempDir.resolve('tcnDistancePlot'),
-                (PlotType.ACESEQ_WG_COVERAGE): tempDir.resolve('wgCoveragePlot'),
+                (PlotType.ACESEQ_WG_COVERAGE)               : tempDir.resolve('wgCoveragePlot'),
         ]
         Path qcJsonFile = tempDir.resolve('qcJsonFile')
         List<Path> allPlots = [tempDir.resolve('allPlot1'), tempDir.resolve('allPlot2')]
@@ -165,7 +164,7 @@ class AceseqValidationJobSpec extends Specification implements DataTest, Workflo
 
         then:
         1 * job.concreteArtefactService.getOutputArtefact(workflowStep, analysisOutput) >> instance
-        1 * job.aceseqService.validateInputBamFiles(instance)
+        1 * job.aceseqWorkFileService.validateInputBamFiles(instance)
     }
 }
 

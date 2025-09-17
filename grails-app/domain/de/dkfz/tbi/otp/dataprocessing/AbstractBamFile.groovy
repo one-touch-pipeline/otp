@@ -274,7 +274,7 @@ abstract class AbstractBamFile implements Artefact, CommentableWithProject, Enti
     }
 
     /**
-     * @deprecated use {@link AbstractBamFileService#getBaseDirectory()}
+     * @deprecated use {@link AbstractAlignmentWorkFileService#getDirectoryPath()} or {@link AbstractAlignmentLinkFileService#getDirectoryPath()}
      */
     @Deprecated
     File getBaseDirectory() {

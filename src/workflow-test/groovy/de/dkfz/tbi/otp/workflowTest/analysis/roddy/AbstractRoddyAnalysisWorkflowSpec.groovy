@@ -59,7 +59,7 @@ abstract class AbstractRoddyAnalysisWorkflowSpec<I extends BamFilePairAnalysis> 
         }
 
         when:
-        execute()
+        execute(1, 2)
 
         then:
         checkInstance()
@@ -75,7 +75,7 @@ abstract class AbstractRoddyAnalysisWorkflowSpec<I extends BamFilePairAnalysis> 
         }
 
         when:
-        execute()
+        execute(1, 2)
 
         then:
         checkInstance()

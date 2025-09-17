@@ -40,9 +40,6 @@ class AceseqValidationJob extends AbstractRoddyClusterValidationJob implements A
     @Autowired
     AceseqWorkFileService aceseqWorkFileService
 
-    @Autowired
-    AceseqService aceseqService
-
     @Override
     protected RoddyResult getRoddyResult(WorkflowStep workflowStep) {
         return getAceseqInstance(workflowStep)
@@ -73,6 +70,6 @@ class AceseqValidationJob extends AbstractRoddyClusterValidationJob implements A
     @Override
     protected void doFurtherValidation(WorkflowStep workflowStep) {
         AceseqInstance instance = getAceseqInstance(workflowStep)
-        aceseqService.validateInputBamFiles(instance)
+        aceseqWorkFileService.validateInputBamFiles(instance)
     }
 }

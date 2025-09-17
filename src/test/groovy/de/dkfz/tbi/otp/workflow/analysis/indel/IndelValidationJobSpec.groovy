@@ -22,12 +22,12 @@
 package de.dkfz.tbi.otp.workflow.analysis.indel
 
 import grails.testing.gorm.DataTest
-import spock.lang.*
+import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingService
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelWorkFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
@@ -38,7 +38,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
-import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
 
@@ -89,9 +89,8 @@ class IndelValidationJobSpec extends Specification implements DataTest, Workflow
     void setup() {
         workflowStep = createWorkflowStep([workflowRun: createWorkflowRun([workflow: findOrCreateWorkflow(IndelWorkflow.WORKFLOW)])])
         job = new IndelValidationJob([
-                indelWorkFileService      : Mock(IndelWorkFileService),
-                indelCallingService       : Mock(IndelCallingService),
-                concreteArtefactService   : Mock(ConcreteArtefactService),
+                indelWorkFileService   : Mock(IndelWorkFileService),
+                concreteArtefactService: Mock(ConcreteArtefactService),
         ])
         instance = IndelDomainFactory.INSTANCE.createInstance(IndelDomainFactory.INSTANCE.createSamplePairWithExternallyProcessedBamFiles(), [
                 processingState: AnalysisProcessingStates.IN_PROGRESS,
@@ -161,6 +160,6 @@ class IndelValidationJobSpec extends Specification implements DataTest, Workflow
 
         then:
         1 * job.concreteArtefactService.getOutputArtefact(workflowStep, analysisOutput) >> instance
-        1 * job.indelCallingService.validateInputBamFiles(instance)
+        1 * job.indelWorkFileService.validateInputBamFiles(instance)
     }
 }

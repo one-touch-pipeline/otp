@@ -22,7 +22,8 @@
 package de.dkfz.tbi.otp.workflow.analysis.sophia
 
 import grails.testing.gorm.DataTest
-import spock.lang.*
+import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -30,7 +31,6 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
-import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaService
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaWorkFileService
 import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.SophiaDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
@@ -38,7 +38,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
-import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
 
@@ -89,9 +89,8 @@ class SophiaValidationJobSpec extends Specification implements DataTest, Workflo
     void setup() {
         workflowStep = createWorkflowStep([workflowRun: createWorkflowRun([workflow: findOrCreateWorkflow(SophiaWorkflow.WORKFLOW)])])
         job = new SophiaValidationJob([
-                sophiaWorkFileService     : Mock(SophiaWorkFileService),
-                concreteArtefactService   : Mock(ConcreteArtefactService),
-                sophiaService             : Mock(SophiaService),
+                sophiaWorkFileService  : Mock(SophiaWorkFileService),
+                concreteArtefactService: Mock(ConcreteArtefactService),
         ])
         instance = SophiaDomainFactory.INSTANCE.createInstance(SophiaDomainFactory.INSTANCE.createSamplePairWithExternallyProcessedBamFiles(), [
                 processingState: AnalysisProcessingStates.IN_PROGRESS,
@@ -118,7 +117,7 @@ class SophiaValidationJobSpec extends Specification implements DataTest, Workflo
         resultPaths == [finalAceseqInput]
 
         and:
-        1  * job.concreteArtefactService.getOutputArtefact(workflowStep, analysisOutput) >> instance
+        1 * job.concreteArtefactService.getOutputArtefact(workflowStep, analysisOutput) >> instance
         1 * job.sophiaWorkFileService.getFinalAceseqInputFile(instance) >> finalAceseqInput
     }
 
@@ -154,6 +153,6 @@ class SophiaValidationJobSpec extends Specification implements DataTest, Workflo
 
         then:
         1 * job.concreteArtefactService.getOutputArtefact(workflowStep, analysisOutput) >> instance
-        1 * job.sophiaService.validateInputBamFiles(instance)
+        1 * job.sophiaWorkFileService.validateInputBamFiles(instance)
     }
 }

@@ -28,7 +28,6 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqWorkFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
@@ -46,9 +45,6 @@ class AceseqExecuteJob extends AbstractExecuteRoddyPipelineJob implements Aceseq
 
     @Autowired
     ReferenceGenomeService referenceGenomeService
-
-    @Autowired
-    SnvCallingService snvCallingService
 
     @Override
     protected RoddyResult getRoddyResult(WorkflowStep workflowStep) {

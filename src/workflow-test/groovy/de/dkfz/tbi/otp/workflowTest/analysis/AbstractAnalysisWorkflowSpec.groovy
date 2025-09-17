@@ -29,7 +29,9 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.SnvDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryInstance
+import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.infrastructure.alignment.AlignmentLinkFileServiceFactoryService
+import de.dkfz.tbi.otp.infrastructure.alignment.AlignmentWorkFileServiceFactoryService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.ngsdata.taxonomy.Species
@@ -40,14 +42,16 @@ import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowTest.AbstractDecidedWorkflowSpec
 import de.dkfz.tbi.otp.workflowTest.referenceGenome.UsingReferenceGenome
 
+import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Duration
 
 abstract class AbstractAnalysisWorkflowSpec extends AbstractDecidedWorkflowSpec implements DomainFactoryCore, SeqTypeAndInputBamFiles, UsingReferenceGenome {
 
     AlignmentLinkFileServiceFactoryService alignmentLinkFileServiceFactoryService
-    AbstractBamFileService abstractBamFileService
+    AlignmentWorkFileServiceFactoryService alignmentWorkFileServiceFactoryService
     ReferenceGenomeService referenceGenomeService
+    FilestoreService filestoreService
 
     static final Double COVERAGE = 30.0
 
@@ -209,15 +213,24 @@ abstract class AbstractAnalysisWorkflowSpec extends AbstractDecidedWorkflowSpec 
         individual.pid = PID
         individual.save(flush: true)
 
-        bamFileTumor.workPackage.bamFileInProjectFolder = bamFileTumor
-        bamFileTumor.workPackage.save(flush: true)
-        bamFileTumor.workflowArtefact = createWorkflowArtefact(artefactType: ArtefactType.BAM, state: WorkflowArtefact.State.SUCCESS)
-        bamFileTumor.save(flush: true)
-
-        bamFileControl.workPackage.bamFileInProjectFolder = bamFileControl
-        bamFileControl.workPackage.save(flush: true)
-        bamFileControl.workflowArtefact = createWorkflowArtefact(artefactType: ArtefactType.BAM, state: WorkflowArtefact.State.SUCCESS)
-        bamFileControl.save(flush: true)
+        [
+                bamFileTumor,
+                bamFileControl,
+        ].each { AbstractBamFile bamFile ->
+            WorkflowRun workflowRun = createWorkflowRun([
+                    state: WorkflowRun.State.LEGACY,
+            ])
+            bamFile.workPackage.bamFileInProjectFolder = bamFile
+            bamFile.workPackage.save(flush: true)
+            bamFile.workflowArtefact = createWorkflowArtefact(
+                    [
+                            artefactType: ArtefactType.BAM,
+                            state       : WorkflowArtefact.State.SUCCESS,
+                            producedBy  : workflowRun,
+                    ])
+            bamFile.save(flush: true)
+            filestoreService.attachWorkFolder(workflowRun, filestoreService.createWorkFolder(baseFolderInput))
+        }
 
         RawSequenceFile.list().each {
             it.fastqImportInstance = fastqImportInstance
@@ -266,10 +279,10 @@ abstract class AbstractAnalysisWorkflowSpec extends AbstractDecidedWorkflowSpec 
     void setupBamFilesInFileSystem() {
         BamFileSet bamFileSet = this.bamFileSet
 
-        Path diseaseBamFile = alignmentLinkFileServiceFactoryService.getService(bamFileTumor).getPathForFurtherProcessing(bamFileTumor)
-        Path diseaseBaiFile = diseaseBamFile.parent.resolve(bamFileTumor.baiFileName)
-        Path controlBamFile = alignmentLinkFileServiceFactoryService.getService(bamFileControl).getPathForFurtherProcessing(bamFileControl)
-        Path controlBaiFile = controlBamFile.parent.resolve(bamFileControl.baiFileName)
+        Path diseaseBamFile = alignmentWorkFileServiceFactoryService.getService(bamFileTumor).getBamFile(bamFileTumor)
+        Path diseaseBaiFile = alignmentWorkFileServiceFactoryService.getService(bamFileTumor).getBaiFile(bamFileTumor)
+        Path controlBamFile = alignmentWorkFileServiceFactoryService.getService(bamFileControl).getBamFile(bamFileControl)
+        Path controlBaiFile = alignmentWorkFileServiceFactoryService.getService(bamFileControl).getBaiFile(bamFileControl)
         [
                 (bamFileSet.diseaseBamFile): diseaseBamFile,
                 (bamFileSet.diseaseBaiFile): diseaseBaiFile,
@@ -279,10 +292,10 @@ abstract class AbstractAnalysisWorkflowSpec extends AbstractDecidedWorkflowSpec 
             fileService.createLink(link, fileService.toPath(target, fileSystemService.remoteFileSystem))
         }
 
-        Path diseaseBamFileLink = abstractBamFileService.getBaseDirectory(bamFileTumor).resolve(bamFileTumor.bamFileName)
-        Path diseaseBaiFileLink = abstractBamFileService.getBaseDirectory(bamFileTumor).resolve(bamFileTumor.baiFileName)
-        Path controlBamFileLink = abstractBamFileService.getBaseDirectory(bamFileControl).resolve(bamFileControl.bamFileName)
-        Path controlBaiFileLink = abstractBamFileService.getBaseDirectory(bamFileControl).resolve(bamFileControl.baiFileName)
+        Path diseaseBamFileLink = alignmentLinkFileServiceFactoryService.getService(bamFileTumor).getBamFile(bamFileTumor)
+        Path diseaseBaiFileLink = alignmentLinkFileServiceFactoryService.getService(bamFileTumor).getBaiFile(bamFileTumor)
+        Path controlBamFileLink = alignmentLinkFileServiceFactoryService.getService(bamFileControl).getBamFile(bamFileControl)
+        Path controlBaiFileLink = alignmentLinkFileServiceFactoryService.getService(bamFileControl).getBaiFile(bamFileControl)
         [
                 (diseaseBamFile): diseaseBamFileLink,
                 (diseaseBaiFile): diseaseBaiFileLink,
@@ -292,10 +305,10 @@ abstract class AbstractAnalysisWorkflowSpec extends AbstractDecidedWorkflowSpec 
             fileService.createLink(link, target)
         }
 
-        bamFileTumor.fileSize = bamFileSet.diseaseBamFile.size()
+        bamFileTumor.fileSize = Files.size(diseaseBamFileLink)
         bamFileTumor.save(flush: true)
 
-        bamFileControl.fileSize = bamFileSet.controlBamFile.size()
+        bamFileControl.fileSize = Files.size(controlBamFileLink)
         bamFileControl.save(flush: true)
     }
 

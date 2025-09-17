@@ -148,6 +148,10 @@ abstract class AbstractBamFileAnalysisService<T extends BamFilePairAnalysis> imp
         return SamplePair.find(samplePairForProcessing.toString(), parameters)
     }
 
+    /**
+     * @deprecated  Old workflow system
+     */
+    @Deprecated
     void validateInputBamFiles(final BamFilePairAnalysis analysis) throws Throwable {
         try {
             abstractBamFileService.getExistingBamFilePath(analysis.sampleType1BamFile)

@@ -30,74 +30,30 @@ import de.dkfz.tbi.otp.workflowExecution.Workflow
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 Map<ReferenceGenome, String> conf = [:]
-conf[exactlyOneElement(ReferenceGenome.findAllByName('1KGRef_PhiX'))] = """\
-{
-  "RODDY": {
-    "cvalues": {
-      "ARRIBA_BLACKLIST": {
-        "type": "path",
-        "value": "\${BASE_REFERENCE_GENOME}/bwa06_1KGRef_PhiX/indexes/ariba_blacklist/blacklist_hs37d5_gencode19_2017-01-09.tsv.gz"
-      },
-      "ARRIBA_KNOWN_FUSIONS": {
-        "type": "path",
-        "value": "\${BASE_REFERENCE_GENOME}/bwa06_1KGRef_PhiX/indexes/ariba_known_fusions/known_fusions_CancerGeneCensus_gencode19_2017-01-16.tsv.gz"
-      },
-      "GENE_MODELS": {
-        "type": "path",
-        "value": "\${BASE_REFERENCE_GENOME}/bwa06_1KGRef_PhiX/gencode/gencode19/gencode.v19.annotation_plain.gtf"
-      },
-      "GENE_MODELS_DEXSEQ": {
-        "type": "path",
-        "value": "\${BASE_REFERENCE_GENOME}/bwa06_1KGRef_PhiX/gencode/gencode19/gencode.v19.annotation_plain.dexseq.gff"
-      },
-      "GENE_MODELS_EXCLUDE": {
-        "type": "path",
-        "value": "\${BASE_REFERENCE_GENOME}/bwa06_1KGRef_PhiX/gencode/gencode19/gencode.v19.annotation_plain.chrXYMT.rRNA.tRNA.gtf"
-      },
-      "GENE_MODELS_GC": {
-        "type": "path",
-        "value": "\${BASE_REFERENCE_GENOME}/bwa06_1KGRef_PhiX/gencode/gencode19/gencode.v19.annotation_plain.transcripts.autosomal_transcriptTypeProteinCoding_nonPseudo.1KGRef.gc"
-      },
-      "GENOME_GATK_INDEX": {
-        "type": "path",
-        "value": "\${BASE_REFERENCE_GENOME}/bwa06_1KGRef_PhiX/indexes/gatk/hs37d5_PhiX.fa"
-      },
-      "GENOME_KALLISTO_INDEX": {
-        "type": "path",
-        "value": "\${BASE_REFERENCE_GENOME}/bwa06_1KGRef_PhiX/indexes/kallisto/kallisto-0.43.0_1KGRef_Gencode19_k31/kallisto-0.43.0_1KGRef_Gencode19_k31.noGenes.index"
-      },
-      "GENOME_STAR_INDEX": {
-        "type": "path",
-        "value": "\${BASE_REFERENCE_GENOME}/bwa06_1KGRef_PhiX/indexes/star_200/STAR_2.5.2b_1KGRef_PhiX_Gencode19_200bp"
-      }
-    }
-  }
-}
-"""
 
-conf[exactlyOneElement(ReferenceGenome.findAllByName('GRCm38mm10_PhiX'))] = """\
+conf[exactlyOneElement(ReferenceGenome.findAllByName('bwa06_GRCm38mm10_PhiX_hD3A'))] = """\
 {
   "RODDY": {
     "cvalues": {
       "GENE_MODELS": {
         "type": "path",
-        "value": "\${BASE_REFERENCE_GENOME}/bwa06_GRCm38mm10_PhiX/gencode/gencodeM12/gencode.vM12.annotation_plain.w_GeneTranscriptID_MT.gtf"
+        "value": "\${BASE_REFERENCE_GENOME}/bwa06_GRCm38mm10_PhiX_hD3A/gencode/gencodeM12/gencode.vM12.annotation_plain.w_GeneTranscriptID_MT_v2_with_hd3a.gtf"
       },
       "GENE_MODELS_EXCLUDE": {
         "type": "path",
-        "value": "\${BASE_REFERENCE_GENOME}/bwa06_GRCm38mm10_PhiX/gencode/gencodeM12/gencode.vM12.annotation_plain.chrXYMT.rRNA.tRNA.gtf"
+        "value": "\${BASE_REFERENCE_GENOME}/bwa06_GRCm38mm10_PhiX_hD3A/gencode/gencodeM12/gencode.vM12.annotation_plain.chrXYMT.rRNA.tRNA.gtf"
       },
       "GENOME_GATK_INDEX": {
         "type": "path",
-        "value": "\${BASE_REFERENCE_GENOME}/bwa06_GRCm38mm10_PhiX/indexes/gatk/GRCm38mm10_PhiX.fa"
+        "value": "\${BASE_REFERENCE_GENOME}/bwa06_GRCm38mm10_PhiX_hD3A/indexes/gatk/GRCm38mm10_PhiX_hD3A.fa"
       },
       "GENOME_KALLISTO_INDEX": {
         "type": "path",
-        "value": "\${BASE_REFERENCE_GENOME}/bwa06_GRCm38mm10_PhiX/indexes/kallisto/kallisto-0.43.0_GRCm38mm10_GencodevM12_k31.index"
+        "value": "\${BASE_REFERENCE_GENOME}/bwa06_GRCm38mm10_PhiX_hD3A/indexes/kallisto/kallisto-0.43.0_GRCm38mm10_GencodevM12_k31.index"
       },
       "GENOME_STAR_INDEX": {
         "type": "path",
-        "value": "\${BASE_REFERENCE_GENOME}/bwa06_GRCm38mm10_PhiX/indexes/star_200/STAR_2.5.2b_GRCm38mm10_gencodevM12_PhiX_200bp"
+        "value": "\${BASE_REFERENCE_GENOME}/bwa06_GRCm38mm10_PhiX_hD3A/indexes/star_200/STAR_2.5.2b_GRCm38mm10_PhiX_hD3A_gencode-v27_hd3a_125bp"
       },
       "RUN_ARRIBA": {
         "type": "string",
@@ -112,46 +68,6 @@ conf[exactlyOneElement(ReferenceGenome.findAllByName('GRCm38mm10_PhiX'))] = """\
 }
 """
 
-conf[exactlyOneElement(ReferenceGenome.findAllByName('hs37d5_GRCm38mm_PhiX'))] = """\
-{
-  "RODDY": {
-    "cvalues": {
-      "ARRIBA_BLACKLIST": {
-        "type": "path",
-        "value": "\${BASE_REFERENCE_GENOME}/bwa06_hs37d5_GRCm38mm_PhiX/indexes/ariba_blacklist/blacklist_hs37d5_gencode19_2017-01-09.tsv.gz"
-      },
-      "ARRIBA_KNOWN_FUSIONS": {
-        "type": "path",
-        "value": "\${BASE_REFERENCE_GENOME}/bwa06_hs37d5_GRCm38mm_PhiX/indexes/ariba_known_fusions/known_fusions_CancerGeneCensus_gencode19_2017-01-16.tsv.gz"
-      },
-      "GENE_MODELS": {
-        "type": "path",
-        "value": "\${BASE_REFERENCE_GENOME}/bwa06_hs37d5_GRCm38mm_PhiX/gencode/gencode19/gencode.v19.annotation_plain.gtf"
-      },
-      "GENE_MODELS_DEXSEQ": {
-        "type": "path",
-        "value": "\${BASE_REFERENCE_GENOME}/bwa06_hs37d5_GRCm38mm_PhiX/gencode/gencode19/gencode.v19.annotation_plain.dexseq.gff"
-      },
-      "GENE_MODELS_EXCLUDE": {
-        "type": "path",
-        "value": "\${BASE_REFERENCE_GENOME}/bwa06_hs37d5_GRCm38mm_PhiX/gencode/gencode19/gencode.v19.annotation_plain.chrXYMT.rRNA.tRNA.gtf"
-      },
-      "GENOME_GATK_INDEX": {
-        "type": "path",
-        "value": "\${BASE_REFERENCE_GENOME}/bwa06_hs37d5_GRCm38mm_PhiX/indexes/gatk/hs37d5_GRCm38mm10_PhiX.fa"
-      },
-      "GENOME_KALLISTO_INDEX": {
-        "type": "path",
-        "value": "\${BASE_REFERENCE_GENOME}/bwa06_hs37d5_GRCm38mm_PhiX/indexes/kallisto/kallisto-0.43.0_hs37d5_gencodev19_GRCm38mm_gencodevM12_k31.index"
-      },
-      "GENOME_STAR_INDEX": {
-        "type": "path",
-        "value": "\${BASE_REFERENCE_GENOME}/bwa06_hs37d5_GRCm38mm_PhiX/indexes/star_200/STAR_2.5.2b_hs37d5_gencodev19_GRCm38mm_gencodevM12_PhiX_200bp"
-      }
-    }
-  }
-}
-"""
 
 List<Workflow> workflows = Workflow.findAllByName(RnaAlignmentWorkflow.WORKFLOW)
 

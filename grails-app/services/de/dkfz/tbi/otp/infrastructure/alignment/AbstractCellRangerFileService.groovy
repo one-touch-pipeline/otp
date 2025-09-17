@@ -26,7 +26,7 @@ import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 
 import java.nio.file.Path
 
-trait AbstractCellRangerFileService implements ArtefactFileService<SingleCellBamFile> {
+trait AbstractCellRangerFileService implements ArtefactFileService<SingleCellBamFile>, AbstractAlignmentFileService<SingleCellBamFile> {
 
     Path getSampleDirectory(SingleCellBamFile bamFile) {
         return getDirectoryPath(bamFile).resolve(CellRangerFileNames.INPUT_DIRECTORY_NAME).resolve(bamFile.id.toString())

@@ -63,6 +63,15 @@ class CellRangerLinkFileServiceSpec extends Specification implements ServiceUnit
             getBaseDirectory(_) >> Paths.get("/base-dir")
         }
     }
+    void "test getBamFile"() {
+        expect:
+        service.getBamFile(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.bamFileName}"
+    }
+
+    void "test getBaiFile"() {
+        expect:
+        service.getBaiFile(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.baiFileName}"
+    }
 
     void "test getSampleDirectory"() {
         expect:
