@@ -55,6 +55,8 @@ import de.dkfz.tbi.otp.workflowTest.AbstractWorkflowSpec
 
 import javax.sql.DataSource
 import java.nio.file.FileSystem
+import java.nio.file.Files
+import java.nio.file.Path
 import java.time.Duration
 import java.time.ZonedDateTime
 import java.util.concurrent.*
@@ -149,13 +151,15 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
     void setup() {
         doCleanup()
         SessionUtils.withTransaction {
-            setupDirectories()
-
             sql = new Sql(dataSource)
             schemaDump = new File(TestCase.createEmptyTestDirectory(), "test-database-dump.sql")
             sql.execute("SCRIPT NODATA DROP TO ?", [schemaDump.absolutePath])
 
             DomainFactory.createAllAlignableSeqTypes()
+            loadCustomInitialisationScript()
+
+            setupDirectories()
+
             createTestProcessingPriority()
 
             findOrCreateProcessingOption(name: OptionName.OTP_SYSTEM_USER, value: createUser().username)
@@ -188,12 +192,6 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
                 }
             }
 
-            File script = configService.workflowTestInitScript
-            if (script.isFile()) {
-                doWithAuth(ADMIN) {
-                    runScript(script)
-                }
-            }
             findOrCreateProcessingOption(
                     name: OptionName.RODDY_APPLICATION_INI,
                     value: new File(inputRootDirectory, "applicationProperties-test.ini").absolutePath
@@ -266,6 +264,28 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
             sql.execute("RUNSCRIPT FROM ?", [schemaDump.absolutePath])
         }
         TestCase.cleanTestDirectory()
+    }
+
+    /**
+     * loads the script provided by OtpProperty.TEST_WORKFLOW_INIT_SCRIPT'
+     */
+    private void loadCustomInitialisationScript() {
+        Path script = configService.workflowTestInitScript
+        if (Files.isRegularFile(script)) {
+            doWithAuth(ADMIN) {
+                log.debug("Loading custom init script: ${script}")
+                runScript(script)
+                log.debug("Custom init script executed successfully")
+
+                log.debug("Validating workflow test properties")
+                configService.validateWorkflowTestProperties()
+                log.debug("Workflow test properties are valid")
+            }
+        } else {
+            String msg = "Custom init script configured but not found: ${script}"
+            log.error(msg)
+            throw new WorkflowTestException(msg)
+        }
     }
 
     protected void setupDirectories() {
@@ -472,7 +492,7 @@ echo \$TEMP_DIR
      * @see #getBaseDirectory()
      */
     protected File getInputRootDirectory() {
-        return configService.workflowTestInputRootDir
+        return new File(configService.workflowTestInputRootDir.toString())
     }
 
     /**
@@ -483,7 +503,7 @@ echo \$TEMP_DIR
      * @return the root directory set in the configuration file, or the default location otherwise.
      */
     protected File getResultRootDirectory() {
-        return configService.workflowTestResultRootDir
+        return new File(configService.workflowTestResultRootDir.toString())
     }
 
     /**
