@@ -49,29 +49,48 @@ class IlpParserSpec extends Specification {
         defaultParsedSampleIdentifier.fullSampleName == input
 
         where:
-        input                      || project    | pid             | sampleTypeDbName
-        'abcd-abcdef-a1-a1-seq1'   || 'project1' | 'abcd-abcdef'   | 'a1-a1-seq1'
+        input                       || project    | pid               | sampleTypeDbName
+        'abcd-abcdef-a1-a1-ig1'     || 'project1' | 'abcd-abcdef'     | 'a1-a1-ig1'
         // other projects
-        'bcde-abcdef-a1-a1-seq1'   || 'project2' | 'bcde-abcdef'   | 'a1-a1-seq1'
-        // other pids
-        'abcd-abcdefg-a1-a1-seq1'  || 'project1' | 'abcd-abcdefg'  | 'a1-a1-seq1'
-        'abcd-abcdefgh-a1-a1-seq1' || 'project1' | 'abcd-abcdefgh' | 'a1-a1-seq1'
-        'abcd-123456-a1-a1-seq1'   || 'project1' | 'abcd-123456'   | 'a1-a1-seq1'
-        'abcd-1234567-a1-a1-seq1'  || 'project1' | 'abcd-1234567'  | 'a1-a1-seq1'
-        'abcd-12345678-a1-a1-seq1' || 'project1' | 'abcd-12345678' | 'a1-a1-seq1'
+        'bcde-abcdef-a1-a1-ig1'     || 'project2' | 'bcde-abcdef'     | 'a1-a1-ig1'
+        // other pids can have different lengths for the pid part
+        'abcd-abcdefg-a1-a1-ig1'    || 'project1' | 'abcd-abcdefg'    | 'a1-a1-ig1'
+        'abcd-abcdefgh-a1-a1-ig1'   || 'project1' | 'abcd-abcdefgh'   | 'a1-a1-ig1'
+        'abcd-123456-a1-a1-ig1'     || 'project1' | 'abcd-123456'     | 'a1-a1-ig1'
+        'abcd-1234567-a1-a1-ig1'    || 'project1' | 'abcd-1234567'    | 'a1-a1-ig1'
+        'abcd-12345678-a1-a1-ig1'   || 'project1' | 'abcd-12345678'   | 'a1-a1-ig1'
+        'abcd-1234-a1-a1-ig1'       || 'project1' | 'abcd-1234'       | 'a1-a1-ig1'
+        'abcd-12345-a1-a1-ig1'      || 'project1' | 'abcd-12345'      | 'a1-a1-ig1'
+        'abcd-123456-a1-a1-ig1'     || 'project1' | 'abcd-123456'     | 'a1-a1-ig1'
+        'abcd-12345678-a1-a1-ig1'   || 'project1' | 'abcd-12345678'   | 'a1-a1-ig1'
+        'abcd-123456789-a1-a1-ig1'  || 'project1' | 'abcd-123456789'  | 'a1-a1-ig1'
+        'abcd-1234567890-a1-a1-ig1' || 'project1' | 'abcd-1234567890' | 'a1-a1-ig1'
         // other sample types
-        'abcd-abcdef-b1-a1-seq1'   || 'project1' | 'abcd-abcdef'   | 'b1-a1-seq1'
-        'abcd-abcdef-a2-a1-seq1'   || 'project1' | 'abcd-abcdef'   | 'a2-a1-seq1'
-        'abcd-abcdef-a9-a1-seq1'   || 'project1' | 'abcd-abcdef'   | 'a9-a1-seq1'
-        'abcd-abcdef-a1-b1-seq1'   || 'project1' | 'abcd-abcdef'   | 'a1-b1-seq1'
-        'abcd-abcdef-a1-a2-seq1'   || 'project1' | 'abcd-abcdef'   | 'a1-a2-seq1'
-        'abcd-abcdef-a1-a9-seq1'   || 'project1' | 'abcd-abcdef'   | 'a1-a9-seq1'
-        'abcd-abcdef-a1-a1-seq2'   || 'project1' | 'abcd-abcdef'   | 'a1-a1-seq2'
-        'abcd-abcdef-a1-a1-seq9'   || 'project1' | 'abcd-abcdef'   | 'a1-a1-seq9'
+        'abcd-abcdef-b1-a1-ig1'     || 'project1' | 'abcd-abcdef'     | 'b1-a1-ig1'
+        'abcd-abcdef-a2-a1-ig1'     || 'project1' | 'abcd-abcdef'     | 'a2-a1-ig1'
+        'abcd-abcdef-a9-a1-ig1'     || 'project1' | 'abcd-abcdef'     | 'a9-a1-ig1'
+        'abcd-abcdef-a1-b1-ig1'     || 'project1' | 'abcd-abcdef'     | 'a1-b1-ig1'
+        'abcd-abcdef-a1-a2-ig1'     || 'project1' | 'abcd-abcdef'     | 'a1-a2-ig1'
+        'abcd-abcdef-a1-a9-ig1'     || 'project1' | 'abcd-abcdef'     | 'a1-a9-ig1'
+        'abcd-abcdef-a1-a1-ig2'     || 'project1' | 'abcd-abcdef'     | 'a1-a1-ig2'
+        'abcd-abcdef-a1-a1-ig9'     || 'project1' | 'abcd-abcdef'     | 'a1-a1-ig9'
         // uppercase
-        'abcd-ABCDEF-a1-a1-seq1'   || 'project1' | 'abcd-ABCDEF'   | 'a1-a1-seq1'
-        'abcd-abcdef-A1-a1-seq1'   || 'project1' | 'abcd-abcdef'   | 'a1-a1-seq1'
-        'abcd-abcdef-a1-A1-seq1'   || 'project1' | 'abcd-abcdef'   | 'a1-a1-seq1'
+        'abcd-ABCDEF-a1-a1-ig1'     || 'project1' | 'abcd-ABCDEF'     | 'a1-a1-ig1'
+        'abcd-abcdef-A1-a1-ig1'     || 'project1' | 'abcd-abcdef'     | 'a1-a1-ig1'
+        'abcd-abcdef-a1-A1-ig1'     || 'project1' | 'abcd-abcdef'     | 'a1-a1-ig1'
+        'abcd-abcdef-a1-a1-IG1'     || 'project1' | 'abcd-abcdef'     | 'a1-a1-ig1'
+        // first part of sample type has two digits
+        'abcd-abcdef-a10-a1-ig1'    || 'project1' | 'abcd-abcdef'     | 'a10-a1-ig1'
+        // second part of sample type has two digits
+        'abcd-abcdef-a1-a10-ig1'    || 'project1' | 'abcd-abcdef'     | 'a1-a10-ig1'
+        // third part of sample type has two digits
+        'abcd-abcdef-a1-a1-ig10'    || 'project1' | 'abcd-abcdef'     | 'a1-a1-ig10'
+        // last optional part of sample type is missing
+        'abcd-abcdef-a1-a1'         || 'project1' | 'abcd-abcdef'     | 'a1-a1'
+        // last optional part of sample type has one letter and two digits
+        'abcd-abcdef-a1-a1-i10'     || 'project1' | 'abcd-abcdef'     | 'a1-a1-i10'
+        // one letter and two digits in the first two parts of sample type and the last optional part has two letters and two digits
+        'abcd-abcd-a12-a12-ig10'    || 'project1' | 'abcd-abcd'       | 'a12-a12-ig10'
     }
 
     @Unroll
@@ -86,20 +105,19 @@ class IlpParserSpec extends Specification {
         defaultParsedSampleIdentifier == null
 
         where:
-        input                       | problem
-        ''                          | 'empty'
-        null                        | 'null'
-        'cdef-abcdef-a1-a1-seq1'    | 'unknown project'
-        'abc-abcdef-a1-a1-seq1'     | 'project part too short"'
-        'abcde-abcdef-a1-a1-seq1'   | 'project part too long"'
-        'abcd-abcde-a1-a1-seq1'     | 'pid too short'
-        'abcd-abcdefghi-a1-a1-seq1' | 'pid too long'
-        'abcd-abcdef-a10-a1-seq1'   | 'first number of sample type has two digits'
-        'abcd-abcdef-a1-a10-seq1'   | 'second number of sample type has two digits'
-        'abcd-abcdef-a1-a1-seq10'   | 'third number of sample type has two digits'
-        'abcd-abcdef-a1-a1-SEQ1'    | 'seq is uppercase'
-        'abcd-abcdef-a1-a1'         | 'seq is missed'
-        'abcd-abcdef-a1-seq1'       | 'only one letter with digit'
+        input                        | problem
+        ''                           | 'empty'
+        null                         | 'null'
+        'cdef-abcdef-a1-a1-ig1'      | 'unknown project'
+        'abc-abcdef-a1-a1-ig1'       | 'project part too short"'
+        'abcde-abcdef-a1-a1-ig1'     | 'project part too long"'
+        'abcd-abc-a1-a1-ig1'         | 'pid too short'
+        'abcd-abcdefghijk-a1-a1-ig1' | 'pid too long'
+        'abcd-abcdef-a1-ig1'         | 'one of the sample type parts is missing, but optional part is there'
+        'abcd-abcdef-aa-a1-ig1'      | 'two letters in the first part of sample type'
+        'abcd-abcdef-a1-11-ig1'      | 'two digits in the second part of sample type'
+        'abcd-abcdef-a1-a1-ig'       | 'third optional part of the sample type without digit'
+        'abcd-abcdef-a1-a1-i123'     | 'third optional part of the sample type with too many digits'
     }
 
     void "test tryParseSingleCellWellLabel is not implemented and returns null"() {
@@ -107,7 +125,7 @@ class IlpParserSpec extends Specification {
         String singleCellWellLabel
 
         when:
-        singleCellWellLabel = ilpParser.tryParseSingleCellWellLabel('abcd-abcdef-a1-a1-seq1')
+        singleCellWellLabel = ilpParser.tryParseSingleCellWellLabel('abcd-abcdef-a1-a1-ig1')
 
         then:
         singleCellWellLabel == null

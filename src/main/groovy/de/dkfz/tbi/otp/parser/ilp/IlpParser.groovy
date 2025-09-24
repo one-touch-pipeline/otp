@@ -36,8 +36,8 @@ import java.util.regex.Matcher
 class IlpParser implements SampleIdentifierParser {
 
     static final String PROJECT = /(?<project>(\w{4}))/
-    static final String PID_PART = /\w{6,8}/
-    static final String SAMPLE_TYPE = /(?<sampleType>(\w\d-\w\d-seq\d))/
+    static final String PID_PART = /\w{4,10}/
+    static final String SAMPLE_TYPE = /(?<sampleType>([a-zA-Z]\d{1,2}-[a-zA-Z]\d{1,2}(-[a-zA-Z]{1,2}\d{1,2})?))/
     static final String PID = "(?<pid>(${PROJECT}-${PID_PART}))"
     static final String REGEX = "^${PID}-${SAMPLE_TYPE}\$"
 
