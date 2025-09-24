@@ -76,7 +76,7 @@ class SequenceControllerSpec extends Specification implements ControllerUnitTest
         controller.dataSwapService.messageSourceService = Mock(MessageSourceService) {
             _ * getMessage(_) >> { args -> args[0] }
         }
-        int expectedNumberOfColumns = 19
+        int expectedNumberOfColumns = 20
 
         when:
         controller.sampleSwapTemplate()

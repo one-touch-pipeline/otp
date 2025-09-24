@@ -39,7 +39,7 @@ enum DataSwapColumn {
     SEQ_TYPE("sequence.list.headers.seqType", true, { SeqTrack seqTrack -> seqTrack.seqType?.displayName }),
 
     LIBRARY_LAYOUT("sequence.list.headers.sequencingReadType"),
-    SINGLE_CELL("sequence.list.headers.singleCell"),
+    SINGLE_CELL("sequence.list.headers.singleCell", true, { SeqTrack seqTrack -> seqTrack.seqType?.singleCell?.toString() }),
 
     SAMPLE_NAME("sequence.list.headers.sampleName", true, { SeqTrack seqTrack -> seqTrack.sampleIdentifier }),
     ANTIBODY_TARGET("sequence.list.headers.antibodyTarget", true, { SeqTrack seqTrack -> seqTrack.antibodyTarget?.name }),

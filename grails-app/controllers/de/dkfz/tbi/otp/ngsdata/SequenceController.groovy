@@ -225,7 +225,8 @@ class SequenceController {
                     row.seqTypeDisplayName,
                     "", // seqTypeNew
                     row.libraryLayout,
-                    row.singleCell ?: "false",
+                    row.singleCell ?: "false", // singleCellOld
+                    "", // singleCellNew placeholder (otp-2701)
                     row.sampleName,
                     "", // sampleNameNew
                     row.antibodyTarget,

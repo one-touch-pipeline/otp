@@ -44,7 +44,7 @@ class DataSwapServiceSpec extends Specification implements DataTest, ServiceUnit
 
     void "getDataSwapHeaders, should produce expected number of headers"() {
         expect:
-        service.dataSwapHeaders.size() == 19
+        service.dataSwapHeaders.size() == 20
     }
 
     void "checkFileType, should throw, when original file type is different from csv"() {
