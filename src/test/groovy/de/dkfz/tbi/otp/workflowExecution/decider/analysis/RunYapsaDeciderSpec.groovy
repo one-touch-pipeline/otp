@@ -57,8 +57,8 @@ class RunYapsaDeciderSpec extends AbstractAnalysisDeciderSpec<RunYapsaInstance> 
     }
 
     @Override
-    void setupDataForCreateWorkflowRunsAndOutputArtefacts(CreatePairVariant variant) {
-        super.setupDataForCreateWorkflowRunsAndOutputArtefacts(variant)
+    void setupDataForCreateWorkflowRunsAndOutputArtefacts(CreatePairVariant variant, Map<String, ?> adaptation) {
+        super.setupDataForCreateWorkflowRunsAndOutputArtefacts(variant, adaptation)
         SamplePair samplePair = factory.createSamplePair([
                 mergingWorkPackage1: bamFileDisease.workPackage,
                 mergingWorkPackage2: bamFileControl.workPackage,
@@ -181,12 +181,12 @@ class RunYapsaDeciderSpec extends AbstractAnalysisDeciderSpec<RunYapsaInstance> 
     @Unroll
     void "createWorkflowRunsAndOutputArtefacts, when #variant, then do not create an analysis and create a warning"() {
         given:
-        setupDataForCreateWorkflowRunsAndOutputArtefacts(variant)
+        setupDataForCreateWorkflowRunsAndOutputArtefacts(variant, [:])
 
         when:
         DeciderResult deciderResult = decider.createWorkflowRunsAndOutputArtefacts(
                 projectSeqTypeGroup, baseDeciderGroup,
-                dataList, additionalDataList, additionalData, workflowVersion)
+                dataList, additionalDataList, additionalData, workflowVersion, [:])
 
         then:
         deciderResult.newArtefacts.empty

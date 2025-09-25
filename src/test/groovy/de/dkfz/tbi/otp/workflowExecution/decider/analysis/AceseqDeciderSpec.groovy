@@ -55,8 +55,8 @@ class AceseqDeciderSpec extends AbstractAnalysisDeciderSpec<AceseqInstance> {
     }
 
     @Override
-    void setupDataForCreateWorkflowRunsAndOutputArtefacts(CreatePairVariant variant) {
-        super.setupDataForCreateWorkflowRunsAndOutputArtefacts(variant)
+    void setupDataForCreateWorkflowRunsAndOutputArtefacts(CreatePairVariant variant, Map<String, ?> adaptation) {
+        super.setupDataForCreateWorkflowRunsAndOutputArtefacts(variant, adaptation)
 
         if (variant != CreateVariantInvalidAceseq.NO_SOPHIA) {
             AnalysisAnalysisArtefactData<SophiaInstance> analysisArtefactDataSophia = createAnalysisAnalysisArtefactData(
@@ -157,12 +157,12 @@ class AceseqDeciderSpec extends AbstractAnalysisDeciderSpec<AceseqInstance> {
     @Unroll
     void "createWorkflowRunsAndOutputArtefacts, when #variant, then do not create an analysis and create a warning"() {
         given:
-        setupDataForCreateWorkflowRunsAndOutputArtefacts(variant)
+        setupDataForCreateWorkflowRunsAndOutputArtefacts(variant, [:])
 
         when:
         DeciderResult deciderResult = decider.createWorkflowRunsAndOutputArtefacts(
                 projectSeqTypeGroup, baseDeciderGroup,
-                dataList, additionalDataList, additionalData, workflowVersion)
+                dataList, additionalDataList, additionalData, workflowVersion, [:])
 
         then:
         deciderResult.newArtefacts.empty

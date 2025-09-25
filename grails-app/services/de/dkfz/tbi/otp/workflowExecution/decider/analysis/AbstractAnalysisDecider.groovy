@@ -221,7 +221,7 @@ abstract class AbstractAnalysisDecider<A extends BamFilePairAnalysis>
             controlData.each { SampleType sampleTypeControl, List<AnalysisBamFileArtefactData> bamFileControlList ->
                 if (bamFileDataSet.contains(bamFileDiseaseList.first()) || bamFileDataSet.contains(bamFileControlList.first())) {
                     createSingleAnalysis(group, bamFileDiseaseList.first(), bamFileControlList.first(), allArtefacts, analysisAdditionalData,
-                            workflowVersion, deciderResult)
+                            workflowVersion, deciderResult, deciderAction)
                 }
             }
         }
@@ -230,21 +230,42 @@ abstract class AbstractAnalysisDecider<A extends BamFilePairAnalysis>
 
     // codenarc thinks, the method would return a boolean and therefore report the return statements
     @SuppressWarnings(["ParameterCount", "AbcMetric", "BooleanMethodReturnsNull"])
-    private void createSingleAnalysis(BaseDeciderGroup group, AnalysisBamFileArtefactData diseaseData, AnalysisBamFileArtefactData controlData,
-                                      AnalysisArtefactDataList allArtefacts, AnalysisAdditionalData analysisAdditionalData,
-                                      WorkflowVersion workflowVersion, DeciderResult deciderResult) {
+    void createSingleAnalysis(BaseDeciderGroup group, AnalysisBamFileArtefactData diseaseData, AnalysisBamFileArtefactData controlData,
+                              AnalysisArtefactDataList allArtefacts, AnalysisAdditionalData analysisAdditionalData,
+                              WorkflowVersion workflowVersion, DeciderResult deciderResult,
+                              Map<Class<? extends Decider>, DeciderCreateWorkflowAction> deciderAction = [:]) {
 
-        BamFilePairAnalysis existingAnalysis = findExistingAnalysis(allArtefacts.alreadyRunAnalysisDataList, diseaseData, controlData)?.artefact
+        Collection<AnalysisAnalysisArtefactData> existingAnalysisData = findExistingAnalysis(allArtefacts.alreadyRunAnalysisDataList, diseaseData, controlData)
 
-        if (existingAnalysis) {
-            deciderResult.warnings << ("skip ${group} ${diseaseData.sampleType.displayName} ${controlData.sampleType.displayName}, " +
-                    "since existing analysis ${workflowName} for the same bam file pair exist").toString()
-            return
+        if (existingAnalysisData) {
+            DeciderCreateWorkflowAction action = deciderAction[getClass()]
+            switch (action) {
+                case DeciderCreateWorkflowAction.CREATE_ALWAYS:
+                    deciderResult.warnings << "recreate ${group}, since action is CREATE_ALWAYS".toString()
+                    break
+                case DeciderCreateWorkflowAction.CREATE_MISSING_AND_NEWER:
+                    // Check if any existing analysis have the same workflow version
+                    boolean sameVersionExists = existingAnalysisData.any { it.version == workflowVersion.workflowVersion }
+                    if (sameVersionExists) {
+                        deciderResult.warnings << ("skip ${group}, since existing ${artefactType} analysis with the same version was found, " +
+                                "and action is CREATE_MISSING_AND_NEWER").toString()
+                        return
+                    }
+                    deciderResult.warnings << ("recreate ${group}, since the existing ${artefactType} analysis has a different version, " +
+                            "and action is CREATE_MISSING_AND_NEWER").toString()
+                    break
+                case DeciderCreateWorkflowAction.CREATE_MISSING:
+                default:
+                    deciderResult.warnings << "skip ${group}, since existing ${artefactType} analysis was found and action is CREATE_MISSING".toString()
+                    return
+            }
         }
 
         Map<String, AnalysisAnalysisArtefactData> additionalAnalysis = dependingAnalysisInstanceClass.collectEntries {
             Collection<? extends AnalysisAnalysisArtefactData<? extends BamFilePairAnalysis>> analysis = allArtefacts.dependingAnalysisDataList?.get(it.key)
-            [(it.key): analysis ? findExistingAnalysis(analysis, diseaseData, controlData) : null]
+            Collection<? extends AnalysisAnalysisArtefactData<? extends BamFilePairAnalysis>> existingAnalysis = analysis ?
+                    findExistingAnalysis(analysis, diseaseData, controlData) : null
+            [(it.key): existingAnalysis ? existingAnalysis.sort { it.artefact.id }.last() : null]
         }
 
         List<String> missingDependencies = additionalAnalysis.findAll { !it.value }*.key
@@ -349,12 +370,12 @@ abstract class AbstractAnalysisDecider<A extends BamFilePairAnalysis>
         ]*.toString()
     }
 
-    private AnalysisAnalysisArtefactData findExistingAnalysis(Collection<AnalysisAnalysisArtefactData<BamFilePairAnalysis>> analysisData,
-                                                              AnalysisBamFileArtefactData diseaseData, AnalysisBamFileArtefactData controlData) {
-        return analysisData.find {
+    private Collection<AnalysisAnalysisArtefactData> findExistingAnalysis(Collection<AnalysisAnalysisArtefactData<BamFilePairAnalysis>> analysisData,
+                                                                          AnalysisBamFileArtefactData diseaseData, AnalysisBamFileArtefactData controlData) {
+        return analysisData.findAll {
             BamFilePairAnalysis analysis = it.artefact
             analysis.sampleType1BamFile == diseaseData.artefact && analysis.sampleType2BamFile == controlData.artefact
-        }
+        } as Collection<AnalysisAnalysisArtefactData>
     }
 
     private Map<SampleTypePerProject.Category, Map<SampleType, List<AnalysisBamFileArtefactData>>> groupAndFilter(

@@ -45,6 +45,7 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
 
     protected Workflow workflow
     protected WorkflowApiVersion workflowApiVersion
+    protected WorkflowVersion workflowVersionOld
     protected WorkflowVersion workflowVersion
     protected Pipeline pipeline
     protected RoddyBamFile bamFileDisease
@@ -124,6 +125,77 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
         then:
         dataList.bamFileDataList == []
         dataList.alreadyRunAnalysisDataList == []
+    }
+
+    void "fetchAdditionalArtefacts, returns related BAM and analyses artefact data"() {
+        given:
+        RoddyBamFile bamFile1 = createBamFile()
+        RoddyBamFile bamFile2 = createBamFile([
+                workPackage: createMergingWorkPackage([
+                        sample : createSample([
+                                individual: bamFile1.individual,
+                        ]),
+                        seqType: bamFile1.seqType,
+                ]),
+        ])
+
+        AnalysisBamFileArtefactData artefactData1 = createAnalysisBamFileArtefactData(bamFile1)
+        createAnalysisBamFileArtefactData(bamFile2)
+        AnalysisArtefactDataList dataList = new AnalysisArtefactDataList([artefactData1], [], [:])
+
+        AnalysisBamFileArtefactData artefactDataAdditional1 = createAnalysisBamFileArtefactData(bamFile1)
+        AnalysisBamFileArtefactData artefactDataAdditional2 = createAnalysisBamFileArtefactData(bamFile2)
+
+        T analysis1 = factory.createInstanceWithRoddyBamFiles([
+                sampleType1BamFile: bamFile1,
+                sampleType2BamFile: bamFile2,
+        ])
+        AnalysisAnalysisArtefactData<T> analysisArtefactData1 = createAnalysisAnalysisArtefactData(analysis1)
+
+        Map<String, List<AnalysisAnalysisArtefactData<BamFilePairAnalysis>>> dependingAnalysisData = [:]
+        decider.dependingAnalysisInstanceClass.each { String role, Class<?> dependingAnalysis ->
+            dependingAnalysisData[role] = []
+        }
+
+        decider.analysisArtefactService = Mock(AnalysisArtefactService) {
+            0 * _
+            1 * fetchRelatedBamFilesArtefactsForBamFiles([bamFile1]) >> [artefactDataAdditional1, artefactDataAdditional2]
+            1 * fetchRelatedAnalysisArtefactsForBamFiles([bamFile1], decider.instanceClass) >> [analysisArtefactData1]
+            decider.dependingAnalysisInstanceClass.size() * fetchRelatedAnalysisArtefactsForBamFiles([bamFile1], _) >> []
+        }
+
+        when:
+        AnalysisArtefactDataList dataList2 = decider.fetchAdditionalArtefacts(dataList)
+
+        then:
+        dataList2.bamFileDataList == [artefactDataAdditional1, artefactDataAdditional2]
+        dataList2.alreadyRunAnalysisDataList == [analysisArtefactData1]
+        dataList2.dependingAnalysisDataList == dependingAnalysisData
+    }
+
+    void "fetchAdditionalArtefacts, if input is empty, then return object with empty list"() {
+        given:
+        AnalysisArtefactDataList dataList = new AnalysisArtefactDataList([], [], [:])
+
+        Map<String, List<AnalysisAnalysisArtefactData<BamFilePairAnalysis>>> dependingAnalysisData = [:]
+        decider.dependingAnalysisInstanceClass.each { String role, Class<?> dependingAnalysis ->
+            dependingAnalysisData[role] = []
+        }
+
+        decider.analysisArtefactService = Mock(AnalysisArtefactService) {
+            0 * _
+            1 * fetchRelatedBamFilesArtefactsForBamFiles([]) >> []
+            1 * fetchRelatedAnalysisArtefactsForBamFiles([], decider.instanceClass) >> []
+            decider.dependingAnalysisInstanceClass.size() * fetchRelatedAnalysisArtefactsForBamFiles([], _) >> []
+        }
+
+        when:
+        AnalysisArtefactDataList dataList2 = decider.fetchAdditionalArtefacts(dataList)
+
+        then:
+        dataList2.bamFileDataList == []
+        dataList2.alreadyRunAnalysisDataList == []
+        dataList2.dependingAnalysisDataList == dependingAnalysisData
     }
 
     void "fetchAdditionalData"() {
@@ -475,13 +547,13 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
     @Unroll
     void "createWorkflowRunsAndOutputArtefacts, when #variant, then create new analysis"() {
         given:
-        setupDataForCreateWorkflowRunsAndOutputArtefacts(variant)
+        setupDataForCreateWorkflowRunsAndOutputArtefacts(variant, [:])
         int countAnalysis = BamFilePairAnalysis.count()
 
         when:
         DeciderResult deciderResult = decider.createWorkflowRunsAndOutputArtefacts(
                 projectSeqTypeGroup, baseDeciderGroup,
-                dataList, additionalDataList, additionalData, workflowVersion)
+                dataList, additionalDataList, additionalData, workflowVersion, [:])
 
         then:
         deciderResult.newArtefacts.size() == 1
@@ -528,7 +600,7 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
     @Unroll
     void "createWorkflowRunsAndOutputArtefacts, when #variant, then do not create an analysis and create a warning"() {
         given:
-        setupDataForCreateWorkflowRunsAndOutputArtefacts(variant)
+        setupDataForCreateWorkflowRunsAndOutputArtefacts(variant, [:])
 
         // simulate that the reference genome is not supported
         if (variant == CreateVariantInvalid.REF_GENOME_NOT_SUPPORTED) {
@@ -538,7 +610,7 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
         when:
         DeciderResult deciderResult = decider.createWorkflowRunsAndOutputArtefacts(
                 projectSeqTypeGroup, baseDeciderGroup,
-                dataList, additionalDataList, additionalData, workflowVersion)
+                dataList, additionalDataList, additionalData, workflowVersion, [:])
 
         then:
         deciderResult.newArtefacts.empty
@@ -551,7 +623,7 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
 
     void "createWorkflowRunsAndOutputArtefacts, when both disease and control have wrong ref genomes, then do not create an analysis and create warnings"() {
         given:
-        setupDataForCreateWorkflowRunsAndOutputArtefacts(CreateVariantInvalid.REF_GENOME_NOT_SUPPORTED)
+        setupDataForCreateWorkflowRunsAndOutputArtefacts(CreateVariantInvalid.REF_GENOME_NOT_SUPPORTED, [:])
 
         // both disease and control samples have reference genomes which are not supported (not in the allowed list)
         workflowVersion.allowedReferenceGenomes -= [
@@ -562,7 +634,7 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
         when:
         DeciderResult deciderResult = decider.createWorkflowRunsAndOutputArtefacts(
                 projectSeqTypeGroup, baseDeciderGroup,
-                dataList, additionalDataList, additionalData, workflowVersion)
+                dataList, additionalDataList, additionalData, workflowVersion, [:])
 
         then:
         deciderResult.newArtefacts.empty
@@ -589,6 +661,72 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
         then:
         result instanceof T
         result.id
+    }
+
+    void "createSingleAnalysis, when valid disease and control data provided, then create analysis successfully"() {
+        given:
+        setupDataForCreateWorkflowRunsAndOutputArtefacts(CreateVariantValidPair.BOTH_GIVEN, [:])
+
+        AnalysisBamFileArtefactData diseaseData = createAnalysisBamFileArtefactData(bamFileDisease)
+        AnalysisBamFileArtefactData controlData = createAnalysisBamFileArtefactData(bamFileControl)
+
+        AnalysisArtefactDataList allArtefacts = new AnalysisArtefactDataList([diseaseData, controlData], [], additionalDataList.dependingAnalysisDataList ?: [:])
+        DeciderResult deciderResult = new DeciderResult()
+
+        int initialAnalysisCount = BamFilePairAnalysis.count()
+
+        when:
+        decider.createSingleAnalysis(baseDeciderGroup, diseaseData, controlData, allArtefacts,
+                additionalData, workflowVersion, deciderResult, [:])
+
+        then:
+        BamFilePairAnalysis.count() == initialAnalysisCount + 1
+
+        BamFilePairAnalysis analysis = BamFilePairAnalysis.last()
+        analysis.sampleType1BamFile == bamFileDisease
+        analysis.sampleType2BamFile == bamFileControl
+        analysis.workflowArtefact
+
+        deciderResult.newArtefacts.size() == 1
+        deciderResult.newArtefacts[0] == analysis.workflowArtefact
+        deciderResult.infos.any { it.contains("create analysis") }
+    }
+
+    @Unroll
+    void "createWorkflowRunsAndOutputArtefacts, when #deciderCreateWorkflowAction, existsAndSameVersion=#sameVersion, analysisCreated=#existingAnalysis, then correct warning is added"() {
+        given:
+        Map<Class<? extends Decider>, DeciderCreateWorkflowAction> deciderAction = [
+                (AceseqDecider)  : deciderCreateWorkflowAction,
+                (SnvDecider)     : deciderCreateWorkflowAction,
+                (SophiaDecider)  : deciderCreateWorkflowAction,
+                (IndelDecider)   : deciderCreateWorkflowAction,
+                (RunYapsaDecider): deciderCreateWorkflowAction,
+        ]
+
+        and:
+        setupDataForCreateWorkflowRunsAndOutputArtefacts(createVariant, [sameVersion: sameVersion, existingAnalysis: existingAnalysis])
+
+        when:
+        DeciderResult deciderResult = decider.createWorkflowRunsAndOutputArtefacts(
+                projectSeqTypeGroup, baseDeciderGroup,
+                dataList, additionalDataList, additionalData, workflowVersion, deciderAction)
+
+        then:
+        !deciderResult.newArtefacts.empty == newArtefactCreated
+        (deciderResult?.warnings?.size() > 0 && deciderResult?.warnings?.first()?.contains(expectedWarningOrInfo)) ||
+                (deciderResult?.infos?.size() > 0 && deciderResult?.infos?.any { it.contains(expectedWarningOrInfo) })
+
+        where:
+        deciderCreateWorkflowAction                          | createVariant                               | sameVersion | existingAnalysis || expectedWarningOrInfo                                                          | newArtefactCreated
+        DeciderCreateWorkflowAction.CREATE_ALWAYS            | CreateVariantInvalid.EXISTING_ANALYSIS      | true        | true             || "action is CREATE_ALWAYS"                                                      | true
+        DeciderCreateWorkflowAction.CREATE_ALWAYS            | CreateVariantInvalid.EXISTING_ANALYSIS      | false       | true             || "action is CREATE_ALWAYS"                                                      | true
+        DeciderCreateWorkflowAction.CREATE_ALWAYS            | CreateVariantValidPair.SAMPLE_PAIR_NO_EXIST | false       | false            || "create analysis"                                                              | true
+        DeciderCreateWorkflowAction.CREATE_MISSING_AND_NEWER | CreateVariantInvalid.EXISTING_ANALYSIS      | true        | true             || "analysis with the same version was found, and action is CREATE_MISSING_AND_NEWER" | false
+        DeciderCreateWorkflowAction.CREATE_MISSING_AND_NEWER | CreateVariantInvalid.EXISTING_ANALYSIS      | false       | true             || "analysis has a different version, and action is CREATE_MISSING_AND_NEWER"           | true
+        DeciderCreateWorkflowAction.CREATE_MISSING_AND_NEWER | CreateVariantValidPair.SAMPLE_PAIR_NO_EXIST | false       | false            || "create analysis"                                                              | true
+        DeciderCreateWorkflowAction.CREATE_MISSING           | CreateVariantInvalid.EXISTING_ANALYSIS      | true        | true             || "analysis was found and action is CREATE_MISSING"                                  | false
+        DeciderCreateWorkflowAction.CREATE_MISSING           | CreateVariantInvalid.EXISTING_ANALYSIS      | false       | true             || "analysis was found and action is CREATE_MISSING"                                  | false
+        DeciderCreateWorkflowAction.CREATE_MISSING           | CreateVariantValidPair.SAMPLE_PAIR_NO_EXIST | false       | false            || "create analysis"                                                              | true
     }
 
     protected BaseDeciderGroup createAnalysisDeciderGroup(AbstractBamFile bamFile) {
@@ -642,19 +780,22 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
         )
     }
 
-    void setupDataForCreateWorkflowRunsAndOutputArtefacts(CreatePairVariant variant) {
+    void setupDataForCreateWorkflowRunsAndOutputArtefacts(CreatePairVariant variant, Map<String, ?> adaptation) {
         workflow = createWorkflow(name: decider.workflowName)
         pipeline = findOrCreateAnalysisPipeline()
 
         // artefact data
         bamFileDisease = createBamFile([
                 workflowArtefact: createWorkflowArtefact(),
+                config          : null,
         ])
         bamFileControl = createCorrespondingBamFile(bamFileDisease, [
                 workflowArtefact: createWorkflowArtefact(),
+                config          : null,
         ])
 
         workflowApiVersion = createWorkflowApiVersion([workflow: workflow])
+        workflowVersionOld = createWorkflowVersion([apiVersion: createWorkflowApiVersion(workflow: workflow)])
         workflowVersion = createWorkflowVersion([
                 apiVersion             : workflowApiVersion,
                 allowedReferenceGenomes: [
@@ -734,38 +875,50 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
             SamplePair samplePair = factory.createSamplePair([
                     mergingWorkPackage1: bamFileDisease.workPackage,
                     mergingWorkPackage2: bamFileControl.workPackage,
-
             ])
             AnalysisGroup analysisGroup = new AnalysisGroup(bamFileDisease.workPackage, bamFileControl.workPackage)
             samplePairMap[analysisGroup] = samplePair
 
             switch (variant) {
                 case CreateVariantInvalid.EXISTING_ANALYSIS:
-                    additionalDataList.alreadyRunAnalysisDataList << createAnalysisAnalysisArtefactData(factory.createInstance([
-                            samplePair        : samplePair,
-                            sampleType1BamFile: bamFileDisease,
-                            sampleType2BamFile: bamFileControl,
-                            instanceName      : "instanceName",
-                    ]))
+                    if (adaptation.existingAnalysis) {
+                        // create existing analysis with proper workflow version
+                        T existingAnalysis = factory.createInstance([
+                                samplePair        : samplePair,
+                                sampleType1BamFile: bamFileDisease,
+                                sampleType2BamFile: bamFileControl,
+                                workflowArtefact  : createWorkflowArtefact([
+                                        artefactType: decider.artefactType,
+                                        producedBy  : createWorkflowRun([
+                                                workflowVersion: adaptation.sameVersion ? workflowVersion : workflowVersionOld,
+                                                project        : bamFileDisease.project,
+                                        ])
+                                ]),
+                        ])
+                        additionalDataList.alreadyRunAnalysisDataList << createAnalysisAnalysisArtefactData(existingAnalysis)
+                    } else {
+                        additionalDataList.alreadyRunAnalysisDataList << createAnalysisAnalysisArtefactData(factory.createInstance([
+                                samplePair        : samplePair,
+                                sampleType1BamFile: bamFileDisease,
+                                sampleType2BamFile: bamFileControl,
+                        ]))
+                    }
                     break
                 case CreateVariantValidPair.ANALYSIS_WITH_SAME_CONTROL:
                     additionalDataList.alreadyRunAnalysisDataList << createAnalysisAnalysisArtefactData(factory.createInstanceWithRoddyBamFiles([
                             samplePair        : samplePair,
                             sampleType2BamFile: bamFileControl,
-                            instanceName      : "instanceName",
                     ]))
                     break
                 case CreateVariantValidPair.ANALYSIS_WITH_SAME_DISEASE:
                     additionalDataList.alreadyRunAnalysisDataList << createAnalysisAnalysisArtefactData(factory.createInstanceWithRoddyBamFiles([
                             samplePair        : samplePair,
                             sampleType1BamFile: bamFileDisease,
-                            instanceName      : "instanceName",
                     ]))
                     break
                 case CreateVariantValidPair.INDEPENDENT_ANALYSIS:
                     additionalDataList.alreadyRunAnalysisDataList << createAnalysisAnalysisArtefactData(factory.createInstanceWithRoddyBamFiles([
-                            samplePair  : samplePair,
-                            instanceName: "instanceName",
+                            samplePair: samplePair,
                     ]))
                     break
             }
@@ -823,7 +976,7 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
         NO_DISEASE("since no sample pairs available"),
         NO_CONTROL("since no sample pairs available"),
         DIFFERENT_SEQ_PLATFORM_GROUP("since they use different seqPlatformGroups"),
-        EXISTING_ANALYSIS("since existing analysis"),
+        EXISTING_ANALYSIS("analysis"),
         REF_GENOME_NOT_SUPPORTED("since the reference genome")
 
         String message
