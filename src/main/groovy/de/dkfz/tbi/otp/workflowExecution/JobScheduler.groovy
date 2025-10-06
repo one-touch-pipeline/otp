@@ -71,14 +71,24 @@ class JobScheduler {
     @Scheduled(fixedDelay = 1000L)
     void scheduleJob() {
         if (workflowSystemService.enabled) {
-            WorkflowStep step = SessionUtils.withTransaction {
-                CollectionUtils.atMostOneElement(
-                        WorkflowStep.findAllByState(WorkflowStep.State.CREATED, [sort: 'id', order: 'asc', max: 1])
+            List<Long> stepIds = SessionUtils.withTransaction {
+                // Use SQL to avoid the LIMIT 1 problem with PostgreSQL
+                WorkflowStep.executeQuery(
+                        "SELECT id FROM WorkflowStep WHERE state=:state ORDER BY id ASC",
+                        [state: WorkflowStep.State.CREATED],
+                        [readOnly: true, max: 1]
                 )
             }
-            if (step) {
+
+            // Skip the scheduling if no job/step is found
+            if (stepIds?.find()) {
+                WorkflowStep step
                 SessionUtils.withTransaction {
-                    step.refresh()
+                    step = WorkflowStep.get(stepIds.first())
+                    if (!step) {
+                        log.warn("WorkflowStep with id ${stepIds.first()} not found, possibly already processed")
+                        return
+                    }
                     log.debug("Found job to starting asyncron: ${step.displayInfo()}")
                     workflowStateChangeService.changeStateToRunning(step)
                 }
