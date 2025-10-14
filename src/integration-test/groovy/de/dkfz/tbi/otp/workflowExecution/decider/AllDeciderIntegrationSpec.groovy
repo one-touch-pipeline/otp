@@ -31,6 +31,10 @@ import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflow.analysis.snv.SnvWorkflow
+import de.dkfz.tbi.otp.workflow.analysis.indel.IndelWorkflow
+import de.dkfz.tbi.otp.workflow.analysis.sophia.SophiaWorkflow
+import de.dkfz.tbi.otp.workflow.analysis.aceseq.AceseqWorkflow
 
 @Rollback
 @Integration
@@ -44,6 +48,10 @@ class AllDeciderIntegrationSpec extends Specification implements ServiceUnitTest
         createWorkflow(name: PanCancerWorkflow.WORKFLOW)
         createWorkflow(name: WgbsWorkflow.WORKFLOW)
         createWorkflow(name: RnaAlignmentWorkflow.WORKFLOW)
+        createWorkflow(name: SnvWorkflow.WORKFLOW)
+        createWorkflow(name: IndelWorkflow.WORKFLOW)
+        createWorkflow(name: SophiaWorkflow.WORKFLOW)
+        createWorkflow(name: AceseqWorkflow.WORKFLOW)
         WorkflowStep workflowStep = createWorkflowStep()
         WorkflowArtefact wa1 = createWorkflowArtefact([
                 state       : WorkflowArtefact.State.SUCCESS,

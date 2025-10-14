@@ -92,37 +92,47 @@ class TriggerAlignmentService {
 
     // The result indexes for the above HQL query
     private static final int IDX_WORKFLOW = 0
-    private static final int IDX_PROJECT  = 1
-    private static final int IDX_SEQTYPE  = 2
-    private static final int IDX_COUNT    = 3
+    private static final int IDX_PROJECT = 1
+    private static final int IDX_SEQTYPE = 2
+    private static final int IDX_COUNT = 3
 
     @Transactional(readOnly = false)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     @CompileDynamic
-    TriggerAlignmentResult triggerAlignment(Collection<SeqTrack> seqTracks, boolean withdrawBamFiles = false, boolean ignoreSeqPlatformGroup = false,
-                                            Map<Class<? extends Decider>, DeciderCreateWorkflowAction> deciderAction) {
-        // Mark the bam files as withdrawn
-        if (withdrawBamFiles) {
-            LogUsedTimeUtils.logUsedTimeStartEnd(log, "withdrawn existing bamFiles") {
-                roddyBamFileWithdrawService.collectObjects(seqTracks as List<SeqTrack>).each { RoddyBamFile bamFile ->
-                    bamFile.withdraw()
-                    bamFile.save(flush: true)
-                }
-            }
-        }
-
+    TriggerAlignmentResult triggerAlignment(Collection<SeqTrack> seqTrackList, Collection<AbstractBamFile> bamFiles,
+                                            boolean ignoreSeqPlatformGroup = false, Map<Class<? extends Decider>, DeciderCreateWorkflowAction> deciderAction) {
         // Modify the notification status
-        ticketService.findAllTickets(seqTracks).each {
+        ticketService.findAllTickets(seqTrackList).each {
             ticketService.resetAlignmentAndAnalysisNotification(it)
         }
 
-        // Start alignment workflows
-        Collection<SeqTrack> alignableSeqTracks = LogUsedTimeUtils.logUsedTime(log, "search seqTracks") {
-            allDecider.findAlignableSeqTracks(seqTracks)
+        // Start deciders for all workflows
+        Collection<WorkflowArtefact> allArtefacts = LogUsedTimeUtils.logUsedTime(log, "search seqTracks") {
+            allDecider.findAlignableSeqTracks(seqTrackList)*.workflowArtefact
         }
-        DeciderResult deciderResult = allDecider.decide(alignableSeqTracks*.workflowArtefact, [
+
+        if (bamFiles) {
+            allArtefacts += LogUsedTimeUtils.logUsedTime(log, "collect bamFile seqTrack artefacts") {
+                AbstractBamFile.createCriteria().list {
+                    'in'('id', bamFiles*.id)
+                    seqTracks {
+                        isNotNull('workflowArtefact')
+                        projections {
+                            property('workflowArtefact')
+                        }
+                    }
+                }
+            }
+
+            allArtefacts += LogUsedTimeUtils.logUsedTime(log, "collect bamFile artefacts") {
+                bamFiles*.workflowArtefact
+            }
+        }
+
+        DeciderResult deciderResult = allDecider.decide(allArtefacts, [
                 ignoreSeqPlatformGroup: ignoreSeqPlatformGroup.toString()
         ], deciderAction)
+
         Collection<MergingWorkPackage> mergingWorkPackages = deciderResult.newArtefacts.findAll {
             it.artefactType == ArtefactType.BAM
         }*.artefact*.get()*.workPackage

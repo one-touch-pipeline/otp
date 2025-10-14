@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.SnvDomainFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryInstance
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
@@ -44,9 +45,11 @@ import de.dkfz.tbi.otp.workflow.analysis.indel.IndelWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.runyapsa.RunYapsaWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.snv.SnvWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.sophia.SophiaWorkflow
+import de.dkfz.tbi.otp.workflow.bamImport.BamImportWorkflow
 import de.dkfz.tbi.otp.workflow.fastqc.WesFastQcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.decider.*
+import de.dkfz.tbi.otp.workflowExecution.decider.analysis.*
 
 import java.time.LocalDate
 
@@ -60,6 +63,7 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, Work
                 AbstractBamFile,
                 BamFilePairAnalysis,
                 ExternallyProcessedBamFile,
+                ExternalMergingWorkPackage,
                 FastqFile,
                 Individual,
                 MergingWorkPackage,
@@ -84,98 +88,80 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, Work
         service = new TriggerAlignmentService()
     }
 
-    void "run triggerAlignment, which should trigger one workflow"() {
+    void "run triggerAlignment with external BAM files only, should trigger analysis workflows"() {
         given:
-        final SeqType st1 = createSeqTypePaired()
-        final SeqType st2 = createSeqTypePaired()
-        final SeqType st3 = createSeqTypePaired()
-        Map<Class<? extends Decider>, DeciderCreateWorkflowAction> deciderAction = [
-                (FastqcDecider)      : DeciderCreateWorkflowAction.SKIP,
-                (PanCancerDecider)   : DeciderCreateWorkflowAction.CREATE_ALWAYS,
-                (WgbsDecider)        : DeciderCreateWorkflowAction.SKIP,
-                (RnaAlignmentDecider): DeciderCreateWorkflowAction.SKIP,
-        ]
-        Project project = createProject()
-        Individual individual = createIndividual(project: project)
-
-        Workflow wf = createWorkflow([
-                defaultSeqTypesForWorkflowVersions: [st1, st2]
-        ])
-        WorkflowRun run = createWorkflowRun([
-                workflow: wf,
-                project : project,
+        Map<Class<? extends Decider>, DeciderCreateWorkflowAction> deciderAction = createStandardDeciderActions([
+                (PanCancerDecider): DeciderCreateWorkflowAction.SKIP,
+                (SnvDecider)      : DeciderCreateWorkflowAction.CREATE_ALWAYS,
+                (IndelDecider)    : DeciderCreateWorkflowAction.CREATE_ALWAYS,
         ])
 
-        WorkflowArtefact workflowArtefact1 = createWorkflowArtefact([
-                producedBy: run,
-        ])
-        WorkflowArtefact workflowArtefact2 = createWorkflowArtefact([
-                producedBy: run
-        ])
+        ExternalMergingWorkPackage workPackage1 = ExternalBamFactoryInstance.INSTANCE.createMergingWorkPackage()
+        ExternalMergingWorkPackage workPackage2 = ExternalBamFactoryInstance.INSTANCE.createMergingWorkPackage()
 
-        SeqTrack seqTrack1 = createSeqTrackWithTwoFastqFile([
-                sample          : createSample(individual: individual),
-                seqType         : st1,
-                workflowArtefact: workflowArtefact1,
-        ])
-        SeqTrack seqTrack2 = createSeqTrackWithTwoFastqFile([
-                sample          : createSample(individual: individual),
-                seqType         : st2,
-                workflowArtefact: workflowArtefact2,
-        ])
+        ExternallyProcessedBamFile bamFile1 = createExternalBamFileWithArtefact([workPackage: workPackage1])
+        ExternallyProcessedBamFile bamFile2 = createExternalBamFileWithArtefact([workPackage: workPackage2])
 
-        SeqTrack seqTrack3 = createSeqTrackWithTwoFastqFile([
-                seqType: st3,
-        ])
+        WorkflowArtefact snvArtefact = createWorkflowArtefact([artefactType: ArtefactType.SNV, outputRole: SnvWorkflow.ANALYSIS_OUTPUT])
+        WorkflowArtefact indelArtefact = createWorkflowArtefact([artefactType: ArtefactType.INDEL, outputRole: IndelWorkflow.ANALYSIS_OUTPUT])
 
-        WorkflowArtefact outputArtefact = createWorkflowArtefact([
-                artefactType: ArtefactType.BAM,
-                outputRole  : PanCancerWorkflow.OUTPUT_BAM,
-                producedBy  : run,
-        ])
-        DeciderResult deciderResultToReturn = new DeciderResult()
-        deciderResultToReturn.newArtefacts << outputArtefact
+        DeciderResult deciderResult = createDeciderResultWithArtefacts([snvArtefact, indelArtefact])
 
-        MergingWorkPackage mergingWorkPackage1 = createMergingWorkPackage()
-        RoddyBamFile bamFile1 = createRoddyBamFile([
-                workflowArtefact: outputArtefact,
-                workPackage     : mergingWorkPackage1,
-                seqTracks       : [seqTrack1, seqTrack2],
-        ], RoddyBamFile)
-
-        // Mock service for workflow system
-        service.allDecider = Mock(AllDecider) {
-            1 * decide(_, _, _) >> deciderResultToReturn
-            1 * findAlignableSeqTracks(_) >> [seqTrack1, seqTrack2]
-            0 * _
+        setupAllDeciderMock([], deciderResult) { artefacts, params, actions ->
+            // Should only contain BAM file artefacts, NO seqTrack artefacts
+            assert artefacts.containsAll([bamFile1.workflowArtefact, bamFile2.workflowArtefact])
+            assert artefacts.size() == 2  // Only 2 BAM artefacts, no seqTrack artefacts
         }
-
-        // Check resetting tickets works
-        service.ticketService = Mock(TicketService) {
-            1 * findAllTickets(_) >> [createTicket(), createTicket()]
-            2 * resetAlignmentAndAnalysisNotification(_)
-        }
-
-        // Make sure sample pairs are created
-        service.samplePairDeciderService = Mock(SamplePairDeciderService) {
-            1 * findOrCreateSamplePairs([mergingWorkPackage1])
-        }
-
-        service.roddyBamFileWithdrawService = Mock(RoddyBamFileWithdrawService) {
-            _ * collectObjects(_) >> {
-                return [bamFile1]
-            }
-        }
+        setupTicketServiceMock([])
+        setupSamplePairDeciderServiceMock([])
+        setupRoddyBamFileWithdrawServiceMock()
 
         when:
-        TriggerAlignmentResult triggerAlignmentResult = service.triggerAlignment([seqTrack1, seqTrack2, seqTrack3] as Set, true,
-                true, deciderAction)
+        TriggerAlignmentResult result = service.triggerAlignment([] as Set, [bamFile1, bamFile2] as Set, true, deciderAction)
 
         then:
-        triggerAlignmentResult.newArtefacts.size() == 1
-        TestCase.assertContainSame(triggerAlignmentResult.mergingWorkPackages, [mergingWorkPackage1])
+        result.newArtefacts.size() == 2
+        result.mergingWorkPackages.isEmpty()
+    }
 
-        bamFile1.withdrawn
+    void "run triggerAlignment with different workflow combinations"() {
+        given:
+        Map<Class<? extends Decider>, DeciderCreateWorkflowAction> deciderAction = createStandardDeciderActions(workflowOverrides)
+
+        SeqTrack seqTrack = createSeqTrackWithArtefact()
+        MergingWorkPackage workPackage = createMergingWorkPackage()
+        RoddyBamFile bamFile = createBamFileWithArtefact([workPackage: workPackage, seqTracks: [seqTrack]])
+
+        List<WorkflowArtefact> expectedArtefacts = createAnalysisArtefacts(enabledWorkflows)
+
+        if (expectedMergingWorkPackages) {
+            expectedArtefacts << bamFile.workflowArtefact
+        }
+
+        DeciderResult deciderResult = createDeciderResultWithArtefacts(expectedArtefacts)
+
+        setupAllDeciderMock([], deciderResult) { artefacts, params, actions ->
+            assert artefacts.contains(bamFile.workflowArtefact)
+            assert artefacts.contains(seqTrack.workflowArtefact)
+            assert artefacts.size() == 2
+        }
+        setupTicketServiceMock([])
+        setupSamplePairDeciderServiceMock(expectedMergingWorkPackages ? [workPackage] : [])
+        setupRoddyBamFileWithdrawServiceMock()
+
+        when:
+        TriggerAlignmentResult result = service.triggerAlignment([] as Set, [bamFile] as Set, true, deciderAction)
+
+        then:
+        result.newArtefacts.size() == expectedArtefactCount
+        result.mergingWorkPackages.size() == (expectedMergingWorkPackages ? [workPackage] : []).size()
+
+        where:
+        scenario               | workflowOverrides                                                                                                                                                                                                                                                                                  | enabledWorkflows                     | expectedMergingWorkPackages | expectedArtefactCount
+        "SNV and Indel"        | [(PanCancerDecider): DeciderCreateWorkflowAction.SKIP, (SnvDecider): DeciderCreateWorkflowAction.CREATE_ALWAYS, (IndelDecider): DeciderCreateWorkflowAction.CREATE_ALWAYS]                                                                                                                         | ['SNV', 'INDEL']                     | false                       | 2
+        "All analysis"         | [(PanCancerDecider): DeciderCreateWorkflowAction.SKIP, (SnvDecider): DeciderCreateWorkflowAction.CREATE_ALWAYS, (IndelDecider): DeciderCreateWorkflowAction.CREATE_ALWAYS, (SophiaDecider): DeciderCreateWorkflowAction.CREATE_ALWAYS, (AceseqDecider): DeciderCreateWorkflowAction.CREATE_ALWAYS] | ['SNV', 'INDEL', 'SOPHIA', 'ACESEQ'] | false                       | 4
+        "Alignment + Analysis" | [(SnvDecider): DeciderCreateWorkflowAction.CREATE_ALWAYS, (IndelDecider): DeciderCreateWorkflowAction.CREATE_ALWAYS]                                                                                                                                                                               | ['BAM', 'SNV', 'INDEL']              | true                        | 3
+        "Alignment only"       | [:]                                                                                                                                                                                                                                                                                                | ['BAM']                              | true                        | 1
     }
 
     void "createWarningsForMissingWorkflowConfig returns the expected warnings with correct counts"() {
@@ -246,9 +232,9 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, Work
         TestCase.assertContainSame(seqTracksNotConfigured, expected)
 
         where:
-        type  || createSelector
-        1     || true
-        2     || false
+        type || createSelector
+        1    || true
+        2    || false
     }
 
     void "createWarningsForMissingWorkflowConfig returns the expected warnings"() {
@@ -260,8 +246,8 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, Work
         ])
 
         SeqTrack seqTrackWithoutConfig = createSeqTrack([
-                sample: createSample([
-                        individual    : createIndividual([
+                sample : createSample([
+                        individual: createIndividual([
                                 project: createProject(name: "seqTrackWithoutConfig"),
                         ]),
                 ]),
@@ -269,8 +255,8 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, Work
         ])
 
         SeqTrack seqTrackWithConfig = createSeqTrack([
-                sample: createSample([
-                        individual    : createIndividual([
+                sample : createSample([
+                        individual: createIndividual([
                                 project: createProject(name: "seqTrackWithConfig"),
                         ]),
                 ]),
@@ -283,8 +269,8 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, Work
         ])
 
         SeqTrack seqTrackWithDeprecatedConfig = createSeqTrack([
-                sample: createSample([
-                        individual    : createIndividual([
+                sample : createSample([
+                        individual: createIndividual([
                                 project: createProject(name: "seqTrackWithDeprecatedConfig"),
                         ]),
                 ]),
@@ -336,15 +322,15 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, Work
         List<Map<String, String>> expected = [
                 [
                         workflow: PanCancerWorkflow.WORKFLOW,
-                        project: seqTrackWithoutConfig.project.name,
-                        seqType: seqTrackWithoutConfig.seqType.displayNameWithLibraryLayout,
-                        count  : "1",
+                        project : seqTrackWithoutConfig.project.name,
+                        seqType : seqTrackWithoutConfig.seqType.displayNameWithLibraryLayout,
+                        count   : "1",
                 ],
                 [
                         workflow: PanCancerWorkflow.WORKFLOW,
-                        project: seqTrackWithDeprecatedConfig.project.name,
-                        seqType: seqTrackWithDeprecatedConfig.seqType.displayNameWithLibraryLayout,
-                        count  : "1",
+                        project : seqTrackWithDeprecatedConfig.project.name,
+                        seqType : seqTrackWithDeprecatedConfig.seqType.displayNameWithLibraryLayout,
+                        count   : "1",
                 ],
         ]
 
@@ -931,5 +917,163 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, Work
         map["project"] == seqTrack2.project.name
         map["seqType"] == seqTrack2.seqType.displayName
         map["sampleType"] == seqTrack2.sampleType.displayName
+    }
+
+    // some of these should be moved into a corresponding DomainFactory
+    private Map<Class<? extends Decider>, DeciderCreateWorkflowAction> createStandardDeciderActions(Map overrides = [:]) {
+        Map<Class<? extends Decider>, DeciderCreateWorkflowAction> defaults = [
+                (FastqcDecider)      : DeciderCreateWorkflowAction.SKIP,
+                (PanCancerDecider)   : DeciderCreateWorkflowAction.CREATE_ALWAYS,
+                (WgbsDecider)        : DeciderCreateWorkflowAction.SKIP,
+                (RnaAlignmentDecider): DeciderCreateWorkflowAction.SKIP,
+                (SnvDecider)         : DeciderCreateWorkflowAction.SKIP,
+                (IndelDecider)       : DeciderCreateWorkflowAction.SKIP,
+                (SophiaDecider)      : DeciderCreateWorkflowAction.SKIP,
+                (AceseqDecider)      : DeciderCreateWorkflowAction.SKIP,
+        ]
+        return defaults + overrides
+    }
+
+    private SeqTrack createSeqTrackWithArtefact(Map options = [:]) {
+        Project project = options.project ?: createProject()
+        Individual individual = options.individual ?: createIndividual(project: project)
+        SeqType seqType = options.seqType ?: createSeqTypePaired()
+
+        Workflow workflow = options.workflow ?: createWorkflow([
+                defaultSeqTypesForWorkflowVersions: [seqType]
+        ])
+        WorkflowRun run = options.run ?: createWorkflowRun([
+                workflow: workflow,
+                project : project,
+        ])
+
+        WorkflowArtefact artefact = createWorkflowArtefact([
+                producedBy: run,
+        ])
+
+        return createSeqTrackWithTwoFastqFile([
+                sample          : options.sample ?: createSample(individual: individual),
+                seqType         : seqType,
+                workflowArtefact: artefact,
+        ])
+    }
+
+    private RoddyBamFile createBamFileWithArtefact(Map options = [:]) {
+        Project project = options.project ?: createProject()
+        SeqType seqType = options.seqType ?: createSeqTypePaired()
+
+        Workflow workflow = options.workflow ?: createWorkflow([
+                defaultSeqTypesForWorkflowVersions: [seqType]
+        ])
+        WorkflowRun run = options.run ?: createWorkflowRun([
+                workflow: workflow,
+                project : project,
+        ])
+
+        WorkflowArtefact bamArtefact = createWorkflowArtefact([
+                artefactType: ArtefactType.BAM,
+                outputRole  : PanCancerWorkflow.OUTPUT_BAM,
+                producedBy  : run,
+        ])
+
+        MergingWorkPackage workPackage = options.workPackage ?: createMergingWorkPackage()
+        List<SeqTrack> seqTracks = options.seqTracks ?: []
+
+        return createRoddyBamFile([
+                workflowArtefact: bamArtefact,
+                workPackage     : workPackage,
+                seqTracks       : seqTracks,
+        ], RoddyBamFile)
+    }
+
+    private ExternallyProcessedBamFile createExternalBamFileWithArtefact(Map options = [:]) {
+        Project project = options.project ?: createProject()
+
+        Workflow workflow = options.workflow ?: createWorkflow()
+        WorkflowRun run = options.run ?: createWorkflowRun([
+                workflow: workflow,
+                project : project,
+        ])
+
+        WorkflowArtefact bamArtefact = createWorkflowArtefact([
+                artefactType: ArtefactType.BAM,
+                outputRole  : BamImportWorkflow.OUTPUT_BAM,
+                producedBy  : run,
+        ])
+
+        ExternalMergingWorkPackage workPackage = options.workPackage ?: createExternalMergingWorkPackage()
+
+        return ExternalBamFactoryInstance.INSTANCE.createBamFile([
+                workflowArtefact: bamArtefact,
+                workPackage     : workPackage,
+        ])
+    }
+
+    private List<WorkflowArtefact> createAnalysisArtefacts(List<String> enabledWorkflows) {
+        List<WorkflowArtefact> artefacts = []
+        if (enabledWorkflows.contains('SNV')) {
+            artefacts << createWorkflowArtefact([artefactType: ArtefactType.SNV, outputRole: SnvWorkflow.ANALYSIS_OUTPUT])
+        }
+        if (enabledWorkflows.contains('INDEL')) {
+            artefacts << createWorkflowArtefact([artefactType: ArtefactType.INDEL, outputRole: IndelWorkflow.ANALYSIS_OUTPUT])
+        }
+        if (enabledWorkflows.contains('SOPHIA')) {
+            artefacts << createWorkflowArtefact([artefactType: ArtefactType.SOPHIA, outputRole: SophiaWorkflow.ANALYSIS_OUTPUT])
+        }
+        if (enabledWorkflows.contains('ACESEQ')) {
+            artefacts << createWorkflowArtefact([artefactType: ArtefactType.ACESEQ, outputRole: AceseqWorkflow.ANALYSIS_OUTPUT])
+        }
+        return artefacts
+    }
+
+    private DeciderResult createDeciderResultWithArtefacts(List<WorkflowArtefact> artefacts) {
+        DeciderResult result = new DeciderResult()
+        artefacts.each { result.newArtefacts << it }
+        return result
+    }
+
+    private void setupAllDeciderMock(List<SeqTrack> alignableSeqTracks, DeciderResult result, Closure additionalAssertions = null) {
+        service.allDecider = Mock(AllDecider) {
+            1 * decide(_, _, _) >> { List<WorkflowArtefact> artefacts, Map<String, String> params, Map<Class<? extends Decider>, DeciderCreateWorkflowAction> actions ->
+                if (additionalAssertions) {
+                    additionalAssertions.call(artefacts, params, actions)
+                }
+                return result
+            }
+            1 * findAlignableSeqTracks(_) >> alignableSeqTracks
+            0 * _
+        }
+    }
+
+    private void setupTicketServiceMock(Collection<SeqTrack> expectedSeqTracks) {
+        List tickets = expectedSeqTracks.collect { createTicket() }
+        service.ticketService = Mock(TicketService) {
+            1 * findAllTickets { Collection<SeqTrack> actual ->
+                actual.containsAll(expectedSeqTracks) && expectedSeqTracks.containsAll(actual)
+            } >> tickets
+            tickets.size() * resetAlignmentAndAnalysisNotification(_)
+        }
+    }
+
+    private void setupSamplePairDeciderServiceMock(List<MergingWorkPackage> workPackages) {
+        service.samplePairDeciderService = Mock(SamplePairDeciderService) {
+            if (workPackages.isEmpty()) {
+                0 * findOrCreateSamplePairs(_)
+            } else {
+                1 * findOrCreateSamplePairs(workPackages)
+            }
+        }
+    }
+
+    private void setupRoddyBamFileWithdrawServiceMock(Map<List<SeqTrack>, List<AbstractBamFile>> collectObjectsMap = [:]) {
+        service.roddyBamFileWithdrawService = Mock(RoddyBamFileWithdrawService)
+
+        collectObjectsMap.each { seqTracks, bamFiles ->
+            service.roddyBamFileWithdrawService.collectObjects(seqTracks) >> bamFiles
+        }
+
+        if (collectObjectsMap.isEmpty()) {
+            service.roddyBamFileWithdrawService.collectObjects(_) >> []
+        }
     }
 }

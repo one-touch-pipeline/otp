@@ -37,6 +37,7 @@ import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
+import de.dkfz.tbi.otp.workflowExecution.decider.analysis.*
 
 /**
  * knows all deciders and also the order of the deciders based on the input and output  WorkflowArtefacts
@@ -61,6 +62,10 @@ class AllDecider implements Decider {
             PanCancerDecider,
             WgbsDecider,
             RnaAlignmentDecider,
+            SnvDecider,
+            IndelDecider,
+            SophiaDecider,
+            AceseqDecider,
     ]
 
     Class<? extends Decider> getDeciderClassByName(String name) {

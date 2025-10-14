@@ -134,6 +134,7 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
                 artefactType: ArtefactType.FASTQ,
                 displayName : "displayName_${nextId}",
                 outputRole  : { properties.producedBy ? "role ${nextId}" : null },
+                producedBy  : { properties.outputRole ? createWorkflowRun() : null },
         ], properties)
     }
 

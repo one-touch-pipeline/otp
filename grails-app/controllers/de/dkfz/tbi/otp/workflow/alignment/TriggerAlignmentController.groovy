@@ -38,7 +38,6 @@ class TriggerAlignmentController {
     private static final String PARAM_KEY_SEQ_TRACKS = 'seqTracks[]'
     private static final String PARAM_KEY_BAM_FILES = 'bamFiles[]'
     private static final String PARAM_KEY_IGNORE_SEQ_GROUP = 'ignoreSeqPlatformGroup'
-    private static final String PARAM_KEY_WITHDRAW_BAMFILES = 'withdrawBamFiles'
     private static final String PARAM_KEY_DECIDER_ACTIONS = 'deciderActions[]'
 
     private static final String MEESAGE_CODE_OPTION_NOTE = 'triggerAlignment.option.decider.notes'
@@ -66,13 +65,13 @@ class TriggerAlignmentController {
         List<DeciderWithActions> deciders = triggerWorkflowService.allDecidersWithActions
 
         return [
-                seqTypes: seqTypeService.list().sort {
+                seqTypes      : seqTypeService.list().sort {
                     it.displayNameWithLibraryLayout
                 },
-                warnings: EMPTY_WARNINGS,
-                deciders: deciders,
+                warnings      : EMPTY_WARNINGS,
+                deciders      : deciders,
                 deciderActions: DeciderCreateWorkflowAction.values(),
-                deciderNotes: [
+                deciderNotes  : [
                         General  : g.message(code: "${MEESAGE_CODE_OPTION_NOTE}.general") as String,
                         Fastqc   : g.message(code: "${MEESAGE_CODE_OPTION_NOTE}.fastqc") as String,
                         Alignment: g.message(code: "${MEESAGE_CODE_OPTION_NOTE}.alignment") as String,
@@ -147,13 +146,9 @@ class TriggerAlignmentController {
         Set<Long> bamFilesIds = getIdsFromParams(PARAM_KEY_BAM_FILES)
 
         Set<SeqTrack> seqTracks = SeqTrack.getAll(seqTracksIds)
-
-        List<ExternallyProcessedBamFile> externalBamFiles = triggerWorkflowService.getExternalBamFiles(bamFilesIds)
-
-        log.debug("ignoreing ${externalBamFiles} for now")
+        Set<AbstractBamFile> bamFiles = AbstractBamFile.getAll(bamFilesIds)
 
         boolean ignoreSeqPlatformGroup = Boolean.parseBoolean(params[PARAM_KEY_IGNORE_SEQ_GROUP])
-        boolean withdrawBamFiles = Boolean.parseBoolean(params[PARAM_KEY_WITHDRAW_BAMFILES])
 
         Map<Class<? extends Decider>, DeciderCreateWorkflowAction> deciderAction = [:]
         if (params[PARAM_KEY_DECIDER_ACTIONS].getClass().isArray()) {
@@ -179,8 +174,7 @@ class TriggerAlignmentController {
             }
         }
 
-        TriggerAlignmentResult triggerAlignmentResult = triggerAlignmentService.triggerAlignment(seqTracks, withdrawBamFiles,
-                ignoreSeqPlatformGroup, deciderAction)
+        TriggerAlignmentResult triggerAlignmentResult = triggerAlignmentService.triggerAlignment(seqTracks, bamFiles, ignoreSeqPlatformGroup, deciderAction)
 
         return render([
                 success        : !triggerAlignmentResult.mergingWorkPackages.empty,
