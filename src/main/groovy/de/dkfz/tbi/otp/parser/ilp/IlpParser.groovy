@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.ngsdata.SampleTypePerProject
 import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
 import de.dkfz.tbi.otp.parser.SampleIdentifierParser
 
@@ -62,12 +63,15 @@ class IlpParser implements SampleIdentifierParser {
                 return null
             }
 
+            String sampleType = matcher.group('sampleType').toLowerCase()
+            SampleTypePerProject.Category category = determineSampleTypeCategory(sampleType)
+
             return new DefaultParsedSampleIdentifier(
                     projectName,
                     matcher.group('pid'),
-                    matcher.group('sampleType').toLowerCase(),
+                    sampleType,
                     sampleIdentifier,
-                    null,
+                    category,
             )
         }
         return null
@@ -91,5 +95,18 @@ class IlpParser implements SampleIdentifierParser {
             return projectName?.trim() ?: null
         }
         return null
+    }
+
+    protected SampleTypePerProject.Category determineSampleTypeCategory(String sampleType) {
+        String firstLetter = sampleType.charAt(0)
+
+        switch (firstLetter) {
+            case ['b', 'n', 'f', 'k', 'z']:
+                return SampleTypePerProject.Category.CONTROL
+            case ['t', 'm', 's', 'x', 'l', 'p', 'c', 'a', 'q', 'y', 'u']:
+                return SampleTypePerProject.Category.DISEASE
+            default:
+                return null
+        }
     }
 }
