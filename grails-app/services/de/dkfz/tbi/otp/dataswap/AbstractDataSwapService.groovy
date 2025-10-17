@@ -359,7 +359,7 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
      */
     void createRemoveAnalysisAndAlignmentsCommands(DataSwapData data) {
         data.moveFilesCommands << "\n\n################ delete bam and analysis files ################\n"
-        data.dirsToDelete.flatten()*.path.each {
+        data.dirsToDelete.each {
             data.moveFilesCommands << "rm -rf ${it}\n"
         }
     }

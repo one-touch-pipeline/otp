@@ -373,7 +373,9 @@ class DeletionService {
                     bamFiles.first().workPackage)
 
             analyses.each {
-                dirsToDelete << analysisDeletionService.deleteInstance(it)
+                dirsToDelete.addAll(analysisDeletionService.deleteInstance(it).collect {
+                    new File(it.toString())
+                })
                 deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(it.id.toString(), it.class.name))
             }
             dirsToDelete.addAll(analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(samplePairs))
