@@ -175,7 +175,7 @@ class AnalysisArtefactService {
                 bf1 in (:bamFiles)
                 or bf2 in (:bamFiles)
             )
-            and analysis.class = :clazz
+            and analysis.class in (:classes)
             and analysis.withdrawn = false
             and wa.state <> '${WorkflowArtefact.State.FAILED}'
             and wa.state <> '${WorkflowArtefact.State.SKIPPED}'
@@ -248,9 +248,9 @@ class AnalysisArtefactService {
     }
 
     List<AnalysisAnalysisArtefactData> fetchRelatedAnalysisArtefactsForBamFiles(
-            Collection<AbstractBamFile> bamFiles, Class<? extends BamFilePairAnalysis> clazz) {
-        return LogUsedTimeUtils.logUsedTime(log, "          fetchRelatedAnalysisArtefactsForBamFiles (${clazz.simpleName})") {
-            return this.<BamFilePairAnalysis> executeHelperAnalysis(HQL_FIND_RELATED_ANALYSIS_FOR_BAM_FILES, bamFiles, clazz)
+            Collection<AbstractBamFile> bamFiles, List<Class<? extends BamFilePairAnalysis>> classes) {
+        return LogUsedTimeUtils.logUsedTime(log, "          fetchRelatedAnalysisArtefactsForBamFiles (${classes*.simpleName.join(', ')})") {
+            return this.<BamFilePairAnalysis> executeHelperAnalysis(HQL_FIND_RELATED_ANALYSIS_FOR_BAM_FILES, bamFiles, classes)
         }
     }
 
@@ -322,13 +322,13 @@ class AnalysisArtefactService {
     }
 
     private <T extends BamFilePairAnalysis> List<AnalysisAnalysisArtefactData<T>> executeHelperAnalysis(
-            String hql, Collection<AbstractBamFile> bamFiles, Class<T> clazz) {
-        if (!bamFiles) {
+            String hql, Collection<AbstractBamFile> bamFiles, List<Class<T>> classes) {
+        if (!bamFiles || !classes) {
             return []
         }
         Map<String, ?> parameters = [
                 bamFiles: bamFiles,
-                clazz   : clazz.name,
+                classes : classes*.name,
         ]
 
         return BamFilePairAnalysis.executeQuery(hql, parameters) as List<AnalysisAnalysisArtefactData<T>>

@@ -293,7 +293,7 @@ abstract class AbstractAnalysisArtefactServiceSpec<T> extends HibernateSpec impl
 
         when:
         List<AnalysisAnalysisArtefactData<? extends BamFilePairAnalysis>> result =
-                analysisArtefactService.fetchRelatedAnalysisArtefactsForBamFiles([bamFile1], factory.instanceClass)
+                analysisArtefactService.fetchRelatedAnalysisArtefactsForBamFiles([bamFile1], [factory.instanceClass])
 
         then:
         result.size() == 1
@@ -319,7 +319,7 @@ abstract class AbstractAnalysisArtefactServiceSpec<T> extends HibernateSpec impl
 
         when:
         List<AnalysisAnalysisArtefactData<? extends BamFilePairAnalysis>> result =
-                analysisArtefactService.fetchRelatedAnalysisArtefactsForBamFiles([bamFileNew], factory.instanceClass)
+                analysisArtefactService.fetchRelatedAnalysisArtefactsForBamFiles([bamFileNew], [factory.instanceClass])
 
         then:
         result.size() == 1
@@ -340,7 +340,7 @@ abstract class AbstractAnalysisArtefactServiceSpec<T> extends HibernateSpec impl
         setupDataWithAnalysis(factory, artefactType)
 
         when:
-        List<AnalysisAnalysisArtefactData<? extends BamFilePairAnalysis>> result = analysisArtefactService.fetchRelatedAnalysisArtefactsForBamFiles([], factory.instanceClass)
+        List<AnalysisAnalysisArtefactData<? extends BamFilePairAnalysis>> result = analysisArtefactService.fetchRelatedAnalysisArtefactsForBamFiles([], [factory.instanceClass])
 
         then:
         result.empty

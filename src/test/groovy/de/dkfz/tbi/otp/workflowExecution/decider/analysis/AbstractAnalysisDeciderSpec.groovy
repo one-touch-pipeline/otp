@@ -153,15 +153,15 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
         AnalysisAnalysisArtefactData<T> analysisArtefactData1 = createAnalysisAnalysisArtefactData(analysis1)
 
         Map<String, List<AnalysisAnalysisArtefactData<BamFilePairAnalysis>>> dependingAnalysisData = [:]
-        decider.dependingAnalysisInstanceClass.each { String role, Class<?> dependingAnalysis ->
+        decider.dependingAnalysisInstanceClasses.each { String role, List<Class<?>> dependingAnalysis ->
             dependingAnalysisData[role] = []
         }
 
         decider.analysisArtefactService = Mock(AnalysisArtefactService) {
             0 * _
             1 * fetchRelatedBamFilesArtefactsForBamFiles([bamFile1]) >> [artefactDataAdditional1, artefactDataAdditional2]
-            1 * fetchRelatedAnalysisArtefactsForBamFiles([bamFile1], decider.instanceClass) >> [analysisArtefactData1]
-            decider.dependingAnalysisInstanceClass.size() * fetchRelatedAnalysisArtefactsForBamFiles([bamFile1], _) >> []
+            1 * fetchRelatedAnalysisArtefactsForBamFiles([bamFile1], decider.instanceClasses) >> [analysisArtefactData1]
+            decider.dependingAnalysisInstanceClasses.size() * fetchRelatedAnalysisArtefactsForBamFiles([bamFile1], _) >> []
         }
 
         when:
@@ -178,15 +178,15 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
         AnalysisArtefactDataList dataList = new AnalysisArtefactDataList([], [], [:])
 
         Map<String, List<AnalysisAnalysisArtefactData<BamFilePairAnalysis>>> dependingAnalysisData = [:]
-        decider.dependingAnalysisInstanceClass.each { String role, Class<?> dependingAnalysis ->
+        decider.dependingAnalysisInstanceClasses.each { String role, List<Class<?>> dependingAnalysis ->
             dependingAnalysisData[role] = []
         }
 
         decider.analysisArtefactService = Mock(AnalysisArtefactService) {
             0 * _
             1 * fetchRelatedBamFilesArtefactsForBamFiles([]) >> []
-            1 * fetchRelatedAnalysisArtefactsForBamFiles([], decider.instanceClass) >> []
-            decider.dependingAnalysisInstanceClass.size() * fetchRelatedAnalysisArtefactsForBamFiles([], _) >> []
+            1 * fetchRelatedAnalysisArtefactsForBamFiles([], decider.instanceClasses) >> []
+            decider.dependingAnalysisInstanceClasses.size() * fetchRelatedAnalysisArtefactsForBamFiles([], _) >> []
         }
 
         when:
@@ -717,16 +717,16 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
                 (deciderResult?.infos?.size() > 0 && deciderResult?.infos?.any { it.contains(expectedWarningOrInfo) })
 
         where:
-        deciderCreateWorkflowAction                          | createVariant                               | sameVersion | existingAnalysis || expectedWarningOrInfo                                                          | newArtefactCreated
-        DeciderCreateWorkflowAction.CREATE_ALWAYS            | CreateVariantInvalid.EXISTING_ANALYSIS      | true        | true             || "action is CREATE_ALWAYS"                                                      | true
-        DeciderCreateWorkflowAction.CREATE_ALWAYS            | CreateVariantInvalid.EXISTING_ANALYSIS      | false       | true             || "action is CREATE_ALWAYS"                                                      | true
-        DeciderCreateWorkflowAction.CREATE_ALWAYS            | CreateVariantValidPair.SAMPLE_PAIR_NO_EXIST | false       | false            || "create analysis"                                                              | true
+        deciderCreateWorkflowAction                          | createVariant                               | sameVersion | existingAnalysis || expectedWarningOrInfo                                                              | newArtefactCreated
+        DeciderCreateWorkflowAction.CREATE_ALWAYS            | CreateVariantInvalid.EXISTING_ANALYSIS      | true        | true             || "action is CREATE_ALWAYS"                                                          | true
+        DeciderCreateWorkflowAction.CREATE_ALWAYS            | CreateVariantInvalid.EXISTING_ANALYSIS      | false       | true             || "action is CREATE_ALWAYS"                                                          | true
+        DeciderCreateWorkflowAction.CREATE_ALWAYS            | CreateVariantValidPair.SAMPLE_PAIR_NO_EXIST | false       | false            || "create analysis"                                                                  | true
         DeciderCreateWorkflowAction.CREATE_MISSING_AND_NEWER | CreateVariantInvalid.EXISTING_ANALYSIS      | true        | true             || "analysis with the same version was found, and action is CREATE_MISSING_AND_NEWER" | false
-        DeciderCreateWorkflowAction.CREATE_MISSING_AND_NEWER | CreateVariantInvalid.EXISTING_ANALYSIS      | false       | true             || "analysis has a different version, and action is CREATE_MISSING_AND_NEWER"           | true
-        DeciderCreateWorkflowAction.CREATE_MISSING_AND_NEWER | CreateVariantValidPair.SAMPLE_PAIR_NO_EXIST | false       | false            || "create analysis"                                                              | true
+        DeciderCreateWorkflowAction.CREATE_MISSING_AND_NEWER | CreateVariantInvalid.EXISTING_ANALYSIS      | false       | true             || "analysis has a different version, and action is CREATE_MISSING_AND_NEWER"         | true
+        DeciderCreateWorkflowAction.CREATE_MISSING_AND_NEWER | CreateVariantValidPair.SAMPLE_PAIR_NO_EXIST | false       | false            || "create analysis"                                                                  | true
         DeciderCreateWorkflowAction.CREATE_MISSING           | CreateVariantInvalid.EXISTING_ANALYSIS      | true        | true             || "analysis was found and action is CREATE_MISSING"                                  | false
         DeciderCreateWorkflowAction.CREATE_MISSING           | CreateVariantInvalid.EXISTING_ANALYSIS      | false       | true             || "analysis was found and action is CREATE_MISSING"                                  | false
-        DeciderCreateWorkflowAction.CREATE_MISSING           | CreateVariantValidPair.SAMPLE_PAIR_NO_EXIST | false       | false            || "create analysis"                                                              | true
+        DeciderCreateWorkflowAction.CREATE_MISSING           | CreateVariantValidPair.SAMPLE_PAIR_NO_EXIST | false       | false            || "create analysis"                                                                  | true
     }
 
     protected BaseDeciderGroup createAnalysisDeciderGroup(AbstractBamFile bamFile) {

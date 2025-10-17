@@ -53,12 +53,12 @@ class IndelDeciderSpec extends AbstractAnalysisDeciderNoAnalysisDependencySpec<I
 
     void "getInstanceClass, should return IndelCallingInstance"() {
         expect:
-        decider.instanceClass == IndelCallingInstance
+        decider.instanceClasses == [IndelCallingInstance]
     }
 
     void "getDependingAnalysisInstanceClass, should return empty map"() {
         expect:
-        decider.dependingAnalysisInstanceClass == [:]
+        decider.dependingAnalysisInstanceClasses == [:]
     }
 
     void "getArtefactType, should return ArtefactType.INDEL"() {

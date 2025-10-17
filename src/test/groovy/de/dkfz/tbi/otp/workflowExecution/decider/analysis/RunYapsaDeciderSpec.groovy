@@ -94,14 +94,14 @@ class RunYapsaDeciderSpec extends AbstractAnalysisDeciderSpec<RunYapsaInstance> 
 
     void "getInstanceClass, should return RunYapsaInstance"() {
         expect:
-        decider.instanceClass == RunYapsaInstance
+        decider.instanceClasses == [RunYapsaInstance]
     }
 
     void "getDependingAnalysisInstanceClass, should return map with snv and indel"() {
         expect:
-        decider.dependingAnalysisInstanceClass == [
-                (RunYapsaWorkflow.SNV_INPUT)  : RoddySnvCallingInstance,
-                (RunYapsaWorkflow.INDEL_INPUT): IndelCallingInstance,
+        decider.dependingAnalysisInstanceClasses == [
+                (RunYapsaWorkflow.SNV_INPUT)  : [RoddySnvCallingInstance],
+                (RunYapsaWorkflow.INDEL_INPUT): [IndelCallingInstance],
         ]
     }
 
@@ -137,9 +137,9 @@ class RunYapsaDeciderSpec extends AbstractAnalysisDeciderSpec<RunYapsaInstance> 
         decider.analysisArtefactService = Mock(AnalysisArtefactService) {
             0 * _
             1 * fetchRelatedBamFilesArtefactsForBamFiles([bamFile1]) >> [artefactData2]
-            1 * fetchRelatedAnalysisArtefactsForBamFiles([bamFile1], decider.instanceClass) >> [analysisArtefactData]
-            1 * fetchRelatedAnalysisArtefactsForBamFiles([bamFile1], RoddySnvCallingInstance) >> [analysisArtefactDataSnv]
-            1 * fetchRelatedAnalysisArtefactsForBamFiles([bamFile1], IndelCallingInstance) >> [analysisArtefactDataIndel]
+            1 * fetchRelatedAnalysisArtefactsForBamFiles([bamFile1], decider.instanceClasses) >> [analysisArtefactData]
+            1 * fetchRelatedAnalysisArtefactsForBamFiles([bamFile1], [RoddySnvCallingInstance]) >> [analysisArtefactDataSnv]
+            1 * fetchRelatedAnalysisArtefactsForBamFiles([bamFile1], [IndelCallingInstance]) >> [analysisArtefactDataIndel]
         }
 
         when:
@@ -161,9 +161,9 @@ class RunYapsaDeciderSpec extends AbstractAnalysisDeciderSpec<RunYapsaInstance> 
         decider.analysisArtefactService = Mock(AnalysisArtefactService) {
             0 * _
             1 * fetchRelatedBamFilesArtefactsForBamFiles([]) >> []
-            1 * fetchRelatedAnalysisArtefactsForBamFiles([], decider.instanceClass) >> []
-            1 * fetchRelatedAnalysisArtefactsForBamFiles([], RoddySnvCallingInstance) >> []
-            1 * fetchRelatedAnalysisArtefactsForBamFiles([], IndelCallingInstance) >> []
+            1 * fetchRelatedAnalysisArtefactsForBamFiles([], decider.instanceClasses) >> []
+            1 * fetchRelatedAnalysisArtefactsForBamFiles([], [RoddySnvCallingInstance]) >> []
+            1 * fetchRelatedAnalysisArtefactsForBamFiles([], [IndelCallingInstance]) >> []
         }
 
         when:

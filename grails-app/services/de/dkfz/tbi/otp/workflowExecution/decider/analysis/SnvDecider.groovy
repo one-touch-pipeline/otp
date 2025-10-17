@@ -47,9 +47,12 @@ class SnvDecider extends AbstractAnalysisDecider<AbstractSnvCallingInstance> {
 
     final String workflowName = SnvWorkflow.WORKFLOW
 
-    final Class<AbstractSnvCallingInstance> instanceClass = AbstractSnvCallingInstance
+    final List<Class<AbstractSnvCallingInstance>> instanceClasses = ([
+            SnvCallingInstance,
+            RoddySnvCallingInstance,
+    ].asImmutable() as List<Class<AbstractSnvCallingInstance>>)
 
-    final Map<String, Class<? extends BamFilePairAnalysis>> dependingAnalysisInstanceClass = Collections.emptyMap()
+    final Map<String, List<Class<? extends BamFilePairAnalysis>>> dependingAnalysisInstanceClasses = Collections.emptyMap()
 
     final ArtefactType artefactType = ArtefactType.SNV
 

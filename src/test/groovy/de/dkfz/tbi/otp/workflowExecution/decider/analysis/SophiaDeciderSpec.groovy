@@ -53,12 +53,12 @@ class SophiaDeciderSpec extends AbstractAnalysisDeciderNoAnalysisDependencySpec<
 
     void "getInstanceClass, should return SophiaInstance"() {
         expect:
-        decider.instanceClass == SophiaInstance
+        decider.instanceClasses == [SophiaInstance]
     }
 
     void "getDependingAnalysisInstanceClass, should return empty map"() {
         expect:
-        decider.dependingAnalysisInstanceClass == [:]
+        decider.dependingAnalysisInstanceClasses == [:]
     }
 
     void "getArtefactType, should return ArtefactType.SOPHIA"() {

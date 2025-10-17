@@ -28,7 +28,8 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.dataprocessing.aceseq.*
+import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
+import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqWorkFileService
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.workflow.analysis.aceseq.AceseqWorkflow
 import de.dkfz.tbi.otp.workflowExecution.ArtefactType
@@ -48,10 +49,10 @@ class AceseqDecider extends AbstractAnalysisDecider<AceseqInstance> {
 
     final String workflowName = AceseqWorkflow.WORKFLOW
 
-    final Class<AceseqInstance> instanceClass = AceseqInstance
+    final List<Class<AceseqInstance>> instanceClasses = [AceseqInstance].asImmutable()
 
-    final Map<String, Class<? extends BamFilePairAnalysis>> dependingAnalysisInstanceClass = [
-            (AceseqWorkflow.SOPHIA_INPUT): SophiaInstance,
+    final Map<String, List<Class<? extends BamFilePairAnalysis>>> dependingAnalysisInstanceClasses = [
+            (AceseqWorkflow.SOPHIA_INPUT): [SophiaInstance],
     ].asImmutable()
 
     final ArtefactType artefactType = ArtefactType.ACESEQ

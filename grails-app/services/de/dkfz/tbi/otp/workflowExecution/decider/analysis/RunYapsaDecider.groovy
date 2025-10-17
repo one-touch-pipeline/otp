@@ -50,11 +50,11 @@ class RunYapsaDecider extends AbstractAnalysisDecider<RunYapsaInstance> {
 
     final String workflowName = RunYapsaWorkflow.WORKFLOW
 
-    final Class<RunYapsaInstance> instanceClass = RunYapsaInstance
+    final List<Class<RunYapsaInstance>> instanceClasses = [RunYapsaInstance].asImmutable()
 
-    final Map<String, Class<? extends BamFilePairAnalysis>> dependingAnalysisInstanceClass = [
-            (RunYapsaWorkflow.SNV_INPUT)  : RoddySnvCallingInstance,
-            (RunYapsaWorkflow.INDEL_INPUT): IndelCallingInstance,
+    final Map<String, List<Class<? extends BamFilePairAnalysis>>> dependingAnalysisInstanceClasses = [
+            (RunYapsaWorkflow.SNV_INPUT)  : [RoddySnvCallingInstance].asImmutable(),
+            (RunYapsaWorkflow.INDEL_INPUT): [IndelCallingInstance].asImmutable(),
     ].asImmutable()
 
     final ArtefactType artefactType = ArtefactType.RUN_YAPSA

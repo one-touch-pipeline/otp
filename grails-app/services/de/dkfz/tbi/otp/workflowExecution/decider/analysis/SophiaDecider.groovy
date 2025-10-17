@@ -48,9 +48,9 @@ class SophiaDecider extends AbstractAnalysisDecider<SophiaInstance> {
 
     final String workflowName = SophiaWorkflow.WORKFLOW
 
-    final Class<SophiaInstance> instanceClass = SophiaInstance
+    final List<Class<SophiaInstance>> instanceClasses = [SophiaInstance].asImmutable()
 
-    final Map<String, Class<? extends BamFilePairAnalysis>> dependingAnalysisInstanceClass = Collections.emptyMap()
+    final Map<String, List<Class<? extends BamFilePairAnalysis>>> dependingAnalysisInstanceClasses = Collections.emptyMap()
 
     final ArtefactType artefactType = ArtefactType.SOPHIA
 

@@ -68,14 +68,14 @@ abstract class AbstractAnalysisDecider<A extends BamFilePairAnalysis>
     abstract String getWorkflowName()
 
     /**
-     * Returns the class of the analysis that is created by the decider.
+     * Returns the classes of the analysis that is created by the decider.
      */
-    abstract Class<A> getInstanceClass()
+    abstract List<Class<A>> getInstanceClasses()
 
     /**
      * Returns the map of additional analysis with role name and analysis this workflow depends on.
      */
-    abstract Map<String, Class<? extends BamFilePairAnalysis>> getDependingAnalysisInstanceClass()
+    abstract Map<String, List<Class<? extends BamFilePairAnalysis>>> getDependingAnalysisInstanceClasses()
 
     /**
      * Returns the artefact type of the analysis that is created by the decider.
@@ -118,10 +118,10 @@ abstract class AbstractAnalysisDecider<A extends BamFilePairAnalysis>
                 analysisArtefactService.fetchRelatedBamFilesArtefactsForBamFiles(bamFiles)
 
         List<AnalysisAnalysisArtefactData<BamFilePairAnalysis>> analysisData =
-                analysisArtefactService.fetchRelatedAnalysisArtefactsForBamFiles(bamFiles, instanceClass)
+                analysisArtefactService.fetchRelatedAnalysisArtefactsForBamFiles(bamFiles, instanceClasses)
 
         Map<String, List<AnalysisAnalysisArtefactData<BamFilePairAnalysis>>> dependingAnalysisData =
-                dependingAnalysisInstanceClass.collectEntries {
+                dependingAnalysisInstanceClasses.collectEntries {
                     [(it.key): analysisArtefactService.fetchRelatedAnalysisArtefactsForBamFiles(bamFiles, it.value)]
                 }
 
@@ -151,7 +151,6 @@ abstract class AbstractAnalysisDecider<A extends BamFilePairAnalysis>
     protected Map<BaseDeciderGroup, AnalysisArtefactDataList> groupData(AnalysisArtefactDataList inputArtefactDataList,
                                                                         AnalysisAdditionalData additionalData,
                                                                         Map<String, String> userParams) {
-
         Map<BaseDeciderGroup, AnalysisArtefactDataList> map = [:].withDefault {
             new AnalysisArtefactDataList([], [], [:].withDefault { [] })
         }
@@ -161,7 +160,7 @@ abstract class AbstractAnalysisDecider<A extends BamFilePairAnalysis>
         inputArtefactDataList.alreadyRunAnalysisDataList.each {
             map[createAnalysisDeciderGroup(it)].alreadyRunAnalysisDataList << it
         }
-        dependingAnalysisInstanceClass.each { String role, Class<?> dependingAnalysis ->
+        dependingAnalysisInstanceClasses.each { String role, List<Class<?>> dependingAnalysis ->
             inputArtefactDataList.dependingAnalysisDataList.getOrDefault(role, []).each {
                 map[createAnalysisDeciderGroup(it)].dependingAnalysisDataList[role] << it
             }
@@ -198,7 +197,7 @@ abstract class AbstractAnalysisDecider<A extends BamFilePairAnalysis>
         AnalysisArtefactDataList allArtefacts = new AnalysisArtefactDataList(
                 givenArtefacts.bamFileDataList + additionalArtefacts.bamFileDataList,
                 givenArtefacts.alreadyRunAnalysisDataList + additionalArtefacts.alreadyRunAnalysisDataList,
-                dependingAnalysisInstanceClass.collectEntries {
+                dependingAnalysisInstanceClasses.collectEntries {
                     Collection<? extends AnalysisAnalysisArtefactData<? extends BamFilePairAnalysis>> list = []
                     list.addAll(givenArtefacts.dependingAnalysisDataList.getOrDefault(it.key, []))
                     list.addAll(additionalArtefacts.dependingAnalysisDataList.getOrDefault(it.key, []))
@@ -261,7 +260,7 @@ abstract class AbstractAnalysisDecider<A extends BamFilePairAnalysis>
             }
         }
 
-        Map<String, AnalysisAnalysisArtefactData> additionalAnalysis = dependingAnalysisInstanceClass.collectEntries {
+        Map<String, AnalysisAnalysisArtefactData> additionalAnalysis = dependingAnalysisInstanceClasses.collectEntries {
             Collection<? extends AnalysisAnalysisArtefactData<? extends BamFilePairAnalysis>> analysis = allArtefacts.dependingAnalysisDataList?.get(it.key)
             Collection<? extends AnalysisAnalysisArtefactData<? extends BamFilePairAnalysis>> existingAnalysis = analysis ?
                     findExistingAnalysis(analysis, diseaseData, controlData) : null

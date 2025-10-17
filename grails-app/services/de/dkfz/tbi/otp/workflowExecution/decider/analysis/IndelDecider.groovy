@@ -48,9 +48,9 @@ class IndelDecider extends AbstractAnalysisDecider<IndelCallingInstance> {
 
     final String workflowName = IndelWorkflow.WORKFLOW
 
-    final Class<IndelCallingInstance> instanceClass = IndelCallingInstance
+    final List<Class<IndelCallingInstance>> instanceClasses = [IndelCallingInstance].asImmutable()
 
-    final Map<String, Class<? extends BamFilePairAnalysis>> dependingAnalysisInstanceClass = Collections.emptyMap()
+    final Map<String, List<Class<? extends BamFilePairAnalysis>>> dependingAnalysisInstanceClasses = Collections.emptyMap()
 
     final ArtefactType artefactType = ArtefactType.INDEL
 

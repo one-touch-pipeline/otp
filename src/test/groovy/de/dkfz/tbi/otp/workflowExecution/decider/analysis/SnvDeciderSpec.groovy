@@ -52,12 +52,12 @@ class SnvDeciderSpec extends AbstractAnalysisDeciderNoAnalysisDependencySpec<Abs
 
     void "getInstanceClass, should return AbstractSnvCallingInstance"() {
         expect:
-        decider.instanceClass == AbstractSnvCallingInstance
+        decider.instanceClasses == [SnvCallingInstance, RoddySnvCallingInstance]
     }
 
     void "getDependingAnalysisInstanceClass, should return empty map"() {
         expect:
-        decider.dependingAnalysisInstanceClass == [:]
+        decider.dependingAnalysisInstanceClasses == [:]
     }
 
     void "getArtefactType, should return ArtefactType.SNV"() {

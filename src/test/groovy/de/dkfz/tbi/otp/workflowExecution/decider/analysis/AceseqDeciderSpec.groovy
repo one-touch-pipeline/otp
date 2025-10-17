@@ -81,13 +81,13 @@ class AceseqDeciderSpec extends AbstractAnalysisDeciderSpec<AceseqInstance> {
 
     void "getInstanceClass, should return AceseqInstance"() {
         expect:
-        decider.instanceClass == AceseqInstance
+        decider.instanceClasses == [AceseqInstance]
     }
 
     void "getDependingAnalysisInstanceClass, should return map with sophia"() {
         expect:
-        decider.dependingAnalysisInstanceClass == [
-                (AceseqWorkflow.SOPHIA_INPUT): SophiaInstance,
+        decider.dependingAnalysisInstanceClasses == [
+                (AceseqWorkflow.SOPHIA_INPUT): [SophiaInstance],
         ]
     }
 
@@ -121,8 +121,8 @@ class AceseqDeciderSpec extends AbstractAnalysisDeciderSpec<AceseqInstance> {
         decider.analysisArtefactService = Mock(AnalysisArtefactService) {
             0 * _
             1 * fetchRelatedBamFilesArtefactsForBamFiles([bamFile1]) >> [artefactData2]
-            1 * fetchRelatedAnalysisArtefactsForBamFiles([bamFile1], decider.instanceClass) >> [analysisArtefactData]
-            1 * fetchRelatedAnalysisArtefactsForBamFiles([bamFile1], SophiaInstance) >> [analysisArtefactDataSophia]
+            1 * fetchRelatedAnalysisArtefactsForBamFiles([bamFile1], decider.instanceClasses) >> [analysisArtefactData]
+            1 * fetchRelatedAnalysisArtefactsForBamFiles([bamFile1], [SophiaInstance]) >> [analysisArtefactDataSophia]
         }
 
         when:
@@ -141,8 +141,8 @@ class AceseqDeciderSpec extends AbstractAnalysisDeciderSpec<AceseqInstance> {
         decider.analysisArtefactService = Mock(AnalysisArtefactService) {
             0 * _
             1 * fetchRelatedBamFilesArtefactsForBamFiles([]) >> []
-            1 * fetchRelatedAnalysisArtefactsForBamFiles([], decider.instanceClass) >> []
-            1 * fetchRelatedAnalysisArtefactsForBamFiles([], SophiaInstance) >> []
+            1 * fetchRelatedAnalysisArtefactsForBamFiles([], decider.instanceClasses) >> []
+            1 * fetchRelatedAnalysisArtefactsForBamFiles([], [SophiaInstance]) >> []
         }
 
         when:

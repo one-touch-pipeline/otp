@@ -45,7 +45,7 @@ abstract class AbstractAnalysisDeciderNoAnalysisDependencySpec<T extends BamFile
         decider.analysisArtefactService = Mock(AnalysisArtefactService) {
             0 * _
             1 * fetchRelatedBamFilesArtefactsForBamFiles([bamFile1]) >> [artefactData2]
-            1 * fetchRelatedAnalysisArtefactsForBamFiles([bamFile1], decider.instanceClass) >> [analysisArtefactData]
+            1 * fetchRelatedAnalysisArtefactsForBamFiles([bamFile1], decider.instanceClasses) >> [analysisArtefactData]
         }
 
         when:
@@ -64,7 +64,7 @@ abstract class AbstractAnalysisDeciderNoAnalysisDependencySpec<T extends BamFile
         decider.analysisArtefactService = Mock(AnalysisArtefactService) {
             0 * _
             1 * fetchRelatedBamFilesArtefactsForBamFiles([]) >> []
-            1 * fetchRelatedAnalysisArtefactsForBamFiles([], decider.instanceClass) >> []
+            1 * fetchRelatedAnalysisArtefactsForBamFiles([], decider.instanceClasses) >> []
         }
 
         when:
