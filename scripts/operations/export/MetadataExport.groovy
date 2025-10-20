@@ -21,19 +21,19 @@
  */
 
 /**
- * Script to export metadata for selected fastq files.
+ * Script to export metadata for selected fastq files
  *
- * The export contains all metadata imported with the fastq files. But the metadata OTP use in other
- * domains are taken from there to have the actual used information. For the fastq files the complete view-by-pid path is used.
+ * The export contains all metadata imported with the fastq files. But the updated metadata that OTP uses in other
+ * domains is taken from the database to have the correct information. For the fastq files the complete view-by-pid path is used.
  *
- * The selection can be done about following input areas:
+ * The selection for the export can be done with the following inputs:
  * - project name
  * - pid
  * - ilseNumber
  * - sampleIds
- * - md5Sum of datafile (select complete otp lane, for paired also the other read)
- * - about a input table defining seqTracks. Each line needs to be find at least one seqTrack. Be careful with combining with filters.
- *   The table has following 5-6 columns:
+ * - md5Sum of the datafile (select complete OTP lane, for paired also the other read)
+ * - or with an input table defining the seqTracks. Each line needs to be able to find at least one seqTrack. Be careful when combining this with the other filters.
+ *   The table should have the following 5-6 columns:
  *   - pid
  *   - sample type
  *   - seqType name or alias (for example WGS, WES, RNA, ...)
@@ -41,21 +41,23 @@
  *   - single cell flag: true = single cell, false = bulk
  *   - sampleName: optional column, if present, the seqTrack has to have this sample name
  *
- * Additional a filter can be done about:
- * - sampleType: Only seqTracks of this sampleType is shown.
- *   If used together with input table all sample types used there should be included, otherwise the seqTracks there will be lost.
+ * Additionally, a filter can be created for:
+ * - sampleType: Only seqTracks of this sampleType are shown.
+ *   If used together with the input table all sample types used in the table should be included, otherwise the other seqTracks will not be in the exported file.
  * - seqType (Specified about sampleTypeName, libraryLayout and single cell flag).
- *   If used together with input table all seqTypes used there should be included, otherwise the seqTracks there will be lost.
+ *   If used together with the input table all seqTypes used there should be included, otherwise the other seqTracks will not be in the exported file.
  *
- * Please provide one value per line. Spaces around the values are trimmed away. Empty lines and lines starting with # are ignored.
+ * Please provide one value per line. Spaces around the values will be trimmed away. Empty lines and lines starting with # will be ignored.
  *
- * The file is generated in the provided file with permission 660. Missing parent directories are created, if necessary.
- * A copy of the file with permission 440 is created using the file name and adding the suffix '.org'
+ * The file will be generated at the provided filepath with the permissions 660. Missing parent directories will be created, if necessary.
+ * A copy of the file with the permissions 440 will be created using the file name and adding the suffix '.org'
  *
- * The flag 'overwriteExisting' indicate, if an existing file should be replaced.
+ * The flag 'overwriteExisting' indicates, if an existing file should be replaced.
  *
- * A flag exportOnlyWhiteListedColumns indicates, if only columns listed in the processing option METADATA_WHITELIST_COLUMNS should be exported (true)
- * or all data (false).
+ * The flag 'exportColumns' indicates, which columns should be exported. This flag can be set to ALL, WHITE_LISTED_COLUMNS, or REIMPORT_COLUMNS.
+ * The option WHITE_LISTED_COLUMNS exports only the columns listed in the processing option METADATA_WHITELIST_COLUMNS.
+ * The option REIMPORT_COLUMNS exports only the columns necessary for the reimport.
+ * Otherwise, all data will be exported.
  */
 
 import de.dkfz.tbi.otp.egaSubmission.EgaSubmissionService
@@ -81,7 +83,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 // input area
 
 /**
- * List of project, one per line
+ * List of projects, one per line
  */
 String selectByProject = """
 #project1
@@ -90,7 +92,7 @@ String selectByProject = """
 """
 
 /**
- * List of pids, one per line
+ * List of PIDs, one per line
  */
 String selectByIndividual = """
 #pid1
@@ -99,7 +101,7 @@ String selectByIndividual = """
 """
 
 /**
- * List of ilse, one per line
+ * List of ilseIDs, one per line
  */
 String selectByIlse = """
 #ilse1
@@ -108,7 +110,7 @@ String selectByIlse = """
 """
 
 /**
- * List of sample types, one per line
+ * List of sample names, one per line
  */
 String selectBySampleName = """
 #sampleName1
@@ -118,7 +120,7 @@ String selectBySampleName = """
 
 /**
  * List of md5sums, one per line.
- * For paired data always the corresponding read are also fetched.
+ * For paired data the corresponding reads will also be fetched.
  */
 String selectByMd5Sum = """
 #Md5Sum1
@@ -141,7 +143,7 @@ String filterBySampleType = """
  * - LibraryLayout (PAIRED, SINGLE, MATE_PAIRED)
  * - singleCell flag (true = single cell, false = bulk).
  *
- * The columns can be separated by space, comma, semicolon or tab. Multiple separators are merged together.
+ * The columns can be separated by space, comma, semicolon or tab. Multiple separators will be merged together.
  */
 String filterBySeqTypeName = """
 #EXON PAIRED false
@@ -152,14 +154,14 @@ String filterBySeqTypeName = """
 
 /**
  * Multi selector using:
- * - pid
+ * - PID
  * - sample type
- * - seqType name or alias (for example WGS, WES, RNA, ...
+ * - seqType name or alias (for example WGS, WES, RNA, ...)
  * - sequencingReadType (LibraryLayout): PAIRED, SINGLE, MATE_PAIRED
  * - single cell flag: true = single cell, false = bulk
  * - sampleName: optional
  *
- * The columns can be separated by space, comma, semicolon or tab. Multiple separators are merged together.
+ * The columns can be separated by space, comma, semicolon or tab. Multiple separators will be merged together.
  */
 String multiColumnInput = """
 #pid1,tumor,WGS,PAIRED,false,sampleName1
@@ -169,7 +171,7 @@ String multiColumnInput = """
 """
 
 /**
- * Name of the file to generate. The name must be absolute.
+ * Name of the file to generate. The name must be an absolute path.
  */
 String fileName = ''
 
@@ -179,12 +181,23 @@ String fileName = ''
 boolean overwriteExisting = false
 
 /**
- * Flag to indicate export only white-listed columns provided in processing options [option name: METADATA_WHITELIST_COLUMNS]
+ * Flag to indicate which columns to export. The white-listed columns are provided in the processing options [option name: METADATA_WHITELIST_COLUMNS]
  */
-boolean exportOnlyWhiteListedColumns = false
+ExportColumnsEnum exportColumns = ExportColumnsEnum.ALL // export all columns
+// ExportColumnsEnum exportColumns = ExportColumnsEnum.WHITE_LISTED_COLUMNS // export only the white listed columns
+// ExportColumnsEnum exportColumns = ExportColumnsEnum.REIMPORT_COLUMNS // export only the columns necessary for the reimport
+
+enum ExportColumnsEnum {
+    ALL, WHITE_LISTED_COLUMNS, REIMPORT_COLUMNS
+}
 
 /**
- * Flag to indicate whether withdrawn Data should be exported or not
+ * If you chose to export the metadata for a reimport, please also add the name of the new project it should be imported to.
+ */
+String newProjectSelector = ""
+
+/**
+ * Flag to indicate whether withdrawn data should be exported or not
  */
 boolean exportWithdrawn = false
 
@@ -198,7 +211,7 @@ static <T> List<T> parseHelper(String inputArea, String inputType, Closure<T> se
     inputArea.split('\n')*.trim().findAll {
         it && !it.startsWith('#')
     }.collect {
-        CollectionUtils.exactlyOneElement(selection(it), "Could not found ${inputType} '${it}'")
+        CollectionUtils.exactlyOneElement(selection(it), "Could not find ${inputType} '${it}'")
     }
 }
 
@@ -206,11 +219,16 @@ List<Project> projects = parseHelper(selectByProject, 'project') {
     Project.findAllByName(it)
 }
 
-List<Individual> individuals = parseHelper(selectByIndividual, 'Individual') {
+Project reimportProject = Project.findByName(newProjectSelector.trim())
+if (exportColumns == ExportColumnsEnum.REIMPORT_COLUMNS && !reimportProject) {
+    throw new AssertionError("Could not find any projects with the name ${newProjectSelector}, this is required for the reimport.")
+}
+
+List<Individual> individuals = parseHelper(selectByIndividual, 'individual') {
     Individual.findAllByPid(it)
 }
 
-List<IlseSubmission> ilseSubmissions = parseHelper(selectByIlse, 'IlseNumber') {
+List<IlseSubmission> ilseSubmissions = parseHelper(selectByIlse, 'ilseNumber') {
     IlseSubmission.findAllByIlseNumber(it as long)
 }
 
@@ -220,7 +238,7 @@ List<SeqTrack> seqTracksSampleIdentifier = selectBySampleName.split('\n')*.trim(
     List<SeqTrack> seqTracks = SeqTrack.findAllBySampleIdentifier(it)
 
     if (!seqTracks) {
-        throw new AssertionError("Could not find any OTP lane with the sample name ${it}")
+        throw new AssertionError("Could not find any OTP lanes with the sample name ${it}")
     }
     return seqTracks
 }
@@ -231,12 +249,12 @@ List<SeqTrack> seqTracksPerMd5sum = selectByMd5Sum.split('\n')*.trim().findAll {
     List<RawSequenceFile> rawSequenceFiles = exportWithdrawn ? RawSequenceFile.findAllByFastqMd5sum(it) : RawSequenceFile.findAllByFastqMd5sumAndFileWithdrawn(it, exportWithdrawn)
 
     if (!rawSequenceFiles) {
-        throw new AssertionError("Could not find any datafile with the md5sum ${it}")
+        throw new AssertionError("Could not find any datafiles with the md5sum ${it}")
     }
     return rawSequenceFiles*.seqTrack
 }
 
-List<SampleType> sampleTypes = parseHelper(filterBySampleType, 'SampleTYpe') {
+List<SampleType> sampleTypes = parseHelper(filterBySampleType, 'sampleType') {
     SampleType.findAllByName(it)
 }
 
@@ -245,9 +263,9 @@ List<SeqType> seqTypes = filterBySeqTypeName.split('\n')*.trim().findAll {
 }.collect {
     String[] values = it.split('[ ,;\t]+')
     int valueSize = values.size()
-    assert valueSize == 3: "A seqtype is defined by three parts"
+    assert valueSize == 3: "A seqType is defined by three parts"
     SequencingReadType libraryLayout = SequencingReadType.getByName(values[1])
-    assert libraryLayout: "${values[1]} is no valid sequencing read type"
+    assert libraryLayout: "${values[1]} is not a valid sequencing read type"
     boolean singleCell = Boolean.parseBoolean(values[2])
 
     SeqType seqType = seqTypeService.findByNameOrImportAlias(values[0], [
@@ -265,19 +283,19 @@ List<SeqTrack> seqTrackPerMultiImport = multiColumnInput.split('\n')*.trim().fin
     int valueSize = values.size()
     assert valueSize in [5, 6]: "A multi input is defined by 5 or 6 columns"
     Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(values[0]),
-            "Could not find one individual with name ${values[0]}")
+            "Could not find any individuals with the name ${values[0]}")
     SampleType sampleType = CollectionUtils.exactlyOneElement(SampleType.findAllByName(values[1]),
-            "Could not find one sampleType with name ${values[1]}")
+            "Could not find any sampleTypes with the name ${values[1]}")
 
     SequencingReadType libraryLayout = SequencingReadType.getByName(values[3])
-    assert libraryLayout: "${values[3]} is no valid sequencingReadType"
+    assert libraryLayout: "${values[3]} is not a valid sequencingReadType"
     boolean singleCell = Boolean.parseBoolean(values[4])
 
     SeqType seqType = seqTypeService.findByNameOrImportAlias(values[2], [
             libraryLayout: libraryLayout,
             singleCell   : singleCell,
     ])
-    assert seqType: "Could not find seqType with : ${values[2]} ${values[3]} ${values[4]}"
+    assert seqType: "Could not find seqType with: ${values[2]} ${values[3]} ${values[4]}"
 
     List<SeqTrack> seqTracks = SeqTrack.withCriteria {
         sample {
@@ -294,25 +312,26 @@ List<SeqTrack> seqTrackPerMultiImport = multiColumnInput.split('\n')*.trim().fin
 }
 
 if (!projects && !individuals && !ilseSubmissions && !seqTracksSampleIdentifier && !seqTracksPerMd5sum && !seqTrackPerMultiImport) {
-    println "no selection defined, stopped"
+    println "No selection defined, export stopped"
     return
 }
 
 if (seqTrackPerMultiImport && sampleTypes && !sampleTypes.containsAll(seqTrackPerMultiImport*.sampleType.unique())) {
-    println "Attention: your sampleTypes filter do not contain all sample types used in your table input. " +
-            "Therefore some of the seqTracks there will removed"
+    println "Attention: Your sampleTypes filter does not contain all sample types used in your table input. " +
+            "Therefore some of the seqTracks will not be exported."
 }
 
 if (seqTrackPerMultiImport && seqTypes && !seqTypes.containsAll(seqTrackPerMultiImport*.seqType.unique())) {
-    println "Attention: your seqTypes filter do not contain all seqTypes used in your table input. " +
-            "Therefore some of the seqTracks there will removed"
+    println "Attention: Your seqTypes filter does not contain all seqTypes used in your table input. " +
+            "Therefore some of the seqTracks will not be exported."
 }
 
 List<Project> projectsEgaSubmissionInProgress = egaSubmissionService.findProjectsWithUploadInProgress(projects)
 
 if (projectsEgaSubmissionInProgress) {
-    println "Attention: some data of following projects could change, since Ega submission is still uploading data:\n"
+    println "Attention: Some data of the following projects could change, since the EGA submission is still in the upload process:"
     println projectsEgaSubmissionInProgress.name.join('\n')
+    println "\n"
 }
 
 
@@ -379,7 +398,7 @@ Collection<RawSequenceFile> rawSequenceFiles = RawSequenceFile.createCriteria().
 if (rawSequenceFiles) {
     println "Found ${rawSequenceFiles.size()} lanes"
 } else {
-    throw new OtpRuntimeException("Could not find any Datafiles for the Criteria.")
+    throw new OtpRuntimeException("Could not find any datafiles for the criteria.")
 }
 
 class MetaDataExport {
@@ -393,58 +412,87 @@ class MetaDataExport {
      * Creates a TSV file containing the metadata of the specified {@linkplain RawSequenceFile}s.
      * The output file has a format which is processable by the {@linkplain MetadataImportService}.
      */
-    void writeMetadata(Collection<RawSequenceFile> rawSequenceFiles, Path metadataOutputFile, boolean exportOnlyWhiteListedColumns) {
-        metadataOutputFile.bytes = getMetadata(rawSequenceFiles, exportOnlyWhiteListedColumns).getBytes(StandardCharsets.UTF_8)
+    void writeMetadata(Collection<RawSequenceFile> rawSequenceFiles, Path metadataOutputFile, ExportColumnsEnum exportColumns, Project reimportProject) {
+        metadataOutputFile.bytes = getMetadata(rawSequenceFiles, exportColumns, reimportProject).getBytes(StandardCharsets.UTF_8)
     }
 
-    String getMetadata(Collection<RawSequenceFile> rawSequenceFiles, boolean exportOnlyWhiteListedColumns) {
+    String getMetadata(Collection<RawSequenceFile> rawSequenceFiles, ExportColumnsEnum exportColumns, Project reimportProject) {
         MetaDataKey.list()
-        Collection<Map<String, String>> allProperties = rawSequenceFiles.collect { getMetadata(it) }
-        List<String> allColumnsList = MetaDataColumn.values()*.name() + (allProperties*.keySet().sum() as List<String>).sort().unique() as List<String>
-        List<String> headers = []
-        if (exportOnlyWhiteListedColumns) {
-            String whitelistColumns = processingOptionService.findOptionAsString(ProcessingOption.OptionName.METADATA_WHITELIST_COLUMNS)
-            List<String> selectedColumns = whitelistColumns.split('[,;\t]+')*.trim()
-            selectedColumns.findAll().each { String column ->
-                if (allColumnsList.contains(column)) {
-                    headers << column
-                }
-            }
-        } else {
-            headers = allColumnsList
+        boolean reimport = exportColumns == ExportColumnsEnum.REIMPORT_COLUMNS
+        Collection<Map<String, String>> allProperties = rawSequenceFiles.collect { getMetadata(it, reimport, reimportProject) }
+
+        List<String> allColumnHeaders = MetaDataColumn.values()*.name() + allProperties*.keySet().flatten().sort().unique()
+        List<String> headers = determineHeaders(exportColumns, allColumnHeaders).unique()
+
+        StringBuilder metadataString = new StringBuilder(headers.join('\t')).append('\n')
+        allProperties.each { properties ->
+            metadataString << headers.collect { header -> properties[header] ?: '' }.join('\t')
+            metadataString << '\n'
         }
-        headers = headers.unique()
-        StringBuilder s = new StringBuilder(headers.join('\t')).append('\n')
-        for (Map<String, String> properties : allProperties) {
-            s << headers.collect { String header ->
-                properties.get(header) ?: ''
-            }.join('\t')
-            s << '\n'
-        }
-        return s.toString()
+        return metadataString.toString()
     }
 
-    Map<String, String> getMetadata(RawSequenceFile rawSequenceFile) {
-        Map<String, String> properties = [:]
+    private List<String> determineHeaders(ExportColumnsEnum exportColumns, List<String> allColumnHeaders) {
+        if (exportColumns == ExportColumnsEnum.WHITE_LISTED_COLUMNS) {
+            String whitelistColumns = processingOptionService.findOptionAsString(ProcessingOption.OptionName.METADATA_WHITELIST_COLUMNS)
+            return whitelistColumns.split('[,;\t]+')*.trim().findAll { column -> allColumnHeaders.contains(column) }
+        } else if (exportColumns == ExportColumnsEnum.REIMPORT_COLUMNS) {
+            // this could also be made into a ProcessingOption if wanted
+            List<String> removedColumns = ["SWAPPED", "WITHDRAWN", "WITHDRAWN_DATE", "WITHDRAWN_COMMENT", "FILE_EXISTS", "CUSTOMER_TAGS"]
+            List<String> headers = allColumnHeaders - removedColumns
+            // discussion with operators: column BASE_MATERIAL should always exist, even if empty (otp-2322)
+            if (!headers.contains("BASE_MATERIAL")) headers << "BASE_MATERIAL"
+            return headers.unique()
+        }
+        return allColumnHeaders.unique()
+    }
+
+    Map<String, String> getMetadata(RawSequenceFile rawSequenceFile, Boolean reimport, Project reimportProject) {
+        Map<String, String> metadataValues = [:]
         MetaDataEntry.findAllBySequenceFile(rawSequenceFile).each {
-            properties.put(it.key.name, it.value)
+            String value = (it.value == "N.A.") ? "" : it.value
+            metadataValues.put(it.key.name, value)
         }
 
         Closure put = { MetaDataColumn column, String value ->
             if (value != null) {
-                properties.put(column.toString(), value)
+                metadataValues.put(column.toString(), value)
             }
         }
 
         put(FASTQ_FILE, rawSequenceDataWorkFileService.getFilePath(rawSequenceFile)?.toString()?.replaceAll('//+', '/'))
         put(MD5, rawSequenceFile.fastqMd5sum)
         put(READ, (rawSequenceFile.indexFile ? 'I' : '') + rawSequenceFile.mateNumber?.toString())
-        put(WITHDRAWN, rawSequenceFile.fileWithdrawn ? '1' : null)
-        put(WITHDRAWN_DATE, TimeFormats.DATE.getFormattedDate(rawSequenceFile.withdrawnDate))
-        put(WITHDRAWN_COMMENT, rawSequenceFile.withdrawnComment?.trim()?.replace("\t", ", ")?.replace("\n", "; "))
 
-        // export, if the fastq file is available or is a dead link. It use the cached flag in the database.
-        put(FILE_EXISTS, rawSequenceFile.fileExists.toString())
+        SeqTrack seqTrack = rawSequenceFile.seqTrack
+        List<SpeciesWithStrain> speciesList = []
+        if (rawSequenceFile.individual.species) {
+            speciesList.add(rawSequenceFile.individual.species)
+            speciesList.addAll(rawSequenceFile.sample.mixedInSpecies?.unique() ?: [])
+        }
+
+        if (!reimport) {
+            put(WITHDRAWN, rawSequenceFile.fileWithdrawn ? '1' : null)
+            put(WITHDRAWN_DATE, TimeFormats.DATE.getFormattedDate(rawSequenceFile.withdrawnDate))
+            put(WITHDRAWN_COMMENT, rawSequenceFile.withdrawnComment?.trim()?.replace("\t", ", ")?.replace("\n", "; "))
+
+            // export, if the fastq file is available or is a dead link. It use the cached flag in the database.
+            put(FILE_EXISTS, rawSequenceFile.fileExists.toString())
+            put(SWAPPED, seqTrack.swapped.toString())
+
+            metadataValues.put('OTP_PID', seqTrack.individual.pid)
+            metadataValues.put('OTP_SAMPLE_TYPE', seqTrack.sampleType.name)
+            put(PROJECT, seqTrack.project.name)
+            put(SPECIES, speciesList ? speciesList*.importAlias*.first().join(' + ') : '')
+        } else {
+            String oldPid = seqTrack.individual.pid
+            String newPrefixPid = oldPid.startsWith(seqTrack.project.individualPrefix) ?
+                    oldPid.replaceFirst(seqTrack.project.individualPrefix, reimportProject.individualPrefix) : (reimportProject.individualPrefix + oldPid)
+            put(PATIENT_ID, newPrefixPid)
+            put(SAMPLE_TYPE, seqTrack.sampleType.name)
+            put(PROJECT, reimportProject.name)
+            put(SPECIES, speciesList ? speciesList*.displayName.join(' + ') : '')
+        }
 
         Run run = rawSequenceFile.run
         put(RUN_ID, run.name)
@@ -454,22 +502,20 @@ class MetaDataExport {
         put(INSTRUMENT_MODEL, run.seqPlatform.seqPlatformModelLabel?.name)
         put(SEQUENCING_KIT, run.seqPlatform.sequencingKitLabel?.name)
 
-        SeqTrack seqTrack = rawSequenceFile.seqTrack
         String[] laneId = seqTrack.laneId.split('_', 2)
         put(LANE_NO, laneId[0])
         put(INDEX, laneId.length > 1 ? laneId[1] : null)
-        String seqType = seqTrack.seqType.name
-        put(SEQUENCING_TYPE, seqType)
+        put(SEQUENCING_TYPE, seqTrack.seqType.name)
         put(SEQUENCING_READ_TYPE, seqTrack.seqType.libraryLayout.toString())
-        properties.put('OTP_PID', seqTrack.individual.pid)
-        properties.put('OTP_SAMPLE_TYPE', seqTrack.sampleType.name)
+
         put(SAMPLE_NAME, seqTrack.sampleIdentifier)
         put(FASTQ_GENERATOR, preferredOrLongest(
-                properties.get(FASTQ_GENERATOR.toString()), SoftwareToolIdentifier.findAllBySoftwareTool(seqTrack.pipelineVersion)*.name))
+                metadataValues.get(FASTQ_GENERATOR.toString()),
+                SoftwareToolIdentifier.findAllBySoftwareTool(seqTrack.pipelineVersion)*.name
+        ))
         put(FRAGMENT_SIZE, String.valueOf(seqTrack.insertSize))
         put(LIB_PREP_KIT, seqTrack.libraryPreparationKit?.name)
         put(ILSE_NO, seqTrack.ilseSubmission?.ilseNumber?.toString())
-        put(PROJECT, seqTrack.project.name)
         put(TAGMENTATION_LIBRARY, seqTrack.libraryName)
 
         if (seqTrack.seqType.hasAntibodyTarget) {
@@ -477,38 +523,32 @@ class MetaDataExport {
             put(ANTIBODY, seqTrack.antibody)
         }
 
-        put(SWAPPED, seqTrack.swapped.toString())
-
-        List<SpeciesWithStrain> speciesList = []
-        if (rawSequenceFile.individual.species) {
-            speciesList.add(rawSequenceFile.individual.species)
-            if (rawSequenceFile.sample.mixedInSpecies) {
-                speciesList.addAll(rawSequenceFile.sample.mixedInSpecies.unique())
-            }
-        }
-        put(SPECIES, speciesList ? speciesList*.importAlias*.first().join(' + ') : '')
-
-        return properties
+        return metadataValues
     }
 
     static String preferredOrLongest(String preferred, Collection<String> all) {
         return all.contains(preferred) ? preferred : all.max { it.length() }
     }
 
-    Path handleCreationOfMetadataFile(Collection<RawSequenceFile> rawSequenceFiles, String fileName, boolean overwriteExisting, boolean exportOnlyWhiteListedColumns) {
-        assert fileName: 'No file name given, but this is required'
-        assert !fileName.contains(' '): 'File name contains spaces, which is not allowed'
+    Path handleCreationOfMetadataFile(
+            Collection<RawSequenceFile> rawSequenceFiles,
+            String fileName, boolean overwriteExisting,
+            ExportColumnsEnum exportColumns,
+            Project reimportProject
+    ) {
+        assert fileName: 'Error: No file name given'
+        assert !fileName.contains(' '): 'Error: File name contains spaces'
 
         FileSystem fileSystem = fileSystemService.remoteFileSystem
         Path outputFile = fileSystem.getPath(fileName)
 
-        assert outputFile.absolute: '"The file name is not absolute, but that is required'
+        assert outputFile.absolute: 'Error: The file path is not absolute'
 
         if (Files.exists(outputFile)) {
             if (overwriteExisting) {
                 Files.delete(outputFile)
             } else {
-                throw new OtpRuntimeException("The file ${outputFile} already exist and overwrite is set to false")
+                throw new OtpRuntimeException("The file ${outputFile} already exists and overwrite is set to false")
             }
         }
 
@@ -521,7 +561,7 @@ class MetaDataExport {
 
         fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputFile.parent)
 
-        writeMetadata(rawSequenceFiles, outputFile, exportOnlyWhiteListedColumns)
+        writeMetadata(rawSequenceFiles, outputFile, exportColumns, reimportProject)
         fileService.setPermission(outputFile, [
                 PosixFilePermission.OWNER_READ,
                 PosixFilePermission.OWNER_WRITE,
@@ -542,6 +582,6 @@ MetaDataExport metaDataExport = new MetaDataExport([
         processingOptionService       : ctx.processingOptionService,
 ])
 
-Path file = metaDataExport.handleCreationOfMetadataFile(rawSequenceFiles, fileName, overwriteExisting, exportOnlyWhiteListedColumns)
+Path file = metaDataExport.handleCreationOfMetadataFile(rawSequenceFiles, fileName, overwriteExisting, exportColumns, reimportProject)
 
 println "Metadata exported to ${file}"
