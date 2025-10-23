@@ -109,10 +109,10 @@ abstract class AbstractAnalysisWorkFileServiceSpec<T extends AbstractAnalysisWor
     void "test getDirectoryPath for newWorkflowSystem #newWorkflowSystem"() {
         given:
         service.filestoreService = Mock(FilestoreService) {
-            _ * getWorkFolderPath(_) >> tempDir.resolve("uuid")
+            countUuid * getWorkFolderPath(_) >> tempDir.resolve("uuid")
         }
         IndividualService individualService = Mock(IndividualService) {
-            _ * getViewByPidPath(_, _) >> tempDir.resolve("view-by-pid")
+            countOldSystem * getViewByPidPath(_, _) >> tempDir.resolve("view-by-pid")
         }
         service.analysisLinkFileServiceFactoryService = new AnalysisLinkFileServiceFactoryService([
                 aceseqLinkFileService  : new AceseqLinkFileService(individualService: individualService),
@@ -129,7 +129,9 @@ abstract class AbstractAnalysisWorkFileServiceSpec<T extends AbstractAnalysisWor
                 tempDir.resolve("view-by-pid")
 
         where:
-        newWorkflowSystem << [true, false]
+        newWorkflowSystem | countUuid | countOldSystem
+        true              | 1         | 0
+        false             | 0         | 1
     }
 
     void "validateInputBamFiles, when all fine, then do not throw exception"() {
@@ -159,28 +161,29 @@ abstract class AbstractAnalysisWorkFileServiceSpec<T extends AbstractAnalysisWor
         e.cause.message.contains(assertMessagePart)
 
         where:
-        name                           | changeClosure                                                                                                                      || firstBamFile | assertMessagePart
-        'md5sum changed of bam 1'      | { BamFilePairAnalysis analysis2, Path tempDir2 -> analysis2.sampleType1BamFile.md5sum = "0" }                                                     || true         | "bamFile.md5sum"
-        'md5sum changed of bam 2'      | { BamFilePairAnalysis analysis2, Path tempDir2 -> analysis2.sampleType2BamFile.md5sum = "0" }                                                     || false        | "bamFile.md5sum"
-        'file size of bam 1 is 0'      | { BamFilePairAnalysis analysis2, Path tempDir2 -> analysis2.sampleType1BamFile.fileSize = 0 }                                                     || true         | "bamFile.fileSize"
-        'file size of bam 2 is 0'      | { BamFilePairAnalysis analysis2, Path tempDir2 -> analysis2.sampleType2BamFile.fileSize = 0 }                                                     || false        | "bamFile.fileSize"
-        'file size of bam 1 is wrong'  | { BamFilePairAnalysis analysis2, Path tempDir2 -> analysis2.sampleType1BamFile.fileSize = 1 }                                                     || true         | "Files.size"
-        'file size of bam 2 is wrong'  | { BamFilePairAnalysis analysis2, Path tempDir2 -> analysis2.sampleType2BamFile.fileSize = 1 }                                                     || false        | "Files.size"
-        'file of bam 1 is not a file' | { BamFilePairAnalysis analysis2, Path tempDir2 -> Files.delete(tempDir2.resolve("bam1.bam")); Files.createDirectory(tempDir2.resolve("bam1.bam")) } || true         | "Files.isRegularFile" // codenarc-disable-line ExplicitFlushForDeleteRule
-        'file of bam 2 is not a file' | { BamFilePairAnalysis analysis2, Path tempDir2 -> Files.delete(tempDir2.resolve("bam2.bam")); Files.createDirectory(tempDir2.resolve("bam2.bam")) } || false        | "Files.isRegularFile" // codenarc-disable-line ExplicitFlushForDeleteRule
-        'file of bam 1 is not a file' | { BamFilePairAnalysis analysis2, Path tempDir2 -> Files.setPosixFilePermissions(tempDir2.resolve("bam1.bam"), [] as Set) }                          || true         | "Files.isReadable"
-        'file of bam 2 is not a file' | { BamFilePairAnalysis analysis2, Path tempDir2 -> Files.setPosixFilePermissions(tempDir2.resolve("bam2.bam"), [] as Set) }                          || false        | "Files.isReadable"
-        'file of bam 1 does not exist' | { BamFilePairAnalysis analysis2, Path tempDir2 -> Files.delete(tempDir2.resolve("bam1.bam")) }                                                     || true         | "Files.exists" // codenarc-disable-line ExplicitFlushForDeleteRule
-        'file of bam 2 does not exist' | { BamFilePairAnalysis analysis2, Path tempDir2 -> Files.delete(tempDir2.resolve("bam2.bam")) }                                                     || false        | "Files.exists" // codenarc-disable-line ExplicitFlushForDeleteRule
+        name                           | changeClosure                                                                                                                                       || firstBamFile | assertMessagePart
+        'md5sum changed of bam 1'      | { BamFilePairAnalysis analysis2, Path tempDir2 -> analysis2.sampleType1BamFile.md5sum = "0" }                                                       || true         | "bamFile.md5sum"
+        'md5sum changed of bam 2'      | { BamFilePairAnalysis analysis2, Path tempDir2 -> analysis2.sampleType2BamFile.md5sum = "0" }                                                       || false        | "bamFile.md5sum"
+        'file size of bam 1 is 0'      | { BamFilePairAnalysis analysis2, Path tempDir2 -> analysis2.sampleType1BamFile.fileSize = 0 }                                                       || true         | "bamFile.fileSize"
+        'file size of bam 2 is 0'      | { BamFilePairAnalysis analysis2, Path tempDir2 -> analysis2.sampleType2BamFile.fileSize = 0 }                                                       || false        | "bamFile.fileSize"
+        'file size of bam 1 is wrong'  | { BamFilePairAnalysis analysis2, Path tempDir2 -> analysis2.sampleType1BamFile.fileSize = 1 }                                                       || true         | "Files.size"
+        'file size of bam 2 is wrong'  | { BamFilePairAnalysis analysis2, Path tempDir2 -> analysis2.sampleType2BamFile.fileSize = 1 }                                                       || false        | "Files.size"
+        'file of bam 1 is not a file'  | { BamFilePairAnalysis analysis2, Path tempDir2 -> Files.delete(tempDir2.resolve("bam1.bam")); Files.createDirectory(tempDir2.resolve("bam1.bam")) } || true         | "Files.isRegularFile" // codenarc-disable-line ExplicitFlushForDeleteRule
+        'file of bam 2 is not a file'  | { BamFilePairAnalysis analysis2, Path tempDir2 -> Files.delete(tempDir2.resolve("bam2.bam")); Files.createDirectory(tempDir2.resolve("bam2.bam")) } || false        | "Files.isRegularFile" // codenarc-disable-line ExplicitFlushForDeleteRule
+        'file of bam 1 is not a file'  | { BamFilePairAnalysis analysis2, Path tempDir2 -> Files.setPosixFilePermissions(tempDir2.resolve("bam1.bam"), [] as Set) }                          || true         | "Files.isReadable"
+        'file of bam 2 is not a file'  | { BamFilePairAnalysis analysis2, Path tempDir2 -> Files.setPosixFilePermissions(tempDir2.resolve("bam2.bam"), [] as Set) }                          || false        | "Files.isReadable"
+        'file of bam 1 does not exist' | { BamFilePairAnalysis analysis2, Path tempDir2 -> Files.delete(tempDir2.resolve("bam1.bam")) }                                                      || true         | "Files.exists" // codenarc-disable-line ExplicitFlushForDeleteRule
+        'file of bam 2 does not exist' | { BamFilePairAnalysis analysis2, Path tempDir2 -> Files.delete(tempDir2.resolve("bam2.bam")) }                                                      || false        | "Files.exists" // codenarc-disable-line ExplicitFlushForDeleteRule
     }
 
     protected BamFilePairAnalysis getInstance(boolean newWorkflowSystem) {
-        return factory.createInstanceWithRoddyBamFiles(
-                [workflowArtefact: createWorkflowArtefact(newWorkflowSystem ?
-                        [producedBy: createWorkflowRun(workFolder: createWorkFolder())] :
-                        [:])
-                ]
-        )
+        return factory.createInstanceWithRoddyBamFiles([
+                workflowArtefact: createWorkflowArtefact([
+                        producedBy: createWorkflowRun([
+                                workFolder: newWorkflowSystem ? createWorkFolder() : null,
+                        ])
+                ])
+        ])
     }
 
     private BamFilePairAnalysis setUpForValidateInputBamFiles(boolean calledForBoth) {

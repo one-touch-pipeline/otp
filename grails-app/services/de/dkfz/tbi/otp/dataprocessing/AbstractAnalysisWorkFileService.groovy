@@ -47,7 +47,7 @@ abstract class AbstractAnalysisWorkFileService<T extends BamFilePairAnalysis> im
     AlignmentWorkFileServiceFactoryService alignmentWorkFileServiceFactoryService
 
     Path getDirectoryPath(T instance) {
-        return instance.workflowArtefact?.producedBy ?
+        return instance.workflowArtefact?.producedBy?.workFolder ?
                 filestoreService.getWorkFolderPath(instance.workflowArtefact.producedBy) :
                 analysisLinkFileServiceFactoryService.getService(instance).getDirectoryPath(instance)
     }
