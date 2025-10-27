@@ -86,6 +86,9 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
                 workflowArtefact(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
                     producedBy(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
                         property('state', 'runState')
+                        workflowVersion(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
+                            property('workflowVersion', 'workflowVersion')
+                        }
                     }
                 }
                 samplePair {
@@ -118,7 +121,7 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
                         }
                     }
                 }
-                config {
+                config(JoinType.LEFT_OUTER_JOIN.joinTypeValue) {
                     property("programVersion", 'version')
                 }
                 property('processingState', 'processingState')
@@ -151,6 +154,7 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
                 if (processingState != AnalysisProcessingStates.FINISHED) {
                     remove('instanceId')
                 }
+                version = workflowVersion ?: version
                 return it
             }
             return properties
