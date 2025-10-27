@@ -213,6 +213,7 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
         AnalysisBamFileArtefactData artefactData1 = createAnalysisBamFileArtefactData(bamFile1)
         AnalysisBamFileArtefactData artefactData2 = createAnalysisBamFileArtefactData(bamFile2)
         AnalysisArtefactDataList dataList = new AnalysisArtefactDataList([artefactData1, artefactData2], [], [:])
+        AnalysisArtefactDataList dataList2 = new AnalysisArtefactDataList([], [], [:])
 
         Pipeline pipeline = findOrCreateAnalysisPipeline()
 
@@ -247,7 +248,7 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
         }
 
         when:
-        AnalysisAdditionalData analysisAdditionalData = decider.fetchAdditionalData(dataList, workflow)
+        AnalysisAdditionalData analysisAdditionalData = decider.fetchAdditionalData(dataList, dataList2, workflow)
 
         then:
         analysisAdditionalData.samplePairMap == samplePairMap
@@ -259,6 +260,7 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
         given:
         Workflow workflow = createWorkflow(name: decider.workflowName)
         AnalysisArtefactDataList dataList = new AnalysisArtefactDataList([], [], [:])
+        AnalysisArtefactDataList dataList2 = new AnalysisArtefactDataList([], [], [:])
 
         and: 'mocked services'
         decider.analysisArtefactService = Mock(AnalysisArtefactService) {
@@ -269,12 +271,70 @@ abstract class AbstractAnalysisDeciderSpec<T extends BamFilePairAnalysis> extend
         }
 
         when:
-        AnalysisAdditionalData analysisAdditionalData = decider.fetchAdditionalData(dataList, workflow)
+        AnalysisAdditionalData analysisAdditionalData = decider.fetchAdditionalData(dataList, dataList2, workflow)
 
         then:
         analysisAdditionalData.samplePairMap == [:]
         analysisAdditionalData.categoryMap == [:]
         analysisAdditionalData.pipeline == null
+    }
+
+    void "fetchAdditionalData, include also category of additional bam files"() {
+        given:
+        Workflow workflow = createWorkflow(name: decider.workflowName)
+        RoddyBamFile bamFile1 = createBamFile()
+        RoddyBamFile bamFile2 = createBamFile([
+                workPackage: createMergingWorkPackage([
+                        sample : createSample([
+                                individual: bamFile1.individual,
+                        ]),
+                        seqType: bamFile1.seqType,
+                ]),
+        ])
+        AnalysisBamFileArtefactData artefactData1 = createAnalysisBamFileArtefactData(bamFile1)
+        AnalysisBamFileArtefactData artefactData2 = createAnalysisBamFileArtefactData(bamFile2)
+        AnalysisArtefactDataList dataList = new AnalysisArtefactDataList([artefactData1], [], [:])
+        AnalysisArtefactDataList dataList2 = new AnalysisArtefactDataList([artefactData2], [], [:])
+
+        Pipeline pipeline = findOrCreateAnalysisPipeline()
+
+        and: 'objects for fetchSamplePairs'
+        SamplePair samplePair = factory.createSamplePair([
+                mergingWorkPackage1: bamFile1.workPackage,
+                mergingWorkPackage2: bamFile2.workPackage,
+        ])
+        AnalysisGroup analysisGroup = new AnalysisGroup(bamFile1.workPackage, bamFile2.workPackage)
+
+        Map<AnalysisGroup, SamplePair> samplePairMap = [
+                (analysisGroup): samplePair,
+        ]
+
+        and: 'objects for fetchCategoryPerSampleTypeAndProject'
+        ProjectSampleTypeGroup projectSampleTypeGroup1 = new ProjectSampleTypeGroup(bamFile1.project, bamFile1.sampleType)
+        ProjectSampleTypeGroup projectSampleTypeGroup2 = new ProjectSampleTypeGroup(bamFile2.project, bamFile2.sampleType)
+        Map<ProjectSampleTypeGroup, SampleTypePerProject.Category> categoryMap = [
+                (projectSampleTypeGroup1): SampleTypePerProject.Category.DISEASE,
+                (projectSampleTypeGroup2): SampleTypePerProject.Category.CONTROL,
+        ]
+
+        and: 'mocked services'
+        decider.analysisArtefactService = Mock(AnalysisArtefactService) {
+            0 * _
+            1 * fetchSamplePairs([bamFile1, bamFile2]) >> samplePairMap
+            1 * fetchCategoryPerSampleTypeAndProject([bamFile1, bamFile2]) >> categoryMap
+        }
+        decider.pipelineService = Mock(PipelineService) {
+            0 * _
+            1 * findByPipelineName(_) >> pipeline
+        }
+
+        when:
+        AnalysisAdditionalData analysisAdditionalData = decider.fetchAdditionalData(dataList, dataList2, workflow)
+
+        then:
+        analysisAdditionalData.samplePairMap == samplePairMap
+        analysisAdditionalData.categoryMap == categoryMap
+        analysisAdditionalData.pipeline == pipeline
     }
 
     void "fetchWorkflowVersionSelector"() {

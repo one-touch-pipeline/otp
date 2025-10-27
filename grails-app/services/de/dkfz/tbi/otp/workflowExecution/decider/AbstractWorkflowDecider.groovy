@@ -77,7 +77,7 @@ abstract class AbstractWorkflowDecider<ADL extends ArtefactDataList, G extends B
      *
      * This method is called only once for each input artefact list.
      */
-    abstract protected AD fetchAdditionalData(ADL inputArtefactDataList, Workflow workflow)
+    abstract protected AD fetchAdditionalData(ADL inputArtefactDataList, ADL additionalArtefactDataList, Workflow workflow)
 
     /**
      * Fetches the workflow version selector for the given input artefacts.
@@ -148,7 +148,7 @@ abstract class AbstractWorkflowDecider<ADL extends ArtefactDataList, G extends B
         }
 
         AD additionalData = LogUsedTimeUtils.logUsedTimeStartEnd(log, "        fetch additional Data") {
-            fetchAdditionalData(inputArtefactDataList, w)
+            fetchAdditionalData(inputArtefactDataList, additionalArtefactDataList, w)
         }
 
         Map<ProjectSeqTypeGroup, WorkflowVersionSelector> workflowVersionSelectorMap =

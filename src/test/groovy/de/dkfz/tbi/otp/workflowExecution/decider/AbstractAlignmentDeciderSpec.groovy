@@ -190,6 +190,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         AlignmentArtefactData<FastqcProcessedFile> fastqcProcessedFileData = createAlignmentArtefactData()
         AlignmentArtefactData<RoddyBamFile> roddyBamFileData = createAlignmentArtefactData()
         AlignmentArtefactDataList dataList = new AlignmentArtefactDataList([seqTrackData], [fastqcProcessedFileData], [roddyBamFileData])
+        AlignmentArtefactDataList dataList2 = new AlignmentArtefactDataList([], [], [])
 
         and: 'mocked services'
         decider.alignmentArtefactService = Mock(AlignmentArtefactService) {
@@ -207,7 +208,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         }
 
         when:
-        AlignmentAdditionalData alignmentAdditionalData = decider.fetchAdditionalData(dataList, workflow)
+        AlignmentAdditionalData alignmentAdditionalData = decider.fetchAdditionalData(dataList, dataList2, workflow)
 
         then:
         alignmentAdditionalData.referenceGenomeMap == referenceGenomeMap

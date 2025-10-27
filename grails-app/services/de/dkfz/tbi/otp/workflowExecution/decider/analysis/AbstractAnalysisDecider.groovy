@@ -129,11 +129,13 @@ abstract class AbstractAnalysisDecider<A extends BamFilePairAnalysis>
     }
 
     @Override
-    protected AnalysisAdditionalData fetchAdditionalData(AnalysisArtefactDataList inputArtefactDataList, Workflow workflow) {
+    protected AnalysisAdditionalData fetchAdditionalData(AnalysisArtefactDataList inputArtefactDataList,
+                                                         AnalysisArtefactDataList additionalArtefactDataList, Workflow workflow) {
         List<AbstractBamFile> bamFiles = inputArtefactDataList.bamFileDataList*.artefact
         if (!bamFiles) {
             return new AnalysisAdditionalData([:], [:], null)
         }
+        bamFiles.addAll(additionalArtefactDataList.bamFileDataList*.artefact as Collection<AbstractBamFile>)
         return new AnalysisAdditionalData(
                 analysisArtefactService.fetchSamplePairs(bamFiles),
                 analysisArtefactService.fetchCategoryPerSampleTypeAndProject(bamFiles),

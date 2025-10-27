@@ -179,13 +179,9 @@ describe('Check trigger alignment page', () => {
 
       cy.get('#warnAreaAccordion > div').should('not.be.visible'); // reactivate once underlying problem is fixed
       cy.get('#infos li').should('not.be.empty');
-      cy.get('#resultWarning li').should('have.length', 10)
-        .each((row, i) => {
-          if (i < 2) {
-            cy.wrap(row).contains('recreate').contains('since action is CREATE_ALWAYS');
-          } else {
-            cy.wrap(row).contains('skip').contains('since no sample pairs available');
-          }
+      cy.get('#resultWarning li').should('have.length', 2)
+        .each((row) => {
+          cy.wrap(row).contains('recreate').contains('since action is CREATE_ALWAYS');
         });
       cy.get('#resultWorkPackageList li').should('have.length', 2);
     });

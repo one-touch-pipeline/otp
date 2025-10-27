@@ -117,7 +117,8 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
     }
 
     @Override
-    protected AlignmentAdditionalData fetchAdditionalData(AlignmentArtefactDataList inputArtefactDataList, Workflow workflow) {
+    protected AlignmentAdditionalData fetchAdditionalData(AlignmentArtefactDataList inputArtefactDataList,
+                                                          AlignmentArtefactDataList additionalArtefactDataList, Workflow workflow) {
         Collection<SeqTrack> seqTracks = inputArtefactDataList.seqTrackData*.artefact
         if (!seqTracks) {
             return new AlignmentAdditionalData([:], [:], [:], [:], [:], [:], null)
