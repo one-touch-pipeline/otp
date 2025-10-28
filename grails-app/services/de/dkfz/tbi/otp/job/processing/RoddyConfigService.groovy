@@ -214,15 +214,15 @@ class RoddyConfigService {
         }
         '''
 
-    private static final JsonSchema SCHEMA_VALIDATOR = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V201909).getSchema(SCHEMA)
-    private static final JsonSchema FILENAMES_SCHEMA_VALIDATOR = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V201909).getSchema(FILENAMES_SCHEMA)
+    private static final Schema SCHEMA_VALIDATOR = SchemaRegistry.withDefaultDialect(SpecificationVersion.DRAFT_2020_12).getSchema(SCHEMA)
+    private static final Schema FILENAMES_SCHEMA_VALIDATOR = SchemaRegistry.withDefaultDialect(SpecificationVersion.DRAFT_2020_12).getSchema(FILENAMES_SCHEMA)
     private static final ObjectMapper MAPPER = new ObjectMapper()
     private static final int DROP_CHAR_COUNT = 2
 
     @SuppressWarnings("DuplicateNumberLiteral")
     static Set<String> validateRoddyConfig(String value) {
         JsonNode node = MAPPER.readTree(value)
-        Set<ValidationMessage> errors = SCHEMA_VALIDATOR.validate(node)
+        List<Error> errors = SCHEMA_VALIDATOR.validate(node)
         Set<String> errorsString = errors.collect { error ->
             return "RODDY." + error.message.drop(DROP_CHAR_COUNT)
         } as Set
@@ -232,7 +232,7 @@ class RoddyConfigService {
     @SuppressWarnings("DuplicateNumberLiteral")
     static Set<String> validateRoddyFilenamesConfig(String value) {
         JsonNode node = MAPPER.readTree(value)
-        Set<ValidationMessage> errors = FILENAMES_SCHEMA_VALIDATOR.validate(node)
+        List<Error> errors = FILENAMES_SCHEMA_VALIDATOR.validate(node)
         Set<String> errorsString = errors.collect { error ->
             return "RODDY_FILENAMES." + error.message.drop(DROP_CHAR_COUNT)
         } as Set
