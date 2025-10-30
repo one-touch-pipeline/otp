@@ -31,6 +31,8 @@ import de.dkfz.roddy.config.JobLog
 import de.dkfz.roddy.config.ResourceSet
 import de.dkfz.roddy.execution.jobs.*
 import de.dkfz.roddy.tools.BufferValue
+import de.dkfz.roddy.execution.Code
+import de.dkfz.roddy.tools.UnescapedString
 import de.dkfz.tbi.otp.OtpException
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -87,8 +89,7 @@ class ClusterJobSchedulerService {
      */
     @Deprecated
     @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
-    String executeJob(String script, Map<String, String> environmentVariables = [:],
-                      Map<JobSubmissionOption, String> jobSubmissionOptions = [:]) throws Throwable {
+    String executeJob(String script, Map<JobSubmissionOption, String> jobSubmissionOptions = [:]) throws Throwable {
         if (!script) {
             throw new ProcessingException("No job script specified.")
         }
@@ -143,19 +144,17 @@ class ClusterJobSchedulerService {
                 options.get(JobSubmissionOption.QUEUE),
                 options.get(JobSubmissionOption.NODE_FEATURE),
         )
-
         BEJob job = new BEJob(
                 null,
-                jobName,
-                null,
-                scriptText,
-                null,
+                jobManager,
+                new UnescapedString(jobName),
+                new Code(scriptText),
                 resourceSet,
                 [],
-                environmentVariables,
-                jobManager,
+                [:], // in BE 0.2.1 this attribute gets ignored
                 JobLog.toOneFile(new File(clusterLogDirectory, "${jobName}-{JOB_ID}.log")),
                 null,
+                null
         )
 
         BEJobResult jobResult = jobManager.submitJob(job)

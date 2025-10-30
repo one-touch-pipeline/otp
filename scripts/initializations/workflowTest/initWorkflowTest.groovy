@@ -19,29 +19,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package initializations.workflowTest
 
+import groovy.transform.Field
+
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.workflowExecution.ConfigSelectorService
-import de.dkfz.tbi.otp.workflowExecution.Workflow
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.analysis.aceseq.AceseqWorkflow
+import de.dkfz.tbi.otp.workflow.analysis.indel.IndelWorkflow
+import de.dkfz.tbi.otp.workflow.analysis.snv.SnvWorkflow
+import de.dkfz.tbi.otp.workflow.analysis.sophia.SophiaWorkflow
+import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.commands.CreateCommand
 import de.dkfz.tbi.otp.workflowTest.WorkflowTestProperty
 
 /**
  * This script configures workflow test properties that were previously configured
  * in .otp.properties files.
- * 
- * This script is automatically loaded by AbstractWorkflowSpec
+ *
+ * This script is automatically loaded by AbstractWorkflowSpec and WorkflowTestCase
  * during test setup if configured via otp.testing.workflows.init.script property
  * in .otp.properties file.
  *
- * You should adapt this file to fit to your local workflow test environment.
+ * Note: Adapt this file to fit your local workflow test environment.
  */
-ConfigService configService = ctx.configService
+
+@Field
+TestConfigService configService = ctx.configService
+
+@Field
 ConfigSelectorService configSelectorService = ctx.configSelectorService
 
 /**
  * Map of workflow test properties.
+ * Please adapt this map to fit your local workflow test environment.
  * @see WorkflowTestProperty
  */
 Map<WorkflowTestProperty, String> workflowTestProperties = [
@@ -53,6 +67,65 @@ Map<WorkflowTestProperty, String> workflowTestProperties = [
         (WorkflowTestProperty.TEST_WORKFLOW_QUEUE)                            : 'your-queue',
         (WorkflowTestProperty.TEST_WORKFLOW_CONFIG_SUFFIX)                    : 'your-config-suffix',
 ]
+
+/**
+ * configure apptainer for roddy
+ */
+void configureApptainer() {
+    println "configure Apptainer"
+    List<Workflow> roddyWorkflows = """
+        #alignment
+        ${PanCancerWorkflow.WORKFLOW}
+        ${WgbsWorkflow.WORKFLOW}
+        ${RnaAlignmentWorkflow.WORKFLOW}
+
+        # analysis
+        ${SnvWorkflow.WORKFLOW}
+        ${IndelWorkflow.WORKFLOW}
+        ${SophiaWorkflow.WORKFLOW}
+        ${AceseqWorkflow.WORKFLOW}
+
+    """.split('\n')*.trim().findAll {
+        it && !it.startsWith('#')
+    }.collect {
+        println "- ${it}"
+        CollectionUtils.exactlyOneElement(Workflow.findAllByName(it), "Could not find '${it}")
+    }
+
+    println configSelectorService.create(new CreateCommand([
+            selectorName: 'Roddy apptainer',
+            type        : SelectorType.GENERIC,
+            workflows   : roddyWorkflows,
+            value       : """
+                            {
+                                "RODDY": {
+                                    "cvalues": {
+                                        "jobExecutionEnvironment": {
+                                            "type": "string",
+                                            "value": "apptainer"
+                                        },
+                                        "apptainerArguments": {
+                                            "type": "string",
+                                            "value": "--contain"
+                                        },
+                                        "containerEnginePath": {
+                                            "type": "path",
+                                            "value": "/usr/bin/apptainer"
+                                        },
+                                        "containerImage": {
+                                            "type": "path",
+                                            "value": "$YOUR_APPTAINER_IMAGE"
+                                        },
+                                        "containerMounts": {
+                                            "type": "bashArray",
+                                            "value": "( $YOUR_MOUNT_LIST )"
+                                        }
+                                    }
+                                }
+                            }
+                            """
+    ]))
+}
 
 /**
  * Configure workflow-specific settings with example configurations.
@@ -87,6 +160,7 @@ try {
     println("=== Starting workflow test initialization ===")
 
     configService.storeWorkflowTestProperties(workflowTestProperties)
+    configureApptainer()
     configureWorkflowSpecificSettings()
 
     println("=== Workflow test initialization completed successfully ===")

@@ -28,6 +28,8 @@ import spock.lang.Specification
 import de.dkfz.roddy.BEException
 import de.dkfz.roddy.config.JobLog
 import de.dkfz.roddy.config.ResourceSet
+import de.dkfz.roddy.execution.Code
+import de.dkfz.roddy.tools.UnescapedString
 import de.dkfz.roddy.execution.io.ExecutionResult
 import de.dkfz.roddy.execution.jobs.*
 import de.dkfz.tbi.TestCase
@@ -127,8 +129,8 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
 
         then:
         beJobs.size() == 2
-        beJobs[0].toolScript == wrappedScript1
-        beJobs[1].toolScript == wrappedScript2
+        beJobs[0].commandObj.code.value == wrappedScript1
+        beJobs[1].commandObj.code.value == wrappedScript2
         beJobs.each {
             assert it.jobName == jobName
             assert it.resourceSet == resourceSet
@@ -432,16 +434,15 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
     private BEJob createBeJobs(String id = "valid") {
         return new BEJob(
                 id ? new BEJobID(id) : null,
-                "job name ${nextId}",
                 null,
-                "script ${nextId}",
-                null,
-                null,
+                new UnescapedString("job name ${nextId}"),
+                new Code("script ${nextId}"),
+                new ResourceSet(null, 1, 1, Duration.ofHours(1), null, 'queue', null),
                 [],
                 [:],
-                null,
                 JobLog.none(),
                 null,
+                null
         )
     }
 

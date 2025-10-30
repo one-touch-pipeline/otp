@@ -143,10 +143,10 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
         service.clusterJobManagerFactoryService.remoteShellHelper = Mock(RemoteShellHelper)
         service.clusterJobManagerFactoryService.configService = Mock(ConfigService) {
             getSshUser() >> SSHUSER
-            getJobScheduler() >> JobScheduler.PBS
+            getJobScheduler() >> JobScheduler.LSF
         }
 
-        ProcessOutput out = new ProcessOutput("${clusterJobId}.pbs", "", 0)
+        ProcessOutput out = new ProcessOutput("<${clusterJobId}>", "", 0)
         ClusterJob clusterJob = DomainFactory.createClusterJob(clusterJobId: clusterJobId)
         DomainFactory.createProcessingStepUpdate(processingStep: clusterJob.processingStep)
 

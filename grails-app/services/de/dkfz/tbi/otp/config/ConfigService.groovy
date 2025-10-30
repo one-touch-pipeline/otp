@@ -284,12 +284,12 @@ class ConfigService implements ApplicationContextAware {
         return new File(otpProperties.get(property) ?: property.defaultValue)
     }
 
-    private boolean getBooleanValue(OtpProperty otpPropertiesValue) {
+    protected boolean getBooleanValue(OtpProperty otpPropertiesValue) {
         return otpProperties.get(otpPropertiesValue) ? Boolean.parseBoolean(otpProperties.get(otpPropertiesValue)) :
                 Boolean.parseBoolean(otpPropertiesValue.defaultValue)
     }
 
-    private boolean getBooleanValue(OtpProperty otpPropertiesValue, boolean defaultValue) {
+    protected boolean getBooleanValue(OtpProperty otpPropertiesValue, boolean defaultValue) {
         return otpProperties.get(otpPropertiesValue) ? Boolean.parseBoolean(otpProperties.get(otpPropertiesValue)) : defaultValue
     }
 

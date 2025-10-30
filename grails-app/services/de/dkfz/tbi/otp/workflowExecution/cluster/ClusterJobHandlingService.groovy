@@ -28,6 +28,8 @@ import de.dkfz.roddy.BEException
 import de.dkfz.roddy.config.JobLog
 import de.dkfz.roddy.config.ResourceSet
 import de.dkfz.roddy.execution.jobs.*
+import de.dkfz.roddy.execution.Code
+import de.dkfz.roddy.tools.UnescapedString
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -81,16 +83,15 @@ class ClusterJobHandlingService {
         List<BEJob> beJobs = scripts.collect {
             new BEJob(
                     null,
-                    jobName,
-                    null,
-                    clusterJobHelperService.wrapScript(it, logFileName, logMessage),
-                    null,
+                    jobManager,
+                    new UnescapedString(jobName),
+                    new Code(clusterJobHelperService.wrapScript(it, logFileName, logMessage)),
                     resourceSet,
                     [],
-                    [:],
-                    jobManager,
+                    [:], // in BE 0.2.1 this attribute gets ignored
                     JobLog.toOneFile(new File(clusterLogDirectory, "${jobName}-{JOB_ID}.log")),
                     null,
+                    null
             )
         }
         logService.addSimpleLogEntry(workflowStep, "Finish preparing ${scripts.size()} scripts for sending to cluster")

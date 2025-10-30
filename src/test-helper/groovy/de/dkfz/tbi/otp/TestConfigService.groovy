@@ -211,12 +211,12 @@ class TestConfigService extends ConfigService {
      */
     void storeWorkflowTestProperties(Map<WorkflowTestProperty, String> properties) {
         // Store in TestConfig if configService is available (when running in test context)
-        log.info("Storing ${properties.size()} properties in TestConfig.workflowTestProperties")
+        log.info("  Storing ${properties.size()} properties in TestConfig.workflowTestProperties")
         workflowTestProperties.putAll(properties)
 
         // Log each property for debugging
         properties.each { key, value ->
-            log.info("  TestConfig stored: ${key} = ${value}")
+            log.info("  - ${key} = ${value}")
         }
     }
 

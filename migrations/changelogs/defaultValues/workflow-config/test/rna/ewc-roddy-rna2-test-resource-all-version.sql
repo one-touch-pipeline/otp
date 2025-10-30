@@ -30,7 +30,7 @@ VALUES (nextval('hibernate_sequence'), 0, now(), now(), 0, 'Default test-resourc
         '                "basepath": "rnaseqworkflow"' ||
         '            },' ||
         '            "starAlignment": {' ||
-        '                "memory": "37g",' ||
+        '                "memory": "100g",' ||
         '                "value": "HIPO2_rnaseq_processing.sh",' ||
         '                "walltime": "5h",' ||
         '                "cores": 4,' ||
