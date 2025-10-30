@@ -376,6 +376,8 @@ configurations {
     }
 
     all {
+        exclude group: 'com.fasterxml.jackson.datatype', module: 'jackson-datatype-jsr310:2.13.5'
+        exclude group: 'com.fasterxml.jackson.core' , module: 'jackson-core:2.13.5'
         exclude group: 'org.webjars', module: 'popper.js'    // exclude popper.js, since the correct version is already imported within bootstrap.bundle
     }
 }
@@ -388,7 +390,7 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-validation"
     implementation "org.springframework.boot:spring-boot-autoconfigure"
     implementation "org.grails:grails-core"
-    implementation "org.springframework.boot:spring-boot-starter-actuator"
+    implementation "org.springframework.boot:spring-boot-starter-actuator:3.4.3"
     implementation "org.springframework.boot:spring-boot-starter-tomcat"
     implementation "org.grails:grails-web-boot"
     implementation "org.grails:grails-logging"
@@ -443,6 +445,9 @@ dependencies {
 
     // openapi-generator:7.13.0 requires jackson-datatype-jsr310:2.17.1
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.20.0"
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.20.0'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.20.0'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.20'
 
     integrationTestImplementation sourceSets.testHelper.output
     integrationTestRuntimeOnly sourceSets.testHelper.output

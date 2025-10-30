@@ -20,6 +20,8 @@
  * SOFTWARE.
  */
 import grails.util.Environment
+import io.micrometer.core.instrument.Tag
+import io.micrometer.core.instrument.binder.jpa.HibernateMetrics
 
 import de.dkfz.tbi.otp.ProjectLinkGenerator
 import de.dkfz.tbi.otp.handler.CustomExceptionResolver
@@ -42,4 +44,6 @@ beans = {
     grailsLinkGenerator(ProjectLinkGenerator, grailsApplication.config.getProperty("grails.serverURL", String.class)) { bean ->
         bean.autowire = true
     }
+
+    hibernateMetrics(HibernateMetrics, ref('sessionFactory'), 'hibernate', [] as Iterable<Tag>)
 }

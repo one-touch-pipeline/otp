@@ -77,6 +77,7 @@ dataSource {
 }
 
 hibernate {
+    generate_statistics = true
     singleSession = true // configure OSIV singleSession mode
     flush.mode = 'manual' // OSIV session flush mode outside of transactional context
 }
