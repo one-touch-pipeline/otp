@@ -63,36 +63,6 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
         workflowStep.workflowRun.state == WorkflowRun.State.RUNNING_WES
     }
 
-    void "test changeStateToFinalFailed"() {
-        given:
-        WorkflowStep workflowStep = createWorkflowStep()
-        WorkflowArtefact wa1 = createWorkflowArtefact(producedBy: workflowStep.workflowRun, outputRole: "asdf")
-        workflowStep.workflowRun.save(flush: true)
-
-        WorkflowRun wr2 = createWorkflowRun(state: WorkflowRun.State.FAILED)
-        WorkflowArtefact wa2 = createWorkflowArtefact(state: WorkflowArtefact.State.FAILED, producedBy: wr2, outputRole: "asdf")
-        createWorkflowRunInputArtefact(workflowRun: wr2, workflowArtefact: wa1)
-
-        WorkflowRun wr3 = createWorkflowRun(state: WorkflowRun.State.PENDING)
-        WorkflowArtefact wa3 = createWorkflowArtefact(state: WorkflowArtefact.State.PLANNED_OR_RUNNING, producedBy: wr3, outputRole: "asdf")
-        createWorkflowRunInputArtefact(workflowRun: wr3, workflowArtefact: wa2)
-
-        when:
-        service.changeStateToFinalFailed(workflowStep)
-
-        then:
-        workflowStep.workflowRun.state == WorkflowRun.State.FAILED_FINAL
-        wa1.state == WorkflowArtefact.State.FAILED
-
-        wa2.state == WorkflowArtefact.State.FAILED
-        wr2.state == WorkflowRun.State.FAILED
-
-        wa3.state == WorkflowArtefact.State.SKIPPED
-        wr3.state == WorkflowRun.State.SKIPPED_MISSING_PRECONDITION
-        wr3.skipMessage.category == WorkflowStepSkipMessage.Category.PREREQUISITE_WORKFLOW_RUN_NOT_SUCCESSFUL
-        wr3.skipMessage.message == "Previous run failed"
-    }
-
     void "test changeStateToFailedWithManualChangedError"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()

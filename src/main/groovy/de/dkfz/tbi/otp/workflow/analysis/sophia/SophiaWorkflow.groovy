@@ -68,6 +68,8 @@ class SophiaWorkflow extends AbstractAnalysisWorkflow {
     @Override
     Artefact createCopyOfArtefact(Artefact artefact) {
         SophiaInstance sophiaInstance = artefact as SophiaInstance
+        sophiaInstance.withdrawn = true
+        sophiaInstance.save(flush: true)
 
         SamplePair samplePair = sophiaInstance.samplePair
 

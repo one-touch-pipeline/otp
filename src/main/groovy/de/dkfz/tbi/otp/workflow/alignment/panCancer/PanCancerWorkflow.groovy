@@ -29,7 +29,8 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.infrastructure.alignment.RoddyBamFileNames
 import de.dkfz.tbi.otp.workflow.alignment.*
 import de.dkfz.tbi.otp.workflow.jobs.*
-import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflowExecution.Artefact
+import de.dkfz.tbi.otp.workflowExecution.LinearWorkflow
 
 /**
  * represents the PanCancer Workflow
@@ -69,6 +70,8 @@ class PanCancerWorkflow extends AlignmentWorkflow implements LinearWorkflow {
     @Override
     Artefact createCopyOfArtefact(Artefact artefact) {
         RoddyBamFile roddyBamFile = artefact as RoddyBamFile
+        roddyBamFile.withdrawn = true
+        roddyBamFile.save(flush: true)
 
         MergingWorkPackage mergingWorkPackage = roddyBamFile.mergingWorkPackage
         int identifier = RoddyBamFile.nextIdentifier(mergingWorkPackage)

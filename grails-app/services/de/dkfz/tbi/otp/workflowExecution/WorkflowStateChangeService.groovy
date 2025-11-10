@@ -139,6 +139,7 @@ class WorkflowStateChangeService {
         step.workflowRun.outputArtefacts.each { String role, WorkflowArtefact workflowArtefact ->
             workflowArtefact.state = WorkflowArtefact.State.FAILED
             workflowArtefact.save(flush: true)
+            withdrawArtefact(workflowArtefact)
         }
 
         getDependingWorkflowRuns(step.workflowRun).each { WorkflowRun workflowRun ->
@@ -154,6 +155,7 @@ class WorkflowStateChangeService {
                     if (workflowArtefact.state == WorkflowArtefact.State.PLANNED_OR_RUNNING) {
                         workflowArtefact.state = WorkflowArtefact.State.SKIPPED
                         workflowArtefact.save(flush: true)
+                        withdrawArtefact(workflowArtefact)
                     }
                 }
             }

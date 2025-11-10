@@ -68,6 +68,8 @@ class IndelWorkflow extends AbstractAnalysisWorkflow {
     @Override
     Artefact createCopyOfArtefact(Artefact artefact) {
         IndelCallingInstance indelCallingInstance = artefact as IndelCallingInstance
+        indelCallingInstance.withdrawn = true
+        indelCallingInstance.save(flush: true)
 
         SamplePair samplePair = indelCallingInstance.samplePair
 

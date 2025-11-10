@@ -65,6 +65,8 @@ class SnvWorkflow extends AbstractAnalysisWorkflow {
     @Override
     Artefact createCopyOfArtefact(Artefact artefact) {
         RoddySnvCallingInstance snvCallingInstance = artefact as RoddySnvCallingInstance
+        snvCallingInstance.withdrawn = true
+        snvCallingInstance.save(flush: true)
 
         SamplePair samplePair = snvCallingInstance.samplePair
 

@@ -89,5 +89,8 @@ class RnaAlignmentWorkflowSpec extends Specification implements RoddyRnaFactory,
         outputRoddyBamFile.seqTracks == roddyBamFile.seqTracks
         outputRoddyBamFile.config == roddyBamFile.config
         outputRoddyBamFile.numberOfMergedLanes == roddyBamFile.numberOfMergedLanes
+
+        and:
+        roddyBamFile.withdrawn
     }
 }

@@ -89,5 +89,8 @@ class PanCancerWorkflowSpec extends Specification implements RoddyPanCancerFacto
         outputRoddyBamFile.seqTracks == roddyBamFile.seqTracks
         outputRoddyBamFile.config == roddyBamFile.config
         outputRoddyBamFile.numberOfMergedLanes == roddyBamFile.numberOfMergedLanes
+
+        and:
+        roddyBamFile.withdrawn
     }
 }

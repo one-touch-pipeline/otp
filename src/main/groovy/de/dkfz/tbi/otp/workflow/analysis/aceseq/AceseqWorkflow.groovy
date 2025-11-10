@@ -70,6 +70,8 @@ class AceseqWorkflow extends AbstractAnalysisWorkflow {
     @Override
     Artefact createCopyOfArtefact(Artefact artefact) {
         AceseqInstance aceseqInstance = artefact as AceseqInstance
+        aceseqInstance.withdrawn = true
+        aceseqInstance.save(flush: true)
 
         SamplePair samplePair = aceseqInstance.samplePair
 

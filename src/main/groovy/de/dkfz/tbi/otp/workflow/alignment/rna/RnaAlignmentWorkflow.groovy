@@ -65,6 +65,8 @@ class RnaAlignmentWorkflow extends AlignmentWorkflow implements LinearWorkflow {
     @Override
     Artefact createCopyOfArtefact(Artefact artefact) {
         RnaRoddyBamFile rnaRoddyBamFile = artefact as RnaRoddyBamFile
+        rnaRoddyBamFile.withdrawn = true
+        rnaRoddyBamFile.save(flush: true)
 
         MergingWorkPackage mergingWorkPackage = rnaRoddyBamFile.mergingWorkPackage
         int identifier = RnaRoddyBamFile.nextIdentifier(mergingWorkPackage)

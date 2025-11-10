@@ -178,4 +178,48 @@ class WorkflowStateChangeServiceIntegrationSpec extends Specification implements
         where:
         [name, initClosure, checkClosure] << INPUT_TABLE
     }
+
+    void "test changeStateToFinalFailed"() {
+        given:
+        createUserAndRoles()
+
+        WorkflowRun wr1 = createWorkflowRun(state: WorkflowRun.State.FAILED)
+        WorkflowStep workflowStep = createWorkflowStep(workflowRun: wr1)
+        WorkflowArtefact wa1 = createWorkflowArtefact(state: WorkflowArtefact.State.FAILED, producedBy: workflowStep.workflowRun, outputRole: "asdf")
+        workflowStep.workflowRun.save(flush: true)
+        Artefact artefact1 = AlignmentPipelineFactory.RoddyPanCancerFactoryInstance.INSTANCE.createBamFile([workflowArtefact: wa1])
+
+        WorkflowRun wr2 = createWorkflowRun(state: WorkflowRun.State.PENDING)
+        WorkflowArtefact wa2 = createWorkflowArtefact(state: WorkflowArtefact.State.PLANNED_OR_RUNNING, producedBy: wr2, outputRole: "asdf2")
+        createWorkflowRunInputArtefact(workflowRun: wr2, workflowArtefact: wa1)
+        Artefact artefact2 = AlignmentPipelineFactory.RoddyPanCancerFactoryInstance.INSTANCE.createBamFile([workflowArtefact: wa2])
+
+        WorkflowRun wr3 = createWorkflowRun(state: WorkflowRun.State.PENDING)
+        WorkflowArtefact wa3 = createWorkflowArtefact(state: WorkflowArtefact.State.PLANNED_OR_RUNNING, producedBy: wr3, outputRole: "asdf3")
+        createWorkflowRunInputArtefact(workflowRun: wr3, workflowArtefact: wa2)
+        Artefact artefact3 = AlignmentPipelineFactory.RoddyPanCancerFactoryInstance.INSTANCE.createBamFile([workflowArtefact: wa3])
+
+        when:
+        doWithAuth(ADMIN) {
+            workflowStateChangeService.changeStateToFinalFailed(workflowStep)
+        }
+
+        then:
+        workflowStep.workflowRun.state == WorkflowRun.State.FAILED_FINAL
+        wa1.state == WorkflowArtefact.State.FAILED
+
+        wa2.state == WorkflowArtefact.State.SKIPPED
+        wr2.state == WorkflowRun.State.SKIPPED_MISSING_PRECONDITION
+        wr2.skipMessage.category == WorkflowStepSkipMessage.Category.PREREQUISITE_WORKFLOW_RUN_NOT_SUCCESSFUL
+        wr2.skipMessage.message == "Previous run failed"
+
+        wa3.state == WorkflowArtefact.State.SKIPPED
+        wr3.state == WorkflowRun.State.SKIPPED_MISSING_PRECONDITION
+        wr3.skipMessage.category == WorkflowStepSkipMessage.Category.PREREQUISITE_WORKFLOW_RUN_NOT_SUCCESSFUL
+        wr3.skipMessage.message == "Previous run failed"
+
+        artefact1.withdrawn
+        artefact2.withdrawn
+        artefact3.withdrawn
+    }
 }

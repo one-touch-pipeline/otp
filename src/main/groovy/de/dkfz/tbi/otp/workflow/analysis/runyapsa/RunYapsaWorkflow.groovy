@@ -71,6 +71,8 @@ class RunYapsaWorkflow extends AbstractAnalysisWorkflow {
     @Override
     Artefact createCopyOfArtefact(Artefact artefact) {
         RunYapsaInstance runYapsaInstance = artefact as RunYapsaInstance
+        runYapsaInstance.withdrawn = true
+        runYapsaInstance.save(flush: true)
 
         SamplePair samplePair = runYapsaInstance.samplePair
 
