@@ -64,7 +64,7 @@ class SeqTrackMatchesColumnsValidator implements DataSwapValidator {
                     Column column = getOldColumn(context, columnName)
                     Cell cell = row.getCell(column)
                     String description = messageSourceService.getMessage(columnName.message)
-                    checkForProblem(context, cell, seqTrackCell, columnName.seqTrackTextMapping(seqTrack) ?: '', description)
+                    checkForProblem(context, cell, seqTrackCell, columnName.seqTrackTextMapping(seqTrack) ?: '', description, columnName)
                 }
             } else {
                 context.addProblem([seqTrackCell] as Set, LogLevel.ERROR, "SeqTrack with ID \"${seqTrackCell.text}\" doesn't exist")
@@ -76,8 +76,14 @@ class SeqTrackMatchesColumnsValidator implements DataSwapValidator {
         return context.spreadsheet.getColumn(dataSwapService.getHeaderName(column, DataSwapService.HeaderType.OLD))
     }
 
-    private void checkForProblem(ValidationContext context, Cell cellToCheck, Cell seqTrackCell, String originalValue, String description) {
-        if (cellToCheck.text != originalValue) {
+    private static void checkForProblem(ValidationContext context, Cell cellToCheck, Cell seqTrackCell, String originalValue, String description,
+                                 DataSwapColumn columnName) {
+        boolean isSingleCellColumn = columnName == DataSwapColumn.SINGLE_CELL
+        boolean mismatch = isSingleCellColumn ?
+                !(cellToCheck.text?.equalsIgnoreCase(originalValue)) :
+                cellToCheck.text != originalValue
+
+        if (mismatch) {
             context.addProblem([seqTrackCell, cellToCheck] as Set, LogLevel.ERROR, "${description.capitalize()} \"${cellToCheck.text}\" doesn't " +
                     "correspond to the seqTrack's current ${description.capitalize()} \"${originalValue}\".")
         }
