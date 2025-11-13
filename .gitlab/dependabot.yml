@@ -53,6 +53,8 @@ updates:
       # Grails 6 requires asset pipeline major version 4, while Grails 7 requires version 5
       - dependency-name: "com.bertramlabs.plugins:*"
         update-types: [ "version-update:semver-major", "version-update:semver-minor" ]
+      # version 3.14.0 is required by the used version of asset pipeline, which can only updated after Grails update
+      - dependency-name: "org.apache.commons:commons-lang3"
       # This dependency will be removed in the future, see youtrack issue otp-2710
       - dependency-name: "org.junit.vintage:junit-vintage-engine"
         update-types: [ "version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch" ]

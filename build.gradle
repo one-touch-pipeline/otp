@@ -535,21 +535,6 @@ configurations.all {
     }
 }
 
-/**
- *  This is needed to avoid the following Error
- *  java.lang.ExceptionInInitializerError: Exception java.lang.NoSuchMethodError: 'org.apache.commons.lang3.Range org.apache.commons.lang3.Range.of(java.lang.Comparable, java.lang.Comparable)
- *  It occurs during workflow tests and i have not found another way to fix it.
- */
-configurations.all {
-    resolutionStrategy {
-        eachDependency { DependencyResolveDetails details ->
-            if (details.requested.group == 'org.apache.commons' && details.requested.name == 'commons-lang3') {
-                details.useVersion '3.14.0'
-            }
-        }
-    }
-}
-
 task buildInfo {
     def separator = System.getProperty('line.separator')
     def tags = "git tag --points-at HEAD".execute().text.trim()
