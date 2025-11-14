@@ -25,10 +25,19 @@ import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 @Transactional
 class RoddyBamFileWithdrawService extends AbstractWithdrawBamFileService<RoddyBamFile> {
+
+    @Override
+    List<Class<RoddyBamFile>> getSupportedClasses() {
+        return [ // codenarc-disable-line UnnecessaryCast
+                 RoddyBamFile,
+                 RnaRoddyBamFile,
+        ] as List<Class<RoddyBamFile>>
+    }
 
     @Override
     @CompileDynamic
@@ -37,7 +46,7 @@ class RoddyBamFileWithdrawService extends AbstractWithdrawBamFileService<RoddyBa
             seqTracks {
                 'in'('id', seqTrackList*.id)
             }
-        }
+        } as List<RoddyBamFile>
         return roddyBamFiles
     }
 }

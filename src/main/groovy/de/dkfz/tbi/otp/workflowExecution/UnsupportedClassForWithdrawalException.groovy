@@ -19,31 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.withdraw
+package de.dkfz.tbi.otp.workflowExecution
 
-import grails.gorm.transactions.Transactional
-import groovy.transform.CompileDynamic
+import groovy.transform.InheritConstructors
 
-import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
-@Transactional
-class CellRangerBamFileWithdrawService extends AbstractWithdrawBamFileService<SingleCellBamFile> {
-
-    @Override
-    List<Class<SingleCellBamFile>> getSupportedClasses() {
-        return [
-                SingleCellBamFile,
-        ]
-    }
-
-    @Override
-    @CompileDynamic
-    List<SingleCellBamFile> collectObjects(List<SeqTrack> seqTrackList) {
-        return SingleCellBamFile.createCriteria().list {
-            seqTracks {
-                'in'('id', seqTrackList*.id)
-            }
-        } as List<SingleCellBamFile>
-    }
+@InheritConstructors
+class UnsupportedClassForWithdrawalException extends OtpRuntimeException {
 }

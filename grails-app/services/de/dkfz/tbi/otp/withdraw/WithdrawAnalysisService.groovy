@@ -25,13 +25,29 @@ import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
+import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 
 @Transactional
 class WithdrawAnalysisService implements ProcessingWithdrawService<BamFilePairAnalysis, AbstractBamFile> {
     AnalysisDeletionService analysisDeletionService
     AnalysisLinkFileServiceFactoryService analysisLinkFileServiceFactoryService
     AnalysisWorkFileServiceFactoryService analysisWorkFileServiceFactoryService
+
+    @Override
+    List<Class<BamFilePairAnalysis>> getSupportedClasses() {
+        return [ // codenarc-disable-line UnnecessaryCast
+                SnvCallingInstance,
+                RoddySnvCallingInstance,
+                IndelCallingInstance,
+                SophiaInstance,
+                AceseqInstance,
+                RunYapsaInstance,
+        ] as List<Class<BamFilePairAnalysis>>
+    }
 
     @Override
     @CompileDynamic

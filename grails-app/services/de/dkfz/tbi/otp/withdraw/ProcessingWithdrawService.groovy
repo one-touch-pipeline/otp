@@ -28,6 +28,8 @@ import de.dkfz.tbi.otp.utils.Entity
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
 interface ProcessingWithdrawService<E extends Entity, Input extends Entity> {
 
+    List<Class<? extends E>> getSupportedClasses()
+
     List<E> collectObjects(List<Input> entities)
 
     List<String> collectPaths(List<E> entities)

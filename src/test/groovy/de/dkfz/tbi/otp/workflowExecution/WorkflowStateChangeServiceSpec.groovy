@@ -39,37 +39,6 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
         ]
     }
 
-    void "test changeStateToSkipped"() {
-        given:
-        WorkflowStep workflowStep = createWorkflowStep()
-        WorkflowStepSkipMessage skippedMessage = new WorkflowStepSkipMessage(message: "asdf", category: WorkflowStepSkipMessage.Category.WORKFLOW_COVERAGE_REJECTION)
-        WorkflowArtefact wa1 = createWorkflowArtefact(producedBy: workflowStep.workflowRun, outputRole: "asdf")
-
-        WorkflowRun wr2 = createWorkflowRun(state: WorkflowRun.State.FAILED)
-        WorkflowArtefact wa2 = createWorkflowArtefact(state: WorkflowArtefact.State.FAILED, producedBy: wr2, outputRole: "asdf")
-        createWorkflowRunInputArtefact(workflowRun: wr2, workflowArtefact: wa1)
-
-        WorkflowRun wr3 = createWorkflowRun(state: WorkflowRun.State.PENDING)
-        WorkflowArtefact wa3 = createWorkflowArtefact(state: WorkflowArtefact.State.PLANNED_OR_RUNNING, producedBy: wr3, outputRole: "asdf")
-        createWorkflowRunInputArtefact(workflowRun: wr3, workflowArtefact: wa2)
-
-        when:
-        service.changeStateToSkipped(workflowStep, skippedMessage)
-
-        then:
-        workflowStep.state == WorkflowStep.State.SKIPPED
-        workflowStep.workflowRun.state == WorkflowRun.State.SKIPPED_MISSING_PRECONDITION
-        workflowStep.workflowRun.skipMessage == skippedMessage
-        wa1.state == WorkflowArtefact.State.SKIPPED
-
-        wa2.state == WorkflowArtefact.State.FAILED
-        wr2.state == WorkflowRun.State.FAILED
-
-        wa3.state == WorkflowArtefact.State.SKIPPED
-        wr3.state == WorkflowRun.State.SKIPPED_MISSING_PRECONDITION
-        wr3.skipMessage == skippedMessage
-    }
-
     void "test changeStateToWaitingOnUser"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep()

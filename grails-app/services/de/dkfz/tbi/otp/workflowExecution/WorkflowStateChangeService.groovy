@@ -23,14 +23,22 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
+import org.hibernate.Hibernate
 
+import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.StackTraceUtils
+import de.dkfz.tbi.otp.withdraw.ProcessingWithdrawService
+import de.dkfz.tbi.otp.withdraw.WithdrawFactoryService
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 
 @Transactional
 class WorkflowStateChangeService {
 
     OtpWorkflowService otpWorkflowService
+
+    WithdrawFactoryService withdrawFactoryService
 
     @CompileDynamic
     void changeStateToSkipped(WorkflowStep step, WorkflowStepSkipMessage message) {
@@ -46,6 +54,7 @@ class WorkflowStateChangeService {
         step.workflowRun.outputArtefacts.each { String role, WorkflowArtefact workflowArtefact ->
             workflowArtefact.state = WorkflowArtefact.State.SKIPPED
             workflowArtefact.save(flush: true)
+            withdrawArtefact(workflowArtefact)
         }
 
         getDependingWorkflowRuns(step.workflowRun).each { WorkflowRun workflowRun ->
@@ -57,10 +66,33 @@ class WorkflowStateChangeService {
                     if (workflowArtefact.state == WorkflowArtefact.State.PLANNED_OR_RUNNING) {
                         workflowArtefact.state = WorkflowArtefact.State.SKIPPED
                         workflowArtefact.save(flush: true)
+                        withdrawArtefact(workflowArtefact)
                     }
                 }
             }
         }
+    }
+
+    private void withdrawArtefact(WorkflowArtefact workflowArtefact) {
+        if (!workflowArtefact) {
+            return
+        }
+        Optional<Artefact> artefactOptional = workflowArtefact.artefact
+        if (artefactOptional.isEmpty()) {
+            // if artefact is already deleted, nothing needs to be done
+            return
+        }
+        Entity entity = artefactOptional.get() as Entity
+        Class clazz = Hibernate.getClass(entity)
+        if (clazz in [SeqTrack, FastqcProcessedFile]) {
+            return
+        }
+        ProcessingWithdrawService processingWithdrawService = withdrawFactoryService.findProcessingWithdrawService(entity)
+        if (!processingWithdrawService) {
+            throw new UnsupportedClassForWithdrawalException(
+                    "For Class ${clazz}, no ProcessingWithdrawService is registered and is also not part of the skip list.")
+        }
+        processingWithdrawService.withdrawObjects([entity])
     }
 
     @CompileDynamic

@@ -26,6 +26,7 @@ import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.aceseq.*
@@ -61,6 +62,21 @@ class WithdrawAnalysisServiceSpec extends Specification implements ServiceUnitTe
                 SophiaInstance,
                 SophiaQc,
         ]
+    }
+
+    void "getSupportedClasses returns correct analysis classes"() {
+        when:
+        List<Class<BamFilePairAnalysis>> supported = service.supportedClasses
+
+        then:
+        TestCase.assertContainSame(supported, [
+                SnvCallingInstance,
+                RoddySnvCallingInstance,
+                IndelCallingInstance,
+                SophiaInstance,
+                AceseqInstance,
+                RunYapsaInstance,
+        ])
     }
 
     @Unroll

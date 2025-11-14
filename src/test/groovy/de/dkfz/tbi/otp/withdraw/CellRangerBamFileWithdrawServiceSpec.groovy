@@ -40,6 +40,14 @@ class CellRangerBamFileWithdrawServiceSpec extends AbstractWithdrawBamFileServic
         ]
     }
 
+    void "getSupportedClasses returns correct supported classes"() {
+        when:
+        List<Class> supported = service.supportedClasses
+
+        then:
+        supported == [SingleCellBamFile]
+    }
+
     void "collectObjects, when called, then return all bamFiles containing the seqTracks"() {
         given:
         SingleCellBamFile bamFile1 = createBamFile()

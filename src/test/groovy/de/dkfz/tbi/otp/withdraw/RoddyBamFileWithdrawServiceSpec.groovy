@@ -26,6 +26,7 @@ import grails.testing.services.ServiceUnitTest
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 
 class RoddyBamFileWithdrawServiceSpec extends AbstractWithdrawBamFileServiceSpec<RoddyBamFileWithdrawService> implements ServiceUnitTest<RoddyBamFileWithdrawService>, RoddyPanCancerFactory {
@@ -36,6 +37,14 @@ class RoddyBamFileWithdrawServiceSpec extends AbstractWithdrawBamFileServiceSpec
                 MergingWorkPackage,
                 RoddyBamFile,
         ]
+    }
+
+    void "RoddyBamFileWithdrawService returns correct supported classes"() {
+        when:
+        List<Class<?>> supported = service.supportedClasses
+
+        then:
+        TestCase.assertContainSame(supported, [RoddyBamFile, RnaRoddyBamFile])
     }
 
     void "collectObjects, when called, then return all bamFiles containing the seqTracks"() {

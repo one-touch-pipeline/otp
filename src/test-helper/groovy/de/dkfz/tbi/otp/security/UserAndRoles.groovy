@@ -83,8 +83,10 @@ trait UserAndRoles {
     static <T> T doWithAuth(String username, final Closure<T> closure) {
         Authentication previousAuth = SecurityContextHolder.context.authentication
 
+        User user = CollectionUtils.exactlyOneElement(User.findAllByUsername(username))
+
         UserDetails userDetails = new org.springframework.security.core.userdetails.User(username, "",
-                UserRole.findAllByUser(User.findByUsername(username))*.role.collect { new SimpleGrantedAuthority(it.authority) })
+                UserRole.findAllByUser(user)*.role.collect { new SimpleGrantedAuthority(it.authority) })
         SecurityContextHolder.context.authentication = new UsernamePasswordAuthenticationToken(userDetails, userDetails.password, userDetails.authorities)
 
         try {
