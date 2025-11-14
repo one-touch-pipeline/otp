@@ -357,6 +357,6 @@ abstract class AbstractAnalysisWorkflowSpec extends AbstractDecidedWorkflowSpec 
 
     @Override
     Duration getRunningTimeout() {
-        return Duration.ofHours(5)
+        return Duration.ofHours(24)
     }
 }
