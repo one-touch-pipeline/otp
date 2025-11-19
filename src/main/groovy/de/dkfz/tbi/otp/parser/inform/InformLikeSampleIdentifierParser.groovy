@@ -21,27 +21,55 @@
  */
 package de.dkfz.tbi.otp.parser.inform
 
+import groovy.json.JsonException
+import groovy.json.JsonSlurper
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
 import de.dkfz.tbi.otp.parser.SampleIdentifierParser
 
 import java.util.regex.Matcher
 
 @Component
-class InformSampleIdentifierParser implements SampleIdentifierParser {
 
-    static final String REGEX = createRegex()
-
+class InformLikeSampleIdentifierParser implements SampleIdentifierParser {
     static final int PAD_LEFT = 2
+
+    @Autowired
+    ProcessingOptionService processingOptionService
+
+    private Map<String, String> projectPrefixToNameMap() {
+        String option = processingOptionService.findOptionAsString(ProcessingOption.OptionName.INFORM_LIKE_PARSER_MAPPING)
+        if (option?.trim()) {
+            try {
+                return new JsonSlurper().parseText(option) as Map<String, String>
+            } catch (JsonException ignored) {
+                return [:]
+            }
+        }
+        return [:]
+    }
+
+    private String mapProjectName(String projectPrefix) {
+        Map<String, String> prefixToName = projectPrefixToNameMap()
+        return prefixToName[projectPrefix]?.trim() ?: null
+    }
+
+    private List<String> fetchProjectPrefixes() {
+        return projectPrefixToNameMap().keySet().toList()
+    }
 
     @Override
     DefaultParsedSampleIdentifier tryParse(String sampleIdentifier) {
-        Matcher matcher = sampleIdentifier =~ REGEX
+        Matcher matcher = sampleIdentifier =~ createRegex()
         if (matcher) {
             assert matcher.matches()
+            String projectName = mapProjectName(matcher.group('project'))
             return new DefaultParsedSampleIdentifier(
-                    'INFORM1',
+                    projectName,
                     matcher.group('pid'),
                     buildSampleTypeDbName(matcher),
                     sampleIdentifier,
@@ -72,13 +100,15 @@ class InformSampleIdentifierParser implements SampleIdentifierParser {
         return tissueType.join('')
     }
 
-    private static String getPidRegex() {
+    private String getPidRegex() {
+        // the prefix pattern should not be more than 3 chars long
+        String prefixPattern = fetchProjectPrefixes().findAll { it.length() <= 3 }.join('|')
         String treatingCenterId = "([0-9]{3})"
         String patientId = "([0-9]{3})"
-        return "(I${treatingCenterId}_${patientId})"
+        return "(?<project>${prefixPattern})${treatingCenterId}_${patientId}"
     }
 
-    private static String createRegex() {
+    private String createRegex() {
         String sampleTypeNumber = "(?<sampleTypeNumber>(([0-9]{1,2})|X))"
         String tissueTypeKey = "(?<tissueTypeKey>([${InformTissueType.values()*.key.join('')}]))"
         String sampleTypeOrderNumber = "(?<sampleTypeOrderNumber>([0-9]))"

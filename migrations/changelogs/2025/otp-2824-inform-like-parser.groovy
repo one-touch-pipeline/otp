@@ -19,25 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.parser
-
-import groovy.transform.TupleConstructor
-
-@TupleConstructor
-enum SampleIdentifierParserBeanName {
-    NO_PARSER('', 'No Parser'),
-    DEEP('deepSampleIdentifierParser', 'DEEP'),
-    HIPO('hipoSampleIdentifierParser', 'HIPO'),
-    HIPO2('hipo2SampleIdentifierParser', 'HIPO2'),
-    HIPO2_SPL('hipo2SamplePreparationLabSampleIdentifierParser', 'HIPO2_SPL'),
-    INFORM_LIKE('informLikeSampleIdentifierParser', 'INFORM'),
-    OE0290_EORTC('OE0290_EORTC_SampleIdentifierParser', 'OE0290_EORTC'),
-    SIMPLE('simpleProjectIndividualSampleTypeParser', 'Simple'),
-    ITCC_4P('iTCC_4P_Parser', 'ITCC-4P'),
-    PEDION('pedionParser', 'PeDiOn'),
-    COVID19('covid19SampleIdentifierParser', 'Covid-19'),
-    ILP('ilpParser', 'ILP'),
-
-    final String beanName
-    final String displayName
+databaseChangeLog = {
+    changeSet(author: "-", id: "otp-2824") {
+        sql("""
+UPDATE project
+SET sample_identifier_parser_bean_name = 'INFORM_LIKE' 
+WHERE sample_identifier_parser_bean_name = 'INFORM';
+        """)
+    }
 }

@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.parser.hipo.Hipo2SampleIdentifierParser
+import de.dkfz.tbi.otp.parser.inform.InformLikeSampleIdentifierParser
 import de.dkfz.tbi.otp.project.Project
 
 @Rollback
@@ -84,7 +85,15 @@ class SampleIdentifierServiceTests implements DomainFactoryCore {
 
     @Test
     void testParseSampleIdentifier_WithInformSampleNameAndDefaultParsers_ShouldReturnInformSampleIdentifier() {
-        Project project = createProject(name: 'INFORM1', sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.INFORM)
+        findOrCreateProcessingOption(
+                name: ProcessingOption.OptionName.INFORM_LIKE_PARSER_MAPPING,
+                value: '{\n' +
+                        '   "I":"INFORM1"\n' +
+                        '}',
+        )
+        InformLikeSampleIdentifierParser parser = sampleIdentifierService.getSampleIdentifierParser(SampleIdentifierParserBeanName.INFORM_LIKE) as InformLikeSampleIdentifierParser
+        parser.processingOptionService = new ProcessingOptionService()
+        Project project = createProject(name: 'INFORM1', sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.INFORM_LIKE)
         assert sampleIdentifierService.parseSampleIdentifier('I123_456_1T3_D1', project).projectName == 'INFORM1'
     }
 }

@@ -208,4 +208,6 @@ databaseChangeLog = {
     include file: 'changelogs/2025/otp-2410-disable-aceseq-workflow.groovy'
 
     include file: 'changelogs/2025/otp-2760.groovy'
+
+    include file: 'changelogs/2025/otp-2824-inform-like-parser.groovy'
 }
