@@ -27,6 +27,12 @@
 workflowSelectionUpdateSuccessHandler = function (container) {
   'use strict';
 
+  const NOT_CONFIGURED = 'Not configured';
+
+  if (container.parent().find('p.edit-switch-label').text().includes(NOT_CONFIGURED)) {
+    return;
+  }
+
   const rowIdx = container.parent().parent().parent().index('tr') === 2 ? 1 : 2;
   const row = container.parent().parent().parent().parent()
     .parent()
@@ -34,7 +40,7 @@ workflowSelectionUpdateSuccessHandler = function (container) {
     .eq(rowIdx);
 
   // just update the text to match the value from backend, otherwise you have to refresh the page
-  $('.edit-switch-label span', row).text('Not configured');
+  $('.edit-switch-label span', row).text(NOT_CONFIGURED);
 };
 
 $.otp.workflowSelection = {

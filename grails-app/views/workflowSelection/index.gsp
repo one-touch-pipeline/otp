@@ -85,7 +85,7 @@
                                         template="dropDown"
                                         optionKey="id"
                                         optionValue="nameWithDefault"
-                                        link="${g.createLink(controller: 'workflowSelection', action: 'updateVersion', params: ['workflow': fastqcVersion.workflow.id])}"
+                                        link="${g.createLink(controller: 'workflowSelection', action: 'updateFastqcVersion', params: ['workflow': fastqcVersion.workflow.id])}"
                                         sucessHandler="workflowSelectionUpdateSuccessHandler"
                                         values="${fastqcVersion.versions}"
                                         value="${fastqcVersion.version?.id}"

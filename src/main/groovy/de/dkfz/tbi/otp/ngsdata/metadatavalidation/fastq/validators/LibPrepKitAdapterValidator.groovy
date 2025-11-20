@@ -121,7 +121,7 @@ class LibPrepKitAdapterValidator extends AbstractValueTuplesValidator<MetadataVa
                 return
             }
 
-            WorkflowVersionSelector workflowVersionSelector = workflowVersionSelectorService.findByProjectAndWorkflowAndSeqType(project, workflow, seqType)
+            WorkflowVersionSelector workflowVersionSelector = workflowVersionSelectorService.findByProjectSeqTypeWorkflow(project, seqType, workflow)
             if (!workflowVersionSelector) {
                 return
             }

@@ -79,7 +79,7 @@ class MetadataValidationService {
         } else {
             try {
                 content = Files.readAllBytes(metadataFile)
-            } catch (Exception e) {
+            } catch (IOException | OutOfMemoryError | SecurityException e) {
                 problems.addProblem(Collections.emptySet(), LogLevel.ERROR, e.message)
             }
         }

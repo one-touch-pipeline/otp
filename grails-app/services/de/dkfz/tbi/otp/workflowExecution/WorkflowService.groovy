@@ -41,7 +41,7 @@ class WorkflowService {
 
     WorkflowVersionService workflowVersionService
 
-    private static final Set<String> FASTQC_WORKFLOWS = [
+    static final Set<String> FASTQC_WORKFLOWS = [
             BashFastQcWorkflow.WORKFLOW,
             WesFastQcWorkflow.WORKFLOW,
     ].toSet().asImmutable()
@@ -276,5 +276,12 @@ class WorkflowService {
      */
     boolean isAlignment(Workflow workflow) {
         return otpWorkflowService.lookupOtpWorkflowBean(workflow)?.isAlignment()
+    }
+
+    /**
+     * returns if a given workflow is a FastQc workflow
+     */
+    boolean isFastqc(Workflow workflow) {
+        return workflow.name in FASTQC_WORKFLOWS
     }
 }

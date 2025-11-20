@@ -46,7 +46,7 @@ class WorkflowSelectionController implements CheckAndCall {
 
     static allowedMethods = [
             index                     : "GET",
-            updateVersion             : "POST",
+            updateFastqcVersion       : "POST",
             updateMergingCriteriaLPK  : "POST",
             updateMergingCriteriaSPG  : "POST",
             possibleAlignmentOptions  : "POST",
@@ -228,10 +228,23 @@ class WorkflowSelectionController implements CheckAndCall {
         }
     }
 
-    def updateVersion(UpdateWorkflowVersionCommand cmd) {
+    def updateFastqcVersion(UpdateWorkflowVersionCommand cmd) {
         checkDefaultErrorsAndCallMethod(cmd) {
-            workflowVersionSelectorService.createOrUpdate(projectSelectionService.requestedProject, cmd.seqType, cmd.workflowVersion)
-            render([success: true] as JSON)
+            try {
+                Project project = projectSelectionService.requestedProject
+                if (!project) {
+                    response.status = 400
+                    render([success: false, error: "No project selected"] as JSON)
+                    return
+                }
+
+                workflowVersionSelectorService.updateFastqcVersion(project, cmd.workflow, cmd.workflowVersion)
+                render([success: true] as JSON)
+            } catch (Exception e) {
+                log.error("Error updating workflow version: ${e.message}", e)
+                response.status = 500
+                render([success: false, error: "Failed to update workflow version: ${e.message}"] as JSON)
+            }
         }
     }
 
