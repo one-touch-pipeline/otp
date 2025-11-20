@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdService
 import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
-import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.roddy.rna.RnaAlignmentWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
 class RnaQaOverviewServiceHibernateSpec extends HibernateSpec implements RoddyPanCancerFactory {

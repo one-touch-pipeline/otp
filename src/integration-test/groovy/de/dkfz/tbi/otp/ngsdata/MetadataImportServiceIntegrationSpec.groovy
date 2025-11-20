@@ -52,7 +52,7 @@ import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.otp.administration.MailHelperService
-import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.roddy.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.utils.TimeFormats
 import de.dkfz.tbi.otp.utils.TimeUtils
 

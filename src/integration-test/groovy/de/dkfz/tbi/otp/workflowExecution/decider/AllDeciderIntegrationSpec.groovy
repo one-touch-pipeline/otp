@@ -27,9 +27,9 @@ import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.FastqcWorkflowDomainFactory
-import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
-import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
-import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.roddy.rna.RnaAlignmentWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.roddy.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflow.analysis.snv.SnvWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.indel.IndelWorkflow

@@ -38,8 +38,8 @@ import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.otp.withdraw.RoddyBamFileWithdrawService
-import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
-import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.roddy.rna.RnaAlignmentWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.aceseq.AceseqWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.indel.IndelWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.runyapsa.RunYapsaWorkflow

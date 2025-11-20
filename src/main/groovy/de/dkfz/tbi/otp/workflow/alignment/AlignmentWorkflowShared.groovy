@@ -23,24 +23,31 @@ package de.dkfz.tbi.otp.workflow.alignment
 
 import org.springframework.beans.factory.annotation.Autowired
 
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.WorkflowShared
-import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
-import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
-import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.cellRanger.CellRangerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.roddy.rna.RnaAlignmentWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.roddy.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-trait AlignmentWorkflowShared implements WorkflowShared {
-    private static final List<String> WORKFLOWS = [PanCancerWorkflow.WORKFLOW, WgbsWorkflow.WORKFLOW, RnaAlignmentWorkflow.WORKFLOW]
+trait AlignmentWorkflowShared<T extends AbstractBamFile> implements WorkflowShared {
+
+    private static final List<String> WORKFLOWS = [
+            CellRangerWorkflow.WORKFLOW,
+            PanCancerWorkflow.WORKFLOW,
+            RnaAlignmentWorkflow.WORKFLOW,
+            WgbsWorkflow.WORKFLOW,
+    ]
 
     @Autowired
     ConcreteArtefactService concreteArtefactService
 
-    RoddyBamFile getRoddyBamFile(WorkflowStep workflowStep) {
+    T getBamFile(WorkflowStep workflowStep) {
         checkWorkflowName(workflowStep, WORKFLOWS)
-        return concreteArtefactService.<RoddyBamFile> getOutputArtefact(workflowStep, AlignmentWorkflow.OUTPUT_BAM)
+        return concreteArtefactService.<T> getOutputArtefact(workflowStep, AlignmentWorkflow.OUTPUT_BAM)
     }
 
     List<SeqTrack> getSeqTracks(WorkflowStep workflowStep) {

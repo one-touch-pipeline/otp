@@ -32,9 +32,9 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
-import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
-import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
-import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.roddy.rna.RnaAlignmentWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.roddy.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 import de.dkfz.tbi.otp.workflowExecution.decider.analysis.*

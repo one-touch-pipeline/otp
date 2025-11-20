@@ -1,8 +1,8 @@
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeProjectSeqType
 import de.dkfz.tbi.otp.ngsdata.StatSizeFileName
-import de.dkfz.tbi.otp.workflow.alignment.panCancer.PanCancerWorkflow
-import de.dkfz.tbi.otp.workflow.alignment.wgbs.WgbsWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.roddy.wgbs.WgbsWorkflow
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigSelector
 import de.dkfz.tbi.otp.workflowExecution.SelectorType

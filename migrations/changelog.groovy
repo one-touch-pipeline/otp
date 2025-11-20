@@ -206,4 +206,6 @@ databaseChangeLog = {
     include file: 'changelogs/2025/otp-2411-disable-sophia-workflow.groovy'
 
     include file: 'changelogs/2025/otp-2410-disable-aceseq-workflow.groovy'
+
+    include file: 'changelogs/2025/otp-2760.groovy'
 }

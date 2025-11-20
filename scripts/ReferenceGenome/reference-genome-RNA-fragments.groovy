@@ -21,7 +21,7 @@
  */
 
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.workflow.alignment.rna.RnaAlignmentWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.roddy.rna.RnaAlignmentWorkflow
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigSelector
 import de.dkfz.tbi.otp.workflowExecution.SelectorType

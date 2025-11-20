@@ -28,7 +28,7 @@ describe('Check projectSeqPlatformGroup page', () => {
       cy.intercept('/projectSeqPlatformGroup/update*').as('updateProjectSeqPlatformGroup');
       cy.loginAs('operator');
       cy.visit('/workflowSelection/index');
-      cy.get('table#mergingCriteriaTable tr td').find('a').first().click({ force: true });
+      cy.get('table#mergingCriteriaTable tr td').find('a').eq(1).click({ force: true });
     });
 
 

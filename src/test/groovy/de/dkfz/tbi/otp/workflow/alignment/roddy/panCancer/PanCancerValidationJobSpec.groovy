@@ -1,0 +1,105 @@
+/*
+ * Copyright 2011-2025 The OTP authors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer
+
+import spock.lang.Unroll
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
+import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
+import de.dkfz.tbi.otp.workflow.alignment.roddy.AbstractRoddyAlignmentValidationJobSpec
+
+import java.nio.file.Path
+import java.nio.file.Paths
+
+class PanCancerValidationJobSpec extends AbstractRoddyAlignmentValidationJobSpec {
+
+    @Override
+    protected String workflowName() {
+        return PanCancerWorkflow.WORKFLOW
+    }
+
+    @Override
+    protected PanCancerValidationJob createJob() {
+        return new PanCancerValidationJob()
+    }
+
+    @Override
+    protected AbstractBamFile createRoddyBamFile() {
+        return createRoddyBamFile(RoddyBamFile)
+    }
+
+    @Override
+    Class[] getDomainClassesToMock() {
+        return super.domainClassesToMock + [
+                RoddyBamFile,
+        ]
+    }
+
+    @Unroll
+    void "test getExpectedFiles() and getExpectedDirectories, when called the correct paths (files or directories) should be returned"() {
+        given:
+        PanCancerWorkFileService panCancerWorkFileService = new PanCancerWorkFileService()
+        panCancerWorkFileService.abstractBamFileService = Mock(AbstractBamFileService) {
+            getBaseDirectory(_) >> Paths.get("/")
+        }
+
+        // an extra file is added to the return list if the bamFile's seqType is exome
+        abstractBamFile.seqType.needsBedFile = needsBedFile
+
+        List<Path> expectedFiles = [
+                panCancerWorkFileService.getBamFile(abstractBamFile),
+                panCancerWorkFileService.getBaiFile(abstractBamFile),
+                panCancerWorkFileService.getMd5sumFile(abstractBamFile),
+                panCancerWorkFileService.getMergedQAJsonFile(abstractBamFile),
+        ] + panCancerWorkFileService.getSingleLaneQAJsonFiles(abstractBamFile).values()
+
+        if (needsBedFile) {
+            expectedFiles.add(panCancerWorkFileService.getMergedQATargetExtractJsonFile(abstractBamFile))
+        }
+
+        List<Path> expectedDirectories = [
+                panCancerWorkFileService.getDirectoryPath(abstractBamFile),
+                panCancerWorkFileService.getExecutionStoreDirectory(abstractBamFile),
+                panCancerWorkFileService.getMergedQADirectory(abstractBamFile),
+        ]
+
+        job.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(_, _) >> abstractBamFile
+        }
+        job.fileSystemService = new TestFileSystemService()
+        job.panCancerWorkFileService = panCancerWorkFileService
+
+        when:
+        List<Path> files = job.getExpectedFiles(workflowStep)
+        List<Path> directories = job.getExpectedDirectories(workflowStep)
+
+        then:
+        TestCase.assertContainSame(files, expectedFiles)
+        TestCase.assertContainSame(directories, expectedDirectories)
+
+        where:
+        needsBedFile << [true, false]
+    }
+}
