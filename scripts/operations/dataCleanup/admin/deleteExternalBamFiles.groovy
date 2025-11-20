@@ -29,18 +29,18 @@ import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /**
- * Script to delete ExternallyProcessedBamFile inclusive dependencies for given pids.
+ * Script to delete ExternallyProcessedBamFiles including their dependencies for the given PIDs.
  *
- * The script change only the database. For the filesystem a bash script is displayed.
+ * The script changes only the database. For the filesystem a bash script is printed out.
  *
- * The script has a tryRun mode, were all changes are roll backed.
+ * The script has a tryRun mode, in which all changes are rolled back afterwards.
  *
  * input:
- * - a list of pids
+ * - a list of PIDs
  *
  * output:
- * - list of deleted bam files and analysis
- * - bash script to delete it from the file system
+ * - list of deleted bam files and analysis files
+ * - bash script to delete them from the file system
  *
  * The script
  */
@@ -49,15 +49,16 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 // input
 
 /**
- * list of Pid and sampleType.
+ * list of PID and sampleType.
  */
-List<String> multiColumnInput = """
+String multiColumnInput = """
 #pid1
 #pid2 sampleType2
+
 """
 
 /**
- * flag to allow a try and rollback the changes at the end (true) or do the changes(false)
+ * flag to allow a trial run with a rollback of the changes at the end (if it is set to "true")
  */
 boolean tryRun = true
 
@@ -71,11 +72,11 @@ List<ExternallyProcessedBamFile> bamFiles = multiColumnInput.split('\n')*.trim()
     int valueSize = values.size()
     assert valueSize in [1, 2]: "A multi input is defined by 1 or 2 columns"
     Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(values[0]),
-            "Could not find one individual with name ${values[0]}")
+            "Could not find an individual with the name ${values[0]}")
     SampleType sampleType
     if (valueSize == 2) {
         sampleType = CollectionUtils.exactlyOneElement(SampleType.findAllByNameIlike(values[1]),
-                "Could not find one sampleType with name ${values[1]}")
+                "Could not find a sampleType with the name ${values[1]}")
     }
     List<ExternallyProcessedBamFile> bamFiles = ExternallyProcessedBamFile.createCriteria().listDistinct {
         workPackage {
@@ -87,7 +88,7 @@ List<ExternallyProcessedBamFile> bamFiles = multiColumnInput.split('\n')*.trim()
             }
         }
     }
-    assert bamFiles: "Could not find any seqtracks for ${values.join(' ')}"
+    assert bamFiles: "Could not find any bamFiles for ${values.join(' ')}"
     return bamFiles
 }
 
@@ -123,7 +124,7 @@ ExternallyProcessedBamFile.withTransaction {
             }
             List<File> files = analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances([samplePair])
             if (otherSamplePairs) {
-                println "    --> there exist other sample pairs with same seqtype and sampletypes --> keep the result paths itself"
+                println "    --> there exist other sample pairs with the same seqtype and sampletypes --> keep the result paths itself"
             } else {
                 dirsToDelete.addAll(files)
             }
@@ -140,7 +141,7 @@ ExternallyProcessedBamFile.withTransaction {
             externallyProcessedBamFiles {
                 eq('id', epmbf.id)
             }
-        }.each { BamImportInstance importInstance->
+        }.each { BamImportInstance importInstance ->
             println "  --> remove from: ${importInstance}"
             importInstance.externallyProcessedBamFiles.remove(epmbf)
             importInstance.save(flush: true)
@@ -158,10 +159,10 @@ ExternallyProcessedBamFile.withTransaction {
     it.flush()
 
     println "\n\nDirectories to delete"
-    println dirsToDelete.collect {
+    println dirsToDelete.flatten().unique().collect {
         "rm -rf ${it}"
     }.join('\n')
     println "\n"
 
-    assert !tryRun: "Rollback, since only tryRun."
+    assert !tryRun: "Rollback since it was only a tryRun."
 }
