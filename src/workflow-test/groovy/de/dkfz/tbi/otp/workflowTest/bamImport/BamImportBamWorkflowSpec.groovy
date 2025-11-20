@@ -19,16 +19,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
+package de.dkfz.tbi.otp.workflowTest.bamImport
 
-enum ArtefactType {
-    FASTQ,
-    FASTQC,
-    BAM,
-    ALIGNED_CRAM,
-    SNV,
-    INDEL,
-    SOPHIA,
-    ACESEQ,
-    RUN_YAPSA,
+import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryBam
+
+class BamImportBamWorkflowSpec extends AbstractBamImportWorkflowSpec implements ExternalBamFactoryBam {
+
+    private static final String BAM_ORIGINAL_FILENAME = "bamFiles/wgs/tumor_SOMEPID_merged.mdup.bam"
+
+    @Override
+    protected String getIndexFileName() {
+        return "${BAM_ORIGINAL_FILENAME}.bai"
+    }
+
+    @Override
+    protected String getAlignmentFileName() {
+        return BAM_ORIGINAL_FILENAME
+    }
 }

@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryBam
 
-class ExternalBamFileAnalysisArtefactServiceSpec<T> extends AbstractAnalysisArtefactServiceSpec implements ExternalBamFactory {
+class ExternalBamFileAnalysisArtefactServiceSpec<T> extends AbstractAnalysisArtefactServiceSpec implements ExternalBamFactoryBam {
 }

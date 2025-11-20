@@ -55,15 +55,6 @@ abstract class AbstractAlignmentWorkflowSpec extends AbstractDecidedWorkflowSpec
     }
 
     /**
-     * link the reference genome directory into the test structure
-     */
-    void linkReferenceGenomeDirectoryToReference(ReferenceGenome referenceGenome) {
-        Path target = referenceDataDirectory.resolve("reference-genomes").resolve(referenceGenome.path)
-        Path link = remoteFileSystem.getPath(referenceGenomeService.referenceGenomeDirectory(referenceGenome, false).absolutePath)
-        fileService.createLink(link, target)
-    }
-
-    /**
      * link the adapter directory into the test structure
      */
     void linkAdapterDirectoryToReference(LibraryPreparationKit libraryPreparationKit) {

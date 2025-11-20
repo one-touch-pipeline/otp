@@ -27,7 +27,8 @@ import spock.lang.Shared
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.AbstractExternalBamFactory
+
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.infrastructure.alignment.ExternalAlignmentLinkFileService
 import de.dkfz.tbi.otp.infrastructure.alignment.ExternalAlignmentWorkFileService
@@ -42,13 +43,14 @@ import de.dkfz.tbi.otp.workflowTest.AbstractWorkflowSpec
 
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.time.Duration
 
-class BamImportWorkflowSpec extends AbstractWorkflowSpec implements ExternalBamFactory {
+abstract class AbstractBamImportWorkflowSpec extends AbstractWorkflowSpec implements AbstractExternalBamFactory {
 
     // @Slf4j does not work with Spock containing tests and produces problems in closures
     @SuppressWarnings('PropertyName')
-    final static Logger log = LoggerFactory.getLogger(BamImportWorkflowSpec)
+    final static Logger log = LoggerFactory.getLogger(AbstractBamImportWorkflowSpec)
 
     protected final static String FURTHER_FILE_NAME = "furtherFile.txt"
 
@@ -90,11 +92,6 @@ class BamImportWorkflowSpec extends AbstractWorkflowSpec implements ExternalBamF
             SUBDIRECTORY22,
     ].asImmutable()
 
-    /**
-     * Test bam file that exists (in #referenceDataDirectory) and has correct content
-     */
-    static final private String BAM_ORIGINAL_FILENAME = "bamFiles/wgs/tumor_SOMEPID_merged.mdup.bam"
-
     static final int WORKFLOW_RUN_COUNT = 1
 
     Class<BamImportWorkflow> workflowComponentClass = BamImportWorkflow
@@ -103,12 +100,12 @@ class BamImportWorkflowSpec extends AbstractWorkflowSpec implements ExternalBamF
     ExternalAlignmentLinkFileService externalAlignmentLinkFileService
     ExternalAlignmentWorkFileService externalAlignmentWorkFileService
 
-    private ExternallyProcessedBamFile bamFile
+    protected ExternallyProcessedBamFile bamFile
 
     /**
-     * Bam file path to be imported
+     * Bam/CRAM file path to be imported
      */
-    Path bamFilePath
+    Path filePath
 
     /**
      * Two folders are created to simulate
@@ -124,19 +121,23 @@ class BamImportWorkflowSpec extends AbstractWorkflowSpec implements ExternalBamF
     /**
      * An instance for bam import
      */
-//    protected BamImportInstance bamImportInstance
-    private BamImportInstance bamImportInstance
+    protected BamImportInstance bamImportInstance
+
+    protected abstract String getAlignmentFileName()
+
+    protected abstract String getIndexFileName()
 
     /**
-     * create bamImportInstance
+     * Helper to create bamImportInstance
      */
     private void initBamImportInstance(BamImportInstance.LinkOperation linkOperation) {
         log.debug("creating bamImportInstance")
         SessionUtils.withTransaction {
             bamFile = createBamFile([
-                    importedFrom: bamFilePath,
-                    fileName    : bamFilePath.fileName,
+                    importedFrom: filePath,
+                    fileName    : filePath.fileName,
                     furtherFiles: FURTHER_FILES_LINKED,
+                    workPackage : createExternalMergingWorkPackage(),
             ])
             bamImportInstance = createBamImportInstance([
                     externallyProcessedBamFiles: [bamFile],
@@ -147,13 +148,17 @@ class BamImportWorkflowSpec extends AbstractWorkflowSpec implements ExternalBamF
         log.debug("finished creating bamImportInstance")
     }
 
-    private void prepareFileSystemForFile(String orgName) {
+    protected ExternalMergingWorkPackage createExternalMergingWorkPackage() {
+        return createMergingWorkPackage()
+    }
+
+    protected void prepareFileSystemForFile() {
         Path realDir = additionalDataDirectory.resolve("real")
         Path linkDir = additionalDataDirectory.resolve("link")
 
-        Path bamPath = prepareFileSystemCopyBamBai(orgName, realDir)
+        Path bamPath = prepareFileSystemCopyFiles(realDir)
 
-        String bamFileName = prepareFileSystemLinkBamBai(bamPath, linkDir, realDir)
+        String bamFileName = prepareFileSystemLinkFiles(bamPath, linkDir, realDir)
 
         prepareFileSystemCreateAndLinkFurtherFiles(realDir, linkDir)
 
@@ -161,21 +166,21 @@ class BamImportWorkflowSpec extends AbstractWorkflowSpec implements ExternalBamF
         linkBamFilePath = linkDir.resolve(bamFileName)
     }
 
-    private Path prepareFileSystemCopyBamBai(String orgName, Path realDir) {
-        Path bamPath = referenceDataDirectory.resolve(orgName)
-        Path baiPath = referenceDataDirectory.resolve(orgName + ".bai")
+    private Path prepareFileSystemCopyFiles(Path realDir) {
+        Path bamPath = referenceDataDirectory.resolve(alignmentFileName)
+        Path indexPath = referenceDataDirectory.resolve(indexFileName)
         fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(realDir)
-        remoteShellHelper.executeCommandReturnProcessOutput("cp ${bamPath} ${baiPath} ${realDir}").assertExitCodeZeroAndStderrEmpty()
+        remoteShellHelper.executeCommandReturnProcessOutput("cp ${bamPath} ${indexPath} ${realDir}").assertExitCodeZeroAndStderrEmpty()
         return bamPath
     }
 
-    private String prepareFileSystemLinkBamBai(Path bamPath, Path linkDir, Path realDir) {
-        String bamFileName = bamPath.fileName
-        String baiFileName = "${bamFileName}.bai"
-        [bamFileName, baiFileName].each { String filePath ->
-            fileService.createLink(linkDir.resolve(filePath), realDir.resolve(filePath))
+    private String prepareFileSystemLinkFiles(Path bamPath, Path linkDir, Path realDir) {
+        String bamBaseName = bamPath.fileName
+        String indexBaseName = Paths.get(indexFileName).fileName
+        [bamBaseName, indexBaseName].each { String fileName ->
+            fileService.createLink(linkDir.resolve(fileName), realDir.resolve(fileName))
         }
-        return bamFileName
+        return bamBaseName
     }
 
     private void prepareFileSystemCreateAndLinkFurtherFiles(Path realDir, Path linkDir) {
@@ -198,13 +203,15 @@ class BamImportWorkflowSpec extends AbstractWorkflowSpec implements ExternalBamF
 
     @Override
     void setup() {
-        prepareFileSystemForFile(BAM_ORIGINAL_FILENAME)
+        log.debug("Start setup ${this.class.simpleName}")
+        prepareFileSystemForFile()
+        log.debug("Finish setup ${this.class.simpleName}")
     }
 
     @Unroll
     void "test BamImport, when COPY_AND_KEEP and #name, then copy files and do not adapt source"() {
         given:
-        bamFilePath = bamImportPath()
+        filePath = bamImportPath()
         initBamImportInstance(BamImportInstance.LinkOperation.COPY_AND_KEEP)
         setupWorkflow(WORKFLOW_RUN_COUNT)
 
@@ -225,7 +232,7 @@ class BamImportWorkflowSpec extends AbstractWorkflowSpec implements ExternalBamF
     @Unroll
     void "test BamImport, when COPY_AND_LINK and #name, then copy files and link source to copied files"() {
         given:
-        bamFilePath = bamImportPath()
+        filePath = bamImportPath()
         initBamImportInstance(BamImportInstance.LinkOperation.COPY_AND_LINK)
         setupWorkflow(WORKFLOW_RUN_COUNT)
 
@@ -246,7 +253,7 @@ class BamImportWorkflowSpec extends AbstractWorkflowSpec implements ExternalBamF
     @Unroll
     void "test BamImport, when LINK_SOURCE and #name, then link source into uuid"() {
         given:
-        bamFilePath = bamImportPath()
+        filePath = bamImportPath()
         initBamImportInstance(BamImportInstance.LinkOperation.LINK_SOURCE)
         setupWorkflow(WORKFLOW_RUN_COUNT)
         SessionUtils.withTransaction {
@@ -322,12 +329,15 @@ class BamImportWorkflowSpec extends AbstractWorkflowSpec implements ExternalBamF
      */
     private boolean shouldBeLinkInUuid(boolean isSourceLinked, String pathName) {
         return bamImportInstance.linkOperation == BamImportInstance.LinkOperation.LINK_SOURCE && (
-                isSourceLinked || (pathName in FURTHER_FILES_LINKED) || pathName.endsWithAny('.bam', '.bai')
+                isSourceLinked ||
+                (pathName in FURTHER_FILES_LINKED) ||
+                // Use the bam file's own names instead of relying on file extensions
+                pathName == bamFile.bamFileName || pathName == bamFile.baiFileName
         )
     }
 
     /**
-     * check the viewByPid structure
+     * check the viewByPid structure: all files are links to the uuid folder
      */
     private void assertViewByPidStructure(ExternallyProcessedBamFile bamFile, Path uuidDir) {
         Path viewByPidDir = externalAlignmentLinkFileService.getDirectoryPath(bamFile)

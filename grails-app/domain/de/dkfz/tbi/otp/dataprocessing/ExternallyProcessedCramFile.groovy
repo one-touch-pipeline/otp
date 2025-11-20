@@ -19,16 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
+package de.dkfz.tbi.otp.dataprocessing
 
-enum ArtefactType {
-    FASTQ,
-    FASTQC,
-    BAM,
-    ALIGNED_CRAM,
-    SNV,
-    INDEL,
-    SOPHIA,
-    ACESEQ,
-    RUN_YAPSA,
+import grails.gorm.hibernate.annotation.ManagedEntity
+
+import de.dkfz.tbi.otp.workflowExecution.ArtefactType
+
+/**
+ * Specialized domain class for externally processed CRAM alignment files.
+ *
+ * Behaves like {@link ExternallyProcessedBamFile} but provides the CRAM index
+ * file name (.crai) instead of BAM index (.bai).
+ */
+@ManagedEntity
+class ExternallyProcessedCramFile extends ExternallyProcessedBamFile {
+
+    @Override
+    String getBaiFileName() {
+        return "${bamFileName}.crai"
+    }
+
+    @Override
+    ArtefactType getArtefactType() {
+        return ArtefactType.ALIGNED_CRAM
+    }
 }

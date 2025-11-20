@@ -27,14 +27,14 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryBam
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.workflow.WorkflowCreateState
 import de.dkfz.tbi.otp.workflowExecution.*
 
 class BamImportInitializationServiceSpec extends Specification
-        implements ServiceUnitTest<BamImportInitializationService>, DataTest, WorkflowSystemDomainFactory, ExternalBamFactory {
+        implements ServiceUnitTest<BamImportInitializationService>, DataTest, WorkflowSystemDomainFactory, ExternalBamFactoryBam {
 
     @Override
     Class[] getDomainClassesToMock() {

@@ -164,13 +164,21 @@ class BamMetadataImportService {
                         libraryPreparationKit: libraryPreparationKit ? libraryPreparationKitService.findByNameOrImportAlias(libraryPreparationKit) : null,)
                 assert emwp.save(flush: true)
 
-                ExternallyProcessedBamFile epmbf = new ExternallyProcessedBamFile(workPackage: emwp,
-                        importedFrom: bamFilePath,
-                        fileName: getNameFromPath(bamFilePath),
-                        coverage: coverage ? Double.parseDouble(coverage) : null,
-                        md5sum: md5sum ?: null,
+                Map properties = [
+                        workPackage      : emwp,
+                        importedFrom     : bamFilePath,
+                        fileName         : getNameFromPath(bamFilePath),
+                        coverage         : coverage ? Double.parseDouble(coverage) : null,
+                        md5sum           : md5sum ?: null,
                         maximumReadLength: maximalReadLength ? Integer.parseInt(maximalReadLength) : null,
-                        furtherFiles: [] as Set).save(flush: true)
+                        furtherFiles     : [] as Set,
+                ]
+
+                ExternallyProcessedBamFile epmbf = (
+                        bamFilePath?.toLowerCase()?.endsWith('.cram')
+                                ? new ExternallyProcessedCramFile(properties)
+                                : new ExternallyProcessedBamFile(properties)
+                ).save(flush: true)
 
                 Path bamFileParent = fileSystem.getPath(epmbf.importedFrom).parent
 

@@ -21,11 +21,11 @@
  */
 package de.dkfz.tbi.otp.domainFactory.workflowSystem
 
-import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryBam
 import de.dkfz.tbi.otp.workflow.bamImport.BamImportWorkflow
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 
-trait BamImportWorkflowDomainFactory extends WorkflowSystemDomainFactory implements ExternalBamFactory {
+trait BamImportWorkflowDomainFactory extends WorkflowSystemDomainFactory implements ExternalBamFactoryBam {
 
     Workflow findOrCreateBamImportWorkflowWorkflow() {
         return findOrCreateWorkflow(BamImportWorkflow.WORKFLOW, [beanName: BamImportWorkflow.simpleName.uncapitalize()])

@@ -170,6 +170,9 @@ class FileService {
     static final Collection<String> BAM_FILE_EXTENSIONS = [
             '.bam',
             '.bam.bai',
+            '.cram',
+            '.cram.crai',
+
     ].asImmutable()
 
     /**

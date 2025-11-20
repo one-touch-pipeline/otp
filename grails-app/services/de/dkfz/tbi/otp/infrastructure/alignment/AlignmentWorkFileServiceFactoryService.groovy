@@ -51,10 +51,11 @@ class AlignmentWorkFileServiceFactoryService {
 
     private Map getMap() {
         serviceMap = serviceMap ?: Collections.unmodifiableMap([
-                (ExternallyProcessedBamFile): externalAlignmentWorkFileService,
-                (RoddyBamFile)              : panCancerWorkFileService,
-                (RnaRoddyBamFile)           : rnaAlignmentWorkFileService,
-                (SingleCellBamFile)         : cellRangerWorkFileService,
+                (ExternallyProcessedBamFile) : externalAlignmentWorkFileService,
+                (ExternallyProcessedCramFile): externalAlignmentWorkFileService,
+                (RoddyBamFile)               : panCancerWorkFileService,
+                (RnaRoddyBamFile)            : rnaAlignmentWorkFileService,
+                (SingleCellBamFile)          : cellRangerWorkFileService,
         ])
         return serviceMap
     }

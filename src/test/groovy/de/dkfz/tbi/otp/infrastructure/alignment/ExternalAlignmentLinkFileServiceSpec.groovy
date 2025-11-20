@@ -27,13 +27,13 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryBam
 import de.dkfz.tbi.otp.utils.HelperUtils
 
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class ExternalAlignmentLinkFileServiceSpec extends Specification implements ServiceUnitTest<ExternalAlignmentLinkFileService>, DataTest, ExternalBamFactory {
+class ExternalAlignmentLinkFileServiceSpec extends Specification implements ServiceUnitTest<ExternalAlignmentLinkFileService>, DataTest, ExternalBamFactoryBam {
 
     @Override
     Class[] getDomainClassesToMock() {

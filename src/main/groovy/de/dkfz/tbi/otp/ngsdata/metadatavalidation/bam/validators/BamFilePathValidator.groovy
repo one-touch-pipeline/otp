@@ -45,9 +45,9 @@ class BamFilePathValidator extends AbstractSingleValueValidator<BamMetadataValid
     @Override
     Collection<String> getDescriptions() {
         return [
-                "The bam file must be an absolute path",
-                "The bam file path must end with '.bam'.",
-                "The bam file path must contain only legal characters.",
+                "The BAM/CRAM file must be an absolute path",
+                "The BAM/CRAM file path must end with '.bam' or '.cram'.",
+                "The BAM/CRAM file path must contain only legal characters.",
         ]
     }
 
@@ -58,8 +58,8 @@ class BamFilePathValidator extends AbstractSingleValueValidator<BamMetadataValid
 
     @Override
     void validateValue(BamMetadataValidationContext context, String filePath, Set<Cell> cells) {
-        if (!filePath.endsWith(".bam")) {
-            context.addProblem(cells, LogLevel.ERROR, "Filename '${filePath}' does not end with '.bam'.", "At least one filename does not end with '.bam'.")
+        if (!(filePath.endsWith(".bam") || filePath.endsWith(".cram"))) {
+            context.addProblem(cells, LogLevel.ERROR, "Filename '${filePath}' does not end with '.bam' or '.cram'.", "At least one filename does not end with '.bam' or '.cram'.")
         }
         if (OtpPathValidator.isValidAbsolutePath(filePath)) {
             try {

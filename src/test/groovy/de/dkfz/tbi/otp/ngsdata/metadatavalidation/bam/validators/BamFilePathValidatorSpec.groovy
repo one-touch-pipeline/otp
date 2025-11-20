@@ -61,6 +61,7 @@ class BamFilePathValidatorSpec extends Specification implements DataTest {
         given:
         File wrongFormatFile = Files.createFile(tempDir.resolve('test.xls')).toFile()
         File file = Files.createFile(tempDir.resolve('abc.bam')).toFile()
+        File cramFile = Files.createFile(tempDir.resolve('def.cram')).toFile()
         File dir = Files.createDirectory(tempDir.resolve('folder.bam')).toFile()
         File notReadableFile = Files.createFile(tempDir.resolve('abcde.bam')).toFile()
         notReadableFile.readable = false
@@ -76,7 +77,8 @@ class BamFilePathValidatorSpec extends Specification implements DataTest {
                         "/tmp/test.bam\n" +
                         "${dir.absolutePath}\n" +
                         "${notReadableFile.absolutePath}\n" +
-                        "${file.absolutePath}\n" // valid
+                        "${file.absolutePath}\n" + // valid
+                        "${cramFile.absolutePath}\n" // valid
 
         )
         Collection<Problem> expectedProblems = [
@@ -89,7 +91,7 @@ class BamFilePathValidatorSpec extends Specification implements DataTest {
                 new Problem(context.spreadsheet.dataRows[3].cells as Set, LogLevel.ERROR,
                         "The path './testFile.bam' is no absolute path.", "At least one path is no absolute path."),
                 new Problem(context.spreadsheet.dataRows[4].cells as Set, LogLevel.ERROR,
-                        "Filename '${wrongFormatFile}' does not end with '.bam'.", "At least one filename does not end with '.bam'."),
+                        "Filename '${wrongFormatFile}' does not end with '.bam' or '.cram'.", "At least one filename does not end with '.bam' or '.cram'."),
                 new Problem(context.spreadsheet.dataRows[5].cells as Set, LogLevel.ERROR,
                          "'/tmp/test.bam' does not exist or cannot be accessed by OTP.", "At least one file does not exist or cannot be accessed by OTP."),
                 new Problem(context.spreadsheet.dataRows[6].cells as Set, LogLevel.ERROR,

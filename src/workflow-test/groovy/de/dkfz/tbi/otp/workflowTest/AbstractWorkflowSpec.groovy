@@ -44,6 +44,7 @@ import de.dkfz.tbi.otp.filestore.BaseFolder
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.*
@@ -101,6 +102,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     FileSystemService fileSystemService
     FileService fileService
     LsdfFilesService lsdfFilesService
+    ReferenceGenomeService referenceGenomeService
     RemoteShellHelper remoteShellHelper
     TestConfigService configService
     WorkflowSystemService workflowSystemService
@@ -857,6 +859,15 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                 selectorType                  : SelectorType.GENERIC,
         ] + selectors)
         log.info("Create selector ${name} ${selector}")
+    }
+
+    /**
+     * link the reference genome directory into the test structure
+     */
+    protected void linkReferenceGenomeDirectoryToReference(ReferenceGenome referenceGenome) {
+        Path target = referenceDataDirectory.resolve("reference-genomes").resolve(referenceGenome.path)
+        Path link = remoteFileSystem.getPath(referenceGenomeService.referenceGenomeDirectory(referenceGenome, false).absolutePath)
+        fileService.createLink(link, target)
     }
 
     /**

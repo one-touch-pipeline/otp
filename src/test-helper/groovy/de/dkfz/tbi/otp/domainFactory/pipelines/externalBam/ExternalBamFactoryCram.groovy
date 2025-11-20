@@ -19,16 +19,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
+package de.dkfz.tbi.otp.domainFactory.pipelines.externalBam
 
-enum ArtefactType {
-    FASTQ,
-    FASTQC,
-    BAM,
-    ALIGNED_CRAM,
-    SNV,
-    INDEL,
-    SOPHIA,
-    ACESEQ,
-    RUN_YAPSA,
+import de.dkfz.tbi.otp.dataprocessing.*
+
+/**
+ * CRAM-specific factory trait implementing createBamFile for externally processed CRAMs.
+ */
+trait ExternalBamFactoryCram implements AbstractExternalBamFactory {
+
+    @Override
+    ExternallyProcessedBamFile createBamFile(Map properties = [:]) {
+        String defaultFileName = "bamfile_${nextId}.cram"
+        return createDomainObject(ExternallyProcessedCramFile, [
+                fileName           : defaultFileName,
+                workPackage        : { createMergingWorkPackage() },
+                numberOfMergedLanes: null,
+                importedFrom       : "${File.separator}importFrom_${nextId}",
+                furtherFiles       : [],
+        ], properties)
+    }
 }

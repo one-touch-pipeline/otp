@@ -19,16 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
+package de.dkfz.tbi.otp.domainFactory.pipelines.externalBam
 
-enum ArtefactType {
-    FASTQ,
-    FASTQC,
-    BAM,
-    ALIGNED_CRAM,
-    SNV,
-    INDEL,
-    SOPHIA,
-    ACESEQ,
-    RUN_YAPSA,
+import de.dkfz.tbi.otp.dataprocessing.*
+
+/**
+ * BAM-specific factory trait implementing createBamFile for externally processed BAMs.
+ */
+trait ExternalBamFactoryBam implements AbstractExternalBamFactory {
+
+    @Override
+    ExternallyProcessedBamFile createBamFile(Map properties = [:]) {
+        String defaultFileName = "bamfile_${nextId}.bam"
+        return createDomainObject(ExternallyProcessedBamFile, [
+                fileName           : defaultFileName,
+                workPackage        : { createMergingWorkPackage() },
+                numberOfMergedLanes: null,
+                importedFrom       : "${File.separator}importFrom_${nextId}",
+                furtherFiles       : [],
+        ], properties)
+    }
+}
+
+/**
+ * Singleton access to the BAM-specific external BAM factory, kept for
+ * compatibility with existing tests/utilities expecting this instance.
+ */
+class ExternalBamFactoryInstance implements ExternalBamFactoryBam {
+    static final ExternalBamFactoryInstance INSTANCE = new ExternalBamFactoryInstance()
 }

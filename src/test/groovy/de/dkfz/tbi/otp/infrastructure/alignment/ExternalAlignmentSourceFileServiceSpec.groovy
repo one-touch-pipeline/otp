@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 import java.nio.file.FileSystems
 import java.nio.file.Paths
 
-class ExternalAlignmentSourceFileServiceSpec extends Specification implements ServiceUnitTest<ExternalAlignmentSourceFileService>, DataTest, de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactory {
+class ExternalAlignmentSourceFileServiceSpec extends Specification implements ServiceUnitTest<ExternalAlignmentSourceFileService>, DataTest, de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryBam {
 
     @Override
     Class[] getDomainClassesToMock() {

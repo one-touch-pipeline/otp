@@ -30,7 +30,13 @@ import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.exceptions.NotSupportedException
 import de.dkfz.tbi.otp.workflow.WorkflowCreateState
 
-trait ExternalBamFactory implements IsAlignment {
+/**
+ * Shared base for external BAM/CRAM domain factories used in tests.
+ *
+ * Concrete traits must implement createBamFile(Map) to define whether BAM or CRAM
+ * files are created by default.
+ */
+trait AbstractExternalBamFactory implements IsAlignment {
 
     private final String seqTrackName = "seqTrack_${nextId}"
 
@@ -60,17 +66,6 @@ trait ExternalBamFactory implements IsAlignment {
                 antibodyTarget : mwp.antibodyTarget,
 
         ], properties, saveAndValidate)
-    }
-
-    @Override
-    ExternallyProcessedBamFile createBamFile(Map properties = [:]) {
-        return createDomainObject(ExternallyProcessedBamFile, [
-                fileName           : "bamfile_${nextId}.bam",
-                workPackage        : { createMergingWorkPackage() },
-                numberOfMergedLanes: null,
-                importedFrom       : "${File.separator}importFrom_${nextId}",
-                furtherFiles       : [],
-        ], properties)
     }
 
     /**
@@ -145,8 +140,4 @@ trait ExternalBamFactory implements IsAlignment {
                 linkOperation              : BamImportInstance.LinkOperation.COPY_AND_KEEP,
         ], properties)
     }
-}
-
-class ExternalBamFactoryInstance implements ExternalBamFactory {
-    static final ExternalBamFactoryInstance INSTANCE = new ExternalBamFactoryInstance()
 }

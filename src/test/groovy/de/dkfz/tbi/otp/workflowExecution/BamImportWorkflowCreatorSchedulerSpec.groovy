@@ -26,7 +26,7 @@ import spock.lang.Unroll
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
-import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryBam
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.tracking.NotificationCreator
@@ -39,7 +39,7 @@ import de.dkfz.tbi.otp.workflow.bamImport.BamImportService
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 import de.dkfz.tbi.otp.workflowExecution.decider.DeciderResult
 
-class BamImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSchedulerSpec implements UserDomainFactory, ExternalBamFactory {
+class BamImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSchedulerSpec implements UserDomainFactory, ExternalBamFactoryBam {
 
     @Override
     List<Class> getDomainClasses() {

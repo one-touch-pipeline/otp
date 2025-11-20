@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.infrastructure.alignment.ExternalAlignmentWorkFileService
 import de.dkfz.tbi.otp.ngsdata.MergedAlignmentDataFileService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflowExecution.ArtefactType
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigFragment
 
 /**
@@ -169,6 +170,10 @@ class ExternallyProcessedBamFile extends AbstractBamFile {
     @Override
     Integer getMaximalReadLength() {
         return maximumReadLength
+    }
+
+    ArtefactType getArtefactType() {
+        return ArtefactType.BAM
     }
 
     static Closure constraints = {

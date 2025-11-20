@@ -153,10 +153,10 @@ class BamFilePairAnalysisSpec extends Specification implements DataTest {
         )
 
         where:
-        classBamFile1                    | classBamFile2
-        RoddyBamFile                     | RoddyBamFile
+        classBamFile1              | classBamFile2
+        RoddyBamFile               | RoddyBamFile
         ExternallyProcessedBamFile | ExternallyProcessedBamFile
-        RoddyBamFile                     | ExternallyProcessedBamFile
+        RoddyBamFile               | ExternallyProcessedBamFile
         ExternallyProcessedBamFile | RoddyBamFile
     }
 

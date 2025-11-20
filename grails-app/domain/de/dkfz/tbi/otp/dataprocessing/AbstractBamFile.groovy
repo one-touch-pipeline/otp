@@ -181,7 +181,7 @@ abstract class AbstractBamFile implements Artefact, CommentableWithProject, Enti
         md5sum nullable: true, matches: /^[0-9a-f]{32}$/
         sha256sum nullable: true
         numberOfMergedLanes nullable: true, validator: { val, obj ->
-            if (Hibernate.getClass(obj) == ExternallyProcessedBamFile) {
+            if (Hibernate.getClass(obj) in [ExternallyProcessedBamFile, ExternallyProcessedCramFile]) {
                 val == null
             } else {
                 val >= 1

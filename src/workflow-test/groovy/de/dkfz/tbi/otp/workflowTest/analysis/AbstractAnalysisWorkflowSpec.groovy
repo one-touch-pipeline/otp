@@ -303,15 +303,6 @@ abstract class AbstractAnalysisWorkflowSpec extends AbstractDecidedWorkflowSpec 
     }
 
     /**
-     * link the reference genome directory into the test structure
-     */
-    void linkReferenceGenomeDirectoryToReference(ReferenceGenome referenceGenome) {
-        Path target = referenceDataDirectory.resolve("reference-genomes").resolve(referenceGenome.path)
-        Path link = remoteFileSystem.getPath(referenceGenomeService.referenceGenomeDirectory(referenceGenome, false).absolutePath)
-        fileService.createLink(link, target)
-    }
-
-    /**
      * Currently certain pipelines have reference genomes specified via a processing option.
      * This will be changed in the future. Refer to {@link WorkflowVersion.allowedReferenceGenomes}.
      * For now we just set these to the current reference genome until these workflows are transferred to the new system.

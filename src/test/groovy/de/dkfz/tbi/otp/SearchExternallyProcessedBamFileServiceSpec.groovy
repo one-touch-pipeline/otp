@@ -26,11 +26,11 @@ import grails.testing.services.ServiceUnitTest
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryBam
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
-class SearchExternallyProcessedBamFileServiceSpec extends HibernateSpec implements ServiceUnitTest<SearchExternallyProcessedBamFileService>, ExternalBamFactory {
+class SearchExternallyProcessedBamFileServiceSpec extends HibernateSpec implements ServiceUnitTest<SearchExternallyProcessedBamFileService>, ExternalBamFactoryBam {
 
     @Override
     List<Class> getDomainClasses() {

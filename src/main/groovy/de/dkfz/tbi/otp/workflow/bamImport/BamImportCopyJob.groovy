@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractExecuteClusterPipelineJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -37,6 +38,9 @@ class BamImportCopyJob extends AbstractExecuteClusterPipelineJob implements BamI
 
     @Autowired
     ProcessingOptionService processingOptionService
+
+    @Autowired
+    ReferenceGenomeService referenceGenomeService
 
     @Override
     protected List<String> createScripts(WorkflowStep workflowStep) {
@@ -64,6 +68,11 @@ class BamImportCopyJob extends AbstractExecuteClusterPipelineJob implements BamI
         Path targetBaseDir = externalAlignmentWorkFileService.getDirectoryPath(bamFile)
 
         Path bamMaxReadLengthFile = externalAlignmentWorkFileService.getBamMaxReadLengthFile(bamFile)
+
+        String referenceGenomePath = ""
+        if (bamFile instanceof ExternallyProcessedCramFile) {
+            referenceGenomePath = "-T ${referenceGenomeService.fastaFilePath(bamFile.referenceGenome)}"
+        }
 
         String updateBaseDir = "sed -e 's#${sourceBaseDir}#${targetBaseDir}#'"
 
@@ -109,7 +118,7 @@ fi
 
 mkdir -p -m 2750 ${targetBaseDir}
 # copy and calculate max read length at the same time
-cat ${sourceBam} | tee ${targetBam} | ${samtoolsCommand} view - | ${groovyCommand} ${maxReadLengthScript} > ${bamMaxReadLengthFile}
+cat ${sourceBam} | tee ${targetBam} | ${samtoolsCommand} view ${referenceGenomePath} - | ${groovyCommand} ${maxReadLengthScript} > ${bamMaxReadLengthFile}
 cp -HL ${sourceBai} ${targetBai}
 
 ${furtherFilesCopy}

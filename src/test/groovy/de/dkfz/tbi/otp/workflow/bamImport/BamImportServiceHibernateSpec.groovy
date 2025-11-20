@@ -26,11 +26,11 @@ import grails.testing.services.ServiceUnitTest
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryBam
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.workflow.WorkflowCreateState
 
-class BamImportServiceHibernateSpec extends HibernateSpec implements ServiceUnitTest<BamImportService>, ExternalBamFactory {
+class BamImportServiceHibernateSpec extends HibernateSpec implements ServiceUnitTest<BamImportService>, ExternalBamFactoryBam {
 
     @Override
     List<Class> getDomainClasses() {

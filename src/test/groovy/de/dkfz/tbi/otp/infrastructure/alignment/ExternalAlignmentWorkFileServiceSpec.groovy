@@ -27,7 +27,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryBam
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
@@ -36,7 +36,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 class ExternalAlignmentWorkFileServiceSpec extends Specification
-        implements ServiceUnitTest<ExternalAlignmentWorkFileService>, DataTest, ExternalBamFactory, WorkflowSystemDomainFactory {
+        implements ServiceUnitTest<ExternalAlignmentWorkFileService>, DataTest, ExternalBamFactoryBam, WorkflowSystemDomainFactory {
 
     @Override
     Class[] getDomainClassesToMock() {

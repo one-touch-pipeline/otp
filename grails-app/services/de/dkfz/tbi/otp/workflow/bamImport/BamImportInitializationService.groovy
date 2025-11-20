@@ -69,7 +69,7 @@ class BamImportInitializationService {
         ProcessingPriority pp = priority ?: bamFile.mergingWorkPackage.project.processingPriority
         WorkflowRun run = workflowRunService.buildWorkflowRun(workflow, pp, "", bamFile.mergingWorkPackage.project, runDisplayName, shortName)
         WorkflowArtefact artefact = workflowArtefactService.buildWorkflowArtefact(new WorkflowArtefactValues(
-                run, BamImportWorkflow.OUTPUT_BAM, ArtefactType.BAM, artefactDisplayName
+                run, BamImportWorkflow.OUTPUT_BAM, bamFile.artefactType, artefactDisplayName
         ))
 
         bamFile.workflowArtefact = artefact

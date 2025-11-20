@@ -28,7 +28,7 @@ import spock.lang.Unroll
 import de.dkfz.tbi.otp.dataprocessing.ExternalMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.dataswap.data.LaneSwapData
-import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryBam
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
@@ -36,7 +36,7 @@ import de.dkfz.tbi.otp.project.Project
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class LaneSwapServiceHibernateSpec extends HibernateSpec implements ServiceUnitTest<LaneSwapService>, ExternalBamFactory {
+class LaneSwapServiceHibernateSpec extends HibernateSpec implements ServiceUnitTest<LaneSwapService>, ExternalBamFactoryBam {
 
     @Override
     List<Class> getDomainClasses() {
