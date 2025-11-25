@@ -21,6 +21,7 @@
 FROM ghcr.io/linuxserver/openssh-server
 
 ADD *.sh /custom-cont-init.d/
+RUN chmod +x /custom-cont-init.d/*.sh
 RUN mkdir -p /home/otp
 
 # config per project and seq type files
