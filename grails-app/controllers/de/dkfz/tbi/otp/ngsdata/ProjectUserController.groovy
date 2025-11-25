@@ -25,7 +25,6 @@ import grails.converters.JSON
 import grails.validation.Validateable
 import groovy.transform.TupleConstructor
 import groovy.util.logging.Slf4j
-import org.apache.commons.lang.WordUtils
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 
@@ -274,7 +273,7 @@ enum PermissionStatus {
 
     @Override
     String toString() {
-        return WordUtils.uncapitalize(WordUtils.capitalizeFully(this.name(), ['_'] as char[]).replaceAll("_", ""))
+        return this.name().split('_').collect { it.toLowerCase().capitalize() }.join('').uncapitalize()
     }
 
     boolean toBoolean() {

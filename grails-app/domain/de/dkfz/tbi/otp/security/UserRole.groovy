@@ -22,7 +22,7 @@
 package de.dkfz.tbi.otp.security
 
 import grails.gorm.hibernate.annotation.ManagedEntity
-import org.apache.commons.lang.builder.HashCodeBuilder
+import org.apache.commons.lang3.builder.HashCodeBuilder
 
 import de.dkfz.tbi.otp.security.user.RolesService
 import de.dkfz.tbi.otp.utils.Entity

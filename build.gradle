@@ -480,6 +480,7 @@ dependencies {
     implementation 'com.github.theroddywms:BatchEuphoria:0.2.1'
     implementation 'com.github.theroddywms:RoddyToolLib:2.5.0'
     implementation 'org.apache.commons:commons-lang3:3.14.0'
+    implementation 'commons-io:commons-io:2.21.0'
 
     // libraries for SSH and SFTP
     implementation 'com.github.mwiede:jsch:2.27.6'
