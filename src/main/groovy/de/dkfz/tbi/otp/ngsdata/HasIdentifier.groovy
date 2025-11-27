@@ -33,7 +33,7 @@ trait HasIdentifier {
     static int nextIdentifier(MergingWorkPackage mergingWorkPackage) {
         assert mergingWorkPackage
         Integer maxIdentifier = maxIdentifier(mergingWorkPackage)
-        return (maxIdentifier == null) ? 0 : (maxIdentifier + 1)
+        return (maxIdentifier == null) ? 0 : (maxIdentifier.intValue() + 1)
     }
 
     @CompileDynamic
