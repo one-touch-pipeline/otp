@@ -64,6 +64,37 @@ describe('Check workflow run overview page', () => {
         });
       });
     });
+
+    it('should open edit workflow modal when clicking a workflow status dot', () => {
+      cy.intercept('GET', '**/workflowSystemConfig/getWorkflows*').as('getWorkflows');
+      cy.intercept('POST', '**/workflowSystemConfig/updateWorkflow').as('updateWorkflow');
+
+      cy.visit('/workflowRunOverview/index');
+      cy.wait('@getWorkflows', { timeout: 15000 });
+
+      cy.get('#editWorkflowModal').should('exist').and('not.be.visible');
+
+      cy.get('table#runs tbody .dot.small[data-workflow-id]')
+        .should('have.length.greaterThan', 0)
+        .first()
+        .click();
+
+      cy.get('#editWorkflowModal', { timeout: 10000 })
+        .should('have.class', 'show')
+        .and('be.visible');
+
+      cy.get('#modal-priority').should('exist');
+      cy.get('#modal-max-runs').should('exist');
+      cy.get('#modal-defaultVersion').should('exist');
+      cy.get('#modal-seqTypes').should('exist');
+      cy.get('#modal-refGenomes').should('exist');
+      cy.get('#modal-enabled').should('exist');
+
+      cy.get('#editWorkflowModal #confirmModal')
+        .should('be.visible')
+        .click();
+    });
+
   });
 
   context('when user is normal user', () => {

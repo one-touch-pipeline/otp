@@ -22,6 +22,7 @@
 <html>
 <head>
     <title>${g.message(code: "workflowSystemConfig.title")}</title>
+    <asset:javascript src="common/editWorkflow.js"/>
     <asset:javascript src="pages/workflowSystemConfig/index.js"/>
     <asset:javascript src="pages/workflowSystemConfig/workflowVersions.js"/>
 </head>

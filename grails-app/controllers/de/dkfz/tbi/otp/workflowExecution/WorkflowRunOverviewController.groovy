@@ -24,6 +24,11 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.util.Pair
 import org.springframework.security.access.prepost.PreAuthorize
 
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
+import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
+
 @PreAuthorize("hasRole('ROLE_ADMIN')")
 class WorkflowRunOverviewController {
 
@@ -53,6 +58,8 @@ class WorkflowRunOverviewController {
 
     WorkflowService workflowService
     WorkflowRunOverviewService workflowRunOverviewService
+    ReferenceGenomeService referenceGenomeService
+    SeqTypeService seqTypeService
 
     def index() {
         List<Workflow> workflows = workflowService.list().sort { a, b ->
@@ -64,6 +71,13 @@ class WorkflowRunOverviewController {
         Map<Workflow, String> lastFails = workflowRunOverviewService.latestFailedRuns
         Map<Workflow, String> lastSuccesses = workflowRunOverviewService.latestSuccessfulRuns
 
+        List<ReferenceGenome> refGenomes = referenceGenomeService.list().sort { a, b ->
+            String.CASE_INSENSITIVE_ORDER.compare(a.name, b.name)
+        }
+        List<SeqType> seqTypes = seqTypeService.list().sort {
+            it.displayNameWithLibraryLayout
+        }
+
         return [
                 states       : STATES,
                 workflows    : workflows,
@@ -71,6 +85,8 @@ class WorkflowRunOverviewController {
                 lastFails    : lastFails,
                 lastSuccesses: lastSuccesses,
                 runs         : runs,
+                seqTypes     : seqTypes,
+                refGenomes   : refGenomes,
         ]
     }
 }

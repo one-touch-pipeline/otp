@@ -69,10 +69,10 @@ const addEventHandlerToTable = () => {
         tr.removeClass('shown');
       });
     } else {
-      spinner.show();
+      spinner.removeClass('d-none');
       icon.hide();
       loadWorkflowVersionData(row).finally(() => {
-        spinner.hide();
+        spinner.addClass('d-none');
         icon.show();
         tr.addClass('shown');
       });

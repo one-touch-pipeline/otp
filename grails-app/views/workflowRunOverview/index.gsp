@@ -21,10 +21,10 @@
   --}%
 <%@ page import="grails.util.Pair" %>
 <%@ page import="de.dkfz.tbi.otp.workflowExecution.WorkflowRun" %>
-
 <html>
 <head>
     <title>${g.message(code: "workflowRun.overview.title")}</title>
+    <asset:javascript src="common/editWorkflow.js"/>
     <asset:javascript src="pages/workflowRunOverview/index.js"/>
 </head>
 
@@ -70,7 +70,7 @@
         <tbody>
         <g:each in="${workflows}" var="workflow">
             <tr>
-                <td><div class="${workflow.enabled ? "dot green" : "dot grey"} small" title="${workflow.enabled ? "Enabled" : "Disabled"}"></div></td>
+                <td><div class="${workflow.enabled ? "dot green" : "dot grey"} small" title="${workflow.enabled ? "Enabled" : "Disabled"}" data-workflow-id="${workflow.id}" style="cursor: pointer"></div></td>
                 <td><g:link controller="workflowRunList" action="index" params="${["workflow.id": workflow.id]}">${workflow}</g:link></td>
                 <td><g:link controller="workflowRunList" action="index" params="${["workflow.id": workflow.id]}">
                     ${states.collect { state -> state.value.sum { runs[new Pair(it, workflow)] ?: 0 } }.sum()}
@@ -99,5 +99,63 @@
         </tbody>
     </table>
 </div>
+
+<otp:otpModal modalId="editWorkflowModal" title="${g.message(code: 'workflowSystemConfig.modal.title')}" type="dialog"
+              closeText="${g.message(code: 'workflowSystemConfig.modal.cancel')}"
+              confirmText="${g.message(code: 'workflowSystemConfig.modal.confirm')}" closable="false">
+    <form>
+        <div class="form-group">
+            <label for="modal-priority"><g:message code="workflowSystemConfig.modal.priority"/></label>
+            <input type="number" class="form-control" id="modal-priority" aria-describedby="priority">
+            <small id="priority" class="form-text text-muted"><g:message code="workflowSystemConfig.modal.priority.description"/></small>
+        </div>
+
+        <div class="form-group">
+            <label for="modal-max-runs"><g:message code="workflowSystemConfig.modal.maxParallel"/></label>
+            <input type="number" class="form-control" id="modal-max-runs" aria-describedby="max-runs">
+            <small id="max-runs" class="form-text text-muted"><g:message code="workflowSystemConfig.modal.maxParallel.description"/></small>
+        </div>
+
+        <div class="form-group">
+            <label for="modal-defaultVersion"><g:message code="workflowSystemConfig.modal.default.version"/></label>
+            <select id="modal-defaultVersion"
+                    name="modal-defaultVersion"
+                    class="form-control use-select-2"
+                    data-placeholder="${g.message(code: 'workflowSystemConfig.modal.default.version.placeholder')}">
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="modal-seqTypes"><g:message code="workflowSystemConfig.th.defaultSeqTypes"/></label>
+            <g:select id="modal-seqTypes"
+                      name="modal-seqTypes"
+                      class="form-control use-select-2"
+                      multiple="true"
+                      value=""
+                      from="${seqTypes}"
+                      optionKey="id"
+                      optionValue="displayNameWithLibraryLayout"
+                      data-placeholder="${g.message(code: 'workflowSystemConfig.modal.defaultSeqTypes.placeholder')}"/>
+        </div>
+
+        <div class="form-group">
+            <label for="modal-refGenomes"><g:message code="workflowSystemConfig.th.defaultRefGen"/></label>
+            <g:select id="modal-refGenomes"
+                      name="modal-refGenomes"
+                      class="form-control use-select-2"
+                      multiple="true"
+                      value=""
+                      from="${refGenomes}"
+                      optionKey="id"
+                      optionValue="name"
+                      data-placeholder="${g.message(code: 'workflowSystemConfig.modal.defaultRefGen.placeholder')}"/>
+        </div>
+
+        <div class="form-group form-check custom-control custom-switch">
+            <input type="checkbox" class="custom-control-input" id="modal-enabled">
+            <label class="custom-control-label" for="modal-enabled"><g:message code="workflowSystemConfig.modal.enabled"/></label>
+        </div>
+    </form>
+</otp:otpModal>
 </body>
 </html>
