@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.workflow.restartHandler
 
 import grails.testing.gorm.DataTest
-import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -31,8 +30,7 @@ import de.dkfz.tbi.otp.workflow.restartHandler.logging.RestartHandlerLogService
 import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-class WorkflowJobErrorDefinitionServiceSpec extends Specification
-        implements ServiceUnitTest<WorkflowJobErrorDefinitionService>, DataTest, WorkflowSystemDomainFactory {
+class WorkflowJobErrorDefinitionServiceSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -46,10 +44,13 @@ class WorkflowJobErrorDefinitionServiceSpec extends Specification
         given:
         WorkflowStep workflowStep = createWorkflowStep()
 
-        service.logService = Mock(LogService) {
-            1 * addSimpleLogEntry(workflowStep) { String message -> message.contains('no JobErrorDefinition found ') }
-            0 * _
-        }
+        WorkflowJobErrorDefinitionService service = new WorkflowJobErrorDefinitionService(
+                Mock(LogService) {
+                    1 * addSimpleLogEntry(workflowStep) { String message -> message.contains('no JobErrorDefinition found ') }
+                    0 * _
+                },
+                [],
+        )
 
         when:
         List<JobErrorDefinitionWithLogWithIdentifier> results = service.findMatchingJobErrorDefinition(workflowStep)
@@ -86,18 +87,19 @@ class WorkflowJobErrorDefinitionServiceSpec extends Specification
                 errorExpression: 'doMatch',
         ])
 
-        service.restartHandlerLogServices = [
-                sourceTypeNotMatch,
-                sourceTypeMatchNoLogs,
-                sourceTypeMatchWithLogs,
-        ]
-
-        service.logService = Mock(LogService) {
-            1 * addSimpleLogEntry(workflowStep) { String message -> message.contains('since no JobErrorDefinition found') }
-            1 * addSimpleLogEntry(workflowStep) { String message -> message.contains('since no logs') }
-            1 * addSimpleLogEntry(workflowStep) { String message -> message.contains('since no matching JobErrorDefinition could be found') }
-            0 * _
-        }
+        WorkflowJobErrorDefinitionService service = new WorkflowJobErrorDefinitionService(
+                Mock(LogService) {
+                    1 * addSimpleLogEntry(workflowStep) { String message -> message.contains('since no JobErrorDefinition found') }
+                    1 * addSimpleLogEntry(workflowStep) { String message -> message.contains('since no logs') }
+                    1 * addSimpleLogEntry(workflowStep) { String message -> message.contains('since no matching JobErrorDefinition could be found') }
+                    0 * _
+                },
+                [
+                        sourceTypeNotMatch,
+                        sourceTypeMatchNoLogs,
+                        sourceTypeMatchWithLogs,
+                ]
+        )
 
         when:
         List<JobErrorDefinitionWithLogWithIdentifier> results = service.findMatchingJobErrorDefinition(workflowStep)
@@ -136,6 +138,8 @@ class WorkflowJobErrorDefinitionServiceSpec extends Specification
                 mailText            : "Some mail text\n${nextId}",
         ])
 
+        WorkflowJobErrorDefinitionService service = new WorkflowJobErrorDefinitionService(null, [])
+
         when:
         WorkflowJobErrorDefinition definition = service.create(cmd)
 
@@ -155,6 +159,7 @@ class WorkflowJobErrorDefinitionServiceSpec extends Specification
     @SuppressWarnings('ExplicitFlushForDeleteRule')
     void "delete, when all fine, then create object and return it"() {
         given:
+        WorkflowJobErrorDefinitionService service = new WorkflowJobErrorDefinitionService(null, [])
         WorkflowJobErrorDefinition definition = createWorkflowJobErrorDefinition()
 
         when:
@@ -167,6 +172,7 @@ class WorkflowJobErrorDefinitionServiceSpec extends Specification
     @Unroll
     void "updateAction, when action is #action and newAction is #newAction, then property action and beanToRestart are set correctly"() {
         given:
+        WorkflowJobErrorDefinitionService service = new WorkflowJobErrorDefinitionService(null, [])
         WorkflowJobErrorDefinition definition = createWorkflowJobErrorDefinition([
                 action: action
         ])

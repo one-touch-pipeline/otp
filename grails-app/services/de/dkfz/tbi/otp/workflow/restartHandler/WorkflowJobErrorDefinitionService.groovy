@@ -33,9 +33,17 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 @Transactional
 class WorkflowJobErrorDefinitionService {
 
-    LogService logService
+    private final LogService logService
 
-    List<RestartHandlerLogService> restartHandlerLogServices
+    private final List<RestartHandlerLogService> restartHandlerLogServices
+
+    WorkflowJobErrorDefinitionService(
+            LogService logService,
+            List<RestartHandlerLogService> restartHandlerLogServices
+    ) {
+        this.logService = logService
+        this.restartHandlerLogServices = restartHandlerLogServices
+    }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     @CompileDynamic
