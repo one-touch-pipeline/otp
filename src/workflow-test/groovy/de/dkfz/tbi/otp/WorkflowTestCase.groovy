@@ -155,6 +155,8 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
             schemaDump = new File(TestCase.createEmptyTestDirectory(), "test-database-dump.sql")
             sql.execute("SCRIPT NODATA DROP TO ?", [schemaDump.absolutePath])
 
+            createUserAndRoles()
+
             DomainFactory.createAllAlignableSeqTypes()
             loadCustomInitialisationScript()
 
@@ -181,7 +183,6 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
                 findOrCreateProcessingOption(name: OptionName.CLUSTER_SUBMISSIONS_OPTION, value: jobSubmissionOptions, type: jobName)
             }
 
-            createUserAndRoles()
             loadWorkflow()
 
             doWithAuth(ADMIN) {
