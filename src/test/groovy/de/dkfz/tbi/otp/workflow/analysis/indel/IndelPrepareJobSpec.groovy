@@ -67,7 +67,6 @@ class IndelPrepareJobSpec extends Specification implements DataTest, WorkflowSys
                 ExternalMergingWorkPackage,
                 ExternallyProcessedBamFile,
                 SampleTypePerProject,
-                ProcessingThresholds,
                 MergingWorkPackage,
                 ReferenceGenomeProjectSeqType,
                 FileType,

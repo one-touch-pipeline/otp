@@ -21,11 +21,9 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
-import spock.lang.Specification
-import spock.lang.TempDir
-import spock.lang.Unroll
+import grails.testing.mixin.integration.Integration
+import spock.lang.*
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
@@ -36,7 +34,6 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
@@ -51,7 +48,6 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
     Path tempDir
 
     final static String ARBITRARY_INSTANCE_NAME = '2014-08-25_15h32'
-    final static double COVERAGE_TOO_LOW = 20.0
 
     SamplePair samplePair1
 
@@ -220,107 +216,6 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
 
         where:
         number << [1, 2]
-    }
-
-    @Unroll
-    void "samplePairForProcessing when for bamFile#number the coverage is too low"() {
-        given:
-        setupData()
-
-        AbstractBamFile problematicBamFile = (number == 1) ? bamFile1 : bamFile2
-        problematicBamFile.coverage = COVERAGE_TOO_LOW
-        assert problematicBamFile.save(flush: true)
-
-        expect:
-        snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
-
-        where:
-        number << [1, 2]
-    }
-
-    @Unroll
-    void "samplePairForProcessing when for bamFile#number the number of lanes is too low"() {
-        given:
-        setupData()
-
-        AbstractBamFile problematicBamFile = (number == 1) ? bamFile1 : bamFile2
-        ProcessingThresholds thresholds = CollectionUtils.atMostOneElement(ProcessingThresholds.findAllBySampleType(problematicBamFile.sampleType))
-        thresholds.numberOfLanes = 5
-        assert thresholds.save(flush: true)
-
-        expect:
-        snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
-
-        where:
-        number << [1, 2]
-    }
-
-    void "samplePairForProcessing when for both bam Files the number of lanes is too low"() {
-        given:
-        setupData()
-
-        ProcessingThresholds.findAllByProject(samplePair1.project).each {
-            it.numberOfLanes = 5
-            it.save(flush: true)
-        }
-
-        expect:
-        snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
-    }
-
-    void "samplePairForProcessing when for both bam Files the coverage is too low"() {
-        given:
-        setupData()
-
-        [bamFile1, bamFile2].each {
-            it.coverage = COVERAGE_TOO_LOW
-            it.save(flush: true)
-        }
-
-        expect:
-        snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
-    }
-
-    @Unroll
-    void "samplePairForProcessing when for bamFile#number no threshold exists"() {
-        given:
-        setupData()
-
-        Project otherProject = DomainFactory.createProject()
-        AbstractBamFile problematicBamFile = (number == 1) ? bamFile1 : bamFile2
-        ProcessingThresholds thresholds = CollectionUtils.atMostOneElement(ProcessingThresholds.findAllBySampleType(problematicBamFile.sampleType))
-        thresholds.project = otherProject
-        assert thresholds.save(flush: true)
-
-        expect:
-        snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
-
-        where:
-        number << [1, 2]
-    }
-
-    @Unroll
-    void "samplePairForProcessing when for bamFile#number the processing threshold #property is null"() {
-        given:
-        setupData()
-
-        AbstractBamFile bamFile = (number == 1) ? bamFile1 : bamFile2
-        ProcessingThresholds thresholds = CollectionUtils.atMostOneElement(ProcessingThresholds.findAllBySampleType(bamFile.sampleType))
-        thresholds[property] = null
-        if (property == "coverage") {
-            thresholds.numberOfLanes = 1
-        }
-        assert thresholds.save(flush: true)
-
-        expect:
-        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
-
-        where:
-        number | property
-        1      | "coverage"
-        2      | "coverage"
-        1      | "numberOfLanes"
-        2      | "numberOfLanes"
     }
 
     @Unroll

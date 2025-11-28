@@ -73,7 +73,6 @@ class AceseqValidationJobSpec extends Specification implements DataTest, Workflo
                 FastqImportInstance,
                 ExternalMergingWorkPackage,
                 ExternallyProcessedBamFile,
-                ProcessingThresholds,
         ]
     }
 

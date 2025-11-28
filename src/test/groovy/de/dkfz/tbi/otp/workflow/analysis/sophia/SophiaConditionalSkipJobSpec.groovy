@@ -48,7 +48,6 @@ class SophiaConditionalSkipJobSpec extends Specification implements DataTest, Wo
                 Sample,
                 MergingWorkPackage,
                 ReferenceGenomeProjectSeqType,
-                ProcessingThresholds,
                 FileType,
                 FastqImportInstance,
                 FastqFile,

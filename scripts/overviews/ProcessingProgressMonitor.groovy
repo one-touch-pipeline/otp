@@ -393,16 +393,6 @@ if (allProcessed) {
             )
             and (
                 bamFile${number}.fileOperationStatus <> '${AbstractBamFile.FileOperationStatus.PROCESSED}'
-                or exists (
-                    from
-                        ProcessingThresholds pt
-                    where
-                        pt.project = mwp${number}.sample.individual.project
-                        and pt.seqType = mwp${number}.seqType
-                        and pt.sampleType = mwp${number}.sample.sampleType
-                        and (pt.coverage is null OR pt.coverage <= bamFile${number}.coverage)
-                        and (pt.numberOfLanes is null OR pt.numberOfLanes <= bamFile${number}.numberOfMergedLanes)
-                )
             )
         """
     }

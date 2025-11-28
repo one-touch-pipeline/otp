@@ -60,7 +60,6 @@ class DataExportServiceSpec extends Specification implements DataTest, IsRoddy {
                 SampleTypePerProject,
                 SamplePair,
                 RoddyWorkflowConfig,
-                ProcessingThresholds,
                 ProcessingOption,
                 RoddyBamFile,
                 ExternalMergingWorkPackage,

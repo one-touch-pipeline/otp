@@ -89,7 +89,6 @@ class MetadataImportService {
     MailHelperService mailHelperService
     MergingCriteriaService mergingCriteriaService
     TicketService ticketService
-    ProcessingThresholdsService processingThresholdsService
     SampleIdentifierService sampleIdentifierService
     SampleTypeService sampleTypeService
     SeqPlatformService seqPlatformService
@@ -361,8 +360,7 @@ class MetadataImportService {
         Long timeGeneratedThresholds = System.currentTimeMillis()
         log.debug("  generatedThresholds started")
         List<SeqTrack> analysableSeqTracks = SeqTrackService.getAnalysableSeqTracks((fastqImportInstance.sequenceFiles*.seqTrack as List).unique())
-        List<ProcessingThresholds> generatedThresholds = processingThresholdsService.generateDefaultThresholds(analysableSeqTracks)
-        notifyAboutUnsetConfig(analysableSeqTracks, generatedThresholds, fastqImportInstance.ticket)
+        notifyAboutUnsetConfig(analysableSeqTracks, fastqImportInstance.ticket)
         log.debug("  generatedThresholds stopped took: ${System.currentTimeMillis() - timeGeneratedThresholds}")
 
         metaDataFile.save(flush: true)
@@ -373,46 +371,34 @@ class MetadataImportService {
     }
 
     /**
-     * Send an email notification with a list of the unset categories
-     * and the generated default thresholds.
+     * Send an email notification with a list of the unset categories.
      */
-    protected void notifyAboutUnsetConfig(List<SeqTrack> seqTracks, List<ProcessingThresholds> defaultThresholds, Ticket ticket) {
+    protected void notifyAboutUnsetConfig(List<SeqTrack> seqTracks, Ticket ticket) {
         List<SeqTrack> withoutCategory = sampleTypeService.getSeqTracksWithoutSampleCategory(seqTracks)
 
-        if (withoutCategory || defaultThresholds) {
+        if (withoutCategory) {
             StringBuilder subject = new StringBuilder()
             if (ticket) {
                 subject.append("[${ticketService.getPrefixedTicketNumber(ticket)}] ")
             }
-            subject.append("Configuration missing for ")
-            subject.append([withoutCategory ? "category" : "", defaultThresholds ? "threshold" : ""].findAll().join(" and "))
+            subject.append("Configuration missing for category")
 
-            String body = ""
-            if (withoutCategory) {
-                body += "\nNo category set for:\n"
-                body += "${withoutCategory.collect { "${it.project} - ${it.sampleType.displayName}" }.unique().join(";\n")}\n"
-            }
-            if (defaultThresholds) {
-                body += "\nThese thresholds have been generated automatically:\n"
-                body += defaultThresholds.collect {
-                    "${it.project} - ${it.sampleType.displayName} - ${it.seqType.displayName}, min. Lanes: ${it.numberOfLanes}"
-                }.unique().join("\n")
-                body += "\n"
-            }
+            String body = "\nNo category set for:\n"
+            body += "${withoutCategory.collect { "${it.project} - ${it.sampleType.displayName}" }.unique().join(";\n")}\n"
 
-            body += "\n\n Link to the Processing Thresholds Page:\n"
+            body += "\n\n Link to the sample category Page:\n"
             List<Project> projects = seqTracks*.project.unique()
             projects.each { Project project ->
-                body += getNoThresholdSetLink(project) + "\n"
+                body += getNoSampleCategorySetLink(project) + "\n"
             }
 
             mailHelperService.saveErrorMailInNewTransaction(subject.toString(), body)
         }
     }
 
-    private String getNoThresholdSetLink(Project project) {
+    private String getNoSampleCategorySetLink(Project project) {
         return linkGenerator.link(
-                controller: "processingThreshold",
+                controller: "sampleCategory",
                 action: "index",
                 absolute: true,
                 params: [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): project.name]

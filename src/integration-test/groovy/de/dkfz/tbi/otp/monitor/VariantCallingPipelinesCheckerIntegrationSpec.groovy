@@ -125,7 +125,6 @@ class VariantCallingPipelinesCheckerIntegrationSpec extends Specification {
                     createBpaWithSingleAnalysisFinished(workflowProcessingStatus, createTestInstance)
                 }
 
-        and: 'all bam files have a processing threshold set'
         List<AbstractBamFile> bamFiles = (
         analysesOfAllAnalysisFinishedSamplePair +
                 analysesOfSingleAnalysisFinishedSamplePairs
@@ -139,9 +138,7 @@ class VariantCallingPipelinesCheckerIntegrationSpec extends Specification {
                     seqType   : it.seqType,
                     sampleType: it.sampleType,
             ]
-        }.unique().each {
-            DomainFactory.createProcessingThresholds(it + [coverage: null, numberOfLanes: 1])
-        }
+        }.unique()
 
         List<SamplePair> expectedSamplePairs = [finishedSamplePair]
 

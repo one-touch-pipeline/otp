@@ -108,8 +108,6 @@ class TriggerAlignmentController {
                 triggerAlignmentService.createWarningsForSamplesHavingMultipleLibPrepKits(seqTracks)
         List<Map<String, String>> warningsForMissingSampleTypePerProject =
                 triggerAlignmentService.createWarningsForMissingSampleTypePerProject(seqTracks)
-        List<Map<String, String>> warningsForMissingProcessingThresholds =
-                triggerAlignmentService.createWarningsForMissingProcessingThresholds(seqTracks)
 
         return render([
                 data    : seqTracks.collect { SeqTrack seqTrack ->
@@ -132,7 +130,6 @@ class TriggerAlignmentController {
                         seqPlatformGroups          : warningsForSamplesHavingMultipleSeqPlatformGroups,
                         libraryPreparationKits     : warningsForSamplesHavingMultipleLibPrepKits,
                         missingSampleTypePerProject: warningsForMissingSampleTypePerProject,
-                        missingProcessingThresholds: warningsForMissingProcessingThresholds,
                 ],
                 message : message,
         ] as JSON)

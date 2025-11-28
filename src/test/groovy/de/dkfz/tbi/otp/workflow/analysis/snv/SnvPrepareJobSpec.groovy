@@ -28,7 +28,6 @@ import de.dkfz.tbi.otp.dataprocessing.ExternalMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholds
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
@@ -70,7 +69,6 @@ class SnvPrepareJobSpec extends Specification implements DataTest, WorkflowSyste
                 RoddySnvCallingInstance,
                 SampleTypePerProject,
                 RoddyBamFile,
-                ProcessingThresholds,
                 ExternalMergingWorkPackage,
                 ExternallyProcessedBamFile,
         ]

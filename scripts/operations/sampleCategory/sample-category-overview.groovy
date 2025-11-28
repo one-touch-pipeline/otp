@@ -19,16 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package operations.sampleCategory
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholds
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /**
- * This script shows the categories and thresholds of all configured sampleTypes for a given project.
+ * This script shows the categories of all configured sampleTypes for a given project.
  *
- * Additionally, it shows missing categories and thresholds for the project.
+ * Additionally, it shows missing categories for the project.
  */
 
 // -----------------------------------------------
@@ -43,15 +43,9 @@ Project project = CollectionUtils.exactlyOneElement(Project.findAllByName(projec
 
 SampleTypeService sampleTypeService = ctx.sampleTypeService
 
-SeqType wes = SeqTypeService.exomePairedSeqType
-SeqType wgs = SeqTypeService.wholeGenomePairedSeqType
-
 List<SampleType> sampleTypes = sampleTypeService.findUsedSampleTypesForProject(project)
 List<SampleTypePerProject> sampleTypePerProjects = SampleTypePerProject.findAllByProject(project)
 List<SampleType> sampleTypesWithCategory = sampleTypePerProjects*.sampleType
-List<ProcessingThresholds> processingThresholds = ProcessingThresholds.findAllByProject(project)
-List<SampleType> sampleTypesWithWesThreshold = processingThresholds.findAll { it.seqType == wes }*.sampleType
-List<SampleType> sampleTypesWithWgsThreshold = processingThresholds.findAll { it.seqType == wgs }*.sampleType
 
 println '\n\ncategories: '
 println sampleTypePerProjects.collect {
@@ -61,29 +55,9 @@ println sampleTypePerProjects.collect {
     ].join(' ')
 }.sort().join('\n')
 
-println '\n\nprocessingThresholds: '
-println processingThresholds.collect {
-    [
-            it.sampleType,
-            it.seqType,
-            it.numberOfLanes,
-            it.coverage,
-    ].join(' ')
-}.sort().join('\n')
-
 println '\n\nmissed categories: '
 println sampleTypes.findAll {
     !sampleTypesWithCategory.contains(it)
-}*.name.sort().join('\n')
-
-println '\n\nmissed wes processingThresholds: '
-println sampleTypes.findAll {
-    !sampleTypesWithWesThreshold.contains(it)
-}*.name.sort().join('\n')
-
-println '\n\nmissed wgs processingThresholds: '
-println sampleTypes.findAll {
-    !sampleTypesWithWgsThreshold.contains(it)
 }*.name.sort().join('\n')
 
 ''

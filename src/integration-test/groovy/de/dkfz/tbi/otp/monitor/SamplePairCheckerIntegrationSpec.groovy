@@ -112,29 +112,6 @@ class SamplePairCheckerIntegrationSpec extends Specification implements IsRoddy 
         ]
     }
 
-    void "bamFilesWithoutThreshold, when some bam files has a threshold  and some not, return only bam files without threshold"() {
-        given:
-        SamplePairChecker samplePairChecker = new SamplePairChecker()
-
-        AbstractBamFile bamFile1 = createBamFile()
-        AbstractBamFile bamFile2 = createBamFile()
-        AbstractBamFile bamFile3 = createBamFile()
-        AbstractBamFile bamFile4 = createBamFile()
-        AbstractBamFile bamFile5 = createBamFile()
-        List<AbstractBamFile> bamFiles = [bamFile1, bamFile2, bamFile3, bamFile4, bamFile5]
-
-        DomainFactory.createProcessingThresholdsForBamFile(bamFile1)
-        DomainFactory.createProcessingThresholdsForBamFile(bamFile2)
-
-        List<AbstractBamFile> expected = [bamFile3, bamFile4, bamFile5]
-
-        when:
-        List returnValue = samplePairChecker.bamFilesWithoutThreshold(bamFiles)
-
-        then:
-        TestCase.assertContainSame(expected, returnValue)
-    }
-
     void "bamFilesWithoutSamplePair, when some bam files has a sample pair and some not, return only bam files without sample pair"() {
         given:
         SamplePairChecker samplePairChecker = new SamplePairChecker()
@@ -245,8 +222,6 @@ class SamplePairCheckerIntegrationSpec extends Specification implements IsRoddy 
         ])
 
         DomainFactory.createSampleTypePerProjectForMergingWorkPackage(samplePair.mergingWorkPackage2, SampleTypePerProject.Category.CONTROL)
-        DomainFactory.createProcessingThresholdsForMergingWorkPackage(samplePair.mergingWorkPackage1, [coverage: 30.0, numberOfLanes: 3])
-        DomainFactory.createProcessingThresholdsForMergingWorkPackage(samplePair.mergingWorkPackage2, [coverage: 30.0, numberOfLanes: 3])
 
         when:
         List<SamplePairChecker.BlockedSamplePair> result = samplePairChecker.blockedSamplePairs([samplePair])
@@ -263,12 +238,8 @@ class SamplePairCheckerIntegrationSpec extends Specification implements IsRoddy 
         'thresholds reached'         | false      | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED | false      | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED || null
         'disease withdrawn'          | true       | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED | false      | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED || "disease ${SamplePairChecker.BLOCKED_BAM_IS_WITHDRAWN}"
         'disease is in processing'   | false      | true          | 4                    | 40        | QcTrafficLightStatus.ACCEPTED | false      | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED || "disease ${SamplePairChecker.BLOCKED_BAM_IS_IN_PROCESSING}"
-        'disease lane count to less' | false      | false         | 1                    | 40        | QcTrafficLightStatus.ACCEPTED | false      | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED || "disease ${SamplePairChecker.BLOCKED_TO_FEW_LANES}"
-        'disease coverage to less'   | false      | false         | 4                    | 20        | QcTrafficLightStatus.ACCEPTED | false      | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED || "disease ${SamplePairChecker.BLOCKED_TO_FEW_COVERAGE}"
         'control withdrawn'          | false      | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED | true       | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED || "control ${SamplePairChecker.BLOCKED_BAM_IS_WITHDRAWN}"
         'control is in processing'   | false      | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED | false      | true          | 4                    | 40        | QcTrafficLightStatus.ACCEPTED || "control ${SamplePairChecker.BLOCKED_BAM_IS_IN_PROCESSING}"
-        'control lane count to less' | false      | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED | false      | false         | 1                    | 40        | QcTrafficLightStatus.ACCEPTED || "control ${SamplePairChecker.BLOCKED_TO_FEW_LANES}"
-        'control coverage to less'   | false      | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED | false      | false         | 4                    | 20        | QcTrafficLightStatus.ACCEPTED || "control ${SamplePairChecker.BLOCKED_TO_FEW_COVERAGE}"
     }
 
     void "handle, if no bam files given, do nothing"() {
@@ -297,46 +268,28 @@ class SamplePairCheckerIntegrationSpec extends Specification implements IsRoddy 
 
         and: 'sample type has no disease state'
         AbstractBamFile unknownDiseaseStatus = createRoddyBamFile()
-        DomainFactory.createProcessingThresholdsForBamFile(unknownDiseaseStatus)
 
         and: 'sample type has disease state undefined'
         AbstractBamFile undefinedDiseaseStatus = createRoddyBamFile()
         DomainFactory.createSampleTypePerProjectForBamFile(undefinedDiseaseStatus, SampleTypePerProject.Category.UNDEFINED)
-        DomainFactory.createProcessingThresholdsForBamFile(undefinedDiseaseStatus)
 
         and: 'sample type has disease state ignored'
         AbstractBamFile ignoredDiseaseStatus = createRoddyBamFile()
         DomainFactory.createSampleTypePerProjectForBamFile(ignoredDiseaseStatus, SampleTypePerProject.Category.IGNORED)
-        DomainFactory.createProcessingThresholdsForBamFile(ignoredDiseaseStatus)
-
-        and: 'sample type has no threshold'
-        AbstractBamFile unknownThreshold = createRoddyBamFile()
-        DomainFactory.createSampleTypePerProjectForBamFile(unknownThreshold, SampleTypePerProject.Category.DISEASE)
 
         and: 'na sample pair exist for bam file'
         AbstractBamFile noSamplePairFound = createRoddyBamFile()
         DomainFactory.createSampleTypePerProjectForBamFile(noSamplePairFound, SampleTypePerProject.Category.DISEASE)
-        DomainFactory.createProcessingThresholdsForBamFile(noSamplePairFound)
 
         and: 'sample pair without disease bam file'
         AbstractBamFile missingDiseaseBamFile = createRoddyBamFile()
         DomainFactory.createSampleTypePerProjectForBamFile(missingDiseaseBamFile, SampleTypePerProject.Category.CONTROL)
-        DomainFactory.createProcessingThresholdsForBamFile(missingDiseaseBamFile)
         SamplePair missingDiseaseSamplePair = DomainFactory.createSamplePair([mergingWorkPackage2: missingDiseaseBamFile.mergingWorkPackage])
 
         and: 'sample pair without control bam file'
         AbstractBamFile missingControlBamFile = createRoddyBamFile()
         DomainFactory.createSampleTypePerProjectForBamFile(missingControlBamFile, SampleTypePerProject.Category.DISEASE)
-        DomainFactory.createProcessingThresholdsForBamFile(missingControlBamFile)
         SamplePair missingControlSamplePair = DomainFactory.createSamplePair([mergingWorkPackage1: missingControlBamFile.mergingWorkPackage])
-
-        and: 'bam files of sample pair does not reached threshold'
-        SamplePair thresholdSamplePair = createSamplePair()
-        AbstractBamFile thresholdDiseaseBamFile = createRoddyBamFile([workPackage: thresholdSamplePair.mergingWorkPackage1, coverage: 10])
-        DomainFactory.createProcessingThresholdsForBamFile(thresholdDiseaseBamFile, [coverage: 50])
-        AbstractBamFile thresholdControlFile = createRoddyBamFile([workPackage: thresholdSamplePair.mergingWorkPackage2, coverage: 10])
-        DomainFactory.createProcessingThresholdsForBamFile(thresholdControlFile, [coverage: 50])
-        DomainFactory.createSampleTypePerProjectForBamFile(thresholdControlFile)
 
         and: 'fine sample pair'
         SamplePair fineSamplePair = createSamplePair()
@@ -360,8 +313,6 @@ class SamplePairCheckerIntegrationSpec extends Specification implements IsRoddy 
                 fileSize           : DomainFactory.counter++,
         ])
         DomainFactory.createSampleTypePerProjectForBamFile(controlBamFile)
-        DomainFactory.createProcessingThresholdsForBamFile(diseaseBamFile, [coverage: 10, numberOfLanes: 1])
-        DomainFactory.createProcessingThresholdsForBamFile(controlBamFile, [coverage: 10, numberOfLanes: 1])
 
         and: 'other preparing'
         List<AbstractBamFile> bamFiles = [
@@ -369,11 +320,9 @@ class SamplePairCheckerIntegrationSpec extends Specification implements IsRoddy 
                 unknownDiseaseStatus,
                 undefinedDiseaseStatus,
                 ignoredDiseaseStatus,
-                unknownThreshold,
                 noSamplePairFound,
                 missingDiseaseBamFile,
                 missingControlBamFile,
-                thresholdDiseaseBamFile,
                 diseaseBamFile,
         ]
         List<SamplePair> samplePairs = [fineSamplePair]
@@ -402,10 +351,6 @@ class SamplePairCheckerIntegrationSpec extends Specification implements IsRoddy 
         1 * output.showUniqueList(SamplePairChecker.HEADER_DISEASE_STATE_IGNORED, [ignoredDiseaseStatus], _)
 
         then:
-        1 * samplePairChecker.bamFilesWithoutThreshold(_)
-        1 * output.showUniqueList(SamplePairChecker.HEADER_UNKNOWN_THRESHOLD, [unknownThreshold], _)
-
-        then:
         1 * samplePairChecker.bamFilesWithoutSamplePair(_)
         1 * output.showUniqueList(SamplePairChecker.HEADER_NO_SAMPLE_PAIR, [noSamplePairFound])
 
@@ -415,11 +360,7 @@ class SamplePairCheckerIntegrationSpec extends Specification implements IsRoddy 
         1 * output.showList(SamplePairChecker.HEADER_SAMPLE_PAIR_WITHOUT_CONTROL_BAM_FILE, [missingControlSamplePair])
 
         then:
-        1 * samplePairChecker.blockedSamplePairs(_)
-        1 * output.showList(SamplePairChecker.HEADER_BLOCKED_SAMPLE_PAIRS, _) >> { String header, List<SamplePairChecker.BlockedSamplePair> blocked ->
-            assert !blocked.empty
-            assert blocked[0].samplePair == thresholdSamplePair
-        }
+        1 * output.showList('The following samplePairs are waiting', [])
 
         0 * output._
     }

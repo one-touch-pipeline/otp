@@ -305,8 +305,6 @@ $(() => {
 
     getWarningsForMissingSampleTypePerProjectTable: () => $('#warningsForMissingSampleTypePerProject').DataTable(),
 
-    getWarningsForMissingProcessingThresholdsTable: () => $('#warningsForMissingProcessingThresholds').DataTable(),
-
     getSeqTrackTable: () => $('#seqTrackTable').DataTable(),
 
     getBamTable: () => $('#bamTable').DataTable(),
@@ -584,21 +582,6 @@ $(() => {
               $.otp.triggerAlignment.getWarningsForMissingSampleTypePerProjectTable().clear().draw();
             }
 
-            // missing ProcessingThresholds
-            if (warnings.missingProcessingThresholds && warnings.missingProcessingThresholds.length) {
-              $('#warningsForMissingProcessingThresholdsCard').removeClass('d-none');
-              $.otp.triggerAlignment.getWarningsForMissingProcessingThresholdsTable().clear().rows.add(
-                warnings.missingProcessingThresholds.map((o) => [
-                  o.project,
-                  o.seqType,
-                  o.sampleType
-                ])
-              ).draw();
-            } else {
-              $('#warningsForMissingProcessingThresholdsCard').addClass('d-none');
-              $.otp.triggerAlignment.getWarningsForMissingProcessingThresholdsTable().clear().draw();
-            }
-
             // message
             // eslint-disable-next-line no-extra-boolean-cast
             if (!!outputdata.data.message) {
@@ -688,13 +671,6 @@ $(() => {
     });
 
     $('#warningsForMissingSampleTypePerProject').DataTable({
-      dom: 'B<"toolbar">frtip',
-      buttons: ['csv'],
-      scrollCollapse: true,
-      paging: false
-    });
-
-    $('#warningsForMissingProcessingThresholds').DataTable({
       dom: 'B<"toolbar">frtip',
       buttons: ['csv'],
       scrollCollapse: true,

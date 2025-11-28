@@ -78,7 +78,6 @@ class IndelParseJobSpec extends Specification implements DataTest, WorkflowSyste
                 FastqImportInstance,
                 ExternalMergingWorkPackage,
                 ExternallyProcessedBamFile,
-                ProcessingThresholds,
         ]
     }
 

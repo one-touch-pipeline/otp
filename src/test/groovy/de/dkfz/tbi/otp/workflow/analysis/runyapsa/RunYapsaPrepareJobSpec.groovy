@@ -58,7 +58,6 @@ class RunYapsaPrepareJobSpec extends Specification implements DataTest, Workflow
                 RoddyWorkflowConfig,
                 SampleTypePerProject,
                 RoddyBamFile,
-                ProcessingThresholds,
                 ExternalMergingWorkPackage,
                 ExternallyProcessedBamFile,
                 SamplePair,

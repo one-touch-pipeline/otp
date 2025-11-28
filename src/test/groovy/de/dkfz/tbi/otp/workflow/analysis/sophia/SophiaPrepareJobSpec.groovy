@@ -73,7 +73,6 @@ class SophiaPrepareJobSpec extends Specification implements DataTest, WorkflowSy
                 SophiaInstance,
                 SampleTypePerProject,
                 RoddyBamFile,
-                ProcessingThresholds,
                 ExternalMergingWorkPackage,
                 ExternallyProcessedBamFile,
         ]

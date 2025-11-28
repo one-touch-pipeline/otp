@@ -22,14 +22,10 @@
 package de.dkfz.tbi.otp.workflow.analysis
 
 import groovy.util.logging.Slf4j
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholds
-import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholdsService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractConditionalSkipJob
-import de.dkfz.tbi.otp.workflow.shared.JobFailedException
 import de.dkfz.tbi.otp.workflow.shared.SkipWorkflowStepException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStepSkipMessage
@@ -37,8 +33,6 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStepSkipMessage
 @Component
 @Slf4j
 class AnalysisConditionalSkipJob extends AbstractConditionalSkipJob implements AnalysisWorkflowShared {
-    @Autowired
-    ProcessingThresholdsService processingThresholdsService
 
     /** Threshold should be moved to OtpWorkflow or Workflow in the future */
     static final Double ANALYSIS_WORKFLOW_COVERAGE_THRESHOLD = 20
@@ -51,45 +45,11 @@ class AnalysisConditionalSkipJob extends AbstractConditionalSkipJob implements A
         checkCoverageForWorkflow(tumorBamFile)
         checkCoverageForWorkflow(controlBamFile)
 
-        checkCoverageForProcessingThresholds(tumorBamFile)
-        checkCoverageForProcessingThresholds(controlBamFile)
         checkBamFiles(tumorBamFile, controlBamFile)
     }
 
     @SuppressWarnings(['UnusedMethodParameter', 'EmptyMethod'])
     protected void checkBamFiles(AbstractBamFile bamFileDisease, AbstractBamFile bamFileControl) throws SkipWorkflowStepException {
-    }
-
-    private void checkCoverageForProcessingThresholds(AbstractBamFile bamFile) throws SkipWorkflowStepException {
-        ProcessingThresholds processingThresholds = processingThresholdsService.findByAbstractBamFile(bamFile)
-        if (!processingThresholds) {
-            throw new JobFailedException("No processing Thresholds where found for project ${bamFile.project}, sample Type " +
-                    "${bamFile.sampleType} and seq type ${bamFile.seqType} for bam file ${bamFile.bamFileName}")
-        }
-
-        /** Threshold is assumed to be reached, when its not defined, since that can happen for imported bam Files */
-        if (bamFile.coverage !== null && processingThresholds.coverage && bamFile.coverage < processingThresholds.coverage) {
-            WorkflowStepSkipMessage skipMessage = new WorkflowStepSkipMessage([
-                    message : "Coverage threshold of ${processingThresholds.coverage} for project ${processingThresholds.project}, sample Type " +
-                            "${processingThresholds.sampleType} and seq type ${processingThresholds.seqType} was not reached by the " +
-                            "bam file ${bamFile.bamFileName} with a coverage of ${bamFile.coverage}.",
-                    category: WorkflowStepSkipMessage.Category.PROJECT_THRESHOLD_REJECTION,
-            ])
-
-            throw new SkipWorkflowStepException(skipMessage)
-        }
-
-        /** Threshold is assumed to be reached, when its not defined, since that can happen for imported bam Files */
-        if (bamFile.numberOfMergedLanes !== null && processingThresholds.numberOfLanes && bamFile.numberOfMergedLanes < processingThresholds.numberOfLanes) {
-            WorkflowStepSkipMessage skipMessage = new WorkflowStepSkipMessage([
-                    message : "Number of lanes threshold of ${processingThresholds.numberOfLanes} for project ${processingThresholds.project}, sample Type " +
-                            "${processingThresholds.sampleType} and seq type ${processingThresholds.seqType} was not reached by the " +
-                            "bam file ${bamFile.bamFileName} with ${bamFile.numberOfMergedLanes} lanes.",
-                    category: WorkflowStepSkipMessage.Category.PROJECT_THRESHOLD_REJECTION,
-            ])
-
-            throw new SkipWorkflowStepException(skipMessage)
-        }
     }
 
     private void checkCoverageForWorkflow(AbstractBamFile bamFile) throws SkipWorkflowStepException {

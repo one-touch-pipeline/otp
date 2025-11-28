@@ -80,7 +80,6 @@ class SophiaParseJobSpec extends Specification implements DataTest, WorkflowSyst
                 FastqImportInstance,
                 ExternalMergingWorkPackage,
                 ExternallyProcessedBamFile,
-                ProcessingThresholds,
         ]
     }
 

@@ -238,7 +238,6 @@ abstract class AbstractAnalysisWorkflowSpec extends AbstractDecidedWorkflowSpec 
         }
 
         createSampleTypeCategories()
-        createThresholds()
         setupBamFilesInFileSystem()
     }
 
@@ -256,24 +255,6 @@ abstract class AbstractAnalysisWorkflowSpec extends AbstractDecidedWorkflowSpec 
         )
 
         samplePair = SnvDomainFactory.INSTANCE.createSamplePair(bamFileTumor.mergingWorkPackage, bamFileControl.mergingWorkPackage)
-    }
-
-    void createThresholds() {
-        SnvDomainFactory.INSTANCE.createProcessingThresholds(
-                project: project,
-                seqType: seqType,
-                sampleType: sampleTypeTumor,
-                coverage: COVERAGE,
-                numberOfLanes: null,
-        )
-
-        SnvDomainFactory.INSTANCE.createProcessingThresholds(
-                project: project,
-                seqType: seqType,
-                sampleType: sampleTypeControl,
-                coverage: COVERAGE,
-                numberOfLanes: null,
-        )
     }
 
     void setupBamFilesInFileSystem() {

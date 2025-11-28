@@ -56,7 +56,6 @@ abstract class AbstractBamFileAnalysisServiceSpec extends Specification implemen
                 MergingWorkPackage,
                 Pipeline,
                 ProcessingOption,
-                ProcessingThresholds,
                 Project,
                 ReferenceGenome,
                 RoddyBamFile,

@@ -426,7 +426,7 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
             2 * createPathTargetForMetadataFile(_, TICKET_NUMBER) >> tempDir.resolve("target.tsv")
             2 * copyMetadataFile(_, _) >> null
             2 * getMetadataFilePathForIlseNumber(_, _) >> file1 >> file2
-            _ * notifyAboutUnsetConfig(_, _, _) >> null
+            _ * notifyAboutUnsetConfig(_, _) >> null
             _ * getDirectoryStructure(_) >> directoryStructure
         }
         service.sampleIdentifierService = Mock(SampleIdentifierService) {
@@ -461,7 +461,6 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
         service.dataInstallationInitializationService = Mock(DataInstallationInitializationService) {
             _ * createWorkflowRuns(_) >> []
         }
-        service.processingThresholdsService = Mock(ProcessingThresholdsService)
         service.fileSystemService = new TestFileSystemService()
         service.configService = new TestConfigService()
         service.configService.processingOptionService = new ProcessingOptionService()
@@ -740,7 +739,7 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
             return identifier
         }
         MetadataImportService service = Spy(MetadataImportService) {
-            notifyAboutUnsetConfig(_, _, _) >> null
+            notifyAboutUnsetConfig(_, _) >> null
         }
         service.sampleIdentifierService = Mock(SampleIdentifierService) {
             parseAndFindOrSaveSampleIdentifier(parse, _) >> createSampleIdentifierForSample2(parse)
@@ -1143,7 +1142,7 @@ ${ILSE_NO}                      -                           1234          1234  
         )
 
         MetadataImportService service = Spy(MetadataImportService) {
-            notifyAboutUnsetConfig(_, _, _) >> null
+            notifyAboutUnsetConfig(_, _) >> null
         }
         service.sampleIdentifierService = Mock(SampleIdentifierService) {
             0 * _
@@ -1323,7 +1322,7 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         )
 
         MetadataImportService service = Spy(MetadataImportService) {
-            notifyAboutUnsetConfig(_, _, _) >> null
+            notifyAboutUnsetConfig(_, _) >> null
         }
         service.sampleIdentifierService = Mock(SampleIdentifierService) {
             0 * _
@@ -1962,7 +1961,6 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         service.dataInstallationInitializationService = Mock(DataInstallationInitializationService) {
             _ * createWorkflowRuns(_) >> []
         }
-        service.processingThresholdsService = Mock(ProcessingThresholdsService)
         service.cellRangerConfigurationService = Mock(CellRangerConfigurationService)
     }
 }

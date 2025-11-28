@@ -73,7 +73,6 @@ class IndelValidationJobSpec extends Specification implements DataTest, Workflow
                 FastqImportInstance,
                 ExternalMergingWorkPackage,
                 ExternallyProcessedBamFile,
-                ProcessingThresholds,
         ]
     }
 

@@ -25,22 +25,19 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.ProjectSelectionService
-import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholds
-import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholdsService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.workflow.TriggerWorkflowService
 
 @PreAuthorize('isFullyAuthenticated()')
-class ProcessingThresholdController {
+class SampleCategoryController {
 
     static allowedMethods = [
             index : "GET",
             update: "POST",
     ]
 
-    ProcessingThresholdsService processingThresholdsService
     ProjectSelectionService projectSelectionService
     SamplePairDeciderService samplePairDeciderService
     SampleTypePerProjectService sampleTypePerProjectService
@@ -48,18 +45,16 @@ class ProcessingThresholdController {
     SecurityService securityService
     TriggerWorkflowService triggerWorkflowService
 
-    Map index(ProcThresholdsEditCommand cmd) {
+    Map index(SampleCategoryEditCommand cmd) {
         Project project = projectSelectionService.selectedProject
 
         boolean isAdmin = securityService.hasCurrentUserAdministrativeRoles()
         boolean edit = isAdmin ? cmd.edit : false
 
         List<SampleTypePerProject> sampleTypePerProjects = sampleTypePerProjectService.findByProject(project)
-        List<ProcessingThresholds> processingThresholds = processingThresholdsService.findByProject(project)
 
         List<SampleType> sampleTypes = (sampleTypeService.findUsedSampleTypesForProject(project) +
-                sampleTypePerProjects*.sampleType +
-                processingThresholds*.sampleType
+                sampleTypePerProjects*.sampleType
         ).unique().sort { it.name }
 
         Map<SampleType, SampleTypePerProject> groupedCategories = sampleTypePerProjects
@@ -68,31 +63,16 @@ class ProcessingThresholdController {
                     [sampleType, sampleTypePerProjects1.first()?.category]
                 }
 
-        Map<SampleType, Map<SeqType, ProcessingThresholds>> groupedThresholds = processingThresholds
-                .groupBy { it.sampleType }
-                .collectEntries { sampleType, processingThresholds1 ->
-                    [sampleType, processingThresholds1
-                            .groupBy { it.seqType }
-                            .collectEntries { seqType, processingThresholds2 ->
-                                [seqType, processingThresholds2.first()]
-                            },
-                    ]
-                }
-
-        List<SeqType> seqTypes = edit ? SeqTypeService.allAnalysableSeqTypes : processingThresholds*.seqType.unique()
-
         return [
                 categories       : SampleTypePerProject.Category.values(),
                 sampleTypes      : sampleTypes,
-                seqTypes         : seqTypes.sort(),
                 groupedCategories: groupedCategories,
-                groupedThresholds: groupedThresholds,
                 edit             : edit,
         ]
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    def update(ProcThresholdsCommand cmd) {
+    def update(SampleCategoryCommand cmd) {
         assert cmd.validate()
         Project project = projectSelectionService.requestedProject
 
@@ -100,18 +80,13 @@ class ProcessingThresholdController {
         Map<SampleType, SampleTypePerProject.Category> categories = sampleTypePerProjectService.findByProject(project).collectEntries {
             [it.sampleType, it.category]
         }
-        Set<SampleType> sampleTypesChanged = cmd.sampleTypes.findAll { ProcThresholdSampleTypeCommand sampleType ->
+        Set<SampleType> sampleTypesChanged = cmd.sampleTypes.findAll { SampleCategorySampleTypeCommand sampleType ->
             return sampleType.category != categories[sampleType.sampleType]
         }*.sampleType
 
         Project.withTransaction {
-            cmd.sampleTypes.each { ProcThresholdSampleTypeCommand sampleType ->
+            cmd.sampleTypes.each { SampleCategorySampleTypeCommand sampleType ->
                 sampleTypePerProjectService.createOrUpdate(project, sampleType.sampleType, sampleType.category)
-                sampleType.seqTypes.each { ProcThresholdSeqTypeCommand seqType ->
-                    processingThresholdsService.createUpdateOrDelete(
-                            project, sampleType.sampleType, seqType.seqType, seqType.minNumberOfLanes ?: null, seqType.minCoverage ?: null
-                    )
-                }
             }
         }
 
@@ -119,27 +94,20 @@ class ProcessingThresholdController {
         samplePairDeciderService.createSamplePairs(project, sampleTypesChanged)
         triggerWorkflowService.triggerWorkflowByProjectAndSampleTypes(project, sampleTypesChanged)
 
-        flash.message = new FlashMessage(g.message(code: "processingThresholds.edit.success") as String)
+        flash.message = new FlashMessage(g.message(code: "sampleCategory.edit.success") as String)
         redirect(action: "index")
     }
 }
 
-class ProcThresholdsEditCommand {
+class SampleCategoryEditCommand {
     Boolean edit
 }
 
-class ProcThresholdsCommand {
-    List<ProcThresholdSampleTypeCommand> sampleTypes
+class SampleCategoryCommand {
+    List<SampleCategorySampleTypeCommand> sampleTypes
 }
 
-class ProcThresholdSampleTypeCommand {
+class SampleCategorySampleTypeCommand {
     SampleType sampleType
     SampleTypePerProject.Category category
-    List<ProcThresholdSeqTypeCommand> seqTypes
-}
-
-class ProcThresholdSeqTypeCommand {
-    SeqType seqType
-    Integer minNumberOfLanes
-    Double minCoverage
 }

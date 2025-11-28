@@ -47,36 +47,6 @@ abstract class AbstractAnalysisDomainFactory<T extends BamFilePairAnalysis> impl
 
     abstract protected Class<? extends AbstractAnalysisWorkflow> getWorkflowClass()
 
-    ProcessingThresholds createProcessingThresholds(Map properties = [:]) {
-        return createDomainObject(ProcessingThresholds, [
-                project      : { createProject() },
-                seqType      : { createSeqType() },
-                sampleType   : { createSampleType() },
-                coverage     : DEFAULT_COVERAGE,
-                numberOfLanes: 3,
-        ], properties)
-    }
-
-    ProcessingThresholds findOrCreateProcessingThresholdsForMergingWorkPackage(AbstractMergingWorkPackage mergingWorkPackage, Map properties = [:]) {
-        return findOrCreateDomainObject(ProcessingThresholds, [
-                project   : mergingWorkPackage.project,
-                seqType   : mergingWorkPackage.seqType,
-                sampleType: mergingWorkPackage.sampleType,
-        ], properties, [:])
-    }
-
-    ProcessingThresholds findOrCreateProcessingThresholdsForSeqTrack(SeqTrack seqTrack, Map properties = [:]) {
-        return findOrCreateDomainObject(ProcessingThresholds, [
-                project   : seqTrack.project,
-                seqType   : seqTrack.seqType,
-                sampleType: seqTrack.sampleType,
-        ], properties, [:])
-    }
-
-    ProcessingThresholds findOrCreateProcessingThresholdsForBamFile(AbstractBamFile bamFile, Map properties = [:]) {
-        return findOrCreateProcessingThresholdsForMergingWorkPackage(bamFile.mergingWorkPackage, properties)
-    }
-
     private Map getDefaultSampleTypeProperties() {
         return [
                 project   : { createProject() },
@@ -142,9 +112,6 @@ abstract class AbstractAnalysisDomainFactory<T extends BamFilePairAnalysis> impl
         bamFile1.mergingWorkPackage.bamFileInProjectFolder = bamFile1
         bamFile2.mergingWorkPackage.bamFileInProjectFolder = bamFile2
 
-        findOrCreateProcessingThresholdsForBamFile(bamFile1, [numberOfLanes: null])
-        findOrCreateProcessingThresholdsForBamFile(bamFile2, [numberOfLanes: null])
-
         return [
                 samplePair: samplePair,
                 bamFile1  : bamFile1,
@@ -185,9 +152,6 @@ abstract class AbstractAnalysisDomainFactory<T extends BamFilePairAnalysis> impl
 
         SamplePair samplePair = createSamplePair(bamFileTumor.mergingWorkPackage, bamFileControl.mergingWorkPackage)
 
-        findOrCreateProcessingThresholdsForBamFile(bamFileTumor, [numberOfLanes: null])
-        findOrCreateProcessingThresholdsForBamFile(bamFileControl, [numberOfLanes: null])
-
         return samplePair
     }
 
@@ -225,9 +189,6 @@ abstract class AbstractAnalysisDomainFactory<T extends BamFilePairAnalysis> impl
         findOrCreateSampleTypePerProjectForMergingWorkPackage(controlMwp, SampleTypePerProject.Category.CONTROL)
 
         SamplePair samplePair = createSamplePair(tumorMwp, controlMwp)
-
-        findOrCreateProcessingThresholdsForMergingWorkPackage(samplePair.mergingWorkPackage1, [numberOfLanes: null, coverage: 10])
-        findOrCreateProcessingThresholdsForMergingWorkPackage(samplePair.mergingWorkPackage2, [numberOfLanes: null, coverage: 10])
 
         return samplePair
     }

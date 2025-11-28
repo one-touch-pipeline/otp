@@ -156,7 +156,6 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
         assert bamFileControl.workPackage.save(flush: true)
 
         createSampleTypeCategories()
-        createThresholds()
         setupBamFilesInFileSystem()
     }
 
@@ -174,24 +173,6 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
         )
 
         samplePair = DomainFactory.createSamplePair(bamFileTumor.mergingWorkPackage, bamFileControl.mergingWorkPackage)
-    }
-
-    void createThresholds() {
-        DomainFactory.createProcessingThresholds(
-                project: project,
-                seqType: seqType,
-                sampleType: sampleTypeTumor,
-                coverage: COVERAGE,
-                numberOfLanes: null,
-        )
-
-        DomainFactory.createProcessingThresholds(
-                project: project,
-                seqType: seqType,
-                sampleType: sampleTypeControl,
-                coverage: COVERAGE,
-                numberOfLanes: null,
-        )
     }
 
     void setupBamFilesInFileSystem() {

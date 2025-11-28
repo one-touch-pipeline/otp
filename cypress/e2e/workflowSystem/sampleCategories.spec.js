@@ -20,29 +20,29 @@
  * SOFTWARE.
  */
 
-describe('Check processing threshold page', () => {
+describe('Check sample category page', () => {
   'use strict';
 
   context('when user is an operator', () => {
     beforeEach(() => {
       cy.loginAs('operator');
-      cy.visit('/processingThreshold/index');
+      cy.visit('/sampleCategory/index');
     });
 
-    it('should display the processing threshold page', () => {
-      cy.get('h1').should('have.text', 'Processing Thresholds for ExampleProject');
-      cy.get('a.btn').contains('Edit thresholds').should('exist');
+    it('should display the sample category page', () => {
+      cy.get('h1').should('have.text', 'Sample Categories for ExampleProject');
+      cy.get('a.btn').contains('Edit categories').should('exist');
       cy.get('table tbody').should('exist').should('not.be.empty');
 
       cy.get('#project.form-select').select('Example project 1', { force: true });
       cy.url().should('include', 'Example+project+1');
-      cy.get('h1').should('have.text', 'Processing Thresholds for Example project 1');
-      cy.get('td').should('have.text', 'No processing thresholds exist for this project.');
-      cy.get('.btn').contains('Edit thresholds').should('not.exist');
+      cy.get('h1').should('have.text', 'Sample Categories for Example project 1');
+      cy.get('td').should('have.text', 'No sample categories exist for this project.');
+      cy.get('.btn').contains('Edit categories').should('not.exist');
     });
 
-    it('should edit the processing thresholds', () => {
-      cy.get('a.btn').contains('Edit thresholds').click();
+    it('should edit the sample categories', () => {
+      cy.get('a.btn').contains('Edit categories').click();
       cy.url().should('include', 'edit');
 
       cy.get('table tbody').should('exist').should('not.be.empty');
@@ -53,27 +53,19 @@ describe('Check processing threshold page', () => {
 
       cy.get('@editRow').within(() => {
         cy.get('td:nth-child(2) select').select('DISEASE', { force: true });
-        cy.get('input[name="sampleTypes[0].seqTypes[0].minNumberOfLanes"]').clear().type('5');
-        cy.get('input[name="sampleTypes[0].seqTypes[0].minCoverage"]').clear().type('50');
-        cy.get('input[name="sampleTypes[0].seqTypes[1].minNumberOfLanes"]').clear().type('5');
-        cy.get('input[name="sampleTypes[0].seqTypes[1].minCoverage"]').clear().type('50');
       });
       cy.get('.confirm > .btn-primary').click();
 
       cy.get('#otpToastBox .otpSuccessToast').should('exist')
-        .and('contain.text', 'The processing thresholds were edited successfully');
+        .and('contain.text', 'The sample categories were edited successfully');
 
       cy.get('@editRow').within(() => {
         cy.get('td:nth-child(2)').should('contain.text', 'DISEASE');
-        cy.get('td:nth-child(3)').should('contain.text', '5');
-        cy.get('td:nth-child(4)').should('contain.text', '50');
-        cy.get('td:nth-child(5)').should('contain.text', '5');
-        cy.get('td:nth-child(6)').should('contain.text', '50');
       });
     });
 
-    it('should remove the processing thresholds', () => {
-      cy.get('a.btn').contains('Edit thresholds').click();
+    it('should remove the sample categories', () => {
+      cy.get('a.btn').contains('Edit categories').click();
       cy.url().should('include', 'edit');
 
       cy.get('table tbody').should('exist').should('not.be.empty');
@@ -84,27 +76,19 @@ describe('Check processing threshold page', () => {
 
       cy.get('@editRow').within(() => {
         cy.get('td:nth-child(2) select').select('IGNORED', { force: true });
-        cy.get('input[name="sampleTypes[0].seqTypes[0].minNumberOfLanes"]').clear();
-        cy.get('input[name="sampleTypes[0].seqTypes[0].minCoverage"]').clear();
-        cy.get('input[name="sampleTypes[0].seqTypes[1].minNumberOfLanes"]').clear();
-        cy.get('input[name="sampleTypes[0].seqTypes[1].minCoverage"]').clear();
       });
       cy.get('.confirm > .btn-primary').click();
 
       cy.get('#otpToastBox .otpSuccessToast').should('exist')
-        .and('contain.text', 'The processing thresholds were edited successfully');
+        .and('contain.text', 'The sample categories were edited successfully');
 
       cy.get('@editRow').within(() => {
         cy.get('td:nth-child(2)').should('contain.text', 'IGNORED');
-        cy.get('td:nth-child(3)').should('contain.text', '');
-        cy.get('td:nth-child(4)').should('contain.text', '');
-        cy.get('td:nth-child(5)').should('contain.text', '');
-        cy.get('td:nth-child(6)').should('contain.text', '');
       });
     });
 
-    it('should add the processing thresholds', () => {
-      cy.get('a.btn').contains('Edit thresholds').click();
+    it('should add the sample categories', () => {
+      cy.get('a.btn').contains('Edit categories').click();
       cy.url().should('include', 'edit');
 
       cy.get('table tbody').should('exist').should('not.be.empty');
@@ -115,22 +99,14 @@ describe('Check processing threshold page', () => {
 
       cy.get('@editRow').within(() => {
         cy.get('td:nth-child(2) select').select('CONTROL', { force: true });
-        cy.get('input[name="sampleTypes[0].seqTypes[0].minNumberOfLanes"]').clear().type('1');
-        cy.get('input[name="sampleTypes[0].seqTypes[0].minCoverage"]').clear().type('10');
-        cy.get('input[name="sampleTypes[0].seqTypes[1].minNumberOfLanes"]').clear().type('1');
-        cy.get('input[name="sampleTypes[0].seqTypes[1].minCoverage"]').clear().type('10');
       });
       cy.get('.confirm > .btn-primary').click();
 
       cy.get('#otpToastBox .otpSuccessToast').should('exist')
-        .and('contain.text', 'The processing thresholds were edited successfully');
+        .and('contain.text', 'The sample categories were edited successfully');
 
       cy.get('@editRow').within(() => {
         cy.get('td:nth-child(2)').should('contain.text', 'CONTROL');
-        cy.get('td:nth-child(3)').should('contain.text', '1');
-        cy.get('td:nth-child(4)').should('contain.text', '10');
-        cy.get('td:nth-child(5)').should('contain.text', '1');
-        cy.get('td:nth-child(6)').should('contain.text', '10');
       });
     });
   });
@@ -138,12 +114,12 @@ describe('Check processing threshold page', () => {
   context('when user is normal user with project access', () => {
     beforeEach(() => {
       cy.loginAs('user');
-      cy.visit('/processingThreshold/index');
+      cy.visit('/sampleCategory/index');
     });
 
-    it('should display the processing threshold page for user', () => {
-      cy.get('h1').should('have.text', 'Processing Thresholds for ExampleProject');
-      cy.get('.btn').contains('Edit thresholds').should('not.exist');
+    it('should display the sample category page for user', () => {
+      cy.get('h1').should('have.text', 'Sample Categories for ExampleProject');
+      cy.get('.btn').contains('Edit categories').should('not.exist');
       cy.get('table tbody').should('exist').should('not.be.empty');
     });
   });

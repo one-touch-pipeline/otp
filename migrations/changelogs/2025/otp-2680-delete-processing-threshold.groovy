@@ -19,13 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+databaseChangeLog = {
 
-$(() => {
-  'use strict';
-
-  $('form.confirm').on('submit', (e) => {
-    if (!window.confirm('Are you sure you want to create these thresholds?')) {
-      e.preventDefault();
+    changeSet(author: "-", id: "1762269610203-94") {
+        dropForeignKeyConstraint(baseTableName: "processing_thresholds", constraintName: "FK8o7rmi93crkr1h2au59gx2u3p")
     }
-  });
-});
+
+    changeSet(author: "-", id: "1762269610203-95") {
+        dropForeignKeyConstraint(baseTableName: "processing_thresholds", constraintName: "FKb1j34pggqajkqbuch7ybw2su9")
+    }
+
+    changeSet(author: "-", id: "1762269610203-104") {
+        dropForeignKeyConstraint(baseTableName: "processing_thresholds", constraintName: "sample_type_FK")
+    }
+
+    changeSet(author: "-", id: "1762269610203-111") {
+        dropUniqueConstraint(constraintName: "UKb7a01d2be3fdbf83d79c75252adb", tableName: "processing_thresholds")
+    }
+
+    changeSet(author: "-", id: "1762269610203-117") {
+        dropTable(tableName: "processing_thresholds")
+    }
+}

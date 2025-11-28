@@ -593,9 +593,6 @@ class DomainFactory {
                 pipeline: createRoddySnvPipelineLazy()
         )
 
-        createProcessingThresholdsForBamFile(bamFile1, [numberOfLanes: null])
-        createProcessingThresholdsForBamFile(bamFile2, [numberOfLanes: null])
-
         return [
                 samplePair : samplePair,
                 bamFile1   : bamFile1,
@@ -644,9 +641,6 @@ class DomainFactory {
                 project: samplePair.project,
                 pipeline: createSophiaPipelineLazy()
         )
-
-        createProcessingThresholdsForBamFile(bamFileTumor, [numberOfLanes: null])
-        createProcessingThresholdsForBamFile(bamFileControl, [numberOfLanes: null])
 
         createProcessingOptionLazy(
                 name: OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
@@ -717,31 +711,15 @@ class DomainFactory {
     }
 
     /**
-     * @deprecated use {@link AbstractAnalysisDomainFactory#findOrCreateProcessingThresholdsForMergingWorkPackage()}, {@link DomainFactoryCore#findOrCreateProcessingOption}
+     * @deprecated use {@link DomainFactoryCore#findOrCreateProcessingOption}
      *
      * create necessary initialising for the analysis pipelines for the sample Pair.
-     *
-     * This contains <ul>
-     * <le> ProcessingThresholds </le>
-     * <le> RoddyWorkflowConfig for the different roddy analysis pipelines</le>
-     * <le> ProcessingOption with the allowed   processing options for the
-     *
-     * create processing thresholds for the merging workpa, the
      */
     static void initAnalysisForSamplePair(SamplePair samplePair) {
-        [
-                samplePair.mergingWorkPackage1,
-                samplePair.mergingWorkPackage2,
-        ].each {
-            createProcessingThresholdsForMergingWorkPackage(it, [numberOfLanes: null, coverage: 10])
-        }
-
-        [
-                createRoddySnvPipelineLazy(),
-                createIndelPipelineLazy(),
-                createSophiaPipelineLazy(),
-                createAceseqPipelineLazy(),
-        ].each {
+        [createRoddySnvPipelineLazy(),
+         createIndelPipelineLazy(),
+         createSophiaPipelineLazy(),
+         createAceseqPipelineLazy()].each {
             createRoddyWorkflowConfig(
                     seqType: samplePair.seqType,
                     project: samplePair.project,
@@ -1822,48 +1800,6 @@ class DomainFactory {
     @Deprecated
     static ExternallyProcessedBamFile createFinishedExternallyProcessedBamFile(Map properties = [:]) {
         return ExternalBamFactoryInstance.INSTANCE.createFinishedBamFile(properties)
-    }
-
-    /**
-     * @deprecated use {@link AbstractAnalysisDomainFactory#createProcessingThresholds()}
-     */
-    static ProcessingThresholds createProcessingThresholds(Map properties = [:]) {
-        return createDomainObject(ProcessingThresholds, [
-                project      : { createProject() },
-                seqType      : { createSeqType() },
-                sampleType   : { createSampleType() },
-                coverage     : 30.0,
-                numberOfLanes: 3,
-        ], properties)
-    }
-
-    /**
-     * @deprecated use {@link AbstractAnalysisDomainFactory#findOrCreateProcessingThresholdsForMergingWorkPackage()}
-     */
-    static ProcessingThresholds createProcessingThresholdsForMergingWorkPackage(AbstractMergingWorkPackage mergingWorkPackage, Map properties = [:]) {
-        return createProcessingThresholds([
-                project   : mergingWorkPackage.project,
-                seqType   : mergingWorkPackage.seqType,
-                sampleType: mergingWorkPackage.sampleType,
-        ] + properties)
-    }
-
-    /**
-     * @deprecated use {@link AbstractAnalysisDomainFactory#findOrCreateProcessingThresholdsForSeqTrack()}
-     */
-    static ProcessingThresholds createProcessingThresholdsForSeqTrack(SeqTrack seqTrack, Map properties = [:]) {
-        return createProcessingThresholds([
-                project   : seqTrack.project,
-                seqType   : seqTrack.seqType,
-                sampleType: seqTrack.sampleType,
-        ] + properties)
-    }
-
-    /**
-     * @deprecated use {@link AbstractAnalysisDomainFactory#findOrCreateProcessingThresholdsForBamFile()}
-     */
-    static ProcessingThresholds createProcessingThresholdsForBamFile(AbstractBamFile bamFile, Map properties = [:]) {
-        return createProcessingThresholdsForMergingWorkPackage(bamFile.mergingWorkPackage, properties)
     }
 
     /**

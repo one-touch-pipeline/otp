@@ -389,7 +389,6 @@ class ExampleData {
             findOrCreateMergingCriteria(it)
         }
         configureWorkflowsNewSystem()
-        findOrCreateProcessingThresholds()
         createDocumentTestData()
         SessionUtils.withTransaction {
             it.flush()
@@ -856,24 +855,6 @@ class ExampleData {
                     species        : [speciesWithStrainHuman, speciesWithStrainMouse] as Set,
                     referenceGenome: referenceGenomeHumanMouse,
             ]).save(flush: false)
-        }
-    }
-
-    void findOrCreateProcessingThresholds() {
-        [
-                diseaseSampleTypes.keySet(),
-                controlSampleTypes,
-        ].flatten().each { SampleType sampleType ->
-            analyseAbleSeqType.each { SeqType seqType ->
-                return CollectionUtils.atMostOneElement(ProcessingThresholds.findAllByProjectAndSampleTypeAndSeqType(project, sampleType, seqType)) ?:
-                        new ProcessingThresholds([
-                                project      : project,
-                                seqType      : seqType,
-                                sampleType   : sampleType,
-                                coverage     : 20,
-                                numberOfLanes: 1,
-                        ]).save(flush: false)
-            }
         }
     }
 

@@ -71,7 +71,6 @@ class SnvValidationJobSpec extends Specification implements DataTest, WorkflowSy
                 FastqImportInstance,
                 ExternalMergingWorkPackage,
                 ExternallyProcessedBamFile,
-                ProcessingThresholds,
         ]
     }
 

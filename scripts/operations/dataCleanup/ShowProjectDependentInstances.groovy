@@ -64,7 +64,6 @@ Individual.findAllByProject(project).each { Individual individual ->
         RawSequenceFile,
         ReferenceGenomeProjectSeqType,
         MergingCriteria,
-        ProcessingThresholds,
         SampleTypePerProject,
         ConfigPerProjectAndSeqType,
         UserProjectRole,

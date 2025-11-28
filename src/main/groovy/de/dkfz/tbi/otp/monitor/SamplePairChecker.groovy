@@ -38,8 +38,6 @@ class SamplePairChecker extends PipelinesChecker<AbstractBamFile> {
             'For the following project sampleType combination the sampleType category is set to IGNORED'
     static final String HEADER_DISEASE_STATE_UNDEFINED =
             'For the following project sampleType combination the sampleType category is set to UNDEFINED'
-    static final String HEADER_UNKNOWN_THRESHOLD =
-            'For the following project sampleType seqType combination no threshold is defined'
     static final String HEADER_NO_SAMPLE_PAIR =
             'For the following BamFile no SamplePair could be found'
     static final String HEADER_SAMPLE_PAIR_WITHOUT_DISEASE_BAM_FILE =
@@ -51,8 +49,6 @@ class SamplePairChecker extends PipelinesChecker<AbstractBamFile> {
 
     static final String BLOCKED_BAM_IS_WITHDRAWN = "bam file is withdrawn"
     static final String BLOCKED_BAM_IS_IN_PROCESSING = "bam file is in processing"
-    static final String BLOCKED_TO_FEW_LANES = "bam file has too few lanes"
-    static final String BLOCKED_TO_FEW_COVERAGE = "bam file has insufficient coverage"
 
     @Override
     List<SamplePair> handle(List<AbstractBamFile> bamFilesInput, MonitorOutputCollector output) {
@@ -93,12 +89,6 @@ class SamplePairChecker extends PipelinesChecker<AbstractBamFile> {
             "${it.project.name} ${it.sampleType.name}"
         }
         bamFiles = bamFiles - ignoredDiseaseStatus
-
-        List<AbstractBamFile> unknownThreshold = bamFilesWithoutThreshold(bamFiles)
-        output.showUniqueList(HEADER_UNKNOWN_THRESHOLD, unknownThreshold) {
-            "${it.project.name} ${it.sampleType.name} ${it.seqType.name}"
-        }
-        bamFiles = bamFiles - unknownThreshold
 
         List<AbstractBamFile> noPairFound = bamFilesWithoutSamplePair(bamFiles)
         output.showUniqueList(HEADER_NO_SAMPLE_PAIR, noPairFound)
@@ -160,32 +150,6 @@ class SamplePairChecker extends PipelinesChecker<AbstractBamFile> {
                     and sampleTypePerProject.sampleType = bamFile.workPackage.sample.sampleType
                     and sampleTypePerProject.category = '${category}'
             """.toString(), [
-                bamFiles: bamFiles,
-        ])
-    }
-
-    List<AbstractBamFile> bamFilesWithoutThreshold(List<AbstractBamFile> bamFiles) {
-        if (!bamFiles) {
-            return []
-        }
-        return AbstractBamFile.executeQuery("""
-                select
-                    bamFile
-                from
-                    AbstractBamFile bamFile
-                where
-                    bamFile in (:bamFiles)
-                    and not exists (
-                        select
-                            processingThresholds
-                        from
-                            ProcessingThresholds processingThresholds
-                        where
-                            processingThresholds.project = bamFile.workPackage.sample.individual.project
-                            and processingThresholds.sampleType = bamFile.workPackage.sample.sampleType
-                            and processingThresholds.seqType = bamFile.workPackage.seqType
-                    )
-            """, [
                 bamFiles: bamFiles,
         ])
     }
@@ -271,9 +235,6 @@ class SamplePairChecker extends PipelinesChecker<AbstractBamFile> {
                         and sampleTypePerProject${number}.project = samplePair.mergingWorkPackage${number}.sample.individual.project
                         and sampleTypePerProject${number}.sampleType = samplePair.mergingWorkPackage${number}.sample.sampleType
                         and sampleTypePerProject${number}.category in ('${SampleTypePerProject.Category.DISEASE}', '${SampleTypePerProject.Category.CONTROL}')
-                        and processingThresholds${number}.project = samplePair.mergingWorkPackage${number}.sample.individual.project
-                        and processingThresholds${number}.sampleType = samplePair.mergingWorkPackage${number}.sample.sampleType
-                        and processingThresholds${number}.seqType = samplePair.mergingWorkPackage${number}.seqType
                         and bamFile${number}.id = (
                             select
                                 max(bamFile.id)
@@ -289,8 +250,6 @@ class SamplePairChecker extends PipelinesChecker<AbstractBamFile> {
             return """(
                             bamFile${number}.withdrawn = true
                             or bamFile${number}.md5sum is null
-                            or bamFile${number}.coverage < processingThresholds${number}.coverage
-                            or bamFile${number}.numberOfMergedLanes < processingThresholds${number}.numberOfLanes
                         )"""
         }
 
@@ -299,16 +258,12 @@ class SamplePairChecker extends PipelinesChecker<AbstractBamFile> {
                     new ${BlockedSamplePair.name} (
                         samplePair,
                         bamFile1,
-                        bamFile2,
-                        processingThresholds1,
-                        processingThresholds2
+                        bamFile2
                     )
                 from
                     SamplePair samplePair,
                     AbstractBamFile bamFile1,
                     AbstractBamFile bamFile2,
-                    ProcessingThresholds processingThresholds1,
-                    ProcessingThresholds processingThresholds2,
                     SampleTypePerProject sampleTypePerProject1,
                     SampleTypePerProject sampleTypePerProject2
                 where
@@ -330,8 +285,6 @@ class SamplePairChecker extends PipelinesChecker<AbstractBamFile> {
         SamplePair samplePair
         AbstractBamFile bamFile1
         AbstractBamFile bamFile2
-        ProcessingThresholds processingThresholds1
-        ProcessingThresholds processingThresholds2
 
         @Override
         String toString() {
@@ -339,26 +292,17 @@ class SamplePairChecker extends PipelinesChecker<AbstractBamFile> {
             [
                     disease: [
                             bamFile             : bamFile1,
-                            processingThresholds: processingThresholds1,
                     ],
                     control: [
                             bamFile             : bamFile2,
-                            processingThresholds: processingThresholds2,
                     ],
             ].each { String key, Map map ->
                 AbstractBamFile bamFile = map.bamFile
-                ProcessingThresholds processingThresholds = map.processingThresholds
                 if (bamFile.withdrawn) {
                     reasonsForBlocking << "${key} ${BLOCKED_BAM_IS_WITHDRAWN}"
-                } else if (bamFile.md5sum == null) {
+                }
+                if (bamFile.md5sum == null) {
                     reasonsForBlocking << "${key} ${BLOCKED_BAM_IS_IN_PROCESSING}"
-                } else {
-                    if (!processingThresholds.isAboveLaneThreshold(bamFile)) {
-                        reasonsForBlocking << "${key} ${BLOCKED_TO_FEW_LANES} (${bamFile.numberOfMergedLanes} of ${processingThresholds.numberOfLanes})"
-                    }
-                    if (!processingThresholds.isAboveCoverageThreshold(bamFile)) {
-                        reasonsForBlocking << "${key} ${BLOCKED_TO_FEW_COVERAGE} (${bamFile.coverage.round(2)} of ${processingThresholds.coverage})"
-                    }
                 }
             }
             return "${samplePair} (${reasonsForBlocking.join(', ')})"

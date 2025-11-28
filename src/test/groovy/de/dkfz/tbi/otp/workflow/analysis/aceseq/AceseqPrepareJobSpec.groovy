@@ -64,7 +64,6 @@ class AceseqPrepareJobSpec extends Specification implements DataTest, WorkflowSy
                 ExternalMergingWorkPackage,
                 ExternallyProcessedBamFile,
                 SampleTypePerProject,
-                ProcessingThresholds,
                 MergingWorkPackage,
                 ReferenceGenomeProjectSeqType,
                 FileType,

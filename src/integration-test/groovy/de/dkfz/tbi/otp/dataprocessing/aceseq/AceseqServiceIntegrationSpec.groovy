@@ -88,20 +88,6 @@ class AceseqServiceIntegrationSpec extends Specification {
         aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL) == null
     }
 
-    void "samplePairForProcessing, for ACEseq pipeline, coverage is not high enough, should not return SamplePair"() {
-        given:
-        setupData()
-        prepareSophiaForAceseq([:], [:])
-        DomainFactory.createProcessingOptionLazy([
-                name   : ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE,
-                type   : Pipeline.Type.ACESEQ.toString(),
-                value  : "40",
-        ])
-
-        expect:
-        !aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL)
-    }
-
     private void prepareSophiaForAceseqBase() {
         samplePair1.sophiaProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
         samplePair1.save(flush: true)

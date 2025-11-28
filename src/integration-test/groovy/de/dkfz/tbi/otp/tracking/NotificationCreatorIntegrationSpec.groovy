@@ -1057,9 +1057,16 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         SessionUtils.withTransaction {
             analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
+            analysisInstance.samplePair[pairAnalysis.processingStatus] = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
+            analysisInstance.samplePair.save(flush: true)
             mwpStatus = createMergingWorkPackageProcessingStatus(analysisInstance.sampleType1BamFile)
             [1, 2].each {
                 saveBamFileInProjectFolder(analysisInstance."sampleType${it}BamFile")
+            }
+
+            referenceGenomeProcessingOptions.each {
+                it.value = analysisInstance.samplePair.mergingWorkPackage1.referenceGenome.name
+                it.save(flush: true)
             }
         }
 
@@ -1095,10 +1102,19 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         SessionUtils.withTransaction {
             analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"()
+            analysisInstance.samplePair[pairAnalysis.processingStatus] = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
+            analysisInstance.samplePair.save(flush: true)
+
             mwpStatus = createMergingWorkPackageProcessingStatus(analysisInstance.sampleType1BamFile)
             [1, 2].each {
                 saveBamFileInProjectFolder(analysisInstance."sampleType${it}BamFile")
             }
+
+            referenceGenomeProcessingOptions.each {
+                it.value = analysisInstance.samplePair.mergingWorkPackage1.referenceGenome.name
+                it.save(flush: true)
+            }
+
             analysisInstance.delete(flush: true)
         }
 
@@ -1135,7 +1151,6 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             mwpStatus = createMergingWorkPackageProcessingStatus(analysisInstance.sampleType1BamFile)
             [1, 2].each {
                 saveBamFileInProjectFolder(analysisInstance."sampleType${it}BamFile")
-                DomainFactory.createProcessingThresholdsForBamFile(analysisInstance."sampleType${it}BamFile", [coverage: 1, numberOfLanes: null])
             }
 
             referenceGenomeProcessingOptions.each {
@@ -1192,7 +1207,6 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
             [1, 2].each {
                 saveBamFileInProjectFolder(analysisInstance."sampleType${it}BamFile")
-                DomainFactory.createProcessingThresholdsForBamFile(analysisInstance."sampleType${it}BamFile", [coverage: 1, numberOfLanes: null])
             }
 
             referenceGenomeProcessingOptions.each {

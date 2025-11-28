@@ -67,7 +67,6 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, Work
                 FastqFile,
                 Individual,
                 MergingWorkPackage,
-                ProcessingThresholds,
                 Project,
                 RawSequenceFile,
                 ReferenceGenomeSelector,
@@ -895,27 +894,6 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, Work
         then:
         Map<String, String> map = CollectionUtils.exactlyOneElement(result)
         map["project"] == seqTrack2.project.name
-        map["sampleType"] == seqTrack2.sampleType.displayName
-    }
-
-    void "test createWarningsForMissingProcessingThresholds"() {
-        given:
-        SeqTrack seqTrack1 = createSeqTrack()
-        SeqTrack seqTrack2 = createSeqTrack()
-        SnvDomainFactory.INSTANCE.createProcessingThresholds(project: seqTrack1.project, seqType: seqTrack1.seqType, sampleType: seqTrack1.sampleType)
-
-        service.workflowService = Mock(WorkflowService) {
-            findAllAnalysisWorkflows() >> [new Workflow()]
-            getSupportedSeqTypesOfVersions(_) >> [seqTrack1.seqType, seqTrack2.seqType]
-        }
-
-        when:
-        List<Map<String, String>> result = service.createWarningsForMissingProcessingThresholds([seqTrack1, seqTrack2])
-
-        then:
-        Map<String, String> map = CollectionUtils.exactlyOneElement(result)
-        map["project"] == seqTrack2.project.name
-        map["seqType"] == seqTrack2.seqType.displayName
         map["sampleType"] == seqTrack2.sampleType.displayName
     }
 

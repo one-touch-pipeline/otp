@@ -80,7 +80,6 @@ class AceseqParseJobSpec extends Specification implements DataTest, WorkflowSyst
                 FastqImportInstance,
                 ExternalMergingWorkPackage,
                 ExternallyProcessedBamFile,
-                ProcessingThresholds,
         ]
     }
 

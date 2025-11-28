@@ -487,8 +487,6 @@ class DeletionService {
 
         MergingCriteria.findAllByProject(project)*.delete(flush: true)
 
-        ProcessingThresholds.findAllByProject(project)*.delete(flush: true)
-
         SampleTypePerProject.findAllByProject(project)*.delete(flush: true)
 
         List configPerProjectAndSeqTypes = ConfigPerProjectAndSeqType.findAllByProject(project)

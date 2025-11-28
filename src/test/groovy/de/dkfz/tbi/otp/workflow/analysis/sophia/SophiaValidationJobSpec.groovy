@@ -72,7 +72,6 @@ class SophiaValidationJobSpec extends Specification implements DataTest, Workflo
                 FastqImportInstance,
                 ExternalMergingWorkPackage,
                 ExternallyProcessedBamFile,
-                ProcessingThresholds,
                 SophiaInstance,
         ]
     }

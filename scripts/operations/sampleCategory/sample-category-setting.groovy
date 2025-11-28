@@ -1,4 +1,3 @@
-package operations.threshold
 /*
  * Copyright 2011-2025 The OTP authors
  *
@@ -20,17 +19,17 @@ package operations.threshold
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package operations.sampleCategory
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholdsService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /**
- * This script allows to create/update category and threshold for all sampleTypes of a project.
+ * This script allows to create/update the sample categories for all sampleTypes of a project.
  *
- * The sampleTypes need to exist already in OTP, but must not be connected to the project yet.```
+ * The sampleTypes need to already exist in OTP, but must not be connected to the project yet.
  */
 
 // -----------------------------------------------
@@ -49,9 +48,6 @@ String sampleTypesControlInput = """
 #sampletype3
 
 """
-
-int laneCountWes = 1
-int laneCountWgs = 1
 
 // ------------------------------------------------
 // working
@@ -78,11 +74,7 @@ List<SampleType> allSampleTypes = [
 ].flatten()
 
 SampleTypePerProjectService sampleTypePerProjectService = ctx.sampleTypePerProjectService
-ProcessingThresholdsService processingThresholdsService = ctx.processingThresholdsService
 SamplePairDeciderService samplePairDeciderService = ctx.samplePairDeciderService
-
-SeqType wes = SeqTypeService.exomePairedSeqType
-SeqType wgs = SeqTypeService.wholeGenomePairedSeqType
 
 SampleType.withNewTransaction {
     sampleTypesDisease.each {
@@ -94,15 +86,6 @@ SampleType.withNewTransaction {
         sampleTypePerProjectService.createOrUpdate(project, it, SampleTypePerProject.Category.CONTROL)
     }
     println "create control: ${sampleTypesControl*.name.join(', ')}"
-
-    allSampleTypes.each { SampleType sampleType ->
-        processingThresholdsService.createUpdateOrDelete(project, sampleType, wes, laneCountWes, null)
-        processingThresholdsService.createUpdateOrDelete(project, sampleType, wgs, laneCountWgs, null)
-    }
-    println "create/update thresholds "
-    println "    - for WGS with: ${laneCountWgs} lanes and no coverage"
-    println "    - for WES with: ${laneCountWes} lanes and no coverage"
-    println "    - the following sample types:  ${allSampleTypes*.name.join(', ')}"
 
     samplePairDeciderService.findOrCreateSamplePairsForProject(project)
     println "create sample pairs "

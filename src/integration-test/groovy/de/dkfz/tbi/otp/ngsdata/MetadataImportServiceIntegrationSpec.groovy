@@ -31,8 +31,6 @@ import spock.lang.TempDir
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholds
-import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholdsService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
@@ -116,31 +114,19 @@ class MetadataImportServiceIntegrationSpec extends Specification implements Doma
         Ticket ticket = createTicket()
         SeqTrack st1 = createSeqTrack()
         SeqTrack st2 = createSeqTrack()
-        ProcessingThresholds p1 = DomainFactory.createProcessingThresholds()
-        ProcessingThresholds p2 = DomainFactory.createProcessingThresholds()
 
         service.sampleTypeService = Mock(SampleTypeService) {
             getSeqTracksWithoutSampleCategory(_) >> [st1]
-        }
-        service.processingThresholdsService = Mock(ProcessingThresholdsService) {
-            getSeqTracksWithoutProcessingThreshold(_) >> [st2]
         }
         service.linkGenerator = Mock(LinkGenerator) {
             2 * link(_) >> "link1" >> "link2"
         }
         service.mailHelperService = Mock(MailHelperService) {
             1 * saveErrorMailInNewTransaction(_, _) >> { String subject, String body ->
-                assert subject.contains("threshold")
                 assert subject.contains("category")
                 assert body.contains("link1")
                 assert body.contains("link2")
                 assert body.contains(st1.project.displayName)
-                assert body.contains(p1.project.displayName)
-                assert body.contains(p1.sampleType.displayName)
-                assert body.contains(p1.seqType.displayName)
-                assert body.contains(p2.project.displayName)
-                assert body.contains(p2.sampleType.displayName)
-                assert body.contains(p2.seqType.displayName)
             }
         }
         service.ticketService = Mock(TicketService) {
@@ -148,7 +134,7 @@ class MetadataImportServiceIntegrationSpec extends Specification implements Doma
         }
 
         expect:
-        service.notifyAboutUnsetConfig([st1, st2], [p1, p2], ticket)
+        service.notifyAboutUnsetConfig([st1, st2], ticket)
     }
 
     void 'validateAndImportResults, when project data is given, then validate and import data'() {

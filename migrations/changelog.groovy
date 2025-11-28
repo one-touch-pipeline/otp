@@ -210,4 +210,6 @@ databaseChangeLog = {
     include file: 'changelogs/2025/otp-2760.groovy'
 
     include file: 'changelogs/2025/otp-2824-inform-like-parser.groovy'
+
+    include file: 'changelogs/2025/otp-2680-delete-processing-threshold.groovy'
 }
