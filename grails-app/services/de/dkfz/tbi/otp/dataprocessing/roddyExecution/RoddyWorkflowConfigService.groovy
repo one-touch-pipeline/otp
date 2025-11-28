@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.FileSystem
+import java.nio.file.Files
 import java.nio.file.Path
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -113,7 +114,7 @@ class RoddyWorkflowConfigService {
         Matcher matcher = configFile.fileName.toString() =~ pattern
         assert matcher.matches(): "The file name '${configFile}' does not match the pattern '${pattern}'"
         assert config.programVersion.endsWith(":${matcher.group(1)}")
-        def configuration = new XmlParser().parseText(configFile.text)
+        def configuration = new XmlParser().parseText(Files.readString(configFile))
         assert configuration.@name == config.nameUsedInConfig
         if (config.individual) {
             assert config.configFilePath.contains(config.individual.pid)

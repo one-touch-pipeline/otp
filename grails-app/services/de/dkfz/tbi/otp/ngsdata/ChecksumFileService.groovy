@@ -64,7 +64,7 @@ class ChecksumFileService {
 
         fileService.ensureFileIsReadableAndNotEmpty(md5File)
         String md5sum
-        List<String> lines = md5File.readLines()
+        List<String> lines = Files.readAllLines(md5File)
         List<String> tokens = lines.get(0).tokenize()
         md5sum = tokens.get(0).trim().toLowerCase(Locale.ENGLISH)
         if (file instanceof FastqFile) {
@@ -86,7 +86,7 @@ class ChecksumFileService {
         if (Files.size(file) == 0) {
             throw new FileIsEmptyException("MD5 file \"${file}\" is empty")
         }
-        String md5sum = file.readLines().get(0).tokenize().get(0)
+        String md5sum = Files.readAllLines(file).get(0).tokenize().get(0)
         if (!(md5sum ==~ /^[0-9a-fA-F]{32}$/)) {
             throw new ParsingException("The format of the MD5sum of the MD5 file \"${file}\" is wrong: value=${md5sum}")
         }

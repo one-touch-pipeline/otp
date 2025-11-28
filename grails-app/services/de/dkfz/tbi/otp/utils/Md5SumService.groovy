@@ -33,16 +33,16 @@ class Md5SumService {
 
     FileService fileService
 
-    String extractMd5Sum(Path md5Sum) {
-        assert md5Sum: "Parameter md5Sum is null"
-        assert md5Sum.isAbsolute() : "The md5sum file '${md5Sum}' is not absolute"
-        assert Files.exists(md5Sum): "The md5sum file '${md5Sum}' does not exist"
-        assert Files.isRegularFile(md5Sum): "The md5sum file '${md5Sum}' is not a file"
-        assert fileService.fileIsReadable(md5Sum): "The md5sum file '${md5Sum}' is not readable"
-        assert md5Sum.text: "The md5sum file '${md5Sum}' is empty"
+    String extractMd5Sum(Path md5SumPath) {
+        assert md5SumPath: "Parameter md5Sum is null"
+        assert md5SumPath.isAbsolute() : "The md5sum file '${md5SumPath}' is not absolute"
+        assert Files.exists(md5SumPath): "The md5sum file '${md5SumPath}' does not exist"
+        assert Files.isRegularFile(md5SumPath): "The md5sum file '${md5SumPath}' is not a file"
+        assert fileService.fileIsReadable(md5SumPath): "The md5sum file '${md5SumPath}' is not readable"
 
-        String md5sum = md5Sum.text.replaceAll("\n", "").toLowerCase(Locale.ENGLISH)
-        assert md5sum ==~ /^[0-9a-f]{32}$/ : "The md5sum file '${md5Sum}' has not the correct form (/^[0-9a-f]{32}\$/)"
+        String md5sum = Files.readString(md5SumPath).replaceAll("\n", "").toLowerCase(Locale.ENGLISH)
+        assert md5sum: "The md5sum file '${md5SumPath}' is empty"
+        assert md5sum ==~ /^[0-9a-f]{32}$/ : "The md5sum file '${md5SumPath}' has not the correct form (/^[0-9a-f]{32}\$/)"
         return md5sum
     }
 }

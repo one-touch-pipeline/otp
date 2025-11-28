@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RoddyConfigService
 
+import java.nio.file.Files
 import java.nio.file.Path
 
 @Transactional
@@ -42,8 +43,8 @@ class AlignmentQualityOverviewService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#roddyResult.project, 'OTP_READ_ACCESS')")
     byte[] fetchConfigFileContent(RoddyResult roddyResult) {
-        Path configFile = roddyResultWorkFileServiceFactoryService.getService(roddyResult).getConfigFile(roddyResult)
+        Path configPath = roddyResultWorkFileServiceFactoryService.getService(roddyResult).getConfigFile(roddyResult)
 
-        return fileService.fileIsReadable(configFile) ? configFile.bytes : new byte[0]
+        return fileService.fileIsReadable(configPath) ? Files.readAllBytes(configPath) : new byte[0]
     }
 }

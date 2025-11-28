@@ -29,7 +29,6 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import java.util.regex.Pattern
 
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.threadLog
-import static org.springframework.util.Assert.notNull
 
 /**
  * A service to construct paths and messages for logging the status of cluster jobs.
@@ -57,7 +56,7 @@ class JobStatusLoggingService {
      * @return the base directory of the status log file
      */
     String logFileBaseDir(ProcessingStep processingStep) {
-        notNull processingStep, 'No processing step specified.'
+        assert processingStep: 'No processing step specified.'
         return "${configService.loggingRootPath}/${STATUS_LOGGING_BASE_DIR}"
     }
 
@@ -98,7 +97,7 @@ class JobStatusLoggingService {
      * @return a logging message
      */
     String constructMessage(ProcessingStep processingStep, String clusterJobId = null) {
-        notNull processingStep, 'No processing step specified.'
+        assert processingStep: 'No processing step specified.'
         String message = [
                 processingStep.jobDefinition.plan.name,
                 processingStep.nonQualifiedJobClass,
@@ -119,8 +118,8 @@ class JobStatusLoggingService {
      */
     Collection<ClusterJobIdentifier> failedOrNotFinishedClusterJobs(
             final ProcessingStep processingStep, final Collection<ClusterJobIdentifier> clusterJobs) {
-        notNull processingStep
-        notNull clusterJobs
+        assert processingStep
+        assert clusterJobs != null
         def invalidInput = clusterJobs.findAll { it == null || it.clusterJobId == null }
         assert invalidInput == []: "clusterJobs argument contains null values: ${invalidInput}"
         return failedOrNotFinishedClusterJobs2(processingStep, clusterJobs)
@@ -136,8 +135,8 @@ class JobStatusLoggingService {
      */
     Collection<ClusterJobIdentifier> failedOrNotFinishedClusterJobs2(
             final ProcessingStep processingStep, final Collection<ClusterJobIdentifier> clusterJobs) {
-        notNull processingStep
-        notNull clusterJobs
+        assert processingStep
+        assert clusterJobs != null
 
         // OTP-967: try to figure out why processingStep sometimes returns NULL for .jobClass
         // lets try explicitly reconnecting it..
@@ -152,7 +151,7 @@ class JobStatusLoggingService {
             } catch (final FileNotFoundException e) {
                 threadLog?.debug "Cluster job status log file ${logFile} not found."
             }
-            notNull it
+            assert it
             final String expectedLogMessage = constructMessage(processingStep, it.clusterJobId)
             if (!(logFileText =~ /(?:^|\s)${Pattern.quote(expectedLogMessage)}(?:$|\s)/)) {
                 threadLog?.debug "Did not find \"${expectedLogMessage}\" in ${logFile}."

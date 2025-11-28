@@ -57,11 +57,11 @@ class SingleCellMappingFileService {
             fileService.createFileWithContent(mappingFile, "", FileService.OWNER_READ_WRITE_GROUP_READ_FILE_PERMISSION)
         }
 
-        if (!mappingFile.text.contains(value)) {
+        if (!Files.readString(mappingFile).contains(value)) {
             if (!Files.isWritable(mappingFile)) {
                 fileService.setPermission(mappingFile, FileService.OWNER_READ_WRITE_GROUP_READ_FILE_PERMISSION)
             }
-            mappingFile << value << '\n'
+            Files.write(mappingFile, "${value}\n".bytes, StandardOpenOption.APPEND)
         }
         fileService.setPermission(mappingFile, FileService.DEFAULT_FILE_PERMISSION)
     }

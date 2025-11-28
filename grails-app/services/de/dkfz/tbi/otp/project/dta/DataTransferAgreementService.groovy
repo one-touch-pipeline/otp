@@ -142,13 +142,13 @@ class DataTransferAgreementService {
             throw new FileNotFoundException("The DTA document ${dtaDocument?.fileName} was not found.")
         }
 
-        Path file = fileSystemService.remoteFileSystem.getPath(getPathOnRemoteFileSystem(dtaDocument).toString())
+        Path path = fileSystemService.remoteFileSystem.getPath(getPathOnRemoteFileSystem(dtaDocument).toString())
 
-        if (!Files.exists(file)) {
+        if (!Files.exists(path)) {
             throw new FileNotFoundException("The DTA document ${dtaDocument.fileName} was not found.")
         }
 
-        return file.bytes
+        return Files.readAllBytes(path)
     }
 
     /**

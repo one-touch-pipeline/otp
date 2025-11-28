@@ -80,7 +80,7 @@ class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTe
         service.logFileBaseDir(null)
 
         then:
-        thrown(IllegalArgumentException)
+        thrown(AssertionError)
     }
 
     void "test constructLogFileLocation, when processing step is null"() {
@@ -88,7 +88,7 @@ class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTe
         service.constructLogFileLocation(null)
 
         then:
-        thrown(IllegalArgumentException)
+        thrown(AssertionError)
     }
 
     void "test logFileBaseDir"() {
@@ -125,7 +125,7 @@ class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTe
         service.constructMessage(null)
 
         then:
-        thrown(IllegalArgumentException)
+        thrown(AssertionError)
     }
 
     void "test constructMessage, when cluster job ID is not passed"() {

@@ -79,7 +79,7 @@ class ProjectInfoService {
         project.save(flush: true)
         projectInfo.save(flush: true)
 
-        uploadProjectInfoToProjectFolder(projectInfo, path.bytes)
+        uploadProjectInfoToProjectFolder(projectInfo, Files.readAllBytes(path))
 
         return projectInfo
     }
@@ -99,8 +99,8 @@ class ProjectInfoService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     byte[] getProjectInfoContent(ProjectInfo projectInfo) {
         assert projectInfo: "No ProjectInfo given"
-        Path file = getPath(projectInfo)
-        return Files.exists(file) ? file.bytes : [] as byte[]
+        Path path = getPath(projectInfo)
+        return Files.exists(path) ? Files.readAllBytes(path) : [] as byte[]
     }
 
     private Path uploadProjectInfoToProjectFolder(ProjectInfo projectInfo, byte[] content) {

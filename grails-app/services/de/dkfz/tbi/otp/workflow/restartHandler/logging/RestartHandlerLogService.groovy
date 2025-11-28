@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.FileSystem
+import java.nio.file.Files
 import java.nio.file.Path
 
 trait RestartHandlerLogService {
@@ -56,7 +57,7 @@ trait RestartHandlerLogService {
         } else {
             return new LogWithIdentifier(
                     identifier: identifier,
-                    log: file.text
+                    log: Files.readString(file)
             )
         }
 

@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStepService
 
 import java.nio.file.FileSystem
+import java.nio.file.Files
 import java.nio.file.Path
 import java.util.regex.Pattern
 
@@ -81,7 +82,7 @@ abstract class AbstractOtpClusterValidationJob extends AbstractValidationJob {
         }
 
         String expectedLogMessage = jobStatusLoggingFileService.constructMessage(clusterJob.workflowStep, clusterJob.clusterJobId)
-        String logFileText = logFile.text
+        String logFileText = Files.readString(logFile)
         return (logFileText =~ /(?:^|\s)${Pattern.quote(expectedLogMessage)}(?:$|\s)/) ? null :
             "Did not find \"${expectedLogMessage}\" in ${logFile}."
     }

@@ -26,7 +26,9 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 
 import java.nio.file.FileSystem
+import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardOpenOption
 
 class ScriptBuilder {
     ConfigService configService
@@ -139,8 +141,7 @@ class ScriptBuilder {
         Path outDir = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve(this.relativeOutputDir.toString())
 
         try {
-            Path bashScriptPath = fileService.createOrOverwriteScriptOutputFile(outDir, filename)
-            bashScriptPath << content
+            Files.write(fileService.createOrOverwriteScriptOutputFile(outDir, filename), content.bytes, StandardOpenOption.APPEND)
         } catch (IOException e) {
             println "Error while writing bash script: ${e}" // codenarc-disable-line
         }

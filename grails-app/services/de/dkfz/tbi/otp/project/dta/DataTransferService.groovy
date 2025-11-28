@@ -166,13 +166,13 @@ class DataTransferService {
             throw new FileNotFoundException("The transfer document ${transferDocument?.fileName} was not found.")
         }
 
-        Path file = getPathOnRemoteFileSystem(transferDocument)
+        Path path = getPathOnRemoteFileSystem(transferDocument)
 
-        if (!Files.exists(file)) {
+        if (!Files.exists(path)) {
             throw new FileNotFoundException("The transfer document ${transferDocument.fileName} was not found.")
         }
 
-        return file.bytes
+        return Files.readAllBytes(path)
     }
 
     /**

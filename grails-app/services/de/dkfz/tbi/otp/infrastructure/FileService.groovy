@@ -610,9 +610,7 @@ class FileService {
                                String content,
                                Set<PosixFilePermission> filePermission = DEFAULT_FILE_PERMISSION,
                                boolean overwrite = false) {
-        createFileWithContentCommonPartHelper(path, filePermission, overwrite) {
-            path.text = content
-        }
+        createFileWithContent(path, content.bytes, filePermission, overwrite)
     }
 
     /**
@@ -641,7 +639,7 @@ class FileService {
                                Set<PosixFilePermission> filePermission = DEFAULT_FILE_PERMISSION,
                                boolean overwrite = false) {
         createFileWithContentCommonPartHelper(path, filePermission, overwrite) {
-            path.bytes = content
+            Files.write(path, content)
         }
     }
 

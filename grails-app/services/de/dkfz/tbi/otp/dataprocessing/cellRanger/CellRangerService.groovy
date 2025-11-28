@@ -229,15 +229,15 @@ class CellRangerService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#singleCellBamFile.project, 'OTP_READ_ACCESS')")
     byte[] getWebSummaryResultFileContent(SingleCellBamFile singleCellBamFile) throws NoSuchFileException, AccessDeniedException {
-        Path file = singleCellBamFile.mergingWorkPackage.status == CellRangerMergingWorkPackage.Status.FINAL ?
+        Path path = singleCellBamFile.mergingWorkPackage.status == CellRangerMergingWorkPackage.Status.FINAL ?
                 cellRangerLinkFileService.getWebSummaryResultFile(singleCellBamFile) :
                 cellRangerWorkFileService.getWebSummaryResultFile(singleCellBamFile)
-        if (!Files.exists(file)) {
-            throw new NoSuchFileException(file.toAbsolutePath().toString())
+        if (!Files.exists(path)) {
+            throw new NoSuchFileException(path.toAbsolutePath().toString())
         }
-        if (!fileService.fileIsReadable(file)) {
-            throw new AccessDeniedException(file.toAbsolutePath().toString())
+        if (!fileService.fileIsReadable(path)) {
+            throw new AccessDeniedException(path.toAbsolutePath().toString())
         }
-        return file.bytes
+        return Files.readAllBytes(path)
     }
 }

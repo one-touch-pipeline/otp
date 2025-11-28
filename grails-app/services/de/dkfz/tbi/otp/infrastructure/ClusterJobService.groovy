@@ -38,6 +38,7 @@ import de.dkfz.tbi.otp.utils.TimeUtils
 
 import javax.sql.DataSource
 import java.nio.file.FileSystem
+import java.nio.file.Files
 import java.time.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
@@ -223,7 +224,7 @@ class ClusterJobService {
         }
         try {
             FileSystem fs = fileSystemService.remoteFileSystem
-            return fs.getPath(clusterJob.jobLog).text
+            return Files.readString(fs.getPath(clusterJob.jobLog))
         } catch (IOException e) {
             log.error(e.message, e)
             return "Error accessing the file: ${e.message}"

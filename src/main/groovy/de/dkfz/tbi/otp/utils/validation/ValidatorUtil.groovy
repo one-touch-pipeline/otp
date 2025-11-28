@@ -32,7 +32,7 @@ class ValidatorUtil {
      * by providing the methods rejectValue() and reject(),
      * and makes it possible to use the same message codes as when returning strings from the validator.
      */
-    static <T, U>  Closure messageArgs(String propertyName, @ClosureParams(value = FromString, options = "T, U, Closure") Closure validator) {
+    static <T, U> Closure messageArgs(String propertyName, @ClosureParams(value = FromString, options = "T, U") Closure validator) {
         return { T val, U obj, Errors errors ->
             validator.delegate = new ValidatorDelegate(
                     rejectValue.curry(propertyName, obj, val, errors),
@@ -51,10 +51,21 @@ class ValidatorUtil {
     }
 
     static Closure rejectValue = { String propertyName, Object obj, Object val, Errors errors, String message, List args = [] ->
-        errors.rejectValue(propertyName, "${obj.class.simpleName.uncapitalize()}.${propertyName}.${message}", ([propertyName, obj.class.simpleName, val] + args) as Object[], "Field '${propertyName}' with value '${val}' does not pass custom validation")
+        errors.rejectValue(
+                propertyName,
+                "${obj.class.simpleName.uncapitalize()}.${propertyName}.${message}",
+                ([propertyName, obj.class.simpleName, val] + args) as Object[],
+                "Field '${propertyName}' with value '${val}' does not pass custom validation"
+        )
     }
 
-    static Closure reject = { Object obj, Errors errors, String message, List args = [] ->
-        errors.reject("${obj.class.simpleName.uncapitalize()}.${message}", ([obj.class.simpleName] + args) as Object[], "Fields do not pass custom validation")
+    static Closure reject = { Object obj, Errors errors, String message, List<Object> args = [] ->
+        List<Object> allArgs = [obj.class.simpleName]
+        allArgs.addAll(args)
+        errors.reject(
+                "${obj.class.simpleName.uncapitalize()}.${message}",
+                allArgs as Object[],
+                "Fields do not pass custom validation"
+        )
     }
 }
