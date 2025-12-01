@@ -191,8 +191,8 @@ WorkflowRun.withNewTransaction {
         return new WesLog(
                 name: "wes log name",
                 cmd: "COMMAND CMD",
-                startTime: LocalDateTime.now().minusHours(6),
-                endTime: finished ? LocalDateTime.now() : null,
+                startTime: ZonedDateTime.of(LocalDateTime.now().minusHours(6), ZoneId.systemDefault()),
+                endTime: finished ? ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault()) : null,
                 stdout: (("OUTOUT " * 20) + "\n") * 30,
                 stderr: finished == "failed" ? (("ERROR " * 20) + "\n") * 30 : "",
                 exitCode: finished == "" ? null : (finished == "success" ? 0 : 100),

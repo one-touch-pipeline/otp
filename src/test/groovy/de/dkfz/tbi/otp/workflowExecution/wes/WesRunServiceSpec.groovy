@@ -22,20 +22,39 @@
 package de.dkfz.tbi.otp.workflowExecution.wes
 
 import grails.testing.gorm.DataTest
-import spock.lang.Specification
+import grails.testing.services.ServiceUnitTest
+import io.swagger.client.wes.model.State
+import spock.lang.*
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.filestore.FilestoreService
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-class WesRunServiceSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
+import java.nio.file.*
+
+class WesRunServiceSpec extends Specification implements ServiceUnitTest<WesRunService>, DataTest, WorkflowSystemDomainFactory {
 
     @Override
     Class<?>[] getDomainClassesToMock() {
         return [
                 WesRun,
+                WesRunLog,
+                WesLog,
+                WorkflowStep,
         ]
     }
+
+    @TempDir
+    Path tempDir
+
+    @Shared
+    Path reportFilePath
+
+    @Shared
+    Path otherFilePath
 
     void "monitoredRuns, when called, return all WesRun in monitor state checking"() {
         given:
@@ -43,9 +62,6 @@ class WesRunServiceSpec extends Specification implements DataTest, WorkflowSyste
         WesRun wesRun1 = createWesRun([state: WesRun.MonitorState.CHECKING])
         WesRun wesRun2 = createWesRun([state: WesRun.MonitorState.CHECKING])
         createWesRun([state: WesRun.MonitorState.FINISHED])
-
-        and: 'service'
-        WesRunService service = new WesRunService()
 
         when:
         List<WesRun> result = service.monitoredRuns()
@@ -62,13 +78,217 @@ class WesRunServiceSpec extends Specification implements DataTest, WorkflowSyste
         createWesRun([state: WesRun.MonitorState.CHECKING])
         createWesRun([state: WesRun.MonitorState.FINISHED])
 
-        and: 'service'
-        WesRunService service = new WesRunService()
-
         when:
         List<WesRun> result = service.allByWorkflowStep(workflowStep)
 
         then:
         TestCase.assertContainSame(result, [wesRun1, wesRun2])
+    }
+
+    void "getReportPath, when report file exists, returns correct path"() {
+        given:
+        WesRun wesRun = createWesRun([subPath: "subdir"])
+        Path mockWorkFolder = Paths.get("/work/folder")
+        Path mockSubPath = mockWorkFolder.resolve("subdir")
+        reportFilePath = mockSubPath.resolve("report-20252034.html")
+
+        and: 'mocked services'
+        service.filestoreService = Mock(FilestoreService) {
+            getWorkFolderPath(_) >> mockWorkFolder
+        }
+        service.fileService = Mock(FileService) {
+            findFileInPath(mockSubPath, WesRunService.MATCHER_REPORT_FILE) >> reportFilePath
+        }
+
+        when:
+        Path result = service.getReportPath(wesRun)
+
+        then:
+        result == reportFilePath
+    }
+
+    void "getReportFileContent, when valid path and readable file, returns expected content"() {
+        given:
+        WesRun wesRun = createWesRun([subPath: "subdir"])
+        String expectedContent = "<html>Report content</html>"
+
+        and: 'create mock report file with expected content'
+        Path mockWorkFolder = tempDir.resolve("workFolder")
+        Path mockSubPath = mockWorkFolder.resolve("subdir")
+        reportFilePath = mockSubPath.resolve("report-20252034.html")
+        // Create the report file
+        CreateFileHelper.createFile(reportFilePath, expectedContent)
+        // Creates other file
+        otherFilePath = mockSubPath.resolve("other.html")
+        CreateFileHelper.createFile(otherFilePath)
+
+        and: 'mock services for successful file operations'
+        service.filestoreService = Mock(FilestoreService) {
+            1 * getWorkFolderPath(_) >> mockWorkFolder
+        }
+        service.fileService = Mock(FileService) {
+            findFileInPath(mockSubPath, WesRunService.MATCHER_REPORT_FILE) >> reportFilePath
+            fileIsReadable(reportFilePath) >> true
+        }
+
+        when:
+        byte[] result = service.getReportFileContent(wesRun)
+
+        then:
+        result == expectedContent.bytes
+    }
+
+    @Unroll
+    void "getReportFileContent, when #scenario, throws #exceptionClass.simpleName with correct message"() {
+        given:
+        WesRun wesRun = createWesRun([id: 123L, subPath: "test-subdir"])
+
+        and: 'mock the file structure'
+        Path mockWorkFolder = tempDir.resolve("workFolder")
+        Path mockSubPath = mockWorkFolder.resolve("subdir")
+
+        reportFilePath = mockSubPath.resolve("report-20252034.html")
+        CreateFileHelper.createFile(reportFilePath)
+
+        otherFilePath = mockSubPath.resolve("other.html")
+
+        and: 'mock services for file operations'
+        service.filestoreService = Mock(FilestoreService) {
+            1 * getWorkFolderPath(_) >> mockWorkFolder
+        }
+        service.fileService = Mock(FileService) {
+            1 * findFileInPath(_ as Path, WesRunService.MATCHER_REPORT_FILE) >> reportFileClosure()
+            (0..1) * fileIsReadable(reportFilePath as Path) >> readable
+        }
+
+        when:
+        service.getReportFileContent(wesRun)
+
+        then:
+        FileSystemException ex = thrown()
+        ex.class == exceptionClass
+        ex.message.contains("Report file for 123")
+        ex.message.contains(exceptionTextClosure())
+
+        where:
+        scenario                       || exceptionClass        | readable | reportFileClosure  | exceptionTextClosure
+        "report file not found"        || NoSuchFileException   | true     | { null }           | { "not found: test-subdir" }
+        "wrong file found"             || NoSuchFileException   | true     | { otherFilePath }  | { "not found: ${otherFilePath}" }
+        "file exists but not readable" || AccessDeniedException | false    | { reportFilePath } | { "found but not readable: ${reportFilePath}" }
+    }
+
+    void "getById, when WesRun exists, returns correct WesRun"() {
+        given:
+        WesRun wesRun = createWesRun([id: 123L])
+
+        when:
+        WesRun result = service.getById(123L)
+
+        then:
+        result == wesRun
+    }
+
+    void "getById, when WesRun does not exist, returns null"() {
+        when:
+        WesRun result = service.getById(999L)
+
+        then:
+        result == null
+    }
+
+    @Unroll
+    void "hasReports, when wesRunLog state is #state, returns #expected"() {
+        given:
+        WesRunLog wesRunLog = createWesRunLog([state: state])
+        WesRun wesRun = createWesRun([wesRunLog: wesRunLog])
+
+        when:
+        boolean result = service.hasReports(wesRun)
+
+        then:
+        result == expected
+
+        where:
+        state                     || expected
+        State.COMPLETE            || true
+        State.EXECUTOR_ERROR      || true
+        State.SYSTEM_ERROR        || true
+        State.RUNNING             || false
+        State.PAUSED              || false
+        State.CANCELED            || false
+        State.INITIALIZING        || false
+        State.QUEUED              || false
+        State.UNKNOWN             || false
+    }
+
+    void "hasReports, when wesRunLog is null, returns false"() {
+        given:
+        WesRun wesRun = createWesRun([wesRunLog: null])
+
+        when:
+        boolean result = service.hasReports(wesRun)
+
+        then:
+        result == false
+    }
+
+    void "getCumulatedWesRunsStatus, when empty list provided, returns empty string"() {
+        when:
+        String result = service.getCumulatedWesRunsStatus([])
+
+        then:
+        result == ""
+    }
+
+    @Unroll
+    void "getCumulatedWesRunsStatus, with single WesRun in #monitorStatus/#wesRunState, returns #expected"() {
+        given:
+        List<WesRunStateDto> wesRunStates = [new WesRunStateDto(monitorStatus, wesRunState)]
+
+        when:
+        String result = service.getCumulatedWesRunsStatus(wesRunStates)
+
+        then:
+        result == expected
+
+        where:
+        monitorStatus                    | wesRunState           || expected
+        WesRun.MonitorState.CHECKING     | State.RUNNING         || "CHECKING"
+        WesRun.MonitorState.FINISHED     | State.COMPLETE        || "FINISHED/COMPLETE"
+        WesRun.MonitorState.FINISHED     | State.EXECUTOR_ERROR  || "FINISHED/EXECUTOR_ERROR"
+        WesRun.MonitorState.FINISHED     | null                  || "FINISHED/UNKNOWN"
+    }
+
+    void "getCumulatedWesRunsStatus, with multiple WesRuns, returns highest priority status"() {
+        given:
+        List<WesRunStateDto> wesRunStates = [
+            new WesRunStateDto(WesRun.MonitorState.FINISHED, State.COMPLETE),       // Priority: 1 + 0 = 1
+            new WesRunStateDto(WesRun.MonitorState.CHECKING, State.RUNNING),        // Priority: 3 + 0 = 3 (highest)
+            new WesRunStateDto(WesRun.MonitorState.FINISHED, State.EXECUTOR_ERROR), // Priority: 1 + 1 = 2
+        ]
+
+        when:
+        String result = service.getCumulatedWesRunsStatus(wesRunStates)
+
+        then:
+        result == "CHECKING"  // CHECKING has highest priority (3), and doesn't show state for checking
+    }
+
+    void "saveWorkflowRun, when called, creates WesRun with correct properties"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep()
+        String wesIdentifier = "wes-run-123"
+        String subPath = "workflow/run/path"
+
+        when:
+        service.saveWorkflowRun(workflowStep, wesIdentifier, subPath)
+
+        then:
+        WesRun wesRun = WesRun.findByWesIdentifier(wesIdentifier)
+        wesRun != null
+        wesRun.workflowStep == workflowStep
+        wesRun.wesIdentifier == wesIdentifier
+        wesRun.subPath == subPath
+        wesRun.state == WesRun.MonitorState.CHECKING
     }
 }

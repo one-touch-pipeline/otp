@@ -26,18 +26,19 @@ import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
 import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
+import io.swagger.client.wes.model.State
 import org.hibernate.*
 import org.hibernate.criterion.Order
 import org.hibernate.sql.JoinType
 
 import de.dkfz.tbi.otp.SqlUtil
 import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.infrastructure.ClusterJobDetailService
-import de.dkfz.tbi.otp.infrastructure.ClusterJobService
+import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.workflowExecution.wes.WesRun
+import de.dkfz.tbi.otp.workflowExecution.wes.WesRunService
+import de.dkfz.tbi.otp.workflowExecution.wes.WesRunStateDto
 
 import javax.sql.DataSource
 import java.time.LocalDateTime
@@ -52,6 +53,7 @@ class WorkflowRunService {
     ConfigFragmentService configFragmentService
     ConfigService configService
     WorkflowStepService workflowStepService
+    WesRunService wesRunService
 
     public static final int PESSIMISTIC_WRITE_TIME_OUT = 10000
 
@@ -362,8 +364,9 @@ class WorkflowRunService {
                             convertDateToLocalDateTime(step.lastUpdated)),
                     error                     : step.workflowError,
                     clusterJobs               : collectClusterJobDetails(clusterJobs),
-                    cummulatedClusterJobsState: getCumulatedClusterJobsStatus(clusterJobs.collect { new ClusterJobStateDto(it.checkStatus, it.exitStatus) }),
+                    cumulatedClusterJobsState: getCumulatedClusterJobsStatus(clusterJobs.collect { new ClusterJobStateDto(it.checkStatus, it.exitStatus) }),
                     wesRuns                   : collectWesRunDetails(wesRuns),
+                    cumulatedWesRunsState    : wesRunService.getCumulatedWesRunsStatus(wesRuns.collect { new WesRunStateDto(it.state, it.wesRunLog?.state) }),
                     hasLogs                   : !workflowLogService.findAllByWorkflowStepInCorrectOrder(step).empty,
                     obsolete                  : step.obsolete,
                     previousStepId            : workflowStepService.getPreviousRunningWorkflowStep(step)?.id,
@@ -391,9 +394,8 @@ class WorkflowRunService {
             [
                     id           : wesRun.id,
                     wesIdentifier: wesRun.wesIdentifier,
-                    state        : wesRun.wesRunLog?.state ?: wesRun.state,
-                    subPath      : wesRun.subPath,
-                    logName      : wesRun.wesRunLog?.runLog?.name,
+                    state        : wesRun.wesRunLog?.state ?: State.UNKNOWN,
+                    hasReport    : wesRunService.hasReports(wesRun),
                     exitCode     : wesRun.wesRunLog?.runLog?.exitCode ?: "-",
             ]
         } as List<Map<String, Object>>

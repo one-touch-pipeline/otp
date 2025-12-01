@@ -124,7 +124,7 @@
                     <col class="columnColors">
                     <col class="columnProperty">
                     <col class="columnValue">
-                    <g:each in="${wesRun.wesRunLog.taskLogs}" var="log">
+                    <g:each in="${wesRun.wesRunLog?.taskLogs}" var="log">
                         <tr>
                             <td></td>
                             <td class="pl-3"><g:message code="wesRun.task"/></td>
@@ -134,7 +134,7 @@
                             </td>
                         </tr>
                     </g:each>
-                    <g:if test="${!wesRun.wesRunLog.taskLogs}">
+                    <g:if test="${!wesRun.wesRunLog?.taskLogs}">
                         <tr>
                             <td></td>
                             <td class="pl-3">${NA}</td>

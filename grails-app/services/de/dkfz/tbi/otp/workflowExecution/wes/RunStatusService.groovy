@@ -26,14 +26,15 @@ import io.swagger.client.wes.model.State
 
 class RunStatusService {
 
-    private static final List<State> END_STATES = [
-            State.COMPLETE,
-            State.EXECUTOR_ERROR,
-            State.SYSTEM_ERROR,
-            State.CANCELED,
+    // Weskit run exit states with priorities
+    static final Map<State, Integer> END_STATES = [
+            (State.COMPLETE)      : 0,
+            (State.CANCELED)      : 1,
+            (State.EXECUTOR_ERROR): 1,
+            (State.SYSTEM_ERROR)  : 1,
     ].asImmutable()
 
     boolean isInEndState(RunStatus runStatus) {
-        return END_STATES.contains(runStatus.state)
+        return END_STATES.containsKey(runStatus.state)
     }
 }

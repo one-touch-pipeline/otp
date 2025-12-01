@@ -120,8 +120,7 @@ $(() => {
         <th></th>
         <th>WorkflowExecutionSystem identifier</th>
         <th>State</th>
-        <th>Subpath</th>
-        <th>Log name</th>
+        <th>Report</th>
         <th>Exit code</th>
       </tr>
     </thead>
@@ -142,8 +141,13 @@ $(() => {
   })}
                        </td>
                        <td>${wesRun.state}</td>
-                       <td>${wesRun.subPath}</td>
-                       <td>${wesRun.logName}</td>
+                       <td>${wesRun.hasReport ? $.otp.createLinkMarkup({
+    text: 'WESkit Report',
+    controller: 'wesRun',
+    action: 'showReport',
+    id: wesRun.id
+  }) : ''}
+                       </td>
                        <td>${wesRun.exitCode}</td>
                      </tr>`;
     });
@@ -208,10 +212,27 @@ $(() => {
     return `<div title="${row.state}" class="${cssClass} small"></div> ${renderStepClusterJobsStatusCircle(row)}`;
   }
 
+  /**
+   * Find the state of an external job (cluster job or WES job) if existing.
+   * For WES job, prioritizes states in order: error/failing -> running -> pending -> success.
+   *
+   * @param row with workflow step data
+   * @returns {string} the state
+   */
+  function getCumulatedState(row) {
+    let state = '';
+    if (row.wesRuns.length > 0) {
+      state = row.cumulatedWesRunsState;
+    } else if (row.clusterJobs.length > 0) {
+      state = row.cumulatedClusterJobsState;
+    }
+    return state;
+  }
+
   function renderStepClusterJobsStatusCircle(row) {
-    if (row.clusterJobs.length > 0) {
-      const state = row.cummulatedClusterJobsState;
-      const cssClass = statusToClassName(state);
+    const state = getCumulatedState(row);
+    if (state) {
+      const cssClass = statusToClassName(state.split('/').pop());
       return `<div title="${state} is the congregated state of the cluster/WorkflowExecutionSystem jobs" 
                    class="ml-1 ${cssClass} small"></div>`;
     }
@@ -219,8 +240,9 @@ $(() => {
   }
 
   let lastStepFailed = false;
+  const $stepsTable = $('#steps');
 
-  const table = $('#steps').DataTable({
+  const table = $stepsTable.DataTable({
     columns: [
       {
         data(row, type) {
@@ -236,7 +258,7 @@ $(() => {
           if (type === 'sort') {
             return null;
           }
-          if (!row.error && !row.clusterJobs.length && !row.wes && !row.hasLogs) {
+          if (!row.error && !row.clusterJobs.length && !row.wesRuns.length && !row.hasLogs) {
             return '';
           }
           return '<button class=\'btn btn-xs btn-info details-control\'>' +
@@ -262,7 +284,7 @@ $(() => {
             return null;
           }
 
-          const runState = $('#steps')
+          const runState = $stepsTable
             .data('wf-run-state');
           const buttonsDisabled = (!lastStepFailed ||
           runState === 'RESTARTED' ||
@@ -288,7 +310,7 @@ $(() => {
       url: $.otp.createLink({
         controller: 'workflowRunDetails',
         action: 'data',
-        parameters: { 'workflowRun.id': $('#steps').data('id') }
+        parameters: { 'workflowRun.id': $stepsTable.data('id') }
       }),
       dataSrc(json) {
         if (json.data && json.data[0] && json.data[0].state === 'FAILED') {
@@ -300,11 +322,10 @@ $(() => {
   });
 
   function createLinkParametersForNavigation() {
-    const stepsTable = $('#steps');
-    const workflowRunId = stepsTable.data('wf-run-id');
-    const workflowId = stepsTable.data('wf-id');
-    const state = stepsTable.data('state');
-    const name = stepsTable.data('name');
+    const workflowRunId = $stepsTable.data('wf-run-id');
+    const workflowId = $stepsTable.data('wf-id');
+    const state = $stepsTable.data('state');
+    const name = $stepsTable.data('name');
 
     return {
       'workflowRun.id': workflowRunId,
@@ -346,11 +367,11 @@ $(() => {
       $('#steps tbody tr:first-child td .details-control').trigger('click');
     }
 
-    // expand to show the clusterJobs if exist
-    $('#steps tbody tr.even, #steps tbody tr.odd').each((idx) => {
-      const row = table.row(idx);
+    // expand to show the clusterJobs/WesRun if exist
+    $('#steps tbody tr.even, #steps tbody tr.odd').each(function () {
+      const row = table.row(this);
       const rowData = row.data();
-      if (rowData && rowData.clusterJobs.length > 0) {
+      if (rowData && (rowData.clusterJobs.length > 0 || rowData.wesRuns.length > 0)) {
         showChildTable($(this), row);
       }
     });

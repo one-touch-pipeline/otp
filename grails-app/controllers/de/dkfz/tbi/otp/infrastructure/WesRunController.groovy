@@ -21,19 +21,30 @@
  */
 package de.dkfz.tbi.otp.infrastructure
 
+import grails.validation.Validateable
+import org.apache.http.Consts
+import org.apache.http.entity.ContentType
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRunService
 import de.dkfz.tbi.otp.workflowExecution.wes.*
+
+import javax.servlet.http.HttpServletResponse
+import java.nio.file.AccessDeniedException
+import java.nio.file.NoSuchFileException
 
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
 class WesRunController {
+    WorkflowRunService workflowRunService
+    WesRunService wesRunService
 
     static final String NOT_AVAILABLE = "N/A"
 
     static allowedMethods = [
-            show    : "GET",
-            showTask: "GET",
+            show      : "GET",
+            showTask  : "GET",
+            showReport: "GET",
     ]
 
     def show(NavigationCommand navigationCommand) {
@@ -56,5 +67,39 @@ class WesRunController {
                 nav   : navigationCommand,
                 NA    : NOT_AVAILABLE,
         ]
+    }
+
+    /**
+     * Render the report file of a WES run.
+     * @param reportCommand the command object containing the WES run ID
+     * @return the content of the report file
+     */
+    def showReport(WesRunReportCommand reportCommand) {
+        WesRun wesRun = wesRunService.getById(reportCommand.id)
+        if (!wesRun) {
+            log.error("WesRun with id ${reportCommand.id} not found")
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "WesRun not found")
+            return
+        }
+
+        try {
+            byte[] content = wesRunService.getReportFileContent(wesRun)
+            render(file: content, contentType: ContentType.TEXT_HTML.mimeType, encoding: Consts.UTF_8)
+        } catch (NoSuchFileException e) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Report file not found")
+        } catch (AccessDeniedException e) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied to show report file")
+        }
+    }
+}
+
+/**
+ * Command object for WES run report requests.
+ */
+class WesRunReportCommand implements Validateable {
+    Long id
+
+    static constraints = {
+        id(nullable: false)
     }
 }
