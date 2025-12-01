@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.utils.MessageSourceService
+import de.dkfz.tbi.otp.utils.SystemUserService
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.workflow.WorkflowCreateState
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
@@ -194,6 +195,12 @@ class FastqImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSch
                 notificationCreator                  : Mock(NotificationCreator),
                 samplePairDeciderService             : Mock(SamplePairDeciderService),
                 workflowSystemService                : Mock(WorkflowSystemService),
+                systemUserService                    : Mock(SystemUserService) {
+                    _ * useSystemUserAsOperator(_) >> { Closure closure ->
+                        return closure.call()
+                    }
+                    0 * _
+                },
         ])
     }
 }

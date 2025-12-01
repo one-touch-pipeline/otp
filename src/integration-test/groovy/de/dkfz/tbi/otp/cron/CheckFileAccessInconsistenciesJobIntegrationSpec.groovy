@@ -39,6 +39,7 @@ import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.MessageSourceService
+import de.dkfz.tbi.otp.utils.SystemUserService
 
 @Rollback
 @Integration
@@ -119,6 +120,12 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
                             _ * getMessageInternal("projectUser.notification.fileAccessChange.body.removed.cron", [], _) >> "File access for project removed body"
                         }
                 ),
+                systemUserService      : Mock(SystemUserService) {
+                    accessCount * useSystemUserAsOperator(_ as Closure) >> { Closure c ->
+                        c.call()
+                    }
+                    0 * _
+                },
         ])
 
         when:
@@ -247,6 +254,12 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
                             _ * getMessageInternal("projectUser.notification.fileAccessChange.body.removed.cron", [], _) >> "File access for project ${project.name} removed"
                         }
                 ),
+                systemUserService      : Mock(SystemUserService) {
+                    1 * useSystemUserAsOperator(_ as Closure) >> { Closure c ->
+                        c.call()
+                    }
+                    0 * _
+                },
         ])
 
         when:

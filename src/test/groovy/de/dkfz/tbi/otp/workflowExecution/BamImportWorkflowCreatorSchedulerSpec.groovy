@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.utils.MessageSourceService
+import de.dkfz.tbi.otp.utils.SystemUserService
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 import de.dkfz.tbi.otp.workflow.WorkflowCreateState
 import de.dkfz.tbi.otp.workflow.bamImport.BamImportInitializationService
@@ -196,6 +197,12 @@ class BamImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSched
                 notificationCreator           : Mock(NotificationCreator),
                 workflowSystemService         : Mock(WorkflowSystemService),
                 samplePairDeciderService      : Mock(SamplePairDeciderService),
+                systemUserService             : Mock(SystemUserService) {
+                    _ * useSystemUserAsOperator(_) >> { Closure closure ->
+                        return closure.call()
+                    }
+                    0 * _
+                },
         ])
     }
 }

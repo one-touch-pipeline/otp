@@ -36,7 +36,7 @@ import de.dkfz.tbi.otp.security.user.DepartmentService
 import de.dkfz.tbi.otp.security.user.DeputyRelationService
 import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.utils.ProcessOutput
-import de.dkfz.tbi.otp.utils.SystemUserUtils
+import de.dkfz.tbi.otp.utils.SystemUserService
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
@@ -62,6 +62,9 @@ class UpdateDepartmentHeadsJob extends AbstractScheduledJob {
 
     @Autowired
     DeputyRelationService deputyRelationService
+
+    @Autowired
+    SystemUserService systemUserService
 
     @Override
     boolean isAdditionalRunConditionMet() {
@@ -97,7 +100,7 @@ class UpdateDepartmentHeadsJob extends AbstractScheduledJob {
             return
         }
 
-        SystemUserUtils.useSystemUser {
+        systemUserService.useSystemUserAsOperator {
             departmentService.updateDepartments(departmentCommands)
             deputyRelationService.cleanUpDeputyRelations()
         }

@@ -27,23 +27,16 @@ import org.codehaus.groovy.runtime.typehandling.GroovyCastException
 import org.grails.web.json.JSONArray
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
-import de.dkfz.tbi.otp.security.AuditLogService
-import de.dkfz.tbi.otp.security.Department
-import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.security.UserAndRoles
-import de.dkfz.tbi.otp.security.user.DepartmentService
-import de.dkfz.tbi.otp.security.user.DeputyRelationService
-import de.dkfz.tbi.otp.security.user.UserService
+import de.dkfz.tbi.otp.security.*
+import de.dkfz.tbi.otp.security.user.*
 import de.dkfz.tbi.otp.utils.*
 
-import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.COST_CENTER_KEY_NAME
-import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.ORGANIZATIONAL_UNIT_KEY_NAME
-import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.DEPARTMENT_WITH_ALL_INFO_SCRIPT
-import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.DEPARTMENT_HEAD_KEY_NAME
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
 @Rollback
 @Integration
@@ -234,14 +227,20 @@ ${jsonLiteral(departments[0])}
     private UpdateDepartmentHeadsJob createJob(String returnJSON) {
         return new UpdateDepartmentHeadsJob([
                 processingOptionService: new ProcessingOptionService(),
-                departmentService    : new DepartmentService(auditLogService: Mock(AuditLogService) {
+                departmentService      : new DepartmentService(auditLogService: Mock(AuditLogService) {
                     _ * logAction(_, _) >> _
                 }),
-                remoteShellHelper    : Mock(RemoteShellHelper) {
+                remoteShellHelper      : Mock(RemoteShellHelper) {
                     1 * executeCommandReturnProcessOutput(_) >> { return new ProcessOutput(returnJSON, "", 0) }
                     0 * executeCommandReturnProcessOutput(_)
                 },
-                deputyRelationService: Mock(DeputyRelationService),
+                deputyRelationService  : Mock(DeputyRelationService),
+                systemUserService      : Mock(SystemUserService) {
+                    _ * useSystemUserAsOperator(_) >> { Closure closure ->
+                        return closure.call()
+                    }
+                    0 * _
+                },
         ])
     }
 }

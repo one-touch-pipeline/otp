@@ -35,7 +35,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.utils.MessageSourceService
-import de.dkfz.tbi.otp.utils.SystemUserUtils
+import de.dkfz.tbi.otp.utils.SystemUserService
 import de.dkfz.tbi.otp.workflow.WorkflowCreateState
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 import de.dkfz.tbi.otp.workflowExecution.decider.DeciderResult
@@ -59,6 +59,9 @@ abstract class AbstractWorkflowCreatorScheduler {
 
     @Autowired
     SamplePairDeciderService samplePairDeciderService
+
+    @Autowired
+    SystemUserService systemUserService
 
     @Autowired
     WorkflowSystemService workflowSystemService
@@ -148,7 +151,7 @@ abstract class AbstractWorkflowCreatorScheduler {
         }.findAll {
             it.seqType in seqTypes
         }
-        SystemUserUtils.useSystemUser {
+        systemUserService.useSystemUserAsOperator {
             samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages)
         }
         log.debug("  sample pair creation finished for ${count} datafiles after: ${System.currentTimeMillis() - timeSamplePairs}ms")

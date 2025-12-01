@@ -60,6 +60,9 @@ class JobScheduler {
     NotificationCreator notificationCreator
 
     @Autowired
+    SystemUserService systemUserService
+
+    @Autowired
     AutoRestartHandlerService autoRestartHandlerService
 
     @Autowired
@@ -116,8 +119,10 @@ class JobScheduler {
         log.debug("Start job: ${workflowStep.displayInfo()}")
         logService.addSimpleLogEntry(workflowStep, "Start")
         Job job = applicationContext.getBean(workflowStep.beanName, Job)
-        ExecutedCommandLogCallbackThreadLocalHolder.withCommandLogCallback(new WorkflowStepCommandCallback(logService, workflowStep)) {
-            job.execute(workflowStep)
+        systemUserService.useSystemUserAsAdmin {
+            ExecutedCommandLogCallbackThreadLocalHolder.withCommandLogCallback(new WorkflowStepCommandCallback(logService, workflowStep)) {
+                job.execute(workflowStep)
+            }
         }
         log.debug("Finish job: ${workflowStep.displayInfo()}")
         logService.addSimpleLogEntry(workflowStep, "End")

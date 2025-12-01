@@ -21,15 +21,17 @@
  */
 package de.dkfz.tbi.otp.utils
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.security.InsufficientRightsException
 import de.dkfz.tbi.otp.security.Role
@@ -37,18 +39,18 @@ import de.dkfz.tbi.otp.utils.exceptions.SecurityContextAlreadyExistsException
 
 @Rollback
 @Integration
-class SystemUserUtilsIntegrationSpec extends Specification implements UserDomainFactory {
+class SystemUserServiceIntegrationSpec extends Specification implements UserDomainFactory {
 
-    void "useSystemUser, if called, it use the system user"() {
+    protected String userName
+
+    protected SystemUserService systemUserService
+
+    void "useSystemUserAsOperator, if called, it use the system user"() {
         given:
-        String userName = "systemuser ${nextId}"
-        createUser([
-                username: userName,
-        ])
-        findOrCreateProcessingOption(ProcessingOption.OptionName.OTP_SYSTEM_USER, userName)
+        setupData()
 
         expect:
-        SystemUserUtils.useSystemUser {
+        systemUserService.useSystemUserAsOperator {
             Authentication authentication = SecurityContextHolder.context.authentication
             assert authentication
             assert authentication.name == userName
@@ -59,17 +61,34 @@ class SystemUserUtilsIntegrationSpec extends Specification implements UserDomain
         assert !SecurityContextHolder.context.authentication
     }
 
-    void "useUser, if called, it use the given system user"() {
+    void "useSystemUserAsAdmin, if called, it use the system user"() {
         given:
-        String userName = "systemUser ${nextId}"
+        setupData()
 
         expect:
-        SystemUserUtils.useUser(userName) {
+        systemUserService.useSystemUserAsAdmin {
             Authentication authentication = SecurityContextHolder.context.authentication
             assert authentication
             assert authentication.name == userName
             assert authentication.authorities.size() == 1
-            assert authentication.authorities.first().role == Role.ROLE_OPERATOR
+            assert authentication.authorities.first().role == Role.ROLE_ADMIN
+            true
+        }
+        assert !SecurityContextHolder.context.authentication
+    }
+
+    void "useUser, if called, it use the given system user with given role"() {
+        given:
+        setupData()
+        String role = "role_${nextId}"
+
+        expect:
+        systemUserService.useUser(userName, role) {
+            Authentication authentication = SecurityContextHolder.context.authentication
+            assert authentication
+            assert authentication.name == userName
+            assert authentication.authorities.size() == 1
+            assert authentication.authorities.first().role == role
             true
         }
         assert !SecurityContextHolder.context.authentication
@@ -77,12 +96,15 @@ class SystemUserUtilsIntegrationSpec extends Specification implements UserDomain
 
     void "useUser, if called and a security context exist, then fail"() {
         given:
-        String userName = "systemUser ${nextId}"
-        UserDetails userDetails = new org.springframework.security.core.userdetails.User(userName, "", [])
+        setupData()
+        String role = "role_${nextId}"
+
+        and:
+        UserDetails userDetails = new User(userName, "", [])
         SecurityContextHolder.context.authentication = new UsernamePasswordAuthenticationToken(userDetails, null, [])
 
         when:
-        SystemUserUtils.useUser(userName) {
+        systemUserService.useUser(userName, role) {
             throw new InsufficientRightsException("should not be reached")
         }
 
@@ -91,5 +113,15 @@ class SystemUserUtilsIntegrationSpec extends Specification implements UserDomain
 
         cleanup:
         SecurityContextHolder.clearContext()
+    }
+
+    void setupData() {
+        userName = "user ${nextId}"
+        createUser([
+                username: userName,
+        ])
+        findOrCreateProcessingOption(ProcessingOption.OptionName.OTP_SYSTEM_USER, userName)
+        systemUserService = new SystemUserService()
+        systemUserService.processingOptionService = new ProcessingOptionService()
     }
 }

@@ -35,7 +35,7 @@ import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.MessageSourceService
-import de.dkfz.tbi.otp.utils.SystemUserUtils
+import de.dkfz.tbi.otp.utils.SystemUserService
 
 @CompileDynamic
 @Component
@@ -64,6 +64,9 @@ class CheckFileAccessInconsistenciesJob extends AbstractScheduledJob {
 
     @Autowired
     UserProjectRoleService userProjectRoleService
+
+    @Autowired
+    SystemUserService systemUserService
 
     @Autowired
     MessageSourceService messageSourceService
@@ -110,7 +113,7 @@ class CheckFileAccessInconsistenciesJob extends AbstractScheduledJob {
 
             // if the user has no file access in LDAP, but has it in OTP, and there has been no request to change it, set it to false and send a notification
             if (fileAccessInOtp && !fileAccessInLdap && !userProjectRole.fileAccessChangeRequested) {
-                SystemUserUtils.useSystemUser {
+                systemUserService.useSystemUserAsOperator {
                     userProjectRoleService.setAccessToFiles(userProjectRole, false, true)
                     notifyUserAboutFileAccessChangeThroughCron(userProjectRole)
                 }
@@ -138,9 +141,9 @@ class CheckFileAccessInconsistenciesJob extends AbstractScheduledJob {
         String subject = messageSourceService.createMessage("projectUser.notification.fileAccessChange.subject.removed", [projectName: project.name])
 
         String body = messageSourceService.createMessage("projectUser.notification.fileAccessChange.body.removed.cron", [
-                username                  : user.realName,
-                projectName               : project.name,
-                supportTeamSalutation     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
+                username             : user.realName,
+                projectName          : project.name,
+                supportTeamSalutation: processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
         ])
         mailHelperService.saveMail(subject, body, [user.email])
     }
