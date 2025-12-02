@@ -63,11 +63,11 @@ class RnaAlignmentWorkflowSpec extends Specification implements RoddyRnaFactory,
                 RnaAlignmentExecuteJob,
                 RnaAlignmentValidationJob,
                 RnaAlignmentParseJob,
-                RoddyAlignmentCheckQcJob,
                 RnaAlignmentCleanUpJob,
                 SetCorrectPermissionJob,
                 CalculateSizeJob,
                 RnaAlignmentLinkJob,
+                RoddyAlignmentCheckQcJob,
                 RoddyAlignmentFinishJob,
         ]
     }

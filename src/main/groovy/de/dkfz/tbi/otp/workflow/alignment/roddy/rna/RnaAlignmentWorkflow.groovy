@@ -57,11 +57,11 @@ class RnaAlignmentWorkflow extends AlignmentWorkflow implements LinearWorkflow {
                 RnaAlignmentExecuteJob,
                 RnaAlignmentValidationJob,
                 RnaAlignmentParseJob,
-                RoddyAlignmentCheckQcJob,
                 RnaAlignmentCleanUpJob,
                 SetCorrectPermissionJob,
                 CalculateSizeJob,
                 RnaAlignmentLinkJob,
+                RoddyAlignmentCheckQcJob,
                 RoddyAlignmentFinishJob,
         ]
     }

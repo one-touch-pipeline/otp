@@ -56,11 +56,11 @@ class WgbsWorkflow extends PanCancerWorkflow {
                 WgbsExecuteJob,
                 WgbsValidationJob,
                 WgbsParseJob,
-                RoddyAlignmentCheckQcJob,
                 PanCancerCleanUpJob,
                 SetCorrectPermissionJob,
                 CalculateSizeJob,
                 WgbsLinkJob,
+                RoddyAlignmentCheckQcJob,
                 RoddyAlignmentFinishJob,
         ]
     }

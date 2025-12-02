@@ -59,11 +59,11 @@ class PanCancerWorkflow extends AlignmentWorkflow implements LinearWorkflow {
                 PanCancerExecuteJob,
                 PanCancerValidationJob,
                 PanCancerParseJob,
-                RoddyAlignmentCheckQcJob,
                 PanCancerCleanUpJob,
                 SetCorrectPermissionJob,
                 CalculateSizeJob,
                 PanCancerLinkJob,
+                RoddyAlignmentCheckQcJob,
                 RoddyAlignmentFinishJob,
         ]
     }
