@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.alignment.RoddyBamFileNames
 import de.dkfz.tbi.otp.ngsdata.FastqFile
+import de.dkfz.tbi.otp.workflow.alignment.AlignmentFragmentJob
 import de.dkfz.tbi.otp.workflow.alignment.roddy.*
 import de.dkfz.tbi.otp.workflow.jobs.*
 
@@ -54,7 +55,7 @@ class RnaAlignmentWorkflowSpec extends Specification implements RoddyRnaFactory,
     void "getJobList, should return all RnaAlignmentJob bean names in correct order"() {
         expect:
         rnaAlignmentWorkflow.jobList == [
-                RoddyAlignmentFragmentJob,
+                AlignmentFragmentJob,
 //                RnaAlignmentCheckFragmentKeysJob,
                 RoddyAlignmentConditionalFailJob,
                 AttachUuidJob,

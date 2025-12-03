@@ -31,7 +31,6 @@ import de.dkfz.tbi.otp.workflow.alignment.*
 import de.dkfz.tbi.otp.workflow.alignment.roddy.RoddyAlignmentCheckQcJob
 import de.dkfz.tbi.otp.workflow.alignment.roddy.RoddyAlignmentConditionalFailJob
 import de.dkfz.tbi.otp.workflow.alignment.roddy.RoddyAlignmentFinishJob
-import de.dkfz.tbi.otp.workflow.alignment.roddy.RoddyAlignmentFragmentJob
 import de.dkfz.tbi.otp.workflow.alignment.roddy.RoddyAlignmentPrepareJob
 import de.dkfz.tbi.otp.workflow.jobs.*
 import de.dkfz.tbi.otp.workflowExecution.*
@@ -47,7 +46,7 @@ class RnaAlignmentWorkflow extends AlignmentWorkflow implements LinearWorkflow {
     @Override
     List<Class<? extends Job>> getJobList() {
         return [
-                RoddyAlignmentFragmentJob,
+                AlignmentFragmentJob,
 //                RnaAlignmentCheckFragmentKeysJob,
                 // will be uncommented after default fragments have been adapted
                 // Keep the order, since it is important

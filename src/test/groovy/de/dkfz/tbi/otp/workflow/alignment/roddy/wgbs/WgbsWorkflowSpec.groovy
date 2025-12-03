@@ -25,6 +25,7 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
+import de.dkfz.tbi.otp.workflow.alignment.AlignmentFragmentJob
 import de.dkfz.tbi.otp.workflow.alignment.roddy.*
 import de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer.PanCancerCleanUpJob
 import de.dkfz.tbi.otp.workflow.jobs.*
@@ -40,7 +41,7 @@ class WgbsWorkflowSpec extends Specification implements RoddyPanCancerFactory, D
     void "getJobList, should return all WGBS Workflow bean names in correct order"() {
         expect:
         wgbsWorkflow.jobList == [
-                RoddyAlignmentFragmentJob,
+                AlignmentFragmentJob,
 //                RoddyAlignmentCheckFragmentKeysJob,
                 AttachUuidJob,
                 RoddyAlignmentConditionalFailJob,

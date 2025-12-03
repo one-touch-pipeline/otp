@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.alignment.roddy
+package de.dkfz.tbi.otp.workflow.alignment
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
@@ -35,7 +35,7 @@ import de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.SingleSelectSelectorExtendedCriteria
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-class RoddyAlignmentFragmentJobSpec extends Specification implements DataTest, PanCancerWorkflowDomainFactory, IsRoddy {
+class AlignmentFragmentJobSpec extends Specification implements DataTest, PanCancerWorkflowDomainFactory, IsRoddy {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -49,7 +49,7 @@ class RoddyAlignmentFragmentJobSpec extends Specification implements DataTest, P
         ]
     }
 
-    private RoddyAlignmentFragmentJob job
+    private AlignmentFragmentJob job
     private WorkflowStep workflowStep
     private LibraryPreparationKit seqTrackLibPrepKit
     private LibraryPreparationKit workPackageLibPrepKit
@@ -76,7 +76,7 @@ class RoddyAlignmentFragmentJobSpec extends Specification implements DataTest, P
                 useLibPrepKit: !workPackageLibIsNull,
         ])
 
-        job = new RoddyAlignmentFragmentJob()
+        job = new AlignmentFragmentJob()
         job.concreteArtefactService = Mock(ConcreteArtefactService) {
             1 * getOutputArtefact(workflowStep, PanCancerWorkflow.OUTPUT_BAM) >> { roddyBamFile }
             0 * _

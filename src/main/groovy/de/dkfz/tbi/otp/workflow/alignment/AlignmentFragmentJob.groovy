@@ -19,24 +19,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.alignment.roddy
+package de.dkfz.tbi.otp.workflow.alignment
 
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.workflow.alignment.AlignmentWorkflowShared
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.workflow.jobs.AbstractFragmentJob
 import de.dkfz.tbi.otp.workflowExecution.SingleSelectSelectorExtendedCriteria
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 @Component
 @Slf4j
-class RoddyAlignmentFragmentJob extends AbstractFragmentJob implements AlignmentWorkflowShared<RoddyBamFile> {
+
+class AlignmentFragmentJob extends AbstractFragmentJob implements AlignmentWorkflowShared<AbstractBamFile> {
 
     @Override
     protected List<SingleSelectSelectorExtendedCriteria> fetchSelectors(WorkflowStep workflowStep) {
-        RoddyBamFile bamFile = getBamFile(workflowStep)
+        AbstractBamFile bamFile = getBamFile(workflowStep)
         return bamFile.containedSeqTracks*.libraryPreparationKit.unique().sort {
             it?.name
         }.collect {

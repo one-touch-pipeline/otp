@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer.PanCancerCleanUpJob
 import de.dkfz.tbi.otp.workflow.alignment.roddy.RoddyAlignmentCheckQcJob
 import de.dkfz.tbi.otp.workflow.alignment.roddy.RoddyAlignmentConditionalFailJob
 import de.dkfz.tbi.otp.workflow.alignment.roddy.RoddyAlignmentFinishJob
-import de.dkfz.tbi.otp.workflow.alignment.roddy.RoddyAlignmentFragmentJob
+import de.dkfz.tbi.otp.workflow.alignment.AlignmentFragmentJob
 import de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.jobs.AttachUuidJob
 import de.dkfz.tbi.otp.workflow.jobs.CalculateSizeJob
@@ -45,7 +45,7 @@ class WgbsWorkflow extends PanCancerWorkflow {
     @Override
     List<Class<? extends Job>> getJobList() {
         return [
-                RoddyAlignmentFragmentJob,
+                AlignmentFragmentJob,
 //                RoddyAlignmentCheckFragmentKeysJob,
                 // will be uncommented after default fragments have been adapted
                 // Keep the order, since it is important
