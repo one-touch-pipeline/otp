@@ -64,7 +64,7 @@ docker compose -f docker-compose.yml up --build openssh-server > logs/openssh-se
 timeout 90s bash -c 'until docker exec otp-dev-postgres pg_isready ; do sleep 5 ; done'
 
 echo "===================================="
-./gradlew --build-cache dbmUpdate npm_install_cypress
+./gradlew --build-cache dbmUpdate npm_exec_cypress_install
 
 echo "===================================="
 ./gradlew --build-cache npm_run_cy-wait | tee cypressReport.txt
