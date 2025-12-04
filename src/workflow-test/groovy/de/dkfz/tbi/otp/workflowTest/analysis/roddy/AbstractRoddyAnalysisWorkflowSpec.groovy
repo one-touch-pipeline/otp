@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2024 The OTP authors
+ * Copyright 2011-2025 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -59,10 +59,33 @@ abstract class AbstractRoddyAnalysisWorkflowSpec<I extends BamFilePairAnalysis> 
         }
 
         when:
-        execute(1, 2)
+        execute()
 
         then:
         checkInstance()
+    }
+
+    @IgnoreIf({ instance.ignoreRoddyBamFileTest })
+    void "testWholeWorkflowWithRoddyBamFileLowCoverage"() {
+        given:
+        SessionUtils.withTransaction {
+            setupRoddyBamFileLowCoverage()
+            setupData()
+            decide(expectedExistingWorkflowArtefactCount, expectedNewWorkflowArtefactCount)
+        }
+
+        when:
+        execute(CheckType.SKIPPED)
+
+        then:
+        SessionUtils.withTransaction {
+            I createdInstance = BamFilePairAnalysis.listOrderById().last()
+            assert createdInstance.processingState == AnalysisProcessingStates.IN_PROGRESS
+            assert createdInstance.withdrawn
+            assert createdInstance.sampleType1BamFile == bamFileTumor
+            assert createdInstance.sampleType2BamFile == bamFileControl
+            true
+        }
     }
 
     @IgnoreIf({ instance.ignoreExternalBamFileTest })
@@ -75,7 +98,7 @@ abstract class AbstractRoddyAnalysisWorkflowSpec<I extends BamFilePairAnalysis> 
         }
 
         when:
-        execute(1, 2)
+        execute()
 
         then:
         checkInstance()

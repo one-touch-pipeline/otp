@@ -33,15 +33,16 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflowExecution.decider.Decider
 import de.dkfz.tbi.otp.workflowExecution.decider.FastqcDecider
-import de.dkfz.tbi.otp.workflowTest.AbstractWorkflowSpec
+import de.dkfz.tbi.otp.workflowTest.AbstractDecidedWorkflowSpec
 
 import java.nio.file.Path
 import java.time.Duration
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
-class FastqcWorkflowSpec extends AbstractWorkflowSpec {
+class FastqcWorkflowSpec extends AbstractDecidedWorkflowSpec {
 
     // @Slf4j does not work with Spock containing tests and produces problems in closures
     @SuppressWarnings('PropertyName')
@@ -64,6 +65,11 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
 
     private Workflow workflow
     private WorkflowVersion workflowVersion
+
+    @Override
+    protected Decider getDecider() {
+        return fastqcDecider
+    }
 
     void setupWorkflow(String fileExtension) {
         log.debug("Start setup ${this.class.simpleName}")
@@ -128,11 +134,11 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
             setupWorkflow('gz')
             Path initialPath = lsdfFilesService.getFileInitialPathAsPath(rawSequenceFile).parent
             fileService.createLink(initialPath.resolve(expectedFastqc.fileName), expectedFastqc)
-            fastqcDecider.decide([workflowArtefact], [:], [:])
+            decide(1, 1)
         }
 
         when:
-        execute(1, 1)
+        execute()
 
         then:
         checkExistenceOfResultsFiles()
@@ -145,11 +151,11 @@ class FastqcWorkflowSpec extends AbstractWorkflowSpec {
         given:
         SessionUtils.withTransaction {
             setupWorkflow(extension)
-            fastqcDecider.decide([workflowArtefact], [:], [:])
+            decide(1, 1)
         }
 
         when:
-        execute(1, 1)
+        execute()
 
         then:
         checkExistenceOfResultsFiles()

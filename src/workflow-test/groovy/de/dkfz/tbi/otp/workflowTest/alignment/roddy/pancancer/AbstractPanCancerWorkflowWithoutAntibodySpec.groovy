@@ -62,7 +62,7 @@ abstract class AbstractPanCancerWorkflowWithoutAntibodySpec extends AbstractPanC
         }
 
         when:
-        execute(1, 2)
+        execute()
 
         then:
         verify_AlignLanesOnly_AllFine()
@@ -80,7 +80,7 @@ abstract class AbstractPanCancerWorkflowWithoutAntibodySpec extends AbstractPanC
         }
 
         when:
-        execute(1, 4)
+        execute()
 
         then:
         verify_alignLanesOnly_TwoLanes(firstSeqTrack, secondSeqTrack)

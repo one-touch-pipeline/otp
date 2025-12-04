@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationWorkflow
 import de.dkfz.tbi.otp.workflowExecution.OtpWorkflow
-import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
+import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 import de.dkfz.tbi.otp.workflowTest.AbstractWorkflowSpec
 
 import java.nio.file.Files
@@ -142,10 +142,11 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
         SessionUtils.withTransaction {
             fastqImportInstance.refresh()
             assert fastqImportInstance.sequenceFiles
-            List<WorkflowRun> workflowRuns = dataInstallationInitializationService.createWorkflowRuns(fastqImportInstance)
-            assert workflowRuns.size() == expectedWorkflows
+            newWorkflowRuns = dataInstallationInitializationService.createWorkflowRuns(fastqImportInstance)
+            assert newWorkflowRuns.size() == expectedWorkflows
+            newWorkflowArtefact = WorkflowArtefact.findAllByProducedByInList(newWorkflowRuns)
         }
-        execute(expectedWorkflows)
+        execute()
     }
 
     void "test WholeGenome DataInstallation"() {

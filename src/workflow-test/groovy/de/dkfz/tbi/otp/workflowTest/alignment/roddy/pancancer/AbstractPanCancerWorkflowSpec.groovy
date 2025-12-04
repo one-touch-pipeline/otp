@@ -76,7 +76,7 @@ abstract class AbstractPanCancerWorkflowSpec extends AbstractRoddyAlignmentWorkf
         }
 
         when:
-        execute(1, 2)
+        execute()
 
         then:
         verify_AlignLanesOnly_AllFine()

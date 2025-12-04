@@ -37,7 +37,7 @@ import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.workflow.WorkflowCreateState
 import de.dkfz.tbi.otp.workflow.bamImport.BamImportInitializationService
 import de.dkfz.tbi.otp.workflow.bamImport.BamImportWorkflow
-import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
+import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 import de.dkfz.tbi.otp.workflowTest.AbstractWorkflowSpec
 
 import java.nio.file.Files
@@ -190,8 +190,9 @@ class BamImportWorkflowSpec extends AbstractWorkflowSpec implements ExternalBamF
         SessionUtils.withTransaction {
             bamImportInstance.refresh()
             assert bamImportInstance.externallyProcessedBamFiles
-            List<WorkflowRun> workflowRuns = bamImportInitializationService.createWorkflowRuns(bamImportInstance)
-            assert workflowRuns.size() == expectedWorkflows
+            newWorkflowRuns = bamImportInitializationService.createWorkflowRuns(bamImportInstance)
+            assert newWorkflowRuns.size() == expectedWorkflows
+            newWorkflowArtefact = WorkflowArtefact.findAllByProducedBy(newWorkflowRuns)
         }
     }
 
@@ -208,7 +209,7 @@ class BamImportWorkflowSpec extends AbstractWorkflowSpec implements ExternalBamF
         setupWorkflow(WORKFLOW_RUN_COUNT)
 
         when:
-        execute(WORKFLOW_RUN_COUNT)
+        execute()
 
         then:
         checkThatFileCopyingWasSuccessful(sourceLinked)
@@ -229,7 +230,7 @@ class BamImportWorkflowSpec extends AbstractWorkflowSpec implements ExternalBamF
         setupWorkflow(WORKFLOW_RUN_COUNT)
 
         when:
-        execute(WORKFLOW_RUN_COUNT)
+        execute()
 
         then:
         checkThatFileCopyingWasSuccessful(sourceLinked)
@@ -258,7 +259,7 @@ class BamImportWorkflowSpec extends AbstractWorkflowSpec implements ExternalBamF
         }
 
         when:
-        execute(WORKFLOW_RUN_COUNT)
+        execute()
 
         then:
         checkThatFileCopyingWasSuccessful(sourceLinked)

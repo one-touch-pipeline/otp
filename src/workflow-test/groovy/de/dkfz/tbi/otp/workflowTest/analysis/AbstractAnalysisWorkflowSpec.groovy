@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2024 The OTP authors
+ * Copyright 2011-2025 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -54,6 +54,7 @@ abstract class AbstractAnalysisWorkflowSpec extends AbstractDecidedWorkflowSpec 
     FilestoreService filestoreService
 
     static final Double COVERAGE = 30.0
+    static final Double LOW_COVERAGE = 10.0
 
     static final String PID = 'stds' // name have to be the same as in the reference data for OTP snv
 
@@ -162,6 +163,14 @@ abstract class AbstractAnalysisWorkflowSpec extends AbstractDecidedWorkflowSpec 
         commonBamFileSetup()
         createBedFileAndLibPrepKit()
         linkReferenceGenomeDirectoryToReference(referenceGenome)
+    }
+
+    void setupRoddyBamFileLowCoverage() {
+        setupRoddyBamFile()
+        bamFileTumor.coverage = LOW_COVERAGE
+        bamFileTumor.save(flush: true)
+        bamFileControl.coverage = LOW_COVERAGE
+        bamFileControl.save(flush: true)
     }
 
     void setupExternalBamFile() {

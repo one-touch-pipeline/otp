@@ -188,7 +188,7 @@ class WesFastqcWorkflowSpec extends AbstractDecidedWorkflowSpec {
         }
 
         when:
-        execute(1, 1)
+        execute()
 
         then:
         checkExistenceOfResultsFiles(EXPECTED_ZIP_ENTRIES_COPIED)
@@ -205,7 +205,7 @@ class WesFastqcWorkflowSpec extends AbstractDecidedWorkflowSpec {
         }
 
         when:
-        execute(parallel, parallel)
+        execute()
 
         then:
         checkExistenceOfResultsFiles(EXPECTED_ZIP_ENTRIES_WES)

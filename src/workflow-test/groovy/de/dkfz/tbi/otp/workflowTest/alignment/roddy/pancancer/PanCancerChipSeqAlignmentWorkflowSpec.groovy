@@ -61,7 +61,7 @@ class PanCancerChipSeqAlignmentWorkflowSpec extends AbstractPanCancerWorkflowSpe
         }
 
         when:
-        execute(1, 4)
+        execute()
 
         then:
         verify_alignLanesOnly_TwoLanes(firstSeqTrack, secondSeqTrack)
@@ -82,7 +82,7 @@ class PanCancerChipSeqAlignmentWorkflowSpec extends AbstractPanCancerWorkflowSpe
         }
 
         when:
-        execute(2, 4)
+        execute()
 
         then:
         SessionUtils.withTransaction {

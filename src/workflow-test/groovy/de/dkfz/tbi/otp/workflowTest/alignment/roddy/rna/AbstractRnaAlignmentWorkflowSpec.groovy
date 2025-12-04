@@ -171,7 +171,7 @@ abstract class AbstractRnaAlignmentWorkflowSpec extends AbstractRoddyAlignmentWo
         }
 
         when:
-        execute(1, 1)
+        execute()
 
         then:
         verify_AlignLanesOnly_AllFine()
@@ -186,7 +186,7 @@ abstract class AbstractRnaAlignmentWorkflowSpec extends AbstractRoddyAlignmentWo
         }
 
         when:
-        execute(1, 1)
+        execute()
 
         then:
         verify_AlignLanesOnly_AllFine()

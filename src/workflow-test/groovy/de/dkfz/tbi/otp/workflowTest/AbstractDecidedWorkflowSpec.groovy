@@ -50,13 +50,14 @@ abstract class AbstractDecidedWorkflowSpec extends AbstractWorkflowSpec {
         log.debug("Run decider:")
         DeciderResult deciderResult = decider.decide(WorkflowArtefact.list(), [:], [:])
         log.debug("Decide result ${deciderResult}")
-        List<WorkflowArtefact> newWorkflowArtefact = deciderResult.newArtefacts
+        newWorkflowArtefact = deciderResult.newArtefacts.sort { it.id }
         log.debug("Decide output artefacts ${newWorkflowArtefact.size()}:")
         newWorkflowArtefact.each {
             log.debug("- ${it.toString().replaceAll('\n', ' ')} (${it.artefactType}) for ${it.artefact}")
         }
         log.debug("Created runs:")
-        newWorkflowArtefact*.producedBy.unique().sort { it.id }.eachWithIndex { WorkflowRun workflowRun, int i ->
+        newWorkflowRuns = newWorkflowArtefact*.producedBy.unique().sort { it.id }
+        newWorkflowRuns.eachWithIndex { WorkflowRun workflowRun, int i ->
             log.debug("  - run ${i}: ${workflowRun.shortDisplayName}")
         }
         assert newWorkflowArtefact.size() == expectedNewWorkflowArtefactCount

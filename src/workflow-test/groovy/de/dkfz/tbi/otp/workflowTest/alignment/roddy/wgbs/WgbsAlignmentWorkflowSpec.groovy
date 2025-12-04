@@ -100,7 +100,7 @@ class WgbsAlignmentWorkflowSpec extends AbstractRoddyAlignmentWorkflowSpec imple
         }
 
         when:
-        execute(1, 1)
+        execute()
 
         then:
         verify_AlignLanesOnly_AllFine()
@@ -124,7 +124,7 @@ class WgbsAlignmentWorkflowSpec extends AbstractRoddyAlignmentWorkflowSpec imple
         }
 
         when:
-        execute(1, 2)
+        execute()
 
         then:
         verify_alignLanesOnly_TwoLanes(firstSeqTrack, secondSeqTrack)

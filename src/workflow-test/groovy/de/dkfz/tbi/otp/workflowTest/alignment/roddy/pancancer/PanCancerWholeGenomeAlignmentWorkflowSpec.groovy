@@ -42,7 +42,7 @@ class PanCancerWholeGenomeAlignmentWorkflowSpec extends AbstractPanCancerWorkflo
         }
 
         when:
-        execute(1, 2)
+        execute()
 
         then:
         verify_AlignLanesOnly_AllFine()
