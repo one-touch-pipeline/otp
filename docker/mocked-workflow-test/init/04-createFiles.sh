@@ -90,7 +90,6 @@ fastqFiles/wes/tumor/paired/run4/sequence/gerald_D1VCPACXX_x_R2.fastq.gz
 fastqFiles/wes/tumor/paired/run4/sequence/gerald_D1VCPACXX_x_R1.fastq.gz
 fastqFiles/fastqc/input_fastqc.fastq.bz2
 fastqFiles/fastqc/input_fastqc.fastq.tar.gz
-fastqFiles/fastqc/asdf_fastqc.zip
 fastqFiles/fastqc/input_fastqc.fastq.tar.bz2
 fastqFiles/fastqc/input_fastqc.fastq.gz
 reference-genomes/hg_GRCh38/indexes/cellranger/1.2.0/genes/genes.gtf

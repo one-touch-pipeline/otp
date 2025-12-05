@@ -165,7 +165,8 @@ class WeskitAccessService {
         String body
         try {
             JSONObject jsonObject = JSON.parse(response) as JSONObject
-            body = jsonObject.toString(JSON_INDENT_FACTOR)
+            // json escapes new lines, which makes multi line values, for example the stacktrace of the WES ErrorResponse msg, unreadable
+            body = jsonObject.toString(JSON_INDENT_FACTOR).replace('\\r\\n', '\n').replace('\\n', '\n')
         } catch (ignored) {
             body = response
         }

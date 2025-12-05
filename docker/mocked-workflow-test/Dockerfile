@@ -24,12 +24,14 @@ FROM ghcr.io/linuxserver/openssh-server
 # The Groovy Version that we want to install
 ARG GROOVY_VERSION=3.0.25
 
-#user home defined by the container
+# user home defined by the container
 ENV OTP_HOME=/config
 ENV WORKFLOWS=/workflows
 ENV SDKMAN=$WORKFLOWS/.sdkman
+ENV LOGS=$WORKFLOWS/logs
 ENV JOBS=$WORKFLOWS/jobs
 ENV GROOVY=$WORKFLOWS/groovy
+ENV GROOVY_SERVICE=$WORKFLOWS/groovy-service
 ENV BIN=$WORKFLOWS/bin
 ENV REFERENCE_DATA=$WORKFLOWS/reference-data
 
@@ -43,7 +45,7 @@ RUN apk update && \
 
 # create directories needed for mocked workflow tests
 RUN mkdir -p $WORKFLOWS/tests $WORKFLOWS/ngs_share $WORKFLOWS/virtualenvs \
-    $REFERENCE_DATA $JOBS $GROOVY $BIN $OTP_HOME && \
+    $REFERENCE_DATA $JOBS $LOGS $GROOVY $GROOVY_SERVICE $BIN $OTP_HOME && \
     chown -R 1000:1002 $WORKFLOWS
 
 # needed for sdk install
@@ -60,6 +62,9 @@ RUN curl -s "https://get.sdkman.io" | bash && \
 ADD init /custom-cont-init.d/
 RUN chown -R root:root /custom-cont-init.d/ && \
     chmod -R u+rwx,go-rwx /custom-cont-init.d/
+
+# add service
+ADD groovy-service $GROOVY_SERVICE
 
 # add scripts for mocking commands
 ADD groovy $GROOVY

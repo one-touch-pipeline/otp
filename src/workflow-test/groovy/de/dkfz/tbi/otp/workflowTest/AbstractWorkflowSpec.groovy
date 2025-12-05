@@ -758,9 +758,9 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      * {@link JobSchedulerException} if a scheduler exception was detected.
      *
      * @param condition human-readable label used in log and timeout messages (e.g. {@code "start"}, {@code "finish"})
-     * @param timeout   maximum time to wait before throwing {@link TimeoutException}
-     * @param interval  milliseconds between periodic progress log messages
-     * @param closure   condition evaluated inside a transaction; polling stops when it returns {@code true}
+     * @param timeout maximum time to wait before throwing {@link TimeoutException}
+     * @param interval milliseconds between periodic progress log messages
+     * @param closure condition evaluated inside a transaction; polling stops when it returns {@code true}
      */
     protected void waitUntilWorkflowInState(String condition, Duration timeout, long interval, Closure closure) {
         long timeoutMillis = timeout.toMillis()

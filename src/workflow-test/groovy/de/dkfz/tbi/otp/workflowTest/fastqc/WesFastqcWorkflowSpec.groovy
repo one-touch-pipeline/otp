@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.workflowTest.fastqc
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import spock.lang.Ignore
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
@@ -38,12 +37,12 @@ import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.decider.FastqcDecider
 import de.dkfz.tbi.otp.workflowTest.AbstractDecidedWorkflowSpec
 
+import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Duration
 import java.util.zip.ZipEntry
-import java.util.zip.ZipFile
+import java.util.zip.ZipInputStream
 
-@Ignore("This test requires a weskit setup")
 class WesFastqcWorkflowSpec extends AbstractDecidedWorkflowSpec {
 
     //@Slf4j does not work with Spock containing tests and produces problems in closures
@@ -59,12 +58,11 @@ class WesFastqcWorkflowSpec extends AbstractDecidedWorkflowSpec {
     private static final List<String> EXPECTED_ZIP_ENTRIES = [
             "",
             "Icons/",
-            "Images/",
             "Icons/fastqc_icon.png",
             "Icons/warning.png",
             "Icons/error.png",
             "Icons/tick.png",
-            "summary.txt",
+            "Images/",
             "Images/per_base_quality.png",
             "Images/per_tile_quality.png",
             "Images/per_sequence_quality.png",
@@ -86,6 +84,7 @@ class WesFastqcWorkflowSpec extends AbstractDecidedWorkflowSpec {
             "fastqc_report.html",
             "fastqc_data.txt",
             "fastqc.fo",
+            "summary.txt",
     ].asImmutable()
 
     private static final List<String> EXPECTED_ZIP_ENTRIES_COPIED = (EXPECTED_ZIP_ENTRIES + ["Images/kmer_profiles.png"]).findAll {
@@ -224,11 +223,15 @@ class WesFastqcWorkflowSpec extends AbstractDecidedWorkflowSpec {
         SessionUtils.withTransaction {
             allRawSequenceFiles.each { RawSequenceFile rawSequenceFile ->
                 FastqcProcessedFile fastqcProcessedFile = CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllBySequenceFile(rawSequenceFile))
-                ZipFile actualResult = new ZipFile(fastqcLinkFileService.fastqcOutputPath(fastqcProcessedFile).toString())
 
+                Path remotePath = fastqcLinkFileService.fastqcOutputPath(fastqcProcessedFile)
+
+                // the zip file is read sequentially, since ZipFile needs random access, which the remote file system does not provide
                 List<String> actualFiles = []
-                actualResult.entries().each { ZipEntry entry ->
-                    actualFiles.add(entry.name)
+                new ZipInputStream(Files.newInputStream(remotePath)).withCloseable { ZipInputStream zipStream ->
+                    for (ZipEntry zipEntry = zipStream.nextEntry; zipEntry != null; zipEntry = zipStream.nextEntry) {
+                        actualFiles.add(zipEntry.name)
+                    }
                 }
 
                 TestCase.assertContainSame(actualFiles, expectedZipEntries)

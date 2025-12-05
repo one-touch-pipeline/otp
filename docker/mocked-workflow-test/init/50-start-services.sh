@@ -1,3 +1,4 @@
+#!/bin/bash
 #
 # Copyright 2011-2026 The OTP authors
 #
@@ -20,39 +21,22 @@
 # SOFTWARE.
 #
 
-##ssh
-otp.ssh.user=otp
-otp.ssh.authMethod=password
-otp.ssh.password=otp
-otp.ssh.host=openssh-server
-otp.ssh.port=2222
-otp.ssh.timeout=0
-otp.scheduler=LSF
+# the script starts keycloak in the background, so that it is available for the workflow tests
 
-## weskit
-otp.wes.url=http://openssh-server:8200/ga4gh/wes/v1
-otp.wes.data.directory=/tmp
-otp.wes.auth.tokenUri=http://openssh-server:8100/realms/test/protocol/openid-connect/token
-otp.wes.auth.clientId=dummy
-otp.wes.auth.clientSecret=dummy
+(
+  set -e -o pipefail
 
-##oidc
-otp.security.oidc.enabled=false
-otp.security.oidc.client=dummy
-otp.security.oidc.redirectUri=http://127.0.0.1:8080/login/oauth2/code/
+  cat <<EOF_SUDO | sudo --preserve-env=REFERENCE_DATA -i -u otp bash -s
+  set -e -o pipefail
 
-## Keycloak Settings for API connection
-otp.security.keycloak.server=http://127.0.0.1:8100
-otp.security.keycloak.clientId=dummy
-otp.security.keycloak.clientSecret=dummy
+  cd $GROOVY_SERVICE
 
-## properties for tests
-otp.testing.group=otpGroup
-otp.testing.project.unix.group=otp
+  . $HOME/.sdkman/bin/sdkman-init.sh
 
-## paths: tools & roddy
-otp.path.tools=/tmp/tools
-otp.path.tools.roddy=/tmp/roddy
-
-## settings for workflow tests
-#otp.testing.workflows.init.script added automatically in the ci
+  for i in *Server.groovy
+  do
+    echo "Starting \$i"
+    groovy \$i 2>&1 | tee $LOGS/\${i%.groovy}.log &
+  done
+EOF_SUDO
+)

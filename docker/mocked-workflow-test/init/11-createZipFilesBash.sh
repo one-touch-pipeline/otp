@@ -21,7 +21,7 @@
 # SOFTWARE.
 #
 
-# the script create an mocked fastqc zip file, containing all expected files as dummy, + for the parsed file the expected entries
+# the script create an mocked fastqc zip file for the bash fastqc workflow , containing all expected files as dummy, + for the parsed file the expected entries
 
 set -e -o pipefail
 
