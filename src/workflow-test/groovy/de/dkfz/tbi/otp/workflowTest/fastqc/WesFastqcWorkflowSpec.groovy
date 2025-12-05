@@ -190,7 +190,7 @@ class WesFastqcWorkflowSpec extends AbstractDecidedWorkflowSpec {
         execute()
 
         then:
-        checkExistenceOfResultsFiles(EXPECTED_ZIP_ENTRIES_COPIED)
+        checkZipFileContent(EXPECTED_ZIP_ENTRIES_COPIED)
         validateFastqcProcessedFile()
         validateFastQcFileContent()
     }
@@ -207,7 +207,7 @@ class WesFastqcWorkflowSpec extends AbstractDecidedWorkflowSpec {
         execute()
 
         then:
-        checkExistenceOfResultsFiles(EXPECTED_ZIP_ENTRIES_WES)
+        checkZipFileContent(EXPECTED_ZIP_ENTRIES_WES)
         validateFastqcProcessedFile()
         validateFastQcFileContent()
 
@@ -220,7 +220,7 @@ class WesFastqcWorkflowSpec extends AbstractDecidedWorkflowSpec {
         'gz'      | 3
     }
 
-    private void checkExistenceOfResultsFiles(List<String> expectedZipEntries) {
+    private void checkZipFileContent(List<String> expectedZipEntries) {
         SessionUtils.withTransaction {
             allRawSequenceFiles.each { RawSequenceFile rawSequenceFile ->
                 FastqcProcessedFile fastqcProcessedFile = CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllBySequenceFile(rawSequenceFile))

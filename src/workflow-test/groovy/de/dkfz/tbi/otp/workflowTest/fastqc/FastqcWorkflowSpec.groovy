@@ -25,6 +25,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import spock.lang.Unroll
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcLinkFileService
 import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
@@ -37,10 +38,11 @@ import de.dkfz.tbi.otp.workflowExecution.decider.Decider
 import de.dkfz.tbi.otp.workflowExecution.decider.FastqcDecider
 import de.dkfz.tbi.otp.workflowTest.AbstractDecidedWorkflowSpec
 
+import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Duration
 import java.util.zip.ZipEntry
-import java.util.zip.ZipFile
+import java.util.zip.ZipInputStream
 
 class FastqcWorkflowSpec extends AbstractDecidedWorkflowSpec {
 
@@ -51,6 +53,32 @@ class FastqcWorkflowSpec extends AbstractDecidedWorkflowSpec {
     private static final String INPUT_FILE = "fastqFiles/fastqc/input_fastqc.fastq."
     private static final String EXPECTED_RESULT_FILE = "fastqFiles/fastqc/asdf_fastqc.zip"
     private static final String BASE_NAME = "asdf.fastq"
+
+    private static final List<String> ZIP_ENTRIES = [
+            "",
+            "Icons/",
+            "Icons/fastqc_icon.png",
+            "Icons/warning.png",
+            "Icons/error.png",
+            "Icons/tick.png",
+            "Images/",
+            "Images/per_base_quality.png",
+            "Images/per_tile_quality.png",
+            "Images/per_sequence_quality.png",
+            "Images/per_base_sequence_content.png",
+            "Images/per_sequence_gc_content.png",
+            "Images/per_base_n_content.png",
+            "Images/sequence_length_distribution.png",
+            "Images/duplication_levels.png",
+            "Images/adapter_content.png",
+            "Images/kmer_profiles.png",
+            "fastqc_data.txt",
+            "fastqc_report.html",
+            "fastqc.fo",
+            "summary.txt",
+    ].collect {
+        "asdf_fastqc/${it}".toString()
+    }.asImmutable()
 
     Class<BashFastQcWorkflow> workflowComponentClass = BashFastQcWorkflow
 
@@ -141,7 +169,7 @@ class FastqcWorkflowSpec extends AbstractDecidedWorkflowSpec {
         execute()
 
         then:
-        checkExistenceOfResultsFiles()
+        checkZipFileContent()
         validateFastqcProcessedFile()
         validateFastQcFileContent()
     }
@@ -158,7 +186,7 @@ class FastqcWorkflowSpec extends AbstractDecidedWorkflowSpec {
         execute()
 
         then:
-        checkExistenceOfResultsFiles()
+        checkZipFileContent()
         validateFastqcProcessedFile()
         validateFastQcFileContent()
 
@@ -170,22 +198,21 @@ class FastqcWorkflowSpec extends AbstractDecidedWorkflowSpec {
         'tar.bz2' | _
     }
 
-    private void checkExistenceOfResultsFiles() {
+    private void checkZipFileContent() {
         SessionUtils.withTransaction {
             FastqcProcessedFile fastqcProcessedFile = CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllBySequenceFile(rawSequenceFile))
-            ZipFile expectedResult = new ZipFile(fileService.toFile(expectedFastqc))
-            ZipFile actualResult = new ZipFile(fastqcLinkFileService.fastqcOutputPath(fastqcProcessedFile).toString())
 
+            Path remotePath = fastqcLinkFileService.fastqcOutputPath(fastqcProcessedFile)
+
+            // the zip file is read sequentially, since ZipFile needs random access, which the remote file system does not provide
             List<String> actualFiles = []
-            actualResult.entries().each { ZipEntry entry ->
-                actualFiles.add(entry.name)
+            new ZipInputStream(Files.newInputStream(remotePath)).withCloseable { ZipInputStream zipStream ->
+                for (ZipEntry zipEntry = zipStream.nextEntry; zipEntry != null; zipEntry = zipStream.nextEntry) {
+                    actualFiles.add(zipEntry.name)
+                }
             }
 
-            expectedResult.entries().each { ZipEntry entry ->
-                assert actualFiles.contains(entry.name)
-                actualFiles.remove(entry.name)
-            }
-            assert actualFiles.isEmpty()
+            TestCase.assertContainSame(actualFiles, ZIP_ENTRIES)
         }
     }
 
