@@ -823,13 +823,16 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      */
     protected void ensureThatFilePermissionsAreCorrect() {
         log.debug("Checking file permissions")
-        Files.walk(configService.rootPath.toPath()).each { Path path ->
-            if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
-                assert fileService.getPermissionViaBash(path, LinkOption.NOFOLLOW_LINKS) == fileService.DEFAULT_DIRECTORY_PERMISSION_STRING
-            }
-            if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
-                Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(path, LinkOption.NOFOLLOW_LINKS)
-                assert permissions == FileService.DEFAULT_FILE_PERMISSION
+        Path rootPath = remoteFileSystem.getPath(configService.rootPath.toString())
+        Files.walk(rootPath).withCloseable { stream ->
+            stream.each { Path path ->
+                if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
+                    assert fileService.getPermissionViaBash(path, LinkOption.NOFOLLOW_LINKS) == fileService.DEFAULT_DIRECTORY_PERMISSION_STRING
+                }
+                if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
+                    Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(path, LinkOption.NOFOLLOW_LINKS)
+                    assert permissions == FileService.DEFAULT_FILE_PERMISSION
+                }
             }
         }
     }

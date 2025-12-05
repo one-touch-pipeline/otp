@@ -64,3 +64,10 @@ build-database-docker-image:
     IMAGE_NAME: otp-ci-integration-test-database
     CONTEXT: "${CI_PROJECT_DIR}/docker/integration-test-build-database/"
     PATH_CHECK_CHANGES: docker/integration-test-build-database/**/*
+
+build-mocked-cluster:
+  extends: .build-image
+  variables:
+    IMAGE_NAME: otp-mocked-cluster
+    CONTEXT: "${CI_PROJECT_DIR}/docker/mocked-workflow-test/"
+    PATH_CHECK_CHANGES: docker/mocked-workflow-test/**/*

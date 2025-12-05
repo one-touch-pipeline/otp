@@ -359,10 +359,32 @@ task workflowTest(type: Test) {
     testClassesDirs = sourceSets.workflowTest.output.classesDirs
     classpath = sourceSets.workflowTest.runtimeClasspath
     reports.html.enabled = true
-    testLogging.showStandardStreams = true
+    testLogging.showStandardStreams = !System.getenv('CI_PIPELINE_ID')
     group = LifecycleBasePlugin.VERIFICATION_GROUP
     shouldRunAfter "integrationTest"
     systemProperty "grails.env", "WORKFLOW_TEST" // change to TEST??
+}
+
+task jacocoWorkflowTestReport(type: JacocoReport) {
+    dependsOn workflowTest // tests are required to run before generating the report
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    executionData workflowTest
+    sourceSets sourceSets.main
+    shouldRunAfter "jacocoIntegrationTestReport"
+    reports {
+        html.outputLocation = layout.buildDirectory.dir('reports/jacoco/workflowTest')
+    }
+    afterEvaluate {
+        filterCoverage(classDirectories)
+    }
+
+    doLast {
+        println "Coverage workflow report is created in file://${project.projectDir}/build/reports/jacoco/workflowTest/index.html"
+    }
+}
+
+workflowTest(){
+    finalizedBy jacocoWorkflowTestReport // report is always generated after tests run
 }
 
 tasks.withType(GroovyCompile).configureEach {

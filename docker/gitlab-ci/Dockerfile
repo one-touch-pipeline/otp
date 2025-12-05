@@ -36,6 +36,7 @@ RUN ln -fs /usr/share/zoneinfo/UTC /etc/localtime && \
         libnotify-bin \
         libxss1 \
         libnss3 \
+        openssh-client \
         postgresql \
         python3-mako \
         python3 \
