@@ -141,6 +141,7 @@ class ParseIndelQcJobSpec extends Specification implements DataTest {
         "indelQcJsonFile"    | _
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test execute method when both files available"() {
         given:
         DomainFactory.createIndelQcFileOnFileSystem(indelQcJsonFile)

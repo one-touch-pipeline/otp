@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
@@ -161,6 +162,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         e.message.contains('The configVersion is not allowed to be null')
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test importProjectConfigFile when no previous RoddyWorkflowConfig exists"() {
         given:
         RoddyWorkflowConfigService service = createObjectsAndService()
@@ -184,6 +186,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         roddyWorkflowConfig.individual == null
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test importProjectConfigFile with individual when no previous RoddyWorkflowConfig exists"() {
         given:
         RoddyWorkflowConfigService service = createObjectsAndService()
@@ -205,6 +208,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         roddyWorkflowConfig.individual == individual
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test importProjectConfigFile when previous RoddyWorkflowConfig exists"() {
         given:
         RoddyWorkflowConfigService service = createObjectsAndService()

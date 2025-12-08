@@ -450,7 +450,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
 
     void "sendCreatedEmail, should send a mail only to the ticketsystem when recipient and ccs are empty"() {
         given:
-        final String dirAnalysis = "/dirAnalysis"
+        final String dirAnalysis = "${File.separator}dirAnalysis"
         final String dirName = "dirName"
         final ProjectRequest projectRequest = ProjectRequest.create()
         final Project project = createProject([
@@ -498,7 +498,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         given:
         final List<String> recipients = ['requester1', 'requester2']
         final List<String> ccs = ['ccUser1', 'ccUser2']
-        final String dirAnalysis = "/dirAnalysis"
+        final String dirAnalysis = "${File.separator}dirAnalysis"
         final String dirName = "dirName"
         final ProjectRequest projectRequest = ProjectRequest.create()
         final Project project = createProject([

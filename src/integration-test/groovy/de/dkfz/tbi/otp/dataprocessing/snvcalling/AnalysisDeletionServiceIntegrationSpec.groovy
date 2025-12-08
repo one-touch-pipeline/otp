@@ -39,6 +39,8 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactoryInstance
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
+import java.nio.file.Path
+
 @Rollback
 @Integration
 class AnalysisDeletionServiceIntegrationSpec extends Specification implements IsRoddy {
@@ -58,7 +60,7 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification implements Is
     RunYapsaInstance runYapsaInstance
     AbstractBamFile bamFileTumor2
     SamplePair samplePair2
-    List<File> analysisInstancesDirectories
+    List<Path> analysisInstancesDirectories
     List<File> analysisSamplePairsDirectories
     List<SamplePair> samplePairs
 
@@ -94,7 +96,7 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification implements Is
                 analysisDeletionService.analysisWorkFileServiceFactoryService.getService(SophiaInstance).getDirectoryPath(sophiaInstance),
                 analysisDeletionService.analysisWorkFileServiceFactoryService.getService(IndelCallingInstance).getDirectoryPath(indelCallingInstance),
                 analysisDeletionService.analysisWorkFileServiceFactoryService.getService(RunYapsaInstance).getDirectoryPath(runYapsaInstance),
-        ].collect { analysisDeletionService.fileService.toFile(it) }
+        ]
         analysisSamplePairsDirectories = [
                 analysisDeletionService.analysisLinkFileServiceFactoryService.getService(AceseqInstance).getSamplePairPath(aceseqInstance.samplePair),
                 analysisDeletionService.analysisLinkFileServiceFactoryService.getService(RoddySnvCallingInstance).getSamplePairPath(snvCallingInstance.samplePair),
@@ -115,7 +117,7 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification implements Is
         given:
         setupData()
 
-        List<File> instancesDirectories = []
+        List<Path> instancesDirectories = []
         List<File> samplePairsDirectories
 
         when:
@@ -127,8 +129,8 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification implements Is
         samplePairsDirectories = analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(samplePairs)
 
         then:
-        TestCase.assertContainSame(instancesDirectories*.toString(), analysisInstancesDirectories*.toString())
-        TestCase.assertContainSame(samplePairsDirectories*.toString(), analysisSamplePairsDirectories*.toString())
+        TestCase.assertContainSame(instancesDirectories, analysisInstancesDirectories)
+        TestCase.assertContainSame(samplePairsDirectories, analysisSamplePairsDirectories)
         !RoddySnvCallingInstance.count()
         !IndelCallingInstance.count()
         !SophiaInstance.count()
@@ -153,7 +155,7 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification implements Is
         SophiaInstance sophiaInstance2 = DomainFactory.createSophiaInstanceWithSameSamplePair(snvCallingInstance2)
         AceseqInstance aceseqInstance2 = DomainFactory.createAceseqInstanceWithSameSamplePair(snvCallingInstance2)
         RunYapsaInstance runYapsaInstance2 = DomainFactory.createRunYapsaInstanceWithSameSamplePair(snvCallingInstance2)
-        List<File> instancesDirectories = []
+        List<Path> instancesDirectories = []
         List<File> samplePairsDirectories
 
         analysisInstancesDirectories.addAll([
@@ -162,16 +164,14 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification implements Is
                 analysisDeletionService.analysisWorkFileServiceFactoryService.getService(SophiaInstance).getDirectoryPath(sophiaInstance2),
                 analysisDeletionService.analysisWorkFileServiceFactoryService.getService(IndelCallingInstance).getDirectoryPath(indelCallingInstance2),
                 analysisDeletionService.analysisWorkFileServiceFactoryService.getService(RunYapsaInstance).getDirectoryPath(runYapsaInstance2),
-        ].collect { analysisDeletionService.fileService.toFile(it) }
-        )
+        ])
         analysisSamplePairsDirectories.addAll([
                 analysisDeletionService.analysisLinkFileServiceFactoryService.getService(AceseqInstance).getSamplePairPath(aceseqInstance2.samplePair),
                 analysisDeletionService.analysisLinkFileServiceFactoryService.getService(RoddySnvCallingInstance).getSamplePairPath(snvCallingInstance2.samplePair),
                 analysisDeletionService.analysisLinkFileServiceFactoryService.getService(SophiaInstance).getSamplePairPath(sophiaInstance2.samplePair),
                 analysisDeletionService.analysisLinkFileServiceFactoryService.getService(IndelCallingInstance).getSamplePairPath(indelCallingInstance2.samplePair),
                 analysisDeletionService.analysisLinkFileServiceFactoryService.getService(RunYapsaInstance).getSamplePairPath(runYapsaInstance2.samplePair),
-        ].collect { analysisDeletionService.fileService.toFile(it) }
-        )
+        ].collect { analysisDeletionService.fileService.toFile(it) })
         samplePairs.addAll([
                 snvCallingInstance2.samplePair,
                 indelCallingInstance2.samplePair,
@@ -189,8 +189,8 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification implements Is
         samplePairsDirectories = analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(samplePairs)
 
         then:
-        TestCase.assertContainSame(instancesDirectories*.toString(), analysisInstancesDirectories*.toString())
-        TestCase.assertContainSame(samplePairsDirectories*.toString(), analysisSamplePairsDirectories*.toString())
+        TestCase.assertContainSame(instancesDirectories, analysisInstancesDirectories)
+        TestCase.assertContainSame(samplePairsDirectories, analysisSamplePairsDirectories)
         !RoddySnvCallingInstance.count()
         !IndelCallingInstance.count()
         !SophiaInstance.count()

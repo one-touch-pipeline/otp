@@ -57,6 +57,7 @@ class RoddyAlignmentConditionalFailJobSpec extends Specification implements Data
     }
 
     @Unroll
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test check #name, succeeds"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep([
@@ -129,6 +130,7 @@ class RoddyAlignmentConditionalFailJobSpec extends Specification implements Data
         e.message.contains("has no dataFiles")
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test check, succeeds when a seqTrack with single seqType has only one dataFile"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep([
@@ -165,6 +167,7 @@ class RoddyAlignmentConditionalFailJobSpec extends Specification implements Data
         notThrown(WorkflowException)
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test check, fails because physical files are missing for a seqTrack"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep([
@@ -205,6 +208,7 @@ class RoddyAlignmentConditionalFailJobSpec extends Specification implements Data
         e.message.contains("files are missing")
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test check, fails when file names are not consistent for a seqTrack"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep([

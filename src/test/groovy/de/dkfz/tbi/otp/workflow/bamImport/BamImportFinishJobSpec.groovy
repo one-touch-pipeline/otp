@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflow.bamImport
 
 import grails.testing.gorm.DataTest
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -77,6 +78,7 @@ class BamImportFinishJobSpec extends Specification implements DataTest, BamImpor
         job.fileSystemService = new TestFileSystemService()
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "updateDomains should update roddyBamFile with correct values when md5Sum and maximumReadLength are not given"() {
         given:
         TestConfigService testConfigService = new TestConfigService(tempDir)

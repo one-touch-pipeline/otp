@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.*
 
+import java.nio.file.Paths
 import java.time.*
 import java.time.temporal.ChronoUnit
 
@@ -85,7 +86,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         GenericJobInfo jobInfo = new GenericJobInfo(null, null, null, null, [c2.clusterJobId])
 
         jobInfo.askedResources = new ResourceSet(new BufferValue(7), 8, 9, Duration.ofSeconds(10), new BufferValue(11), "fasttrack", null)
-        jobInfo.logFile = new File("/file.log")
+        jobInfo.logFile = Paths.get("/file.log").toFile()
         jobInfo.account = "257"
 
         when:
@@ -97,7 +98,7 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         job.requestedMemory == 7 * 1024 * 1024
 
         job.accountName == "257"
-        job.jobLog == new File("/file.log").absolutePath
+        job.jobLog == Paths.get("/file.log").toString()
         job.dependencies == [c2] as Set
     }
 

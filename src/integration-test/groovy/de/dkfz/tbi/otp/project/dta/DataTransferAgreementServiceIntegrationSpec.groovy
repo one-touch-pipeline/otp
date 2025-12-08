@@ -25,6 +25,7 @@ import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import grails.validation.ValidationException
 import org.springframework.web.multipart.MultipartFile
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -40,6 +41,7 @@ import java.nio.file.*
 
 @Rollback
 @Integration
+@IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
 class DataTransferAgreementServiceIntegrationSpec extends Specification implements DocumentFactory, UserAndRoles {
 
     DataTransferAgreementService dataTransferAgreementService

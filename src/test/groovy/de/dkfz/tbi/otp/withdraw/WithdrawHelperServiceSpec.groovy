@@ -403,9 +403,9 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         final Path finalPathNormal = CreateFileHelper.createFile(tempDir.resolve("finalNormal"))
         final Path finalPathSingleCell = CreateFileHelper.createFile(tempDir.resolve("finalSingleCell"))
         final Path uuidPath = CreateFileHelper.createFile(tempDir.resolve("uuid"))
-        final String viewByPidPathNormal = "/tmp/viewByPidNormal"
-        final String viewByPidPathSingleCell = "/tmp/viewByPidSingleCell"
-        final String wellPathSingleCell = "/tmp/wellSingleCell"
+        final String viewByPidPathNormal = "${File.separator}tmp${File.separator}viewByPidNormal"
+        final String viewByPidPathSingleCell = "${File.separator}tmp${File.separator}viewByPidSingleCell"
+        final String wellPathSingleCell = "${File.separator}tmp${File.separator}wellSingleCell"
         final Path fastqcPath = CreateFileHelper.createFile(tempDir.resolve("fastqc"))
         final Path finalMd5sumNormal = CreateFileHelper.createFile(tempDir.resolve("finalMd5sum"))
         final Path finalMd5sumSingleCell = CreateFileHelper.createFile(tempDir.resolve("finalMd5sumSingleCell"))

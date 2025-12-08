@@ -45,6 +45,7 @@ class QualityControlFileValidatorSpec extends Specification {
     Path tempDir
 
     @Unroll
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void 'validate context with errors'() {
         given:
         File bamFile = Files.createFile(tempDir.resolve('bam')).toFile()

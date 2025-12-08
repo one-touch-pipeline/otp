@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.ProjectService
 
-import java.nio.file.Paths
+import java.nio.file.*
 
 class RawSequenceDataAllWellFileServiceSpec extends Specification implements DataTest, DomainFactoryCore {
 
@@ -43,7 +43,7 @@ class RawSequenceDataAllWellFileServiceSpec extends Specification implements Dat
 
     RawSequenceDataAllWellFileService service
 
-    String seqDir = "/seq-dir"
+    String seqDir = Paths.get('/seq-dir').toAbsolutePath()
 
     void setup() {
         service = new RawSequenceDataAllWellFileService()
@@ -77,17 +77,17 @@ class RawSequenceDataAllWellFileServiceSpec extends Specification implements Dat
                 ]),
         ])
 
-        String expected = [
+        String expected = Paths.get(
                 seqDir,
                 seqType.dirName,
-                "view-by-pid",
+                'view-by-pid',
                 rawSequenceFile.individual.pid,
                 sampleTypePart,
                 seqType.libraryLayoutDirName,
                 "run${rawSequenceFile.run.name}",
                 rawSequenceFile.fileType.vbpPath,
                 rawSequenceFile.vbpFileName,
-        ].join('/')
+        )
 
         when:
         String path = service.getFilePath(rawSequenceFile)
@@ -97,8 +97,8 @@ class RawSequenceDataAllWellFileServiceSpec extends Specification implements Dat
 
         where:
         sampleType | antiBody    || sampleTypePart
-        'CONTROL'  | null        || 'control/0_all'
-        'CONTROL'  | 'anti-body' || 'control-anti-body/0_all'
+        'CONTROL'  | null        || Paths.get('control', '0_all').toString()
+        'CONTROL'  | 'anti-body' || Paths.get('control-anti-body', '0_all').toString()
     }
 
     @Unroll

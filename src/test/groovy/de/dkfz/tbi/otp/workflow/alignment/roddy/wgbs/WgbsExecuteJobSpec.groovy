@@ -98,20 +98,21 @@ class WgbsExecuteJobSpec extends Specification implements DataTest, WgbsAlignmen
             0 * _
         }
 
+        configService = new TestConfigService([
+                (OtpProperty.PATH_PROJECT_ROOT): tempDir.toString(),
+        ])
+
         job.processingOptionService = new ProcessingOptionService()
         job.bedFileService = Mock(BedFileService)
         job.roddyConfigValueService = new RoddyConfigValueService()
         job.referenceGenomeService = Mock(ReferenceGenomeService) {
-            fastaFilePath(roddyBamFile.referenceGenome) >> { new File("/fasta-path") }
-            cytosinePositionIndexFilePath(roddyBamFile.referenceGenome) >> { new File("/cytosine-position-index-path") }
+            fastaFilePath(roddyBamFile.referenceGenome) >> { tempDir.resolve("fasta-path").toAbsolutePath().toFile() }
+            cytosinePositionIndexFilePath(roddyBamFile.referenceGenome) >>
+                    { Paths.get(tempDir.toString(), "cytosine-position-index-path").toAbsolutePath().toFile() }
         }
         job.roddyConfigValueService.referenceGenomeService = job.referenceGenomeService
 
         DomainFactory.createRoddyAlignableSeqTypes()
-
-        configService = new TestConfigService([
-                (OtpProperty.PATH_PROJECT_ROOT): tempDir.toString(),
-        ])
 
         DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(tempDir.toString(), "reference_genomes").path)
     }
@@ -169,13 +170,13 @@ class WgbsExecuteJobSpec extends Specification implements DataTest, WgbsAlignmen
 
         Map<String, String> expectedCommand = [
                 sharedFilesBaseDirectory         : [value: null, type: "path"],
-                INDEX_PREFIX                     : [value: "/fasta-path", type: "path"],
-                GENOME_FA                        : [value: "/fasta-path", type: "path"],
+                INDEX_PREFIX                     : [value: tempDir.resolve("fasta-path").toString(), type: "path"],
+                GENOME_FA                        : [value: tempDir.resolve("fasta-path").toString(), type: "path"],
                 possibleControlSampleNamePrefixes: [value: roddyBamFile.sampleType.dirName],
                 possibleTumorSampleNamePrefixes  : [value: ""],
                 runFingerprinting                : [value: "false", type: "boolean"],
                 CHROMOSOME_INDICES               : [value: "( adsf )", type: "bashArray"],
-                CYTOSINE_POSITIONS_INDEX         : [value: "/cytosine-position-index-path", type: "path"],
+                CYTOSINE_POSITIONS_INDEX         : [value: tempDir.resolve("cytosine-position-index-path").toString(), type: "path"],
         ]
 
         when:
@@ -195,19 +196,19 @@ class WgbsExecuteJobSpec extends Specification implements DataTest, WgbsAlignmen
         referenceGenome.fingerPrintingFileName = "fingerprintingFile"
         referenceGenome.save(flush: true)
 
-        job.roddyConfigValueService.referenceGenomeService.fingerPrintingFile(roddyBamFile.referenceGenome) >> { new File("/fingerprint-path") }
+        job.roddyConfigValueService.referenceGenomeService.fingerPrintingFile(roddyBamFile.referenceGenome) >> { tempDir.resolve("fingerprint-path").toAbsolutePath().toFile() }
         job.roddyConfigValueService.chromosomeIdentifierSortingService = new ChromosomeIdentifierSortingService()
 
         Map<String, String> expectedCommand = [
                 sharedFilesBaseDirectory         : [value: null, type: "path"],
-                INDEX_PREFIX                     : [value: "/fasta-path", type: "path"],
-                GENOME_FA                        : [value: "/fasta-path", type: "path"],
+                INDEX_PREFIX                     : [value: tempDir.resolve("fasta-path").toString(), type: "path"],
+                GENOME_FA                        : [value: tempDir.resolve("fasta-path").toString(), type: "path"],
                 possibleControlSampleNamePrefixes: [value: roddyBamFile.sampleType.dirName],
                 possibleTumorSampleNamePrefixes  : [value: ""],
                 runFingerprinting                : [value: "true", type: "boolean"],
-                fingerprintingSitesFile          : [value: "/fingerprint-path", type: "path"],
+                fingerprintingSitesFile          : [value: tempDir.resolve("fingerprint-path").toString(), type: "path"],
                 CHROMOSOME_INDICES               : [value: "( adsf )", type: "bashArray"],
-                CYTOSINE_POSITIONS_INDEX         : [value: "/cytosine-position-index-path", type: "path"],
+                CYTOSINE_POSITIONS_INDEX         : [value: tempDir.resolve("cytosine-position-index-path").toString(), type: "path"],
         ]
 
         when:
@@ -225,6 +226,6 @@ class WgbsExecuteJobSpec extends Specification implements DataTest, WgbsAlignmen
         }
 
         expect:
-        job.getAdditionalParameters(workflowStep) == ["--usemetadatatable=/asdf"]
+        job.getAdditionalParameters(workflowStep) == ["--usemetadatatable=${File.separator}asdf"]
     }
 }

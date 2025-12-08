@@ -55,12 +55,12 @@ class TestConfigServiceSpec extends Specification implements DataTest, WorkflowS
     void "test storeWorkflowTestProperties() stores and validates properties without exception"() {
         given:
         Map<WorkflowTestProperty, String> workflowTestProperties = [
-                (WorkflowTestProperty.TEST_WORKFLOW_INPUT_DIR): '/script/input',
-                (WorkflowTestProperty.TEST_WORKFLOW_RESULT_DIR): '/script/result',
-                (WorkflowTestProperty.TEST_WORKFLOW_RODDY_SHARED_FILES_BASE_DIRECTORY): '/script/shared-files',
-                (WorkflowTestProperty.TEST_WORKFLOW_RODDY_VIRTUAL_ENVS_DIRECTORY): '/script/virtualenvs',
-                (WorkflowTestProperty.TEST_WORKFLOW_QUEUE): 'script-queue',
-                (WorkflowTestProperty.TEST_WORKFLOW_CONFIG_SUFFIX): 'script-suffix',
+                (WorkflowTestProperty.TEST_WORKFLOW_INPUT_DIR): Paths.get("/script", "input").toString(),
+                (WorkflowTestProperty.TEST_WORKFLOW_RESULT_DIR): Paths.get("/script", "result").toString(),
+                (WorkflowTestProperty.TEST_WORKFLOW_RODDY_SHARED_FILES_BASE_DIRECTORY): Paths.get("/script", "shared-files").toString(),
+                (WorkflowTestProperty.TEST_WORKFLOW_RODDY_VIRTUAL_ENVS_DIRECTORY): Paths.get("/script", "virtualenvs").toString(),
+                (WorkflowTestProperty.TEST_WORKFLOW_QUEUE): "script-queue",
+                (WorkflowTestProperty.TEST_WORKFLOW_CONFIG_SUFFIX): "script-suffix",
         ]
 
         when:
@@ -75,10 +75,10 @@ class TestConfigServiceSpec extends Specification implements DataTest, WorkflowS
         // Verify validation passes (no exception thrown)
         noExceptionThrown()
         // Verify getters work correctly
-        configService.workflowTestInputRootDir == Paths.get('/script/input')
-        configService.workflowTestResultRootDir == Paths.get('/script/result')
-        configService.workflowTestRoddySharedFilesBaseDir == Paths.get('/script/shared-files')
-        configService.workflowTestRoddyVirtualEnvsBaseDir == Paths.get('/script/virtualenvs')
+        configService.workflowTestInputRootDir == Paths.get("/script", "input")
+        configService.workflowTestResultRootDir == Paths.get("/script", "result")
+        configService.workflowTestRoddySharedFilesBaseDir == Paths.get("/script", "shared-files")
+        configService.workflowTestRoddyVirtualEnvsBaseDir == Paths.get("/script", "virtualenvs")
         configService.workflowTestQueue == 'script-queue'
         configService.workflowTestConfigSuffix == 'script-suffix'
     }
@@ -118,8 +118,8 @@ class TestConfigServiceSpec extends Specification implements DataTest, WorkflowS
     void "test validateWorkflowTestProperties() throws exception for invalid properties"() {
         given:
         Map<WorkflowTestProperty, String> workflowTestProperties = [
-                (WorkflowTestProperty.TEST_WORKFLOW_INPUT_DIR): '/correct/absolute/path',
-                (WorkflowTestProperty.TEST_WORKFLOW_RESULT_DIR): './wrong/relative/path',
+                (WorkflowTestProperty.TEST_WORKFLOW_INPUT_DIR): Paths.get("/correct", "absolute", "path").toString(),
+                (WorkflowTestProperty.TEST_WORKFLOW_RESULT_DIR): Paths.get("wrong", "relative", "path").toString(),
                 (WorkflowTestProperty.TEST_WORKFLOW_RODDY_SHARED_FILES_BASE_DIRECTORY): 'false',
                 (WorkflowTestProperty.TEST_WORKFLOW_RODDY_VIRTUAL_ENVS_DIRECTORY): '[multiple paths]',
                 (WorkflowTestProperty.TEST_WORKFLOW_QUEUE): 'not a single word',

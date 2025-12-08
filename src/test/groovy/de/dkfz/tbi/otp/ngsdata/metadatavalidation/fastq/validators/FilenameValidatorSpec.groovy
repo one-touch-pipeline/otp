@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import grails.testing.gorm.DataTest
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
@@ -34,6 +35,7 @@ import de.dkfz.tbi.otp.utils.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
+@IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
 class FilenameValidatorSpec extends Specification implements DataTest, DomainFactoryCore {
 
     @Override

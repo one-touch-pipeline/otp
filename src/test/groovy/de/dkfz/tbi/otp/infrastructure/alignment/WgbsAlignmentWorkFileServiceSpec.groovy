@@ -79,7 +79,7 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
         setupNonUuid()
 
         expect:
-        service.getDirectoryPath(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}"
+        service.getDirectoryPath(bamFile) == Paths.get("/base-dir", bamFile.workDirectoryName)
     }
 
     void "test getQADirectory"() {
@@ -87,7 +87,7 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
         setupNonUuid()
 
         expect:
-        service.getQADirectory(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}"
+        service.getQADirectory(bamFile) == Paths.get("/base-dir", bamFile.workDirectoryName, RoddyBamFileNames.QUALITY_CONTROL_DIR)
     }
 
     void "test getExecutionStoreDirectory"() {
@@ -95,7 +95,7 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
         setupNonUuid()
 
         expect:
-        service.getExecutionStoreDirectory(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${RoddyBamFile.RODDY_EXECUTION_STORE_DIR}"
+        service.getExecutionStoreDirectory(bamFile) == Paths.get("/base-dir", bamFile.workDirectoryName, RoddyBamFile.RODDY_EXECUTION_STORE_DIR)
     }
 
     void "test getBamFile"() {
@@ -103,7 +103,7 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
         setupNonUuid()
 
         expect:
-        service.getBamFile(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.bamFileName}"
+        service.getBamFile(bamFile) == Paths.get("/base-dir", bamFile.workDirectoryName, bamFile.bamFileName)
     }
 
     void "test getBaiFile"() {
@@ -111,7 +111,7 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
         setupNonUuid()
 
         expect:
-        service.getBaiFile(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.baiFileName}"
+        service.getBaiFile(bamFile) == Paths.get("/base-dir", bamFile.workDirectoryName, bamFile.baiFileName)
     }
 
     void "test getMd5sumFile"() {
@@ -119,7 +119,7 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
         setupNonUuid()
 
         expect:
-        service.getMd5sumFile(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.bamFileName}.md5"
+        service.getMd5sumFile(bamFile) == Paths.get("/base-dir", bamFile.workDirectoryName, "${bamFile.bamFileName}.md5")
     }
 
     void "test getMergedQADirectory"() {
@@ -127,7 +127,8 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
         setupNonUuid()
 
         expect:
-        service.getMergedQADirectory(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/${RoddyBamFileNames.MERGED_DIR}"
+        service.getMergedQADirectory(bamFile) ==
+                Paths.get("/base-dir", bamFile.workDirectoryName, RoddyBamFileNames.QUALITY_CONTROL_DIR, RoddyBamFileNames.MERGED_DIR)
     }
 
     void "test getMergedQAJsonFile"() {
@@ -135,8 +136,8 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
         setupNonUuid()
 
         expect:
-        service.getMergedQAJsonFile(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/" +
-                "${RoddyBamFileNames.MERGED_DIR}/${RoddyBamFileNames.QUALITY_CONTROL_JSON_FILE_NAME}"
+        service.getMergedQAJsonFile(bamFile) ==
+                Paths.get("/base-dir", bamFile.workDirectoryName, RoddyBamFileNames.QUALITY_CONTROL_DIR, RoddyBamFileNames.MERGED_DIR, RoddyBamFileNames.QUALITY_CONTROL_JSON_FILE_NAME)
     }
 
     void "test getSingleLaneQADirectories, no seq tracks"() {
@@ -155,8 +156,7 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
 
         SeqTrack seqTrack = bamFile.seqTracks.iterator()[0]
         updateRawSequenceFileNames(seqTrack)
-        Path dir = Paths.get("/base-dir/${bamFile.workDirectoryName}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/" +
-                "run${seqTrack.run.name}_${COMMON_PREFIX}")
+        Path dir = Paths.get("/base-dir", bamFile.workDirectoryName, RoddyBamFileNames.QUALITY_CONTROL_DIR, "run${seqTrack.run.name}_${COMMON_PREFIX}")
 
         expect:
         [(seqTrack): dir] == service.getSingleLaneQADirectories(bamFile)
@@ -172,7 +172,7 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
         bamFile.seqTracks.add(seqTrack)
         Map<SeqTrack, Path> expected = [:]
         bamFile.seqTracks.each {
-            Path dir = Paths.get("/base-dir/${bamFile.workDirectoryName}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/run${it.run.name}_${COMMON_PREFIX}")
+            Path dir = Paths.get("/base-dir", bamFile.workDirectoryName, RoddyBamFileNames.QUALITY_CONTROL_DIR, "run${it.run.name}_${COMMON_PREFIX}")
             expected.put((it), dir)
         }
 
@@ -186,8 +186,7 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
 
         SeqTrack seqTrack = bamFile.seqTracks.iterator()[0]
         updateRawSequenceFileNames(seqTrack)
-        Path file = Paths.get("/base-dir/${bamFile.workDirectoryName}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/" +
-                "run${seqTrack.run.name}_${COMMON_PREFIX}/${RoddyBamFileNames.QUALITY_CONTROL_JSON_FILE_NAME}")
+        Path file = Paths.get("/base-dir", bamFile.workDirectoryName, RoddyBamFileNames.QUALITY_CONTROL_DIR, "run${seqTrack.run.name}_${COMMON_PREFIX}", RoddyBamFileNames.QUALITY_CONTROL_JSON_FILE_NAME)
 
         expect:
         [(seqTrack): file] == service.getSingleLaneQAJsonFiles(bamFile)
@@ -200,7 +199,7 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
 
         Map<String, Path> expected = [:]
         bamFile.seqTracks.each {
-            Path dir = Paths.get("/base-dir/${bamFile.workDirectoryName}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/${it.libraryDirectoryName}")
+            Path dir = Paths.get("/base-dir", bamFile.workDirectoryName, RoddyBamFileNames.QUALITY_CONTROL_DIR, it.libraryDirectoryName)
             expected.put((it.libraryDirectoryName), dir)
         }
 
@@ -215,7 +214,7 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
 
         Map<String, Path> expected = [:]
         bamFile.seqTracks.each {
-            Path dir = Paths.get("/base-dir/${bamFile.workDirectoryName}/${WgbsAlignmentWorkFileService.METHYLATION_DIR}/${it.libraryDirectoryName}")
+            Path dir = Paths.get("/base-dir", bamFile.workDirectoryName, WgbsAlignmentWorkFileService.METHYLATION_DIR, it.libraryDirectoryName)
             expected.put((it.libraryDirectoryName), dir)
         }
 
@@ -230,7 +229,7 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
 
         Map<String, Path> expected = [:]
         bamFile.seqTracks.each {
-            Path dir = Paths.get("/base-dir/${bamFile.workDirectoryName}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/${it.libraryDirectoryName}/${RoddyBamFileNames.QUALITY_CONTROL_JSON_FILE_NAME}")
+            Path dir = Paths.get("/base-dir", bamFile.workDirectoryName, RoddyBamFileNames.QUALITY_CONTROL_DIR, it.libraryDirectoryName, RoddyBamFileNames.QUALITY_CONTROL_JSON_FILE_NAME)
             expected.put((it.libraryDirectoryName), dir)
         }
 
@@ -243,7 +242,7 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
         setupUuid()
 
         expect:
-        service.getDirectoryPath(bamFile).toString() == "/base-dir-uuid"
+        service.getDirectoryPath(bamFile) == Paths.get("/base-dir-uuid")
     }
 
     void "test getQADirectory for uuid structure"() {
@@ -251,7 +250,7 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
         setupUuid()
 
         expect:
-        service.getQADirectory(bamFile).toString() == "/base-dir-uuid/${RoddyBamFileNames.QUALITY_CONTROL_DIR}"
+        service.getQADirectory(bamFile) == Paths.get("/base-dir-uuid", RoddyBamFileNames.QUALITY_CONTROL_DIR)
     }
 
     void "test getExecutionStoreDirectory for uuid structure"() {
@@ -259,7 +258,7 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
         setupUuid()
 
         expect:
-        service.getExecutionStoreDirectory(bamFile).toString() == "/base-dir-uuid/${RoddyBamFile.RODDY_EXECUTION_STORE_DIR}"
+        service.getExecutionStoreDirectory(bamFile) == Paths.get("/base-dir-uuid", RoddyBamFile.RODDY_EXECUTION_STORE_DIR)
     }
 
     void "test getBamFile for uuid structure"() {
@@ -267,7 +266,7 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
         setupUuid()
 
         expect:
-        service.getBamFile(bamFile).toString() == "/base-dir-uuid/${bamFile.bamFileName}"
+        service.getBamFile(bamFile) == Paths.get("/base-dir-uuid", bamFile.bamFileName)
     }
 
     void "test getBaiFile for uuid structure"() {
@@ -275,7 +274,7 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
         setupUuid()
 
         expect:
-        service.getBaiFile(bamFile).toString() == "/base-dir-uuid/${bamFile.baiFileName}"
+        service.getBaiFile(bamFile) == Paths.get("/base-dir-uuid", bamFile.baiFileName)
     }
 
     void "test getMd5sumFile for uuid structure"() {
@@ -283,7 +282,7 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
         setupUuid()
 
         expect:
-        service.getMd5sumFile(bamFile).toString() == "/base-dir-uuid/${bamFile.bamFileName}.md5"
+        service.getMd5sumFile(bamFile) == Paths.get("/base-dir-uuid", "${bamFile.bamFileName}.md5")
     }
 
     void "test getMergedQADirectory for uuid structure"() {
@@ -291,7 +290,7 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
         setupUuid()
 
         expect:
-        service.getMergedQADirectory(bamFile).toString() == "/base-dir-uuid/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/${RoddyBamFileNames.MERGED_DIR}"
+        service.getMergedQADirectory(bamFile) == Paths.get("/base-dir-uuid", RoddyBamFileNames.QUALITY_CONTROL_DIR, RoddyBamFileNames.MERGED_DIR)
     }
 
     void "test getMergedQAJsonFile for uuid structure"() {
@@ -299,8 +298,8 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
         setupUuid()
 
         expect:
-        service.getMergedQAJsonFile(bamFile).toString() == "/base-dir-uuid/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/" +
-                "${RoddyBamFileNames.MERGED_DIR}/${RoddyBamFileNames.QUALITY_CONTROL_JSON_FILE_NAME}"
+        service.getMergedQAJsonFile(bamFile) == Paths.get("/base-dir-uuid", RoddyBamFileNames.QUALITY_CONTROL_DIR,
+                RoddyBamFileNames.MERGED_DIR, RoddyBamFileNames.QUALITY_CONTROL_JSON_FILE_NAME)
     }
 
     void "test getSingleLaneQADirectories for uuid structure, no seq tracks"() {
@@ -319,7 +318,7 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
 
         SeqTrack seqTrack = bamFile.seqTracks.iterator()[0]
         updateRawSequenceFileNames(seqTrack)
-        Path dir = Paths.get("/base-dir-uuid/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/" +
+        Path dir = Paths.get("/base-dir-uuid", RoddyBamFileNames.QUALITY_CONTROL_DIR,
                 "run${seqTrack.run.name}_${COMMON_PREFIX}")
 
         expect:
@@ -336,7 +335,7 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
         bamFile.seqTracks.add(seqTrack)
         Map<SeqTrack, Path> expected = [:]
         bamFile.seqTracks.each {
-            Path dir = Paths.get("/base-dir-uuid/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/run${it.run.name}_${COMMON_PREFIX}")
+            Path dir = Paths.get("/base-dir-uuid", RoddyBamFileNames.QUALITY_CONTROL_DIR, "run${it.run.name}_${COMMON_PREFIX}")
             expected.put((it), dir)
         }
 
@@ -350,7 +349,7 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
 
         SeqTrack seqTrack = bamFile.seqTracks.iterator()[0]
         updateRawSequenceFileNames(seqTrack)
-        Path file = Paths.get("/base-dir-uuid/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/" +
+        Path file = Paths.get("/base-dir-uuid", RoddyBamFileNames.QUALITY_CONTROL_DIR,
                 "run${seqTrack.run.name}_${COMMON_PREFIX}/${RoddyBamFileNames.QUALITY_CONTROL_JSON_FILE_NAME}")
 
         expect:
@@ -364,7 +363,7 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
 
         Map<String, Path> expected = [:]
         bamFile.seqTracks.each {
-            Path dir = Paths.get("/base-dir-uuid/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/${it.libraryDirectoryName}")
+            Path dir = Paths.get("/base-dir-uuid", RoddyBamFileNames.QUALITY_CONTROL_DIR, it.libraryDirectoryName)
             expected.put((it.libraryDirectoryName), dir)
         }
 
@@ -379,7 +378,7 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
 
         Map<String, Path> expected = [:]
         bamFile.seqTracks.each {
-            Path dir = Paths.get("/base-dir-uuid/${WgbsAlignmentWorkFileService.METHYLATION_DIR}/${it.libraryDirectoryName}")
+            Path dir = Paths.get("/base-dir-uuid", WgbsAlignmentWorkFileService.METHYLATION_DIR, it.libraryDirectoryName)
             expected.put((it.libraryDirectoryName), dir)
         }
 
@@ -394,7 +393,11 @@ class WgbsAlignmentWorkFileServiceSpec extends Specification implements ServiceU
 
         Map<String, Path> expected = [:]
         bamFile.seqTracks.each {
-            Path dir = Paths.get("/base-dir-uuid/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/${it.libraryDirectoryName}/${RoddyBamFileNames.QUALITY_CONTROL_JSON_FILE_NAME}")
+            Path dir = Paths.get(
+                    "/base-dir-uuid",
+                    RoddyBamFileNames.QUALITY_CONTROL_DIR,
+                    it.libraryDirectoryName,
+                    RoddyBamFileNames.QUALITY_CONTROL_JSON_FILE_NAME)
             expected.put((it.libraryDirectoryName), dir)
         }
 

@@ -72,7 +72,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         when:
         request.method = 'POST'
         controller.params.name = 'LibraryPreparationKit'
-        controller.params.adapterFile = '/asdf'
+        controller.params.adapterFile = "${File.separator}asdf"
         controller.params.reverseComplementAdapterSequence = 'GATC'
         controller.params.libraryPreparationKitService = controller.libraryPreparationKitService
         controller.createLibraryPreparationKit()

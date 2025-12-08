@@ -25,6 +25,7 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.exceptions.NotSupportedException
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
 /**
  * Represents a relative file system path.
@@ -58,7 +59,7 @@ class OtpPath {
     }
 
     private File getAbsolutePath(File path) {
-        if (!path.isAbsolute()) {
+        if (!OtpPathValidator.isValidAbsolutePath(path.toString())) {
             throw new NotSupportedException("${path} is not absolute.")
         }
         return new File(path.absolutePath, relativePath.path)

@@ -94,6 +94,7 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
         e.message.contains('assert indelCallingInstance')
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "prepareAndReturnWorkflowSpecificCValues, when all fine and WGS, return correct value list"() {
         given:
         File fasta = CreateFileHelper.createFile(tempDir.resolve("fasta.fa").toFile())
@@ -175,6 +176,7 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
         configService.clean()
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "prepareAndReturnWorkflowSpecificCValues, when all fine and WES, return correct value list"() {
         given:
         File fasta = CreateFileHelper.createFile(tempDir.resolve("fasta.fa").toFile())

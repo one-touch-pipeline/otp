@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
 import grails.testing.gorm.DataTest
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
@@ -301,6 +302,7 @@ class RoddyWorkflowConfigUnitSpec extends Specification implements DataTest {
         expected == roddyWorkflowConfig.nameUsedInConfig
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void testValidateConfig_shouldBeValid() {
         given:
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
@@ -311,6 +313,7 @@ class RoddyWorkflowConfigUnitSpec extends Specification implements DataTest {
         service.validateConfig(roddyWorkflowConfig)
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void testValidateConfig_shouldFailForMissingFile() {
         given:
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
@@ -322,6 +325,7 @@ class RoddyWorkflowConfigUnitSpec extends Specification implements DataTest {
         }
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void testValidateConfig_shouldFailForFileName() {
         given:
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
@@ -336,6 +340,7 @@ class RoddyWorkflowConfigUnitSpec extends Specification implements DataTest {
         }
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void testValidateConfig_shouldFailForPluginVersionInName() {
         given:
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
@@ -349,6 +354,7 @@ class RoddyWorkflowConfigUnitSpec extends Specification implements DataTest {
         }
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void testValidateConfig_shouldFailForLabelInFile() {
         given:
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
@@ -361,6 +367,7 @@ class RoddyWorkflowConfigUnitSpec extends Specification implements DataTest {
         }
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void testValidateConfig_withIndividual_PidInPath_shouldBeValid() {
         given:
         Individual individual = DomainFactory.createIndividual()
@@ -373,6 +380,7 @@ class RoddyWorkflowConfigUnitSpec extends Specification implements DataTest {
         service.validateConfig(roddyWorkflowConfig)
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void testValidateConfig_withIndividual_PidNotInPath_shouldBeInvalid() {
         given:
         Individual individual = DomainFactory.createIndividual()

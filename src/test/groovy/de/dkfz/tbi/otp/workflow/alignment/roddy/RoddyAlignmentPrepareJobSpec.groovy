@@ -57,7 +57,7 @@ class RoddyAlignmentPrepareJobSpec extends Specification implements DataTest, Pa
         ]
     }
 
-    static private final String DIRECTORY = "/tmp"
+    static private final String DIRECTORY = "${File.separator}tmp"
 
     private WorkflowStep workflowStep
     private WorkflowRun workflowRun

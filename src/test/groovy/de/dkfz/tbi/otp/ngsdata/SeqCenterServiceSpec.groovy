@@ -99,16 +99,16 @@ class SeqCenterServiceSpec extends Specification implements DataTest, DomainFact
         SeqCenter seqCenter = createSeqCenter()
 
         when:
-        seqCenterService.updateAutoImportDirectory(seqCenter, "/tmp")
+        seqCenterService.updateAutoImportDirectory(seqCenter, "${File.separator}tmp")
 
         then:
-        seqCenter.autoImportDir == "/tmp"
+        seqCenter.autoImportDir == "${File.separator}tmp"
     }
 
     void "test updateAutoImportable, when value is set then the object should have that value"() {
         given:
         SeqCenter seqCenter = createSeqCenter([
-                autoImportDir: "/old"
+                autoImportDir: "${File.separator}old"
         ])
 
         when:

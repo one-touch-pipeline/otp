@@ -43,7 +43,7 @@ class RawSequenceDataViewFileServiceSpec extends Specification implements DataTe
 
     RawSequenceDataViewFileService service
 
-    String seqDir = "/seq-dir"
+    String seqDir = Paths.get('/seq-dir')
 
     void setup() {
         service = new RawSequenceDataViewFileService()
@@ -74,17 +74,17 @@ class RawSequenceDataViewFileServiceSpec extends Specification implements DataTe
                 ]),
         ])
 
-        String expected = [
+        String expected = Paths.get(
                 seqDir,
                 seqType.dirName,
-                "view-by-pid",
+                'view-by-pid',
                 rawSequenceFile.individual.pid,
                 sampleTypeDirPart,
                 seqType.libraryLayoutDirName,
                 "run${rawSequenceFile.run.name}",
                 rawSequenceFile.fileType.vbpPath,
                 rawSequenceFile.vbpFileName,
-        ].join('/')
+        )
 
         return [
                 rawSequenceFile: rawSequenceFile,
@@ -109,8 +109,8 @@ class RawSequenceDataViewFileServiceSpec extends Specification implements DataTe
         'Control'  | null        | null   || 'control'
         'CONTROL'  | null        | null   || 'control'
         'CONTROL'  | 'anti-body' | null   || 'control-anti-body'
-        'CONTROL'  | null        | 'well' || 'control/well'
-        'CONTROL'  | 'anti-body' | 'well' || 'control-anti-body/well'
+        'CONTROL'  | null        | 'well' || Paths.get('control', 'well').toString()
+        'CONTROL'  | 'anti-body' | 'well' || Paths.get('control-anti-body', 'well').toString()
     }
 
     void "getFilePath, when datafile is an unaligned single cell bam file, then return expected path"() {
@@ -121,17 +121,17 @@ class RawSequenceDataViewFileServiceSpec extends Specification implements DataTe
                 seqTrack    : seqTrack,
         ])
 
-        String expected = [
+        String expected = Paths.get(
                 seqDir,
                 seqTrack.seqType.dirName,
-                "view-by-pid",
+                'view-by-pid',
                 seqTrack.individual.pid,
                 seqTrack.sampleType.dirName,
                 seqTrack.seqType.libraryLayoutDirName,
                 "run${seqTrack.run.name}",
                 rawSequenceFile.fileType.vbpPath,
                 rawSequenceFile.vbpFileName,
-        ].join('/')
+        )
 
         when:
         String path = service.getFilePath(rawSequenceFile)

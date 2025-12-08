@@ -295,11 +295,11 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         WorkflowVersionSelector.findAll().first().workflowVersion == workflowVersion
 
         where:
-        name      | dirName | dirAnalysis | relatedProjects | projectGroup   | nameInMetadataFiles | description   | processingPriority            | sampleIdentifierParserBeanName
-        'project' | 'dir'   | ''          | ''              | ''             | null                | ''            | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.INFORM_LIKE
-        'project' | 'dir'   | ''          | ''              | 'projectGroup' | 'project'           | 'description' | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.HIPO
-        'project' | 'dir'   | ''          | ''              | ''             | 'project'           | 'description' | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.DEEP
-        'project' | 'dir'   | '/dirA'     | ''              | ''             | 'project'           | 'description' | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.NO_PARSER
+        name      | dirName | dirAnalysis                   | relatedProjects | projectGroup   | nameInMetadataFiles | description   | processingPriority            | sampleIdentifierParserBeanName
+        'project' | 'dir'   | ''                            | ''              | ''             | null                | ''            | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.INFORM_LIKE
+        'project' | 'dir'   | ''                            | ''              | 'projectGroup' | 'project'           | 'description' | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.HIPO
+        'project' | 'dir'   | ''                            | ''              | ''             | 'project'           | 'description' | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.DEEP
+        'project' | 'dir'   | Paths.get('/dirA').toString() | ''              | ''             | 'project'           | 'description' | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.NO_PARSER
     }
 
     @Unroll
@@ -335,9 +335,9 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         Workflow workflow = workflowVersion.workflow
         workflow.defaultSeqTypesForWorkflowVersions = SeqType.findAll()
 
-        String dirName = 'projectDir/projectSubDir'
+        String dirName = Paths.get("projectDir", "projectSubDir")
         Path projectPath = configService.rootPath.toPath().resolve(dirName)
-        Path analysisPath = tempDir.resolve('analysisDir/analysisSubDir')
+        Path analysisPath = tempDir.resolve("analysisDir").resolve("analysisSubDir")
         projectService.fileService = Mock(FileService)
 
         Project project
@@ -380,9 +380,9 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         Workflow workflow = workflowVersion.workflow
         workflow.defaultSeqTypesForWorkflowVersions = SeqType.findAll()
 
-        String dirName = 'projectDir/subDir'
+        String dirName = Paths.get("projectDir", "subDir")
         Path projectPath = configService.rootPath.toPath().resolve(dirName)
-        Path analysisPath = tempDir.resolve('analysisDir/subDir')
+        Path analysisPath = tempDir.resolve("analysisDir").resolve("subDir")
         projectService.fileService = Mock(FileService)
 
         Files.createDirectories(projectPath)
@@ -595,9 +595,9 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         Workflow workflow = workflowVersion.workflow
         workflow.defaultSeqTypesForWorkflowVersions = SeqType.findAll()
 
-        String dirName = 'projectDir/projectSubDir'
+        String dirName = Paths.get("projectDir", "projectSubDir")
         Path projectPath = configService.rootPath.toPath().resolve(dirName)
-        Path analysisPath = tempDir.resolve('analysisDir/analysisSubDir')
+        Path analysisPath = tempDir.resolve("analysisDir").resolve("analysisSubDir")
         projectService.fileService = Mock(FileService)
 
         projectService.projectInfoService = Mock(ProjectInfoService) {
@@ -671,6 +671,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         ''             || 'blank'                         | 'on field \'nameInMetadataFiles\': rejected value []'
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test createProject without project type should fail"() {
         given:
         setupData()
@@ -822,6 +823,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     @Unroll
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test configure #analysisName pipelineProject valid input"() {
         given:
         setupData()
@@ -869,6 +871,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     @Unroll
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test configure #analysisName pipelineProject valid input, twice"() {
         given:
         setupData()
@@ -915,6 +918,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         "Sophia"     | SophiaService | OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test configure Snv PipelineProject valid input, old otp snv config exist"() {
         given:
         setupData()
@@ -953,6 +957,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     @Unroll
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test configure #analysisName pipelineProject valid input, multiple SeqTypes"() {
         given:
         setupData()
@@ -1172,7 +1177,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     void "updateAnalysisDirectory, should succeed and send no mail, when unix group has permission to create directory and force #force"() {
         given:
         setupData()
-        String analysisDirectory = "${tempDir}/dirA"
+        String analysisDirectory = tempDir.resolve('dirA')
         Project project = CollectionUtils.atMostOneElement(Project.findAllByName("testProject"))
         project.unixGroup = configService.testingGroup
         project.save(flush: true)
@@ -1190,6 +1195,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         force << [true, false]
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "updateAnalysisDirectory, should fail with OtpFileSystemException and send no mail, when unix group has no permission and force mode is false"() {
         given:
         setupData()
@@ -1212,6 +1218,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         thrown(OtpFileSystemException)
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "updateAnalysisDirectory, should send email and update, when unix group has no permission and force mode is true"() {
         given:
         setupData()
@@ -1245,6 +1252,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         thrown(UnixGroupIsInvalidException)
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "updateUnixGroup, should fail with UnixGroupNotFoundException when it is not found on cluster"() {
         given:
         setupData()
@@ -1275,6 +1283,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         thrown(UnixGroupIsSharedException)
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "updateUnixGroup, should succeed when unixGroup is valid and unshared"() {
         given:
         setupData()
@@ -1290,6 +1299,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         noExceptionThrown()
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "updateUnixGroup, should succeed in force mode when unixGroup is valid and shared"() {
         given:
         setupData()

@@ -53,7 +53,7 @@ class DataFilesWithAbsolutePathSpec extends Specification {
 
         when:
         Path dataFilePath1 = directoryStructure.getDataFilePath(context, new ValueTuple(
-                [(MetaDataColumn.FASTQ_FILE.name()): "${directory.path}/foo.fastq"], validCells))
+                [(MetaDataColumn.FASTQ_FILE.name()): Paths.get(directory.path, 'foo.fastq').toString()], validCells))
 
         then:
         context.problems.isEmpty()
@@ -62,7 +62,7 @@ class DataFilesWithAbsolutePathSpec extends Specification {
 
         when:
         Path dataFilePath2 = directoryStructure.getDataFilePath(context, new ValueTuple(
-                [(MetaDataColumn.FASTQ_FILE.name()): "${directory.path}/foo(bar).fastq"], invalidCells))
+                [(MetaDataColumn.FASTQ_FILE.name()): Paths.get(directory.path, 'foo(bar).fastq').toString()], invalidCells))
 
         then:
         dataFilePath2 == null

@@ -83,9 +83,9 @@ class TestConfigService extends ConfigService {
             ]
         }
         otpProperties += [
-                (OtpProperty.PATH_PROJECT_ROOT)     : TestCase.uniqueNonExistentPath.path + '/root_path',
-                (OtpProperty.PATH_PROCESSING_ROOT)  : TestCase.uniqueNonExistentPath.path + '/processing_root_path',
-                (OtpProperty.PATH_CLUSTER_LOGS_OTP) : TestCase.uniqueNonExistentPath.path + '/logging_root_path',
+                (OtpProperty.PATH_PROJECT_ROOT)     : Paths.get(TestCase.uniqueNonExistentPath.path, 'root_path').toString(),
+                (OtpProperty.PATH_PROCESSING_ROOT)  : Paths.get(TestCase.uniqueNonExistentPath.path, 'processing_root_path').toString(),
+                (OtpProperty.PATH_CLUSTER_LOGS_OTP) : Paths.get(TestCase.uniqueNonExistentPath.path, 'logging_root_path').toString(),
                 (OtpProperty.OIDC_ENABLED)          : false,
                 (OtpProperty.OIDC_CLIENT)           : '-',
                 (OtpProperty.OIDC_REDIRECT_URI)     : '-',

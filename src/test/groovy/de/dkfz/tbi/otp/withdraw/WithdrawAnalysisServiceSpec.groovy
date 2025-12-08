@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.withdraw
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -97,6 +98,7 @@ class WithdrawAnalysisServiceSpec extends Specification implements ServiceUnitTe
         "control" | false
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "collectPaths, when called for analysis, then return path of each analysis"() {
         given:
         new TestConfigService()

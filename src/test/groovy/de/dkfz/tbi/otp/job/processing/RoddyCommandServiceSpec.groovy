@@ -30,8 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.Individual
 
-import java.nio.file.Path
-import java.nio.file.Paths
+import java.nio.file.*
 
 class RoddyCommandServiceSpec extends Specification implements ServiceUnitTest<RoddyCommandService>, DataTest, DomainFactoryCore {
 
@@ -49,9 +48,9 @@ class RoddyCommandServiceSpec extends Specification implements ServiceUnitTest<R
 
     void "test createRoddyCommand"() {
         given:
-        String roddyPath = "/roddy"
-        String applicationIni = "/etc/appl.ini"
-        String featureToggles = "/data/feturetoggle.ini"
+        String roddyPath = Paths.get('/roddy')
+        String applicationIni = Paths.get('/etc', 'appl.ini')
+        String featureToggles = Paths.get('/data', 'feturetoggle.ini')
         findOrCreateProcessingOption(ProcessingOption.OptionName.RODDY_PATH, roddyPath)
         findOrCreateProcessingOption(ProcessingOption.OptionName.RODDY_APPLICATION_INI, applicationIni)
         findOrCreateProcessingOption(ProcessingOption.OptionName.RODDY_FEATURE_TOGGLES_CONFIG_PATH, featureToggles)
@@ -63,7 +62,7 @@ class RoddyCommandServiceSpec extends Specification implements ServiceUnitTest<R
                 "--para=meters",
         ]
 
-        String expected = "\n${roddyPath}/roddy.sh rerun config@analysis ${individual.pid} --useconfig=${applicationIni} " +
+        String expected = "\n${Paths.get(roddyPath, "roddy.sh")} rerun config@analysis ${individual.pid} --useconfig=${applicationIni} " +
                 "--usefeaturetoggleconfig=${featureToggles} --configurationDirectories=${confDir} --add=itional --para=meters"
 
         expect:

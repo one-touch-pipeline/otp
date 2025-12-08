@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import spock.lang.IgnoreIf
+
 import de.dkfz.tbi.otp.AbstractIntegrationSpecWithoutRollbackAnnotation
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
@@ -51,6 +53,7 @@ class RawSequenceFileConsistencyCheckerIntegrationSpec extends AbstractIntegrati
 
     // false positives, since rule can not recognize calling class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test setFileExistsForAllRawSequenceFiles"() {
         given:
         setupData()

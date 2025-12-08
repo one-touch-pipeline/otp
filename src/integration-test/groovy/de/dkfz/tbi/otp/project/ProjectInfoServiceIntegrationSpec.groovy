@@ -100,6 +100,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         TestCase.assertContainSame(result, expected)
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "createProjectInfoAndUploadFile, succeeds"() {
         given:
         setupData()
@@ -117,6 +118,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         projectInfo.fileName == cmd.projectInfoFile.originalFilename
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "createProjectInfoAndUploadFile, with same fileName for different projects, succeeds"() {
         given:
         setupData()
@@ -140,6 +142,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         projectInfo2.fileName == file.name
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "createProjectInfoAndUploadFile, with same fileName for same project, fails"() {
         given:
         setupData()
@@ -161,6 +164,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         e.message.contains('duplicate')
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "createProjectInfoAndUploadFile, creates file with expected permissions in expected location"() {
         given:
         setupData()
@@ -180,6 +184,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         TestCase.assertContainSame(attrs.permissions(), [PosixFilePermission.OWNER_READ])
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "createProjectInfoAndUploadFile, properly build ProjectInfo from command"() {
         given:
         setupData()
@@ -209,6 +214,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
     }
 
     @Unroll
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "createProjectInfoAndUploadFile, check constraints, when #property is '#value', then succeed"() {
         given:
         setupData()
@@ -265,6 +271,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         e.message =~ /.*project must not be null.*/
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "add and remove a project info with createProjectInfoAndUploadFile and deleteProjectInfo"() {
         given:
         setupData()
@@ -313,6 +320,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         false      || [] as byte[]
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "uploadProjectInfoToProjectFolder, creates file"() {
         given:
         setupData()

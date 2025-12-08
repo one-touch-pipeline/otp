@@ -25,6 +25,7 @@ import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
@@ -47,17 +48,15 @@ class ExternalAlignmentWorkFileServiceSpec extends Specification
     }
 
     private ExternallyProcessedBamFile bamFile
-    private String testDir
     private String importDir
 
     void setup() {
-        importDir = "/path/to/bam/file"
-        testDir = "/base-dir"
+        importDir = TestCase.uniqueNonExistentPath
     }
 
     void setupNonUuid(int count = 1) {
         String bamName = "bamFile.bam"
-        bamFile = createBamFile(fileName: bamName, importedFrom: "${importDir}/${bamName}")
+        bamFile = createBamFile(fileName: bamName, importedFrom: Paths.get(importDir, bamName))
         service.abstractBamFileService = Mock(AbstractBamFileService) {
             count * getBaseDirectory(_) >> Paths.get("/base-dir")
         }
@@ -67,7 +66,7 @@ class ExternalAlignmentWorkFileServiceSpec extends Specification
         String bamName = "bamFileUuid.bam"
         bamFile = createBamFile([
                 fileName        : bamName,
-                importedFrom    : "${importDir}/${bamName}",
+                importedFrom    : Paths.get(importDir, bamName),
                 workflowArtefact: createWorkflowArtefact([
                         producedBy: createWorkflowRun([
                                 workFolder: createWorkFolder(),
@@ -84,7 +83,7 @@ class ExternalAlignmentWorkFileServiceSpec extends Specification
         setupNonUuid()
 
         expect:
-        service.getBamFile(bamFile).toString() == "/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}/${bamFile.bamFileName}"
+        service.getBamFile(bamFile) == Paths.get("/base-dir", "nonOTP", "analysisImport_${bamFile.referenceGenome.name}", bamFile.bamFileName)
     }
 
     void "test getBaiFile"() {
@@ -92,7 +91,7 @@ class ExternalAlignmentWorkFileServiceSpec extends Specification
         setupNonUuid()
 
         expect:
-        service.getBaiFile(bamFile).toString() == "/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}/${bamFile.baiFileName}"
+        service.getBaiFile(bamFile) == Paths.get("/base-dir", "nonOTP", "analysisImport_${bamFile.referenceGenome.name}", bamFile.baiFileName)
     }
 
     void "test getFurtherFiles"() {
@@ -106,7 +105,7 @@ class ExternalAlignmentWorkFileServiceSpec extends Specification
         bamFile.furtherFiles = files as Set
 
         List<Path> expected = files.collect {
-            Paths.get("/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}/${it}")
+            Paths.get("/base-dir", "nonOTP", "analysisImport_${bamFile.referenceGenome.name}", it)
         }
 
         expect:
@@ -118,8 +117,8 @@ class ExternalAlignmentWorkFileServiceSpec extends Specification
         setupNonUuid()
 
         expect:
-        service.getBamMaxReadLengthFile(bamFile).toString() ==
-                "/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}/${bamFile.bamFileName}.maxReadLength"
+        service.getBamMaxReadLengthFile(bamFile) ==
+                Paths.get("/base-dir", "nonOTP", "analysisImport_${bamFile.referenceGenome.name}", "${bamFile.bamFileName}.maxReadLength")
     }
 
     void "test getNonOtpFolder"() {
@@ -127,7 +126,7 @@ class ExternalAlignmentWorkFileServiceSpec extends Specification
         setupNonUuid()
 
         expect:
-        service.getNonOtpFolder(bamFile).toString() == "/base-dir/nonOTP"
+        service.getNonOtpFolder(bamFile) == Paths.get("/base-dir", "nonOTP")
     }
 
     void "test getImportFolder"() {
@@ -135,7 +134,7 @@ class ExternalAlignmentWorkFileServiceSpec extends Specification
         setupNonUuid()
 
         expect:
-        service.getDirectoryPath(bamFile).toString() == "/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}"
+        service.getDirectoryPath(bamFile) == Paths.get("/base-dir", "nonOTP", "analysisImport_${bamFile.referenceGenome.name}")
     }
 
     void "test getBamFile for uuid structure"() {
@@ -143,7 +142,7 @@ class ExternalAlignmentWorkFileServiceSpec extends Specification
         setupUuid()
 
         expect:
-        service.getBamFile(bamFile).toString() == "/base-dir-uuid/${bamFile.bamFileName}"
+        service.getBamFile(bamFile) == Paths.get("/base-dir-uuid", bamFile.bamFileName)
     }
 
     void "test getBaiFile for uuid structure"() {
@@ -151,7 +150,7 @@ class ExternalAlignmentWorkFileServiceSpec extends Specification
         setupUuid()
 
         expect:
-        service.getBaiFile(bamFile).toString() == "/base-dir-uuid/${bamFile.baiFileName}"
+        service.getBaiFile(bamFile) == Paths.get("/base-dir-uuid", bamFile.baiFileName)
     }
 
     void "test getFurtherFiles for uuid structure"() {
@@ -165,7 +164,7 @@ class ExternalAlignmentWorkFileServiceSpec extends Specification
         bamFile.furtherFiles = files as Set
 
         List<Path> expected = files.collect {
-            Paths.get("/base-dir-uuid/${it}")
+            Paths.get("/base-dir-uuid", it)
         }
 
         expect:
@@ -177,8 +176,7 @@ class ExternalAlignmentWorkFileServiceSpec extends Specification
         setupUuid()
 
         expect:
-        service.getBamMaxReadLengthFile(bamFile).toString() ==
-                "/base-dir-uuid/${bamFile.bamFileName}.maxReadLength"
+        service.getBamMaxReadLengthFile(bamFile) == Paths.get("/base-dir-uuid", "${bamFile.bamFileName}.maxReadLength")
     }
 
     void "test getNonOtpFolder for uuid structure"() {
@@ -186,7 +184,7 @@ class ExternalAlignmentWorkFileServiceSpec extends Specification
         setupUuid()
 
         expect:
-        service.getNonOtpFolder(bamFile).toString() == "/base-dir-uuid"
+        service.getNonOtpFolder(bamFile) == Paths.get("/base-dir-uuid")
     }
 
     void "test getImportFolder for uuid structure"() {
@@ -194,6 +192,6 @@ class ExternalAlignmentWorkFileServiceSpec extends Specification
         setupUuid()
 
         expect:
-        service.getDirectoryPath(bamFile).toString() == "/base-dir-uuid"
+        service.getDirectoryPath(bamFile) == Paths.get("/base-dir-uuid")
     }
 }

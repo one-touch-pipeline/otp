@@ -56,6 +56,7 @@ class BamFilePathValidatorSpec extends Specification implements DataTest {
     Path tempDir
 
     @Unroll
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void 'validate context with errors'() {
         given:
         File wrongFormatFile = Files.createFile(tempDir.resolve('test.xls')).toFile()

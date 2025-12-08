@@ -25,6 +25,7 @@ import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 
@@ -45,9 +46,9 @@ class ExternalAlignmentSourceFileServiceSpec extends Specification implements Se
     String importDir
 
     void setup() {
-        importDir = "/path/to/bam/file"
+        importDir = TestCase.uniqueNonExistentPath
         String bamName = "bamFile.bam"
-        bamFile = createBamFile(fileName: bamName, importedFrom: "${importDir}/${bamName}")
+        bamFile = createBamFile(fileName: bamName, importedFrom: Paths.get(importDir, bamName))
         service.abstractBamFileService = Mock(AbstractBamFileService) {
             getBaseDirectory(_) >> Paths.get("/base-dir")
         }
@@ -58,16 +59,16 @@ class ExternalAlignmentSourceFileServiceSpec extends Specification implements Se
 
     void "test getBamFile"() {
         expect:
-        service.getBamFile(bamFile).toString() == "${importDir}/${bamFile.bamFileName}"
+        service.getBamFile(bamFile) == Paths.get(importDir, bamFile.bamFileName)
     }
 
     void "test getBaiFile"() {
         expect:
-        service.getBaiFile(bamFile).toString() == "${importDir}/${bamFile.baiFileName}"
+        service.getBaiFile(bamFile) == Paths.get(importDir, bamFile.baiFileName)
     }
 
     void "test getDirectoryPath"() {
         expect:
-        service.getDirectoryPath(bamFile).toString() == "${importDir}"
+        service.getDirectoryPath(bamFile) == Paths.get(importDir)
     }
 }

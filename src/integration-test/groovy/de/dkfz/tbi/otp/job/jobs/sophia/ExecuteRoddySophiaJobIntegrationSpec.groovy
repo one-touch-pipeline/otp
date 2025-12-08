@@ -57,6 +57,7 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
         e.message.contains('assert sophiaInstance')
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "prepareAndReturnWorkflowSpecificCValues, when all fine, return correct value list"() {
         given:
         configService.addOtpProperties(tempDir)

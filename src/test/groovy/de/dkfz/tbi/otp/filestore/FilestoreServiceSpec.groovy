@@ -51,7 +51,7 @@ class FilestoreServiceSpec extends Specification implements ServiceUnitTest<File
 
     void setup() {
         baseFolder = createBaseFolder([
-                path: "/test"
+                path: Paths.get("/test")
         ])
         workFolder = createWorkFolder([
                 baseFolder: baseFolder

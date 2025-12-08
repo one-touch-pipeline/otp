@@ -28,9 +28,10 @@ import spock.lang.*
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.filestore.FilestoreService
+import de.dkfz.tbi.otp.filestore.*
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.*
@@ -44,6 +45,9 @@ class WesRunServiceSpec extends Specification implements ServiceUnitTest<WesRunS
                 WesRunLog,
                 WesLog,
                 WorkflowStep,
+                WorkflowRun,
+                WorkFolder,
+                BaseFolder,
         ]
     }
 
@@ -87,7 +91,7 @@ class WesRunServiceSpec extends Specification implements ServiceUnitTest<WesRunS
 
     void "getReportPath, when report file exists, returns correct path"() {
         given:
-        WesRun wesRun = createWesRun([subPath: "subdir"])
+        WesRun wesRun = createWesRun([workflowStep: createWorkflowStep([workflowRun: createWorkflowRun([workFolder: createWorkFolder()])]), subPath: "subdir"])
         Path mockWorkFolder = Paths.get("/work/folder")
         Path mockSubPath = mockWorkFolder.resolve("subdir")
         reportFilePath = mockSubPath.resolve("report-20252034.html")
@@ -109,7 +113,7 @@ class WesRunServiceSpec extends Specification implements ServiceUnitTest<WesRunS
 
     void "getReportFileContent, when valid path and readable file, returns expected content"() {
         given:
-        WesRun wesRun = createWesRun([subPath: "subdir"])
+        WesRun wesRun = createWesRun([workflowStep: createWorkflowStep([workflowRun: createWorkflowRun([workFolder: createWorkFolder()])]), subPath: "subdir"])
         String expectedContent = "<html>Report content</html>"
 
         and: 'create mock report file with expected content'
@@ -141,7 +145,10 @@ class WesRunServiceSpec extends Specification implements ServiceUnitTest<WesRunS
     @Unroll
     void "getReportFileContent, when #scenario, throws #exceptionClass.simpleName with correct message"() {
         given:
-        WesRun wesRun = createWesRun([id: 123L, subPath: "test-subdir"])
+        WesRun wesRun = createWesRun([
+            id         : 123L,
+            workflowStep: createWorkflowStep([
+                workflowRun: createWorkflowRun([workFolder: createWorkFolder()])]), subPath: "test-subdir"])
 
         and: 'mock the file structure'
         Path mockWorkFolder = tempDir.resolve("workFolder")
@@ -209,16 +216,16 @@ class WesRunServiceSpec extends Specification implements ServiceUnitTest<WesRunS
         result == expected
 
         where:
-        state                     || expected
-        State.COMPLETE            || true
-        State.EXECUTOR_ERROR      || true
-        State.SYSTEM_ERROR        || true
-        State.RUNNING             || false
-        State.PAUSED              || false
-        State.CANCELED            || false
-        State.INITIALIZING        || false
-        State.QUEUED              || false
-        State.UNKNOWN             || false
+        state                || expected
+        State.COMPLETE       || true
+        State.EXECUTOR_ERROR || true
+        State.SYSTEM_ERROR   || true
+        State.RUNNING        || false
+        State.PAUSED         || false
+        State.CANCELED       || false
+        State.INITIALIZING   || false
+        State.QUEUED         || false
+        State.UNKNOWN        || false
     }
 
     void "hasReports, when wesRunLog is null, returns false"() {
@@ -252,19 +259,19 @@ class WesRunServiceSpec extends Specification implements ServiceUnitTest<WesRunS
         result == expected
 
         where:
-        monitorStatus                    | wesRunState           || expected
-        WesRun.MonitorState.CHECKING     | State.RUNNING         || "CHECKING"
-        WesRun.MonitorState.FINISHED     | State.COMPLETE        || "FINISHED/COMPLETE"
-        WesRun.MonitorState.FINISHED     | State.EXECUTOR_ERROR  || "FINISHED/EXECUTOR_ERROR"
-        WesRun.MonitorState.FINISHED     | null                  || "FINISHED/UNKNOWN"
+        monitorStatus                | wesRunState          || expected
+        WesRun.MonitorState.CHECKING | State.RUNNING        || "CHECKING"
+        WesRun.MonitorState.FINISHED | State.COMPLETE       || "FINISHED/COMPLETE"
+        WesRun.MonitorState.FINISHED | State.EXECUTOR_ERROR || "FINISHED/EXECUTOR_ERROR"
+        WesRun.MonitorState.FINISHED | null                 || "FINISHED/UNKNOWN"
     }
 
     void "getCumulatedWesRunsStatus, with multiple WesRuns, returns highest priority status"() {
         given:
         List<WesRunStateDto> wesRunStates = [
-            new WesRunStateDto(WesRun.MonitorState.FINISHED, State.COMPLETE),       // Priority: 1 + 0 = 1
-            new WesRunStateDto(WesRun.MonitorState.CHECKING, State.RUNNING),        // Priority: 3 + 0 = 3 (highest)
-            new WesRunStateDto(WesRun.MonitorState.FINISHED, State.EXECUTOR_ERROR), // Priority: 1 + 1 = 2
+                new WesRunStateDto(WesRun.MonitorState.FINISHED, State.COMPLETE),       // Priority: 1 + 0 = 1
+                new WesRunStateDto(WesRun.MonitorState.CHECKING, State.RUNNING),        // Priority: 3 + 0 = 3 (highest)
+                new WesRunStateDto(WesRun.MonitorState.FINISHED, State.EXECUTOR_ERROR), // Priority: 1 + 1 = 2
         ]
 
         when:

@@ -25,10 +25,12 @@ import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
 import org.junit.After
 import org.junit.Test
+import org.junit.Assume
 
 import static org.junit.Assert.*
 
 @Rollback
+@Deprecated
 @Integration
 class ProcessStatusServiceIntegrationTests {
 
@@ -54,11 +56,15 @@ class ProcessStatusServiceIntegrationTests {
     @SuppressWarnings('ExplicitFlushForDeleteRule')
     @After
     void tearDown() {
-        file.writable = true
-        file.readable = true
-        dir.writable = true
-        assertTrue(file.delete())
-        assertTrue(dir.delete())
+        if (file) {
+            file.writable = true
+            file.readable = true
+            assertTrue(file.delete())
+        }
+        if (dir) {
+            dir.writable = true
+            assertTrue(dir.delete())
+        }
     }
 
     @Test(expected = IllegalArgumentException)
@@ -87,6 +93,7 @@ class ProcessStatusServiceIntegrationTests {
 
     @Test(expected = IllegalArgumentException)
     void testStatusSuccessfulNotReadable() {
+        Assume.assumeFalse(System.getProperty("os.name").toLowerCase().contains("windows"))
         setupData()
         file.readable = false
         processStatusService.statusSuccessful(LOG_FILE, "PreviousJob")

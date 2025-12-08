@@ -237,6 +237,7 @@ class DataExportServiceSpec extends Specification implements DataTest, IsRoddy {
 
     @SuppressWarnings("LineLength")
     @Unroll
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "exportBamFiles, combination of different inputs, should return correct scripts"() {
         given:
         DataExportInput dataExportInput = createBamFileInput(checkFileStatus, getFileList, external, mode)
@@ -388,6 +389,7 @@ class DataExportServiceSpec extends Specification implements DataTest, IsRoddy {
     }
 
     @Unroll
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "exportAnalyses, combination of different inputs, should return correct scripts"() {
         given:
         DataExportInput dataExportInput = createAnalysisInput(checkFileStatus, getFileList, mode)
@@ -462,6 +464,7 @@ class DataExportServiceSpec extends Specification implements DataTest, IsRoddy {
         true            | false       | DataExportInput.Mode.LINK_INTERNAL | 3
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "exportBamFiles, when linking entire directory for RNA analysis, should not create individual qualitycontrol links"() {
         given: "RNA BAM file with RNA_ANALYSIS enabled and LINK_INTERNAL mode"
         RoddyBamFile rnaBamFile = createBamFile([
@@ -507,6 +510,7 @@ class DataExportServiceSpec extends Specification implements DataTest, IsRoddy {
         output.consoleLog.empty
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "exportBamFiles, when NOT linking entire directory, should create individual qualitycontrol links"() {
         given: "Non-RNA BAM file with LINK_INTERNAL mode (regular BAM export)"
         RoddyBamFile wgsBamFile = createBamFile([

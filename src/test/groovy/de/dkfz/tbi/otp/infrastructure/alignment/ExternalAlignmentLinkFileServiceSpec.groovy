@@ -25,6 +25,7 @@ import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.externalBam.ExternalBamFactory
 import de.dkfz.tbi.otp.utils.HelperUtils
@@ -43,14 +44,10 @@ class ExternalAlignmentLinkFileServiceSpec extends Specification implements Serv
     }
 
     ExternallyProcessedBamFile bamFile
-    String testDir
-    String importDir
 
     void setup() {
-        importDir = "/path/to/bam/file"
         String bamName = "bamFile.bam"
-        bamFile = createBamFile(fileName: bamName, importedFrom: "${importDir}/${bamName}")
-        testDir = "/base-dir"
+        bamFile = createBamFile(fileName: bamName, importedFrom: Paths.get(TestCase.uniqueNonExistentPath.path, bamName))
         service.abstractBamFileService = Mock(AbstractBamFileService) {
             getBaseDirectory(_) >> Paths.get("/base-dir")
         }
@@ -58,12 +55,12 @@ class ExternalAlignmentLinkFileServiceSpec extends Specification implements Serv
 
     void "test getBamFile"() {
         expect:
-        service.getBamFile(bamFile) == Paths.get("/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}").resolve(bamFile.bamFileName)
+        service.getBamFile(bamFile) == Paths.get("/base-dir", "nonOTP", "analysisImport_${bamFile.referenceGenome.name}", bamFile.bamFileName)
     }
 
     void "test getBaiFile"() {
         expect:
-        service.getBaiFile(bamFile) == Paths.get("/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}").resolve(bamFile.baiFileName)
+        service.getBaiFile(bamFile) == Paths.get("/base-dir", "nonOTP", "analysisImport_${bamFile.referenceGenome.name}", bamFile.baiFileName)
     }
 
     void "test getFurtherFiles"() {
@@ -75,7 +72,7 @@ class ExternalAlignmentLinkFileServiceSpec extends Specification implements Serv
         bamFile.furtherFiles = files as Set
 
         List<Path> expected = files.collect {
-            Paths.get("/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}").resolve(it)
+            Paths.get("/base-dir", "nonOTP", "analysisImport_${bamFile.referenceGenome.name}", it)
         }
 
         expect:
@@ -85,17 +82,17 @@ class ExternalAlignmentLinkFileServiceSpec extends Specification implements Serv
     void "test getBamMaxReadLengthFile"() {
         expect:
         service.getBamMaxReadLengthFile(bamFile) ==
-                Paths.get("/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}").resolve("${bamFile.bamFileName}.maxReadLength")
+                Paths.get("/base-dir", "nonOTP", "analysisImport_${bamFile.referenceGenome.name}", "${bamFile.bamFileName}.maxReadLength")
     }
 
     void "test getNonOtpFolder"() {
         expect:
-        service.getNonOtpFolder(bamFile) == Paths.get("/base-dir/nonOTP")
+        service.getNonOtpFolder(bamFile) == Paths.get("/base-dir", "nonOTP")
     }
 
     void "test getImportFolder"() {
         expect:
-        service.getDirectoryPath(bamFile) == Paths.get("/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}")
+        service.getDirectoryPath(bamFile) == Paths.get("/base-dir", "nonOTP", "analysisImport_${bamFile.referenceGenome.name}")
     }
 
     void "test getPathForFurtherProcessing, should return final directory"() {
@@ -109,7 +106,7 @@ class ExternalAlignmentLinkFileServiceSpec extends Specification implements Serv
 
         expect:
         service.getPathForFurtherProcessing(bamFile) ==
-                Paths.get("/base-dir/nonOTP/analysisImport_${bamFile.referenceGenome.name}").resolve(bamFile.bamFileName)
+                Paths.get("/base-dir", "nonOTP", "analysisImport_${bamFile.referenceGenome.name}", bamFile.bamFileName)
     }
 
     void "test getPathForFurtherProcessing, when not set in mergingWorkPackage, should throw exception"() {

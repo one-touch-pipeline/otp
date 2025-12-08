@@ -32,6 +32,9 @@ import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.Individual
 import de.dkfz.tbi.otp.project.Project
 
+import java.nio.file.Path
+import java.nio.file.Paths
+
 class DataProcessingFilesServiceSpec extends Specification implements DataTest, DomainFactoryCore {
 
     @Override
@@ -56,10 +59,10 @@ class DataProcessingFilesServiceSpec extends Specification implements DataTest, 
         String projectDir = project.dirName
         String rootDir = dataProcessingFilesService.configService.processingRootPath
 
-        String expectedPath = "${rootDir}/${projectDir}/results_per_pid/${pid}${lastPath}"
+        Path expectedPath = Paths.get(rootDir, projectDir, "results_per_pid" , pid, lastPath).toAbsolutePath()
 
         when:
-        String actualPath = dataProcessingFilesService.getOutputDirectory(individual, outputDirectories)
+        Path actualPath = dataProcessingFilesService.getOutputDirectory(individual, outputDirectories)
 
         then:
         expectedPath == actualPath
@@ -68,7 +71,7 @@ class DataProcessingFilesServiceSpec extends Specification implements DataTest, 
         outputDirectories           | lastPath
         null                        | ''
         OutputDirectories.BASE      | ''
-        OutputDirectories.ALIGNMENT | '/alignment'
-        OutputDirectories.FASTX_QC  | '/fastx_qc'
+        OutputDirectories.ALIGNMENT | 'alignment'
+        OutputDirectories.FASTX_QC  | 'fastx_qc'
     }
 }

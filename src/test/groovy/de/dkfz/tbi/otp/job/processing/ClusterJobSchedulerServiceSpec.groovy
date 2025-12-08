@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import grails.testing.gorm.DataTest
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -77,6 +78,7 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
         "ERROR" | 1
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "retrieveKnownJobsWithState, when qstat output is empty, returns empty map"() {
         given:
         File logFolder = TestCase.uniqueNonExistentPath

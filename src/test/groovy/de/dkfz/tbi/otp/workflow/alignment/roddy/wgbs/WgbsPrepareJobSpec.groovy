@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflow.alignment.roddy.wgbs
 
 import grails.testing.gorm.DataTest
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -62,7 +63,7 @@ class WgbsPrepareJobSpec extends Specification implements DataTest, WgbsAlignmen
         ]
     }
 
-    static private final String DIRECTORY = "/tmp"
+    static private final String DIRECTORY = "${File.separator}tmp"
 
     @TempDir
     Path tempDir
@@ -154,6 +155,7 @@ class WgbsPrepareJobSpec extends Specification implements DataTest, WgbsAlignmen
         !MergingWorkPackage.findAll(seqTracks: seqTracks).first().needsProcessing
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test doFurtherPreparation should create metadata table file"() {
         given:
         Path metadataFile = tempDir.resolve("file.tsv")

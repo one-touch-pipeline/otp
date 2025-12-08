@@ -27,6 +27,8 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 
+import java.nio.file.Paths
+
 @Rollback
 @Integration
 class MergedAlignmentDataFileServiceIntegrationSpec extends Specification implements DomainFactoryCore {
@@ -37,7 +39,15 @@ class MergedAlignmentDataFileServiceIntegrationSpec extends Specification implem
         given:
         SeqType seqType = DomainFactory.createRnaPairedSeqType()
         Sample sample = createSample()
-        String expectedPath = "${sample.project.dirName}/sequencing/rna_sequencing/view-by-pid/${sample.individual.pid}/${sample.sampleType.dirName}/paired/merged-alignment/"
+        String expectedPath = """${Paths.get(
+                sample.project.dirName,
+                "sequencing",
+                "rna_sequencing",
+                "view-by-pid",
+                sample.individual.pid,
+                sample.sampleType.dirName,
+                "paired",
+                "merged-alignment")}${File.separator}"""
 
         when:
         String actualPath = mergedAlignmentDataFileService.buildRelativePath(seqType, sample)

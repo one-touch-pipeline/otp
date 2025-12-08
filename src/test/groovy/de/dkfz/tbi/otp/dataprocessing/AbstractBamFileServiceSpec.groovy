@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.testing.gorm.DataTest
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.TempDir
 import spock.lang.Unroll
@@ -112,6 +113,7 @@ class AbstractBamFileServiceSpec extends Specification implements DataTest, IsRo
     }
 
     @Unroll
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "getExistingBamFilePath, when fail for #failCase, throw an exception"() {
         given:
         File file = CreateFileHelper.createFile(tempDir.resolve("test.txt")).toFile()

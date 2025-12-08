@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.project.dta
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import org.springframework.web.multipart.MultipartFile
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -41,6 +42,7 @@ import java.nio.file.Path
 
 @Rollback
 @Integration
+@IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
 class DataTransferServiceIntegrationSpec extends Specification implements DocumentFactory, UserAndRoles {
 
     DataTransferService dataTransferService

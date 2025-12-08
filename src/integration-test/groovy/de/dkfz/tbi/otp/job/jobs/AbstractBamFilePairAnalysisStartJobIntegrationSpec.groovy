@@ -37,6 +37,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
+import java.nio.file.Path
 import java.nio.file.Paths
 
 @Rollback
@@ -140,18 +141,19 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Specif
 
         Process failedProcess = DomainFactory.createProcess()
         DomainFactory.createProcessParameter(failedProcess, failedInstance)
+        Path filePath = Paths.get("/asdf")
 
         service.bamFileAnalysisServiceFactoryService = Mock(BamFileAnalysisServiceFactoryService) {
             getService(failedInstance) >> {
                 Mock(AbstractBamFileAnalysisService) {
-                    getWorkDirectory(failedInstance) >> Paths.get("/asdf")
+                    getWorkDirectory(failedInstance) >> filePath
                 }
             }
         }
 
         service.remoteShellHelper = Mock(RemoteShellHelper) {
             1 * executeCommandReturnProcessOutput(_) >> { String cmd ->
-                assert cmd == "rm -rf /asdf"
+                assert cmd == "rm -rf ${filePath}"
             }
         }
 

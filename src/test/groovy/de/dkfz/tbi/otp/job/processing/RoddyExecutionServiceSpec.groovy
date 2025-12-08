@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.job.processing
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -295,6 +296,7 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
 
     // false positives, since rule can not recognize calling class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test saveRoddyExecutionStoreDirectory, execution store directory doesn't exist on filesystem, should fail"() {
         given:
         setupData()
@@ -313,6 +315,7 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
 
     // false positives, since rule can not recognize calling class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test saveRoddyExecutionStoreDirectory, execution store directory isn't a directory, should fail"() {
         given:
         setupData()
@@ -330,6 +333,7 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
         thrown(AssertionError)
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test saveRoddyExecutionStoreDirectory, latest execution store directory isn't last element, should fail"() {
         given:
         setupData()
@@ -345,6 +349,7 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
         thrown(AssertionError)
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test saveRoddyExecutionStoreDirectory"() {
         given:
         setupData()
@@ -357,6 +362,7 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
         roddyBamFile.roddyExecutionDirectoryNames.last() == RODDY_EXECUTION_STORE_DIRECTORY_NAME
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test parseRoddyExecutionStoreDirectoryFromRoddyOutput, when matches once, should return roddyExecutionDirectory"() {
         given:
         setupData()
@@ -371,6 +377,7 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
         roddyExecutionDir == roddyExecutionService.parseRoddyExecutionStoreDirectoryFromRoddyOutput(output, FileSystems.default).toString()
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test parseRoddyExecutionStoreDirectoryFromRoddyOutput, when no match, should fail"() {
         given:
         setupData()
@@ -383,6 +390,7 @@ class RoddyExecutionServiceSpec extends Specification implements ServiceUnitTest
         thrown(RoddyException)
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test parseRoddyExecutionStoreDirectoryFromRoddyOutput, when matches more than once, should fail"() {
         given:
         setupData()

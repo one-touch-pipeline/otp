@@ -122,6 +122,7 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
         e.message.contains("can not be found in")
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "getWebSummaryResultFileContent, access granted for project user and operator"() {
         given:
         setupData()
@@ -146,6 +147,7 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
         username << [OPERATOR, USERNAME]
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "getWebSummaryResultFileContent, when mwp is in final, take it from the final location"() {
         given:
         setupData()

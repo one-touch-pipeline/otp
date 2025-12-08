@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.gorm.DataTest
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.TempDir
 import spock.lang.Unroll
@@ -36,6 +37,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.attribute.PosixFilePermissions
 
+@IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
 class ChecksumFileServiceSpec extends Specification implements DataTest {
 
     static final String BAM_FILE_NAME = "bamFileName.merged.mdup.bam"

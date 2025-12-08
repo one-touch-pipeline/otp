@@ -76,11 +76,15 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
     void "test getDefaultValues"() {
         given:
         service.processingOptionService = new ProcessingOptionService()
-        findOrCreateProcessingOption(name: ProcessingOption.OptionName.BASE_PATH_REFERENCE_GENOME, value: "/qwertz")
-        findOrCreateProcessingOption(name: ProcessingOption.OptionName.RODDY_SHARED_FILES_BASE_DIRECTORY, value: "/asdf")
+        findOrCreateProcessingOption(name: ProcessingOption.OptionName.BASE_PATH_REFERENCE_GENOME, value: "${File.separator}qwertz")
+        findOrCreateProcessingOption(name: ProcessingOption.OptionName.RODDY_SHARED_FILES_BASE_DIRECTORY, value: "${File.separator}asdf")
 
         expect:
-        service.defaultValues == ["BASE_REFERENCE_GENOME": [value: "/qwertz", type: "path"], "sharedFilesBaseDirectory": [value: "/asdf", type: "path"]]
+        service.defaultValues ==
+                [
+                        "BASE_REFERENCE_GENOME"   : [value: "${File.separator}qwertz", type: "path"],
+                        "sharedFilesBaseDirectory": [value: "${File.separator}asdf", type: "path"],
+                ]
     }
 
     void "test getConfigurationValues, with whole genome seq. type, with fingerprinting"() {
@@ -90,17 +94,17 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
         roddyBamFile.referenceGenome.save(flush: true)
 
         service.referenceGenomeService = Mock(ReferenceGenomeService) {
-            _ * fastaFilePath(roddyBamFile.referenceGenome) >> { new File("/fasta-path") }
-            _ * fingerPrintingFile(roddyBamFile.referenceGenome) >> { new File("/fingerprint-path") }
+            _ * fastaFilePath(roddyBamFile.referenceGenome) >> { Paths.get("/fasta-path").toFile() }
+            _ * fingerPrintingFile(roddyBamFile.referenceGenome) >> { Paths.get("/fingerprint-path").toFile() }
         }
 
         Map<String, String> expectedCommand = [
-                INDEX_PREFIX                     : [value: "/fasta-path", type: "path"],
-                GENOME_FA                        : [value: "/fasta-path", type: "path"],
+                INDEX_PREFIX                     : [value: Paths.get("/fasta-path").toAbsolutePath().toString(), type: "path"],
+                GENOME_FA                        : [value: Paths.get("/fasta-path").toAbsolutePath().toString(), type: "path"],
                 possibleControlSampleNamePrefixes: [value: "${roddyBamFile.sampleType.dirName}"],
                 possibleTumorSampleNamePrefixes  : [value: ""],
                 runFingerprinting                : [value: "true", type: "boolean"],
-                fingerprintingSitesFile          : [value: "/fingerprint-path", type: "path"],
+                fingerprintingSitesFile          : [value: Paths.get("/fingerprint-path").toAbsolutePath().toString(), type: "path"],
         ]
 
         when:
@@ -115,12 +119,12 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
         RoddyBamFile roddyBamFile = createBamFile()
 
         service.referenceGenomeService = Mock(ReferenceGenomeService) {
-            fastaFilePath(roddyBamFile.referenceGenome) >> { new File("/fasta-path") }
+            fastaFilePath(roddyBamFile.referenceGenome) >> { Paths.get("/fasta-path").toFile() }
         }
 
         Map<String, String> expectedCommand = [
-                INDEX_PREFIX                     : [value: "/fasta-path", type: "path"],
-                GENOME_FA                        : [value: "/fasta-path", type: "path"],
+                INDEX_PREFIX                     : [value: Paths.get("/fasta-path").toAbsolutePath().toString(), type: "path"],
+                GENOME_FA                        : [value: Paths.get("/fasta-path").toAbsolutePath().toString(), type: "path"],
                 possibleControlSampleNamePrefixes: [value: "${roddyBamFile.sampleType.dirName}"],
                 possibleTumorSampleNamePrefixes  : [value: ""],
                 runFingerprinting                : [value: "false", type: "boolean"],
@@ -139,12 +143,12 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
         roddyBamFile.mergingWorkPackage.seqType = DomainFactory.createRnaPairedSeqType()
 
         service.referenceGenomeService = Mock(ReferenceGenomeService) {
-            fastaFilePath(roddyBamFile.referenceGenome) >> { new File("/fasta-path") }
+            fastaFilePath(roddyBamFile.referenceGenome) >> { Paths.get("/fasta-path").toFile() }
         }
 
         Map<String, String> expectedCommand = [
-                INDEX_PREFIX                     : [value: "/fasta-path", type: "path"],
-                GENOME_FA                        : [value: "/fasta-path", type: "path"],
+                INDEX_PREFIX                     : [value: Paths.get("/fasta-path").toAbsolutePath().toString(), type: "path"],
+                GENOME_FA                        : [value: Paths.get("/fasta-path").toAbsolutePath().toString(), type: "path"],
                 possibleControlSampleNamePrefixes: [value: "${roddyBamFile.sampleType.dirName}"],
                 possibleTumorSampleNamePrefixes  : [value: ""],
                 runFingerprinting                : [value: "false", type: "boolean"],
@@ -169,7 +173,7 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
         given:
         RoddyBamFile roddyBamFile = createBamFile()
 
-        String path = "/adapter-file"
+        String path = Paths.get("/adapter-file")
         roddyBamFile.containedSeqTracks*.libraryPreparationKit*.adapterFile = path
         roddyBamFile.containedSeqTracks*.libraryPreparationKit*.save(flush: true)
 
@@ -242,13 +246,15 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
     void "test getFilesToMerge"() {
         given:
         service.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
-            2 * getFilePath(_) >> { RawSequenceFile rawSequenceFile -> Paths.get("/completePath/${rawSequenceFile.fileName}") }
+            2 * getFilePath(_) >> { RawSequenceFile rawSequenceFile -> Paths.get("/completePath", rawSequenceFile.fileName).toAbsolutePath() }
         }
         RoddyBamFile roddyBamFile = createBamFile()
         createBamFile()
 
         expect:
-        service.getFilesToMerge(roddyBamFile) == [fastq_list: [value: '/completePath/DataFileFileName_R1.gz;/completePath/DataFileFileName_R2.gz']]
+        service.getFilesToMerge(roddyBamFile) == [
+                fastq_list: [value: "${Paths.get('/completePath', 'DataFileFileName_R1.gz').toAbsolutePath()};" +
+                        "${Paths.get('/completePath', 'DataFileFileName_R2.gz').toAbsolutePath()}"]]
     }
 
     void "createValueMap, when value given, return map without type"() {

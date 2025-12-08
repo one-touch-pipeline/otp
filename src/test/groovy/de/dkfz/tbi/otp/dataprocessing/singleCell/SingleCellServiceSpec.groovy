@@ -106,7 +106,7 @@ class SingleCellServiceSpec extends Specification implements DataTest, DomainFac
         new TestConfigService()
 
         RawSequenceFile rawSequenceFile = createRawSequenceFileHelper()
-        String rawSequenceFilePath = "pathToFastq/fastq.fastq"
+        String rawSequenceFilePath = Paths.get("pathToFastq", "fastq.fastq")
 
         SingleCellService service = new SingleCellService(
                 rawSequenceDataViewFileService: Mock(RawSequenceDataViewFileService) {

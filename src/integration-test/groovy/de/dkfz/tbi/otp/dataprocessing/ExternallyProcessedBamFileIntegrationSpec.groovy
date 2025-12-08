@@ -29,6 +29,8 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
+import java.nio.file.Paths
+
 @Rollback
 @Integration
 class ExternallyProcessedBamFileIntegrationSpec extends Specification {
@@ -92,7 +94,19 @@ class ExternallyProcessedBamFileIntegrationSpec extends Specification {
     void "test getFile returns correct file path"() {
         given:
         setupData()
-        String expectedFile = "${configService.rootPath}/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/paired/merged-alignment/nonOTP/analysisImport_REF_GEN/FILE_NAME"
+        String expectedFile = Paths.get(
+                configService.rootPath.toString(),
+                "project-dir",
+                "sequencing",
+                "seq-type-dir",
+                "view-by-pid",
+                "patient",
+                "sample-type",
+                "paired",
+                "merged-alignment",
+                "nonOTP",
+                "analysisImport_REF_GEN",
+                "FILE_NAME").toAbsolutePath()
 
         when:
         String otpFile = bamFile.bamFile.absolutePath

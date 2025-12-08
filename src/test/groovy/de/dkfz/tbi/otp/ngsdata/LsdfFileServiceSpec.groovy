@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.gorm.DataTest
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -96,6 +97,7 @@ class LsdfFileServiceSpec extends Specification implements DataTest, DomainFacto
         e.message =~ /(?i)isRegularFile/
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test ensureFileIsReadableAndNotEmpty, when file isn't readable, should fail"() {
         given:
         File file = tempDir.resolve("test.txt").toFile()

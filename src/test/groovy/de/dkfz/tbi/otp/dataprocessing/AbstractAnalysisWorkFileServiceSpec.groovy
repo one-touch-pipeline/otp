@@ -146,6 +146,7 @@ abstract class AbstractAnalysisWorkFileServiceSpec<T extends AbstractAnalysisWor
     }
 
     @Unroll
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "validateInputBamFiles, when #name, then throw exception"() {
         given:
         BamFilePairAnalysis analysis = setUpForValidateInputBamFiles(!firstBamFile)

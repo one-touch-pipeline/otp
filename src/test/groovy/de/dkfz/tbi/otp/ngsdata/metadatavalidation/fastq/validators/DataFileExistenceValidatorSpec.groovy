@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import grails.testing.gorm.DataTest
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -37,6 +38,7 @@ import java.util.regex.Matcher
 import static de.dkfz.tbi.TestCase.assertContainSame
 import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory.createContext
 
+@IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
 class DataFileExistenceValidatorSpec extends Specification implements DataTest {
 
     @Override

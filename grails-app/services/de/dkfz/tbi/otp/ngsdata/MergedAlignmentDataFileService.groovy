@@ -25,6 +25,8 @@ import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFileService
 
+import java.nio.file.Paths
+
 @Transactional
 @Deprecated
 class MergedAlignmentDataFileService {
@@ -36,6 +38,9 @@ class MergedAlignmentDataFileService {
         assert !type.hasAntibodyTarget
         String sampleType = sample.sampleType.dirName
         String layout = type.libraryLayoutDirName
-        return "${sample.individual.getViewByPidPath(type).relativePath}/${sampleType}/${layout}/merged-alignment/"
+        return """${Paths.get(sample.individual.getViewByPidPath(type).relativePath.path)
+                .resolve(sampleType)
+                .resolve(layout)
+                .resolve("merged-alignment")}${File.separator}"""
     }
 }

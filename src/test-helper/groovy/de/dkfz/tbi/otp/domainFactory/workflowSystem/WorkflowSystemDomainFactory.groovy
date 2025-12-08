@@ -37,6 +37,7 @@ import de.dkfz.tbi.otp.workflowExecution.log.*
 import de.dkfz.tbi.otp.workflowExecution.wes.*
 
 import java.time.ZonedDateTime
+import java.nio.file.Paths
 
 trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory {
 
@@ -262,7 +263,7 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
     }
 
     BaseFolder createBaseFolder(Map properties = [:], boolean saveAndValidate = true) {
-        String path = properties.path ?: "/${nextId}"
+        String path = properties.path ?: Paths.get("/${nextId}").toAbsolutePath()
         return createDomainObject(BaseFolder, [
                 path    : path,
                 writable: true,

@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
 
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
 
@@ -78,14 +79,14 @@ class ProjectServiceSpec extends Specification implements DataTest, DomainFactor
         err.message.contains("contains (partial) data processing root path")
 
         where:
-        dirName                         | _
-        'some/nested/root/path/dirName' | _
-        'nested/root/path/dirName'      | _
-        'root/path/dirName'             | _
-        'path/dirName'                  | _
-        'some/dirName'                  | _
-        'nested/dirName'                | _
-        'root/dirName'                  | _
+        dirName                                                | _
+        Paths.get("some", "nested", "root", "path", "dirName") | _
+        Paths.get("nested", "root", "path", "dirName")         | _
+        Paths.get("root", "path", "dirName")                   | _
+        Paths.get("path", "dirName")                           | _
+        Paths.get("some", "dirName")                           | _
+        Paths.get("nested", "dirName")                         | _
+        Paths.get("root", "dirName")                           | _
     }
 
     void "test invalidateProjectConfig"() {
@@ -143,7 +144,7 @@ class ProjectServiceSpec extends Specification implements DataTest, DomainFactor
                 fileSystemService: new TestFileSystemService(),
         ])
         Project project = createProject(
-                dirName: "${HelperUtils.uniqueString}/${HelperUtils.uniqueString}/${HelperUtils.uniqueString}"
+                dirName: Paths.get(HelperUtils.uniqueString, HelperUtils.uniqueString, HelperUtils.uniqueString)
         )
 
         when:

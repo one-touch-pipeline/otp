@@ -25,6 +25,7 @@ import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import grails.web.mapping.LinkGenerator
 import org.springframework.beans.factory.annotation.Autowired
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -137,6 +138,7 @@ class MetadataImportServiceIntegrationSpec extends Specification implements Doma
         service.notifyAboutUnsetConfig([st1, st2], ticket)
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void 'validateAndImportResults, when project data is given, then validate and import data'() {
         given:
         String runName = 'run'

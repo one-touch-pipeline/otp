@@ -43,7 +43,7 @@ class JobStatusLoggingService {
     ConfigService configService
 
     final static LOGFILE_EXTENSION = '.log'
-    final static STATUS_LOGGING_BASE_DIR = 'log/status'
+    final static STATUS_LOGGING_BASE_DIR = "log${File.separator}status"
 
     private String shellSnippetForClusterJobId() {
         return "\$(echo \${${clusterJobManagerFactoryService.jobManager.jobIdVariable}} | cut -d. -f1)"
@@ -57,7 +57,7 @@ class JobStatusLoggingService {
      */
     String logFileBaseDir(ProcessingStep processingStep) {
         assert processingStep: 'No processing step specified.'
-        return "${configService.loggingRootPath}/${STATUS_LOGGING_BASE_DIR}"
+        return "${configService.loggingRootPath}${File.separator}${STATUS_LOGGING_BASE_DIR}"
     }
 
     /**
@@ -76,7 +76,7 @@ class JobStatusLoggingService {
                 processingStep.process.id,
                 clusterJobId ?: shellSnippetForClusterJobId(),
         ].join("_")
-        return "${baseDir}/${fileName}${LOGFILE_EXTENSION}"
+        return "${baseDir}${File.separator}${fileName}${LOGFILE_EXTENSION}"
     }
 
     /**

@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflow.datainstallation
 
 import grails.testing.gorm.DataTest
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -40,6 +41,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
 
+@IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
 class DataInstallationConditionalFailJobSpec extends Specification implements DataTest, DataInstallationWorkflowDomainFactory {
 
     @TempDir

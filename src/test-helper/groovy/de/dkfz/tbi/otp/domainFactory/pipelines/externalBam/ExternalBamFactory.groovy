@@ -68,7 +68,7 @@ trait ExternalBamFactory implements IsAlignment {
                 fileName           : "bamfile_${nextId}.bam",
                 workPackage        : { createMergingWorkPackage() },
                 numberOfMergedLanes: null,
-                importedFrom       : "/importFrom_${nextId}",
+                importedFrom       : "${File.separator}importFrom_${nextId}",
                 furtherFiles       : [],
         ], properties)
     }

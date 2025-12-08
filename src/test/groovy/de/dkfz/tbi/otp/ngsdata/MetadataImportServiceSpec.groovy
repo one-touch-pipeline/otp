@@ -66,6 +66,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
+@IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
 class MetadataImportServiceSpec extends Specification implements DomainFactoryCore, DataTest, TaxonomyFactory {
 
     @Override

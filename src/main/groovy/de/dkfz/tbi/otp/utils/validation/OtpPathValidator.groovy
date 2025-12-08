@@ -21,31 +21,77 @@
  */
 package de.dkfz.tbi.otp.utils.validation
 
+import grails.util.Environment
+
 import java.util.regex.Pattern
 
 class OtpPathValidator {
-    static final String PATH_COMPONENT_REGEX = /[a-zA-Z0-9_\-\+\.]+/
-    static final String PATH_CHARACTERS_REGEX = /[a-zA-Z0-9_\-\+\.\/]+/
+
+    static boolean isWindows() {
+        if (Environment.current == Environment.PRODUCTION) {
+            return false
+        }
+
+        return System.getProperty("os.name").toLowerCase().contains("windows")
+    }
+
+    static final String PATH_COMPONENT_REGEX = /[a-zA-Z0-9_\-+.]+/
+    static final String UNIX_SEPARATOR_REGEX = "/"
+    static final String WINDOWS_SEPARATOR_REGEX = "\\\\"
+    static final String UNIX_PATH_CHARACTERS_REGEX = /[a-zA-Z0-9_\-\+\.\/]+/
+    static final String WINDOWS_PATH_CHARACTERS_REGEX = /[a-zA-Z0-9_\-\+\.\\:]+/
+    static final String WINDOWS_DRIVE_REGEX = /[a-zA-Z]:/
+
     static final Pattern PATH_COMPONENT_PATTERN = Pattern.compile(/^${PATH_COMPONENT_REGEX}$/)
-    static final Pattern RELATIVE_PATH_PATTERN = Pattern.compile(/^${PATH_COMPONENT_REGEX}(?:\/${PATH_COMPONENT_REGEX})*$/)
-    static final Pattern ABSOLUTE_PATH_PATTERN = Pattern.compile(/^(?:\/${PATH_COMPONENT_REGEX})+$/)
-    static final Pattern ILLEGAL_IN_NORMALIZED_PATH = Pattern.compile(/(?:^|\/)\.{1,2}(?:\/|$)/)
+
+    private static String getSeparatorRegex() {
+        return isWindows() ? WINDOWS_SEPARATOR_REGEX : UNIX_SEPARATOR_REGEX
+    }
+
+    static String getPathCharactersRegex() {
+        return isWindows() ? WINDOWS_PATH_CHARACTERS_REGEX : UNIX_PATH_CHARACTERS_REGEX
+    }
+
+    private static boolean isValidPath(String string, String pathRegex) {
+        String sepRegex = separatorRegex
+        Pattern pattern = Pattern.compile(pathRegex)
+        Pattern illegalPattern = Pattern.compile(/(?:^|${sepRegex})\.{1,2}(?:${sepRegex}|$)/)
+        return pattern.matcher(string).matches() && !illegalPattern.matcher(string).find()
+    }
 
     static boolean isValidPathComponent(String string) {
-        return PATH_COMPONENT_PATTERN.matcher(string).matches() && !ILLEGAL_IN_NORMALIZED_PATH.matcher(string).find()
+        String sepRegex = separatorRegex
+        Pattern illegalPattern = Pattern.compile(/(?:^|${sepRegex})\.{1,2}(?:${sepRegex}|$)/)
+        return PATH_COMPONENT_PATTERN.matcher(string).matches() && !illegalPattern.matcher(string).find()
     }
 
     static boolean isValidRelativePath(String string) {
-        return RELATIVE_PATH_PATTERN.matcher(string).matches() && !ILLEGAL_IN_NORMALIZED_PATH.matcher(string).find()
+        String sepRegex = separatorRegex
+        return isValidPath(string, /^${PATH_COMPONENT_REGEX}(?:${sepRegex}${PATH_COMPONENT_REGEX})*$/)
     }
 
     static boolean isValidAbsolutePath(String string) {
-        return ABSOLUTE_PATH_PATTERN.matcher(string).matches() && !ILLEGAL_IN_NORMALIZED_PATH.matcher(string).find()
+        String sepRegex = separatorRegex
+        if (isWindows()) {
+            // Support both UNC paths (\path\to\file) and drive letter paths (C:\path\to\file)
+            String uncPathRegex = /^${sepRegex}${PATH_COMPONENT_REGEX}(?:${sepRegex}${PATH_COMPONENT_REGEX})*$/
+            String drivePathRegex = /^${WINDOWS_DRIVE_REGEX}${sepRegex}${PATH_COMPONENT_REGEX}(?:${sepRegex}${PATH_COMPONENT_REGEX})*$/
+            String driveOnlyRegex = /^${WINDOWS_DRIVE_REGEX}${sepRegex}?$/
+            return isValidPath(string, uncPathRegex) || isValidPath(string, drivePathRegex) || isValidPath(string, driveOnlyRegex)
+        }
+        return isValidPath(string, /^${sepRegex}${PATH_COMPONENT_REGEX}(?:${sepRegex}${PATH_COMPONENT_REGEX})*$/)
     }
 
     static boolean isValidAbsolutePathContainingVariable(String string) {
         String pathComponentRegex = /[a-zA-Z0-9_\-\+\.\$\{\}]+/
-        return Pattern.compile(/^(?:\/${pathComponentRegex})+$/).matcher(string).matches() &&
-                !OtpPathValidator.ILLEGAL_IN_NORMALIZED_PATH.matcher(string).find()
+        String sepRegex = separatorRegex
+        if (isWindows()) {
+            // Support both UNC paths (\path\to\file) and drive letter paths (C:\path\to\file) with variables
+            String uncPathRegex = /^${sepRegex}${pathComponentRegex}(?:${sepRegex}${pathComponentRegex})*$/
+            String drivePathRegex = /^${WINDOWS_DRIVE_REGEX}${sepRegex}${pathComponentRegex}(?:${sepRegex}${pathComponentRegex})*$/
+            String driveOnlyRegex = /^${WINDOWS_DRIVE_REGEX}${sepRegex}?$/
+            return isValidPath(string, uncPathRegex) || isValidPath(string, drivePathRegex) || isValidPath(string, driveOnlyRegex)
+        }
+        return isValidPath(string, /^${sepRegex}${pathComponentRegex}(?:${sepRegex}${pathComponentRegex})*$/)
     }
 }

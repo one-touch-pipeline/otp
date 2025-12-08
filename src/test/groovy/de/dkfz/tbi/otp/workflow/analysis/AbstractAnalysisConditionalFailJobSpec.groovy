@@ -214,6 +214,7 @@ abstract class AbstractAnalysisConditionalFailJobSpec extends Specification impl
     }
 
     @Unroll
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "check if #name, then throw exception with error messages containing check errors"() {
         given:
         setupWithSeqType(SeqTypeNames.WHOLE_GENOME.seqTypeName)

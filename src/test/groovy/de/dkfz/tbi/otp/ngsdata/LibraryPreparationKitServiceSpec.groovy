@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.gorm.DataTest
+import spock.lang.IgnoreIf
 import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
@@ -49,7 +50,7 @@ class LibraryPreparationKitServiceSpec extends AbstractMetadataFieldsServiceSpec
 
     LibraryPreparationKitService libraryPreparationKitService = new LibraryPreparationKitService()
 
-    final static String ADAPTER_FILE = "/file.fa"
+    final static String ADAPTER_FILE = "${File.separator}file.fa"
     final static String ADAPTER_SEQUENCE = "ATGC"
 
     void setup() {
@@ -209,6 +210,7 @@ class LibraryPreparationKitServiceSpec extends AbstractMetadataFieldsServiceSpec
         adapterSequence << [null, ""]
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "getAdapterFileContentToRender, returns adapter file content as String"() {
         given:
         setupServiceForAdapterFileReading()
@@ -230,6 +232,7 @@ class LibraryPreparationKitServiceSpec extends AbstractMetadataFieldsServiceSpec
         content << ["some content", ""]
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "getAdapterFileContentToRender, throws assertion exception if file exceeds limit"() {
         given:
         setupServiceForAdapterFileReading()
@@ -252,6 +255,7 @@ class LibraryPreparationKitServiceSpec extends AbstractMetadataFieldsServiceSpec
         e.message =~ "Adapter file is too large to be displayed in the GUI"
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "getAdapterFileContentToRender, throws exception when file is not readable"() {
         given:
         setupServiceForAdapterFileReading()

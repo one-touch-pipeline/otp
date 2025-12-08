@@ -37,6 +37,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 import java.nio.file.FileSystem
 import java.nio.file.Path
+import java.nio.file.Paths
 
 /**
  * @deprecated use {@link RoddyCommandService} for the new WF system
@@ -176,7 +177,7 @@ class ExecuteRoddyCommandService {
         assert configName: "configName is not allowed to be null"
         assert analysisId: "analysisId is not allowed to be null"
         assert type: "type is not allowed to be null"
-        return "${roddyPath}/roddy.sh ${type.cmd} ${configName}.config@${analysisId}"
+        return "${Paths.get(roddyPath.path, "roddy.sh")} ${type.cmd} ${configName}.config@${analysisId}"
     }
 
     /**

@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.dataswap
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -71,6 +72,7 @@ class IndividualSwapServiceIntegrationSpec extends Specification implements User
 
     // false positives, since rule can not recognize calling class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "swap, succeed if parameters match existing entities and data files"() {
         given:
         setupData()

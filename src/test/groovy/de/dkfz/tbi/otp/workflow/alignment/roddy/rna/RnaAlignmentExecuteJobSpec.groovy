@@ -112,7 +112,7 @@ class RnaAlignmentExecuteJobSpec extends Specification implements DataTest, RnaA
         job.roddyConfigValueService = new RoddyConfigValueService()
 
         job.roddyConfigValueService.referenceGenomeService = Mock(ReferenceGenomeService) {
-            fastaFilePath(roddyBamFile.referenceGenome) >> { new File("/fasta-path") }
+            fastaFilePath(roddyBamFile.referenceGenome) >> { tempDir.resolve("fasta-path").toFile() }
         }
 
         DomainFactory.createRnaAlignableSeqTypes()
@@ -178,8 +178,8 @@ class RnaAlignmentExecuteJobSpec extends Specification implements DataTest, RnaA
 
         Map<String, String> expectedCommand = [
                 sharedFilesBaseDirectory         : [value: null, type: "path"],
-                INDEX_PREFIX                     : [value: "/fasta-path", type: "path"],
-                GENOME_FA                        : [value: "/fasta-path", type: "path"],
+                INDEX_PREFIX                     : [value: tempDir.resolve("fasta-path").toString(), type: "path"],
+                GENOME_FA                        : [value: tempDir.resolve("fasta-path").toString(), type: "path"],
                 possibleControlSampleNamePrefixes: [value: roddyBamFile.sampleType.dirName],
                 possibleTumorSampleNamePrefixes  : [value: ""],
                 runFingerprinting                : [value: "false", type: "boolean"],

@@ -28,6 +28,7 @@ import io.swagger.client.wes.api.WorkflowExecutionServiceApi
 import io.swagger.client.wes.model.RunId
 import org.grails.web.json.JSONObject
 import reactor.core.publisher.Mono
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -42,6 +43,7 @@ import java.nio.file.*
 
 @Rollback
 @Integration
+@IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
 class WeskitAccessServiceIntegrationSpec extends Specification implements DomainFactoryCore {
 
     private WeskitAccessService service

@@ -105,15 +105,15 @@ class RoddyAlignmentExecuteJobSpec extends Specification implements DataTest, Pa
         job.processingOptionService = new ProcessingOptionService()
         job.roddyConfigValueService = new RoddyConfigValueService()
 
-        job.roddyConfigValueService.referenceGenomeService = Mock(ReferenceGenomeService) {
-            fastaFilePath(roddyBamFile.referenceGenome) >> { new File("/fasta-path") }
-        }
-
-        DomainFactory.createRoddyAlignableSeqTypes()
-
         configService = new TestConfigService([
                 (OtpProperty.PATH_PROJECT_ROOT): tempDir.toString(),
         ])
+
+        job.roddyConfigValueService.referenceGenomeService = Mock(ReferenceGenomeService) {
+            fastaFilePath(roddyBamFile.referenceGenome) >> { tempDir.resolve("fasta-path").toFile() }
+        }
+
+        DomainFactory.createRoddyAlignableSeqTypes()
 
         DomainFactory.createProcessingOptionBasePathReferenceGenome(tempDir.resolve("reference_genomes").toString())
     }
@@ -171,8 +171,8 @@ class RoddyAlignmentExecuteJobSpec extends Specification implements DataTest, Pa
 
         Map<String, String> expectedCommand = [
                 sharedFilesBaseDirectory         : [value: null, type: "path"],
-                INDEX_PREFIX                     : [value: "/fasta-path", type: "path"],
-                GENOME_FA                        : [value: "/fasta-path", type: "path"],
+                INDEX_PREFIX                     : [value: tempDir.resolve("fasta-path").toAbsolutePath().toString(), type: "path"],
+                GENOME_FA                        : [value: tempDir.resolve("fasta-path").toAbsolutePath().toString(), type: "path"],
                 possibleControlSampleNamePrefixes: [value: roddyBamFile.sampleType.dirName],
                 possibleTumorSampleNamePrefixes  : [value: ""],
                 runFingerprinting                : [value: "false", type: "boolean"],

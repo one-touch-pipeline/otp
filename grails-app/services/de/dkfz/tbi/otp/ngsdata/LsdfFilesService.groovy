@@ -100,7 +100,7 @@ class LsdfFilesService {
         if (segment =~ /(?:^|${Pattern.quote(File.separator)})\.{1,2}(?:${Pattern.quote(File.separator)}|$)/) {
             throw new IllegalArgumentException("${segmentPosition} contains '.' or '..': ${segment}")
         }
-        if (!(segment ==~ OtpPathValidator.PATH_CHARACTERS_REGEX)) {
+        if (!(segment ==~ OtpPathValidator.pathCharactersRegex)) {
             throw new IllegalArgumentException("${segmentPosition} contains at least one illegal character: ${segment}")
         }
     }

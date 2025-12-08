@@ -31,6 +31,9 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 
+import java.nio.file.Path
+import java.nio.file.Paths
+
 class RnaRoddyBamFileSpec extends Specification implements RoddyRnaFactory, DataTest {
     @Override
     Class[] getDomainClassesToMock() {
@@ -70,10 +73,10 @@ class RnaRoddyBamFileSpec extends Specification implements RoddyRnaFactory, Data
     void "test method getCorrespondingWorkChimericBamFile"() {
         given:
         RnaRoddyBamFile roddyBamFile = createBamFile()
-        String testDir = "${roddyBamFile.individual.getViewByPidPath(roddyBamFile.seqType).absoluteDataManagementPath.path}/" +
-                "${roddyBamFile.sampleType.dirName}/${roddyBamFile.seqType.libraryLayoutDirName}/merged-alignment"
+        Path testDir = Paths.get(roddyBamFile.individual.getViewByPidPath(roddyBamFile.seqType).absoluteDataManagementPath.path,
+                roddyBamFile.sampleType.dirName, roddyBamFile.seqType.libraryLayoutDirName, "merged-alignment")
 
         expect:
-        "${testDir}/${roddyBamFile.workDirectoryName}/${roddyBamFile.sampleType.dirName}_${roddyBamFile.individual.pid}_${RnaRoddyBamFile.CHIMERIC_BAM_SUFFIX}" == roddyBamFile.correspondingWorkChimericBamFile.path
+        testDir.resolve(roddyBamFile.workDirectoryName).resolve("${roddyBamFile.sampleType.dirName}_${roddyBamFile.individual.pid}_${RnaRoddyBamFile.CHIMERIC_BAM_SUFFIX}").toFile() == roddyBamFile.correspondingWorkChimericBamFile
     }
 }

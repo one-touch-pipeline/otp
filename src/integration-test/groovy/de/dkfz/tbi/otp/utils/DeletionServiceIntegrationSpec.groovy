@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.utils
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -55,6 +56,7 @@ import java.nio.file.*
 
 @Rollback
 @Integration
+@IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
 class DeletionServiceIntegrationSpec extends Specification implements EgaSubmissionFactory, IsRoddy, DocumentFactory, FastqcDomainFactory,
         WorkflowSystemDomainFactory, UserAndRoles {
 

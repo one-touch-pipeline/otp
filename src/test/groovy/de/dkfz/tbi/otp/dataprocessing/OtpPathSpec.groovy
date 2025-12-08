@@ -29,6 +29,8 @@ import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.project.Project
 
+import java.nio.file.Paths
+
 class OtpPathSpec extends Specification implements DataTest, DomainFactoryCore {
 
     void "relativePath"() {
@@ -68,7 +70,7 @@ class OtpPathSpec extends Specification implements DataTest, DomainFactoryCore {
     void "absoluteDataManagementPath, when absolute, then return absolute file"() {
         given:
         new TestConfigService([
-                (OtpProperty.PATH_PROJECT_ROOT): '/root_path'
+                (OtpProperty.PATH_PROJECT_ROOT): Paths.get("/root_path").toString()
         ])
         OtpPath otpPath = new OtpPath(new Project(), 'child')
 
@@ -76,6 +78,6 @@ class OtpPathSpec extends Specification implements DataTest, DomainFactoryCore {
         File path = otpPath.absoluteDataManagementPath
 
         then:
-        path == new File('/root_path/child')
+        path == Paths.get("/root_path", "child").toAbsolutePath().toFile()
     }
 }

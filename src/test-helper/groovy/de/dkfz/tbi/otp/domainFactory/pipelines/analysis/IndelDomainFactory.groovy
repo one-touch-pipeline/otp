@@ -85,7 +85,7 @@ class IndelDomainFactory extends AbstractAnalysisQcDomainFactory<IndelCallingIns
     @Override
     Map getQcValues() {
         return [
-                file                 : '/path/to/file',
+                file                 : "${File.separator}path${File.separator}to${File.separator}file",
                 numIndels            : 23,
                 numIns               : 24,
                 numDels              : 25,

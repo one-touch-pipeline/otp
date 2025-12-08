@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.utils
 
 import grails.testing.gorm.DataTest
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -32,6 +33,7 @@ import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import java.nio.file.Path
 import java.nio.file.Paths
 
+@IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
 class LinkFileUtilsSpec extends Specification implements DataTest {
 
     @Override

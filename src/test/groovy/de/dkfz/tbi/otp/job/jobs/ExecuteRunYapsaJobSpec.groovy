@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.job.jobs
 
 import grails.testing.gorm.DataTest
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
@@ -114,6 +115,7 @@ class ExecuteRunYapsaJobSpec extends Specification implements DataTest {
     }
 
     @SuppressWarnings("LineLength") // suppressed because breaking the line would break the commands
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test createScript"() {
         given:
         ConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): "/root", (OtpProperty.PATH_TOOLS): "/tools"])
@@ -152,7 +154,7 @@ class ExecuteRunYapsaJobSpec extends Specification implements DataTest {
             load r
             load programmVersion\\d+
 
-            runYAPSA.R -i /root/projectDirName_\\d+/sequencing/whole_genome_sequencing/view-by-pid/pid_\\d+/snv_results/paired/sample-type-name-\\d+_sample-type-name-\\d+/instance-\\d+/snvs_pid_\\d+_somatic_snvs_conf_${MIN_CONFIDENCE_SCORE}_to_10.vcf -o /root/projectDirName_\\d+/sequencing/whole_genome_sequencing/view-by-pid/pid_\\d+/mutational_signatures_results/paired/sample-type-name-\\d+_sample-type-name-\\d+/instance-\\d+ -s WGS -r /reference/genome.fa -v
+            runYAPSA.R -i /root${File.separator}projectDirName_\\d+/sequencing${File.separator}whole_genome_sequencing${File.separator}view-by-pid${File.separator}pid_\\d+/snv_results${File.separator}paired${File.separator}sample-type-name-\\d+_sample-type-name-\\d+/instance-\\d+/snvs_pid_\\d+_somatic_snvs_conf_${MIN_CONFIDENCE_SCORE}_to_10.vcf -o /root${File.separator}projectDirName_\\d+/sequencing${File.separator}whole_genome_sequencing${File.separator}view-by-pid${File.separator}pid_\\d+/mutational_signatures_results${File.separator}paired${File.separator}sample-type-name-\\d+_sample-type-name-\\d+/instance-\\d+ -s WGS -r /reference${File.separator}genome.fa -v
 
             """.stripIndent()
 

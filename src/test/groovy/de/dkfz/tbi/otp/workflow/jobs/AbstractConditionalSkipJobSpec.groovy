@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflow.jobs
 
 import grails.testing.gorm.DataTest
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
@@ -31,6 +32,7 @@ import de.dkfz.tbi.otp.workflow.shared.JobFailedException
 import de.dkfz.tbi.otp.workflow.shared.SkipWorkflowStepException
 import de.dkfz.tbi.otp.workflowExecution.*
 
+@IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
 class AbstractConditionalSkipJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
     AbstractConditionalSkipJob job

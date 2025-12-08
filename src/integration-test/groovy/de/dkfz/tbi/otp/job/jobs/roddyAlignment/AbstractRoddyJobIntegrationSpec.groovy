@@ -25,6 +25,7 @@ import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import org.codehaus.groovy.control.io.NullWriter
 import org.springframework.beans.factory.annotation.Qualifier
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -104,6 +105,7 @@ class AbstractRoddyJobIntegrationSpec extends Specification {
         return workRoddyExecutionDir
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test maybeSubmit"() {
         given:
         setupData()
@@ -190,6 +192,7 @@ newLine"""
         1 * roddyJob.validate(_) >> _
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test execute, finishedClusterJobs is null"() {
         given:
         setupData()

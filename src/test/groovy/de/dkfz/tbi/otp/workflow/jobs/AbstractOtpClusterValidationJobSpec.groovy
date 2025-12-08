@@ -123,6 +123,7 @@ class AbstractOtpClusterValidationJobSpec extends Specification implements DataT
         e.message.contains('does not exist')
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "ensureExternalJobsRunThrough, when the job status log file is not readable, then fail"() {
         given:
         File file = CreateFileHelper.createFile(tempDir.resolve("test.txt")).toFile()

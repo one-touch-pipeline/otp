@@ -60,6 +60,7 @@ import de.dkfz.tbi.otp.utils.exceptions.NotSupportedException
 
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.time.Duration
 import java.time.ZonedDateTime
 
@@ -1175,14 +1176,14 @@ class DomainFactory {
                 speciesWithStrain: [TaxonomyFactoryInstance.INSTANCE.findOrCreateHumanSpecies()] as Set,
                 species: [] as Set,
                 gcContentFile: "gcContentFile.file",
-                geneticMapFile: "/geneticMapFile.file",
-                geneticMapFileX: "/geneticMapFileX.file",
-                knownHaplotypesFile: "/knownHaplotypesFile.file",
-                knownHaplotypesFileX: "/knownHaplotypesFileX.file",
-                knownHaplotypesLegendFile: "/knownHaplotypesLegendFile.file",
-                knownHaplotypesLegendFileX: "/knownHaplotypesLegendFileX.file",
-                mappabilityFile: "/mappabilityFile.file",
-                replicationTimeFile: "/replicationTimeFile.file",
+                geneticMapFile: Paths.get('/geneticMapFile.file'),
+                geneticMapFileX: Paths.get('/geneticMapFileX.file'),
+                knownHaplotypesFile: Paths.get('/knownHaplotypesFile.file'),
+                knownHaplotypesFileX: Paths.get('/knownHaplotypesFileX.file'),
+                knownHaplotypesLegendFile: Paths.get('/knownHaplotypesLegendFile.file'),
+                knownHaplotypesLegendFileX: Paths.get('/knownHaplotypesLegendFileX.file'),
+                mappabilityFile: Paths.get('/mappabilityFile.file'),
+                replicationTimeFile: Paths.get('/replicationTimeFile.file'),
         )
     }
 
@@ -1334,7 +1335,7 @@ class DomainFactory {
                 pipeline             : pipeline,
                 seqType              : seqType,
                 configFilePath       : {
-                    "${TestCase.uniqueNonExistentPath}/${pipeline.name.name()}_${seqType.roddyName}_${seqType.libraryLayout}_${programVersion.substring(programVersion.indexOf(':') + 1)}_${configVersion}.xml"
+                    "${TestCase.uniqueNonExistentPath}${File.separator}${pipeline.name.name()}_${seqType.roddyName}_${seqType.libraryLayout}_${programVersion.substring(programVersion.indexOf(':') + 1)}_${configVersion}.xml"
                 },
                 programVersion       : programVersion,
                 configVersion        : configVersion,
@@ -1772,23 +1773,23 @@ class DomainFactory {
     static void createRoddyProcessingOptions(File basePath = TestCase.uniqueNonExistentPath) {
         createProcessingOptionLazy(
                 OptionName.RODDY_PATH,
-                "${basePath}/roddy",
+                Paths.get(basePath.path, 'roddy').toString(),
         )
         createProcessingOptionLazy(
                 OptionName.RODDY_BASE_CONFIGS_PATH,
-                "${basePath}/roddyBaseConfigs",
+                Paths.get(basePath.path, 'roddyBaseConfigs').toString(),
         )
         createProcessingOptionLazy(
                 OptionName.RODDY_APPLICATION_INI,
-                "${basePath}/roddyBaseConfigs/applicationProperties.ini",
+                Paths.get(basePath.path, 'roddyBaseConfigs', 'applicationProperties.ini').toString(),
         )
         createProcessingOptionLazy(
                 OptionName.RODDY_FEATURE_TOGGLES_CONFIG_PATH,
-                "${basePath}/roddyBaseConfigs/featureToggles.ini",
+                Paths.get(basePath.path, 'roddyBaseConfigs', 'featureToggles.ini').toString(),
         )
         createProcessingOptionLazy(
                 OptionName.RODDY_SHARED_FILES_BASE_DIRECTORY,
-                "/shared",
+                Paths.get('shared').toAbsolutePath().toString(),
         )
     }
 

@@ -288,16 +288,16 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         given:
         final String OLD_FINAL_PATH = "oldFinalPath"
         final String OLD_PATH = 'oldPath'
-        final String OLD_ALL_PATH = "${OLD_PATH}/all"
-        final String OLD_WELL_PATH = "${OLD_ALL_PATH}/oldFile"
-        final String OLD_MAPPING_PATH = "${OLD_ALL_PATH}/mapping"
+        final String OLD_ALL_PATH = Paths.get(OLD_PATH, "all")
+        final String OLD_WELL_PATH = Paths.get(OLD_ALL_PATH, "oldFile")
+        final String OLD_MAPPING_PATH = Paths.get(OLD_ALL_PATH, "mapping")
         final String OLD_ENTRY = 'oldEntry\tvalue'
 
         final Path NEW_FINAL_PATH = Paths.get("newFinalPath")
         final String NEW_PATH = 'newPath'
-        final String NEW_ALL_PATH = "${NEW_PATH}/all"
-        final Path NEW_WELL_PATH = Paths.get("${NEW_ALL_PATH}/newFile")
-        final String NEW_MAPPING_PATH = "${NEW_ALL_PATH}/mapping"
+        final String NEW_ALL_PATH = Paths.get(NEW_PATH, "all")
+        final Path NEW_WELL_PATH = Paths.get(NEW_ALL_PATH, "newFile")
+        final String NEW_MAPPING_PATH = Paths.get(NEW_ALL_PATH, "mapping")
         final String NEW_ENTRY = 'newEntry\tvalue'
 
         final RawSequenceFile rawSequenceFile = createFastqFile(

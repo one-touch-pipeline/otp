@@ -1057,7 +1057,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         given:
         setupData()
 
-        Project project = createProject(dirAnalysis: "/dev/null")
+        Project project = createProject(dirAnalysis: TestCase.uniqueNonExistentPath)
         UserProjectRole userProjectRole = createUserProjectRole(
                 project: project,
                 accessToFiles: true
@@ -1099,7 +1099,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         given:
         setupData()
 
-        Project project = createProject(dirAnalysis: "/dev/null")
+        Project project = createProject(dirAnalysis: TestCase.uniqueNonExistentPath)
         UserProjectRole userProjectRole = createUserProjectRole(
                 project: project,
                 accessToFiles: false

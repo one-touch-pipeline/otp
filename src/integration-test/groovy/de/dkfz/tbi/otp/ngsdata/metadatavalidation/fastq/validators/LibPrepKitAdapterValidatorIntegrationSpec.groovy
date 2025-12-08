@@ -26,6 +26,7 @@ import grails.testing.mixin.integration.Integration
 import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.*
 import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -85,7 +86,7 @@ class LibPrepKitAdapterValidatorIntegrationSpec extends Specification implements
 
         LibraryPreparationKit kitWithoutAdapterFileAndSequence = createLibraryPreparationKit(name: 'lib_prep_kit_without_adapter_file_and_sequence')
         LibraryPreparationKit kitWithoutAdapterFile = createLibraryPreparationKit(name: 'lib_prep_kit_without_adapter_file', reverseComplementAdapterSequence: "ACGTC")
-        LibraryPreparationKit kitWithoutAdapterSequence = createLibraryPreparationKit(name: 'lib_prep_kit_without_adapter_sequence', adapterFile: "/asdf")
+        LibraryPreparationKit kitWithoutAdapterSequence = createLibraryPreparationKit(name: 'lib_prep_kit_without_adapter_sequence', adapterFile: TestCase.uniqueNonExistentPath)
 
         Project wgsProject = createProject()
         Project wgbsProject = createProject()

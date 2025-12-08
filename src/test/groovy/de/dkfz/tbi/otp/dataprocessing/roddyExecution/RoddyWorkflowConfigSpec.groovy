@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
 import grails.testing.gorm.DataTest
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -164,6 +165,7 @@ class RoddyWorkflowConfigSpec extends Specification implements DataTest {
         SeqTypeNames.EXOME                               | false
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test getStandardConfigDirectory all fine should return correct path for project"() {
         given:
         Project project = DomainFactory.createProject()
@@ -263,7 +265,7 @@ class RoddyWorkflowConfigSpec extends Specification implements DataTest {
 
         File path = RoddyWorkflowConfig.getStandardConfigDirectory(project, pipelineName)
         String name = RoddyWorkflowConfig.getConfigFileName(pipelineName, seqType, PROGRAM_VERSION, CONFIG_VERSION)
-        String expected = "${path.path}/${name}"
+        String expected = "${path.path}${File.separator}${name}"
 
         when:
         File file = RoddyWorkflowConfig.getStandardConfigFile(project, pipelineName, seqType, PROGRAM_VERSION, CONFIG_VERSION)

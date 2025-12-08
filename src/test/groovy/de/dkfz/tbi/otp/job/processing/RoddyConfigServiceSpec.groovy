@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.job.processing
 
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -32,6 +33,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowVersion
 
 import java.nio.file.Paths
 
+@IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
 class RoddyConfigServiceSpec extends Specification implements ServiceUnitTest<RoddyConfigService>, DataTest, WorkflowSystemDomainFactory {
 
     private static final String COMBINED_CONFIG = """

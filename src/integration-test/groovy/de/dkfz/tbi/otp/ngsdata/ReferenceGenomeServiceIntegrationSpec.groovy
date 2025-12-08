@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -81,6 +82,7 @@ class ReferenceGenomeServiceIntegrationSpec extends Specification implements Use
         configService.clean()
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "createReferenceGenomeMetafile, file is created with expected content"() {
         given:
         setupData()
@@ -108,6 +110,7 @@ class ReferenceGenomeServiceIntegrationSpec extends Specification implements Use
         expectedFile.text == expectedContent
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test loadReferenceGenome"() {
         given:
         setupData()

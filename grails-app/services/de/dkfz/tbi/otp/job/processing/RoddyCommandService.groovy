@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.Individual
 
 import java.nio.file.Path
+import java.nio.file.Paths
 
 @Transactional
 class RoddyCommandService {
@@ -44,7 +45,7 @@ class RoddyCommandService {
         ].join('\n')
     }
 
-    private String activateModulesForRoddyCommand() {
+    protected String activateModulesForRoddyCommand() {
         String loadModule = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER)
         String activateGroovy = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_ACTIVATION_GROOVY)
         String activateJava = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_ACTIVATION_JAVA)
@@ -62,7 +63,7 @@ class RoddyCommandService {
         String featureTogglesConfigPath = processingOptionService.findOptionAsString(ProcessingOption.OptionName.RODDY_FEATURE_TOGGLES_CONFIG_PATH)
 
         return ([
-                "${roddyPath}/roddy.sh" as String,
+                Paths.get(roddyPath, "roddy.sh") as String,
                 "rerun",
                 "${RoddyConfigService.CONFIGURATION_NAME}@${RoddyConfigService.ANALYSIS_ID}" as String,
                 "${individual.pid}" as String,

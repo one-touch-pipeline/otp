@@ -48,6 +48,8 @@ import de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
+import java.nio.file.Paths
+
 import static de.dkfz.tbi.otp.tracking.Ticket.ProcessingStep.*
 
 class CreateNotificationTextServiceSpec extends Specification implements AlignmentPipelineFactory, WorkflowSystemDomainFactory, DataTest {
@@ -210,8 +212,8 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         when:
         String fileNameString = createNotificationTextService.getSeqTypeDirectories([seqTrack1, seqTrack2])
         String expected = [
-                new File("${configService.rootPath}/${seqTrack1.project.dirName}/sequencing/${seqTrack1.seqType.dirName}"),
-                new File("${configService.rootPath}/${seqTrack2.project.dirName}/sequencing/${seqTrack2.seqType.dirName}"),
+                Paths.get(configService.rootPath.toString(), seqTrack1.project.dirName, "sequencing", seqTrack1.seqType.dirName).toAbsolutePath(),
+                Paths.get(configService.rootPath.toString(), seqTrack2.project.dirName, "sequencing", seqTrack2.seqType.dirName).toAbsolutePath(),
         ].sort().join('\n')
 
         then:
@@ -251,10 +253,10 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         when:
         String fileNameString = createNotificationTextService.getMergingDirectories([roddyBamFile1, roddyBamFile2, roddyBamFile3])
         String expected = [
-                new File("${configService.rootPath}/${roddyBamFile1.project.dirName}/sequencing/${roddyBamFile1.seqType.dirName}/" +
-                        "view-by-pid/\${PID}/\${SAMPLE_TYPE}/${roddyBamFile1.seqType.libraryLayoutDirName}/merged-alignment"),
-                new File("${configService.rootPath}/${roddyBamFile2.project.dirName}/sequencing/${roddyBamFile1.seqType.dirName}/" +
-                        "view-by-pid/\${PID}/\${SAMPLE_TYPE}/${roddyBamFile2.seqType.libraryLayoutDirName}/merged-alignment"),
+                Paths.get(configService.rootPath.toString(), roddyBamFile1.project.dirName, "sequencing", roddyBamFile1.seqType.dirName,
+                        "view-by-pid", "\${PID}", "\${SAMPLE_TYPE}", roddyBamFile1.seqType.libraryLayoutDirName, "merged-alignment").toAbsolutePath(), /* codenarc-disable-line GStringExpressionWithinString */
+                Paths.get(configService.rootPath.toString(), roddyBamFile2.project.dirName, "sequencing", roddyBamFile1.seqType.dirName,
+                        "view-by-pid", "\${PID}", "\${SAMPLE_TYPE}", roddyBamFile1.seqType.libraryLayoutDirName, "merged-alignment").toAbsolutePath(), /* codenarc-disable-line GStringExpressionWithinString */
         ].sort().join('\n')
 
         then:
@@ -276,9 +278,10 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
 
         when:
         String fileNameString = createNotificationTextService.getMergingDirectories([roddyBamFile])
-        String expected = new File("${configService.rootPath}/${roddyBamFile.project.dirName}/sequencing/" +
-                "${roddyBamFile.seqType.dirName}/view-by-pid/\${PID}/\${SAMPLE_TYPE}-\${ANTI_BODY_TARGET}/" +
-                "${roddyBamFile.seqType.libraryLayoutDirName}/merged-alignment").path
+        String expected =
+                Paths.get(configService.rootPath.toString(), roddyBamFile.project.dirName, "sequencing", roddyBamFile.seqType.dirName,
+                        "view-by-pid", "\${PID}", "\${SAMPLE_TYPE}-\${ANTI_BODY_TARGET}", /* codenarc-disable-line GStringExpressionWithinString */
+                        roddyBamFile.seqType.libraryLayoutDirName, "merged-alignment").toAbsolutePath()
 
         then:
         expected == fileNameString
@@ -301,12 +304,12 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         String fileNameString = new CreateNotificationTextService().variantCallingDirectories([samplePair1, samplePair2], analysis)
 
         String expected = [
-                new File("${configService.rootPath}/${samplePair1.project.dirName}/sequencing/${samplePair1.seqType.dirName}/" +
-                        "view-by-pid/${samplePair1.individual.pid}/${pathSegment}/${samplePair1.seqType.libraryLayoutDirName}/" +
-                        "${samplePair1.sampleType1.dirName}_${samplePair1.sampleType2.dirName}"),
-                new File("${configService.rootPath}/${samplePair2.project.dirName}/sequencing/${samplePair2.seqType.dirName}/" +
-                        "view-by-pid/${samplePair2.individual.pid}/${pathSegment}/${samplePair2.seqType.libraryLayoutDirName}/" +
-                        "${samplePair2.sampleType1.dirName}_${samplePair2.sampleType2.dirName}"),
+                Paths.get(configService.rootPath.toString(), samplePair1.project.dirName, "sequencing", samplePair1.seqType.dirName,
+                        "view-by-pid", samplePair1.individual.pid, pathSegment, samplePair1.seqType.libraryLayoutDirName,
+                        "${samplePair1.sampleType1.dirName}_${samplePair1.sampleType2.dirName}").toAbsolutePath(),
+                Paths.get(configService.rootPath.toString(), samplePair2.project.dirName, "sequencing", samplePair2.seqType.dirName,
+                        "view-by-pid", samplePair2.individual.pid, pathSegment, samplePair2.seqType.libraryLayoutDirName,
+                        "${samplePair2.sampleType1.dirName}_${samplePair2.sampleType2.dirName}").toAbsolutePath(),
         ].sort().join('\n')
 
         then:
@@ -650,24 +653,24 @@ ${expectedAlign}"""
                 alignmentProcessingStatus: ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
         ], true)
         Map data2 = createData([
-                sampleId1: 'sampleId2a',
-                sampleId2: 'sampleId2b',
-                project: multipleProjects ? createProject() : data1.seqTrack.project,
-                seqType: multipleSeqTypes ? DomainFactory.createSeqTypePaired() : data1.seqTrack.seqType,
-                run: data1.seqTrack.run,
+                sampleId1                : 'sampleId2a',
+                sampleId2                : 'sampleId2b',
+                project                  : multipleProjects ? createProject() : data1.seqTrack.project,
+                seqType                  : multipleSeqTypes ? DomainFactory.createSeqTypePaired() : data1.seqTrack.seqType,
+                run                      : data1.seqTrack.run,
                 alignmentProcessingStatus: secondSampleAligned ? ProcessingStatus.WorkflowProcessingStatus.ALL_DONE :
                         ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
-                snvProcessingStatus: snv ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO :
+                snvProcessingStatus      : snv ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO :
                         ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
-                indelProcessingStatus: indel ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO :
+                indelProcessingStatus    : indel ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO :
                         ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
-                sophiaProcessingStatus: sophia ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO :
+                sophiaProcessingStatus   : sophia ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO :
                         ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
-                aceseqProcessingStatus: aceseq ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO :
+                aceseqProcessingStatus   : aceseq ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO :
                         ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
-                runYapsaProcessingStatus: runYapsa ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO :
+                runYapsaProcessingStatus : runYapsa ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO :
                         ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
-                workflow: data1.workflow,
+                workflow                 : data1.workflow,
         ], true)
 
         ProcessingStatus processingStatus = new ProcessingStatus([
@@ -1271,7 +1274,7 @@ samtoolsProgram: ${data.alignmentInfo.samToolsCommand}"""
 
     MessageSourceService getMessageSourceServiceWithMockedMessageSource() {
         return new MessageSourceService(
-            messageSource: messageSource
+                messageSource: messageSource
         )
     }
 

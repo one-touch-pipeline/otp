@@ -516,15 +516,17 @@ class CreateNotificationTextService {
         String sampleType = '${SAMPLE_TYPE}'
 
         return bamFiles.collect {
-            String projectDir = projectService.getProjectDirectory(it.project)
             String seqTypeDir = it.seqType.dirName
             String layout = it.seqType.libraryLayoutDirName
             String antiBodyTarget = it.seqType.hasAntibodyTarget ? '-${ANTI_BODY_TARGET}' : ''
-            "${projectDir}/sequencing/" +
-                    "${seqTypeDir}/" +
-                    "view-by-pid/${pid}/" +
-                    "${sampleType}${antiBodyTarget}/" +
-                    "${layout}/merged-alignment"
+            projectService.getProjectDirectory(it.project)
+                    .resolve("sequencing")
+                    .resolve(seqTypeDir)
+                    .resolve("view-by-pid")
+                    .resolve(pid)
+                    .resolve("${sampleType}${antiBodyTarget}")
+                    .resolve(layout)
+                    .resolve("merged-alignment")
         }.unique().sort().join('\n')
     }
 

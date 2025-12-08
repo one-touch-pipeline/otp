@@ -25,8 +25,7 @@ import grails.gorm.hibernate.annotation.ManagedEntity
 import groovy.transform.ToString
 
 import de.dkfz.tbi.otp.utils.Entity
-
-import java.nio.file.Paths
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
 /**
  * BaseFolder is part of the UUID based file system
@@ -49,7 +48,7 @@ class BaseFolder implements Entity {
 
     static Closure constraints = {
         path(unique: true, validator: {
-            if (!Paths.get(it).isAbsolute()) {
+            if (!OtpPathValidator.isValidAbsolutePath(it)) {
                 return "not.absolute"
             }
         })

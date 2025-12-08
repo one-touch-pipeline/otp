@@ -146,7 +146,7 @@ class IndelExecuteJobSpec extends Specification implements DataTest, WorkflowSys
                 matchExactSampleName                   : [value: 'true', type: "boolean"],
                 allowSampleTerminationWithIndex        : [value: 'false', type: "boolean"],
                 useLowerCaseFilenameForSampleExtraction: [value: 'false', type: "boolean"],
-                REFERENCE_GENOME                       : [value: '/fasta-path', type: "path"],
+                REFERENCE_GENOME                       : [value: "${File.separator}fasta-path", type: "path"],
                 CHR_SUFFIX                             : [value: instance.referenceGenome.chromosomeSuffix],
                 CHR_PREFIX                             : [value: instance.referenceGenome.chromosomePrefix],
                 VCF_NORMAL_HEADER_COL                  : [value: instance.sampleType2BamFile.sampleType.dirName],
@@ -179,14 +179,14 @@ class IndelExecuteJobSpec extends Specification implements DataTest, WorkflowSys
                 "matchExactSampleName"                   : [value: 'true', type: "boolean"],
                 "allowSampleTerminationWithIndex"        : [value: 'false', type: "boolean"],
                 "useLowerCaseFilenameForSampleExtraction": [value: 'false', type: "boolean"],
-                "REFERENCE_GENOME"                       : [value: '/fasta-path', type: "path"],
+                "REFERENCE_GENOME"                       : [value: "${File.separator}fasta-path", type: "path"],
                 "CHR_SUFFIX"                             : [value: instance.referenceGenome.chromosomeSuffix],
                 "CHR_PREFIX"                             : [value: instance.referenceGenome.chromosomePrefix],
                 "VCF_NORMAL_HEADER_COL"                  : [value: instance.sampleType2BamFile.sampleType.dirName],
                 "VCF_TUMOR_HEADER_COL"                   : [value: instance.sampleType1BamFile.sampleType.dirName],
                 "SEQUENCE_TYPE"                          : [value: instance.sampleType1BamFile.seqType.roddyName],
                 "analysisMethodNameOnOutput"             : [value: 'work-dir'],
-                "EXOME_CAPTURE_KIT_BEDFILE"              : [value: '/bed-path', type: "path"],
+                "EXOME_CAPTURE_KIT_BEDFILE"              : [value: "${File.separator}bed-path", type: "path"],
         ])
     }
 

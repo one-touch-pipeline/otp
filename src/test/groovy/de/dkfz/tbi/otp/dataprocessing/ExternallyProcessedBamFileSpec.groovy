@@ -27,6 +27,7 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.utils.HelperUtils
+import java.nio.file.*
 
 class ExternallyProcessedBamFileSpec extends Specification implements DataTest {
 
@@ -40,7 +41,7 @@ class ExternallyProcessedBamFileSpec extends Specification implements DataTest {
     private Map createMap() {
         return [
                 fileName           : 'bamfile.bam',
-                importedFrom       : '/tmp/bamfile',
+                importedFrom       : Paths.get('/tmp', 'bamfile').toString(),
                 fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
                 md5sum             : HelperUtils.randomMd5sum,
                 maximumReadLength  : 5,

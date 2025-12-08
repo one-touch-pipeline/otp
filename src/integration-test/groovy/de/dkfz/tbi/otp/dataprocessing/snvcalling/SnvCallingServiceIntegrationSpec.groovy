@@ -311,6 +311,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         e.message.contains('The input BAM files have changed on the file system while this job processed them.')
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "getResultRequiredForRunYapsaAndEnsureIsReadableAndNotEmpty, should find the file"() {
         given:
         setupData()

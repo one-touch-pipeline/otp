@@ -50,6 +50,7 @@ import static de.dkfz.tbi.otp.utils.HelperUtils.byteArrayToHexString
 @Rollback
 @Integration
 @DirtiesContext
+@IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
 class BamMetadataImportServiceIntegrationSpec extends Specification implements RoddyPanCancerFactory, UserAndRoles {
 
     @Autowired

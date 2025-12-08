@@ -146,6 +146,6 @@ class BamImportConditionalFailJobSpec extends Specification implements DataTest,
         then:
         WorkflowException e = thrown(WorkflowException)
         e.message.contains("files are missing")
-        e.message.contains("directory/test2.txt")
+        e.message.contains("directory${File.separator}test2.txt")
     }
 }

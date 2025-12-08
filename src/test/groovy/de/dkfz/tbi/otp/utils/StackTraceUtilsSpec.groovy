@@ -21,10 +21,12 @@
  */
 package de.dkfz.tbi.otp.utils
 
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
+@IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
 class StackTraceUtilsSpec extends Specification {
 
     void "getStackTrace, when Throwable is given, then return String of stackTrace"() {

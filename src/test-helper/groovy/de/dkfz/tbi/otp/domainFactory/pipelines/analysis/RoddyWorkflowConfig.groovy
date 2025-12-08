@@ -48,7 +48,7 @@ trait RoddyWorkflowConfig extends WorkflowConfig {
                 pipeline             : pipeline,
                 seqType              : seqType,
                 configFilePath       : {
-                    "${TestCase.uniqueNonExistentPath}/${pipeline.name.name()}_${seqType.roddyName}_${seqType.libraryLayout}_${programVersion.substring(programVersion.indexOf(':') + 1)}_${configVersion}.xml"
+                    "${TestCase.uniqueNonExistentPath}${File.separator}${pipeline.name.name()}_${seqType.roddyName}_${seqType.libraryLayout}_${programVersion.substring(programVersion.indexOf(':') + 1)}_${configVersion}.xml"
                 },
                 programVersion       : programVersion,
                 configVersion        : configVersion,

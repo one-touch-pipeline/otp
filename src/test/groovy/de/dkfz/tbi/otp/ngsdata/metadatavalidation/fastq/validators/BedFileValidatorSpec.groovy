@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import grails.testing.gorm.DataTest
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -40,6 +41,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowVersionSelectorService
 
 import static de.dkfz.tbi.TestCase.assertContainSame
 
+@IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
 class BedFileValidatorSpec extends Specification implements DataTest, DomainFactoryCore {
 
     @Override

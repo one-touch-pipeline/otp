@@ -99,7 +99,7 @@ class RnaAlignmentWorkFileServiceSpec extends Specification
         setupNonUuid()
 
         expect:
-        service.getMergedQADirectory(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/qualitycontrol"
+        service.getMergedQADirectory(bamFile) == Paths.get("/base-dir", bamFile.workDirectoryName, "qualitycontrol")
     }
 
     void "test getSingleLaneQADirectories"() {
@@ -112,8 +112,8 @@ class RnaAlignmentWorkFileServiceSpec extends Specification
         setupNonUuid()
 
         expect:
-        service.getCorrespondingChimericBamFile(bamFile).toString() ==
-                "/base-dir/${bamFile.workDirectoryName}/${bamFile.sampleType.dirName}_${bamFile.individual.pid}_chimeric_merged.mdup.bam"
+        service.getCorrespondingChimericBamFile(bamFile) ==
+                Paths.get("/base-dir", bamFile.workDirectoryName, "${bamFile.sampleType.dirName}_${bamFile.individual.pid}_chimeric_merged.mdup.bam")
     }
 
     void "test getArribaFusionPlotPdf"() {
@@ -121,8 +121,8 @@ class RnaAlignmentWorkFileServiceSpec extends Specification
         setupNonUuid()
 
         expect:
-        service.getArribaFusionPlotPdf(bamFile).toString() ==
-                "/base-dir/${bamFile.workDirectoryName}/fusions_arriba/${bamFile.sampleType.dirName}_${bamFile.individual.pid}.fusions.pdf"
+        service.getArribaFusionPlotPdf(bamFile) ==
+                Paths.get("/base-dir", bamFile.workDirectoryName, "fusions_arriba", "${bamFile.sampleType.dirName}_${bamFile.individual.pid}.fusions.pdf")
     }
 
     void "test getMergedQADirectory for uuid structure"() {
@@ -130,7 +130,7 @@ class RnaAlignmentWorkFileServiceSpec extends Specification
         setupUuid()
 
         expect:
-        service.getMergedQADirectory(bamFile).toString() == "/base-dir-uuid/qualitycontrol"
+        service.getMergedQADirectory(bamFile) == Paths.get("/base-dir-uuid", "qualitycontrol")
     }
 
     void "test getCorrespondingWorkChimericBamFile for uuid structure"() {
@@ -138,8 +138,8 @@ class RnaAlignmentWorkFileServiceSpec extends Specification
         setupUuid()
 
         expect:
-        service.getCorrespondingChimericBamFile(bamFile).toString() ==
-                "/base-dir-uuid/${bamFile.sampleType.dirName}_${bamFile.individual.pid}_chimeric_merged.mdup.bam"
+        service.getCorrespondingChimericBamFile(bamFile) ==
+                Paths.get("/base-dir-uuid", "${bamFile.sampleType.dirName}_${bamFile.individual.pid}_chimeric_merged.mdup.bam")
     }
 
     void "test getArribaFusionPlotPdf for uuid structure"() {
@@ -147,7 +147,7 @@ class RnaAlignmentWorkFileServiceSpec extends Specification
         setupUuid()
 
         expect:
-        service.getArribaFusionPlotPdf(bamFile).toString() ==
-                "/base-dir-uuid/fusions_arriba/${bamFile.sampleType.dirName}_${bamFile.individual.pid}.fusions.pdf"
+        service.getArribaFusionPlotPdf(bamFile) ==
+                Paths.get("/base-dir-uuid", "fusions_arriba", "${bamFile.sampleType.dirName}_${bamFile.individual.pid}.fusions.pdf")
     }
 }

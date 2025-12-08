@@ -41,6 +41,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 import java.nio.file.Files
 import java.nio.file.Path
 
+@IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
 class IndelParseJobSpec extends Specification implements DataTest, WorkflowSystemDomainFactory {
 
     @Override

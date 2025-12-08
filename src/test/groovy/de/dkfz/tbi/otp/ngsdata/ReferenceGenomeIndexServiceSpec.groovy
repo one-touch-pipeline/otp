@@ -50,7 +50,7 @@ class ReferenceGenomeIndexServiceSpec extends Specification implements DataTest,
         ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome(path: "1KGRef")
         ToolName toolName = DomainFactory.createToolName(path: "toolName")
         referenceGenomeIndex = DomainFactory.createReferenceGenomeIndex(path: "path", toolName: toolName, referenceGenome: referenceGenome)
-        DomainFactory.createProcessingOptionBasePathReferenceGenome("/referenceGenomes")
+        DomainFactory.createProcessingOptionBasePathReferenceGenome("${File.separator}referenceGenomes")
     }
 
     void "test getFile"() {

@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation
 
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -105,6 +106,7 @@ class BamMetadataValidationServiceSpec extends Specification {
         problems.problems.empty
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "checkFile, when is not readable, add the corresponding problem"() {
         given:
         Path notReadAble = CreateFileHelper.createFile(tempDir.resolve('notReadable.txt'))

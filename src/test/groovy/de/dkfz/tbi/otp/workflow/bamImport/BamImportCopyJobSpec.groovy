@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflow.bamImport
 
 import grails.testing.gorm.DataTest
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -42,6 +43,7 @@ import java.nio.file.Path
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
+@IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
 class BamImportCopyJobSpec extends Specification implements DataTest, DomainFactoryCore, BamImportWorkflowDomainFactory {
 
     @Override

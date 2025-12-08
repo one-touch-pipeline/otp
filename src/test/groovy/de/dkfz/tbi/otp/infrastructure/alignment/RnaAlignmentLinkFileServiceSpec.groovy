@@ -25,6 +25,7 @@ import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
@@ -73,15 +74,15 @@ class RnaAlignmentLinkFileServiceSpec extends Specification implements ServiceUn
 
     void setup() {
         bamFile = createBamFile()
-        testDir = "/base-dir"
+        testDir = TestCase.uniqueNonExistentPath
         service.abstractBamFileService = Mock(AbstractBamFileService) {
-            getBaseDirectory(_) >> Paths.get("/base-dir")
+            getBaseDirectory(_) >> Paths.get(testDir)
         }
     }
 
     void "test getMergedQADirectory"() {
         expect:
-        service.getMergedQADirectory(bamFile).toString() == "${testDir}/qualitycontrol"
+        service.getMergedQADirectory(bamFile) == Paths.get(testDir, "qualitycontrol")
     }
 
     void "test getSingleLaneQADirectories"() {
@@ -91,19 +92,19 @@ class RnaAlignmentLinkFileServiceSpec extends Specification implements ServiceUn
 
     void "test getCorrespondingWorkChimericBamFile"() {
         expect:
-        service.getCorrespondingChimericBamFile(bamFile).toString() ==
-                "/base-dir/${bamFile.sampleType.dirName}_${bamFile.individual.pid}_chimeric_merged.mdup.bam"
+        service.getCorrespondingChimericBamFile(bamFile) ==
+                Paths.get(testDir, "${bamFile.sampleType.dirName}_${bamFile.individual.pid}_chimeric_merged.mdup.bam")
     }
 
     void "test getArribaFusionPlotPdf"() {
         expect:
-        service.getArribaFusionPlotPdf(bamFile).toString() ==
-                "/base-dir/fusions_arriba/${bamFile.sampleType.dirName}_${bamFile.individual.pid}.fusions.pdf"
+        service.getArribaFusionPlotPdf(bamFile) ==
+                Paths.get(testDir, "fusions_arriba", "${bamFile.sampleType.dirName}_${bamFile.individual.pid}.fusions.pdf")
     }
 
     void "test getPathForFurtherProcessingNoCheck, should call rnaAlignmentWorkFileService.getBamFile"() {
         given:
-        Path path = Paths.get("/some/path")
+        Path path = Paths.get("/some", "path")
         service.rnaAlignmentWorkFileService = Mock(RnaAlignmentWorkFileService) {
             1 * getBamFile(_) >> path
         }

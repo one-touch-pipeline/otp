@@ -54,38 +54,37 @@ class CellRangerLinkFileServiceSpec extends Specification implements ServiceUnit
     }
 
     SingleCellBamFile bamFile
-    String testDir
 
     void setup() {
         bamFile = createBamFile()
-        testDir = "/base-dir"
         service.abstractBamFileService = Mock(AbstractBamFileService) {
             getBaseDirectory(_) >> Paths.get("/base-dir")
         }
     }
+
     void "test getBamFile"() {
         expect:
-        service.getBamFile(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.bamFileName}"
+        service.getBamFile(bamFile) == Paths.get("/base-dir", bamFile.workDirectoryName, bamFile.bamFileName)
     }
 
     void "test getBaiFile"() {
         expect:
-        service.getBaiFile(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.baiFileName}"
+        service.getBaiFile(bamFile) == Paths.get("/base-dir", bamFile.workDirectoryName, bamFile.baiFileName)
     }
 
     void "test getSampleDirectory"() {
         expect:
-        service.getSampleDirectory(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/cell-ranger-input/${bamFile.id}"
+        service.getSampleDirectory(bamFile) == Paths.get("/base-dir", bamFile.workDirectoryName, "cell-ranger-input", bamFile.id.toString())
     }
 
     void "test getOutputDirectory"() {
         expect:
-        service.getOutputDirectory(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.id}"
+        service.getOutputDirectory(bamFile) == Paths.get("/base-dir", bamFile.workDirectoryName, bamFile.id.toString())
     }
 
     void "test getResultDirectory"() {
         expect:
-        service.getResultDirectory(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.id}/outs"
+        service.getResultDirectory(bamFile) == Paths.get("/base-dir", bamFile.workDirectoryName, bamFile.id.toString(), "outs")
     }
 
     void "test getFileMappingForLinks"() {
@@ -108,36 +107,36 @@ class CellRangerLinkFileServiceSpec extends Specification implements ServiceUnit
 
     void "test getLinkedResultFiles"() {
         expect:
-        service.getLinkedResultFiles(bamFile)*.toString() == [
-                "/base-dir/${bamFile.workDirectoryName}/web_summary.html",
-                "/base-dir/${bamFile.workDirectoryName}/metrics_summary.csv",
-                "/base-dir/${bamFile.workDirectoryName}/${bamFile.bamFileName}",
-                "/base-dir/${bamFile.workDirectoryName}/${bamFile.baiFileName}",
-                "/base-dir/${bamFile.workDirectoryName}/${bamFile.md5SumFileName}",
-                "/base-dir/${bamFile.workDirectoryName}/filtered_feature_bc_matrix.h5",
-                "/base-dir/${bamFile.workDirectoryName}/raw_feature_bc_matrix.h5",
-                "/base-dir/${bamFile.workDirectoryName}/molecule_info.h5",
-                "/base-dir/${bamFile.workDirectoryName}/cloupe.cloupe",
-                "/base-dir/${bamFile.workDirectoryName}/filtered_feature_bc_matrix",
-                "/base-dir/${bamFile.workDirectoryName}/raw_feature_bc_matrix",
-                "/base-dir/${bamFile.workDirectoryName}/analysis",
+        service.getLinkedResultFiles(bamFile) == [
+                Paths.get("/base-dir", bamFile.workDirectoryName, "web_summary.html"),
+                Paths.get("/base-dir", bamFile.workDirectoryName, "metrics_summary.csv"),
+                Paths.get("/base-dir", bamFile.workDirectoryName, bamFile.bamFileName),
+                Paths.get("/base-dir", bamFile.workDirectoryName, bamFile.baiFileName),
+                Paths.get("/base-dir", bamFile.workDirectoryName, bamFile.md5SumFileName),
+                Paths.get("/base-dir", bamFile.workDirectoryName, "filtered_feature_bc_matrix.h5"),
+                Paths.get("/base-dir", bamFile.workDirectoryName, "raw_feature_bc_matrix.h5"),
+                Paths.get("/base-dir", bamFile.workDirectoryName, "molecule_info.h5"),
+                Paths.get("/base-dir", bamFile.workDirectoryName, "cloupe.cloupe"),
+                Paths.get("/base-dir", bamFile.workDirectoryName, "filtered_feature_bc_matrix"),
+                Paths.get("/base-dir", bamFile.workDirectoryName, "raw_feature_bc_matrix"),
+                Paths.get("/base-dir", bamFile.workDirectoryName, "analysis"),
         ]
     }
 
     void "test getQualityAssessmentCsvFile"() {
         expect:
-        service.getQualityAssessmentCsvFile(bamFile).toString() ==
-                "/base-dir/${bamFile.workDirectoryName}/${bamFile.id}/outs/metrics_summary.csv"
+        service.getQualityAssessmentCsvFile(bamFile) ==
+                Paths.get("/base-dir", bamFile.workDirectoryName, bamFile.id.toString(), "outs", "metrics_summary.csv")
     }
 
     void "test getWebSummaryResultFile"() {
         expect:
-        service.getWebSummaryResultFile(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.id}/outs/web_summary.html"
+        service.getWebSummaryResultFile(bamFile) == Paths.get("/base-dir", bamFile.workDirectoryName, bamFile.id.toString(), "outs", "web_summary.html")
     }
 
     void "test getPathForFurtherProcessing, should return final directory"() {
         expect:
-        service.getPathForFurtherProcessing(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.bamFileName}"
+        service.getPathForFurtherProcessing(bamFile) == Paths.get("/base-dir", bamFile.workDirectoryName, bamFile.bamFileName)
     }
 
     void "test getPathForFurtherProcessing, when not set in mergingWorkPackage, should throw exception"() {

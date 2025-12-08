@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 import java.nio.file.Path
+import java.nio.file.Paths
 
 class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<RoddyBamFile> {
 
@@ -81,10 +82,6 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
     @TempDir
     Path tempDir
 
-    static final String FIRST_DATAFILE_NAME = "4_NoIndex_L004_R1_complete_filtered.fastq.gz"
-    static final String SECOND_DATAFILE_NAME = "4_NoIndex_L004_R2_complete_filtered.fastq.gz"
-    static final String COMMON_PREFIX = "4_NoIndex_L004"
-
     void setupTest() {
         roddyBamFile = DomainFactory.createRoddyBamFile([
                 roddyExecutionDirectoryNames: [],
@@ -92,7 +89,7 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         sampleType = roddyBamFile.sampleType
         individual = roddyBamFile.individual
         configService = new TestConfigService(tempDir)
-        testDir = "${individual.getViewByPidPath(roddyBamFile.seqType).absoluteDataManagementPath.path}/${sampleType.dirName}/${roddyBamFile.seqType.libraryLayoutDirName}/merged-alignment"
+        testDir = "${individual.getViewByPidPath(roddyBamFile.seqType).absoluteDataManagementPath.path}${File.separator}${sampleType.dirName}${File.separator}${roddyBamFile.seqType.libraryLayoutDirName}/merged-alignment"
     }
 
     void testGetRoddyBamFileName() {
@@ -116,7 +113,7 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         setupTest()
 
         expect:
-        "${testDir}/${roddyBamFile.workDirectoryName}" == roddyBamFile.workDirectory.path
+        Paths.get(testDir, roddyBamFile.workDirectoryName).toFile() == roddyBamFile.workDirectory
     }
 
     void testGetWorkQADirectory_AllFine() {
@@ -124,8 +121,7 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         setupTest()
 
         expect:
-        "${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}" ==
-                roddyBamFile.workQADirectory.path
+        Paths.get(testDir, roddyBamFile.workDirectoryName, RoddyBamFileNames.QUALITY_CONTROL_DIR).toFile() == roddyBamFile.workQADirectory
     }
 
     void testGetFinalQADirectory_AllFine() {
@@ -133,8 +129,7 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         setupTest()
 
         expect:
-        "${testDir}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}" ==
-                roddyBamFile.finalQADirectory.path
+        Paths.get(testDir, RoddyBamFileNames.QUALITY_CONTROL_DIR).toFile() == roddyBamFile.finalQADirectory
     }
 
     void testGetWorkExecutionStoreDirectory_AllFine() {
@@ -142,8 +137,7 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         setupTest()
 
         expect:
-        "${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFile.RODDY_EXECUTION_STORE_DIR}" ==
-                roddyBamFile.workExecutionStoreDirectory.path
+        Paths.get(testDir, roddyBamFile.workDirectoryName, RoddyBamFile.RODDY_EXECUTION_STORE_DIR).toFile() == roddyBamFile.workExecutionStoreDirectory
     }
 
     void testGetWorkBamFile_AllFine() {
@@ -151,8 +145,7 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         setupTest()
 
         expect:
-        "${testDir}/${roddyBamFile.workDirectoryName}/${roddyBamFile.bamFileName}" ==
-                roddyBamFile.workBamFile.path
+        Paths.get(testDir, roddyBamFile.workDirectoryName, roddyBamFile.bamFileName).toFile() == roddyBamFile.workBamFile
     }
 
     void testGetWorkBaiFile_AllFine() {
@@ -160,8 +153,7 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         setupTest()
 
         expect:
-        "${testDir}/${roddyBamFile.workDirectoryName}/${roddyBamFile.baiFileName}" ==
-                roddyBamFile.workBaiFile.path
+        Paths.get(testDir, roddyBamFile.workDirectoryName, roddyBamFile.baiFileName).toFile() == roddyBamFile.workBaiFile
     }
 
     void testGetFinalBamFile_AllFine() {
@@ -169,8 +161,7 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         setupTest()
 
         expect:
-        "${testDir}/${roddyBamFile.bamFileName}" ==
-                roddyBamFile.finalBamFile.path
+        Paths.get(testDir, roddyBamFile.bamFileName).toFile() == roddyBamFile.finalBamFile
     }
 
     void testGetWorkMergedQADirectory_AllFine() {
@@ -178,8 +169,8 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         setupTest()
 
         expect:
-        "${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/${RoddyBamFileNames.MERGED_DIR}" ==
-                roddyBamFile.workMergedQADirectory.path
+        Paths.get(testDir, roddyBamFile.workDirectoryName, RoddyBamFileNames.QUALITY_CONTROL_DIR, RoddyBamFileNames.MERGED_DIR).toFile() ==
+                roddyBamFile.workMergedQADirectory
     }
 
     void testGetWorkMergedQAJsonFile_AllFine() {
@@ -187,8 +178,8 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         setupTest()
 
         expect:
-        "${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/${RoddyBamFileNames.MERGED_DIR}/${RoddyBamFileNames.QUALITY_CONTROL_JSON_FILE_NAME}" ==
-                roddyBamFile.workMergedQAJsonFile.path
+        Paths.get(testDir, roddyBamFile.workDirectoryName, RoddyBamFileNames.QUALITY_CONTROL_DIR, RoddyBamFileNames.MERGED_DIR, RoddyBamFileNames.QUALITY_CONTROL_JSON_FILE_NAME).toFile() ==
+                roddyBamFile.workMergedQAJsonFile
     }
 
     void testGetFinalMergedQADirectory_AllFine() {
@@ -196,8 +187,9 @@ class RoddyBamFileDomainSpec extends Specification implements DomainUnitTest<Rod
         setupTest()
 
         expect:
-        "${testDir}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/${RoddyBamFileNames.MERGED_DIR}" ==
-                roddyBamFile.finalMergedQADirectory.path
+        Paths.get(testDir,
+                RoddyBamFileNames.QUALITY_CONTROL_DIR,
+                RoddyBamFileNames.MERGED_DIR).toFile() == roddyBamFile.finalMergedQADirectory
     }
 
     void testGetLatestWorkExecutionDirectory_WhenRoddyExecutionDirectoryNamesEmpty_ShouldFail() {

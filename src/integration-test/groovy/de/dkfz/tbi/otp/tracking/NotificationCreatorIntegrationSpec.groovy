@@ -1722,7 +1722,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         SessionUtils.withTransaction {
             DomainFactory.createProcessingOptionForTicketPrefix(PREFIX)
 
-            String blacklisted = setupBlacklistImportSourceNotificationProcessingOption("/blacklisted").value
+            String blacklisted = setupBlacklistImportSourceNotificationProcessingOption("${File.separator}blacklisted").value
             ticket = createTicket()
 
             FastqImportInstance fastqImportInstance = createFastqImportInstance(ticket: ticket, sequenceFiles: [
@@ -1777,7 +1777,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         List<String> expected = []
 
         SessionUtils.withTransaction {
-            String blacklisted = setupBlacklistImportSourceNotificationProcessingOption("/blacklisted").value
+            String blacklisted = setupBlacklistImportSourceNotificationProcessingOption("${File.separator}blacklisted").value
 
             ticket = createTicket()
 
@@ -1785,13 +1785,13 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             FastqImportInstance fastqImportInstanceA = createFastqImportInstance(ticket: ticket, sequenceFiles: rawSequenceFilesA)
 
             Closure<RawSequenceFile> createBlacklistedRawSequenceFile = {
-                createFastqFile(initialDirectory: "${blacklisted}/path/dataFile")
+                createFastqFile(initialDirectory: "${blacklisted}${File.separator}path${File.separator}dataFile")
             }
             List<RawSequenceFile> rawSequenceFilesB = [createFastqFile()]
             List<RawSequenceFile> rawSequenceFilesBBlacklisted = [createBlacklistedRawSequenceFile(), createBlacklistedRawSequenceFile()]
             FastqImportInstance fastqImportInstanceB = createFastqImportInstance(ticket: ticket, sequenceFiles: rawSequenceFilesB + rawSequenceFilesBBlacklisted)
 
-            DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceA, filePathSource: "${blacklisted}/path/metaDataFile")
+            DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceA, filePathSource: "${blacklisted}${File.separator}path${File.separator}metaDataFile")
             DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceB)
 
             expected.addAll(rawSequenceFilesA*.fullInitialPath)
@@ -1810,12 +1810,12 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         Ticket ticket
 
         SessionUtils.withTransaction {
-            String blacklisted = setupBlacklistImportSourceNotificationProcessingOption("/blacklisted").value
+            String blacklisted = setupBlacklistImportSourceNotificationProcessingOption("${File.separator}blacklisted").value
 
             ticket = createTicket()
 
             Closure<RawSequenceFile> createBlacklistedRawSequenceFile = {
-                createFastqFile(initialDirectory: "${blacklisted}/path/dataFile")
+                createFastqFile(initialDirectory: "${blacklisted}${File.separator}path${File.separator}dataFile")
             }
 
             FastqImportInstance fastqImportInstanceA = createFastqImportInstance(ticket: ticket, sequenceFiles: [
@@ -1827,8 +1827,8 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                     createBlacklistedRawSequenceFile(),
             ])
 
-            DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceA, filePathSource: "${blacklisted}/path/metaDataFile")
-            DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceB, filePathSource: "${blacklisted}/path/metaDataFile")
+            DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceA, filePathSource: "${blacklisted}${File.separator}path${File.separator}metaDataFile")
+            DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceB, filePathSource: "${blacklisted}${File.separator}path${File.separator}metaDataFile")
         }
 
         expect:

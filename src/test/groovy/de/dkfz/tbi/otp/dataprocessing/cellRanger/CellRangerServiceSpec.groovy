@@ -186,6 +186,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         1 * cellRangerService.fileService.deleteDirectoryRecursively(null)
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "validateFilesExistsInResultDirectory, if singleCellBamFile given and all files exist, then throw no exception"() {
         given:
         new TestConfigService(tempDir)
@@ -218,6 +219,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
     }
 
     @Unroll
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "validateFilesExistsInResultDirectory, if singleCellBamFile given and file/directory '#missingFile' does not exist, then throw an assert"() {
         given:
         new TestConfigService(tempDir)

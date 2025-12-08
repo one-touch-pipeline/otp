@@ -58,6 +58,7 @@ class MetadataValidationServiceSpec extends Specification implements DomainFacto
     }
 
     @Unroll
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void 'readPath, when file cannot be opened, adds an error #problemMessage'() {
         when:
         ContentWithPathAndProblems contentWithProblems = metadataValidationFileService.readPath(path)
@@ -208,6 +209,7 @@ class MetadataValidationServiceSpec extends Specification implements DomainFacto
         actual == expected
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void 'pathForMessage, when path points to a symlink, returns path of symlink and path of target'() {
         given:
         Path linkPath = tempDir.resolve('i_am_a_symlink')
@@ -222,6 +224,7 @@ class MetadataValidationServiceSpec extends Specification implements DomainFacto
         actual == expected
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void 'pathForMessage, when path points to a symlink to a symlink, returns path of symlink and path of final target'() {
         given:
         Path sourceSymlink = tempDir.resolve('source_symlink')

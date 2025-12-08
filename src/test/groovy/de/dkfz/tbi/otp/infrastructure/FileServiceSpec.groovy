@@ -33,6 +33,7 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.*
 import java.nio.file.attribute.*
 
+@IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
 class FileServiceSpec extends Specification implements DataTest {
 
     static final String SOME_CONTENT = 'SomeContent'

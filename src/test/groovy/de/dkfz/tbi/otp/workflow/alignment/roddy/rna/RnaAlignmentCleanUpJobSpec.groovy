@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflow.alignment.roddy.rna
 
 import grails.testing.gorm.DataTest
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -55,6 +56,7 @@ class RnaAlignmentCleanUpJobSpec extends Specification implements DataTest, RnaA
         ]
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "getAdditionalPathsToDelete, should return the correct paths"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep([

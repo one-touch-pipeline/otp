@@ -101,7 +101,7 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
 
         ExecuteRoddySnvJob job = new ExecuteRoddySnvJob([
                 configService         : configService,
-                individualService: individualService,
+                individualService     : individualService,
                 snvCallingService     : Spy(SnvCallingService) {
                     1 * validateInputBamFiles(_) >> { }
                 },
@@ -132,9 +132,9 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
         String bamFileDiseasePath = bamFileDisease.pathForFurtherProcessing.path
         String bamFileControlPath = bamFileControl.pathForFurtherProcessing.path
 
-        String analysisMethodNameOnOutput = "snv_results/${roddySnvCallingInstance.seqType.libraryLayoutDirName}/" +
-                "${roddySnvCallingInstance.sampleType1BamFile.sampleType.dirName}_${roddySnvCallingInstance.sampleType2BamFile.sampleType.dirName}/" +
-                "${roddySnvCallingInstance.instanceName}"
+        String analysisMethodNameOnOutput = "snv_results${File.separator}${roddySnvCallingInstance.seqType.libraryLayoutDirName}${File.separator}" +
+                "${roddySnvCallingInstance.sampleType1BamFile.sampleType.dirName}_${roddySnvCallingInstance.sampleType2BamFile.sampleType.dirName}" +
+                "${File.separator}${roddySnvCallingInstance.instanceName}"
 
         List<String> chromosomeNames = ["1", "2", "3", "4", "5", "X", "Y", "M"]
         DomainFactory.createReferenceGenomeEntries(roddySnvCallingInstance.referenceGenome, chromosomeNames)

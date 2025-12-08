@@ -100,7 +100,7 @@ class PanCancerWorkFileServiceSpec extends Specification implements ServiceUnitT
 
     void "test getDirectory, when workFolder doesn't exist"() {
         expect:
-        Paths.get("${baseDir}/${roddyBamFile.workDirectoryName}") == service.getDirectoryPath(roddyBamFile)
+        service.getDirectoryPath(roddyBamFile) == Paths.get(baseDir, roddyBamFile.workDirectoryName)
     }
 
     void "test getDirectory, when workFolder exists"() {
@@ -113,45 +113,44 @@ class PanCancerWorkFileServiceSpec extends Specification implements ServiceUnitT
 
     void "test getQADirectory"() {
         expect:
-        Paths.get("${baseDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}") ==
-                service.getQADirectory(roddyBamFile)
+        service.getQADirectory(roddyBamFile) ==
+                Paths.get(baseDir, roddyBamFile.workDirectoryName, RoddyBamFileNames.QUALITY_CONTROL_DIR)
     }
 
     void "test getExecutionStoreDirectory"() {
         expect:
-        Paths.get("${baseDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFile.RODDY_EXECUTION_STORE_DIR}") ==
-                service.getExecutionStoreDirectory(roddyBamFile)
+        service.getExecutionStoreDirectory(roddyBamFile) ==
+                Paths.get(baseDir, roddyBamFile.workDirectoryName, RoddyBamFile.RODDY_EXECUTION_STORE_DIR)
     }
 
     void "test getBamFile"() {
         expect:
-        Paths.get("${baseDir}/${roddyBamFile.workDirectoryName}/${roddyBamFile.bamFileName}") ==
-                service.getBamFile(roddyBamFile)
+        service.getBamFile(roddyBamFile) ==
+                Paths.get(baseDir, roddyBamFile.workDirectoryName, roddyBamFile.bamFileName)
     }
 
     void "test getBaiFile"() {
         expect:
-        Paths.get("${baseDir}/${roddyBamFile.workDirectoryName}/${roddyBamFile.baiFileName}") ==
-                service.getBaiFile(roddyBamFile)
+        service.getBaiFile(roddyBamFile) ==
+                Paths.get(baseDir, roddyBamFile.workDirectoryName, roddyBamFile.baiFileName)
     }
 
     void "test getMd5sumFile"() {
         expect:
-        Paths.get("${baseDir}/${roddyBamFile.workDirectoryName}/${roddyBamFile.bamFileName}.md5") ==
-                service.getMd5sumFile(roddyBamFile)
+        service.getMd5sumFile(roddyBamFile) ==
+                Paths.get(baseDir, roddyBamFile.workDirectoryName, "${roddyBamFile.bamFileName}.md5")
     }
 
     void "test getMergedQADirectory"() {
         expect:
-        Paths.get("${baseDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/${RoddyBamFileNames.MERGED_DIR}") ==
-                service.getMergedQADirectory(roddyBamFile)
+        service.getMergedQADirectory(roddyBamFile) ==
+                Paths.get(baseDir, roddyBamFile.workDirectoryName, RoddyBamFileNames.QUALITY_CONTROL_DIR, RoddyBamFileNames.MERGED_DIR)
     }
 
     void "test getMergedQAJsonFile"() {
         expect:
-        Paths.get("${baseDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/${RoddyBamFileNames.MERGED_DIR}/" +
-                "${RoddyBamFileNames.QUALITY_CONTROL_JSON_FILE_NAME}") ==
-                service.getMergedQAJsonFile(roddyBamFile)
+        service.getMergedQAJsonFile(roddyBamFile) ==
+                Paths.get(baseDir, roddyBamFile.workDirectoryName, RoddyBamFileNames.QUALITY_CONTROL_DIR, RoddyBamFileNames.MERGED_DIR, RoddyBamFileNames.QUALITY_CONTROL_JSON_FILE_NAME)
     }
 
     void "test getSingleLaneQADirectories, no seq tracks"() {
@@ -166,8 +165,7 @@ class PanCancerWorkFileServiceSpec extends Specification implements ServiceUnitT
         given:
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
         updateRawSequenceFileNames(seqTrack)
-        Path dir = Paths.get("${baseDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/" +
-                "run${seqTrack.run.name}_${COMMON_PREFIX}")
+        Path dir = Paths.get(baseDir, roddyBamFile.workDirectoryName, RoddyBamFileNames.QUALITY_CONTROL_DIR, "run${seqTrack.run.name}_${COMMON_PREFIX}")
 
         expect:
         [(seqTrack): dir] == service.getSingleLaneQADirectories(roddyBamFile)
@@ -181,7 +179,7 @@ class PanCancerWorkFileServiceSpec extends Specification implements ServiceUnitT
         roddyBamFile.seqTracks.add(seqTrack)
         Map<SeqTrack, Path> expected = [:]
         roddyBamFile.seqTracks.each {
-            Path dir = Paths.get("${baseDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/run${it.run.name}_${COMMON_PREFIX}")
+            Path dir = Paths.get(baseDir, roddyBamFile.workDirectoryName, RoddyBamFileNames.QUALITY_CONTROL_DIR, "run${it.run.name}_${COMMON_PREFIX}")
             expected.put((it), dir)
         }
 
@@ -193,8 +191,7 @@ class PanCancerWorkFileServiceSpec extends Specification implements ServiceUnitT
         given:
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
         updateRawSequenceFileNames(seqTrack)
-        Path file = Paths.get("${baseDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFileNames.QUALITY_CONTROL_DIR}/" +
-                "run${seqTrack.run.name}_${COMMON_PREFIX}/${RoddyBamFileNames.QUALITY_CONTROL_JSON_FILE_NAME}")
+        Path file = Paths.get(baseDir, roddyBamFile.workDirectoryName, RoddyBamFileNames.QUALITY_CONTROL_DIR, "run${seqTrack.run.name}_${COMMON_PREFIX}", RoddyBamFileNames.QUALITY_CONTROL_JSON_FILE_NAME)
 
         expect:
         [(seqTrack): file] == service.getSingleLaneQAJsonFiles(roddyBamFile)

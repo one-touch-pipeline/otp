@@ -47,7 +47,7 @@ class GeneModelServiceSpec extends Specification implements DataTest, ServiceUni
         service.referenceGenomeService.processingOptionService = new ProcessingOptionService()
         ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome(path: "1KGRef")
         geneModel = DomainFactory.createGeneModel(path: "geneModel", referenceGenome: referenceGenome)
-        DomainFactory.createProcessingOptionBasePathReferenceGenome("/referenceGenomes")
+        DomainFactory.createProcessingOptionBasePathReferenceGenome("${File.separator}referenceGenomes")
     }
 
     void "test getFile"() {

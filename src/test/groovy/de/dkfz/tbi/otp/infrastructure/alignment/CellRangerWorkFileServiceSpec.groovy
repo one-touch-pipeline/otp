@@ -84,7 +84,7 @@ class CellRangerWorkFileServiceSpec extends Specification implements ServiceUnit
         setupNonUuid()
 
         expect:
-        service.getDirectoryPath(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}"
+        service.getDirectoryPath(bamFile) == Paths.get("/base-dir", bamFile.workDirectoryName)
     }
 
     void "test getBamFile"() {
@@ -92,7 +92,7 @@ class CellRangerWorkFileServiceSpec extends Specification implements ServiceUnit
         setupNonUuid()
 
         expect:
-        service.getBamFile(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.bamFileName}"
+        service.getBamFile(bamFile) == Paths.get("/base-dir", bamFile.workDirectoryName, bamFile.bamFileName)
     }
 
     void "test getBaiFile"() {
@@ -100,7 +100,7 @@ class CellRangerWorkFileServiceSpec extends Specification implements ServiceUnit
         setupNonUuid()
 
         expect:
-        service.getBaiFile(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.baiFileName}"
+        service.getBaiFile(bamFile) == Paths.get("/base-dir", bamFile.workDirectoryName, bamFile.baiFileName)
     }
 
     void "test buildWorkDirectoryName"() {
@@ -126,7 +126,7 @@ class CellRangerWorkFileServiceSpec extends Specification implements ServiceUnit
         setupNonUuid()
 
         expect:
-        service.getSampleDirectory(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/cell-ranger-input/${bamFile.id}"
+        service.getSampleDirectory(bamFile) == Paths.get("/base-dir", bamFile.workDirectoryName, "cell-ranger-input", bamFile.id.toString())
     }
 
     void "test getOutputDirectory"() {
@@ -134,7 +134,7 @@ class CellRangerWorkFileServiceSpec extends Specification implements ServiceUnit
         setupNonUuid()
 
         expect:
-        service.getOutputDirectory(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.id}"
+        service.getOutputDirectory(bamFile) == Paths.get("/base-dir", bamFile.workDirectoryName, bamFile.id.toString())
     }
 
     void "test getResultDirectory"() {
@@ -142,7 +142,7 @@ class CellRangerWorkFileServiceSpec extends Specification implements ServiceUnit
         setupNonUuid()
 
         expect:
-        service.getResultDirectory(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.id}/outs"
+        service.getResultDirectory(bamFile) == Paths.get("/base-dir", bamFile.workDirectoryName, bamFile.id.toString(), "outs")
     }
 
     void "test getFileMappingForLinks"() {
@@ -171,19 +171,19 @@ class CellRangerWorkFileServiceSpec extends Specification implements ServiceUnit
         setupNonUuid()
 
         expect:
-        service.getLinkedResultFiles(bamFile)*.toString() == [
-                "/base-dir/${bamFile.workDirectoryName}/web_summary.html",
-                "/base-dir/${bamFile.workDirectoryName}/metrics_summary.csv",
-                "/base-dir/${bamFile.workDirectoryName}/${bamFile.bamFileName}",
-                "/base-dir/${bamFile.workDirectoryName}/${bamFile.baiFileName}",
-                "/base-dir/${bamFile.workDirectoryName}/${bamFile.md5SumFileName}",
-                "/base-dir/${bamFile.workDirectoryName}/filtered_feature_bc_matrix.h5",
-                "/base-dir/${bamFile.workDirectoryName}/raw_feature_bc_matrix.h5",
-                "/base-dir/${bamFile.workDirectoryName}/molecule_info.h5",
-                "/base-dir/${bamFile.workDirectoryName}/cloupe.cloupe",
-                "/base-dir/${bamFile.workDirectoryName}/filtered_feature_bc_matrix",
-                "/base-dir/${bamFile.workDirectoryName}/raw_feature_bc_matrix",
-                "/base-dir/${bamFile.workDirectoryName}/analysis",
+        service.getLinkedResultFiles(bamFile) == [
+                Paths.get("/base-dir", bamFile.workDirectoryName, "web_summary.html"),
+                Paths.get("/base-dir", bamFile.workDirectoryName, "metrics_summary.csv"),
+                Paths.get("/base-dir", bamFile.workDirectoryName, bamFile.bamFileName),
+                Paths.get("/base-dir", bamFile.workDirectoryName, bamFile.baiFileName),
+                Paths.get("/base-dir", bamFile.workDirectoryName, bamFile.md5SumFileName),
+                Paths.get("/base-dir", bamFile.workDirectoryName, "filtered_feature_bc_matrix.h5"),
+                Paths.get("/base-dir", bamFile.workDirectoryName, "raw_feature_bc_matrix.h5"),
+                Paths.get("/base-dir", bamFile.workDirectoryName, "molecule_info.h5"),
+                Paths.get("/base-dir", bamFile.workDirectoryName, "cloupe.cloupe"),
+                Paths.get("/base-dir", bamFile.workDirectoryName, "filtered_feature_bc_matrix"),
+                Paths.get("/base-dir", bamFile.workDirectoryName, "raw_feature_bc_matrix"),
+                Paths.get("/base-dir", bamFile.workDirectoryName, "analysis"),
         ]
     }
 
@@ -192,8 +192,8 @@ class CellRangerWorkFileServiceSpec extends Specification implements ServiceUnit
         setupNonUuid()
 
         expect:
-        service.getQualityAssessmentCsvFile(bamFile).toString() ==
-                "/base-dir/${bamFile.workDirectoryName}/${bamFile.id}/outs/metrics_summary.csv"
+        service.getQualityAssessmentCsvFile(bamFile) ==
+                Paths.get("/base-dir", bamFile.workDirectoryName, bamFile.id.toString(), "outs", "metrics_summary.csv")
     }
 
     void "test getWebSummaryResultFile"() {
@@ -201,7 +201,7 @@ class CellRangerWorkFileServiceSpec extends Specification implements ServiceUnit
         setupNonUuid()
 
         expect:
-        service.getWebSummaryResultFile(bamFile).toString() == "/base-dir/${bamFile.workDirectoryName}/${bamFile.id}/outs/web_summary.html"
+        service.getWebSummaryResultFile(bamFile) == Paths.get("/base-dir", bamFile.workDirectoryName, bamFile.id.toString(), "outs", "web_summary.html")
     }
 
     void "test getDirectoryPath for uuid structure"() {
@@ -209,7 +209,7 @@ class CellRangerWorkFileServiceSpec extends Specification implements ServiceUnit
         setupUuid()
 
         expect:
-        service.getDirectoryPath(bamFile).toString() == "/base-dir-uuid"
+        service.getDirectoryPath(bamFile) == Paths.get("/base-dir-uuid")
     }
 
     void "test getBamFile for uuid structure"() {
@@ -217,7 +217,7 @@ class CellRangerWorkFileServiceSpec extends Specification implements ServiceUnit
         setupUuid()
 
         expect:
-        service.getBamFile(bamFile).toString() == "/base-dir-uuid/${bamFile.bamFileName}"
+        service.getBamFile(bamFile) == Paths.get("/base-dir-uuid", bamFile.bamFileName)
     }
 
     void "test getBaiFile for uuid structure"() {
@@ -225,7 +225,7 @@ class CellRangerWorkFileServiceSpec extends Specification implements ServiceUnit
         setupUuid()
 
         expect:
-        service.getBaiFile(bamFile).toString() == "/base-dir-uuid/${bamFile.baiFileName}"
+        service.getBaiFile(bamFile) == Paths.get("/base-dir-uuid", bamFile.baiFileName)
     }
 
     @Unroll
@@ -250,7 +250,7 @@ class CellRangerWorkFileServiceSpec extends Specification implements ServiceUnit
         setupUuid()
 
         expect:
-        service.getSampleDirectory(bamFile).toString() == "/base-dir-uuid/cell-ranger-input/${bamFile.id}"
+        service.getSampleDirectory(bamFile) == Paths.get("/base-dir-uuid", "cell-ranger-input", bamFile.id.toString())
     }
 
     void "test getOutputDirectory for uuid structure"() {
@@ -258,7 +258,7 @@ class CellRangerWorkFileServiceSpec extends Specification implements ServiceUnit
         setupUuid()
 
         expect:
-        service.getOutputDirectory(bamFile).toString() == "/base-dir-uuid/${bamFile.id}"
+        service.getOutputDirectory(bamFile) == Paths.get("/base-dir-uuid", bamFile.id.toString())
     }
 
     void "test getResultDirectory for uuid structure"() {
@@ -266,7 +266,7 @@ class CellRangerWorkFileServiceSpec extends Specification implements ServiceUnit
         setupUuid()
 
         expect:
-        service.getResultDirectory(bamFile).toString() == "/base-dir-uuid/${bamFile.id}/outs"
+        service.getResultDirectory(bamFile) == Paths.get("/base-dir-uuid", bamFile.id.toString(), "outs")
     }
 
     void "test getLinkedResultFiles for uuid structure"() {
@@ -274,19 +274,19 @@ class CellRangerWorkFileServiceSpec extends Specification implements ServiceUnit
         setupUuid()
 
         expect:
-        service.getLinkedResultFiles(bamFile)*.toString() == [
-                "/base-dir-uuid/web_summary.html",
-                "/base-dir-uuid/metrics_summary.csv",
-                "/base-dir-uuid/${bamFile.bamFileName}",
-                "/base-dir-uuid/${bamFile.baiFileName}",
-                "/base-dir-uuid/${bamFile.md5SumFileName}",
-                "/base-dir-uuid/filtered_feature_bc_matrix.h5",
-                "/base-dir-uuid/raw_feature_bc_matrix.h5",
-                "/base-dir-uuid/molecule_info.h5",
-                "/base-dir-uuid/cloupe.cloupe",
-                "/base-dir-uuid/filtered_feature_bc_matrix",
-                "/base-dir-uuid/raw_feature_bc_matrix",
-                "/base-dir-uuid/analysis",
+        service.getLinkedResultFiles(bamFile) == [
+                Paths.get("/base-dir-uuid", "web_summary.html"),
+                Paths.get("/base-dir-uuid", "metrics_summary.csv"),
+                Paths.get("/base-dir-uuid", bamFile.bamFileName),
+                Paths.get("/base-dir-uuid", bamFile.baiFileName),
+                Paths.get("/base-dir-uuid", bamFile.md5SumFileName),
+                Paths.get("/base-dir-uuid", "filtered_feature_bc_matrix.h5"),
+                Paths.get("/base-dir-uuid", "raw_feature_bc_matrix.h5"),
+                Paths.get("/base-dir-uuid", "molecule_info.h5"),
+                Paths.get("/base-dir-uuid", "cloupe.cloupe"),
+                Paths.get("/base-dir-uuid", "filtered_feature_bc_matrix"),
+                Paths.get("/base-dir-uuid", "raw_feature_bc_matrix"),
+                Paths.get("/base-dir-uuid", "analysis"),
         ]
     }
 
@@ -295,8 +295,8 @@ class CellRangerWorkFileServiceSpec extends Specification implements ServiceUnit
         setupUuid()
 
         expect:
-        service.getQualityAssessmentCsvFile(bamFile).toString() ==
-                "/base-dir-uuid/${bamFile.id}/outs/metrics_summary.csv"
+        service.getQualityAssessmentCsvFile(bamFile) ==
+                Paths.get("/base-dir-uuid", bamFile.id.toString(), "outs", "metrics_summary.csv")
     }
 
     void "test getWebSummaryResultFile for uuid structure"() {
@@ -304,6 +304,6 @@ class CellRangerWorkFileServiceSpec extends Specification implements ServiceUnit
         setupUuid()
 
         expect:
-        service.getWebSummaryResultFile(bamFile).toString() == "/base-dir-uuid/${bamFile.id}/outs/web_summary.html"
+        service.getWebSummaryResultFile(bamFile) == Paths.get("/base-dir-uuid", bamFile.id.toString(), "outs", "web_summary.html")
     }
 }

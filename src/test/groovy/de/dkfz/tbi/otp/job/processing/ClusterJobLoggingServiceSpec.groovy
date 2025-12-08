@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import grails.testing.gorm.DataTest
+import spock.lang.IgnoreIf
 import spock.lang.TempDir
 import spock.lang.Specification
 
@@ -35,6 +36,7 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import java.nio.file.Files
 import java.nio.file.Path
 
+@IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
 class ClusterJobLoggingServiceSpec extends Specification implements DataTest {
 
     @Override

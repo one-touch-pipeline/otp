@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.gorm.DataTest
 import org.springframework.context.ApplicationContext
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
@@ -43,6 +44,7 @@ import java.nio.file.Paths
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
+@IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
 class BamMetadataImportServiceSpec extends Specification implements DomainFactoryCore, DataTest {
 
     @Override

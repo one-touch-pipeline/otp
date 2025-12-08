@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.utils
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -148,7 +149,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
 
         expect:
         executeRoddyCommandService.roddyBaseCommand(roddyPath, CONFIG_NAME, ANALYSIS_ID, ExecuteRoddyCommandService.RoddyInvocationType.EXECUTE) ==
-                "${roddyPath}/roddy.sh rerun ${CONFIG_NAME}.config@${ANALYSIS_ID}"
+                "${Paths.get(roddyPath.path, 'roddy.sh')} rerun ${CONFIG_NAME}.config@${ANALYSIS_ID}"
     }
 
     void "test getAnalysisIDinConfigFile_InputIsNull_ShouldFail"() {
@@ -325,7 +326,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
                 "--usePluginVersion=${roddyBamFile.config.programVersion} " +
                 "--configurationDirectories=${new File(roddyBamFile.config.configFilePath).parent},${roddyBaseConfigsPath}," +
                 "${roddyBaseConfigsPath}/${ExecuteRoddyCommandService.RESOURCE_PATH}/${scheduler.toString().toLowerCase()} " +
-                "--useiodir=/view-by-pid-path,${roddyBamFile.workDirectory}"
+                "--useiodir=${Paths.get( '/view-by-pid-path')},${roddyBamFile.workDirectory}"
     }
 
     void "test defaultRoddyExecutionCommand_firstRun_AllFine"() {
@@ -336,7 +337,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         executeRoddyCommandService.createWorkOutputDirectory(_) >> { File file -> }
         executeRoddyCommandService.individualService = Mock(IndividualService) {
             getViewByPidPathBase(_, _) >> { Individual individual, SeqType seqType ->
-                Paths.get("/view-by-pid-path")
+                Paths.get('/view-by-pid-path')
             }
         }
         executeRoddyCommandService.processingOptionService = new ProcessingOptionService()
@@ -374,7 +375,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         executeRoddyCommandService.createWorkOutputDirectory(_) >> { File file -> }
         executeRoddyCommandService.individualService = Mock(IndividualService) {
             getViewByPidPathBase(_, _) >> { Individual individual, SeqType seqType ->
-                Paths.get("/view-by-pid-path")
+                Paths.get('/view-by-pid-path')
             }
         }
         executeRoddyCommandService.processingOptionService = new ProcessingOptionService()
@@ -413,7 +414,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         executeRoddyCommandService.createWorkOutputDirectory(_) >> { File file -> }
         executeRoddyCommandService.individualService = Mock(IndividualService) {
             getViewByPidPathBase(_, _) >> { Individual individual, SeqType seqType ->
-                Paths.get("/view-by-pid-path")
+                Paths.get('/view-by-pid-path')
             }
         }
         executeRoddyCommandService.processingOptionService = new ProcessingOptionService()
@@ -498,6 +499,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
 
     // false positives, since rule can not recognize calling class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test createWorkOutputDirectory_AllFine"() {
         given:
         setupData()
@@ -529,6 +531,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         assert permissionAndGroup ==~ expected
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test createWorkOutputDirectory_DirectoryAlreadyExist_AllFine"() {
         given:
         setupData()
@@ -558,6 +561,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         permissionAndGroup ==~ expected
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test correctPermission_AllOkay"() {
         given:
         setupData()
@@ -623,6 +627,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         e.message.contains("roddyResult")
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test correctGroup_AllFine"() {
         given:
         setupData()
@@ -669,6 +674,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
         e.message.contains("roddyResult")
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test correctPermissionsAndGroups"() {
         given:
         setupData()

@@ -31,7 +31,10 @@ import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.JobScheduler
+
+import java.nio.file.Paths
 
 class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTest<JobStatusLoggingService>, DataTest {
 
@@ -48,8 +51,8 @@ class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTe
 
     TestConfigService configService
 
-    final static String LOGGING_ROOT_PATH = '/fakeRootPath'
-    final static String EXPECTED_BASE_PATH = '/fakeRootPath/log/status'
+    final static String LOGGING_ROOT_PATH = Paths.get("/fakeRootPath")
+    final static String EXPECTED_BASE_PATH = Paths.get(LOGGING_ROOT_PATH, "log", "status")
 
     final static Long ARBITRARY_ID = 23
     final static Long ARBITRARY_PROCESS_ID = 12345
@@ -68,7 +71,7 @@ class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTe
     void setup() {
         configService = new TestConfigService([(OtpProperty.PATH_CLUSTER_LOGS_OTP): LOGGING_ROOT_PATH])
         service.configService = configService
-        expectedLogFilePath = "/fakeRootPath/log/status/joblog_${ARBITRARY_PROCESS_ID}_${ARBITRARY_PBS_ID}.log"
+        expectedLogFilePath = Paths.get(LOGGING_ROOT_PATH, "log", "status", "joblog_${ARBITRARY_PROCESS_ID}_${ARBITRARY_PBS_ID}.log")
     }
 
     void cleanup() {
@@ -109,7 +112,7 @@ class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTe
 
         expect:
         service.constructLogFileLocation(processingStep) ==
-                "${EXPECTED_BASE_PATH}/joblog_${ARBITRARY_PROCESS_ID}_\$(echo \${PBS_JOBID} | cut -d. -f1).log"
+                "${EXPECTED_BASE_PATH}${File.separator}joblog_${ARBITRARY_PROCESS_ID}_\$(echo \${PBS_JOBID} | cut -d. -f1).log"
     }
 
     void "test constructLogFileLocation, when cluster job ID is passed"() {

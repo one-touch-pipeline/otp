@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing.roddy
 
 import grails.testing.gorm.DataTest
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -71,6 +72,7 @@ class JobStateLogFileSpec extends Specification implements DataTest {
         thrown FileNotFoundException
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void testValidateFile_WhenFileExistsButIsNotReadable_ShouldThrowException() {
         given:
         File file = tempDir.resolve(JOB_STATE_LOG_FILE_NAME).toFile()
@@ -117,6 +119,7 @@ class JobStateLogFileSpec extends Specification implements DataTest {
         jobStateLogFile.logFileEntries.get(logFileEntry3.clusterJobId).jobClass == logFileEntry3.jobClass
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void testParseJobStateLogFile_WhenEntriesDoNotMatch_ShouldThrowException() {
         given:
         JobStateLogFile.LogFileEntry logFileEntry = CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: "jobId1"])

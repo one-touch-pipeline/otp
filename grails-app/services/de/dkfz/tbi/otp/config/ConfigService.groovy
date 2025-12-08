@@ -35,8 +35,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.JobScheduler
 
-import java.nio.file.FileSystem
-import java.nio.file.Path
+import java.nio.file.*
 import java.time.*
 
 @Transactional
@@ -61,7 +60,7 @@ class ConfigService implements ApplicationContextAware {
         if (propertiesFile && new File(propertiesFile).canRead()) {
             properties.load(new FileInputStream(propertiesFile))
         } else {
-            properties.load(new FileInputStream("${System.getProperty("user.home")}${File.separator}.otp.properties"))
+            properties.load(Files.newInputStream(Paths.get(System.getProperty("user.home"), ".otp.properties")))
         }
         return properties
     }

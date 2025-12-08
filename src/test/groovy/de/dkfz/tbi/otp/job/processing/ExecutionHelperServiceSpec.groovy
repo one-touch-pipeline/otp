@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import grails.testing.gorm.DataTest
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -46,6 +47,7 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
         service = new ExecutionHelperService()
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test setGroup & getGroup allFine"() {
         given:
         File tmpFile = tempDir.toFile()
@@ -148,6 +150,7 @@ class ExecutionHelperServiceSpec extends Specification implements DataTest {
         e.message.contains(FAIL_MESSAGE)
     }
 
+    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test setPermission allFine"() {
         given:
         String PERMISSION = '777'

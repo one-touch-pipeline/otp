@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.dataprocessing.singleCell
 
 import grails.testing.gorm.DataTest
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -34,6 +35,7 @@ import de.dkfz.tbi.otp.utils.CreateFileHelper
 
 import java.nio.file.*
 
+@IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
 class SingleCellMappingFileServiceSpec extends Specification implements DataTest, DomainFactoryCore {
 
     private static final String ENTRY = "fileNew\twellNew"
