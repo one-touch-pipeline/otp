@@ -28,7 +28,6 @@ import io.swagger.client.wes.model.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import org.springframework.web.reactive.function.client.WebClientRequestException
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
@@ -62,20 +61,10 @@ class WesMonitor {
     @Autowired
     WorkflowSystemService workflowSystemService
 
-    @Autowired
-    WeskitAuthService weskitAuthService
-
     @Scheduled(fixedDelay = 30000L)
     void check() {
         if (!workflowSystemService.enabled) {
             return // job system is inactive
-        }
-        try {
-            log.debug("Send keep alive for WESKit OAuth2 service")
-            weskitAuthService.requestWeskitAccessToken()
-        } catch (WeskitRequestAccessTokenFailedException | WebClientRequestException e) {
-            log.warn("Keep alive for WESKit OAuth2 service failed: ${e.message}")
-            return
         }
         List<WesRun> wesRuns = LogUsedTimeUtils.logUsedTime(log, "Fetching WESKit runs to monitor from database") {
             wesRunService.monitoredRuns()

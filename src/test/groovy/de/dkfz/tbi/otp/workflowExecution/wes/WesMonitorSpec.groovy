@@ -62,10 +62,6 @@ class WesMonitorSpec extends Specification implements DataTest, WorkflowSystemDo
         monitor.workflowSystemService = Mock(WorkflowSystemService) {
             0 * _
         }
-        monitor.weskitAuthService = Mock(WeskitAuthService) {
-            _ * requestWeskitAccessToken()
-            0 * _
-        }
         monitor.configService = new TestConfigService()
     }
 
