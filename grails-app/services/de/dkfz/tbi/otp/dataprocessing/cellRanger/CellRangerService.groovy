@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerFileNames
 import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerLinkFileService
 import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerWorkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -115,14 +116,15 @@ class CellRangerService {
         fileService.deleteDirectoryRecursively(outputDirectory)
     }
 
+    @Deprecated
     void validateFilesExistsInResultDirectory(SingleCellBamFile singleCellBamFile) {
         Path resultDir = cellRangerWorkFileService.getResultDirectory(singleCellBamFile)
 
-        SingleCellBamFile.CREATED_RESULT_FILES.each {
+        CellRangerFileNames.CREATED_RESULT_FILES.each {
             fileService.ensureFileIsReadableAndNotEmpty(resultDir.resolve(it))
         }
 
-        SingleCellBamFile.CREATED_RESULT_DIRS.each {
+        CellRangerFileNames.CREATED_RESULT_DIRS.each {
             fileService.ensureDirIsReadableAndNotEmpty(resultDir.resolve(it))
         }
     }
