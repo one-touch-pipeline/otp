@@ -770,6 +770,19 @@ class FileServiceSpec extends Specification implements DataTest {
     }
 
     // ----------------------------------------------------------------------------------------------------
+    // test for fileExists
+
+    void "fileExists, return correct existence status"() {
+        given:
+        Path existingFile = CreateFileHelper.createFile(tempDir.resolve("existingFile"))
+        Path nonExistingFile = tempDir.resolve("nonExistingFile")
+
+        expect:
+        fileService.fileExists(existingFile)
+        !fileService.fileExists(nonExistingFile)
+    }
+
+    // ----------------------------------------------------------------------------------------------------
     // test for correctPathPermissionRecursive
 
     void "correctPathPermissionRecursive, correct permission of output folder"() {

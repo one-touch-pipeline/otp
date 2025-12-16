@@ -29,20 +29,21 @@ import de.dkfz.tbi.otp.withdraw.UnwithdrawService
 import de.dkfz.tbi.otp.withdraw.UnwithdrawStateHolder
 
 /**
- * Script to Unwithdraw data (remove the withdraw flag).
+ * Script to revert the withdrawal of data (removes the "withdrawn" flag).
  *
  * For all file changes a bash script is created, which needs to be executed manually.
  *
- * It fetches all seqTracks for all samples given by PID, SAMPLE_TYPE SEQ_TYPE and LIBRARY_LAYOUT, removes the withdrawn flag and adds a withdrawn comment.
- * It does not consider alignment or analysis, since they could also for other reason marked as withdrawn.
+ * It fetches all seqTracks for the samples for the given PID, SAMPLE_TYPE SEQ_TYPE and LIBRARY_LAYOUT,
+ * removes the withdrawn flag for these samples, and adds a withdrawn comment.
+ * It does not consider alignment or analysis files, since they could also have been marked as withdrawn for other reasons.
  *
- * The script provide a tryRun mode to see, what would be changed.
- * If this is fine,change TryRun to false
+ * The script provides a `tryRun` mode to see what would be changed.
+ * If everything works correctly, change `tryRun` to "false" to fully run the script.
  *
- * Execute the generated script after looking over it. It is located in the typical sample
- * swap location, but the path is also printed out at the end.
+ * Execute the generated bash script after looking over it. It is located in the usual sample swap location,
+ * but the path will also be printed out at the end.
  *
- * Input: See description of the input variables.
+ * Input: See descriptions of the input variables.
  */
 
 // --------------------------------------------------------
@@ -50,16 +51,16 @@ import de.dkfz.tbi.otp.withdraw.UnwithdrawStateHolder
 
 /**
  * Multi selector using:
- * - pid
+ * - PID
  * - sample type
- * - seqType name or alias (for example WGS, WES, RNA, ...
+ * - seqType name or alias (for example WGS, WES, RNA, ...)
  * - sequencingReadType (LibraryLayout): PAIRED, SINGLE, MATE_PAIRED
  * - single cell flag: true = single cell, false = bulk
  * - sampleName: can be empty
- * - withdrawn comment: comment in single quotes 'withdrawn Comment'
+ * - withdrawn comment: comment in single quotes 'withdrawn comment'
  *
- * The columns can be separated by comma, semicolon or tab. Each value is also trimmed.
- * # indicates commentaries, that will be ignored in the script.
+ * The columns can be separated by comma, semicolon, or tab. Each value will also be trimmed.
+ * A '#' indicates comments that will be ignored in the script.
  */
 String multiColumnInputSample = """
 #pid1,tumor,WGS,PAIRED,false,sampleName1, 'withdrawn comment'
@@ -77,12 +78,11 @@ dfghsdf
  * Multi selector using:
  * - project
  * - run
- * - lane (inclusive barcode)
- * - well label: if single cell data with file per well
- * - withdrawn comment: comment in single quotes 'withdrawn Comment'
+ * - lane (including the barcode)
+ * - well label: if it is single cell data including the file per well
+ * - withdrawn comment: comment in single quotes 'withdrawn comment'
  *
- * The columns can be separated by comma, semicolon or tab. Each value is also trimmed.
- *
+ * The columns can be separated by comma, semicolon, or tab. Each value will also be trimmed.
  */
 String multiColumnInputSeqTrack = """
 #project1,run3,6,,'withdrawn comment'
@@ -95,8 +95,8 @@ comment'
 /**
  * List of seqTracks, one per line:
  * Multi selector using:
- * - SeqTrackId
- * - withdrawn comment: comment in single quotes 'withdrawn Comment'
+ * - seqTrackId
+ * - withdrawn comment: comment in single quotes 'withdrawn comment'
  */
 String seqTracksIds = """
 #123456, 'long withdraw
@@ -107,42 +107,42 @@ comment'
 
 /**
  * Name of the generated bash file.
- * The file is created in the default directory script directory in the withdrawn folder.
+ * The file is created in the default script directory in the withdrawn folder.
  * It is also possible to provide an absolute path.
  *
- * If the file does not end of '.sh', the end is added.
+ * If the file does not end with '.sh', the file ending is added.
  */
 String fileName = ''
 
 /**
- * Unwithdraw BAM files.
+ * Revert the withdrawal of the BAM files.
  * A BAM file can only be unwithdrawn if the processing was finished, the file was not deleted,
- * and all FastQ files it was generated from are available (neither withdrawn nor deleted)
+ * and all FASTQ files it has been generated from are available (neither withdrawn nor deleted).
  */
 boolean unwithdrawBamFiles = true
 
 /**
- * Unwithdraw analysis results.
+ * Revert the withdrawal of the analysis results.
  * An analysis result can only be unwithdrawn if the processing was finished, the result folder was not deleted,
- * and all BAM files it was generated from are available (neither withdrawn nor deleted)
+ * and all BAM files it has been generated from are available (neither withdrawn nor deleted).
  */
 boolean unwithdrawAnalysis = true
 
 /**
- * flag to allow a try and rollback the changes at the end (true) or do the changes(false)
+ * A flag to allow a trial run with a rollback of the changes at the end (if it is set to "true")
  */
 boolean tryRun = true
 
 // --------------------------------------------------------
 // WORK
-assert fileName?.trim(): "no file name were given"
+assert fileName?.trim(): "No file names were given"
 
 // services
 ScriptInputHelperService scriptInputHelperService = ctx.scriptInputHelperService
 UnwithdrawService unwithdrawService = ctx.unwithdrawService
 
 assert (scriptInputHelperService.checkIfExactlyOneMultiLineStringContainsContent(
-        [multiColumnInputSample, multiColumnInputSeqTrack, seqTracksIds])): "Please use exactly one multiColumnInput option for input"
+        [multiColumnInputSample, multiColumnInputSeqTrack, seqTracksIds])): "Please use exactly one multiColumnInput option for the input"
 
 // load data
 List<SeqTrackWithComment> seqTracksWithComments = [
@@ -172,10 +172,10 @@ final String TRIM_LINE = "----------------------------------------"
 
 SeqTrack.withTransaction {
     if (unwithdrawStateHolder.seqTracks.any { it.project.state == Project.State.ARCHIVED }) {
-        throw new FileAccessForProjectNotAllowedException("Project is archived, unwithdraw is not allowed")
+        throw new FileAccessForProjectNotAllowedException("Project is archived, unwithdrawing is not allowed")
     }
     if (unwithdrawStateHolder.seqTracks.any { it.project.state == Project.State.DELETED }) {
-        throw new FileAccessForProjectNotAllowedException("Project is deleted, unwithdraw is not allowed")
+        throw new FileAccessForProjectNotAllowedException("Project is deleted, unwithdrawing is not allowed")
     }
 
     unwithdrawService.unwithdrawSeqTracks(unwithdrawStateHolder)
@@ -190,5 +190,5 @@ SeqTrack.withTransaction {
 
     println(unwithdrawStateHolder.summary.join("\n"))
 
-    assert !tryRun: "Rollback, since only tryRun"
+    assert !tryRun: "Rollback since it was only a tryRun"
 }

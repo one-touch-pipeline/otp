@@ -37,6 +37,7 @@ import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
 
 import java.nio.file.Paths
@@ -105,6 +106,9 @@ class WithdrawAnalysisServiceSpec extends Specification implements ServiceUnitTe
 
         List<BamFilePairAnalysis> analyses = createAnalysisList()
         createFactoryService(service)
+        service.fileService = Mock(FileService) {
+            5 * fileExists(_) >> true
+        }
 
         when:
         List<String> result = service.collectPaths(analyses)

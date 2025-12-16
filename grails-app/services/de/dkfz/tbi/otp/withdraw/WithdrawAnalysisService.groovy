@@ -30,12 +30,14 @@ import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
+import de.dkfz.tbi.otp.infrastructure.FileService
 
 @Transactional
 class WithdrawAnalysisService implements ProcessingWithdrawService<BamFilePairAnalysis, AbstractBamFile> {
     AnalysisDeletionService analysisDeletionService
     AnalysisLinkFileServiceFactoryService analysisLinkFileServiceFactoryService
     AnalysisWorkFileServiceFactoryService analysisWorkFileServiceFactoryService
+    FileService fileService
 
     @Override
     List<Class<BamFilePairAnalysis>> getSupportedClasses() {
@@ -63,11 +65,13 @@ class WithdrawAnalysisService implements ProcessingWithdrawService<BamFilePairAn
         return entities.collectMany {
             [
                     // Collect traditional analysis paths (existing logic)
-                    analysisLinkFileServiceFactoryService.getService(it).getDirectoryPath(it).toString(),
+                    analysisLinkFileServiceFactoryService.getService(it).getDirectoryPath(it),
                     // Collect UUID work folder paths for analysis with workflowArtefact
-                    analysisWorkFileServiceFactoryService.getService(it).getDirectoryPath(it).toString(),
+                    analysisWorkFileServiceFactoryService.getService(it).getDirectoryPath(it),
             ]
-        }.unique()
+        }.unique().findAll {
+            fileService.fileExists(it)
+        }*.toString()
     }
 
     @Override

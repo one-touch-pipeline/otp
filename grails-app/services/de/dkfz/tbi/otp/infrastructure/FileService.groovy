@@ -759,6 +759,19 @@ class FileService {
     }
 
     /**
+     * Check if the file exists on the file system
+     *
+     * @param path the file to check
+     * @return true if the file exists, false if not
+     */
+    boolean fileExists(Path path) {
+        assert path
+        assert path.absolute
+
+        return Files.exists(path)
+    }
+
+    /**
      * Correct the group and permission recursive for the directory structure.
      *
      * The permissions are set:

@@ -116,14 +116,10 @@ class ScriptInputHelperService {
     }
 
     /**
-     * Checks whether a multiLineString contains content with lines that are not commented out.
+     * Checks whether only exactly one multiLineStringList contains content with lines that have not been commented out.
      */
     boolean checkIfExactlyOneMultiLineStringContainsContent(List<String> multiLineStringList) {
-        Integer sumOfEmptyEntries = 0
-        for (multiLineString in multiLineStringList) {
-            sumOfEmptyEntries += ((parseHelper(multiLineString).empty) ? 1 : 0)
-        }
-        return (sumOfEmptyEntries == multiLineStringList.size() - 1)
+        return multiLineStringList.count { !parseHelper(it).empty } == 1
     }
 
     /**

@@ -27,68 +27,68 @@ import de.dkfz.tbi.otp.withdraw.WithdrawParameters
 import de.dkfz.tbi.otp.withdraw.WithdrawService
 
 /**
- * Script to handle withdrawing data.
+ * Script to handle the withdrawing of data.
  *
- * The scripts allow to select between deletion and withdrawing of bam files and of analysis.
+ * The scripts handles the deletion and withdrawing of bam files and analysis files.
  *
  * For all file changes a bash script is created, which needs to be executed manually.
  *
  * The script does the following:
  * - RawSequenceFile:
  *   - withdraw in OTP
- *   - change unix group for file in run folder
- *   - delete link from viewByPidFolder
- *   - delete link in Well directory, if exist
+ *   - change the unix group of the file in the run folder
+ *   - delete the link from the viewByPidFolder
+ *   - delete the link in the well directory, if it exists
  * - BamFile (if deleteBamFiles = false)
  *   - withdraw the bam fle in OTP
- *   - change unix group in file system for the bam directory
+ *   - change the unix group in the file system for the bam directory
  * - BamFile (if deleteBamFiles = true)
- *   - delete in in OTP (including analysis)
- *   - delete on file system (including analysis)
+ *   - delete the bam file in OTP (including the analysis files)
+ *   - delete the bam file on the file system (including the analysis files)
  * - Analysis (if deleteBamFiles = false and deleteAnalysis = false)
  *   - withdraw the analysis files in OTP
- *   - change unix group in file analysis directory recursively
+ *   - change the unix group in the file analysis directory recursively
  * - Analysis (if deleteBamFiles = true or deleteAnalysis = true)
- *   - delete in in OTP
- *   - delete on file system
+ *   - delete the analysis files in in OTP
+ *   - delete the analysis files on the file system
  *
- * The script provide a tryRun mode to see, what would be changed.
- * If this is fine,change TryRun to false
+ * The script provides a `tryRun` mode to see what would be changed.
+ * If everything works correctly, change `tryRun` to "false" to fully run the script.
  *
- * Execute the generated script after looking over it. It is located in the typical sample
- * swap location, but the path is also printed out at the end.
+ * Execute the generated bash script after looking over it. It is located in the usual sample swap location,
+ * but the path will also be printed out at the end.
  *
- * Input: See description of the input variables.
+ * Input: See the descriptions of the input variables.
  */
 
 // --------------------------------------------------------
 // input
 
 /**
- * indicate, if the bam files should be deleted (true) or set to withdrawn (false).
+ * Indicates if the bam files should be deleted (true) or set to withdrawn (false).
  */
 boolean deleteBamFile = false
 
 /**
- * indicate, if the analysis files should be deleted (true) or set to withdrawn (false).
- * The selection is only possible, if the bam files are not deleted.
+ * Indicates if the analysis files should be deleted (true) or set to withdrawn (false).
+ * This selection is only possible, if the bam files have not already been deleted.
  */
 boolean deleteAnalysis = false
 
-// Choose exactly one option for selecting SeqTracks
+// Choose exactly one of the following options for selecting the SeqTracks
 
 /**
  * Multi selector using:
- * - pid
+ * - PID
  * - sample type
- * - seqType name or alias (for example WGS, WES, RNA, ...
+ * - seqType name or alias (for example WGS, WES, RNA, ...)
  * - sequencingReadType (LibraryLayout): PAIRED, SINGLE, MATE_PAIRED
  * - single cell flag: true = single cell, false = bulk
  * - sampleName: can be empty
- * - withdrawn comment: comment in single quotes 'withdrawn Comment'
+ * - withdrawn comment: comment in single quotes 'withdrawn comment'
  *
- * The columns can be separated by comma, semicolon or tab. Each value is also trimmed.
- * # indicates commentaries, that will be ignored in the script.
+ * The columns can be separated by comma, semicolon, or tab. Each value will also be trimmed.
+ * A '#' indicates comments that will be ignored in the script.
  */
 String multiColumnInputSample = """
 #pid1,tumor,WGS,PAIRED,false,sampleName1, 'withdrawn comment'
@@ -105,12 +105,11 @@ dfghsdf
  * Multi selector using:
  * - project
  * - run
- * - lane (inclusive barcode)
- * - well label: if single cell data with file per well
- * - withdrawn comment: comment in single quotes 'withdrawn Comment'
+ * - lane (including the barcode)
+ * - well label: if it is single cell data including the file per well
+ * - withdrawn comment: comment in single quotes 'withdrawn comment'
  *
- * The columns can be separated by comma, semicolon or tab. Each value is also trimmed.
- *
+ * The columns can be separated by comma, semicolon, or tab. Each value will also be trimmed.
  */
 String multiColumnInputSeqTrack = """
 #project1,run3,6,,'withdrawn comment'
@@ -123,8 +122,8 @@ comment'
 /**
  * List of seqTracks, one per line:
  * Multi selector using:
- * - SeqTrackId
- * - withdrawn comment: comment in single quotes 'withdrawn Comment'
+ * - seqTrackId
+ * - withdrawn comment: comment in single quotes 'withdrawn comment'
  */
 String seqTracksIds = """
 #123456, 'long withdraw
@@ -135,38 +134,39 @@ comment'
 
 /**
  * Name of the generated bash file.
- * The file is created in the default directory script directory in the withdrawn folder.
+ * The file is created in the default script directory in the withdrawn folder.
  * It is also possible to provide an absolute path.
  *
- * If the file does not end of '.sh', the end is added.
+ * If the file does not end with '.sh', the file ending is added.
  */
 String fileName = ''
 
 /**
- * Should withdrawing stop if files are not existing in file system (using cached value 'sequenceFile.fileExists')
+ * Set to "true" if the withdrawing should be stopped if files do not exist on the file system (using the cached value 'sequenceFile.fileExists')
  */
 boolean stopOnMissingFiles = true
 
 /**
- * Should withdrawing stop if data files are already withdrawn
+ * Set to "true" if the withdrawing should be stopped if the data files are already withdrawn
  */
 boolean stopOnAlreadyWithdrawnData = true
 
 /**
- * flag to allow a try and rollback the changes at the end (true) or do the changes(false)
+ * A flag to allow a trial run with a rollback of the changes at the end (if it is set to "true")
  */
 boolean tryRun = true
 
 // --------------------------------------------------------
 // WORK
-assert fileName?.trim(): "no file name were given"
+assert fileName?.trim(): "No file name was given"
 
 // services
 ScriptInputHelperService scriptInputHelperService = ctx.scriptInputHelperService
 WithdrawService withdrawService = ctx.withdrawService
 
-assert (scriptInputHelperService.checkIfExactlyOneMultiLineStringContainsContent(
-        [multiColumnInputSample, multiColumnInputSeqTrack, seqTracksIds])): "Please use exactly one multiColumnInput option for input"
+assert (
+        scriptInputHelperService.checkIfExactlyOneMultiLineStringContainsContent([multiColumnInputSample, multiColumnInputSeqTrack, seqTracksIds])
+): "Please use exactly one multiColumnInput option for the input"
 
 // load data
 List<SeqTrackWithComment> seqTracksWithComments = [
@@ -194,6 +194,6 @@ WithdrawParameters withdrawParameters = new WithdrawParameters([
 SeqTrack.withNewTransaction {
     String summary = withdrawService.withdraw(withdrawParameters)
     println summary
-    assert !tryRun: "Rollback, since only tryRun"
+    assert !tryRun: "Rollback since it was only a tryRun"
 }
 ''

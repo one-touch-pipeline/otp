@@ -124,19 +124,20 @@ class UnwithdrawService {
 
     void unwithdrawAnalysis(UnwithdrawStateHolder withdrawStateHolder) {
         FileSystem fileSystem = fileSystemService.remoteFileSystem
-        List<BamFilePairAnalysis> analysis = withdrawAnalysisService.collectObjects(withdrawStateHolder.bamFiles).unique()
-        analysis = analysis.findAll {
+        List<BamFilePairAnalysis> bamFilePairAnalysisList = withdrawAnalysisService.collectObjects(withdrawStateHolder.bamFiles).unique()
+        bamFilePairAnalysisList = bamFilePairAnalysisList.findAll {
             it.processingState == AnalysisProcessingStates.FINISHED &&
                     !it.sampleType1BamFile.withdrawn && !it.sampleType2BamFile.withdrawn &&
                     withdrawAnalysisService.collectPaths([it]).every { path -> Files.exists(fileSystem.getPath(path)) }
         }
 
-        withdrawStateHolder.pathsToChangeGroup.putAll(analysis.collectEntries {
-            [withdrawAnalysisService.collectPaths([it]).first().toString(), it.project.unixGroup]
+        withdrawStateHolder.pathsToChangeGroup.putAll(bamFilePairAnalysisList.collectEntries {
+            List<String> collectedPaths = withdrawAnalysisService.collectPaths([it])
+            collectedPaths ? [collectedPaths.first().toString(), it.project.unixGroup] : null
         })
-        if (analysis.size() > 0) {
-            withdrawStateHolder.summary << ("Unwithdrawing analysis result: ${analysis}" as String)
-            withdrawAnalysisService.unwithdrawObjects(analysis)
+        if (bamFilePairAnalysisList.size() > 0) {
+            withdrawStateHolder.summary << ("Unwithdrawing analysis result: ${bamFilePairAnalysisList}" as String)
+            withdrawAnalysisService.unwithdrawObjects(bamFilePairAnalysisList)
         } else {
             withdrawStateHolder.summary << 'Unwithdrawing analysis result: Nothing to do'
         }

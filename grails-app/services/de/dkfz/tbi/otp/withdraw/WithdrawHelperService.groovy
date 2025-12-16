@@ -102,10 +102,10 @@ class WithdrawHelperService {
 
     void checkArchivedProject(WithdrawStateHolder withdrawStateHolder) {
         if (withdrawStateHolder.seqTracks.any { it.project.state == Project.State.ARCHIVED }) {
-            throw new FileAccessForProjectNotAllowedException("Project is archived, withdraw is not allowed")
+            throw new FileAccessForProjectNotAllowedException("Project is archived, withdrawal is not allowed")
         }
         if (withdrawStateHolder.seqTracks.any { it.project.state == Project.State.DELETED }) {
-            throw new FileAccessForProjectNotAllowedException("Project is deleted, withdraw is not allowed")
+            throw new FileAccessForProjectNotAllowedException("Project is deleted, withdrawal is not allowed")
         }
     }
 
@@ -119,11 +119,13 @@ class WithdrawHelperService {
             }.sort()
 
             if (withdrawStateHolder.stopOnMissingFiles) {
-                throw new WithdrawnException("Stop, since ${nonExistingRawSequenceFiles.size()} datafiles are not existing on file system:\n" +
-                        nonExistingData.join('\n'))
+                throw new WithdrawnException(
+                        "Stopped since ${nonExistingRawSequenceFiles.size()} datafiles do not exist on the file system:\n" +
+                        nonExistingData.join('\n')
+                )
             }
 
-            withdrawStateHolder.summary << "\n${nonExistingRawSequenceFiles.size()} datafiles not existing on file system found:"
+            withdrawStateHolder.summary << "\n${nonExistingRawSequenceFiles.size()} datafiles found that do not exist on the file system:"
             withdrawStateHolder.summary.addAll(nonExistingData)
             withdrawStateHolder.summary << "\n${NOTE_IGNORE_MISSING_FILES}"
         }
@@ -139,7 +141,7 @@ class WithdrawHelperService {
             }.sort()
 
             if (withdrawStateHolder.stopOnAlreadyWithdrawnData) {
-                throw new WithdrawnException("Stop, since ${withdrawnRawSequenceFiles.size()} datafiles are already withdrawn:\n${withdrawnData.join('\n')}")
+                throw new WithdrawnException("Stopped since ${withdrawnRawSequenceFiles.size()} datafiles are already withdrawn:\n${withdrawnData.join('\n')}")
             }
             withdrawStateHolder.summary << "\n${withdrawnRawSequenceFiles.size()} datafiles are already withdrawn: "
             withdrawStateHolder.summary.addAll(withdrawnData)
@@ -173,8 +175,10 @@ class WithdrawHelperService {
 
     @CompileDynamic
     void handleRawSequenceFiles(WithdrawStateHolder withdrawStateHolder) {
-        List<RawSequenceFile> rawSequenceFiles = RawSequenceFile.findAllBySeqTrackInListAndFileWithdrawn(withdrawStateHolder.seqTracksWithComments*.seqTrack,
-                false)
+        List<RawSequenceFile> rawSequenceFiles = RawSequenceFile.findAllBySeqTrackInListAndFileWithdrawn(
+                withdrawStateHolder.seqTracksWithComments*.seqTrack,
+                false
+        )
         Map<SeqTrack, String> commentBySeqTrack = withdrawStateHolder.seqTracksWithComments.collectEntries {
             [(it.seqTrack): it.comment]
         }
@@ -224,7 +228,7 @@ class WithdrawHelperService {
 
         String script = createBashScript(withdrawStateHolder)
 
-        fileService.deleteDirectoryRecursively(outputFile) // delete file if already exists
+        fileService.deleteDirectoryRecursively(outputFile) // delete file if it already exists
         fileService.createFileWithContent(outputFile, script, FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION)
 
         withdrawStateHolder.summary << "\nScript Path:"
@@ -250,7 +254,7 @@ class WithdrawHelperService {
             script << ("chgrp --recursive --verbose ${withdrawnGroup} ${it}" as String)
         }
 
-        script << "\necho script has run till end\n"
+        script << "\necho the script has run to the end\n"
 
         return script.join('\n')
     }

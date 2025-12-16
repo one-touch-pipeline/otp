@@ -42,6 +42,7 @@ import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaLinkFileService
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaWorkFileService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
@@ -136,6 +137,10 @@ class UnwithdrawServiceIntegrationSpec extends Specification implements DomainFa
 
         List<AbstractBamFile> bamFiles = [indelCallingInstance.sampleType1BamFile, indelCallingInstance.sampleType2BamFile]
         state.bamFiles = bamFiles
+
+        service.withdrawAnalysisService.fileService = Mock(FileService) {
+            fileExists(_) >> true
+        }
 
         when:
         service.unwithdrawAnalysis(state)
