@@ -48,7 +48,6 @@ import de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.workflow.WorkflowCreateState
-import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
 import java.time.Instant
 
@@ -385,7 +384,7 @@ class NotificationCreator {
         }
     }
 
-    private static WorkflowProcessingStatus getAnalysisProcessingStatus(BamFilePairAnalysis analysis, SamplePair sp, AbstractBamFileAnalysisService service) {
+    private static WorkflowProcessingStatus getAnalysisProcessingStatus(BamFilePairAnalysis analysis, SamplePair sp) {
         WorkflowProcessingStatus status
         if (analysis && !analysis.withdrawn && analysis.processingState == AnalysisProcessingStates.FINISHED && MERGING_WORK_PACKAGE_NUMBERS.every {
             AbstractBamFile bamFile = analysis."sampleType${it}BamFile"
@@ -397,11 +396,7 @@ class NotificationCreator {
         } else if (MERGING_WORK_PACKAGE_NUMBERS.every {
             sp."mergingWorkPackage${it}".bamFileThatIsReadyForFurtherAnalysis
         }) {
-            if (service.samplePairForProcessing(ProcessingPriority.MINIMUM, sp)) {
-                status = NOTHING_DONE_MIGHT_DO
-            } else {
-                status = NOTHING_DONE_WONT_DO
-            }
+            status = NOTHING_DONE_WONT_DO
         } else {
             status = NOTHING_DONE_MIGHT_DO
         }
@@ -415,11 +410,11 @@ class NotificationCreator {
         SophiaInstance si = sp.findLatestSophiaInstance()
         RunYapsaInstance ryi = sp.findLatestRunYapsaInstance()
 
-        WorkflowProcessingStatus snvStatus = getAnalysisProcessingStatus(sci, sp, snvCallingService)
-        WorkflowProcessingStatus indelStatus = getAnalysisProcessingStatus(ici, sp, indelCallingService)
-        WorkflowProcessingStatus sophiaStatus = getAnalysisProcessingStatus(si, sp, sophiaService)
-        WorkflowProcessingStatus aceseqStatus = getAnalysisProcessingStatus(ai, sp, aceseqService)
-        WorkflowProcessingStatus runYapsaStatus = getAnalysisProcessingStatus(ryi, sp, runYapsaService)
+        WorkflowProcessingStatus snvStatus = getAnalysisProcessingStatus(sci, sp)
+        WorkflowProcessingStatus indelStatus = getAnalysisProcessingStatus(ici, sp)
+        WorkflowProcessingStatus sophiaStatus = getAnalysisProcessingStatus(si, sp)
+        WorkflowProcessingStatus aceseqStatus = getAnalysisProcessingStatus(ai, sp)
+        WorkflowProcessingStatus runYapsaStatus = getAnalysisProcessingStatus(ryi, sp)
 
         return new SamplePairProcessingStatus(
                 sp,

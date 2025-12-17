@@ -1138,62 +1138,6 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         pairAnalysis << listPairAnalysis
     }
 
-    @Unroll("fillInSamplePairStatuses, no #pairAnalysis.analysisType, bamFileInProjectFolder set, samplePairForProcessing exists, returns NOTHING_DONE_MIGHT_DO")
-    void "fillInSamplePairStatuses, no analysisInstance, bamFileInProjectFolder set, samplePairForProcessing exists, returns NOTHING_DONE_MIGHT_DO"() {
-        given:
-        setupData()
-
-        BamFilePairAnalysis analysisInstance
-        MergingWorkPackageProcessingStatus mwpStatus
-
-        SessionUtils.withTransaction {
-            analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"([:], [coverage: 2], [coverage: 2])
-            mwpStatus = createMergingWorkPackageProcessingStatus(analysisInstance.sampleType1BamFile)
-            [1, 2].each {
-                saveBamFileInProjectFolder(analysisInstance."sampleType${it}BamFile")
-            }
-
-            referenceGenomeProcessingOptions.each {
-                it.value = analysisInstance.samplePair.mergingWorkPackage1.referenceGenome.name
-                it.save(flush: true)
-            }
-
-            switch (pairAnalysis.analysisType) {
-                case Ticket.ProcessingStep.ACESEQ:
-                    analysisInstance.samplePair.sophiaProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
-                    analysisInstance.samplePair.save(flush: true)
-                    DomainFactory.createSophiaInstance(analysisInstance.samplePair)
-                    break
-                case Ticket.ProcessingStep.RUN_YAPSA:
-                    analysisInstance.samplePair.snvProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
-                    analysisInstance.samplePair.save(flush: true)
-                    DomainFactory.createRoddySnvInstanceWithRoddyBamFiles([samplePair: analysisInstance.samplePair])
-                    break
-            }
-
-            analysisInstance.delete(flush: true)
-        }
-
-        when:
-        SessionUtils.withTransaction {
-            notificationCreator.fillInSamplePairStatuses([mwpStatus])
-        }
-
-        then:
-        SessionUtils.withTransaction {
-            SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
-            assert samplePairStatus.samplePair == analysisInstance.samplePair
-            assert samplePairStatus."${pairAnalysis.completeCallingInstance}" == null
-            assert samplePairStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
-            assert mwpStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
-            assert createSeqTrackProcessingStatus(mwpStatus)."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
-            return true
-        }
-
-        where:
-        pairAnalysis << listPairAnalysis
-    }
-
     void "fillInSamplePairStatuses, no AI, bamFileInProjectFolder set, samplePairForProcessing exists, but Sophia is not finished yet, returns NOTHING_DONE_WONT_DO"() {
         given:
         setupData()
