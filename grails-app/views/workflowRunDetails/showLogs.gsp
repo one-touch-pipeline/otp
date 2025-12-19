@@ -53,26 +53,31 @@
         <pre>${g.message(code: "workflowRun.details.log.none")}</pre>
     </g:if>
     <g:else>
+        <div> Total logs: ${logs?.size() ?: 0}</div>
         <table class="table table-sm table-bordered table-striped mt-3">
             <thead>
             <tr>
-                <th scope="col">Type</th>
-                <th scope="col">Log message</th>
+                <th scope="col">Log Number</th>
                 <th scope="col">Created</th>
+                <th scope="col">Log message</th>
+                <th scope="col">Type</th>
                 <th scope="col">Database id</th>
             </tr>
             </thead>
             <tbody>
-            <g:each in="${logs}" var="log">
+            <g:each in="${logs}" var="log" status="i">
                 <tr>
                     <td>
-                        ${log.type}
+                        ${i + 1}
+                    </td>
+                    <td>
+                        ${log.dateCreated}
                     </td>
                     <td>
                         <pre>${log.message}</pre>
                     </td>
                     <td>
-                        ${log.dateCreated}
+                        ${log.type}
                     </td>
                     <td>
                         ${log.id}
