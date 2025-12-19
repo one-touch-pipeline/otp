@@ -194,7 +194,7 @@ class CellRangerService {
         cellRangerWorkflowService.linkResultFiles(singleCellBamFile)
     }
 
-    private void completeBamFile(SingleCellBamFile singleCellBamFile) {
+    void completeBamFile(SingleCellBamFile singleCellBamFile) {
         assert singleCellBamFile.isMostRecentBamFile(): "The BamFile ${singleCellBamFile} is not the most recent one. This must not happen!"
         assert [
                 AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING,
