@@ -313,14 +313,16 @@ scriptInputHelperService.parseAndSplitHelper([selectByIndividual, multiColumnInp
                 }
                 if (!bamFilePairAnalyses.isEmpty()) {
                     BamFilePairAnalysis analysis = bamFilePairAnalyses.first()
-                    analysisListMap[pipelineType].add(analysis)
-                    dataExportOverview.add(new DataExportOverviewItem(
-                            pipelineType: pipelineType,
-                            individual: analysis.individual,
-                            sampleType: analysis.sampleType1BamFile.sampleType,
-                            sampleType2: analysis.sampleType2BamFile.sampleType,
-                            seqType: analysis.sampleType1BamFile.seqType,
-                    ))
+                    if(!analysis.withdrawn || exportWithdrawnData) {
+                        analysisListMap[pipelineType].add(analysis)
+                        dataExportOverview.add(new DataExportOverviewItem(
+                                pipelineType: pipelineType,
+                                individual: analysis.individual,
+                                sampleType: analysis.sampleType1BamFile.sampleType,
+                                sampleType2: analysis.sampleType2BamFile.sampleType,
+                                seqType: analysis.sampleType1BamFile.seqType,
+                        ))
+                    }
                 }
             }
         }
