@@ -133,8 +133,6 @@ class AbstractBamFileService {
     List<AbstractBamFile> findAllByProjectAndSampleType(Project project, Set<SampleType> sampleTypes) {
         return AbstractBamFile.createCriteria().list {
             eq("withdrawn", false)
-            eq("fileOperationStatus",
-                    AbstractBamFile.FileOperationStatus.PROCESSED)
             workPackage {
                 sample {
                     individual {
