@@ -38,6 +38,7 @@ import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.otp.withdraw.RoddyBamFileWithdrawService
+import de.dkfz.tbi.otp.workflow.TriggerWorkflowsService
 import de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.roddy.rna.RnaAlignmentWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.aceseq.AceseqWorkflow
@@ -53,9 +54,9 @@ import de.dkfz.tbi.otp.workflowExecution.decider.analysis.*
 
 import java.time.LocalDate
 
-class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, WorkflowSystemDomainFactory {
+class TriggerWorkflowsServiceSpec extends HibernateSpec implements IsRoddy, WorkflowSystemDomainFactory {
 
-    TriggerAlignmentService service
+    TriggerWorkflowsService service
 
     @Override
     List<Class> getDomainClasses() {
@@ -84,10 +85,10 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, Work
     }
 
     void setup() {
-        service = new TriggerAlignmentService()
+        service = new TriggerWorkflowsService()
     }
 
-    void "run triggerAlignment with external BAM files only, should trigger analysis workflows"() {
+    void "run triggerWorkflow with external BAM files only, should trigger analysis workflows"() {
         given:
         Map<Class<? extends Decider>, DeciderCreateWorkflowAction> deciderAction = createStandardDeciderActions([
                 (PanCancerDecider): DeciderCreateWorkflowAction.SKIP,
@@ -116,14 +117,14 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, Work
         setupRoddyBamFileWithdrawServiceMock()
 
         when:
-        TriggerAlignmentResult result = service.triggerAlignment([] as Set, [bamFile1, bamFile2] as Set, true, deciderAction)
+        TriggerWorkflowsResult result = service.triggerWorkflow([] as Set, [bamFile1, bamFile2] as Set, true, deciderAction)
 
         then:
         result.newArtefacts.size() == 2
         result.mergingWorkPackages.isEmpty()
     }
 
-    void "run triggerAlignment with different workflow combinations"() {
+    void "run triggerWorkflow with different workflow combinations"() {
         given:
         Map<Class<? extends Decider>, DeciderCreateWorkflowAction> deciderAction = createStandardDeciderActions(workflowOverrides)
 
@@ -149,7 +150,7 @@ class TriggerAlignmentServiceSpec extends HibernateSpec implements IsRoddy, Work
         setupRoddyBamFileWithdrawServiceMock()
 
         when:
-        TriggerAlignmentResult result = service.triggerAlignment([] as Set, [bamFile] as Set, true, deciderAction)
+        TriggerWorkflowsResult result = service.triggerWorkflow([] as Set, [bamFile] as Set, true, deciderAction)
 
         then:
         result.newArtefacts.size() == expectedArtefactCount

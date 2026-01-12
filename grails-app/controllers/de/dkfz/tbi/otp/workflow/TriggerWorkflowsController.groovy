@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.alignment
+package de.dkfz.tbi.otp.workflow
 
 import grails.converters.JSON
 import org.grails.web.json.JSONObject
@@ -29,21 +29,20 @@ import de.dkfz.tbi.otp.SearchSeqTrackService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
-import de.dkfz.tbi.otp.workflow.*
+import de.dkfz.tbi.otp.workflow.alignment.TriggerWorkflowsResult
 import de.dkfz.tbi.otp.workflowExecution.decider.*
 
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
-class TriggerAlignmentController {
+class TriggerWorkflowsController {
 
     private static final String PARAM_KEY_SEQ_TRACKS = 'seqTracks[]'
     private static final String PARAM_KEY_BAM_FILES = 'bamFiles[]'
     private static final String PARAM_KEY_IGNORE_SEQ_GROUP = 'ignoreSeqPlatformGroup'
     private static final String PARAM_KEY_DECIDER_ACTIONS = 'deciderActions[]'
 
-    private static final String MEESAGE_CODE_OPTION_NOTE = 'triggerAlignment.option.decider.notes'
+    private static final String MEESAGE_CODE_OPTION_NOTE = 'triggerWorkflows.option.decider.notes'
 
-    TriggerAlignmentService triggerAlignmentService
-    TriggerWorkflowService triggerWorkflowService
+    TriggerWorkflowsService triggerWorkflowsService
     SearchSeqTrackService searchSeqTrackService
     SeqTypeService seqTypeService
     AllDecider allDecider
@@ -51,7 +50,7 @@ class TriggerAlignmentController {
     static allowedMethods = [
             index           : "GET",
             generateWarnings: "GET",
-            triggerAlignment: "POST",
+            triggerWorkflows: "POST",
     ]
 
     private final static Map EMPTY_WARNINGS = [
@@ -62,7 +61,7 @@ class TriggerAlignmentController {
     ].asImmutable()
 
     def index() {
-        List<DeciderWithActions> deciders = triggerWorkflowService.allDecidersWithActions
+        List<DeciderWithActions> deciders = triggerWorkflowsService.allDecidersWithActions
 
         return [
                 seqTypes      : seqTypeService.list().sort {
@@ -96,28 +95,28 @@ class TriggerAlignmentController {
             ] as JSON)
         }
 
-        List<Map<String, String>> warningsForMissingLibPrepKits = triggerAlignmentService.createWarningsForMissingLibPrepKits(seqTracks)
-        List<Map<String, String>> warningsForWithdrawnSeqTracks = triggerAlignmentService.createWarningsForWithdrawnSeqTracks(seqTracks)
-        List<Map<String, String>> warningsForMissingWorkflowConfig = triggerAlignmentService.createWarningsForMissingWorkflowConfig(seqTracks)
-        List<Map<String, String>> warningsForMissingSeqPlatformGroups = triggerAlignmentService.createWarningsForMissingSeqPlatformGroup(seqTracks)
+        List<Map<String, String>> warningsForMissingLibPrepKits = triggerWorkflowsService.createWarningsForMissingLibPrepKits(seqTracks)
+        List<Map<String, String>> warningsForWithdrawnSeqTracks = triggerWorkflowsService.createWarningsForWithdrawnSeqTracks(seqTracks)
+        List<Map<String, String>> warningsForMissingWorkflowConfig = triggerWorkflowsService.createWarningsForMissingWorkflowConfig(seqTracks)
+        List<Map<String, String>> warningsForMissingSeqPlatformGroups = triggerWorkflowsService.createWarningsForMissingSeqPlatformGroup(seqTracks)
         List<Map<String, String>> warningsForMissingReferenceGenomeConfiguration =
-                triggerAlignmentService.createWarningsForMissingReferenceGenomeConfiguration(seqTracks)
+                triggerWorkflowsService.createWarningsForMissingReferenceGenomeConfiguration(seqTracks)
         List<Map<String, String>> warningsForSamplesHavingMultipleSeqPlatformGroups =
-                triggerAlignmentService.createWarningsForSamplesHavingMultipleSeqPlatformGroups(seqTracks)
+                triggerWorkflowsService.createWarningsForSamplesHavingMultipleSeqPlatformGroups(seqTracks)
         List<Map<String, String>> warningsForSamplesHavingMultipleLibPrepKits =
-                triggerAlignmentService.createWarningsForSamplesHavingMultipleLibPrepKits(seqTracks)
+                triggerWorkflowsService.createWarningsForSamplesHavingMultipleLibPrepKits(seqTracks)
         List<Map<String, String>> warningsForMissingSampleTypePerProject =
-                triggerAlignmentService.createWarningsForMissingSampleTypePerProject(seqTracks)
+                triggerWorkflowsService.createWarningsForMissingSampleTypePerProject(seqTracks)
 
         return render([
                 data    : seqTracks.collect { SeqTrack seqTrack ->
                     searchSeqTrackService.projectSeqTrack(seqTrack)
                 },
-                bamData : (triggerWorkflowService.getBamFiles(seqTracks*.id) + extBamFiles).collect { AbstractBamFile bamFile ->
+                bamData : (triggerWorkflowsService.getBamFiles(seqTracks*.id) + extBamFiles).collect { AbstractBamFile bamFile ->
                     getBamValue(bamFile)
                 },
                 info    : [
-                        workflows: triggerWorkflowService.getInfo(seqTracks).collect {
+                        workflows: triggerWorkflowsService.getInfo(seqTracks).collect {
                             getWorkflowsValue(it)
                         }
                 ],
@@ -138,7 +137,7 @@ class TriggerAlignmentController {
     /**
      * Trigger the alignment workflow
      */
-    JSON triggerAlignment() {
+    JSON triggerWorkflows() {
         Set<Long> seqTracksIds = getIdsFromParams(PARAM_KEY_SEQ_TRACKS)
         Set<Long> bamFilesIds = getIdsFromParams(PARAM_KEY_BAM_FILES)
 
@@ -166,12 +165,12 @@ class TriggerAlignmentController {
                     deciderAction.put(deciderClass, action)
                 } catch (ClassNotFoundException | IllegalArgumentException e) {
                     log.warn("Invalid decider action: ${deciderName}: ${actionId}", e)
-                    return render(g.message(code: "triggerAlignment.warn.deciderAction.invalid"))
+                    return render(g.message(code: "triggerWorkflows.warn.deciderAction.invalid"))
                 }
             }
         }
 
-        TriggerAlignmentResult triggerAlignmentResult = triggerAlignmentService.triggerAlignment(seqTracks, bamFiles, ignoreSeqPlatformGroup, deciderAction)
+        TriggerWorkflowsResult triggerAlignmentResult = triggerWorkflowsService.triggerWorkflow(seqTracks, bamFiles, ignoreSeqPlatformGroup, deciderAction)
 
         return render([
                 success        : !triggerAlignmentResult.mergingWorkPackages.empty,

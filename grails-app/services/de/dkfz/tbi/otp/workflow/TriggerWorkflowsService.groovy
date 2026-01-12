@@ -19,18 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.alignment
+package de.dkfz.tbi.otp.workflow
 
 import grails.gorm.transactions.Transactional
 import grails.web.mapping.LinkGenerator
 import groovy.transform.CompileDynamic
+import groovy.transform.TupleConstructor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.MergingCriteria.SpecificSeqPlatformGroups
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.Individual
+import de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit
+import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
+import de.dkfz.tbi.otp.ngsdata.Sample
+import de.dkfz.tbi.otp.ngsdata.SampleType
+import de.dkfz.tbi.otp.ngsdata.SeqPlatform
+import de.dkfz.tbi.otp.ngsdata.SeqPlatformGroup
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqTrackService
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import de.dkfz.tbi.otp.ngsdata.mergingCriteria.DefaultSeqPlatformGroupController
 import de.dkfz.tbi.otp.ngsdata.mergingCriteria.ProjectSeqPlatformGroupController
 import de.dkfz.tbi.otp.project.Project
@@ -38,25 +48,105 @@ import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.otp.withdraw.RoddyBamFileWithdrawService
+import de.dkfz.tbi.otp.workflow.alignment.TriggerWorkflowsResult
 import de.dkfz.tbi.otp.workflowExecution.*
-import de.dkfz.tbi.otp.workflowExecution.decider.*
+import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
+import de.dkfz.tbi.otp.workflowExecution.decider.Decider
+import de.dkfz.tbi.otp.workflowExecution.decider.DeciderCreateWorkflowAction
+import de.dkfz.tbi.otp.workflowExecution.decider.DeciderResult
 
-import static de.dkfz.tbi.otp.dataprocessing.MergingCriteria.SpecificSeqPlatformGroups.*
+import static de.dkfz.tbi.otp.dataprocessing.MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING
+import static de.dkfz.tbi.otp.dataprocessing.MergingCriteria.SpecificSeqPlatformGroups.USE_OTP_DEFAULT
+import static de.dkfz.tbi.otp.dataprocessing.MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
 
-@Transactional(readOnly = true)
-class TriggerAlignmentService {
+@Transactional
+class TriggerWorkflowsService {
 
     @Autowired
     LinkGenerator linkGenerator
-
+    AbstractBamFileService abstractBamFileService
+    AllDecider allDecider
     SeqTrackService seqTrackService
     SamplePairDeciderService samplePairDeciderService
     TicketService ticketService
-    AllDecider allDecider
     RoddyBamFileWithdrawService roddyBamFileWithdrawService
     MergingCriteriaService mergingCriteriaService
     WorkflowService workflowService
     MessageSourceService messageSourceService
+
+    @CompileDynamic
+    List<AbstractBamFile> getBamFiles(List<Long> seqTrackIds) {
+        if (!seqTrackIds) {
+            return []
+        }
+
+        return RoddyBamFile.createCriteria().listDistinct {
+            seqTracks {
+                'in'('id', seqTrackIds)
+            }
+            eq('withdrawn', false)
+        } as List<RoddyBamFile>
+    }
+
+    @CompileDynamic
+    List<SeqTrack> getSeqTracks(Collection<Long> bamFileIds) {
+        if (!bamFileIds) {
+            return []
+        }
+
+        return AbstractBamFile.executeQuery('''
+            SELECT DISTINCT bf.seqTracks
+            FROM AbstractBamFile bf
+            WHERE bf.id IN (:bamFileIds)
+        ''', [bamFileIds: bamFileIds]) as List<SeqTrack>
+    }
+
+    @CompileDynamic
+    List<ExternallyProcessedBamFile> getExternalBamFiles(Collection<Long> bamFileIds) {
+        if (!bamFileIds) {
+            return []
+        }
+
+        return ExternallyProcessedBamFile.executeQuery('''
+            SELECT DISTINCT bf
+            FROM ExternallyProcessedBamFile bf
+            WHERE bf.id IN (:bamFileIds)
+        ''', [bamFileIds: bamFileIds]) as List<ExternallyProcessedBamFile>
+    }
+
+    @CompileDynamic
+    List<WorkflowVersionAndReferenceGenomeSelector> getInfo(Collection<SeqTrack> seqTracks) {
+        if (!seqTracks) {
+            return []
+        }
+
+        List<WorkflowVersionSelector> wvs = WorkflowVersionSelector.createCriteria().listDistinct {
+            or {
+                seqTracks.each { st ->
+                    and {
+                        eq('project', st.project)
+                        eq('seqType', st.seqType)
+                    }
+                }
+            }
+            isNull('deprecationDate')
+        } as List<WorkflowVersionSelector>
+        return wvs.collect {
+            new WorkflowVersionAndReferenceGenomeSelector(it,
+                    ReferenceGenomeSelector.findAllByProjectAndSeqTypeAndWorkflow(it.project, it.seqType, it.workflowVersion.workflow))
+        }
+    }
+
+    void triggerWorkflowByProjectAndSampleTypes(Project project, Set<SampleType> sampleTypes) {
+        List<WorkflowArtefact> artefacts = abstractBamFileService.findAllByProjectAndSampleType(project, sampleTypes)*.workflowArtefact
+        allDecider.decide(artefacts)
+    }
+
+    List<DeciderWithActions> getAllDecidersWithActions() {
+        return allDecider.allDeciderActionsMap.collect { k, v ->
+            return new DeciderWithActions(k.simpleName, v)
+        }
+    }
 
     /**
      * HQL query to find SeqTracks that are missing the configuration for the given workflows.
@@ -96,11 +186,11 @@ class TriggerAlignmentService {
     private static final int IDX_SEQTYPE = 2
     private static final int IDX_COUNT = 3
 
-    @Transactional(readOnly = false)
+    @Transactional
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     @CompileDynamic
-    TriggerAlignmentResult triggerAlignment(Collection<SeqTrack> seqTrackList, Collection<AbstractBamFile> bamFiles,
-                                            boolean ignoreSeqPlatformGroup = false, Map<Class<? extends Decider>, DeciderCreateWorkflowAction> deciderAction) {
+    TriggerWorkflowsResult triggerWorkflow(Collection<SeqTrack> seqTrackList, Collection<AbstractBamFile> bamFiles,
+                                           boolean ignoreSeqPlatformGroup = false, Map<Class<? extends Decider>, DeciderCreateWorkflowAction> deciderAction) {
         // Modify the notification status
         ticketService.findAllTickets(seqTrackList).each {
             ticketService.resetAlignmentAndAnalysisNotification(it)
@@ -145,17 +235,19 @@ class TriggerAlignmentService {
 
         log.debug(deciderResult.toString())
 
-        return new TriggerAlignmentResult(deciderResult, mergingWorkPackages)
+        return new TriggerWorkflowsResult(deciderResult, mergingWorkPackages)
     }
 
     /**
      * C seqTracks that do not have the alignment workflow configured (deprecated)
      */
+    @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     @CompileDynamic
     List<Map<String, Object>> createWarningsForMissingSeqPlatformGroup(Collection<SeqTrack> seqTracks) {
         List<SeqPlatformGroup> defaultSeqPlatformGroups = mergingCriteriaService.findDefaultSeqPlatformGroupsOperator()
-        List<SeqPlatform> configuredSeqPlatformsByDefault = defaultSeqPlatformGroups ? defaultSeqPlatformGroups.collectMany { it.seqPlatforms } : []
+        List<SeqPlatform> configuredSeqPlatformsByDefault = defaultSeqPlatformGroups
+                ? defaultSeqPlatformGroups.collectMany { it.seqPlatforms } : []
 
         return (((seqTracks.groupBy {
             [
@@ -205,13 +297,16 @@ class TriggerAlignmentService {
         }
     }
 
-    private Map<String, String> createSeqPlatformConfigPageLink(Project project, SeqType seqType, SpecificSeqPlatformGroups specificSeqPlatformGroups) {
-        String controller = (specificSeqPlatformGroups == USE_PROJECT_SEQ_TYPE_SPECIFIC ? ProjectSeqPlatformGroupController.simpleName :
-                DefaultSeqPlatformGroupController.simpleName) - 'Controller'
+    private Map<String, String> createSeqPlatformConfigPageLink(Project project, SeqType seqType,
+                                                                MergingCriteria.SpecificSeqPlatformGroups specificSeqPlatformGroups) {
+        String controller = (
+                specificSeqPlatformGroups == USE_PROJECT_SEQ_TYPE_SPECIFIC ? ProjectSeqPlatformGroupController.simpleName :
+                DefaultSeqPlatformGroupController.simpleName
+        ) - 'Controller'
         Map<String, Long> params = specificSeqPlatformGroups == USE_PROJECT_SEQ_TYPE_SPECIFIC ? [project: project.id, seqType: seqType.id] : null
         String linkName = specificSeqPlatformGroups == USE_PROJECT_SEQ_TYPE_SPECIFIC ?
-                messageSourceService.createMessage('triggerAlignment.warn.info.projectAndSeqTypeSpecificPlatformGroup') :
-                messageSourceService.createMessage('triggerAlignment.warn.info.defaultSeqPlatformGroup')
+                messageSourceService.createMessage('triggerWorkflows.warn.info.projectAndSeqTypeSpecificPlatformGroup') :
+                messageSourceService.createMessage('triggerWorkflows.warn.info.defaultSeqPlatformGroup')
         return [
                 name: linkName,
                 path: linkGenerator.link([
@@ -226,6 +321,7 @@ class TriggerAlignmentService {
     /**
      * check that the SeqTracks of a Sample seqType combination have compatible SeqPlatforms according the MergingCriteria
      */
+    @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     @CompileDynamic
     List<Map<String, Object>> createWarningsForSamplesHavingMultipleSeqPlatformGroups(Collection<SeqTrack> seqTracks) {
@@ -278,6 +374,7 @@ class TriggerAlignmentService {
     /**
      * check that the SeqTracks of a Sample seqType combination have the same libraryPreparationKit in case it is part of the MergingCriteria
      */
+    @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     @CompileDynamic
     List<Map<String, Object>> createWarningsForSamplesHavingMultipleLibPrepKits(Collection<SeqTrack> seqTracks) {
@@ -325,7 +422,7 @@ class TriggerAlignmentService {
             ]
         }
     }
-
+    @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<Map<String, Object>> createWarningsForMissingLibPrepKits(Collection<SeqTrack> seqTracks) {
         Set<SeqType> seqTypes = SeqTypeService.seqTypesRequiredLibPrepKit as Set
@@ -356,6 +453,7 @@ class TriggerAlignmentService {
      * check that for all project seqType speciesWithStrain combination of the seqTracks an ReferenceGenome is configured.
      */
     @SuppressWarnings("DuplicateNumberLiteral")
+    @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     @CompileDynamic
     List<Map<String, String>> createWarningsForMissingReferenceGenomeConfiguration(Collection<SeqTrack> seqTracks) {
@@ -391,6 +489,7 @@ class TriggerAlignmentService {
      * check for withdrawn seqTracks.
      */
     @SuppressWarnings("DuplicateNumberLiteral")
+    @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     @CompileDynamic
     List<Map<String, String>> createWarningsForWithdrawnSeqTracks(Collection<SeqTrack> seqTracks) {
@@ -429,6 +528,7 @@ class TriggerAlignmentService {
     /**
      * check for missing SampleTypePerProject.
      */
+    @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     @CompileDynamic
     List<Map<String, String>> createWarningsForMissingSampleTypePerProject(Collection<SeqTrack> seqTracks) {
@@ -464,6 +564,7 @@ class TriggerAlignmentService {
      *
      * The constrains are the workflow names and the seqTrack ids.
      */
+    @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     @CompileDynamic
     List<Map<String, String>> createWarningsForMissingWorkflowConfig(Collection<SeqTrack> seqTracks) {
@@ -479,4 +580,16 @@ class TriggerAlignmentService {
             ]
         } as List<Map<String, String>>
     }
+}
+
+@TupleConstructor
+class WorkflowVersionAndReferenceGenomeSelector {
+    WorkflowVersionSelector workflowVersionSelector
+    List<ReferenceGenomeSelector> referenceGenomeSelectors
+}
+
+@TupleConstructor
+class DeciderWithActions {
+    String name
+    List<DeciderCreateWorkflowAction> createActions
 }

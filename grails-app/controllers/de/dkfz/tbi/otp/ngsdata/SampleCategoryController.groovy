@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.SecurityService
-import de.dkfz.tbi.otp.workflow.TriggerWorkflowService
+import de.dkfz.tbi.otp.workflow.TriggerWorkflowsService
 
 @PreAuthorize('isFullyAuthenticated()')
 class SampleCategoryController {
@@ -43,7 +43,7 @@ class SampleCategoryController {
     SampleTypePerProjectService sampleTypePerProjectService
     SampleTypeService sampleTypeService
     SecurityService securityService
-    TriggerWorkflowService triggerWorkflowService
+    TriggerWorkflowsService triggerWorkflowsService
 
     Map index(SampleCategoryEditCommand cmd) {
         Project project = projectSelectionService.selectedProject
@@ -92,7 +92,7 @@ class SampleCategoryController {
 
         // Sample pairs are created only if their sample types have been changed. Has to stay until snv, indel and sophia are created in new system
         samplePairDeciderService.createSamplePairs(project, sampleTypesChanged)
-        triggerWorkflowService.triggerWorkflowByProjectAndSampleTypes(project, sampleTypesChanged)
+        triggerWorkflowsService.triggerWorkflowByProjectAndSampleTypes(project, sampleTypesChanged)
 
         flash.message = new FlashMessage(g.message(code: "sampleCategory.edit.success") as String)
         redirect(action: "index")

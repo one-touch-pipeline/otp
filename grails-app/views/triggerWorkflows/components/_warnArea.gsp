@@ -25,30 +25,30 @@
         <div class="card-header">
             <button class="btn btn-link w-100 text-left collapsed p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="true"
                     aria-controls="collapseFive">
-                <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerAlignment.warn.withdrawnWarnings.title"/>
+                <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerWorkflows.warn.withdrawnWarnings.title"/>
             </button>
         </div>
 
         <div id="collapseFive" class="collapse" data-parent="#warnAreaAccordion">
             <div class="card-body">
                 <div class="alert alert-warning" role="alert">
-                    <p class="card-text"><g:message code="triggerAlignment.warn.withdrawnWarnings"/></p>
+                    <p class="card-text"><g:message code="triggerWorkflows.warn.withdrawnWarnings"/></p>
                 </div>
 
                 <table id="withdrawnWarnings" class="table table-sm table-striped table-hover table-bordered">
                     <thead>
                     <tr>
-                        <th><g:message code="triggerAlignment.warn.table.project"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.individual"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.seqType"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.sampleType"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.effectedLaneCount"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.project"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.individual"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.seqType"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.sampleType"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.effectedLaneCount"/></th>
                     </tr>
                     </thead>
                     <tbody/>
                 </table>
 
-                <p class="card-text"><g:message code="triggerAlignment.warn.triggeringWontBeStarted"/></p>
+                <p class="card-text"><g:message code="triggerWorkflows.warn.triggeringWontBeStarted"/></p>
             </div>
         </div>
     </div>
@@ -57,37 +57,37 @@
         <div class="card-header">
             <button class="btn btn-link w-100 text-left collapsed p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true"
                     aria-controls="collapseOne">
-                <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerAlignment.warn.missingWorkflowConfig.title"/>
+                <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerWorkflows.warn.missingWorkflowConfig.title"/>
             </button>
         </div>
 
         <div id="collapseOne" class="collapse" data-parent="#warnAreaAccordion">
             <div class="card-body">
                 <div class="alert alert-warning" role="alert">
-                    <p class="card-text"><g:message code="triggerAlignment.warn.missingWorkflowConfig"/>
-                        <g:link controller="workflowSelection">${g.message(code: 'triggerAlignment.warn.config.link')}</g:link></p>
+                    <p class="card-text"><g:message code="triggerWorkflows.warn.missingWorkflowConfig"/>
+                        <g:link controller="workflowSelection">${g.message(code: 'triggerWorkflows.warn.config.link')}</g:link></p>
                 </div>
 
                 <table id="missingWorkflowConfigsWarnings" class="table table-sm table-striped table-hover table-bordered">
                     <thead>
                     <tr>
-                        <th><g:message code="triggerAlignment.warn.table.workflow"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.project"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.seqType"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.effectedLaneCount"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.workflow"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.project"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.seqType"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.effectedLaneCount"/></th>
                     </tr>
                     </thead>
                     <tbody/>
                 </table>
 
-                <p class="card-text"><g:message code="triggerAlignment.warn.triggeringWontBeStarted"/></p>
+                <p class="card-text"><g:message code="triggerWorkflows.warn.triggeringWontBeStarted"/></p>
 
                 <p class="card-text">
-                    <g:message code="triggerAlignment.warn.configPageReference"/>
+                    <g:message code="triggerWorkflows.warn.configPageReference"/>
                     <g:link controller="workflowSelection" action="index">
-                        <g:message code="triggerAlignment.warn.configPageReference.page"/>
+                        <g:message code="triggerWorkflows.warn.configPageReference.page"/>
                     </g:link>
-                    <g:message code="triggerAlignment.warn.configPageReference.note"/>
+                    <g:message code="triggerWorkflows.warn.configPageReference.note"/>
                 </p>
             </div>
         </div>
@@ -97,37 +97,37 @@
         <div class="card-header">
             <button class="btn btn-link w-100 text-left collapsed p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="true"
                     aria-controls="collapseFour">
-                <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerAlignment.warn.missingReferenceGenomeConfig.title"/>
+                <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerWorkflows.warn.missingReferenceGenomeConfig.title"/>
             </button>
         </div>
 
         <div id="collapseFour" class="collapse" data-parent="#warnAreaAccordion">
             <div class="card-body">
                 <div class="alert alert-warning" role="alert">
-                    <p class="card-text"><g:message code="triggerAlignment.warn.missingReferenceGenomeConfig"/>
-                        <g:link controller="workflowSelection">${g.message(code: 'triggerAlignment.warn.config.link')}</g:link></p>
+                    <p class="card-text"><g:message code="triggerWorkflows.warn.missingReferenceGenomeConfig"/>
+                        <g:link controller="workflowSelection">${g.message(code: 'triggerWorkflows.warn.config.link')}</g:link></p>
                 </div>
 
                 <table id="missingReferenceGenomeWarnings" class="table table-sm table-striped table-hover table-bordered">
                     <thead>
                     <tr>
-                        <th><g:message code="triggerAlignment.warn.table.project"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.seqType"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.species"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.effectedLaneCount"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.project"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.seqType"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.species"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.effectedLaneCount"/></th>
                     </tr>
                     </thead>
                     <tbody/>
                 </table>
 
-                <p class="card-text"><g:message code="triggerAlignment.warn.triggeringWontBeStarted"/></p>
+                <p class="card-text"><g:message code="triggerWorkflows.warn.triggeringWontBeStarted"/></p>
 
                 <p class="card-text">
-                    <g:message code="triggerAlignment.warn.configPageReference"/>
+                    <g:message code="triggerWorkflows.warn.configPageReference"/>
                     <g:link controller="workflowSelection" action="index">
-                        <g:message code="triggerAlignment.warn.configPageReference.page"/>
+                        <g:message code="triggerWorkflows.warn.configPageReference.page"/>
                     </g:link>
-                    <g:message code="triggerAlignment.warn.configPageReference.note"/>
+                    <g:message code="triggerWorkflows.warn.configPageReference.note"/>
                 </p>
             </div>
         </div>
@@ -137,32 +137,32 @@
         <div class="card-header">
             <button class="btn btn-link w-100 text-left collapsed p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-1" aria-expanded="true"
                     aria-controls="collapse-1">
-                <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerAlignment.warn.missingSeqPlatformGroups.title"/>
+                <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerWorkflows.warn.missingSeqPlatformGroups.title"/>
             </button>
         </div>
 
         <div id="collapse-1" class="collapse" data-parent="#warnAreaAccordion">
             <div class="card-body">
                 <div class="alert alert-warning" role="alert">
-                    <p class="card-text"><g:message code="triggerAlignment.warn.missingSeqPlatformGroups"/>
-                        <g:link controller="workflowSelection">${g.message(code: 'triggerAlignment.warn.config.link')}</g:link></p>
+                    <p class="card-text"><g:message code="triggerWorkflows.warn.missingSeqPlatformGroups"/>
+                        <g:link controller="workflowSelection">${g.message(code: 'triggerWorkflows.warn.config.link')}</g:link></p>
                 </div>
 
                 <table id="missingSeqPlatformGroupsTable" class="table table-sm table-striped table-hover table-bordered">
                     <thead>
                     <tr>
-                        <th><g:message code="triggerAlignment.warn.table.project"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.individual"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.seqType"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.sampleType"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.seqPlatforms"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.link"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.project"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.individual"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.seqType"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.sampleType"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.seqPlatforms"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.link"/></th>
                     </tr>
                     </thead>
                     <tbody/>
                 </table>
 
-                <p class="card-text"><g:message code="triggerAlignment.warn.seqPlatform.triggeringStartsOnlyWhenSeqPlatformGroupsIgnored"/></p>
+                <p class="card-text"><g:message code="triggerWorkflows.warn.seqPlatform.triggeringStartsOnlyWhenSeqPlatformGroupsIgnored"/></p>
             </div>
         </div>
     </div>
@@ -171,31 +171,31 @@
         <div class="card-header">
             <button class="btn btn-link w-100 text-left collapsed p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="true"
                     aria-controls="collapseTwo">
-                <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerAlignment.warn.mismatchedSeqPlatform.title"/>
+                <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerWorkflows.warn.mismatchedSeqPlatform.title"/>
             </button>
         </div>
 
         <div id="collapseTwo" class="collapse" data-parent="#warnAreaAccordion">
             <div class="card-body">
                 <div class="alert alert-warning" role="alert">
-                    <p class="card-text"><g:message code="triggerAlignment.warn.mismatchedSeqPlatform"/>
-                        <g:link controller="workflowSelection">${g.message(code: 'triggerAlignment.warn.config.link')}</g:link></p>
+                    <p class="card-text"><g:message code="triggerWorkflows.warn.mismatchedSeqPlatform"/>
+                        <g:link controller="workflowSelection">${g.message(code: 'triggerWorkflows.warn.config.link')}</g:link></p>
                 </div>
 
                 <table id="seqPlatformWarnings" class="table table-sm table-striped table-hover table-bordered">
                     <thead>
                     <tr>
-                        <th><g:message code="triggerAlignment.warn.table.project"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.individual"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.seqType"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.sampleType"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.seqPlatformGroupSubTable"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.project"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.individual"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.seqType"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.sampleType"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.seqPlatformGroupSubTable"/></th>
                     </tr>
                     </thead>
                     <tbody/>
                 </table>
 
-                <p class="card-text"><g:message code="triggerAlignment.warn.seqPlatform.triggeringStartsOnlyOneGroup"/></p>
+                <p class="card-text"><g:message code="triggerWorkflows.warn.seqPlatform.triggeringStartsOnlyOneGroup"/></p>
             </div>
         </div>
     </div>
@@ -204,30 +204,30 @@
         <div class="card-header">
             <button class="btn btn-link w-100 text-left collapsed p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree"
                     aria-expanded="true" aria-controls="collapseThree">
-                <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerAlignment.warn.mismatchedPreparationKit.title"/>
+                <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerWorkflows.warn.mismatchedPreparationKit.title"/>
             </button>
         </div>
 
         <div id="collapseThree" class="collapse" data-parent="#warnAreaAccordion">
             <div class="card-body">
                 <div class="alert alert-warning" role="alert">
-                    <p class="card-text"><g:message code="triggerAlignment.warn.mismatchedPreparationKit"/></p>
+                    <p class="card-text"><g:message code="triggerWorkflows.warn.mismatchedPreparationKit"/></p>
                 </div>
 
                 <table id="libraryPrepKitWarnings" class="table table-sm table-striped table-hover table-bordered">
                     <thead>
                     <tr>
-                        <th><g:message code="triggerAlignment.warn.table.project"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.individual"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.seqType"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.sampleType"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.libraryPreparationKitSubTable"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.project"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.individual"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.seqType"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.sampleType"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.libraryPreparationKitSubTable"/></th>
                     </tr>
                     </thead>
                     <tbody/>
                 </table>
 
-                <p class="card-text"><g:message code="triggerAlignment.warn.libraryPrepKit.triggeringStartsOnlyOneGroup"/></p>
+                <p class="card-text"><g:message code="triggerWorkflows.warn.libraryPrepKit.triggeringStartsOnlyOneGroup"/></p>
             </div>
         </div>
     </div>
@@ -236,25 +236,25 @@
         <div class="card-header">
             <button class="btn btn-link w-100 text-left collapsed p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSix"
                     aria-expanded="true" aria-controls="collapseSix">
-                <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerAlignment.warn.missingPreparationKit.title"/>
+                <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerWorkflows.warn.missingPreparationKit.title"/>
             </button>
         </div>
 
         <div id="collapseSix" class="collapse" data-parent="#warnAreaAccordion">
             <div class="card-body">
                 <div class="alert alert-warning" role="alert">
-                    <p class="card-text"><g:message code="triggerAlignment.warn.missingPreparationKit"/></p>
+                    <p class="card-text"><g:message code="triggerWorkflows.warn.missingPreparationKit"/></p>
                 </div>
 
                 <table id="missingLibraryPrepKitWarnings" class="table table-sm table-striped table-hover table-bordered">
                     <thead>
                     <tr>
-                        <th><g:message code="triggerAlignment.warn.table.project"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.individual"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.seqType"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.sampleType"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.lane"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.run"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.project"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.individual"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.seqType"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.sampleType"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.lane"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.run"/></th>
                     </tr>
                     </thead>
                     <tbody/>
@@ -267,28 +267,28 @@
         <div class="card-header">
             <button class="btn btn-link w-100 text-left collapsed p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-2"
                     aria-expanded="true" aria-controls="collapse-2">
-                <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerAlignment.warn.missingSampleTypePerProjectCard.title"/>
+                <i class="bi bi-exclamation-triangle"></i> <g:message code="triggerWorkflows.warn.missingSampleTypePerProjectCard.title"/>
             </button>
         </div>
 
         <div id="collapse-2" class="collapse" data-parent="#warnAreaAccordion">
             <div class="card-body">
                 <div class="alert alert-warning" role="alert">
-                    <p class="card-text"><g:message code="triggerAlignment.warn.missingSampleTypePerProjectCard"/>
-                        <g:link controller="sampleCategory">${g.message(code: 'triggerAlignment.warn.config.link')}</g:link></p>
+                    <p class="card-text"><g:message code="triggerWorkflows.warn.missingSampleTypePerProjectCard"/>
+                        <g:link controller="sampleCategory">${g.message(code: 'triggerWorkflows.warn.config.link')}</g:link></p>
                 </div>
 
                 <table id="warningsForMissingSampleTypePerProject" class="table table-sm table-striped table-hover table-bordered">
                     <thead>
                     <tr>
-                        <th><g:message code="triggerAlignment.warn.table.project"/></th>
-                        <th><g:message code="triggerAlignment.warn.table.sampleType"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.project"/></th>
+                        <th><g:message code="triggerWorkflows.warn.table.sampleType"/></th>
                     </tr>
                     </thead>
                     <tbody/>
                 </table>
 
-                <p class="card-text"><g:message code="triggerAlignment.warn.analysisWontBeStarted"/></p>
+                <p class="card-text"><g:message code="triggerWorkflows.warn.analysisWontBeStarted"/></p>
             </div>
         </div>
     </div>

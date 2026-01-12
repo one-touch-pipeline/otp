@@ -22,17 +22,17 @@
 
 <div class="card">
     <div class="card-header">
-        <i class="bi bi-search"></i> <g:message code="triggerAlignment.input.selection"/>
+        <i class="bi bi-search"></i> <g:message code="triggerWorkflows.input.selection"/>
     </div>
     <div class="card-body">
         <div class="alert alert-primary" role="alert">
-            <p class="card-text"><g:message code="triggerAlignment.input.cardTitle"/></p>
+            <p class="card-text"><g:message code="triggerWorkflows.input.cardTitle"/></p>
         </div>
 
         <g:render template="/templates/bootstrap/seqTrackSelectionTabBar/seqTrackSelectionTabBar" tabs="$tabs" model="[seqTypes: seqTypes]"/>
 
         <p class="card-text"></p>
 
-        <button id="searchSeqTrackButton" class="btn btn-primary" onclick="$.otp.triggerAlignment.search(this)"><g:message code="triggerAlignment.input.searchButton"/></button>
+        <button id="searchSeqTrackButton" class="btn btn-primary" onclick="$.otp.triggerWorkflows.search(this)"><g:message code="triggerWorkflows.input.searchButton"/></button>
     </div>
 </div>

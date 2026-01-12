@@ -43,10 +43,10 @@ import de.dkfz.tbi.otp.workflowExecution.decider.*
 
 @Rollback
 @Integration
-class TriggerWorkflowServiceIntegrationSpec extends Specification implements DomainFactoryCore, RoddyPanCancerFactory, WorkflowSystemDomainFactory {
+class TriggerWorkflowsServiceIntegrationSpec extends Specification implements DomainFactoryCore, RoddyPanCancerFactory, WorkflowSystemDomainFactory {
 
     @Autowired
-    TriggerWorkflowService service
+    TriggerWorkflowsService service
 
     @Autowired
     ApplicationContext applicationContext

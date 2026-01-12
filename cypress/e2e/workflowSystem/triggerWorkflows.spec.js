@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-describe('Check trigger alignment page', () => {
+describe('Check trigger Workflows page', () => {
   'use strict';
 
   context('when user is an operator', () => {
@@ -28,13 +28,13 @@ describe('Check trigger alignment page', () => {
       cy.loginAs('operator');
     });
 
-    it('should search seq tracks by project and seqType and trigger alignment', () => {
-      cy.visit('/triggerAlignment/index');
+    it('should search seq tracks by project and seqType and trigger workflow', () => {
+      cy.visit('/triggerWorkflows/index');
       cy.intercept('/searchSeqTrack/searchSeqTrackByProjectSeqType*').as('search');
-      cy.intercept('/triggerAlignment/generateWarnings*').as('warnings');
-      cy.intercept('/triggerAlignment/triggerAlignment*').as('triggerAlignment');
+      cy.intercept('/triggerWorkflows/generateWarnings*').as('warnings');
+      cy.intercept('/triggerWorkflows/triggerWorkflows*').as('triggerWorkflows');
 
-      cy.fixture('triggerAlignment.json').then((alignment) => {
+      cy.fixture('triggerWorkflows.json').then((alignment) => {
         cy.get('select#project').select(alignment[0].project, { force: true });
         cy.get('select#seqTypeProject').select(alignment[0].seqType, { force: true });
         cy.get('button#searchSeqTrackButton').click();
@@ -67,9 +67,9 @@ describe('Check trigger alignment page', () => {
         // Configure decider actions - set all to "Create always" (default behavior)
         configureDeciderActions('CREATE_ALWAYS');
 
-        cy.get('button#triggerAlignmentButton').click();
+        cy.get('button#triggerWorkflowsButton').click();
 
-        cy.wait('@triggerAlignment').then((interception) => {
+        cy.wait('@triggerWorkflows').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
         });
 
@@ -82,13 +82,13 @@ describe('Check trigger alignment page', () => {
       });
     });
 
-    it('should search seq tracks by pid and seq. type and trigger alignment', () => {
-      cy.visit('/triggerAlignment/index');
+    it('should search seq tracks by pid and seq. type and trigger workflow', () => {
+      cy.visit('/triggerWorkflows/index');
       cy.intercept('/searchSeqTrack/searchSeqTrackByPidSeqType*').as('search');
-      cy.intercept('/triggerAlignment/generateWarnings*').as('warnings');
-      cy.intercept('/triggerAlignment/triggerAlignment*').as('triggerAlignment');
+      cy.intercept('/triggerWorkflows/generateWarnings*').as('warnings');
+      cy.intercept('/triggerWorkflows/triggerWorkflows*').as('triggerWorkflows');
 
-      cy.fixture('triggerAlignment.json').then((alignment) => {
+      cy.fixture('triggerWorkflows.json').then((alignment) => {
         cy.get('a#pid-tab').click();
 
         cy.get('textarea#pid-selection').clear().type(alignment[1].pid.join(';'));
@@ -122,9 +122,9 @@ describe('Check trigger alignment page', () => {
         // Configure decider actions - set all to "Create always" (default behavior)
         configureDeciderActions('CREATE_ALWAYS');
 
-        cy.get('button#triggerAlignmentButton').click();
+        cy.get('button#triggerWorkflowsButton').click();
 
-        cy.wait('@triggerAlignment').then((interception) => {
+        cy.wait('@triggerWorkflows').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
         });
 
@@ -137,13 +137,13 @@ describe('Check trigger alignment page', () => {
       });
     });
 
-    it('should search seq tracks by seqTrack ids and trigger alignment', () => {
-      cy.visit('/triggerAlignment/index');
+    it('should search seq tracks by seqTrack ids and trigger workflow', () => {
+      cy.visit('/triggerWorkflows/index');
       cy.intercept('/searchSeqTrack/searchSeqTrackBySeqTrackId*').as('search');
-      cy.intercept('/triggerAlignment/generateWarnings*').as('warnings');
-      cy.intercept('/triggerAlignment/triggerAlignment*').as('triggerAlignment');
+      cy.intercept('/triggerWorkflows/generateWarnings*').as('warnings');
+      cy.intercept('/triggerWorkflows/triggerWorkflows*').as('triggerWorkflows');
 
-      cy.fixture('triggerAlignment.json').then((alignment) => {
+      cy.fixture('triggerWorkflows.json').then((alignment) => {
         cy.get('a#seqtrack-id-tab').click();
 
         cy.get('textarea#seqTrackId-selection').clear().type(alignment[2].seqTrackIds.join('\t'));
@@ -171,9 +171,9 @@ describe('Check trigger alignment page', () => {
       // Configure decider actions - set all to "Create always" (default behavior)
       configureDeciderActions('CREATE_ALWAYS');
 
-      cy.get('button#triggerAlignmentButton').click();
+      cy.get('button#triggerWorkflowsButton').click();
 
-      cy.wait('@triggerAlignment').then((interception) => {
+      cy.wait('@triggerWorkflows').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
       });
 
@@ -186,13 +186,13 @@ describe('Check trigger alignment page', () => {
       cy.get('#resultWorkPackageList li').should('have.length', 2);
     });
 
-    it('should search seq tracks by ilse number and trigger alignment', () => {
-      cy.visit('/triggerAlignment/index');
+    it('should search seq tracks by ilse number and trigger workflow', () => {
+      cy.visit('/triggerWorkflows/index');
       cy.intercept('/searchSeqTrack/searchSeqTrackByIlseNumber*').as('search');
-      cy.intercept('/triggerAlignment/generateWarnings*').as('warnings');
-      cy.intercept('/triggerAlignment/triggerAlignment*').as('triggerAlignment');
+      cy.intercept('/triggerWorkflows/generateWarnings*').as('warnings');
+      cy.intercept('/triggerWorkflows/triggerWorkflows*').as('triggerWorkflows');
 
-      cy.fixture('triggerAlignment.json').then((alignment) => {
+      cy.fixture('triggerWorkflows.json').then((alignment) => {
         cy.get('a#ilse-tab').click();
 
         cy.get('textarea#ilse-selection').clear().type(alignment[3].ilseNumbers.join('\t'));
@@ -218,27 +218,27 @@ describe('Check trigger alignment page', () => {
         // Configure decider actions - set all to "Create always" (default behavior)
         configureDeciderActions('CREATE_ALWAYS');
 
-        cy.get('button#triggerAlignmentButton').click();
+        cy.get('button#triggerWorkflowsButton').click();
 
-        cy.wait('@triggerAlignment').then((interception) => {
+        cy.wait('@triggerWorkflows').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
         });
 
         cy.get('#warnAreaAccordion > div').should('not.be.visible');
-        cy.get('div.otpWarningToast').should('be.visible').contains('No alignment workflow has been started');
+        cy.get('div.otpWarningToast').should('be.visible').contains('No workflows were started');
         cy.get('#infos li').should('not.be.empty');
         cy.get('#resultWarning li').should('have.length', 1).should('have.text', 'none');
         cy.get('#resultWorkPackageList li').should('have.length', 1).should('have.text', 'none');
       });
     });
 
-    it('should search seq tracks by multi input and trigger alignment', () => {
-      cy.visit('/triggerAlignment/index');
+    it('should search seq tracks by multi input and trigger workflows', () => {
+      cy.visit('/triggerWorkflows/index');
       cy.intercept('/searchSeqTrack/searchSeqTrackByMultiInput*').as('search');
-      cy.intercept('/triggerAlignment/generateWarnings*').as('warnings');
-      cy.intercept('/triggerAlignment/triggerAlignment*').as('triggerAlignment');
+      cy.intercept('/triggerWorkflows/generateWarnings*').as('warnings');
+      cy.intercept('/triggerWorkflows/triggerWorkflows*').as('triggerWorkflows');
 
-      cy.fixture('triggerAlignment.json').then((alignment) => {
+      cy.fixture('triggerWorkflows.json').then((alignment) => {
         const fix = alignment[4];
         cy.get('a#multi-input-tab').click();
 
@@ -281,9 +281,9 @@ describe('Check trigger alignment page', () => {
         // Configure decider actions - set all to "Create always" (default behavior)
         configureDeciderActions('CREATE_ALWAYS');
 
-        cy.get('button#triggerAlignmentButton').click();
+        cy.get('button#triggerWorkflowsButton').click();
 
-        cy.wait('@triggerAlignment').then((interception) => {
+        cy.wait('@triggerWorkflows').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
         });
 
@@ -297,12 +297,12 @@ describe('Check trigger alignment page', () => {
     });
 
     it('should search seq tracks by BAM ID and trigger alignment', () => {
-      cy.visit('/triggerAlignment/index');
+      cy.visit('/triggerWorkflows/index');
       cy.intercept('/searchSeqTrack/searchSeqTrackByBamId*').as('search');
-      cy.intercept('/triggerAlignment/generateWarnings*').as('warnings');
-      cy.intercept('/triggerAlignment/triggerAlignment*').as('triggerAlignment');
+      cy.intercept('/triggerWorkflows/generateWarnings*').as('warnings');
+      cy.intercept('/triggerWorkflows/triggerWorkflows*').as('triggerWorkflows');
 
-      cy.fixture('triggerAlignment.json').then((alignment) => {
+      cy.fixture('triggerWorkflows.json').then((alignment) => {
         cy.get('a#bam-tab').click();
 
         cy.get('textarea#bam-selection').clear().type(alignment[5].bamIds.join('\t'));
@@ -332,9 +332,9 @@ describe('Check trigger alignment page', () => {
         // Configure decider actions - set all to "Create always" (default behavior)
         configureDeciderActions('CREATE_ALWAYS');
 
-        cy.get('button#triggerAlignmentButton').click();
+        cy.get('button#triggerWorkflowsButton').click();
 
-        cy.wait('@triggerAlignment').then((interception) => {
+        cy.wait('@triggerWorkflows').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
         });
 
@@ -349,12 +349,12 @@ describe('Check trigger alignment page', () => {
     });
 
     it('should test different decider action configurations', () => {
-      cy.visit('/triggerAlignment/index');
+      cy.visit('/triggerWorkflows/index');
       cy.intercept('/searchSeqTrack/searchSeqTrackByProjectSeqType*').as('search');
-      cy.intercept('/triggerAlignment/generateWarnings*').as('warnings');
-      cy.intercept('/triggerAlignment/triggerAlignment*').as('triggerAlignment');
+      cy.intercept('/triggerWorkflows/generateWarnings*').as('warnings');
+      cy.intercept('/triggerWorkflows/triggerWorkflows*').as('triggerWorkflows');
 
-      cy.fixture('triggerAlignment.json').then((alignment) => {
+      cy.fixture('triggerWorkflows.json').then((alignment) => {
         cy.get('select#project').select(alignment[0].project, { force: true });
         cy.get('select#seqTypeProject').select(alignment[0].seqType, { force: true });
         cy.get('button#searchSeqTrackButton').click();
@@ -380,9 +380,9 @@ describe('Check trigger alignment page', () => {
         // Set all deciders to "Skip" to test different behavior
         configureDeciderActions('SKIP');
 
-        cy.get('button#triggerAlignmentButton').click();
+        cy.get('button#triggerWorkflowsButton').click();
 
-        cy.wait('@triggerAlignment').then((interception) => {
+        cy.wait('@triggerWorkflows').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
         });
 
@@ -398,12 +398,12 @@ describe('Check trigger alignment page', () => {
       // Ensure the config is deleted before starting the test
       deleteConfig();
 
-      cy.visit('/triggerAlignment/index');
+      cy.visit('/triggerWorkflows/index');
 
       cy.intercept('/searchSeqTrack/searchSeqTrackByProjectSeqType*').as('search');
-      cy.intercept('/triggerAlignment/generateWarnings*').as('warnings');
+      cy.intercept('/triggerWorkflows/generateWarnings*').as('warnings');
 
-      cy.fixture('triggerAlignment.json').then((alignment) => {
+      cy.fixture('triggerWorkflows.json').then((alignment) => {
         cy.get('select#project').select(alignment[0].project, { force: true });
         cy.get('select#seqTypeProject').select(alignment[0].seqTypes, { force: true });
         cy.get('button#searchSeqTrackButton').click();
@@ -435,9 +435,9 @@ describe('Check trigger alignment page', () => {
     });
 
     it('should not be able to visit the page', () => {
-      cy.checkAccessDenied('/triggerAlignment/index');
-      cy.checkAccessDenied('/triggerAlignment/generateWarnings');
-      cy.checkAccessDenied('/triggerAlignment/triggerAlignment');
+      cy.checkAccessDenied('/triggerWorkflows/index');
+      cy.checkAccessDenied('/triggerWorkflows/generateWarnings');
+      cy.checkAccessDenied('/triggerWorkflows/triggerWorkflows');
       cy.checkAccessDenied('/searchSeqTrack/searchSeqTrackByProjectSeqType');
       cy.checkAccessDenied('/searchSeqTrack/searchSeqTrackByPidSeqType');
       cy.checkAccessDenied('/searchSeqTrack/searchSeqTrackBySeqTrackId');
@@ -455,7 +455,7 @@ const addConfig = () => {
   cy.get('div.tab-menu a:contains("Workflow selection")').click();
   cy.get('h2.accordion-header button.accordion-button:contains("Alignment workflows")').click();
   cy.get('table#alignmentTable > tfoot > tr').within(() => {
-    cy.fixture('triggerAlignment.json').then((alignment) => {
+    cy.fixture('triggerWorkflows.json').then((alignment) => {
       cy.get('td:first-child > select').select(alignment[6].workflow, { force: true })
         .should('have.value', '18');
       cy.get('td:nth-child(2) > select').select(alignment[6].seqType, { force: true })
@@ -479,7 +479,7 @@ const deleteConfig = () => {
 
   cy.intercept('/workflowSelection/deleteConfiguration?project=ExampleProject').as('deleteConfig');
 
-  cy.fixture('triggerAlignment.json').then((alignment) => {
+  cy.fixture('triggerWorkflows.json').then((alignment) => {
     cy.get('div.tab-menu a:contains("Workflow selection")').click();
     cy.get('h2.accordion-header button.accordion-button:contains("Alignment workflows")').click();
     cy.get(`table#alignmentTable > tbody > tr > td:first-child:contains("${alignment[6].workflow}")`)

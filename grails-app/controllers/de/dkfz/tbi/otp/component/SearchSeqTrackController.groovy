@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.SearchSeqTrackService
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.workflow.TriggerWorkflowService
+import de.dkfz.tbi.otp.workflow.TriggerWorkflowsService
 
 /**
  * Action handler to search seqTrack by supplying either
@@ -53,7 +53,7 @@ class SearchSeqTrackController {
     ProjectSelectionService projectSelectionService
     SearchSeqTrackService searchSeqTrackService
     SeqTrackService seqTrackService
-    TriggerWorkflowService triggerWorkflowService
+    TriggerWorkflowsService triggerWorkflowsService
     SearchExternallyProcessedBamFileService searchExternallyProcessedBamFileService
 
     static final String PARAM_KEY_PIDS = 'pids[]'
@@ -98,7 +98,7 @@ class SearchSeqTrackController {
 
         if (!individuals) {
             response.status = HttpStatus.NOT_FOUND.value()
-            return render([error: HttpStatus.NOT_FOUND.reasonPhrase, message: g.message(code: "triggerAlignment.error.noIndividuals") as String] as JSON)
+            return render([error: HttpStatus.NOT_FOUND.reasonPhrase, message: g.message(code: "triggerWorkflows.error.noIndividuals") as String] as JSON)
         }
 
         Set<Long> seqTypeIds = getListParam(PARAM_KEY_SEQTYPES).collect { it as long }
@@ -124,7 +124,7 @@ class SearchSeqTrackController {
 
         if (!seqTrackIds) {
             response.status = HttpStatus.NOT_FOUND.value()
-            return render([error: HttpStatus.NOT_FOUND.reasonPhrase, message: g.message(code: "triggerAlignment.error.noSeqTrackIds") as String] as JSON)
+            return render([error: HttpStatus.NOT_FOUND.reasonPhrase, message: g.message(code: "triggerWorkflows.error.noSeqTrackIds") as String] as JSON)
         }
 
         Set<SeqTrack> seqTracks = SeqTrack.getAll(seqTrackIds).findAll()
@@ -144,13 +144,13 @@ class SearchSeqTrackController {
 
         if (!bamIds) {
             response.status = HttpStatus.NOT_FOUND.value()
-            return render([error: HttpStatus.NOT_FOUND.reasonPhrase, message: g.message(code: "triggerAlignment.error.noLanes.bam") as String] as JSON)
+            return render([error: HttpStatus.NOT_FOUND.reasonPhrase, message: g.message(code: "triggerWorkflows.error.noLanes.bam") as String] as JSON)
         }
 
-        Set<SeqTrack> seqTracks = triggerWorkflowService.getSeqTracks(bamIds)
-        Set<ExternallyProcessedBamFile> extBamFiles = triggerWorkflowService.getExternalBamFiles(bamIds)
+        Set<SeqTrack> seqTracks = triggerWorkflowsService.getSeqTracks(bamIds)
+        Set<ExternallyProcessedBamFile> extBamFiles = triggerWorkflowsService.getExternalBamFiles(bamIds)
 
-        Set<String> missingItems = (bamIds - triggerWorkflowService.getBamFiles(seqTracks*.id)*.id - extBamFiles*.id)*.toString()
+        Set<String> missingItems = (bamIds - triggerWorkflowsService.getBamFiles(seqTracks*.id)*.id - extBamFiles*.id)*.toString()
         return redirectHelper(params, seqTracks, extBamFiles, missingItems ?: null)
     }
 
@@ -169,7 +169,7 @@ class SearchSeqTrackController {
 
         if (!ilseSubmissions) {
             response.status = HttpStatus.NOT_FOUND.value()
-            return render([error: HttpStatus.NOT_FOUND.reasonPhrase, message: g.message(code: "triggerAlignment.error.noIlseSubmissions") as String] as JSON)
+            return render([error: HttpStatus.NOT_FOUND.reasonPhrase, message: g.message(code: "triggerWorkflows.error.noIlseSubmissions") as String] as JSON)
         }
 
         Set<SeqTrack> seqTracks = searchSeqTrackService.getAllSeqTracksByIlseSubmissions(ilseSubmissions)

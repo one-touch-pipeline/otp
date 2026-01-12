@@ -27,13 +27,13 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.workflow.TriggerWorkflowService
+import de.dkfz.tbi.otp.workflow.TriggerWorkflowsService
 
 @Transactional
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
 class SearchSeqTrackService {
 
-    TriggerWorkflowService triggerWorkflowService
+    TriggerWorkflowsService triggerWorkflowsService
 
     @CompileDynamic
     Set<SeqTrack> getAllSeqTracksByProjectAndSeqTypes(Project project, Set<SeqType> seqTypes) {
@@ -103,7 +103,7 @@ class SearchSeqTrackService {
                 seqPlatformGroup: seqTrack.seqPlatformGroup?.toString(),
                 species         : seqTrack.individual.species.displayName,
                 mixedInSpecies  : seqTrack.sample.mixedInSpecies*.displayName.join(', '),
-                bamIds          : triggerWorkflowService.getBamFiles([seqTrack.id])*.id.join(', '),
+                bamIds          : triggerWorkflowsService.getBamFiles([seqTrack.id])*.id.join(', '),
         ]
     }
 }

@@ -37,42 +37,42 @@
     <g:if test="${tabs.contains('project')}">
         <li class="nav-item" role="presentation">
             <a class="nav-link active" id="project-tab" data-bs-toggle="tab" data-bs-target="#project" type="button" role="tab" aria-controls="project" aria-selected="true">
-                <g:message code="triggerAlignment.input.tab.project"/>
+                <g:message code="triggerWorkflows.input.tab.project"/>
             </a>
         </li>
     </g:if>
     <g:if test="${tabs.contains('pid')}">
         <li class="nav-item" role="presentation">
             <a class="nav-link" id="pid-tab" data-bs-toggle="tab" data-bs-target="#pid" type="button" role="tab" aria-controls="pid" aria-selected="false"
-            ><g:message code="triggerAlignment.input.tab.pid"/>
+            ><g:message code="triggerWorkflows.input.tab.pid"/>
             </a>
         </li>
     </g:if>
     <g:if test="${tabs.contains('seqTrackId')}">
         <li class="nav-item" role="presentation">
             <a class="nav-link" id="seqtrack-id-tab" data-bs-toggle="tab" data-bs-target="#seqTrackId" type="button" role="tab" aria-controls="seqTrackId" aria-selected="false">
-                <g:message code="triggerAlignment.input.tab.seqTrackId"/>
+                <g:message code="triggerWorkflows.input.tab.seqTrackId"/>
             </a>
         </li>
     </g:if>
     <g:if test="${tabs.contains('ilse')}">
         <li class="nav-item" role="presentation">
             <a class="nav-link" id="ilse-tab" data-bs-toggle="tab" data-bs-target="#ilse" type="button" aria-controls="ilse" aria-selected="false">
-                <g:message code="triggerAlignment.input.tab.ilse"/>
+                <g:message code="triggerWorkflows.input.tab.ilse"/>
             </a>
         </li>
     </g:if>
     <g:if test="${tabs.contains('multiInput')}">
         <li class="nav-item" role="presentation">
             <a class="nav-link" id="multi-input-tab" data-bs-toggle="tab" data-bs-target="#multi-input" type="button" role="tab" aria-controls="multi-input" aria-selected="false">
-                <g:message code="triggerAlignment.input.tab.multiInput"/>
+                <g:message code="triggerWorkflows.input.tab.multiInput"/>
             </a>
         </li>
     </g:if>
     <g:if test="${tabs.contains('bam')}">
         <li class="nav-item" role="presentation">
             <a class="nav-link" id="bam-tab" data-bs-toggle="tab" data-bs-target="#bam" type="button" role="tab" aria-controls="bam" aria-selected="false">
-                <g:message code="triggerAlignment.input.tab.bam"/>
+                <g:message code="triggerWorkflows.input.tab.bam"/>
             </a>
         </li>
     </g:if>

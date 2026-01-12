@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.workflowExecution.decider.DeciderResult
 
 @ToString
 @TupleConstructor
-class TriggerAlignmentResult {
+class TriggerWorkflowsResult {
 
     @Delegate
     final DeciderResult deciderResult

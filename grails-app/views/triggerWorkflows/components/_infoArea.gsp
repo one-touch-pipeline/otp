@@ -21,18 +21,18 @@
   --}%
 <div class="card">
     <div class="card-header">
-        <i class="bi bi-list-check"></i> <g:message code="triggerAlignment.info.header"/>
+        <i class="bi bi-list-check"></i> <g:message code="triggerWorkflows.info.header"/>
     </div>
     <div class="card-body">
-        <p id="workflowTableText" class="card-text"><g:message code="triggerAlignment.info.body"/></p>
+        <p id="workflowTableText" class="card-text"><g:message code="triggerWorkflows.info.body"/></p>
         <table id="workflowTable" class="table table-sm table-striped display table-hover table-bordered w-100">
             <thead>
             <tr>
-                <th><g:message code="triggerAlignment.info.header.project"/></th>
-                <th><g:message code="triggerAlignment.info.header.seqType"/></th>
-                <th><g:message code="triggerAlignment.info.header.workflow"/></th>
-                <th><g:message code="triggerAlignment.info.header.version"/></th>
-                <th><g:message code="triggerAlignment.info.header.refGen"/></th>
+                <th><g:message code="triggerWorkflows.info.header.project"/></th>
+                <th><g:message code="triggerWorkflows.info.header.seqType"/></th>
+                <th><g:message code="triggerWorkflows.info.header.workflow"/></th>
+                <th><g:message code="triggerWorkflows.info.header.version"/></th>
+                <th><g:message code="triggerWorkflows.info.header.refGen"/></th>
             </tr>
             </thead>
             <tbody>

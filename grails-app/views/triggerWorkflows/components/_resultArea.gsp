@@ -23,7 +23,7 @@
 <div class="accordion" id="result">
     <div class="card">
         <div class="card-header">
-            <i class="bi bi-list"></i> <g:message code="triggerAlignment.result.warning.title"/>
+            <i class="bi bi-list"></i> <g:message code="triggerWorkflows.result.warning.title"/>
         </div>
 
         <div class="card-body">
@@ -34,7 +34,7 @@
 
     <div class="card">
         <div class="card-header">
-            <i class="bi bi-list"></i> <g:message code="triggerAlignment.result.bamFile.title"/>
+            <i class="bi bi-list"></i> <g:message code="triggerWorkflows.result.bamFile.title"/>
         </div>
 
         <div class="card-body">
@@ -45,7 +45,7 @@
 
     <div class="card">
         <div class="card-header">
-            <i class="bi bi-list"></i> <g:message code="triggerAlignment.result.info.title"/>
+            <i class="bi bi-list"></i> <g:message code="triggerWorkflows.result.info.title"/>
         </div>
 
         <div class="card-body">

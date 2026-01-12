@@ -30,16 +30,16 @@
   --}%
 <div class="card">
     <div class="card-header">
-        <i class="bi bi-list-check"></i> <g:message code="triggerAlignment.option.header"/>
+        <i class="bi bi-list-check"></i> <g:message code="triggerWorkflows.option.header"/>
     </div>
     <div class="card-body">
         <div class="form-check">
             <input class="form-check-input" type="checkbox" id="ignoreSeqPlatformGroup">
-            <label class="form-check-label" for="ignoreSeqPlatformGroup"><g:message code="triggerAlignment.input.checkbox.ignoreSeqPlatformGroup"/></label>
+            <label class="form-check-label" for="ignoreSeqPlatformGroup"><g:message code="triggerWorkflows.input.checkbox.ignoreSeqPlatformGroup"/></label>
         </div>
         <div class="card">
             <div class="card-header">
-                <i class="bi bi-check2-square"></i> <g:message code="triggerAlignment.option.decider.header"/>
+                <i class="bi bi-check2-square"></i> <g:message code="triggerWorkflows.option.decider.header"/>
             </div>
             <div class="card-body row">
                 <form id="deciderActionSelection" class="col-md-4">
@@ -48,7 +48,7 @@
                     </g:each>
                 </form>
                 <div class="col">
-                    <div><g:message code="triggerAlignment.option.decider.selection.header"/>
+                    <div><g:message code="triggerWorkflows.option.decider.selection.header"/>
                         <ul class="list-group">
                             <g:each in="${deciderActions}" var="action">
                                 <li class="list-group-item">
@@ -59,7 +59,7 @@
                         </ul>
 
                     </div>
-                    <div><g:message code="triggerAlignment.option.decider.notes.header"/>
+                    <div><g:message code="triggerWorkflows.option.decider.notes.header"/>
                         <ul class="list-group">
                             <g:each in="${deciderNotes}" var="note">
                                 <li class="list-group-item">
