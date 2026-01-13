@@ -29,7 +29,6 @@ import spock.lang.Unroll
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
@@ -101,8 +100,6 @@ class WesFastqcWorkflowSpec extends AbstractDecidedWorkflowSpec {
 
     FastqcDataFilesService fastqcDataFilesService
     FastqcDecider fastqcDecider
-    LsdfFilesService lsdfFilesService
-    RawSequenceDataWorkFileService rawSequenceDataWorkFileService
 
     private Path expectedFastqc
     private final List<RawSequenceFile> allRawSequenceFiles = []

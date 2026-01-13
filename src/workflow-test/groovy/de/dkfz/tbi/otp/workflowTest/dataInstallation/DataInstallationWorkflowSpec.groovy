@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.workflowTest.dataInstallation
 
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataAllWellFileService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -54,7 +53,6 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
     Class<? extends OtpWorkflow> workflowComponentClass = DataInstallationWorkflow
 
     DataInstallationInitializationService dataInstallationInitializationService
-    RawSequenceDataWorkFileService rawSequenceDataWorkFileService
     RawSequenceDataAllWellFileService rawSequenceDataAllWellFileService
     SingleCellService singleCellService
 

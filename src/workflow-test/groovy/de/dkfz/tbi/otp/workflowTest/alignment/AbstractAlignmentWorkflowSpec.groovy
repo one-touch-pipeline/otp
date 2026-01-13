@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.workflowTest.alignment
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.workflowTest.AbstractDecidedWorkflowSpec
 
 import java.nio.file.Files
@@ -32,8 +31,6 @@ import java.nio.file.Path
  * Provides some helper needed in all alignment workflows
  */
 abstract class AbstractAlignmentWorkflowSpec extends AbstractDecidedWorkflowSpec {
-
-    ReferenceGenomeService referenceGenomeService
 
     protected void linkFastqFiles(SeqTrack seqTrack, List<Path> testFastqFiles) {
         List<RawSequenceFile> rawSequenceFiles = RawSequenceFile.findAllBySeqTrack(seqTrack)

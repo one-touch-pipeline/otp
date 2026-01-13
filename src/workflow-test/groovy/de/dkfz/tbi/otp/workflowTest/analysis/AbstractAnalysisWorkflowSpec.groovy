@@ -33,7 +33,6 @@ import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.infrastructure.alignment.AlignmentLinkFileServiceFactoryService
 import de.dkfz.tbi.otp.infrastructure.alignment.AlignmentWorkFileServiceFactoryService
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.ngsdata.taxonomy.Species
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
@@ -50,7 +49,6 @@ abstract class AbstractAnalysisWorkflowSpec extends AbstractDecidedWorkflowSpec 
 
     AlignmentLinkFileServiceFactoryService alignmentLinkFileServiceFactoryService
     AlignmentWorkFileServiceFactoryService alignmentWorkFileServiceFactoryService
-    ReferenceGenomeService referenceGenomeService
     FilestoreService filestoreService
 
     static final Double COVERAGE = 30.0
