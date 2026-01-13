@@ -644,6 +644,24 @@ task showCodenarcHTMLFile {
     }
 }
 
+tasks.register('codenarcFiles', CodeNarc) {
+    description = "Run CodeNarc analysis on one or multiple files. Usage: ./gradlew codenarcFiles -Pfiles=path/to/File.groovy"
+
+    source = files(provider {
+        def targetFiles = project.findProperty('files')
+        if (!targetFiles) {
+            throw new GradleException("Missing required property 'files'. Usage: ./gradlew codenarcFiles -Pfiles=path/to/File.groovy")
+        }
+        targetFiles.split(',').collect{ it.trim() }.collect{ file(it) }
+    })
+    reports {
+        text.enabled = true
+        html.enabled = true
+    }
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+}
+
+
 task codenarcAll(type: CodeNarc) {
     mustRunAfter clean
     finalizedBy showCodenarcHTMLFile
