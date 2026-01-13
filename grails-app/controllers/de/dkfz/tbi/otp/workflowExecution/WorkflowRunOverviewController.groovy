@@ -60,8 +60,10 @@ class WorkflowRunOverviewController {
     WorkflowRunOverviewService workflowRunOverviewService
     ReferenceGenomeService referenceGenomeService
     SeqTypeService seqTypeService
+    WorkflowSystemService workflowSystemService
 
     def index() {
+        boolean workflowSystemStatus = workflowSystemService.isEnabled()
         List<Workflow> workflows = workflowService.list().sort { a, b ->
             !a.enabled <=> !b.enabled ?: String.CASE_INSENSITIVE_ORDER.compare(a.toString(), b.toString())
         }
@@ -79,14 +81,15 @@ class WorkflowRunOverviewController {
         }
 
         return [
-                states       : STATES,
-                workflows    : workflows,
-                lastRuns     : lastRuns,
-                lastFails    : lastFails,
-                lastSuccesses: lastSuccesses,
-                runs         : runs,
-                seqTypes     : seqTypes,
-                refGenomes   : refGenomes,
+                states              : STATES,
+                workflows           : workflows,
+                workflowSystemStatus: workflowSystemStatus,
+                lastRuns            : lastRuns,
+                lastFails           : lastFails,
+                lastSuccesses       : lastSuccesses,
+                runs                : runs,
+                seqTypes            : seqTypes,
+                refGenomes          : refGenomes,
         ]
     }
 }

@@ -36,6 +36,17 @@
             tooltip : g.message(code: 'workflowSystem.configPage.tooltip'),
     ]"/>
 
+     <g:if test="${!workflowSystemStatus}">
+         <div class="alert alert-warning" role="alert">
+             <i class="bi bi-exclamation-triangle"></i>
+             <strong><g:message code="workflowRun.overview.systemDisabled.title"/></strong>
+             <br/>
+             <g:link controller="crashRepair" action="index" class="alert-link">
+                 <g:message code="workflowRun.overview.systemDisabled.link"/>
+             </g:link>
+         </div>
+     </g:if>
+
     <h1>${g.message(code: "workflowRun.overview.title")}</h1>
     <button class="btn btn-primary toggleButton">${g.message(code: "workflowRun.overview.show.detailed")}</button>
     <button class="btn btn-primary toggleButton" style="display: none">${g.message(code: "workflowRun.overview.show.condensed")}</button>
