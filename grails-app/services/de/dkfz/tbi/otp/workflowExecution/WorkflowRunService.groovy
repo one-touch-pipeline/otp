@@ -381,7 +381,7 @@ class WorkflowRunService {
                     id      : clusterJob.id,
                     name    : clusterJob.clusterJobName,
                     jobId   : clusterJob.clusterJobId,
-                    hasLog  : clusterJobService.doesClusterJobLogExist(clusterJob),
+                    hasLog  : clusterJobService.isClusterJobLogPathSet(clusterJob),
                     node    : clusterJob.node ?: "-",
                     wallTime: clusterJobDetailService.getElapsedWalltimeAsHhMmSs(clusterJob),
                     exitCode: clusterJob.exitCode ?: "-",

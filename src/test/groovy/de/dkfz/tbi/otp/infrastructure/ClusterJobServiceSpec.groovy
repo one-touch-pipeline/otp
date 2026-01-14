@@ -24,12 +24,20 @@ package de.dkfz.tbi.otp.infrastructure
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
+import spock.lang.TempDir
+import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.utils.LocalShellHelper
+import de.dkfz.tbi.otp.utils.MessageSourceService
 
+import java.nio.file.Path
 import java.time.LocalDate
 import java.time.ZoneId
 
@@ -38,6 +46,10 @@ class ClusterJobServiceSpec extends Specification implements DataTest, ServiceUn
     static final LocalDate START_DATE = LocalDate.now()
     static final LocalDate END_DATE = START_DATE.plusDays(1)
 
+    @TempDir
+    Path tempDir
+
+    FileService fileService = new FileService()
     ClusterJobService clusterJobService = new ClusterJobService()
 
     @Override
@@ -81,5 +93,109 @@ class ClusterJobServiceSpec extends Specification implements DataTest, ServiceUn
 
         expect:
         clusterJobService.getClusterJobByIdentifier(identifier, clusterJob.processingStep) == clusterJob
+    }
+
+    @Unroll
+    void "test getClusterJobLog when log file path is empty or it doesn't exist"() {
+        given:
+        ClusterJob clusterJob = Mock(ClusterJob)
+        MessageSourceService messageSourceService = Mock(MessageSourceService)
+        clusterJobService.messageSourceService = messageSourceService
+        messageSourceService.createMessage("clusterJobService.path_to_job_log_not_set") >> "Path to job log not set"
+        clusterJob.jobLog >> log
+
+        when:
+        String expectedLog = clusterJobService.getClusterJobLog(clusterJob)
+
+        then:
+        expectedLog == expected
+
+        where:
+        log                 | expected
+        null                | "Path to job log not set"
+        ''                  | "Path to job log not set"
+    }
+    void "test getClusterJobLog when log file exists"() {
+        given:
+        Path basePath = CreateFileHelper.createFile(tempDir.resolve("test.txt")) as Path
+        ClusterJob clusterJob = Mock(ClusterJob)
+        clusterJob.jobLog >> basePath.toString()
+        TestFileSystemService fileSystemService = new TestFileSystemService()
+        fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
+        clusterJobService.fileSystemService = fileSystemService
+        clusterJobService.fileService = fileService
+
+        when:
+        String log = clusterJobService.getClusterJobLog(clusterJob)
+
+        then:
+        log == basePath.text
+    }
+
+    void "test getClusterJobLog when log file doesn't exist"() {
+        given:
+        Path basePath = tempDir.resolve("test.txt")
+        ClusterJob clusterJob = Mock(ClusterJob)
+        clusterJob.jobLog >> basePath.toString()
+        MessageSourceService messageSourceService = Mock(MessageSourceService)
+        clusterJobService.messageSourceService = messageSourceService
+        messageSourceService.createMessage("clusterJobService.non_existing_file") >> "File doesn't exist"
+        TestFileSystemService fileSystemService = new TestFileSystemService()
+        fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
+        clusterJobService.fileSystemService = fileSystemService
+        clusterJobService.fileService = fileService
+
+        when:
+        String log = clusterJobService.getClusterJobLog(clusterJob)
+
+        then:
+        log == "File doesn't exist"
+    }
+
+    @SuppressWarnings('UnnecessarySetter')
+    void "test getClusterJobLog when log file is not readable"() {
+        given:
+        Path basePath = CreateFileHelper.createFile(tempDir.resolve("test.txt")) as Path
+        basePath.toFile().setReadable(false)
+        ClusterJob clusterJob = Mock(ClusterJob)
+        clusterJob.jobLog >> basePath.toString()
+        MessageSourceService messageSourceService = Mock(MessageSourceService)
+        clusterJobService.messageSourceService = messageSourceService
+        messageSourceService.createMessage("clusterJobService.unreadable_file") >> "File is not readable"
+        TestFileSystemService fileSystemService = new TestFileSystemService()
+        fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
+        clusterJobService.fileSystemService = fileSystemService
+        clusterJobService.fileService = fileService
+
+        when:
+        String log = clusterJobService.getClusterJobLog(clusterJob)
+
+        then:
+        log == "File is not readable"
+    }
+
+    void "test getClusterJobLog when we get IO exception"() {
+        given:
+        Path basePath = CreateFileHelper.createFile(tempDir.resolve("test.txt")) as Path
+        ClusterJob clusterJob = Mock(ClusterJob)
+        clusterJob.jobLog >> basePath.toString()
+        TestFileSystemService fileSystemService = new TestFileSystemService()
+        fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_) >> { String cmd -> throw new IOException("Test IO Exception") }
+        }
+        clusterJobService.fileSystemService = fileSystemService
+        clusterJobService.fileService = fileService
+
+        when:
+        String log = clusterJobService.getClusterJobLog(clusterJob)
+
+        then:
+        log == "Error accessing the file: Test IO Exception"
     }
 }

@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 import de.dkfz.tbi.otp.utils.TimeFormats
 import de.dkfz.tbi.otp.utils.TimeUtils
@@ -39,6 +40,7 @@ import de.dkfz.tbi.otp.utils.TimeUtils
 import javax.sql.DataSource
 import java.nio.file.FileSystem
 import java.nio.file.Files
+import java.nio.file.Path
 import java.time.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
@@ -52,6 +54,7 @@ class ClusterJobService {
     FileService fileService
     DataSource dataSource
     ClusterJobDetailService clusterJobDetailService
+    MessageSourceService messageSourceService
 
     static final Long HOURS_TO_MILLIS = HOURS.toMillis(1)
     static final Duration DURATION_JOB_OBVIOUSLY_FAILED = Duration.ofMillis(9)
@@ -201,15 +204,11 @@ class ClusterJobService {
     }
 
     /**
-     * Does log exist and can be read.
+     * Checks whether job log path is configured.
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    boolean doesClusterJobLogExist(ClusterJob clusterJob) {
-        if (!clusterJob.jobLog) {
-            return false
-        }
-        FileSystem fs = fileSystemService.remoteFileSystem
-        return fileService.fileIsReadable(fs.getPath(clusterJob.jobLog))
+    boolean isClusterJobLogPathSet(ClusterJob clusterJob) {
+        return clusterJob.jobLog as boolean
     }
 
     /**
@@ -220,11 +219,17 @@ class ClusterJobService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     String getClusterJobLog(ClusterJob clusterJob) {
         if (!clusterJob.jobLog) {
-            return "Path to job log not set."
+            return messageSourceService.createMessage("clusterJobService.path_to_job_log_not_set")
         }
         try {
             FileSystem fs = fileSystemService.remoteFileSystem
-            return Files.readString(fs.getPath(clusterJob.jobLog))
+            Path logPath = fs.getPath(clusterJob.jobLog)
+            if (!fileService.fileIsReadable(logPath)) {
+                return fileService.fileExists(logPath) ?
+                        messageSourceService.createMessage("clusterJobService.unreadable_file") :
+                        messageSourceService.createMessage("clusterJobService.non_existing_file")
+            }
+            return Files.readString(logPath)
         } catch (IOException e) {
             log.error(e.message, e)
             return "Error accessing the file: ${e.message}"
