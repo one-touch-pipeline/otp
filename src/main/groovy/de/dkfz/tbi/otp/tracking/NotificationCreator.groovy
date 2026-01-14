@@ -178,7 +178,11 @@ class NotificationCreator {
             }
 
             if (ilseSubmissions) {
-                subject.append("[S#${ilseSubmissions*.ilseNumber.sort().join(',')}] ")
+                List<Integer> sortedIlseNumbers = ilseSubmissions*.ilseNumber.sort()
+                String ilseIds = sortedIlseNumbers.size() > 5 ?
+                    "[S#${sortedIlseNumbers.take(5).join(',')}...]" :
+                    "[S#${sortedIlseNumbers.join(',')}]"
+                subject.append("${ilseIds} ")
             }
             subject.append("${project.name} sequencing data ${notificationStep.notificationSubject}")
 

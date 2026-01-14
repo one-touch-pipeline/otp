@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
 
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
@@ -283,7 +284,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
         ]
         MetaDataFile metaDataFile = DomainFactory.createMetaDataFile([
                 fastqImportInstance: createFastqImportInstance([
-                        ticket: ticket,
+                        ticket       : ticket,
                         sequenceFiles: rawSequenceFiles,
                 ]),
         ])
@@ -398,5 +399,63 @@ ILSe 5678, runA, lane 1, ${sampleText}
         ["/data/t1", "/data/t2", "/filtered/t3"]      | "/filtered"     || ["/data/t1", "/data/t2"]
         ["/data/t1", "/filtered/no", "/filtered/yes"] | "/filtered/yes" || ["/data/t1", "/filtered/no"]
         ["/data/t1", "/filtered/no", "/filtered/yes"] | "/filt"         || ["/data/t1"]
+    }
+
+    @Unroll
+    void 'sendCustomerNotificationForOneProject has the correct subject for different amounts of IlseNumbers'() {
+        given:
+        Ticket ticket = createTicket()
+        Project project = createProject(processingNotification: true)
+
+        // Customer notifications are only sent when automatic notification is enabled and the project allows processing notifications
+        ticket.automaticNotification = true
+        Run run = createRun(name: 'run')
+        Sample sample = createSample(individual: createIndividual(project: project))
+        SeqType seqType = createSeqType()
+
+        List<IlseSubmission> ilseSubmissions = ilseNumbers.collect { createIlseSubmission(ilseNumber: it) }
+
+        // It will work for any DataProcessingState
+        Closure createInstalledSeqTrack = { Map properties ->
+            createSeqTrack([dataInstallationState: SeqTrack.DataProcessingState.FINISHED] + properties)
+        }
+
+        Set<SeqTrack> seqTracks = ilseSubmissions.withIndex().collect { IlseSubmission ilseSubmission, int index ->
+            createInstalledSeqTrack(sample: sample, seqType: seqType, ilseSubmission: ilseSubmission,
+                    run: run, laneId: "${index + 1}")
+        } as Set
+
+        // It will work for any ProcessingStatus
+        ProcessingStatus status = new ProcessingStatus(seqTracks.collect {
+            new SeqTrackProcessingStatus(it, ALL_DONE, ALL_DONE, [])
+        })
+
+        // It will work for any ProcessingStep
+        Ticket.ProcessingStep step = Ticket.ProcessingStep.ALIGNMENT
+
+        notificationCreator.mailHelperService = Mock(MailHelperService)
+        notificationCreator.userProjectRoleService = Mock(UserProjectRoleService) {
+            getEmailsOfToBeNotifiedProjectUsers(_) >> []
+        }
+        notificationCreator.createNotificationTextService = Mock(CreateNotificationTextService) {
+            notification(_, _, _, _) >> "Test notification content"
+        }
+
+        when:
+        notificationCreator.sendCustomerNotificationForOneProject(ticket, status, step)
+
+        then:
+        1 * notificationCreator.mailHelperService.saveMail(_, _, _) >> { String subject, String content, List recipients ->
+            assert subject.contains(expectedFormat)
+            assert subject.contains("[${ticketPrefix}#${ticket.ticketNumber}]")
+            assert subject.contains("TO BE SENT:")
+            assert subject.contains("${project.name} sequencing data ${step.notificationSubject}")
+        }
+
+        where:
+        ilseNumbers                                | expectedFormat
+        [1, 2, 3]                                  | "[S#1,2,3]"
+        [5, 4, 3, 2, 1]                            | "[S#1,2,3,4,5]"
+        [10345, 30324, 20221, 50221, 40221, 60654] | "[S#10345,20221,30324,40221,50221...]"
     }
 }
