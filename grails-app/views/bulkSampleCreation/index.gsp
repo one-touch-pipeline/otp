@@ -68,10 +68,9 @@
                     <td class="table-column-header"><g:message code="bulk.sample.creation.delimiter"/></td>
                     <td>
                         <g:select name="delimiter" class="use-select-2" style="width: 24ch;"
-                                  from="${delimiters}" value="${delimiter}" optionValue="displayName"
-                                  noSelection="['': 'Choose a Delimiter']"/>
+                                  from="${delimiters}" value="${delimiter ?: de.dkfz.tbi.otp.utils.spreadsheet.Delimiter.TAB}" optionValue="displayName" />
                     </td>
-                    <td></td>
+                    <td><small class="text-muted">Default delimiter is tab.</small></td>
                 </tr>
                 <tr>
                     <td class="table-column-header"><g:message code="bulk.sample.creation.text.upload"/></td>

@@ -34,13 +34,16 @@ describe('Check bulk sample creation page', () => {
     it('should visit the index page', () => {
       cy.get('#select2-project-container').should('have.text', 'ExampleProject');
       cy.get('tr:first-child').should('contain.text', 'ExampleProject');
-      cy.get('#sampleText').should('have.value', 'PROJECT,PID,SAMPLE_TYPE,SAMPLE_IDENTIFIER');
+      cy.get('#sampleText').should('have.value', 'PROJECT\tPID\tSAMPLE_TYPE\tSAMPLE_IDENTIFIER');
 
       cy.get('#project.form-select').select('Example project 1', { force: true });
       cy.url().should('include', 'Example+project+1');
       cy.get('tr:first-child').should('contain.text', 'Example project 1');
     });
 
+    it('should have the default delimiter set to tab', () => {
+      cy.get('select#delimiter').find('option:selected').should('have.text', 'tab');
+    });
 
     it('should be able to upload samples for bulk creation', () => {
       cy.intercept('/bulkSampleCreation/upload*').as('bulkSampleUpload');
@@ -73,9 +76,6 @@ describe('Check bulk sample creation page', () => {
       cy.get('#sampleText').clear().type('PROJECT,PID,SAMPLE_TYPE,SAMPLE_IDENTIFIER\nUnknownProject,pid1,tumor1,identifier1');
 
       cy.get('.btn').contains('Submit').click();
-
-      cy.get('#otpToastBox .otpErrorToast').should('exist')
-        .and('contain.text', 'Field "delimiter" cannot be empty');
 
       // Fixing the delimiter and trying again
       cy.get('select#delimiter').select(',', { force: true });

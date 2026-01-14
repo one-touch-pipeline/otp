@@ -44,7 +44,7 @@ class BulkSampleCreationController {
                 delimiters              : Delimiter.simpleValues(),
                 delimiter               : flash.delimiter,
                 header                  : SampleIdentifierService.BulkSampleCreationHeader.values(),
-                sampleText              : flash.sampleText ?: SampleIdentifierService.BulkSampleCreationHeader.getHeaders(Delimiter.COMMA),
+                sampleText              : flash.sampleText ?: SampleIdentifierService.BulkSampleCreationHeader.getHeaders(Delimiter.TAB),
         ]
     }
 
