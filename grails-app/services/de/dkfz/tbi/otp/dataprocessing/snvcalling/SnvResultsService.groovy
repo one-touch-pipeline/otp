@@ -27,9 +27,9 @@ import org.grails.datastore.mapping.query.api.Criteria
 import de.dkfz.tbi.otp.dataprocessing.AbstractAnalysisResultsService
 
 @Transactional
-class SnvResultsService extends AbstractAnalysisResultsService<AbstractSnvCallingInstance> {
+class SnvResultsService extends AbstractAnalysisResultsService<SnvCallingInstance> {
 
-    final Class<AbstractSnvCallingInstance> instanceClass = AbstractSnvCallingInstance
+    final Class<SnvCallingInstance> instanceClass = SnvCallingInstance
 
     @Override
     void appendQcFetchingCriteria(Criteria criteria) {

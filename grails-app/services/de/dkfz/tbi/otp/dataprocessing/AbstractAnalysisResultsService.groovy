@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqLinkFileService
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelLinkFileService
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.AbstractSnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvLinkFileService
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaLinkFileService
@@ -210,7 +210,7 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
                 filePaths.add(sophiaLinkFileService.getCombinedPlotPath(callingInstance as SophiaInstance))
                 break
             case PlotType.SNV:
-                filePaths.add(snvLinkFileService.getCombinedPlotPath(callingInstance as AbstractSnvCallingInstance))
+                filePaths.add(snvLinkFileService.getCombinedPlotPath(callingInstance as SnvCallingInstance))
                 break
             case PlotType.INDEL:
                 filePaths.add(indelLinkFileService.getCombinedPlotPath(callingInstance as IndelCallingInstance))

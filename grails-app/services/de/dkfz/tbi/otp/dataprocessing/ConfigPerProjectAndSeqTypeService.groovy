@@ -26,7 +26,6 @@ import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
 
@@ -34,11 +33,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 @Transactional
 class ConfigPerProjectAndSeqTypeService {
-
-    @CompileDynamic
-    SnvConfig findSnvConfigByProjectAndSeqType(Project project, SeqType seqType) {
-        return atMostOneElement(SnvConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType))
-    }
 
     @CompileDynamic
     RunYapsaConfig findRunYapsaConfigByProjectAndSeqType(Project project, SeqType seqType) {

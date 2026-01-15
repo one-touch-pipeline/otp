@@ -42,12 +42,11 @@ class WithdrawAnalysisService implements ProcessingWithdrawService<BamFilePairAn
     @Override
     List<Class<BamFilePairAnalysis>> getSupportedClasses() {
         return [ // codenarc-disable-line UnnecessaryCast
-                SnvCallingInstance,
-                RoddySnvCallingInstance,
-                IndelCallingInstance,
-                SophiaInstance,
-                AceseqInstance,
-                RunYapsaInstance,
+                 SnvCallingInstance,
+                 IndelCallingInstance,
+                 SophiaInstance,
+                 AceseqInstance,
+                 RunYapsaInstance,
         ] as List<Class<BamFilePairAnalysis>>
     }
 

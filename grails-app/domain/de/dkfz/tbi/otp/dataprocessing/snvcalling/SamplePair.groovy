@@ -203,8 +203,8 @@ class SamplePair implements Entity {
         return "SP ${id}: ${toStringWithoutId()}"
     }
 
-    AbstractSnvCallingInstance findLatestSnvCallingInstance() {
-        return findLatestInstance(AbstractSnvCallingInstance) as AbstractSnvCallingInstance
+    SnvCallingInstance findLatestSnvCallingInstance() {
+        return findLatestInstance(SnvCallingInstance) as SnvCallingInstance
     }
 
     IndelCallingInstance findLatestIndelCallingInstance() {

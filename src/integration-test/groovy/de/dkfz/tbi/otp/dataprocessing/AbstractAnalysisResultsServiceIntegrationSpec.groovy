@@ -33,7 +33,7 @@ import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelResultsService
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaResultsService
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvResultsService
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaResultsService
@@ -78,7 +78,7 @@ class AbstractAnalysisResultsServiceIntegrationSpec extends Specification implem
 
         where:
         service                | analysis       | instance
-        SnvResultsService      | "RoddySnv"     | RoddySnvCallingInstance
+        SnvResultsService      | "Snv"          | SnvCallingInstance
         IndelResultsService    | "IndelCalling" | IndelCallingInstance
         AceseqResultsService   | "Aceseq"       | AceseqInstance
         SophiaResultsService   | "Sophia"       | SophiaInstance
@@ -119,7 +119,7 @@ class AbstractAnalysisResultsServiceIntegrationSpec extends Specification implem
 
         where:
         analysis       | instance                | plotType
-        "RoddySnv"     | RoddySnvCallingInstance | PlotType.SNV
+        "Snv"          | SnvCallingInstance      | PlotType.SNV
         "IndelCalling" | IndelCallingInstance    | PlotType.INDEL
         "IndelCalling" | IndelCallingInstance    | PlotType.INDEL_TINDA
         "Aceseq"       | AceseqInstance          | PlotType.ACESEQ_ALL

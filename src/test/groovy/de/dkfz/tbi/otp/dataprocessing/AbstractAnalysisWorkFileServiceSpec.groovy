@@ -33,7 +33,7 @@ import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelLinkFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaLinkFileService
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvLinkFileService
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaLinkFileService
@@ -61,7 +61,7 @@ abstract class AbstractAnalysisWorkFileServiceSpec<T extends AbstractAnalysisWor
                 IndelCallingInstance,
                 MergingWorkPackage,
                 RoddyBamFile,
-                RoddySnvCallingInstance,
+                SnvCallingInstance,
                 RoddyWorkflowConfig,
                 RunYapsaInstance,
                 SampleTypePerProject,

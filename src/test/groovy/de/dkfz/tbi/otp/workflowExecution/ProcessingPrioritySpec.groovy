@@ -35,7 +35,7 @@ import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryProcessingPriority
@@ -58,7 +58,7 @@ class ProcessingPrioritySpec extends Specification implements DataTest, DomainFa
                 ReferenceGenomeProjectSeqType,
                 RnaRoddyBamFile,
                 RoddyBamFile,
-                RoddySnvCallingInstance,
+                SnvCallingInstance,
                 RunYapsaConfig,
                 RunYapsaInstance,
                 SingleCellBamFile,
@@ -91,7 +91,7 @@ class ProcessingPrioritySpec extends Specification implements DataTest, DomainFa
         RnaRoddyBamFile             | { AlignmentPipelineFactory.RoddyRnaFactoryInstance.INSTANCE.createBamFile() }
         SingleCellBamFile           | { AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createBamFile() }
         // analysis
-        RoddySnvCallingInstance     | { DomainFactory.createRoddySnvInstanceWithRoddyBamFiles() }
+        SnvCallingInstance | { DomainFactory.createSnvInstanceWithRoddyBamFiles() }
         IndelCallingInstance        | { DomainFactory.createIndelCallingInstanceWithRoddyBamFiles() }
         SophiaInstance              | { DomainFactory.createSophiaInstanceWithRoddyBamFiles() }
         AceseqInstance              | { DomainFactory.createAceseqInstanceWithRoddyBamFiles() }

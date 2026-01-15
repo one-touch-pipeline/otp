@@ -79,7 +79,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                     processingStatus       : "indelProcessingStatus",
             ], [
                     analysisType           : Ticket.ProcessingStep.SNV,
-                    createRoddyBamFile     : "createRoddySnvInstanceWithRoddyBamFiles",
+                    createRoddyBamFile     : "createSnvInstanceWithRoddyBamFiles",
                     completeCallingInstance: "completeSnvCallingInstance",
                     processingStatus       : "snvProcessingStatus",
             ], [

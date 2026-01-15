@@ -426,7 +426,7 @@ if (allProcessed) {
             or ${needsProcessing('indelProcessingStatus', Pipeline.Type.INDEL)}
             or ${needsProcessing('sophiaProcessingStatus', Pipeline.Type.SOPHIA)}
             or ${needsProcessingWithDependency('aceseqProcessingStatus', Pipeline.Type.ACESEQ, 'SophiaInstance')}
-            or ${needsProcessingWithDependency('runYapsaProcessingStatus', Pipeline.Type.MUTATIONAL_SIGNATURE, 'RoddySnvCallingInstance')}
+            or ${needsProcessingWithDependency('runYapsaProcessingStatus', Pipeline.Type.MUTATIONAL_SIGNATURE, 'SnvCallingInstance')}
         )
         and ${connectBamFile('1')}
         and ${connectBamFile('2')}

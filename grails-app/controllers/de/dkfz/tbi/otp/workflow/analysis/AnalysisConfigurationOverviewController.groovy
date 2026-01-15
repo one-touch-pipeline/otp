@@ -27,7 +27,6 @@ import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
@@ -88,14 +87,10 @@ class AnalysisConfigurationOverviewController {
         pipeline.seqTypes.each { SeqType seqType ->
             List<String> row = []
             row.add(seqType.displayNameWithLibraryLayout)
-            SnvConfig snvConfig = configPerProjectAndSeqTypeService.findSnvConfigByProjectAndSeqType(project, seqType)
             RunYapsaConfig runYapsaConfig = configPerProjectAndSeqTypeService.findRunYapsaConfigByProjectAndSeqType(project, seqType)
             RoddyWorkflowConfig roddyWorkflowConfig = configPerProjectAndSeqTypeService.findRoddyWorkflowConfigByProjectAndSeqTypeAndPipeline(project,
                     seqType, pipeline)
-            if (pipeline.type == Pipeline.Type.SNV && snvConfig) {
-                row.add("Yes")
-                row.add(snvConfig.programVersion)
-            } else if (pipeline.name == Pipeline.Name.RUN_YAPSA && runYapsaConfig) {
+            if (pipeline.name == Pipeline.Name.RUN_YAPSA && runYapsaConfig) {
                 row.add("Yes")
                 row.add(runYapsaConfig.programVersion)
             } else if (pipeline.usesRoddy() && roddyWorkflowConfig) {

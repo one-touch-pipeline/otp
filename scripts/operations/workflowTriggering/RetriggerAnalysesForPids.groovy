@@ -25,7 +25,7 @@ import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.ngsdata.SeqType
@@ -84,7 +84,7 @@ println("\n")
 Map<String, Map<String, Object>> analysesObjectMapping = [
         snv: [
                 processingStatusName: "snvProcessingStatus",
-                instanceClass:        RoddySnvCallingInstance,
+                instanceClass:        SnvCallingInstance,
         ],
         indel: [
                 processingStatusName: "indelProcessingStatus",

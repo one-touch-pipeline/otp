@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvLinkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisConditionalFailJob
@@ -62,7 +62,7 @@ class RunYapsaConditionalFailJob extends AbstractAnalysisConditionalFailJob impl
         }
 
         // RunYapsa runs after Snv has run
-        RoddySnvCallingInstance snvInstance = getSnvInstance(workflowStep)
+        SnvCallingInstance snvInstance = getSnvInstance(workflowStep)
         if (!snvInstance) {
             errorMessages.push("Required SNV instance ${snvInstance} is null." as String)
             return errorMessages

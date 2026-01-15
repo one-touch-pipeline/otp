@@ -43,7 +43,7 @@ class RoddySnvCallingStartJobIntegrationSpec extends AbstractBamFilePairAnalysis
 
     @Override
     Pipeline createPipeline() {
-        return DomainFactory.createRoddySnvPipelineLazy()
+        return DomainFactory.createSnvPipelineLazy()
     }
 
     @Override
@@ -53,7 +53,7 @@ class RoddySnvCallingStartJobIntegrationSpec extends AbstractBamFilePairAnalysis
 
     @Override
     BamFilePairAnalysis getInstance() {
-        return DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
+        return DomainFactory.createSnvInstanceWithRoddyBamFiles()
     }
 
     @Override
@@ -73,7 +73,7 @@ class RoddySnvCallingStartJobIntegrationSpec extends AbstractBamFilePairAnalysis
         DomainFactory.createRoddyWorkflowConfig(
                 project: samplePair.project,
                 seqType: samplePair.seqType,
-                pipeline: DomainFactory.createRoddySnvPipelineLazy(),
+                pipeline: DomainFactory.createSnvPipelineLazy(),
         )
 
         return samplePair

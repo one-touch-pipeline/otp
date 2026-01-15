@@ -25,7 +25,7 @@ import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.AbstractSnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class SnvCallingPipelineChecker extends AbstractVariantCallingPipelineChecker {
@@ -40,5 +40,5 @@ class SnvCallingPipelineChecker extends AbstractVariantCallingPipelineChecker {
         return CollectionUtils.atMostOneElement(Pipeline.findAllByName(Pipeline.Name.RODDY_SNV))
     }
 
-    final Class<? extends BamFilePairAnalysis> bamFilePairAnalysisClass = AbstractSnvCallingInstance
+    final Class<? extends BamFilePairAnalysis> bamFilePairAnalysisClass = SnvCallingInstance
 }

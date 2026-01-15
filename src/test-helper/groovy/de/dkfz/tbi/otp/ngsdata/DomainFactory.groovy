@@ -190,12 +190,7 @@ class DomainFactory {
         return createPipeline(Pipeline.Name.DEFAULT_OTP, Pipeline.Type.ALIGNMENT)
     }
 
-    @Deprecated
-    static Pipeline createOtpSnvPipelineLazy() {
-        return createPipeline(Pipeline.Name.OTP_SNV, Pipeline.Type.SNV)
-    }
-
-    static Pipeline createRoddySnvPipelineLazy() {
+    static Pipeline createSnvPipelineLazy() {
         return createPipeline(Pipeline.Name.RODDY_SNV, Pipeline.Type.SNV)
     }
 
@@ -590,7 +585,7 @@ class DomainFactory {
         RoddyWorkflowConfig roddyConfig = createRoddyWorkflowConfig(
                 seqType: samplePair.seqType,
                 project: samplePair.project,
-                pipeline: createRoddySnvPipelineLazy()
+                pipeline: createSnvPipelineLazy()
         )
 
         return [
@@ -716,7 +711,7 @@ class DomainFactory {
      * create necessary initialising for the analysis pipelines for the sample Pair.
      */
     static void initAnalysisForSamplePair(SamplePair samplePair) {
-        [createRoddySnvPipelineLazy(),
+        [createSnvPipelineLazy(),
          createIndelPipelineLazy(),
          createSophiaPipelineLazy(),
          createAceseqPipelineLazy()].each {
@@ -754,17 +749,6 @@ class DomainFactory {
         createSampleTypePerProject(project: controlMwp.project, sampleType: diseaseMwp.sampleType, category: SampleTypePerProject.Category.DISEASE)
         SamplePair samplePair = createSamplePair(diseaseMwp, controlMwp)
         return samplePair
-    }
-
-    @Deprecated
-    static SnvConfig createSnvConfig(Map properties = [:]) {
-        return createDomainObject(SnvConfig, [
-                configuration : "configuration_${counter++}",
-                programVersion: "1.0",
-                seqType       : { createSeqType() },
-                project       : { createProject() },
-                pipeline      : { createOtpSnvPipelineLazy() },
-        ], properties)
     }
 
     private static Map createAnalysisInstanceWithRoddyBamFilesMapHelper(Map properties, Map bamFile1Properties, Map bamFile2Properties) {
@@ -861,21 +845,10 @@ class DomainFactory {
         ]
     }
 
-    @Deprecated
-    static SnvCallingInstance createSnvInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
-        Map map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
-        SamplePair samplePair = map.samplePair
-        map.config = properties.config ?: createSnvConfig(
-                project: samplePair.project,
-                seqType: samplePair.seqType,
-        )
-        return createDomainObject(SnvCallingInstance, map, properties)
-    }
-
     /**
      * @deprecated use {@link SnvDomainFactory#createInstanceWithRoddyBamFiles()}
      */
-    static RoddySnvCallingInstance createRoddySnvInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
+    static SnvCallingInstance createSnvInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
         Map map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
         SamplePair samplePair = map.samplePair
         map += [
@@ -883,10 +856,10 @@ class DomainFactory {
                 config                      : createRoddyWorkflowConfigLazy([
                         project : samplePair.project,
                         seqType : samplePair.seqType,
-                        pipeline: createRoddySnvPipelineLazy()
+                        pipeline: createSnvPipelineLazy()
                 ]),
         ]
-        return createDomainObject(RoddySnvCallingInstance, map, properties)
+        return createDomainObject(SnvCallingInstance, map, properties)
     }
 
     /**
@@ -1452,8 +1425,8 @@ class DomainFactory {
     /**
      * @deprecated use {@link SnvDomainFactory#createInstance()}
      */
-    static RoddySnvCallingInstance createRoddySnvCallingInstance(Map properties = [:]) {
-        return createDomainObject(RoddySnvCallingInstance, [
+    static SnvCallingInstance createSnvCallingInstance(Map properties = [:]) {
+        return createDomainObject(SnvCallingInstance, [
                 processingState: AnalysisProcessingStates.IN_PROGRESS,
                 config         : properties.config ?:
                         properties.samplePair ?
@@ -1469,14 +1442,14 @@ class DomainFactory {
     /**
      * @deprecated use {@link SnvDomainFactory#createInstance()}
      */
-    static RoddySnvCallingInstance createRoddySnvCallingInstance(SamplePair samplePair, Map properties = [:]) {
-        return createDomainObject(RoddySnvCallingInstance, [
+    static SnvCallingInstance createSnvCallingInstance(SamplePair samplePair, Map properties = [:]) {
+        return createDomainObject(SnvCallingInstance, [
                 samplePair        : samplePair,
                 processingState   : AnalysisProcessingStates.FINISHED,
                 sampleType1BamFile: samplePair.mergingWorkPackage1.bamFileInProjectFolder,
                 sampleType2BamFile: samplePair.mergingWorkPackage2.bamFileInProjectFolder,
                 instanceName      : "instance-${counter++}",
-                config            : createRoddyWorkflowConfig([pipeline: createRoddySnvPipelineLazy()]),
+                config            : createRoddyWorkflowConfig([pipeline: createSnvPipelineLazy()]),
         ], properties)
     }
 

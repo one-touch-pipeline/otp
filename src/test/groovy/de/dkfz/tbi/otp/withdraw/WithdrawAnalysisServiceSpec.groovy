@@ -57,7 +57,7 @@ class WithdrawAnalysisServiceSpec extends Specification implements ServiceUnitTe
                 MergingWorkPackage,
                 RoddyBamFile,
                 RoddyWorkflowConfig,
-                RoddySnvCallingInstance,
+                SnvCallingInstance,
                 RunYapsaConfig,
                 RunYapsaInstance,
                 SampleTypePerProject,
@@ -73,7 +73,7 @@ class WithdrawAnalysisServiceSpec extends Specification implements ServiceUnitTe
         then:
         TestCase.assertContainSame(supported, [
                 SnvCallingInstance,
-                RoddySnvCallingInstance,
+                SnvCallingInstance,
                 IndelCallingInstance,
                 SophiaInstance,
                 AceseqInstance,
@@ -153,7 +153,7 @@ class WithdrawAnalysisServiceSpec extends Specification implements ServiceUnitTe
 
     private List<BamFilePairAnalysis> createAnalysisList() {
         return [
-                DomainFactory.createRoddySnvInstanceWithRoddyBamFiles(),
+                DomainFactory.createSnvInstanceWithRoddyBamFiles(),
                 DomainFactory.createIndelCallingInstanceWithRoddyBamFiles(),
                 DomainFactory.createSophiaInstanceWithRoddyBamFiles(),
                 DomainFactory.createAceseqInstanceWithRoddyBamFiles(),

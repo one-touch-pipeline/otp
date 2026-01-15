@@ -26,7 +26,7 @@ import groovy.transform.TupleConstructor
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.AbstractSnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 
@@ -38,7 +38,7 @@ class SamplePairProcessingStatus {
     final SamplePair samplePair
 
     final WorkflowProcessingStatus snvProcessingStatus
-    final AbstractSnvCallingInstance completeSnvCallingInstance
+    final SnvCallingInstance completeSnvCallingInstance
 
     final WorkflowProcessingStatus indelProcessingStatus
     final IndelCallingInstance completeIndelCallingInstance

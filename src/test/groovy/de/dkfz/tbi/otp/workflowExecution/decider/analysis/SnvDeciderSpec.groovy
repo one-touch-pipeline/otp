@@ -27,12 +27,12 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.SnvDomainFactory
 import de.dkfz.tbi.otp.workflow.analysis.snv.SnvWorkflow
 import de.dkfz.tbi.otp.workflowExecution.ArtefactType
 
-class SnvDeciderSpec extends AbstractAnalysisDeciderNoAnalysisDependencySpec<AbstractSnvCallingInstance> {
+class SnvDeciderSpec extends AbstractAnalysisDeciderNoAnalysisDependencySpec<SnvCallingInstance> {
 
     @Override
     Class[] getDomainClassesToMock() {
         return super.domainClassesToMock + [
-                RoddySnvCallingInstance,
+                SnvCallingInstance,
         ]
     }
 
@@ -50,9 +50,9 @@ class SnvDeciderSpec extends AbstractAnalysisDeciderNoAnalysisDependencySpec<Abs
         decider.workflowName == SnvWorkflow.WORKFLOW
     }
 
-    void "getInstanceClass, should return AbstractSnvCallingInstance"() {
+    void "getInstanceClass, should return SnvCallingInstance"() {
         expect:
-        decider.instanceClasses == [SnvCallingInstance, RoddySnvCallingInstance]
+        decider.instanceClasses == [SnvCallingInstance]
     }
 
     void "getDependingAnalysisInstanceClass, should return empty map"() {

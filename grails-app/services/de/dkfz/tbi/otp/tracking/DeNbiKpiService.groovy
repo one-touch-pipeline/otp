@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.AbstractSnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
@@ -153,7 +153,7 @@ class DeNbiKpiService {
     @CompileDynamic
     DeNbiKpi getSnvCallingKpi(Date from, Date to) {
         Closure searchClosure = getBamFilePairAnalysisProjectSearchClosure(from, to)
-        List<String> snvCallingProjects = AbstractSnvCallingInstance.createCriteria().list(searchClosure) as List<String>
+        List<String> snvCallingProjects = SnvCallingInstance.createCriteria().list(searchClosure) as List<String>
         return new DeNbiKpi("Snv", snvCallingProjects.size(), snvCallingProjects.unique())
     }
 

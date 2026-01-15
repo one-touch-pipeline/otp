@@ -27,7 +27,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.AbstractSnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
@@ -38,7 +38,7 @@ class AbstractBamFileIntegrationSpec extends Specification {
 
     void "withdraw, check that analysis also marked as withdrawn"() {
         given:
-        AbstractSnvCallingInstance snvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
+        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles()
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithSameSamplePair(snvCallingInstance)
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstanceWithSameSamplePair(snvCallingInstance)
         AceseqInstance aceseqInstance = DomainFactory.createAceseqInstanceWithSameSamplePair(snvCallingInstance)

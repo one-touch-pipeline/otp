@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.analysis.pair.roddy.snv
 
 import de.dkfz.tbi.otp.analysis.pair.roddy.AbstractRoddyBamFilePairAnalysisWorkflowTests
 import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.ProjectService
@@ -33,14 +33,14 @@ import java.nio.file.Path
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
-abstract class AbstractSnvWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<RoddySnvCallingInstance> {
+abstract class AbstractSnvWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<SnvCallingInstance> {
 
     ProjectService projectService
     SnvCallingService snvCallingService
 
     @Override
     ConfigPerProjectAndSeqType createConfig() {
-        DomainFactory.createRoddySnvPipelineLazy()
+        DomainFactory.createSnvPipelineLazy()
         DomainFactory.createSnvSeqTypes()
         DomainFactory.createReferenceGenomeProjectSeqType(
                 referenceGenome: referenceGenome,
@@ -82,7 +82,7 @@ abstract class AbstractSnvWorkflowTests extends AbstractRoddyBamFilePairAnalysis
     }
 
     @Override
-    List<Path> filesToCheck(RoddySnvCallingInstance instance) {
+    List<Path> filesToCheck(SnvCallingInstance instance) {
         return [
                 snvCallingService.getSnvCallingResult(instance),
                 snvCallingService.getSnvDeepAnnotationResult(instance),

@@ -65,7 +65,7 @@ class SnvValidationJobSpec extends Specification implements DataTest, WorkflowSy
                 ReferenceGenomeEntry,
                 ReferenceGenomeProjectSeqType,
                 RoddyBamFile,
-                RoddySnvCallingInstance,
+                SnvCallingInstance,
                 RoddyWorkflowConfig,
                 Run,
                 FastqImportInstance,
@@ -79,7 +79,7 @@ class SnvValidationJobSpec extends Specification implements DataTest, WorkflowSy
 
     SnvValidationJob job
     WorkflowStep workflowStep
-    RoddySnvCallingInstance instance
+    SnvCallingInstance instance
 
     String analysisOutput = AbstractAnalysisWorkflow.ANALYSIS_OUTPUT
 

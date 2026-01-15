@@ -26,7 +26,7 @@ import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
@@ -97,7 +97,7 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
             throw new UnsupportedOperationException("The SeqType '${seqType}' is not supported by runYapsa workflow")
         }
 
-        RoddySnvCallingInstance snvCallingInstance = DomainFactory.createRoddySnvCallingInstance(samplePair)
+        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvCallingInstance(samplePair)
         Path runYapsaInputFile = CreateRoddyFileHelper.getSnvResultRequiredForRunYapsa(snvCallingInstance, minConfidenceScore, individualService)
         SamplePair sp = SamplePair.get(samplePair.id)
         sp.snvProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED

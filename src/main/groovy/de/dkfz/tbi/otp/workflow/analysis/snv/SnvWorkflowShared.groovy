@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflow.analysis.snv
 
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.workflow.analysis.AnalysisWorkflowShared
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -30,8 +30,8 @@ trait SnvWorkflowShared extends AnalysisWorkflowShared {
     private static final String WORKFLOW = SnvWorkflow.WORKFLOW
     private static final String SNV_OUTPUT = SnvWorkflow.ANALYSIS_OUTPUT
 
-    RoddySnvCallingInstance getSnvInstance(WorkflowStep workflowStep) {
+    SnvCallingInstance getSnvInstance(WorkflowStep workflowStep) {
         checkWorkflowName(workflowStep, WORKFLOW)
-        return concreteArtefactService.<RoddySnvCallingInstance> getOutputArtefact(workflowStep, SNV_OUTPUT)
+        return concreteArtefactService.<SnvCallingInstance> getOutputArtefact(workflowStep, SNV_OUTPUT)
     }
 }

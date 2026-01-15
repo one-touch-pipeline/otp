@@ -35,12 +35,12 @@ class RunYapsaService extends AbstractBamFileAnalysisService<RunYapsaInstance> i
     protected String getProcessingStateCheck() {
         return "sp.runYapsaProcessingStatus = :needsProcessing AND " +
                 "sp.snvProcessingStatus = 'NO_PROCESSING_NEEDED' AND " +
-                "EXISTS (FROM RoddySnvCallingInstance sci " +
+                "EXISTS (FROM SnvCallingInstance sci " +
                 "  WHERE sci.samplePair = sp AND " +
                 "  sci.processingState = 'FINISHED' AND " +
                 "  sci.withdrawn = false " +
                 ") AND " +
-                "NOT EXISTS (FROM RoddySnvCallingInstance sci " +
+                "NOT EXISTS (FROM SnvCallingInstance sci " +
                 "  WHERE sci.samplePair = sp AND " +
                 "  sci.processingState = 'IN_PROGRESS' AND " +
                 "  sci.withdrawn = false " +

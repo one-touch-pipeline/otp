@@ -216,4 +216,6 @@ databaseChangeLog = {
     include file: 'changelogs/2025/otp-2680-delete-processing-threshold.groovy'
 
     include file: 'changelogs/2026/otp-2820-update-processingOption-metadata-whitelisted-columns.groovy'
+
+    include file: 'changelogs/2026/otp-2852.groovy'
 }

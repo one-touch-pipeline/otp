@@ -35,7 +35,7 @@ import de.dkfz.tbi.otp.workflowExecution.ArtefactType
 @Component
 @Transactional
 @Slf4j
-class SnvDecider extends AbstractAnalysisDecider<AbstractSnvCallingInstance> {
+class SnvDecider extends AbstractAnalysisDecider<SnvCallingInstance> {
 
     @Autowired
     SnvWorkFileService snvWorkFileService
@@ -47,10 +47,9 @@ class SnvDecider extends AbstractAnalysisDecider<AbstractSnvCallingInstance> {
 
     final String workflowName = SnvWorkflow.WORKFLOW
 
-    final List<Class<AbstractSnvCallingInstance>> instanceClasses = ([
+    final List<Class<SnvCallingInstance>> instanceClasses = ([
             SnvCallingInstance,
-            RoddySnvCallingInstance,
-    ].asImmutable() as List<Class<AbstractSnvCallingInstance>>)
+    ].asImmutable() as List<Class<SnvCallingInstance>>)
 
     final Map<String, List<Class<? extends BamFilePairAnalysis>>> dependingAnalysisInstanceClasses = Collections.emptyMap()
 
@@ -60,6 +59,6 @@ class SnvDecider extends AbstractAnalysisDecider<AbstractSnvCallingInstance> {
 
     @Override
     BamFilePairAnalysis createAnalysisWithoutFlush(Map properties) {
-        return new RoddySnvCallingInstance(properties).save(flush: false, deepValidate: false)
+        return new SnvCallingInstance(properties).save(flush: false, deepValidate: false)
     }
 }

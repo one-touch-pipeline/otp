@@ -306,7 +306,7 @@ class RoddyWorkflowConfigSpec extends Specification implements DataTest {
 
     void "test pipeline constraint when pipeline not valid"() {
         given:
-        Pipeline pipeline = DomainFactory.createOtpSnvPipelineLazy()
+        Pipeline pipeline = DomainFactory.createRunYapsaPipelineLazy()
         RoddyWorkflowConfig config = DomainFactory.createRoddyWorkflowConfig([pipeline: pipeline], false)
 
         expect:

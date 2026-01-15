@@ -106,7 +106,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         given:
         setupData()
 
-        DomainFactory.createRoddySnvCallingInstance(
+        DomainFactory.createSnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 samplePair: samplePair1,
                 config: roddyConfig1,
@@ -122,7 +122,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         given:
         setupData()
 
-        DomainFactory.createRoddySnvCallingInstance(
+        DomainFactory.createSnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 samplePair: samplePair1,
                 config: roddyConfig1,
@@ -142,7 +142,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         Map map2 = DomainFactory.createProcessableSamplePair()
         SamplePair samplePair2 = map2.samplePair
 
-        DomainFactory.createRoddySnvCallingInstance(
+        DomainFactory.createSnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 samplePair: samplePair2,
                 config: roddyConfig1,
@@ -271,7 +271,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         given:
         setupData()
 
-        RoddySnvCallingInstance snvCallingInstance = DomainFactory.createRoddySnvCallingInstance(
+        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 samplePair: samplePair1,
                 config: roddyConfig1,
@@ -295,7 +295,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
         given:
         setupData()
 
-        RoddySnvCallingInstance instance = new RoddySnvCallingInstance([
+        SnvCallingInstance instance = new SnvCallingInstance([
                 sampleType1BamFile: new RoddyBamFile(),
                 sampleType2BamFile: new RoddyBamFile(),
         ])
@@ -329,7 +329,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
 
-        RoddySnvCallingInstance instance = DomainFactory.createRoddySnvCallingInstance(
+        SnvCallingInstance instance = DomainFactory.createSnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 samplePair: samplePair1,
                 config: roddyConfig1,

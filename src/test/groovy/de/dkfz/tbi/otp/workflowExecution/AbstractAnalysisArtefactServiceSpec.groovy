@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsPipeline
@@ -54,7 +54,7 @@ abstract class AbstractAnalysisArtefactServiceSpec<T> extends HibernateSpec impl
                 MergingWorkPackage,
                 ReferenceGenomeProjectSeqType,
                 RoddyBamFile,
-                RoddySnvCallingInstance,
+                SnvCallingInstance,
                 RunYapsaConfig,
                 RunYapsaInstance,
                 SampleTypePerProject,

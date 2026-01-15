@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqService
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaService
@@ -102,26 +102,26 @@ class CreateRoddyFileHelper {
         createRoddyAlignmentResultFiles(service, roddyBamFile)
     }
 
-    static void createRoddySnvResultFiles(RoddySnvCallingInstance roddySnvCallingInstance, IndividualService individualService, int minConfidenceScore = 8) {
+    static void createRoddySnvResultFiles(SnvCallingInstance snvCallingInstance, IndividualService individualService, int minConfidenceScore = 8) {
         SnvCallingService service = new SnvCallingService(individualService: individualService)
-        CreateFileHelper.createFile(new File(roddySnvCallingInstance.workExecutionStoreDirectory, 'someFile'))
+        CreateFileHelper.createFile(new File(snvCallingInstance.workExecutionStoreDirectory, 'someFile'))
 
-        roddySnvCallingInstance.workExecutionDirectories.each {
+        snvCallingInstance.workExecutionDirectories.each {
             CreateFileHelper.createFile(new File(it, 'someFile'))
         }
 
-        CreateFileHelper.createFile(service.getCombinedPlotPath(roddySnvCallingInstance))
+        CreateFileHelper.createFile(service.getCombinedPlotPath(snvCallingInstance))
 
         [
-                service.getSnvCallingResult(roddySnvCallingInstance),
-                service.getSnvDeepAnnotationResult(roddySnvCallingInstance),
-                getSnvResultRequiredForRunYapsa(roddySnvCallingInstance, minConfidenceScore, individualService),
+                service.getSnvCallingResult(snvCallingInstance),
+                service.getSnvDeepAnnotationResult(snvCallingInstance),
+                getSnvResultRequiredForRunYapsa(snvCallingInstance, minConfidenceScore, individualService),
         ].each {
             CreateFileHelper.createFile(it)
         }
     }
 
-    static Path getSnvResultRequiredForRunYapsa(RoddySnvCallingInstance instance, int minConfidenceScore, IndividualService individualService) {
+    static Path getSnvResultRequiredForRunYapsa(SnvCallingInstance instance, int minConfidenceScore, IndividualService individualService) {
         SnvCallingService service = new SnvCallingService(individualService: individualService)
         return service.getWorkDirectory(instance).resolve("snvs_${instance.individual.pid}_somatic_snvs_conf_${minConfidenceScore}_to_10.vcf")
     }

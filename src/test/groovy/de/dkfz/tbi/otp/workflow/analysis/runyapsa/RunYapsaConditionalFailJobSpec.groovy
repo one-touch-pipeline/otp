@@ -26,7 +26,7 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvLinkFileService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -40,7 +40,7 @@ class RunYapsaConditionalFailJobSpec extends AbstractAnalysisConditionalFailJobS
     final static String BEDFILE_FILE_NAME = "bed_file"
 
     BedFile bedFile
-    RoddySnvCallingInstance snvInstance
+    SnvCallingInstance snvInstance
 
     @Shared
     Path snvResultLinkDir
@@ -74,12 +74,12 @@ class RunYapsaConditionalFailJobSpec extends AbstractAnalysisConditionalFailJobS
                 sampleType1BamFile: bamFile1,
                 sampleType2BamFile: bamFile2,
         ])
-        snvInstance = DomainFactory.createRoddySnvCallingInstance([
+        snvInstance = DomainFactory.createSnvCallingInstance([
                 samplePair        : instance.samplePair,
                 config            : DomainFactory.createRoddyWorkflowConfig(
                         project: bamFile1.project,
                         seqType: bamFile1.seqType,
-                        pipeline: DomainFactory.createRoddySnvPipelineLazy()
+                        pipeline: DomainFactory.createSnvPipelineLazy()
                 ),
                 sampleType1BamFile: bamFile1,
                 sampleType2BamFile: bamFile2,

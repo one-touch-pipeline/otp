@@ -66,7 +66,7 @@ class RunYapsaPipelineCheckerIntegrationSpec extends AbstractVariantCallingPipel
 
     @Override
     Pipeline createPipeLineForCrosschecking() {
-        return DomainFactory.createRoddySnvPipelineLazy()
+        return DomainFactory.createSnvPipelineLazy()
     }
 
     @Override
@@ -76,7 +76,7 @@ class RunYapsaPipelineCheckerIntegrationSpec extends AbstractVariantCallingPipel
 
     @Override
     BamFilePairAnalysis createAnalysisForCrosschecking(Map properties) {
-        return DomainFactory.createRoddySnvInstanceWithRoddyBamFiles(properties)
+        return DomainFactory.createSnvInstanceWithRoddyBamFiles(properties)
     }
 
     // RunYapsa is not a Roddy workflow, so the default doesn't work...

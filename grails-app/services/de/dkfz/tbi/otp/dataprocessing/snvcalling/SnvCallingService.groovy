@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.IndividualService
 import java.nio.file.Path
 
 @Transactional
-class SnvCallingService extends AbstractBamFileAnalysisService<AbstractSnvCallingInstance> implements RoddyBamFileAnalysis {
+class SnvCallingService extends AbstractBamFileAnalysisService<SnvCallingInstance> implements RoddyBamFileAnalysis {
 
     @Deprecated
     private final static String SNV_RESULTS_PATH_PART = 'snv_results'
@@ -45,7 +45,7 @@ class SnvCallingService extends AbstractBamFileAnalysisService<AbstractSnvCallin
         return "sp.snvProcessingStatus = :needsProcessing "
     }
 
-    final Class<RoddySnvCallingInstance> analysisClass = RoddySnvCallingInstance
+    final Class<SnvCallingInstance> analysisClass = SnvCallingInstance
 
     @Override
     protected Pipeline.Type getAnalysisType() {
@@ -78,21 +78,21 @@ class SnvCallingService extends AbstractBamFileAnalysisService<AbstractSnvCallin
     /**
      * @deprecated use {@link SnvLinkFileService#getSnvCallingResult()} or {@link SnvWorkFileService#getSnvCallingResult()}
      */
-    Path getSnvCallingResult(AbstractSnvCallingInstance instance) {
+    Path getSnvCallingResult(SnvCallingInstance instance) {
         return getWorkDirectory(instance).resolve("${SNV_RESULTS_PREFIX}${instance.individual.pid}_raw.vcf.gz")
     }
 
     /**
      * @deprecated use {@link SnvLinkFileService#getSnvDeepAnnotationResult()} or {@link SnvWorkFileService#getSnvDeepAnnotationResult()}
      */
-    Path getSnvDeepAnnotationResult(AbstractSnvCallingInstance instance) {
+    Path getSnvDeepAnnotationResult(SnvCallingInstance instance) {
         return getWorkDirectory(instance).resolve("${SNV_RESULTS_PREFIX}${instance.individual.pid}.vcf.gz")
     }
 
     /**
      * @deprecated use {@link SnvLinkFileService#getCombinedPlotPath()} or {@link SnvWorkFileService#getCombinedPlotPath()}
      */
-    Path getCombinedPlotPath(AbstractSnvCallingInstance instance) {
+    Path getCombinedPlotPath(SnvCallingInstance instance) {
         return getWorkDirectory(instance).resolve("${SNV_RESULTS_PREFIX}${instance.individual.pid}_allSNVdiagnosticsPlots.pdf")
     }
 }

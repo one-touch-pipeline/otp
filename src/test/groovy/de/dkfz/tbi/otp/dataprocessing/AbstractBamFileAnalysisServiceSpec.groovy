@@ -59,7 +59,7 @@ abstract class AbstractBamFileAnalysisServiceSpec extends Specification implemen
                 Project,
                 ReferenceGenome,
                 RoddyBamFile,
-                RoddySnvCallingInstance,
+                SnvCallingInstance,
                 RoddyWorkflowConfig,
                 Run,
                 RunYapsaConfig,
@@ -75,7 +75,6 @@ abstract class AbstractBamFileAnalysisServiceSpec extends Specification implemen
                 SeqTrack,
                 SeqType,
                 SequencingKitLabel,
-                SnvConfig,
                 SoftwareTool,
                 SophiaInstance,
         ]
@@ -102,7 +101,7 @@ abstract class AbstractBamFileAnalysisServiceSpec extends Specification implemen
     void "test withdraw"() {
         given:
         AbstractBamFileAnalysisService service = new SnvCallingService()
-        RoddySnvCallingInstance snvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
+        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles()
 
         when:
         service.withdraw(snvCallingInstance)

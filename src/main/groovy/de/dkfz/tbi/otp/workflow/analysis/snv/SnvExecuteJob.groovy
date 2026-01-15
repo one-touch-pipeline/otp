@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvWorkFileService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqType
@@ -69,17 +69,17 @@ class SnvExecuteJob extends AbstractExecuteRoddyPipelineJob implements SnvWorkfl
 
     @Override
     protected Map<String, Map<String, String>> getConfigurationValues(WorkflowStep workflowStep, String combinedConfig) {
-        RoddySnvCallingInstance roddySnvCallingInstance = getSnvInstance(workflowStep)
+        SnvCallingInstance snvCallingInstance = getSnvInstance(workflowStep)
 
-        Path resultDirectory = snvWorkFileService.getDirectoryPath(roddySnvCallingInstance)
+        Path resultDirectory = snvWorkFileService.getDirectoryPath(snvCallingInstance)
 
-        AbstractBamFile bamFileControl = roddySnvCallingInstance.sampleType2BamFile
+        AbstractBamFile bamFileControl = snvCallingInstance.sampleType2BamFile
 
-        ReferenceGenome referenceGenome = roddySnvCallingInstance.referenceGenome
+        ReferenceGenome referenceGenome = snvCallingInstance.referenceGenome
         File referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(referenceGenome)
         File chromosomeLengthFile = referenceGenomeService.chromosomeLengthFile(bamFileControl.mergingWorkPackage)
 
-        Path individualPath = individualService.getViewByPidPath(roddySnvCallingInstance.individual, roddySnvCallingInstance.seqType)
+        Path individualPath = individualService.getViewByPidPath(snvCallingInstance.individual, snvCallingInstance.seqType)
 
         Map<String, Map<String, String>> additionalValues = [
                 REFERENCE_GENOME          : roddyConfigValueService.createPathValueMap(referenceGenomeFastaFile.path.toString()),
@@ -89,8 +89,8 @@ class SnvExecuteJob extends AbstractExecuteRoddyPipelineJob implements SnvWorkfl
                 analysisMethodNameOnOutput: roddyConfigValueService.createValueMap(individualPath.relativize(resultDirectory).toString()),
         ]
 
-        return roddyConfigValueService.getAnalysisInputVersion1(roddySnvCallingInstance) + additionalValues +
-                roddyConfigValueService.getChromosomeIndexParameterWithoutMitochondrion(roddySnvCallingInstance.referenceGenome)
+        return roddyConfigValueService.getAnalysisInputVersion1(snvCallingInstance) + additionalValues +
+                roddyConfigValueService.getChromosomeIndexParameterWithoutMitochondrion(snvCallingInstance.referenceGenome)
     }
 
     @Override

@@ -29,11 +29,11 @@ class RoddySnvCallingPipelineCheckerIntegrationSpec extends AbstractSnvCallingPi
 
     @Override
     Pipeline createPipeLine() {
-        return DomainFactory.createRoddySnvPipelineLazy()
+        return DomainFactory.createSnvPipelineLazy()
     }
 
     @Override
     BamFilePairAnalysis createAnalysis(Map properties) {
-        return DomainFactory.createRoddySnvInstanceWithRoddyBamFiles(properties)
+        return DomainFactory.createSnvInstanceWithRoddyBamFiles(properties)
     }
 }

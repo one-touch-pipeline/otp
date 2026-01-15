@@ -28,7 +28,7 @@ import spock.lang.TempDir
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvWorkFileService
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.SnvDomainFactory
@@ -49,7 +49,7 @@ class SnvExecuteJobSpec extends Specification implements DataTest, WorkflowSyste
     Path tempDir
 
     SnvExecuteJob job
-    RoddySnvCallingInstance instance
+    SnvCallingInstance instance
     WorkflowStep workflowStep
 
     @Override
@@ -63,7 +63,7 @@ class SnvExecuteJobSpec extends Specification implements DataTest, WorkflowSyste
                 ReferenceGenomeProjectSeqType,
                 RoddyBamFile,
                 RoddyMergedBamQa,
-                RoddySnvCallingInstance,
+                SnvCallingInstance,
                 RoddyWorkflowConfig,
                 SampleTypePerProject,
         ]
@@ -111,7 +111,7 @@ class SnvExecuteJobSpec extends Specification implements DataTest, WorkflowSyste
 
     void "test getRoddyResult"() {
         given:
-        RoddySnvCallingInstance instance = SnvDomainFactory.INSTANCE.createInstanceWithRoddyBamFiles()
+        SnvCallingInstance instance = SnvDomainFactory.INSTANCE.createInstanceWithRoddyBamFiles()
         WorkflowStep workflowStep = createWorkflowStep([
                 workflowRun: createWorkflowRun([
                         workflowVersion: null,

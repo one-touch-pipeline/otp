@@ -28,7 +28,7 @@ import spock.lang.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
@@ -79,7 +79,7 @@ abstract class AbstractAnalysisConditionalFailJobSpec extends Specification impl
                 MergingWorkPackage,
                 Project,
                 RawSequenceFile,
-                RoddySnvCallingInstance,
+                SnvCallingInstance,
                 SampleTypePerProject,
                 SeqTrack,
                 ReferenceGenomeProjectSeqType,

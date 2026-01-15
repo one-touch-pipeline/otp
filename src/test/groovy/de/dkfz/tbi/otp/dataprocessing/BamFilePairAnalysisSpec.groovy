@@ -33,7 +33,7 @@ import spock.lang.Unroll
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.ngsdata.*
@@ -64,7 +64,7 @@ class BamFilePairAnalysisSpec extends Specification implements DataTest {
                 ReferenceGenome,
                 ReferenceGenomeProjectSeqType,
                 RoddyBamFile,
-                RoddySnvCallingInstance,
+                SnvCallingInstance,
                 RoddyWorkflowConfig,
                 Run,
                 FastqImportInstance,
@@ -147,7 +147,7 @@ class BamFilePairAnalysisSpec extends Specification implements DataTest {
         DomainFactory.createSampleTypePerProjectForMergingWorkPackage(bamFile1.mergingWorkPackage)
 
         expect:
-        DomainFactory.createRoddySnvInstanceWithRoddyBamFiles(
+        DomainFactory.createSnvInstanceWithRoddyBamFiles(
                 sampleType1BamFile: bamFile1,
                 sampleType2BamFile: bamFile2,
         )
@@ -188,7 +188,7 @@ class BamFilePairAnalysisSpec extends Specification implements DataTest {
 
     static MockBamFilePairAnalysis createMockBamFilePairAnalysis() {
         Pipeline alignmentPipeline = DomainFactory.createPanCanPipeline()
-        Pipeline snvPipeline = DomainFactory.createRoddySnvPipelineLazy()
+        Pipeline snvPipeline = DomainFactory.createSnvPipelineLazy()
 
         MergingWorkPackage controlWorkPackage = DomainFactory.createMergingWorkPackage(
                 pipeline: alignmentPipeline,

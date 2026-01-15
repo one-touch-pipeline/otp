@@ -66,7 +66,6 @@ class DataExportServiceSpec extends Specification implements DataTest, IsRoddy {
                 ExternallyProcessedBamFile,
                 IndelCallingInstance,
                 SnvCallingInstance,
-                SnvConfig,
                 RunYapsaInstance,
                 RunYapsaConfig,
                 AceseqInstance,

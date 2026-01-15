@@ -27,21 +27,21 @@ import de.dkfz.tbi.otp.ngsdata.IndividualService
 
 import java.nio.file.Path
 
-trait AbstractSnvFileService implements ArtefactFileService<AbstractSnvCallingInstance>, RoddyResultServiceTrait<RoddySnvCallingInstance> {
+trait AbstractSnvFileService implements ArtefactFileService<SnvCallingInstance>, RoddyResultServiceTrait<SnvCallingInstance> {
 
     FileService fileService
 
     private final static String SNV_RESULTS_PREFIX = 'snvs_'
 
-    Path getSnvCallingResult(AbstractSnvCallingInstance instance) {
+    Path getSnvCallingResult(SnvCallingInstance instance) {
         return getDirectoryPath(instance).resolve("${SNV_RESULTS_PREFIX}${instance.individual.pid}_raw.vcf.gz")
     }
 
-    Path getSnvDeepAnnotationResult(AbstractSnvCallingInstance instance) {
+    Path getSnvDeepAnnotationResult(SnvCallingInstance instance) {
         return getDirectoryPath(instance).resolve("${SNV_RESULTS_PREFIX}${instance.individual.pid}.vcf.gz")
     }
 
-    Path getCombinedPlotPath(AbstractSnvCallingInstance instance) {
+    Path getCombinedPlotPath(SnvCallingInstance instance) {
         return getDirectoryPath(instance).resolve("${SNV_RESULTS_PREFIX}${instance.individual.pid}_allSNVdiagnosticsPlots.pdf")
     }
 

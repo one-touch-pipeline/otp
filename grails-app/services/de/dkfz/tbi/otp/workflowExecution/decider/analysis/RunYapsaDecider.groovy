@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaWorkFileService
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.workflow.analysis.runyapsa.RunYapsaWorkflow
 import de.dkfz.tbi.otp.workflowExecution.ArtefactType
 
@@ -53,7 +53,7 @@ class RunYapsaDecider extends AbstractAnalysisDecider<RunYapsaInstance> {
     final List<Class<RunYapsaInstance>> instanceClasses = [RunYapsaInstance].asImmutable()
 
     final Map<String, List<Class<? extends BamFilePairAnalysis>>> dependingAnalysisInstanceClasses = [
-            (RunYapsaWorkflow.SNV_INPUT)  : [RoddySnvCallingInstance].asImmutable(),
+            (RunYapsaWorkflow.SNV_INPUT)  : [SnvCallingInstance].asImmutable(),
             (RunYapsaWorkflow.INDEL_INPUT): [IndelCallingInstance].asImmutable(),
     ].asImmutable()
 

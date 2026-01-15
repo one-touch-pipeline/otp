@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaWorkFileService
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.*
 import de.dkfz.tbi.otp.workflow.analysis.runyapsa.RunYapsaWorkflow
@@ -42,7 +42,7 @@ class RunYapsaDeciderSpec extends AbstractAnalysisDeciderSpec<RunYapsaInstance> 
     Class[] getDomainClassesToMock() {
         return super.domainClassesToMock + [
                 RunYapsaInstance,
-                RoddySnvCallingInstance,
+                SnvCallingInstance,
                 IndelCallingInstance,
         ]
     }
@@ -64,7 +64,7 @@ class RunYapsaDeciderSpec extends AbstractAnalysisDeciderSpec<RunYapsaInstance> 
                 mergingWorkPackage2: bamFileControl.workPackage,
         ])
         if (variant != CreateVariantInvalidRunYapsa.NO_SNV) {
-            AnalysisAnalysisArtefactData<RoddySnvCallingInstance> analysisArtefactDataSnv = createAnalysisAnalysisArtefactData(
+            AnalysisAnalysisArtefactData<SnvCallingInstance> analysisArtefactDataSnv = createAnalysisAnalysisArtefactData(
                     SnvDomainFactory.INSTANCE.createInstance([
                             processingState   : AnalysisProcessingStates.FINISHED,
                             samplePair        : samplePair,
@@ -100,7 +100,7 @@ class RunYapsaDeciderSpec extends AbstractAnalysisDeciderSpec<RunYapsaInstance> 
     void "getDependingAnalysisInstanceClass, should return map with snv and indel"() {
         expect:
         decider.dependingAnalysisInstanceClasses == [
-                (RunYapsaWorkflow.SNV_INPUT)  : [RoddySnvCallingInstance],
+                (RunYapsaWorkflow.SNV_INPUT)  : [SnvCallingInstance],
                 (RunYapsaWorkflow.INDEL_INPUT): [IndelCallingInstance],
         ]
     }
@@ -129,7 +129,7 @@ class RunYapsaDeciderSpec extends AbstractAnalysisDeciderSpec<RunYapsaInstance> 
         RoddyBamFile bamFile2 = createBamFile()
         AnalysisBamFileArtefactData artefactData2 = createAnalysisBamFileArtefactData(bamFile2)
         AnalysisAnalysisArtefactData<RunYapsaInstance> analysisArtefactData = createAnalysisAnalysisArtefactData(createAnalysisInstance())
-        AnalysisAnalysisArtefactData<RoddySnvCallingInstance> analysisArtefactDataSnv = createAnalysisAnalysisArtefactData(
+        AnalysisAnalysisArtefactData<SnvCallingInstance> analysisArtefactDataSnv = createAnalysisAnalysisArtefactData(
                 SnvDomainFactory.INSTANCE.createInstanceWithSameSamplePair(analysisArtefactData.artefact))
         AnalysisAnalysisArtefactData<IndelCallingInstance> analysisArtefactDataIndel = createAnalysisAnalysisArtefactData(
                 IndelDomainFactory.INSTANCE.createInstanceWithSameSamplePair(analysisArtefactData.artefact))
@@ -138,7 +138,7 @@ class RunYapsaDeciderSpec extends AbstractAnalysisDeciderSpec<RunYapsaInstance> 
             0 * _
             1 * fetchRelatedBamFilesArtefactsForBamFiles([bamFile1]) >> [artefactData2]
             1 * fetchRelatedAnalysisArtefactsForBamFiles([bamFile1], decider.instanceClasses) >> [analysisArtefactData]
-            1 * fetchRelatedAnalysisArtefactsForBamFiles([bamFile1], [RoddySnvCallingInstance]) >> [analysisArtefactDataSnv]
+            1 * fetchRelatedAnalysisArtefactsForBamFiles([bamFile1], [SnvCallingInstance]) >> [analysisArtefactDataSnv]
             1 * fetchRelatedAnalysisArtefactsForBamFiles([bamFile1], [IndelCallingInstance]) >> [analysisArtefactDataIndel]
         }
 
@@ -162,7 +162,7 @@ class RunYapsaDeciderSpec extends AbstractAnalysisDeciderSpec<RunYapsaInstance> 
             0 * _
             1 * fetchRelatedBamFilesArtefactsForBamFiles([]) >> []
             1 * fetchRelatedAnalysisArtefactsForBamFiles([], decider.instanceClasses) >> []
-            1 * fetchRelatedAnalysisArtefactsForBamFiles([], [RoddySnvCallingInstance]) >> []
+            1 * fetchRelatedAnalysisArtefactsForBamFiles([], [SnvCallingInstance]) >> []
             1 * fetchRelatedAnalysisArtefactsForBamFiles([], [IndelCallingInstance]) >> []
         }
 

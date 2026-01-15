@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
@@ -44,7 +44,7 @@ import java.nio.file.Path
 @Component
 @Scope("prototype")
 @Slf4j
-class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<RoddySnvCallingInstance> implements AutoRestartableJob {
+class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<SnvCallingInstance> implements AutoRestartableJob {
 
     @Autowired
     ReferenceGenomeService referenceGenomeService
@@ -60,23 +60,23 @@ class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<RoddySnvCallingInstanc
 
     @Override
     @SuppressWarnings('UnnecessaryObjectReferences') // old wf
-    protected List<String> prepareAndReturnWorkflowSpecificCValues(RoddySnvCallingInstance roddySnvCallingInstance) {
-        assert roddySnvCallingInstance
+    protected List<String> prepareAndReturnWorkflowSpecificCValues(SnvCallingInstance snvCallingInstance) {
+        assert snvCallingInstance
 
-        snvCallingService.validateInputBamFiles(roddySnvCallingInstance)
+        snvCallingService.validateInputBamFiles(snvCallingInstance)
 
-        AbstractBamFile bamFileDisease = roddySnvCallingInstance.sampleType1BamFile
-        AbstractBamFile bamFileControl = roddySnvCallingInstance.sampleType2BamFile
+        AbstractBamFile bamFileDisease = snvCallingInstance.sampleType1BamFile
+        AbstractBamFile bamFileControl = snvCallingInstance.sampleType2BamFile
         File bamFileDiseasePath = bamFileDisease.pathForFurtherProcessing
         File bamFileControlPath = bamFileControl.pathForFurtherProcessing
 
-        ReferenceGenome referenceGenome = roddySnvCallingInstance.referenceGenome
+        ReferenceGenome referenceGenome = snvCallingInstance.referenceGenome
         File referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(referenceGenome)
         assert referenceGenomeFastaFile: "Path to the reference genome file is null"
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(referenceGenomeFastaFile)
 
-        Path individualPath = individualService.getViewByPidPath(roddySnvCallingInstance.individual, roddySnvCallingInstance.seqType)
-        Path resultDirectory = snvCallingService.getWorkDirectory(roddySnvCallingInstance)
+        Path individualPath = individualService.getViewByPidPath(snvCallingInstance.individual, snvCallingInstance.seqType)
+        Path resultDirectory = snvCallingService.getWorkDirectory(snvCallingInstance)
 
         List<String> cValues = []
         cValues.add("bamfile_list:${bamFileControlPath};${bamFileDiseasePath}")
@@ -87,32 +87,32 @@ class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<RoddySnvCallingInstanc
         cValues.add("CHROMOSOME_LENGTH_FILE:${referenceGenomeService.chromosomeLengthFile(bamFileControl.mergingWorkPackage).path}")
         cValues.add("CHR_SUFFIX:${referenceGenome.chromosomeSuffix}")
         cValues.add("CHR_PREFIX:${referenceGenome.chromosomePrefix}")
-        cValues.add("${getChromosomeIndexParameterWithoutMitochondrium(roddySnvCallingInstance.referenceGenome)}")
+        cValues.add("${getChromosomeIndexParameterWithoutMitochondrium(snvCallingInstance.referenceGenome)}")
         cValues.add("analysisMethodNameOnOutput:${individualPath.relativize(resultDirectory)}")
 
         return cValues
     }
 
     @Override
-    protected String prepareAndReturnWorkflowSpecificParameter(RoddySnvCallingInstance roddySnvCallingInstance) {
+    protected String prepareAndReturnWorkflowSpecificParameter(SnvCallingInstance snvCallingInstance) {
         return ""
     }
 
     @Override
-    protected void validate(RoddySnvCallingInstance roddySnvCallingInstance) throws Throwable {
-        assert roddySnvCallingInstance: "The input roddyResult must not be null"
+    protected void validate(SnvCallingInstance snvCallingInstance) throws Throwable {
+        assert snvCallingInstance: "The input roddyResult must not be null"
 
-        executeRoddyCommandService.correctPermissionsAndGroups(roddySnvCallingInstance)
+        executeRoddyCommandService.correctPermissionsAndGroups(snvCallingInstance)
 
         List<File> directories = [
-                roddySnvCallingInstance.workExecutionStoreDirectory,
+                snvCallingInstance.workExecutionStoreDirectory,
         ]
-        directories.addAll(roddySnvCallingInstance.workExecutionDirectories)
+        directories.addAll(snvCallingInstance.workExecutionDirectories)
 
         List<Path> files = [
-                snvCallingService.getCombinedPlotPath(roddySnvCallingInstance),
-                snvCallingService.getSnvCallingResult(roddySnvCallingInstance),
-                snvCallingService.getSnvDeepAnnotationResult(roddySnvCallingInstance),
+                snvCallingService.getCombinedPlotPath(snvCallingInstance),
+                snvCallingService.getSnvCallingResult(snvCallingInstance),
+                snvCallingService.getSnvDeepAnnotationResult(snvCallingInstance),
         ]
 
         directories.each {
@@ -123,10 +123,10 @@ class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<RoddySnvCallingInstanc
             FileService.ensureFileIsReadableAndNotEmptyStatic(it)
         }
 
-        snvCallingService.getResultRequiredForRunYapsaAndEnsureIsReadableAndNotEmpty(roddySnvCallingInstance)
-        snvCallingService.validateInputBamFiles(roddySnvCallingInstance)
+        snvCallingService.getResultRequiredForRunYapsaAndEnsureIsReadableAndNotEmpty(snvCallingInstance)
+        snvCallingService.validateInputBamFiles(snvCallingInstance)
 
-        roddySnvCallingInstance.processingState = AnalysisProcessingStates.FINISHED
-        roddySnvCallingInstance.save(flush: true)
+        snvCallingInstance.processingState = AnalysisProcessingStates.FINISHED
+        snvCallingInstance.save(flush: true)
     }
 }

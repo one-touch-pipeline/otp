@@ -32,6 +32,6 @@ class SnvCallingServiceSpec extends AbstractBamFileAnalysisServiceSpec implement
 
     @Override
     BamFilePairAnalysis getNewInstance() {
-        return DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
+        return DomainFactory.createSnvInstanceWithRoddyBamFiles()
     }
 }

@@ -64,13 +64,13 @@ class SnvWorkflow extends AbstractAnalysisWorkflow {
 
     @Override
     Artefact createCopyOfArtefact(Artefact artefact) {
-        RoddySnvCallingInstance snvCallingInstance = artefact as RoddySnvCallingInstance
+        SnvCallingInstance snvCallingInstance = artefact as SnvCallingInstance
         snvCallingInstance.withdrawn = true
         snvCallingInstance.save(flush: true)
 
         SamplePair samplePair = snvCallingInstance.samplePair
 
-        RoddySnvCallingInstance outputSnvCallingInstance = new RoddySnvCallingInstance([
+        SnvCallingInstance outputSnvCallingInstance = new SnvCallingInstance([
                 samplePair        : samplePair,
                 instanceName      : snvWorkFileService.constructInstanceName(artefact.workflowArtefact.producedBy.workflowVersion),
                 config            : snvCallingInstance.config,

@@ -38,7 +38,6 @@ import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfig
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfigService
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaService
 import de.dkfz.tbi.otp.domainFactory.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
@@ -102,7 +101,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         DomainFactory.createAllAlignableSeqTypes()
         DomainFactory.createPanCanPipeline()
         DomainFactory.createRnaPipeline()
-        DomainFactory.createRoddySnvPipelineLazy()
+        DomainFactory.createSnvPipelineLazy()
         DomainFactory.createIndelPipelineLazy()
         DomainFactory.createSophiaPipelineLazy()
         DomainFactory.createAceseqPipelineLazy()
@@ -918,44 +917,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         "Sophia"     | SophiaService | OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME
     }
 
-    @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
-    void "test configure Snv PipelineProject valid input, old otp snv config exist"() {
-        given:
-        setupData()
-        SnvConfig configuration = DomainFactory.createSnvConfig([
-                project: CollectionUtils.atMostOneElement(Project.findAllByName("testProjectAlignment")),
-                seqType: SeqTypeService.exomePairedSeqType,
-        ])
-        File projectDirectory = LsdfFilesService.getPath(
-                configService.rootPath.absolutePath,
-                configuration.project.dirName,
-        )
-        assert projectDirectory.exists() || projectDirectory.mkdirs()
-
-        RoddyConfiguration configuration2 = createRoddySnvConfiguration([
-                configVersion: 'v1_1',
-        ])
-
-        when:
-        doWithAuth(ADMIN) {
-            projectService.configureSnvPipelineProject(configuration2)
-        }
-
-        then:
-        Set<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndPipelineInListAndProgramVersion(
-                configuration.project,
-                Pipeline.findAllByTypeAndName(Pipeline.Type.SNV, Pipeline.Name.RODDY_SNV),
-                "${configuration2.pluginName}:${configuration2.programVersion}"
-        )
-        roddyWorkflowConfigs.size() == 1
-        roddyWorkflowConfigs[0].obsoleteDate == null
-
-        SnvConfig snvConfig = CollectionUtils.exactlyOneElement(SnvConfig.list())
-        snvConfig.obsoleteDate != null
-
-        roddyWorkflowConfigs[0].previousConfig == snvConfig
-    }
-
     @Unroll
     @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "test configure #analysisName pipelineProject valid input, multiple SeqTypes"() {
@@ -1403,6 +1364,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         cellRangerConfig.pipeline == pipeline
     }
 
+    @SuppressWarnings('UnusedPrivateMethod')
+    // method name is constructed at runtime
     private RoddyConfiguration createRoddySnvConfiguration(Map properties = [:]) {
         RoddyConfiguration configuration = new RoddyConfiguration([
                 project          : CollectionUtils.atMostOneElement(Project.findAllByName("testProjectAlignment")),

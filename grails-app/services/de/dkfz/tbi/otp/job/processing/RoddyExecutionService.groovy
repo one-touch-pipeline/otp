@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.utils.ProcessOutput
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -60,7 +60,7 @@ class RoddyExecutionService {
 
     // suppressed because breaking the line would break the pattern
     @SuppressWarnings("LineLength")
-    static final Pattern RODDY_EXECUTION_STORE_DIRECTORY_PATTERN = Pattern.compile(/(?:^|\n)Creating\sthe\sfollowing\sexecution\sdirectory\sto\sstore\sinformation\sabout\sthis\sprocess:\s*\n\s*(\/.*\/${RoddySnvCallingInstance.RODDY_EXECUTION_DIR_PATTERN})(?:\n|$)/)
+    static final Pattern RODDY_EXECUTION_STORE_DIRECTORY_PATTERN = Pattern.compile(/(?:^|\n)Creating\sthe\sfollowing\sexecution\sdirectory\sto\sstore\sinformation\sabout\sthis\sprocess:\s*\n\s*(\/.*\/${SnvCallingInstance.RODDY_EXECUTION_DIR_PATTERN})(?:\n|$)/)
 
     // Example:
     // Running job r150428_104246480_stds_snvCallingMetaScript => 3504988

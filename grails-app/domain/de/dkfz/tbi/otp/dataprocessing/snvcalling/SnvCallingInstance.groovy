@@ -24,22 +24,65 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 import grails.gorm.hibernate.annotation.ManagedEntity
 import org.hibernate.Hibernate
 
+import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 
 /**
- * @deprecated: succeeded by {@link RoddySnvCallingInstance}
+ * For each tumor-control pair the snv pipeline will be called.
  */
-@Deprecated
 @ManagedEntity
-class SnvCallingInstance extends AbstractSnvCallingInstance {
+class SnvCallingInstance extends BamFilePairAnalysis implements RoddyResult {
+
+    static hasMany = [
+            roddyExecutionDirectoryNames: String,
+    ]
+
     static constraints = {
         config validator: { val, obj ->
-            SnvConfig.isAssignableFrom(Hibernate.getClass(val))
+            !val || (RoddyWorkflowConfig.isAssignableFrom(Hibernate.getClass(val)) && val.pipeline.name.type == Pipeline.Type.SNV)
         }
+    }
+
+    /**
+     * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/snv_results/paired/tumor_control/2014-08-25_15h32
+     *
+     * @deprecated use {@link SnvLinkFileService#getDirectoryPath()} or {@link SnvWorkFileService#getDirectoryPath()}}
+     */
+    @Override
+    @Deprecated
+    OtpPath getInstancePath() {
+        return new OtpPath(samplePair.snvSamplePairPath, instanceName)
+    }
+
+    @Override
+    RoddyWorkflowConfig getConfig() {
+        return super.config ? RoddyWorkflowConfig.get(super.config.id) : null
+    }
+
+    @Deprecated
+    @Override
+    Pipeline getPipeline() {
+        return config?.pipeline
+    }
+
+    @Deprecated
+    @Override
+    File getBaseDirectory() {
+        return workDirectory.parentFile
     }
 
     @Override
     ReferenceGenome getReferenceGenome() {
+        // The reference genome of the control is used because the tumor can be Xenograft and for these reference genomes SNV fails.
         return sampleType2BamFile.referenceGenome
+    }
+
+    @Override
+    String toString() {
+        return "SCI ${id} ${withdrawn ? ' (withdrawn)' : ''}: ${instanceName} ${samplePair.toStringWithoutId()}"
     }
 }

@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.workflow.analysis.runyapsa
 
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.workflow.analysis.AnalysisWorkflowShared
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -34,9 +34,9 @@ trait RunYapsaWorkflowShared extends AnalysisWorkflowShared {
     private static final String INDEL_INPUT = RunYapsaWorkflow.INDEL_INPUT
     private static final String RUN_YAPSA_OUTPUT = RunYapsaWorkflow.ANALYSIS_OUTPUT
 
-    RoddySnvCallingInstance getSnvInstance(WorkflowStep workflowStep) {
+    SnvCallingInstance getSnvInstance(WorkflowStep workflowStep) {
         checkWorkflowName(workflowStep, WORKFLOW)
-        return concreteArtefactService.<RoddySnvCallingInstance> getInputArtefact(workflowStep, SNV_INPUT)
+        return concreteArtefactService.<SnvCallingInstance> getInputArtefact(workflowStep, SNV_INPUT)
     }
 
     IndelCallingInstance getIndelInstance(WorkflowStep workflowStep) {

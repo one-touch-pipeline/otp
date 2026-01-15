@@ -93,7 +93,7 @@ class VariantCallingPipelinesCheckerIntegrationSpec extends Specification {
         //   - the DomainFactory methods to create test instances for that workflow.
         // samplePair.workflowProcessingStatus fieldname : DomainFactory.&create${Workflow}InstanceWithRoddyBamFiles
         Map<String, Closure<BamFilePairAnalysis>> workflowStatusFieldsAndTheirTestInstanceCreator = [
-                snvProcessingStatus     : DomainFactory.&createRoddySnvInstanceWithRoddyBamFiles,
+                snvProcessingStatus     : DomainFactory.&createSnvInstanceWithRoddyBamFiles,
                 indelProcessingStatus   : DomainFactory.&createIndelCallingInstanceWithRoddyBamFiles,
                 sophiaProcessingStatus  : DomainFactory.&createSophiaInstanceWithRoddyBamFiles,
                 aceseqProcessingStatus  : DomainFactory.&createAceseqInstanceWithRoddyBamFiles,

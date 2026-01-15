@@ -38,7 +38,6 @@ import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfig
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfigService
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.infrastructure.OtpFileSystemException
@@ -560,17 +559,6 @@ class ProjectService {
     RoddyWorkflowConfig configureSnvPipelineProject(RoddyConfiguration snvPipelineConfiguration) {
         RoddyWorkflowConfig roddyWorkflowConfig = configurePipelineProject(snvPipelineConfiguration, Pipeline.Name.RODDY_SNV.pipeline, RoddySnvConfigTemplate)
 
-        SnvConfig snvConfig = atMostOneElement(SnvConfig.findAllWhere([
-                project     : snvPipelineConfiguration.project,
-                seqType     : snvPipelineConfiguration.seqType,
-                obsoleteDate: null,
-        ]))
-        if (snvConfig) {
-            snvConfig.obsoleteDate = new Date()
-            snvConfig.save(flush: true)
-            roddyWorkflowConfig.previousConfig = snvConfig
-            roddyWorkflowConfig.save(flush: true)
-        }
         return roddyWorkflowConfig
     }
 

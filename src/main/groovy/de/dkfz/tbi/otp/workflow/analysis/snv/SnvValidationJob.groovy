@@ -41,7 +41,7 @@ class SnvValidationJob extends AbstractRoddyClusterValidationJob implements SnvW
 
     @Override
     protected List<Path> getExpectedFiles(WorkflowStep workflowStep) {
-        RoddySnvCallingInstance instance = getSnvInstance(workflowStep)
+        SnvCallingInstance instance = getSnvInstance(workflowStep)
         return [snvWorkFileService.getCombinedPlotPath(instance),
                 snvWorkFileService.getSnvCallingResult(instance),
                 snvWorkFileService.getSnvDeepAnnotationResult(instance),
@@ -51,7 +51,7 @@ class SnvValidationJob extends AbstractRoddyClusterValidationJob implements SnvW
 
     @Override
     protected List<Path> getExpectedDirectories(WorkflowStep workflowStep) {
-        RoddySnvCallingInstance instance = getSnvInstance(workflowStep)
+        SnvCallingInstance instance = getSnvInstance(workflowStep)
 
         return [snvWorkFileService.getExecutionStoreDirectory(instance)] + snvWorkFileService.getExecutionDirectories(instance)
     }
@@ -67,7 +67,7 @@ class SnvValidationJob extends AbstractRoddyClusterValidationJob implements SnvW
 
     @Override
     protected void doFurtherValidation(WorkflowStep workflowStep) {
-        RoddySnvCallingInstance instance = getSnvInstance(workflowStep)
+        SnvCallingInstance instance = getSnvInstance(workflowStep)
         snvWorkFileService.validateInputBamFiles(instance)
     }
 }

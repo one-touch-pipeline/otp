@@ -66,12 +66,11 @@ class BamFileAnalysisServiceFactoryService {
 
     private Map<Class<? extends BamFilePairAnalysis>, AbstractBamFileAnalysisService<? extends BamFilePairAnalysis>> getMap() {
         serviceMap = serviceMap ?: Collections.unmodifiableMap([
-                (AceseqInstance)         : aceseqService,
-                (IndelCallingInstance)   : indelCallingService,
-                (RoddySnvCallingInstance): snvCallingService,
-                (RunYapsaInstance)       : runYapsaService,
-                (SnvCallingInstance)     : snvCallingService,
-                (SophiaInstance)         : sophiaService,
+                (AceseqInstance)      : aceseqService,
+                (IndelCallingInstance): indelCallingService,
+                (SnvCallingInstance)  : snvCallingService,
+                (RunYapsaInstance)    : runYapsaService,
+                (SophiaInstance)      : sophiaService,
         ])
         return serviceMap
     }

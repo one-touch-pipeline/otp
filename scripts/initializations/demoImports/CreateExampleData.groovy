@@ -315,7 +315,7 @@ class ExampleData {
     List<RoddyBamFile> roddyBamFiles = []
     List<RoddyBamFile> rnaRoddyBamFiles = []
     List<SingleCellBamFile> singleCellBamFiles = []
-    List<RoddySnvCallingInstance> roddySnvCallingInstances = []
+    List<SnvCallingInstance> snvCallingInstances = []
     List<IndelCallingInstance> indelCallingInstances = []
     List<SophiaInstance> sophiaInstances = []
     List<AceseqInstance> aceseqInstances = []
@@ -433,7 +433,7 @@ class ExampleData {
                 diseaseBamFiles[seqType].each { AbstractBamFile diseaseBamFile ->
                     controlBamFiles[seqType].each { AbstractBamFile controlBamFile ->
                         SamplePair samplePair = createSamplePair(diseaseBamFile.mergingWorkPackage, controlBamFile.mergingWorkPackage)
-                        createRoddySnvCallingInstance(samplePair)
+                        createSnvCallingInstance(samplePair)
                         createIndelCallingInstance(samplePair)
                         createSophiaInstance(samplePair)
                         createAceseqInstance(samplePair)
@@ -628,7 +628,7 @@ class ExampleData {
     void createSnvFilesOnFilesystem() {
         println "creating dummy snv files on file system"
 
-        roddySnvCallingInstances.each { RoddySnvCallingInstance snvCallingInstance ->
+        snvCallingInstances.each { SnvCallingInstance snvCallingInstance ->
             [
                     snvCallingService.getSnvCallingResult(snvCallingInstance),
                     snvCallingService.getSnvDeepAnnotationResult(snvCallingInstance),
@@ -1671,13 +1671,13 @@ class ExampleData {
         return samplePair
     }
 
-    RoddySnvCallingInstance createRoddySnvCallingInstance(SamplePair samplePair) {
+    SnvCallingInstance createSnvCallingInstance(SamplePair samplePair) {
         if (!snvSeqTypes.contains(samplePair.seqType)) {
             return null
         }
         RoddyWorkflowConfig config = getOrCreateConfig(samplePair, Pipeline.Name.RODDY_SNV)
         String instanceName = "results_${config.programVersion.replaceAll(":", "-")}_${config.configVersion}_${TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date())}"
-        BamFilePairAnalysis analysis = new RoddySnvCallingInstance([
+        BamFilePairAnalysis analysis = new SnvCallingInstance([
                 samplePair        : samplePair,
                 instanceName      : instanceName,
                 config            : config,
@@ -1686,7 +1686,7 @@ class ExampleData {
                 processingState   : AnalysisProcessingStates.FINISHED,
         ]).save(flush: false)
         println "    - snv: ${analysis}"
-        roddySnvCallingInstances << analysis
+        snvCallingInstances << analysis
         return analysis
     }
 

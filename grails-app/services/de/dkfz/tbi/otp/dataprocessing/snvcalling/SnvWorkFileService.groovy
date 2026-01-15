@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractAnalysisWorkFileService
 
-class SnvWorkFileService extends AbstractAnalysisWorkFileService<RoddySnvCallingInstance> implements AbstractSnvFileService {
+class SnvWorkFileService extends AbstractAnalysisWorkFileService<SnvCallingInstance> implements AbstractSnvFileService {
 
     final String workflowDirectoryName = 'SNVCallingWorkflow'
 }

@@ -408,7 +408,7 @@ class NotificationCreator {
     }
 
     SamplePairProcessingStatus getSamplePairProcessingStatus(SamplePair sp) {
-        AbstractSnvCallingInstance sci = sp.findLatestSnvCallingInstance()
+        SnvCallingInstance sci = sp.findLatestSnvCallingInstance()
         IndelCallingInstance ici = sp.findLatestIndelCallingInstance()
         AceseqInstance ai = sp.findLatestAceseqInstance()
         SophiaInstance si = sp.findLatestSophiaInstance()

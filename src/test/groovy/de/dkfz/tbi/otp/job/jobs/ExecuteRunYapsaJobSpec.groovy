@@ -53,7 +53,7 @@ class ExecuteRunYapsaJobSpec extends Specification implements DataTest {
         return [
                 AbstractBamFile,
                 AbstractMergingWorkPackage,
-                AbstractSnvCallingInstance,
+                SnvCallingInstance,
                 RawSequenceFile,
                 FastqFile,
                 FileType,
@@ -68,7 +68,7 @@ class ExecuteRunYapsaJobSpec extends Specification implements DataTest {
                 ReferenceGenome,
                 ReferenceGenomeProjectSeqType,
                 RoddyBamFile,
-                RoddySnvCallingInstance,
+                SnvCallingInstance,
                 RoddyWorkflowConfig,
                 Run,
                 FastqImportInstance,
@@ -106,7 +106,7 @@ class ExecuteRunYapsaJobSpec extends Specification implements DataTest {
 
         RunYapsaInstance instance = DomainFactory.createRunYapsaInstanceWithRoddyBamFiles()
 
-        DomainFactory.createRoddySnvCallingInstance(instance.samplePair, [
+        DomainFactory.createSnvCallingInstance(instance.samplePair, [
                 sampleType1BamFile: CollectionUtils.atMostOneElement(RoddyBamFile.findAllByWorkPackage(instance.samplePair.mergingWorkPackage1)),
                 sampleType2BamFile: CollectionUtils.atMostOneElement(RoddyBamFile.findAllByWorkPackage(instance.samplePair.mergingWorkPackage2)),
         ])

@@ -1271,8 +1271,8 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
         deleteProcessingFilesOfProject_RBF_Validation()
     }
 
-    private AbstractSnvCallingInstance deleteProcessingFilesOfProject_RBF_SNV_Setup() {
-        AbstractSnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
+    private SnvCallingInstance deleteProcessingFilesOfProject_RBF_SNV_Setup() {
+        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
 
         AbstractBamFile tumorBamFiles = snvCallingInstance.sampleType1BamFile
         dataBaseSetupForBamFiles(tumorBamFiles)
@@ -1291,7 +1291,7 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
     void "testDeleteProcessingFilesOfProject_RBF_SNV"() {
         given:
         setupDataForProcessingFiles()
-        AbstractSnvCallingInstance snvCallingInstance = deleteProcessingFilesOfProject_RBF_SNV_Setup()
+        SnvCallingInstance snvCallingInstance = deleteProcessingFilesOfProject_RBF_SNV_Setup()
 
         when:
         deletionService.deleteProcessingFilesOfProject(snvCallingInstance.project.name, outputFolder, true)
@@ -1301,14 +1301,14 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
         Path outputFile = outputFolder.resolve("Delete_${snvCallingInstance.project.name}.sh")
 
         outputFile.text.contains(snvFolder.path) && outputFile.text.contains(snvFolder.parent)
-        AbstractSnvCallingInstance.list().empty
+        SnvCallingInstance.list().empty
         SamplePair.list().empty
     }
 
     void "testDeleteProcessingFilesOfProject_RBF_SNV_notVerified"() {
         given:
         setupDataForProcessingFiles()
-        AbstractSnvCallingInstance snvCallingInstance = deleteProcessingFilesOfProject_RBF_SNV_Setup()
+        SnvCallingInstance snvCallingInstance = deleteProcessingFilesOfProject_RBF_SNV_Setup()
 
         when:
         deletionService.deleteProcessingFilesOfProject(snvCallingInstance.project.name, outputFolder)
@@ -1318,7 +1318,7 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
         Path outputFile = outputFolder.resolve("Delete_${snvCallingInstance.project.name}.sh")
 
         outputFile.text.contains(snvFolder.path) && outputFile.text.contains(snvFolder.parent)
-        AbstractSnvCallingInstance.list().empty
+        SnvCallingInstance.list().empty
         SamplePair.list().empty
     }
 

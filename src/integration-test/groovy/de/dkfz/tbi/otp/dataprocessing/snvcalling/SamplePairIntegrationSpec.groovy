@@ -116,8 +116,8 @@ class SamplePairIntegrationSpec extends Specification {
 
     void "test findLatestSnvCallingInstance when SnvCallingInstance exists should return latest"() {
         given:
-        AbstractSnvCallingInstance first = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
-        AbstractSnvCallingInstance latest = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles([samplePair: first.samplePair, instanceName: '2015-08-25_15h32'])
+        SnvCallingInstance first = DomainFactory.createSnvInstanceWithRoddyBamFiles()
+        SnvCallingInstance latest = DomainFactory.createSnvInstanceWithRoddyBamFiles([samplePair: first.samplePair, instanceName: '2015-08-25_15h32'])
 
         expect:
         latest == latest.samplePair.findLatestSnvCallingInstance()

@@ -59,7 +59,7 @@ SamplePair.withTransaction {
         AbstractBamFile sampleType1BamFile = samplePair.mergingWorkPackage1.processableBamFileInProjectFolder
         AbstractBamFile sampleType2BamFile = samplePair.mergingWorkPackage2.processableBamFileInProjectFolder
 
-        BamFilePairAnalysis analysis = new RoddySnvCallingInstance(
+        BamFilePairAnalysis analysis = new SnvCallingInstance(
                 samplePair: samplePair,
                 instanceName: roddySnvCallingStartJob.getInstanceName(config),
                 config: config,

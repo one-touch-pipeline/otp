@@ -43,7 +43,7 @@ class AnalysisDeletionService {
     AnalysisWorkFileServiceFactoryService analysisWorkFileServiceFactoryService
 
     static final List<Class<?>> ANALYSIS_CLASSES = [
-            RoddySnvCallingInstance,
+            SnvCallingInstance,
             IndelCallingInstance,
             AceseqInstance,
             SophiaInstance,

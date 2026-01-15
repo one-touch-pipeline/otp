@@ -100,7 +100,7 @@ final Map<String, String> workflowClassMap = [
         (AceseqWorkflow.WORKFLOW)  : "de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance",
         (SophiaWorkflow.WORKFLOW)  : "de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance",
         (RunYapsaWorkflow.WORKFLOW): "de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance",
-        (SnvWorkflow.WORKFLOW)     : "de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance",
+        (SnvWorkflow.WORKFLOW)     : "de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance",
         (IndelWorkflow.WORKFLOW)   : "de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance",
 ].asImmutable()
 

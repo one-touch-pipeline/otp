@@ -66,7 +66,7 @@ class IndelCallingPipelineCheckerIntegrationSpec extends AbstractVariantCallingP
 
     @Override
     Pipeline createPipeLineForCrosschecking() {
-        return DomainFactory.createRoddySnvPipelineLazy()
+        return DomainFactory.createSnvPipelineLazy()
     }
 
     @Override
@@ -76,6 +76,6 @@ class IndelCallingPipelineCheckerIntegrationSpec extends AbstractVariantCallingP
 
     @Override
     BamFilePairAnalysis createAnalysisForCrosschecking(Map properties) {
-        return DomainFactory.createRoddySnvInstanceWithRoddyBamFiles(properties)
+        return DomainFactory.createSnvInstanceWithRoddyBamFiles(properties)
     }
 }

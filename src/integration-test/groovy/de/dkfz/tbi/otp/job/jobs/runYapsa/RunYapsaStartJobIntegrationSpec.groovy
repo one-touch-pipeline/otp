@@ -85,7 +85,7 @@ class RunYapsaStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStartJo
 
     @Override
     void createDependeeInstance(SamplePair samplePair, AnalysisProcessingStates dependeeAnalysisProcessingState) {
-        DomainFactory.createRoddySnvCallingInstance(samplePair, [processingState: dependeeAnalysisProcessingState,])
+        DomainFactory.createSnvCallingInstance(samplePair, [processingState: dependeeAnalysisProcessingState,])
     }
 
     @Override

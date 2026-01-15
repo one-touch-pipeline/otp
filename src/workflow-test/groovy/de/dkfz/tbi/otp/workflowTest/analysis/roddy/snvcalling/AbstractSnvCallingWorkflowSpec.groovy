@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.workflowTest.referenceGenome.ReferenceGenomeHg37
 
 import java.nio.file.Path
 
-abstract class AbstractSnvCallingWorkflowSpec extends AbstractRoddyAnalysisWorkflowSpec<RoddySnvCallingInstance> implements ReferenceGenomeHg37 {
+abstract class AbstractSnvCallingWorkflowSpec extends AbstractRoddyAnalysisWorkflowSpec<SnvCallingInstance> implements ReferenceGenomeHg37 {
 
     SnvDecider snvDecider
     SnvLinkFileService snvLinkFileService
@@ -57,7 +57,7 @@ abstract class AbstractSnvCallingWorkflowSpec extends AbstractRoddyAnalysisWorkf
     }
 
     @Override
-    List<Path> filesToCheck(RoddySnvCallingInstance instance) {
+    List<Path> filesToCheck(SnvCallingInstance instance) {
         return [
                 snvLinkFileService.getSnvCallingResult(instance),
                 snvWorkFileService.getSnvCallingResult(instance),
@@ -80,7 +80,7 @@ abstract class AbstractSnvCallingWorkflowSpec extends AbstractRoddyAnalysisWorkf
 
     @SuppressWarnings("EmptyMethodInAbstractClass") // Makes no sense to implement this in each subclass
     @Override
-    void checkQc(RoddySnvCallingInstance instance) { }
+    void checkQc(SnvCallingInstance instance) { }
 
     Class<SnvWorkflow> workflowComponentClass = SnvWorkflow
 }

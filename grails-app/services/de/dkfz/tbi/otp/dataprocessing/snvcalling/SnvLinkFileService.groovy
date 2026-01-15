@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractAnalysisLinkFileService
 
-class SnvLinkFileService extends AbstractAnalysisLinkFileService<RoddySnvCallingInstance> implements AbstractSnvFileService {
+class SnvLinkFileService extends AbstractAnalysisLinkFileService<SnvCallingInstance> implements AbstractSnvFileService {
 
     final String resultsDirectoryName = 'snv_results'
 }

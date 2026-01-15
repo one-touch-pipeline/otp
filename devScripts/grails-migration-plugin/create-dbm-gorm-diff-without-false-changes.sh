@@ -77,7 +77,7 @@ joinTables="\
 (project_request_project_request_user)|\
 (project_request_user_project_role)|\
 (roddy_bam_file_roddy_execution_directory_names)|\
-(roddy_snv_calling_instance_roddy_execution_directory_names)|\
+(snv_calling_instance_roddy_execution_directory_names)|\
 (seq_center_import_dirs_allow_linking)|\
 (seq_platform_group_comment)|\
 (seq_platform_model_label_import_alias)|\

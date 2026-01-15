@@ -25,7 +25,7 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
@@ -37,7 +37,7 @@ class RunYapsaWorkflowSharedSpec extends Specification implements WorkflowSystem
 
     private WorkflowStep workflowStep
     private RunYapsaWorkflowShared runYapsaWorkflowSharedInstance
-    private RoddySnvCallingInstance snvCallingInstance
+    private SnvCallingInstance snvCallingInstance
     private IndelCallingInstance indelInstance
     private RunYapsaInstance runYapsaInstance
 
@@ -56,7 +56,7 @@ class RunYapsaWorkflowSharedSpec extends Specification implements WorkflowSystem
 
     private void createData() {
         runYapsaWorkflowSharedInstance = Spy(RunYapsaWorkflowSharedInstance)
-        snvCallingInstance = new RoddySnvCallingInstance()
+        snvCallingInstance = new SnvCallingInstance()
         indelInstance = new IndelCallingInstance()
         runYapsaInstance = new RunYapsaInstance()
         runYapsaWorkflowSharedInstance.concreteArtefactService = Mock(ConcreteArtefactService)

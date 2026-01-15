@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvWorkFileService
 import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.SnvDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
@@ -66,7 +66,7 @@ class SnvPrepareJobSpec extends Specification implements DataTest, WorkflowSyste
                 FastqImportInstance,
                 FastqFile,
                 RoddyWorkflowConfig,
-                RoddySnvCallingInstance,
+                SnvCallingInstance,
                 SampleTypePerProject,
                 RoddyBamFile,
                 ExternalMergingWorkPackage,
@@ -79,7 +79,7 @@ class SnvPrepareJobSpec extends Specification implements DataTest, WorkflowSyste
         SnvDomainFactory snvDomainFactory = SnvDomainFactory.INSTANCE
 
         Path workDirectoryPath = Paths.get('/path')
-        RoddySnvCallingInstance snvCallingInstance = snvDomainFactory.createInstance(snvDomainFactory.createSamplePairWithExternallyProcessedBamFiles())
+        SnvCallingInstance snvCallingInstance = snvDomainFactory.createInstance(snvDomainFactory.createSamplePairWithExternallyProcessedBamFiles())
         WorkflowStep workflowStep = createWorkflowStep([workflowRun: createWorkflowRun([workflow: findOrCreateWorkflow(SnvWorkflow.WORKFLOW)])])
         SnvPrepareJob job = new SnvPrepareJob([
                 snvWorkFileService     : Mock(SnvWorkFileService),

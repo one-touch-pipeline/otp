@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelWorkFileService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvWorkFileService
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaWorkFileService
@@ -50,12 +50,12 @@ class RoddyResultWorkFileServiceFactoryService {
     @CompileDynamic
     RoddyResultServiceTrait<? extends RoddyResult> getService(RoddyResult rr) {
         Map<Class<? extends RoddyResult>, RoddyResultServiceTrait<? extends RoddyResult>> map = [
-                (AceseqInstance)            : aceseqWorkFileService,
-                (IndelCallingInstance)      : indelWorkFileService,
-                (RnaRoddyBamFile)           : rnaAlignmentWorkFileService,
-                (RoddyBamFile)              : panCancerWorkFileService,
-                (RoddySnvCallingInstance)   : snvWorkFileService,
-                (SophiaInstance)            : sophiaWorkFileService,
+                (AceseqInstance)      : aceseqWorkFileService,
+                (IndelCallingInstance): indelWorkFileService,
+                (RnaRoddyBamFile)     : rnaAlignmentWorkFileService,
+                (RoddyBamFile)        : panCancerWorkFileService,
+                (SnvCallingInstance)  : snvWorkFileService,
+                (SophiaInstance)      : sophiaWorkFileService,
         ]
         RoddyResultServiceTrait<? extends RoddyResult> result = map[rr.class]
         if (!result) {

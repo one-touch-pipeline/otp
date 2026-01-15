@@ -27,7 +27,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.IndelDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.FastqFile
@@ -45,7 +45,7 @@ class AnalysisFinishJobSpec extends Specification implements DataTest, WorkflowS
                 MergingWorkPackage,
                 FastqImportInstance,
                 FastqFile,
-                RoddySnvCallingInstance,
+                SnvCallingInstance,
                 SampleTypePerProject,
                 RoddyWorkflowConfig,
                 RoddyBamFile,

@@ -70,7 +70,7 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
                 ReferenceGenomeEntry,
                 ReferenceGenomeProjectSeqType,
                 RoddyBamFile,
-                RoddySnvCallingInstance,
+                SnvCallingInstance,
                 RoddyWorkflowConfig,
                 Run,
                 FastqImportInstance,
@@ -80,13 +80,13 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
     @TempDir
     Path tempDir
 
-    void "prepareAndReturnWorkflowSpecificCValues, when roddySnvCallingInstance is null, throw assert"() {
+    void "prepareAndReturnWorkflowSpecificCValues, when snvCallingInstance is null, throw assert"() {
         when:
         new ExecuteRoddySnvJob().prepareAndReturnWorkflowSpecificCValues(null)
 
         then:
         AssertionError e = thrown()
-        e.message.contains('assert roddySnvCallingInstance')
+        e.message.contains('assert snvCallingInstance')
     }
 
     void "prepareAndReturnWorkflowSpecificCValues, when all fine, return correct value list"() {
@@ -115,10 +115,10 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
         job.snvCallingService.individualService = individualService
         job.chromosomeIdentifierSortingService = new ChromosomeIdentifierSortingService()
 
-        RoddySnvCallingInstance roddySnvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
+        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles()
 
-        AbstractBamFile bamFileDisease = roddySnvCallingInstance.sampleType1BamFile
-        AbstractBamFile bamFileControl = roddySnvCallingInstance.sampleType2BamFile
+        AbstractBamFile bamFileDisease = snvCallingInstance.sampleType1BamFile
+        AbstractBamFile bamFileControl = snvCallingInstance.sampleType2BamFile
 
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(bamFileDisease)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(bamFileControl)
@@ -132,12 +132,12 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
         String bamFileDiseasePath = bamFileDisease.pathForFurtherProcessing.path
         String bamFileControlPath = bamFileControl.pathForFurtherProcessing.path
 
-        String analysisMethodNameOnOutput = "snv_results${File.separator}${roddySnvCallingInstance.seqType.libraryLayoutDirName}${File.separator}" +
-                "${roddySnvCallingInstance.sampleType1BamFile.sampleType.dirName}_${roddySnvCallingInstance.sampleType2BamFile.sampleType.dirName}" +
-                "${File.separator}${roddySnvCallingInstance.instanceName}"
+        String analysisMethodNameOnOutput = "snv_results${File.separator}${snvCallingInstance.seqType.libraryLayoutDirName}${File.separator}" +
+                "${snvCallingInstance.sampleType1BamFile.sampleType.dirName}_${snvCallingInstance.sampleType2BamFile.sampleType.dirName}" +
+                "${File.separator}${snvCallingInstance.instanceName}"
 
         List<String> chromosomeNames = ["1", "2", "3", "4", "5", "X", "Y", "M"]
-        DomainFactory.createReferenceGenomeEntries(roddySnvCallingInstance.referenceGenome, chromosomeNames)
+        DomainFactory.createReferenceGenomeEntries(snvCallingInstance.referenceGenome, chromosomeNames)
 
         List<String> expectedList = [
                 "bamfile_list:${bamFileControlPath};${bamFileDiseasePath}",
@@ -146,14 +146,14 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
                 "possibleControlSampleNamePrefixes:${bamFileControl.sampleType.dirName}",
                 "REFERENCE_GENOME:${fasta.path}",
                 "CHROMOSOME_LENGTH_FILE:${chromosomeLength.path}",
-                "CHR_SUFFIX:${roddySnvCallingInstance.referenceGenome.chromosomeSuffix}",
-                "CHR_PREFIX:${roddySnvCallingInstance.referenceGenome.chromosomePrefix}",
-                "${job.getChromosomeIndexParameterWithoutMitochondrium(roddySnvCallingInstance.referenceGenome)}",
+                "CHR_SUFFIX:${snvCallingInstance.referenceGenome.chromosomeSuffix}",
+                "CHR_PREFIX:${snvCallingInstance.referenceGenome.chromosomePrefix}",
+                "${job.getChromosomeIndexParameterWithoutMitochondrium(snvCallingInstance.referenceGenome)}",
                 "analysisMethodNameOnOutput:${analysisMethodNameOnOutput}",
         ]
 
         when:
-        List<String> returnedList = job.prepareAndReturnWorkflowSpecificCValues(roddySnvCallingInstance)
+        List<String> returnedList = job.prepareAndReturnWorkflowSpecificCValues(snvCallingInstance)
 
         then:
         expectedList == returnedList
@@ -170,7 +170,7 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
         where:
         value << [
                 null,
-                new RoddySnvCallingInstance(),
+                new SnvCallingInstance(),
         ]
     }
 
@@ -196,21 +196,21 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
         job.fileSystemService = new TestFileSystemService()
         job.fileService = new FileService()
 
-        RoddySnvCallingInstance roddySnvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
+        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles()
 
-        CreateRoddyFileHelper.createRoddySnvResultFiles(roddySnvCallingInstance, individualService)
+        CreateRoddyFileHelper.createRoddySnvResultFiles(snvCallingInstance, individualService)
 
         when:
-        job.validate(roddySnvCallingInstance)
+        job.validate(snvCallingInstance)
 
         then:
-        roddySnvCallingInstance.processingState == AnalysisProcessingStates.FINISHED
+        snvCallingInstance.processingState == AnalysisProcessingStates.FINISHED
 
         cleanup:
         configService.clean()
     }
 
-    void "validate, when roddySnvCallingInstance is null, throw assert"() {
+    void "validate, when snvCallingInstance is null, throw assert"() {
         when:
         new ExecuteRoddySnvJob().validate(null)
 
@@ -236,17 +236,17 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
                     }
                 },
         ])
-        RoddySnvCallingInstance roddySnvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
+        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles()
 
-        CreateRoddyFileHelper.createRoddySnvResultFiles(roddySnvCallingInstance, individualService)
+        CreateRoddyFileHelper.createRoddySnvResultFiles(snvCallingInstance, individualService)
 
         when:
-        job.validate(roddySnvCallingInstance)
+        job.validate(snvCallingInstance)
 
         then:
         AssertionError e = thrown()
         e.message.contains(md5sum)
-        roddySnvCallingInstance.processingState != AnalysisProcessingStates.FINISHED
+        snvCallingInstance.processingState != AnalysisProcessingStates.FINISHED
 
         cleanup:
         configService.clean()
@@ -271,39 +271,39 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
         job.snvCallingService = new SnvCallingService()
         job.snvCallingService.individualService = individualService
 
-        RoddySnvCallingInstance roddySnvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
+        SnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles()
 
-        CreateRoddyFileHelper.createRoddySnvResultFiles(roddySnvCallingInstance, individualService)
+        CreateRoddyFileHelper.createRoddySnvResultFiles(snvCallingInstance, individualService)
 
-        Path fileToDelete = fileClousure(roddySnvCallingInstance, job.snvCallingService)
+        Path fileToDelete = fileClousure(snvCallingInstance, job.snvCallingService)
         new FileService().deleteDirectoryRecursively(fileToDelete)
 
         when:
-        job.validate(roddySnvCallingInstance)
+        job.validate(snvCallingInstance)
 
         then:
         AssertionError e = thrown()
         e.message.contains(fileToDelete.toString())
-        roddySnvCallingInstance.processingState != AnalysisProcessingStates.FINISHED
+        snvCallingInstance.processingState != AnalysisProcessingStates.FINISHED
 
         cleanup:
         configService.clean()
 
         where:
         fileClousure << [
-                { RoddySnvCallingInstance it, SnvCallingService service ->
+                { SnvCallingInstance it, SnvCallingService service ->
                     it.workExecutionStoreDirectory.toPath()
                 },
-                { RoddySnvCallingInstance it, SnvCallingService service ->
+                { SnvCallingInstance it, SnvCallingService service ->
                     it.workExecutionDirectories.first().toPath()
                 },
-                { RoddySnvCallingInstance it, SnvCallingService service ->
+                { SnvCallingInstance it, SnvCallingService service ->
                     service.getCombinedPlotPath(it)
                 },
-                { RoddySnvCallingInstance it, SnvCallingService service ->
+                { SnvCallingInstance it, SnvCallingService service ->
                     service.getSnvCallingResult(it)
                 },
-                { RoddySnvCallingInstance it, SnvCallingService service ->
+                { SnvCallingInstance it, SnvCallingService service ->
                     service.getSnvDeepAnnotationResult(it)
                 },
         ]

@@ -29,7 +29,6 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QcTrafficLightStatus
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
@@ -81,7 +80,7 @@ abstract class BamFilePairAnalysis implements Artefact, CommentableWithProject, 
         }
         instanceName blank: false, unique: 'samplePair', shared: "pathComponent"
         config nullable: true, validator: { val ->
-            !val || ([SnvConfig, RoddyWorkflowConfig, RunYapsaConfig].any { it.isAssignableFrom(Hibernate.getClass(val)) }) &&
+            !val || ([RoddyWorkflowConfig, RunYapsaConfig].any { it.isAssignableFrom(Hibernate.getClass(val)) }) &&
                     val?.pipeline?.type != Pipeline.Type.ALIGNMENT
         }
         qcTrafficLightStatus nullable: true, validator: { status, obj ->

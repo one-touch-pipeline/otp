@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflow.analysis.snv
 
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisConditionalFailJobSpec
 
 class SnvConditionalFailJobSpec extends AbstractAnalysisConditionalFailJobSpec {
@@ -32,7 +32,7 @@ class SnvConditionalFailJobSpec extends AbstractAnalysisConditionalFailJobSpec {
                         workflow: findOrCreateWorkflow(SnvWorkflow.WORKFLOW, [beanName: SnvWorkflow.simpleName.uncapitalize()]),
                 ]),
         ])
-        instance = new RoddySnvCallingInstance()
+        instance = new SnvCallingInstance()
 
         job = new SnvConditionalFailJob()
     }

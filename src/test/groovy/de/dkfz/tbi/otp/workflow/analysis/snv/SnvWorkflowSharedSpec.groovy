@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.workflow.analysis.snv
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
@@ -36,7 +36,7 @@ class SnvWorkflowSharedSpec extends Specification implements WorkflowSystemDomai
 
     private WorkflowStep workflowStep
     private SnvWorkflowShared snvWorkflowSharedInstance
-    private RoddySnvCallingInstance snvInstance
+    private SnvCallingInstance snvInstance
     private static final String SNV_OUTPUT = AbstractAnalysisWorkflow.ANALYSIS_OUTPUT
 
     @Override
@@ -50,7 +50,7 @@ class SnvWorkflowSharedSpec extends Specification implements WorkflowSystemDomai
 
     private void createData() {
         snvWorkflowSharedInstance = Spy(SnvWorkflowSharedInstance)
-        snvInstance = new RoddySnvCallingInstance()
+        snvInstance = new SnvCallingInstance()
         snvWorkflowSharedInstance.concreteArtefactService = Mock(ConcreteArtefactService)
         final WorkflowRun run = createWorkflowRun([
                 workflow: createWorkflow([
