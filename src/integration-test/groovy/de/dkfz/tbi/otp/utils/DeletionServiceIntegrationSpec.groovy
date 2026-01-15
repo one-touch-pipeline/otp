@@ -68,6 +68,7 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
     CellRangerWorkFileService cellRangerWorkFileService
     RawSequenceDataWorkFileService rawSequenceDataWorkFileService
     RawSequenceDataViewFileService rawSequenceDataViewFileService
+    PanCancerWorkFileService panCancerWorkFileService
     PanCancerLinkFileService panCancerLinkFileService
     ExternalAlignmentLinkFileService externalAlignmentLinkFileService
 
@@ -1388,5 +1389,96 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
         Path outputFile = outputFolder.resolve("Delete_${bamFile.project.name}.sh")
         !outputFile.text.contains(externalBamPath.toString())
         ExternallyProcessedBamFile.list().contains(bamFile)
+    }
+
+    void "deleteSeqTrack should delete withdrawn bam file and keep active bam file and files"() {
+        given:
+        setupDataForProcessingFiles()
+        Sample sample = createSample([:])
+        SeqType seqType = createSeqType(name: "WGS")
+
+        SeqTrack lane1 = createSeqTrack([sample: sample, seqType: seqType])
+        SeqTrack lane2 = createSeqTrack([sample: sample, seqType: seqType])
+        SeqTrack lane3 = createSeqTrack([sample: sample, seqType: seqType])
+        SeqTrack lane4 = createSeqTrack([sample: sample, seqType: seqType])
+
+        createFastqFile(seqTrack: lane1, fileWithdrawn: true)
+        createFastqFile(seqTrack: lane2, fileWithdrawn: true)
+
+        MergingWorkPackage mwp = createMergingWorkPackage([sample: sample, seqType: seqType])
+
+        RoddyBamFile withdrawnBam = createRoddyBamFile([
+                workPackage: mwp,
+                withdrawn: true,
+                identifier: 1,
+                seqTracks: [lane1, lane2] as Set
+        ], RoddyBamFile)
+
+        RoddyBamFile activeBam = createRoddyBamFile([
+                workPackage: mwp,
+                withdrawn: false,
+                identifier: 2,
+                seqTracks: [lane3, lane4] as Set,
+                workflowArtefact: createWorkflowArtefact([
+                        producedBy: createWorkflowRun([
+                                workFolder: createWorkFolder([
+                                        baseFolder: createBaseFolder([
+                                                path: tempDir.resolve('baseFolder'),
+                                        ])
+                                ])
+                        ])
+                ])
+        ], RoddyBamFile)
+
+        // Setup uuid folder for activeBam
+        Path uuidFolder = panCancerWorkFileService.getDirectoryPath(activeBam)
+        uuidFolder.toFile().mkdirs()
+        Path bamFile = uuidFolder.resolve(activeBam.bamFileName)
+        Path baiFile = uuidFolder.resolve(activeBam.baiFileName)
+        Files.createFile(bamFile)
+        Files.createFile(baiFile)
+        Files.createDirectories(uuidFolder.resolve("roddyExecutionStore"))
+        Files.createDirectories(uuidFolder.resolve("qualitycontrol"))
+
+        // Setup link directory
+        Path linkDir = panCancerLinkFileService.getDirectoryPath(activeBam)
+        Files.createDirectories(linkDir)
+        Files.createSymbolicLink(linkDir.resolve(activeBam.bamFileName), bamFile)
+        Files.createSymbolicLink(linkDir.resolve(activeBam.baiFileName), baiFile)
+        Files.createSymbolicLink(linkDir.resolve("roddyExecutionStore"), uuidFolder.resolve("roddyExecutionStore"))
+        Files.createSymbolicLink(linkDir.resolve("qualitycontrol"), uuidFolder.resolve("qualitycontrol"))
+
+        when:
+        List<File> files = deletionService.deleteSeqTrack(lane1)
+        files.addAll(deletionService.deleteSeqTrack(lane2))
+        files.each {
+            it.delete()
+        }
+
+        then:
+        !SeqTrack.exists(lane1.id)
+        !SeqTrack.exists(lane2.id)
+        !RoddyBamFile.exists(withdrawnBam.id)
+
+        SeqTrack.exists(lane3.id)
+        SeqTrack.exists(lane4.id)
+        RoddyBamFile.exists(activeBam.id)
+
+        mwp.refresh()
+        mwp.seqTracks.containsAll([lane3, lane4])
+        !mwp.seqTracks.contains(lane1)
+        !mwp.seqTracks.contains(lane2)
+
+        Files.exists(uuidFolder)
+        Files.exists(bamFile)
+        Files.exists(baiFile)
+        new File(uuidFolder.toFile(), "roddyExecutionStore").exists()
+        new File(uuidFolder.toFile(), "qualitycontrol").exists()
+
+        Files.exists(linkDir)
+        Files.exists(linkDir.resolve(activeBam.bamFileName))
+        Files.exists(linkDir.resolve(activeBam.baiFileName))
+        Files.exists(linkDir.resolve("roddyExecutionStore"))
+        Files.exists(linkDir.resolve("qualitycontrol"))
     }
 }

@@ -38,6 +38,7 @@ import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerWorkFileService
 import de.dkfz.tbi.otp.infrastructure.alignment.ExternalAlignmentWorkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerLinkFileService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.*
@@ -76,6 +77,7 @@ class DeletionService {
     RawSequenceDataWorkFileService rawSequenceDataWorkFileService
     RawSequenceDataViewFileService rawSequenceDataViewFileService
     ExternalAlignmentWorkFileService externalAlignmentWorkFileService
+    PanCancerLinkFileService panCancerLinkFileService
 
     @CompileDynamic
     void deleteProjectContent(Project project) {
@@ -388,12 +390,11 @@ class DeletionService {
             mergingWorkPackage.save(flush: true, validate: false) // since object is deleted later, no validation is necessary
             deleteQualityAssessmentInfoForAbstractBamFile(bamFile)
             deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(bamFile.id.toString(), bamFile.class.name))
-            Path baseDir = abstractBamFileService.getBaseDirectory(bamFile)
-            if (Files.exists(baseDir)) {
+            Path baseDir = panCancerLinkFileService.getDirectoryPath(bamFile)
+            if (Files.exists(baseDir) && bamFile.isMostRecentBamFile()) {
                 Files.list(baseDir).findAll {
                     it.fileName.toString() != ExternallyProcessedBamFile.NON_OTP
                 }.each {
-                    println "found: ${it}"
                     dirsToDelete << new File(it.toString())
                 }
             }

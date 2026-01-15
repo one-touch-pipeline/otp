@@ -98,8 +98,7 @@ class DomainFactory {
      */
     static int counter = 0
 
-    private
-    static <T> T createDomainObject(Class<T> domainClass, Map defaultProperties, Map parameterProperties, boolean saveAndValidate = true) {
+    private static <T> T createDomainObject(Class<T> domainClass, Map defaultProperties, Map parameterProperties, boolean saveAndValidate = true) {
         T domain = domainClass.newInstance()
         defaultProperties.each { String key, def value ->
             if (!parameterProperties.containsKey(key)) {
