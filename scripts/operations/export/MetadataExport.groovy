@@ -419,7 +419,7 @@ class MetaDataExport {
     String getMetadata(Collection<RawSequenceFile> rawSequenceFiles, ExportColumnsEnum exportColumns, Project reimportProject) {
         MetaDataKey.list()
         boolean reimport = exportColumns == ExportColumnsEnum.REIMPORT_COLUMNS
-        Collection<Map<String, String>> allProperties = rawSequenceFiles.collect { getMetadata(it, reimport, reimportProject) }
+        Collection<Map<String, String>> allProperties = rawSequenceFiles.collect { getMetadata(it, reimport, reimportProject, exportColumns) }
 
         List<String> allColumnHeaders = MetaDataColumn.values()*.name() + allProperties*.keySet().flatten().sort().unique()
         List<String> headers = determineHeaders(exportColumns, allColumnHeaders).unique()
@@ -447,7 +447,7 @@ class MetaDataExport {
         return allColumnHeaders.unique()
     }
 
-    Map<String, String> getMetadata(RawSequenceFile rawSequenceFile, Boolean reimport, Project reimportProject) {
+    Map<String, String> getMetadata(RawSequenceFile rawSequenceFile, Boolean reimport, Project reimportProject, ExportColumnsEnum exportColumns) {
         Map<String, String> metadataValues = [:]
         MetaDataEntry.findAllBySequenceFile(rawSequenceFile).each {
             String value = (it.value == "N.A.") ? "" : it.value
@@ -460,11 +460,18 @@ class MetaDataExport {
             }
         }
 
-        put(FASTQ_FILE, rawSequenceDataWorkFileService.getFilePath(rawSequenceFile)?.toString()?.replaceAll('//+', '/'))
+        Path fastqPath = rawSequenceDataWorkFileService.getFilePath(rawSequenceFile)
+        String fastqValue = fastqPath?.toString()?.replaceAll('//+', '/')
+        if (exportColumns == ExportColumnsEnum.WHITE_LISTED_COLUMNS && fastqValue) {
+            fastqValue = Paths.get(fastqValue).fileName.toString()
+        }
+        put(FASTQ_FILE, fastqValue)
         put(MD5, rawSequenceFile.fastqMd5sum)
         put(READ, (rawSequenceFile.indexFile ? 'I' : '') + rawSequenceFile.mateNumber?.toString())
 
         SeqTrack seqTrack = rawSequenceFile.seqTrack
+        put(SAMPLE_TYPE, seqTrack.sampleType.name)
+
         List<SpeciesWithStrain> speciesList = []
         if (rawSequenceFile.individual.species) {
             speciesList.add(rawSequenceFile.individual.species)
@@ -480,8 +487,7 @@ class MetaDataExport {
             put(FILE_EXISTS, rawSequenceFile.fileExists.toString())
             put(SWAPPED, seqTrack.swapped.toString())
 
-            metadataValues.put('OTP_PID', seqTrack.individual.pid)
-            metadataValues.put('OTP_SAMPLE_TYPE', seqTrack.sampleType.name)
+            put(PATIENT_ID, seqTrack.individual.pid)
             put(PROJECT, seqTrack.project.name)
             put(SPECIES, speciesList ? speciesList*.importAlias*.first().join(' + ') : '')
         } else {
