@@ -26,6 +26,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.dataprocessing.BamImportInstance
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
 class BamMetadataImportController {
@@ -102,7 +103,16 @@ class BamMetadataControllerSubmitCommand {
         path blank: false
         submit nullable: true
         md5 nullable: true
-        furtherFilePaths nullable: true
+        furtherFilePaths nullable: true, validator: { List<String> paths ->
+            if (paths) {
+                for (String path in paths) {
+                    if (path && !OtpPathValidator.isValidRelativePath(path)) {
+                        return 'bamMetadata.furtherFilePaths.relativePath.invalid'
+                    }
+                }
+            }
+            return true
+        }
     }
 
     void setPath(String path) {

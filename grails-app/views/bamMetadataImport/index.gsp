@@ -152,7 +152,7 @@
                         <div class="field">
                             <g:textField name="furtherFilePaths" style="width: 1000px" value="${file}"/>
                             <g:if test="${i == 0}">
-                                <button class="add-field">+</button>
+                                <button class="add-field">+</button><br/>
                                 <label style="color: red"><g:message code="bamMetadataImport.furtherFile.info"/></label>
                             </g:if>
                             <g:else>
