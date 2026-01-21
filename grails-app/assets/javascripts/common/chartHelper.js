@@ -97,6 +97,8 @@ $.otp.chart = {
   },
 
   destroyChartOnElementIfExists(elementId) {
+    'use strict';
+
     const chart = Chart.getChart(elementId);
     if (chart) {
       chart.destroy();

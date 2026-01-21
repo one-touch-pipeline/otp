@@ -552,14 +552,22 @@ $.otp.applySelect2 = function (jqSelection) {
  * @param input is a delimited string
  * @returns an array of the split input
  */
-$.otp.parseDelimitedStringToArray = (input) => input.trim().split(/[\s,;]+/).filter((o) => o.trim());
+$.otp.parseDelimitedStringToArray = (input) => {
+  'use strict';
+
+  return input.trim().split(/[\s,;]+/).filter((o) => o.trim());
+};
 
 /**
  * Parse the input string array delimited with whitespace ([ \t\r\n\f]), comma or semicolon to an array or arrays
  * @param input is a string array
  * @returns an array of arrays containing the split input
  */
-$.otp.parseDelimitedStringArrayToArrays = (input) => input.map((string) => $.otp.parseDelimitedStringToArray(string));
+$.otp.parseDelimitedStringArrayToArrays = (input) => {
+  'use strict';
+
+  return input.map((string) => $.otp.parseDelimitedStringToArray(string));
+};
 
 /**
  * Parse the input multi line string delimited by new lines and
@@ -567,8 +575,11 @@ $.otp.parseDelimitedStringArrayToArrays = (input) => input.map((string) => $.otp
  * @param input is a multiline (/n) string split by delimiters
  * @returns an array of arrays containing the split input
  */
-$.otp.parseDelimitedMultiLineStringToArrays =
-  (input) => $.otp.parseDelimitedStringArrayToArrays(input.split('\n').filter(String));
+$.otp.parseDelimitedMultiLineStringToArrays = (input) => {
+  'use strict';
+
+  return $.otp.parseDelimitedStringArrayToArrays(input.split('\n').filter(String));
+};
 
 $(document).ready(() => {
   'use strict';

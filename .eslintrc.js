@@ -34,6 +34,7 @@ const lintRules = {
   'no-undef': 'off',
   'func-names': 'off',
   'no-use-before-define': 'off',
+  'no-alert': 'off',
   strict: ['error', 'function'],
   'no-console': 'error'
 };

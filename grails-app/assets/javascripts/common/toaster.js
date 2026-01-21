@@ -31,6 +31,8 @@ $.otp.toaster = {
    * @returns {*|string}: converted message
    */
   convertMessageArray(message) {
+    'use strict';
+
     if (Array.isArray(message)) {
       return `<ul>${message.map((msgElement) => `<li>${msgElement}</li>`).join('')}</ul>`;
     }
