@@ -222,11 +222,7 @@ $(() => {
 
   $('#selectAll').on('click', (e) => {
     const checkboxes = $('input.tableCheckbox:not([disabled])');
-    const { checked } = e.target;
-    checkboxes.each((i, el) => {
-      // eslint-disable-next-line no-param-reassign
-      el.checked = checked;
-    });
+    checkboxes.prop('checked', e.target.checked);
   });
 
   $('#bulk').on('submit', (e) => {

@@ -43,7 +43,10 @@ function syncWorkflowStepData() {
 
       if (!result || Object.keys(result).length === 0) {
         noDataAlert.show();
+        $('#selectAll').prop('checked', false).prop('disabled', true);
+        $('#totalEntries').text(0);
       } else {
+        $('#selectAll').prop('disabled', false);
         renderStepDataTable(result);
       }
     },
@@ -62,6 +65,10 @@ function renderStepDataTable(steps) {
 
   const table = $('#jobTable');
   const dataTable = table.DataTable();
+
+  dataTable.clear();
+  $('#totalEntries').text(steps.length);
+  $('#selectAll').prop('checked', false);
 
   steps.forEach((step) => {
     dataTable.row.add([
@@ -351,4 +358,15 @@ $(document).ready(() => {
 
   initializeDataTable();
   syncWorkflowStepData();
+
+  $('#selectAll').on('click', (e) => {
+    const checkboxes = $('input.tableCheckbox:not([disabled])');
+    checkboxes.prop('checked', e.target.checked);
+  });
+
+  $('#jobTable').on('change', '.tableCheckbox', () => {
+    const allCheckboxes = $('input.tableCheckbox:not([disabled])');
+    const checkedCheckboxes = $('input.tableCheckbox:checked');
+    $('#selectAll').prop('checked', allCheckboxes.length === checkedCheckboxes.length);
+  });
 });

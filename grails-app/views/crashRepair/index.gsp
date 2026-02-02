@@ -69,10 +69,15 @@
                 </button>
             </div>
 
+            <div class="mt-2 mb-2">
+                <strong><g:message code ="crashRepair.totalEntries"/></strong>
+                <span id="totalEntries">0</span>
+            </div>
+
             <table id="jobTable" class="table table-sm table-hover table-striped table-bordered">
                 <thead>
                 <tr>
-                    <th scope="col"></th>
+                    <th scope="col"><label for="selectAll"></label><input type="checkbox" name="selectAll" id="selectAll"></th>
                     <th scope="col"><g:message code="crashRepair.table.workflow"/></th>
                     <th scope="col"><g:message code="crashRepair.table.name"/></th>
                     <th scope="col"><g:message code="crashRepair.table.step"/></th>
