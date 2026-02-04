@@ -37,11 +37,13 @@ import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+import de.dkfz.tbi.otp.ngsdata.MetadataImportController.ValidationParametersDTO
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructureBeanName
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators.DataFileExistenceValidator
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrainService
 import de.dkfz.tbi.otp.project.Project
@@ -55,7 +57,6 @@ import de.dkfz.tbi.otp.utils.spreadsheet.*
 import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.otp.workflow.WorkflowCreateState
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
-
 import java.nio.file.*
 import java.util.logging.Level
 import java.util.regex.Matcher
@@ -111,14 +112,15 @@ class MetadataImportService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     MetadataValidationContext validateWithAuth(ContentWithPathAndProblems contentWithPathAndProblems,
-                                               DirectoryStructureBeanName directoryStructure, boolean ignoreAlreadyKnownMd5sum = false) {
+                                               DirectoryStructureBeanName directoryStructure,
+                                               ValidationParametersDTO validationParameters = null) {
         MetadataValidationContext context = fastqMetadataValidationService.createFromContent(
                 contentWithPathAndProblems,
                 getDirectoryStructure(directoryStructure),
                 directoryStructure.displayName,
-                ignoreAlreadyKnownMd5sum
+                validationParameters?.ignoreMd5sumError ?: false
         )
-        return validate(context)
+        return validate(context, validationParameters)
     }
 
     MetadataValidationContext validatePath(Path metadataPath, DirectoryStructureBeanName directoryStructure, boolean ignoreAlreadyKnownMd5sum = false) {
@@ -131,18 +133,19 @@ class MetadataImportService {
         return validate(context)
     }
 
-    private MetadataValidationContext validate(MetadataValidationContext context) {
+    private MetadataValidationContext validate(MetadataValidationContext context, ValidationParametersDTO validationParameters = null) {
         if (context.spreadsheet) {
             Long hash = System.currentTimeMillis()
             Long startTimeAll = System.currentTimeMillis()
             int dataCount = context.spreadsheet.dataRows.size()
             log.debug("start validation of ${dataCount} lines of ${context.metadataFile}, validation started : ${hash}")
-            metadataValidators.each {
+            List<MetadataValidator> activeValidators = getActiveValidators(validationParameters)
+            activeValidators.each {
                 Long startTime = System.currentTimeMillis()
                 it.validate(context)
                 log.debug("finished ${it.class} took ${System.currentTimeMillis() - startTime}ms for ${dataCount} lines, validation started : ${hash}")
             }
-            log.debug("finished all ${metadataValidators.size()} validators for ${dataCount} lines took " +
+            log.debug("finished all ${activeValidators.size()} validators for ${dataCount} lines took " +
                     "${System.currentTimeMillis() - startTimeAll}ms, validation started : ${hash}")
         }
         return context
@@ -151,17 +154,17 @@ class MetadataImportService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<ValidateAndImportResult> validateAndImport(List<ContentWithProblemsAndPreviousMd5sum> metadataPaths,
                                                     DirectoryStructureBeanName directoryStructure,
-                                                    boolean ignoreWarnings, String ticketNumber, String seqCenterComment,
+                                                    String ticketNumber, String seqCenterComment,
                                                     boolean automaticNotification,
-                                                    boolean ignoreAlreadyKnownMd5sum = false) {
+                                                    ValidationParametersDTO validationParameters = null) {
         try {
             Long startTime = System.currentTimeMillis()
             Map<MetadataValidationContext, String> contexts = metadataPaths.collectEntries { ContentWithProblemsAndPreviousMd5sum pathWithMd5sum ->
-                MetadataValidationContext context = validateWithAuth(pathWithMd5sum.contentWithPathAndProblems, directoryStructure, ignoreAlreadyKnownMd5sum)
+                MetadataValidationContext context = validateWithAuth(pathWithMd5sum.contentWithPathAndProblems, directoryStructure, validationParameters)
                 return [(context): pathWithMd5sum.previousMd5sum]
             }
             contexts.collect { context, previousMd5Sum ->
-                mayImport(context, ignoreWarnings, previousMd5Sum)
+                mayImport(context, validationParameters?.ignoreWarnings ?: false, previousMd5Sum)
             }
 
             List<ValidateAndImportResult> results = contexts.collect { context, md5sum ->
@@ -197,6 +200,17 @@ class MetadataImportService {
     void updateFinalNotificationFlag(Ticket ticket, boolean finalNotificationSent) {
         ticket.finalNotificationSent = finalNotificationSent
         assert ticket.save(flush: true)
+    }
+
+    List<MetadataValidator> getActiveValidators(ValidationParametersDTO params) {
+        List<MetadataValidator> validators = metadataValidators as List<MetadataValidator>
+
+        if (params?.skipFileExistenceValidation) {
+            validators.removeAll { validator ->
+                validator instanceof DataFileExistenceValidator
+            }
+        }
+        return validators
     }
 
     protected Path createPathTargetForMetadataFile(MetadataValidationContext context, String ticketNumber) {

@@ -192,6 +192,19 @@
             </div>
         </div>
 
+        <div class="mb-3 row">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-10">
+                <div class="form-check" id="skip-file-existence-row">
+                    <input class="form-check-input" name="skipFileExistenceValidation" type="checkbox" id="skip-file-existence-input">
+                    <label for="skip-file-existence-input" class="form-check-label">
+                        <g:message code="metadataImport.skipFileExistenceValidation.label"/>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+
         <button class="btn btn-primary" id="validate-btn" type="submit" value="Validate">
             <span id="validate-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
             Validate

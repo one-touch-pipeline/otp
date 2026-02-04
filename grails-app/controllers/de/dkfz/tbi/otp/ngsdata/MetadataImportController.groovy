@@ -119,8 +119,10 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
                 }
             }
 
+            ValidationParametersDTO validationParams = new ValidationParametersDTO(cmd)
+
             List<MetadataValidationContext> metadataValidationContexts = contentsWithPathAndProblems.collect { contentWithPathAndProblems ->
-                metadataImportService.validateWithAuth(contentWithPathAndProblems, cmd.directoryStructure, cmd.ignoreMd5sumError)
+                metadataImportService.validateWithAuth(contentWithPathAndProblems, cmd.directoryStructure, validationParams)
             }
 
             render([
@@ -158,9 +160,11 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
                             ] as ContentWithProblemsAndPreviousMd5sum
                         }
                     }
+                    ValidationParametersDTO validationParams = new ValidationParametersDTO(cmd)
+
                     List<ValidateAndImportResult> validateAndImportResults = metadataImportService.validateAndImport(
-                            contentsWithProblemsAndPreviousMd5sum, cmd.directoryStructure, cmd.ignoreWarnings,
-                            cmd.ticketNumber, cmd.seqCenterComment, cmd.automaticNotification, cmd.ignoreMd5sumError
+                            contentsWithProblemsAndPreviousMd5sum, cmd.directoryStructure, cmd.ticketNumber,
+                            cmd.seqCenterComment, cmd.automaticNotification, validationParams
                     )
                     log.debug("No problem")
                     if (validateAndImportResults.size() == 1) {
@@ -448,6 +452,18 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
             this.level = LogLevel.normalize(problem.level).name
         }
     }
+
+    class ValidationParametersDTO {
+        boolean skipFileExistenceValidation = false
+        boolean ignoreMd5sumError = false
+        boolean ignoreWarnings = false
+
+        ValidationParametersDTO(MetadataImportControllerSubmitCommand cmd) {
+            this.skipFileExistenceValidation = cmd.skipFileExistenceValidation
+            this.ignoreMd5sumError = cmd.ignoreMd5sumError
+            this.ignoreWarnings = cmd.ignoreWarnings
+        }
+    }
 }
 
 class BlackListedIlseCommand implements Validateable {
@@ -538,7 +554,7 @@ class MetadataImportControllerSubmitCommand implements Validateable {
     String seqCenterComment
     boolean automaticNotification = true
     boolean ignoreWarnings = false
-
+    boolean skipFileExistenceValidation = false
     boolean ignoreMd5sumError = false
 
     static constraints = {

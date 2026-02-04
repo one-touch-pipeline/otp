@@ -46,6 +46,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryS
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesInGpcfSpecificStructure
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators.DataFileExistenceValidator
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrainService
 import de.dkfz.tbi.otp.project.Project
@@ -208,7 +209,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
 
         when:
         List<ValidateAndImportResult> results = service.validateAndImport(
-                [pathWithMd5sum], directoryStructureName, false, TICKET_NUMBER, null, automaticNotification)
+                [pathWithMd5sum], directoryStructureName, TICKET_NUMBER, null, automaticNotification)
 
         then:
         results[0].context.metadataFile == metadataFile.fileName
@@ -237,8 +238,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         service.fileSystemService = new TestFileSystemService()
 
         when:
-        service.validateAndImport([pathWithMd5sum], directoryStructureName,
-                false, TICKET_NUMBER, null, true)
+        service.validateAndImport([pathWithMd5sum], directoryStructureName, TICKET_NUMBER, null, true)
 
         then:
         thrown(MetadataFileImportException)
@@ -249,13 +249,15 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         DirectoryStructure directoryStructure = [:] as DirectoryStructure
         DirectoryStructureBeanName directoryStructureName = DirectoryStructureBeanName.SAME_DIRECTORY
         createSeqCenter(autoImportable: false)
+
         byte[] content1 = 'a\tb\ta'.bytes
         Path path1 = Paths.get("import1_meta.tsv")
-        MetadataValidationContext context1 = MetadataValidationContextFactory.createContext([metadataFile: Paths.get("import1_meta.tsv"), content: content1])
+        MetadataValidationContext context1 = MetadataValidationContextFactory.createContext([metadataFile: path1, content: content1])
         MetaDataFile metadataFile1 = DomainFactory.createMetaDataFile()
+
         byte[] content2 = 'c\td\te'.bytes
         Path path2 = Paths.get("import2_meta.tsv")
-        MetadataValidationContext context2 = MetadataValidationContextFactory.createContext([metadataFile: path2, content: 'c\td\te'.bytes])
+        MetadataValidationContext context2 = MetadataValidationContextFactory.createContext([metadataFile: path2, content: content2])
         MetaDataFile metadataFile2 = DomainFactory.createMetaDataFile()
 
         List<ContentWithPathAndProblems> contentWithProblems = [
@@ -272,8 +274,6 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
 
         MetadataImportService service = Spy(MetadataImportService) {
             2 * copyMetadataFile(_, _) >> null
-            1 * validateWithAuth(contentWithProblems[0], directoryStructureName, false) >> { assert imported == 0; context1 }
-            1 * validateWithAuth(contentWithProblems[1], directoryStructureName, false) >> { assert imported == 0; context2 }
             1 * importMetadataFile(context1, FastqImportInstance.ImportMode.MANUAL, TICKET_NUMBER, null, true, _) >> {
                 imported++
                 metadataFile1
@@ -284,16 +284,31 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
             }
             0 * importMetadataFile(*_)
         }
+
         service.applicationContext = Mock(ApplicationContext) {
             getBean(directoryStructureName.beanName, DirectoryStructure) >> directoryStructure
+            getBeansOfType(MetadataValidator) >> [:]
         }
+
         service.fileSystemService = new TestFileSystemService()
         service.configService = new TestConfigService([(OtpProperty.PATH_METADATA_STORAGE): '/metadata-storage'])
         service.configService.processingOptionService = new ProcessingOptionService()
 
+        service.fastqMetadataValidationService = Mock(FastqMetadataValidationService) {
+            createFromContent(contentWithProblems[0], directoryStructure, directoryStructureName.displayName, false) >> {
+                assert imported == 0
+                context1
+            }
+            createFromContent(contentWithProblems[1], directoryStructure, directoryStructureName.displayName, false) >> {
+                assert imported == 0
+                context2
+            }
+        }
+
         when:
         List<ValidateAndImportResult> validateAndImportResults = service.validateAndImport(
-                contentWithProblemsAndPreviousMd5sums, directoryStructureName, false, TICKET_NUMBER, null, true)
+                contentWithProblemsAndPreviousMd5sums, directoryStructureName,
+                TICKET_NUMBER, null, true, null)
 
         then:
         validateAndImportResults*.context == [context1, context2]
@@ -448,7 +463,7 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
             0 * _
         }
         service.applicationContext = Mock(ApplicationContext) {
-            4 * getBeansOfType(MetadataValidator) >> [:]
+            2 * getBeansOfType(MetadataValidator) >> [:]
         }
         service.ticketService = Mock(TicketService) {
             2 * createOrResetTicket(_, _, _) >> ticket
@@ -527,6 +542,64 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
         MultiImportFailedException e = thrown()
         containSame(e.failedValidations, [context1, context3])
         containSame(e.allPaths, [context1, context2, context3]*.metadataFile)
+    }
+
+    void "getActiveValidators returns all validators when no parameters provided"() {
+        given:
+        MetadataValidator validator1 = Mock(MetadataValidator)
+        MetadataValidator validator2 = Mock(MetadataValidator)
+        DataFileExistenceValidator dataFileExistenceValidator = Mock(DataFileExistenceValidator)
+
+        Map<String, MetadataValidator> allValidators = [
+                'validator1': validator1,
+                'validator2': validator2,
+                'dataFileExistenceValidator': dataFileExistenceValidator,
+        ]
+
+        MetadataImportService service = new MetadataImportService()
+        service.applicationContext = Mock(ApplicationContext) {
+            1 * getBeansOfType(MetadataValidator) >> allValidators
+        }
+
+        when:
+        List<MetadataValidator> result = service.getActiveValidators(null)
+
+        then:
+        result.size() == 3
+        result.contains(validator1)
+        result.contains(validator2)
+        result.contains(dataFileExistenceValidator)
+    }
+
+    void "getActiveValidators excludes DataFileExistenceValidator when skipFileExistenceValidation is true"() {
+        given:
+        MetadataValidator validator1 = Mock(MetadataValidator)
+        MetadataValidator validator2 = Mock(MetadataValidator)
+        DataFileExistenceValidator dataFileExistenceValidator = Mock(DataFileExistenceValidator)
+
+        Map<String, MetadataValidator> allValidators = [
+                'validator1': validator1,
+                'validator2': validator2,
+                'dataFileExistenceValidator': dataFileExistenceValidator,
+        ]
+
+        MetadataImportService service = new MetadataImportService()
+        service.applicationContext = Mock(ApplicationContext) {
+            1 * getBeansOfType(MetadataValidator) >> allValidators
+        }
+
+        def validationParams = Mock(MetadataImportController.ValidationParametersDTO) {
+            getSkipFileExistenceValidation() >> true
+        }
+
+        when:
+        List<MetadataValidator> result = service.getActiveValidators(validationParams)
+
+        then:
+        result.size() == 2
+        result.contains(validator1)
+        result.contains(validator2)
+        !result.any { it instanceof DataFileExistenceValidator }
     }
 
     @Unroll
