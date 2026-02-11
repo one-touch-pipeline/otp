@@ -87,10 +87,9 @@ class CellRangerService {
     void createInputDirectoryStructure(SingleCellBamFile singleCellBamFile) {
         String sampleName = singleCellBamFile.singleCellSampleName
 
-        FileSystem fileSystem = fileSystemService.remoteFileSystem
         String unixGroup = singleCellBamFile.project.unixGroup
 
-        Path sampleDirectory = fileSystem.getPath(singleCellBamFile.sampleDirectory.path)
+        Path sampleDirectory = cellRangerWorkFileService.getSampleDirectory(singleCellBamFile)
 
         fileService.deleteDirectoryRecursively(sampleDirectory) // delete dir if exist from previous run
         fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(sampleDirectory, unixGroup)
@@ -141,8 +140,9 @@ class CellRangerService {
         String localCores = processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_CELLRANGER_CORE_COUNT)
         String localMem = processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_CELLRANGER_CORE_MEM)
 
+        Path sampleDirectory = cellRangerWorkFileService.getSampleDirectory(singleCellBamFile)
         String fastqDirectories = singleCellBamFile.containedSeqTracks*.sampleIdentifier.unique().collect { String sampleIdentifier ->
-            new File(singleCellBamFile.sampleDirectory, sampleIdentifierForDirectoryStructure(sampleIdentifier)).absolutePath
+            sampleDirectory.resolve(sampleIdentifierForDirectoryStructure(sampleIdentifier))
         }.join(",")
 
         Map<String, String> parameters = [

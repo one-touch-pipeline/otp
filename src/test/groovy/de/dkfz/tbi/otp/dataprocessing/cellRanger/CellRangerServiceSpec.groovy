@@ -124,11 +124,14 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
 
         CellRangerService cellRangerService = new CellRangerService([
                 fileSystemService             : Mock(FileSystemService) {
-                    1 * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
                 rawSequenceDataViewFileService: Mock(RawSequenceDataViewFileService),
                 fileService                   : Mock(FileService),
+                cellRangerWorkFileService     : Mock(CellRangerWorkFileService) {
+                    1 * getSampleDirectory(singleCellBamFile) >> sampleDirectory
+                    0 * _
+                },
         ])
 
         when:
@@ -161,6 +164,51 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         1 * cellRangerService.fileService.createLink(mate4, filePath4, _, _)
     }
 
+    void "createInputDirectoryStructure, when using cellRangerWorkFileService, then creates UUID folder structure"() {
+        given:
+        new TestConfigService()
+
+        String sampleIdentifier = "sample123"
+        CellRangerMergingWorkPackage mwp = createMergingWorkPackage()
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithFastqFiles(mwp, [sampleIdentifier: sampleIdentifier])
+        SingleCellBamFile singleCellBamFile = createBamFile([workPackage: mwp, seqTracks: [seqTrack]])
+
+        Path uuidBasedSampleDirectory = tempDir.resolve("uuid-123e4567-e89b-12d3-a456-426614174000").resolve("sample")
+        Path expectedSampleSubDir = uuidBasedSampleDirectory.resolve(sampleIdentifier)
+
+        String file1 = 'file1.fastq.gz'
+        String file2 = 'file2.fastq.gz'
+        Path filePath1 = tempDir.resolve(file1)
+        Path filePath2 = tempDir.resolve(file2)
+
+        CellRangerService cellRangerService = new CellRangerService([
+                rawSequenceDataViewFileService: Mock(RawSequenceDataViewFileService) {
+                    2 * getFilePath(_) >>> [filePath1, filePath2]
+                    0 * _
+                },
+                fileService                   : Mock(FileService) {
+                    1 * deleteDirectoryRecursively(uuidBasedSampleDirectory)
+                    1 * createDirectoryRecursivelyAndSetPermissionsViaBash(uuidBasedSampleDirectory, _)
+                    1 * createDirectoryRecursivelyAndSetPermissionsViaBash(expectedSampleSubDir, _)
+                    2 * createLink(_, _, _, _)
+                    0 * _
+                },
+                cellRangerWorkFileService     : Mock(CellRangerWorkFileService) {
+                    1 * getSampleDirectory(singleCellBamFile) >> uuidBasedSampleDirectory
+                    0 * _
+                },
+        ])
+
+        when:
+        cellRangerService.createInputDirectoryStructure(singleCellBamFile)
+
+        then:
+        noExceptionThrown()
+
+        and: "verify UUID folder structure is used instead of old direct path access"
+        uuidBasedSampleDirectory != singleCellBamFile.sampleDirectory.toPath()
+    }
+
     void "deleteOutputDirectoryStructureIfExists, if singleCellBamFile given, then delete the output directory"() {
         given:
         new TestConfigService()
@@ -168,10 +216,6 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         SingleCellBamFile singleCellBamFile = createBamFile()
 
         CellRangerService cellRangerService = new CellRangerService([
-                fileSystemService        : Mock(FileSystemService) {
-                    _ * getRemoteFileSystem() >> FileSystems.default
-                    0 * _
-                },
                 fileService              : Mock(FileService),
                 cellRangerWorkFileService: Mock(CellRangerWorkFileService) {
                     _ * getOutputDirectory(singleCellBamFile) >> null
@@ -273,6 +317,8 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithFastqFiles(mwp,
                 [sampleIdentifier: sampleIdentifier,]
         )
+        Path resultDirectory = tempDir.resolve('result')
+        Path sampleDirectory = tempDir.resolve('sample')
         SingleCellBamFile singleCellBamFile = createBamFile([workPackage: mwp, seqTracks: [seqTrack1]])
 
         CellRangerService cellRangerService = new CellRangerService([
@@ -283,6 +329,13 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
                     1 * findOptionAsString(ProcessingOption.OptionName.PIPELINE_CELLRANGER_CORE_COUNT) >> '15'
                     1 * findOptionAsString(ProcessingOption.OptionName.PIPELINE_CELLRANGER_CORE_MEM) >> '60'
                 },
+                cellRangerWorkFileService: Mock(CellRangerWorkFileService) {
+                    _ * getResultDirectory(singleCellBamFile) >> resultDirectory
+                    _ * getSampleDirectory(singleCellBamFile) >> sampleDirectory
+                },
+                fileService: Mock(FileService) {
+                    _ * toFile(_) >> { Path path -> path.toFile() }
+                },
         ])
 
         when:
@@ -290,7 +343,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
 
         then:
         map[CellRangerParameters.ID.parameterName] == singleCellBamFile.id.toString()
-        map[CellRangerParameters.FASTQ.parameterName] == new File(singleCellBamFile.sampleDirectory, "abc________________def").absolutePath
+        map[CellRangerParameters.FASTQ.parameterName] == sampleDirectory.resolve("abc________________def").toFile().absolutePath
         map[CellRangerParameters.TRANSCRIPTOME.parameterName] == indexFile.absolutePath
         map[CellRangerParameters.SAMPLE.parameterName] == singleCellBamFile.singleCellSampleName
         map[CellRangerParameters.LOCAL_CORES.parameterName] ==~ /\d+/
