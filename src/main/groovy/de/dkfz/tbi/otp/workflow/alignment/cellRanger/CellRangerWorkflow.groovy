@@ -56,6 +56,7 @@ class CellRangerWorkflow extends AlignmentWorkflow implements LinearWorkflow {
                 // CellRangerValidationJob,
                 // CellRangerParseJob,
                 // CellRangerCleanUpJob,
+                // CellRangerAclCleanUpJob,
                 SetCorrectPermissionJob,
                 CalculateSizeJob,
                 // CellRangerLinkJob,
