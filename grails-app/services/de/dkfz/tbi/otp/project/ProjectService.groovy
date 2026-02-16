@@ -860,8 +860,19 @@ echo 'OK'
 
     @CompileDynamic
     Map<Project, List<User>> getExpiredProjectsWithPIs() {
-        List<Project> projects = Project.findAllByStorageUntilLessThanAndStateNotInList(LocalDate.now(), [Project.State.DELETED, Project.State.ARCHIVED])
+        List<Project> projects = Project.findAllByStorageUntilLessThanAndStateNotInList(
+            LocalDate.now(), [Project.State.DELETED, Project.State.ARCHIVED])
+        return getProjectsWithPIs(projects)
+    }
 
+    @CompileDynamic
+    Map<Project, List<User>> getProjectsPastDeletionDateWithPIs() {
+        List<Project> projects = Project.findAllByDeleteOnLessThanAndStateNotEqual(LocalDate.now(), Project.State.DELETED)
+        return getProjectsWithPIs(projects)
+    }
+
+    @CompileDynamic
+    private Map<Project, List<User>> getProjectsWithPIs(List<Project> projects) {
         if (projects.empty) {
             return [:]
         }
