@@ -29,7 +29,7 @@
 </head>
 <body>
     <div class="container-fluid otp-main-container">
-        <g:render template="/templates/messages"/>
+        <g:render template="/layouts/messages"/>
 
         <h3><g:message code="serverShutdown.title"/></h3>
         <p><g:message code="serverShutdown.description"/></p>
@@ -42,7 +42,7 @@
                     <g:form action="planShutdown">
                         <div class="form-group">
                             <label for="reasonInput"><g:message code="serverShutdown.reasonLabel"/></label>
-                            <input type="text" name="reason" class="form-control" id="reasonInput" aria-describedby="reasonHelp">
+                            <input type="text" name="reason" class="form-control" id="reasonInput" aria-describedby="reasonHelp" required>
                             <small id="reasonHelp" class="form-text text-muted"><g:message code="serverShutdown.reason"/></small>
                         </div>
                         <button type="submit" class="btn btn-primary"><g:message code="serverShutdown.planButton"/></button>

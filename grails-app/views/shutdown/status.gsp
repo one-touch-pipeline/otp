@@ -29,7 +29,7 @@
 </head>
 <body>
     <div class="container-fluid otp-main-container">
-        <g:render template="/templates/messages"/>
+        <g:render template="/layouts/messages"/>
         <div class="card">
             <div class="card-header">
                 <i class="bi bi-info-circle align-text-bottom"></i> <g:message code="serverShutdown.shutdownInformation"/><br>
@@ -48,7 +48,7 @@
         <p><g:message code="serverShutdown.old.descriptionRunning"/></p>
         <div class="card">
             <div class="card-header">
-                <span class="badge badge-secondary"><g:message code="serverShutdown.old.badgeOld"/></span> <g:message code="serverShutdown.runningJobsNotResumable"/><br>
+                <span class="badge badge-secondary"><g:message code="serverShutdown.old.badgeOld"/></span> <g:message code="serverShutdown.runningJobsNotResumable"/> (${notResumableJobs.size()})<br>
                 <small class="text-muted"><g:message code="serverShutdown.notResumableDescription"/></small>
             </div>
             <div class="card-body">
@@ -75,7 +75,7 @@
         <div class="empty-divider"></div>
         <div class="card">
             <div class="card-header">
-                <span class="badge badge-secondary"><g:message code="serverShutdown.old.badgeOld"/></span> <g:message code="serverShutdown.runningJobsResumable"/><br>
+                <span class="badge badge-secondary"><g:message code="serverShutdown.old.badgeOld"/></span> <g:message code="serverShutdown.runningJobsResumable"/> (${resumableJobs.size()})<br>
                 <small class="text-muted"><g:message code="serverShutdown.resumableDescription"/></small>
             </div>
             <div class="card-body">
@@ -104,7 +104,7 @@
         <p><g:message code="serverShutdown.new.description"/></p>
         <div class="card">
             <div class="card-header">
-                <span class="badge badge-primary"><g:message code="serverShutdown.new.badge"/></span> <g:message code="serverShutdown.runningJobsNotResumable"/><br>
+                <span class="badge badge-primary"><g:message code="serverShutdown.new.badge"/></span> <g:message code="serverShutdown.runningJobsNotResumable"/> (${notRestartableRunningWorkflowSteps.size()})<br>
                 <small class="text-muted"><g:message code="serverShutdown.notResumableDescription"/></small>
             </div>
             <div class="card-body">
@@ -131,7 +131,7 @@
         <div class="empty-divider"></div>
         <div class="card">
             <div class="card-header">
-                <span class="badge badge-primary"><g:message code="serverShutdown.new.badge"/></span> <g:message code="serverShutdown.runningJobsResumable"/><br>
+                <span class="badge badge-primary"><g:message code="serverShutdown.new.badge"/></span> <g:message code="serverShutdown.runningJobsResumable"/> (${restartableRunningWorkflowSteps.size()})<br>
                 <small class="text-muted"><g:message code="serverShutdown.resumableDescription"/></small>
             </div>
             <div class="card-body">
