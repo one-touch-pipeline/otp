@@ -54,7 +54,8 @@ class SingleCellMappingFileService {
         String value = singleCellService.mappingEntry(rawSequenceFile)
 
         if (!Files.exists(mappingFile)) {
-            fileService.createFileWithContent(mappingFile, "", FileService.OWNER_READ_WRITE_GROUP_READ_FILE_PERMISSION)
+            String unixGroup = rawSequenceFile.project.unixGroup
+            fileService.createFileWithContent(mappingFile, "", unixGroup, FileService.OWNER_READ_WRITE_GROUP_READ_FILE_PERMISSION)
         }
 
         if (!Files.readString(mappingFile).contains(value)) {

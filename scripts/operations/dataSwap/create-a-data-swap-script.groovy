@@ -21,6 +21,7 @@
  */
 
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataswap.AbstractDataSwapService
 import de.dkfz.tbi.otp.dataswap.ScriptBuilder
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -34,6 +35,7 @@ import java.nio.file.Paths
 ConfigService configService = ctx.configService
 FileService fileService = ctx.fileService
 FileSystemService fileSystemService = ctx.fileSystemService
+ProcessingOptionService processingOptionService = ctx.processingOptionService
 
 /**
  * Generation Script which allow:
@@ -162,7 +164,7 @@ Closure<Integer> newSampleSwapScript = { ScriptBuilder builder, Project newProje
 
 Closure<ScriptBuilder> createScripts = { String swapLabel ->
     // buffers for all the changes we are preparing
-    ScriptBuilder builder = new ScriptBuilder(configService, fileService, fileSystemService, Paths.get('sample_swap', swapLabel))
+    ScriptBuilder builder = new ScriptBuilder(configService, fileService, fileSystemService, processingOptionService, Paths.get('sample_swap', swapLabel))
 
     Set<String> createdPids = [] as Set
     Set<String> createdSamples = [] as Set

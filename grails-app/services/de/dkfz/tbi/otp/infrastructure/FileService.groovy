@@ -435,11 +435,7 @@ class FileService {
 
     /**
      * Set the permission of the path to the given permission.
-     *
-     * The path have to be absolute and have to exist,
-     *
-     * For directories with setgid bit you need to use {@link #setPermissionViaBash(Path, String)},
-     * since that is not possible with {@link PosixFilePermission}
+     * The path has to be absolute and has to exist
      */
     void setPermission(Path path, Set<PosixFilePermission> permissions) {
         assert path
@@ -458,32 +454,29 @@ class FileService {
      *
      * It won't fail if the directory already exist, but then the group and permissions are not changed.
      */
-    void createDirectoryRecursivelyAndSetPermissionsViaBash(Path path, String groupString = '',
+    void createDirectoryRecursivelyAndSetPermissionsViaBash(Path path, String unixGroup,
                                                             String permissions = DEFAULT_DIRECTORY_PERMISSION_STRING) {
         assert path
         assert path.absolute
+        assert unixGroup?.trim(), "unixGroup must not be null or blank"
 
-        createDirectoryRecursivelyAndSetPermissionsViaBashInternal(path, groupString, permissions)
+        createDirectoryRecursivelyAndSetPermissionsViaBashInternal(path, unixGroup, permissions)
     }
 
-    private void createDirectoryRecursivelyAndSetPermissionsViaBashInternal(Path path, String groupString, String permissions) {
+    private void createDirectoryRecursivelyAndSetPermissionsViaBashInternal(Path path, String unixGroup, String permissions) {
         if (Files.exists(path)) {
             if (!Files.isDirectory(path)) {
                 throw new CreateDirectoryException("The path ${path} already exist, but is not a directory")
             }
         } else {
-            createDirectoryRecursivelyAndSetPermissionsViaBashInternal(path.parent, groupString, permissions)
+            createDirectoryRecursivelyAndSetPermissionsViaBashInternal(path.parent, unixGroup, permissions)
 
             try {
                 createDirectoryHandlingParallelCreationOfSameDirectory(path)
             } catch (IOException e) {
                 throw new CreateDirectoryException("Failed to create directory ${path}", e)
             }
-
-            // chgrp needs to be done before chmod, as chgrp resets setgid and setuid
-            if (groupString) {
-                setGroupViaBash(path, groupString)
-            }
+            setGroupViaBash(path, unixGroup)
             setPermissionViaBash(path, permissions)
         }
     }
@@ -505,11 +498,12 @@ class FileService {
                 .assertExitCodeZeroAndStderrEmpty().stdout.trim()
     }
 
-    void setGroupViaBash(Path path, String groupString) throws ChangeFileGroupException {
+    void setGroupViaBash(Path path, String unixGroup) throws ChangeFileGroupException {
+        assert unixGroup?.trim(), "unixGroup must not be null or blank"
         try {
-            remoteShellHelper.executeCommandReturnProcessOutput("chgrp -h ${groupString} ${path}").assertExitCodeZeroAndStderrEmpty()
+            remoteShellHelper.executeCommandReturnProcessOutput("chgrp -h ${unixGroup} ${path}").assertExitCodeZeroAndStderrEmpty()
         } catch (ProcessingException | AssertionError e) {
-            throw new ChangeFileGroupException("Failed to change group to ${groupString} for path ${path}", e)
+            throw new ChangeFileGroupException("Failed to change group to ${unixGroup} for path ${path}", e)
         }
     }
 
@@ -609,11 +603,13 @@ class FileService {
      * The path have to be absolute and may not exist yet. Missing parent directories are created automatically with the
      * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
      */
-    void createFileWithContent(Path path,
-                               String content,
-                               Set<PosixFilePermission> filePermission = DEFAULT_FILE_PERMISSION,
-                               boolean overwrite = false) {
-        createFileWithContent(path, content.bytes, filePermission, overwrite)
+    void createFileWithContent(
+            Path path,
+            String content,
+            String unixGroup,
+            Set<PosixFilePermission> filePermission = DEFAULT_FILE_PERMISSION,
+            boolean overwrite = false) {
+        createFileWithContent(path, content.bytes, unixGroup, filePermission, overwrite)
     }
 
     /**
@@ -622,11 +618,13 @@ class FileService {
      * The path must be absolute and may not exist yet. Missing parent directories will be created automatically using
      * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
      */
-    void createFileWithContent(Path path,
-                               List<String> content,
-                               Set<PosixFilePermission> filePermission = DEFAULT_FILE_PERMISSION,
-                               boolean overwrite = false) {
-        createFileWithContentCommonPartHelper(path, filePermission, overwrite) {
+    void createFileWithContent(
+            Path path,
+            List<String> content,
+            String unixGroup,
+            Set<PosixFilePermission> filePermission = DEFAULT_FILE_PERMISSION,
+            boolean overwrite = false) {
+        createFileWithContentCommonPartHelper(path, unixGroup, filePermission, overwrite) {
             Files.write(path, content)
         }
     }
@@ -637,21 +635,26 @@ class FileService {
      * The path have to be absolute and may not exist yet. Missing parent directories are created automatically with the
      * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
      */
-    void createFileWithContent(Path path,
-                               byte[] content,
-                               Set<PosixFilePermission> filePermission = DEFAULT_FILE_PERMISSION,
-                               boolean overwrite = false) {
-        createFileWithContentCommonPartHelper(path, filePermission, overwrite) {
+    void createFileWithContent(
+            Path path,
+            byte[] content,
+            String unixGroup,
+            Set<PosixFilePermission> filePermission = DEFAULT_FILE_PERMISSION,
+            boolean overwrite = false) {
+        createFileWithContentCommonPartHelper(path, unixGroup, filePermission, overwrite) {
             Files.write(path, content)
         }
     }
 
     // delete is for file system, not on domain class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
-    private void createFileWithContentCommonPartHelper(Path path,
-                                                       Set<PosixFilePermission> filePermission,
-                                                       boolean overwrite,
-                                                       Closure closure) {
+    private void createFileWithContentCommonPartHelper(
+            Path path,
+            String unixGroup,
+            Set<PosixFilePermission> filePermission,
+            boolean overwrite,
+            Closure closure
+    ) {
         assert path
         assert path.absolute
         if (overwrite) {
@@ -662,7 +665,7 @@ class FileService {
             assert !Files.exists(path)
         }
 
-        createDirectoryRecursivelyAndSetPermissionsViaBash(path.parent)
+        createDirectoryRecursivelyAndSetPermissionsViaBash(path.parent, unixGroup)
 
         try {
             closure()
@@ -672,6 +675,7 @@ class FileService {
             throw new CreateFileException("Creating of file ${path} failed", e)
         }
         setPermission(path, filePermission)
+        setGroupViaBash(path, unixGroup)
     }
 
     /**
@@ -684,10 +688,10 @@ class FileService {
      */
     // false positives, since rule can not recognize calling class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
-    Path createOrOverwriteScriptOutputFile(Path outputFolder, String fileName) {
+    Path createOrOverwriteScriptOutputFile(Path outputFolder, String fileName, String unixGroup) {
         Path p = outputFolder.resolve(fileName)
 
-        createDirectoryRecursivelyAndSetPermissionsViaBash(outputFolder)
+        createDirectoryRecursivelyAndSetPermissionsViaBash(outputFolder, unixGroup)
 
         if (Files.exists(p)) {
             Files.delete(p)
@@ -696,6 +700,7 @@ class FileService {
         // sftp does not support setting permission during creation, so it needs to be done afterwards.
         Files.createFile(p)
         Files.setPosixFilePermissions(p, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
+        setGroupViaBash(p, unixGroup)
         return p
     }
 
@@ -717,12 +722,12 @@ class FileService {
      *
      * @param link the path of the link
      * @param target the existing path the link should point to
-     * @param groupString the name of the unix group of the associated project
+     * @param unixGroup the name of the unix group of the associated project
      * @param options Option to adapt the behavior, see {@link CreateLinkOption}
      */
     // false positives, since rule can not recognize calling class
     @SuppressWarnings(['ExplicitFlushForDeleteRule', 'Instanceof'])
-    void createLink(Path link, Path target, String groupString = '', CreateLinkOption... options) {
+    void createLink(Path link, Path target, String unixGroup, CreateLinkOption... options) {
         assert link
         assert target
         assert link.absolute
@@ -750,7 +755,7 @@ class FileService {
                 target :
                 link.parent.relativize(target)
 
-        createDirectoryRecursivelyAndSetPermissionsViaBash(link.parent, groupString)
+        createDirectoryRecursivelyAndSetPermissionsViaBash(link.parent, unixGroup)
 
         // SFTP does not support creating symbolic links
         if (link.fileSystem.provider() instanceof SFTPFileSystemProvider) {
@@ -759,6 +764,7 @@ class FileService {
         } else {
             Files.createSymbolicLink(link, targetPath)
         }
+        setGroupViaBash(link, unixGroup)
     }
 
     /**

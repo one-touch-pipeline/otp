@@ -24,6 +24,7 @@ package migration
 import groovy.sql.Sql
 
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataswap.ScriptBuilder
 import de.dkfz.tbi.otp.filestore.BaseFolder
 import de.dkfz.tbi.otp.filestore.WorkFolder
@@ -46,11 +47,12 @@ FileService fileService = ctx.fileService
 FileSystemService fileSystemService = ctx.fileSystemService
 DataSource dataSource = ctx.dataSource
 ConfigService configService = ctx.configService
+ProcessingOptionService processingOptionService = ctx.processingOptionService
 RawSequenceDataWorkFileService rawSequenceDataWorkFileService = ctx.rawSequenceDataWorkFileService
 RawSequenceDataViewFileService rawSequenceDataViewFileService = ctx.rawSequenceDataViewFileService
 
 Path path = fileService.toPath(new File(fastqToCramFile), fileSystemService.remoteFileSystem)
-ScriptBuilder scriptBuilder = new ScriptBuilder(configService, fileService, fileSystemService, path.parent)
+ScriptBuilder scriptBuilder = new ScriptBuilder(configService, fileService, fileSystemService, processingOptionService, path.parent)
 ArrayList<String[]> rows = path.readLines().tail()*.split('\t')
 
 List<String> pathsToDelete = []

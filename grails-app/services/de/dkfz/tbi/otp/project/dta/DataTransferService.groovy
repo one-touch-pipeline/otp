@@ -133,9 +133,10 @@ class DataTransferService {
     private Path uploadDataTransferDocumentToRemoteFileSystem(DataTransferDocument transferDocument, byte[] fileContent) {
         Path path = getPathOnRemoteFileSystem(transferDocument)
 
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path.parent, '', FileService.OWNER_DIRECTORY_PERMISSION_STRING)
-        fileService.createFileWithContent(path, fileContent, [PosixFilePermission.OWNER_READ] as Set<PosixFilePermission>)
-        fileService.setGroupViaBash(path, transferDocument.dataTransfer.dataTransferAgreement.project.unixGroup)
+        String unixGroup = transferDocument.dataTransfer.dataTransferAgreement.project.unixGroup
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path.parent, unixGroup, FileService.OWNER_DIRECTORY_PERMISSION_STRING)
+        fileService.createFileWithContent(path, fileContent, unixGroup, [PosixFilePermission.OWNER_READ] as Set<PosixFilePermission>)
+        fileService.setGroupViaBash(path, unixGroup)
 
         return path
     }

@@ -39,6 +39,7 @@ FileSystemService fileSystemService = ctx.fileSystemService
 List<Project> projects = Project.list(sort: 'name')
 
 String withdrawnUnixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.WITHDRAWN_UNIX_GROUP)
+String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
 
 FileSystem fileSystem = fileSystemService.remoteFileSystem
 Path scriptPath = fileSystem.getPath(configService.scriptOutputPath.toString())
@@ -102,8 +103,8 @@ withPool(numCores, {
                     Files.exists(it.key)
                 }
 
+                String projectUnixGroup = project.unixGroup
                 if (oldToNewMap) {
-                    String projectUnixGroup = it.sequenceFile.project.unixGroup
                     String fileUnixGroup = it.sequenceFile.fileWithdrawn ? withdrawnUnixGroup : projectUnixGroup
 
                     scriptPerProject << """
@@ -124,7 +125,7 @@ withPool(numCores, {
             }
             scriptPerProject << "\n\necho end of script ${file}\n"
             Files.deleteIfExists(file)
-            fileService.createFileWithContent(file, scriptPerProject.join(''))
+            fileService.createFileWithContent(file, scriptPerProject.join(''), projectUnixGroup)
             scriptAllProjects << "bash ${file}"
         }
     }
@@ -132,7 +133,7 @@ withPool(numCores, {
 
 Path file = basePath.resolve("all.sh")
 Files.deleteIfExists(file)
-fileService.createFileWithContent(file, scriptAllProjects.join('\n'))
+fileService.createFileWithContent(file, scriptAllProjects.join('\n'), unixGroup)
 
 println "Script generated at: ${file}"
 

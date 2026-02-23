@@ -521,6 +521,7 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         WithdrawHelperService service = new WithdrawHelperService()
         service.processingOptionService = Mock(ProcessingOptionService) {
             1 * findOptionAsString(ProcessingOption.OptionName.WITHDRAWN_UNIX_GROUP) >> withdrawnGroup
+            _ * findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP) >> 'test-group'
             0 * _
         }
         service.configService = new TestConfigService([
@@ -529,7 +530,7 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         service.fileService = Mock(FileService) {
             1 * toPath(scriptFolder, fileSystem) >> scriptFolder.toPath()
             1 * deleteDirectoryRecursively(withdrawnScript)
-            1 * createFileWithContent(withdrawnScript, _, FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION) >> { Path path, String content, Set<PosixFilePermission> filePermission ->
+            1 * createFileWithContent(withdrawnScript, _, _, FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION) >> { Path path, String content, String unixGroup, Set<PosixFilePermission> filePermission ->
                 assert content.startsWith(FileService.BASH_HEADER)
                 assert content.contains("rm --recursive --force --verbose ${pathToDelete}" as String)
                 assert content.contains("chgrp --recursive --verbose ${withdrawnGroup} ${pathToChangeGroup}" as String)
@@ -572,6 +573,7 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         WithdrawHelperService service = new WithdrawHelperService()
         service.processingOptionService = Mock(ProcessingOptionService) {
             1 * findOptionAsString(ProcessingOption.OptionName.WITHDRAWN_UNIX_GROUP) >> withdrawnGroup
+            _ * findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP) >> 'test-group'
         }
 
         WithdrawStateHolder holder = new WithdrawStateHolder([

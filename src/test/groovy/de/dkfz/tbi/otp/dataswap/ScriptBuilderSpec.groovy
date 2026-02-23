@@ -26,6 +26,8 @@ import spock.lang.Specification
 import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -42,7 +44,7 @@ class ScriptBuilderSpec extends Specification implements DataTest, RoddyPanCance
     @TempDir
     Path tempDir
 
-    ScriptBuilder builder = new ScriptBuilder(null, null, null, null)
+    ScriptBuilder builder = new ScriptBuilder(null, null, null, null, null)
 
     void "addMetaInfo, should add new list entry in metaInformation"() {
         when:
@@ -147,10 +149,14 @@ class ScriptBuilderSpec extends Specification implements DataTest, RoddyPanCance
         ConfigService configService = Mock(ConfigService)
         FileService fileService = Mock(FileService)
         FileSystemService fileSystemService = Mock(FileSystemService)
+        ProcessingOptionService processingOptionService = Mock(ProcessingOptionService) {
+            _ * findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP) >> 'test-group'
+        }
 
         builder.configService = configService
         builder.fileService = fileService
         builder.fileSystemService = fileSystemService
+        builder.processingOptionService = processingOptionService
         builder.relativeOutputDir = Paths.get("subDir")
 
         when:
@@ -172,7 +178,8 @@ class ScriptBuilderSpec extends Specification implements DataTest, RoddyPanCance
         1 * fileSystemService.remoteFileSystem >> FileSystems.default
         1 * fileService.toPath(_, _) >> Paths.get("/")
         1 * configService.scriptOutputPath
-        1 * fileService.createOrOverwriteScriptOutputFile(_, _) >> tempDir.resolve("testFile")
+        1 * fileService.createOrOverwriteScriptOutputFile(_, _, _) >> tempDir.resolve("testFile")
+        1 * processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP) >> 'test-group'
         0 * _
 
         where:

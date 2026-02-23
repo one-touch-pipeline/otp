@@ -24,6 +24,8 @@ package de.dkfz.tbi.otp.workflowExecution.cluster.logs
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.utils.TimeFormats
@@ -39,6 +41,8 @@ abstract class AbstractLogDirectoryService {
 
     FileSystemService fileSystemService
 
+    ProcessingOptionService processingOptionService
+
     protected Path createAndGetLogDirectoryHelper(Date date, String logType) {
         assert date
 
@@ -49,7 +53,8 @@ abstract class AbstractLogDirectoryService {
         if (!Files.exists(logPath)) {
             FileSystem fileSystem = fileSystemService.remoteFileSystem
             Path remoteLogPath = fileService.changeFileSystem(logPath, fileSystem)
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(remoteLogPath)
+            String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(remoteLogPath, unixGroup)
         }
         return logPath
     }

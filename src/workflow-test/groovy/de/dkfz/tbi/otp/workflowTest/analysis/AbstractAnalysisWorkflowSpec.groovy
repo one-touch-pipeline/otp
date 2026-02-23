@@ -277,7 +277,7 @@ abstract class AbstractAnalysisWorkflowSpec extends AbstractDecidedWorkflowSpec 
                 (bamFileSet.controlBamFile): controlBamFile,
                 (bamFileSet.controlBaiFile): controlBaiFile,
         ].each { File target, Path link ->
-            fileService.createLink(link, fileService.toPath(target, fileSystemService.remoteFileSystem))
+            fileService.createLink(link, fileService.toPath(target, fileSystemService.remoteFileSystem), configService.workflowProjectUnixGroup)
         }
 
         Path diseaseBamFileLink = alignmentLinkFileServiceFactoryService.getService(bamFileTumor).getBamFile(bamFileTumor)
@@ -290,7 +290,7 @@ abstract class AbstractAnalysisWorkflowSpec extends AbstractDecidedWorkflowSpec 
                 (controlBamFile): controlBamFileLink,
                 (controlBaiFile): controlBaiFileLink,
         ].each { Path target, Path link ->
-            fileService.createLink(link, target)
+            fileService.createLink(link, target, configService.workflowProjectUnixGroup)
         }
 
         bamFileTumor.fileSize = Files.size(diseaseBamFileLink)

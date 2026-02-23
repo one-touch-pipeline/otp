@@ -46,8 +46,8 @@ abstract class AbstractAlignmentWorkflowSpec extends AbstractDecidedWorkflowSpec
             rawSequenceFile.save(flush: true)
             Path linkFastqFile = rawSequenceDataWorkFileService.getFilePath(rawSequenceFile)
             Path linkViewByPid = rawSequenceDataViewFileService.getFilePath(rawSequenceFile)
-            fileService.createLink(linkFastqFile, sourceFastqFile)
-            fileService.createLink(linkViewByPid, linkFastqFile)
+            fileService.createLink(linkFastqFile, sourceFastqFile, configService.workflowProjectUnixGroup)
+            fileService.createLink(linkViewByPid, linkFastqFile, configService.workflowProjectUnixGroup)
         }
     }
 
@@ -57,6 +57,6 @@ abstract class AbstractAlignmentWorkflowSpec extends AbstractDecidedWorkflowSpec
     void linkAdapterDirectoryToReference(LibraryPreparationKit libraryPreparationKit) {
         Path target = referenceDataDirectory.resolve("adapters")
         Path link = remoteFileSystem.getPath(libraryPreparationKit.adapterFile).parent
-        fileService.createLink(link, target)
+        fileService.createLink(link, target, configService.workflowProjectUnixGroup)
     }
 }

@@ -26,6 +26,8 @@ import spock.lang.Specification
 import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -50,15 +52,19 @@ abstract class AbstractLogDirectoryServiceSpec extends Specification implements 
 
     void setup() {
         service.configService = configService = new TestConfigService(tempDir)
+        service.processingOptionService = Mock(ProcessingOptionService) {
+            _ * findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP) >> configService.testingGroup
+        }
     }
 
     protected void mockPathDoesNotExist(Path expected, int countRemoteFileSystem = 1) {
+        String unixGroup = configService.testingGroup
         service.fileSystemService = Mock(FileSystemService) {
             countRemoteFileSystem * getRemoteFileSystem() >> FileSystems.default
             0 * _
         }
         service.fileService = Mock(FileService) {
-            1 * createDirectoryRecursivelyAndSetPermissionsViaBash(expected)
+            1 * createDirectoryRecursivelyAndSetPermissionsViaBash(expected, unixGroup)
             1 * changeFileSystem(expected, FileSystems.default) >> expected
             0 * _
         }

@@ -20,6 +20,8 @@
  * SOFTWARE.
  */
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.Individual
@@ -76,6 +78,7 @@ DeletionService deletionService = ctx.deletionService
 FileService fileService = ctx.fileService
 ConfigService configService = ctx.configService
 FileSystemService fileSystemService = ctx.fileSystemService
+ProcessingOptionService processingOptionService = ctx.processingOptionService
 
 FileSystem fileSystem = fileSystemService.remoteFileSystem
 
@@ -94,7 +97,8 @@ Individual.withTransaction {
         allFilesToRemove << deletionService.deleteIndividual(it, check)
     }
 
-    Path deleteFileCmd = fileService.createOrOverwriteScriptOutputFile(baseOutputDir, fileName)
+    String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
+    Path deleteFileCmd = fileService.createOrOverwriteScriptOutputFile(baseOutputDir, fileName, unixGroup)
 
     deleteFileCmd << allFilesToRemove.join('\n')
 

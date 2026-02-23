@@ -51,6 +51,7 @@ abstract class AbstractLinkJob extends AbstractJob {
             fileService.createLink(
                     entry.link,
                     entry.target,
+                    project.unixGroup,
                     CreateLinkOption.DELETE_EXISTING_FILE,
             )
         }

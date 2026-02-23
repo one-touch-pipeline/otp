@@ -35,11 +35,13 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
 import de.dkfz.tbi.otp.infrastructure.alignment.WgbsAlignmentWorkFileService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.job.processing.RoddyConfigValueService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.utils.LinkEntry
+import de.dkfz.tbi.otp.utils.ProcessOutput
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflow.alignment.RoddyAlignmentPrepareService
 import de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer.PanCancerWorkflow
@@ -173,7 +175,12 @@ class WgbsPrepareJobSpec extends Specification implements DataTest, WgbsAlignmen
         job.roddyAlignmentPrepareService = Mock(RoddyAlignmentPrepareService)
         job.roddyConfigValueService = new RoddyConfigValueService()
         job.roddyConfigValueService.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService)
-        job.fileService = new FileService()
+        job.fileService = new FileService(
+                remoteShellHelper: Mock(RemoteShellHelper) {
+                    executeCommandReturnProcessOutput(_) >> new ProcessOutput("", "", 0)
+                },
+        )
+
         job.wgbsAlignmentWorkFileService = Mock(WgbsAlignmentWorkFileService) {
             getMetadataTableFile(_) >> metadataFile
         }

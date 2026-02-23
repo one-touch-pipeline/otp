@@ -27,6 +27,8 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
@@ -45,6 +47,7 @@ class UnwithdrawService {
     FastqcDataFilesService fastqcDataFilesService
     FileService fileService
     FileSystemService fileSystemService
+    ProcessingOptionService processingOptionService
     WithdrawAnalysisService withdrawAnalysisService
     RawSequenceDataWorkFileService rawSequenceDataWorkFileService
     RawSequenceDataViewFileService rawSequenceDataViewFileService
@@ -148,8 +151,9 @@ class UnwithdrawService {
         Path outputFile = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve('withdrawn').resolve(withdrawStateHolder.scriptFileName)
 
         fileService.deleteDirectoryRecursively(outputFile) // delete file if already exists
+        String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
         fileService.createFileWithContent(outputFile, withdrawStateHolder.script.join('\n'),
-                FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION)
+                unixGroup, FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION)
 
         withdrawStateHolder.summary << "\nScript Path:"
         withdrawStateHolder.summary << outputFile.toString()

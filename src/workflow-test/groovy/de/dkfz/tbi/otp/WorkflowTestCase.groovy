@@ -336,8 +336,9 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
 
     void createDirectories(List<File> files) {
         FileSystem fileSystem = fileSystemService.remoteFileSystem
+        String unixGroup = configService.testingGroup
         files.each {
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(fileSystem.getPath(it.toString()), '',
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(fileSystem.getPath(it.toString()), unixGroup,
                     FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
         }
     }
@@ -476,6 +477,7 @@ echo \$TEMP_DIR
 
         linkFileUtils.createAndValidateLinks(
                 [(sourceDir): referenceGenomeService.referenceGenomeDirectory(referenceGenome, false)],
+                configService.workflowProjectUnixGroup,
         )
         return referenceGenome
     }

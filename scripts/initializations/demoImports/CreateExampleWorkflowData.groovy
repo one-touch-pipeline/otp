@@ -46,12 +46,14 @@ import java.time.*
  */
 int numberOfDemoSets = 6
 
+String projectUnixGroup = null
 
 WorkflowRun.withNewTransaction {
     SeqType seqType = SeqType.findByName('EXAMPLE')
     SeqTrack seqTrack = SeqTrack.findBySeqType(seqType)
     Individual individual = seqTrack.individual
     Project project = individual.project
+    projectUnixGroup = project.unixGroup
     ProcessingPriority priority = project.processingPriority
 
     String workflowName = "Example Workflow ${Workflow.count()}"
@@ -378,7 +380,7 @@ FileSystem fileSystem = fileSystemService.remoteFileSystem
     Path path = fileSystem.getPath("/tmp/log${it}.out")
     if (!Files.exists(path)) {
         println "create file: ${path}"
-        fileService.createFileWithContent(path, "Example log ${it}\n\nSome content\nMorecontent")
+        fileService.createFileWithContent(path, "Example log ${it}\n\nSome content\nMorecontent", projectUnixGroup)
     }
 }
 

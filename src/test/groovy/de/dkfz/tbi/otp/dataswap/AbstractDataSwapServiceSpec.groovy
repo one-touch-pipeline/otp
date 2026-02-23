@@ -529,7 +529,10 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         Files.createDirectory(scriptOutputDirectory)
 
         service.fileService = Mock(FileService) {
-            1 * createOrOverwriteScriptOutputFile(_, _) >> Files.createFile(scriptOutputDirectory.resolve("restartAli_${bashScriptName}.groovy"))
+            1 * createOrOverwriteScriptOutputFile(_, _, _) >> Files.createFile(scriptOutputDirectory.resolve("restartAli_${bashScriptName}.groovy"))
+        }
+        service.processingOptionService = Mock(ProcessingOptionService) {
+            1 * findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP) >> 'test-group'
         }
 
         final DataSwapParameters parameters = new DataSwapParameters(
@@ -559,7 +562,10 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         Files.createDirectory(scriptOutputDirectory)
 
         service.fileService = Mock(FileService) {
-            1 * createOrOverwriteScriptOutputFile(_, _) >> Files.createFile(scriptOutputDirectory.resolve("restartAli_${bashScriptName}.groovy"))
+            1 * createOrOverwriteScriptOutputFile(_, _, _) >> Files.createFile(scriptOutputDirectory.resolve("restartAli_${bashScriptName}.groovy"))
+        }
+        service.processingOptionService = Mock(ProcessingOptionService) {
+            1 * findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP) >> 'test-group'
         }
 
         final DataSwapParameters parameters = new DataSwapParameters(

@@ -35,6 +35,7 @@ import de.dkfz.roddy.execution.Code
 import de.dkfz.roddy.tools.UnescapedString
 import de.dkfz.tbi.otp.OtpException
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
@@ -57,7 +58,8 @@ import java.time.format.DateTimeFormatter
  */
 @GrailsCompileStatic
 @Transactional
-@Deprecated // replace by a new system ClusterStatisticService
+@Deprecated
+// replace by a new system ClusterStatisticService
 class ClusterJobSchedulerService {
 
     static final int WAITING_TIME_FOR_SECOND_TRY_IN_MILLISECONDS = (Environment.current == Environment.TEST) ? 0 : 10000
@@ -88,7 +90,8 @@ class ClusterJobSchedulerService {
      * @return the cluster job ID
      */
     @Deprecated
-    @SuppressWarnings("ThrowRuntimeException") // ignored: will be removed with the old workflow system
+    @SuppressWarnings("ThrowRuntimeException")
+    // ignored: will be removed with the old workflow system
     String executeJob(String script, Map<JobSubmissionOption, String> jobSubmissionOptions = [:]) throws Throwable {
         if (!script) {
             throw new ProcessingException("No job script specified.")
@@ -207,8 +210,9 @@ class ClusterJobSchedulerService {
         }
 
         Path logFile = pathForLogging()
+        String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
 
-        fileService.createFileWithContent(logFile, logStringBuilder.toString())
+        fileService.createFileWithContent(logFile, logStringBuilder.toString(), unixGroup)
 
         return jobStates
     }

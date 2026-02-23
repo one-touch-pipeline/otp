@@ -29,9 +29,11 @@ import spock.lang.TempDir
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.FastqFile
 import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.otp.utils.ProcessOutput
 
 import java.nio.file.*
 
@@ -73,7 +75,11 @@ class SingleCellMappingFileServiceSpec extends Specification implements DataTest
                 fileSystemService: Mock(FileSystemService) {
                     _ * getRemoteFileSystem() >> FileSystems.default
                 },
-                fileService      : new FileService(),
+                fileService: new FileService(
+                    remoteShellHelper: Mock(RemoteShellHelper) {
+                        executeCommandReturnProcessOutput(_) >> new ProcessOutput("", "", 0)
+                    },
+                ),
                 singleCellService: Mock(SingleCellService) {
                     _ * singleCellMappingFile(_) >> { RawSequenceFile df -> data.mappingFileOfRawSequenceFile[df] }
                     _ * mappingEntry(_) >> ENTRY

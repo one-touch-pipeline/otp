@@ -367,7 +367,7 @@ projects.each { Project project ->
     ].each {
         Path path = outputDirectory.resolve("${it[0]}.csv")
         println "    - ${path}"
-        fileService.createFileWithContent(path, it[1])
+        fileService.createFileWithContent(path, it[1], project.unixGroup)
     }
 }
 

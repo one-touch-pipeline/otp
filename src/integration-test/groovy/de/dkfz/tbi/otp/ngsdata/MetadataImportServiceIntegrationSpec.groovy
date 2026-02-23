@@ -31,6 +31,7 @@ import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
@@ -219,6 +220,10 @@ ${SINGLE_CELL_WELL_LABEL}       Test                                        Test
                 [metadataFile: Paths.get("${seqCenter.autoImportDir}/1111_meta.tsv")])
         remoteShellHelper = metadataImportService.fileService.remoteShellHelper
         testConfigService.addOtpProperty(OtpProperty.PATH_METADATA_STORAGE, tempDir.resolve("metadata").toString())
+        DomainFactory.createProcessingOptionLazy(
+                name: ProcessingOption.OptionName.OTP_USER_LINUX_GROUP,
+                value: testConfigService.testingGroup,
+        )
         metadataImportService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }

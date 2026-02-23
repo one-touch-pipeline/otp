@@ -169,7 +169,8 @@ abstract class AbstractBamImportWorkflowSpec extends AbstractWorkflowSpec implem
     private Path prepareFileSystemCopyFiles(Path realDir) {
         Path bamPath = referenceDataDirectory.resolve(alignmentFileName)
         Path indexPath = referenceDataDirectory.resolve(indexFileName)
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(realDir)
+        String unixGroup = configService.testingGroup
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(realDir, unixGroup)
         remoteShellHelper.executeCommandReturnProcessOutput("cp ${bamPath} ${indexPath} ${realDir}").assertExitCodeZeroAndStderrEmpty()
         return bamPath
     }
@@ -177,17 +178,19 @@ abstract class AbstractBamImportWorkflowSpec extends AbstractWorkflowSpec implem
     private String prepareFileSystemLinkFiles(Path bamPath, Path linkDir, Path realDir) {
         String bamBaseName = bamPath.fileName
         String indexBaseName = Paths.get(indexFileName).fileName
+        String unixGroup = configService.testingGroup
         [bamBaseName, indexBaseName].each { String fileName ->
-            fileService.createLink(linkDir.resolve(fileName), realDir.resolve(fileName))
+            fileService.createLink(linkDir.resolve(fileName), realDir.resolve(fileName), unixGroup)
         }
         return bamBaseName
     }
 
     private void prepareFileSystemCreateAndLinkFurtherFiles(Path realDir, Path linkDir) {
+        String unixGroup = configService.testingGroup
         ALL_FILES.each { String filePath ->
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(realDir.resolve(filePath))
-            fileService.createFileWithContent(realDir.resolve(filePath), "dummy", FileService.DEFAULT_FILE_PERMISSION, true)
-            fileService.createLink(linkDir.resolve(filePath), realDir.resolve(filePath))
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(realDir.resolve(filePath), unixGroup)
+            fileService.createFileWithContent(realDir.resolve(filePath), "dummy", unixGroup, FileService.DEFAULT_FILE_PERMISSION, true)
+            fileService.createLink(linkDir.resolve(filePath), realDir.resolve(filePath), unixGroup)
         }
     }
 
@@ -330,9 +333,9 @@ abstract class AbstractBamImportWorkflowSpec extends AbstractWorkflowSpec implem
     private boolean shouldBeLinkInUuid(boolean isSourceLinked, String pathName) {
         return bamImportInstance.linkOperation == BamImportInstance.LinkOperation.LINK_SOURCE && (
                 isSourceLinked ||
-                (pathName in FURTHER_FILES_LINKED) ||
-                // Use the bam file's own names instead of relying on file extensions
-                pathName == bamFile.bamFileName || pathName == bamFile.baiFileName
+                        (pathName in FURTHER_FILES_LINKED) ||
+                        // Use the bam file's own names instead of relying on file extensions
+                        pathName == bamFile.bamFileName || pathName == bamFile.baiFileName
         )
     }
 

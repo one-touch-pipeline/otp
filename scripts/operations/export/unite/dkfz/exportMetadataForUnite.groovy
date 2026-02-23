@@ -203,21 +203,24 @@ def runYapsaResults(Project p, Path folder) {
 ConfigService configService = ctx.configService
 FileSystemService fileSystemService = ctx.fileSystemService
 FileService fileService = ctx.fileService
+ProcessingOptionService processingOptionService = ctx.processingOptionService
 
 FileSystem fileSystem = fileSystemService.remoteFileSystem
 
 Path outputFolder = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve("export").resolve("UNITE").resolve("output")
-Path file = fileService.createOrOverwriteScriptOutputFile(outputFolder, "status.tsv")
+String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
+Path file = fileService.createOrOverwriteScriptOutputFile(outputFolder, "status.tsv", unixGroup)
 
 file << new Date()
 
 projectNames.each { projectName ->
 
-    Path outputFolderPerProject = outputFolder.resolve(projectName)
-    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputFolderPerProject)
 
     Project project = CollectionUtils.atMostOneElement(Project.findAllByName(projectName))
     assert project : "There is not project with the name ${projectName}"
+
+    Path outputFolderPerProject = outputFolder.resolve(projectName)
+    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputFolderPerProject, project.unixGroup)
 
     file << "\n${projectName}\n"
 

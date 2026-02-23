@@ -53,13 +53,13 @@ class DataTransferAgreementService {
      * Create a new DataTransferAgreement (DTA) and persist it in the database.
      *
      * @param dta data transfer agreement
-     * @param files of dta, will be created in their own domain class
+     * @param files of dta will be created in their own domain class
      * @return persisted DataTransferAgreement
      * @throws FileIsEmptyException when files contains a file without content
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     DataTransferAgreement persistDtaWithDtaDocuments(DataTransferAgreement dta, List<MultipartFile> files) throws FileIsEmptyException {
-        assert dta.project : "Project can not be empty."
+        assert dta.project: "Project can not be empty."
 
         dta.project.addToDataTransferAgreements(dta).save(flush: true)
         return addFilesToDta(dta, files)
@@ -69,8 +69,8 @@ class DataTransferAgreementService {
      * Add a document file to an existing DataTransferAgreement (DTA). It will be added in the
      * database as well as in the filesystem.
      *
-     * @param dta, as reference
-     * @param file, new document to add
+     * @param dta as reference
+     * @param file new document to add
      * @return updated DataTransferAgreement
      * @throws FileIsEmptyException when file has no content
      */
@@ -94,8 +94,8 @@ class DataTransferAgreementService {
      * Add multiple documents to an existing DataTransferAgreement (DTA). Those documents will be added in the
      * database as well as in the filesystem.
      *
-     * @param dta, as reference
-     * @param files, list of the new documents
+     * @param dta  as reference
+     * @param files  list of the new documents
      * @return updated DataTransferAgreement
      * @throws DataTransferAgreementNotFoundException when the given dta does not exist
      * @throws FileIsEmptyException when one of the files is empty
@@ -192,9 +192,10 @@ class DataTransferAgreementService {
     private Path uploadDataTransferAgreementToRemoteFileSystem(DataTransferAgreementDocument dtaFile, byte[] fileContent) {
         Path absoluteFilePath = getPathOnRemoteFileSystem(dtaFile)
 
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(absoluteFilePath.parent, '', FileService.OWNER_DIRECTORY_PERMISSION_STRING)
-        fileService.createFileWithContent(absoluteFilePath, fileContent, [PosixFilePermission.OWNER_READ] as Set<PosixFilePermission>)
-        fileService.setGroupViaBash(absoluteFilePath, dtaFile.dataTransferAgreement.project.unixGroup)
+        String unixGroup = dtaFile.dataTransferAgreement.project.unixGroup
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(absoluteFilePath.parent, unixGroup, FileService.OWNER_DIRECTORY_PERMISSION_STRING)
+        fileService.createFileWithContent(absoluteFilePath, fileContent, unixGroup, [PosixFilePermission.OWNER_READ] as Set<PosixFilePermission>)
+        fileService.setGroupViaBash(absoluteFilePath, unixGroup)
 
         return absoluteFilePath
     }

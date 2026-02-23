@@ -28,6 +28,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -229,7 +230,8 @@ class WithdrawHelperService {
         String script = createBashScript(withdrawStateHolder)
 
         fileService.deleteDirectoryRecursively(outputFile) // delete file if it already exists
-        fileService.createFileWithContent(outputFile, script, FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION)
+        String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
+        fileService.createFileWithContent(outputFile, script, unixGroup, FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION)
 
         withdrawStateHolder.summary << "\nScript Path:"
         withdrawStateHolder.summary << outputFile.toString()

@@ -22,6 +22,8 @@
 
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.project.ProjectRequest
 
@@ -42,6 +44,7 @@ assert !fileName.contains(' '): 'File name contains spaces, which is not allowed
 ConfigService configService = ctx.configService
 FileSystemService fileSystemService = ctx.fileSystemService
 FileService fileService = ctx.fileService
+ProcessingOptionService processingOptionService = ctx.processingOptionService
 
 FileSystem fileSystem = fileSystemService.remoteFileSystem
 Path path = fileSystem.getPath(fileName)
@@ -58,6 +61,7 @@ String content = ProjectRequest.list().sort {
 }.join('\n')
 
 String output = [contentHeader, content].join('\n')
-fileService.createFileWithContent(path, output)
+String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
+fileService.createFileWithContent(path, output, unixGroup)
 
 println "Project data from Database has been exported to ${fileName}"

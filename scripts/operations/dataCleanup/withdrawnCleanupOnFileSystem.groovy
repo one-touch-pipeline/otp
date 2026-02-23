@@ -57,6 +57,7 @@ AnalysisLinkFileServiceFactoryService analysisLinkFileServiceFactoryService = ct
 FilestoreService filestoreService = ctx.filestoreService
 
 String withdrawnGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.WITHDRAWN_UNIX_GROUP)
+String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
 String chgrp = "chgrp --recursive --verbose ${withdrawnGroup}"
 
 // Handle BAM files with both link paths and UUID work folder paths
@@ -176,4 +177,4 @@ String script = [
 
 Path path = fileSystemService.remoteFileSystem.getPath(file)
 
-fileService.createFileWithContent(path, script)
+fileService.createFileWithContent(path, script, unixGroup)

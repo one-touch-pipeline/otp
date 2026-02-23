@@ -106,11 +106,11 @@ class ProjectInfoService {
     private Path uploadProjectInfoToProjectFolder(ProjectInfo projectInfo, byte[] content) {
         Path file = getPath(projectInfo)
 
+        String unixGroup = projectInfo.project.unixGroup
         fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(file.parent,
-                '', FileService.OWNER_DIRECTORY_PERMISSION_STRING)
-        fileService.createFileWithContent(file, content, [PosixFilePermission.OWNER_READ] as Set)
-        fileService.setGroupViaBash(file, projectInfo.project.unixGroup)
-
+                unixGroup,
+                FileService.OWNER_DIRECTORY_PERMISSION_STRING)
+        fileService.createFileWithContent(file, content, unixGroup, [PosixFilePermission.OWNER_READ] as Set)
         return file
     }
 

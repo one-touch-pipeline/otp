@@ -27,6 +27,8 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 
 import java.nio.file.*
 
@@ -119,6 +121,7 @@ class BamExportImport {
     FileService fileService
     FileSystemService fileSystemService
     PanCancerLinkFileService panCancerLinkFileService
+    ProcessingOptionService processingOptionService
 
     String inputFieldDelimiter
     String outputFieldDelimiter
@@ -236,7 +239,8 @@ class BamExportImport {
     }
 
     void writeFile(Path path, String content) {
-        fileService.createFileWithContent(path, content, FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION)
+        String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
+        fileService.createFileWithContent(path, content, unixGroup, FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION)
     }
 
     Path handleInput(List<String> input, String filename, boolean overwriteExisting) {
@@ -354,6 +358,7 @@ class HandleInputTypes {
     FileService fileService
     FileSystemService fileSystemService
     PanCancerLinkFileService panCancerLinkFileService
+    ProcessingOptionService processingOptionService
 
     String inputFieldDelimiter
     String outputFieldDelimiter
@@ -386,6 +391,7 @@ class HandleInputTypes {
                 inputFieldDelimiter     : inputFieldDelimiter,
                 outputFieldDelimiter    : outputFieldDelimiter,
                 panCancerLinkFileService: panCancerLinkFileService,
+                processingOptionService : processingOptionService,
         ])
         Path file = export.handleInput(input, fileName, overwriteExisting)
         println "Metadata exported to ${file}\n"
@@ -416,6 +422,7 @@ HandleInputTypes export = new HandleInputTypes([
         fileService             : ctx.fileService,
         fileSystemService       : ctx.fileSystemService,
         panCancerLinkFileService: ctx.panCancerLinkFileService,
+        processingOptionService : ctx.processingOptionService,
         inputFieldDelimiter     : inputFieldDelimiter,
         outputFieldDelimiter    : outputFieldDelimiter,
 ]).handleInput(input, fileName, overwriteExisting)

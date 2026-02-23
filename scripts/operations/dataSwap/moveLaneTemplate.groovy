@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.dataswap.parameters.LaneSwapParameters
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 
 import java.nio.file.FileSystem
 import java.nio.file.Path
@@ -60,13 +61,15 @@ ConfigService configService = ctx.configService
 FileSystemService fileSystemService = ctx.fileSystemService
 FileService fileService = ctx.fileService
 LaneSwapService laneSwapService = ctx.laneSwapService
+ProcessingOptionService processingOptionService = ctx.processingOptionService
 
 FileSystem fileSystem = fileSystemService.remoteFileSystem
 
 StringBuilder outputStringBuilder = new StringBuilder()
 
 final Path scriptOutputDirectory = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve('sample_swap')
-fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(scriptOutputDirectory)
+String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
+fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(scriptOutputDirectory, unixGroup)
 fileService.setPermission(scriptOutputDirectory, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
 
 /** have we manually checked yet if all (potentially symlinked) fastq datafiles still exist on the filesystem? */

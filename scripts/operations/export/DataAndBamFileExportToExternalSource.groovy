@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.ScriptInputHelperService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 
 import java.nio.file.FileSystem
 import java.nio.file.Path
@@ -147,6 +148,7 @@ SeqTrackService seqTrackService = ctx.seqTrackService
 AbstractBamFileService abstractBamFileService = ctx.abstractBamFileService
 SamplePairService samplePairService = ctx.samplePairService
 DataExportService dataExportService = ctx.dataExportService
+ProcessingOptionService processingOptionService = ctx.processingOptionService
 
 FileSystem fileSystem = fileSystemService.remoteFileSystem
 
@@ -159,8 +161,9 @@ String outputFileName = scriptOutputPath.fileName
 String outputDir = scriptOutputPath.parent.toString()
 
 Path outputDirPath = fileService.toPath(new File(outputDir), fileSystem)
-fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDirPath)
-Path outputFile = fileService.createOrOverwriteScriptOutputFile(outputDirPath, outputFileName)
+String unixGroupForDir = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
+fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDirPath, unixGroupForDir)
+Path outputFile = fileService.createOrOverwriteScriptOutputFile(outputDirPath, outputFileName, unixGroupForDir)
 
 assert scriptOutputPath.absolute: "scriptOutputPath is not an absolute path"
 assert targetFolder.absolute: "targetOutputFolder is not an absolute path"

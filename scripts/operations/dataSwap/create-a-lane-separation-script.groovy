@@ -22,6 +22,7 @@
 package operations.dataSwap
 
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataswap.AbstractDataSwapService
 import de.dkfz.tbi.otp.dataswap.ScriptBuilder
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -34,6 +35,7 @@ import java.nio.file.Paths
 ConfigService configService = ctx.configService
 FileService fileService = ctx.fileService
 FileSystemService fileSystemService = ctx.fileSystemService
+ProcessingOptionService processingOptionService = ctx.processingOptionService
 
 /**
  * Generation Script which allows to separate lanes of a Sample into different SampleTypes.
@@ -65,7 +67,7 @@ Map<String, String> swapMap = [
 List<String> files = []
 
 Closure<ScriptBuilder> createSamplesAndSampleTypesCreationScript = { List<String> sampleNames ->
-    ScriptBuilder builder = new ScriptBuilder(configService, fileService, fileSystemService, Paths.get('sample_swap', swapLabel))
+    ScriptBuilder builder = new ScriptBuilder(configService, fileService, fileSystemService, processingOptionService, Paths.get('sample_swap', swapLabel))
 
     builder.addMetaInfo("Objects to be created:")
 
@@ -118,7 +120,7 @@ Closure<ScriptBuilder> createSamplesAndSampleTypesCreationScript = { List<String
 
 int counter = 1
 Closure<ScriptBuilder> createSwapScript = { String swapLabel ->
-    ScriptBuilder builder = new ScriptBuilder(configService, fileService, fileSystemService, Paths.get('sample_swap', swapLabel))
+    ScriptBuilder builder = new ScriptBuilder(configService, fileService, fileSystemService, processingOptionService, Paths.get('sample_swap', swapLabel))
 
     builder.addGroovyCommand(Snippets.databaseFixingHeader(swapLabel))
 

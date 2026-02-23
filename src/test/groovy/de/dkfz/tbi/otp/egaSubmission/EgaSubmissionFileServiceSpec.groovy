@@ -337,13 +337,13 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
             0 * _
         }
         egaSubmissionFileService.fileService = Mock(FileService) {
-            1 * createFileWithContent(basePath.resolve('mapping'), 'mappingContent', _)
-            1 * createFileWithContent(basePath.resolve('fastqSingle1'), 'contentFastqSingle1', _)
-            1 * createFileWithContent(basePath.resolve('fastqSingle2'), 'contentFastqSingle2', _)
-            1 * createFileWithContent(basePath.resolve('fastqPaired1'), 'contentFastqPaired1', _)
-            1 * createFileWithContent(basePath.resolve('fastqPaired2'), 'contentFastqPaired2', _)
-            1 * createFileWithContent(basePath.resolve('bam1'), 'contentBam1', _)
-            1 * createFileWithContent(basePath.resolve('bam2'), 'contentBam2', _)
+            1 * createFileWithContent(basePath.resolve('mapping'), 'mappingContent', _, _)
+            1 * createFileWithContent(basePath.resolve('fastqSingle1'), 'contentFastqSingle1', _, _)
+            1 * createFileWithContent(basePath.resolve('fastqSingle2'), 'contentFastqSingle2', _, _)
+            1 * createFileWithContent(basePath.resolve('fastqPaired1'), 'contentFastqPaired1', _, _)
+            1 * createFileWithContent(basePath.resolve('fastqPaired2'), 'contentFastqPaired2', _, _)
+            1 * createFileWithContent(basePath.resolve('bam1'), 'contentBam1', _, _)
+            1 * createFileWithContent(basePath.resolve('bam2'), 'contentBam2', _, _)
         }
 
         when:
@@ -420,7 +420,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
             0 * _
         }
         egaSubmissionFileService.fileService = Mock(FileService) {
-            _ * createFileWithContent(_, _)
+            _ * createFileWithContent(_, _, _, _)
         }
         egaSubmissionFileService.securityService = Mock(SecurityService) {
             1 * getCurrentUser() >> user

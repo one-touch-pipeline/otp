@@ -146,7 +146,7 @@ class AbstractExecuteWesPipelineJobSpec extends Specification implements DataTes
         }
         job.fileService = Mock(FileService) {
             1 * deleteDirectoryContent(_)
-            2 * createDirectoryRecursivelyAndSetPermissionsViaBash(_)
+            2 * createDirectoryRecursivelyAndSetPermissionsViaBash(_, _)
             0 * _
         }
         job.logService = Mock(LogService) {

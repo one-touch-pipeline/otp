@@ -29,16 +29,19 @@ import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataswap.parameters.SampleSwapParameters
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactoryInstance
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateRoddyFileHelper
+import de.dkfz.tbi.otp.utils.LocalShellHelper
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -61,6 +64,10 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
         createUserAndRoles()
         outputFolder = Files.createDirectory(tempDir.resolve("outputFolder"))
         configService.addOtpProperties(outputFolder)
+        findOrCreateProcessingOption(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP, configService.testingGroup)
+        sampleSwapService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
     }
 
     void cleanup() {

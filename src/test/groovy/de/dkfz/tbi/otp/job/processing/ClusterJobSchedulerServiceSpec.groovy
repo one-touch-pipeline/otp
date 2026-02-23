@@ -30,6 +30,7 @@ import de.dkfz.roddy.execution.jobs.*
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.plan.JobDefinition
@@ -101,10 +102,13 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest, 
             1 * getLoggingRootPath() >> logFolder
         }
         service.fileService = Mock(FileService) {
-            1 * createFileWithContent(_, _)
+            1 * createFileWithContent(_, _, _)
         }
         service.fileSystemService = Mock(FileSystemService) {
             1 * getRemoteFileSystem() >> FileSystems.default
+        }
+        service.processingOptionService = Mock(ProcessingOptionService) {
+            1 * findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP) >> 'test-group'
         }
 
         when:

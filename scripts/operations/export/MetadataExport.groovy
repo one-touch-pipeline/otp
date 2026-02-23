@@ -565,7 +565,8 @@ class MetaDataExport {
             assert !Files.exists(outputFile): "Original outputfile ${outputFileOrg} already exists"
         }
 
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputFile.parent)
+        String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputFile.parent, unixGroup)
 
         writeMetadata(rawSequenceFiles, outputFile, exportColumns, reimportProject)
         fileService.setPermission(outputFile, [

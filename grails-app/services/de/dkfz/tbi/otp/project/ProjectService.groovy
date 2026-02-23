@@ -370,17 +370,18 @@ class ProjectService {
 
     private void createProjectDirectoryIfNeeded(Project project) {
         Path projectDirectory = getProjectDirectory(project)
+        String unixGroup = project.unixGroup
 
         if (Files.exists(projectDirectory)) {
             // ensure correct permission and group
-            fileService.setGroupViaBash(projectDirectory, project.unixGroup)
+            fileService.setGroupViaBash(projectDirectory, unixGroup)
             fileService.setPermissionViaBash(projectDirectory, FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
             return
         }
 
         fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectDirectory.parent,
-                '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectDirectory, project.unixGroup)
+                unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectDirectory, unixGroup)
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -389,17 +390,18 @@ class ProjectService {
         assert project.dirAnalysis
         FileSystem fs = fileSystemService.remoteFileSystem
         Path analysisDirectory = fs.getPath(project.dirAnalysis)
+        String unixGroup = project.unixGroup
         if (Files.exists(analysisDirectory)) {
             // ensure correct permission and group
-            fileService.setGroupViaBash(analysisDirectory, project.unixGroup)
+            fileService.setGroupViaBash(analysisDirectory, unixGroup)
             fileService.setPermissionViaBash(analysisDirectory, FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
             return
         }
 
         try {
             fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisDirectory.parent,
-                    '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisDirectory, project.unixGroup,
+                    unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisDirectory, unixGroup,
                     FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
         } catch (FileSystemException | OtpFileSystemException e) {
             if (sendMailInErrorCase) {

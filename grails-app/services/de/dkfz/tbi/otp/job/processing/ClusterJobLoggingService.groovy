@@ -24,6 +24,8 @@ package de.dkfz.tbi.otp.job.processing
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.utils.TimeFormats
 
@@ -38,6 +40,7 @@ class ClusterJobLoggingService {
     ConfigService configService
     FileService fileService
     FileSystemService fileSystemService
+    ProcessingOptionService processingOptionService
 
     File getLogDirectory(ProcessingStep processingStep) {
         assert processingStep: 'No processing step specified.'
@@ -52,7 +55,8 @@ class ClusterJobLoggingService {
         if (!logDirectory.exists()) {
             // race condition between threads and within NFS can be ignored, since createDirectoryRecursivelyAndSetPermissionsViaBash handle them
             FileSystem fileSystem = fileSystemService.remoteFileSystem
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(fileSystem.getPath(logDirectory.toString()))
+            String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(fileSystem.getPath(logDirectory.toString()), unixGroup)
         }
         return logDirectory
     }

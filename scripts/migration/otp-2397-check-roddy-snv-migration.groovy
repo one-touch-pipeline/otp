@@ -120,10 +120,11 @@ String featureTogglesConfigPath = processingOptionService.findOptionAsString(Pro
 Path base = fileSystem.getPath(configService.scriptOutputPath.toString()).resolve('checkXmlMigration').
         resolve(TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date()))
 
-fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(base)
+String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
+fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(base, unixGroup)
 println "Base Directory:\n${base}"
 
-List<String> handleRoddyCall(String cmd, Path commandOutput, String nameUsedInConfig, Path extractedOutput) {
+List<String> handleRoddyCall(String cmd, Path commandOutput, String nameUsedInConfig, Path extractedOutput, String unixGroup) {
     ProcessOutput output
     try {
         semaphore.acquire()
@@ -144,7 +145,7 @@ ${output.stdout}
 
 ----------------------------------------
 ${output.stderr}
-""")
+""", unixGroup)
 
     if (output.exitCode != 0) {
         throw new NotSupportedException("Roddy call fail.")
@@ -185,7 +186,7 @@ ${output.stderr}
                 !it.startsWith('USERGROUP =')
     }.sort()
 
-    fileService.createFileWithContent(extractedOutput, result.join('\n') + '\n')
+    fileService.createFileWithContent(extractedOutput, result.join('\n') + '\n', unixGroup)
     return result
 }
 
@@ -223,7 +224,7 @@ GParsPool.withPool(parallel) {
                         '[^a-zA-Z0-9_]', '-')
                 String plugin = roddyWorkflowConfig.programVersion.split(':')[1]
                 work = base.resolve(plugin).resolve(projectName)
-                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(work)
+                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(work, unixGroup)
 
                 // -------------
                 // old system
@@ -232,7 +233,8 @@ GParsPool.withPool(parallel) {
                 List<String> resultOld = handleRoddyCall(cmdOld,
                         work.resolve('11-roddyCall'),
                         "${roddyWorkflowConfig.nameUsedInConfig}",
-                        work.resolve('12-resultOldExtracted'))
+                        work.resolve('12-resultOldExtracted'),
+                        roddyWorkflowConfig.project.unixGroup)
 
                 // -------------
                 // new system
@@ -252,10 +254,10 @@ GParsPool.withPool(parallel) {
 
                 List<ExternalWorkflowConfigSelector> selectors = configSelectorService.findAllSelectorsSortedByPriority(extendedCriteria)
                 List<ExternalWorkflowConfigFragment> fragments = selectors*.externalWorkflowConfigFragment
-                fileService.createFileWithContent(work.resolve('21-selectors'), selectors*.name.join('\n') + '\n')
+                fileService.createFileWithContent(work.resolve('21-selectors'), selectors*.name.join('\n') + '\n', roddyWorkflowConfig.project.unixGroup)
 
                 String fragmentJson = configFragmentService.mergeSortedFragments(fragments)
-                fileService.createFileWithContent(work.resolve('22-json'), JsonOutput.prettyPrint(fragmentJson) + '\n')
+                fileService.createFileWithContent(work.resolve('22-json'), JsonOutput.prettyPrint(fragmentJson) + '\n', roddyWorkflowConfig.project.unixGroup)
 
                 // parameter
                 String combinedConfig = fragmentJson
@@ -276,10 +278,10 @@ GParsPool.withPool(parallel) {
                         queue,
                         filenameSectionKillSwitch
                 )
-                fileService.createFileWithContent(work.resolve('23-xml'), newXml + '\n')
+                fileService.createFileWithContent(work.resolve('23-xml'), newXml + '\n', roddyWorkflowConfig.project.unixGroup)
 
                 Path configDir = work.resolve('config')
-                fileService.createFileWithContent(configDir.resolve('config.xml'), newXml)
+                fileService.createFileWithContent(configDir.resolve('config.xml'), newXml, roddyWorkflowConfig.project.unixGroup)
 
                 String cmdNew = [
                         loadModule,
@@ -298,7 +300,8 @@ GParsPool.withPool(parallel) {
                 List<String> resultNew = handleRoddyCall(cmdNew,
                         work.resolve('24-roddyCall'),
                         "${roddyWorkflowConfig.nameUsedInConfig}",
-                        work.resolve('25-resultNewExtracted'))
+                        work.resolve('25-resultNewExtracted'),
+                        roddyWorkflowConfig.project.unixGroup)
 
                 // ------------------
                 // checkForEquals
@@ -318,10 +321,10 @@ ${c2Set*.toString().sort().join('\n')}
 in both (${c3Set.size()}):
 ${c3Set*.toString().sort().join('\n')}
 """
-                fileService.createFileWithContent(work.resolve('31-onlyInOld'), c1Set*.toString().sort().join('\n') + '\n')
-                fileService.createFileWithContent(work.resolve('32-onlyInNew'), c2Set*.toString().sort().join('\n') + '\n')
-                fileService.createFileWithContent(work.resolve('33-inBoth'), c3Set*.toString().sort().join('\n') + '\n')
-                fileService.createFileWithContent(work.resolve('34-compared'), compared)
+                fileService.createFileWithContent(work.resolve('31-onlyInOld'), c1Set*.toString().sort().join('\n') + '\n', roddyWorkflowConfig.project.unixGroup)
+                fileService.createFileWithContent(work.resolve('32-onlyInNew'), c2Set*.toString().sort().join('\n') + '\n', roddyWorkflowConfig.project.unixGroup)
+                fileService.createFileWithContent(work.resolve('33-inBoth'), c3Set*.toString().sort().join('\n') + '\n', roddyWorkflowConfig.project.unixGroup)
+                fileService.createFileWithContent(work.resolve('34-compared'), compared, roddyWorkflowConfig.project.unixGroup)
 
                 if (c1Set || c2Set) {
                     out << """
@@ -339,7 +342,7 @@ ${c2Set*.toString().sort().join('\n')}
             out << "\n Exception:"
             out << stacktrace
             Path exceptionOut = work ? work.resolve('44-exception') : base.resolve("exceptionOut-${roddyWorkflowConfig.id}")
-            fileService.createFileWithContent(exceptionOut, stacktrace)
+            fileService.createFileWithContent(exceptionOut, stacktrace, roddyWorkflowConfig.project.unixGroup)
         }
         return out.join('\n')
     }.join('\n\n')

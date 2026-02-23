@@ -24,6 +24,8 @@ package de.dkfz.tbi.otp.workflow.jobs
 import groovy.json.JsonOutput
 import org.springframework.beans.factory.annotation.Autowired
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataprocessing.RoddyResultServiceTrait
 import de.dkfz.tbi.otp.dataprocessing.RoddyResultWorkFileServiceFactoryService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
@@ -47,6 +49,9 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
 
     @Autowired
     IndividualService individualService
+
+    @Autowired
+    ProcessingOptionService processingOptionService
 
     @Autowired
     RoddyCommandService roddyCommandService
@@ -92,7 +97,8 @@ abstract class AbstractExecuteRoddyPipelineJob extends AbstractExecutePipelineJo
         )
         logService.addSimpleLogEntry(workflowStep, "The final xml:\n${xmlConfig}")
 
-        fileService.createFileWithContent(confFile, xmlConfig, FileService.DEFAULT_FILE_PERMISSION, true)
+        String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
+        fileService.createFileWithContent(confFile, xmlConfig, unixGroup, FileService.DEFAULT_FILE_PERMISSION, true)
 
         createAdditionalConfigFiles(workflowStep, confDir)
 

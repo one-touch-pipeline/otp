@@ -188,7 +188,7 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
                 (bamFileSet.diseaseBaiFile): diseaseBaiFile,
                 (bamFileSet.controlBamFile): controlBamFile,
                 (bamFileSet.controlBaiFile): controlBaiFile,
-        ])
+        ], configService.workflowProjectUnixGroup)
 
         bamFileTumor.fileSize = bamFileSet.diseaseBamFile.size()
         assert bamFileTumor.save(flush: true)

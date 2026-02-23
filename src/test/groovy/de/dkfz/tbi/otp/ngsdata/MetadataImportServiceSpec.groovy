@@ -1808,9 +1808,12 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
             1 * saveErrorMailInNewTransaction(_, _)
         }
         data.service.fileService = Mock(FileService) {
-            1 * createFileWithContent(_, _) >> {
+            1 * createFileWithContent(_, _, _) >> {
                 throw new CreateFileException("Creating of file failed")
             }
+        }
+        data.service.processingOptionService = Mock(ProcessingOptionService) {
+            _ * findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP) >> data.service.configService.testingGroup
         }
 
         when:
@@ -1825,8 +1828,12 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
     void "copyMetaDataFile, if metadata exists and copying fine, all fine"() {
         given:
         Map data = setupForCopyMetaDataFile(null)
+        data.service.mailHelperService = Mock(MailHelperService)
+        data.service.processingOptionService = Mock(ProcessingOptionService) {
+            _ * findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP) >> data.service.configService.testingGroup
+        }
         data.service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            3 * executeCommandReturnProcessOutput(_) >> { return new ProcessOutput([stderr: "", exitCode: 0]) }
+            _ * executeCommandReturnProcessOutput(_) >> { return new ProcessOutput([stderr: "", exitCode: 0]) }
         }
         Path targetFile = data.service.createPathTargetForMetadataFile(data.context, TICKET_NUMBER)
 
@@ -1847,10 +1854,16 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
     void "copyMetaDataFile, if metadata is copied, check the permission string must be 2770"() {
         given:
         Map data = setupForCopyMetaDataFile(null)
+        data.service.mailHelperService = Mock(MailHelperService)
+        data.service.processingOptionService = Mock(ProcessingOptionService) {
+            _ * findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP) >> data.service.configService.testingGroup
+        }
         Path targetFile = data.service.createPathTargetForMetadataFile(data.context, TICKET_NUMBER)
         data.service.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            4 * executeCommandReturnProcessOutput(_) >> { String command ->
-                assert command.contains("chmod 2770")
+            _ * executeCommandReturnProcessOutput(_) >> { String command ->
+                if (command.startsWith("chmod")) {
+                    assert command.contains("chmod 2770")
+                }
                 return new ProcessOutput(command, '', 0)
             }
         }

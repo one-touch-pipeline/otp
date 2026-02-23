@@ -122,9 +122,10 @@ abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob 
 
             Map<Path, Map<String, String>> parameters = getRunSpecificParameters(workflowStep, basePath)
             logService.addSimpleLogEntry(workflowStep, "Create ${parameters.size()} weskit calls")
+            String unixGroup = workflowStep.workflowRun.project.unixGroup
             parameters.each { Path path, Map<String, String> parameter ->
                 // define directory to store its output
-                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path)
+                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path, unixGroup)
 
                 // config should be created each time since it is modified with mergeSortedMaps method
                 Map<String, String> config = mapper.readValue(workflowStep.workflowRun.combinedConfig, HashMap)

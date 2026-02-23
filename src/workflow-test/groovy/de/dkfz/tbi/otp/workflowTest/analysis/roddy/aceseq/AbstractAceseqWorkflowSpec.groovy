@@ -89,7 +89,7 @@ abstract class AbstractAceseqWorkflowSpec extends AbstractRoddyAnalysisWorkflowS
                         ]),
                 ])
         Path sophiaInput = sophiaLinkFileService.getFinalAceseqInputFile(sophiaInstance)
-        fileService.createLink(sophiaInput, sourceSophiaInputFile)
+        fileService.createLink(sophiaInput, sourceSophiaInputFile, configService.workflowProjectUnixGroup)
     }
 
     private void adaptReferenceGenome() {

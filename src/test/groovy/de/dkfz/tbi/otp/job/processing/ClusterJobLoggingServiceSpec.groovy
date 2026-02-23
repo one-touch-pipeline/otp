@@ -28,6 +28,8 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
@@ -63,8 +65,11 @@ class ClusterJobLoggingServiceSpec extends Specification implements DataTest {
         processingStepUpdate = DomainFactory.createProcessingStepUpdate()
         service = new ClusterJobLoggingService()
         service.configService = configService
+        service.processingOptionService = Mock(ProcessingOptionService) {
+            _ * findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP) >> configService.testingGroup
+        }
         service.fileService = Stub(FileService) {
-            createDirectoryRecursivelyAndSetPermissionsViaBash(_) >> { Path dir ->
+            createDirectoryRecursivelyAndSetPermissionsViaBash(_, _) >> { Path dir, String unixGroup ->
                 Files.createDirectories(dir)
             }
         }
@@ -95,7 +100,7 @@ class ClusterJobLoggingServiceSpec extends Specification implements DataTest {
         given:
         service.fileSystemService = new TestFileSystemService()
         service.fileService = Mock(FileService) {
-            1 * createDirectoryRecursivelyAndSetPermissionsViaBash(_) >> { Path dir ->
+            1 * createDirectoryRecursivelyAndSetPermissionsViaBash(_, _) >> { Path dir, String unixGroup ->
                 Files.createDirectories(dir)
             }
         }
@@ -111,7 +116,7 @@ class ClusterJobLoggingServiceSpec extends Specification implements DataTest {
         given:
         service.fileSystemService = new TestFileSystemService()
         service.fileService = Mock(FileService) {
-            3 * createDirectoryRecursivelyAndSetPermissionsViaBash(_)
+            3 * createDirectoryRecursivelyAndSetPermissionsViaBash(_, _)
         }
 
         when:

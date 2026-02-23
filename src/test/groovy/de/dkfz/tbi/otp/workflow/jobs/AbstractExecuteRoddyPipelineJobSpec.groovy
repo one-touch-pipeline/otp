@@ -106,6 +106,9 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         job.workflowRunService = Mock(WorkflowRunService)
         job.logService = Mock(LogService)
         job.roddyResultWorkFileServiceFactoryService = Mock(RoddyResultWorkFileServiceFactoryService)
+        job.processingOptionService = Mock(ProcessingOptionService) {
+            1 * findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP) >> configService.testingGroup
+        }
 
         when:
         job.execute(workflowStep)
@@ -120,7 +123,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
             getConfigFile(bamFile) >> configFile
         }
         0 * job.roddyConfigService._
-        1 * job.fileService.createFileWithContent(configFile, configText, _, true)
+        1 * job.fileService.createFileWithContent(configFile, configText, _, _, true)
         1 * job.roddyCommandService.createRoddyCommand(_, _, ["c", "d"]) >> { cmd }
         1 * job.roddyExecutionService.clearRoddyExecutionStoreDirectory(bamFile)
         1 * job.workflowRunService.markJobAsNotRestartableInSeparateTransaction(workflowStep.workflowRun)
@@ -166,6 +169,9 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         job.workflowRunService = Mock(WorkflowRunService)
         job.logService = Mock(LogService)
         job.roddyResultWorkFileServiceFactoryService = Mock(RoddyResultWorkFileServiceFactoryService)
+        job.processingOptionService = Mock(ProcessingOptionService) {
+            1 * findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP) >> configService.testingGroup
+        }
 
         when:
         job.execute(workflowStep)
@@ -180,7 +186,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
             1 * getConfigFile(bamFile) >> configFile
         }
         0 * job.roddyConfigService._
-        1 * job.fileService.createFileWithContent(configFile, configText, _, true)
+        1 * job.fileService.createFileWithContent(configFile, configText, _, _, true)
         1 * job.roddyCommandService.createRoddyCommand(_, _, ["c", "d"]) >> { cmd }
         1 * job.roddyExecutionService.clearRoddyExecutionStoreDirectory(bamFile)
         1 * job.workflowRunService.markJobAsNotRestartableInSeparateTransaction(workflowStep.workflowRun)
@@ -227,6 +233,9 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
         job.workflowRunService = Mock(WorkflowRunService)
         job.logService = Mock(LogService)
         job.roddyResultWorkFileServiceFactoryService = Mock(RoddyResultWorkFileServiceFactoryService)
+        job.processingOptionService = Mock(ProcessingOptionService) {
+            1 * findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP) >> configService.testingGroup
+        }
 
         when:
         job.execute(workflowStep)
@@ -241,7 +250,7 @@ class AbstractExecuteRoddyPipelineJobSpec extends Specification implements DataT
             1 * getConfigFile(bamFile) >> configFile
         }
         0 * job.roddyConfigService._
-        1 * job.fileService.createFileWithContent(configFile, configText, _, true)
+        1 * job.fileService.createFileWithContent(configFile, configText, _, _, true)
         1 * job.roddyCommandService.createRoddyCommand(_, _, ["c", "d"]) >> { cmd }
         1 * job.roddyExecutionService.clearRoddyExecutionStoreDirectory(bamFile)
         1 * job.workflowRunService.markJobAsNotRestartableInSeparateTransaction(workflowStep.workflowRun)

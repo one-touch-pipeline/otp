@@ -45,7 +45,7 @@ class LinkFileUtils {
      * Creates relative symbolic links.
      * Links which already exist are overwritten, parent directories are created automatically if necessary.
      * @param targetLinkMap The values of the map are used as link names, the keys as the targets.
-     * @deprecated use {@link FileService#createLink(Path, Path, CreateLinkOption[])}
+     * @deprecated use {@link FileService#createLink(Path, Path, String, CreateLinkOption[])}
      */
     @Deprecated
     void createAndValidateLinks(Map<File, File> targetLinkMap, String unixGroup = '')  {
@@ -63,7 +63,7 @@ class LinkFileUtils {
             targetLinkMap.each { File target, File link ->
                 Path targetPath = fileService.toPath(target, fileSystem)
                 Path linkPath = fileService.toPath(link, fileSystem)
-                fileService.createLink(linkPath, targetPath, CreateLinkOption.DELETE_EXISTING_FILE)
+                fileService.createLink(linkPath, targetPath, unixGroup, CreateLinkOption.DELETE_EXISTING_FILE)
             }
         }
     }

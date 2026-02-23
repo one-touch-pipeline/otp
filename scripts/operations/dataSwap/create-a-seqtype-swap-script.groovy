@@ -21,6 +21,7 @@
  */
 
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataswap.AbstractDataSwapService
 import de.dkfz.tbi.otp.dataswap.ScriptBuilder
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -32,7 +33,7 @@ import java.nio.file.Paths
 ConfigService configService = ctx.configService
 FileService fileService = ctx.fileService
 FileSystemService fileSystemService = ctx.fileSystemService
-
+ProcessingOptionService processingOptionService = ctx.processingOptionService
 
 /**
  * Generation script for LaneSwaps
@@ -95,7 +96,7 @@ def adaptValues = { SeqTrack oldSeqTrack ->
 // ------------------------------
 
 int counter = 1
-ScriptBuilder builder = new ScriptBuilder(configService, fileService, fileSystemService, Paths.get('sample_swap', swapLabel))
+ScriptBuilder builder = new ScriptBuilder(configService, fileService, fileSystemService, processingOptionService, Paths.get('sample_swap', swapLabel))
 List<String> all_swaps = []
 
 builder.addGroovyCommand("""
@@ -119,16 +120,18 @@ builder.addGroovyCommand("""
           FileSystemService fileSystemService = ctx.fileSystemService
           FileService fileService = ctx.fileService
           LaneSwapService laneSwapService = ctx.laneSwapService
-          
+          ProcessingOptionService processingOptionService = ctx.processingOptionService
+
           FileSystem fileSystem = fileSystemService.remoteFileSystem
-          
+
           StringBuilder log = new StringBuilder()
-          
+
           // create a container dir for all output of this swap;
           // group-editable so non-server users can also work with it
           String swapLabel = "${swapLabel}"
           final Path SCRIPT_OUTPUT_DIRECTORY = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve('sample_swap').resolve(swapLabel)
-          fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(SCRIPT_OUTPUT_DIRECTORY)
+          String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
+          fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(SCRIPT_OUTPUT_DIRECTORY, unixGroup)
           fileService.setPermission(SCRIPT_OUTPUT_DIRECTORY, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
           
           /** did we manually check yet if all (potentially symlinked) fastq datafiles still exist on the filesystem? */
@@ -164,7 +167,7 @@ seqTracks.each { seqTrack ->
             "\t\trawSequenceFileSwaps        : [\n")
 
     seqTrack.sequenceFiles.each { rawSequenceFile ->
-        builder.addGroovyCommand( "\t\t\tnew Swap<String>('${rawSequenceFile.fileName}', ''),\n")
+        builder.addGroovyCommand("\t\t\tnew Swap<String>('${rawSequenceFile.fileName}', ''),\n")
     }
 
     builder.addGroovyCommand("\t\t],\n" +

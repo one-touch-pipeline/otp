@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.filestore.*
 import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
@@ -39,6 +40,8 @@ import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowMessageLog
 import de.dkfz.tbi.otp.workflowExecution.wes.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 
 import java.nio.file.*
 import java.time.*
@@ -70,6 +73,7 @@ String uuidRoot = ""
 @Field FileService fileService = ctx.fileService
 @Field FileSystemService fileSystemService = ctx.fileSystemService
 @Field RawSequenceDataViewFileService rawSequenceDataViewFileService = ctx.rawSequenceDataViewFileService
+@Field ProcessingOptionService processingOptionService = ctx.processingOptionService
 
 println "Creating WesFastQcWorkflow test data for project: ${projectName}..."
 
@@ -92,20 +96,20 @@ Project findOrCreateProject(String name) {
     if (!project) {
         println "Creating new project: ${name}"
         ProcessingPriority priority = ProcessingPriority.first() ?: new ProcessingPriority(
-            name: "NORMAL",
-            priority: 5,
-            errorMailPrefix: "[OTP-ERROR]"
+                name: "NORMAL",
+                priority: 5,
+                errorMailPrefix: "[OTP-ERROR]"
         ).save(flush: true)
 
         project = new Project(
-            name: name,
-            projectType: Project.ProjectType.SEQUENCING,
-            unixGroup: "WES_GROUP",
-            individualPrefix: name.toLowerCase().replaceAll(/[^a-z0-9]/, ''),
-            dirName: name.toLowerCase().replaceAll(/[^a-z0-9_-]/, '_'),
-            description: "Test project for WES FastQC workflow testing",
-            processingPriority: priority,
-            state: Project.State.OPEN
+                name: name,
+                projectType: Project.ProjectType.SEQUENCING,
+                unixGroup: "WES_GROUP",
+                individualPrefix: name.toLowerCase().replaceAll(/[^a-z0-9]/, ''),
+                dirName: name.toLowerCase().replaceAll(/[^a-z0-9_-]/, '_'),
+                description: "Test project for WES FastQC workflow testing",
+                processingPriority: priority,
+                state: Project.State.OPEN
         ).save(flush: true)
     }
     return project
@@ -119,11 +123,11 @@ Individual findOrCreateIndividual(Project project, String pid) {
     if (!individual) {
         println "Creating individual: ${pid}"
         individual = new Individual(
-            pid: pid,
-            mockPid: pid,
-            mockFullName: "Test Individual ${pid}",
-            project: project,
-            type: Individual.Type.REAL
+                pid: pid,
+                mockPid: pid,
+                mockFullName: "Test Individual ${pid}",
+                project: project,
+                type: Individual.Type.REAL
         ).save(flush: true)
     } else {
         println "Found existing individual: ${pid}"
@@ -152,16 +156,16 @@ SeqTrack findOrCreateSeqTrack(Individual individual, SeqType seqType, String ide
     if (!seqTrack) {
         println "Creating SeqTrack for individual: ${individual.pid}"
         seqTrack = new SeqTrack(
-            sample: sample,
-            seqType: seqType,
-            run: run,
-            laneId: "L00${identifier[-1]}",
-            sampleIdentifier: "SAMPLE_${identifier}",
-            pipelineVersion: findOrCreateSoftwareTool(),
-            dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
-            fastqcState: SeqTrack.DataProcessingState.NOT_STARTED,
-            libraryPreparationKit: LibraryPreparationKit.first(),
-            kitInfoReliability: InformationReliability.KNOWN
+                sample: sample,
+                seqType: seqType,
+                run: run,
+                laneId: "L00${identifier[-1]}",
+                sampleIdentifier: "SAMPLE_${identifier}",
+                pipelineVersion: findOrCreateSoftwareTool(),
+                dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
+                fastqcState: SeqTrack.DataProcessingState.NOT_STARTED,
+                libraryPreparationKit: LibraryPreparationKit.first(),
+                kitInfoReliability: InformationReliability.KNOWN
         ).save(flush: true)
 
         FastqImportInstance fastqImportInstance = new FastqImportInstance([
@@ -204,10 +208,10 @@ Run findOrCreateRun(String identifier) {
     if (!run) {
         println "Creating run: ${runName}"
         run = new Run(
-            name: runName,
-            dateExecuted: new Date(),
-            seqCenter: findOrCreateSeqCenter(),
-            seqPlatform: findOrCreateSeqPlatform()
+                name: runName,
+                dateExecuted: new Date(),
+                seqCenter: findOrCreateSeqCenter(),
+                seqPlatform: findOrCreateSeqPlatform()
         ).save(flush: true)
     } else {
         println "Found existing run: ${runName}"
@@ -222,8 +226,8 @@ SeqCenter findOrCreateSeqCenter() {
     SeqCenter seqCenter = SeqCenter.findByName("TEST_CENTER")
     if (!seqCenter) {
         seqCenter = new SeqCenter(
-            name: "TEST_CENTER",
-            dirName: "test_center"
+                name: "TEST_CENTER",
+                dirName: "test_center"
         ).save(flush: true)
     }
     return seqCenter
@@ -236,8 +240,8 @@ SeqPlatform findOrCreateSeqPlatform() {
     SeqPlatform seqPlatform = SeqPlatform.findByName("HISEQ_2500")
     if (!seqPlatform) {
         seqPlatform = new SeqPlatform(
-            name: "HISEQ_2500",
-            seqPlatformGroups: [] as Set
+                name: "HISEQ_2500",
+                seqPlatformGroups: [] as Set
         ).save(flush: true)
     }
     return seqPlatform
@@ -250,7 +254,7 @@ SampleType findOrCreateSampleType(String name) {
     SampleType sampleType = SampleType.findByName(name)
     if (!sampleType) {
         sampleType = new SampleType(
-            name: name,
+                name: name,
         ).save(flush: true)
     }
     return sampleType
@@ -263,8 +267,8 @@ Sample findOrCreateSample(Individual individual, SampleType sampleType) {
     Sample sample = Sample.findByIndividualAndSampleType(individual, sampleType)
     if (!sample) {
         sample = new Sample(
-            individual: individual,
-            sampleType: sampleType
+                individual: individual,
+                sampleType: sampleType
         ).save(flush: true)
     }
     return sample
@@ -281,20 +285,20 @@ WorkflowArtefact findOrCreateArtefact(WorkflowRun producedBy, String outputRole,
     }
 
     String displayText = [
-        project: seqTrack.individual.project.name,
-        individual: seqTrack.individual.pid,
-        seqType: seqTrack.seqType.displayNameWithLibraryLayout,
-        sampleType: seqTrack.sampleType,
-        run: seqTrack.run.name,
-        laneId: seqTrack.laneId,
+            project   : seqTrack.individual.project.name,
+            individual: seqTrack.individual.pid,
+            seqType   : seqTrack.seqType.displayNameWithLibraryLayout,
+            sampleType: seqTrack.sampleType,
+            run       : seqTrack.run.name,
+            laneId    : seqTrack.laneId,
     ].collect { "${it.key}: ${it.value}" }.join('\n')
 
     WorkflowArtefact workflowArtefact = new WorkflowArtefact(
-        state: WorkflowArtefact.State.SUCCESS,
-        producedBy: producedBy,
-        outputRole: outputRole,
-        artefactType: ArtefactType.FASTQ,
-        displayName: "FastQC artefact\n${displayText}",
+            state: WorkflowArtefact.State.SUCCESS,
+            producedBy: producedBy,
+            outputRole: outputRole,
+            artefactType: ArtefactType.FASTQ,
+            displayName: "FastQC artefact\n${displayText}",
     ).save(flush: true)
 
     seqTrack.workflowArtefact = workflowArtefact
@@ -309,9 +313,9 @@ WorkflowRunInputArtefact findOrCreateInputArtefact(WorkflowRun workflowRun, Stri
     WorkflowRunInputArtefact inputArtefact = WorkflowRunInputArtefact.findByWorkflowRunAndRole(workflowRun, inputRole)
     if (!inputArtefact) {
         inputArtefact = new WorkflowRunInputArtefact(
-            workflowRun: workflowRun,
-            role: inputRole,
-            workflowArtefact: findOrCreateArtefact(null, null, seqTrack)
+                workflowRun: workflowRun,
+                role: inputRole,
+                workflowArtefact: findOrCreateArtefact(null, null, seqTrack)
         ).save(flush: true)
     }
     return inputArtefact
@@ -330,16 +334,16 @@ SoftwareTool findOrCreateSoftwareTool() {
  * Find or create a complete workflow run with specified state and characteristics
  */
 WorkflowRun findOrCreateWorkflowRun(Workflow workflow, Project project, SeqTrack seqTrack,
-                              WorkflowRun.State workflowState, String displaySuffix,
-                              BaseFolder baseFolder, ScenarioType scenarioType) {
+                                    WorkflowRun.State workflowState, String displaySuffix,
+                                    BaseFolder baseFolder, ScenarioType scenarioType) {
 
     String displayText = [
-        project: project.name,
-        individual: seqTrack.individual.pid,
-        seqType: seqTrack.seqType.displayNameWithLibraryLayout,
-        sampleType: seqTrack.sampleType,
-        run: seqTrack.run.name,
-        laneId: seqTrack.laneId,
+            project   : project.name,
+            individual: seqTrack.individual.pid,
+            seqType   : seqTrack.seqType.displayNameWithLibraryLayout,
+            sampleType: seqTrack.sampleType,
+            run       : seqTrack.run.name,
+            laneId    : seqTrack.laneId,
     ].collect { "${it.key}: ${it.value}" }.join('\n')
 
     String shortDisplayName = "WesFastQcWorkflow ${displaySuffix}"
@@ -353,15 +357,15 @@ WorkflowRun findOrCreateWorkflowRun(Workflow workflow, Project project, SeqTrack
         WorkFolder workFolder = filestoreService.createWorkFolder(baseFolder)
 
         workflowRun = new WorkflowRun(
-            workflow: workflow,
-            state: workflowState,
-            project: project,
-            priority: project.processingPriority,
-            displayName: "WesFastQcWorkflow ${displaySuffix}\n${displayText}",
-            shortDisplayName: shortDisplayName,
-            combinedConfig: '{}',
-            workflowSteps: [],
-            workFolder: workFolder,
+                workflow: workflow,
+                state: workflowState,
+                project: project,
+                priority: project.processingPriority,
+                displayName: "WesFastQcWorkflow ${displaySuffix}\n${displayText}",
+                shortDisplayName: shortDisplayName,
+                combinedConfig: '{}',
+                workflowSteps: [],
+                workFolder: workFolder,
         ).save(flush: true)
 
         // Create input and output artefacts
@@ -383,12 +387,12 @@ WorkflowRun findOrCreateWorkflowRun(Workflow workflow, Project project, SeqTrack
             // Also update the processing step state for data consistency
             if (workflowRun.workflowSteps) {
                 SeqTrack seqTrackUpdate = SeqTrack.findByWorkflowArtefact(
-                    WorkflowRunInputArtefact.findByWorkflowRun(workflowRun)?.workflowArtefact
+                        WorkflowRunInputArtefact.findByWorkflowRun(workflowRun)?.workflowArtefact
                 )
                 if (seqTrackUpdate) {
                     seqTrackUpdate.fastqcState = workflowState == WorkflowRun.State.SUCCESS ?
-                        SeqTrack.DataProcessingState.FINISHED :
-                        SeqTrack.DataProcessingState.NOT_STARTED
+                            SeqTrack.DataProcessingState.FINISHED :
+                            SeqTrack.DataProcessingState.NOT_STARTED
                     seqTrackUpdate.save(flush: true)
                 }
             }
@@ -423,11 +427,12 @@ void createWorkflowSteps(WorkflowRun workflowRun, ScenarioType scenarioType) {
 
 class WorkflowStepsCreatorFactory {
     static Map<ScenarioType, Class> scenarioCreators = [
-            (ScenarioType.SUCCESS)    : SuccessfulWorkflowRunCreator,
-            (ScenarioType.RUNNING)    : RunningWorkflowRunCreator,
-            (ScenarioType.FAILED_OTP) : OtpFailedWorkflowRunCreator,
-            (ScenarioType.FAILED_WES) : WesFailedWorkflowRunCreator,
+            (ScenarioType.SUCCESS)   : SuccessfulWorkflowRunCreator,
+            (ScenarioType.RUNNING)   : RunningWorkflowRunCreator,
+            (ScenarioType.FAILED_OTP): OtpFailedWorkflowRunCreator,
+            (ScenarioType.FAILED_WES): WesFailedWorkflowRunCreator,
     ]
+
     static WorkflowStepsCreator getInstance(ScenarioType scenarioType, WorkflowRun run) {
         return scenarioCreators[scenarioType].newInstance(scenarioType, run)
     }
@@ -450,7 +455,7 @@ trait WorkflowStepsCreator {
     void createWorkflowSteps() {
         int idx = 0
         WorkflowStep previousStep = null
-        while(idx < lastJob) {
+        while (idx < lastJob) {
             WorkflowStep step = createWorkflowStep(jobNames[idx], previousStep)
             if (idx == 5) {
                 step.state = getStepState(idx)
@@ -489,11 +494,11 @@ trait WorkflowStepsCreator {
     WorkflowStep createWorkflowStep(String jobName, WorkflowStep previousStep) {
         return new WorkflowStep([
                 workflowRun: workflowRun,
-                beanName: jobName,
-                state: WorkflowStep.State.SUCCESS,
-                previous: previousStep,
+                beanName   : jobName,
+                state      : WorkflowStep.State.SUCCESS,
+                previous   : previousStep,
                 clusterJobs: [] as Set,
-                wesRuns: [] as Set,
+                wesRuns    : [] as Set,
         ]).save(flush: false)
     }
 
@@ -511,7 +516,6 @@ trait WorkflowStepsCreator {
         workflowStep.wesRuns.add(wesRun)
         return wesRun
     }
-
 
     /**
      * Create WES run log based on state
@@ -565,10 +569,12 @@ class RunningWorkflowRunCreator implements WorkflowStepsCreator {
     int getLastJob() {
         return 6
     }
+
     @Override
     WorkflowStep.State getStepState(int idx) {
         return WorkflowStep.State.SUCCESS
     }
+
     @Override
     void handleExecutionStep(WorkflowStep step, int idx) {
         createWesRun(step, jobNames[idx], WesRun.MonitorState.FINISHED, State.RUNNING, "")
@@ -626,6 +632,7 @@ class WesFailedWorkflowRunCreator implements WorkflowStepsCreator {
         this.scenarioType = scenarioType
         this.workflowRun = workflowRun
     }
+
     @Override
     int getLastJob() {
         return 7
@@ -677,21 +684,22 @@ WorkflowRun.withNewTransaction {
 
     // Find or create the WesFastQcWorkflow
     Workflow workflow = CollectionUtils.atMostOneElement(Workflow.findAllByName(workflowName)) ?: new Workflow(
-        name: workflowName,
-        beanName: WesFastQcWorkflow.simpleName.uncapitalize(),
-        enabled: true
+            name: workflowName,
+            beanName: WesFastQcWorkflow.simpleName.uncapitalize(),
+            enabled: true
     ).save(flush: true)
 
     // Find or create BaseFolder
     try {
         baseFolder = filestoreService.findAnyWritableBaseFolder()
     } catch (AssertionError e) {
+        String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
         baseFolder = new BaseFolder(
-            path: basePath.resolve(uuidRoot).toString(),
-            writable: true
+                path: basePath.resolve(uuidRoot).toString(),
+                writable: true
         ).save(flush: true)
         // Create main directory structure if not done yet
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(basePath)
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(basePath, unixGroup)
 
         println "Created new BaseFolder: ${baseFolder.path}"
     }
@@ -731,6 +739,8 @@ void createFileStructureForWorkflowRun(WorkflowRun workflowRun, String baseDir, 
 
     println "Creating OTP file structure for workflow ${workflowRun.id} (${individual.pid}) in: ${baseDir}"
 
+    String unixGroup = individual.project.unixGroup
+
     // Use remote filesystem consistently for all path operations
     Path workFolderPath = filestoreService.getWorkFolderPath(workflowRun)
 
@@ -738,14 +748,14 @@ void createFileStructureForWorkflowRun(WorkflowRun workflowRun, String baseDir, 
     if (Files.exists(workFolderPath)) {
         fileService.deleteDirectoryRecursively(workFolderPath)
     }
-    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workFolderPath)
+    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workFolderPath, unixGroup)
     println "Created WorkFolder with UUID: ${workflowRun.workFolder.uuid}"
     println "WorkFolder path: ${workFolderPath}"
 
     // Create proper OTP view-by-pid structure using OTP file services
     Path runPath = rawSequenceDataViewFileService.getFilePath(seqTrack.sequenceFiles.first()).parent
 
-    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(runPath)
+    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(runPath, unixGroup)
 
     // Create subfolders within the UUID directory using remote filesystem
     Path inputPath = workFolderPath.resolve("input")
@@ -753,10 +763,10 @@ void createFileStructureForWorkflowRun(WorkflowRun workflowRun, String baseDir, 
     Path tracePath = workFolderPath.resolve("trace")
     Path logsPath = workFolderPath.resolve("logs")
 
-    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(inputPath)
-    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(fastqcResultsPath)
-    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(tracePath)
-    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(logsPath)
+    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(inputPath, unixGroup)
+    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(fastqcResultsPath, unixGroup)
+    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(tracePath, unixGroup)
+    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(logsPath, unixGroup)
 
     // Create realistic FastQ files in input subfolder
     String samplePrefix = "sample_${individual.pid.toLowerCase()}"
@@ -784,8 +794,8 @@ CAGATCCCAATCGGTCATTCTTTGTAACAGTCTTCCATTAACCAAAACCTTTTCAGTTTT
     Path fastq1 = inputPath.resolve("${samplePrefix}_R1.fastq.gz")
     Path fastq2 = inputPath.resolve("${samplePrefix}_R2.fastq.gz")
 
-    fileService.createFileWithContent(fastq1, fastqContent1)
-    fileService.createFileWithContent(fastq2, fastqContent2)
+    fileService.createFileWithContent(fastq1, fastqContent1, unixGroup)
+    fileService.createFileWithContent(fastq2, fastqContent2, unixGroup)
 
     // Create FastQC result files based on workflow state
     boolean shouldCreateResults = workflowRun.state in [WorkflowRun.State.SUCCESS, WorkflowRun.State.FAILED]
@@ -838,9 +848,9 @@ CAGATCCCAATCGGTCATTCTTTGTAACAGTCTTCCATTAACCAAAACCTTTTCAGTTTT
 
         String zipContent = "PK\u0003\u0004\u0014\u0000\u0000\u0000\u0008\u0000" // Fake ZIP header
 
-        fileService.createFileWithContent(reportHtml, fastqcReport)
-        fileService.createFileWithContent(fastqcZip1, zipContent + "FastQC ZIP content for ${samplePrefix}_R1")
-        fileService.createFileWithContent(fastqcZip2, zipContent + "FastQC ZIP content for ${samplePrefix}_R2")
+        fileService.createFileWithContent(reportHtml, fastqcReport, unixGroup)
+        fileService.createFileWithContent(fastqcZip1, zipContent + "FastQC ZIP content for ${samplePrefix}_R1", unixGroup)
+        fileService.createFileWithContent(fastqcZip2, zipContent + "FastQC ZIP content for ${samplePrefix}_R2", unixGroup)
     }
 
     // Create Nextflow trace file
@@ -854,7 +864,7 @@ Duration    : 2m 45s
 CPU hours   : 0.1
 ${workflowRun.state == WorkflowRun.State.SUCCESS ? 'Succeeded' : (workflowRun.state == WorkflowRun.State.FAILED ? 'Failed' : 'Running')}   : ${workflowRun.state == WorkflowRun.State.SUCCESS ? '12' : (workflowRun.state == WorkflowRun.State.FAILED ? '6' : '8')}"""
 
-    fileService.createFileWithContent(traceFile, traceContent)
+    fileService.createFileWithContent(traceFile, traceContent, unixGroup)
 
     // Create cluster job log files
     (1..5).each { i ->
@@ -875,37 +885,37 @@ ${workflowRun.state == WorkflowRun.State.FAILED && i > 3 ? '- ERROR: Processing 
 ${workflowRun.state == WorkflowRun.State.FAILED && i > 3 ? 'FastQC analysis failed.' : 'FastQC analysis completed successfully.'}
 Report generated: ${samplePrefix}_${i}_fastqc.html
 Result files written to: ${fastqcResultsPath}
-""")
+""", unixGroup)
     }
 
     // Create view-by-pid links
     Path viewFastqcResultsPath = runPath
     Path viewLogsPath = runPath.resolve("logs")
-    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(viewFastqcResultsPath)
-    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(viewLogsPath)
+    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(viewFastqcResultsPath, unixGroup)
+    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(viewLogsPath, unixGroup)
 
     try {
         // Link input FastQ files
-        fileService.createLink(runPath.resolve("${samplePrefix}_R1.fastq.gz"), fastq1, CreateLinkOption.DELETE_EXISTING_FILE)
-        fileService.createLink(runPath.resolve("${samplePrefix}_R2.fastq.gz"), fastq2, CreateLinkOption.DELETE_EXISTING_FILE)
+        fileService.createLink(runPath.resolve("${samplePrefix}_R1.fastq.gz"), fastq1, unixGroup, CreateLinkOption.DELETE_EXISTING_FILE)
+        fileService.createLink(runPath.resolve("${samplePrefix}_R2.fastq.gz"), fastq2, unixGroup, CreateLinkOption.DELETE_EXISTING_FILE)
 
         if (shouldCreateResults) {
             // Link FastQC result files
             fileService.createLink(viewFastqcResultsPath.resolve("report_fastqc.html"),
-                fastqcResultsPath.resolve("report_fastqc.html"), CreateLinkOption.DELETE_EXISTING_FILE)
+                    fastqcResultsPath.resolve("report_fastqc.html"), unixGroup, CreateLinkOption.DELETE_EXISTING_FILE)
             fileService.createLink(viewFastqcResultsPath.resolve("${samplePrefix}_R1_fastqc.zip"),
-                fastqcResultsPath.resolve("${samplePrefix}_R1_fastqc.zip"), CreateLinkOption.DELETE_EXISTING_FILE)
+                    fastqcResultsPath.resolve("${samplePrefix}_R1_fastqc.zip"), unixGroup, CreateLinkOption.DELETE_EXISTING_FILE)
             fileService.createLink(viewFastqcResultsPath.resolve("${samplePrefix}_R2_fastqc.zip"),
-                fastqcResultsPath.resolve("${samplePrefix}_R2_fastqc.zip"), CreateLinkOption.DELETE_EXISTING_FILE)
+                    fastqcResultsPath.resolve("${samplePrefix}_R2_fastqc.zip"), unixGroup, CreateLinkOption.DELETE_EXISTING_FILE)
         }
 
-        fileService.createLink(viewFastqcResultsPath.resolve("trace_${workflowRun.id}_${System.currentTimeMillis()}.txt"), traceFile, CreateLinkOption.DELETE_EXISTING_FILE)
+        fileService.createLink(viewFastqcResultsPath.resolve("trace_${workflowRun.id}_${System.currentTimeMillis()}.txt"), traceFile, unixGroup, CreateLinkOption.DELETE_EXISTING_FILE)
 
         // Link log files
         (1..5).each { i ->
             Path sourceLog = logsPath.resolve("fastqc_log${i}_${individual.pid.toLowerCase()}.out")
             Path linkLog = viewLogsPath.resolve("fastqc_log${i}_${individual.pid.toLowerCase()}.out")
-            fileService.createLink(linkLog, sourceLog, CreateLinkOption.DELETE_EXISTING_FILE)
+            fileService.createLink(linkLog, sourceLog, unixGroup, CreateLinkOption.DELETE_EXISTING_FILE)
         }
 
         println "Created symbolic links in view-by-pid structure for ${individual.pid}"

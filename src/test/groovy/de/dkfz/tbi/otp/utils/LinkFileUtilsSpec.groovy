@@ -26,6 +26,7 @@ import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.lang.TempDir
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
@@ -45,8 +46,19 @@ class LinkFileUtilsSpec extends Specification implements DataTest {
 
     File testDirectory
 
+    TestConfigService configService = new TestConfigService()
+
     @TempDir
     Path tempDir
+
+    private void mockRemoteShellHelper() {
+        linkFileUtils.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            _ * executeCommandReturnProcessOutput(_) >> { String command ->
+                return LocalShellHelper.executeAndWait(command)
+            }
+            0 * _
+        }
+    }
 
     void setup() {
         testDirectory = tempDir.toFile()
@@ -74,9 +86,11 @@ class LinkFileUtilsSpec extends Specification implements DataTest {
         File sourceFile = new File(testDirectory, "sourceFile")
         sourceFile.createNewFile()
         File linkFile = new File(testDirectory, "linkFile")
+        String unixGroup = configService.testingGroup
+        mockRemoteShellHelper()
 
         when:
-        linkFileUtils.createAndValidateLinks([(sourceFile): linkFile])
+        linkFileUtils.createAndValidateLinks([(sourceFile): linkFile], unixGroup)
 
         then:
         linkFile.exists()
@@ -90,9 +104,11 @@ class LinkFileUtilsSpec extends Specification implements DataTest {
         sourceFile.createNewFile()
         File linkFile = new File(testDirectory, "linkFile")
         linkFile << oldContent
+        String unixGroup = configService.testingGroup
+        mockRemoteShellHelper()
 
         when:
-        linkFileUtils.createAndValidateLinks([(sourceFile): linkFile])
+        linkFileUtils.createAndValidateLinks([(sourceFile): linkFile], unixGroup)
 
         then:
         linkFile.exists()
@@ -105,10 +121,12 @@ class LinkFileUtilsSpec extends Specification implements DataTest {
         File sourceFile = new File(testDirectory, "sourceFile")
         sourceFile.createNewFile()
         File linkFile = new File(testDirectory, "linkFile")
+        String unixGroup = configService.testingGroup
         assert linkFile.mkdirs()
+        mockRemoteShellHelper()
 
         when:
-        linkFileUtils.createAndValidateLinks([(sourceFile): linkFile])
+        linkFileUtils.createAndValidateLinks([(sourceFile): linkFile], unixGroup)
 
         then:
         linkFile.exists() && !linkFile.isDirectory()
@@ -122,16 +140,16 @@ class LinkFileUtilsSpec extends Specification implements DataTest {
         File linkDir = new File(testDirectory, "linkDir")
         assert !linkDir.exists()
         File linkFile = new File(linkDir, "linkFile")
+        String unixGroup = configService.testingGroup
 
         linkFileUtils.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            1 * executeCommandReturnProcessOutput(_) >> { String command ->
-                command ==~ "chmod 2750 ${linkDir}"
+            3 * executeCommandReturnProcessOutput(_) >> { String command ->
                 return new ProcessOutput(command, '', 0)
             }
         }
 
         when:
-        linkFileUtils.createAndValidateLinks([(sourceFile): linkFile])
+        linkFileUtils.createAndValidateLinks([(sourceFile): linkFile], unixGroup)
 
         then:
         linkFile.exists()

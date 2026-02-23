@@ -70,7 +70,7 @@ class AbstractPrepareJobSpec extends Specification implements DataTest, Workflow
         workflowStep.workflowRun.workDirectory == workDirectory.toString()
 
         1 * job.generateMapForLinking(workflowStep) >> [new LinkEntry(link, target)]
-        1 * job.fileService.createLink(target, link, CreateLinkOption.DELETE_EXISTING_FILE) >> null
+        1 * job.fileService.createLink(target, link, _, CreateLinkOption.DELETE_EXISTING_FILE) >> null
 
         1 * job.doFurtherPreparation(workflowStep) >> null
 
@@ -105,7 +105,7 @@ class AbstractPrepareJobSpec extends Specification implements DataTest, Workflow
         1 * job.fileService.setGroupViaBash(workDirectory, testGroup)
 
         1 * job.generateMapForLinking(workflowStep) >> [new LinkEntry(link, target)]
-        1 * job.fileService.createLink(target, link, CreateLinkOption.DELETE_EXISTING_FILE) >> null
+        1 * job.fileService.createLink(target, link, _, CreateLinkOption.DELETE_EXISTING_FILE) >> null
 
         1 * job.doFurtherPreparation(workflowStep) >> null
 
@@ -142,7 +142,7 @@ class AbstractPrepareJobSpec extends Specification implements DataTest, Workflow
         1 * job.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workFolder, testGroup, "2750")
 
         1 * job.generateMapForLinking(workflowStep) >> [new LinkEntry(link, target)]
-        1 * job.fileService.createLink(target, link, CreateLinkOption.DELETE_EXISTING_FILE) >> null
+        1 * job.fileService.createLink(target, link, _, CreateLinkOption.DELETE_EXISTING_FILE) >> null
 
         1 * job.doFurtherPreparation(workflowStep) >> null
 

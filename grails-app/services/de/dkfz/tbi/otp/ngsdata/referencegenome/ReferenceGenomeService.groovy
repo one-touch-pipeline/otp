@@ -28,6 +28,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -340,7 +341,8 @@ class ReferenceGenomeService {
             ].join("\t")
         }.join("\n")
 
-        fileService.createFileWithContent(path, content)
+        String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
+        fileService.createFileWithContent(path, content, unixGroup)
     }
 
     void checkReferenceGenomeFilesAvailability(AbstractMergingWorkPackage mergingWorkPackage) {

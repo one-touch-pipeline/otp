@@ -110,6 +110,10 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
         createUserAndRoles()
         outputFolder = Files.createDirectory(tempDir.resolve("outputFolder"))
         configService.addOtpProperties(outputFolder)
+        findOrCreateProcessingOption(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP, configService.testingGroup)
+        fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
     }
 
     void cleanup() {

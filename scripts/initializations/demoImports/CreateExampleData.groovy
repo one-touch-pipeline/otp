@@ -273,7 +273,6 @@ class ExampleData {
 
     SeqTypeService seqTypeService
     RoddyConfigService roddyConfigService
-
     Project project
     FastqImportInstance fastqImportInstance
     FileType fileType
@@ -484,9 +483,9 @@ class ExampleData {
                     directPath,
                     directPathMd5sum,
             ].each {
-                fileService.createFileWithContent(it, it.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
+                fileService.createFileWithContent(it, it.toString(), project.unixGroup, FileService.DEFAULT_FILE_PERMISSION, true)
             }
-            fileService.createLink(vbpPath, directPath, CreateLinkOption.DELETE_EXISTING_FILE)
+            fileService.createLink(vbpPath, directPath, project.unixGroup, CreateLinkOption.DELETE_EXISTING_FILE)
         }
     }
 
@@ -499,7 +498,7 @@ class ExampleData {
                     fastqcPath,
                     fastqcMd5Path,
             ].each {
-                fileService.createFileWithContent(it, it.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
+                fileService.createFileWithContent(it, it.toString(), project.unixGroup, FileService.DEFAULT_FILE_PERMISSION, true)
             }
         }
     }
@@ -511,7 +510,7 @@ class ExampleData {
                 Path target = rawSequenceDataWorkFileService.getFilePath(rawSequenceFile)
                 Path link = rawSequenceDataAllWellFileService.getFilePath(rawSequenceFile)
 
-                fileService.createLink(link, target, CreateLinkOption.DELETE_EXISTING_FILE)
+                fileService.createLink(link, target, project.unixGroup, CreateLinkOption.DELETE_EXISTING_FILE)
 
                 singleCellMappingFileService.addMappingFileEntryIfMissing(rawSequenceFile)
             }
@@ -544,21 +543,22 @@ class ExampleData {
                 }
             }
 
+            String unixGroup = project.unixGroup
             dirs.each {
-                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(it)
+                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(it, unixGroup)
             }
 
             dirsMap.each { Path pathFinal, Path pathWork ->
-                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(pathWork)
-                fileService.createLink(pathFinal, pathWork, CreateLinkOption.DELETE_EXISTING_FILE)
+                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(pathWork, unixGroup)
+                fileService.createLink(pathFinal, pathWork, unixGroup, CreateLinkOption.DELETE_EXISTING_FILE)
             }
 
             filesMap.each { Path pathFinal, Path pathWork ->
-                fileService.createFileWithContent(pathWork, pathWork.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
-                fileService.createLink(pathFinal, pathWork, CreateLinkOption.DELETE_EXISTING_FILE)
+                fileService.createFileWithContent(pathWork, pathWork.toString(), unixGroup, FileService.DEFAULT_FILE_PERMISSION, true)
+                fileService.createLink(pathFinal, pathWork, unixGroup, CreateLinkOption.DELETE_EXISTING_FILE)
             }
             Path config = panCancerWorkFileService.getConfigFile(bam)
-            fileService.createFileWithContent(config, config.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
+            fileService.createFileWithContent(config, config.toString(), unixGroup, FileService.DEFAULT_FILE_PERMISSION, true)
         }
     }
 
@@ -603,45 +603,43 @@ class ExampleData {
                 dirsMap[baseDir.resolve(it)] = workDir.resolve(it)
             }
 
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workDir)
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workDir, project.unixGroup)
 
             dirsMap.each {
                 Path pathFinal = fileSystem.getPath(it.key.toString())
                 Path pathWork = fileSystem.getPath(it.value.toString())
-                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(pathWork)
-                fileService.createLink(pathFinal, pathWork, CreateLinkOption.DELETE_EXISTING_FILE)
+                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(pathWork, project.unixGroup)
+                fileService.createLink(pathFinal, pathWork, project.unixGroup, CreateLinkOption.DELETE_EXISTING_FILE)
             }
 
             filesMap.each {
                 Path pathFinal = fileSystem.getPath(it.key.toString())
                 Path pathWork = fileSystem.getPath(it.value.toString())
-                fileService.createFileWithContent(pathWork, pathWork.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
-                fileService.createLink(pathFinal, pathWork, CreateLinkOption.DELETE_EXISTING_FILE)
+                fileService.createFileWithContent(pathWork, pathWork.toString(), project.unixGroup, FileService.DEFAULT_FILE_PERMISSION, true)
+                fileService.createLink(pathFinal, pathWork, project.unixGroup, CreateLinkOption.DELETE_EXISTING_FILE)
             }
             Path plot = rnaAlignmentWorkFileService.getArribaFusionPlotPdf(bam)
-            fileService.createFileWithContent(plot, plot.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
+            fileService.createFileWithContent(plot, plot.toString(), project.unixGroup, FileService.DEFAULT_FILE_PERMISSION, true)
             Path config = rnaAlignmentWorkFileService.getConfigFile(bam)
-            fileService.createFileWithContent(config, config.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
+            fileService.createFileWithContent(config, config.toString(), project.unixGroup, FileService.DEFAULT_FILE_PERMISSION, true)
         }
     }
 
     void createSnvFilesOnFilesystem() {
         println "creating dummy snv files on file system"
-
-        snvCallingInstances.each { SnvCallingInstance snvCallingInstance ->
+        roddySnvCallingInstances.each { RoddySnvCallingInstance snvCallingInstance ->
             [
                     snvCallingService.getSnvCallingResult(snvCallingInstance),
                     snvCallingService.getSnvDeepAnnotationResult(snvCallingInstance),
                     snvCallingService.getCombinedPlotPath(snvCallingInstance),
             ].each {
-                fileService.createFileWithContent(it, it.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
+                fileService.createFileWithContent(it, it.toString(), project.unixGroup, FileService.DEFAULT_FILE_PERMISSION, true)
             }
         }
     }
 
     void createIndelFilesOnFilesystem() {
         println "creating dummy indel files on file system"
-
         indelCallingInstances.each { IndelCallingInstance indelCallingInstance ->
             [
                     indelCallingService.getCombinedPlotPath(indelCallingInstance),
@@ -649,28 +647,26 @@ class ExampleData {
                     indelCallingService.getIndelQcJsonFile(indelCallingInstance),
                     indelCallingService.getSampleSwapJsonFile(indelCallingInstance),
             ].each {
-                fileService.createFileWithContent(it, it.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
+                fileService.createFileWithContent(it, it.toString(), project.unixGroup, FileService.DEFAULT_FILE_PERMISSION, true)
             }
         }
     }
 
     void createSophiaFilesOnFilesystem() {
         println "creating dummy sophia files on file system"
-
         sophiaInstances.each { SophiaInstance sophiaInstance ->
             [
                     sophiaService.getCombinedPlotPath(sophiaInstance),
                     sophiaService.getFinalAceseqInputFile(sophiaInstance),
                     sophiaService.getQcJsonFile(sophiaInstance),
             ].each {
-                fileService.createFileWithContent(it, it.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
+                fileService.createFileWithContent(it, it.toString(), project.unixGroup, FileService.DEFAULT_FILE_PERMISSION, true)
             }
         }
     }
 
     void createAceseqFilesOnFilesystem() {
         println "creating dummy aceseq files on file system"
-
         aceseqInstances.each { AceseqInstance aceseqInstance ->
             Path base = aceseqService.getWorkDirectory(aceseqInstance)
             AceseqQc aceseqQc = CollectionUtils.exactlyOneElement(AceseqQc.findAllByNumberAndAceseqInstance(1, aceseqInstance))
@@ -694,14 +690,13 @@ class ExampleData {
                     base.resolve("${plotPrefixAceseqExtra}_3.png"),
                     base.resolve("${plotPrefixAceseqExtra}_5.png"),
             ].each {
-                fileService.createFileWithContent(it, it.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
+                fileService.createFileWithContent(it, it.toString(), project.unixGroup, FileService.DEFAULT_FILE_PERMISSION, true)
             }
         }
     }
 
     void createRunYapsaFilesOnFilesystem() {
         println "creating dummy runYapsaInstances files on file system"
-
         runYapsaInstances.each { RunYapsaInstance runYapsaInstance ->
             Path base = runYapsaService.getWorkDirectory(runYapsaInstance)
             [
@@ -713,17 +708,16 @@ class ExampleData {
                     "snvs_${runYapsaInstance.individual.pid}_somatic_snvs_conf_8_to_10.vcfreportText.txt",
             ].each {
                 Path file = base.resolve(it)
-                fileService.createFileWithContent(file, file.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
+                fileService.createFileWithContent(file, file.toString(), project.unixGroup, FileService.DEFAULT_FILE_PERMISSION, true)
             }
         }
     }
 
     void createCellRangerFilesOnFilesystem() {
         println "creating dummy cell ranger files on file system"
-
         singleCellBamFiles.each { SingleCellBamFile bam ->
             Path workdir = cellRangerWorkFileService.getDirectoryPath(bam)
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workdir)
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workdir, project.unixGroup)
 
             Path resultsPath = cellRangerWorkFileService.getResultDirectory(bam)
 
@@ -732,17 +726,17 @@ class ExampleData {
                     cellRangerWorkFileService.getOutputDirectory(bam),
                     resultsPath,
             ].each {
-                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(it)
+                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(it, project.unixGroup)
             }
 
             CellRangerFileNames.CREATED_RESULT_DIRS.each {
                 Path path = resultsPath.resolve(it)
-                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path)
+                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path, project.unixGroup)
             }
 
             CellRangerFileNames.CREATED_RESULT_FILES.each {
                 Path path = resultsPath.resolve(it)
-                fileService.createFileWithContent(path, path.toString(), FileService.DEFAULT_FILE_PERMISSION, true)
+                fileService.createFileWithContent(path, path.toString(), project.unixGroup, FileService.DEFAULT_FILE_PERMISSION, true)
             }
 
             cellRangerWorkflowService.linkResultFiles(bam)
@@ -765,7 +759,7 @@ class ExampleData {
 
     SampleType findOrCreateSampleType(String name) {
         return CollectionUtils.atMostOneElement(SampleType.findAllByName(name)) ?: new SampleType([
-                name                   : name,
+                name: name,
         ]).save(flush: false)
     }
 
@@ -1518,8 +1512,9 @@ class ExampleData {
 
         if (createFilesOnFilesystem) {
             Path path = fileSystemService.remoteFileSystem.getPath(file)
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path.parent)
-            fileService.createFileWithContent(path, "someDummyContent", FileService.DEFAULT_FILE_PERMISSION, true)
+            String unixGroup = project.unixGroup
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path.parent, unixGroup)
+            fileService.createFileWithContent(path, "someDummyContent", unixGroup, FileService.DEFAULT_FILE_PERMISSION, true)
         }
         return new RoddyWorkflowConfig([
                 project              : mergingWorkPackage.project,

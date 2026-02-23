@@ -105,7 +105,7 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
 
         linkFileUtils.createAndValidateLinks([
                 (sourceSnvCallingInputFile): new File(runYapsaInputFile.toString()),
-        ])
+        ], configService.workflowProjectUnixGroup)
     }
 
     @Override

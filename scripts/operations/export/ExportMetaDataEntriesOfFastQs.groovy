@@ -27,7 +27,8 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
-
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import java.nio.file.FileSystem
 import java.nio.file.Path
 
@@ -81,12 +82,14 @@ ConfigService configService = ctx.configService
 FileSystemService fileSystemService = ctx.fileSystemService
 FileService fileService = ctx.fileService
 RawSequenceDataViewFileService rawSequenceDataViewFileService = ctx.rawSequenceDataViewFileService
+ProcessingOptionService processingOptionService = ctx.processingOptionService
 
 FileSystem fileSystem = fileSystemService.remoteFileSystem
 
 // where to put output
 Path output_dir = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve("export")
-fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(output_dir)
+String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
+fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(output_dir, unixGroup)
 Path output =    output_dir.resolve("${output_name}.csv")
 Path done_flag = output_dir.resolve("${output_name}.done")
 

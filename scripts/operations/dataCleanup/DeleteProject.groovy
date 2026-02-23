@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 
 import java.nio.file.FileSystem
 import java.nio.file.Path
@@ -89,11 +90,13 @@ DeletionService deletionService = ctx.deletionService
 ProjectService projectService = ctx.projectService
 FileSystemService fileSystemService = ctx.fileSystemService
 FileService fileService = ctx.fileService
+ProcessingOptionService processingOptionService = ctx.processingOptionService
 
 FileSystem fileSystem = fileSystemService.remoteFileSystem
 Path outputFile = fileSystem.getPath(pathName)
 
-fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputFile.parent)
+String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
+fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputFile.parent, unixGroup)
 
 List<String> output = []
 

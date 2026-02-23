@@ -40,9 +40,12 @@ import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.ngsdata.taxonomy.Species
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigSelector
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -70,8 +73,13 @@ class ReferenceGenomeServiceIntegrationSpec extends Specification implements Use
                 fileSystemService: new TestFileSystemService(),
                 processingOptionService: new ProcessingOptionService(),
         )
+
+        findOrCreateProcessingOption(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP, configService.testingGroup)
         referenceGenomeService.configService.processingOptionService = referenceGenomeService.processingOptionService
         referenceGenomeService.fileService.configService = referenceGenomeService.configService
+        referenceGenomeService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
+        }
         referenceGenome = createReferenceGenome()
 
         File referenceGenomeDirectory = Files.createDirectories(tempDir.resolve("reference_genomes/${referenceGenome.path}")).toFile()

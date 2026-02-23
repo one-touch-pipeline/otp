@@ -39,6 +39,7 @@ import de.dkfz.tbi.otp.infrastructure.RawSequenceDataAllWellFileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
@@ -46,6 +47,7 @@ import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.DeletionService
+import de.dkfz.tbi.otp.utils.ProcessOutput
 
 import java.nio.file.*
 
@@ -89,8 +91,11 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
                 (OtpProperty.PATH_PROJECT_ROOT): tempDir.toString(),
         ])
         service.fileService = Mock(FileService) {
-            1 * createOrOverwriteScriptOutputFile(scriptFolder, "${scriptName}.sh") >> bashScriptPath
-            _ * createOrOverwriteScriptOutputFile(_, _) >> CreateFileHelper.createFile(tempDir.resolve("test2.txt"))
+            1 * createOrOverwriteScriptOutputFile(scriptFolder, "${scriptName}.sh", _) >> bashScriptPath
+            _ * createOrOverwriteScriptOutputFile(_, _, _) >> CreateFileHelper.createFile(tempDir.resolve("test2.txt"))
+            it.remoteShellHelper = Mock(RemoteShellHelper) {
+                executeCommandReturnProcessOutput(_) >> new ProcessOutput("", "", 0)
+            }
         }
         CommentService mockedCommendService = Mock(CommentService) {
             _ * saveComment(_, _) >> null
@@ -117,6 +122,9 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
         }
         service.deletionService = Mock(DeletionService)
         service.sampleService = Mock(SampleService)
+        service.processingOptionService = Mock(ProcessingOptionService) {
+            _ * findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP) >> 'test-group'
+        }
 
         // Domain
         SampleType newSampleType = createSampleType()

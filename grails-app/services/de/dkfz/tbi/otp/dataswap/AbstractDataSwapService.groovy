@@ -90,6 +90,7 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
     RawSequenceDataWorkFileService rawSequenceDataWorkFileService
     RawSequenceDataViewFileService rawSequenceDataViewFileService
     RawSequenceDataAllWellFileService rawSequenceDataAllWellFileService
+    ProcessingOptionService processingOptionService
 
     /**
      * Logs various arguments of DataSwapParameters in DataSwapParameters.log that can be examined later in the script output.
@@ -414,8 +415,9 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
      * @param data DTO containing all entities necessary to perform a swap
      */
     void createGroovyConsoleScriptToRestartAlignments(DataSwapData data) {
+        String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
         Path groovyConsoleScriptToRestartAlignments = fileService.createOrOverwriteScriptOutputFile(
-                data.scriptOutputDirectory, "restartAli_${data.bashScriptName}.groovy"
+                data.scriptOutputDirectory, "restartAli_${data.bashScriptName}.groovy", unixGroup
         )
         groovyConsoleScriptToRestartAlignments << ALIGNMENT_SCRIPT_HEADER
 
@@ -461,7 +463,8 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
      * @return Path to bash script
      */
     void createMoveFilesScript(D data) {
-        Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(data.scriptOutputDirectory, "${data.bashScriptName}.sh")
+        String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
+        Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(data.scriptOutputDirectory, "${data.bashScriptName}.sh", unixGroup)
         bashScriptToMoveFiles << data.moveFilesCommands.join()
     }
 

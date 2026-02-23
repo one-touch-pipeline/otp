@@ -22,6 +22,8 @@
 package de.dkfz.tbi.otp.dataswap
 
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 
@@ -34,6 +36,7 @@ class ScriptBuilder {
     ConfigService configService
     FileService fileService
     FileSystemService fileSystemService
+    ProcessingOptionService processingOptionService
 
     List<String> metaInformation = []
     List<String> groovyCommands = []
@@ -41,10 +44,15 @@ class ScriptBuilder {
     boolean containsChanges = false
     Path relativeOutputDir = null
 
-    ScriptBuilder(ConfigService configService, FileService fileService, FileSystemService fileSystemService, Path relativeOutputDir) {
+    ScriptBuilder(ConfigService configService,
+                  FileService fileService,
+                  FileSystemService fileSystemService,
+                  ProcessingOptionService processingOptionService,
+                  Path relativeOutputDir) {
         this.configService = configService
         this.fileService = fileService
         this.fileSystemService = fileSystemService
+        this.processingOptionService = processingOptionService
         this.relativeOutputDir = relativeOutputDir
     }
 
@@ -141,7 +149,8 @@ class ScriptBuilder {
         Path outDir = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve(this.relativeOutputDir.toString())
 
         try {
-            Files.write(fileService.createOrOverwriteScriptOutputFile(outDir, filename), content.bytes, StandardOpenOption.APPEND)
+            String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
+            Files.write(fileService.createOrOverwriteScriptOutputFile(outDir, filename, unixGroup), content.bytes, StandardOpenOption.APPEND)
         } catch (IOException e) {
             println "Error while writing bash script: ${e}" // codenarc-disable-line
         }

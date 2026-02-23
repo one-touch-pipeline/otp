@@ -78,6 +78,7 @@ class DeletionService {
     RawSequenceDataViewFileService rawSequenceDataViewFileService
     ExternalAlignmentWorkFileService externalAlignmentWorkFileService
     PanCancerLinkFileService panCancerLinkFileService
+    ProcessingOptionService processingOptionService
 
     @CompileDynamic
     void deleteProjectContent(Project project) {
@@ -326,7 +327,8 @@ class DeletionService {
             }
         }
 
-        Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "Delete_${projectName}.sh")
+        String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
+        Path bashScriptToMoveFiles = fileService.createOrOverwriteScriptOutputFile(scriptOutputDirectory, "Delete_${projectName}.sh", unixGroup)
         bashScriptToMoveFiles << AbstractDataSwapService.BASH_HEADER
 
         (dirsToDelete*.toString() - externalMergedBamFolders).each {

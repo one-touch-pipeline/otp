@@ -92,11 +92,13 @@ abstract class AbstractPrepareJob extends AbstractJob {
             }
         }
 
+        String unixGroup = workflowStep.workflowRun.project.unixGroup
         generateMapForLinking(workflowStep).each { LinkEntry entry ->
             logService.addSimpleLogEntry(workflowStep, "Creating link ${entry.link} to ${entry.target}")
             fileService.createLink(
                     entry.link,
                     entry.target,
+                    unixGroup,
                     CreateLinkOption.DELETE_EXISTING_FILE,
             )
         }

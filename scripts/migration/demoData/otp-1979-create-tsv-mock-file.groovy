@@ -102,7 +102,7 @@ Project.findAllByName('ExampleProject').sort {
     ].join('\n')
     println 'Write in file: ' + tableFile
     println(table)
-    fileService.createFileWithContent(tableFile, table, FileService.DEFAULT_FILE_PERMISSION, true)
+    fileService.createFileWithContent(tableFile, table, project.unixGroup, FileService.DEFAULT_FILE_PERMISSION, true)
 }
 
 'end'

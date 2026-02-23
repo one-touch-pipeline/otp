@@ -79,8 +79,9 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
 
         Path linkBamFile = workDirectory.resolve(bamFileName)
         Path linkBaiFile = workDirectory.resolve(baiFileName)
-        fileService.createLink(linkBamFile, targetFileBam, CreateLinkOption.DELETE_EXISTING_FILE)
-        fileService.createLink(linkBaiFile, targetFileBai, CreateLinkOption.DELETE_EXISTING_FILE)
+        String unixGroup = abstractBamFile.project.unixGroup
+        fileService.createLink(linkBamFile, targetFileBam, unixGroup, CreateLinkOption.DELETE_EXISTING_FILE)
+        fileService.createLink(linkBaiFile, targetFileBai, unixGroup, CreateLinkOption.DELETE_EXISTING_FILE)
         return linkBamFile
     }
 

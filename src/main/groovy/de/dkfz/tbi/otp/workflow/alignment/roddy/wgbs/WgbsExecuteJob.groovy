@@ -97,6 +97,8 @@ class WgbsExecuteJob extends RoddyAlignmentExecuteJob implements PanCancerShared
             |               description='This file is a workaround since Roddy plugin imports this config.'>
             |</configuration>
             |""".stripMargin()
-        fileService.createFileWithContent(configPath.resolve("coAppAndRef.xml"), coAppAndRef)
+        RoddyBamFile roddyBamFile = getBamFile(workflowStep)
+        String unixGroup = roddyBamFile.project.unixGroup
+        fileService.createFileWithContent(configPath.resolve("coAppAndRef.xml"), coAppAndRef, unixGroup)
     }
 }

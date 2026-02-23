@@ -243,7 +243,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         String unixGroup = configService.testingGroup
         Path projectPath = configService.rootPath.toPath().resolve(dirName)
         projectService.fileService = Mock(FileService) {
-            1 * createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath.parent, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
+            1 * createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
             1 * createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath, unixGroup)
             0 * _
         }
@@ -251,7 +251,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         if (dirAnalysis) {
             dirAnalysis = "${tempDir}${dirAnalysis}"
             Path analysisPath = Paths.get(dirAnalysis)
-            1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath.parent, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
+            1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
             1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath, unixGroup, FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
         }
 
@@ -361,9 +361,9 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         then:
-        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath.parent, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
         1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath, unixGroup)
-        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath.parent, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
         1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath, unixGroup, FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
         0 * projectService.fileService._
 
@@ -462,9 +462,9 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         then:
-        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath.parent, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
         1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath, unixGroup)
-        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath.parent, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
         1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath, unixGroup, FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING) >> {
             throw new OtpFileSystemException(exceptionMessage)
         }
@@ -546,7 +546,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         then:
-        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath.parent, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING) >> {
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING) >> {
             throw new ChangeFileGroupException(exceptionMessage)
         }
         0 * projectService.fileService._
@@ -625,9 +625,9 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         then:
-        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath.parent, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
         1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath, unixGroup)
-        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath.parent, '', FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
         1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath, unixGroup, FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
         0 * projectService.fileService._
     }

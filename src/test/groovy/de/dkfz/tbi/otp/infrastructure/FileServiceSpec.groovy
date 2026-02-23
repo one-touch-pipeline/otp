@@ -108,6 +108,8 @@ class FileServiceSpec extends Specification implements DataTest {
 
     FileService fileService = new FileService()
 
+    TestConfigService configService = new TestConfigService()
+
     @TempDir
     Path tempDir
 
@@ -497,10 +499,11 @@ class FileServiceSpec extends Specification implements DataTest {
     @Unroll
     void "createFileWithContent (#name), if file does not exist, then create file with given context"() {
         given:
+        mockRemoteShellHelper()
         Path newFile = tempDir.resolve('newFile')
 
         when:
-        fileService.createFileWithContent(newFile, content)
+        fileService.createFileWithContent(newFile, content, configService.testingGroup)
 
         then:
         assertFile(newFile)
@@ -517,7 +520,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path newFile = tempDir.resolve('newFolder/newFile')
 
         when:
-        fileService.createFileWithContent(newFile, content)
+        fileService.createFileWithContent(newFile, content, configService.testingGroup)
 
         then:
         assertDirectory(newFile.parent)
@@ -532,7 +535,7 @@ class FileServiceSpec extends Specification implements DataTest {
     void "createFileWithContent (#name, #cases), if parameter is #cases, throw assertion"() {
         when:
         mockRemoteShellHelper()
-        fileService.createFileWithContent(path, content)
+        fileService.createFileWithContent(path, content, configService.testingGroup)
 
         then:
         thrown(AssertionError)
@@ -550,7 +553,7 @@ class FileServiceSpec extends Specification implements DataTest {
         assert Files.isRegularFile(path)
 
         when:
-        fileService.createFileWithContent(path, content)
+        fileService.createFileWithContent(path, content, configService.testingGroup)
 
         then:
         thrown(AssertionError)
@@ -570,7 +573,7 @@ class FileServiceSpec extends Specification implements DataTest {
         assert path.text == oldContent
 
         when:
-        fileService.createFileWithContent(path, content, FileService.DEFAULT_FILE_PERMISSION, true)
+        fileService.createFileWithContent(path, content, configService.testingGroup, FileService.DEFAULT_FILE_PERMISSION, true)
 
         then:
         path.text == expected
@@ -589,7 +592,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path newFile = filePath.resolve('newDirectory')
 
         when:
-        fileService.createFileWithContent(newFile, content)
+        fileService.createFileWithContent(newFile, content, configService.testingGroup)
 
         then:
         thrown(CreateDirectoryException)
@@ -622,13 +625,14 @@ class FileServiceSpec extends Specification implements DataTest {
 
     void "createLink, if input is valid, then create link"() {
         given:
+        mockRemoteShellHelper()
         Path target = tempDir.resolve('target')
         Path link = tempDir.resolve('link')
 
         target.text = 'text'
 
         when:
-        fileService.createLink(link, target, null, CreateLinkOption.ABSOLUTE)
+        fileService.createLink(link, target,  configService.testingGroup, CreateLinkOption.ABSOLUTE)
 
         then:
         Files.isSymbolicLink(link)
@@ -641,9 +645,7 @@ class FileServiceSpec extends Specification implements DataTest {
         given:
         Path target = targetName ? Paths.get(targetName) : null
         Path link = linkName ? Paths.get(linkName) : null
-        fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
-        }
+        mockRemoteShellHelper()
 
         when:
         fileService.createLink(link, target, null, CreateLinkOption.ABSOLUTE)
@@ -666,11 +668,12 @@ class FileServiceSpec extends Specification implements DataTest {
         given:
         Path target = tempDir.resolve('target')
         Path link = tempDir.resolve('link')
+        mockRemoteShellHelper()
 
         target.text = 'text'
 
         when:
-        fileService.createLink(link, target)
+        fileService.createLink(link, target, configService.testingGroup)
 
         then:
         Files.isSymbolicLink(link)
@@ -685,7 +688,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path link = linkName ? Paths.get(linkName) : null
 
         when:
-        fileService.createLink(link, target)
+        fileService.createLink(link, target, configService.testingGroup)
 
         then:
         AssertionError e = thrown()
@@ -706,13 +709,14 @@ class FileServiceSpec extends Specification implements DataTest {
         given:
         Path target = tempDir.resolve('target')
         Path link = tempDir.resolve('link')
+        mockRemoteShellHelper()
 
         target.text = 'text'
 
         callback(link)
 
         when:
-        fileService.createLink(link, target, null, CreateLinkOption.DELETE_EXISTING_FILE)
+        fileService.createLink(link, target,  configService.testingGroup, CreateLinkOption.DELETE_EXISTING_FILE)
 
         then:
         Files.isSymbolicLink(link)
@@ -736,7 +740,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Files.createDirectory(link)
 
         when:
-        fileService.createLink(link, target, null, CreateLinkOption.DELETE_EXISTING_FILE)
+        fileService.createLink(link, target,  configService.testingGroup, CreateLinkOption.DELETE_EXISTING_FILE)
 
         then:
         AssertionError e = thrown()
@@ -754,7 +758,7 @@ class FileServiceSpec extends Specification implements DataTest {
         callback(link)
 
         when:
-        fileService.createLink(link, target)
+        fileService.createLink(link, target, configService.testingGroup)
 
         then:
         AssertionError e = thrown()
@@ -1430,9 +1434,11 @@ class FileServiceSpec extends Specification implements DataTest {
         String newName = "new-script-file"
         Path newFile = tempDir.resolve(newName)
         assert !Files.exists(newFile)
+        mockRemoteShellHelper()
 
         when:
-        fileService.createOrOverwriteScriptOutputFile(tempDir, newName)
+        String unixGroup = configService.testingGroup
+        fileService.createOrOverwriteScriptOutputFile(tempDir, newName, unixGroup)
 
         then:
         Files.exists(newFile)
@@ -1444,9 +1450,11 @@ class FileServiceSpec extends Specification implements DataTest {
         Path newFile = tempDir.resolve(newName)
         newFile << SOME_CONTENT
         assert newFile.text == SOME_CONTENT
+        mockRemoteShellHelper()
 
         when:
-        fileService.createOrOverwriteScriptOutputFile(tempDir, newName)
+        String unixGroup = configService.testingGroup
+        fileService.createOrOverwriteScriptOutputFile(tempDir, newName, unixGroup)
 
         then:
         newFile.text.empty
@@ -1456,9 +1464,11 @@ class FileServiceSpec extends Specification implements DataTest {
         given:
         String newName = "new-script-file"
         Path newFile = tempDir.resolve(newName)
+        mockRemoteShellHelper()
 
         when:
-        fileService.createOrOverwriteScriptOutputFile(tempDir, newName)
+        String unixGroup = configService.testingGroup
+        fileService.createOrOverwriteScriptOutputFile(tempDir, newName, unixGroup)
 
         then:
         Files.getPosixFilePermissions(newFile).containsAll([

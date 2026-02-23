@@ -47,11 +47,11 @@ abstract class AbstractAlignmentWorkflowTest extends WorkflowTestCase {
             sourceLinkMap.put(linkFastqFile, linkViewByPidFastqFile)
         }
         createDirectories(sourceLinkMap.values()*.parentFile.unique())
-        linkFileUtils.createAndValidateLinks(sourceLinkMap)
+        linkFileUtils.createAndValidateLinks(sourceLinkMap, configService.workflowProjectUnixGroup)
     }
 
     void setUpRefGenomeDir(MergingWorkPackage workPackage, File refGenDir) {
         File linkRefGenDir = referenceGenomeService.referenceGenomeDirectory(workPackage.referenceGenome, false)
-        linkFileUtils.createAndValidateLinks([(refGenDir): linkRefGenDir])
+        linkFileUtils.createAndValidateLinks([(refGenDir): linkRefGenDir], configService.workflowProjectUnixGroup)
     }
 }

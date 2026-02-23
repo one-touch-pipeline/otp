@@ -27,6 +27,8 @@ import grails.util.Environment
 import org.slf4j.event.Level
 
 import de.dkfz.roddy.execution.jobs.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.ClusterJobManagerFactoryService
 import de.dkfz.tbi.otp.utils.logging.AbstractSimpleLogger
@@ -52,6 +54,8 @@ class ClusterStatisticService {
     FileService fileService
 
     LogService logService
+
+    ProcessingOptionService processingOptionService
 
     /**
      * Returns a map of jobs the cluster job scheduler knows about
@@ -79,7 +83,10 @@ class ClusterStatisticService {
             jobStates = jobManager.queryJobStatusAll()
         }
 
-        fileService.createFileWithContent(clusterLogQueryResultFileService.logFileWithCreatingDirectory(), logStringBuilder.toString())
+        String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
+        fileService.createFileWithContent(clusterLogQueryResultFileService.logFileWithCreatingDirectory(),
+                logStringBuilder.toString(),
+                unixGroup)
 
         return jobStates
     }

@@ -87,7 +87,8 @@ Workflow workflow = CollectionUtils.exactlyOneElement(Workflow.findAllByNameInLi
 List<WorkflowRun> workflowRuns = WorkflowRun.findAllByProjectInListAndWorkflowAndWorkFolderIsNull(projects, workflow)
 FileSystem fileSystem = fileSystemService.remoteFileSystem
 final Path scriptOutputDirectory = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve('migrationToUUID').resolve("${TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date())}_${workflow.name.replace(" ", "_")}")
-fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(scriptOutputDirectory)
+String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
+fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(scriptOutputDirectory, unixGroup)
 fileService.setPermission(scriptOutputDirectory, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
 
 int amountStringBuilders = Math.ceil(workflowRuns.size() / workflowRunsPerScript)
@@ -162,7 +163,7 @@ rm -rf ${oldBaseDir}/.merging*
 
     println "Files will be created under: ${scriptOutputDirectory}"
     outputStringBuilders.eachWithIndex { StringBuilder stringBuilder, int index ->
-        fileService.createFileWithContent(scriptOutputDirectory.resolve("script_${index.toString().padLeft(3, "0")}.sh"), stringBuilder.toString())
+        fileService.createFileWithContent(scriptOutputDirectory.resolve("script_${index.toString().padLeft(3, "0")}.sh"), stringBuilder.toString(), unixGroup)
     }
 
     assert !dryRun: "DRY RUN: transaction intentionally failed to rollback changes"

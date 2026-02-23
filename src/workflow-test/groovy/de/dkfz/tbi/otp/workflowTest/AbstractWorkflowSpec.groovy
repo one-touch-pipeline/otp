@@ -516,7 +516,8 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         referenceGenomeDirectory = workingDirectory.resolve("reference-genomes")
         additionalDataDirectory = workingDirectory.resolve('additional-data')
 
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workingDirectory)
+        String unixGroup = configService.testingGroup
+        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workingDirectory, unixGroup)
 
         [
                 (OtpProperty.PATH_PROJECT_ROOT)    : "${workingDirectory}/projectPath",
@@ -867,7 +868,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     protected void linkReferenceGenomeDirectoryToReference(ReferenceGenome referenceGenome) {
         Path target = referenceDataDirectory.resolve("reference-genomes").resolve(referenceGenome.path)
         Path link = remoteFileSystem.getPath(referenceGenomeService.referenceGenomeDirectory(referenceGenome, false).absolutePath)
-        fileService.createLink(link, target)
+        fileService.createLink(link, target, configService.workflowProjectUnixGroup)
     }
 
     /**

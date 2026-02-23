@@ -53,7 +53,7 @@ static def transferDataAndCorrectDB(Path finalPath, Path originalPathResolved, R
         Files.delete(md5sumPath)
     }
     String content = "${df.fastqMd5sum}  ${finalPath.fileName}"
-    fileService.createFileWithContent(md5sumPath, content)
+    fileService.createFileWithContent(md5sumPath, content, df.project.unixGroup)
 
     script << "rsync -uvL --group=${df.project.unixGroup} --perms=440 ${originalPathResolved} ${finalPath}"
 

@@ -89,6 +89,7 @@ class MetadataImportService {
     LibraryPreparationKitService libraryPreparationKitService
     MailHelperService mailHelperService
     MergingCriteriaService mergingCriteriaService
+    ProcessingOptionService processingOptionService
     TicketService ticketService
     SampleIdentifierService sampleIdentifierService
     SampleTypeService sampleTypeService
@@ -236,9 +237,11 @@ class MetadataImportService {
         try {
             if (!Files.exists(targetFile)) {
                 // create the directory and set the permission with owner and group access (setgid bit) explicitly
+                String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
                 fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(targetFile.parent,
-                        "", FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
-                fileService.createFileWithContent(targetFile, context.content)
+                        unixGroup,
+                        FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
+                fileService.createFileWithContent(targetFile, context.content, unixGroup)
             }
             assert Files.readAllBytes(targetFile) == context.content
 

@@ -22,6 +22,8 @@
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
@@ -90,9 +92,11 @@ ConfigService configService = ctx.configService
 DeletionService deletionService = ctx.deletionService
 FileService fileService = ctx.fileService
 FileSystemService fileSystemService = ctx.fileSystemService
+ProcessingOptionService processingOptionService = ctx.processingOptionService
 SeqTypeService seqTypeService = ctx.seqTypeService
 
 FileSystem fileSystem = fileSystemService.remoteFileSystem
+String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
 
 assert pathName: 'No file name given, but this is required'
 assert !pathName.contains(' '): 'File name contains spaces, which is not allowed'
@@ -168,7 +172,7 @@ set -ve
 ${filesToDelete.collect { "rm -rf ${it}" }.join('\n')}
 
 """
-    fileService.createFileWithContent(outputPath, content)
+    fileService.createFileWithContent(outputPath, content, unixGroup)
 
     println """
 deleted in OTP
