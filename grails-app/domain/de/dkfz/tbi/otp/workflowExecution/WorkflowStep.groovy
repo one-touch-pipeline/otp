@@ -98,7 +98,8 @@ class WorkflowStep implements Commentable, Entity {
         comment cascade: "all-delete-orphan"
         wesRuns cascade: "all-delete-orphan"
         workflowRun index: 'workflow_step_workflow_run_idx'
-        state index: 'workflow_step_state_idx'
+        state index: 'workflow_step_state__id__idx'
+        id index: 'workflow_step_state__id__idx'
         workflowError index: 'workflow_step_workflow_error_idx'
         previous index: 'workflow_step_previous_idx'
         restartedFrom index: 'workflow_step_restarted_from_idx'

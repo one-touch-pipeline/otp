@@ -218,4 +218,6 @@ databaseChangeLog = {
     include file: 'changelogs/2026/otp-2820-update-processingOption-metadata-whitelisted-columns.groovy'
 
     include file: 'changelogs/2026/otp-2852.groovy'
+
+    include file: 'changelogs/2026/otp-2929-improve-workflow-step-index.groovy'
 }
