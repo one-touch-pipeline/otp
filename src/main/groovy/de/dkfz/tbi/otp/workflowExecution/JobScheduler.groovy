@@ -30,6 +30,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.workflow.jobs.Job
@@ -37,6 +38,7 @@ import de.dkfz.tbi.otp.workflow.restartHandler.AutoRestartHandlerService
 import de.dkfz.tbi.otp.workflow.restartHandler.ErrorNotificationService
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
 
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import static grails.async.Promises.task
 
 @CompileDynamic
@@ -71,25 +73,33 @@ class JobScheduler {
     @Autowired
     WorkflowSystemService workflowSystemService
 
+    @Autowired
+    ProcessingOptionService processingOptionService
+
     @Scheduled(fixedDelay = 1000L)
     void scheduleJob() {
         if (workflowSystemService.enabled) {
+            int running = SessionUtils.withTransaction { WorkflowStep.countByState(WorkflowStep.State.RUNNING) }
+            int parallelStarting = processingOptionService.findOptionAsInteger(OptionName.JOB_QUEUE_PARALLEL_STARTING)
+            int maxRunning = processingOptionService.findOptionAsInteger(OptionName.JOB_QUEUE_MAX_RUNNING)
+            int newJobs = Math.min(parallelStarting, maxRunning - running)
+            if (newJobs < 1) {
+                return
+            }
             List<Long> stepIds = SessionUtils.withTransaction {
-                // Use SQL to avoid the LIMIT 1 problem with PostgreSQL
                 WorkflowStep.executeQuery(
                         "SELECT id FROM WorkflowStep WHERE state=:state ORDER BY id ASC",
                         [state: WorkflowStep.State.CREATED],
-                        [readOnly: true, max: 1]
+                        [readOnly: true, max: newJobs]
                 )
             }
 
-            // Skip the scheduling if no job/step is found
-            if (stepIds?.find()) {
+            stepIds.each { Long id ->
                 WorkflowStep step
                 SessionUtils.withTransaction {
-                    step = WorkflowStep.get(stepIds.first())
+                    step = WorkflowStep.get(id)
                     if (!step) {
-                        log.warn("WorkflowStep with id ${stepIds.first()} not found, possibly already processed")
+                        log.warn("WorkflowStep with id ${id} not found, possibly already processed")
                         return
                     }
                     log.debug("Found job to starting asyncron: ${step.displayInfo()}")

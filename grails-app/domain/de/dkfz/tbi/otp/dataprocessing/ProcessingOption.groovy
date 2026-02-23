@@ -488,6 +488,15 @@ class ProcessingOption implements Entity {
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_WORD_TEXT, null, true
         ),
 
+        JOB_QUEUE_PARALLEL_STARTING(
+                "the number of otp jobs(WorkflowSteps) that should be started in parallel each round",
+                Necessity.OPTIONAL, "1", TypeValidators.POSITIVE_NUMBER
+        ),
+        JOB_QUEUE_MAX_RUNNING(
+                "the number of otp jobs(WorkflowSteps) should at maximum run at the same time",
+                Necessity.OPTIONAL, "50", TypeValidators.POSITIVE_NUMBER
+        ),
+
         // systemConfiguration
         TIME_ZONE(
                 "Local time zone",

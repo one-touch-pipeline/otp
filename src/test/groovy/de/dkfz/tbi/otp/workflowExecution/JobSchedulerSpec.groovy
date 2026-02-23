@@ -26,6 +26,8 @@ import grails.test.hibernate.HibernateSpec
 import org.grails.async.factory.SynchronousPromiseFactory
 import org.springframework.context.ApplicationContext
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.utils.SystemUserService
 import de.dkfz.tbi.otp.workflow.jobs.Job
@@ -41,6 +43,7 @@ class JobSchedulerSpec extends HibernateSpec implements WorkflowSystemDomainFact
     @Override
     List<Class> getDomainClasses() {
         return [
+                ProcessingOption,
                 WorkflowStep,
         ]
     }
@@ -49,6 +52,7 @@ class JobSchedulerSpec extends HibernateSpec implements WorkflowSystemDomainFact
         given:
         jobScheduler = Spy(JobScheduler)
         jobScheduler.workflowSystemService = [enabled: true] as WorkflowSystemService
+        jobScheduler.processingOptionService = new ProcessingOptionService()
         createWorkflowStep(state: WorkflowStep.State.RUNNING)
 
         when:
@@ -77,8 +81,10 @@ class JobSchedulerSpec extends HibernateSpec implements WorkflowSystemDomainFact
         jobScheduler = Spy(JobScheduler)
         jobScheduler.workflowSystemService = [enabled: true] as WorkflowSystemService
         jobScheduler.workflowStateChangeService = Mock(WorkflowStateChangeService)
-        WorkflowStep workflowStep1 = createWorkflowStep(id: 1, state: WorkflowStep.State.CREATED)
-        createWorkflowStep(id: 2, state: WorkflowStep.State.CREATED)
+        jobScheduler.processingOptionService = new ProcessingOptionService()
+        createWorkflowStep(state: WorkflowStep.State.RUNNING)
+        WorkflowStep workflowStep1 = createWorkflowStep(state: WorkflowStep.State.CREATED)
+        createWorkflowStep(state: WorkflowStep.State.CREATED)
 
         when:
         jobScheduler.scheduleJob()
@@ -88,6 +94,67 @@ class JobSchedulerSpec extends HibernateSpec implements WorkflowSystemDomainFact
         }
         1 * jobScheduler.executeAndCheckJob(workflowStep1) >> {
         }
+    }
+
+    void "test scheduleJob, older steps are executed first"() {
+        given:
+        Promises.promiseFactory = new SynchronousPromiseFactory()
+        jobScheduler = Spy(JobScheduler)
+        jobScheduler.workflowSystemService = [enabled: true] as WorkflowSystemService
+        jobScheduler.workflowStateChangeService = Mock(WorkflowStateChangeService)
+        jobScheduler.processingOptionService = Mock(ProcessingOptionService) {
+            findOptionAsInteger(ProcessingOption.OptionName.JOB_QUEUE_PARALLEL_STARTING) >> 2
+            findOptionAsInteger(ProcessingOption.OptionName.JOB_QUEUE_MAX_RUNNING) >> 50
+        }
+        createWorkflowStep(state: WorkflowStep.State.RUNNING)
+        WorkflowStep workflowStep1 = createWorkflowStep(state: WorkflowStep.State.CREATED)
+        WorkflowStep workflowStep2 = createWorkflowStep(state: WorkflowStep.State.CREATED)
+        createWorkflowStep(state: WorkflowStep.State.CREATED)
+
+        when:
+        jobScheduler.scheduleJob()
+
+        then:
+        1 * jobScheduler.workflowStateChangeService.changeStateToRunning(workflowStep1) >> {
+        }
+        1 * jobScheduler.executeAndCheckJob(workflowStep1) >> {
+        }
+        1 * jobScheduler.workflowStateChangeService.changeStateToRunning(workflowStep2) >> {
+        }
+        1 * jobScheduler.executeAndCheckJob(workflowStep2) >> {
+        }
+        0 * jobScheduler.workflowStateChangeService.changeStateToRunning(_) >> {
+        }
+        0 * jobScheduler.executeAndCheckJob(_) >> {
+        }
+    }
+
+    void "test scheduleJob, start #actualStarting where parallelStarting is #parallelStarting and maxStarting is #maxStarting"() {
+        given:
+        Promises.promiseFactory = new SynchronousPromiseFactory()
+        jobScheduler = Spy(JobScheduler)
+        jobScheduler.workflowSystemService = [enabled: true] as WorkflowSystemService
+        jobScheduler.workflowStateChangeService = Mock(WorkflowStateChangeService)
+        jobScheduler.processingOptionService = Mock(ProcessingOptionService) {
+            findOptionAsInteger(ProcessingOption.OptionName.JOB_QUEUE_PARALLEL_STARTING) >> parallelStarting
+            findOptionAsInteger(ProcessingOption.OptionName.JOB_QUEUE_MAX_RUNNING) >> maxStarting
+        }
+        5.times { createWorkflowStep(state: WorkflowStep.State.RUNNING) }
+        5.times { createWorkflowStep(state: WorkflowStep.State.CREATED) }
+
+        when:
+        jobScheduler.scheduleJob()
+
+        then:
+        actualStarting * jobScheduler.workflowStateChangeService.changeStateToRunning(_) >> {
+        }
+        actualStarting * jobScheduler.executeAndCheckJob(_) >> {
+        }
+        where:
+        parallelStarting | maxStarting | actualStarting
+        4                | 50          | 4
+        5                | 8           | 3
+        10               | 50          | 5
     }
 
     void "test executeAndCheckJob, when job succeeds, create next job"() {
