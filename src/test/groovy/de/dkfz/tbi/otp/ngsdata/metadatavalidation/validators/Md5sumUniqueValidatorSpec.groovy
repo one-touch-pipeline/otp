@@ -96,14 +96,20 @@ ${md5sum2}
 ${md5sum3}
 ${md5sum2}
 """)
-        DomainFactory.createFastqFile(fastqMd5sum: md5sum3)
+        RawSequenceFile fastqFile = DomainFactory.createFastqFile(fastqMd5sum: md5sum3)
         DomainFactory.createFastqFile(fastqMd5sum: md5sum4)
+
+        String expectedDetails = "- Project: '${fastqFile.project}', PID: '${fastqFile.individual.pid}'," +
+                " Sample Type: '${fastqFile.sampleType.name}', Seq Type: '${fastqFile.seqType}'," +
+                " Run: '${fastqFile.run.name}', Lane: '${fastqFile.seqTrack.laneId}'" +
+                (fastqFile.seqTrack.singleCellWellLabel ? ", Well Label: '${fastqFile.seqTrack.singleCellWellLabel}'" : "")
 
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[1].cells + context.spreadsheet.dataRows[3].cells as Set, LogLevel.WARNING,
                         "The MD5 sum '${md5sum2}' is not unique in the metadata file.", "At least one MD5 sum is not unique in the metadata file."),
                 new Problem(context.spreadsheet.dataRows[2].cells as Set, LogLevel.WARNING,
-                        "A fastq file with the MD5 sum '${md5sum3}' is already registered in OTP.", "At least one fastq file has a MD5 sum which is already registered in OTP."),
+                        "A fastq file with the same MD5 sum '${md5sum3}' is already registered in OTP.\n${expectedDetails}",
+                        "At least one fastq file has an MD5 sum that is already registered in OTP."),
         ]
 
         when:
@@ -127,21 +133,26 @@ ${md5sum2}
 ${md5sum3}
 ${md5sum2}
 """)
-        DomainFactory.createExternallyProcessedBamFile(
+        ExternallyProcessedBamFile bamFile = DomainFactory.createExternallyProcessedBamFile(
                 md5sum: md5sum3,
                 fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
-                fileSize: 1
+                fileSize: 1,
         )
         DomainFactory.createExternallyProcessedBamFile(
                 md5sum: md5sum4,
                 fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED,
                 fileSize: 1
         )
+
+        String expectedDetails = "- Project: '${bamFile.project}', PID: '${bamFile.individual.pid}'," +
+                " Sample Type: '${bamFile.sampleType.name}', Seq Type: '${bamFile.seqType}'"
+
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[1].cells + context.spreadsheet.dataRows[3].cells as Set, LogLevel.WARNING,
                         "The MD5 sum '${md5sum2}' is not unique in the metadata file.", "At least one MD5 sum is not unique in the metadata file."),
                 new Problem(context.spreadsheet.dataRows[2].cells as Set, LogLevel.WARNING,
-                        "A bam file with the MD5 sum '${md5sum3}' is already registered in OTP.", "At least one bam file has a MD5 sum is already registered in OTP."),
+                        "A bam file with the same MD5 sum '${md5sum3}' is already registered in OTP.\n${expectedDetails}",
+                        "At least one bam file has an MD5 sum that is already registered in OTP."),
         ]
 
         when:

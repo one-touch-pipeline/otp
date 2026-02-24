@@ -62,12 +62,28 @@ class Md5sumUniqueValidator extends AbstractValueTuplesValidator<AbstractMetadat
                 context.addProblem(valueTuplesOfMd5sum*.cells.sum(), LogLevel.WARNING, "The MD5 sum '${md5sum}' is not unique in the metadata file.", "At least one MD5 sum is not unique in the metadata file.")
             }
             if (context instanceof BamMetadataValidationContext) {
-                if (ExternallyProcessedBamFile.findAllByMd5sum(md5sum)) {
-                    context.addProblem(valueTuplesOfMd5sum*.cells.sum(), LogLevel.WARNING, "A bam file with the MD5 sum '${md5sum}' is already registered in OTP.", "At least one bam file has a MD5 sum is already registered in OTP.")
+                List<ExternallyProcessedBamFile> bamFiles = ExternallyProcessedBamFile.findAllByMd5sum(md5sum)
+                if (bamFiles) {
+                    String details = bamFiles.collect { ExternallyProcessedBamFile bf ->
+                        "- Project: '${bf.project}', PID: '${bf.individual?.pid}'," +
+                                " Sample Type: '${bf.sampleType?.name}', Seq Type: '${bf.seqType}'"
+                    }.join('\n')
+                    context.addProblem(valueTuplesOfMd5sum*.cells.sum(), LogLevel.WARNING,
+                            "A bam file with the same MD5 sum '${md5sum}' is already registered in OTP.\n${details}",
+                            "At least one bam file has an MD5 sum that is already registered in OTP.")
                 }
             } else {
-                if (RawSequenceFile.findAllByFastqMd5sum(md5sum)) {
-                    context.addProblem(valueTuplesOfMd5sum*.cells.sum(), LogLevel.WARNING, "A fastq file with the MD5 sum '${md5sum}' is already registered in OTP.", "At least one fastq file has a MD5 sum which is already registered in OTP.")
+                List<RawSequenceFile> sequenceFiles = RawSequenceFile.findAllByFastqMd5sum(md5sum)
+                if (sequenceFiles) {
+                    String details = sequenceFiles.collect { RawSequenceFile sf ->
+                        "- Project: '${sf.project}', PID: '${sf.individual?.pid}'," +
+                                " Sample Type: '${sf.sampleType?.name}', Seq Type: '${sf.seqType}'," +
+                                " Run: '${sf.run?.name}', Lane: '${sf.seqTrack?.laneId}'" +
+                                (sf.seqTrack?.singleCellWellLabel ? ", Well Label: '${sf.seqTrack?.singleCellWellLabel}'" : "")
+                    }.join('\n')
+                    context.addProblem(valueTuplesOfMd5sum*.cells.sum(), LogLevel.WARNING,
+                            "A fastq file with the same MD5 sum '${md5sum}' is already registered in OTP.\n${details}",
+                            "At least one fastq file has an MD5 sum that is already registered in OTP.")
                 }
             }
         }
