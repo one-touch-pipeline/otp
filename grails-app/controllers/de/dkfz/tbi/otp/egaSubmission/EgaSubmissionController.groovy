@@ -315,7 +315,6 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         }
         Spreadsheet spreadsheet = checkAndReadCsvFile(cmd)
         if (spreadsheet) {
-            Map validateRows = egaSubmissionValidationService.validateRows(spreadsheet, cmd.submission)
             Map validateColumns = egaSubmissionValidationService.validateColumns(spreadsheet, [
                     INDIVIDUAL,
                     INDIVIDUAL_UUID,
@@ -323,18 +322,22 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                     SEQUENCING_READ_TYPE,
                     SINGLE_CELL,
                     SAMPLE_TYPE,
+                    EGA_SAMPLE_ALIAS,
             ])
-            if (!validateRows.valid) {
-                pushError(validateRows.error, cmd.submission)
-            } else if (validateColumns.hasError) {
+            if (validateColumns.hasError) {
                 pushError(validateColumns.error, cmd.submission)
             } else {
-                flash.message = new FlashMessage("File was uploaded")
-                Map<EgaMapKey, String> egaAliases = egaSubmissionFileService.readEgaSampleAliasesFromFile(spreadsheet)
-                flash.egaSampleAliases = egaAliases
-                flash.fastqs = egaAliases.collectEntries { [it.key, true] }
-                flash.bams = egaAliases.collectEntries { [it.key, false] }
-                redirect(action: "editSubmission", params: ['id': cmd.submission.id])
+                Map validateRows = egaSubmissionValidationService.validateRows(spreadsheet, cmd.submission)
+                if (validateRows.valid) {
+                    flash.message = new FlashMessage("File was uploaded")
+                    Map<EgaMapKey, String> egaAliases = egaSubmissionFileService.readEgaSampleAliasesFromFile(spreadsheet)
+                    flash.egaSampleAliases = egaAliases
+                    flash.fastqs = egaAliases.collectEntries { [it.key, true] }
+                    flash.bams = egaAliases.collectEntries { [it.key, false] }
+                    redirect(action: "editSubmission", params: ['id': cmd.submission.id])
+                } else {
+                    pushError(validateRows.error, cmd.submission)
+                }
             }
         }
     }

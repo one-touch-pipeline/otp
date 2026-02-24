@@ -31,17 +31,10 @@ class EgaSubmissionValidationService {
     EgaSubmissionFileService egaSubmissionFileService
 
     Map validateColumns(Spreadsheet spreadsheet, List<EgaSubmissionFileService.EgaColumnName> requiredColumnNames) {
-        boolean hasError = false
-        String error = ""
-        requiredColumnNames.each {
-            if (!spreadsheet.getColumn(it.value)) {
-                hasError = true
-                error = "The column ${it.value} does not exist"
-            }
-        }
+        List<String> missingColumns = requiredColumnNames.findAll { !spreadsheet.getColumn(it.value) }*.value
         return [
-                "hasError": hasError,
-                "error"   : error,
+                "hasError": !missingColumns.empty,
+                "error"   : missingColumns.empty ? "" : "The following columns do not exist: ${missingColumns.join(', ')}",
         ]
     }
 

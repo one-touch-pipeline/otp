@@ -124,6 +124,47 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
         egaSubmissionValidationService.validateRows(spreadsheet, submission).error == "Found and expected samples are different"
     }
 
+    void "validateColumns, when all required columns present, returns no error"() {
+        given:
+        SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject()
+        egaSubmissionValidationService.egaSubmissionFileService = new EgaSubmissionFileService()
+        String content = egaSubmissionValidationService.egaSubmissionFileService.generateSampleInformationCsvFile(
+                [sampleSubmissionObject.id as String], ["alias"])
+        Spreadsheet spreadsheet = new Spreadsheet(content, Delimiter.COMMA)
+        List<EgaSubmissionFileService.EgaColumnName> requiredColumns = [
+                EgaSubmissionFileService.EgaColumnName.INDIVIDUAL,
+                EgaSubmissionFileService.EgaColumnName.SAMPLE_TYPE,
+                EgaSubmissionFileService.EgaColumnName.EGA_SAMPLE_ALIAS,
+        ]
+
+        when:
+        Map result = egaSubmissionValidationService.validateColumns(spreadsheet, requiredColumns)
+
+        then:
+        !result.hasError
+        result.error == ""
+    }
+
+    void "validateColumns, when columns are missing, returns error listing all missing columns"() {
+        given:
+        String individualHeader = EgaSubmissionFileService.EgaColumnName.INDIVIDUAL.value
+        Spreadsheet spreadsheet = new Spreadsheet("${individualHeader}\nind1", Delimiter.COMMA)
+        List<EgaSubmissionFileService.EgaColumnName> requiredColumns = [
+                EgaSubmissionFileService.EgaColumnName.INDIVIDUAL,
+                EgaSubmissionFileService.EgaColumnName.SAMPLE_TYPE,
+                EgaSubmissionFileService.EgaColumnName.SEQ_TYPE_NAME,
+        ]
+
+        when:
+        Map result = egaSubmissionValidationService.validateColumns(spreadsheet, requiredColumns)
+
+        then:
+        result.hasError
+        result.error.contains(EgaSubmissionFileService.EgaColumnName.SAMPLE_TYPE.value)
+        result.error.contains(EgaSubmissionFileService.EgaColumnName.SEQ_TYPE_NAME.value)
+        !result.error.contains(EgaSubmissionFileService.EgaColumnName.INDIVIDUAL.value)
+    }
+
     void "test getting identifier key from sample submission object"() {
         given:
         SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject()
