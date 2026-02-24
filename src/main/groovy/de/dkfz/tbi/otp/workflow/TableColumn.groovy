@@ -19,12 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.jobs
+package de.dkfz.tbi.otp.workflow
 
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import groovy.transform.TupleConstructor
 
-import java.nio.file.Path
-
-abstract class AbstractTsvParseJob extends AbstractParseJob {
-    abstract Path getTsvFileToParse(WorkflowStep workflowStep)
+/**
+ * Represents a column mapping between column names and object attribute names in a table.
+ * Used in the Template Method pattern for parsing different delimiter separated table file formats.
+ */
+@TupleConstructor
+class TableColumn {
+    final String columnName
+    final String attributeName
 }
