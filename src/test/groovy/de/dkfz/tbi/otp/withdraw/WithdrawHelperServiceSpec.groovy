@@ -33,15 +33,20 @@ import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.filestore.BaseFolder
 import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.filestore.PathOption
+import de.dkfz.tbi.otp.filestore.WorkFolder
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataAllWellFileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.otp.workflowExecution.Workflow
+import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
+import de.dkfz.tbi.otp.workflowExecution.ArtefactType
 
 import java.nio.file.*
 import java.nio.file.attribute.PosixFilePermission
@@ -406,16 +411,22 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         final String viewByPidPathNormal = "${File.separator}tmp${File.separator}viewByPidNormal"
         final String viewByPidPathSingleCell = "${File.separator}tmp${File.separator}viewByPidSingleCell"
         final String wellPathSingleCell = "${File.separator}tmp${File.separator}wellSingleCell"
-        final Path fastqcPath = CreateFileHelper.createFile(tempDir.resolve("fastqc"))
+        final Path fastqcPath = tempDir.resolve("fastqc")
+        Files.createDirectories(fastqcPath)
         final Path finalMd5sumNormal = CreateFileHelper.createFile(tempDir.resolve("finalMd5sum"))
         final Path finalMd5sumSingleCell = CreateFileHelper.createFile(tempDir.resolve("finalMd5sumSingleCell"))
-        final WorkflowRun fastqcRun = createWorkflowRun(workFolder: createWorkFolder())
-        final WorkflowRun fastqcSingleCellRun = createWorkflowRun(workFolder: createWorkFolder())
+
+        final Path fastqcZip = CreateFileHelper.createFile(fastqcPath.resolve("fastqc.zip"))
+        final Path fastqcMd5sum = CreateFileHelper.createFile(fastqcPath.resolve("fastqc.zip.md5sum"))
+        final Path fastqcHtml = CreateFileHelper.createFile(fastqcPath.resolve("fastqc.html"))
+        final Path singleCellFastqcZip = CreateFileHelper.createFile(fastqcPath.resolve("singlecell_fastqc.zip"))
+        final Path singleCellFastqcMd5sum = CreateFileHelper.createFile(fastqcPath.resolve("singlecell_fastqc.zip.md5sum"))
+        final Path singleCellFastqcHtml = CreateFileHelper.createFile(fastqcPath.resolve("singlecell_fastqc.html"))
 
         RawSequenceFile fastqFile = createFastqFile()
         FastqcProcessedFile fastqcProcessedFile = createFastqcProcessedFile([
                 sequenceFile: fastqFile,
-                workflowArtefact: createWorkflowArtefact(producedBy: fastqcRun),
+                workflowArtefact: null,  // Old workflow - no artefact
         ])
         RawSequenceFile withdrawnFastqFile = createFastqFile([fileWithdrawn: true])
         RawSequenceFile singleCellFastqFile = createSequenceDataFile([
@@ -428,7 +439,7 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         ])
         FastqcProcessedFile singleCellFastqcProcessedFile = createFastqcProcessedFile([
                 sequenceFile: singleCellFastqFile,
-                workflowArtefact: createWorkflowArtefact(producedBy: fastqcSingleCellRun),
+                workflowArtefact: null,  // Old workflow - no artefact
         ])
         MergingWorkPackage mergingWorkPackage = AlignmentPipelineFactory.RoddyPanCancerFactoryInstance.INSTANCE.createMergingWorkPackage([
                 seqTracks: [fastqFile.seqTrack] as Set,
@@ -481,11 +492,33 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         1 * service.fastqcDataFilesService.fastqcOutputDirectory(fastqcProcessedFile, PathOption.REAL_PATH) >> uuidPath
         1 * service.fastqcDataFilesService.fastqcOutputDirectory(singleCellFastqcProcessedFile) >> fastqcPath
         1 * service.fastqcDataFilesService.fastqcOutputDirectory(singleCellFastqcProcessedFile, PathOption.REAL_PATH) >> uuidPath
+
+        1 * service.fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile) >> fastqcZip
+        1 * service.fastqcDataFilesService.fastqcOutputMd5sumPath(fastqcProcessedFile) >> fastqcMd5sum
+        1 * service.fastqcDataFilesService.fastqcHtmlPath(fastqcProcessedFile) >> fastqcHtml
+        1 * service.fastqcDataFilesService.fastqcOutputPath(singleCellFastqcProcessedFile) >> singleCellFastqcZip
+        1 * service.fastqcDataFilesService.fastqcOutputMd5sumPath(singleCellFastqcProcessedFile) >> singleCellFastqcMd5sum
+        1 * service.fastqcDataFilesService.fastqcHtmlPath(singleCellFastqcProcessedFile) >> singleCellFastqcHtml
+
         0 * service.fastqcDataFilesService._
 
         and:
         TestCase.assertContainSame(holder.pathsToChangeGroup, pathsToChangeGroup)
         TestCase.assertContainSame(holder.pathsToDelete, pathsToDelete)
+
+        Set<String> expectedPermissionPaths = [
+                finalPathNormal.toString(),
+                finalMd5sumNormal.toString(),
+                finalPathSingleCell.toString(),
+                finalMd5sumSingleCell.toString(),
+                fastqcZip.toString(),
+                fastqcMd5sum.toString(),
+                fastqcHtml.toString(),
+                singleCellFastqcZip.toString(),
+                singleCellFastqcMd5sum.toString(),
+                singleCellFastqcHtml.toString(),
+        ] as Set
+        TestCase.assertContainSame(holder.pathsToChangePermissions, expectedPermissionPaths)
 
         with(fastqFile) {
             assert fileWithdrawn
@@ -512,6 +545,7 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         String withdrawnGroup = "withdrawnGroup"
         String pathToDelete = "/tmp/file1"
         String pathToChangeGroup = "/tmp/file2"
+        String pathToChangePermission = "/tmp/fastq1.gz"
 
         String scriptName = 'script.sh'
         File scriptFolder = new File('/tmp/script')
@@ -534,6 +568,7 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
                 assert content.startsWith(FileService.BASH_HEADER)
                 assert content.contains("rm --recursive --force --verbose ${pathToDelete}" as String)
                 assert content.contains("chgrp --recursive --verbose ${withdrawnGroup} ${pathToChangeGroup}" as String)
+                assert content.contains("chmod 440 ${pathToChangePermission}" as String)
             }
             0 * _
         }
@@ -545,6 +580,7 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
                 remoteFileSystem  : fileSystem,
                 pathsToDelete     : [pathToDelete],
                 pathsToChangeGroup: [pathToChangeGroup],
+                pathsToChangePermissions: [pathToChangePermission] as Set,
         ])
 
         when:
@@ -570,6 +606,12 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
                 "/tmp/file3",
         ]
 
+        Set<String> pathsToChangePermissions = [
+                "/tmp/fastq1.gz",
+                "/tmp/fastq2.gz.md5sum",
+                "/tmp/fastqc.zip",
+        ]
+
         WithdrawHelperService service = new WithdrawHelperService()
         service.processingOptionService = Mock(ProcessingOptionService) {
             1 * findOptionAsString(ProcessingOption.OptionName.WITHDRAWN_UNIX_GROUP) >> withdrawnGroup
@@ -580,6 +622,7 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
                 withdrawParameters: new WithdrawParameters(),
                 pathsToDelete     : pathsToDelete,
                 pathsToChangeGroup: pathsToChangeGroup,
+                pathsToChangePermissions: pathsToChangePermissions,
         ])
 
         when:
@@ -595,5 +638,174 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         pathsToChangeGroup.each {
             assert script.contains("chgrp --recursive --verbose ${withdrawnGroup} ${it}" as String)
         }
+
+        pathsToChangePermissions.each {
+            assert script.contains("chmod 440 ${it}" as String)
+        }
+    }
+
+    void "tests handleRawSequenceFiles, when old workflow data given, then collect paths for permission changes"() {
+        given:
+        RawSequenceFile oldWorkflowFile = createFastqFile()
+        oldWorkflowFile.seqTrack.workflowArtefact = null // Simulate old workflow data
+
+        final Path oldFilePath = CreateFileHelper.createFile(tempDir.resolve("oldFastq.gz"))
+        final Path oldMd5Path = CreateFileHelper.createFile(tempDir.resolve("oldFastq.gz.md5sum"))
+
+        WithdrawHelperService service = new WithdrawHelperService()
+        service.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService) {
+            1 * getFilePath(oldWorkflowFile) >> oldFilePath
+            1 * getMd5sumPath(oldWorkflowFile) >> oldMd5Path
+        }
+        service.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
+            1 * getFilePath(oldWorkflowFile) >> Paths.get("/tmp/view")
+        }
+        service.fastqcDataFilesService = Mock(FastqcDataFilesService)
+
+        WithdrawStateHolder holder = new WithdrawStateHolder([
+                withdrawParameters: new WithdrawParameters([
+                        seqTracksWithComments: [new SeqTrackWithComment(oldWorkflowFile.seqTrack, "comment")],
+                ]),
+        ])
+
+        when:
+        service.handleRawSequenceFiles(holder)
+
+        then:
+        holder.pathsToChangePermissions.contains(oldFilePath.toString())
+        holder.pathsToChangePermissions.contains(oldMd5Path.toString())
+        holder.pathsToChangeGroup.size() > 0
+    }
+
+    void "tests handleRawSequenceFiles, when new workflow data given, then skip permission changes"() {
+        given:
+        RawSequenceFile newWorkflowFile = createFastqFile()
+        WorkflowRun workflowRun = createWorkflowRun(workFolder: createWorkFolder())
+        newWorkflowFile.seqTrack.workflowArtefact = createWorkflowArtefact(producedBy: workflowRun)
+
+        final Path newFilePath = CreateFileHelper.createFile(tempDir.resolve("newFastq.gz"))
+        final Path newMd5Path = CreateFileHelper.createFile(tempDir.resolve("newFastq.gz.md5sum"))
+
+        WithdrawHelperService service = new WithdrawHelperService()
+        service.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService) {
+            1 * getFilePath(newWorkflowFile) >> newFilePath
+            1 * getMd5sumPath(newWorkflowFile) >> newMd5Path
+        }
+        service.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
+            1 * getFilePath(newWorkflowFile) >> Paths.get("/tmp/view")
+        }
+        service.fastqcDataFilesService = Mock(FastqcDataFilesService)
+
+        WithdrawStateHolder holder = new WithdrawStateHolder([
+                withdrawParameters: new WithdrawParameters([
+                        seqTracksWithComments: [new SeqTrackWithComment(newWorkflowFile.seqTrack, "comment")],
+                ]),
+        ])
+
+        when:
+        service.handleRawSequenceFiles(holder)
+
+        then:
+        holder.pathsToChangePermissions.empty
+        holder.pathsToChangeGroup.size() > 0
+    }
+
+    void "handleRawSequenceFiles, when fastq new workflow but fastqc old workflow, then change fastqc permissions only"() {
+        given:
+        RawSequenceFile newWorkflowFastqFile = createFastqFile([fileWithdrawn: false])
+        BaseFolder baseFolder = new BaseFolder(
+                path: "/tmp/test-base-folder-${System.currentTimeMillis()}",
+                writable: true
+        )
+        baseFolder.save(flush: true)
+        WorkFolder workFolder = new WorkFolder(
+                baseFolder: baseFolder,
+                uuid: UUID.randomUUID(),
+                size: 0
+        )
+        workFolder.save(flush: true)
+
+        Workflow workflow = new Workflow(
+                name: "TestWorkflow-${System.currentTimeMillis()}",
+                enabled: true,
+                maxParallelWorkflows: 1
+        )
+        workflow.save(flush: true)
+
+        WorkflowRun workflowRun = new WorkflowRun(
+                workFolder: workFolder,
+                state: WorkflowRun.State.SUCCESS,
+                displayName: "Test Workflow Run",
+                shortDisplayName: "TestRun",
+                project: newWorkflowFastqFile.project,
+                workflow: workflow,
+                priority: newWorkflowFastqFile.seqTrack.sample.individual.project.processingPriority
+        )
+        workflowRun.save(flush: true)
+
+        WorkflowArtefact workflowArtefact = new WorkflowArtefact(
+                producedBy: workflowRun,
+                state: WorkflowArtefact.State.SUCCESS,
+                displayName: "Test Workflow Artefact",
+                artefactType: ArtefactType.FASTQ,
+                outputRole: "test"
+        )
+        workflowArtefact.save(flush: true)
+
+        newWorkflowFastqFile.seqTrack.workflowArtefact = workflowArtefact
+        newWorkflowFastqFile.seqTrack.save(flush: true)
+
+        FastqcProcessedFile oldWorkflowFastqcFile = createFastqcProcessedFile([
+                sequenceFile: newWorkflowFastqFile,
+                workflowArtefact: null,
+        ])
+
+        final Path newFastqPath = CreateFileHelper.createFile(tempDir.resolve("newFastq.gz"))
+        final Path newMd5Path = CreateFileHelper.createFile(tempDir.resolve("newFastq.gz.md5sum"))
+
+        final Path fastqcDir = tempDir.resolve("fastqc")
+        Files.createDirectories(fastqcDir)
+        final Path oldFastqcZip = CreateFileHelper.createFile(fastqcDir.resolve("oldFastqc.zip"))
+        final Path oldFastqcMd5 = CreateFileHelper.createFile(fastqcDir.resolve("oldFastqc.zip.md5sum"))
+        final Path oldFastqcHtml = CreateFileHelper.createFile(fastqcDir.resolve("oldFastqc.html"))
+
+        WithdrawHelperService service = new WithdrawHelperService()
+
+        service.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService) {
+            1 * getFilePath(newWorkflowFastqFile) >> newFastqPath
+            1 * getMd5sumPath(newWorkflowFastqFile) >> newMd5Path
+        }
+        service.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
+            1 * getFilePath(newWorkflowFastqFile) >> Paths.get("/tmp/view")
+        }
+        service.fastqcDataFilesService = Mock(FastqcDataFilesService) {
+            1 * fastqcOutputDirectory(oldWorkflowFastqcFile) >> fastqcDir
+            1 * fastqcOutputDirectory(oldWorkflowFastqcFile, PathOption.REAL_PATH) >> fastqcDir
+            1 * fastqcOutputPath(oldWorkflowFastqcFile) >> oldFastqcZip
+            1 * fastqcOutputMd5sumPath(oldWorkflowFastqcFile) >> oldFastqcMd5
+            1 * fastqcHtmlPath(oldWorkflowFastqcFile) >> oldFastqcHtml
+        }
+
+        WithdrawStateHolder holder = new WithdrawStateHolder([
+                withdrawParameters: new WithdrawParameters([
+                        seqTracksWithComments: [new SeqTrackWithComment(newWorkflowFastqFile.seqTrack, "test comment")],
+                ]),
+        ])
+
+        when:
+        service.handleRawSequenceFiles(holder)
+
+        then:
+        !holder.pathsToChangePermissions.contains(newFastqPath.toString())
+        !holder.pathsToChangePermissions.contains(newMd5Path.toString())
+
+        holder.pathsToChangePermissions.contains(oldFastqcZip.toString())
+        holder.pathsToChangePermissions.contains(oldFastqcMd5.toString())
+        holder.pathsToChangePermissions.contains(oldFastqcHtml.toString())
+
+        holder.pathsToChangeGroup.size() > 0
+
+        newWorkflowFastqFile.fileWithdrawn
+        newWorkflowFastqFile.withdrawnDate != null
     }
 }

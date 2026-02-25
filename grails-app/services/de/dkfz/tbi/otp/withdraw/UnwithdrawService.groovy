@@ -67,6 +67,7 @@ class UnwithdrawService {
     }
 
     @CompileDynamic
+    @SuppressWarnings(['AbcMetric', 'CyclomaticComplexity'])
     private void unwithdrawRawSequenceFiles(final RawSequenceFile rawSequenceFile, String comment, UnwithdrawStateHolder unwithdrawStateHolder) {
         unwithdrawStateHolder.summary << "Unwithdrawing RawSequenceFile: ${rawSequenceFile}: ${rawSequenceFile.withdrawnComment}"
         unwithdrawStateHolder.linksToCreate.put(rawSequenceDataWorkFileService.getFilePath(rawSequenceFile),
@@ -89,6 +90,46 @@ class UnwithdrawService {
         }.collect { filePath ->
             unwithdrawStateHolder.pathsToChangeGroup.put(filePath.toString(), rawSequenceFile.project.unixGroup)
         }
+
+        boolean fastqIsOldWorkflow = !rawSequenceFile.seqTrack.workflowArtefact?.producedBy?.workFolder
+        boolean fastqcIsOldWorkflow = fastqcProcessedFile && !fastqcProcessedFile.workflowArtefact?.producedBy?.workFolder
+
+        List<Path> fastqFilePermissionPaths = []
+
+        if (fastqIsOldWorkflow) {
+            // Add the main FASTQ file and its MD5 sum
+            Path fastqFilePath = rawSequenceDataWorkFileService.getFilePath(rawSequenceFile)
+            Path md5sumFilePath = rawSequenceDataWorkFileService.getMd5sumPath(rawSequenceFile)
+
+            if (fastqFilePath && Files.exists(fastqFilePath) && Files.isRegularFile(fastqFilePath)) {
+                fastqFilePermissionPaths.add(fastqFilePath)
+            }
+            if (md5sumFilePath && Files.exists(md5sumFilePath) && Files.isRegularFile(md5sumFilePath)) {
+                fastqFilePermissionPaths.add(md5sumFilePath)
+            }
+        }
+
+        if (fastqcIsOldWorkflow) {
+            // Add FastQC files if they exist (only actual files, not directories)
+            Path fastqcZipFile = fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile)
+            Path fastqcMd5File = fastqcDataFilesService.fastqcOutputMd5sumPath(fastqcProcessedFile)
+            Path fastqcHtmlFile = fastqcDataFilesService.fastqcHtmlPath(fastqcProcessedFile)
+
+            if (fastqcZipFile && Files.exists(fastqcZipFile) && Files.isRegularFile(fastqcZipFile)) {
+                fastqFilePermissionPaths.add(fastqcZipFile)
+            }
+            if (fastqcMd5File && Files.exists(fastqcMd5File) && Files.isRegularFile(fastqcMd5File)) {
+                fastqFilePermissionPaths.add(fastqcMd5File)
+            }
+            if (fastqcHtmlFile && Files.exists(fastqcHtmlFile) && Files.isRegularFile(fastqcHtmlFile)) {
+                fastqFilePermissionPaths.add(fastqcHtmlFile)
+            }
+        }
+
+        fastqFilePermissionPaths.unique().each { filePath ->
+            unwithdrawStateHolder.pathsToChangePermissions.put(filePath.toString(), "444")
+        }
+
         rawSequenceFile.withdrawnDate = null
         if (!rawSequenceFile.withdrawnComment?.contains(comment)) {
             rawSequenceFile.withdrawnComment = "${rawSequenceFile.withdrawnComment ? "${rawSequenceFile.withdrawnComment}\n" : ""}${comment}"
@@ -169,21 +210,31 @@ class UnwithdrawService {
             withdrawStateHolder.script << ("chgrp --recursive --verbose ${group} ${path}" as String)
         }
 
+        withdrawStateHolder.script << "\n#restore file permissions to 444 for unwithdrawn FASTQ files"
+        withdrawStateHolder.pathsToChangePermissions.each { filePath, permission ->
+            withdrawStateHolder.script << ("chmod ${permission} ${filePath}" as String)
+        }
+
         withdrawStateHolder.script << "\necho script has run till end\n"
     }
 }
 
 class UnwithdrawStateHolder {
+
     List<SeqTrackWithComment> seqTracksWithComment = []
 
     List<String> summary = []
 
     Map<Path, Path> linksToCreate = [:]
+
     Map<String, String> pathsToChangeGroup = [:]
+
+    Map<String,String> pathsToChangePermissions = [:]
 
     List<AbstractBamFile> bamFiles = []
 
     List<String> script = []
+
     String scriptFileName
 
     List<SeqTrack> getSeqTracks() {

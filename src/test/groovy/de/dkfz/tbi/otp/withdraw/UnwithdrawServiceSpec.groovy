@@ -35,9 +35,9 @@ import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelLinkFileService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
-import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
@@ -49,6 +49,12 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
+import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
+import de.dkfz.tbi.otp.workflowExecution.Workflow
+import de.dkfz.tbi.otp.workflowExecution.ArtefactType
+import de.dkfz.tbi.otp.filestore.BaseFolder
+import de.dkfz.tbi.otp.filestore.WorkFolder
 
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -58,6 +64,7 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
     @Override
     Class[] getDomainClassesToMock() {
         return [
+                BaseFolder,
                 CellRangerConfig,
                 CellRangerMergingWorkPackage,
                 FastqFile,
@@ -78,6 +85,10 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
                 SampleType,
                 SampleTypePerProject,
                 SingleCellBamFile,
+                WorkFolder,
+                Workflow,
+                WorkflowArtefact,
+                WorkflowRun,
         ]
     }
 
@@ -106,7 +117,8 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
 
         FileSystemService fileSystemService = new TestFileSystemService()
         ProjectService projectService = new ProjectService(configService: configService, fileSystemService: fileSystemService)
-        RawSequenceDataViewFileService rawSequenceDataViewFileService = new RawSequenceDataViewFileService(individualService: new IndividualService(projectService: projectService))
+        RawSequenceDataViewFileService rawSequenceDataViewFileService = new RawSequenceDataViewFileService(
+                individualService: new IndividualService(projectService: projectService))
         LsdfFilesService lsdfFilesService = new LsdfFilesService([
                 projectService                : projectService,
         ])
@@ -326,5 +338,234 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
         state.pathsToChangeGroup == [:]
         state.bamFiles == bamFiles
         [indelCallingInstanceBamFileWithdrawn, indelCallingInstanceFileDeleted].every { it.withdrawn }
+    }
+
+    void "test unWithdrawRawSequenceFiles, when old workflow data given, then collect paths for permission restoration"() {
+        given:
+        RawSequenceFile oldWorkflowFile = createFastqFile([fileWithdrawn: true, withdrawnComment: "test withdrawal"])
+        oldWorkflowFile.seqTrack.workflowArtefact = null // Simulate old workflow data
+
+        final Path oldFilePath = CreateFileHelper.createFile(tempDir.resolve("oldFastq.gz"))
+        final Path oldMd5Path = CreateFileHelper.createFile(tempDir.resolve("oldFastq.gz.md5sum"))
+
+        UnwithdrawService service = new UnwithdrawService()
+        service.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService) {
+            3 * getFilePath(oldWorkflowFile) >> oldFilePath
+            2 * getMd5sumPath(oldWorkflowFile) >> oldMd5Path
+        }
+        service.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
+            2 * getFilePath(oldWorkflowFile) >> Paths.get("/tmp/view")
+        }
+        service.fastqcDataFilesService = Mock(FastqcDataFilesService)
+
+        UnwithdrawStateHolder holder = new UnwithdrawStateHolder()
+
+        when:
+        service.unwithdrawRawSequenceFiles(oldWorkflowFile, "unwithdraw comment", holder)
+
+        then:
+        holder.pathsToChangePermissions.containsKey(oldFilePath.toString())
+        holder.pathsToChangePermissions.get(oldFilePath.toString()) == "444"
+        holder.pathsToChangePermissions.containsKey(oldMd5Path.toString())
+        holder.pathsToChangePermissions.get(oldMd5Path.toString()) == "444"
+        holder.pathsToChangeGroup.size() > 0
+
+        !oldWorkflowFile.fileWithdrawn
+        oldWorkflowFile.withdrawnDate == null
+    }
+
+    void "test unWithdrawRawSequenceFiles, when new workflow data given, then skip permission restoration"() {
+        given:
+        RawSequenceFile newWorkflowFile = createFastqFile([fileWithdrawn: true, withdrawnComment: "test withdrawal"])
+        BaseFolder baseFolder = new BaseFolder(
+            path: "/tmp/test-base-folder-${System.currentTimeMillis()}",
+            writable: true
+        )
+        baseFolder.save(flush: true)
+        WorkFolder workFolder = new WorkFolder(
+            baseFolder: baseFolder,
+            uuid: UUID.randomUUID(),
+            size: 0
+        )
+        workFolder.save(flush: true)
+
+        Workflow workflow = new Workflow(
+            name: "TestWorkflow-${System.currentTimeMillis()}",
+            enabled: true,
+            maxParallelWorkflows: 1
+        )
+        workflow.save(flush: true)
+
+        WorkflowRun workflowRun = new WorkflowRun(
+            workFolder: workFolder,
+            state: WorkflowRun.State.SUCCESS,
+            displayName: "Test Workflow Run",
+            shortDisplayName: "TestRun",
+            project: newWorkflowFile.project,
+            workflow: workflow,
+            priority: newWorkflowFile.seqTrack.sample.individual.project.processingPriority
+        )
+        workflowRun.save(flush: true)
+
+        WorkflowArtefact workflowArtefact = new WorkflowArtefact(
+            producedBy: workflowRun,
+            state: WorkflowArtefact.State.SUCCESS,
+            displayName: "Test Workflow Artefact",
+            artefactType: ArtefactType.FASTQ,
+            outputRole: "test"
+        )
+        workflowArtefact.save(flush: true)
+
+        newWorkflowFile.seqTrack.workflowArtefact = workflowArtefact
+        newWorkflowFile.seqTrack.save(flush: true)
+
+        final Path newFilePath = CreateFileHelper.createFile(tempDir.resolve("newFastq.gz"))
+        final Path newMd5Path = CreateFileHelper.createFile(tempDir.resolve("newFastq.gz.md5sum"))
+
+        UnwithdrawService service = new UnwithdrawService()
+        service.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService) {
+            2 * getFilePath(newWorkflowFile) >> newFilePath
+            1 * getMd5sumPath(newWorkflowFile) >> newMd5Path
+        }
+        service.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
+            2 * getFilePath(newWorkflowFile) >> Paths.get("/tmp/view")
+        }
+        service.fastqcDataFilesService = Mock(FastqcDataFilesService)
+
+        UnwithdrawStateHolder holder = new UnwithdrawStateHolder()
+
+        when:
+        service.unwithdrawRawSequenceFiles(newWorkflowFile, "unwithdraw comment", holder)
+
+        then:
+        holder.pathsToChangePermissions.isEmpty()
+
+        holder.pathsToChangeGroup.size() > 0
+
+        !newWorkflowFile.fileWithdrawn
+        newWorkflowFile.withdrawnDate == null
+    }
+
+    void "test createBashScript, when permission changes given, then generate chmod commands"() {
+        given:
+        UnwithdrawService service = new UnwithdrawService()
+        UnwithdrawStateHolder holder = new UnwithdrawStateHolder()
+        holder.script = []
+        holder.linksToCreate = [(Paths.get("/tmp/source")): Paths.get("/tmp/link")]
+        holder.pathsToChangeGroup = ["/tmp/file1": "group1", "/tmp/file2": "group2"]
+        holder.pathsToChangePermissions = [
+                "/tmp/fastq1.gz": "444",
+                "/tmp/fastq2.gz.md5sum": "444",
+                "/tmp/fastqc.zip": "444",
+        ]
+
+        when:
+        service.createBashScript(holder)
+
+        then:
+        String script = holder.script.join('\n')
+
+        holder.pathsToChangePermissions.each { filePath, permission ->
+            assert script.contains("chmod ${permission} ${filePath}")
+        }
+
+        holder.pathsToChangeGroup.each { path, group ->
+            assert script.contains("chgrp --recursive --verbose ${group} ${path}")
+        }
+
+        assert script.contains("mkdir -p")
+        assert script.contains("ln -rs")
+    }
+
+    void "test unWithdrawRawSequenceFiles, when fastq new workflow but fastqc old workflow, then restore fastqc permissions only"() {
+        given:
+        RawSequenceFile newWorkflowFastqFile = createFastqFile([fileWithdrawn: true, withdrawnComment: "test withdrawal"])
+        BaseFolder baseFolder = new BaseFolder(
+                path: "/tmp/test-base-folder-${System.currentTimeMillis()}",
+                writable: true
+        )
+        baseFolder.save(flush: true)
+        WorkFolder workFolder = new WorkFolder(
+                baseFolder: baseFolder,
+                uuid: UUID.randomUUID(),
+                size: 0
+        )
+        workFolder.save(flush: true)
+
+        Workflow workflow = new Workflow(
+                name: "TestWorkflow-${System.currentTimeMillis()}",
+                enabled: true,
+                maxParallelWorkflows: 1
+        )
+        workflow.save(flush: true)
+
+        WorkflowRun workflowRun = new WorkflowRun(
+                workFolder: workFolder,
+                state: WorkflowRun.State.SUCCESS,
+                displayName: "Test Workflow Run",
+                shortDisplayName: "TestRun",
+                project: newWorkflowFastqFile.project,
+                workflow: workflow,
+                priority: newWorkflowFastqFile.seqTrack.sample.individual.project.processingPriority
+        )
+        workflowRun.save(flush: true)
+
+        WorkflowArtefact workflowArtefact = new WorkflowArtefact(
+                producedBy: workflowRun,
+                state: WorkflowArtefact.State.SUCCESS,
+                displayName: "Test Workflow Artefact",
+                artefactType: ArtefactType.FASTQ,
+                outputRole: "test"
+        )
+        workflowArtefact.save(flush: true)
+
+        newWorkflowFastqFile.seqTrack.workflowArtefact = workflowArtefact
+        newWorkflowFastqFile.seqTrack.save(flush: true)
+
+        FastqcProcessedFile oldWorkflowFastqcFile = createFastqcProcessedFile([
+                sequenceFile: newWorkflowFastqFile,
+                workflowArtefact: null, // Old workflow - no artefact
+        ])
+
+        final Path newFastqPath = CreateFileHelper.createFile(tempDir.resolve("newFastq.gz"))
+        final Path newMd5Path = CreateFileHelper.createFile(tempDir.resolve("newFastq.gz.md5sum"))
+        final Path oldFastqcZip = CreateFileHelper.createFile(tempDir.resolve("oldFastqc.zip"))
+        final Path oldFastqcMd5 = CreateFileHelper.createFile(tempDir.resolve("oldFastqc.zip.md5sum"))
+        final Path oldFastqcHtml = CreateFileHelper.createFile(tempDir.resolve("oldFastqc.html"))
+
+        UnwithdrawService service = new UnwithdrawService()
+        service.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService) {
+            2 * getFilePath(newWorkflowFastqFile) >> newFastqPath
+            1 * getMd5sumPath(newWorkflowFastqFile) >> newMd5Path
+        }
+        service.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
+            2 * getFilePath(newWorkflowFastqFile) >> Paths.get("/tmp/view")
+        }
+        service.fastqcDataFilesService = Mock(FastqcDataFilesService) {
+            2 * fastqcOutputPath(oldWorkflowFastqcFile) >> oldFastqcZip
+            2 * fastqcOutputMd5sumPath(oldWorkflowFastqcFile) >> oldFastqcMd5
+            2 * fastqcHtmlPath(oldWorkflowFastqcFile) >> oldFastqcHtml
+        }
+
+        UnwithdrawStateHolder holder = new UnwithdrawStateHolder()
+
+        when:
+        service.unwithdrawRawSequenceFiles(newWorkflowFastqFile, "unwithdraw comment", holder)
+
+        then:
+        !holder.pathsToChangePermissions.containsKey(newFastqPath.toString())
+        !holder.pathsToChangePermissions.containsKey(newMd5Path.toString())
+
+        holder.pathsToChangePermissions.containsKey(oldFastqcZip.toString())
+        holder.pathsToChangePermissions.get(oldFastqcZip.toString()) == "444"
+        holder.pathsToChangePermissions.containsKey(oldFastqcMd5.toString())
+        holder.pathsToChangePermissions.get(oldFastqcMd5.toString()) == "444"
+        holder.pathsToChangePermissions.containsKey(oldFastqcHtml.toString())
+        holder.pathsToChangePermissions.get(oldFastqcHtml.toString()) == "444"
+
+        holder.pathsToChangeGroup.size() > 0
+
+        !newWorkflowFastqFile.fileWithdrawn
+        newWorkflowFastqFile.withdrawnDate == null
     }
 }

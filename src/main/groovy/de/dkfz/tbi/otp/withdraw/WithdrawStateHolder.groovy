@@ -42,4 +42,6 @@ class WithdrawStateHolder {
     List<AbstractBamFile> bamFiles = []
 
     List<BamFilePairAnalysis> analysis = []
+
+    Set<String> pathsToChangePermissions = []
 }
