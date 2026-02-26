@@ -24,6 +24,7 @@ $(() => {
 
   const runsTable = $('#runs');
   const table = runsTable.DataTable({
+    dom: '<"top"i>rt<"bottom"lp><"clear">',
     columns: [
       {
         data(row, type) {

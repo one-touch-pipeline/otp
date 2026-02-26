@@ -30,7 +30,7 @@ $(() => {
 
   $.otp.workflowSelection.tables[workflowType] = $('#analysisTable').DataTable({
     paging: false,
-    info: false
+    dom: 'it'
   });
   $.otp.workflowSelection.selectElements[workflowType] = [
     workflowSelect, versionSelect, seqTypeSelect

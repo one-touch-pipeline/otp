@@ -39,7 +39,9 @@ $.otp.clusterJobGeneralTable = {
     'use strict';
 
     $('#clusterJobGeneralTable').dataTable({
-      dom: '<"row"<"col-sm-12"f>><"row"<"col-sm-12"tr>><"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+      dom: `<"row"<"col-sm-6"i><"col-sm-6"f>>
+            <"row"<"col-sm-12"tr>>
+            <"row"<"col-sm-12 col-md-5"l><"col-sm-12 col-md-7"p>>`,
       bFilter: true,
       bProcessing: true,
       bServerSide: true,

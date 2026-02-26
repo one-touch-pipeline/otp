@@ -42,7 +42,7 @@ $.otp.refgen = {
     'use strict';
 
     return new DataTable('#referenceGenome-datatable', {
-      dom: '<"row justify-content-end" <"col" B>> t',
+      dom: '<"row justify-content-end" <"top" i><"col" B>> t',
       paginate: false,
       ordering: true,
       // legacy data is sorted to the end, which is fixed

@@ -31,7 +31,7 @@ $.otp.sequence = {
     const showRunLinks = document.getElementById('showRunLinks').value;
 
     $('#sequenceTable').DataTable({
-      dom: '<"row align-items-end" <"col" Bfr>><"row" t>Si',
+      dom: '<"row align-items-end" <"col" Bfr>><"row" <"col-12" i>><"row" t>S',
       buttons: [
         $.otp.showOrHideColumn(() => $.otp.showOrHideColumn()),
         $.otp.getDownloadButtonServerSide(() => $.otp.createLink({

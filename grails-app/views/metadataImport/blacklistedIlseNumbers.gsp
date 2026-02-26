@@ -57,6 +57,16 @@
     </g:form>
 
     <h2><g:message code="metadataImport.blackListedIlseNumbers.table.description"/></h2>
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="table-info">
+            <g:if test="${ilseSubmissions}">
+                Showing 1 to ${ilseSubmissions.size()} of ${ilseSubmissions.size()} entries
+            </g:if>
+            <g:else>
+                Showing 0 to 0 of 0 entries
+            </g:else>
+        </div>
+    </div>
     <table class="table table-sm table-striped table-hover table-bordered w-100" id="blacklistIlseTable">
         <thead>
         <tr>

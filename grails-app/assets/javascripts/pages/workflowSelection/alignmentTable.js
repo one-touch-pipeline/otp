@@ -32,7 +32,7 @@ $(() => {
 
   $.otp.workflowSelection.tables[workflowType] = $('#alignmentTable').DataTable({
     paging: false,
-    info: false
+    dom: 'it'
   });
   $.otp.workflowSelection.selectElements[workflowType] = [
     workflowSelect, versionSelect, seqTypeSelect, speciesSelect, refGenomeSelect

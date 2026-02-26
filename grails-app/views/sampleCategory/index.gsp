@@ -60,6 +60,16 @@
 
     <div class="mt-2">
         <g:form class="confirm" action="update">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="table-info">
+                    <g:if test="${sampleTypes}">
+                        Showing 1 to ${sampleTypes.size()} of ${sampleTypes.size()} entries
+                    </g:if>
+                    <g:else>
+                        Showing 0 to 0 of 0 entries
+                    </g:else>
+                </div>
+            </div>
             <table class="table table-sm table-striped table-bordered">
                 <thead class="table-primary">
                     <tr>

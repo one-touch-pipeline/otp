@@ -111,6 +111,7 @@ $.otp.workflows.registerJobExecutionPlan = function (selector) {
     undefined,
     140,
     {
+      dom: '<"top"i>t<"clear">',
       aaSorting: [[5, 'desc']],
       fnRowCallback(nRow, aData) {
         if (aData.enabled === false) {

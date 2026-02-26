@@ -251,9 +251,9 @@ $(() => {
   });
 
   $('#projectMemberTable').DataTable({
-    info: false,
+    info: true,
     paging: false,
-    dom: 'B t',
+    dom: 'B<"top"i>t',
     buttons: $.otp.getDownloadButton('.csv_export'),
     columnDefs: [
       {

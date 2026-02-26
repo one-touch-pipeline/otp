@@ -31,6 +31,7 @@
 
   const renderWorkflowOverviewTable = (workflowData) => {
     $('#workflowOverview').DataTable({
+      dom: '<"top"i>rt<"bottom"lp><"clear">',
       data: workflowData,
       pageLength: 100,
       order: [2, 'asc'],

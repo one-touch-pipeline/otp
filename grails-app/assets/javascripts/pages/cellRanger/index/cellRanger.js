@@ -54,6 +54,7 @@ $(() => {
 
   // Initializing Data Tables
   const sampleTable = $('table#sampleTable').DataTable({
+    dom: '<"top"i>rt<"bottom"lp><"clear">',
     columns: [
       {
         data() {
@@ -100,6 +101,7 @@ $(() => {
   });
 
   const mwpTable = $('table#mwpTable').DataTable({
+    dom: '<"top"i>rt<"bottom"lp><"clear">',
     columns: [
       {
         data: 'individual',

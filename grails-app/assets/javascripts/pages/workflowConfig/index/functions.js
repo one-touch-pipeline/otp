@@ -344,7 +344,7 @@ $(document).ready(() => {
   const workflowConfigTable = $('#workflowConfigResult').DataTable({
     deferRender: true,
     processing: true,
-    dom: '<"toolbar">frtip',
+    dom: '<"toolbar"><"top"i>ftp',
     columns: [
       { data: 'id' },
       { data: 'fid' },

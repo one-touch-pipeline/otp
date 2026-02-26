@@ -367,8 +367,18 @@
     <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${selectedProject.id}, 'de.dkfz.tbi.otp.project.Project', 'MANAGE_USERS')">
         <div class="otpDataTables projectUserTable mt-3" id="formerProjectMemberTable">
             <h5><strong><g:message code="projectUser.formerUsers"/></strong></h5>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="table-info">
+                    <g:if test="${disabledProjectUsers}">
+                        Showing 1 to ${disabledProjectUsers.size()} of ${disabledProjectUsers.size()} entries
+                    </g:if>
+                    <g:else>
+                        Showing 0 to 0 of 0 entries
+                    </g:else>
+                </div>
+            </div>
             <g:if test="${disabledProjectUsers}">
-            <table class="table table-sm table-striped table-hover fixed-table-header">
+                <table class="table table-sm table-striped table-hover fixed-table-header">
                 <g:render template="userListingTableHeaderRow" model="[mode: 'disabled', project: selectedProject]"/>
                 <g:each in="${disabledProjectUsers}" var="userEntry">
                     <tr>

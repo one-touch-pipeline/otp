@@ -90,6 +90,7 @@ $.otp.processingTimeStatistics = {
     'use strict';
 
     const table = $('#processingTimeStatisticsTable').dataTable({
+      dom: '<"row"<"col-sm-12"f>><"row"<"col-sm-12"i>><"row"<"col-sm-12"tr>>',
       bProcessing: true,
       bServerSide: true,
       bSort: false,

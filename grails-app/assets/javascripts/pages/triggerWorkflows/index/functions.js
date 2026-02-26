@@ -321,7 +321,7 @@ $(() => {
     $('#seqTrackTable').DataTable({
       deferRender: true,
       processing: true,
-      dom: 'B<"toolbar">frtip',
+      dom: 'B<"toolbar"><"top"i>frt',
       scrollY: '500px',
       scrollCollapse: true,
       paging: false,
@@ -614,7 +614,7 @@ $(() => {
     $('div.toolbar').html($('#seqTrackTableText'));
 
     $('#bamTable').DataTable({
-      dom: 'B<"toolbar">frtip',
+      dom: 'B<"toolbar"><"top"i>frtp',
       buttons: ['csv'],
       scrollCollapse: true,
       paging: false,
@@ -622,56 +622,56 @@ $(() => {
     });
 
     $('#workflowTable').DataTable({
-      dom: 'B<"toolbar">frtip',
+      dom: 'B<"toolbar"><"top"i>frtp',
       buttons: ['csv'],
       scrollCollapse: true,
       paging: false
     });
 
     $('#withdrawnWarnings').DataTable({
-      dom: 'B<"toolbar">frtip',
+      dom: 'B<"toolbar"><"top"i>frtp',
       buttons: ['csv'],
       scrollCollapse: true,
       paging: false
     });
 
     $('#missingWorkflowConfigWarnings').DataTable({
-      dom: 'B<"toolbar">frtip',
+      dom: 'B<"toolbar"><"top"i>frtp',
       buttons: ['csv'],
       scrollCollapse: true,
       paging: false
     });
 
     $('#missingReferenceGenomeWarnings').DataTable({
-      dom: 'B<"toolbar">frtip',
+      dom: 'B<"toolbar"><"top"i>frtp',
       buttons: ['csv'],
       scrollCollapse: true,
       paging: false
     });
 
     $('#seqPlatformWarnings').DataTable({
-      dom: 'B<"toolbar">frtip',
+      dom: 'B<"toolbar"><"top"i>frtp',
       buttons: ['csv'],
       scrollCollapse: true,
       paging: false
     });
 
     $('#libraryPrepKitWarnings').DataTable({
-      dom: 'B<"toolbar">frtip',
+      dom: 'B<"toolbar"><"top"i>frtp',
       buttons: ['csv'],
       scrollCollapse: true,
       paging: false
     });
 
     $('#missingLibraryPrepKitWarnings').DataTable({
-      dom: 'B<"toolbar">frtip',
+      dom: 'B<"toolbar"><"top"i>frtp',
       buttons: ['csv'],
       scrollCollapse: true,
       paging: false
     });
 
     $('#warningsForMissingSampleTypePerProject').DataTable({
-      dom: 'B<"toolbar">frtip',
+      dom: 'B<"toolbar"><"top"i>frtp',
       buttons: ['csv'],
       scrollCollapse: true,
       paging: false

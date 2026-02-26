@@ -45,6 +45,7 @@
     }
 
     const dataTable = tableElement.dataTable({
+      dom: '<"top"i>rt<"bottom"lp><"clear">',
       aoColumnDefs: [{
         bVisible: false,
         aTargets: columnsToHide

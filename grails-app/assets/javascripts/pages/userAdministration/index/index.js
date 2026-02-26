@@ -55,6 +55,7 @@ $.otp.userAdministration.loadUserList = function () {
   'use strict';
 
   $('#userTable').dataTable({
+    dom: '<"top"i>rt<"bottom"lp><"clear">',
     aoColumns: [
       {
         mData(source) {

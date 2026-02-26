@@ -24,7 +24,9 @@ $(() => {
 
   const dataSwapBtn = $('button#data-swap-btn');
   const dataSwapSpinner = $('#data-swap-spinner');
-  const validationTable = $('#data-swap-validation-table').DataTable();
+  const validationTable = $('#data-swap-validation-table').DataTable({
+    dom: '<"top"i>t<"bottom"lp><"clear">'
+  });
 
   dataSwapBtn.on('click', (e) => {
     e.preventDefault();

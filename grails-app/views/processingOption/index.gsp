@@ -33,7 +33,16 @@
 <div class="container-fluid otp-main-container">
     <h3><g:message code="processingOption.title"/></h3>
     <p><g:message code="processingOption.subtitle"/></p>
-
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="table-info">
+            <g:if test="${options}">
+                Showing 1 to ${options.size()} of ${options.size()} entries
+            </g:if>
+            <g:else>
+                Showing 0 to 0 of 0 entries
+            </g:else>
+        </div>
+    </div>
     <table class="table table-sm table-striped table-hover">
         <thead>
         <tr>

@@ -285,7 +285,7 @@ $(document).ready(() => {
      * rows id and version are hidden
      */
   const processingPriorityTable = $('#processingPriority').DataTable({
-    dom: '<"toolbar">frtip',
+    dom: '<"toolbar"><"top"i>ftp',
     order: [[3, 'asc']],
     columnDefs: [
       {

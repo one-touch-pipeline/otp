@@ -349,6 +349,7 @@ function initializeDataTable() {
 
   const table = $('#jobTable');
   table.DataTable({
+    dom: 't',
     paging: false
   });
 }

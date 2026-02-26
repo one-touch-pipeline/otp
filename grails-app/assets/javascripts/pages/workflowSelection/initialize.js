@@ -46,11 +46,11 @@ $(document).ready(() => {
 
   $('#fastqcTable').dataTable({
     paging: false,
-    info: false
+    dom: 'it'
   });
 
   $('#mergingCriteriaTable').dataTable({
     paging: false,
-    info: false
+    dom: 'it'
   });
 });
