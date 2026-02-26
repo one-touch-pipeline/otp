@@ -87,6 +87,8 @@ class ProjectUserController implements CheckAndCall {
         projectUsers.unique()
         projectUsers.sort { it.username }
 
+        Set<ProjectRole> grantableRoles = projectRoleService.getRolesCurrentUserCanGrant(project)
+
         List<UserEntry> userEntries = []
         List<String> usersWithoutUserProjectRole = []
         projectUsers.each { User user ->
@@ -105,7 +107,7 @@ class ProjectUserController implements CheckAndCall {
             }
 
             if (userProjectRole) {
-                userEntries.add(new UserEntry(user, project, idpUserDetails, securityService.hasCurrentUserAdministrativeRoles()))
+                userEntries.add(new UserEntry(user, project, idpUserDetails, grantableRoles))
             } else {
                 usersWithoutUserProjectRole.add(user.username)
             }
@@ -119,7 +121,7 @@ class ProjectUserController implements CheckAndCall {
                 usersWithoutUserProjectRole: usersWithoutUserProjectRole,
                 unknownUsersWithFileAccess : nonDatabaseUsers,
                 // available Roles for adding a new user to a project. Caution: Not the available Roles for each projectUser.
-                availableRoles             : projectRoleService.listAvailableProjectRolesAuthenticatedByCurrentUser(),
+                availableRoles             : grantableRoles,
                 hasErrors                  : params.hasErrors,
                 message                    : params.message,
                 emailsIfEnabled            : userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers([project], true).sort().join(','),
@@ -304,9 +306,9 @@ class UserEntry {
 
     /**
      * Class to describe a userEntry in the projectUser view
-     * @param hasAdministrativeRole is used to describe whether the user logged in has an administrative role. (caution: not ProjectRole)!
+     * @param grantableRoles roles the current user is allowed to grant
      */
-    UserEntry(User user, Project project, IdpUserDetails idpUserDetails, boolean hasAdministrativeRole = false) {
+    UserEntry(User user, Project project, IdpUserDetails idpUserDetails, Set<ProjectRole> grantableRoles = [] as Set) {
         this.user = user
         this.userProjectRole = CollectionUtils.exactlyOneElement(UserProjectRole.findAllByUserAndProject(user, project))
 
@@ -316,7 +318,7 @@ class UserEntry {
         this.department = inLdap ? idpUserDetails.department : ""
         this.projectRoleNames = userProjectRole.projectRoles*.name.sort()
         // each UserEntry might have different Roles available dependent on the assigned Roles to the userProjectRole
-        this.availableRoles = fetchAvailableRoles(userProjectRole, hasAdministrativeRole)
+        this.availableRoles = fetchAvailableRoles(userProjectRole, grantableRoles)
         this.deactivated = inLdap ? idpUserDetails.deactivated : false
 
         this.otpAccess = getPermissionStatus(inLdap && userProjectRole.accessToOtp)
@@ -327,13 +329,8 @@ class UserEntry {
         this.receivesNotifications = getPermissionStatus(userProjectRole.receivesNotifications)
     }
 
-    private static List<String> fetchAvailableRoles(UserProjectRole userProjectRole, boolean hasAdministrativeRole) {
-        if (!hasAdministrativeRole) {
-            return (ProjectRole.findAll() - userProjectRole.projectRoles - CollectionUtils.exactlyOneElement(
-                    ProjectRole.findAllByName(ProjectRole.Basic.PI.name())
-            ))*.name.sort()
-        }
-        return (ProjectRole.findAll() - userProjectRole.projectRoles)*.name.sort()
+    private static List<String> fetchAvailableRoles(UserProjectRole userProjectRole, Set<ProjectRole> grantableRoles) {
+        return (grantableRoles - (userProjectRole.projectRoles ?: []))*.name.sort()
     }
 
     private static PermissionStatus getPermissionStatus(boolean access) {

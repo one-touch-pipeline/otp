@@ -22,11 +22,17 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.SecurityService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Transactional
 class ProjectRoleService {
+
+    private static final String PI_ROLE_NAME = ProjectRole.Basic.PI.name()
+    private static final String COORDINATOR_ROLE_NAME = ProjectRole.Basic.COORDINATOR.name()
 
     SecurityService securityService
 
@@ -38,10 +44,20 @@ class ProjectRoleService {
         return (projectRoles*.name)?.contains(ProjectRole.Basic.COORDINATOR.name())
     }
 
-    List<ProjectRole> listAvailableProjectRolesAuthenticatedByCurrentUser() {
+    @CompileDynamic
+    Set<ProjectRole> getRolesCurrentUserCanGrant(Project project) {
+        Set<ProjectRole> allRoles = ProjectRole.all as Set
         if (securityService.hasCurrentUserAdministrativeRoles()) {
-            return ProjectRole.all
+            return allRoles
         }
-        return ProjectRole.all.findAll { it.name != ProjectRole.Basic.PI.name() }
+        UserProjectRole userProjectRole = CollectionUtils.atMostOneElement(UserProjectRole.findAllByUserAndProject(securityService.currentUser, project))
+        if (userProjectRole?.manageUsersAndDelegate) {
+            return allRoles - ProjectRole.findAllByName(PI_ROLE_NAME)
+        }
+        if (userProjectRole?.manageUsers) {
+            return allRoles - ProjectRole.findAllByNameInList([PI_ROLE_NAME, COORDINATOR_ROLE_NAME])
+        }
+        // fallback: user without management permissions
+        return [] as Set
     }
 }

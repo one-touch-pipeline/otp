@@ -198,13 +198,13 @@ describe('Check projectUser page', () => {
 
       getProjectMemberRow('dave').as('userRow');
 
-      cy.get('@userRow').find('select[name="newRoles"]').select('COORDINATOR', { force: true });
+      cy.get('@userRow').find('select[name="newRoles"]').select('OTHER', { force: true });
       cy.get('@userRow').find('button.addRole').click();
 
       cy.wait('@addRole').its('response.body.success').should('eq', true);
 
-      cy.get('@userRow').find('div[name="COORDINATOR"] button.remove').click();
-      cy.get('@userRow').find('div[name="COORDINATOR"] button.delete').click();
+      cy.get('@userRow').find('div[name="OTHER"] button.remove').click();
+      cy.get('@userRow').find('div[name="OTHER"] button.delete').click();
       cy.wait('@removeRole').its('response.body.success').should('eq', true);
     });
 

@@ -38,6 +38,8 @@ import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+import static de.dkfz.tbi.otp.ngsdata.ProjectRole.Basic.*
+
 import static javax.servlet.http.HttpServletResponse.SC_MOVED_TEMPORARILY
 import static javax.servlet.http.HttpServletResponse.SC_OK
 
@@ -190,37 +192,44 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
     }
 
     @Unroll
-    void "UserEntry, checks availableRoles for user having #x role"() {
+    void "UserEntry, checks availableRoles for user with #description"() {
         given:
         createUserAndRoles()
         createAllBasicProjectRoles()
         Project project = createProject()
-        DomainFactory.createUserProjectRole([
-                project     : project,
-                user        : getUser(ADMIN),
-                projectRoles: ProjectRole.findAllByName(ProjectRole.Basic.SUBMITTER.name()),
-        ])
-        DomainFactory.createUserProjectRole([
-                project     : project,
-                user        : getUser(USER),
-                projectRoles: ProjectRole.findAllByName(ProjectRole.Basic.SUBMITTER.name()),
-        ])
+        [ADMIN, OPERATOR, USER, TESTUSER].each { String username ->
+            DomainFactory.createUserProjectRole([
+                    project     : project,
+                    user        : getUser(username),
+                    projectRoles: ProjectRole.findAllByName(ProjectRole.Basic.SUBMITTER.name()),
+            ])
+        }
 
         IdpUserDetails idpUserDetails = new IdpUserDetails()
 
         when:
-        UserEntry userEntry = new UserEntry(getUser(name), project, idpUserDetails, hasAdministrativeRole)
+        UserEntry userEntry = new UserEntry(getUser(name), project, idpUserDetails, grantableRoles())
 
         then:
         CollectionUtils.containSame(userEntry.availableRoles, result())
 
         where:
-        x                   | name  | hasAdministrativeRole | result
-        "an administrative" | ADMIN | true                  | {
-            (ProjectRole.all - CollectionUtils.exactlyOneElement(ProjectRole.findAllByName(ProjectRole.Basic.SUBMITTER.name())))*.name
+        description                     | name     | grantableRoles                      | result
+        "all roles"                     | ADMIN    | { allRolesExcept() }                | { roleNamesExcept(SUBMITTER) }
+        "all except PI"                 | OPERATOR | { allRolesExcept(PI) }              | { roleNamesExcept(SUBMITTER, PI) }
+        "all except PI and COORDINATOR" | USER     | { allRolesExcept(PI, COORDINATOR) } | { roleNamesExcept(SUBMITTER, PI, COORDINATOR) }
+        "no roles"                      | TESTUSER | { [] as Set }                       | { [] }
+    }
+
+    private Set<ProjectRole> allRolesExcept(ProjectRole.Basic... exclusions) {
+        Set<ProjectRole> allRoles = ProjectRole.all as Set
+        if (!exclusions) {
+            return allRoles
         }
-        "no administrative" | USER  | false                 | {
-            (ProjectRole.all - ProjectRole.findAllByNameInList([ProjectRole.Basic.SUBMITTER.name(), ProjectRole.Basic.PI.name(),]))*.name
-        }
+        return allRoles - ProjectRole.findAllByNameInList(exclusions*.name())
+    }
+
+    private List<String> roleNamesExcept(ProjectRole.Basic... exclusions) {
+        return allRolesExcept(exclusions)*.name
     }
 }

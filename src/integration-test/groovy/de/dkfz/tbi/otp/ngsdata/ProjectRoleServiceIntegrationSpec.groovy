@@ -27,35 +27,60 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.UserAndRoles
+
+import static de.dkfz.tbi.otp.ngsdata.ProjectRole.Basic.*
 
 @Rollback
 @Integration
-class ProjectRoleServiceIntegrationSpec extends Specification implements UserAndRoles {
+class ProjectRoleServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore, UserDomainFactory {
 
     ProjectRoleService projectRoleService
 
     @Unroll
-    void "test listAvailableProjectRolesAuthByCurrentUser, for role #role"() {
+    void "test getRolesCurrentUserCanGrant, for #description"() {
         given:
         createUserAndRoles()
         createAllBasicProjectRoles()
+        Project project = createProject()
+        if (manageUsers != null) {
+            createUserProjectRole(
+                    project               : project,
+                    user                  : getUser(role),
+                    manageUsers           : manageUsers,
+                    manageUsersAndDelegate: canDelegate,
+            )
+        }
 
-        List<ProjectRole> projectRoleList = []
+        Set<ProjectRole> projectRoles = [] as Set
 
         when:
         doWithAuth(role) {
-            projectRoleList.addAll(projectRoleService.listAvailableProjectRolesAuthenticatedByCurrentUser())
+            projectRoles.addAll(projectRoleService.getRolesCurrentUserCanGrant(project))
         }
 
         then:
-        TestCase.assertContainSame(projectRoleList, result())
+        TestCase.assertContainSame(projectRoles, result())
 
+        // For admin/operator null means they don't need a UserProjectRole since they get access via their system role
         where:
-        role     | result
-        ADMIN    | { ProjectRole.all }
-        OPERATOR | { ProjectRole.all }
-        USER     | { ProjectRole.all - ProjectRole.findAllByName(ProjectRole.Basic.PI.name()) }
-        TESTUSER | { ProjectRole.all - ProjectRole.findAllByName(ProjectRole.Basic.PI.name()) }
+        description                              | role     | manageUsers | canDelegate | result
+        "admin"                                  | ADMIN    | null        | null        | { allRolesExcept() }
+        "operator"                               | OPERATOR | null        | null        | { allRolesExcept() }
+        "manageUsersAndDelegate"                 | USER     | true        | true        | { allRolesExcept(PI) }
+        "manageUsers only"                       | TESTUSER | true        | false       | { allRolesExcept(PI, COORDINATOR) }
+        "explicit false management permissions"  | TESTUSER | false       | false       | { [] }
+        "no management permissions"              | USER     | null        | null        | { [] }
+    }
+
+    private Set<ProjectRole> allRolesExcept(ProjectRole.Basic... exclusions) {
+        Set<ProjectRole> allRoles = ProjectRole.all as Set
+        if (!exclusions) {
+            return allRoles
+        }
+        return allRoles - ProjectRole.findAllByNameInList(exclusions*.name())
     }
 }
