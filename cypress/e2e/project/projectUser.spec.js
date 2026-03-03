@@ -29,6 +29,13 @@ describe('Check projectUser page', () => {
       cy.visit('/projectUser/index');
     });
 
+    it('should download and check the project user table', () => {
+      cy.clearDownloadsFolder();
+      cy.get('#projectMemberTable').should('exist');
+      cy.get('div#projectMemberTable_wrapper button').contains('Download').click();
+      cy.checkDownloadByContentOfFixture('projectUser.json');
+    });
+
     it('should add an user with LDAP Account', () => {
       cy.intercept('/projectUser/addUserToProject*').as('addUserToProject');
 
@@ -224,6 +231,13 @@ describe('Check projectUser page', () => {
     beforeEach(() => {
       cy.loginAs('user');
       cy.visit('/projectUser/index');
+    });
+
+    it('should download and check the project user table', () => {
+      cy.clearDownloadsFolder();
+      cy.get('#projectMemberTable').should('exist');
+      cy.get('div#projectMemberTable_wrapper button').contains('Download').click();
+      cy.checkDownloadByContentOfFixture('projectUser.json');
     });
 
     shouldBeAbleToToggleNotification('dave');

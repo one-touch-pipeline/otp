@@ -23,32 +23,34 @@
 describe('Check Aceseq pages', () => {
   'use strict';
 
-  context('when user is an operator', () => {
-    beforeEach(() => {
-      cy.loginAs('operator');
-      cy.intercept('/aceseq/dataTableResults*').as('loadDataTable');
-      cy.fixture('downloadChecks/aceseq.json').then((config) => {
-        cy.visit(`/aceseq/results?project=${config.project}`);
+  ['operator', 'user'].forEach((role) => {
+    context(`when user is ${role === 'operator' ? 'an operator' : 'a normal user'}`, () => {
+      beforeEach(() => {
+        cy.loginAs(role);
+        cy.intercept('/aceseq/dataTableResults*').as('loadDataTable');
+        cy.fixture('downloadChecks/aceseq.json').then((config) => {
+          cy.visit(`/aceseq/results?project=${config.project}`);
+        });
+        cy.wait('@loadDataTable').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+        });
       });
-      cy.wait('@loadDataTable').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
+
+      it('should visit the plots page when clicking on Plots and check if plot exists', () => {
+        cy.log('Waiting until loading is done.');
+        cy.get('table tbody tr').contains('Loading...').should('not.exist');
+
+        cy.get('table tbody tr').eq(2).find('a').contains('Plots')
+          .click();
+        cy.checkPage('/aceseq/plots');
       });
-    });
 
-    it('should visit the plots page when clicking on Plots and check if plot exists', () => {
-      cy.log('Waiting until loading is done.');
-      cy.get('table tbody tr').contains('Loading...').should('not.exist');
+      it('should download csv, when button is clicked', () => {
+        cy.get('table tbody tr').contains('Loading...').should('not.exist');
+        cy.get('div#resultsTable_wrapper button').contains('Download').click();
 
-      cy.get('table tbody tr').eq(2).find('a').contains('Plots')
-        .click();
-      cy.checkPage('/aceseq/plots');
-    });
-
-    it('should download csv, when button is clicked', () => {
-      cy.get('table tbody tr').contains('Loading...').should('not.exist');
-      cy.get('div#resultsTable_wrapper button').contains('Download').click();
-
-      cy.checkDownloadByContentOfFixture('aceseq.json');
+        cy.checkDownloadByContentOfFixture('aceseq.json');
+      });
     });
   });
 });

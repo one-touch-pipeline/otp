@@ -496,6 +496,8 @@ describe('Check metadata data fields page', () => {
       });
     });
 
+    // Check for download files
+
     it('should visit the software page and download the csv', () => {
       cy.visit('/softwareTool/list');
 
@@ -503,9 +505,57 @@ describe('Check metadata data fields page', () => {
       cy.get('div#metadatafields-datatable_wrapper button').contains('Download').click();
       cy.checkDownloadByContentOfFixture('softwareTools.json');
     });
+
+    it('should visit the library preparation kit page and download the csv', () => {
+      cy.visit('/metaDataFields/libraryPreparationKits');
+
+      cy.get('#metadatafields-datatable').should('exist');
+      cy.get('div#metadatafields-datatable_wrapper button').contains('Download').click();
+      cy.checkDownloadByContentOfFixture('metadataLibraryPreparationKit.json');
+    });
+
+    it('should visit the antibody target page and download the csv', () => {
+      cy.visit('/metaDataFields/antibodyTargets');
+
+      cy.get('#metadatafields-datatable').should('exist');
+      cy.get('div#metadatafields-datatable_wrapper button').contains('Download').click();
+      cy.checkDownloadByContentOfFixture('metadataAntibodyTarget.json');
+    });
+
+    it('should visit the sequencing center page and download the csv', () => {
+      cy.visit('/metaDataFields/seqCenters');
+
+      cy.get('#metadatafields-datatable').should('exist');
+      cy.get('div#metadatafields-datatable_wrapper button').contains('Download').click();
+      cy.checkDownloadByContentOfFixture('metadataSequencingCenter.json');
+    });
+
+    it('should visit the sequencing platforms page and download the csv', () => {
+      cy.visit('/metaDataFields/seqPlatforms');
+
+      cy.get('#metadatafields-datatable').should('exist');
+      cy.get('div#metadatafields-datatable_wrapper button').contains('Download').click();
+      cy.checkDownloadByContentOfFixture('metadataSequencingPlatforms.json');
+    });
+
+    it('should visit the sequencing types page and download the csv', () => {
+      cy.visit('/metaDataFields/seqTypes');
+
+      cy.get('#metadatafields-datatable').should('exist');
+      cy.get('div#metadatafields-datatable_wrapper button').contains('Download').click();
+      cy.checkDownloadByContentOfFixture('metadataSequencingTypes.json');
+    });
+
+    it('should visit the reference genome page and download the csv', () => {
+      cy.visit('/referenceGenome/index');
+
+      cy.get('#referenceGenome-datatable').should('exist');
+      cy.get('div#referenceGenome-datatable_wrapper button').contains('Download').click();
+      cy.checkDownloadByContentOfFixture('metadataReferenceGenome.json');
+    });
   });
 
-  context('when user is normal user', () => {
+  context('when user is a normal user', () => {
     beforeEach(() => {
       cy.loginAs('user');
     });

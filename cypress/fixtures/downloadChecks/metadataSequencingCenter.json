@@ -1,0 +1,28 @@
+{
+  "project": "ExampleProject",
+  "filename": "Sequencing_Centers",
+  "extension": ".csv",
+  "header": [
+    "Name",
+    "Directory",
+    "Auto Import Directory",
+    "Auto Importable",
+    "Legacy"
+  ],
+  "data": [
+    [
+      "CENTER1",
+      "center1",
+      "-",
+      "false",
+      "false"
+    ],
+    [
+      "CENTER2",
+      "center2",
+      "-",
+      "false",
+      "false"
+    ]
+  ]
+}

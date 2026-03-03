@@ -325,7 +325,7 @@ $(() => {
       scrollY: '500px',
       scrollCollapse: true,
       paging: false,
-      buttons: ['csv'],
+      buttons: $.otp.getDownloadButton(),
       columns: [
         {
           data: 'id',
@@ -615,7 +615,7 @@ $(() => {
 
     $('#bamTable').DataTable({
       dom: 'B<"toolbar"><"top"i>frtp',
-      buttons: ['csv'],
+      buttons: $.otp.getDownloadButton(),
       scrollCollapse: true,
       paging: false,
       scrollY: '500px'
@@ -623,7 +623,7 @@ $(() => {
 
     $('#workflowTable').DataTable({
       dom: 'B<"toolbar"><"top"i>frtp',
-      buttons: ['csv'],
+      buttons: $.otp.getDownloadButton(),
       scrollCollapse: true,
       paging: false
     });

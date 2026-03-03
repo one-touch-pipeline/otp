@@ -37,18 +37,7 @@ describe('Check trigger Workflows page', () => {
       cy.fixture('triggerWorkflows.json').then((alignment) => {
         cy.get('select#project').select(alignment[0].project, { force: true });
         cy.get('select#seqTypeProject').select(alignment[0].seqType, { force: true });
-        cy.get('button#searchSeqTrackButton').click();
-
-        cy.wait('@search').then((interception) => {
-          expect(interception.response.statusCode).to.eq(302);
-        });
-
-        cy.wait('@warnings').then((interception) => {
-          expect(interception.response.statusCode).to.eq(200);
-        });
-
-        // Wait until table is rendered
-        cy.get('div#seqTrackTable_processing').should('not.be.visible');
+        clickSearchButtonAndWait();
         cy.get('#warnAreaAccordion > div').should('not.be.visible'); // reactivate once underlying problem is fixed
 
         cy.get('table#seqTrackTable').find('tbody tr').should('have.length', 12)
@@ -93,18 +82,7 @@ describe('Check trigger Workflows page', () => {
 
         cy.get('textarea#pid-selection').clear().type(alignment[1].pid.join(';'));
         cy.get('select#seqTypePid').select(alignment[1].seqType, { force: true });
-        cy.get('button#searchSeqTrackButton').click();
-
-        cy.wait('@search').then((interception) => {
-          expect(interception.response.statusCode).to.eq(302);
-        });
-
-        cy.wait('@warnings').then((interception) => {
-          expect(interception.response.statusCode).to.eq(200);
-        });
-
-        // Wait until table is rendered
-        cy.get('div#seqTrackTable_processing').should('not.be.visible');
+        clickSearchButtonAndWait();
 
         cy.get('table#seqTrackTable').find('tbody tr').should('have.length', 12)
           .each((row) => {
@@ -147,18 +125,7 @@ describe('Check trigger Workflows page', () => {
         cy.get('a#seqtrack-id-tab').click();
 
         cy.get('textarea#seqTrackId-selection').clear().type(alignment[2].seqTrackIds.join('\t'));
-        cy.get('button#searchSeqTrackButton').click();
-
-        cy.wait('@search').then((interception) => {
-          expect(interception.response.statusCode).to.eq(302);
-        });
-
-        cy.wait('@warnings').then((interception) => {
-          expect(interception.response.statusCode).to.eq(200);
-        });
-
-        // Wait until table is rendered
-        cy.get('div#seqTrackTable_processing').should('not.be.visible');
+        clickSearchButtonAndWait();
 
         cy.get('table#seqTrackTable').find('tbody tr').should('have.length', 2)
           .each((row) => {
@@ -196,18 +163,7 @@ describe('Check trigger Workflows page', () => {
         cy.get('a#ilse-tab').click();
 
         cy.get('textarea#ilse-selection').clear().type(alignment[3].ilseNumbers.join('\t'));
-        cy.get('button#searchSeqTrackButton').click();
-
-        cy.wait('@search').then((interception) => {
-          expect(interception.response.statusCode).to.eq(302);
-        });
-
-        cy.wait('@warnings').then((interception) => {
-          expect(interception.response.statusCode).to.eq(200);
-        });
-
-        // Wait until table is rendered
-        cy.get('div#seqTrackTable_processing').should('not.be.visible');
+        clickSearchButtonAndWait();
 
         cy.get('div#seqTrackTable_wrapper').find('tbody tr').each((row) => {
           cy.wrap(row).find('td').eq(7).should('satisfy', (el) => alignment[3].ilseNumbers.includes(el[0].innerText));
@@ -251,18 +207,7 @@ describe('Check trigger Workflows page', () => {
         cy.get('textarea#multi-input-selection').type(
           `${fix.pids[2]},${fix.sampleTypes[2]}, ${fix.seqTypes[2]} ; ${fix.seqReadTypes[2]} ,${fix.singleCells[2]};\n`
         );
-        cy.get('button#searchSeqTrackButton').click();
-
-        cy.wait('@search').then((interception) => {
-          expect(interception.response.statusCode).to.eq(302);
-        });
-
-        cy.wait('@warnings').then((interception) => {
-          expect(interception.response.statusCode).to.eq(200);
-        });
-
-        // Wait until table is rendered
-        cy.get('div#seqTrackTable_processing').should('not.be.visible');
+        clickSearchButtonAndWait();
 
         cy.get('#seqTrackTable tbody tr').should('have.length', 6);
 
@@ -306,18 +251,7 @@ describe('Check trigger Workflows page', () => {
         cy.get('a#bam-tab').click();
 
         cy.get('textarea#bam-selection').clear().type(alignment[5].bamIds.join('\t'));
-        cy.get('button#searchSeqTrackButton').click();
-
-        cy.wait('@search').then((interception) => {
-          expect(interception.response.statusCode).to.eq(302);
-        });
-
-        cy.wait('@warnings').then((interception) => {
-          expect(interception.response.statusCode).to.eq(200);
-        });
-
-        // Wait until table is rendered
-        cy.get('div#seqTrackTable_processing').should('not.be.visible');
+        clickSearchButtonAndWait();
 
         cy.get('div#seqTrackTable_wrapper').find('tbody tr').each((row) => {
           cy.wrap(row).find('td').eq(14).should('satisfy', (el) => alignment[5].bamIds.includes(el[0].innerText));
@@ -357,18 +291,7 @@ describe('Check trigger Workflows page', () => {
       cy.fixture('triggerWorkflows.json').then((alignment) => {
         cy.get('select#project').select(alignment[0].project, { force: true });
         cy.get('select#seqTypeProject').select(alignment[0].seqType, { force: true });
-        cy.get('button#searchSeqTrackButton').click();
-
-        cy.wait('@search').then((interception) => {
-          expect(interception.response.statusCode).to.eq(302);
-        });
-
-        cy.wait('@warnings').then((interception) => {
-          expect(interception.response.statusCode).to.eq(200);
-        });
-
-        // Wait until table is rendered
-        cy.get('div#seqTrackTable_processing').should('not.be.visible');
+        clickSearchButtonAndWait();
 
         // Verify decider selection area is visible and functional
         cy.get('#deciderActionSelection').should('be.visible');
@@ -389,6 +312,24 @@ describe('Check trigger Workflows page', () => {
         // Verify appropriate response for skipped workflows
         cy.get('#infos li').should('not.be.empty');
       });
+    });
+
+    it('should download and check the seq tracks csv', () => {
+      loadTriggerWorkflowsPage();
+      cy.get('div#seqTrackTable_wrapper button').contains('Download').click();
+      cy.checkDownloadByContentOfFixture('triggerWorkflowsCheckSeqTracks.json');
+    });
+
+    it('should download and check the bam files csv', () => {
+      loadTriggerWorkflowsPage();
+      cy.get('div#bamTable_wrapper button').contains('Download').click();
+      cy.checkDownloadByContentOfFixture('triggerWorkflowsCheckBamFiles.json');
+    });
+
+    it('should download and check the configured workflows csv', () => {
+      loadTriggerWorkflowsPage();
+      cy.get('div#workflowTable_wrapper button').contains('Download').click();
+      cy.checkDownloadByContentOfFixture('triggerWorkflowsConfiguredWorkflows.json');
     });
 
     it('should show warnings for missing workflow config when appropriate', () => {
@@ -446,6 +387,37 @@ describe('Check trigger Workflows page', () => {
     });
   });
 });
+
+const clickSearchButtonAndWait = () => {
+  'use strict';
+
+  cy.get('button#searchSeqTrackButton').click();
+
+  cy.wait('@search').then((interception) => {
+    expect(interception.response.statusCode).to.eq(302);
+  });
+
+  cy.wait('@warnings').then((interception) => {
+    expect(interception.response.statusCode).to.eq(200);
+  });
+
+  cy.get('div#seqTrackTable_processing').should('not.be.visible');
+};
+
+const loadTriggerWorkflowsPage = () => {
+  'use strict';
+
+  cy.clearDownloadsFolder();
+  cy.visit('/triggerWorkflows/index');
+  cy.intercept('/searchSeqTrack/searchSeqTrackByProjectSeqType*').as('search');
+  cy.intercept('/triggerWorkflows/generateWarnings*').as('warnings');
+
+  cy.fixture('triggerWorkflows.json').then((alignment) => {
+    cy.get('select#project').select(alignment[0].project, { force: true });
+    cy.get('select#seqTypeProject').select('EXOME PAIRED bulk', { force: true });
+    clickSearchButtonAndWait();
+  });
+};
 
 const addConfig = () => {
   cy.visit('/workflowSelection/index?project=ExampleProject');

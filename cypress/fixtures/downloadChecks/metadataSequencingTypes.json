@@ -1,0 +1,40 @@
+{
+  "project": "ExampleProject",
+  "filename": "Sequencing_Types",
+  "extension": ".csv",
+  "header": [
+    "Seq. Type",
+    "Single Cell",
+    "Anti-body target",
+    "Needs Bed File",
+    "Directory",
+    "Sequencing Read Type(s)",
+    "Display Name",
+    "Import Alias",
+    "Legacy"
+  ],
+  "data": [
+    [
+      "10x_scRNA",
+      "true",
+      "false",
+      "false",
+      "10x_scRNA_sequencing",
+      "PAIRED",
+      "10x_scRNA",
+      "",
+      "false"
+    ],
+    [
+      "AMPLICON",
+      "false",
+      "false",
+      "false",
+      "amplicon",
+      "PAIRED",
+      "AMPLICON",
+      "",
+      "false"
+    ]
+  ]
+}

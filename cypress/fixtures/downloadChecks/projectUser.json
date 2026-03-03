@@ -1,0 +1,30 @@
+{
+  "filename": "Members_of_Project_ExampleProject",
+  "extension": ".csv",
+  "header": [
+    "Name",
+    "Account",
+    "Dept.",
+    "Mail",
+    "Role",
+    "Accessto OTP",
+    "Accessto Files",
+    "ManageUsers",
+    "Can Delegate Management",
+    "ReceivesNotifications"
+  ],
+  "data": [
+    [
+      "Dave Development",
+      "dave",
+      "Development",
+      "dave.development@otp.dev",
+      "BIOINFORMATICIAN",
+      "approved",
+      "approved",
+      "denied",
+      "denied",
+      "approved"
+    ]
+  ]
+}

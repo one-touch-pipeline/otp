@@ -23,66 +23,64 @@
 describe('Check statistics page', () => {
   'use strict';
 
-  context('when user is an operator', () => {
-    before(() => {
-      cy.clearDownloadsFolder();
-    });
+  ['operator', 'user'].forEach((role) => {
+    context(`when user is ${role === 'operator' ? 'an operator' : 'a normal user'}`, () => {
+      before(() => {
+        cy.clearDownloadsFolder();
+      });
 
-    beforeEach(() => {
-      cy.loginAs('operator');
-    });
+      beforeEach(() => {
+        cy.loginAs(role);
+      });
 
-    it('should visit the index page', () => {
-      cy.intercept('get', '/projectOverview/index*')
-        .as('index');
+      it('should visit the index page', () => {
+        cy.intercept('get', '/projectOverview/index*')
+          .as('index');
 
-      cy.visit('/projectOverview/index');
-      cy.wait('@index')
-        .then((interception) => {
-          expect(interception.response.statusCode).to.equal(200);
-        });
-    });
+        cy.visit('/projectOverview/index');
+        cy.wait('@index')
+          .then((interception) => {
+            expect(interception.response.statusCode).to.equal(200);
+          });
+      });
 
-    // checks for download files
-    it('should download and check the sample type name table', () => {
-      loadPageAndWaitForTables('projectOverviewSampleType.json');
-      cy.get('div#sampleTypeNameCountBySample_wrapper button')
-        .contains('Download').click();
-      cy.checkDownloadByContentOfFixture('projectOverviewSampleType.json');
-    });
+      it('should download and check the sample type name table', () => {
+        loadPageAndWaitForTables('projectOverviewSampleType.json');
+        cy.get('div#sampleTypeNameCountBySample_wrapper button')
+          .contains('Download').click();
+        cy.checkDownloadByContentOfFixture('projectOverviewSampleType.json');
+      });
 
-    // checks for download files
-    it('should download and check the sequencing center table', () => {
-      loadPageAndWaitForTables('projectOverviewSequencingCenter.json');
-      cy.get('div#centerNameRunId_wrapper button')
-        .contains('Download').click();
-      cy.checkDownloadByContentOfFixture('projectOverviewSequencingCenter.json');
-    });
+      it('should download and check the sequencing center table', () => {
+        loadPageAndWaitForTables('projectOverviewSequencingCenter.json');
+        cy.get('div#centerNameRunId_wrapper button')
+          .contains('Download').click();
+        cy.checkDownloadByContentOfFixture('projectOverviewSequencingCenter.json');
+      });
 
-    // checks for download files
-    it('should download and check the sequencing samples table', () => {
-      loadPageAndWaitForTables('projectOverviewSequences.json');
-      cy.get('div#projectOverviewTable_wrapper button')
-        .contains('Download').click();
-      cy.checkDownloadByContentOfFixture('projectOverviewSequences.json');
-    });
+      it('should download and check the sequencing samples table', () => {
+        loadPageAndWaitForTables('projectOverviewSequences.json');
+        cy.get('div#projectOverviewTable_wrapper button')
+          .contains('Download').click();
+        cy.checkDownloadByContentOfFixture('projectOverviewSequences.json');
+      });
 
-    // checks for download files
-    it('should download and check the sequencing type table', () => {
-      loadPageAndWaitForTables('projectOverviewSequencingTypes.json');
+      it('should download and check the sequencing type table', () => {
+        loadPageAndWaitForTables('projectOverviewSequencingTypes.json');
 
-      cy.get('div#patientsAndSamplesGBCountPerProject_wrapper button')
-        .contains('Download').click();
-      cy.checkDownloadByContentOfFixture('projectOverviewSequencingTypes.json');
-    });
+        cy.get('div#patientsAndSamplesGBCountPerProject_wrapper button')
+          .contains('Download').click();
+        cy.checkDownloadByContentOfFixture('projectOverviewSequencingTypes.json');
+      });
 
-    it('should check the length of the tables', () => {
-      cy.visit('/projectOverview/index');
+      it('should check the length of the tables', () => {
+        cy.visit('/projectOverview/index');
 
-      cy.get('table#sampleTypeNameCountBySample tbody').find('tr').should('have.length', 3);
-      cy.get('table#centerNameRunId tbody').find('tr').should('have.length', 1);
-      cy.get('table#projectOverviewTable tbody').find('tr').should('have.length', 31);
-      cy.get('table#patientsAndSamplesGBCountPerProject tbody').find('tr').should('have.length', 6);
+        cy.get('table#sampleTypeNameCountBySample tbody').find('tr').should('have.length', 3);
+        cy.get('table#centerNameRunId tbody').find('tr').should('have.length', 1);
+        cy.get('table#projectOverviewTable tbody').find('tr').should('have.length', 31);
+        cy.get('table#patientsAndSamplesGBCountPerProject tbody').find('tr').should('have.length', 6);
+      });
     });
   });
 });

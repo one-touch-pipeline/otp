@@ -58,5 +58,71 @@ describe('Check alignment quality overview page', () => {
         .should('contain.text', 'test-comment')
         .should('not.contain.html', 'select');
     });
+
+    // Checks for download files
+    it('should download and check the alignment quality control with EXOME', () => {
+      loadAlignmentPage('ExampleProject', 'EXOME PAIRED bulk');
+      cy.get('div#overviewTableProcessedMergedBMF_wrapper button')
+        .contains('Download').click();
+      cy.checkDownloadByContentOfFixture('alignmentQualityControlExome.json');
+    });
+
+    // For the other Seq types the projectUsingFastQ was used
+    // The ExampleProject doesn't have data for other Seq types
+    it('should download and check the alignment quality control with 10x_scRNA', () => {
+      loadAlignmentPage('projectUsingFastq', '10x_scRNA PAIRED single cell');
+      cy.get('div#overviewTableProcessedMergedBMF_wrapper button')
+        .contains('Download').click();
+      cy.checkDownloadByContentOfFixture('alignmentQualityControl10xscRNA.json');
+    });
+
+    it('should download and check the alignment quality control with ChIP paired', () => {
+      loadAlignmentPage('projectUsingFastq', 'ChIP PAIRED bulk');
+      cy.get('div#overviewTableProcessedMergedBMF_wrapper button')
+        .contains('Download').click();
+      cy.checkDownloadByContentOfFixture('alignmentQualityControlChIP.json');
+    });
+
+    it('should download and check the alignment quality control with RNA SINGLE bulk', () => {
+      loadAlignmentPage('projectUsingFastq', 'RNA SINGLE bulk');
+      cy.get('div#overviewTableProcessedMergedBMF_wrapper button')
+        .contains('Download').click();
+      cy.checkDownloadByContentOfFixture('alignmentQualityControlRNA.json');
+    });
+
+    it('should download and check the alignment quality control with WGS PAIRED bulk', () => {
+      loadAlignmentPage('projectUsingFastq', 'WGS PAIRED bulk');
+      cy.get('div#overviewTableProcessedMergedBMF_wrapper button')
+        .contains('Download').click();
+      cy.checkDownloadByContentOfFixture('alignmentQualityControlWGS.json');
+    });
+  });
+
+  context('when user is a normal user', () => {
+    beforeEach(() => {
+      cy.loginAs('user');
+    });
+
+    // Checks for download files
+    // Normal User has access only to ExampleProject
+    it('should download and check the alignment quality control with EXOME', () => {
+      loadAlignmentPage('ExampleProject', 'EXOME PAIRED bulk');
+      cy.get('div#overviewTableProcessedMergedBMF_wrapper button')
+        .contains('Download').click();
+      cy.checkDownloadByContentOfFixture('alignmentQualityControlExome.json');
+    });
   });
 });
+
+const loadAlignmentPage = (project, seqType) => {
+  'use strict';
+
+  cy.clearDownloadsFolder();
+  cy.intercept('POST', '/alignmentQualityOverview/dataTableSource*').as('dataTable');
+  cy.visit(`/alignmentQualityOverview/index?project=${project}`);
+  cy.get('#seqType')
+    .select(seqType, { force: true });
+  cy.wait('@dataTable').then((interception) => {
+    expect(interception.response.statusCode).to.equal(200);
+  });
+};

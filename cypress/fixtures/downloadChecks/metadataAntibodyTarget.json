@@ -1,0 +1,22 @@
+{
+  "project": "ExampleProject",
+  "filename": "Antibody_Targets",
+  "extension": ".csv",
+  "header": [
+    "Antibody Target",
+    "Import Alias",
+    "Legacy"
+  ],
+  "data": [
+    [
+      "AHCY",
+      "",
+      "false"
+    ],
+    [
+      "AntibodyTarget",
+      "",
+      "false"
+    ]
+  ]
+}

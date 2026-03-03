@@ -1,0 +1,31 @@
+{
+  "project": "ExampleProject",
+  "filename": "Library_Preparation_Kits",
+  "extension": ".csv",
+  "header": [
+    "Library Prep. Kit",
+    "Import Alias",
+    "Adapter File",
+    "Rev. Compl. Adapter Sequence",
+    "Reference Genomes with BED file",
+    "Legacy"
+  ],
+  "data": [
+    [
+      "Agilent SureSelect V4",
+      "",
+      "undefined",
+      "undefined",
+      "",
+      "false"
+    ],
+    [
+      "Agilent SureSelect V5",
+      "",
+      "undefined",
+      "undefined",
+      "",
+      "false"
+    ]
+  ]
+}

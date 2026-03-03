@@ -1,0 +1,28 @@
+{
+  "project": "ExampleProject",
+  "filename": "Reference_Genomes",
+  "extension": ".csv",
+  "header": [
+    "Name",
+    "Species",
+    "Folder",
+    "Date created",
+    "Legacy"
+  ],
+  "data": [
+    [
+      "1KGRef_PhiX",
+      "Human (Homo sapiens) [No strain available]",
+      "1KGRef_PhiX",
+      "2022-08-26",
+      "false"
+    ],
+    [
+      "hg_GRCh38",
+      "Human (Homo sapiens) [No strain available]",
+      "hg_GRCh38",
+      "2022-08-26",
+      "false"
+    ]
+  ]
+}

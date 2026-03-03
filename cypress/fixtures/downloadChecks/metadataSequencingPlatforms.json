@@ -1,0 +1,31 @@
+{
+  "project": "ExampleProject",
+  "filename": "Sequencing_Platforms",
+  "extension": ".csv",
+  "header": [
+    "Platform Name",
+    "Model",
+    "Model Import Alias",
+    "Sequencing Kit",
+    "Sequencing Kit Import Alias",
+    "Legacy"
+  ],
+  "data": [
+    [
+      "Illumina",
+      "HiSeq 2000",
+      "HiSeq2000",
+      "",
+      "",
+      "false"
+    ],
+    [
+      "Illumina",
+      "HiSeq 2000",
+      "HiSeq2000",
+      "v1",
+      "v 1",
+      "false"
+    ]
+  ]
+}

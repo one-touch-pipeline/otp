@@ -1,0 +1,43 @@
+{
+  "project": "ExampleProject",
+  "filename": "Trigger_Workflow",
+  "extension": ".csv",
+  "header": [
+    "BAM ID",
+    "Project",
+    "Individual",
+    "Sample Type",
+    "Withdrawn",
+    "Library Prep. Kit",
+    "Species",
+    "Mixed In Species",
+    "Reference genome",
+    "Seq. Platform Group"
+  ],
+  "data": [
+    [
+      "958",
+      "ExampleProject",
+      "example_2",
+      "tumor01",
+      "false",
+      "Agilent SureSelect V5",
+      "Human (Homo sapiens) [No strain available]",
+      "",
+      "1KGRef_PhiX",
+      "'OTP global' seq platform group with 'ExampleSeqPlatform ExampleModel ExampleKit'"
+    ],
+    [
+      "1038",
+      "ExampleProject",
+      "example_2",
+      "tumor02",
+      "false",
+      "Agilent SureSelect V5",
+      "Human (Homo sapiens) [No strain available]",
+      "",
+      "1KGRef_PhiX",
+      "'OTP global' seq platform group with 'ExampleSeqPlatform ExampleModel ExampleKit'"
+    ]
+  ]
+}

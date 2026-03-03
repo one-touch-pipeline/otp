@@ -1,0 +1,28 @@
+{
+  "project": "ExampleProject",
+  "filename": "Trigger_Workflow",
+  "extension": ".csv",
+  "header": [
+    "Project",
+    "Seq. type",
+    "Workflow",
+    "Configured version",
+    "Configured reference genome"
+  ],
+  "data": [
+    [
+      "ExampleProject",
+      "EXOME",
+      "Roddy Sophia (structural variation calling)",
+      "2.2.3",
+      "-"
+    ],
+    [
+      "ExampleProject",
+      "EXOME",
+      "Roddy Indel calling",
+      "2.4.1-2",
+      "-"
+    ]
+  ]
+}
