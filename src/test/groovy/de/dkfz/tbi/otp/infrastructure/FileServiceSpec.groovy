@@ -130,9 +130,8 @@ class FileServiceSpec extends Specification implements DataTest {
         permission                                                || output
         FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION || "770"
         FileService.OWNER_DIRECTORY_PERMISSION                    || "700"
-        FileService.DEFAULT_FILE_PERMISSION                       || "440"
-        FileService.OWNER_READ_WRITE_GROUP_READ_FILE_PERMISSION   || "640"
-        FileService.DEFAULT_BAM_FILE_PERMISSION                   || "444"
+        FileService.DEFAULT_FILE_PERMISSION                       || "444"
+        FileService.OWNER_READ_WRITE_GROUP_READ_FILE_PERMISSION   || "644"
     }
 
     @Unroll
@@ -615,7 +614,7 @@ class FileServiceSpec extends Specification implements DataTest {
         assert !permissions.contains(PosixFilePermission.GROUP_WRITE)
         assert !permissions.contains(PosixFilePermission.GROUP_EXECUTE)
 
-        assert !permissions.contains(PosixFilePermission.OTHERS_READ)
+        assert permissions.contains(PosixFilePermission.OTHERS_READ)
         assert !permissions.contains(PosixFilePermission.OTHERS_WRITE)
         assert !permissions.contains(PosixFilePermission.OTHERS_EXECUTE)
     }
@@ -830,8 +829,8 @@ class FileServiceSpec extends Specification implements DataTest {
         Files.getPosixFilePermissions(dir2) == POSIX_DIRECTORY_PERMISSION_PART
 
         Files.getPosixFilePermissions(file) == FileService.DEFAULT_FILE_PERMISSION
-        Files.getPosixFilePermissions(baiFile) == FileService.DEFAULT_BAM_FILE_PERMISSION
-        Files.getPosixFilePermissions(baiFile) == FileService.DEFAULT_BAM_FILE_PERMISSION
+        Files.getPosixFilePermissions(bamFile) == FileService.DEFAULT_FILE_PERMISSION
+        Files.getPosixFilePermissions(baiFile) == FileService.DEFAULT_FILE_PERMISSION
 
         paths.each {
             assert Files.getFileAttributeView(it, PosixFileAttributeView, LinkOption.NOFOLLOW_LINKS).readAttributes().group().name == group

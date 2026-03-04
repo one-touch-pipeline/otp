@@ -36,10 +36,8 @@ UNIX_GROUP_SHOULD="$4"
 
 CMD_CHGRP="chgrp -vh "$UNIX_GROUP_SHOULD" {}"
 CMD_CHMOD_2750="chmod -v 2750 {}"
-CMD_CHMOD_400="chmod -v 400 {}"
-CMD_CHMOD_440="chmod -v 440 {}"
 CMD_CHMOD_444="chmod -v 444 {}"
-CMD_CHMOD_640="chmod -v 640 {}"
+CMD_CHMOD_644="chmod -v 644 {}"
 
 interceptor=""
 
@@ -62,14 +60,11 @@ then
     find "$PID_DIRECTORY" \
         \( -group "$UNIX_GROUP_IS"                                        -exec $interceptor $CMD_CHGRP \; \) , \
         \( -type d -not -perm 2750                                        -exec $interceptor $CMD_CHMOD_2750 \; \) , \
-        \( -type f -not -perm 440 \
-                   -not -name "*.bam" \
-                   -not -name "*.bai" \
+        \( -type f -not -perm 444 \
                    -not -name ".roddyExecCache.txt" \
                    -not -name "zippedAnalysesMD5.txt" \
-                   -not -name "*_mapping.tsv"                              -exec $interceptor $CMD_CHMOD_440 \; \) , \
-        \( -type f -not -perm 444 \( -name "*.bam" -or -name "*.bai" \)    -exec $interceptor $CMD_CHMOD_444 \; \) , \
-        \( -type f -not -perm 640 -name "*_mapping.tsv" -path "*/0_all/*"  -exec $interceptor $CMD_CHMOD_640 \; \);
+                   -not -name "*_mapping.tsv"                              -exec $interceptor $CMD_CHMOD_444 \; \) , \
+        \( -type f -not -perm 644 -name "*_mapping.tsv" -path "*/0_all/*"  -exec $interceptor $CMD_CHMOD_644 \; \);
 else
     echo "# pid directory not found: $PID_DIRECTORY"
 fi

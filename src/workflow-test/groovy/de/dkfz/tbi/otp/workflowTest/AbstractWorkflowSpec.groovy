@@ -829,11 +829,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
             }
             if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
                 Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(path, LinkOption.NOFOLLOW_LINKS)
-                if (FileService.BAM_FILE_EXTENSIONS.any { path.toString().endsWith(it) }) {
-                    assert permissions == FileService.DEFAULT_BAM_FILE_PERMISSION
-                } else {
-                    assert permissions == FileService.DEFAULT_FILE_PERMISSION
-                }
+                assert permissions == FileService.DEFAULT_FILE_PERMISSION
             }
         }
     }

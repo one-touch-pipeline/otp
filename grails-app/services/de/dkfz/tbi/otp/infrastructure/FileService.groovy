@@ -125,20 +125,22 @@ class FileService {
     ].toSet().asImmutable()
 
     /**
-     * The default file permissions (440)
+     * The default file permissions (444)
      */
     static final Set<PosixFilePermission> DEFAULT_FILE_PERMISSION = [
             PosixFilePermission.OWNER_READ,
             PosixFilePermission.GROUP_READ,
+            PosixFilePermission.OTHERS_READ,
     ].toSet().asImmutable()
 
     /**
-     * User read write group read file permission (640)
+     * User read write group read file permission (644)
      */
     static final Set<PosixFilePermission> OWNER_READ_WRITE_GROUP_READ_FILE_PERMISSION = [
             PosixFilePermission.OWNER_READ,
             PosixFilePermission.OWNER_WRITE,
             PosixFilePermission.GROUP_READ,
+            PosixFilePermission.OTHERS_READ,
     ].toSet().asImmutable()
 
     /**
@@ -150,30 +152,6 @@ class FileService {
             PosixFilePermission.GROUP_READ,
             PosixFilePermission.GROUP_WRITE,
     ].toSet().asImmutable()
-
-    /**
-     * The default file permissions for bam/bai (444).
-     *
-     * Some tools require read access for others to work.
-     *
-     * The extension to use is defined in {@link #BAM_FILE_EXTENSIONS}
-     */
-    static final Set<PosixFilePermission> DEFAULT_BAM_FILE_PERMISSION = [
-            PosixFilePermission.OWNER_READ,
-            PosixFilePermission.GROUP_READ,
-            PosixFilePermission.OTHERS_READ,
-    ].toSet().asImmutable()
-
-    /**
-     * File extension for which {@link #DEFAULT_BAM_FILE_PERMISSION} should be used
-     */
-    static final Collection<String> BAM_FILE_EXTENSIONS = [
-            '.bam',
-            '.bam.bai',
-            '.cram',
-            '.cram.crai',
-
-    ].asImmutable()
 
     /**
      * The default header to use for bash scripts.
@@ -785,8 +763,7 @@ class FileService {
      *
      * The permissions are set:
      * - directories are set to: {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}
-     * - bam/bai files to: {@link #DEFAULT_BAM_FILE_PERMISSION}
-     * - other files to: {@link #DEFAULT_FILE_PERMISSION}
+     * - files to: {@link #DEFAULT_FILE_PERMISSION}
      */
     void correctPathPermissionAndGroupRecursive(Path path, String group) {
         assert path
@@ -815,21 +792,9 @@ class FileService {
             setGroupViaBash(path, group)
         } else if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
             setGroupViaBash(path, group)
-            if (useBamFilePermission(path)) {
-                setPermission(path, DEFAULT_BAM_FILE_PERMISSION)
-            } else {
-                setPermission(path, DEFAULT_FILE_PERMISSION)
-            }
+            setPermission(path, DEFAULT_FILE_PERMISSION)
         } else {
             throw new RuntimeException("'${path} is neither directory, nor file nor link")
-        }
-    }
-
-    @SuppressWarnings('UnnecessaryToString')
-    private boolean useBamFilePermission(Path path) {
-        String fileName = path.toString()
-        return BAM_FILE_EXTENSIONS.any {
-            fileName.endsWith(it)
         }
     }
 
