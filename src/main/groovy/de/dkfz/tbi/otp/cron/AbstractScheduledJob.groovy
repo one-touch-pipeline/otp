@@ -42,7 +42,8 @@ abstract class AbstractScheduledJob {
     static final List<Class> ALL_JOB_CLASSES = [
             CellRangerDataCleanupJob,
             CheckExpiredProjectsJob,
-            CheckFileAccessInconsistenciesJob,
+            CheckFileAccessInconsistenciesForUsersOnlyInLdapOrWithoutProjectRoleJob,
+            CheckFileAccessInconsistenciesForUsersWithProjectRoleJob,
             CheckForAdUpdateJob,
             CleanupWorkFoldersJob,
             DeactivateUsersJob,

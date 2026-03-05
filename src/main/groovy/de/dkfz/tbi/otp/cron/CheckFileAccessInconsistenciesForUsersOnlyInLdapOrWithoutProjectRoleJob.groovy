@@ -34,30 +34,13 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.user.identityProvider.IdentityProvider
 import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
-import de.dkfz.tbi.otp.utils.MessageSourceService
-import de.dkfz.tbi.otp.utils.SystemUserService
 
 @CompileDynamic
 @Component
 @Slf4j
-class CheckFileAccessInconsistenciesJob extends AbstractScheduledJob {
+class CheckFileAccessInconsistenciesForUsersOnlyInLdapOrWithoutProjectRoleJob extends AbstractScheduledJob {
 
     static final String SUBJECT = "User Management Inconsistencies status"
-
-    /**
-     * the header of the table of inconsistencies
-     */
-    static final String HEADER = [
-            "in Unix-group",
-            "File Access (OTP)",
-            "ldap deact.",
-            "planned deact.",
-            "enabled in OTP",
-            "user",
-            "project",
-            "unix group",
-            "Command to add/remove user from group",
-    ].join('\t')
 
     @Autowired
     IdentityProvider identityProvider
@@ -65,87 +48,12 @@ class CheckFileAccessInconsistenciesJob extends AbstractScheduledJob {
     @Autowired
     UserProjectRoleService userProjectRoleService
 
-    @Autowired
-    SystemUserService systemUserService
-
-    @Autowired
-    MessageSourceService messageSourceService
-
     @Override
     void wrappedExecute() {
-        String mailContent = generateReportForUsersInOtpWithProjectRoleWithHeader()
-        if (mailContent) {
-            mailHelperService.saveMail(SUBJECT, mailContent)
-        }
-
         String userInconsistencies = generateReportForUsersOnlyInLdapOrInOtpWithoutProjectRole()
         if (userInconsistencies) {
             mailHelperService.saveMail(SUBJECT, userInconsistencies)
         }
-    }
-
-    String generateReportForUsersInOtpWithProjectRoleWithHeader() {
-        String body = generateReportForUsersInOtpWithProjectRole()
-        return body ? HEADER + '\n' + body : ''
-    }
-
-    String generateReportForUsersInOtpWithProjectRole() {
-        List<String> content = []
-
-        List<User> userList = User.findAllByUsernameIsNotNull()
-        Map<String, IdpUserDetails> ldapUserDetailsByUsername = identityProvider.getIdpUserDetailsByUserList(userList).collectEntries {
-            [(it.username): it]
-        }
-
-        UserProjectRole.createCriteria().list {
-            'in'('user', userList)
-            project {
-                ne('state', Project.State.DELETED)
-            }
-        }.each { UserProjectRole userProjectRole ->
-            User user = userProjectRole.user
-            Project project = userProjectRole.project
-
-            boolean fileAccessInOtp = userProjectRole.accessToFiles
-            List<String> groupsOfUser = ldapUserDetailsByUsername[user.username]?.memberOfGroupList ?: []
-            boolean fileAccessInLdap = project.unixGroup in groupsOfUser
-            boolean ldapDeactivated = identityProvider.isUserDeactivated(user)
-
-            // if the user has no file access in LDAP, but has it in OTP, and there has been no request to change it, set it to false and send a notification
-            if (fileAccessInOtp && !fileAccessInLdap && !userProjectRole.fileAccessChangeRequested) {
-                systemUserService.useSystemUserAsOperator {
-                    userProjectRoleService.setAccessToFiles(userProjectRole, false, true)
-                    notifyUserAboutFileAccessChangeThroughCron(userProjectRole)
-                }
-            } else if (fileAccessInOtp != fileAccessInLdap) {
-                content << [
-                        fileAccessInLdap,
-                        fileAccessInOtp,
-                        ldapDeactivated,
-                        user.plannedDeactivationDate as boolean,
-                        user.enabled,
-                        user.username,
-                        project.name,
-                        project.unixGroup,
-                        userProjectRoleService.getCommand(project.unixGroup, user.username, fileAccessInOtp ? OperatorAction.ADD : OperatorAction.REMOVE),
-                ].join('\t')
-            }
-        }
-        return content.sort().join('\n')
-    }
-
-    protected void notifyUserAboutFileAccessChangeThroughCron(UserProjectRole userProjectRole) {
-        Project project = userProjectRole.project
-        User user = userProjectRole.user
-
-        String subject = messageSourceService.createMessage("projectUser.notification.fileAccessChange.subject.removed", [projectName: project.name])
-
-        String body = messageSourceService.createMessage("projectUser.notification.fileAccessChange.body.removed.cron", [
-                username             : user.realName,
-                projectName          : project.name,
-                supportTeamSalutation: processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
-        ])
-        mailHelperService.saveMail(subject, body, [user.email])
     }
 
     String generateReportForUsersOnlyInLdapOrInOtpWithoutProjectRole() {

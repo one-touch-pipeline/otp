@@ -43,7 +43,7 @@ import de.dkfz.tbi.otp.utils.SystemUserService
 
 @Rollback
 @Integration
-class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification implements UserDomainFactory {
+class CheckFileAccessInconsistenciesForUsersWithProjectRoleJobIntegrationSpec extends Specification implements UserDomainFactory {
 
     private static final String USER_ACCOUNT = 'jdoe'
     private static final String USER_REAL_NAME = 'John Doe'
@@ -53,11 +53,11 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
     private static final String PROJECT_NAME_TEST = 'TestProject'
 
     IdentityProvider identityProvider
-    CheckFileAccessInconsistenciesJob job
+    CheckFileAccessInconsistenciesForUsersWithProjectRoleJob job
 
     void setupData() {
         identityProvider = Mock(IdentityProvider)
-        job = new CheckFileAccessInconsistenciesJob(identityProvider: identityProvider, processingOptionService: new ProcessingOptionService())
+        job = new CheckFileAccessInconsistenciesForUsersWithProjectRoleJob(identityProvider: identityProvider, processingOptionService: new ProcessingOptionService())
     }
 
     @Unroll
@@ -93,18 +93,17 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
                 memberOfGroupList: [fileAccessLdap ? UNIX_GROUP_PROJECT : UNIX_GROUP_SECOND],
         ])
 
-        CheckFileAccessInconsistenciesJob job = new CheckFileAccessInconsistenciesJob([
+        CheckFileAccessInconsistenciesForUsersWithProjectRoleJob job = new CheckFileAccessInconsistenciesForUsersWithProjectRoleJob([
                 processingOptionService: new ProcessingOptionService(),
                 identityProvider       : Mock(IdentityProvider) {
                     1 * getIdpUserDetailsByUserList(_) >> [idpUserDetails,]
                     1 * isUserDeactivated(_) >> ldapDisabled
-                    1 * getGroupMembersByGroupName(UNIX_GROUP_PROJECT) >> [USER_ACCOUNT]
                     0 * _
                 },
                 mailHelperService      : Mock(MailHelperService) {
                     mailCount * saveMail(_, _) >> { String subject, String body ->
-                        assert subject.startsWith(CheckFileAccessInconsistenciesJob.SUBJECT)
-                        assert body.contains(CheckFileAccessInconsistenciesJob.HEADER)
+                        assert subject.startsWith(CheckFileAccessInconsistenciesForUsersWithProjectRoleJob.SUBJECT)
+                        assert body.contains(CheckFileAccessInconsistenciesForUsersWithProjectRoleJob.HEADER)
                         assert body.contains(USER_ACCOUNT)
                         assert body.contains(PROJECT_NAME_TEST)
                     }
@@ -184,17 +183,16 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
                 fileAccessChangeRequested: true,
         ])
 
-        CheckFileAccessInconsistenciesJob job = new CheckFileAccessInconsistenciesJob([
+        CheckFileAccessInconsistenciesForUsersWithProjectRoleJob job = new CheckFileAccessInconsistenciesForUsersWithProjectRoleJob([
                 identityProvider       : Mock(IdentityProvider) {
                     1 * getIdpUserDetailsByUserList(_) >> [idpUserDetails]
-                    1 * getGroupMembersByGroupName(UNIX_GROUP_PROJECT) >> [USER_ACCOUNT]
                     0 * _
                 },
                 processingOptionService: new ProcessingOptionService(),
                 mailHelperService      : Mock(MailHelperService) {
                     0 * saveMail(_, _) >> { String subject, String body ->
-                        assert subject.startsWith(CheckFileAccessInconsistenciesJob.SUBJECT)
-                        assert body.contains(CheckFileAccessInconsistenciesJob.HEADER)
+                        assert subject.startsWith(CheckFileAccessInconsistenciesForUsersWithProjectRoleJob.SUBJECT)
+                        assert body.contains(CheckFileAccessInconsistenciesForUsersWithProjectRoleJob.HEADER)
                         assert body.contains(USER_ACCOUNT)
                         assert body.contains(PROJECT_NAME_TEST)
                     }
@@ -233,7 +231,7 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
                 memberOfGroupList: [UNIX_GROUP_SECOND],
         ])
 
-        CheckFileAccessInconsistenciesJob job = new CheckFileAccessInconsistenciesJob([
+        CheckFileAccessInconsistenciesForUsersWithProjectRoleJob job = new CheckFileAccessInconsistenciesForUsersWithProjectRoleJob([
                 processingOptionService: new ProcessingOptionService(),
                 identityProvider       : Mock(IdentityProvider) {
                     1 * getIdpUserDetailsByUserList(_) >> [idpUserDetails,]
@@ -267,126 +265,5 @@ class CheckFileAccessInconsistenciesJobIntegrationSpec extends Specification imp
 
         then:
         1 * job.userProjectRoleService.setAccessToFiles(userProjectRole, false, true)
-    }
-
-    void "test generateReportForUsersOnlyInLdapOrInOtpWithoutProjectRole, report should be blank if no inconsistencies were found"() {
-        given:
-        setupData()
-        Project project = createProject([name: PROJECT_NAME_TEST, unixGroup: UNIX_GROUP_PROJECT])
-        User user = createUser([
-                username: USER_ACCOUNT,
-                realName: USER_REAL_NAME,
-                email   : USER_EMAIL,
-                enabled : true,
-        ])
-        createUserProjectRole(project: project, user: user)
-
-        identityProvider.getGroupMembersByGroupName(UNIX_GROUP_PROJECT) >> [USER_ACCOUNT]
-
-        when:
-        String report = job.generateReportForUsersOnlyInLdapOrInOtpWithoutProjectRole()
-
-        then:
-        report.isBlank()
-    }
-
-    void "test generateReportForUsersOnlyInLdapOrInOtpWithoutProjectRole - user without UserProjectRole"() {
-        given:
-        setupData()
-        Project project = createProject([name: PROJECT_NAME_TEST, unixGroup: UNIX_GROUP_PROJECT])
-        User user = createUser([
-                username: USER_ACCOUNT,
-                realName: USER_REAL_NAME,
-                email   : USER_EMAIL,
-                enabled : true,
-        ])
-
-        identityProvider.getGroupMembersByGroupName(UNIX_GROUP_PROJECT) >> [USER_ACCOUNT]
-        job.userProjectRoleService = Mock(UserProjectRoleService) {
-            getCommand(UNIX_GROUP_PROJECT, user.username, OperatorAction.REMOVE) >> "cmd"
-        }
-
-        when:
-        String report = job.generateReportForUsersOnlyInLdapOrInOtpWithoutProjectRole()
-
-        then:
-        report.contains("The following table lists users, which are in an OTP project group according LDAP, but in OTP are not connected to that project.")
-        report.contains("Project: ${project.name} (${project.unixGroup})")
-        report.contains("Following users have not been added to the project:")
-        report.contains(user.username)
-        report.contains(user.realName)
-        report.contains(user.email)
-        report.contains("Command to remove user from group: cmd")
-    }
-
-    void 'test generateReportForUsersOnlyInLdapOrInOtpWithoutProjectRole - non-database user'() {
-        given:
-        setupData()
-        Project project = createProject([name: PROJECT_NAME_TEST, unixGroup: UNIX_GROUP_PROJECT])
-
-        identityProvider.getGroupMembersByGroupName(UNIX_GROUP_PROJECT) >> ['nonexistentuser']
-        identityProvider.getIdpUserDetailsByUsername('nonexistentuser') >> new IdpUserDetails(
-                username: 'nonexistentuser',
-                realName: 'Nonexistent User',
-                mail: 'nonexistentuser@test.de'
-        )
-        job.userProjectRoleService = Mock(UserProjectRoleService) {
-            getCommand(UNIX_GROUP_PROJECT, 'nonexistentuser', OperatorAction.REMOVE) >> "cmd"
-        }
-
-        when:
-        String report = job.generateReportForUsersOnlyInLdapOrInOtpWithoutProjectRole()
-
-        then:
-        report.contains("The following table lists users, which are in an OTP project group according LDAP, but in OTP are not connected to that project.")
-        report.contains("Project: ${project.name} (${project.unixGroup})")
-        report.contains("Following Users could not be resolved to a user in the OTP database:")
-        report.contains('nonexistentuser')
-        report.contains('Nonexistent User')
-        report.contains('nonexistentuser@test.de')
-        report.contains("Command to remove user from group: cmd")
-    }
-
-    void "test generateReportForUsersOnlyInLdapOrInOtpWithoutProjectRole - user with and without roles, plus non-database users and ignored unregistered users"() {
-        given:
-        setupData()
-        Project project = createProject([name: PROJECT_NAME_TEST, unixGroup: UNIX_GROUP_PROJECT])
-        User user1 = createUser([
-                username: USER_ACCOUNT,
-                realName: USER_REAL_NAME,
-                email   : USER_EMAIL,
-                enabled : true,
-        ])
-        User user2 = createUser([username: 'testuser2', realName: 'Test User 2', email: 'testuser2@example.com'])
-        User user3 = createUser([username: 'testuser3', realName: 'Test User 3', email: 'testuser3@example.com'])
-        createUserProjectRole(project: project, user: user1)
-        findOrCreateProcessingOption(ProcessingOption.OptionName.GUI_IGNORE_UNREGISTERED_OTP_USERS_FOUND, 'nonexistentIgnoreduser')
-
-        identityProvider.getGroupMembersByGroupName(UNIX_GROUP_PROJECT) >> [USER_ACCOUNT, 'testuser2', 'testuser3', 'nonexistentuser', 'nonexistentIgnoreduser']
-        identityProvider.getIdpUserDetailsByUsername('nonexistentuser') >> new IdpUserDetails(
-                username: 'nonexistentuser',
-                realName: 'Nonexistent User',
-                mail: 'nonexistentuser@test.de'
-        )
-        job.userProjectRoleService = Mock(UserProjectRoleService) {
-            getCommand(UNIX_GROUP_PROJECT, 'nonexistentuser', OperatorAction.REMOVE) >> "cmd"
-            getCommand(UNIX_GROUP_PROJECT, user2.username, OperatorAction.REMOVE) >> "cmd"
-            getCommand(UNIX_GROUP_PROJECT, user3.username, OperatorAction.REMOVE) >> "cmd"
-        }
-
-        when:
-        String report = job.generateReportForUsersOnlyInLdapOrInOtpWithoutProjectRole()
-
-        then:
-        report.trim() == """
-            |The following table lists users, which are in an OTP project group according LDAP, but in OTP are not connected to that project.\n
-            |Project: ${project.name} (${project.unixGroup})
-            |Following users have not been added to the project:
-            |${user2.username}       | ${user2.realName}          | ${user2.email}                    | Command to remove user from group: cmd
-            |${user3.username}       | ${user3.realName}          | ${user3.email}                    | Command to remove user from group: cmd
-            |\n
-            |Following Users could not be resolved to a user in the OTP database:
-            |nonexistentuser | Nonexistent User     | nonexistentuser@test.de                  | Command to remove user from group: cmd
-        """.stripMargin().trim().toString()
     }
 }
