@@ -49,6 +49,7 @@ class WgbsWorkflowSpec extends Specification implements RoddyPanCancerFactory, D
                 WgbsExecuteJob,
                 WgbsValidationJob,
                 WgbsParseJob,
+                RoddyCleanupJob,
                 PanCancerCleanUpJob,
                 SetCorrectPermissionJob,
                 CalculateSizeJob,

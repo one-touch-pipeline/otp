@@ -65,6 +65,7 @@ class PanCancerWorkflowSpec extends Specification implements RoddyPanCancerFacto
                 PanCancerExecuteJob,
                 PanCancerValidationJob,
                 PanCancerParseJob,
+                RoddyCleanupJob,
                 PanCancerCleanUpJob,
                 SetCorrectPermissionJob,
                 CalculateSizeJob,

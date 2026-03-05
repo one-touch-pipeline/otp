@@ -54,7 +54,7 @@ class SnvWorkflow extends AbstractAnalysisWorkflow {
                 SnvPrepareJob,
                 SnvExecuteJob,
                 SnvValidationJob,
-//                SnvCleanupJob,
+                RoddyCleanupJob,
                 SetCorrectPermissionJob,
                 CalculateSizeJob,
                 AnalysisLinkJob,

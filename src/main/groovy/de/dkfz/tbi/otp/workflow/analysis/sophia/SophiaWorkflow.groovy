@@ -57,7 +57,7 @@ class SophiaWorkflow extends AbstractAnalysisWorkflow {
                 SophiaExecuteJob,
                 SophiaValidationJob,
                 SophiaParseJob,
-//                SophiaCleanupJob,
+                RoddyCleanupJob,
                 SetCorrectPermissionJob,
                 CalculateSizeJob,
                 AnalysisLinkJob,

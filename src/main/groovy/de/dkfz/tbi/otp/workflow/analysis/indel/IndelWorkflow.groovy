@@ -57,7 +57,7 @@ class IndelWorkflow extends AbstractAnalysisWorkflow {
                 IndelExecuteJob,
                 IndelValidationJob,
                 IndelParseJob,
-//                IndelCleanupJob,
+                RoddyCleanupJob,
                 SetCorrectPermissionJob,
                 CalculateSizeJob,
                 AnalysisLinkJob,

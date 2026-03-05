@@ -59,7 +59,7 @@ class AceseqWorkflow extends AbstractAnalysisWorkflow {
                 AceseqExecuteJob,
                 AceseqValidationJob,
                 AceseqParseJob,
-//                AceseqCleanupJob,
+                RoddyCleanupJob,
                 SetCorrectPermissionJob,
                 CalculateSizeJob,
                 AnalysisLinkJob,

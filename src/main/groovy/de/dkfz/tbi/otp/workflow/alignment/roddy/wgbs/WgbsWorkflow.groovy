@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.jobs.AttachUuidJob
 import de.dkfz.tbi.otp.workflow.jobs.CalculateSizeJob
 import de.dkfz.tbi.otp.workflow.jobs.Job
+import de.dkfz.tbi.otp.workflow.jobs.RoddyCleanupJob
 import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
 import de.dkfz.tbi.otp.workflowExecution.*
 
@@ -56,6 +57,7 @@ class WgbsWorkflow extends PanCancerWorkflow {
                 WgbsExecuteJob,
                 WgbsValidationJob,
                 WgbsParseJob,
+                RoddyCleanupJob,
                 PanCancerCleanUpJob,
                 SetCorrectPermissionJob,
                 CalculateSizeJob,
