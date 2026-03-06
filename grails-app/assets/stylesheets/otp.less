@@ -327,6 +327,10 @@ tr {
     }
     select.threshold {
         width: 100%;
+
+        & + .select2-container {
+            min-width: 40ch;
+        }
     }
     // 'other property' column
     th:nth-child(8) {

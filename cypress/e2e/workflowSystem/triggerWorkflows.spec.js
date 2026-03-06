@@ -420,11 +420,13 @@ const loadTriggerWorkflowsPage = () => {
 };
 
 const addConfig = () => {
+  'use strict';
+
   cy.visit('/workflowSelection/index?project=ExampleProject');
 
   cy.intercept('/workflowSelection/saveAlignmentConfiguration?project=ExampleProject').as('saveConfig');
 
-  cy.get('div.tab-menu a:contains("Workflow selection")').click();
+  cy.get('.tab-menu a:contains("Workflow selection")').click();
   cy.get('h2.accordion-header button.accordion-button:contains("Alignment workflows")').click();
   cy.get('table#alignmentTable > tfoot > tr').within(() => {
     cy.fixture('triggerWorkflows.json').then((alignment) => {
@@ -447,12 +449,14 @@ const addConfig = () => {
 };
 
 const deleteConfig = () => {
+  'use strict';
+
   cy.visit('/workflowSelection/index?project=ExampleProject');
 
   cy.intercept('/workflowSelection/deleteConfiguration?project=ExampleProject').as('deleteConfig');
 
   cy.fixture('triggerWorkflows.json').then((alignment) => {
-    cy.get('div.tab-menu a:contains("Workflow selection")').click();
+    cy.get('.tab-menu a:contains("Workflow selection")').click();
     cy.get('h2.accordion-header button.accordion-button:contains("Alignment workflows")').click();
     cy.get(`table#alignmentTable > tbody > tr > td:first-child:contains("${alignment[6].workflow}")`)
       .parent().find(`td:nth-child(2):contains("${alignment[6].seqType}")`)
@@ -465,6 +469,8 @@ const deleteConfig = () => {
 };
 
 const configureDeciderActions = (action) => {
+  'use strict';
+
   // Map action names to their corresponding IDs based on DeciderCreateWorkflowAction enum
   const actionIdMap = {
     'CREATE_MISSING': '1',

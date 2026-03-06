@@ -343,3 +343,19 @@ Cypress.Commands.add('toggleButton', (buttonText, expectedSelector, assertionCal
         .should('exist').should(assertionCallback);
     });
 });
+
+/**
+ * Command to select an available option (by default the first) from a dropdown
+ * @param {string} selectName - The name attribute of the select element
+ * @param {number} optionIndex - The index of the option to select (default: 1 to skip the placeholder)
+ * @example
+ * cy.selectAvailableOptionFromDropdown('property');
+ * cy.selectAvailableOptionFromDropdown('seqType.id', 2);
+ */
+// eslint-disable-next-line strict
+Cypress.Commands.add('selectAvailableOptionFromDropdown', (selectName, optionIndex = 1) => {
+  cy.get(`select[name="${selectName}"]`).then(($select) => {
+    const option = $select.find('option').eq(optionIndex).val();
+    cy.get(`select[name="${selectName}"]`).select(option, { force: true });
+  });
+});

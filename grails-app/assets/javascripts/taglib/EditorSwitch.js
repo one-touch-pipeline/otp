@@ -42,39 +42,35 @@ $(() => {
   $('td.add-table-buttons button.add').on('click', function (event) {
     event.preventDefault();
     const p = $(this).parent();
-    $('.save', p).show();
-    $('.cancel', p).show();
-    $('.add', p).hide();
-    $('.add-table-fields', p.parent().parent()).show();
+    $('.save, .cancel', p).show().removeClass('d-none');
+    $('.add', p).hide().addClass('d-none');
+    $('.add-table-fields', p.parent().parent()).show().removeClass('d-none');
   });
 
   $('td.add-table-buttons button.cancel').on('click', function (event) {
     event.preventDefault();
     const p = $(this).parent();
-    $('.save', p).hide();
-    $('.cancel', p).hide();
-    $('.add', p).show();
-    $('.add-table-fields', p.parent().parent()).hide();
+    $('.save, .cancel', p).hide().addClass('d-none');
+    $('.add', p).show().removeClass('d-none');
+    $('.add-table-fields', p.parent().parent()).hide().addClass('d-none');
   });
 
   $('tr.edit-table-buttons button.button-edit').on('click', function (event) {
     event.preventDefault();
     const p = $(this).parent();
-    $('.save', p).show();
-    $('.cancel', p).show();
-    $('.button-edit', p).hide();
-    $('.edit-fields', p.parent()).show();
-    $('.show-fields', p.parent()).hide();
+    $('.save, .cancel', p).show().removeClass('d-none');
+    $('.button-edit', p).hide().addClass('d-none');
+    $('.edit-fields', p.parent()).show().removeClass('d-none');
+    $('.show-fields', p.parent()).hide().addClass('d-none');
   });
 
   $('tr.edit-table-buttons button.cancel').on('click', function (event) {
     event.preventDefault();
     const p = $(this).parent();
-    $('.save', p).hide();
-    $('.cancel', p).hide();
-    $('.button-edit', p).show();
-    $('.edit-fields', p.parent()).hide();
-    $('.show-fields', p.parent()).show();
+    $('.save, .cancel', p).hide().addClass('d-none');
+    $('.button-edit', p).show().removeClass('d-none');
+    $('.edit-fields', p.parent()).hide().addClass('d-none');
+    $('.show-fields', p.parent()).show().removeClass('d-none');
   });
 
   $.otp.editorswitch = {};

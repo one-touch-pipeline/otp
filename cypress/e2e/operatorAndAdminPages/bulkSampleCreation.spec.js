@@ -22,6 +22,7 @@
 
 describe('Check bulk sample creation page', () => {
   'use strict';
+
   const fixturesFolder = Cypress.config('fixturesFolder');
 
   context('when user is an operator', () => {

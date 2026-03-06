@@ -20,6 +20,8 @@
   - SOFTWARE.
   --}%
 
+%{-- g:if and this tab-menu can be removed as soon as the alignmentConfigurationOverview and analysisConfigurationOverview pages have been removed --}%
+<g:if test="${controllerName == "alignmentConfigurationOverview" || controllerName == "analysisConfigurationOverview"}">
 <div class="tab-menu">
     <g:link controller="workflowSelection" action="index" class="${controllerName == "workflowSelection" ? 'active' : ''}"><g:message code="config.tabMenu.workflowSelection"/></g:link>
     <g:link controller="alignmentConfigurationOverview" action="index" class="${controllerName == "alignmentConfigurationOverview" ? 'active' : ''}"><g:message code="config.tabMenu.alignment"/></g:link>
@@ -28,38 +30,40 @@
     <g:link controller="qcThreshold" action="projectConfiguration" class="${controllerName == "qcThreshold" ? 'active' : ''}"><g:message code="config.tabMenu.qcThresholds"/></g:link>
     <g:link controller="cellRangerConfiguration" action="index" class="${controllerName == "cellRangerConfiguration" ? 'active' : ''}"><g:message code="config.tabMenu.cellRanger"/></g:link>
 </div>
+</g:if>
 
-%{-- Can be used as soon as all the pages within the tab structure have been converted to bootstrap pages --}%
-%{--
-<ul class="nav nav-tabs">
+
+<g:if test="${controllerName != "alignmentConfigurationOverview" && controllerName != "analysisConfigurationOverview"}">
+<ul class="nav nav-tabs tab-menu">
     <li class="nav-item">
-        <g:link controller="workflowSelection" action="index" class="nav-link ${controllerName == "workflowSelection" ? 'active fw-bold' : ''}">
+        <g:link controller="workflowSelection" action="index" class="nav-link ${controllerName == "workflowSelection" ? 'active fw-bold' : 'text-black'}">
             <g:message code="config.tabMenu.workflowSelection"/>
         </g:link>
     </li>
     <li class="nav-item">
-        <g:link controller="alignmentConfigurationOverview" action="index" class="nav-link ${controllerName == "alignmentConfigurationOverview" ? 'active fw-bold' : ''}">
+        <g:link controller="alignmentConfigurationOverview" action="index" class="nav-link ${controllerName == "alignmentConfigurationOverview" ? 'active fw-bold' : 'text-black'}">
             <g:message code="config.tabMenu.alignment"/>
         </g:link>
     </li>
     <li class="nav-item">
-        <g:link controller="analysisConfigurationOverview" action="index" class="nav-link ${controllerName == "analysisConfigurationOverview" ? 'active fw-bold' : ''}">
+        <g:link controller="analysisConfigurationOverview" action="index" class="nav-link ${controllerName == "analysisConfigurationOverview" ? 'active fw-bold' : 'text-black'}">
             <g:message code="config.tabMenu.analysis"/>
         </g:link>
     </li>
     <li class="nav-item">
-        <g:link controller="sampleCategory" action="index" class="nav-link ${controllerName == "sampleCategory" ? 'active fw-bold' : ''}">
+        <g:link controller="sampleCategory" action="index" class="nav-link ${controllerName == "sampleCategory" ? 'active fw-bold' : 'text-black'}">
             <g:message code="config.tabMenu.sampleCategory"/>
         </g:link>
     </li>
     <li class="nav-item">
-        <g:link controller="qcThreshold" action="projectConfiguration" class="nav-link ${controllerName == "qcThreshold" ? 'active fw-bold' : ''}">
+        <g:link controller="qcThreshold" action="projectConfiguration" class="nav-link ${controllerName == "qcThreshold" ? 'active fw-bold' : 'text-black'}">
             <g:message code="config.tabMenu.qcThresholds"/>
         </g:link>
     </li>
     <li class="nav-item">
-        <g:link controller="cellRangerConfiguration" action="index" class="nav-link ${controllerName == "cellRangerConfiguration" ? 'active fw-bold' : ''}">
+        <g:link controller="cellRangerConfiguration" action="index" class="nav-link ${controllerName == "cellRangerConfiguration" ? 'active fw-bold' : 'text-black'}">
             <g:message code="config.tabMenu.cellRanger"/>
         </g:link>
     </li>
-</ul>--}%
+</ul>
+</g:if>
