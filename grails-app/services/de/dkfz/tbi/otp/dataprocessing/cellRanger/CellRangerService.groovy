@@ -46,6 +46,8 @@ import java.util.regex.Matcher
 @Transactional
 class CellRangerService {
 
+    private static final int CELLRANGER_VERSION_WITH_CREATE_BAM = 8
+
     @TupleConstructor
     enum MetricsSummaryCsvColumn {
         ESTIMATED_NUMBER_OF_CELLS("estimatedNumberOfCells", "Estimated Number of Cells"),
@@ -128,6 +130,7 @@ class CellRangerService {
         }
     }
 
+    @Deprecated
     Map<String, String> createCellRangerParameters(SingleCellBamFile singleCellBamFile) {
         assert singleCellBamFile
 
@@ -154,7 +157,43 @@ class CellRangerService {
                 (CellRangerParameters.LOCAL_MEM.parameterName)    : localMem,
         ]
         Matcher matcher = singleCellBamFile.mergingWorkPackage.config.programVersion =~ /cellranger\/(?<major>\d+)\.\d+\.\d+/
-        if (matcher.find() && (matcher.group("major") as int) >= 8) {
+        if (matcher.find() && (matcher.group("major") as int) >= CELLRANGER_VERSION_WITH_CREATE_BAM) {
+            parameters[CellRangerParameters.CREATE_BAM.parameterName] = "true"
+        }
+        if (workPackage.expectedCells) {
+            parameters[CellRangerParameters.EXPECT_CELLS.parameterName] = workPackage.expectedCells.toString()
+        }
+        if (workPackage.enforcedCells) {
+            parameters[CellRangerParameters.FORCE_CELLS.parameterName] = workPackage.enforcedCells.toString()
+        }
+        return parameters
+    }
+
+    Map<String, String> createCellRangerParameters(SingleCellBamFile singleCellBamFile, String programVersion,
+                                                    String localCores, String localMem) {
+        assert singleCellBamFile
+
+        CellRangerMergingWorkPackage workPackage = singleCellBamFile.workPackage as CellRangerMergingWorkPackage
+
+        ReferenceGenomeIndex referenceGenomeIndex = workPackage.referenceGenomeIndex
+
+        File indexFile = referenceGenomeIndexService.getFile(referenceGenomeIndex)
+
+        Path sampleDirectory = cellRangerWorkFileService.getSampleDirectory(singleCellBamFile)
+        String fastqDirectories = singleCellBamFile.containedSeqTracks*.sampleIdentifier.unique().collect { String sampleIdentifier ->
+            sampleDirectory.resolve(sampleIdentifierForDirectoryStructure(sampleIdentifier))
+        }.join(",")
+
+        Map<String, String> parameters = [
+                (CellRangerParameters.ID.parameterName)           : singleCellBamFile.id.toString(),
+                (CellRangerParameters.FASTQ.parameterName)        : fastqDirectories,
+                (CellRangerParameters.TRANSCRIPTOME.parameterName): indexFile.absolutePath,
+                (CellRangerParameters.SAMPLE.parameterName)       : singleCellBamFile.singleCellSampleName,
+                (CellRangerParameters.LOCAL_CORES.parameterName)  : localCores,
+                (CellRangerParameters.LOCAL_MEM.parameterName)    : localMem,
+        ]
+        Matcher matcher = programVersion =~ /CellRanger\/(?<major>\d+)\.\d+\.\d+/
+        if (matcher.find() && (matcher.group("major") as int) >= CELLRANGER_VERSION_WITH_CREATE_BAM) {
             parameters[CellRangerParameters.CREATE_BAM.parameterName] = "true"
         }
         if (workPackage.expectedCells) {
