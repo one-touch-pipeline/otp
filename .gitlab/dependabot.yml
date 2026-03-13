@@ -25,9 +25,7 @@ version: 2
 updates:
   - package-ecosystem: gradle
     directory: /
-    schedule:
-      interval: daily
-    open-pull-requests-limit: 100
+    open-pull-requests-limit: 10
     commit-message:
       prefix: "Update: "
     ignore:
@@ -61,12 +59,22 @@ updates:
       # These dependencies below are under investigation, deactivate them first
       - dependency-name: "org.cyclonedx.bom"
         update-types: [ "version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch" ]
+      # Grails 6 requires gradle 7.6.x
+      - dependency-name: "gradle-wrapper"
+        update-types: [ "version-update:semver-major", "version-update:semver-minor" ]
+      # Grails 6 requires Spring Boot 2.7
+      - dependency-name: "org.springframework.boot:spring-boot-starter-actuator"
+        update-types: [ "version-update:semver-major", "version-update:semver-minor" ]
+      # Can be upgraded to version 3 if jackson also gets upgraded to version 3
+      - dependency-name: "com.networknt:json-schema-validator"
+        update-types: [ "version-update:semver-major" ]
+      # Not clear yet if jacocolog version 4 is compatible with gradle 7
+      - dependency-name: "org.barfuin.gradle.jacocolog"
+        update-types: [ "version-update:semver-major" ]
     rebase-strategy: none
   - package-ecosystem: npm
     directory: /
-    schedule:
-      interval: daily
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     commit-message:
       prefix: "Update: "
     ignore:
@@ -75,4 +83,7 @@ updates:
       # These dependencies below are under investigation, deactivate them first
       - dependency-name: "@cyclonedx/cyclonedx-npm"
         update-types: [ "version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch" ]
+      # JQuery version 4 is the first major release in 10 years. Refactoring of js code is required
+      - dependency-name: "org.webjars:jquery"
+        update-types: [ "version-update:semver-major" ]
     rebase-strategy: none
