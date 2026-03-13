@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.SampleTypeService
 import de.dkfz.tbi.otp.parser.*
 import de.dkfz.tbi.otp.parser.covid19.Covid19SampleIdentifierParser
 import de.dkfz.tbi.otp.parser.hipo.*
-import de.dkfz.tbi.otp.parser.inform.InformSampleIdentifierParser
+import de.dkfz.tbi.otp.parser.inform.InformLikeSampleIdentifierParser
 import de.dkfz.tbi.otp.parser.itccp4.ITCC_4P_Parser
 import de.dkfz.tbi.otp.parser.pedion.PedionParser
 
@@ -48,7 +48,7 @@ String input = """
 // uncomment the parser to use
 SampleIdentifierParser parser
 // parser = ctx.deepSampleIdentifierParser
-// parser = ctx.informSampleIdentifierParser
+// parser = ctx.informLikeSampleIdentifierParser
 // parser = ctx.hipoSampleIdentifierParser
 // parser = ctx.hipo2SampleIdentifierParser
 // parser = ctx.hipo2SamplePreparationLabSampleIdentifierParser

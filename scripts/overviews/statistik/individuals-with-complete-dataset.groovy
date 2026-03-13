@@ -34,7 +34,7 @@
 
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.project.Project;
+import de.dkfz.tbi.otp.project.Project
 
 class Global {
     // User Configuration

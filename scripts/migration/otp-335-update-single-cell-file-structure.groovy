@@ -24,40 +24,41 @@ import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataAllWellFileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
-import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 
 import java.nio.file.Path
 
-List<DataFile> datafiles = DataFile.createCriteria().list {
+List<RawSequenceFile> rawSequenceFiles = RawSequenceFile.createCriteria().list {
     seqTrack {
         isNotNull('singleCellWellLabel')
+        ne('singleCellWellLabel', '')
     }
-}
+} as List<RawSequenceFile>
 
 SingleCellService singleCellService = ctx.singleCellService
 RawSequenceDataWorkFileService rawSequenceDataWorkFileService = ctx.rawSequenceDataWorkFileService
 RawSequenceDataViewFileService rawSequenceDataViewFileService = ctx.rawSequenceDataViewFileService
 RawSequenceDataAllWellFileService rawSequenceDataAllWellFileService = ctx.rawSequenceDataAllWellFileService
 
-println "Datafiles with well label: ${datafiles.size()}"
+println "rawSequenceFiles with well label: ${rawSequenceFiles.size()}"
 
-println datafiles.collect { DataFile dataFile ->
-    Path newPath = rawSequenceDataViewFileService.getFilePath(dataFile)
-    String oldPath = newPath.toString().replace(dataFile.seqTrack.singleCellWellLabel, '').replace('//', '/')
-    Path wellPath = rawSequenceDataAllWellFileService.getFilePath(dataFile)
-    Path source = rawSequenceDataWorkFileService.getFilePath(dataFile)
-    Path mappingFile = singleCellService.singleCellMappingFile(dataFile)
+println rawSequenceFiles.collect { RawSequenceFile rawSequenceFile ->
+    Path newPath = rawSequenceDataViewFileService.getFilePath(rawSequenceFile)
+    String oldPath = newPath.toString().replace(rawSequenceFile.seqTrack.singleCellWellLabel, '').replace('//', '/')
+    Path wellPath = rawSequenceDataAllWellFileService.getFilePath(rawSequenceFile)
+    Path source = rawSequenceDataWorkFileService.getFilePath(rawSequenceFile)
+    Path mappingFile = singleCellService.singleCellMappingFile(rawSequenceFile)
 
     [
             '-------------------------------',
-            "#${dataFile} of ${dataFile.seqTrack.toString().replace('<br>', ' ')}",
+            "#${rawSequenceFile} of ${rawSequenceFile.seqTrack.toString().replace('<br>', ' ')}",
             "mkdir -m 2750 -p ${newPath.parent}",
             "mkdir -m 2750 -p ${wellPath.parent}",
             "rm ${oldPath} ",
             "ln -s ${source} ${newPath}",
             "ln -s ${source} ${wellPath}",
             "touch ${mappingFile}",
-            "echo ${dataFile.fileName} >> ${mappingFile}",
+            "echo ${rawSequenceFile.fileName} >> ${mappingFile}",
     ].join('\n')
 }.join('\n\n\n')
 
