@@ -90,11 +90,13 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
                 MergingWorkPackage,
                 ReferenceGenomeProjectSeqType,
                 ReferenceGenomeSelector,
+                ReferenceGenomeIndex,
                 RoddyBamFile,
                 WorkflowArtefact,
                 WorkflowVersionSelector,
                 CellRangerMergingWorkPackage,
                 SingleCellBamFile,
+                ToolName,
         ]
     }
 
@@ -474,6 +476,52 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
         TestCase.assertContainSame(result, expected)
     }
 
+    void "fetchReferenceGenomeIndexes, when called for given referenceGenomes, then return ReferenceGenomeIndexes"() {
+        given:
+        setupData()
+
+        ToolName toolName = DomainFactory.createToolName(name: 'CELL_RANGER', type: ToolName.Type.SINGLE_CELL)
+        ToolName anotherToolName = DomainFactory.createToolName(name: 'RNA', type: ToolName.Type.RNA)
+
+        ReferenceGenome referenceGenome1 = createReferenceGenome()
+        ReferenceGenome referenceGenome2 = createReferenceGenome()
+        ReferenceGenome referenceGenome3 = createReferenceGenome()
+
+        Collection<ReferenceGenome> referenceGenomes = [
+                referenceGenome1,
+                referenceGenome2,
+                referenceGenome3,
+        ]
+
+        ReferenceGenomeIndex referenceGenomeIndex11 = createReferenceGenomeIndex([
+                referenceGenome: referenceGenome1,
+                toolName: toolName,
+        ])
+        ReferenceGenomeIndex referenceGenomeIndex12 = createReferenceGenomeIndex([
+                referenceGenome: referenceGenome1,
+                toolName: toolName,
+        ])
+        createReferenceGenomeIndex([
+                referenceGenome: referenceGenome1,
+                toolName: anotherToolName,
+        ])
+
+        ReferenceGenomeIndex referenceGenomeIndex2 = createReferenceGenomeIndex([
+                referenceGenome: referenceGenome2,
+                toolName: toolName,
+        ])
+        Map<ReferenceGenome, Set<ReferenceGenomeIndex>> expected = [
+                (referenceGenome1): [referenceGenomeIndex11, referenceGenomeIndex12] as Set,
+                (referenceGenome2): [referenceGenomeIndex2] as Set,
+        ]
+
+        when:
+        Map<ReferenceGenome, Set<ReferenceGenomeIndex>> result = alignmentArtefactService.fetchReferenceGenomeIndexes(referenceGenomes, toolName)
+
+        then:
+        TestCase.assertContainSame(result, expected)
+    }
+
     void "fetchMergingCriteria, when called for seqTracks, then return WorkflowVersionSelector"() {
         given:
         setupData()
@@ -633,12 +681,12 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
         AlignmentWorkPackageGroup group3 = new AlignmentWorkPackageGroup(
                 bamFile1.mergingWorkPackage.sample, bamFile1.mergingWorkPackage.seqType, bamFile1.mergingWorkPackage.antibodyTarget)
 
-        Map<AlignmentWorkPackageGroup, MergingWorkPackage> expected = [
-                (group3): bamFile1.mergingWorkPackage,
+        Map<AlignmentWorkPackageGroup, Set<MergingWorkPackage>> expected = [
+                (group3): [bamFile1.mergingWorkPackage],
         ]
 
         when:
-        Map<AlignmentWorkPackageGroup, MergingWorkPackage> result = alignmentArtefactService.fetchMergingWorkPackage(seqTracks)
+        Map<AlignmentWorkPackageGroup, Set<MergingWorkPackage>> result = alignmentArtefactService.fetchMergingWorkPackages(seqTracks)
 
         then:
         TestCase.assertContainSame(result, expected)

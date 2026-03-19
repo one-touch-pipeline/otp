@@ -176,8 +176,8 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
 
         and: 'objects for fetchMergingWorkPackage'
         AlignmentWorkPackageGroup alignmentWorkPackageGroup = new AlignmentWorkPackageGroup(roddyBamFile.sample, roddyBamFile.seqType, roddyBamFile.workPackage.antibodyTarget)
-        Map<AlignmentWorkPackageGroup, MergingWorkPackage> mergingWorkPackageMap = [
-                (alignmentWorkPackageGroup): roddyBamFile.workPackage,
+        Map<AlignmentWorkPackageGroup, Set<MergingWorkPackage>> mergingWorkPackageMap = [
+                (alignmentWorkPackageGroup): [roddyBamFile.workPackage] as Set,
         ]
 
         and: 'objects for fetchRawSequenceFiles'
@@ -199,7 +199,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
             1 * fetchMergingCriteria([seqTrack]) >> mergingCriteriaMap
             1 * fetchSpecificSeqPlatformGroup([seqTrack]) >> specificSeqPlatformGroupMap
             1 * fetchDefaultSeqPlatformGroup() >> defaultSeqPlatformGroupMap
-            1 * fetchMergingWorkPackage([seqTrack]) >> mergingWorkPackageMap
+            1 * fetchMergingWorkPackages([seqTrack]) >> mergingWorkPackageMap
             useFastqcCount * fetchRawSequenceFiles([seqTrack]) >> rawSequenceFileMap
         }
         decider.pipelineService = Mock(PipelineService) {
@@ -258,7 +258,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         }
 
         and: 'AlignmentArtefactDataList'
-        List<AlignmentArtefactData<SeqTrack>> seqTrackData = [createAlignmentArtefactDataForSeqTrack(seqTrack)]
+        List<AlignmentArtefactData<SeqTrack>> seqTrackData = [createAlignmentArtefactData(seqTrack)]
 
         List<AlignmentArtefactData<FastqcProcessedFile>> fastqcProcessedFileData = fastqcProcessedFiles.collect { FastqcProcessedFile fastqcProcessedFile ->
             createAlignmentArtefactDataForFastqcProcessedFile(fastqcProcessedFile)
@@ -279,7 +279,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         Map<SeqPlatform, SeqPlatformGroup> defaultSeqPlatformGroupMap = [
                 (seqPlatform): seqPlatformGroup,
         ]
-        Map<AlignmentWorkPackageGroup, MergingWorkPackage> mergingWorkPackageMap = [:]
+        Map<AlignmentWorkPackageGroup, Set<MergingWorkPackage>> mergingWorkPackageMap = [:]
         Map<SeqTrack, List<RawSequenceFile>> rawSequenceFileMap = [
                 (seqTrack): seqTrack.sequenceFiles
         ]
@@ -331,8 +331,8 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
 
         and: 'AlignmentArtefactDataList'
         List<AlignmentArtefactData<SeqTrack>> seqTrackData = [
-                createAlignmentArtefactDataForSeqTrack(seqTrack1),
-                createAlignmentArtefactDataForSeqTrack(seqTrack2),
+                createAlignmentArtefactData(seqTrack1),
+                createAlignmentArtefactData(seqTrack2),
         ]
 
         List<AlignmentArtefactData<FastqcProcessedFile>> fastqcProcessedFileData = [
@@ -361,7 +361,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
                 (seqPlatform): seqPlatformGroup,
         ]
 
-        Map<AlignmentWorkPackageGroup, MergingWorkPackage> mergingWorkPackageMap = [:]
+        Map<AlignmentWorkPackageGroup, Set<MergingWorkPackage>> mergingWorkPackageMap = [:]
 
         Map<SeqTrack, List<RawSequenceFile>> rawSequenceFileMap = [
                 (seqTrack1): seqTrack1.sequenceFiles,
@@ -414,14 +414,14 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         }
 
         and: 'AlignmentArtefactDataList 1'
-        List<AlignmentArtefactData<SeqTrack>> seqTrackData1 = [createAlignmentArtefactDataForSeqTrack(seqTrack1)]
+        List<AlignmentArtefactData<SeqTrack>> seqTrackData1 = [createAlignmentArtefactData(seqTrack1)]
         List<AlignmentArtefactData<FastqcProcessedFile>> fastqcProcessedFileData1 = fastqcProcessedFiles1.collect { FastqcProcessedFile fastqcProcessedFile ->
             createAlignmentArtefactDataForFastqcProcessedFile(fastqcProcessedFile)
         }
         AlignmentArtefactDataList dataList1 = new AlignmentArtefactDataList(seqTrackData1, fastqcProcessedFileData1, [])
 
         and: 'AlignmentArtefactDataList 2'
-        List<AlignmentArtefactData<SeqTrack>> seqTrackData2 = [createAlignmentArtefactDataForSeqTrack(seqTrack2)]
+        List<AlignmentArtefactData<SeqTrack>> seqTrackData2 = [createAlignmentArtefactData(seqTrack2)]
         List<AlignmentArtefactData<FastqcProcessedFile>> fastqcProcessedFileData2 = fastqcProcessedFiles2.collect { FastqcProcessedFile fastqcProcessedFile ->
             createAlignmentArtefactDataForFastqcProcessedFile(fastqcProcessedFile)
         }
@@ -450,7 +450,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
                 (seqPlatform1): seqPlatformGroup1,
                 (seqPlatform2): seqPlatformGroup2,
         ]
-        Map<AlignmentWorkPackageGroup, MergingWorkPackage> mergingWorkPackageMap = [:]
+        Map<AlignmentWorkPackageGroup, Set<MergingWorkPackage>> mergingWorkPackageMap = [:]
         Map<SeqTrack, List<RawSequenceFile>> rawSequenceFileMap = [
                 (seqTrack1): seqTrack1.sequenceFiles,
                 (seqTrack2): seqTrack2.sequenceFiles,
@@ -492,7 +492,6 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         assertAlignmentArtefactDataList(alignmentArtefactDataListMap[alignmentDeciderGroup2], dataList2)
     }
 
-    @SuppressWarnings("NestedBlockDepth")
     void "groupData all data combination"() {
         given:
         List<SpeciesWithStrain> speciesWithStrains = (1..2).collect {
@@ -599,7 +598,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
 
         and: 'input objects'
         List<AlignmentArtefactData<SeqTrack>> seqTrackData = seqTracks.collect { SeqTrack seqTrack ->
-            createAlignmentArtefactDataForSeqTrack(seqTrack)
+            createAlignmentArtefactData(seqTrack)
         }
         List<AlignmentArtefactData<FastqcProcessedFile>> fastqcProcessedFileData = fastqcProcessedFiles.collect { FastqcProcessedFile fastqcProcessedFile ->
             createAlignmentArtefactDataForFastqcProcessedFile(fastqcProcessedFile)
@@ -628,7 +627,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
             }
         }
 
-        Map<AlignmentWorkPackageGroup, MergingWorkPackage> mergingWorkPackageMap = [:]
+        Map<AlignmentWorkPackageGroup, Set<MergingWorkPackage>> mergingWorkPackageMap = [:]
         Map<SeqTrack, List<RawSequenceFile>> rawSequenceFileMap = seqTracks.collectEntries {
             [(it): it.sequenceFiles]
         }
@@ -680,7 +679,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         SeqPlatformGroup seqPlatformGroupDefault = createSeqPlatformGroup([seqPlatforms: [seqTrack.seqPlatform]])
         SeqPlatformGroup seqPlatformGroupSpecific = createSeqPlatformGroup([seqPlatforms: [seqTrack.seqPlatform], mergingCriteria: mergingCriteria])
 
-        AlignmentArtefactData<SeqTrack> data = createAlignmentArtefactDataForSeqTrack(seqTrack)
+        AlignmentArtefactData<SeqTrack> data = createAlignmentArtefactData(seqTrack)
 
         and: 'additional data'
         ProjectSeqTypeGroup projectSeqTypeGroup = new ProjectSeqTypeGroup(seqTrack.project, seqTrack.seqType)
@@ -699,7 +698,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         Map<SeqPlatform, SeqPlatformGroup> defaultSeqPlatformGroupMap = [
                 (seqTrack.seqPlatform): seqPlatformGroupDefault,
         ]
-        Map<AlignmentWorkPackageGroup, MergingWorkPackage> mergingWorkPackageMap = [:]
+        Map<AlignmentWorkPackageGroup, Set<MergingWorkPackage>> mergingWorkPackageMap = [:]
         Map<SeqTrack, List<RawSequenceFile>> rawSequenceFileMap = [:]
 
         AlignmentAdditionalData additionalData = new AlignmentAdditionalData(
@@ -884,72 +883,201 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         ])
     }
 
-    protected AlignmentDeciderGroup createAlignmentDeciderGroup(SeqTrack seqTrack, SeqPlatformGroup seqPlatformGroup) {
-        return new AlignmentDeciderGroup(
-                seqTrack.individual,
-                seqTrack.seqType,
-                seqTrack.sampleType,
-                seqTrack.sample,
-                seqTrack.antibodyTarget,
-                seqTrack.libraryPreparationKit,
-                seqPlatformGroup)
+    void "findOrCreateMergingWorkPackage, when existing workPackage has non-matching properties, should throw DeciderMergingWorkPackageValidationException"() {
+        given:
+        LibraryPreparationKit existingKit = createLibraryPreparationKit()
+        LibraryPreparationKit differentKit = createLibraryPreparationKit()
+
+        MergingWorkPackage existingWorkPackage = createMergingWorkPackage([
+                libraryPreparationKit: existingKit
+        ])
+
+        AlignmentWorkPackageGroup alignmentGroup = new AlignmentWorkPackageGroup(
+                existingWorkPackage.sample, existingWorkPackage.seqType, existingWorkPackage.antibodyTarget)
+
+        Set<MergingWorkPackage> workPackageSet = [existingWorkPackage] as Set
+        AlignmentAdditionalData additionalData = new AlignmentAdditionalData(
+                [:], [:], [:], [:], [(alignmentGroup): workPackageSet], [:], findOrCreatePipeline())
+
+        SeqTrack seqTrack = createSeqTrack([
+                sample               : existingWorkPackage.sample,
+                seqType              : existingWorkPackage.seqType,
+                antibodyTarget       : existingWorkPackage.antibodyTarget,
+                libraryPreparationKit: differentKit,  // Different library prep kit
+        ])
+        Set<SeqTrack> seqTracks = [seqTrack] as Set
+
+        AlignmentDeciderGroup deciderGroup = new AlignmentDeciderGroup(
+                existingWorkPackage.sample.individual, existingWorkPackage.seqType, existingWorkPackage.sample.sampleType,
+                existingWorkPackage.sample, existingWorkPackage.antibodyTarget,
+                differentKit, existingWorkPackage.seqPlatformGroup)
+
+        when:
+        decider.findOrCreateMergingWorkPackage(
+                additionalData, alignmentGroup, seqTracks, deciderGroup, existingWorkPackage.referenceGenome)
+
+        then:
+        DeciderMergingWorkPackageValidationException exception = thrown(DeciderMergingWorkPackageValidationException)
+        exception.group == deciderGroup
+        exception.sendsUnalignableSeqTrackEmail
     }
 
-    protected <T extends Artefact> AlignmentArtefactData<T> createAlignmentArtefactData(T t = null) {
-        return new AlignmentArtefactData<>(createWorkflowArtefact(), t, null, null, null, null, null, null, null, null, null, null)
+    void "findOrCreateMergingWorkPackage, when existing workPackage has different referenceGenome, should throw DeciderReferenceGenomeValidationException"() {
+        given:
+        ReferenceGenome existingReferenceGenome = createReferenceGenome()
+        ReferenceGenome differentReferenceGenome = createReferenceGenome()
+
+        MergingWorkPackage existingWorkPackage = createMergingWorkPackage([
+                referenceGenome: existingReferenceGenome
+        ])
+
+        AlignmentWorkPackageGroup alignmentGroup = new AlignmentWorkPackageGroup(
+                existingWorkPackage.sample, existingWorkPackage.seqType, existingWorkPackage.antibodyTarget)
+
+        Set<MergingWorkPackage> workPackageSet = [existingWorkPackage] as Set
+        AlignmentAdditionalData additionalData = new AlignmentAdditionalData(
+                [:], [:], [:], [:], [(alignmentGroup): workPackageSet], [:], findOrCreatePipeline())
+
+        SeqTrack seqTrack = createSeqTrack([
+                sample               : existingWorkPackage.sample,
+                seqType              : existingWorkPackage.seqType,
+                antibodyTarget       : existingWorkPackage.antibodyTarget,
+                libraryPreparationKit: existingWorkPackage.libraryPreparationKit,
+        ])
+        Set<SeqTrack> seqTracks = [seqTrack] as Set
+
+        AlignmentDeciderGroup deciderGroup = new AlignmentDeciderGroup(
+                existingWorkPackage.sample.individual, existingWorkPackage.seqType, existingWorkPackage.sample.sampleType,
+                existingWorkPackage.sample, existingWorkPackage.antibodyTarget,
+                existingWorkPackage.libraryPreparationKit, existingWorkPackage.seqPlatformGroup)
+
+        when:
+        decider.findOrCreateMergingWorkPackage(
+                additionalData, alignmentGroup, seqTracks, deciderGroup, differentReferenceGenome)
+
+        then:
+        DeciderReferenceGenomeValidationException exception = thrown(DeciderReferenceGenomeValidationException)
+        exception.existingReferenceGenome == existingReferenceGenome
+        exception.configuredReferenceGenome == differentReferenceGenome
+        exception.group == deciderGroup
+        exception.message.contains("existing MergingWorkPackage uses ReferenceGenome '${existingReferenceGenome}'")
+        exception.message.contains("but the configured one is '${differentReferenceGenome}'")
+        exception.message.contains("for group ${deciderGroup}")
     }
 
-    protected AlignmentArtefactData<SeqTrack> createAlignmentArtefactDataForSeqTrack(SeqTrack seqTrack) {
-        return new AlignmentArtefactData<SeqTrack>(
-                seqTrack.workflowArtefact,
-                seqTrack,
-                seqTrack.workflowArtefact?.producedBy?.workflowVersion?.workflowVersion,
-                seqTrack.project,
-                seqTrack.seqType,
-                seqTrack.individual,
-                seqTrack.sampleType,
-                seqTrack.sample,
-                seqTrack.antibodyTarget,
-                seqTrack.libraryPreparationKit,
-                seqTrack.seqPlatform,
-                null
-        )
+    void "findOrCreateMergingWorkPackage, when existing workPackage has seqPlatformGroup difference but group has no seqPlatformGroup, should ignore seqPlatformGroup in validation"() {
+        given:
+        SeqPlatformGroup existingSeqPlatformGroup = createSeqPlatformGroup()
+
+        MergingWorkPackage existingWorkPackage = createMergingWorkPackage([
+                seqPlatformGroup: existingSeqPlatformGroup
+        ])
+
+        AlignmentWorkPackageGroup alignmentGroup = new AlignmentWorkPackageGroup(
+                existingWorkPackage.sample, existingWorkPackage.seqType, existingWorkPackage.antibodyTarget)
+
+        Set<MergingWorkPackage> workPackageSet = [existingWorkPackage] as Set
+        AlignmentAdditionalData additionalData = new AlignmentAdditionalData(
+                [:], [:], [:], [:], [(alignmentGroup): workPackageSet], [:], findOrCreatePipeline())
+
+        SeqTrack seqTrack = createSeqTrack([
+                sample               : existingWorkPackage.sample,
+                seqType              : existingWorkPackage.seqType,
+                antibodyTarget       : existingWorkPackage.antibodyTarget,
+                libraryPreparationKit: existingWorkPackage.libraryPreparationKit,
+        ])
+        Set<SeqTrack> seqTracks = [seqTrack] as Set
+
+        AlignmentDeciderGroup deciderGroup = new AlignmentDeciderGroup(
+                existingWorkPackage.sample.individual, existingWorkPackage.seqType, existingWorkPackage.sample.sampleType,
+                existingWorkPackage.sample, existingWorkPackage.antibodyTarget,
+                existingWorkPackage.libraryPreparationKit, null)  // No seqPlatformGroup
+
+        when:
+        MergingWorkPackage result = decider.findOrCreateMergingWorkPackage(
+                additionalData, alignmentGroup, seqTracks, deciderGroup, existingWorkPackage.referenceGenome)
+
+        then:
+        result == existingWorkPackage
     }
 
-    protected AlignmentArtefactData<FastqcProcessedFile> createAlignmentArtefactDataForFastqcProcessedFile(FastqcProcessedFile fastqcProcessedFile) {
-        SeqTrack seqTrack = fastqcProcessedFile.sequenceFile.seqTrack
-        return new AlignmentArtefactData<FastqcProcessedFile>(
-                fastqcProcessedFile.workflowArtefact,
-                fastqcProcessedFile,
-                seqTrack.workflowArtefact?.producedBy?.workflowVersion?.workflowVersion,
-                seqTrack.project,
-                seqTrack.seqType,
-                seqTrack.individual,
-                seqTrack.sampleType,
-                seqTrack.sample,
-                seqTrack.antibodyTarget,
-                seqTrack.libraryPreparationKit,
-                seqTrack.seqPlatform,
-                null
-        )
+    void "findOrCreateMergingWorkPackage, when no existing workPackage found, should create new one"() {
+        given:
+        Sample sample = createSample()
+        SeqType seqType = createSeqType()
+        AntibodyTarget antibodyTarget = createAntibodyTarget()
+        SeqPlatformGroup seqPlatformGroup = createSeqPlatformGroup()
+        LibraryPreparationKit libraryPreparationKit = createLibraryPreparationKit()
+        ReferenceGenome referenceGenome = createReferenceGenome()
+        Pipeline pipeline = findOrCreatePipeline()
+
+        AlignmentWorkPackageGroup alignmentGroup = new AlignmentWorkPackageGroup(sample, seqType, antibodyTarget)
+
+        AlignmentAdditionalData additionalData = new AlignmentAdditionalData(
+                [:], [:], [:], [:], [:], [:], pipeline)  // Empty mergingWorkPackageMap
+
+        SeqTrack seqTrack = createSeqTrack([
+                sample               : sample,
+                seqType              : seqType,
+                antibodyTarget       : antibodyTarget,
+                libraryPreparationKit: libraryPreparationKit,
+        ])
+        Set<SeqTrack> seqTracks = [seqTrack] as Set
+
+        AlignmentDeciderGroup deciderGroup = new AlignmentDeciderGroup(
+                sample.individual, seqType, sample.sampleType, sample, antibodyTarget, libraryPreparationKit, seqPlatformGroup)
+
+        when:
+        MergingWorkPackage result = decider.findOrCreateMergingWorkPackage(
+                additionalData, alignmentGroup, seqTracks, deciderGroup, referenceGenome)
+
+        then:
+        result != null
+        result.sample == sample
+        result.seqType == seqType
+        result.antibodyTarget == antibodyTarget
+        result.seqPlatformGroup == seqPlatformGroup
+        result.libraryPreparationKit == libraryPreparationKit
+        result.referenceGenome == referenceGenome
+        result.pipeline == pipeline
     }
 
-    protected AlignmentArtefactData<RoddyBamFile> createAlignmentArtefactDataForRoddyBamFile(RoddyBamFile bamFile) {
-        MergingWorkPackage workPackage = bamFile.workPackage
-        return new AlignmentArtefactData<RoddyBamFile>(
-                bamFile.workflowArtefact,
-                bamFile,
-                bamFile.config?.programVersion ?: bamFile.workflowArtefact?.producedBy?.workflowVersion?.workflowVersion,
-                workPackage.project,
-                workPackage.seqType,
-                workPackage.individual,
-                workPackage.sampleType,
-                workPackage.sample,
-                workPackage.antibodyTarget,
-                workPackage.libraryPreparationKit,
-                null,
-                workPackage.seqPlatformGroup
-        )
+    @Unroll
+    void "findOrCreateMergingWorkPackage, when workPackageCollection is #test, should create new workPackage"() {
+        given:
+        Sample sample = createSample()
+        SeqType seqType = createSeqType()
+
+        AlignmentWorkPackageGroup alignmentGroup = new AlignmentWorkPackageGroup(sample, seqType, null)
+
+        Set<MergingWorkPackage> workPackageSet = emptyWorkPackageSet
+
+        AlignmentAdditionalData additionalData = new AlignmentAdditionalData(
+                [:], [:], [:], [:], [(alignmentGroup): workPackageSet], [:], findOrCreatePipeline())
+
+        SeqTrack seqTrack = createSeqTrack([
+                sample    : sample,
+                seqType   : seqType,
+                antibodyTarget: null,
+        ])
+        Set<SeqTrack> seqTracks = [seqTrack] as Set
+
+        AlignmentDeciderGroup deciderGroup = new AlignmentDeciderGroup(
+                sample.individual, seqType, sample.sampleType, sample, null, seqTrack.libraryPreparationKit, null)
+
+        when:
+        MergingWorkPackage result = decider.findOrCreateMergingWorkPackage(
+                additionalData, alignmentGroup, seqTracks, deciderGroup, createReferenceGenome())
+
+        then:
+        result != null
+        result.sample == sample
+        result.seqType == seqType
+
+        where:
+        test    | emptyWorkPackageSet
+        "null"  | null
+        "empty" | [] as Set
     }
 
     protected void assertAlignmentArtefactDataList(AlignmentArtefactDataList returned, AlignmentArtefactDataList expected) {
@@ -1034,7 +1162,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
 
         // AlignmentArtefactDataList
         List<AlignmentArtefactData<SeqTrack>> seqTrackData = values.noSeqTrack ? [] : seqTracks.collect {
-            createAlignmentArtefactDataForSeqTrack(it)
+            createAlignmentArtefactData(it)
         }
 
         List<AlignmentArtefactData<FastqcProcessedFile>> fastqcProcessedFileData = fastqcProcessedFiles.collect { FastqcProcessedFile fastqcProcessedFile ->
@@ -1069,7 +1197,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
                     pipeline             : findOrCreatePipeline(),
             ])
             AlignmentWorkPackageGroup group = new AlignmentWorkPackageGroup(baseMergingWorkPackage.sample, baseMergingWorkPackage.seqType, baseMergingWorkPackage.antibodyTarget)
-            additionalData.mergingWorkPackageMap[group] = baseMergingWorkPackage
+            additionalData.mergingWorkPackageMap[group] = [baseMergingWorkPackage] as Set
 
             if (values.existingBamFileOtherSeqTracks || values.existingBamFileSameSeqTracks) {
                 bamFile = createBamFile([
@@ -1098,6 +1226,18 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
                 antibodyTarget       : seqTrack.antibodyTarget,
                 run                  : seqTrack.run,
         ])
+    }
+
+    protected AlignmentDeciderGroup createAlignmentDeciderGroup(SeqTrack seqTrack, SeqPlatformGroup seqPlatformGroup) {
+        return new AlignmentDeciderGroup(
+                seqTrack.individual,
+                seqTrack.seqType,
+                seqTrack.sampleType,
+                seqTrack.sample,
+                seqTrack.antibodyTarget,
+                seqTrack.libraryPreparationKit,
+                seqPlatformGroup
+        )
     }
 
     private void createServicesForCreateWorkflowRunsAndOutputArtefacts(WorkflowVersion workflowVersion, SeqTrack seqTrack) {
@@ -1162,5 +1302,58 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
 
     protected Pipeline findPipeline() {
         return findOrCreatePipeline(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT)
+    }
+
+    protected AlignmentArtefactData<SeqTrack> createAlignmentArtefactData(SeqTrack seqTrack = createSeqTrack()) {
+        return new AlignmentArtefactData<SeqTrack>(
+                seqTrack.workflowArtefact,
+                seqTrack,
+                seqTrack.workflowArtefact?.producedBy?.workflowVersion?.workflowVersion,
+                seqTrack.project,
+                seqTrack.seqType,
+                seqTrack.individual,
+                seqTrack.sampleType,
+                seqTrack.sample,
+                seqTrack.antibodyTarget,
+                seqTrack.libraryPreparationKit,
+                seqTrack.seqPlatform,
+                null
+        )
+    }
+
+    protected AlignmentArtefactData<FastqcProcessedFile> createAlignmentArtefactDataForFastqcProcessedFile(FastqcProcessedFile fastqcProcessedFile) {
+        SeqTrack seqTrack = fastqcProcessedFile.sequenceFile.seqTrack
+        return new AlignmentArtefactData<FastqcProcessedFile>(
+                fastqcProcessedFile.workflowArtefact,
+                fastqcProcessedFile,
+                fastqcProcessedFile.workflowArtefact?.producedBy?.workflowVersion?.workflowVersion,
+                seqTrack.project,
+                seqTrack.seqType,
+                seqTrack.individual,
+                seqTrack.sampleType,
+                seqTrack.sample,
+                seqTrack.antibodyTarget,
+                seqTrack.libraryPreparationKit,
+                seqTrack.seqPlatform,
+                null
+        )
+    }
+
+    protected AlignmentArtefactData<RoddyBamFile> createAlignmentArtefactDataForRoddyBamFile(RoddyBamFile bamFile) {
+        MergingWorkPackage workPackage = bamFile.workPackage ?: this.createMergingWorkPackage()
+        return new AlignmentArtefactData<RoddyBamFile>(
+                bamFile.workflowArtefact,
+                bamFile,
+                bamFile.workflowArtefact?.producedBy?.workflowVersion?.workflowVersion ?: bamFile.config?.programVersion,
+                workPackage.project,
+                workPackage.seqType,
+                workPackage.individual,
+                workPackage.sampleType,
+                workPackage.sample,
+                workPackage.antibodyTarget,
+                workPackage.libraryPreparationKit,
+                null,
+                workPackage.seqPlatformGroup
+        )
     }
 }

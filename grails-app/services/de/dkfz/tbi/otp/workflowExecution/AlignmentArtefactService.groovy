@@ -374,6 +374,17 @@ class AlignmentArtefactService {
             and st.seqType = st2.seqType
         """
 
+    private final static String HQL_REFERENCE_GENOME_INDEXES = """
+        select distinct
+            rgi.referenceGenome,
+            rgi
+        from
+            ReferenceGenomeIndex rgi
+        where
+            rgi.toolName = (:toolName)
+            and rgi.referenceGenome in (:referenceGenomes)
+        """
+
     List<AlignmentArtefactData<SeqTrack>> fetchSeqTrackArtefacts(Collection<WorkflowArtefact> workflowArtefacts,
                                                                  Collection<SeqType> seqTypes = SeqType.list()) {
         return LogUsedTimeUtils.logUsedTime(log, "          fetchSeqTrackArtefacts") {
@@ -434,6 +445,19 @@ class AlignmentArtefactService {
         }
     }
 
+    Map<ReferenceGenome, Set<ReferenceGenomeIndex>> fetchReferenceGenomeIndexes(Collection<ReferenceGenome> referenceGenomes, ToolName toolName) {
+        return LogUsedTimeUtils.logUsedTime(log, "          fetchReferenceGenomeIndexes") {
+            return (ReferenceGenomeIndex.executeQuery(HQL_REFERENCE_GENOME_INDEXES, [
+                    referenceGenomes: referenceGenomes,
+                    toolName        : toolName,
+            ]) as List<List<?>>).groupBy {
+                it[INDEX_0] as ReferenceGenome
+            }.collectEntries {
+                [(it.key): it.value.collect { it[INDEX_1] as ReferenceGenomeIndex } as Set]
+            } as Map<ReferenceGenome, Set<ReferenceGenomeIndex>>
+        }
+    }
+
     Map<ProjectSeqTypeGroup, MergingCriteria> fetchMergingCriteria(Collection<SeqTrack> seqTracks) {
         return LogUsedTimeUtils.logUsedTime(log, "          fetchMergingCriteria") {
             return (AbstractBamFile.executeQuery(HQL_MERGING_CRITERIA, [
@@ -466,14 +490,15 @@ class AlignmentArtefactService {
         }
     }
 
-    Map<AlignmentWorkPackageGroup, MergingWorkPackage> fetchMergingWorkPackage(Collection<SeqTrack> seqTracks) {
-        return LogUsedTimeUtils.logUsedTime(log, "          fetchMergingWorkPackage") {
+    Map<AlignmentWorkPackageGroup, Set<MergingWorkPackage>> fetchMergingWorkPackages(Collection<SeqTrack> seqTracks) {
+        return LogUsedTimeUtils.logUsedTime(log, "          fetchMergingWorkPackages") {
             return (AbstractBamFile.executeQuery(HQL_FETCH_WORK_PACKAGES, [
                     seqTracks: seqTracks,
-            ]) as List<List<?>>).collectEntries {
-                AlignmentWorkPackageGroup group = new AlignmentWorkPackageGroup(it[INDEX_0] as Sample, it[INDEX_1] as SeqType, it[INDEX_2] as AntibodyTarget)
-                [(group): it[INDEX_3] as MergingWorkPackage]
-            } as Map<AlignmentWorkPackageGroup, MergingWorkPackage>
+            ]) as List<List<?>>).groupBy {
+                new AlignmentWorkPackageGroup(it[INDEX_0] as Sample, it[INDEX_1] as SeqType, it[INDEX_2] as AntibodyTarget)
+            }.collectEntries {
+                [(it.key): it.value.collect { it[INDEX_3] as MergingWorkPackage }]
+            } as Map<AlignmentWorkPackageGroup, Set<MergingWorkPackage>>
         }
     }
 

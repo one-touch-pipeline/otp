@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
 import de.dkfz.tbi.otp.infrastructure.alignment.RoddyBamFileNames
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.decider.alignment.*
@@ -128,7 +129,7 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
                 alignmentArtefactService.fetchMergingCriteria((seqTracks)),
                 alignmentArtefactService.fetchSpecificSeqPlatformGroup((seqTracks)),
                 alignmentArtefactService.fetchDefaultSeqPlatformGroup(),
-                alignmentArtefactService.fetchMergingWorkPackage(seqTracks),
+                alignmentArtefactService.fetchMergingWorkPackages(seqTracks),
                 requiresFastqcResults() ? alignmentArtefactService.fetchRawSequenceFiles(seqTracks) : [:],
                 pipelineService.findByPipelineName(pipelineName),
         )
@@ -269,6 +270,7 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
         if (group.sample.mixedInSpecies) {
             allSpecies.addAll(group.sample.mixedInSpecies)
         }
+
         ReferenceGenome referenceGenome = additionalData.referenceGenomeMap[projectSeqTypeGroup].get(allSpecies)
         if (!referenceGenome) {
             deciderResult.warnings <<
@@ -277,47 +279,25 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
         }
 
         AlignmentWorkPackageGroup alignmentWorkPackageGroup = new AlignmentWorkPackageGroup(group.sample, group.seqType, group.antibodyTarget)
-        MergingWorkPackage workPackage = additionalData.mergingWorkPackageMap[alignmentWorkPackageGroup]
 
-        if (workPackage) {
-            if (workPackage.referenceGenome != referenceGenome) {
-                deciderResult.warnings << ("skip ${group}, since existing MergingWorkPackage uses ReferenceGenome '${workPackage.referenceGenome}', " +
-                        "but the configured one is '${referenceGenome}'").toString()
-                return deciderResult
+        MergingWorkPackage workPackage
+        try {
+            workPackage = findOrCreateMergingWorkPackage(additionalData, alignmentWorkPackageGroup, seqTrackSet, group, referenceGenome)
+        } catch (DeciderReferenceGenomeValidationException e) {
+            deciderResult.warnings << "skip ${group}, since ${e.message}".toString()
+            return deciderResult
+        } catch (DeciderMergingWorkPackageValidationException e) {
+            deciderResult.warnings << "skip ${group}, since ${e.message}".toString()
+            if (e.sendsUnalignableSeqTrackEmail) {
+                // Send email for unaligned SeqTrack issues
+                if (e.workPackage) {
+                    UnalignableSeqTrackEmailCreator.MailContent content = unalignableSeqTrackEmailCreator.getMailContent(e.workPackage, seqTracks.first())
+                    mailHelperService.saveMail(content.subject, content.body)
+                }
             }
-            SeqTrack seqTrack = seqTracks.first()
-            Map<String, Entity> properties = MergingWorkPackage.getMergingProperties(seqTrack)
-            if (!group.seqPlatformGroup) {
-                properties.remove('seqPlatformGroup') //since seqPlatformGroup may be ignored, it should not part of the check
-            }
-            Map<String, Entity> nonMatchingProperties = properties.findAll { String key, Entity value ->
-                value != workPackage[key]
-            }
-            if (nonMatchingProperties) {
-                String nonMatchingString = nonMatchingProperties.collect { String key, Entity value ->
-                    [
-                            key,
-                            "- workPackage: ${workPackage[key]}",
-                            "- seqTrack:    ${value}",
-                    ].join('\n')
-                }.join('\n')
-
-                deciderResult.warnings << "skip ${group}, since existing MergingWorkPackage and Lanes do not match\n${nonMatchingString}".toString()
-                UnalignableSeqTrackEmailCreator.MailContent content = unalignableSeqTrackEmailCreator.getMailContent(workPackage, seqTrack)
-                mailHelperService.saveMail(content.subject, content.body)
-                return deciderResult
-            }
-        } else {
-            workPackage = new MergingWorkPackage([
-                    sample               : group.sample,
-                    seqType              : group.seqType,
-                    seqPlatformGroup     : group.seqPlatformGroup,
-                    antibodyTarget       : group.antibodyTarget,
-                    libraryPreparationKit: group.libraryPreparationKit,
-                    referenceGenome      : referenceGenome,
-                    pipeline             : additionalData.pipeline,
-            ])
+            return deciderResult
         }
+
         workPackage.seqTracks = seqTracks as Set
         workPackage.save(flush: false, deepValidate: false)
 
@@ -383,5 +363,56 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
         deciderResult.infos << "--> create bam file ${bamFile}".toString()
         deciderResult.newArtefacts << workflowOutputArtefact
         return deciderResult
+    }
+
+    /**
+     * Extension point method to allow subclasses to customize MergingWorkPackage creation.
+     * Standard workflows use the default implementation, while specialized workflows like
+     * CellRanger can override this to create specific subclasses (e.g., CellRangerMergingWorkPackage).
+     *
+     * @param additionalData Additional data that may contain workflow-specific information needed for validation and creation of the MergingWorkPackage
+     * @param alignmentWorkPackageGroup The group for which the MergingWorkPackage is being found or created
+     * @param seqTracks The set of SeqTracks that are being processed for this group, used for validation against existing MergingWorkPackage properties
+     * @param group The AlignmentDeciderGroup containing the context of the current processing group, used for validation and error reporting
+     * @param referenceGenome The ReferenceGenome that should be used for the MergingWorkPackage, used for validation against MergingWorkPackage properties
+     * @return The existing MergingWorkPackage if found and valid, or a new MergingWorkPackage if not found. Throws exceptions if validation fails
+     */
+    protected MergingWorkPackage findOrCreateMergingWorkPackage(AlignmentAdditionalData additionalData,
+                                                                AlignmentWorkPackageGroup alignmentWorkPackageGroup,
+                                                                Set<SeqTrack> seqTracks,
+                                                                AlignmentDeciderGroup group,
+                                                                ReferenceGenome referenceGenome) {
+        Set<MergingWorkPackage> workPackages = additionalData.mergingWorkPackageMap[alignmentWorkPackageGroup]
+        // The constrain of MergingWorkPackage allows only one element at most to be saved for the same alignmentWorkPackageGroup
+        // so it is safe to use atMostOneElement here
+        MergingWorkPackage workPackage = workPackages ? CollectionUtils.atMostOneElement(workPackages) : null
+        if (workPackage) {
+            if (workPackage.referenceGenome != referenceGenome) {
+                throw new DeciderReferenceGenomeValidationException(workPackage.referenceGenome, referenceGenome, group)
+            }
+            SeqTrack seqTrack = seqTracks.first()
+            Map<String, Entity> properties = MergingWorkPackage.getMergingProperties(seqTrack)
+            if (!group.seqPlatformGroup) {
+                properties.remove('seqPlatformGroup') //since seqPlatformGroup may be ignored, it should not part of the check
+            }
+            Map<String, Entity> nonMatchingProperties = properties.findAll { String key, Entity value ->
+                value != workPackage[key]
+            }
+            if (nonMatchingProperties) {
+                throw new DeciderMergingWorkPackageValidationException(nonMatchingProperties, group, workPackage, true)
+            }
+        } else {
+            workPackage = new MergingWorkPackage([
+                    sample               : group.sample,
+                    seqType              : group.seqType,
+                    seqPlatformGroup     : group.seqPlatformGroup,
+                    antibodyTarget       : group.antibodyTarget,
+                    libraryPreparationKit: group.libraryPreparationKit,
+                    referenceGenome      : referenceGenome,
+                    pipeline             : additionalData.pipeline,
+            ])
+        }
+
+        return workPackage
     }
 }

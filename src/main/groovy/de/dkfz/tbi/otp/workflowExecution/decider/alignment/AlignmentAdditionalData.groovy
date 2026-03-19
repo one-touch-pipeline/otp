@@ -31,14 +31,15 @@ import de.dkfz.tbi.otp.workflowExecution.decider.AdditionalData
 import de.dkfz.tbi.otp.workflowExecution.decider.ProjectSeqTypeGroup
 
 @ToString(includePackage = false, includeNames = true)
-@TupleConstructor
+@TupleConstructor(excludes = "referenceGenomeIndexMap")
 class AlignmentAdditionalData implements AdditionalData {
 
     Map<ProjectSeqTypeGroup, Map<Set<SpeciesWithStrain>, ReferenceGenome>> referenceGenomeMap
+    Map<ReferenceGenome, ReferenceGenomeIndex> referenceGenomeIndexMap
     Map<ProjectSeqTypeGroup, MergingCriteria> mergingCriteriaMap
     Map<ProjectSeqTypeGroup, Map<SeqPlatform, SeqPlatformGroup>> specificSeqPlatformGroupMap
     Map<SeqPlatform, SeqPlatformGroup> defaultSeqPlatformGroupMap
-    Map<AlignmentWorkPackageGroup, MergingWorkPackage> mergingWorkPackageMap
+    Map<AlignmentWorkPackageGroup, Set<MergingWorkPackage>> mergingWorkPackageMap
     Map<SeqTrack, List<RawSequenceFile>> rawSequenceFileMap
     Pipeline pipeline
 }
