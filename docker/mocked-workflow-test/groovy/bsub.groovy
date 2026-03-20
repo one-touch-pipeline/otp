@@ -24,32 +24,41 @@ import java.nio.file.*
 
 class BSub {
 
+    static final Set<String> FLAGS_WITHOUT_VALUE = ['-H'] as Set
+    static final List<String> REQUIRED = ['-env', '-J', '-H', '-cwd', '-oo', '-M', '-R', '-W', '-q']
+    // option names that must not be consumed as the value of a preceding option
+    static final Set<String> KNOWN_OPTIONS = (REQUIRED + FLAGS_WITHOUT_VALUE + ['-n']) as Set
+    static final Path TESTS_DIR = Path.of('/workflows/tests')
+
     static void main(String[] args) {
         if (!args) {
             System.err.println("No arguments")
             System.exit(1)
         }
-        if (args.size() != 17) {
-            System.err.println("Unexpected count of parameters, expected 17, found ${args.size()}")
+        // options may be repeated (e.g. -R) or optional (e.g. -n for multi-core jobs), so parse them by name
+        Map<String, List<String>> options = [:]
+        for (int i = 0; i < args.size(); i++) {
+            String key = args[i]
+            assert key.startsWith('-'): "Unexpected argument '${key}' at position ${i}"
+            String value = ''
+            if (!(key in FLAGS_WITHOUT_VALUE)) {
+                assert i + 1 < args.size() && !(args[i + 1] in KNOWN_OPTIONS): "Missing value for parameter '${key}'"
+                value = args[++i]
+            }
+            options.computeIfAbsent(key) { [] } << value
+        }
+        List<String> missing = REQUIRED - options.keySet()
+        if (missing) {
+            System.err.println("Missing parameters: ${missing}")
             System.exit(1)
         }
-        assert args[0] == '-env'
-        assert args[1] == 'all'
-        assert args[2] == '-J'
-        // job name, not checked
-        assert args[4] == '-H'
-        assert args[5] == '-cwd'
-        // home name, not checked
-        assert args[7] == '-oo'
-        String file = args[8]
-        assert args[9] == '-M'
-        // memory value, not checked
-        assert args[11] == '-R'
-        // resource request, not checked
-        assert args[13] == '-W'
-        // walltime, not checked
-        assert args[15] == '-q'
-        String queue = args[16]
+        assert options['-env'] == ['all']
+        String file = options['-oo'].first()
+        Path outputPath = Path.of(file)
+        assert outputPath.absolute: "Value of '-oo' must be an absolute path, but was '${file}'"
+        assert outputPath.normalize().startsWith(TESTS_DIR) && outputPath.normalize() != TESTS_DIR:
+                "Value of '-oo' must be inside '${TESTS_DIR}', but was '${file}'"
+        String queue = options['-q'].first()
 
         String clusterId = System.nanoTime()
 

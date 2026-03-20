@@ -254,12 +254,13 @@ workflow tests:
         - IMPORT
         - FASTQC
         - ALIGNMENT
+        - CELL_RANGER
         - SNV
         - INDEL
         - SOPHIA
         - ACESEQ
   services:
-    - name:  registry.gitlab.com/one-touch-pipeline/otp/otp-mocked-cluster:2026-10-06
+    - name:  registry.gitlab.com/one-touch-pipeline/otp/otp-mocked-cluster:2026-10-19
       alias: openssh-server
       variables:
         PUID: "1000"

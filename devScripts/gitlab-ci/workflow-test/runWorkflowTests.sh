@@ -44,6 +44,9 @@ case "$group" in
     ALIGNMENT)
         tests=( 'de.dkfz.tbi.otp.workflowTest.alignment.roddy.*' )
         ;;
+    CELL_RANGER)
+        tests=( 'de.dkfz.tbi.otp.workflowTest.alignment.cellRanger.*' )
+        ;;
     SNV)
         tests=( 'de.dkfz.tbi.otp.workflowTest.analysis.roddy.snvcalling.*' )
         ;;

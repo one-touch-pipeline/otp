@@ -39,6 +39,7 @@ mkdir fastqFiles
 mkdir fastqFiles/10x
 mkdir fastqFiles/10x/normal
 mkdir fastqFiles/10x/normal/paired
+mkdir fastqFiles/10x/small
 mkdir fastqFiles/chipSeq
 mkdir fastqFiles/chipSeq/normal
 mkdir fastqFiles/chipSeq/normal/paired

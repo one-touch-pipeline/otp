@@ -25,7 +25,7 @@ set -e -o pipefail
 
 cd $REFERENCE_DATA
 
-cat <<EOF | while read line ; do echo $line > $line ; done
+cat <<EOF | while read -r line ; do echo "$line" > "$line" || exit 1 ; done
 aceseq/svs_stds_filtered_somatic_minEventScore3.tsv
 adapters/TruSeq3-PE.fa
 bamFiles/small/div8/tumor_HCC1187-div8_merged.mdup.bam.bai
@@ -480,4 +480,8 @@ runYapsa/snvs_stds_somatic_snvs_conf_8_to_10-wgs.vcf
 runYapsa/snvs_stds_somatic_snvs_conf_8_to_10-wes.vcf
 sophia/blood_HCC1187-div128_insertsize_plot.png_qcValues.txt
 sophia/tumor_HCC1187-div128_insertsize_plot.png_qcValues.txt
+fastqFiles/10x/small/test_10x_sc3_v3_5k_a549_gex_l1_fastq1.fastq.gz
+fastqFiles/10x/small/test_10x_sc3_v3_5k_a549_gex_l1_fastq2.fastq.gz
+fastqFiles/10x/small/test_10x_sc3_v3_5k_a549_gex_l2_fastq2.fastq.gz
+fastqFiles/10x/small/test_10x_sc3_v3_5k_a549_gex_l2_fastq1.fastq.gz
 EOF

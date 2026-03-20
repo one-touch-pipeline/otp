@@ -33,6 +33,7 @@ class Module {
             "Groovy/4.0.22",    // bam import and roddy workflows
             "Java/1.8.0_131",   // roddy workflows
             "SAMtools/1.20",    // bam import
+            "CellRanger/10.0.0",// CellRanger
     ].asImmutable()
 
     static void main(String[] args) {

@@ -59,6 +59,15 @@ RUN curl -s "https://get.sdkman.io" | bash && \
     sdk install groovy $GROOVY_VERSION" && \
     chown -R 1000:1002 $SDKMAN
 
+# create reference data for mocked workflow tests at build time
+COPY dockerInit /tmp/dockerInit
+RUN for i in /tmp/dockerInit/*.sh; do \
+      echo "executing $i"; \
+      bash "$i" || exit 1; \
+    done && \
+    chown -R 1000:1002 $REFERENCE_DATA && \
+    rm -rf /tmp/dockerInit
+
 # add init script for ssh server (will execute on starting)
 ADD init /custom-cont-init.d/
 RUN chown -R root:root /custom-cont-init.d/ && \
