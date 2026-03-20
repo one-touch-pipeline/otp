@@ -59,6 +59,7 @@ stages:
   - test
   - war
   - codestyle
+  - checks
   - scanning
   - qm
   - doc
@@ -202,12 +203,12 @@ build gradle:
 
 
 # ------------------------------------------------------
-# jobs stage scanning
+# jobs stage checks
 # ------------------------------------------------------
 
 license check:
   image: groovy:3.0-jdk17-alpine
-  stage: scanning
+  stage: checks
   dependencies: [ ]
   needs: [ ]
   cache: [ ]
@@ -215,6 +216,43 @@ license check:
     - !reference [ .shared, rules-push ]
   script:
     - groovy devScripts/gitlab-ci/license-checker/licensecheck.groovy
+
+
+check workflow test configured for ci:
+  image: groovy:3.0-jdk17-alpine
+  stage: checks
+  dependencies: [ ]
+  needs: [ ]
+  cache: [ ]
+  rules:
+    - !reference [ .shared, rules-default ]
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
+      changes:
+        compare_to: 'refs/heads/master'
+        paths:
+          - .gitlab-ci-core.yml
+          - src/workflow-test/groovy
+          - devScripts/gitlab-ci/workflow-test/checkWorkflowTestsConfigured.groovy
+  script:
+    - groovy devScripts/gitlab-ci/workflow-test/checkWorkflowTestsConfigured.groovy
+
+
+# This job checks, that all cypress suites (directories in cypress/e2e/) are defined in the ci job 'cypress tests'
+check cypress suite configured for ci:
+  dependencies: [ ]
+  needs: [ ]
+  stage: checks
+  rules:
+    - !reference [ .shared, rules-default ]
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
+      changes:
+        compare_to: 'refs/heads/master'
+        paths:
+          - .gitlab-ci-core.yml
+          - cypress/e2e/**/*
+  script:
+    - set -e
+    - devScripts/gitlab-ci/cypress/check-suite-configured-for-ci.sh
 
 
 # ------------------------------------------------------
@@ -480,24 +518,6 @@ cypress tests:
           - "operatorAndAdminPages"
           - "workflowSystem"
           - "others"
-
-
-# This job checks, that all cypress suites (directories in cypress/e2e/) are defined in the ci job 'cypress tests'
-check cypress suite configured for ci:
-  dependencies: [ ]
-  needs: [ ]
-  stage: test
-  rules:
-    - !reference [ .shared, rules-default ]
-    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH
-      changes:
-        compare_to: 'refs/heads/master'
-        paths:
-          - .gitlab-ci-core.yml
-          - cypress/e2e/**/*
-  script:
-    - set -e
-    - devScripts/gitlab-ci/cypress/check-suite-configured-for-ci.sh
 
 
 # ------------------------------------------------------
