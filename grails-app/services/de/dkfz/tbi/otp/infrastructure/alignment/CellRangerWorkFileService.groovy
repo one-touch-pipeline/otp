@@ -50,7 +50,7 @@ class CellRangerWorkFileService extends AbstractAlignmentWorkFileService<SingleC
                 "TV_${workPackage.referenceGenomeIndex.toolWithVersion.replace(" ", "-")}",
                 "EC_${workPackage.expectedCells ?: '-'}",
                 "FC_${workPackage.enforcedCells ?: '-'}",
-                "PV_${workPackage.config.programVersion.replace("/", "-")}",
+                "PV_${(workPackage.programVersion ?: "-").replace("/", "-")}",
                 "ID_${identifier}",
         ].join('_')
     }

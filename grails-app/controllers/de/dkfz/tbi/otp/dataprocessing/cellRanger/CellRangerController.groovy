@@ -49,7 +49,7 @@ class CellRangerController {
         List<CellRangerMergingWorkPackage> mwps = cellRangerConfigurationService.findCellRangerMergingWorkPackageByProject(project)
 
         List<GroupedMwp> groupedMwps = mwps.groupBy {
-            new GroupedMwp(it.sample, it.seqType, it.config.programVersion, it.referenceGenomeIndex)
+            new GroupedMwp(it.sample, it.seqType, it.programVersion, it.referenceGenomeIndex)
         }.collect { k, v ->
             k.mwps = v
             return k

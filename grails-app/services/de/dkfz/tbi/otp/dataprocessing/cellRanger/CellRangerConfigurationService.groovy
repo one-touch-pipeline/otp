@@ -262,7 +262,7 @@ class CellRangerConfigurationService {
             )
         }
         List<CellRangerMergingWorkPackage> allMwps = getAllMwps(
-                mwpToKeep.sample, mwpToKeep.seqType, mwpToKeep.config.programVersion, mwpToKeep.referenceGenomeIndex,
+                mwpToKeep.sample, mwpToKeep.seqType, mwpToKeep.programVersion, mwpToKeep.referenceGenomeIndex,
                 CellRangerMergingWorkPackage.Status.UNSET
         )
         deleteMwps(allMwps - mwpToKeep)

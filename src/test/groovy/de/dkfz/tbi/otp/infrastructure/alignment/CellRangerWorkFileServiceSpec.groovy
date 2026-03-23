@@ -112,7 +112,7 @@ class CellRangerWorkFileServiceSpec extends Specification implements ServiceUnit
         expect:
         service.buildWorkDirectoryName(mwp, 1234) ==
                 "RG_${mwp.referenceGenome.name}_TV_${mwp.referenceGenomeIndex.toolWithVersion.replace(" ", "-")}_" +
-                "EC_${expectecCells ?: "-"}_FC_${enforcedCells ?: "-"}_PV_${mwp.config.programVersion}_ID_1234"
+                "EC_${expectecCells ?: "-"}_FC_${enforcedCells ?: "-"}_PV_${mwp.programVersion}_ID_1234"
 
         where:
         expectecCells | enforcedCells || _
@@ -236,7 +236,7 @@ class CellRangerWorkFileServiceSpec extends Specification implements ServiceUnit
         expect:
         service.buildWorkDirectoryName(mwp, 1234) ==
                 "RG_${mwp.referenceGenome.name}_TV_${mwp.referenceGenomeIndex.toolWithVersion.replace(" ", "-")}_" +
-                "EC_${expectecCells ?: "-"}_FC_${enforcedCells ?: "-"}_PV_${mwp.config.programVersion}_ID_1234"
+                "EC_${expectecCells ?: "-"}_FC_${enforcedCells ?: "-"}_PV_${mwp.programVersion}_ID_1234"
 
         where:
         expectecCells | enforcedCells || _

@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
 import grails.gorm.hibernate.annotation.ManagedEntity
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeIndex
 import de.dkfz.tbi.otp.security.User
@@ -62,7 +63,7 @@ class CellRangerMergingWorkPackage extends MergingWorkPackage {
                         isNull('enforcedCells')
                     }
                     config {
-                        eq('programVersion', obj.config.programVersion)
+                        eq('programVersion', obj.programVersion)
                     }
                     eq('referenceGenomeIndex', obj.referenceGenomeIndex)
                     'in'('status', [CellRangerMergingWorkPackage.Status.UNSET, CellRangerMergingWorkPackage.Status.FINAL])
@@ -115,5 +116,17 @@ class CellRangerMergingWorkPackage extends MergingWorkPackage {
     @Override
     String toString() {
         return "CRMWP ${id}: ${toStringWithoutIdAndPipeline()} ${pipeline?.name} ${referenceGenomeIndex}"
+    }
+
+    String getProgramVersion() {
+        if (config) {
+            return config.programVersion
+        }
+        AbstractBamFile lastBamFile = AbstractBamFile.createCriteria().get {
+            eq("workPackage", this)
+            order("identifier", "desc")
+            maxResults(1)
+        }
+        return lastBamFile?.workflowArtefact?.producedBy?.workflowVersion?.workflowVersion
     }
 }

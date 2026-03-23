@@ -50,7 +50,7 @@ class SingleCellBamFileIntegrationSpec extends Specification implements CellRang
                 expectedCells: 5000,
         )
         String TV = workPackage.referenceGenomeIndex.toolWithVersion.replace(" ", "-")
-        String PV = workPackage.config.programVersion.replace("/", "-")
+        String PV = workPackage.programVersion.replace("/", "-")
         int ID = 123
 
         expect:

@@ -451,7 +451,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
 
         when:
         doWithAuth(ADMIN) {
-            cellRangerConfigurationService.selectNoneAsFinal(mwp1.sample, mwp1.seqType, mwp1.config.programVersion, mwp1.referenceGenomeIndex)
+            cellRangerConfigurationService.selectNoneAsFinal(mwp1.sample, mwp1.seqType, mwp1.programVersion, mwp1.referenceGenomeIndex)
         }
 
         then:
@@ -529,7 +529,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
 
         when:
         doWithAuth(ADMIN) {
-            cellRangerConfigurationService.deleteFinalMwp(mwp1.sample, mwp1.seqType, mwp1.config.programVersion, mwp1.referenceGenomeIndex)
+            cellRangerConfigurationService.deleteFinalMwp(mwp1.sample, mwp1.seqType, mwp1.programVersion, mwp1.referenceGenomeIndex)
         }
 
         then:

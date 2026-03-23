@@ -202,7 +202,7 @@ class SingleCellBamFile extends AbstractBamFile implements HasIdentifier, Proces
                 "TV_${workPackage.referenceGenomeIndex.toolWithVersion.replace(" ", "-")}",
                 "EC_${workPackage.expectedCells ?: '-'}",
                 "FC_${workPackage.enforcedCells ?: '-'}",
-                "PV_${workPackage.config.programVersion.replace("/", "-")}",
+                "PV_${(workPackage.programVersion ?: "-").replace("/", "-")}",
                 "ID_${identifier}",
         ].join('_')
     }

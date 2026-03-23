@@ -109,7 +109,7 @@ class CellRangerConfigurationController extends AbstractConfigureNonRoddyPipelin
                             individual          : mwp.individual.toString(),
                             sampleType          : mwp.sampleType.toString(),
                             seqType             : mwp.seqType.displayNameWithLibraryLayout,
-                            config              : mwp.config.programVersion,
+                            config              : mwp.programVersion,
                             referenceGenome     : mwp.referenceGenome.toString(),
                             referenceGenomeIndex: mwp.referenceGenomeIndex.toolWithVersion,
                             expectedCells       : mwp.expectedCells,

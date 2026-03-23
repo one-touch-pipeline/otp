@@ -27,22 +27,31 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.workflowExecution.*
 
-class CellRangerMergingWorkPackageSpec extends Specification implements CellRangerFactory, DataTest {
+class CellRangerMergingWorkPackageSpec extends Specification implements CellRangerFactory, WorkflowSystemDomainFactory, DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
         return [
+                CellRangerConfig,
                 CellRangerMergingWorkPackage,
+                FastqImportInstance,
+                FastqFile,
                 Individual,
                 Pipeline,
                 Project,
                 ReferenceGenome,
                 ReferenceGenomeIndex,
+                ReferenceGenomeProjectSeqType,
                 SeqType,
+                SingleCellBamFile,
+                WorkflowArtefact,
         ]
     }
 
@@ -150,5 +159,34 @@ class CellRangerMergingWorkPackageSpec extends Specification implements CellRang
         then:
         ValidationException e = thrown()
         e.message =~ "unique.combination"
+    }
+
+    void "getProgramVersion returns config.programVersion when config is set"() {
+        given:
+        CellRangerMergingWorkPackage mwp = createMergingWorkPackage()
+
+        expect:
+        mwp.programVersion == mwp.config.programVersion
+    }
+
+    void "getProgramVersion returns workflow version when config is null and artefact chain is complete"() {
+        given:
+        WorkflowVersion wfVersion = createWorkflowVersion()
+        WorkflowArtefact artefact = createWorkflowArtefact(producedBy: createWorkflowRun(workflowVersion: wfVersion))
+        SingleCellBamFile bamFile = createBamFile(workflowArtefact: artefact)
+        CellRangerMergingWorkPackage mwp = bamFile.workPackage as CellRangerMergingWorkPackage
+        mwp.config = null
+
+        expect:
+        mwp.programVersion == wfVersion.workflowVersion
+    }
+
+    void "getProgramVersion returns null when config is null and bamFileInProjectFolder is null"() {
+        given:
+        CellRangerMergingWorkPackage mwp = createMergingWorkPackage()
+        mwp.config = null
+
+        expect:
+        mwp.programVersion == null
     }
 }
