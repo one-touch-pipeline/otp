@@ -42,6 +42,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.exceptions.NotSupportedException
+import de.dkfz.tbi.otp.workflow.alignment.cellRanger.CellRangerWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.roddy.rna.RnaAlignmentWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.roddy.wgbs.WgbsWorkflow
@@ -195,24 +196,28 @@ class AlignmentQualityOverviewController implements CheckAndCall {
 
         List<String> header
         String columnsSelectionKey = ""
+        Set<SeqType> panCancerSeqTypes = workflowService.getSupportedSeqTypes(PanCancerWorkflow.WORKFLOW)
+        Set<SeqType> wgbsSeqTypes = workflowService.getSupportedSeqTypes(WgbsWorkflow.WORKFLOW)
+        Set<SeqType> rnaSeqTypes = workflowService.getSupportedSeqTypes(RnaAlignmentWorkflow.WORKFLOW)
+        Set<SeqType> cellRangerSeqTypes = workflowService.getSupportedSeqTypes(CellRangerWorkflow.WORKFLOW)
         switch (seqType) {
             case null:
                 header = ['alignment.quality.noSeqType']
                 break
-            case workflowService.getSupportedSeqTypes(PanCancerWorkflow.WORKFLOW).findAll { !it.needsBedFile }:
-            case workflowService.getSupportedSeqTypes(WgbsWorkflow.WORKFLOW):
+            case panCancerSeqTypes.findAll { !it.needsBedFile }:
+            case wgbsSeqTypes:
                 header = HEADER_PANCANCER_AND_WGBS
                 columnsSelectionKey = "PANCANCER_AND_WGBS"
                 break
-            case workflowService.getSupportedSeqTypes(PanCancerWorkflow.WORKFLOW).findAll { it.needsBedFile }:
+            case panCancerSeqTypes.findAll { it.needsBedFile }:
                 header = HEADER_PANCANCER_BED
                 columnsSelectionKey = "PANCANCER_BED"
                 break
-            case workflowService.getSupportedSeqTypes(RnaAlignmentWorkflow.WORKFLOW):
+            case rnaSeqTypes:
                 header = HEADER_RNA
                 columnsSelectionKey = "RNA"
                 break
-            case { it.name == SeqTypeNames._10X_SCRNA.seqTypeName }:
+            case cellRangerSeqTypes:
                 header = HEADER_CELL_RANGER
                 columnsSelectionKey = "CELL_RANGER"
                 break

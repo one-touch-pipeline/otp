@@ -22,16 +22,21 @@
 package de.dkfz.tbi.otp.dataprocessing.qaalignmentoverview
 
 import grails.gorm.transactions.Transactional
+import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractQualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
 import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.workflow.alignment.cellRanger.CellRangerWorkflow
+import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
 
 @Transactional(readOnly = true)
 class CellRangerQaOverviewService extends AbstractQaOverviewService {
+
+    @Autowired
+    WorkflowService workflowService
 
     final static List<? extends ColumnDefinition> COLUMN_DEFINITIONS = [
             new PropertyColumnDefinition('mergingWorkPackage', 'expectedCells', 'expectedCells'),
@@ -82,7 +87,7 @@ class CellRangerQaOverviewService extends AbstractQaOverviewService {
 
     @Override
     List<SeqType> supportedSeqTypes() {
-        return SeqTypeService.cellRangerAlignableSeqTypes
+        return workflowService.getSupportedSeqTypes(CellRangerWorkflow.WORKFLOW) as List
     }
 
     @Override

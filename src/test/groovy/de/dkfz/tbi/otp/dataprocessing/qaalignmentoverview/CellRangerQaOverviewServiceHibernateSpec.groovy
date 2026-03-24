@@ -33,6 +33,8 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdService
 import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
+import de.dkfz.tbi.otp.workflow.alignment.cellRanger.CellRangerWorkflow
+import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
 class CellRangerQaOverviewServiceHibernateSpec extends HibernateSpec implements RoddyPanCancerFactory {
 
@@ -51,6 +53,9 @@ class CellRangerQaOverviewServiceHibernateSpec extends HibernateSpec implements 
                     0 * _
                 },
                 qcThresholdService: Mock(QcThresholdService) {
+                    0 * _
+                },
+                workflowService   : Mock(WorkflowService) {
                     0 * _
                 },
         ])
@@ -72,6 +77,11 @@ class CellRangerQaOverviewServiceHibernateSpec extends HibernateSpec implements 
         (1..3).collect {
             createSeqTypePaired()
             createSeqType()
+        }
+
+        service.workflowService = Mock(WorkflowService) {
+            1 * getSupportedSeqTypes(CellRangerWorkflow.WORKFLOW) >> seqTypes
+            0 * _
         }
 
         expect:
