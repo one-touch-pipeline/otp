@@ -195,10 +195,10 @@
         <div class="mb-3 row">
             <div class="col-sm-2"></div>
             <div class="col-sm-10">
-                <div class="form-check" id="skip-file-existence-row">
-                    <input class="form-check-input" name="skipFileExistenceValidation" type="checkbox" id="skip-file-existence-input">
-                    <label for="skip-file-existence-input" class="form-check-label">
-                        <g:message code="metadataImport.skipFileExistenceValidation.label"/>
+                <div class="form-check" id="data-existence-row">
+                    <g:checkBox class="form-check-input" name="dataExistenceValidation" id="data-existence-input" value="true" checked="true"/>
+                    <label for="data-existence-input" class="form-check-label">
+                        <g:message code="metadataImport.dataExistenceValidation.label"/>
                     </label>
                 </div>
             </div>

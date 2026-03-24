@@ -270,6 +270,54 @@ describe('Check metadata import page', () => {
         cy.location('pathname').should('match', /\/\/?metadataImport\/multiDetails/);
       });
     });
+
+    it('should uncheck data-existence checkbox and auto-trigger validation when autoValidation=ON and dataExistenceValidator=OFF', () => {
+      cy.intercept('/metadataImport/validatePathsOrFiles*').as('validate');
+
+      cy.visit('/metadataImport/index?ticketNumber=123' +
+        '&paths=/home/otp/filesystem/otp_example_data/example_import_project02_1.csv' +
+        '&autoValidation=ON&dataExistenceValidator=OFF');
+
+      cy.get('#data-existence-input').should('not.be.checked');
+
+      cy.wait('@validate').its('response.statusCode').should('eq', 200);
+    });
+
+    it('should keep data-existence checkbox checked and auto-trigger validation when autoValidation=ON and dataExistenceValidator=ON', () => {
+      cy.intercept('/metadataImport/validatePathsOrFiles*').as('validate');
+
+      cy.visit('/metadataImport/index?ticketNumber=123' +
+        '&paths=/home/otp/filesystem/otp_example_data/example_import_project02_1.csv' +
+        '&autoValidation=ON&dataExistenceValidator=ON');
+
+      cy.get('#data-existence-input').should('be.checked');
+
+      cy.wait('@validate').its('response.statusCode').should('eq', 200);
+    });
+
+    it('should leave data-existence checkbox checked and not auto-trigger validation when no URL params', () => {
+      cy.intercept('/metadataImport/validatePathsOrFiles*').as('validate');
+
+      cy.visit('/metadataImport/index');
+
+      cy.get('#data-existence-input').should('be.checked');
+
+      cy.get('#validate-btn').should('not.be.disabled');
+      cy.get('#import-btn').should('be.disabled');
+    });
+
+    it('should uncheck data-existence checkbox and not auto-trigger validation when autoValidation=OFF and dataExistenceValidator=OFF', () => {
+      cy.intercept('/metadataImport/validatePathsOrFiles*').as('validate');
+
+      cy.visit('/metadataImport/index?ticketNumber=123' +
+        '&paths=/home/otp/filesystem/otp_example_data/example_import_project02_1.csv' +
+        '&autoValidation=OFF&dataExistenceValidator=OFF');
+
+      cy.get('#data-existence-input').should('not.be.checked');
+
+      cy.get('#validate-btn').should('not.be.disabled');
+      cy.get('#import-btn').should('be.disabled');
+    });
   });
 
   context('when user is normal user', () => {

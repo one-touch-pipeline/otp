@@ -206,7 +206,7 @@ class MetadataImportService {
     List<MetadataValidator> getActiveValidators(ValidationParametersDTO params) {
         List<MetadataValidator> validators = metadataValidators as List<MetadataValidator>
 
-        if (params?.skipFileExistenceValidation) {
+        if (params?.dataExistenceValidation == false) {
             validators.removeAll { validator ->
                 validator instanceof DataFileExistenceValidator
             }

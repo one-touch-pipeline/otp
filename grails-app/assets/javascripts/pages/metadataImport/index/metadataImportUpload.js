@@ -358,14 +358,24 @@ $(() => {
     sendAjaxImportCall(formData);
   });
 
-  const initialValidationCall = () => {
+  const controlValidation = () => {
+    const params = new URLSearchParams(window.location.search);
+    const autoValidation = (params.get('autoValidation') || '').toLowerCase();
+    const dataExistenceValidator = (params.get('dataExistenceValidator') || '').toLowerCase();
+
+    if (dataExistenceValidator === 'on') {
+      $('#data-existence-input').prop('checked', true);
+    } else if (dataExistenceValidator === 'off') {
+      $('#data-existence-input').prop('checked', false);
+    }
+
     const formData = new FormData(form);
-    if (formData.get('ticketNumber') && formData.get('paths')) {
+    if (autoValidation === 'on' && formData.get('ticketNumber') && formData.get('paths')) {
       validateButton.trigger('click');
     }
   };
 
-  initialValidationCall();
+  controlValidation();
 
   // Helper handler to remove clicked argument from other buttons after click,
   // to identify clicked button upon submitting of form

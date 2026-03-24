@@ -571,7 +571,7 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
         result.contains(dataFileExistenceValidator)
     }
 
-    void "getActiveValidators excludes DataFileExistenceValidator when skipFileExistenceValidation is true"() {
+    void "getActiveValidators excludes DataFileExistenceValidator when dataExistenceValidation is false"() {
         given:
         MetadataValidator validator1 = Mock(MetadataValidator)
         MetadataValidator validator2 = Mock(MetadataValidator)
@@ -589,7 +589,7 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
         }
 
         def validationParams = Mock(MetadataImportController.ValidationParametersDTO) {
-            getSkipFileExistenceValidation() >> true
+            getDataExistenceValidation() >> false
         }
 
         when:
@@ -600,6 +600,37 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
         result.contains(validator1)
         result.contains(validator2)
         !result.any { it instanceof DataFileExistenceValidator }
+    }
+
+    void "getActiveValidators includes DataFileExistenceValidator when dataExistenceValidation is true"() {
+        given:
+        MetadataValidator validator1 = Mock(MetadataValidator)
+        MetadataValidator validator2 = Mock(MetadataValidator)
+        DataFileExistenceValidator dataFileExistenceValidator = Mock(DataFileExistenceValidator)
+
+        Map<String, MetadataValidator> allValidators = [
+                'validator1': validator1,
+                'validator2': validator2,
+                'dataFileExistenceValidator': dataFileExistenceValidator,
+        ]
+
+        MetadataImportService service = new MetadataImportService()
+        service.applicationContext = Mock(ApplicationContext) {
+            1 * getBeansOfType(MetadataValidator) >> allValidators
+        }
+
+        def validationParams = Mock(MetadataImportController.ValidationParametersDTO) {
+            getDataExistenceValidation() >> true
+        }
+
+        when:
+        List<MetadataValidator> result = service.getActiveValidators(validationParams)
+
+        then:
+        result.size() == 3
+        result.contains(validator1)
+        result.contains(validator2)
+        result.any { it instanceof DataFileExistenceValidator }
     }
 
     @Unroll

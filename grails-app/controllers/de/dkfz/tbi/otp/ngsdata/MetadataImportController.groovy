@@ -454,12 +454,12 @@ class MetadataImportController implements CheckAndCall, PlainResponseExceptionHa
     }
 
     class ValidationParametersDTO {
-        boolean skipFileExistenceValidation = false
+        boolean dataExistenceValidation = true
         boolean ignoreMd5sumError = false
         boolean ignoreWarnings = false
 
         ValidationParametersDTO(MetadataImportControllerSubmitCommand cmd) {
-            this.skipFileExistenceValidation = cmd.skipFileExistenceValidation
+            this.dataExistenceValidation = cmd.dataExistenceValidation
             this.ignoreMd5sumError = cmd.ignoreMd5sumError
             this.ignoreWarnings = cmd.ignoreWarnings
         }
@@ -554,7 +554,7 @@ class MetadataImportControllerSubmitCommand implements Validateable {
     String seqCenterComment
     boolean automaticNotification = true
     boolean ignoreWarnings = false
-    boolean skipFileExistenceValidation = false
+    boolean dataExistenceValidation = true
     boolean ignoreMd5sumError = false
 
     static constraints = {
