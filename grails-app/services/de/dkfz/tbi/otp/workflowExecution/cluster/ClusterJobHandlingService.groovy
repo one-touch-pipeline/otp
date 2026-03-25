@@ -81,11 +81,13 @@ class ClusterJobHandlingService {
         File clusterLogDirectory = fileService.toFile(clusterLogDirectoryService.createAndGetLogDirectory(workflowStep))
 
         List<BEJob> beJobs = scripts.collect {
+            String fullWrappedScript = clusterJobHelperService.wrapScript(it, logFileName, logMessage)
+            logService.addSimpleLogEntry(workflowStep, "full wrapped script:\n${fullWrappedScript}")
             new BEJob(
                     null,
                     jobManager,
                     new UnescapedString(jobName),
-                    new Code(clusterJobHelperService.wrapScript(it, logFileName, logMessage)),
+                    new Code(fullWrappedScript),
                     resourceSet,
                     [],
                     [:], // in BE 0.2.1 this attribute gets ignored

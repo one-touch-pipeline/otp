@@ -114,7 +114,7 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
             1 * createAndGetLogDirectory(workflowStep) >> clusterLogDirectory
         }
         service.logService = Mock(LogService) {
-            2 * addSimpleLogEntry(workflowStep, _)
+            4 * addSimpleLogEntry(workflowStep, _)
         }
         service.fileService = Mock(FileService) {
             1 * toFile(_) >> { Path path ->
