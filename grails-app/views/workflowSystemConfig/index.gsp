@@ -128,7 +128,7 @@
                       value=""
                       from="${refGenomes}"
                       optionKey="id"
-                      optionValue="name"
+                      optionValue="displayName"
                       data-placeholder="${g.message(code: 'workflowSystemConfig.modal.defaultRefGen.placeholder')}"/>
         </div>
 
@@ -164,7 +164,7 @@
                       value=""
                       from="${refGenomes}"
                       optionKey="id"
-                      optionValue="name"
+                      optionValue="displayName"
                       data-placeholder="${g.message(code: 'workflowSystemConfig.modal.allowedRefGen.placeholder')}"/>
         </div>
 

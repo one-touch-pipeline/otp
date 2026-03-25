@@ -62,7 +62,7 @@
         },
         {
           data: 'allowedRefGenomes',
-          render: (refGenomes) => (refGenomes ? refGenomes.map((g) => g.name).join(', ') : '')
+          render: (refGenomes) => (refGenomes ? refGenomes.map((g) => g.displayName).join(', ') : '')
         },
         {
           data: 'deprecationDate',

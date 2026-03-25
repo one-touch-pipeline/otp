@@ -104,7 +104,7 @@ const renderWorkflowVersionTable = (workflowVersionData, workflowId) => {
       },
       {
         data: 'allowedRefGenomes',
-        render: (allowedRefGenomes) => allowedRefGenomes.map((refGenome) => refGenome.name).join(', ')
+        render: (allowedRefGenomes) => allowedRefGenomes.map((refGenome) => refGenome.displayName).join(', ')
       },
       { data: 'comment' },
       {

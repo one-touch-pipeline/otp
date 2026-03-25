@@ -173,6 +173,10 @@ class ReferenceGenome implements Entity, Legacy {
             referenceGenomeIndexes: ReferenceGenomeIndex,
     ]
 
+    String getDisplayName() {
+        return toString()
+    }
+
     @Override
     String toString() {
         return name + (legacy ? " (legacy)" : "")

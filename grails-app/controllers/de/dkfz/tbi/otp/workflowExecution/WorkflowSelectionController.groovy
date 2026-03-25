@@ -127,10 +127,12 @@ class WorkflowSelectionController implements CheckAndCall {
             }.collect { Version.fromWorkflowVersion(it) }
         }
 
-        Set<ReferenceGenome> refGenomes = workflowVersionService.findAllByWorkflows(alignmentWorkflows).collectMany {
+        List<ReferenceGenome> refGenomes = (workflowVersionService.findAllByWorkflows(alignmentWorkflows).collectMany {
             it.allowedReferenceGenomes
-        } as Set<ReferenceGenome>
-        Set<SpeciesWithStrain> species = referenceGenomeService.getAllSpeciesWithStrains(refGenomes)
+        }).sort { ReferenceGenome a, ReferenceGenome b ->
+            (a.legacy <=> b.legacy) ?: a.name.compareToIgnoreCase(b.name)
+        }.unique()
+        Set<SpeciesWithStrain> species = referenceGenomeService.getAllSpeciesWithStrains(refGenomes as Set)
         return [
                 alignment             : [
                         conf            : alignmentConf,
@@ -183,7 +185,7 @@ class WorkflowSelectionController implements CheckAndCall {
                     seqType                : [id: wvSelector.seqType.id, displayName: wvSelector.seqType.displayNameWithLibraryLayout],
                     version                : [id: wvSelector.workflowVersion.id, displayName: wvSelector.workflowVersion.workflowVersion],
                     species                : rgSelector.species.collect { [id: it.id, displayName: it.displayName] },
-                    refGenome              : [id: rgSelector.referenceGenome.id, displayName: rgSelector.referenceGenome.name],
+                    refGenome              : [id: rgSelector.referenceGenome.id, displayName: rgSelector.referenceGenome.displayName],
                     workflowVersionSelector: [id: wvSelector.id, previousId: wvSelector.previous?.id],
                     refGenSelectorId       : rgSelector.id,
             ] as JSON)

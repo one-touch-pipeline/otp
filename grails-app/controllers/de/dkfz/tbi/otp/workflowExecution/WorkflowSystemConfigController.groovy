@@ -54,8 +54,8 @@ class WorkflowSystemConfigController implements CheckAndCall {
 
     def index() {
         return [
-                refGenomes: referenceGenomeService.list().sort { a, b ->
-                    String.CASE_INSENSITIVE_ORDER.compare(a.name, b.name)
+                refGenomes: referenceGenomeService.list().sort { ReferenceGenome a, ReferenceGenome b ->
+                    (a.legacy <=> b.legacy) ?: a.name.compareToIgnoreCase(b.name)
                 },
                 seqTypes  : seqTypeService.list().sort {
                     it.displayNameWithLibraryLayout
@@ -128,12 +128,14 @@ class WorkflowSystemConfigController implements CheckAndCall {
     }
 
     private List<Map> buildReferenceGenomesOutputObject(Set<ReferenceGenome> rgList) {
-        return rgList.collect { ReferenceGenome rg ->
+        return rgList.sort { ReferenceGenome a, ReferenceGenome b ->
+            (a.legacy <=> b.legacy) ?: a.name.compareToIgnoreCase(b.name)
+        }.collect { ReferenceGenome rg ->
             [
-                    id  : rg.id,
-                    name: rg.name,
+                    id         : rg.id,
+                    displayName: rg.displayName,
             ]
-        }.sort { it.name } as List<Map>
+        } as List<Map>
     }
 
     private List<Map> buildSeqTypesOutputObject(Set<SeqType> seqTypeList) {

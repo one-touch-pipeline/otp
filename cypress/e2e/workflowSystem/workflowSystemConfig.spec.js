@@ -35,6 +35,7 @@ describe('Check workflow system configuration page', {
       const priority = Math.floor(Math.random() * 1000);
       const maxRuns = Math.floor(Math.random() * 10);
       const supportedSeqType = 'ChIP PAIRED bulk';
+      const defaultRefGen = 'GRCm38mm10_PhiX';
 
       cy.intercept('/workflowSystemConfig/updateWorkflow*').as('updateWorkflow');
 
@@ -48,6 +49,7 @@ describe('Check workflow system configuration page', {
       cy.checkedTyping(() => cy.get('#editWorkflowModal #modal-priority'), priority);
       cy.checkedTyping(() => cy.get('#editWorkflowModal #modal-max-runs'), maxRuns);
       cy.get('#editWorkflowModal #modal-seqTypes').select(supportedSeqType, { force: true });
+      cy.get('#editWorkflowModal #modal-refGenomes').select(defaultRefGen, { force: true });
 
       cy.get('#editWorkflowModal #confirmModal').click();
 
@@ -56,6 +58,7 @@ describe('Check workflow system configuration page', {
         cy.get('td').contains('Cell Ranger').siblings().contains(priority);
         cy.get('td').contains('Cell Ranger').siblings().contains(maxRuns);
         cy.get('td').contains('Cell Ranger').siblings().contains(supportedSeqType);
+        cy.get('td').contains('Cell Ranger').siblings().contains(defaultRefGen);
       });
     });
 
@@ -90,7 +93,7 @@ describe('Check workflow system configuration page', {
           expect(interception2.response.statusCode).to.eq(200);
           cy.get(`#modify-btn-${workflowVersionId}`).parent().parent().as('wvRow');
           cy.get('@wvRow').contains(interception2.response.body.comment);
-          cy.get('@wvRow').contains(interception2.response.body.allowedRefGenomes[0].name);
+          cy.get('@wvRow').contains(interception2.response.body.allowedRefGenomes[0].displayName);
           cy.get('@wvRow').contains(interception2.response.body.supportedSeqTypes[0].displayName);
           cy.get('@wvRow').contains(interception2.response.body.commentData.date);
           cy.get('@wvRow').contains(interception2.response.body.commentData.author);

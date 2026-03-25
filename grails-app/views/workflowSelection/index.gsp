@@ -128,7 +128,7 @@
                                 <td>${config.workflow.name}</td>
                                 <td>${config.seqType}</td>
                                 <td>${config.version.workflowVersion}</td>
-                                <td>${config.refGen.referenceGenome.name}</td>
+                                <td>${config.refGen.referenceGenome}</td>
                                 <td>${config.refGen.species.join(' + ')}</td>
                                 <sec:ifAllGranted roles="ROLE_OPERATOR">
                                     <td>
@@ -159,7 +159,7 @@
                                 </td>
                                 <td>
                                     <g:select required="true" class="use-select-2 w-100" id="alignment-ref-genome-select" name="alignment-ref-genome-select"
-                                              noSelection="${['': 'Unselected']}" from="${alignment.referenceGenomes}" optionKey="id" optionValue="name"/>
+                                              noSelection="${['': 'Unselected']}" from="${alignment.referenceGenomes}" optionKey="id" optionValue="displayName"/>
                                 </td>
                                 <td>
                                     <g:select required="true" class="use-select-2 w-100" id="alignment-species-select" name="alignment-species-select"
