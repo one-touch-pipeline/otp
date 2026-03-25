@@ -117,11 +117,10 @@ class TriggerWorkflowsServiceSpec extends HibernateSpec implements IsRoddy, Work
         setupRoddyBamFileWithdrawServiceMock()
 
         when:
-        TriggerWorkflowsResult result = service.triggerWorkflow([] as Set, [bamFile1, bamFile2] as Set, true, deciderAction)
+        DeciderResult result = service.triggerWorkflow([] as Set, [bamFile1, bamFile2] as Set, true, deciderAction)
 
         then:
         result.newArtefacts.size() == 2
-        result.mergingWorkPackages.isEmpty()
     }
 
     void "run triggerWorkflow with different workflow combinations"() {
@@ -150,11 +149,10 @@ class TriggerWorkflowsServiceSpec extends HibernateSpec implements IsRoddy, Work
         setupRoddyBamFileWithdrawServiceMock()
 
         when:
-        TriggerWorkflowsResult result = service.triggerWorkflow([] as Set, [bamFile] as Set, true, deciderAction)
+        DeciderResult result = service.triggerWorkflow([] as Set, [bamFile] as Set, true, deciderAction)
 
         then:
         result.newArtefacts.size() == expectedArtefactCount
-        result.mergingWorkPackages.size() == (expectedMergingWorkPackages ? [workPackage] : []).size()
 
         where:
         scenario               | workflowOverrides                                                                                                                                                                                                                                                                                  | enabledWorkflows                     | expectedMergingWorkPackages | expectedArtefactCount

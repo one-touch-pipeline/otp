@@ -48,7 +48,6 @@ import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.otp.withdraw.RoddyBamFileWithdrawService
-import de.dkfz.tbi.otp.workflow.alignment.TriggerWorkflowsResult
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.decider.AllDecider
 import de.dkfz.tbi.otp.workflowExecution.decider.Decider
@@ -189,8 +188,8 @@ class TriggerWorkflowsService {
     @Transactional
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     @CompileDynamic
-    TriggerWorkflowsResult triggerWorkflow(Collection<SeqTrack> seqTrackList, Collection<AbstractBamFile> bamFiles,
-                                           boolean ignoreSeqPlatformGroup = false, Map<Class<? extends Decider>, DeciderCreateWorkflowAction> deciderAction) {
+    DeciderResult triggerWorkflow(Collection<SeqTrack> seqTrackList, Collection<AbstractBamFile> bamFiles,
+                                  boolean ignoreSeqPlatformGroup = false, Map<Class<? extends Decider>, DeciderCreateWorkflowAction> deciderAction) {
         // Modify the notification status
         ticketService.findAllTickets(seqTrackList).each {
             ticketService.resetAlignmentAndAnalysisNotification(it)
@@ -235,7 +234,7 @@ class TriggerWorkflowsService {
 
         log.debug(deciderResult.toString())
 
-        return new TriggerWorkflowsResult(deciderResult, mergingWorkPackages)
+        return deciderResult
     }
 
     /**

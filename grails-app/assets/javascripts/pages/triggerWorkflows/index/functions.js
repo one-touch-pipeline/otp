@@ -107,13 +107,13 @@ $(() => {
               if (response.warnings.length === 0) {
                 resultWarning.append('<li>none</li>');
               }
-              response.newWorkPackages.forEach((newWorkPackage) => {
-                resultWorkPackageList.append(`<li>${newWorkPackage}</li>`);
-              });
-              if (response.newWorkPackages.length) {
+              if (response.newArtefacts && response.newArtefacts.length > 0) {
+                response.newArtefacts.forEach((artefact) => {
+                  resultWorkPackageList.append(`<li>${artefact}</li>`);
+                });
                 $.otp.toaster.showSuccessToast(
                   $.otp.triggerWorkflows.TOAST_TITLE.TRIGGER_SUCCESS,
-                  `${response.newWorkPackages.length} Workflows have been started successfully. ` +
+                  'Workflows have been started successfully. ' +
                   'Refer to result section for details.'
                 );
               } else {

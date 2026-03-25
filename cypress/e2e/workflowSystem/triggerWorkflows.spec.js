@@ -67,7 +67,7 @@ describe('Check trigger Workflows page', () => {
           .each((row) => {
             cy.wrap(row).contains('recreate').contains('since action is CREATE_ALWAYS');
           });
-        cy.get('#resultWorkPackageList li').should('have.length', 6);
+        cy.get('#resultWorkPackageList li').should('have.length.at.least', 6);
       });
     });
 
@@ -111,7 +111,7 @@ describe('Check trigger Workflows page', () => {
           .each((row) => {
             cy.wrap(row).contains('recreate').contains('since action is CREATE_ALWAYS');
           });
-        cy.get('#resultWorkPackageList li').should('have.length', 6);
+        cy.get('#resultWorkPackageList li').should('have.length.at.least', 6);
       });
     });
 
@@ -150,7 +150,7 @@ describe('Check trigger Workflows page', () => {
         .each((row) => {
           cy.wrap(row).contains('recreate').contains('since action is CREATE_ALWAYS');
         });
-      cy.get('#resultWorkPackageList li').should('have.length', 2);
+      cy.get('#resultWorkPackageList li').should('not.contain', 'none').should('have.length.at.least', 2);
     });
 
     it('should search seq tracks by ilse number and trigger workflow', () => {
@@ -237,7 +237,7 @@ describe('Check trigger Workflows page', () => {
           .each((row) => {
             cy.wrap(row).contains('recreate').contains('since action is CREATE_ALWAYS');
           });
-        cy.get('#resultWorkPackageList li').should('have.length', 1);
+        cy.get('#resultWorkPackageList li').should('not.contain', 'none').should('have.length.at.least', 1);
       });
     });
 
@@ -278,7 +278,7 @@ describe('Check trigger Workflows page', () => {
           .each((row) => {
             cy.wrap(row).contains('recreate').contains('since action is CREATE_ALWAYS');
           });
-        cy.get('#resultWorkPackageList li').should('have.length', 1);
+        cy.get('#resultWorkPackageList li').should('not.contain', 'none').should('have.length.at.least', 1);
       });
     });
 

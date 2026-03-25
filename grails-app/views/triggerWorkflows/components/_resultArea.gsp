@@ -34,7 +34,7 @@
 
     <div class="card">
         <div class="card-header">
-            <i class="bi bi-list"></i> <g:message code="triggerWorkflows.result.bamFile.title"/>
+            <i class="bi bi-list"></i> <g:message code="triggerWorkflows.result.newWorkflows.title"/>
         </div>
 
         <div class="card-body">

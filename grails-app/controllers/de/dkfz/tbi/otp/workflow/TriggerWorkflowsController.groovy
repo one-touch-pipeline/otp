@@ -29,7 +29,6 @@ import de.dkfz.tbi.otp.SearchSeqTrackService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
-import de.dkfz.tbi.otp.workflow.alignment.TriggerWorkflowsResult
 import de.dkfz.tbi.otp.workflowExecution.decider.*
 
 @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -170,13 +169,13 @@ class TriggerWorkflowsController {
             }
         }
 
-        TriggerWorkflowsResult triggerAlignmentResult = triggerWorkflowsService.triggerWorkflow(seqTracks, bamFiles, ignoreSeqPlatformGroup, deciderAction)
+        DeciderResult deciderResult = triggerWorkflowsService.triggerWorkflow(seqTracks, bamFiles, ignoreSeqPlatformGroup, deciderAction)
 
         return render([
-                success        : !triggerAlignmentResult.mergingWorkPackages.empty,
-                infos          : triggerAlignmentResult.infos,
-                warnings       : triggerAlignmentResult.warnings,
-                newWorkPackages: triggerAlignmentResult.mergingWorkPackages*.toString(),
+                success     : !deciderResult.newArtefacts.empty,
+                infos       : deciderResult.infos,
+                warnings    : deciderResult.warnings,
+                newArtefacts: deciderResult.newArtefacts*.toString(),
         ] as JSON)
     }
 
