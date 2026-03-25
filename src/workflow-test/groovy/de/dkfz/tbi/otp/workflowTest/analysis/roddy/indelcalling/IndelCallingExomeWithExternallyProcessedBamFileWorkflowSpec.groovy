@@ -19,33 +19,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.analysis.indel
+package de.dkfz.tbi.otp.workflowTest.analysis.roddy.indelcalling
 
-import spock.lang.Specification
+import de.dkfz.tbi.otp.analysis.pair.bamfiles.SeqTypeAndInputBamFilesHCC1187Div32
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
-import de.dkfz.tbi.TestCase
+class IndelCallingExomeWithExternallyProcessedBamFileWorkflowSpec extends AbstractIndelCallingWorkflowSpec implements SeqTypeAndInputBamFilesHCC1187Div32 {
 
-class IndelCheckFragmentKeysJobSpec extends Specification {
-    IndelCheckFragmentKeysJob job
+    void setupSpec() {
+        ignoreRoddyBamFileTest = true
+    }
 
-    void "getCvalues, should return expected keys"() {
-        given:
-        job = new IndelCheckFragmentKeysJob()
-        Collection<String> expectedKeys = [
-                "VEP_BINARY",
-                "VEP_VERSION",
-                "VEP_FORKS",
-                "VEP_FA_INDEX",
-                "VEP_CACHE_BASE",
-                "VEP_PLUGIN_CADD_SNV",
-                "VEP_PLUGIN_SPLICEAI_SNV",
-                "VEP_PLUGIN_SPLICEAI_INDEL",
-                "VEP_SPECIES",
-                "VEP_ASSEMBLY",
-                "VEP_OUT_FORMAT",
-        ]
-
-        expect:
-        TestCase.assertContainSame(job.cvalues, expectedKeys)
+    @Override
+    SeqType seqTypeToUse() {
+        return SeqTypeService.exomePairedSeqType
     }
 }

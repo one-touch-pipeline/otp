@@ -22,59 +22,48 @@
  */
 
     INSERT INTO external_workflow_config_fragment(id, version, date_created, last_updated, object_version, name, config_values)
-        VALUES(nextval('hibernate_sequence'), 0, now(), now(), 0, 'Default test-resource values for Roddy Indel calling test',
+        VALUES(nextval('hibernate_sequence'), 0, now(), now(), 0, 'Default resources values for Roddy Indel calling 1.2.177-603',
 '{' ||
 '    "RODDY": {' ||
 '        "resources": {' ||
-'            "checkSampleSwap": {' ||
-'                "memory": "3",' ||
-'                "value": "checkSampleSwap_TiN.sh",' ||
-'                "walltime": "2",' ||
-'                "cores": 3,' ||
-'                "basepath": "indelCallingWorkflow"' ||
-'            },' ||
 '            "indelCalling": {' ||
-'                "memory": "16",' ||
+'                "memory": "32",' ||
 '                "value": "indelCalling.sh",' ||
-'                "walltime": "1",' ||
+'                "nodes": 1,' ||
+'                "walltime": "100",' ||
 '                "cores": 8,' ||
 '                "basepath": "indelCallingWorkflow"' ||
 '            },' ||
+'            "checkSampleSwap": {' ||
+'                "memory": "10",' ||
+'                "value": "checkSampleSwap_TiN.sh",' ||
+'                "nodes": 1,' ||
+'                "walltime": "24",' ||
+'                "cores": 3,' ||
+'                "basepath": "indelCallingWorkflow"' ||
+'            },' ||
 '            "indelAnnotation": {' ||
-'                "memory": "6",' ||
+'                "memory": "16",' ||
 '                "value": "platypusIndelAnnotation.sh",' ||
-'                "walltime": "10",' ||
-'                "cores": 6,' ||
+'                "nodes": 1,' ||
+'                "walltime": "50",' ||
+'                "cores": 3,' ||
 '                "basepath": "indelCallingWorkflow"' ||
 '            },' ||
 '            "indelDeepAnnotation": {' ||
-'                "memory": "1",' ||
+'                "memory": "8",' ||
 '                "value": "vcf_pipeAnnotator.sh",' ||
-'                "walltime": "2",' ||
-'                "cores": 3,' ||
+'                "nodes": 1,' ||
+'                "walltime": "10",' ||
+'                "cores": 2,' ||
 '                "basepath": "indelCallingWorkflow"' ||
 '            },' ||
 '            "indelVcfFilter": {' ||
-'                "memory": "2",' ||
+'                "memory": "8",' ||
 '                "value": "filter_vcf.sh",' ||
-'                "walltime": "2",' ||
+'                "nodes": 1,' ||
+'                "walltime": "12",' ||
 '                "cores": 3,' ||
-'                "basepath": "indelCallingWorkflow"' ||
-'            },' ||
-'            "indelCallingWithoutControl": {' ||
-'                "value": "indelCalling.sh",' ||
-'                "walltime": "1",' ||
-'                "basepath": "indelCallingWorkflow"' ||
-'            },' ||
-'            "indelAnnotationWithoutControl": {' ||
-'                "memory": "3",' ||
-'                "value": "platypusIndelAnnotation.sh",' ||
-'                "walltime": "2",' ||
-'                "basepath": "indelCallingWorkflow"' ||
-'            },' ||
-'            "indelVcfFilterWithoutControl": {' ||
-'                "value": "filter_vcf.sh",' ||
-'                "walltime": "1",' ||
 '                "basepath": "indelCallingWorkflow"' ||
 '            }' ||
 '        }' ||
@@ -84,10 +73,14 @@
     ON CONFLICT DO NOTHING;
 
     INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, priority, selector_type, external_workflow_config_fragment_id)
-    VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default test-resource values for Roddy Indel calling test', 100, 'DEFAULT_VALUES', (
-       SELECT id FROM external_workflow_config_fragment WHERE name = 'Default test-resource values for Roddy Indel calling test'))
+    VALUES(nextval('hibernate_sequence'), 0, now(), now(), 'Default resources values for Roddy Indel calling 1.2.177-603', 6, 'DEFAULT_VALUES', (
+       SELECT id FROM external_workflow_config_fragment WHERE name = 'Default resources values for Roddy Indel calling 1.2.177-603'))
     ON CONFLICT DO NOTHING;
 
     INSERT INTO external_workflow_config_selector_workflow (external_workflow_config_selector_workflows_id, workflow_id)
-        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default test-resource values for Roddy Indel calling test'), (SELECT id FROM workflow WHERE name = 'Roddy Indel calling')
+        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for Roddy Indel calling 1.2.177-603'), (SELECT id FROM workflow WHERE name = 'Roddy Indel calling')
+    ON CONFLICT DO NOTHING;
+
+    INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
+        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for Roddy Indel calling 1.2.177-603'), (SELECT id FROM workflow_version WHERE api_version_id = (SELECT id FROM workflow_api_version WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy Indel calling')) AND workflow_version.workflow_version = '1.2.177-603')
     ON CONFLICT DO NOTHING;

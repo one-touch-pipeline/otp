@@ -155,13 +155,14 @@ void configureApptainer() {
 }
 
 /**
- * configure Vep for snv for roddy
+ * configure Vep for snv and indel for roddy
  */
-void configureVepForSnvLocationSpecific() {
-    println "configure vep for SNV"
+void configureVepForSnvAndIndelLocationSpecific() {
+    println "configure vep for SNV and Indel"
     List<Workflow> roddyWorkflows = [
             // analysis
             SnvWorkflow.WORKFLOW,
+            IndelWorkflow.WORKFLOW,
     ].collect {
         println "- ${it}"
         CollectionUtils.exactlyOneElement(Workflow.findAllByName(it), "Could not find '${it}'")
@@ -229,7 +230,7 @@ try {
         println "Skip fragment configuration, since no workflows in new system initialized"
     } else {
         configureApptainer()
-        configureVepForSnvLocationSpecific()
+        configureVepForSnvAndIndelLocationSpecific()
         configureWorkflowSpecificSettings()
     }
 

@@ -25,7 +25,11 @@ import de.dkfz.tbi.otp.analysis.pair.bamfiles.SeqTypeAndInputBamFilesHCC1187Div6
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
-class IndelCallingWholeGenomeWorkflowSpec extends AbstractIndelCallingWorkflowSpec implements SeqTypeAndInputBamFilesHCC1187Div64 {
+class IndelCallingWholeGenomeWithExternallyProcessedBamFileWorkflowSpec extends AbstractIndelCallingWorkflowSpec implements SeqTypeAndInputBamFilesHCC1187Div64 {
+
+    void setupSpec() {
+        ignoreRoddyBamFileTest = true
+    }
 
     @Override
     SeqType seqTypeToUse() {

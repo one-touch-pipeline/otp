@@ -21,25 +21,27 @@
  */
 package de.dkfz.tbi.otp.workflowTest.analysis.roddy.indelcalling
 
-import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelLinkFileService
-import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelQualityControl
-import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelSampleSwapDetection
-import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelWorkFileService
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.analysis.indel.IndelWorkflow
 import de.dkfz.tbi.otp.workflowExecution.decider.Decider
 import de.dkfz.tbi.otp.workflowExecution.decider.analysis.IndelDecider
 import de.dkfz.tbi.otp.workflowTest.analysis.roddy.AbstractRoddyAnalysisWorkflowSpec
-import de.dkfz.tbi.otp.workflowTest.referenceGenome.ReferenceGenomeHg37
+import de.dkfz.tbi.otp.workflowTest.referenceGenome.ReferenceGenomeHg37Phix
 
 import java.nio.file.Path
 
-abstract class AbstractIndelCallingWorkflowSpec extends AbstractRoddyAnalysisWorkflowSpec<IndelCallingInstance> implements ReferenceGenomeHg37 {
+abstract class AbstractIndelCallingWorkflowSpec extends AbstractRoddyAnalysisWorkflowSpec<IndelCallingInstance> implements ReferenceGenomeHg37Phix {
 
     IndelDecider indelDecider
     IndelLinkFileService indelLinkFileService
     IndelWorkFileService indelWorkFileService
+
+    @Override
+    void setupData() {
+        super.setupData()
+        createVepFragment()
+    }
 
     @Override
     List<Path> filesToCheck(IndelCallingInstance instance) {

@@ -25,7 +25,11 @@ import de.dkfz.tbi.otp.analysis.pair.bamfiles.SeqTypeAndInputBamFilesHCC1187Div3
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
-class IndelCallingExomeWorkflowSpec extends AbstractIndelCallingWorkflowSpec implements SeqTypeAndInputBamFilesHCC1187Div32 {
+class IndelCallingExomeWithRoddyBamFileWorkflowSpec extends AbstractIndelCallingWorkflowSpec implements SeqTypeAndInputBamFilesHCC1187Div32 {
+
+    void setupSpec() {
+        ignoreExternalBamFileTest = true
+    }
 
     @Override
     SeqType seqTypeToUse() {
