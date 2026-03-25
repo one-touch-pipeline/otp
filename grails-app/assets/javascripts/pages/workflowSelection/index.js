@@ -24,7 +24,7 @@
  * A handler to change the shown version to Not configured after one Fastqc workflow is configured
  * This js avoids to reload the backend
  */
-workflowSelectionUpdateSuccessHandler = function (container) {
+window.workflowSelectionUpdateSuccessHandler = function (container) {
   'use strict';
 
   const NOT_CONFIGURED = 'Not configured';

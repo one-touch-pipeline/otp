@@ -44,40 +44,40 @@ $.otp.toaster = {
    * @param title - title of the toast
    * @param message - the toasts message
    */
-  // eslint-disable-next-line strict
   showInfoToast(title = 'Info', message = '') {
     this.showToast(title, $.otp.toaster.convertMessageArray(message), 30000, 'info');
   },
+
   /**
    * Fires a success toast message.
    *
    * @param title - title of the toast
    * @param message - the toasts message
    */
-  // eslint-disable-next-line strict
   showSuccessToast(title = 'Success', message = 'Operation has been successful.') {
     this.showToast(title, $.otp.toaster.convertMessageArray(message), 15000, 'success');
   },
+
   /**
    * Fires a warning toast message.
    *
    * @param title - title of the toast
    * @param message - the toasts message
    */
-  // eslint-disable-next-line strict
   showWarningToast(title = 'Warning', message = 'A warning occurred during the operation.') {
     this.showToast(title, $.otp.toaster.convertMessageArray(message), 30000, 'warning');
   },
+
   /**
    * Fires an error toast message.
    *
    * @param title - title of the toast
    * @param error - the toast's error message
    */
-  // eslint-disable-next-line strict
   showErrorToast(title = 'Error', error = 'Unknown error. Please try again.') {
     this.showToast(title, $.otp.toaster.convertMessageArray(error), 60000, 'danger');
   },
+
   /**
    * Fires a toast message.
    *
@@ -86,7 +86,6 @@ $.otp.toaster = {
    * @param displayTime - time in ms to show the toast
    * @param state - allowed states: info, success, warning, danger. default is info
    */
-  // eslint-disable-next-line strict
   showToast(title, message, displayTime, state = 'info') {
     const stateProps = this.getStateProps(state);
     const date = new Date().toLocaleTimeString('en-US', {

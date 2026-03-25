@@ -777,12 +777,6 @@ task esLintExport(type: NpmTask) {
     args = ['run', 'lint-export']
 }
 
-task esLintExportCi(type: NpmTask) {
-    dependsOn npmInstall
-    environment = ['CI': 'true']
-    args = ['run', 'lint-export']
-}
-
 task esLintAutoFix(type: NpmTask) {
     dependsOn npmInstall
     environment = ['CI': 'true']

@@ -40,8 +40,10 @@
         {
           className: 'details-control',
           ordering: false,
-          // eslint-disable-next-line max-len
-          render: () => '<button class="btn btn-xs btn-info spinner-button" title="Show/hide workflow versions"><i id="versions-icon" class="bi bi-chevron-bar-expand versions-icon"></i><span class="spinner-border spinner-border-sm d-none" style="display: none" aria-hidden="true"></span></button>'
+          render: () => '<button class="btn btn-xs btn-info spinner-button" title="Show/hide workflow versions">' +
+            '<i id="versions-icon" class="bi bi-chevron-bar-expand versions-icon">' +
+            '</i><span class="spinner-border spinner-border-sm d-none" style="display: none" aria-hidden="true">' +
+            '</span></button>'
         },
         { data: 'name' },
         { data: 'priority' },
@@ -70,8 +72,8 @@
         },
         {
           data: '',
-          // eslint-disable-next-line max-len
-          render: () => '<button class="btn btn-sm btn-primary float-right workflow-edit-btn" aria-label="Edit workflow"><i class="bi bi-pencil"></i></button>'
+          render: () => '<button class="btn btn-sm btn-primary float-right workflow-edit-btn" ' +
+            'aria-label="Edit workflow"><i class="bi bi-pencil"></i></button>'
         }
       ]
     });

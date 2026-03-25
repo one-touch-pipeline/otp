@@ -164,7 +164,6 @@ $(() => {
         action: 'generateWarnings'
       };
 
-      // eslint-disable-next-line default-case
       switch ($.otp.triggerWorkflows.searchQuery.type) {
         case 'project-tab':
           $.otp.triggerWorkflows.searchQuery.seqTypes = $('#seqTypeProject').select2('data')
@@ -355,7 +354,6 @@ $(() => {
       }],
       ajax: (inputdata, callback) => {
         if ($.otp.triggerWorkflows.tableInitialized) {
-          // eslint-disable-next-line no-param-reassign
           inputdata = $.otp.triggerWorkflows.searchQuery;
           $.otp.triggerWorkflows.fetchData(inputdata).then((outputdata) => {
             callback(outputdata.data);

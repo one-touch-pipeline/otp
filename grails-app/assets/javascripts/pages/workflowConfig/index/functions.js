@@ -390,7 +390,6 @@ $(document).ready(() => {
       },
       {
         targets: [4],
-        // eslint-disable-next-line no-nested-ternary
         render: (data) => (typeof (data) === 'string' ? data : data ? data.name : '')
       },
       {
@@ -430,7 +429,6 @@ $(document).ready(() => {
       }
     },
     ajax: (inputdata, callback) => {
-      // eslint-disable-next-line no-param-reassign
       inputdata.query = $.otp.workflowConfig.selectedOptions;
       if ($.otp.workflowConfig.tableInitialized) {
         $.otp.workflowConfig.fetchData(inputdata).then((outputdata) => {
@@ -514,7 +512,6 @@ $(document).ready(() => {
       // filter the workflow versions options shown
       $.otp.workflowConfig.getWorkflowVersionSelection().select2({
         templateResult: (data) => {
-          /* eslint-disable-next-line */
           for (const workflow of selectedWorkflows) {
             if (data.text.startsWith(workflow.text)) {
               return data.text;
@@ -558,7 +555,6 @@ $(document).ready(() => {
         });
         oFragment.val(response[0].id).trigger('change');
         oFragment.on('select2:select', (e) => {
-          // eslint-disable-next-line prefer-destructuring
           const configValues = e.params.data.element.configValues;
           // configValues
           const formattedValue = JSON.stringify(JSON.parse(configValues), null, 2);

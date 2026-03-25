@@ -74,7 +74,6 @@ $.otp.resultsTable = {
         });
       },
       fnInitComplete() {
-        // eslint-disable-next-line no-new
         new $.fn.dataTable.FixedColumns(this, {
           leftColumns: 2
         });

@@ -92,7 +92,6 @@ function renderStepDataTable(steps) {
       step.id,
       step.lastUpdated,
       step.workflowRunJobCanBeRestarted ? '<i class="bi bi-check"></i>' : '<i class="bi bi-x"></i>',
-      /* eslint-disable max-len */
       `<div class="btn-group float-right row-action-buttons" role="group" aria-label="table actions">
            <button class="btn btn-primary" 
                    onclick="restartStep(${step.id})"${(!step.workflowRunJobCanBeRestarted ? 'disabled' : '')}
@@ -123,7 +122,6 @@ function renderStepDataTable(steps) {
                <i class="bi bi-file-earmark-x"></i>
            </button>
        </div>`
-      /* eslint-enable max-len */
     ]).draw();
 
     $('a').tooltip({ html: true });
@@ -334,7 +332,6 @@ function markSelectedRunsAsFinalFailed() {
     });
   });
 }
-/* eslint-enable no-unused-vars */
 
 function getSelectedSteps(callback) {
   'use strict';

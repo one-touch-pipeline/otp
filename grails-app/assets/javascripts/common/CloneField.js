@@ -57,8 +57,9 @@ $(() => {
       $.otp.applySelect2($('select.use-select-2-after-clone', clone));
 
       // Remove the clone-template class, as only the actual template should have it
-      // eslint-disable-next-line max-len
-      $(`.clone-target-${value} > .clone-template-${value}`).removeClass(`clone-template-${value}`).removeClass('hidden');
+      $(`.clone-target-${value} > .clone-template-${value}`)
+        .removeClass(`clone-template-${value}`)
+        .removeClass('hidden');
       return false;
     });
   });

@@ -150,7 +150,6 @@ $(() => {
           if (json.anythingWithdrawn) $('#withdrawn_description').show();
           json.aaData.forEach((row) => {
             const pid = row[0];
-            // eslint-disable-next-line no-param-reassign
             row[0] = $.otp.createLinkMarkup({
               controller: 'individual',
               action: 'show',
@@ -208,7 +207,6 @@ $(() => {
   const proxied = $.otp.getDownloadButton;
 
   $.otp.getDownloadButton = function () {
-    // eslint-disable-next-line prefer-rest-params
     const downloadButton = proxied.apply(this, arguments);
 
     // Add header formatter to remove HTML tags, entities, and extra spaces

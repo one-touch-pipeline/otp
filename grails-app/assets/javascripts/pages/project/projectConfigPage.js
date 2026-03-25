@@ -43,7 +43,6 @@ function onSaveUnixGroup() {
   updateUnixGroup(oldUnixGroup);
 }
 
-// eslint-disable-next-line strict
 function updateUnixGroup(oldUnixGroup, force = false) {
   const unixGroupInputField = $('#unixGroupInput');
   const newUnixGroup = unixGroupInputField.val();
@@ -109,7 +108,6 @@ function onSaveAnalysisDir() {
   updateAnalysisDir(oldAnalysisDir);
 }
 
-// eslint-disable-next-line strict
 function updateAnalysisDir(oldAnalysisDir, force = false) {
   const analysisDirInputField = $('#analysisDirInput');
   const newAnalysisDir = analysisDirInputField.val();

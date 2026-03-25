@@ -84,40 +84,40 @@ $(() => {
     $('.edit-switch-label', outerContainer).hide();
   }
 
-  // eslint-disable-next-line max-len
-  $('div.edit-switch-text .edit-switch-editor button.save, div.edit-switch-integer .edit-switch-editor button.save').on('click', function () {
-    const container = $(this).parent();
-    const outerContainer = container.parent();
-    const inputField = $('input[name=value]', container);
-    if (!inputField[0].validity.valid) {
-      window.alert('The input is not valid. Please provide a valid input value.');
-      return;
-    }
-    $.ajax({
-      url: $('input:hidden[name=target]', container).val(),
-      dataType: 'json',
-      type: 'POST',
-      data: { value: inputField.val() },
-      success(data) {
-        if (data.success) {
-          success('Success', 'Data stored successfully');
-          $('p.edit-switch-label span', outerContainer).text($('input[name=value]', container).val());
-        } else {
-          failure('Data could not be stored', data.error);
+  $('div.edit-switch-text .edit-switch-editor button.save, div.edit-switch-integer .edit-switch-editor button.save')
+    .on('click', function () {
+      const container = $(this).parent();
+      const outerContainer = container.parent();
+      const inputField = $('input[name=value]', container);
+      if (!inputField[0].validity.valid) {
+        window.alert('The input is not valid. Please provide a valid input value.');
+        return;
+      }
+      $.ajax({
+        url: $('input:hidden[name=target]', container).val(),
+        dataType: 'json',
+        type: 'POST',
+        data: { value: inputField.val() },
+        success(data) {
+          if (data.success) {
+            success('Success', 'Data stored successfully');
+            $('p.edit-switch-label span', outerContainer).text($('input[name=value]', container).val());
+          } else {
+            failure('Data could not be stored', data.error);
+            $('input[name=value]', container).val($('p.edit-switch-label span', outerContainer).text());
+          }
+        },
+        error(jqXHR, textStatus, errorThrown) {
+          if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
+            failure('Request failed', jqXHR.responseJSON.message);
+          } else {
+            failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
+          }
           $('input[name=value]', container).val($('p.edit-switch-label span', outerContainer).text());
         }
-      },
-      error(jqXHR, textStatus, errorThrown) {
-        if (jqXHR && jqXHR.responseJSON && jqXHR.responseJSON.message) {
-          failure('Request failed', jqXHR.responseJSON.message);
-        } else {
-          failure(`${textStatus} occurred while processing the data`, `Reason: ${errorThrown}`);
-        }
-        $('input[name=value]', container).val($('p.edit-switch-label span', outerContainer).text());
-      }
-    });
-    $('p.edit-switch-editor', outerContainer).hide();
-    $('p.edit-switch-label', outerContainer).show();
+      });
+      $('p.edit-switch-editor', outerContainer).hide();
+      $('p.edit-switch-label', outerContainer).show();
   });
 
   $('div.edit-switch-text-area p.edit-switch-editor button.save').on('click', function () {

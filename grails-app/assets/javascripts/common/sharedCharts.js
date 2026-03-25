@@ -22,7 +22,6 @@
 
 $.otp.sharedCharts = {
 
-  // eslint-disable-next-line strict
   renderSampleCountPerSeqType(projectGroup = 'All projects') {
     Chart.register(ChartDataLabels);
 
@@ -33,7 +32,6 @@ $.otp.sharedCharts = {
     });
 
     $.otp.chart.renderChartOnElement('sampleCountPerSequenceTypePie', dataUrl, (domContext, chartData) => {
-      // eslint-disable-next-line no-new
       new Chart(domContext, {
         type: 'pie',
         data: {
@@ -44,7 +42,6 @@ $.otp.sharedCharts = {
             datalabels: {
               display: true,
               color: '#fff',
-              // eslint-disable-next-line no-mixed-operators
               formatter: (value, context) => `${Math.round(value / context.chart.getDatasetMeta(0).total * 100)}%`
             }
           }]
@@ -60,7 +57,6 @@ $.otp.sharedCharts = {
     });
   },
 
-  // eslint-disable-next-line strict
   renderSampleCountPerSeqTypeBySelectedProject() {
     Chart.register(ChartDataLabels);
 
@@ -70,7 +66,6 @@ $.otp.sharedCharts = {
     });
 
     $.otp.chart.renderChartOnElement('sampleCountPerSequenceTypePie', dataUrl, (domContext, chartData) => {
-      // eslint-disable-next-line no-new
       new Chart(domContext, {
         type: 'pie',
         data: {
@@ -81,7 +76,6 @@ $.otp.sharedCharts = {
             datalabels: {
               display: true,
               color: '#fff',
-              // eslint-disable-next-line no-mixed-operators
               formatter: (value, context) => `${Math.round(value / context.chart.getDatasetMeta(0).total * 100)}%`
             }
           }]
@@ -97,7 +91,6 @@ $.otp.sharedCharts = {
     });
   },
 
-  // eslint-disable-next-line strict
   renderProjectCountPerDate(projectGroup = 'All projects') {
     const dataUrl = $.otp.createLink({
       controller: 'statistic',
@@ -106,7 +99,6 @@ $.otp.sharedCharts = {
     });
 
     $.otp.chart.renderChartOnElement('projectCountPerDate', dataUrl, (domContext, chartData) => {
-      // eslint-disable-next-line no-new
       new Chart(domContext, {
         type: 'line',
         data: {
@@ -122,7 +114,6 @@ $.otp.sharedCharts = {
     });
   },
 
-  // eslint-disable-next-line strict
   renderLaneCountPerDate(projectGroup = 'All projects') {
     const dataUrl = $.otp.createLink({
       controller: 'statistic',
@@ -131,7 +122,6 @@ $.otp.sharedCharts = {
     });
 
     $.otp.chart.renderChartOnElement('laneCountPerDate', dataUrl, (domContext, chartData) => {
-      // eslint-disable-next-line no-new
       new Chart(domContext, {
         type: 'line',
         data: {
@@ -146,7 +136,6 @@ $.otp.sharedCharts = {
     });
   },
 
-  // eslint-disable-next-line strict
   renderLaneCountPerDateBySelectedProject() {
     const dataUrl = $.otp.createLink({
       controller: 'statistic',
@@ -154,7 +143,6 @@ $.otp.sharedCharts = {
     });
 
     $.otp.chart.renderChartOnElement('laneCountPerDate', dataUrl, (domContext, chartData) => {
-      // eslint-disable-next-line no-new
       new Chart(domContext, {
         type: 'line',
         data: {
@@ -169,7 +157,6 @@ $.otp.sharedCharts = {
     });
   },
 
-  // eslint-disable-next-line strict
   renderGigaBasesPerDay(projectGroup = 'All projects') {
     const dataUrl = $.otp.createLink({
       controller: 'statistic',
@@ -178,7 +165,6 @@ $.otp.sharedCharts = {
     });
 
     $.otp.chart.renderChartOnElement('gigaBasesPerDay', dataUrl, (domContext, chartData) => {
-      // eslint-disable-next-line no-new
       new Chart(domContext, {
         type: 'line',
         data: {
@@ -193,7 +179,6 @@ $.otp.sharedCharts = {
     });
   },
 
-  // eslint-disable-next-line strict
   renderPatientsCountPerSequenceType(projectGroup = 'All projects') {
     const dataUrl = $.otp.createLink({
       controller: 'statistic',
@@ -202,7 +187,6 @@ $.otp.sharedCharts = {
     });
 
     $.otp.chart.renderChartOnElement('patientsCountPerSequenceType', dataUrl, (domContext, chartData) => {
-      // eslint-disable-next-line no-new
       new Chart(domContext, {
         type: 'bar',
         data: {
@@ -218,7 +202,6 @@ $.otp.sharedCharts = {
     });
   },
 
-  // eslint-disable-next-line strict
   renderProjectCountPerSequenceType(projectGroup = 'All projects') {
     const dataUrl = $.otp.createLink({
       controller: 'statistic',
@@ -227,7 +210,6 @@ $.otp.sharedCharts = {
     });
 
     $.otp.chart.renderChartOnElement('projectCountPerSequenceType', dataUrl, (domContext, chartData) => {
-      // eslint-disable-next-line no-new
       new Chart(domContext, {
         type: 'bar',
         data: {

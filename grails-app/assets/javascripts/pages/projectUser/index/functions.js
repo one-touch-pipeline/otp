@@ -53,7 +53,6 @@ function onToggleAccessToFiles(context) {
 function indicateFileAccessChange(button) {
   'use strict';
 
-  // eslint-disable-next-line no-param-reassign
   button.disabled = true;
   $(button).find('#file-access-spinner').removeClass('d-none');
   $.otp.toaster.showInfoToast('Info', 'This request may take some time. Please wait a moment.');

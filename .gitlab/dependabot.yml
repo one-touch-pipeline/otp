@@ -77,13 +77,4 @@ updates:
     open-pull-requests-limit: 5
     commit-message:
       prefix: "Update: "
-    ignore:
-      # the plugin eslint-config-airbnb-base use eslint, but is not compatible with newer versions of it
-      - dependency-name: "eslint"
-      # These dependencies below are under investigation, deactivate them first
-      - dependency-name: "@cyclonedx/cyclonedx-npm"
-        update-types: [ "version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch" ]
-      # JQuery version 4 is the first major release in 10 years. Refactoring of js code is required
-      - dependency-name: "org.webjars:jquery"
-        update-types: [ "version-update:semver-major" ]
     rebase-strategy: none

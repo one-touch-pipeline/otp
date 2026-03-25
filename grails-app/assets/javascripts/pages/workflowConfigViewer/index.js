@@ -66,7 +66,6 @@ $(() => {
   // filter the workflow versions options shown
   $('#workflowVersionSelector').select2({
     templateResult: (data) => {
-      /* eslint-disable-next-line */
       for (const workflow of selectedWorkflows) {
         if (data.text.startsWith(workflow.text)) {
           return data.text;

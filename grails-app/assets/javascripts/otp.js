@@ -100,7 +100,6 @@ $.otp = {
       link += '?';
       counter = 0;
 
-      /* eslint-disable no-restricted-syntax */
       for (const parameter in parameters) {
         if ({}.hasOwnProperty.call(parameters, parameter)) {
           if (counter > 0) {
@@ -110,7 +109,6 @@ $.otp = {
           counter += 1;
         }
       }
-      /* eslint-enable no-restricted-syntax */
     }
     return link;
   },
@@ -207,8 +205,16 @@ $.otp.warningMessage = function (message) {
  * @param height (optional) height in pixels
  * @param dataTableArguments (optional) map with additional arguments for initialization of dataTable
  */
-// eslint-disable-next-line max-len
-$.otp.createListView = (selector, sourcePath, sortOrder, jsonCallback, columnDefs, postData, height, dataTableArguments) => {
+$.otp.createListView = (
+  selector,
+  sourcePath,
+  sortOrder,
+  jsonCallback,
+  columnDefs,
+  postData,
+  height,
+  dataTableArguments
+) => {
   'use strict';
 
   const config = {
@@ -254,8 +260,17 @@ $.otp.createListView = (selector, sourcePath, sortOrder, jsonCallback, columnDef
     $.otp.resizeBodyInit(selector, height);
   }
 };
-// eslint-disable-next-line max-len
-$.otp.createInfinityScrollListView = (selector, sourcePath, sortOrder, jsonCallback, columnDefs, postData, height, dataTableArguments) => {
+
+$.otp.createInfinityScrollListView = (
+  selector,
+  sourcePath,
+  sortOrder,
+  jsonCallback,
+  columnDefs,
+  postData,
+  height,
+  dataTableArguments
+) => {
   'use strict';
 
   const config = {
@@ -416,7 +431,6 @@ $.otp.resizeBodyInit = function (table, margin) {
  * @returns {[{extend: string, exportOptions: {columns: string}, footer: boolean, action: action,
  * text: string, title: string}]} Array containing the button configuration.
  */
-// eslint-disable-next-line strict
 $.otp.getDownloadButton = (columnSelector, fileName, beforeDownload = (callback) => { callback(); }) => {
   const defaultFileName = document.title.replaceAll(' ', '_');
   const date = new Date();

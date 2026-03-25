@@ -201,7 +201,6 @@ $(() => {
       }
 
       if (!bootstrap.Tooltip.getInstance(el)) {
-        // eslint-disable-next-line
         new bootstrap.Tooltip(el, {
           html: true,
           container: 'body',

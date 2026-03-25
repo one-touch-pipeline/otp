@@ -23,8 +23,8 @@
 $.otp.processingPriority = {
 
   /*
-     * Field names shown in the data table (id and version are hidden)
-     */
+   * Field names shown in the data table (id and version are hidden)
+   */
   mapFieldIndex: {
     id: 0,
     version: 1,
@@ -37,9 +37,8 @@ $.otp.processingPriority = {
   },
 
   /*
-     * Last column of data table contains only two buttons (delete, edit)
-     */
-  /* eslint-disable no-template-curly-in-string */
+   * Last column of data table contains only two buttons (delete, edit)
+   */
   ppActionColumn:
     '<button id="delete-row" class="btn btn-sm btn-outline-danger"' +
     ' type="button" title="${g.message(code: "processingPriority.tooltip.delete")}">\n' +
@@ -49,11 +48,10 @@ $.otp.processingPriority = {
     ' type="button" title="${g.message(code: "processingPriority.tooltip.edit")}">\n' +
     '        <i class="bi bi-pencil"></i>\n' +
     '</button>',
-  /* eslint-enable no-template-curly-in-string */
 
   /*
-     * Delete the priority from backend, if successful remove the row also from the data table
-     */
+   * Delete the priority from backend, if successful remove the row also from the data table
+   */
   remove() {
     'use strict';
 
@@ -171,8 +169,8 @@ $.otp.processingPriority = {
   },
 
   /*
-     * Activate the save button only if all fields are valid
-     */
+   * Activate the save button only if all fields are valid
+   */
   toggleSaveButton() {
     'use strict';
 
@@ -185,8 +183,8 @@ $.otp.processingPriority = {
   },
 
   /*
-     * Save the processing priority if a new object is created or existing one to be modified
-     */
+   * Save the processing priority if a new object is created or existing one to be modified
+   */
   save() {
     'use strict';
 
@@ -249,8 +247,8 @@ $.otp.processingPriority = {
   },
 
   /*
-     * Helper functions
-     */
+   * Helper functions
+   */
   getDataTable() {
     'use strict';
 
@@ -280,10 +278,10 @@ $(document).ready(() => {
   'use strict';
 
   /*
-     * Initialization of a DataTable for Processing Priority List
-     * ordered by priority
-     * rows id and version are hidden
-     */
+   * Initialization of a DataTable for Processing Priority List
+   * ordered by priority
+   * rows id and version are hidden
+   */
   const processingPriorityTable = $('#processingPriority').DataTable({
     dom: '<"toolbar"><"top"i>ftp',
     order: [[3, 'asc']],
@@ -308,10 +306,10 @@ $(document).ready(() => {
                data-bs-toggle="modal" data-bs-target="#processingPriorityModal">Create</button>`);
 
   /*
-     * Event handler triggered by Delete icon in the table
-     * it launches the modal dialog window for confirmation before deletion
-     * it checks if the priority has been used somewhere, if yes, stop the deletion
-     */
+   * Event handler triggered by Delete icon in the table
+   * it launches the modal dialog window for confirmation before deletion
+   * it checks if the priority has been used somewhere, if yes, stop the deletion
+   */
   $('#processingPriority').on('click', 'tbody tr td button#delete-row', function () {
     const rowIndex = processingPriorityTable.row($(this).parents('tr')).index();
     const aData = processingPriorityTable.row(rowIndex).data();
@@ -354,10 +352,10 @@ $(document).ready(() => {
   });
 
   /*
-     * Event handler triggered by Edit icon in the table
-     * it launches the modal dialog window for editing the attributes of selected priority
-     * data is transferred from selected row to the dialog
-     */
+   * Event handler triggered by Edit icon in the table
+   * it launches the modal dialog window for editing the attributes of selected priority
+   * data is transferred from selected row to the dialog
+   */
   $('#processingPriority').on('click', 'tbody td button#edit-row', function () {
     const aData = processingPriorityTable.row($(this).parents('tr')).data();
 
@@ -378,8 +376,8 @@ $(document).ready(() => {
   });
 
   /*
-     * Event handler to cleanup after closing the dialog window
-     */
+   * Event handler to cleanup after closing the dialog window
+   */
   $('#processingPriorityModal').on('hidden.bs.modal', () => {
     const oDialog = $.otp.processingPriority.getDialogObj();
 

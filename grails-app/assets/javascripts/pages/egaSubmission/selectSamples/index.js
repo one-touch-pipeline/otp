@@ -67,7 +67,6 @@ function downloadCsvOfSelectedSamples() {
         selectedSamples
       })
     }).then((response) => {
-      // eslint-disable-next-line prefer-destructuring
       filename = response.headers.get('content-disposition').split('filename=')[1];
       return response.blob();
     }).then((blob) => {

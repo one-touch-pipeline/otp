@@ -43,9 +43,7 @@ $.otp.chart = {
    * @param additionalOptions any additional or override chart options
    * @returns object with default options
    */
-  // eslint-disable-next-line strict
   defaultChartOptions(title, additionalOptions = {}) {
-    // eslint-disable-next-line prefer-object-spread
     return {
       showLine: false,
       scales: {
@@ -84,7 +82,6 @@ $.otp.chart = {
    * @param dataUrl, url of the controller method for the chart data
    * @param chartFunction, callback function which contains the chart definition
    */
-  // eslint-disable-next-line strict
   renderChartOnElement(elementId, dataUrl, chartFunction) {
     $.otp.chart.destroyChartOnElementIfExists(elementId);
     fetch(dataUrl)

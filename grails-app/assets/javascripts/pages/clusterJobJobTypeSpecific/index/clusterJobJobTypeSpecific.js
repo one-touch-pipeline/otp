@@ -231,7 +231,6 @@ $.otp.clusterJobJobTypeSpecific = {
       'jobTypeSpecificGraphExitCode',
       jobTypeSpecificExitCodesUrl,
       (domContext, chartData) => {
-        // eslint-disable-next-line no-new
         new Chart(domContext, {
           type: 'pie',
           data: {
@@ -242,7 +241,6 @@ $.otp.clusterJobJobTypeSpecific = {
               datalabels: {
                 display: true,
                 color: '#fff',
-                // eslint-disable-next-line no-mixed-operators
                 formatter: (value, context) => `${Math.round(value / context.chart.getDatasetMeta(0).total * 100)}%`
               }
             }]
@@ -273,7 +271,6 @@ $.otp.clusterJobJobTypeSpecific = {
       'jobTypeSpecificGraphExitStatus',
       jobTypeSpecificExitStatusesUrl,
       (domContext, chartData) => {
-        // eslint-disable-next-line no-new
         new Chart(domContext, {
           type: 'pie',
           data: {
@@ -284,7 +281,6 @@ $.otp.clusterJobJobTypeSpecific = {
               datalabels: {
                 display: true,
                 color: '#fff',
-                // eslint-disable-next-line no-mixed-operators
                 formatter: (value, context) => `${Math.round(value / context.chart.getDatasetMeta(0).total * 100)}%`
               }
             }]
@@ -315,7 +311,6 @@ $.otp.clusterJobJobTypeSpecific = {
       'jobTypeSpecificGraphStates',
       jobTypeSpecificStatesUrl,
       (domContext, chartData) => {
-        // eslint-disable-next-line no-new
         new Chart(domContext, {
           type: 'line',
           data: {
@@ -390,7 +385,6 @@ $.otp.clusterJobJobTypeSpecific = {
           return acc;
         }, []);
 
-        // eslint-disable-next-line no-new
         new Chart(domContext, {
           type: 'scatter',
           data: {

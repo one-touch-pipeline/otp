@@ -37,7 +37,6 @@ $.otp.clusterJobDetailProgress = {
         'delayPieChart',
         dataUrl,
         (domContext, chartData) => {
-          // eslint-disable-next-line no-new
           new Chart(domContext, {
             type: 'pie',
             data: {
@@ -48,7 +47,6 @@ $.otp.clusterJobDetailProgress = {
                 datalabels: {
                   display: true,
                   color: '#fff',
-                  // eslint-disable-next-line no-mixed-operators
                   formatter: (value, context) => `${Math.round(value / context.chart.getDatasetMeta(0).total * 100)}%`
                 }
               }]

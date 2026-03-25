@@ -22,7 +22,7 @@
 
 // no namespace, since method name is given as string and execute using
 // window[$method]
-workflowJobErrorDefinitionActionChangeSuccessHandler = function (container, additionalData) {
+window.workflowJobErrorDefinitionActionChangeSuccessHandler = function (container, additionalData) {
   'use strict';
 
   const row = container.parent().parent().parent();

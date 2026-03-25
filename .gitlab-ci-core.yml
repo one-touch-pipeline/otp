@@ -471,7 +471,7 @@ eslint:
   stage: codestyle
   script:
     - set -e
-    - ./gradlew --build-cache esLintExportCi
+    - ./gradlew --build-cache esLintExport
   rules:
     - !reference [ .shared, rules-default ]
     - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH

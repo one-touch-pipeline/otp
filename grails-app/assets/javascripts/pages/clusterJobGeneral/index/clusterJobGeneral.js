@@ -117,7 +117,6 @@ $.otp.clusterJobGeneralGraph = {
       'delayPieChart',
       delayPieChartDataUrl,
       (domContext, chartData) => {
-        // eslint-disable-next-line no-new
         new Chart(domContext, {
           type: 'pie',
           data: {
@@ -128,7 +127,6 @@ $.otp.clusterJobGeneralGraph = {
               datalabels: {
                 display: true,
                 color: '#fff',
-                // eslint-disable-next-line no-mixed-operators
                 formatter: (value, context) => `${Math.round(value / context.chart.getDatasetMeta(0).total * 100)}%`
               }
             }]
@@ -154,7 +152,6 @@ $.otp.clusterJobGeneralGraph = {
       'generalGraphExitCode',
       allExitCodesUrl,
       (domContext, chartData) => {
-        // eslint-disable-next-line no-new
         new Chart(domContext, {
           type: 'pie',
           data: {
@@ -165,7 +162,6 @@ $.otp.clusterJobGeneralGraph = {
               datalabels: {
                 display: true,
                 color: '#fff',
-                // eslint-disable-next-line no-mixed-operators
                 formatter: (value, context) => `${Math.round(value / context.chart.getDatasetMeta(0).total * 100)}%`
               }
             }]
@@ -191,7 +187,6 @@ $.otp.clusterJobGeneralGraph = {
       'generalGraphExitStatus',
       allExitStatusesUrl,
       (domContext, chartData) => {
-        // eslint-disable-next-line no-new
         new Chart(domContext, {
           type: 'pie',
           data: {
@@ -202,7 +197,6 @@ $.otp.clusterJobGeneralGraph = {
               datalabels: {
                 display: true,
                 color: '#fff',
-                // eslint-disable-next-line no-mixed-operators
                 formatter: (value, context) => `${Math.round(value / context.chart.getDatasetMeta(0).total * 100)}%`
               }
             }]
@@ -228,7 +222,6 @@ $.otp.clusterJobGeneralGraph = {
       'generalGraphStates',
       allStatesUrl,
       (domContext, chartData) => {
-        // eslint-disable-next-line no-new
         new Chart(domContext, {
           type: 'line',
           data: {
@@ -269,7 +262,6 @@ $.otp.clusterJobGeneralGraph = {
       'generalGraphFailed',
       allFailedUrl,
       (domContext, chartData) => {
-        // eslint-disable-next-line no-new
         new Chart(domContext, {
           type: 'line',
           data: {
@@ -298,7 +290,6 @@ $.otp.clusterJobGeneralGraph = {
       'generalGraphCores',
       allAvgCoreUsageUrl,
       (domContext, chartData) => {
-        // eslint-disable-next-line no-new
         new Chart(domContext, {
           type: 'line',
           data: {
@@ -340,7 +331,6 @@ $.otp.clusterJobGeneralGraph = {
       'generalGraphMemory',
       allMemoryUsage,
       (domContext, chartData) => {
-        // eslint-disable-next-line no-new
         new Chart(domContext, {
           type: 'line',
           data: {

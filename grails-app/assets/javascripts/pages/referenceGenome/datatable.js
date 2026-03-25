@@ -75,7 +75,6 @@ $.otp.refgen = {
         }
       },
 
-      // eslint-disable-next-line object-shorthand
       initComplete: function () {
         const dt = this.api();
 
@@ -175,7 +174,6 @@ $.otp.refgen = {
   toggleLegacyData: (state, dt) => {
     'use strict';
 
-    // eslint-disable-next-line array-callback-return
     dt.rows().every(function () {
       const row = this.node();
       if (this.data()[$.otp.refgen.LEGACY_INDEX].indexOf('checked') >= 0) {
@@ -204,12 +202,10 @@ $(() => {
   const proxied = $.otp.getDownloadButton;
 
   $.otp.getDownloadButton = function () {
-    // eslint-disable-next-line prefer-rest-params
     const downloadButton = proxied.apply(this, arguments);
     const proxiedInner = downloadButton[0].exportOptions.format.body;
     downloadButton[0].exportOptions.format.body = function (html, row, col, node) {
       // hidden rows are not downloaded
-      // eslint-disable-next-line prefer-rest-params
       return $(node).is(':visible') ? proxiedInner.apply(this, arguments)
         .trim()
         .replace(/(\s){2,}/g, '; ') : ''; // separate multiple rows in one cell with semicolons

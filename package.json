@@ -14,13 +14,16 @@
   },
   "devDependencies": {
     "@cyclonedx/cyclonedx-npm": "2.1.0",
+    "@eslint/js": "^9.39.2",
     "cypress": "~15.12.0",
-    "mocha-junit-reporter": "~2.2.1",
     "cypress-multi-reporters": "~2.0.5",
+    "eslint": "^9.39.2",
+    "globals": "^17.0.0",
+    "mocha-junit-reporter": "~2.2.1",
     "mochawesome": "~7.1.4",
-    "eslint": "~8.57.0",
-    "eslint-config-airbnb-base": "~15.0.0",
-    "eslint-plugin-import": "~2.32.0",
     "start-server-and-test": "~2.1.5"
+  },
+  "dependencies": {
+    "@humanfs/core": "^0.19.1"
   }
 }
