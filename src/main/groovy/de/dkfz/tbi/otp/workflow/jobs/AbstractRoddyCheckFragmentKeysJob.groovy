@@ -19,35 +19,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.analysis.snv
+package de.dkfz.tbi.otp.workflow.jobs
 
-import spock.lang.Specification
+import groovy.util.logging.Slf4j
 
-import de.dkfz.tbi.TestCase
+@Slf4j
+abstract class AbstractRoddyCheckFragmentKeysJob extends AbstractCheckFragmentKeysJob {
 
-class SnvCheckFragmentKeysJobSpec extends Specification {
+    /**
+     * keys needed for using roddy with apptainer
+     */
+    static final List<String> APPTAINER_KEYS = [
+            "jobExecutionEnvironment",
+            "apptainerArguments",
+            "containerEnginePath",
+            "containerImage",
+            "containerMounts",
+    ].asImmutable()
 
-    SnvCheckFragmentKeysJob job
-
-    void "getCvalues, should return expected keys"() {
-        given:
-        job = new SnvCheckFragmentKeysJob()
-        Collection<String> expectedKeys = [
-                "tbiLsfVirtualEnvDir",
-                "VEP_BINARY",
-                "VEP_VERSION",
-                "VEP_FORKS",
-                "VEP_FA_INDEX",
-                "VEP_CACHE_BASE",
-                "VEP_PLUGIN_CADD_SNV",
-                "VEP_PLUGIN_SPLICEAI_SNV",
-                "VEP_PLUGIN_SPLICEAI_INDEL",
-                "VEP_SPECIES",
-                "VEP_ASSEMBLY",
-                "VEP_OUT_FORMAT",
-        ]
-
-        expect:
-        TestCase.assertContainSame(job.cvalues, expectedKeys)
+    @Override
+    Set<String> getKeyPaths() {
+        return (APPTAINER_KEYS + cvalues).collect {
+            "RODDY/cvalues/${it}".toString()
+        } as Set
     }
+
+    abstract Collection<String> getCvalues()
 }

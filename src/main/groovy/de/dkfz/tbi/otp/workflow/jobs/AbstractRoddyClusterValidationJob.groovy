@@ -75,7 +75,8 @@ abstract class AbstractRoddyClusterValidationJob extends AbstractValidationJob {
                 errorMessages.add("JobStateLogFile contains no information for cluster job ${clusterJob.clusterJobId}.")
             } else if (!jobStateLogFile.isClusterJobFinishedSuccessfully(clusterJob.clusterJobId)) {
                 errorMessages.add("Status code of cluster job ${clusterJob.clusterJobId}: " +
-                        "${jobStateLogFile.getPropertyFromLatestLogFileEntry(clusterJob.clusterJobId, "statusCode")}.")
+                        "${jobStateLogFile.getPropertyFromLatestLogFileEntry(clusterJob.clusterJobId, "statusCode")}" +
+                        "\n    file ${clusterJob.jobLog} on node ${clusterJob.node}.")
             }
         }
 

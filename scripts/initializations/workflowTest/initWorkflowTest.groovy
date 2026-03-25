@@ -23,6 +23,7 @@
 import groovy.transform.Field
 
 import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.roddy.rna.RnaAlignmentWorkflow
@@ -34,6 +35,8 @@ import de.dkfz.tbi.otp.workflow.analysis.sophia.SophiaWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.commands.CreateCommand
 import de.dkfz.tbi.otp.workflowTest.WorkflowTestProperty
+
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
 /**
  * This script configures workflow test properties that were previously configured
@@ -52,6 +55,9 @@ TestConfigService configService = ctx.configService
 @Field
 ConfigSelectorService configSelectorService = ctx.configSelectorService
 
+@Field
+ProcessingOptionService processingOptionService = ctx.processingOptionService
+
 /**
  * Map of workflow test properties.
  * Please adapt this map to fit your local workflow test environment.
@@ -68,13 +74,34 @@ Map<WorkflowTestProperty, String> workflowTestProperties = [
 ]
 
 /**
+ * setting module configurations
+ */
+void settingModuleSystem() {
+    println "init module system"
+
+    processingOptionService.createOrUpdate(COMMAND_LOAD_MODULE_LOADER, "")
+
+    processingOptionService.createOrUpdate(COMMAND_ENABLE_MODULE, "module load")
+
+    // fastqc
+    processingOptionService.createOrUpdate(COMMAND_FASTQC, "fastqc")
+
+    // roddy / bam import
+    processingOptionService.createOrUpdate(COMMAND_GROOVY, 'groovy')
+    processingOptionService.createOrUpdate(COMMAND_ACTIVATION_GROOVY, 'module load $YOUR_GROOVY_VERSION')
+
+    // roddy
+    processingOptionService.createOrUpdate(COMMAND_ACTIVATION_JAVA, 'module load $YOUR_JAVA_VERSION')
+
+    // bam import
+    processingOptionService.createOrUpdate(COMMAND_SAMTOOLS, 'samtools')
+    processingOptionService.createOrUpdate(COMMAND_ACTIVATION_SAMTOOLS, 'module load $YOUR_SAMTOOLS_VERSION')
+}
+
+/**
  * configure apptainer for roddy
  */
 void configureApptainer() {
-    if (Workflow.count == 0) {
-        println "Skip Apptainer configuration, since no workflows in new system initialized"
-        return
-    }
     println "configure Apptainer"
     List<Workflow> roddyWorkflows = [
             // alignment
@@ -87,7 +114,6 @@ void configureApptainer() {
             IndelWorkflow.WORKFLOW,
             SophiaWorkflow.WORKFLOW,
             AceseqWorkflow.WORKFLOW,
-
     ].collect {
         println "- ${it}"
         CollectionUtils.exactlyOneElement(Workflow.findAllByName(it), "Could not find '${it}'")
@@ -129,6 +155,42 @@ void configureApptainer() {
 }
 
 /**
+ * configure Vep for snv for roddy
+ */
+void configureVepForSnvLocationSpecific() {
+    println "configure vep for SNV"
+    List<Workflow> roddyWorkflows = [
+            // analysis
+            SnvWorkflow.WORKFLOW,
+    ].collect {
+        println "- ${it}"
+        CollectionUtils.exactlyOneElement(Workflow.findAllByName(it), "Could not find '${it}'")
+    }
+
+    /**
+     * Also the fragment is reference genome specific, in the workflow tests there is only one reference genome used,
+     * which is also loaded later and therefore not available when this script is loaded
+     */
+    println configSelectorService.create(new CreateCommand([
+            selectorName: 'VEP configuration',
+            type        : SelectorType.GENERIC,
+            workflows   : roddyWorkflows,
+            value       : """
+                            {
+                                "RODDY": {
+                                    "cvalues": {
+                                        "VEP_CACHE_BASE": {
+                                            "type": "path",
+                                            "value": "$PATH_TO_VEP"
+                                        }
+                                    }
+                                }
+                            }
+                            """
+    ]))
+}
+
+/**
  * Configure workflow-specific settings with example configurations.
  * This method demonstrates how to configure various workflows
  * using the ConfigSelectorService
@@ -161,8 +223,15 @@ try {
     println("=== Starting workflow test initialization ===")
 
     configService.storeWorkflowTestProperties(workflowTestProperties)
-    configureApptainer()
-    configureWorkflowSpecificSettings()
+    settingModuleSystem()
+
+    if (Workflow.count == 0) {
+        println "Skip fragment configuration, since no workflows in new system initialized"
+    } else {
+        configureApptainer()
+        configureVepForSnvLocationSpecific()
+        configureWorkflowSpecificSettings()
+    }
 
     println("=== Workflow test initialization completed successfully ===")
 } catch (Exception e) {

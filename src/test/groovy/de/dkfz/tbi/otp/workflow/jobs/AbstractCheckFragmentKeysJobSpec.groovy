@@ -82,9 +82,15 @@ abstract class AbstractCheckFragmentKeysJobSpec extends Specification implements
         workflowStep = createWorkflowStep([workflowRun: run])
 
         job = createJob()
-        job.logService = Mock(LogService)
-        job.messageSourceService = Mock(MessageSourceService)
-        job.workflowStateChangeService = Mock(WorkflowStateChangeService)
+        job.logService = Mock(LogService) {
+            0 * _
+        }
+        job.messageSourceService = Mock(MessageSourceService) {
+            0 * _
+        }
+        job.workflowStateChangeService = Mock(WorkflowStateChangeService) {
+            0 * _
+        }
     }
 
     void "execute(workflowStep) should check the keys in combined config and throw no exception"() {
@@ -96,14 +102,16 @@ abstract class AbstractCheckFragmentKeysJobSpec extends Specification implements
         job.execute(workflowStep)
 
         then:
-        noExceptionThrown()
         1 * job.messageSourceService.createMessage("workflow.job.checkFragmentKeys.ok") >> {
             return messageText
         }
         1 * job.workflowStateChangeService.changeStateToSuccess(workflowStep)
-        1 * job.logService.addSimpleLogEntry(workflowStep, _) >> { arguments ->
+        2 * job.logService.addSimpleLogEntry(workflowStep, _) >> { arguments ->
+            assert arguments[1].startsWith("Expected keys")
+        } >> { arguments ->
             assert arguments[1].contains(messageText)
         }
+        noExceptionThrown()
     }
 
     void "execute(workflowStep) should throw exception if some keys are not found"() {
@@ -119,7 +127,9 @@ abstract class AbstractCheckFragmentKeysJobSpec extends Specification implements
         1 * job.messageSourceService.createMessage("workflow.job.checkFragmentKeys.missing", _) >> {
             return messageText + "\n"
         }
-        1 * job.logService.addSimpleLogEntry(workflowStep, _) >> { arguments ->
+        2 * job.logService.addSimpleLogEntry(workflowStep, _) >> { arguments ->
+            assert arguments[1].startsWith("Expected keys")
+        } >> { arguments ->
             assert arguments[1].contains(messageText)
             missingKeys.each {
                 assert arguments[1].contains(it)

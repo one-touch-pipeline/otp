@@ -118,6 +118,55 @@ abstract class AbstractRoddyAnalysisWorkflowSpec<I extends BamFilePairAnalysis> 
         }
     }
 
+    /**
+     * Provides the reference genome depending VEP settings.
+     *
+     * General are provided via default fragments.
+     *
+     * The location specific cvalue VEP_CACHE_BASE needs to be set via otp init script.
+     */
+    @SuppressWarnings('GStringExpressionWithinString')
+    void createVepFragment() {
+        workflowAnalysis.refresh()
+        referenceGenome.refresh()
+        String fragment = """
+                    {
+                        "RODDY": {
+                            "cvalues": {
+                                "VEP_FA_INDEX": {
+                                    "type": "path",
+                                    "value": "\${BASE_REFERENCE_GENOME}/bwa06_1KGRef_PhiX/tools_data/VEP/reference/hs37d5_PhiX.fa"
+                                },
+                                "VEP_PLUGIN_CADD_SNV": {
+                                    "type": "path",
+                                    "value": "\${BASE_REFERENCE_GENOME}/bwa06_1KGRef_PhiX/tools_data/VEP/plugins/CADD/v1.7/whole_genome_SNVs.tsv.gz"
+                                },
+                                "VEP_PLUGIN_SPLICEAI_SNV": {
+                                    "type": "path",
+                                    "value": "\${BASE_REFERENCE_GENOME}/bwa06_1KGRef_PhiX/tools_data/VEP/plugins/SpliceAI/v1.3/spliceai_scores.raw.snv.hg19.vcf.gz"
+                                },
+                                "VEP_PLUGIN_SPLICEAI_INDEL": {
+                                    "type": "path",
+                                    "value": "\${BASE_REFERENCE_GENOME}/bwa06_1KGRef_PhiX/tools_data/VEP/plugins/SpliceAI/v1.3/spliceai_scores.raw.indel.hg19.vcf.gz"
+                                },
+                                "VEP_SPECIES": {
+                                    "type": "string",
+                                    "value": "homo_sapiens"
+                                },
+                                "VEP_ASSEMBLY": {
+                                    "type": "string",
+                                    "value": "GRCh37"
+                                }
+                            }
+                        }
+                    }
+                """
+        createFragmentAndSelector("reference genome depending VEP", fragment, [
+                workflows       : [workflowAnalysis],
+                referenceGenomes: [referenceGenome],
+        ])
+    }
+
     abstract List<Path> filesToCheck(I instance)
 
     abstract void checkQc(I instance)

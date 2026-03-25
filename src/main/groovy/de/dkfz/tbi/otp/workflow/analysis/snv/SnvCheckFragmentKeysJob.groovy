@@ -25,13 +25,29 @@ import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.workflow.analysis.AnalysisWorkflowShared
-import de.dkfz.tbi.otp.workflow.jobs.AbstractCheckFragmentKeysJob
+import de.dkfz.tbi.otp.workflow.jobs.AbstractRoddyCheckFragmentKeysJob
 
 @Component
 @Slf4j
-class SnvCheckFragmentKeysJob extends AbstractCheckFragmentKeysJob implements AnalysisWorkflowShared {
+class SnvCheckFragmentKeysJob extends AbstractRoddyCheckFragmentKeysJob implements AnalysisWorkflowShared {
+
     @Override
-    Set<String> getKeyPaths() {
-        return [] as Set
+    Collection<String> getCvalues() {
+        return [
+                // option for virtual env
+                "tbiLsfVirtualEnvDir",
+                // new optioned introduced in 1.2.166-6, partly depending on on reference genome or location
+                "VEP_BINARY",
+                "VEP_VERSION",
+                "VEP_FORKS",
+                "VEP_FA_INDEX",
+                "VEP_CACHE_BASE",
+                "VEP_PLUGIN_CADD_SNV",
+                "VEP_PLUGIN_SPLICEAI_SNV",
+                "VEP_PLUGIN_SPLICEAI_INDEL",
+                "VEP_SPECIES",
+                "VEP_ASSEMBLY",
+                "VEP_OUT_FORMAT",
+        ]
     }
 }

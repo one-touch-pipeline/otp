@@ -58,7 +58,9 @@ abstract class AbstractCheckFragmentKeysJob extends AbstractJob {
             ObjectMapper mapper = new ObjectMapper()
             JsonNode configRoot = mapper.readTree(workflowStep.workflowRun.combinedConfig)
             // loop thru all the required keys and ensure they do exist
-            keyPaths.each { String jsonPath ->
+            Set<String> expectedKeys = keyPaths
+            logService.addSimpleLogEntry(workflowStep, "Expected keys: ${expectedKeys.join(', ')}")
+            expectedKeys.each { String jsonPath ->
                 if (findMissingNode(jsonPath, configRoot)) {
                     errorMessages.add(jsonPath)
                 }
@@ -73,8 +75,8 @@ abstract class AbstractCheckFragmentKeysJob extends AbstractJob {
             logService.addSimpleLogEntry(workflowStep, messageSourceService.createMessage("workflow.job.checkFragmentKeys.ok"))
         } else {
             String message = messageSourceService.createMessage("workflow.job.checkFragmentKeys.missing", [
-                    keyCount    : errorMessages.size(),
-                    workflowRun : workflowStep.workflowRun,
+                    keyCount   : errorMessages.size(),
+                    workflowRun: workflowStep.workflowRun,
             ]) + "\n${errorMessages.join('\n')}"
             logService.addSimpleLogEntry(workflowStep, message)
             throw new MissingFragmentKeysException(message)

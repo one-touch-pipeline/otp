@@ -26,11 +26,11 @@ import de.dkfz.tbi.otp.workflow.analysis.snv.SnvWorkflow
 import de.dkfz.tbi.otp.workflowExecution.decider.Decider
 import de.dkfz.tbi.otp.workflowExecution.decider.analysis.SnvDecider
 import de.dkfz.tbi.otp.workflowTest.analysis.roddy.AbstractRoddyAnalysisWorkflowSpec
-import de.dkfz.tbi.otp.workflowTest.referenceGenome.ReferenceGenomeHg37
+import de.dkfz.tbi.otp.workflowTest.referenceGenome.ReferenceGenomeHg37Phix
 
 import java.nio.file.Path
 
-abstract class AbstractSnvCallingWorkflowSpec extends AbstractRoddyAnalysisWorkflowSpec<SnvCallingInstance> implements ReferenceGenomeHg37 {
+abstract class AbstractSnvCallingWorkflowSpec extends AbstractRoddyAnalysisWorkflowSpec<SnvCallingInstance> implements ReferenceGenomeHg37Phix {
 
     SnvDecider snvDecider
     SnvLinkFileService snvLinkFileService
@@ -39,6 +39,7 @@ abstract class AbstractSnvCallingWorkflowSpec extends AbstractRoddyAnalysisWorkf
     @Override
     void setupData() {
         super.setupData()
+        createVepFragment()
         log.debug("Load SNV virtualenvs")
         createFragmentAndSelector("virtualenvs", """
             {
@@ -78,7 +79,8 @@ abstract class AbstractSnvCallingWorkflowSpec extends AbstractRoddyAnalysisWorkf
         return snvDecider
     }
 
-    @SuppressWarnings("EmptyMethodInAbstractClass") // Makes no sense to implement this in each subclass
+    @SuppressWarnings("EmptyMethodInAbstractClass")
+    // Makes no sense to implement this in each subclass
     @Override
     void checkQc(SnvCallingInstance instance) { }
 

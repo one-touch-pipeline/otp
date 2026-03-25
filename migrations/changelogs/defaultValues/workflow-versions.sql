@@ -170,6 +170,12 @@ VALUES (NEXTVAL('hibernate_sequence'), 0,
         '1.2.166-5', NOW(), NOW())
 ON CONFLICT DO NOTHING;
 
+INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
+VALUES (NEXTVAL('hibernate_sequence'), 0,
+        (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy SNV calling') AND wav.identifier = 1),
+        '1.2.166-6', NOW(), NOW())
+ON CONFLICT DO NOTHING;
+
 --Indel versions
 INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
 VALUES (NEXTVAL('hibernate_sequence'), 0,
