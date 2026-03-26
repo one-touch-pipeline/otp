@@ -73,12 +73,13 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
         logService.addSimpleLogEntry(workflowStep, "no fastqc reports found, create script to create them")
         // create and return the shell script only (w/o running it)
         logService.addSimpleLogEntry(workflowStep, "no fastqc reports found, creating cluster scripts")
-        return createFastQcClusterScript(fastqcProcessedFiles, outputDir, workflowStep)
+        return createFastQcClusterScript(fastqcProcessedFiles, workflowStep)
     }
 
-    private List<String> createFastQcClusterScript(List<FastqcProcessedFile> fastqcProcessedFiles, Path outDir, WorkflowStep workflowStep) {
+    private List<String> createFastQcClusterScript(List<FastqcProcessedFile> fastqcProcessedFiles, WorkflowStep workflowStep) {
         return fastqcProcessedFiles.collect { FastqcProcessedFile fastqcProcessedFile ->
             String inputFileName = rawSequenceDataWorkFileService.getFilePath(fastqcProcessedFile.sequenceFile)
+            Path fastqcFile = fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile, PathOption.REAL_PATH)
 
             String decompressFileCommand = ""
             String deleteDecompressedFileCommand = ""
@@ -104,8 +105,9 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
                 |${moduleLoader }
                 |${fastqcActivation }
                 |${decompressFileCommand}
-                |${fastqcCommand} ${inputFileName} --noextract --nogroup -o ${outDir}
+                |${fastqcCommand} ${inputFileName} --noextract --nogroup -o ${fastqcFile.parent}
                 |${deleteDecompressedFileCommand}
+                |unzip -t ${fastqcFile}
                 |""".stripMargin()
         }
     }

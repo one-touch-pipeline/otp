@@ -92,8 +92,8 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
                 name: WORKFLOW
         ])
         version = createWorkflowVersion([
-                apiVersion: createWorkflowApiVersion(workflow: workflow),
-                workflowVersion   : '0.1.1',
+                apiVersion     : createWorkflowApiVersion(workflow: workflow),
+                workflowVersion: '0.1.1',
         ])
         run = createWorkflowRun([
                 workflow       : workflow,
@@ -213,6 +213,8 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
 
         job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
             1 * fastqcOutputDirectory(fastqcProcessedFile1, PathOption.REAL_PATH) >> targetDir
+            1 * fastqcOutputPath(fastqcProcessedFile1, PathOption.REAL_PATH) >> sourceFastqc1
+            1 * fastqcOutputPath(fastqcProcessedFile2, PathOption.REAL_PATH) >> sourceFastqc2
             0 * _
         }
         job.fastqcReportService = Mock(FastqcReportService) {
