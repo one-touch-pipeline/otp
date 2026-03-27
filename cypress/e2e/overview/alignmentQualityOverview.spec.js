@@ -28,10 +28,6 @@ describe('Check alignment quality overview page', () => {
       cy.loginAs('operator');
     });
 
-    it('should visit the index page', () => {
-      cy.visit('/alignmentQualityOverview/index');
-    });
-
     it('should change warning status to accepted', () => {
       cy.visit('/alignmentQualityOverview/index');
 

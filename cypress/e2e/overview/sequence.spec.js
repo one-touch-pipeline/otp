@@ -23,8 +23,10 @@
 describe('Check statistics page', () => {
   'use strict';
 
-  ['operator', 'user'].forEach((role) => {
-    context(`when user is ${role === 'operator' ? 'an operator' : 'a normal user'}`, () => {
+  const userRoles = ['operator', 'user'];
+
+  userRoles.forEach((role) => {
+    context(`when user is ${role}`, () => {
       before(() => {
         cy.clearDownloadsFolder();
       });

@@ -23,28 +23,32 @@
 describe('Check run yapsa page', () => {
   'use strict';
 
-  context('when user is an operator', () => {
-    beforeEach(() => {
-      cy.loginAs('operator');
-      cy.intercept('/runYapsa/dataTableResults*').as('loadDataTable');
-      cy.fixture('downloadChecks/runYapsa.json').then((config) => {
-        cy.visit(`/runYapsa/results?project=${config.project}`);
+  const userRoles = ['operator', 'user'];
+
+  userRoles.forEach((userRole) => {
+    context(`when user is a ${userRole}`, () => {
+      beforeEach(() => {
+        cy.loginAs(userRole);
+        cy.intercept('/runYapsa/dataTableResults*').as('loadDataTable');
+        cy.fixture('downloadChecks/runYapsa.json').then((config) => {
+          cy.visit(`/runYapsa/results?project=${config.project}`);
+        });
+        cy.wait('@loadDataTable').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200);
+        });
       });
-      cy.wait('@loadDataTable').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
+
+      it('should visit the result page', () => {
+        cy.log('Waiting until loading is done.');
+        cy.get('table tbody tr').contains('Loading...').should('not.exist');
       });
-    });
 
-    it('should visit the result page', () => {
-      cy.log('Waiting until loading is done.');
-      cy.get('table tbody tr').contains('Loading...').should('not.exist');
-    });
+      it('should download csv, when button is clicked', () => {
+        cy.get('table tbody tr').contains('Loading...').should('not.exist');
+        cy.get('div#resultsTable_wrapper button').contains('Download').click();
 
-    it('should download csv, when button is clicked', () => {
-      cy.get('table tbody tr').contains('Loading...').should('not.exist');
-      cy.get('div#resultsTable_wrapper button').contains('Download').click();
-
-      cy.checkDownloadByContentOfFixture('runYapsa.json');
+        cy.checkDownloadByContentOfFixture('runYapsa.json');
+      });
     });
   });
 });

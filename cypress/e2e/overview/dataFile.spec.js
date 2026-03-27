@@ -23,37 +23,54 @@
 describe('Check rawSequenceFile pages', () => {
   'use strict';
 
-  context('when user is an operator', () => {
-    beforeEach(() => {
-      cy.loginAs('operator');
-    });
+  const userRoles = ['operator', 'user'];
 
-    it('should visit show details page by starting on project overview page and save a comment there', () => {
-      cy.intercept('/projectOverview/dataTableSourceSequencingSamples?project=*').as('dataTableSource');
-      cy.intercept('/rawSequenceFile/saveDataFileComment*').as('saveDataFileComment');
-      cy.visit('/projectOverview/index');
-      cy.wait('@dataTableSource').then((interception) => {
-        expect(interception.response.statusCode).to.be.eq(200);
+  userRoles.forEach((userRole) => {
+    context(`when user is ${userRole}`, () => {
+      beforeEach(() => {
+        cy.loginAs(userRole);
+      });
 
-        cy.get('table#projectOverviewTable tbody tr').first()
-          .find('td')
-          .first()
-          .click();
+      it('should visit show details page by starting on project overview page and save a comment there', () => {
+        cy.intercept('/projectOverview/dataTableSourceSequencingSamples?project=*').as('dataTableSource');
 
-        cy.get('table tbody tr').find('a').eq(2)
-          .click();
-        cy.checkPage('seqTrack/seqTrackSet');
+        // Only intercept save comment for operator role
+        if (userRole === 'operator') {
+          cy.intercept('/rawSequenceFile/saveDataFileComment*').as('saveDataFileComment');
+        }
 
-        cy.get('div.identifier.dataFile a').eq(2).click();
-        cy.checkPage('rawSequenceFile/showDetails');
+        cy.visit('/projectOverview/index');
+        cy.wait('@dataTableSource').then((interception) => {
+          expect(interception.response.statusCode).to.be.eq(200);
 
-        const comment = `This is a random ${Cypress._.random(0, 1e6)} comment.`;
-        cy.get('textarea#comment-content').clear().type(comment);
-        cy.get('button#button-save').click();
+          cy.get('table#projectOverviewTable tbody tr').first()
+            .find('td')
+            .first()
+            .click();
 
-        cy.wait('@saveDataFileComment').then((intcpt) => {
-          expect(intcpt.response.statusCode).to.be.eq(200);
-          cy.get('span#authorSpan').should('not.be.empty');
+          cy.get('table tbody tr').find('a').eq(2)
+            .click();
+          cy.checkPage('seqTrack/seqTrackSet');
+
+          cy.get('div.identifier.dataFile a').eq(2).click();
+          cy.checkPage('rawSequenceFile/showDetails');
+
+          if (userRole === 'operator') {
+          // Operator can edit comments
+            const comment = `This is a random ${Cypress._.random(0, 1e6)} comment.`;
+            cy.get('textarea#comment-content').clear();
+            cy.get('textarea#comment-content').type(comment);
+            cy.get('button#button-save').click();
+
+            cy.wait('@saveDataFileComment').then((intercept) => {
+              expect(intercept.response.statusCode).to.be.eq(200);
+              cy.get('span#authorSpan').should('not.be.empty');
+            });
+          } else {
+          // User can only view - verify page loads and comment section is visible but readonly
+            cy.get('textarea#comment-content').should('exist');
+            cy.get('textarea#comment-content').should('have.attr', 'readonly');
+          }
         });
       });
     });

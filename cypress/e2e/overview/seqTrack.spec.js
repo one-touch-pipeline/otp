@@ -23,47 +23,58 @@
 describe('Check seq track pages', () => {
   'use strict';
 
-  context('when user is an operator', () => {
-    beforeEach(() => {
-      cy.loginAs('operator');
-    });
+  const userRoles = ['operator', 'user'];
 
-    it('should visit the seq track set page by starting on project overview page', () => {
-      cy.visit('/projectOverview/index');
-      cy.get('table#projectOverviewTable tbody').find('tr').eq(5)
-        .find('td')
-        .eq(0)
-        .find('a')
-        .click();
+  userRoles.forEach((userRole) => {
+    context(`when user is ${userRole}`, () => {
+      beforeEach(() => {
+        cy.loginAs(userRole);
+      });
 
-      cy.get('table tbody tr').find('a').eq(2)
-        .click();
-      cy.checkPage('seqTrack/seqTrackSet');
+      it('should visit the seq track set page by starting on project overview page', () => {
+        cy.visit('/projectOverview/index');
+        cy.get('table#projectOverviewTable tbody').find('tr').eq(5)
+          .find('td')
+          .eq(0)
+          .find('a')
+          .click();
 
-      cy.visit('/projectOverview/index');
-      cy.get('table#projectOverviewTable tbody').find('tr').eq(23)
-        .find('td')
-        .eq(0)
-        .find('a')
-        .click();
-      cy.get('table tbody tr').find('a').eq(10).click();
-      cy.checkPage('seqTrack/seqTrackSet');
-    });
+        cy.get('table tbody tr').find('a').eq(2)
+          .click();
+        cy.checkPage('seqTrack/seqTrackSet');
 
-    it('should visit the run show page by starting on project overview page via the run page', () => {
-      cy.visit('/projectOverview/index');
-      cy.get('table#projectOverviewTable tbody').find('tr').eq(12)
-        .find('td')
-        .eq(0)
-        .find('a')
-        .click();
+        cy.visit('/projectOverview/index');
+        cy.get('table#projectOverviewTable tbody').find('tr').eq(23)
+          .find('td')
+          .eq(0)
+          .find('a')
+          .click();
+        cy.get('table tbody tr').find('a').eq(10).click();
+        cy.checkPage('seqTrack/seqTrackSet');
+      });
 
-      cy.get('table tbody tr').find('a').eq(2)
-        .click();
-      cy.checkPage('seqTrack/seqTrackSet');
+      it('should visit the run show page by starting on project overview page via the run page', () => {
+        cy.visit('/projectOverview/index');
+        cy.get('table#projectOverviewTable tbody').find('tr').eq(12)
+          .find('td')
+          .eq(0)
+          .find('a')
+          .click();
 
-      cy.get('div.run-information').contains('run').click();
-      cy.checkPage('run/show');
+        cy.get('table tbody tr').find('a').eq(2)
+          .click();
+        cy.checkPage('seqTrack/seqTrackSet');
+
+        if (userRole === 'operator') {
+          cy.get('div.run-information').contains('run').click();
+          cy.checkPage('run/show');
+        } else {
+          cy.get('div.run-information').contains('run')
+            .should('not.have.attr', 'href')
+            .and('not.be.a', 'a');
+          cy.log(`User role '${userRole}' does not have permission to access run information`);
+        }
+      });
     });
   });
 });

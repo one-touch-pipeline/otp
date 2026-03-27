@@ -23,38 +23,47 @@
 describe('Check fastqc results page', () => {
   'use strict';
 
-  context('when user is an operator', () => {
-    beforeEach(() => {
-      cy.loginAs('operator');
-    });
+  const userRoles = ['operator', 'user'];
 
-    it('should visit some show pages via the sequence index page', () => {
-      cy.visit('/sequence/index');
-      cy.get('#searchCriteriaTable td.search input[type=button]').click();
-      cy.get('table#sequenceTable tbody').find('tr').eq(3)
-        .find('td')
-        .eq(14)
-        .contains('R1')
-        .click();
-      cy.checkPage('/fastqcResults/show/');
+  userRoles.forEach((userRole) => {
+    context(`when user is ${userRole}`, () => {
+      beforeEach(() => {
+        cy.loginAs(userRole);
+      });
 
-      cy.visit('/sequence/index');
-      cy.get('#searchCriteriaTable td.search input[type=button]').click();
-      cy.get('table#sequenceTable tbody').find('tr').eq(22)
-        .find('td')
-        .eq(14)
-        .contains('R1')
-        .click();
-      cy.checkPage('/fastqcResults/show/');
+      it('should visit some show pages via the sequence index page', () => {
+        cy.visit('/sequence/index');
+        cy.get('#searchCriteriaTable td.search input[type=button]').click();
+        cy.get('table#sequenceTable tbody').find('tr').eq(3)
+          .find('td')
+          .eq(14)
+          .contains('R1')
+          .click();
+        cy.checkPage('/fastqcResults/show/');
 
-      cy.visit('/sequence/index');
-      cy.get('#searchCriteriaTable td.search input[type=button]').click();
-      cy.get('table#sequenceTable tbody').find('tr').eq(12)
-        .find('td')
-        .eq(14)
-        .contains('R2')
-        .click();
-      cy.checkPage('/fastqcResults/show/');
+        cy.visit('/sequence/index');
+        cy.get('#searchCriteriaTable td.search input[type=button]').click();
+        if (userRole === 'user') {
+          cy.get('table#sequenceTable tbody').find('tr').first().as('rowToCheck');
+        } else {
+          cy.get('table#sequenceTable tbody').find('tr').eq(22).as('rowToCheck');
+        }
+        cy.get('@rowToCheck')
+          .find('td')
+          .eq(14)
+          .contains('R1')
+          .click();
+        cy.checkPage('/fastqcResults/show/');
+
+        cy.visit('/sequence/index');
+        cy.get('#searchCriteriaTable td.search input[type=button]').click();
+        cy.get('table#sequenceTable tbody').find('tr').eq(3)
+          .find('td')
+          .eq(14)
+          .contains('R2')
+          .click();
+        cy.checkPage('/fastqcResults/show/');
+      });
     });
   });
 });

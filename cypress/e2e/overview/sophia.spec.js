@@ -23,8 +23,10 @@
 describe('Check sophia pages', () => {
   'use strict';
 
-  ['operator', 'user'].forEach((role) => {
-    context(`when user is ${role === 'operator' ? 'an operator' : 'a normal user'}`, () => {
+  const userRoles = ['operator', 'user'];
+
+  userRoles.forEach((role) => {
+    context(`when user is ${role}`, () => {
       beforeEach(() => {
         cy.loginAs(role);
         cy.intercept('/sophia/dataTableResults*').as('loadDataTable');

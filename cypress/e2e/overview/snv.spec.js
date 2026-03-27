@@ -23,8 +23,10 @@
 describe('Check snv pages', () => {
   'use strict';
 
-  ['operator', 'user'].forEach((role) => {
-    context(`when user is ${role === 'operator' ? 'an operator' : 'a normal user'}`, () => {
+  const userRoles = ['operator', 'user'];
+
+  userRoles.forEach((role) => {
+    context(`when user is ${role}`, () => {
       beforeEach(() => {
         cy.loginAs(role);
         cy.intercept('/snv/dataTableResults*').as('loadDataTable');
@@ -36,23 +38,23 @@ describe('Check snv pages', () => {
         });
       });
 
-      it('should visit the plots page when clicking on Plots and check if plot exists', () => {
-        cy.log('Waiting until loading is done.');
-        cy.get('table tbody tr').contains('Loading...').should('not.exist');
+    it('should visit the plots page when clicking on Plots and check if plot exists', () => {
+      cy.log('Waiting until loading is done.');
+      cy.get('table tbody tr').contains('Loading...').should('not.exist');
 
-        cy.get('table tbody tr').eq(2).find('a').contains('Plots')
-          .click();
+      cy.get('table tbody tr').eq(2).find('a').contains('Plots')
+        .click();
 
-        cy.get('object[data]:not([data=""])').should('exist');
-        cy.checkPage('/snv/plots');
-      });
+      cy.get('object[data]:not([data=""])').should('exist');
+      cy.checkPage('/snv/plots');
+    });
 
-      it('should download csv, when button is clicked', () => {
-        cy.get('table tbody tr').contains('Loading...').should('not.exist');
-        cy.get('div#resultsTable_wrapper button').contains('Download').click();
+    it('should download csv, when button is clicked', () => {
+      cy.get('table tbody tr').contains('Loading...').should('not.exist');
+      cy.get('div#resultsTable_wrapper button').contains('Download').click();
 
-        cy.checkDownloadByContentOfFixture('snv.json');
-      });
+      cy.checkDownloadByContentOfFixture('snv.json');
     });
   });
+});
 });
