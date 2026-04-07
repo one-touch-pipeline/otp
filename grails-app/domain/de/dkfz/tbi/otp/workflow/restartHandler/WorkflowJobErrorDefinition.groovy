@@ -71,6 +71,8 @@ class WorkflowJobErrorDefinition implements Entity {
         WES_RUN_LOG,
         /** check the wes task logs */
         WES_TASK_LOG,
+        /** check the stdout and stderr of the last executed command */
+        COMMAND_LOG,
     }
 
     /**
