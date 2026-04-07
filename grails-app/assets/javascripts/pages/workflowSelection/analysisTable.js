@@ -60,7 +60,9 @@ $(() => {
     data.workflow.displayName,
     data.seqType.displayName,
     data.version.displayName,
-    `<button class="btn float-end btn-primary remove-config-btn" 
-       data-version-selector="${data.workflowVersionSelector.id}">Remove Config</button>`
+    `<button class="btn float-end btn-outline-danger remove-config-btn"
+       data-version-selector="${data.workflowVersionSelector.id}">
+       <i class="bi bi-trash"></i> Remove
+     </button>`
   ];
 });

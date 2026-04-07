@@ -132,9 +132,11 @@
                                 <td>${config.refGen.species.join(' + ')}</td>
                                 <sec:ifAllGranted roles="ROLE_OPERATOR">
                                     <td>
-                                        <button class="btn float-end btn-primary remove-config-btn" data-ref-genome-selector="${config.refGen.id}"
+                                        <button class="btn float-end btn-outline-danger remove-config-btn" data-ref-genome-selector="${config.refGen.id}"
                                                 data-version-selector="${config.workflowVersionSelectorId}">
-                                            <g:message code="workflowSelection.removeConfig"/></button>
+                                            <i class="bi bi-trash"></i>
+                                            <g:message code="workflowSelection.removeConfig"/>
+                                        </button>
                                     </td>
                                 </sec:ifAllGranted>
                             </tr>
@@ -167,8 +169,10 @@
                                               from="${alignment.species}" optionKey="id" optionValue="displayName"/>
                                 </td>
                                 <td>
-                                    <button type="submit" class="btn float-end btn-primary" id="add-alignment-config-btn"><g:message
-                                            code="workflowSelection.addOrUpdateConfig"/></button>
+                                    <button type="submit" class="btn float-end btn-primary" id="add-alignment-config-btn">
+                                        <i class="bi bi-pencil-square"></i>
+                                        <g:message code="workflowSelection.addOrUpdateConfig"/>
+                                    </button>
                                 </td>
                             </tr>
                             </tfoot>
@@ -207,8 +211,9 @@
                                 <td>${config.version.workflowVersion}</td>
                                 <sec:ifAllGranted roles="ROLE_OPERATOR">
                                     <td>
-                                        <button class="btn float-end btn-primary remove-config-btn"
+                                        <button class="btn float-end btn-outline-danger remove-config-btn"
                                                 data-version-selector="${config.workflowVersionSelectorId}">
+                                            <i class="bi bi-trash"></i>
                                             <g:message code="workflowSelection.removeConfig"/>
                                         </button>
                                     </td>
@@ -235,6 +240,7 @@
                                 </td>
                                 <td>
                                     <button type="submit" class="btn float-end btn-primary" id="add-analysis-config-btn">
+                                        <i class="bi bi-pencil-square"></i>
                                         ${g.message(code: "workflowSelection.addOrUpdateConfig")}
                                     </button>
                                 </td>

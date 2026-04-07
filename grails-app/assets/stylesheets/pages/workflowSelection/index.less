@@ -19,7 +19,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 // Should hide disabled select options
 .select2-container .select2-results__option[aria-disabled=true] {
   display: none;
+}
+
+// Fixed table layout to prevent column resizing
+#alignmentTable, #analysisTable {
+  table-layout: fixed !important;
+  width: 100% !important;
+
+  th, td {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  tfoot td {
+    .select2-container, select { width: 100% !important; }
+    .select2-selection {
+      width: 100% !important;
+
+      &__rendered {
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+      }
+    }
+  }
+}
+
+// Alignment table column widths
+#alignmentTable {
+  th, td {
+    &:nth-child(1) { width: 10% !important; } // Workflow
+    &:nth-child(2) { width: 15% !important; } // Seq Type
+    &:nth-child(3) { width: 20% !important; } // Version
+    &:nth-child(4) { width: 20% !important; } // Reference Genome
+    &:nth-child(5) { width: 25% !important; } // Species
+    &:nth-child(6) { width: 7% !important; }  // Action buttons
+  }
+}
+
+// Analysis table column widths
+#analysisTable {
+  th, td {
+    &:nth-child(1) { width: 25% !important; } // Workflow
+    &:nth-child(2) { width: 30% !important; } // Seq Type
+    &:nth-child(3) { width: 30% !important; } // Version
+    &:nth-child(4) { width: 7% !important; }  // Action buttons
+  }
 }

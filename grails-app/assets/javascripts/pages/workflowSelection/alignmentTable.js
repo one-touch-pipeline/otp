@@ -74,7 +74,10 @@ $(() => {
     data.version.displayName,
     data.refGenome.displayName,
     data.species.map((specie) => specie.displayName).join(' + '),
-    `<button class="btn float-end btn-primary remove-config-btn" data-ref-genome-selector="${data.refGenSelectorId}"
-         data-version-selector="${data.workflowVersionSelector.id}">Remove Config</button>`
+    `<button class="btn float-end btn-outline-danger remove-config-btn"
+         data-ref-genome-selector="${data.refGenSelectorId}"
+         data-version-selector="${data.workflowVersionSelector.id}">
+         <i class="bi bi-trash"></i> Remove
+     </button>`
   ];
 });
