@@ -66,14 +66,14 @@ class AutoRestartActionService {
 
     private void restartWorkflow(WorkflowStep workflowStep, List<JobErrorDefinitionWithLogWithIdentifier> matches) {
         try {
-            workflowService.createRestartedWorkflow(workflowStep, true)
+            workflowService.createRestartedWorkflow(workflowStep)
         } catch (OtpRuntimeException e) {
             logService.addSimpleLogEntryWithException(workflowStep, "Fail to restart workflow", e)
             errorNotificationService.send(workflowStep, WorkflowJobErrorDefinition.Action.STOP,
                     "STOP, since workflow restart failed", matches)
             return
         }
-        logService.addSimpleLogEntry(workflowStep, "Create restarted workflow")
+        logService.addSimpleLogEntry(workflowStep, "Create restarted workflow (queued)")
         errorNotificationService.send(workflowStep, WorkflowJobErrorDefinition.Action.RESTART_WORKFLOW,
                 "combining matches rules say ${WorkflowJobErrorDefinition.Action.RESTART_WORKFLOW}", matches)
     }

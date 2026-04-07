@@ -57,8 +57,7 @@ class WorkflowServiceIntegrationSpec extends Specification implements WorkflowSy
 
     static final String WORKFLOW_NAME = "WORKFLOW"
 
-    @Unroll
-    void "createRestartedWorkflows, should create new WorkflowRun based on failed WorkflowRun and start it directly: #startDirectly"() {
+    void "createRestartedWorkflows, should create new WorkflowRun based on failed WorkflowRun"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep([
                 workflowRun: createWorkflowRun([
@@ -81,12 +80,11 @@ class WorkflowServiceIntegrationSpec extends Specification implements WorkflowSy
         OtpWorkflow otpWorkflow = Mock(OtpWorkflow)
 
         when:
-        WorkflowRun newRun = workflowService.createRestartedWorkflows([workflowStep], startDirectly).first()
+        WorkflowRun newRun = workflowService.createRestartedWorkflows([workflowStep]).first()
 
         then:
         _ * workflowService.otpWorkflowService.lookupOtpWorkflowBean(_) >> otpWorkflow
         1 * otpWorkflow.createCopyOfArtefact(seqTrack) >> seqTrack
-        (startDirectly ? 1 : 0) * workflowService.jobService.createNextJob(_)
         _ * otpWorkflow.reconnectDependencies(_, _)
 
         and:
@@ -104,9 +102,6 @@ class WorkflowServiceIntegrationSpec extends Specification implements WorkflowSy
         newWorkflowArtefact.producedBy == newRun
 
         wr2.inputArtefacts.values().every { it == newWorkflowArtefact }
-
-        where:
-        startDirectly << [true, false]
     }
 
     void "findAllAlignmentWorkflows, should return all the alignment workflows"() {
@@ -405,7 +400,7 @@ class WorkflowServiceIntegrationSpec extends Specification implements WorkflowSy
         }
 
         when:
-        WorkflowRun newRun = service.createRestartedWorkflow(workflowStep, false)
+        WorkflowRun newRun = service.createRestartedWorkflow(workflowStep)
 
         then:
         newRun != panCancerRun
@@ -451,7 +446,7 @@ class WorkflowServiceIntegrationSpec extends Specification implements WorkflowSy
         }
 
         when:
-        WorkflowRun newRun = service.createRestartedWorkflow(currentStep, false)
+        WorkflowRun newRun = service.createRestartedWorkflow(currentStep)
 
         then:
         newRun != currentRun

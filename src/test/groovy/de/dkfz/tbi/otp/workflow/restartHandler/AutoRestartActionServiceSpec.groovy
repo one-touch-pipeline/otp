@@ -55,7 +55,7 @@ class AutoRestartActionServiceSpec extends Specification implements ServiceUnitT
         service.handleActionAndSendMail(workflowStep, [errorDefinition], action, null)
 
         then:
-        1 * service.workflowService.createRestartedWorkflow(workflowStep, true)
+        1 * service.workflowService.createRestartedWorkflow(workflowStep)
         1 * service.errorNotificationService.send(workflowStep, action, _, [errorDefinition])
     }
 
@@ -75,7 +75,7 @@ class AutoRestartActionServiceSpec extends Specification implements ServiceUnitT
         service.handleActionAndSendMail(workflowStep, [errorDefinition], action, null)
 
         then:
-        1 * service.workflowService.createRestartedWorkflow(workflowStep, true) >> { throw new JobFailedException('Fail') }
+        1 * service.workflowService.createRestartedWorkflow(workflowStep) >> { throw new JobFailedException('Fail') }
         1 * service.errorNotificationService.send(workflowStep, WorkflowJobErrorDefinition.Action.STOP, _, [errorDefinition])
     }
 

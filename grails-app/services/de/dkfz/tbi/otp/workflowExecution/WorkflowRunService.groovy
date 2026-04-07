@@ -96,7 +96,7 @@ class WorkflowRunService {
                 WHERE wia.workflow_run_id = wr.id
                   AND wa.state NOT IN (${placeholders.successStates})
               )
-            ORDER BY pp.priority DESC, w.priority DESC, wr.date_created
+            ORDER BY pp.priority DESC, w.priority DESC, (wr.restarted_from_id IS NOT NULL) DESC, wr.date_created
             LIMIT 1
         """
     }
@@ -108,10 +108,10 @@ class WorkflowRunService {
 
     WorkflowRun nextWaitingWorkflow(int allowedRunLimit) {
         Map<String, List<String>> params = [
-                runningStates  : STATES_COUNTING_AS_RUNNING*.name(),
-                pendingStates  : PENDING_STATES*.name(),
-                excludedStates : [Project.State.ARCHIVED, Project.State.DELETED]*.name(),
-                successStates  : SUCCESS_STATES*.name(),
+                runningStates : STATES_COUNTING_AS_RUNNING*.name(),
+                pendingStates : PENDING_STATES*.name(),
+                excludedStates: [Project.State.ARCHIVED, Project.State.DELETED]*.name(),
+                successStates : SUCCESS_STATES*.name(),
         ]
 
         Map<String, String> placeholders = params.collectEntries { k, v ->
@@ -355,21 +355,21 @@ class WorkflowRunService {
             List<WesRun> wesRuns = (step.wesRuns as List<WesRun>).sort { it.dateCreated }
 
             return [
-                    state                     : step.state,
-                    id                        : step.id,
-                    name                      : step.beanName,
-                    dateCreated               : TimeFormats.DATE_TIME.getFormattedDate(step.dateCreated),
-                    lastUpdated               : TimeFormats.DATE_TIME.getFormattedDate(step.lastUpdated),
-                    duration                  : TimeUtils.getFormattedDuration(convertDateToLocalDateTime(step.dateCreated),
+                    state                    : step.state,
+                    id                       : step.id,
+                    name                     : step.beanName,
+                    dateCreated              : TimeFormats.DATE_TIME.getFormattedDate(step.dateCreated),
+                    lastUpdated              : TimeFormats.DATE_TIME.getFormattedDate(step.lastUpdated),
+                    duration                 : TimeUtils.getFormattedDuration(convertDateToLocalDateTime(step.dateCreated),
                             convertDateToLocalDateTime(step.lastUpdated)),
-                    error                     : step.workflowError,
-                    clusterJobs               : collectClusterJobDetails(clusterJobs),
+                    error                    : step.workflowError,
+                    clusterJobs              : collectClusterJobDetails(clusterJobs),
                     cumulatedClusterJobsState: getCumulatedClusterJobsStatus(clusterJobs.collect { new ClusterJobStateDto(it.checkStatus, it.exitStatus) }),
-                    wesRuns                   : collectWesRunDetails(wesRuns),
+                    wesRuns                  : collectWesRunDetails(wesRuns),
                     cumulatedWesRunsState    : wesRunService.getCumulatedWesRunsStatus(wesRuns.collect { new WesRunStateDto(it.state, it.wesRunLog?.state) }),
-                    hasLogs                   : !workflowLogService.findAllByWorkflowStepInCorrectOrder(step).empty,
-                    obsolete                  : step.obsolete,
-                    previousStepId            : workflowStepService.getPreviousRunningWorkflowStep(step)?.id,
+                    hasLogs                  : !workflowLogService.findAllByWorkflowStepInCorrectOrder(step).empty,
+                    obsolete                 : step.obsolete,
+                    previousStepId           : workflowStepService.getPreviousRunningWorkflowStep(step)?.id,
             ]
         }
     }

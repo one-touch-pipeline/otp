@@ -183,6 +183,31 @@ class WorkflowRunServiceIntegrationSpec extends Specification implements Workflo
         ret == workflowRun
     }
 
+    void "nextWaitingWorkflow, if multiple workflowRuns ready sharing the highest processingPriority and work priority, return the restarted workflow first"() {
+        given:
+        createWorkflowRunWithPriority(5, 8)
+        Workflow workflow = createWorkflow()
+        WorkflowRun originalWorkflowRun = createWorkflowRunWithPriority(5, 8, workflow)
+        originalWorkflowRun.state = WorkflowRun.State.RESTARTED
+        originalWorkflowRun.save(flush: true)
+        WorkflowRun restartedWorkflowRun = createWorkflowRunWithPriority(5, 8, workflow)
+        restartedWorkflowRun.restartedFrom = originalWorkflowRun
+        restartedWorkflowRun.save(flush: true)
+
+        createWorkflowRunInputArtefact([
+                workflowRun     : restartedWorkflowRun,
+                workflowArtefact: createWorkflowArtefact([
+                        state: WorkflowArtefact.State.SUCCESS,
+                ]),
+        ])
+
+        when:
+        WorkflowRun ret = workflowRunService.nextWaitingWorkflow(0)
+
+        then:
+        ret == restartedWorkflowRun
+    }
+
     void "nextWaitingWorkflow, if project of workflow run is archived, then return null"() {
         given:
         WorkflowRun workflowRun = createWorkflowRunHelper()

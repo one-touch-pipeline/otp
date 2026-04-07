@@ -63,14 +63,14 @@ class WorkflowService {
         return getSupportedSeqTypesOfVersions(Workflow.findAllByName(name))
     }
 
-    List<WorkflowRun> createRestartedWorkflows(List<WorkflowStep> steps, boolean startDirectly = true) {
+    List<WorkflowRun> createRestartedWorkflows(List<WorkflowStep> steps) {
         return steps.collect {
-            createRestartedWorkflow(it, startDirectly)
+            createRestartedWorkflow(it)
         }
     }
 
     @CompileDynamic
-    WorkflowRun createRestartedWorkflow(WorkflowStep step, boolean startDirectly = true) {
+    WorkflowRun createRestartedWorkflow(WorkflowStep step) {
         assert step
         assert step.workflowRun.state in [WorkflowRun.State.FAILED, WorkflowRun.State.FAILED_WAITING]
 
@@ -89,10 +89,6 @@ class WorkflowService {
 
         oldRun.state = WorkflowRun.State.RESTARTED
         oldRun.save(flush: true)
-
-        if (startDirectly) {
-            jobService.createNextJob(run)
-        }
 
         return run
     }
