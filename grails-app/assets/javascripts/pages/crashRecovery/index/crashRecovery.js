@@ -123,7 +123,6 @@ $.otp.crashRecovery.showFailedJobDialog = function (ids, target) {
   $('#markAsFailed').on('click', () => {
     let message = $('input', dialog).val();
     if (!message || message === '') {
-      message = null;
       return;
     }
     dialog.modal('hide');
