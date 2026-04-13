@@ -236,7 +236,8 @@ abstract class AbstractAnalysisDecider<A extends BamFilePairAnalysis>
                               WorkflowVersion workflowVersion, DeciderResult deciderResult,
                               Map<Class<? extends Decider>, DeciderCreateWorkflowAction> deciderAction = [:]) {
 
-        Collection<AnalysisAnalysisArtefactData> existingAnalysisData = findExistingAnalysis(allArtefacts.alreadyRunAnalysisDataList, diseaseData, controlData)
+        Collection<? extends AnalysisAnalysisArtefactData<? extends BamFilePairAnalysis>> existingAnalysisData =
+                findExistingAnalysis(allArtefacts.alreadyRunAnalysisDataList, diseaseData, controlData)
 
         if (existingAnalysisData) {
             DeciderCreateWorkflowAction action = deciderAction[getClass()]
@@ -371,12 +372,13 @@ abstract class AbstractAnalysisDecider<A extends BamFilePairAnalysis>
         ]*.toString()
     }
 
-    private Collection<AnalysisAnalysisArtefactData> findExistingAnalysis(Collection<AnalysisAnalysisArtefactData<BamFilePairAnalysis>> analysisData,
-                                                                          AnalysisBamFileArtefactData diseaseData, AnalysisBamFileArtefactData controlData) {
+    private Collection<? extends AnalysisAnalysisArtefactData<? extends BamFilePairAnalysis>> findExistingAnalysis(
+            Collection<? extends AnalysisAnalysisArtefactData<? extends BamFilePairAnalysis>> analysisData,
+            AnalysisBamFileArtefactData diseaseData, AnalysisBamFileArtefactData controlData) {
         return analysisData.findAll {
             BamFilePairAnalysis analysis = it.artefact
             analysis.sampleType1BamFile == diseaseData.artefact && analysis.sampleType2BamFile == controlData.artefact
-        } as Collection<AnalysisAnalysisArtefactData>
+        } as Collection<? extends AnalysisAnalysisArtefactData<? extends BamFilePairAnalysis>>
     }
 
     private Map<SampleTypePerProject.Category, Map<SampleType, List<AnalysisBamFileArtefactData>>> groupAndFilter(

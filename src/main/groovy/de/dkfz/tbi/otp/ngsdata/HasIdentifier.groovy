@@ -24,20 +24,20 @@ package de.dkfz.tbi.otp.ngsdata
 import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackage
 
 trait HasIdentifier {
 
     int identifier
 
-    static int nextIdentifier(MergingWorkPackage mergingWorkPackage) {
+    static int nextIdentifier(AbstractMergingWorkPackage mergingWorkPackage) {
         assert mergingWorkPackage
         Integer maxIdentifier = maxIdentifier(mergingWorkPackage)
         return (maxIdentifier == null) ? 0 : (maxIdentifier.intValue() + 1)
     }
 
     @CompileDynamic
-    static Integer maxIdentifier(MergingWorkPackage workPackage) {
+    static Integer maxIdentifier(AbstractMergingWorkPackage workPackage) {
         assert workPackage
         return AbstractBamFile.createCriteria().get {
             eq("workPackage", workPackage)

@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 trait IsRoddy implements IsPipeline {
 
     @Override
-    MergingWorkPackage createMergingWorkPackage(Map properties = [:], boolean saveAndValidate = true) {
+    AbstractMergingWorkPackage createMergingWorkPackage(Map properties = [:], boolean saveAndValidate = true) {
         Pipeline pipeline = properties.pipeline ?: findOrCreatePipeline()
         return createDomainObject(MergingWorkPackage, baseMergingWorkPackageProperties(properties) + [
                 seqType         : { createSeqType() },
@@ -40,7 +40,7 @@ trait IsRoddy implements IsPipeline {
         ], properties, saveAndValidate)
     }
 
-    MergingWorkPackage createMergingWorkPackage(AbstractMergingWorkPackage mwp, Map properties = [:], boolean saveAndValidate = true) {
+    AbstractMergingWorkPackage createMergingWorkPackage(AbstractMergingWorkPackage mwp, Map properties = [:], boolean saveAndValidate = true) {
         Pipeline pipeline = properties.pipeline ?: mwp.pipeline
         return createDomainObject(MergingWorkPackage, baseMergingWorkPackageProperties(properties) + [
                 seqType         : mwp.seqType,
@@ -55,14 +55,14 @@ trait IsRoddy implements IsPipeline {
     /**
      * Creates a {@link MergingWorkPackage} with the same properties as the specified one but a different {@link SampleType}.
      */
-    MergingWorkPackage createMergingWorkPackageWithSameProperties(MergingWorkPackage base) {
+    AbstractMergingWorkPackage createMergingWorkPackageWithSameProperties(AbstractMergingWorkPackage base) {
         return createMergingWorkPackageWithSameProperties(base, createSampleType())
     }
 
     /**
      * Creates a {@link MergingWorkPackage} with the same properties as the specified one but a different {@link SampleType}.
      */
-    MergingWorkPackage createMergingWorkPackageWithSameProperties(MergingWorkPackage base, SampleType sampleType) {
+    AbstractMergingWorkPackage createMergingWorkPackageWithSameProperties(AbstractMergingWorkPackage base, SampleType sampleType) {
         Sample sample = createSample(
                 individual: base.individual,
                 sampleType: sampleType,

@@ -35,7 +35,7 @@ import de.dkfz.tbi.otp.workflowExecution.decider.ProjectSeqTypeGroup
 class AlignmentAdditionalData implements AdditionalData {
 
     Map<ProjectSeqTypeGroup, Map<Set<SpeciesWithStrain>, ReferenceGenome>> referenceGenomeMap
-    Map<ReferenceGenome, ReferenceGenomeIndex> referenceGenomeIndexMap
+    Map<ReferenceGenome, Set<ReferenceGenomeIndex>> referenceGenomeIndexMap
     Map<ProjectSeqTypeGroup, MergingCriteria> mergingCriteriaMap
     Map<ProjectSeqTypeGroup, Map<SeqPlatform, SeqPlatformGroup>> specificSeqPlatformGroupMap
     Map<SeqPlatform, SeqPlatformGroup> defaultSeqPlatformGroupMap

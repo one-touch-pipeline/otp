@@ -27,8 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
-import de.dkfz.tbi.otp.infrastructure.alignment.RoddyBamFileNames
+import de.dkfz.tbi.otp.infrastructure.alignment.AlignmentWorkFileServiceFactoryService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -51,7 +50,7 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
     PipelineService pipelineService
 
     @Autowired
-    PanCancerWorkFileService panCancerWorkFileService
+    AlignmentWorkFileServiceFactoryService alignmentWorkFileServiceFactoryService
 
     @Autowired
     UnalignableSeqTrackEmailCreator unalignableSeqTrackEmailCreator
@@ -74,7 +73,7 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
 
     abstract Pipeline.Name getPipelineName()
 
-    abstract RoddyBamFile createBamFileWithoutFlush(Map properties)
+    abstract AbstractBamFile createBamFileWithoutFlush(Map properties)
 
     @Override
     final protected Workflow getWorkflow() {
@@ -195,6 +194,7 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
     }
 
     @Override
+    @SuppressWarnings(['CyclomaticComplexity', 'MethodSize'])
     protected DeciderResult createWorkflowRunsAndOutputArtefacts(ProjectSeqTypeGroup projectSeqTypeGroup, AlignmentDeciderGroup group,
                                                                  AlignmentArtefactDataList givenArtefacts, AlignmentArtefactDataList additionalArtefacts,
                                                                  AlignmentAdditionalData additionalData, WorkflowVersion version,
@@ -208,8 +208,8 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
                 givenArtefacts.bamData + additionalArtefacts.bamData,
         )
 
-        AlignmentArtefactData<RoddyBamFile> existingBamFileData = allArtefacts.bamData.find() as AlignmentArtefactData<RoddyBamFile>
-        RoddyBamFile existingBamFile = existingBamFileData?.artefact
+        AlignmentArtefactData<AbstractBamFile> existingBamFileData = allArtefacts.bamData.find() as AlignmentArtefactData<AbstractBamFile>
+        AbstractBamFile existingBamFile = existingBamFileData?.artefact
         List<SeqTrack> seqTracks = allArtefacts.seqTrackData*.artefact
 
         if (seqTracks.empty) {
@@ -282,7 +282,7 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
 
         MergingWorkPackage workPackage
         try {
-            workPackage = findOrCreateMergingWorkPackage(additionalData, alignmentWorkPackageGroup, seqTrackSet, group, referenceGenome)
+            workPackage = findOrCreateMergingWorkPackage(additionalData, alignmentWorkPackageGroup, seqTrackSet, group, referenceGenome, version)
         } catch (DeciderReferenceGenomeValidationException e) {
             deciderResult.warnings << "skip ${group}, since ${e.message}".toString()
             return deciderResult
@@ -347,17 +347,14 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
                 displayName,
         ))
 
-        int identifier = RoddyBamFile.nextIdentifier(workPackage)
-        RoddyBamFile bamFile = createBamFileWithoutFlush([
+        AbstractBamFile bamFile = createBamFileWithoutFlush([
                 workflowArtefact   : workflowOutputArtefact,
                 workPackage        : workPackage,
-                identifier         : identifier,
-                workDirectoryName  : "${RoddyBamFileNames.WORK_DIR_PREFIX}_${identifier}",
                 seqTracks          : seqTrackSet,
                 numberOfMergedLanes: seqTrackSet.size(),
         ])
 
-        run.workDirectory = panCancerWorkFileService.getDirectoryPath(bamFile)
+        run.workDirectory = alignmentWorkFileServiceFactoryService.getService(bamFile).getDirectoryPath(bamFile)
         run.save(flush: true, deepValidate: false)
 
         deciderResult.infos << "--> create bam file ${bamFile}".toString()
@@ -377,11 +374,13 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
      * @param referenceGenome The ReferenceGenome that should be used for the MergingWorkPackage, used for validation against MergingWorkPackage properties
      * @return The existing MergingWorkPackage if found and valid, or a new MergingWorkPackage if not found. Throws exceptions if validation fails
      */
+    @SuppressWarnings(['UnusedMethodParameter', 'ParameterCount'])
     protected MergingWorkPackage findOrCreateMergingWorkPackage(AlignmentAdditionalData additionalData,
                                                                 AlignmentWorkPackageGroup alignmentWorkPackageGroup,
                                                                 Set<SeqTrack> seqTracks,
                                                                 AlignmentDeciderGroup group,
-                                                                ReferenceGenome referenceGenome) {
+                                                                ReferenceGenome referenceGenome,
+                                                                WorkflowVersion version) {
         Set<MergingWorkPackage> workPackages = additionalData.mergingWorkPackageMap[alignmentWorkPackageGroup]
         // The constrain of MergingWorkPackage allows only one element at most to be saved for the same alignmentWorkPackageGroup
         // so it is safe to use atMostOneElement here

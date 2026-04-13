@@ -24,11 +24,12 @@ package de.dkfz.tbi.otp.workflowExecution.decider
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.ArtefactType
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
-class PanCancerDeciderSpec extends AbstractAlignmentDeciderSpec {
+class PanCancerDeciderSpec extends AbstractAlignmentDeciderSpec implements IsRoddy {
 
     void setup() {
         decider = new PanCancerDecider()

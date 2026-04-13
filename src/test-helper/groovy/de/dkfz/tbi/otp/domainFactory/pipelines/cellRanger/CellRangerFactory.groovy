@@ -200,6 +200,15 @@ trait CellRangerFactory implements IsAlignment {
         }
     }
 
+    ReferenceGenomeIndex findOrCreateCellRangerReferenceGenomeIndex(ReferenceGenome referenceGenome) {
+        ToolName toolName = referenceGenome.referenceGenomeIndexes*.toolName.find {
+            it.name == 'CELL_RANGER' && it.type == ToolName.Type.SINGLE_CELL
+        } ?: createToolName(name: 'CELL_RANGER', type: ToolName.Type.SINGLE_CELL)
+        return referenceGenome.referenceGenomeIndexes.find {
+            it.toolName == toolName
+        } ?: createReferenceGenomeIndex(referenceGenome: referenceGenome, toolName: toolName)
+    }
+
     CellRangerConfig createCellRangerConfig(Map properties) {
         return createDomainObject(CellRangerConfig, [
                 programVersion: "${nextId}",

@@ -28,10 +28,13 @@ import spock.lang.Unroll
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
-import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsAlignment
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.AbstractAlignmentWorkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.AlignmentWorkFileServiceFactoryService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
@@ -39,9 +42,9 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.decider.alignment.*
 
-import java.nio.file.Paths
+import java.nio.file.Path
 
-abstract class AbstractAlignmentDeciderSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, FastqcDomainFactory, IsRoddy {
+abstract class AbstractAlignmentDeciderSpec extends Specification implements DataTest, WorkflowSystemDomainFactory, FastqcDomainFactory, IsAlignment {
 
     protected AbstractAlignmentDecider decider
     protected int useFastqcCount
@@ -50,10 +53,10 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
     protected SeqTrack seqTrack2
     protected List<SeqTrack> seqTracks
     protected List<FastqcProcessedFile> fastqcProcessedFiles
-    protected MergingWorkPackage baseMergingWorkPackage
+    protected AbstractMergingWorkPackage baseMergingWorkPackage
     protected SeqPlatformGroup seqPlatformGroup
     protected ReferenceGenome referenceGenome
-    protected RoddyBamFile bamFile
+    protected AbstractBamFile bamFile
     protected Workflow workflow
     protected WorkflowVersion workflowVersionOld
     protected WorkflowVersion workflowVersion
@@ -65,16 +68,85 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
     protected AlignmentAdditionalData additionalData
 
     @Override
+    Map getQaValuesProperties() {
+        return [:]
+    }
+
+    @Override
+    // codenarc-disable-line
+    Class getQaClass() {
+        return null
+    }
+
+    @Override
     Class[] getDomainClassesToMock() {
         return [
                 FastqFile,
                 FastqcProcessedFile,
                 MergingWorkPackage,
                 ReferenceGenomeProjectSeqType,
+                AbstractBamFile,
                 RoddyBamFile,
+                SingleCellBamFile,
+                CellRangerMergingWorkPackage,
                 WorkflowRunInputArtefact,
                 WorkflowVersionSelector,
         ]
+    }
+
+    protected int getFetchReferenceGenomeIndexesCount() {
+        return 0
+    }
+
+    @SuppressWarnings(['UnusedMethodParameter', 'EmptyMethodInAbstractClass', 'ReturnsNullInsteadOfEmptyCollection'])
+    protected Map<ReferenceGenome, Set<ReferenceGenomeIndex>> getReferenceGenomeIndexMap(ReferenceGenome referenceGenome) {
+        return null
+    }
+
+    @SuppressWarnings(['EmptyMethodInAbstractClass', 'UnusedMethodParameter'])
+    protected void configureFetchAdditionalDataDependencies(ReferenceGenome referenceGenome) {
+    }
+
+    @SuppressWarnings(['EmptyMethodInAbstractClass', 'UnusedMethodParameter'])
+    protected void configureReferenceGenomeIndexMap(AlignmentAdditionalData additionalData, Collection<ReferenceGenome> referenceGenomes) {
+    }
+
+    protected Map<String, ?> getCreateBamFilePropertiesForCreateWorkflowRunsAndOutputArtefacts() {
+        return [
+                config: null,
+        ]
+    }
+
+    @SuppressWarnings('UnusedMethodParameter')
+    protected Map<String, ?> getCreateMergingWorkPackagePropertiesForCreateWorkflowRunsAndOutputArtefacts(
+            ReferenceGenome referenceGenome, WorkflowVersion workflowVersion, Map<String, ?> values) {
+        return [:]
+    }
+
+    @SuppressWarnings('UnusedMethodParameter')
+    protected Map<String, ?> getCreateMergingWorkPackagePropertiesForFindOrCreateMergingWorkPackageTests(
+            ReferenceGenome referenceGenome, WorkflowVersion workflowVersion) {
+        return [:]
+    }
+
+    protected WorkflowVersion getFindOrCreateMergingWorkPackageTestWorkflowVersion() {
+        return createWorkflowVersion(workflowVersion: '1.0.0')
+    }
+
+    protected boolean supportsReferenceGenomeMismatchValidation() {
+        return true
+    }
+
+    protected boolean reusesExistingMergingWorkPackageWithoutBamFile() {
+        return true
+    }
+
+    protected boolean reusesExistingMergingWorkPackageWithOtherBamFileOfDifferentVersion() {
+        return true
+    }
+
+    protected Pipeline getAdditionalDataPipelineForCreateWorkflowRunsAndOutputArtefacts() {
+        return findOrCreatePanCanPipeline()
     }
 
     void "fetchInputArtefacts"() {
@@ -107,13 +179,13 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
 
         AlignmentArtefactData<SeqTrack> seqTrackData = createAlignmentArtefactData(seqTrack)
         AlignmentArtefactData<FastqcProcessedFile> fastqcProcessedFileData = createAlignmentArtefactData()
-        AlignmentArtefactData<RoddyBamFile> roddyBamFileData = createAlignmentArtefactData()
+        AlignmentArtefactData<AbstractBamFile> roddyBamFileData = createAlignmentArtefactData()
 
         AlignmentArtefactDataList dataList = new AlignmentArtefactDataList([seqTrackData], [fastqcProcessedFileData], [roddyBamFileData])
 
         AlignmentArtefactData<SeqTrack> seqTrackData2 = createAlignmentArtefactData()
         AlignmentArtefactData<FastqcProcessedFile> fastqcProcessedFileData2 = createAlignmentArtefactData()
-        AlignmentArtefactData<RoddyBamFile> roddyBamFileData2 = createAlignmentArtefactData()
+        AlignmentArtefactData<AbstractBamFile> roddyBamFileData2 = createAlignmentArtefactData()
 
         decider.alignmentArtefactService = Mock(AlignmentArtefactService) {
             0 * _
@@ -135,7 +207,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         given:
         Workflow workflow = createWorkflow(name: decider.workflowName)
         SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
-        RoddyBamFile roddyBamFile = createBamFile()
+        AbstractBamFile roddyBamFile = createBamFile()
         Pipeline pipeline = findPipeline()
 
         ProjectSeqTypeGroup projectSeqTypeGroup = new ProjectSeqTypeGroup(seqTrack.project, seqTrack.seqType)
@@ -184,15 +256,17 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         Map<SeqTrack, List<RawSequenceFile>> rawSequenceFileMap = [
                 (seqTrack): seqTrack.sequenceFiles,
         ]
+        Map<ReferenceGenome, Set<ReferenceGenomeIndex>> referenceGenomeIndexMap = getReferenceGenomeIndexMap(referenceGenome)
 
         and: 'input objects'
         AlignmentArtefactData<SeqTrack> seqTrackData = createAlignmentArtefactData(seqTrack)
         AlignmentArtefactData<FastqcProcessedFile> fastqcProcessedFileData = createAlignmentArtefactData()
-        AlignmentArtefactData<RoddyBamFile> roddyBamFileData = createAlignmentArtefactData()
+        AlignmentArtefactData<AbstractBamFile> roddyBamFileData = createAlignmentArtefactData()
         AlignmentArtefactDataList dataList = new AlignmentArtefactDataList([seqTrackData], [fastqcProcessedFileData], [roddyBamFileData])
         AlignmentArtefactDataList dataList2 = new AlignmentArtefactDataList([], [], [])
 
         and: 'mocked services'
+        configureFetchAdditionalDataDependencies(referenceGenome)
         decider.alignmentArtefactService = Mock(AlignmentArtefactService) {
             0 * _
             1 * fetchReferenceGenome(workflow, [seqTrack]) >> referenceGenomeMap
@@ -201,6 +275,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
             1 * fetchDefaultSeqPlatformGroup() >> defaultSeqPlatformGroupMap
             1 * fetchMergingWorkPackages([seqTrack]) >> mergingWorkPackageMap
             useFastqcCount * fetchRawSequenceFiles([seqTrack]) >> rawSequenceFileMap
+            fetchReferenceGenomeIndexesCount * fetchReferenceGenomeIndexes(_, _) >> referenceGenomeIndexMap
         }
         decider.pipelineService = Mock(PipelineService) {
             0 * _
@@ -217,6 +292,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         alignmentAdditionalData.defaultSeqPlatformGroupMap == defaultSeqPlatformGroupMap
         alignmentAdditionalData.mergingWorkPackageMap == mergingWorkPackageMap
         alignmentAdditionalData.rawSequenceFileMap == (useFastqcCount ? rawSequenceFileMap : [:])
+        alignmentAdditionalData.referenceGenomeIndexMap == referenceGenomeIndexMap
         alignmentAdditionalData.pipeline == pipeline
     }
 
@@ -229,7 +305,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         and: 'input objects'
         AlignmentArtefactData<SeqTrack> seqTrackData = createAlignmentArtefactData(seqTrack)
         AlignmentArtefactData<FastqcProcessedFile> fastqcProcessedFileData = createAlignmentArtefactData()
-        AlignmentArtefactData<RoddyBamFile> roddyBamFileData = createAlignmentArtefactData()
+        AlignmentArtefactData<AbstractBamFile> roddyBamFileData = createAlignmentArtefactData()
         AlignmentArtefactDataList dataList = new AlignmentArtefactDataList([seqTrackData], [fastqcProcessedFileData], [roddyBamFileData])
 
         and: 'mocked services'
@@ -263,7 +339,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         List<AlignmentArtefactData<FastqcProcessedFile>> fastqcProcessedFileData = fastqcProcessedFiles.collect { FastqcProcessedFile fastqcProcessedFile ->
             createAlignmentArtefactDataForFastqcProcessedFile(fastqcProcessedFile)
         }
-        List<AlignmentArtefactData<RoddyBamFile>> roddyBamFileData = []
+        List<AlignmentArtefactData<AbstractBamFile>> roddyBamFileData = []
         AlignmentArtefactDataList dataList = new AlignmentArtefactDataList(seqTrackData, fastqcProcessedFileData, roddyBamFileData)
 
         and: 'additional data'
@@ -343,7 +419,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
                 createAlignmentArtefactDataForFastqcProcessedFile(fastqcProcessedFile)
             }
         }
-        List<AlignmentArtefactData<RoddyBamFile>> roddyBamFileData = []
+        List<AlignmentArtefactData<AbstractBamFile>> roddyBamFileData = []
         AlignmentArtefactDataList dataList = new AlignmentArtefactDataList(seqTrackData, fastqcProcessedFileData, roddyBamFileData)
 
         and: 'additional data'
@@ -492,6 +568,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         assertAlignmentArtefactDataList(alignmentArtefactDataListMap[alignmentDeciderGroup2], dataList2)
     }
 
+    @SuppressWarnings('NestedBlockDepth')
     void "groupData all data combination"() {
         given:
         List<SpeciesWithStrain> speciesWithStrains = (1..2).collect {
@@ -603,7 +680,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         List<AlignmentArtefactData<FastqcProcessedFile>> fastqcProcessedFileData = fastqcProcessedFiles.collect { FastqcProcessedFile fastqcProcessedFile ->
             createAlignmentArtefactDataForFastqcProcessedFile(fastqcProcessedFile)
         }
-        List<AlignmentArtefactData<RoddyBamFile>> roddyBamFileData = []
+        List<AlignmentArtefactData<AbstractBamFile>> roddyBamFileData = []
         AlignmentArtefactDataList dataList = new AlignmentArtefactDataList(seqTrackData, fastqcProcessedFileData, roddyBamFileData)
 
         and: 'additional data'
@@ -773,15 +850,15 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         workflowArtefact.artefactType == ArtefactType.BAM
         workflowArtefact.outputRole == decider.outputBamRole
 
-        List<RoddyBamFile> roddyBamFiles = RoddyBamFile.list()
+        List<AbstractBamFile> roddyBamFiles = AbstractBamFile.list()
         roddyBamFiles.size() == (existingBamFileOtherSeqTracks ? 2 : 1)
-        RoddyBamFile bamFile = roddyBamFiles.last()
+        AbstractBamFile bamFile = roddyBamFiles.last()
         bamFile.workflowArtefact == workflowArtefact
         CollectionUtils.containSame(bamFile.seqTracks, expectedSeqTracks)
         CollectionUtils.containSame(bamFile.containedSeqTracks, seqTracks)
         bamFile.numberOfMergedLanes == 2
 
-        MergingWorkPackage mergingWorkPackage = bamFile.mergingWorkPackage
+        AbstractMergingWorkPackage mergingWorkPackage = bamFile.mergingWorkPackage
         mergingWorkPackage.sample == seqTrack1.sample
         mergingWorkPackage.seqType == seqTrack1.seqType
         mergingWorkPackage.antibodyTarget == seqTrack1.antibodyTarget
@@ -789,7 +866,14 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         noSeqPlatformGroupMwp || noSeqPlatformGroupSeqTrack || mergingWorkPackage.seqPlatformGroup == seqPlatformGroup
         mergingWorkPackage.referenceGenome == referenceGenome
         TestCase.assertContainSame(mergingWorkPackage.seqTracks, seqTracks)
-        !existingMergingWorkPackage || (mergingWorkPackage == baseMergingWorkPackage)
+        !existingMergingWorkPackage ||
+                (existingBamFileOtherSeqTracks ?
+                        (reusesExistingMergingWorkPackageWithOtherBamFileOfDifferentVersion() ?
+                                (mergingWorkPackage == baseMergingWorkPackage) :
+                                (mergingWorkPackage != baseMergingWorkPackage)) :
+                        reusesExistingMergingWorkPackageWithoutBamFile() ?
+                                (mergingWorkPackage == baseMergingWorkPackage) :
+                                (mergingWorkPackage != baseMergingWorkPackage))
 
         WorkflowRun run = workflowArtefact.producedBy
         run.workflow == workflow
@@ -811,6 +895,12 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
     @Unroll
     void "createWorkflowRunsAndOutputArtefacts, when #name, then do not create a new bam file and create a warning"() {
         given:
+        if (!supportsReferenceGenomeMismatchValidation() && key == 'wrongReferenceGenome') {
+            return
+        }
+        if (!reusesExistingMergingWorkPackageWithoutBamFile() && key in ['wrongLibPrepKit', 'wrongSeqPlatformGroup']) {
+            return
+        }
         createDataForCreateWorkflowRunsAndOutputArtefacts(createMwp, [(key): value])
 
         and: 'services'
@@ -845,6 +935,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
                 (PanCancerDecider)   : deciderCreateWorkflowAction,
                 (WgbsDecider)        : deciderCreateWorkflowAction,
                 (RnaAlignmentDecider): deciderCreateWorkflowAction,
+                (CellRangerDecider)  : deciderCreateWorkflowAction,
         ]
 
         and: 'services'
@@ -885,12 +976,16 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
 
     void "findOrCreateMergingWorkPackage, when existing workPackage has non-matching properties, should throw DeciderMergingWorkPackageValidationException"() {
         given:
+        if (!reusesExistingMergingWorkPackageWithoutBamFile()) {
+            return
+        }
+        WorkflowVersion workflowVersion = findOrCreateMergingWorkPackageTestWorkflowVersion
         LibraryPreparationKit existingKit = createLibraryPreparationKit()
         LibraryPreparationKit differentKit = createLibraryPreparationKit()
 
         MergingWorkPackage existingWorkPackage = createMergingWorkPackage([
                 libraryPreparationKit: existingKit
-        ])
+        ] + getCreateMergingWorkPackagePropertiesForFindOrCreateMergingWorkPackageTests(createReferenceGenome(), workflowVersion))
 
         AlignmentWorkPackageGroup alignmentGroup = new AlignmentWorkPackageGroup(
                 existingWorkPackage.sample, existingWorkPackage.seqType, existingWorkPackage.antibodyTarget)
@@ -898,6 +993,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         Set<MergingWorkPackage> workPackageSet = [existingWorkPackage] as Set
         AlignmentAdditionalData additionalData = new AlignmentAdditionalData(
                 [:], [:], [:], [:], [(alignmentGroup): workPackageSet], [:], findOrCreatePipeline())
+        configureReferenceGenomeIndexMap(additionalData, [existingWorkPackage.referenceGenome])
 
         SeqTrack seqTrack = createSeqTrack([
                 sample               : existingWorkPackage.sample,
@@ -914,7 +1010,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
 
         when:
         decider.findOrCreateMergingWorkPackage(
-                additionalData, alignmentGroup, seqTracks, deciderGroup, existingWorkPackage.referenceGenome)
+                additionalData, alignmentGroup, seqTracks, deciderGroup, existingWorkPackage.referenceGenome, workflowVersion)
 
         then:
         DeciderMergingWorkPackageValidationException exception = thrown(DeciderMergingWorkPackageValidationException)
@@ -924,12 +1020,16 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
 
     void "findOrCreateMergingWorkPackage, when existing workPackage has different referenceGenome, should throw DeciderReferenceGenomeValidationException"() {
         given:
+        if (!supportsReferenceGenomeMismatchValidation()) {
+            return
+        }
         ReferenceGenome existingReferenceGenome = createReferenceGenome()
         ReferenceGenome differentReferenceGenome = createReferenceGenome()
+        WorkflowVersion workflowVersion = findOrCreateMergingWorkPackageTestWorkflowVersion
 
         MergingWorkPackage existingWorkPackage = createMergingWorkPackage([
                 referenceGenome: existingReferenceGenome
-        ])
+        ] + getCreateMergingWorkPackagePropertiesForFindOrCreateMergingWorkPackageTests(existingReferenceGenome, workflowVersion))
 
         AlignmentWorkPackageGroup alignmentGroup = new AlignmentWorkPackageGroup(
                 existingWorkPackage.sample, existingWorkPackage.seqType, existingWorkPackage.antibodyTarget)
@@ -937,6 +1037,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         Set<MergingWorkPackage> workPackageSet = [existingWorkPackage] as Set
         AlignmentAdditionalData additionalData = new AlignmentAdditionalData(
                 [:], [:], [:], [:], [(alignmentGroup): workPackageSet], [:], findOrCreatePipeline())
+        configureReferenceGenomeIndexMap(additionalData, [existingReferenceGenome, differentReferenceGenome])
 
         SeqTrack seqTrack = createSeqTrack([
                 sample               : existingWorkPackage.sample,
@@ -953,7 +1054,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
 
         when:
         decider.findOrCreateMergingWorkPackage(
-                additionalData, alignmentGroup, seqTracks, deciderGroup, differentReferenceGenome)
+                additionalData, alignmentGroup, seqTracks, deciderGroup, differentReferenceGenome, workflowVersion)
 
         then:
         DeciderReferenceGenomeValidationException exception = thrown(DeciderReferenceGenomeValidationException)
@@ -967,11 +1068,15 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
 
     void "findOrCreateMergingWorkPackage, when existing workPackage has seqPlatformGroup difference but group has no seqPlatformGroup, should ignore seqPlatformGroup in validation"() {
         given:
+        if (!reusesExistingMergingWorkPackageWithoutBamFile()) {
+            return
+        }
+        WorkflowVersion workflowVersion = findOrCreateMergingWorkPackageTestWorkflowVersion
         SeqPlatformGroup existingSeqPlatformGroup = createSeqPlatformGroup()
 
         MergingWorkPackage existingWorkPackage = createMergingWorkPackage([
                 seqPlatformGroup: existingSeqPlatformGroup
-        ])
+        ] + getCreateMergingWorkPackagePropertiesForFindOrCreateMergingWorkPackageTests(createReferenceGenome(), workflowVersion))
 
         AlignmentWorkPackageGroup alignmentGroup = new AlignmentWorkPackageGroup(
                 existingWorkPackage.sample, existingWorkPackage.seqType, existingWorkPackage.antibodyTarget)
@@ -979,6 +1084,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         Set<MergingWorkPackage> workPackageSet = [existingWorkPackage] as Set
         AlignmentAdditionalData additionalData = new AlignmentAdditionalData(
                 [:], [:], [:], [:], [(alignmentGroup): workPackageSet], [:], findOrCreatePipeline())
+        configureReferenceGenomeIndexMap(additionalData, [existingWorkPackage.referenceGenome])
 
         SeqTrack seqTrack = createSeqTrack([
                 sample               : existingWorkPackage.sample,
@@ -995,7 +1101,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
 
         when:
         MergingWorkPackage result = decider.findOrCreateMergingWorkPackage(
-                additionalData, alignmentGroup, seqTracks, deciderGroup, existingWorkPackage.referenceGenome)
+                additionalData, alignmentGroup, seqTracks, deciderGroup, existingWorkPackage.referenceGenome, workflowVersion)
 
         then:
         result == existingWorkPackage
@@ -1010,11 +1116,13 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         LibraryPreparationKit libraryPreparationKit = createLibraryPreparationKit()
         ReferenceGenome referenceGenome = createReferenceGenome()
         Pipeline pipeline = findOrCreatePipeline()
+        WorkflowVersion workflowVersion = findOrCreateMergingWorkPackageTestWorkflowVersion
 
         AlignmentWorkPackageGroup alignmentGroup = new AlignmentWorkPackageGroup(sample, seqType, antibodyTarget)
 
         AlignmentAdditionalData additionalData = new AlignmentAdditionalData(
                 [:], [:], [:], [:], [:], [:], pipeline)  // Empty mergingWorkPackageMap
+        configureReferenceGenomeIndexMap(additionalData, [referenceGenome])
 
         SeqTrack seqTrack = createSeqTrack([
                 sample               : sample,
@@ -1029,7 +1137,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
 
         when:
         MergingWorkPackage result = decider.findOrCreateMergingWorkPackage(
-                additionalData, alignmentGroup, seqTracks, deciderGroup, referenceGenome)
+                additionalData, alignmentGroup, seqTracks, deciderGroup, referenceGenome, workflowVersion)
 
         then:
         result != null
@@ -1047,6 +1155,8 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         given:
         Sample sample = createSample()
         SeqType seqType = createSeqType()
+        ReferenceGenome referenceGenome = createReferenceGenome()
+        WorkflowVersion workflowVersion = findOrCreateMergingWorkPackageTestWorkflowVersion
 
         AlignmentWorkPackageGroup alignmentGroup = new AlignmentWorkPackageGroup(sample, seqType, null)
 
@@ -1054,6 +1164,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
 
         AlignmentAdditionalData additionalData = new AlignmentAdditionalData(
                 [:], [:], [:], [:], [(alignmentGroup): workPackageSet], [:], findOrCreatePipeline())
+        configureReferenceGenomeIndexMap(additionalData, [referenceGenome])
 
         SeqTrack seqTrack = createSeqTrack([
                 sample    : sample,
@@ -1067,7 +1178,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
 
         when:
         MergingWorkPackage result = decider.findOrCreateMergingWorkPackage(
-                additionalData, alignmentGroup, seqTracks, deciderGroup, createReferenceGenome())
+                additionalData, alignmentGroup, seqTracks, deciderGroup, referenceGenome, workflowVersion)
 
         then:
         result != null
@@ -1105,7 +1216,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         ]
     }
 
-    private void createDataForCreateWorkflowRunsAndOutputArtefactsDomains(Map<String, ?> adaption) {
+    void createDataForCreateWorkflowRunsAndOutputArtefactsDomains(Map<String, ?> adaption) {
         Map<String, ?> values = createDefaultMapForCreateWorkflowRunsAndOutputArtefactsDomains() + adaption
 
         SpeciesWithStrain speciesWithStrain = findOrCreateHumanSpecies()
@@ -1168,7 +1279,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         List<AlignmentArtefactData<FastqcProcessedFile>> fastqcProcessedFileData = fastqcProcessedFiles.collect { FastqcProcessedFile fastqcProcessedFile ->
             createAlignmentArtefactDataForFastqcProcessedFile(fastqcProcessedFile)
         }
-        List<AlignmentArtefactData<RoddyBamFile>> roddyBamFileData = []
+        List<AlignmentArtefactData<AbstractBamFile>> roddyBamFileData = []
         dataList = new AlignmentArtefactDataList(seqTrackData, fastqcProcessedFileData, roddyBamFileData)
 
         // additional AlignmentArtefactDataList
@@ -1184,18 +1295,21 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
             [(it): it.sequenceFiles]
         }
 
-        additionalData = new AlignmentAdditionalData(referenceGenomeMap, [:], [:], [:], [:], rawSequenceFileMap, findOrCreatePanCanPipeline())
+        additionalData = new AlignmentAdditionalData(referenceGenomeMap, [:], [:], [:], [:], rawSequenceFileMap,
+                additionalDataPipelineForCreateWorkflowRunsAndOutputArtefacts)
+        configureReferenceGenomeIndexMap(additionalData, [referenceGenome])
 
         if (createMwp) {
+            ReferenceGenome workPackageReferenceGenome = values.wrongReferenceGenome ? createReferenceGenome() : referenceGenome
             baseMergingWorkPackage = createMergingWorkPackage([
                     sample               : seqTrack1.sample,
                     seqType              : seqTrack1.seqType,
                     antibodyTarget       : seqTrack1.antibodyTarget,
                     seqPlatformGroup     : values.noSeqPlatformGroupMwp ? null : values.wrongSeqPlatformGroup ? createSeqPlatformGroup() : seqPlatformGroup,
                     libraryPreparationKit: values.wrongLibPrepKit ? createLibraryPreparationKit() : seqTrack1.libraryPreparationKit,
-                    referenceGenome      : values.wrongReferenceGenome ? createReferenceGenome() : referenceGenome,
+                    referenceGenome      : workPackageReferenceGenome,
                     pipeline             : findOrCreatePipeline(),
-            ])
+            ] + getCreateMergingWorkPackagePropertiesForCreateWorkflowRunsAndOutputArtefacts(workPackageReferenceGenome, workflowVersion, values))
             AlignmentWorkPackageGroup group = new AlignmentWorkPackageGroup(baseMergingWorkPackage.sample, baseMergingWorkPackage.seqType, baseMergingWorkPackage.antibodyTarget)
             additionalData.mergingWorkPackageMap[group] = [baseMergingWorkPackage] as Set
 
@@ -1210,10 +1324,11 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
                         ]),
                         workPackage     : baseMergingWorkPackage,
                         seqTracks       : values.existingBamFileSameSeqTracks ? seqTracks : [seqTrack1],
-                        config          : null,
-                ])
-                additionalDataList.bamData << createAlignmentArtefactDataForRoddyBamFile(bamFile)
+                ] + createBamFilePropertiesForCreateWorkflowRunsAndOutputArtefacts) as AbstractBamFile
+                additionalDataList.bamData << createAlignmentArtefactDataForAbstractBamFile(bamFile)
             }
+
+            configureReferenceGenomeIndexMap(additionalData, [referenceGenome, baseMergingWorkPackage.referenceGenome].findAll { it })
         }
     }
 
@@ -1240,7 +1355,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         )
     }
 
-    private void createServicesForCreateWorkflowRunsAndOutputArtefacts(WorkflowVersion workflowVersion, SeqTrack seqTrack) {
+    void createServicesForCreateWorkflowRunsAndOutputArtefacts(WorkflowVersion workflowVersion, SeqTrack seqTrack) {
         decider.workflowRunService = Mock(WorkflowRunService) {
             1 * buildWorkflowRun(workflowVersion.workflow, seqTrack.project.processingPriority, "", seqTrack.project, _, _, workflowVersion) >> {
                 Workflow workflowParam, ProcessingPriority priorityParam, String workDirectoryParam, Project projectParam,
@@ -1276,12 +1391,11 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
             }
             0 * _
         }
-
-        decider.panCancerWorkFileService = Mock(PanCancerWorkFileService) {
-            1 * getDirectoryPath(_) >> { RoddyBamFile roddyBamFile ->
-                Paths.get('/tmp')
-            }
-            0 * _
+        AbstractAlignmentWorkFileService workFileService = Mock(AbstractAlignmentWorkFileService) {
+            _ * getDirectoryPath(_) >> Path.of("")
+        }
+        decider.alignmentWorkFileServiceFactoryService = Mock(AlignmentWorkFileServiceFactoryService) {
+            _ * getService(_) >> workFileService
         }
     }
 
@@ -1339,9 +1453,9 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         )
     }
 
-    protected AlignmentArtefactData<RoddyBamFile> createAlignmentArtefactDataForRoddyBamFile(RoddyBamFile bamFile) {
+    protected AlignmentArtefactData<AbstractBamFile> createAlignmentArtefactDataForAbstractBamFile(AbstractBamFile bamFile) {
         MergingWorkPackage workPackage = bamFile.workPackage ?: this.createMergingWorkPackage()
-        return new AlignmentArtefactData<RoddyBamFile>(
+        return new AlignmentArtefactData<AbstractBamFile>(
                 bamFile.workflowArtefact,
                 bamFile,
                 bamFile.workflowArtefact?.producedBy?.workflowVersion?.workflowVersion ?: bamFile.config?.programVersion,

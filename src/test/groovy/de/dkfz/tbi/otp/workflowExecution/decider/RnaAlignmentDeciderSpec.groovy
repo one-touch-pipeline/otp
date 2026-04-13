@@ -24,11 +24,12 @@ package de.dkfz.tbi.otp.workflowExecution.decider
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.workflow.alignment.roddy.rna.RnaAlignmentWorkflow
 import de.dkfz.tbi.otp.workflowExecution.ArtefactType
 import de.dkfz.tbi.otp.workflowExecution.WorkflowService
 
-class RnaAlignmentDeciderSpec extends AbstractAlignmentDeciderSpec {
+class RnaAlignmentDeciderSpec extends AbstractAlignmentDeciderSpec implements IsRoddy {
 
     @Override
     Class[] getDomainClassesToMock() {
