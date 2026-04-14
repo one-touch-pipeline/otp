@@ -28,33 +28,25 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfig
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingService
-import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelWorkFileService
-import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelLinkFileService
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
-import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
-import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
+import de.dkfz.tbi.otp.filestore.BaseFolder
+import de.dkfz.tbi.otp.filestore.WorkFolder
+import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcLinkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CreateFileHelper
-import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
-import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
-import de.dkfz.tbi.otp.workflowExecution.Workflow
-import de.dkfz.tbi.otp.workflowExecution.ArtefactType
-import de.dkfz.tbi.otp.filestore.BaseFolder
-import de.dkfz.tbi.otp.filestore.WorkFolder
+import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -120,9 +112,9 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
         RawSequenceDataViewFileService rawSequenceDataViewFileService = new RawSequenceDataViewFileService(
                 individualService: new IndividualService(projectService: projectService))
         LsdfFilesService lsdfFilesService = new LsdfFilesService([
-                projectService                : projectService,
+                projectService: projectService,
         ])
-        FastqcDataFilesService fastqcDataFilesService = new FastqcDataFilesService([
+        FastqcLinkFileService fastqcLinkFileService = new FastqcLinkFileService([
                 rawSequenceDataViewFileService: rawSequenceDataViewFileService,
         ])
         RawSequenceDataWorkFileService rawSequenceDataWorkFileService = new RawSequenceDataWorkFileService(lsdfFilesService: lsdfFilesService)
@@ -135,7 +127,7 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
                         roddyBamFileWithdrawService,
                         cellRangerBamFileWithdrawService,
                 ],
-                fastqcDataFilesService        : fastqcDataFilesService,
+                fastqcLinkFileService         : fastqcLinkFileService,
                 rawSequenceDataWorkFileService: rawSequenceDataWorkFileService,
                 rawSequenceDataViewFileService: rawSequenceDataViewFileService,
         ])
@@ -158,9 +150,9 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
         }
         fastqcProcessedFiles.each {
             files.addAll([
-                    fastqcDataFilesService.fastqcOutputPath(it),
-                    fastqcDataFilesService.fastqcOutputMd5sumPath(it),
-                    fastqcDataFilesService.fastqcHtmlPath(it),
+                    fastqcLinkFileService.fastqcOutputPath(it),
+                    fastqcLinkFileService.fastqcOutputMd5sumPath(it),
+                    fastqcLinkFileService.fastqcHtmlPath(it),
             ])
         }
 
@@ -356,7 +348,7 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
         service.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
             2 * getFilePath(oldWorkflowFile) >> Paths.get("/tmp/view")
         }
-        service.fastqcDataFilesService = Mock(FastqcDataFilesService)
+        service.fastqcLinkFileService = Mock(FastqcLinkFileService)
 
         UnwithdrawStateHolder holder = new UnwithdrawStateHolder()
 
@@ -378,41 +370,41 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
         given:
         RawSequenceFile newWorkflowFile = createFastqFile([fileWithdrawn: true, withdrawnComment: "test withdrawal"])
         BaseFolder baseFolder = new BaseFolder(
-            path: "/tmp/test-base-folder-${System.currentTimeMillis()}",
-            writable: true
+                path: "/tmp/test-base-folder-${System.currentTimeMillis()}",
+                writable: true
         )
         baseFolder.save(flush: true)
         WorkFolder workFolder = new WorkFolder(
-            baseFolder: baseFolder,
-            uuid: UUID.randomUUID(),
-            size: 0
+                baseFolder: baseFolder,
+                uuid: UUID.randomUUID(),
+                size: 0
         )
         workFolder.save(flush: true)
 
         Workflow workflow = new Workflow(
-            name: "TestWorkflow-${System.currentTimeMillis()}",
-            enabled: true,
-            maxParallelWorkflows: 1
+                name: "TestWorkflow-${System.currentTimeMillis()}",
+                enabled: true,
+                maxParallelWorkflows: 1
         )
         workflow.save(flush: true)
 
         WorkflowRun workflowRun = new WorkflowRun(
-            workFolder: workFolder,
-            state: WorkflowRun.State.SUCCESS,
-            displayName: "Test Workflow Run",
-            shortDisplayName: "TestRun",
-            project: newWorkflowFile.project,
-            workflow: workflow,
-            priority: newWorkflowFile.seqTrack.sample.individual.project.processingPriority
+                workFolder: workFolder,
+                state: WorkflowRun.State.SUCCESS,
+                displayName: "Test Workflow Run",
+                shortDisplayName: "TestRun",
+                project: newWorkflowFile.project,
+                workflow: workflow,
+                priority: newWorkflowFile.seqTrack.sample.individual.project.processingPriority
         )
         workflowRun.save(flush: true)
 
         WorkflowArtefact workflowArtefact = new WorkflowArtefact(
-            producedBy: workflowRun,
-            state: WorkflowArtefact.State.SUCCESS,
-            displayName: "Test Workflow Artefact",
-            artefactType: ArtefactType.FASTQ,
-            outputRole: "test"
+                producedBy: workflowRun,
+                state: WorkflowArtefact.State.SUCCESS,
+                displayName: "Test Workflow Artefact",
+                artefactType: ArtefactType.FASTQ,
+                outputRole: "test"
         )
         workflowArtefact.save(flush: true)
 
@@ -430,7 +422,7 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
         service.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
             2 * getFilePath(newWorkflowFile) >> Paths.get("/tmp/view")
         }
-        service.fastqcDataFilesService = Mock(FastqcDataFilesService)
+        service.fastqcLinkFileService = Mock(FastqcLinkFileService)
 
         UnwithdrawStateHolder holder = new UnwithdrawStateHolder()
 
@@ -454,9 +446,9 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
         holder.linksToCreate = [(Paths.get("/tmp/source")): Paths.get("/tmp/link")]
         holder.pathsToChangeGroup = ["/tmp/file1": "group1", "/tmp/file2": "group2"]
         holder.pathsToChangePermissions = [
-                "/tmp/fastq1.gz": "444",
+                "/tmp/fastq1.gz"       : "444",
                 "/tmp/fastq2.gz.md5sum": "444",
-                "/tmp/fastqc.zip": "444",
+                "/tmp/fastqc.zip"      : "444",
         ]
 
         when:
@@ -523,7 +515,7 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
         newWorkflowFastqFile.seqTrack.save(flush: true)
 
         FastqcProcessedFile oldWorkflowFastqcFile = createFastqcProcessedFile([
-                sequenceFile: newWorkflowFastqFile,
+                sequenceFile    : newWorkflowFastqFile,
                 workflowArtefact: null, // Old workflow - no artefact
         ])
 
@@ -541,7 +533,7 @@ class UnwithdrawServiceSpec extends Specification implements DomainFactoryCore, 
         service.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
             2 * getFilePath(newWorkflowFastqFile) >> Paths.get("/tmp/view")
         }
-        service.fastqcDataFilesService = Mock(FastqcDataFilesService) {
+        service.fastqcLinkFileService = Mock(FastqcLinkFileService) {
             2 * fastqcOutputPath(oldWorkflowFastqcFile) >> oldFastqcZip
             2 * fastqcOutputMd5sumPath(oldWorkflowFastqcFile) >> oldFastqcMd5
             2 * fastqcHtmlPath(oldWorkflowFastqcFile) >> oldFastqcHtml

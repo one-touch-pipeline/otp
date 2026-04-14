@@ -25,10 +25,10 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
+import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.tracking.Ticket
@@ -76,7 +76,7 @@ class FastqcWesPrepareJobSpec extends Specification implements DataTest, FastqcD
             1 * canFastqcReportsBeCopied([fastqcProcessedFile]) >> canBeCopied
             0 * _
         }
-        job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
+        job.fastqcWorkFileService = Mock(FastqcWorkFileService) {
             1 * fastqcFileName(fastqcProcessedFile) >> 'name.zip'
             0 * _
         }

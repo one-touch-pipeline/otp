@@ -25,19 +25,24 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
-import de.dkfz.tbi.otp.filestore.PathOption
+import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcLinkFileService
+import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcWorkFileService
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.jobs.AbstractLinkJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+
+import java.nio.file.Path
 
 @Component
 @Slf4j
 class FastqcLinkJob extends AbstractLinkJob implements FastqcShared {
 
     @Autowired
-    FastqcDataFilesService fastqcDataFilesService
+    FastqcWorkFileService fastqcWorkFileService
+
+    @Autowired
+    FastqcLinkFileService fastqcLinkFileService
 
     @Override
     protected List<LinkEntry> getLinkMap(WorkflowStep workflowStep) {
@@ -45,15 +50,16 @@ class FastqcLinkJob extends AbstractLinkJob implements FastqcShared {
 
         List<LinkEntry> links = []
         files.each {
-            links.add(new LinkEntry(link: fastqcDataFilesService.fastqcOutputPath(it),
-                    target: fastqcDataFilesService.fastqcOutputPath(it, PathOption.REAL_PATH)))
-            if (fileService.fileIsReadable(fastqcDataFilesService.fastqcHtmlPath(it, PathOption.REAL_PATH))) {
-                links.add(new LinkEntry(link: fastqcDataFilesService.fastqcHtmlPath(it),
-                        target: fastqcDataFilesService.fastqcHtmlPath(it, PathOption.REAL_PATH)))
+            Path outputPath = fastqcWorkFileService.fastqcOutputPath(it)
+            Path htmlPath = fastqcWorkFileService.fastqcHtmlPath(it)
+            Path md5sumPath = fastqcWorkFileService.fastqcOutputMd5sumPath(it)
+
+            links.add(new LinkEntry(link: fastqcLinkFileService.fastqcOutputPath(it), target: outputPath))
+            if (fileService.fileIsReadable(htmlPath)) {
+                links.add(new LinkEntry(link: fastqcLinkFileService.fastqcHtmlPath(it), target: htmlPath))
             }
-            if (fileService.fileIsReadable(fastqcDataFilesService.fastqcOutputMd5sumPath(it, PathOption.REAL_PATH))) {
-                links.add(new LinkEntry(link: fastqcDataFilesService.fastqcOutputMd5sumPath(it),
-                        target: fastqcDataFilesService.fastqcOutputMd5sumPath(it, PathOption.REAL_PATH)))
+            if (fileService.fileIsReadable(md5sumPath)) {
+                links.add(new LinkEntry(link: fastqcLinkFileService.fastqcOutputMd5sumPath(it), target: md5sumPath))
             }
         }
 

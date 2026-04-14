@@ -41,6 +41,7 @@ import de.dkfz.tbi.otp.filestore.BaseFolder
 import de.dkfz.tbi.otp.filestore.WorkFolder
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.infrastructure.alignment.*
+import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcWorkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RoddyConfigService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -241,7 +242,7 @@ class ExampleData {
 
     RnaAlignmentWorkFileService rnaAlignmentWorkFileService
 
-    FastqcDataFilesService fastqcDataFilesService
+    FastqcWorkFileService fastqcWorkFileService
 
     FileService fileService
 
@@ -492,7 +493,7 @@ class ExampleData {
     void createFastqcFilesOnFilesystem() {
         println "creating dummy fastqc reports on file system"
         fastqcProcessedFiles.each { FastqcProcessedFile fastqcProcessedFile ->
-            Path fastqcPath = fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile)
+            Path fastqcPath = fastqcWorkFileService.fastqcOutputPath(fastqcProcessedFile)
             Path fastqcMd5Path = fastqcPath.resolveSibling("${fastqcPath.getFileName()}.md5sum")
             [
                     fastqcPath,
@@ -627,7 +628,7 @@ class ExampleData {
 
     void createSnvFilesOnFilesystem() {
         println "creating dummy snv files on file system"
-        roddySnvCallingInstances.each { RoddySnvCallingInstance snvCallingInstance ->
+        snvCallingInstances.each { SnvCallingInstance snvCallingInstance ->
             [
                     snvCallingService.getSnvCallingResult(snvCallingInstance),
                     snvCallingService.getSnvDeepAnnotationResult(snvCallingInstance),
@@ -1923,7 +1924,7 @@ Project.withTransaction {
             cellRangerConfigurationService   : ctx.cellRangerConfigurationService,
             cellRangerWorkFileService        : ctx.cellRangerWorkFileService,
             cellRangerWorkflowService        : ctx.cellRangerWorkflowService,
-            fastqcDataFilesService           : ctx.fastqcDataFilesService,
+            fastqcWorkFileService           : ctx.fastqcWorkFileService,
             documentService                  : ctx.documentService,
             fileService                      : ctx.fileService,
             fileSystemService                : ctx.fileSystemService,

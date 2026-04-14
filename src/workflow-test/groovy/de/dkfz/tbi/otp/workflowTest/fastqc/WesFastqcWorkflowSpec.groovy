@@ -27,8 +27,8 @@ import spock.lang.Ignore
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
+import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcLinkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
@@ -98,7 +98,7 @@ class WesFastqcWorkflowSpec extends AbstractDecidedWorkflowSpec {
 
     Class<WesFastQcWorkflow> workflowComponentClass = WesFastQcWorkflow
 
-    FastqcDataFilesService fastqcDataFilesService
+    FastqcLinkFileService fastqcLinkFileService
     FastqcDecider fastqcDecider
 
     private Path expectedFastqc
@@ -222,7 +222,7 @@ class WesFastqcWorkflowSpec extends AbstractDecidedWorkflowSpec {
         SessionUtils.withTransaction {
             allRawSequenceFiles.each { RawSequenceFile rawSequenceFile ->
                 FastqcProcessedFile fastqcProcessedFile = CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllBySequenceFile(rawSequenceFile))
-                ZipFile actualResult = new ZipFile(fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile).toString())
+                ZipFile actualResult = new ZipFile(fastqcLinkFileService.fastqcOutputPath(fastqcProcessedFile).toString())
 
                 List<String> actualFiles = []
                 actualResult.entries().each { ZipEntry entry ->

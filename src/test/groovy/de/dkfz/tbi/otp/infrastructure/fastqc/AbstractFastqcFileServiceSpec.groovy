@@ -1,0 +1,209 @@
+/*
+ * Copyright 2011-2026 The OTP authors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package de.dkfz.tbi.otp.infrastructure.fastqc
+
+import grails.testing.gorm.DataTest
+import spock.lang.Specification
+import spock.lang.Unroll
+
+import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
+import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
+import de.dkfz.tbi.otp.ngsdata.FastqFile
+import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
+
+import java.nio.file.Path
+import java.nio.file.Paths
+
+class AbstractFastqcFileServiceSpec extends Specification implements DataTest, FastqcDomainFactory {
+
+    static final Path BASE_DIRECTORY = Paths.get("/tmp/base/")
+    static final Path ZIP_FILE = Paths.get("/tmp/file.zip")
+    static final Path HTML_FILE = Paths.get("/tmp/file.html")
+    static final Path MD5_FILE = Paths.get("/tmp/file.zip.md5sum")
+
+    private final TestAbstractFastqcFileService service = new TestAbstractFastqcFileService()
+
+    @Override
+    Class<?>[] getDomainClassesToMock() {
+        return [
+                FastqFile,
+                FastqcProcessedFile,
+        ]
+    }
+
+    @Unroll
+    void "fastqcFileName, when fastq name is #input, then fastqc name is #output"() {
+        given:
+        RawSequenceFile rawSequenceFile = new FastqFile()
+        rawSequenceFile.fileName = input
+        FastqcProcessedFile fastqcProcessedFile = new FastqcProcessedFile([
+                sequenceFile     : rawSequenceFile,
+                workDirectoryName: "workDirectoryName",
+        ])
+
+        expect:
+        service.fastqcFileName(fastqcProcessedFile) == output + service.FAST_QC_FILE_SUFFIX + service.FAST_QC_ZIP_SUFFIX
+
+        where:
+        input                 || output
+        // no extension
+        "123"                 || "123"
+
+        // one extension
+        "123.gz"              || "123"
+        "123.bz2"             || "123"
+        "123.txt"             || "123"
+        "123.fastq"           || "123"
+        "123.sam"             || "123"
+        "123.bam"             || "123"
+        "123.other"           || "123.other"
+
+        // two extension, second is gz
+        "123.gz.gz"           || "123.gz"
+        "123.bz2.gz"          || "123"
+        "123.txt.gz"          || "123"
+        "123.fastq.gz"        || "123"
+        "123.sam.gz"          || "123"
+        "123.bam.gz"          || "123"
+
+        // two extension, second is bz2
+        "123.gz.bz2"          || "123"
+        "123.bz2.bz2"         || "123"
+        "123.txt.bz2"         || "123"
+        "123.fastq.bz2"       || "123"
+        "123.sam.bz2"         || "123"
+        "123.bam.bz2"         || "123"
+
+        // two extension, second is other
+        "123.gz.other"        || "123.gz.other"
+        "123.bz2.other"       || "123.bz2.other"
+        "123.txt.other"       || "123.txt.other"
+        "123.fastq.other"     || "123.fastq.other"
+        "123.sam.other"       || "123.sam.other"
+        "123.bam.other"       || "123.bam.other"
+
+        // two extension, first is other
+        "123.other.gz"        || "123.other"
+        "123.other.bz2"       || "123.other"
+        "123.other.txt"       || "123.other"
+        "123.other.fastq"     || "123.other"
+        "123.other.sam"       || "123.other"
+        "123.other.bam"       || "123.other"
+
+        // dot in name, no extension
+        "123.456"             || "123.456"
+
+        // dot in name, one extension
+        "123.456.gz"          || "123.456"
+        "123.456.bz2"         || "123.456"
+        "123.456.txt"         || "123.456"
+        "123.456.fastq"       || "123.456"
+        "123.456.sam"         || "123.456"
+        "123.456.bam"         || "123.456"
+
+        // dot in name, two extension, second is gz
+        "123.456.gz.gz"       || "123.456.gz"
+        "123.456.bz2.gz"      || "123.456"
+        "123.456.txt.gz"      || "123.456"
+        "123.456.fastq.gz"    || "123.456"
+        "123.456.sam.gz"      || "123.456"
+        "123.456.bam.gz"      || "123.456"
+
+        // dot in name, two extension, second is bz2
+        "123.456.gz.bz2"      || "123.456"
+        "123.456.bz2.bz2"     || "123.456"
+        "123.456.txt.bz2"     || "123.456"
+        "123.456.fastq.bz2"   || "123.456"
+        "123.456.sam.bz2"     || "123.456"
+        "123.456.bam.bz2"     || "123.456"
+
+        // dot in name, two extension, second is other
+        "123.456.gz.other"    || "123.456.gz.other"
+        "123.456.bz2.other"   || "123.456.bz2.other"
+        "123.456.txt.other"   || "123.456.txt.other"
+        "123.456.fastq.other" || "123.456.fastq.other"
+        "123.456.sam.other"   || "123.456.sam.other"
+        "123.456.bam.other"   || "123.456.bam.other"
+
+        // dot in name, two extension, first is other
+        "123.456.other.gz"    || "123.456.other"
+        "123.456.other.bz2"   || "123.456.other"
+        "123.456.other.txt"   || "123.456.other"
+        "123.456.other.fastq" || "123.456.other"
+        "123.456.other.sam"   || "123.456.other"
+        "123.456.other.bam"   || "123.456.other"
+
+        // handle tar.bz2 (own adaption before)
+        "123.tar.bz2"         || "123"
+        "123.tar.gz"          || "123"
+    }
+
+    @Unroll
+    void "inputFileNameAdaption, when original fastq name is #input, then adapted fastq name is #output"() {
+        expect:
+        service.inputFileNameAdaption(input) == output
+
+        where:
+        input          || output
+        "asdf.tar"     || "asdf.tar"
+        "asdf.tar.gz"  || "asdf"
+        "asdf.tar.bz2" || "asdf"
+        "asdf.gz"      || "asdf.gz"
+        "asdf.bz2"     || "asdf"
+        "asdf.bz2.tar" || "asdf.bz2.tar"
+    }
+
+    void "fastqcHtmlPath, when called, then return correct path"() {
+        given:
+        FastqcProcessedFile fastqcProcessedFile = createFastqcProcessedFile()
+        Path expectedPath = HTML_FILE
+
+        expect:
+        service.fastqcHtmlPath(fastqcProcessedFile) == expectedPath
+    }
+
+    void "fastqcOutputMd5sumPath, when called, then return correct path"() {
+        given:
+        FastqcProcessedFile fastqcProcessedFile = createFastqcProcessedFile()
+        String fastqcMd5sumName = MD5_FILE
+
+        Path expectedPath = Paths.get(fastqcMd5sumName)
+
+        expect:
+        service.fastqcOutputMd5sumPath(fastqcProcessedFile) == expectedPath
+    }
+
+    static class TestAbstractFastqcFileService implements AbstractFastqcFileService {
+
+        @Override
+        Path getDirectoryPath(FastqcProcessedFile fastqcProcessedFile) {
+            assert fastqcProcessedFile
+            return BASE_DIRECTORY
+        }
+
+        @Override
+        Path fastqcOutputPath(FastqcProcessedFile fastqcProcessedFile) {
+            assert fastqcProcessedFile
+            return ZIP_FILE
+        }
+    }
+}

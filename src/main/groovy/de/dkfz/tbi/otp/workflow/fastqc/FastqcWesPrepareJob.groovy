@@ -25,8 +25,8 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
+import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcWorkFileService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.tracking.Ticket
@@ -45,7 +45,7 @@ class FastqcWesPrepareJob extends AbstractPrepareJob implements FastqcShared {
     NotificationCreator notificationCreator
 
     @Autowired
-    FastqcDataFilesService fastqcDataFilesService
+    FastqcWorkFileService fastqcWorkFileService
 
     @Autowired
     FastqcReportService fastqcReportService
@@ -67,12 +67,12 @@ class FastqcWesPrepareJob extends AbstractPrepareJob implements FastqcShared {
             logService.addSimpleLogEntry(workflowStep, "fastqc reports found, mark object to copy them")
             fastqcProcessedFiles.each { FastqcProcessedFile fastqcProcessedFile ->
                 fastqcProcessedFile.fileCopied = true
-                fastqcProcessedFile.pathInWorkFolder = fastqcDataFilesService.fastqcFileName(fastqcProcessedFile)
+                fastqcProcessedFile.pathInWorkFolder = fastqcWorkFileService.fastqcFileName(fastqcProcessedFile)
                 fastqcProcessedFile.save(flush: true)
             }
         } else {
             fastqcProcessedFiles.each { FastqcProcessedFile fastqcProcessedFile ->
-                String name = fastqcDataFilesService.fastqcFileName(fastqcProcessedFile)
+                String name = fastqcWorkFileService.fastqcFileName(fastqcProcessedFile)
                 fastqcProcessedFile.pathInWorkFolder = "${fastqcProcessedFile.sequenceFile.fileName}_reports/${name}"
                 fastqcProcessedFile.fileCopied = false
                 fastqcProcessedFile.save(flush: true)

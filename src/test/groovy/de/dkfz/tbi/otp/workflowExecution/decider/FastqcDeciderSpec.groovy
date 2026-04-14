@@ -26,7 +26,6 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.FastqcWorkflowDomainFactory
@@ -373,15 +372,12 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
         e.message.contains(expectedMessage)
 
         where:
-        deciderAction                                         || expectedMessage
+        deciderAction                                        || expectedMessage
         DeciderCreateWorkflowAction.CREATE_ALWAYS            || 'The action CREATE_ALWAYS is not supported for fastqc'
         DeciderCreateWorkflowAction.CREATE_MISSING_AND_NEWER || 'The action CREATE_MISSING_AND_NEWER is not supported for fastqc'
     }
 
     private void createServicesForCreateWorkflowRunsAndOutputArtefacts(WorkflowVersion workflowVersion, SeqTrack seqTrack) {
-        decider.fastqcDataFilesService = Mock(FastqcDataFilesService) {
-            0 * _
-        }
         decider.workflowRunService = Mock(WorkflowRunService) {
             1 * buildWorkflowRun(workflowVersion.workflow, seqTrack.project.processingPriority, _, seqTrack.project, _, _, workflowVersion) >> {
                 Workflow workflowParam, ProcessingPriority priorityParam, String workDirectoryParam, Project projectParam,

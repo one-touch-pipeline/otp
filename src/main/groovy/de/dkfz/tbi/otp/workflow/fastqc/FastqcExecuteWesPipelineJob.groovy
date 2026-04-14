@@ -25,7 +25,6 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.workflow.jobs.AbstractExecuteWesPipelineJob
 import de.dkfz.tbi.otp.workflowExecution.*
@@ -39,9 +38,6 @@ import java.nio.file.Path
 @Component
 @Slf4j
 class FastqcExecuteWesPipelineJob extends AbstractExecuteWesPipelineJob implements FastqcShared {
-
-    @Autowired
-    FastqcDataFilesService fastqcDataFilesService
 
     @Autowired
     FastqcReportService fastqcReportService

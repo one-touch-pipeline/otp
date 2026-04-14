@@ -39,6 +39,7 @@ import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerWorkFileService
 import de.dkfz.tbi.otp.infrastructure.alignment.ExternalAlignmentWorkFileService
 import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerLinkFileService
+import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcLinkFileService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.*
@@ -65,7 +66,7 @@ class DeletionService {
     CommentService commentService
     ConfigService configService
     DataProcessingFilesService dataProcessingFilesService
-    FastqcDataFilesService fastqcDataFilesService
+    FastqcLinkFileService fastqcLinkFileService
     FileService fileService
     IndividualService individualService
     LsdfFilesService lsdfFilesService
@@ -743,8 +744,8 @@ class DeletionService {
         List<File> filesToDelete = []
 
         if (fastqcProcessedFiles) {
-            String fastqFile = fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFiles.first())
-            File folder = new File(fastqFile).parentFile
+            Path fastqFile = fastqcLinkFileService.fastqcOutputPath(fastqcProcessedFiles.first())
+            File folder = new File(fastqFile.parent.toString())
 
             if (folder.exists()) {
                 filesToDelete.add(folder)

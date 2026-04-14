@@ -33,20 +33,13 @@ import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.filestore.BaseFolder
-import de.dkfz.tbi.otp.filestore.FilestoreService
-import de.dkfz.tbi.otp.filestore.PathOption
-import de.dkfz.tbi.otp.filestore.WorkFolder
-import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataAllWellFileService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
+import de.dkfz.tbi.otp.filestore.*
+import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcLinkFileService
+import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
-import de.dkfz.tbi.otp.workflowExecution.Workflow
-import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
-import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
-import de.dkfz.tbi.otp.workflowExecution.ArtefactType
+import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.*
 import java.nio.file.attribute.PosixFilePermission
@@ -107,7 +100,7 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
                         deleteBamFile        : deleteBamFile,
                         deleteAnalysis       : deleteAnalysis,
                 ]),
-                bamFiles: [
+                bamFiles          : [
                         roddyBamFile1,
                         roddyBamFile2,
                         singleCellBamFile1,
@@ -425,7 +418,7 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
 
         RawSequenceFile fastqFile = createFastqFile()
         FastqcProcessedFile fastqcProcessedFile = createFastqcProcessedFile([
-                sequenceFile: fastqFile,
+                sequenceFile    : fastqFile,
                 workflowArtefact: null,  // Old workflow - no artefact
         ])
         RawSequenceFile withdrawnFastqFile = createFastqFile([fileWithdrawn: true])
@@ -438,7 +431,7 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
                 ])
         ])
         FastqcProcessedFile singleCellFastqcProcessedFile = createFastqcProcessedFile([
-                sequenceFile: singleCellFastqFile,
+                sequenceFile    : singleCellFastqFile,
                 workflowArtefact: null,  // Old workflow - no artefact
         ])
         MergingWorkPackage mergingWorkPackage = AlignmentPipelineFactory.RoddyPanCancerFactoryInstance.INSTANCE.createMergingWorkPackage([
@@ -449,7 +442,8 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         WithdrawHelperService service = new WithdrawHelperService()
 
         service.filestoreService = Mock(FilestoreService)
-        service.fastqcDataFilesService = Mock(FastqcDataFilesService)
+        service.fastqcLinkFileService = Mock(FastqcLinkFileService)
+        service.fastqcWorkFileService = Mock(FastqcWorkFileService)
         service.rawSequenceDataWorkFileService = Mock(RawSequenceDataWorkFileService)
         service.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService)
         service.rawSequenceDataAllWellFileService = Mock(RawSequenceDataAllWellFileService)
@@ -488,19 +482,19 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         1 * service.rawSequenceDataViewFileService.getFilePath(singleCellFastqFile) >> Paths.get(viewByPidPathSingleCell)
         1 * service.rawSequenceDataAllWellFileService.getFilePath(singleCellFastqFile) >> Paths.get(wellPathSingleCell)
 
-        1 * service.fastqcDataFilesService.fastqcOutputDirectory(fastqcProcessedFile) >> fastqcPath
-        1 * service.fastqcDataFilesService.fastqcOutputDirectory(fastqcProcessedFile, PathOption.REAL_PATH) >> uuidPath
-        1 * service.fastqcDataFilesService.fastqcOutputDirectory(singleCellFastqcProcessedFile) >> fastqcPath
-        1 * service.fastqcDataFilesService.fastqcOutputDirectory(singleCellFastqcProcessedFile, PathOption.REAL_PATH) >> uuidPath
+        1 * service.fastqcLinkFileService.getDirectoryPath(fastqcProcessedFile) >> fastqcPath
+        1 * service.fastqcWorkFileService.getDirectoryPath(fastqcProcessedFile) >> uuidPath
+        1 * service.fastqcLinkFileService.getDirectoryPath(singleCellFastqcProcessedFile) >> fastqcPath
+        1 * service.fastqcWorkFileService.getDirectoryPath(singleCellFastqcProcessedFile) >> uuidPath
 
-        1 * service.fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile) >> fastqcZip
-        1 * service.fastqcDataFilesService.fastqcOutputMd5sumPath(fastqcProcessedFile) >> fastqcMd5sum
-        1 * service.fastqcDataFilesService.fastqcHtmlPath(fastqcProcessedFile) >> fastqcHtml
-        1 * service.fastqcDataFilesService.fastqcOutputPath(singleCellFastqcProcessedFile) >> singleCellFastqcZip
-        1 * service.fastqcDataFilesService.fastqcOutputMd5sumPath(singleCellFastqcProcessedFile) >> singleCellFastqcMd5sum
-        1 * service.fastqcDataFilesService.fastqcHtmlPath(singleCellFastqcProcessedFile) >> singleCellFastqcHtml
+        1 * service.fastqcLinkFileService.fastqcOutputPath(fastqcProcessedFile) >> fastqcZip
+        1 * service.fastqcLinkFileService.fastqcOutputMd5sumPath(fastqcProcessedFile) >> fastqcMd5sum
+        1 * service.fastqcLinkFileService.fastqcHtmlPath(fastqcProcessedFile) >> fastqcHtml
+        1 * service.fastqcLinkFileService.fastqcOutputPath(singleCellFastqcProcessedFile) >> singleCellFastqcZip
+        1 * service.fastqcLinkFileService.fastqcOutputMd5sumPath(singleCellFastqcProcessedFile) >> singleCellFastqcMd5sum
+        1 * service.fastqcLinkFileService.fastqcHtmlPath(singleCellFastqcProcessedFile) >> singleCellFastqcHtml
 
-        0 * service.fastqcDataFilesService._
+        0 * service.fastqcLinkFileService._
 
         and:
         TestCase.assertContainSame(holder.pathsToChangeGroup, pathsToChangeGroup)
@@ -574,12 +568,12 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         }
 
         WithdrawStateHolder holder = new WithdrawStateHolder([
-                withdrawParameters: new WithdrawParameters([
+                withdrawParameters      : new WithdrawParameters([
                         fileName: scriptName,
                 ]),
-                remoteFileSystem  : fileSystem,
-                pathsToDelete     : [pathToDelete],
-                pathsToChangeGroup: [pathToChangeGroup],
+                remoteFileSystem        : fileSystem,
+                pathsToDelete           : [pathToDelete],
+                pathsToChangeGroup      : [pathToChangeGroup],
                 pathsToChangePermissions: [pathToChangePermission] as Set,
         ])
 
@@ -619,9 +613,9 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         }
 
         WithdrawStateHolder holder = new WithdrawStateHolder([
-                withdrawParameters: new WithdrawParameters(),
-                pathsToDelete     : pathsToDelete,
-                pathsToChangeGroup: pathsToChangeGroup,
+                withdrawParameters      : new WithdrawParameters(),
+                pathsToDelete           : pathsToDelete,
+                pathsToChangeGroup      : pathsToChangeGroup,
                 pathsToChangePermissions: pathsToChangePermissions,
         ])
 
@@ -660,7 +654,7 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         service.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
             1 * getFilePath(oldWorkflowFile) >> Paths.get("/tmp/view")
         }
-        service.fastqcDataFilesService = Mock(FastqcDataFilesService)
+        service.fastqcLinkFileService = Mock(FastqcLinkFileService)
 
         WithdrawStateHolder holder = new WithdrawStateHolder([
                 withdrawParameters: new WithdrawParameters([
@@ -694,7 +688,7 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         service.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
             1 * getFilePath(newWorkflowFile) >> Paths.get("/tmp/view")
         }
-        service.fastqcDataFilesService = Mock(FastqcDataFilesService)
+        service.fastqcLinkFileService = Mock(FastqcLinkFileService)
 
         WithdrawStateHolder holder = new WithdrawStateHolder([
                 withdrawParameters: new WithdrawParameters([
@@ -756,7 +750,7 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         newWorkflowFastqFile.seqTrack.save(flush: true)
 
         FastqcProcessedFile oldWorkflowFastqcFile = createFastqcProcessedFile([
-                sequenceFile: newWorkflowFastqFile,
+                sequenceFile    : newWorkflowFastqFile,
                 workflowArtefact: null,
         ])
 
@@ -778,9 +772,11 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         service.rawSequenceDataViewFileService = Mock(RawSequenceDataViewFileService) {
             1 * getFilePath(newWorkflowFastqFile) >> Paths.get("/tmp/view")
         }
-        service.fastqcDataFilesService = Mock(FastqcDataFilesService) {
-            1 * fastqcOutputDirectory(oldWorkflowFastqcFile) >> fastqcDir
-            1 * fastqcOutputDirectory(oldWorkflowFastqcFile, PathOption.REAL_PATH) >> fastqcDir
+        service.fastqcWorkFileService = Mock(FastqcWorkFileService) {
+            1 * getDirectoryPath(oldWorkflowFastqcFile) >> fastqcDir
+        }
+        service.fastqcLinkFileService = Mock(FastqcLinkFileService) {
+            1 * getDirectoryPath(oldWorkflowFastqcFile) >> fastqcDir
             1 * fastqcOutputPath(oldWorkflowFastqcFile) >> oldFastqcZip
             1 * fastqcOutputMd5sumPath(oldWorkflowFastqcFile) >> oldFastqcMd5
             1 * fastqcHtmlPath(oldWorkflowFastqcFile) >> oldFastqcHtml

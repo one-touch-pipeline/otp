@@ -27,9 +27,9 @@ import spock.lang.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
+import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcWorkFileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
@@ -186,8 +186,8 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
             0 * _
         }
 
-        job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
-            1 * fastqcOutputDirectory(fastqcProcessedFile1, PathOption.REAL_PATH) >> targetDir
+        job.fastqcWorkFileService = Mock(FastqcWorkFileService) {
+            1 * getDirectoryPath(fastqcProcessedFile1) >> targetDir
             0 * _
         }
 
@@ -211,10 +211,10 @@ class FastqcExecuteClusterPipelineJobSpec extends Specification implements DataT
         final String cmd_activation_fastqc = "cmd module load fastqc"
         final String cmd_fastqc = "cmd fastqc"
 
-        job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
-            1 * fastqcOutputDirectory(fastqcProcessedFile1, PathOption.REAL_PATH) >> targetDir
-            1 * fastqcOutputPath(fastqcProcessedFile1, PathOption.REAL_PATH) >> sourceFastqc1
-            1 * fastqcOutputPath(fastqcProcessedFile2, PathOption.REAL_PATH) >> sourceFastqc2
+        job.fastqcWorkFileService = Mock(FastqcWorkFileService) {
+            1 * getDirectoryPath(fastqcProcessedFile1) >> targetDir
+            1 * fastqcOutputPath(fastqcProcessedFile1) >> sourceFastqc1
+            1 * fastqcOutputPath(fastqcProcessedFile2) >> sourceFastqc2
             0 * _
         }
         job.fastqcReportService = Mock(FastqcReportService) {

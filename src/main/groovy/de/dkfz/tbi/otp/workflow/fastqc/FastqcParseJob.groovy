@@ -25,7 +25,6 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrackService
 import de.dkfz.tbi.otp.ngsqc.FastqcUploadService
@@ -36,9 +35,6 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 @Component
 @Slf4j
 class FastqcParseJob extends AbstractJob implements FastqcShared {
-
-    @Autowired
-    FastqcDataFilesService fastqcDataFilesService
 
     @Autowired
     FastqcUploadService fastqcUploadService

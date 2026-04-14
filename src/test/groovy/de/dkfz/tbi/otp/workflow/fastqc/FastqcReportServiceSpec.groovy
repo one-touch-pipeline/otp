@@ -24,11 +24,12 @@ package de.dkfz.tbi.otp.workflow.fastqc
 import grails.testing.gorm.DataTest
 import spock.lang.*
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
-import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcWorkFileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
@@ -88,8 +89,8 @@ class FastqcReportServiceSpec extends Specification implements DataTest, FastqcD
                 name: WORKFLOW
         ])
         version = createWorkflowVersion([
-                apiVersion: createWorkflowApiVersion(workflow: workflow),
-                workflowVersion   : '0.1.1',
+                apiVersion     : createWorkflowApiVersion(workflow: workflow),
+                workflowVersion: '0.1.1',
         ])
         run = createWorkflowRun([
                 workflow       : workflow,
@@ -158,7 +159,7 @@ class FastqcReportServiceSpec extends Specification implements DataTest, FastqcD
         CreateFileHelper.createFile(sourceFastqcMd5sum1)
         CreateFileHelper.createFile(sourceFastqcMd5sum2)
 
-        service.fastqcDataFilesService = Mock(FastqcDataFilesService) {
+        service.fastqcWorkFileService = Mock(FastqcWorkFileService) {
             1 * pathToFastQcResultFromSeqCenter(fastqcProcessedFile1) >> Paths.get("/not_readable")
             0 * _
         }
@@ -177,7 +178,7 @@ class FastqcReportServiceSpec extends Specification implements DataTest, FastqcD
         CreateFileHelper.createFile(sourceFastqcMd5sum1)
         CreateFileHelper.createFile(sourceFastqcMd5sum2)
 
-        service.fastqcDataFilesService = Mock(FastqcDataFilesService) {
+        service.fastqcWorkFileService = Mock(FastqcWorkFileService) {
             1 * pathToFastQcResultFromSeqCenter(fastqcProcessedFile1) >> sourceFastqc1
             1 * pathToFastQcResultFromSeqCenter(fastqcProcessedFile2) >> sourceFastqc2
             0 * _
@@ -202,15 +203,15 @@ class FastqcReportServiceSpec extends Specification implements DataTest, FastqcD
         CreateFileHelper.createFile(sourceFastqcMd5sum1)
         CreateFileHelper.createFile(sourceFastqcMd5sum2)
 
-        service.fastqcDataFilesService = Mock(FastqcDataFilesService) {
+        service.fastqcWorkFileService = Mock(FastqcWorkFileService) {
             1 * pathToFastQcResultFromSeqCenter(fastqcProcessedFile1) >> sourceFastqc1
             1 * pathToFastQcResultFromSeqCenter(fastqcProcessedFile2) >> sourceFastqc2
             1 * pathToFastQcResultMd5SumFromSeqCenter(fastqcProcessedFile1) >> sourceFastqcMd5sum1
             1 * pathToFastQcResultMd5SumFromSeqCenter(fastqcProcessedFile2) >> sourceFastqcMd5sum2
-            1 * fastqcOutputDirectory(fastqcProcessedFile1, PathOption.REAL_PATH) >> tempOutDir
-            1 * fastqcOutputDirectory(fastqcProcessedFile2, PathOption.REAL_PATH) >> tempOutDir
-            1 * fastqcOutputPath(fastqcProcessedFile1, PathOption.REAL_PATH) >> targetFastqc1
-            1 * fastqcOutputPath(fastqcProcessedFile2, PathOption.REAL_PATH) >> targetFastqc2
+            1 * getDirectoryPath(fastqcProcessedFile1) >> tempOutDir
+            1 * getDirectoryPath(fastqcProcessedFile2) >> tempOutDir
+            1 * fastqcOutputPath(fastqcProcessedFile1) >> targetFastqc1
+            1 * fastqcOutputPath(fastqcProcessedFile2) >> targetFastqc2
             0 * _
         }
 

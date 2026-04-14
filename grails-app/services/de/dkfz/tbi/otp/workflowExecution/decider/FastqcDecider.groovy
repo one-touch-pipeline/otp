@@ -27,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.springframework.transaction.TransactionStatus
 
-import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
@@ -45,9 +44,6 @@ import de.dkfz.tbi.otp.workflowExecution.decider.fastqc.FastqcArtefactDataWithSe
 @Transactional
 @Slf4j
 class FastqcDecider implements Decider {
-
-    @Autowired
-    FastqcDataFilesService fastqcDataFilesService
 
     @Autowired
     WorkflowArtefactService workflowArtefactService

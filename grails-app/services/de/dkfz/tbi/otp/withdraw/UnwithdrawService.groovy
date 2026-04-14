@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
+import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcLinkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -44,7 +45,7 @@ class UnwithdrawService {
 
     AbstractBamFileService abstractBamFileService
     ConfigService configService
-    FastqcDataFilesService fastqcDataFilesService
+    FastqcLinkFileService fastqcLinkFileService
     FileService fileService
     FileSystemService fileSystemService
     ProcessingOptionService processingOptionService
@@ -80,9 +81,9 @@ class UnwithdrawService {
         ]
         if (fastqcProcessedFile) {
             files.addAll([
-                    fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile),
-                    fastqcDataFilesService.fastqcOutputMd5sumPath(fastqcProcessedFile),
-                    fastqcDataFilesService.fastqcHtmlPath(fastqcProcessedFile),
+                    fastqcLinkFileService.fastqcOutputPath(fastqcProcessedFile),
+                    fastqcLinkFileService.fastqcOutputMd5sumPath(fastqcProcessedFile),
+                    fastqcLinkFileService.fastqcHtmlPath(fastqcProcessedFile),
             ])
         }
         files.findAll { path ->
@@ -111,9 +112,9 @@ class UnwithdrawService {
 
         if (fastqcIsOldWorkflow) {
             // Add FastQC files if they exist (only actual files, not directories)
-            Path fastqcZipFile = fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile)
-            Path fastqcMd5File = fastqcDataFilesService.fastqcOutputMd5sumPath(fastqcProcessedFile)
-            Path fastqcHtmlFile = fastqcDataFilesService.fastqcHtmlPath(fastqcProcessedFile)
+            Path fastqcZipFile = fastqcLinkFileService.fastqcOutputPath(fastqcProcessedFile)
+            Path fastqcMd5File = fastqcLinkFileService.fastqcOutputMd5sumPath(fastqcProcessedFile)
+            Path fastqcHtmlFile = fastqcLinkFileService.fastqcHtmlPath(fastqcProcessedFile)
 
             if (fastqcZipFile && Files.exists(fastqcZipFile) && Files.isRegularFile(fastqcZipFile)) {
                 fastqFilePermissionPaths.add(fastqcZipFile)

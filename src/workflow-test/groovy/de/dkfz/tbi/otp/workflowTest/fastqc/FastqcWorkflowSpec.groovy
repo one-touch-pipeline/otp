@@ -25,8 +25,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
+import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcLinkFileService
 import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -54,7 +54,7 @@ class FastqcWorkflowSpec extends AbstractDecidedWorkflowSpec {
 
     Class<BashFastQcWorkflow> workflowComponentClass = BashFastQcWorkflow
 
-    FastqcDataFilesService fastqcDataFilesService
+    FastqcLinkFileService fastqcLinkFileService
     FastqcDecider fastqcDecider
 
     private Path expectedFastqc
@@ -174,7 +174,7 @@ class FastqcWorkflowSpec extends AbstractDecidedWorkflowSpec {
         SessionUtils.withTransaction {
             FastqcProcessedFile fastqcProcessedFile = CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllBySequenceFile(rawSequenceFile))
             ZipFile expectedResult = new ZipFile(fileService.toFile(expectedFastqc))
-            ZipFile actualResult = new ZipFile(fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile).toString())
+            ZipFile actualResult = new ZipFile(fastqcLinkFileService.fastqcOutputPath(fastqcProcessedFile).toString())
 
             List<String> actualFiles = []
             actualResult.entries().each { ZipEntry entry ->

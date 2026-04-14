@@ -26,22 +26,20 @@ import grails.validation.Validateable
 import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.CommentService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataAllWellFileService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
-import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 import de.dkfz.tbi.otp.dataswap.data.DataSwapData
 import de.dkfz.tbi.otp.dataswap.parameters.DataSwapParameters
-import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcLinkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.DeletionService
+import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
 
 import java.nio.file.*
 
@@ -53,7 +51,7 @@ import java.nio.file.*
  * @param < D >  of type DataSwapData<P extends DataSwapParameters> build in {@link #buildDataDTO} containing all entities
  *        necessary to perform swap.
  */
-@SuppressWarnings("JavaIoPackageAccess")
+@SuppressWarnings(["JavaIoPackageAccess", "MethodCount"])
 @CompileDynamic
 @Transactional
 abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends DataSwapData<P>> {
@@ -77,7 +75,7 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
     static final String ALIGNMENT_SCRIPT_HEADER = "// ids of seqtracks which should be triggered with 'TriggerAlignment.groovy' for alignment\n\n"
 
     CommentService commentService
-    FastqcDataFilesService fastqcDataFilesService
+    FastqcLinkFileService fastqcLinkFileService
     ConfigService configService
     SeqTrackService seqTrackService
     FileService fileService
@@ -589,7 +587,7 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
      * @return Swap contain the entities of the old and new project.
      */
     protected Swap<Project> getProjectSwap(P parameters) {
-        Swap<Project> swap =  new Swap<Project>(
+        Swap<Project> swap = new Swap<Project>(
                 CollectionUtils.exactlyOneElement(Project.findAllByName(parameters.projectNameSwap.old),
                         "old project ${parameters.projectNameSwap.old} not found"),
                 CollectionUtils.exactlyOneElement(Project.findAllByName(parameters.projectNameSwap.new),
@@ -639,7 +637,7 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
      */
     protected Map<FastqcProcessedFile, String> getFastQcOutputFileNamesByRawSequenceFilesInList(List<RawSequenceFile> rawSequenceFiles) {
         return rawSequenceFiles ? FastqcProcessedFile.findAllBySequenceFileInList(rawSequenceFiles).collectEntries {
-            [(it.sequenceFile): fastqcDataFilesService.fastqcOutputPath(it).toString()]
+            [(it.sequenceFile): fastqcLinkFileService.fastqcOutputPath(it).toString()]
         } : [:]
     }
 }

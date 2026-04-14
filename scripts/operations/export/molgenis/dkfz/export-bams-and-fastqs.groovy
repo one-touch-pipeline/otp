@@ -26,6 +26,7 @@ import org.springframework.context.ApplicationContext
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
+import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcLinkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
@@ -126,7 +127,7 @@ enum RawSequenceFileColumns {
     }),
     FASTQC_PATH("FastQC Path", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
         FastqcProcessedFile fastqcProcessedFile = CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllBySequenceFile(rawSequenceFile))
-        return fastqcProcessedFile ? (properties["fastqcDataFilesService"] as FastqcDataFilesService).fastqcOutputPath(fastqcProcessedFile).toString() : ""
+        return fastqcProcessedFile ? (properties["fastqcLinkFileService"] as FastqcLinkFileService).fastqcOutputPath(fastqcProcessedFile).toString() : ""
     }),
     RUN_ID("Run ID", { RawSequenceFile rawSequenceFile, Map properties = [:] ->
         return rawSequenceFile.seqTrack.run.id
@@ -312,7 +313,7 @@ class MolgenisExporter {
 
     List<String> exportRawSequenceFiles(List<RawSequenceFile> rawSequenceFiles) {
         MolgenisRawSequenceFile.properties["rawSequenceDataWorkFileService"] = ctx.rawSequenceDataWorkFileService
-        MolgenisRawSequenceFile.properties["fastqcDataFilesService"] = ctx.fastqcDataFilesService
+        MolgenisRawSequenceFile.properties["fastqcLinkFileService"] = ctx.fastqcLinkFileService
         return [new MolgenisRawSequenceFile().headerAsCsv] + rawSequenceFiles.collect { RawSequenceFile df -> MolgenisRawSequenceFile.export(df).toCsvLine() }
     }
 

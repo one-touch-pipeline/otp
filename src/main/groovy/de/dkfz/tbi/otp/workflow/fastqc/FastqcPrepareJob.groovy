@@ -44,9 +44,6 @@ class FastqcPrepareJob extends AbstractPrepareJob implements FastqcShared {
     NotificationCreator notificationCreator
 
     @Autowired
-    FastqcDataFilesService fastqcDataFilesService
-
-    @Autowired
     FastQcProcessedFileService fastQcProcessedFileService
 
     @Override

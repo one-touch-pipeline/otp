@@ -34,20 +34,13 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataswap.parameters.LaneSwapParameters
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactoryInstance
-import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataAllWellFileService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
-import de.dkfz.tbi.otp.job.processing.TestFileSystemService
+import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcLinkFileService
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.CreateFileHelper
-import de.dkfz.tbi.otp.utils.DeletionService
-import de.dkfz.tbi.otp.utils.ProcessOutput
+import de.dkfz.tbi.otp.utils.*
 
 import java.nio.file.*
 
@@ -82,7 +75,7 @@ class LaneSwapServiceSpec extends Specification implements DataTest, ServiceUnit
 
         // Services
         Path path = CreateFileHelper.createFile(tempDir.resolve("test.txt"))
-        service.fastqcDataFilesService = Mock(FastqcDataFilesService) {
+        service.fastqcLinkFileService = Mock(FastqcLinkFileService) {
             _ * fastqcOutputPath(_) >> path
         }
         service.seqTrackService = new SeqTrackService()

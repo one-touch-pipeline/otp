@@ -28,15 +28,13 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.filestore.FilestoreService
-import de.dkfz.tbi.otp.filestore.PathOption
-import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataAllWellFileService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
-import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
+import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcLinkFileService
+import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcWorkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.DeletionService
@@ -59,7 +57,8 @@ class WithdrawHelperService {
 
     ConfigService configService
     DeletionService deletionService
-    FastqcDataFilesService fastqcDataFilesService
+    FastqcLinkFileService fastqcLinkFileService
+    FastqcWorkFileService fastqcWorkFileService
     FileService fileService
     FileSystemService fileSystemService
     ProcessingOptionService processingOptionService
@@ -122,7 +121,7 @@ class WithdrawHelperService {
             if (withdrawStateHolder.stopOnMissingFiles) {
                 throw new WithdrawnException(
                         "Stopped since ${nonExistingRawSequenceFiles.size()} datafiles do not exist on the file system:\n" +
-                        nonExistingData.join('\n')
+                                nonExistingData.join('\n')
                 )
             }
 
@@ -199,9 +198,9 @@ class WithdrawHelperService {
             filePaths.add(md5sumFilePath)
             if (fastqcProcessedFile) {
                 // add the symbolic link
-                filePaths.add(fastqcDataFilesService.fastqcOutputDirectory(fastqcProcessedFile))
+                filePaths.add(fastqcLinkFileService.getDirectoryPath(fastqcProcessedFile))
                 // add the uuid folder, which the link pointed to
-                filePaths.add(fastqcDataFilesService.fastqcOutputDirectory(fastqcProcessedFile, PathOption.REAL_PATH))
+                filePaths.add(fastqcWorkFileService.getDirectoryPath(fastqcProcessedFile))
             }
 
             filePaths.unique().findAll { path ->
@@ -225,9 +224,9 @@ class WithdrawHelperService {
             }
 
             if (fastqcIsOldWorkflow) {
-                Path fastqcZipFile = fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile)
-                Path fastqcMd5File = fastqcDataFilesService.fastqcOutputMd5sumPath(fastqcProcessedFile)
-                Path fastqcHtmlFile = fastqcDataFilesService.fastqcHtmlPath(fastqcProcessedFile)
+                Path fastqcZipFile = fastqcLinkFileService.fastqcOutputPath(fastqcProcessedFile)
+                Path fastqcMd5File = fastqcLinkFileService.fastqcOutputMd5sumPath(fastqcProcessedFile)
+                Path fastqcHtmlFile = fastqcLinkFileService.fastqcHtmlPath(fastqcProcessedFile)
 
                 if (fastqcZipFile && Files.exists(fastqcZipFile) && Files.isRegularFile(fastqcZipFile)) {
                     fastqFilePermissionPaths.add(fastqcZipFile)

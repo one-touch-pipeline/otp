@@ -24,12 +24,12 @@ package de.dkfz.tbi.otp.workflow.fastqc
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.FastqcWorkflowDomainFactory
-import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcLinkFileService
+import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcWorkFileService
 import de.dkfz.tbi.otp.ngsdata.FastqFile
 import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -66,20 +66,27 @@ class FastqcLinkJobSpec extends Specification implements DataTest, FastqcWorkflo
             _ * getOutputArtefacts(workflowStep, WesFastQcWorkflow.OUTPUT_FASTQC) >> [file1, file2]
             0 * _
         }
-        job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
-            fastqcOutputPath(file1) >> Paths.get("/file1-out-link")
-            fastqcHtmlPath(file1) >> Paths.get("/file1-htm-link")
-            fastqcOutputMd5sumPath(file1) >> Paths.get("/file1-md5-link")
-            fastqcOutputPath(file1, PathOption.REAL_PATH) >> Paths.get("/file1-out-real")
-            fastqcHtmlPath(file1, PathOption.REAL_PATH) >> Paths.get("/file1-htm-real")
-            fastqcOutputMd5sumPath(file1, PathOption.REAL_PATH) >> Paths.get("/file1-md5-real")
+        job.fastqcLinkFileService = Mock(FastqcLinkFileService) {
+            1 * fastqcOutputPath(file1) >> Paths.get("/file1-out-link")
+            1 * fastqcHtmlPath(file1) >> Paths.get("/file1-html-link")
+            1 * fastqcOutputMd5sumPath(file1) >> Paths.get("/file1-md5-link")
 
-            fastqcOutputPath(file2) >> Paths.get("/file2-out-link")
-            fastqcHtmlPath(file2) >> Paths.get("/file2-htm-link")
-            fastqcOutputMd5sumPath(file2) >> Paths.get("/file2-md5-link")
-            fastqcOutputPath(file2, PathOption.REAL_PATH) >> Paths.get("/file2-out-real")
-            fastqcHtmlPath(file2, PathOption.REAL_PATH) >> Paths.get("/file2-htm-real")
-            fastqcOutputMd5sumPath(file2, PathOption.REAL_PATH) >> Paths.get("/file2-md5-real")
+            1 * fastqcOutputPath(file2) >> Paths.get("/file2-out-link")
+            1 * fastqcHtmlPath(file2) >> Paths.get("/file2-html-link")
+            1 * fastqcOutputMd5sumPath(file2) >> Paths.get("/file2-md5-link")
+
+            0 * _
+        }
+        job.fastqcWorkFileService = Mock(FastqcWorkFileService) {
+            1 * fastqcOutputPath(file1) >> Paths.get("/file1-out-real")
+            1 * fastqcHtmlPath(file1) >> Paths.get("/file1-html-real")
+            1 * fastqcOutputMd5sumPath(file1) >> Paths.get("/file1-md5-real")
+
+            1 * fastqcOutputPath(file2) >> Paths.get("/file2-out-real")
+            1 * fastqcHtmlPath(file2) >> Paths.get("/file2-html-real")
+            1 * fastqcOutputMd5sumPath(file2) >> Paths.get("/file2-md5-real")
+
+            0 * _
         }
         job.fileService = Mock(FileService) {
             fileIsReadable(_) >> true
@@ -88,10 +95,10 @@ class FastqcLinkJobSpec extends Specification implements DataTest, FastqcWorkflo
         expect:
         CollectionUtils.containSame(job.getLinkMap(workflowStep), [
                 new LinkEntry(link: Paths.get("/file1-out-link"), target: Paths.get("/file1-out-real")),
-                new LinkEntry(link: Paths.get("/file1-htm-link"), target: Paths.get("/file1-htm-real")),
+                new LinkEntry(link: Paths.get("/file1-html-link"), target: Paths.get("/file1-html-real")),
                 new LinkEntry(link: Paths.get("/file1-md5-link"), target: Paths.get("/file1-md5-real")),
                 new LinkEntry(link: Paths.get("/file2-out-link"), target: Paths.get("/file2-out-real")),
-                new LinkEntry(link: Paths.get("/file2-htm-link"), target: Paths.get("/file2-htm-real")),
+                new LinkEntry(link: Paths.get("/file2-html-link"), target: Paths.get("/file2-html-real")),
                 new LinkEntry(link: Paths.get("/file2-md5-link"), target: Paths.get("/file2-md5-real")),
         ])
     }
@@ -110,21 +117,30 @@ class FastqcLinkJobSpec extends Specification implements DataTest, FastqcWorkflo
             _ * getOutputArtefacts(workflowStep, WesFastQcWorkflow.OUTPUT_FASTQC) >> [file1]
             0 * _
         }
-        job.fastqcDataFilesService = Mock(FastqcDataFilesService) {
-            fastqcHtmlPath(file1, PathOption.REAL_PATH) >> Paths.get("/file1-htm-real")
-            fastqcOutputMd5sumPath(file1, PathOption.REAL_PATH) >> Paths.get("/file1-md5-real")
+        job.fastqcWorkFileService = Mock(FastqcWorkFileService) {
+            1 * fastqcOutputPath(file1) >> Paths.get("/tmp-work")
+            1 * fastqcHtmlPath(file1) >> Paths.get("/file1-html-work")
+            1 * fastqcOutputMd5sumPath(file1) >> Paths.get("/file1-md5-work")
+            0 * _
+        }
+        job.fastqcLinkFileService = Mock(FastqcLinkFileService) {
+            1 * fastqcOutputPath(file1) >> Paths.get("/tmp")
+            (htmlExists ? 1 : 0) * fastqcHtmlPath(file1) >> Paths.get("/file1-html-link")
+            (md5Exists ? 1 : 0) * fastqcOutputMd5sumPath(file1) >> Paths.get("/file1-md5-link")
+            0 * _
         }
         job.fileService = Mock(FileService) {
-            fileIsReadable(Paths.get("/file1-htm-real")) >> htmlExists
-            fileIsReadable(Paths.get("/file1-md5-real")) >> md5Exists
+            1 * fileIsReadable(Paths.get("/file1-html-work")) >> htmlExists
+            1 * fileIsReadable(Paths.get("/file1-md5-work")) >> md5Exists
+            0 * _
         }
 
         when:
         List<LinkEntry> result = job.getLinkMap(workflowStep)
 
         then:
-        result*.target.contains(Paths.get("/file1-htm-real")) == htmlExists
-        result*.target.contains(Paths.get("/file1-md5-real")) == md5Exists
+        result*.target.contains(Paths.get("/file1-html-work")) == htmlExists
+        result*.target.contains(Paths.get("/file1-md5-work")) == md5Exists
 
         where:
         htmlExists | md5Exists

@@ -42,6 +42,7 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.egaSubmission.EgaSubmission
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.infrastructure.alignment.*
+import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcLinkFileService
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
@@ -93,7 +94,7 @@ class DeletionServiceIntegrationSpec extends Specification implements EgaSubmiss
             getSequencingDirectory(_) >> Paths.get(seqDir)
         }
         deletionService.commentService = Mock(CommentService)
-        deletionService.fastqcDataFilesService = Mock(FastqcDataFilesService)
+        deletionService.fastqcLinkFileService = Mock(FastqcLinkFileService)
         deletionService.dataProcessingFilesService = Mock(DataProcessingFilesService)
         deletionService.seqTrackService = Mock(SeqTrackService)
         deletionService.analysisDeletionService = new AnalysisDeletionService()

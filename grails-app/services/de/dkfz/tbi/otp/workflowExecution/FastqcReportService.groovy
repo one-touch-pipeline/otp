@@ -25,10 +25,9 @@ import grails.gorm.transactions.Transactional
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 
-import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
-import de.dkfz.tbi.otp.filestore.PathOption
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcWorkFileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 
 import java.nio.file.Files
@@ -38,7 +37,8 @@ import java.nio.file.Path
 @Transactional
 class FastqcReportService {
 
-    FastqcDataFilesService fastqcDataFilesService
+    FastqcWorkFileService fastqcWorkFileService
+
     FileService fileService
 
     @Autowired
@@ -46,17 +46,17 @@ class FastqcReportService {
 
     boolean canFastqcReportsBeCopied(List<FastqcProcessedFile> fastqcProcessedFiles) {
         return fastqcProcessedFiles && fastqcProcessedFiles.every { FastqcProcessedFile fastqcProcessedFile ->
-            Files.isReadable(fastqcDataFilesService.pathToFastQcResultFromSeqCenter(fastqcProcessedFile))
+            Files.isReadable(fastqcWorkFileService.pathToFastQcResultFromSeqCenter(fastqcProcessedFile))
         }
     }
 
     void copyExistingFastqcReports(List<FastqcProcessedFile> fastqcProcessedFiles) {
         fastqcProcessedFiles.each { FastqcProcessedFile fastqcProcessedFile ->
-            Path seqCenterFastQcFile = fastqcDataFilesService.pathToFastQcResultFromSeqCenter(fastqcProcessedFile)
-            Path seqCenterFastQcFileMd5Sum = fastqcDataFilesService.pathToFastQcResultMd5SumFromSeqCenter(fastqcProcessedFile)
+            Path seqCenterFastQcFile = fastqcWorkFileService.pathToFastQcResultFromSeqCenter(fastqcProcessedFile)
+            Path seqCenterFastQcFileMd5Sum = fastqcWorkFileService.pathToFastQcResultMd5SumFromSeqCenter(fastqcProcessedFile)
             fileService.ensureFileIsReadableAndNotEmpty(seqCenterFastQcFile)
 
-            Path realDir = fastqcDataFilesService.fastqcOutputDirectory(fastqcProcessedFile, PathOption.REAL_PATH)
+            Path realDir = fastqcWorkFileService.getDirectoryPath(fastqcProcessedFile)
 
             String copyAndMd5sumCommand = """|
                 |set -e
@@ -72,7 +72,7 @@ class FastqcReportService {
                 |""".stripMargin()
 
             remoteShellHelper.executeCommandReturnProcessOutput(copyAndMd5sumCommand).assertExitCodeZeroAndStderrEmpty()
-            fileService.ensureFileIsReadableAndNotEmpty(fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile, PathOption.REAL_PATH))
+            fileService.ensureFileIsReadableAndNotEmpty(fastqcWorkFileService.fastqcOutputPath(fastqcProcessedFile))
         }
     }
 }

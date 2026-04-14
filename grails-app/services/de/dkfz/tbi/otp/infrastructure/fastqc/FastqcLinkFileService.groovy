@@ -19,43 +19,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.fastqc
+package de.dkfz.tbi.otp.infrastructure.fastqc
 
+import grails.gorm.transactions.Transactional
 import groovy.util.logging.Slf4j
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
-import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcWorkFileService
-import de.dkfz.tbi.otp.workflow.jobs.AbstractOtpClusterValidationJob
-import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 
 import java.nio.file.Path
 
-@Component
+/**
+ * File Service containing the methods for retrieving the files and directories in the view by pid structure,
+ * which is linked to the work directory, for fastqc files.
+ */
 @Slf4j
-class FastqcClusterValidationJob extends AbstractOtpClusterValidationJob implements FastqcShared {
+@Transactional
+class FastqcLinkFileService implements AbstractFastqcFileService {
 
-    @Autowired
-    FastqcWorkFileService fastqcWorkFileService
+    RawSequenceDataViewFileService rawSequenceDataViewFileService
 
     @Override
-    protected List<Path> getExpectedFiles(WorkflowStep workflowStep) {
-        return getFastqcProcessedFiles(workflowStep).collect { FastqcProcessedFile fastqcProcessedFile ->
-            fastqcWorkFileService.fastqcOutputPath(fastqcProcessedFile)
-        }
+    Path getDirectoryPath(FastqcProcessedFile fastqcProcessedFile) {
+        Path baseString = rawSequenceDataViewFileService.getRunDirectoryPath(fastqcProcessedFile.sequenceFile)
+        return baseString.resolve(FAST_QC_DIRECTORY_PART).resolve(fastqcProcessedFile.workDirectoryName)
     }
 
     @Override
-    protected List<Path> getExpectedDirectories(WorkflowStep workflowStep) {
-        return []
-    }
-
-    @Override
-    protected void saveResult(WorkflowStep workflowStep) {
-    }
-
-    @Override
-    protected void doFurtherValidation(WorkflowStep workflowStep) {
+    Path fastqcOutputPath(FastqcProcessedFile fastqcProcessedFile) {
+        String fileName = fastqcFileName(fastqcProcessedFile)
+        return getDirectoryPath(fastqcProcessedFile).resolve(fileName)
     }
 }

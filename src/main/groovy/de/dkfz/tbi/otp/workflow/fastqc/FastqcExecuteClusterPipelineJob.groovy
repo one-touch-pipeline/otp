@@ -26,7 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.filestore.PathOption
+import de.dkfz.tbi.otp.infrastructure.fastqc.CompressionFormat
+import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcWorkFileService
 import de.dkfz.tbi.otp.ngsdata.SeqTrackService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractExecuteClusterPipelineJob
 import de.dkfz.tbi.otp.workflow.shared.NoWorkflowVersionSpecifiedException
@@ -40,7 +41,7 @@ import java.nio.file.Path
 class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob implements FastqcShared {
 
     @Autowired
-    FastqcDataFilesService fastqcDataFilesService
+    FastqcWorkFileService fastqcWorkFileService
 
     @Autowired
     FastqcReportService fastqcReportService
@@ -54,7 +55,7 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
     @Override
     protected List<String> createScripts(WorkflowStep workflowStep) {
         List<FastqcProcessedFile> fastqcProcessedFiles = getFastqcProcessedFiles(workflowStep)
-        Path outputDir = fastqcDataFilesService.fastqcOutputDirectory(fastqcProcessedFiles.first(), PathOption.REAL_PATH)
+        Path outputDir = fastqcWorkFileService.getDirectoryPath(fastqcProcessedFiles.first())
 
         // delete existing output directory in case of restart
         if (Files.exists(outputDir)) {
@@ -79,14 +80,14 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
     private List<String> createFastQcClusterScript(List<FastqcProcessedFile> fastqcProcessedFiles, WorkflowStep workflowStep) {
         return fastqcProcessedFiles.collect { FastqcProcessedFile fastqcProcessedFile ->
             String inputFileName = rawSequenceDataWorkFileService.getFilePath(fastqcProcessedFile.sequenceFile)
-            Path fastqcFile = fastqcDataFilesService.fastqcOutputPath(fastqcProcessedFile, PathOption.REAL_PATH)
+            Path fastqcFile = fastqcWorkFileService.fastqcOutputPath(fastqcProcessedFile)
 
             String decompressFileCommand = ""
             String deleteDecompressedFileCommand = ""
-            FastqcDataFilesService.CompressionFormat usedFormat = FastqcDataFilesService.CompressionFormat.getUsedFormat(inputFileName)
+            CompressionFormat usedFormat = CompressionFormat.getUsedFormat(inputFileName)
             if (usedFormat) {
                 String orgFileName = inputFileName
-                inputFileName = fastqcDataFilesService.inputFileNameAdaption(inputFileName)
+                inputFileName = fastqcWorkFileService.inputFileNameAdaption(inputFileName)
 
                 decompressFileCommand = "{ ${usedFormat.decompressionCommand} ; } < ${orgFileName} > ${inputFileName}"
                 deleteDecompressedFileCommand = "rm -f ${inputFileName}"
@@ -102,8 +103,8 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
             String fastqcCommand = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_FASTQC)
 
             return """|
-                |${moduleLoader }
-                |${fastqcActivation }
+                |${moduleLoader}
+                |${fastqcActivation}
                 |${decompressFileCommand}
                 |${fastqcCommand} ${inputFileName} --noextract --nogroup -o ${fastqcFile.parent}
                 |${deleteDecompressedFileCommand}

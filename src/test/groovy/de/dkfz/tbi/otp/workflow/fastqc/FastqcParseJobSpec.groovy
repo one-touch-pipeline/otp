@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.workflow.fastqc
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
@@ -67,7 +66,6 @@ class FastqcParseJobSpec extends Specification implements DataTest, WorkflowSyst
             0 * _
         }
 
-        job.fastqcDataFilesService = Mock(FastqcDataFilesService)
         job.fastqcUploadService = Mock(FastqcUploadService)
         job.workflowStateChangeService = Mock(WorkflowStateChangeService)
 

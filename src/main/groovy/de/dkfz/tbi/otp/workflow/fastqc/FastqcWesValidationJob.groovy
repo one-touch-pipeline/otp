@@ -25,9 +25,8 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
-import de.dkfz.tbi.otp.filestore.PathOption
+import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcWorkFileService
 import de.dkfz.tbi.otp.workflow.jobs.AbstractWesValidationJob
 import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
@@ -39,12 +38,12 @@ import java.nio.file.Path
 class FastqcWesValidationJob extends AbstractWesValidationJob implements FastqcShared {
 
     @Autowired
-    FastqcDataFilesService fastqcDataFilesService
+    FastqcWorkFileService fastqcWorkFileService
 
     @Override
     protected List<Path> getExpectedFiles(WorkflowStep workflowStep) {
         return getFastqcProcessedFiles(workflowStep).collect { FastqcProcessedFile fastqc ->
-            fastqcDataFilesService.fastqcOutputPath(fastqc, PathOption.REAL_PATH)
+            fastqcWorkFileService.fastqcOutputPath(fastqc)
         }
     }
 
