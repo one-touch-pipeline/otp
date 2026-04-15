@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
 @Transactional
 class EgaFileContentService {
@@ -92,8 +93,10 @@ class EgaFileContentService {
                 seqType.libraryLayout,
                 seqTrack.seqPlatform.name,
                 seqTrack.seqPlatform.seqPlatformModelLabel?.name ?: 'unspecified',
+                seqTrack.seqPlatform.seqPlatformModelLabel?.id ?: '',
                 seqTrack.libraryPreparationKit?.name ?: 'unspecified',
-        ].join('-').replace(' ', '_')
+                seqTrack.libraryPreparationKit?.id ?: ''
+        ].findAll().join('-').replaceAll(OtpPathValidator.PATH_COMPONENT_NOT_ALLOWED_CHARS, '_')
     }
 
     /**
@@ -117,16 +120,20 @@ class EgaFileContentService {
         Set<SeqTrack> seqTracks = bamFile.containedSeqTracks
 
         List<SeqPlatform> seqPlatforms = seqTracks*.seqPlatform
-        List<List<String>> seqPlatformNames = seqPlatforms.collect { SeqPlatform seqPlatform ->
+        List<String> seqPlatformNames = seqPlatforms.collect { SeqPlatform seqPlatform ->
             [
                     seqPlatform.name,
                     seqPlatform.seqPlatformModelLabel?.name ?: 'unspecified',
-            ]
+                    seqPlatform.seqPlatformModelLabel?.id ?: '',
+            ].findAll().join('-')
         }.unique().sort()
 
         List<LibraryPreparationKit> libraryPreparationKits = seqTracks*.libraryPreparationKit
         List<String> libPrepKitNames = libraryPreparationKits.collect { LibraryPreparationKit libraryPreparationKit ->
-            libraryPreparationKit?.name ?: 'unspecified'
+            [
+                    libraryPreparationKit?.name ?: 'unspecified',
+                    libraryPreparationKit?.id ?: '',
+            ].findAll().join('-')
         }.unique().sort()
 
         return [
@@ -134,7 +141,7 @@ class EgaFileContentService {
                 bamFile.seqType.libraryLayout,
                 seqPlatformNames,
                 libPrepKitNames,
-        ].flatten().join('-').replace(' ', '_')
+        ].flatten().join('-').replaceAll(OtpPathValidator.PATH_COMPONENT_NOT_ALLOWED_CHARS, '_')
     }
 
     /**

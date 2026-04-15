@@ -42,6 +42,8 @@ class OtpPathValidator {
     static final String WINDOWS_PATH_CHARACTERS_REGEX = /[a-zA-Z0-9_\-\+\.\\:]+/
     static final String WINDOWS_DRIVE_REGEX = /[a-zA-Z]:/
 
+    static final String PATH_COMPONENT_NOT_ALLOWED_CHARS = /[^a-zA-Z0-9_\-+.]/
+
     static final Pattern PATH_COMPONENT_PATTERN = Pattern.compile(/^${PATH_COMPONENT_REGEX}$/)
 
     private static String getSeparatorRegex() {

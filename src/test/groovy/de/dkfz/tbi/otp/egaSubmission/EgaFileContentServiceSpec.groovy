@@ -48,8 +48,15 @@ class EgaFileContentServiceSpec extends Specification implements EgaSubmissionFa
     }
 
     @Unroll
-    void "createKeyForFastq, when submission object is given, then create expected key #expectedKey"() {
+    void "createKeyForFastq, when submission object is given, then create expected key #expectedKeyTemplate"() {
         given:
+        SeqPlatformModelLabel seqPlatformModelLabel = seqPlatformModelLabelName ? createSeqPlatformModelLabel([
+                name: seqPlatformModelLabelName,
+        ]) : null
+        LibraryPreparationKit libraryPreparationKit = libraryPreparationKitName ? createLibraryPreparationKit([
+                name: libraryPreparationKitName,
+        ]) : null
+
         RawSequenceFileSubmissionObject submissionObject = createRawSequenceFileSubmissionObject([
                 sequenceFile: createFastqFile([
                         seqTrack: createSeqTrack([
@@ -59,18 +66,18 @@ class EgaFileContentServiceSpec extends Specification implements EgaSubmissionFa
                                 ]),
                                 run                  : createRun([
                                         seqPlatform: createSeqPlatform([
-                                                name                 : seqTypeDisplayName,
-                                                seqPlatformModelLabel: seqPlatformModelLabelName ? createSeqPlatformModelLabel([
-                                                        name: seqPlatformModelLabelName,
-                                                ]) : null,
+                                                name                 : seqPlatformName,
+                                                seqPlatformModelLabel: seqPlatformModelLabel,
                                         ]),
                                 ]),
-                                libraryPreparationKit: libraryPreparationKitName ? createLibraryPreparationKit([
-                                        name: libraryPreparationKitName,
-                                ]) : null,
+                                libraryPreparationKit: libraryPreparationKit,
                         ]),
                 ]),
         ])
+
+        String expectedKey = expectedKeyTemplate.
+                replaceAll('#1', seqPlatformModelLabel?.id?.toString() ?: '').
+                replaceAll('#2', libraryPreparationKit?.id?.toString() ?: '')
 
         when:
         String key = new EgaFileContentService().createKeyForFastq(submissionObject)
@@ -79,16 +86,31 @@ class EgaFileContentServiceSpec extends Specification implements EgaSubmissionFa
         key == expectedKey
 
         where:
-        seqTypeDisplayName | libraryLayout             | seqPlatformName | seqPlatformModelLabelName | libraryPreparationKitName || expectedKey
-        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | 'kit'                     || 'seqType-SINGLE-seqType-model-kit'
-        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | null                      || 'seqType-SINGLE-seqType-model-unspecified'
-        'seqType'          | SequencingReadType.SINGLE | 'platform'      | null                      | 'kit'                     || 'seqType-SINGLE-seqType-unspecified-kit'
-        'seqType'          | SequencingReadType.PAIRED | 'platform'      | 'model'                   | 'kit'                     || 'seqType-PAIRED-seqType-model-kit'
+        seqTypeDisplayName | libraryLayout             | seqPlatformName | seqPlatformModelLabelName | libraryPreparationKitName      || expectedKeyTemplate
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | 'kit'                          || 'seqType-SINGLE-platform-model-#1-kit-#2'
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | 'kit with space'               || 'seqType-SINGLE-platform-model-#1-kit_with_space-#2'
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | 'kit (round brackets)'         || 'seqType-SINGLE-platform-model-#1-kit__round_brackets_-#2'
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | 'kit [corner brackets]'        || 'seqType-SINGLE-platform-model-#1-kit__corner_brackets_-#2'
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | 'kit <angle brackets>'         || 'seqType-SINGLE-platform-model-#1-kit__angle_brackets_-#2'
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | 'kit {curly brackets}'         || 'seqType-SINGLE-platform-model-#1-kit__curly_brackets_-#2'
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | 'kit special: !§$%&/?,;:*~"\'' || 'seqType-SINGLE-platform-model-#1-kit_special________________-#2'
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | '& special at start'           || 'seqType-SINGLE-platform-model-#1-__special_at_start-#2'
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | 'special & in % the $ middle'  || 'seqType-SINGLE-platform-model-#1-special___in___the___middle-#2'
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | null                           || 'seqType-SINGLE-platform-model-#1-unspecified'
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | null                      | 'kit'                          || 'seqType-SINGLE-platform-unspecified-kit-#2'
+        'seqType'          | SequencingReadType.PAIRED | 'platform'      | 'model'                   | 'kit'                          || 'seqType-PAIRED-platform-model-#1-kit-#2'
     }
 
     @Unroll
-    void "createKeyForBamFile, when bamFileSubmissionObject is given, then create expected key #expectedKey"() {
+    void "createKeyForBamFile, when bamFileSubmissionObject is given, then create expected key #expectedKeyTemplate"() {
         given:
+        SeqPlatformModelLabel seqPlatformModelLabel = seqPlatformModelLabelName ? createSeqPlatformModelLabel([
+                name: seqPlatformModelLabelName,
+        ]) : null
+        LibraryPreparationKit libraryPreparationKit = libraryPreparationKitName ? createLibraryPreparationKit([
+                name: libraryPreparationKitName,
+        ]) : null
+
         BamFileSubmissionObject bamFileSubmissionObject = createBamFileSubmissionObject([
                 bamFile: createBamFile([
                         seqTracks: [
@@ -99,19 +121,19 @@ class EgaFileContentServiceSpec extends Specification implements EgaSubmissionFa
                                         ]),
                                         run                  : createRun([
                                                 seqPlatform: createSeqPlatform([
-                                                        name                 : seqTypeDisplayName,
-                                                        seqPlatformModelLabel: seqPlatformModelLabelName ? createSeqPlatformModelLabel([
-                                                                name: seqPlatformModelLabelName,
-                                                        ]) : null,
+                                                        name                 : seqPlatformName,
+                                                        seqPlatformModelLabel: seqPlatformModelLabel,
                                                 ]),
                                         ]),
-                                        libraryPreparationKit: libraryPreparationKitName ? createLibraryPreparationKit([
-                                                name: libraryPreparationKitName,
-                                        ]) : null,
+                                        libraryPreparationKit: libraryPreparationKit,
                                 ]),
                         ] as Set
                 ]),
         ])
+
+        String expectedKey = expectedKeyTemplate.
+                replaceAll('#1', seqPlatformModelLabel?.id?.toString() ?: '').
+                replaceAll('#2', libraryPreparationKit?.id?.toString() ?: '')
 
         when:
         String key = new EgaFileContentService().createKeyForBamFile(bamFileSubmissionObject)
@@ -120,11 +142,19 @@ class EgaFileContentServiceSpec extends Specification implements EgaSubmissionFa
         key == expectedKey
 
         where:
-        seqTypeDisplayName | libraryLayout             | seqPlatformName | seqPlatformModelLabelName | libraryPreparationKitName || expectedKey
-        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | 'kit'                     || 'seqType-SINGLE-seqType-model-kit'
-        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | null                      || 'seqType-SINGLE-seqType-model-unspecified'
-        'seqType'          | SequencingReadType.SINGLE | 'platform'      | null                      | 'kit'                     || 'seqType-SINGLE-seqType-unspecified-kit'
-        'seqType'          | SequencingReadType.PAIRED | 'platform'      | 'model'                   | 'kit'                     || 'seqType-PAIRED-seqType-model-kit'
+        seqTypeDisplayName | libraryLayout             | seqPlatformName | seqPlatformModelLabelName | libraryPreparationKitName      || expectedKeyTemplate
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | 'kit'                          || 'seqType-SINGLE-platform-model-#1-kit-#2'
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | 'kit with space'               || 'seqType-SINGLE-platform-model-#1-kit_with_space-#2'
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | 'kit (round brackets)'         || 'seqType-SINGLE-platform-model-#1-kit__round_brackets_-#2'
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | 'kit [corner brackets]'        || 'seqType-SINGLE-platform-model-#1-kit__corner_brackets_-#2'
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | 'kit <angle brackets>'         || 'seqType-SINGLE-platform-model-#1-kit__angle_brackets_-#2'
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | 'kit {curly brackets}'         || 'seqType-SINGLE-platform-model-#1-kit__curly_brackets_-#2'
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | 'kit special: !§$%&/?,;:*~"\'' || 'seqType-SINGLE-platform-model-#1-kit_special________________-#2'
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | '& special at start'           || 'seqType-SINGLE-platform-model-#1-__special_at_start-#2'
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | 'special & in % the $ middle'  || 'seqType-SINGLE-platform-model-#1-special___in___the___middle-#2'
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | 'model'                   | null                           || 'seqType-SINGLE-platform-model-#1-unspecified'
+        'seqType'          | SequencingReadType.SINGLE | 'platform'      | null                      | 'kit'                          || 'seqType-SINGLE-platform-unspecified-kit-#2'
+        'seqType'          | SequencingReadType.PAIRED | 'platform'      | 'model'                   | 'kit'                          || 'seqType-PAIRED-platform-model-#1-kit-#2'
     }
 
     void "createKeyForBamFile, when bamFileSubmissionObject with multiple seqplatform is given, then create expected key #expectedKey"() {
@@ -166,11 +196,21 @@ class EgaFileContentServiceSpec extends Specification implements EgaSubmissionFa
                 ]),
         ])
 
+        String seqPlatformNames = [
+                "seqPlatform1-model1-${seqTracks[1].seqPlatform.seqPlatformModelLabel.id}",
+                "seqPlatform1-model2-${seqTracks[4].seqPlatform.seqPlatformModelLabel.id}",
+                "seqPlatform2-model1-${seqTracks[3].seqPlatform.seqPlatformModelLabel.id}",
+                "seqPlatform2-model3-${seqTracks[0].seqPlatform.seqPlatformModelLabel.id}",
+                "seqPlatform2-unspecified",
+        ].join('-')
+        String libPrepKitNames = "library-${libraryPreparationKit.id}"
+        String expected = "seqtype-PAIRED-${seqPlatformNames}-${libPrepKitNames}"
+
         when:
         String key = new EgaFileContentService().createKeyForBamFile(bamFileSubmissionObject)
 
         then:
-        key == 'seqtype-PAIRED-seqPlatform1-model1-seqPlatform1-model2-seqPlatform2-model1-seqPlatform2-model3-seqPlatform2-unspecified-library'
+        key == expected
     }
 
     void "createKeyForBamFile, when bamFileSubmissionObject with multiple lib_prep_kits is given, then create expected key #expectedKey"() {
@@ -211,11 +251,20 @@ class EgaFileContentServiceSpec extends Specification implements EgaSubmissionFa
                 ]),
         ])
 
+        String seqPlatformNames = "platform-model-${seqPlatform.seqPlatformModelLabel.id}"
+        String libPrepKitNames = [
+                "lib2-${seqTracks[1].libraryPreparationKit.id}",
+                "lib3-${seqTracks[3].libraryPreparationKit.id}",
+                "lib5-${seqTracks[0].libraryPreparationKit.id}",
+                "unspecified",
+        ].join('-')
+        String expected = "seqtype-PAIRED-${seqPlatformNames}-${libPrepKitNames}"
+
         when:
         String key = new EgaFileContentService().createKeyForBamFile(bamFileSubmissionObject)
 
         then:
-        key == 'seqtype-PAIRED-platform-model-lib2-lib3-lib5-unspecified'
+        key == expected
     }
 
     void "createSingleFastqFileMapping, when ega submission is given, then create expectedMap of file names and file content"() {
@@ -271,7 +320,7 @@ class EgaFileContentServiceSpec extends Specification implements EgaSubmissionFa
                 [seqTypeSingle2, seqPlatform2, libraryPreparationKit2, 'fileAlias-222-1', sampleSubmissionObject2,],
         ].collect {
             createRawSequenceFileSubmissionObject([
-                    sequenceFile              : createFastqFile([
+                    sequenceFile          : createFastqFile([
                             seqTrack: createSeqTrack([
                                     sample               : sample,
                                     seqType              : it[0],
@@ -299,27 +348,27 @@ class EgaFileContentServiceSpec extends Specification implements EgaSubmissionFa
                 rawSequenceFilesToSubmit: submissionObjects as Set,
         ])
         Map expectedMap = [
-                ('runs-fastqs-seqtype1-SINGLE-platform1-model1-library1.csv'): '''\
+                ("runs-fastqs-seqtype1-SINGLE-platform1-model1-${seqPlatform1.seqPlatformModelLabel.id}-library1-${libraryPreparationKit1.id}.csv".toString()): '''\
 Sample alias,Fastq File,Checksum,Unencrypted checksum
 sampleAlias1,fileAlias-111-1,,
 sampleAlias1,fileAlias-111-2,,
 sampleAlias1,fileAlias-111-3,,
 ''',
-                ('runs-fastqs-seqtype1-SINGLE-platform1-model1-library2.csv'): '''\
+                ("runs-fastqs-seqtype1-SINGLE-platform1-model1-${seqPlatform1.seqPlatformModelLabel.id}-library2-${libraryPreparationKit2.id}.csv".toString()): '''\
 Sample alias,Fastq File,Checksum,Unencrypted checksum
 sampleAlias2,fileAlias-112-1,,
 sampleAlias2,fileAlias-112-2,,
 sampleAlias2,fileAlias-112-3,,
 ''',
-                ('runs-fastqs-seqtype1-SINGLE-platform2-model2-library1.csv'): '''\
+                ("runs-fastqs-seqtype1-SINGLE-platform2-model2-${seqPlatform2.seqPlatformModelLabel.id}-library1-${libraryPreparationKit1.id}.csv".toString()): '''\
 Sample alias,Fastq File,Checksum,Unencrypted checksum
 sampleAlias1,fileAlias-121-1,,
 ''',
-                ('runs-fastqs-seqtype2-SINGLE-platform1-model1-library1.csv'): '''\
+                ("runs-fastqs-seqtype2-SINGLE-platform1-model1-${seqPlatform1.seqPlatformModelLabel.id}-library1-${libraryPreparationKit1.id}.csv".toString()): '''\
 Sample alias,Fastq File,Checksum,Unencrypted checksum
 sampleAlias1,fileAlias-211-1,,
 ''',
-                ('runs-fastqs-seqtype2-SINGLE-platform2-model2-library2.csv'): '''\
+                ("runs-fastqs-seqtype2-SINGLE-platform2-model2-${seqPlatform2.seqPlatformModelLabel.id}-library2-${libraryPreparationKit2.id}.csv".toString()): '''\
 Sample alias,Fastq File,Checksum,Unencrypted checksum
 sampleAlias2,fileAlias-222-1,,
 ''',
@@ -394,14 +443,14 @@ sampleAlias2,fileAlias-222-1,,
             ])
             [
                     createRawSequenceFileSubmissionObject([
-                            sequenceFile              : createFastqFile([
+                            sequenceFile          : createFastqFile([
                                     seqTrack: seqTrack,
                             ]),
                             egaAliasName          : it[3],
                             sampleSubmissionObject: it[5],
                     ]),
                     createRawSequenceFileSubmissionObject([
-                            sequenceFile              : createFastqFile([
+                            sequenceFile          : createFastqFile([
                                     seqTrack: seqTrack,
                             ]),
                             egaAliasName          : it[4],
@@ -423,27 +472,27 @@ sampleAlias2,fileAlias-222-1,,
         ])
 
         Map expectedMap = [
-                ('runs-fastqs-seqtype1-PAIRED-platform1-model1-library1.csv'): '''\
+                ("runs-fastqs-seqtype1-PAIRED-platform1-model1-${seqPlatform1.seqPlatformModelLabel.id}-library1-${libraryPreparationKit1.id}.csv".toString()): '''\
 Sample alias,First Fastq File,First Checksum,First Unencrypted checksum,Second Fastq File,Second Checksum,Second Unencrypted checksum
 sampleAlias1,fileAlias-111-1-r1,,,fileAlias-111-1-r2,,
 sampleAlias1,fileAlias-111-2-r1,,,fileAlias-111-2-r2,,
 sampleAlias1,fileAlias-111-3-r1,,,fileAlias-111-3-r2,,
 ''',
-                ('runs-fastqs-seqtype1-PAIRED-platform1-model1-library2.csv'): '''\
+                ("runs-fastqs-seqtype1-PAIRED-platform1-model1-${seqPlatform1.seqPlatformModelLabel.id}-library2-${libraryPreparationKit2.id}.csv".toString()): '''\
 Sample alias,First Fastq File,First Checksum,First Unencrypted checksum,Second Fastq File,Second Checksum,Second Unencrypted checksum
 sampleAlias2,fileAlias-112-1-r1,,,fileAlias-112-1-r2,,
 sampleAlias2,fileAlias-112-2-r1,,,fileAlias-112-2-r2,,
 sampleAlias2,fileAlias-112-3-r1,,,fileAlias-112-3-r2,,
 ''',
-                ('runs-fastqs-seqtype1-PAIRED-platform2-model2-library1.csv'): '''\
+                ("runs-fastqs-seqtype1-PAIRED-platform2-model2-${seqPlatform2.seqPlatformModelLabel.id}-library1-${libraryPreparationKit1.id}.csv".toString()): '''\
 Sample alias,First Fastq File,First Checksum,First Unencrypted checksum,Second Fastq File,Second Checksum,Second Unencrypted checksum
 sampleAlias1,fileAlias-121-1-r1,,,fileAlias-121-1-r2,,
 ''',
-                ('runs-fastqs-seqtype2-PAIRED-platform1-model1-library1.csv'): '''\
+                ("runs-fastqs-seqtype2-PAIRED-platform1-model1-${seqPlatform1.seqPlatformModelLabel.id}-library1-${libraryPreparationKit1.id}.csv".toString()): '''\
 Sample alias,First Fastq File,First Checksum,First Unencrypted checksum,Second Fastq File,Second Checksum,Second Unencrypted checksum
 sampleAlias1,fileAlias-211-1-r1,,,fileAlias-211-1-r2,,
 ''',
-                ('runs-fastqs-seqtype2-PAIRED-platform2-model2-library2.csv'): '''\
+                ("runs-fastqs-seqtype2-PAIRED-platform2-model2-${seqPlatform2.seqPlatformModelLabel.id}-library2-${libraryPreparationKit2.id}.csv".toString()): '''\
 Sample alias,First Fastq File,First Checksum,First Unencrypted checksum,Second Fastq File,Second Checksum,Second Unencrypted checksum
 sampleAlias2,fileAlias-222-1-r1,,,fileAlias-222-1-r2,,
 ''',
@@ -545,51 +594,51 @@ sampleAlias2,fileAlias-222-1-r1,,,fileAlias-222-1-r2,,
         ])
 
         Map expectedMap = [
-                ('runs-bams-seqtypePaired1-PAIRED-platform1-model1-library1.csv'): '''\
+                ("runs-bams-seqtypePaired1-PAIRED-platform1-model1-${seqPlatform1.seqPlatformModelLabel.id}-library1-${libraryPreparationKit1.id}.csv".toString()): '''\
 Sample alias,BAM File,Checksum,Unencrypted checksum
 sampleAlias1,fileAlias-p111-1,,
 sampleAlias1,fileAlias-p111-2,,
 sampleAlias1,fileAlias-p111-3,,
 ''',
-                ('runs-bams-seqtypePaired1-PAIRED-platform1-model1-library2.csv'): '''\
+                ("runs-bams-seqtypePaired1-PAIRED-platform1-model1-${seqPlatform1.seqPlatformModelLabel.id}-library2-${libraryPreparationKit2.id}.csv".toString()): '''\
 Sample alias,BAM File,Checksum,Unencrypted checksum
 sampleAlias2,fileAlias-p112-1,,
 sampleAlias2,fileAlias-p112-2,,
 sampleAlias2,fileAlias-p112-3,,
 ''',
-                ('runs-bams-seqtypePaired1-PAIRED-platform2-model2-library1.csv'): '''\
+                ("runs-bams-seqtypePaired1-PAIRED-platform2-model2-${seqPlatform2.seqPlatformModelLabel.id}-library1-${libraryPreparationKit1.id}.csv".toString()): '''\
 Sample alias,BAM File,Checksum,Unencrypted checksum
 sampleAlias1,fileAlias-p121-1,,
 ''',
-                ('runs-bams-seqtypePaired2-PAIRED-platform1-model1-library1.csv'): '''\
+                ("runs-bams-seqtypePaired2-PAIRED-platform1-model1-${seqPlatform1.seqPlatformModelLabel.id}-library1-${libraryPreparationKit1.id}.csv".toString()): '''\
 Sample alias,BAM File,Checksum,Unencrypted checksum
 sampleAlias1,fileAlias-p211-1,,
 ''',
-                ('runs-bams-seqtypePaired2-PAIRED-platform2-model2-library2.csv'): '''\
+                ("runs-bams-seqtypePaired2-PAIRED-platform2-model2-${seqPlatform2.seqPlatformModelLabel.id}-library2-${libraryPreparationKit2.id}.csv".toString()): '''\
 Sample alias,BAM File,Checksum,Unencrypted checksum
 sampleAlias2,fileAlias-p222-1,,
 ''',
-                ('runs-bams-seqtypeSingle1-SINGLE-platform1-model1-library1.csv'): '''\
+                ("runs-bams-seqtypeSingle1-SINGLE-platform1-model1-${seqPlatform1.seqPlatformModelLabel.id}-library1-${libraryPreparationKit1.id}.csv".toString()): '''\
 Sample alias,BAM File,Checksum,Unencrypted checksum
 sampleAlias1,fileAlias-s111-1,,
 sampleAlias1,fileAlias-s111-2,,
 sampleAlias1,fileAlias-s111-3,,
 ''',
-                ('runs-bams-seqtypeSingle1-SINGLE-platform1-model1-library2.csv'): '''\
+                ("runs-bams-seqtypeSingle1-SINGLE-platform1-model1-${seqPlatform1.seqPlatformModelLabel.id}-library2-${libraryPreparationKit2.id}.csv".toString()): '''\
 Sample alias,BAM File,Checksum,Unencrypted checksum
 sampleAlias2,fileAlias-s112-1,,
 sampleAlias2,fileAlias-s112-2,,
 sampleAlias2,fileAlias-s112-3,,
 ''',
-                ('runs-bams-seqtypeSingle1-SINGLE-platform2-model2-library1.csv'): '''\
+                ("runs-bams-seqtypeSingle1-SINGLE-platform2-model2-${seqPlatform2.seqPlatformModelLabel.id}-library1-${libraryPreparationKit1.id}.csv".toString()): '''\
 Sample alias,BAM File,Checksum,Unencrypted checksum
 sampleAlias1,fileAlias-s121-1,,
 ''',
-                ('runs-bams-seqtypeSingle2-SINGLE-platform1-model1-library1.csv'): '''\
+                ("runs-bams-seqtypeSingle2-SINGLE-platform1-model1-${seqPlatform1.seqPlatformModelLabel.id}-library1-${libraryPreparationKit1.id}.csv".toString()): '''\
 Sample alias,BAM File,Checksum,Unencrypted checksum
 sampleAlias1,fileAlias-s211-1,,
 ''',
-                ('runs-bams-seqtypeSingle2-SINGLE-platform2-model2-library2.csv'): '''\
+                ("runs-bams-seqtypeSingle2-SINGLE-platform2-model2-${seqPlatform2.seqPlatformModelLabel.id}-library2-${libraryPreparationKit2.id}.csv".toString()): '''\
 Sample alias,BAM File,Checksum,Unencrypted checksum
 sampleAlias2,fileAlias-s222-1,,
 ''',]
