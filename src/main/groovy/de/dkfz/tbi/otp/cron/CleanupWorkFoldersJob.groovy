@@ -28,6 +28,9 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
+import java.sql.Timestamp
+import java.time.LocalDate
+
 /**
  * Deletes WorkFolders of restarted/final failed Workflows on the FileSystem
  */
@@ -47,8 +50,10 @@ class CleanupWorkFoldersJob extends AbstractScheduledJob {
 
     @CompileDynamic
     private List<WorkflowRun> getWorkflowRuns() {
+        Date threshold = Timestamp.valueOf(LocalDate.now().minusDays(7).atStartOfDay())
         return WorkflowRun.createCriteria().list {
             'in'('state', [WorkflowRun.State.FAILED_FINAL, WorkflowRun.State.RESTARTED])
+            lt("lastUpdated", threshold)
             workFolder {
                 eq("deleted", false)
             }

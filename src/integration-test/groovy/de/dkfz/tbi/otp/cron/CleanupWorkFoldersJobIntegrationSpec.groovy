@@ -26,14 +26,14 @@ import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.filestore.FilestoreService
-import de.dkfz.tbi.otp.filestore.WorkFolder
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
+
+import java.sql.Timestamp
+import java.time.LocalDate
 
 @Rollback
 @Integration
@@ -49,23 +49,32 @@ class CleanupWorkFoldersJobIntegrationSpec extends Specification implements Work
     }
 
     @Unroll
-    void "wrappedExecute, should delete"() {
+    void "wrappedExecute, should #description when lastUpdated is #daysAgo days ago"() {
         given:
         setupData()
         WorkflowRun finalFailed = createWorkflowRun(state: WorkflowRun.State.FAILED_FINAL, workFolder: createWorkFolder())
-        WorkflowRun alreadyDeleted = createWorkflowRun(state: WorkflowRun.State.FAILED_FINAL, workFolder: createWorkFolder(deleted: true))
         WorkflowRun restarted = createWorkflowRun(state: WorkflowRun.State.RESTARTED, workFolder: createWorkFolder())
-        createWorkflowRun(state: WorkflowRun.State.RESTARTED, workFolder: null)
-        createWorkflowRun(state: WorkflowRun.State.LEGACY, workFolder: null)
-        createWorkflowRun(state: WorkflowRun.State.PENDING, workFolder: createWorkFolder())
 
-        expect:
-        CollectionUtils.containSame(WorkFolder.findAllByDeleted(true), [alreadyDeleted.workFolder])
+        and:
+        setLastUpdatedDaysAgo(finalFailed, daysAgo)
+        setLastUpdatedDaysAgo(restarted, daysAgo)
 
         when:
         job.wrappedExecute()
 
         then:
-        TestCase.assertContainSame(WorkFolder.findAllByDeleted(true), [finalFailed, restarted, alreadyDeleted]*.workFolder)
+        finalFailed.workFolder.deleted == shouldBeDeleted
+        restarted.workFolder.deleted == shouldBeDeleted
+
+        where:
+        daysAgo | shouldBeDeleted | description
+        8       | true            | "delete work folders"
+        1       | false           | "not delete work folders"
+    }
+
+    private void setLastUpdatedDaysAgo(WorkflowRun run, int daysAgo) {
+        Date pastDate = Timestamp.valueOf(LocalDate.now().minusDays(daysAgo).atStartOfDay())
+        WorkflowRun.executeUpdate("UPDATE WorkflowRun SET lastUpdated = :date WHERE id = :id", [date: pastDate, id: run.id])
+        run.refresh()
     }
 }
