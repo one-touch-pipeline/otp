@@ -429,11 +429,23 @@ class EgaSubmissionService {
                     it.rawSequenceFile.seqTrack.laneId,
                     "R${it.rawSequenceFile.mateNumber}",
             ].findAll()
-            String aliasName = "${aliasNameHelper.join("_")}.fastq.gz"
+
+            String extension = getExtensionFromDataFormat(it.rawSequenceFile.dataFormat)
+            String aliasName = "${aliasNameHelper.join("_")}${extension}"
             dataFileAliases.put(it.rawSequenceFile.fileName + it.rawSequenceFile.run, aliasName)
         }
-
         return dataFileAliases
+    }
+
+    private String getExtensionFromDataFormat(String dataFormat) {
+        switch (dataFormat?.toLowerCase()) {
+            case 'cram':
+                return '.unaligned.cram'
+            case 'fastq':
+                return '.fastq.gz'
+            default:
+                return '.fastq.gz' // Default fallback for FASTQ files
+        }
     }
 
     @TupleConstructor

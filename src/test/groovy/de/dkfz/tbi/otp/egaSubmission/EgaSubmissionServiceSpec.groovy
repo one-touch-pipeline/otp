@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.domainFactory.submissions.ega.EgaSubmissionFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.HelperUtils
 
 class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFactory, IsRoddy, DataTest {
 
@@ -45,6 +46,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
                 RawSequenceFile,
                 RawSequenceFileSubmissionObject,
                 FastqFile,
+                SequenceCramFile,
                 FileType,
                 Individual,
                 LibraryPreparationKit,
@@ -446,7 +448,8 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
                 rawSequenceFile.seqTrack.laneId,
                 "R${rawSequenceFile.mateNumber}",
         ]
-        defaultEgaAliasesForRawSequenceFiles.get(rawSequenceFile.fileName + rawSequenceFile.run) == "${aliasNameHelper.join("_")}.fastq.gz"
+        String expectedExtension = '.fastq.gz'
+        defaultEgaAliasesForRawSequenceFiles.get(rawSequenceFile.fileName + rawSequenceFile.run) == "${aliasNameHelper.join("_")}${expectedExtension}"
 
         where:
         runName                            || runNameWithoutDate
@@ -508,6 +511,110 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
 
         then:
         TestCase.assertContainSame(found, [projects[0], projects[4]])
+    }
+
+    void "test generate default ega aliases for unaligned CRAM files preserves original extension"() {
+        given:
+        Run run = DomainFactory.createRun()
+        SeqTrack seqTrack = DomainFactory.createSeqTrack([run: run])
+        // Create a SequenceCramFile which returns dataFormat = 'cram'
+        SequenceCramFile rawSequenceFile = createDomainObject(SequenceCramFile, [
+                run                : run,
+                fileName           : 'AS-12345-LR-12345_R1.unaligned.cram',
+                seqTrack           : seqTrack,
+                project            : seqTrack.sample.individual.project,
+                fastqImportInstance: DomainFactory.createFastqImportInstance(),
+                initialDirectory   : TestCase.uniqueNonExistentPath.path,
+                cramMd5sum         : HelperUtils.randomMd5sum,
+                dateExecuted       : new Date(),
+                dateFileSystem     : new Date(),
+                dateCreated        : new Date(),
+                dateLastChecked    : new Date(),
+                fileWithdrawn      : false,
+                fileType           : DomainFactory.createFileType(),
+                used               : true,
+                vbpFileName        : 'VbpDataFileFileName_R1.cram',
+                pathName           : '',
+                fastqMd5sum        : HelperUtils.randomMd5sum,
+                fileExists         : false,
+                fileLinked         : false,
+                fileSize           : 0,
+                mateNumber         : 1,
+                indexFile          : false
+        ], [:])
+
+        String alias = "EGAname_sample"
+        List rawSequenceFileAndAliases = [new RawSequenceFileAndSampleAlias(rawSequenceFile, new SampleSubmissionObject(egaAliasName: alias))]
+
+        when:
+        Map defaultEgaAliasesForRawSequenceFiles = egaSubmissionService.generateDefaultEgaAliasesForRawSequenceFiles(rawSequenceFileAndAliases)
+
+        then:
+        String actualAlias = defaultEgaAliasesForRawSequenceFiles.get(rawSequenceFile.fileName + rawSequenceFile.run)
+        actualAlias.endsWith('.unaligned.cram')
+        !actualAlias.endsWith('.fastq.gz')
+        actualAlias.contains(rawSequenceFile.seqType.displayName)
+        actualAlias.contains(alias)
+        actualAlias.contains("R${rawSequenceFile.mateNumber}")
+    }
+
+    void "test generate default ega aliases for various data formats"() {
+        given:
+        Run run = DomainFactory.createRun()
+        String alias = "test_alias"
+
+        RawSequenceFile rawSequenceFile
+        if (dataFormat == 'cram') {
+            SeqTrack seqTrack = DomainFactory.createSeqTrack([run: run])
+            rawSequenceFile = createDomainObject(SequenceCramFile, [
+                    run                : run,
+                    fileName           : fileName,
+                    seqTrack           : seqTrack,
+                    project            : seqTrack.sample.individual.project,
+                    fastqImportInstance: DomainFactory.createFastqImportInstance(),
+                    initialDirectory   : TestCase.uniqueNonExistentPath.path,
+                    cramMd5sum         : HelperUtils.randomMd5sum,
+                    dateExecuted       : new Date(),
+                    dateFileSystem     : new Date(),
+                    dateCreated        : new Date(),
+                    dateLastChecked    : new Date(),
+                    fileWithdrawn      : false,
+                    fileType           : DomainFactory.createFileType(),
+                    used               : true,
+                    vbpFileName        : "VbpDataFileFileName_${fileName}",
+                    pathName           : '',
+                    fastqMd5sum        : HelperUtils.randomMd5sum,
+                    fileExists         : false,
+                    fileLinked         : false,
+                    fileSize           : 0,
+                    mateNumber         : 1,
+                    indexFile          : false
+            ], [:])
+        } else {
+            // Create FastqFile for FASTQ files
+            rawSequenceFile = DomainFactory.createFastqFile(run: run, fileName: fileName)
+        }
+
+        List<RawSequenceFileAndSampleAlias> rawSequenceFileAndAliases = [new RawSequenceFileAndSampleAlias(rawSequenceFile, new SampleSubmissionObject(egaAliasName: alias))]
+
+        when:
+        Map<String, String> result = egaSubmissionService.generateDefaultEgaAliasesForRawSequenceFiles(rawSequenceFileAndAliases)
+
+        then:
+        String actualAlias = result.get(rawSequenceFile.fileName + rawSequenceFile.run)
+        actualAlias.endsWith(expectedExtension)
+
+        where:
+        fileName                   | dataFormat || expectedExtension
+        'test_file.fastq.gz'       | 'fastq'    || '.fastq.gz'
+        'sample_R1.unaligned.cram' | 'cram'     || '.unaligned.cram'
+        'data_R2.fq.gz'            | 'fastq'    || '.fastq.gz'
+        'sequence.cram'            | 'cram'     || '.unaligned.cram'
+        'file_without_extension'   | 'fastq'    || '.fastq.gz'
+        'file.name.fastq.gz'       | 'fastq'    || '.fastq.gz'
+        'my.sample.unaligned.cram' | 'cram'     || '.unaligned.cram'
+        'data.with.dots.fq.gz'     | 'fastq'    || '.fastq.gz'
+        'complex.file.name.cram'   | 'cram'     || '.unaligned.cram'
     }
 
     /*
