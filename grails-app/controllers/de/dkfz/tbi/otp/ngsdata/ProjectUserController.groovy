@@ -25,7 +25,6 @@ import grails.converters.JSON
 import grails.validation.Validateable
 import groovy.transform.TupleConstructor
 import groovy.util.logging.Slf4j
-import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.*
@@ -41,7 +40,6 @@ import de.dkfz.tbi.otp.security.user.identityProvider.data.IdpUserDetails
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.otp.utils.exceptions.FilePermissionException
-import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
 @PreAuthorize('isFullyAuthenticated()')
 class ProjectUserController implements CheckAndCall {
@@ -158,7 +156,7 @@ class ProjectUserController implements CheckAndCall {
                     )
                 }
                 flash.message = new FlashMessage("Data stored successfully")
-            } catch (LdapUserCreationException | AssertionError | AccessDeniedException | OtpRuntimeException e) {
+            } catch (Exception | AssertionError e) {
                 flash.message = new FlashMessage("An error occurred", e.message)
                 log.error(g.message(code: 'projectUser.addUser.error', args: [cmd.username, project]) + "\n" + e.message, e)
                 mailHelperService.saveErrorMailInNewTransaction(
