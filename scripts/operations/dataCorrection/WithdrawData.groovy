@@ -37,8 +37,8 @@ import de.dkfz.tbi.otp.withdraw.WithdrawService
  * - RawSequenceFile:
  *   - withdraw in OTP
  *   - change the unix group of the file in the run folder
- *   - delete the link from the viewByPidFolder
- *   - delete the link in the well directory, if it exists
+ *   - change the unix group of the links in the UUID structure
+ *   - change the unix group of the link in the well directory, if it exists
  * - BamFile (if deleteBamFiles = false)
  *   - withdraw the bam fle in OTP
  *   - change the unix group in the file system for the bam directory
@@ -152,6 +152,13 @@ boolean stopOnMissingFiles = true
 boolean stopOnAlreadyWithdrawnData = true
 
 /**
+ * Unix group for putting the samples in quarantine state instead of withdrawing them.
+ * If empty, use the WITHDRAWN group from the processing option.
+ * This allows putting samples into quarantine without full withdrawal.
+ */
+String unixGroup = ''
+
+/**
  * A flag to allow a trial run with a rollback of the changes at the end (if it is set to "true")
  */
 boolean tryRun = true
@@ -189,6 +196,7 @@ WithdrawParameters withdrawParameters = new WithdrawParameters([
         fileName                  : fileName,
         stopOnMissingFiles        : stopOnMissingFiles,
         stopOnAlreadyWithdrawnData: stopOnAlreadyWithdrawnData,
+        unixGroup                 : unixGroup,
 ])
 
 SeqTrack.withNewTransaction {

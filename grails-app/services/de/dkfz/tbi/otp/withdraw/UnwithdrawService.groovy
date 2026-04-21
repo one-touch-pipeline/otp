@@ -27,15 +27,15 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.infrastructure.RawSequenceDataAllWellFileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcLinkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.otp.filestore.FilestoreService
 
 import java.nio.file.*
@@ -50,6 +50,7 @@ class UnwithdrawService {
     FileSystemService fileSystemService
     ProcessingOptionService processingOptionService
     WithdrawAnalysisService withdrawAnalysisService
+    RawSequenceDataAllWellFileService rawSequenceDataAllWellFileService
     RawSequenceDataWorkFileService rawSequenceDataWorkFileService
     RawSequenceDataViewFileService rawSequenceDataViewFileService
     FilestoreService filestoreService
@@ -65,15 +66,39 @@ class UnwithdrawService {
                 unwithdrawRawSequenceFiles(it, seqTrackWithComment.comment, unwithdrawStateHolder)
             }
         }
+
+        if (unwithdrawStateHolder.nonExistingRawSequenceFiles) {
+            unwithdrawStateHolder.summary << "\n\nWarning: The following files could not be unwithdraw due to missing files:"
+            unwithdrawStateHolder.nonExistingRawSequenceFiles.each { errorMessage ->
+                unwithdrawStateHolder.summary << "  - ${errorMessage}"
+            }
+        }
     }
 
     @CompileDynamic
     @SuppressWarnings(['AbcMetric', 'CyclomaticComplexity'])
     private void unwithdrawRawSequenceFiles(final RawSequenceFile rawSequenceFile, String comment, UnwithdrawStateHolder unwithdrawStateHolder) {
         unwithdrawStateHolder.summary << "Unwithdrawing RawSequenceFile: ${rawSequenceFile}: ${rawSequenceFile.withdrawnComment}"
-        unwithdrawStateHolder.linksToCreate.put(rawSequenceDataWorkFileService.getFilePath(rawSequenceFile),
-                rawSequenceDataViewFileService.getFilePath(rawSequenceFile))
+
+        Path sourceFile = rawSequenceDataWorkFileService.getFilePath(rawSequenceFile)
+        if (!sourceFile) {
+            String errorMessage = "Cannot unwithdraw ${rawSequenceFile.id}: could not establish file path"
+            unwithdrawStateHolder.nonExistingRawSequenceFiles.add(errorMessage)
+            return
+        }
+        if (!Files.exists(sourceFile)) {
+            String errorMessage = "Cannot unwithdraw ${rawSequenceFile.id}: source file does not exist: ${sourceFile}"
+            unwithdrawStateHolder.nonExistingRawSequenceFiles.add(errorMessage)
+            return
+        }
+
+        // Set group on the view by PID link (no need to create since withdraw no longer deletes it)
         unwithdrawStateHolder.pathsToChangeGroup.put(rawSequenceDataViewFileService.getFilePath(rawSequenceFile).toString(), rawSequenceFile.project.unixGroup)
+        // Set group on single cell well link if it exists
+        if (rawSequenceFile.seqType.singleCell && rawSequenceFile.seqTrack.singleCellWellLabel) {
+            unwithdrawStateHolder.pathsToChangeGroup.put(rawSequenceDataAllWellFileService.getFilePath(rawSequenceFile).toString(),
+                    rawSequenceFile.project.unixGroup)
+        }
         FastqcProcessedFile fastqcProcessedFile = CollectionUtils.atMostOneElement(FastqcProcessedFile.findAllBySequenceFile(rawSequenceFile))
         List<Path> files = [
                 rawSequenceDataWorkFileService.getFilePath(rawSequenceFile),
@@ -87,7 +112,7 @@ class UnwithdrawService {
             ])
         }
         files.findAll { path ->
-            Files.exists(path)
+            path && Files.exists(path)
         }.collect { filePath ->
             unwithdrawStateHolder.pathsToChangeGroup.put(filePath.toString(), rawSequenceFile.project.unixGroup)
         }
@@ -146,8 +171,8 @@ class UnwithdrawService {
                 bamFile.fileOperationStatus == AbstractBamFile.FileOperationStatus.PROCESSED &&
                         !bamFile.containedSeqTracks.any { it.withdrawn } &&
                         (Files.exists(abstractBamFileService.getBaseDirectory(bamFile).resolve(bamFile.bamFileName)) ||
-                         (bamFile.workflowArtefact?.producedBy?.workFolder &&
-                          Files.exists(filestoreService.getWorkFolderPath(bamFile.workflowArtefact.producedBy))))
+                                (bamFile.workflowArtefact?.producedBy?.workFolder &&
+                                        Files.exists(filestoreService.getWorkFolderPath(bamFile.workflowArtefact.producedBy))))
             },]
         }
         withdrawStateHolder.bamFiles = bamFileMap.values().flatten().unique()
@@ -203,17 +228,14 @@ class UnwithdrawService {
 
     void createBashScript(UnwithdrawStateHolder withdrawStateHolder) {
         withdrawStateHolder.script << "\n#change group for links, files and directories"
-        withdrawStateHolder.linksToCreate.each { target, link ->
-            withdrawStateHolder.script << ("mkdir -p  ${link.parent}" as String)
-            withdrawStateHolder.script << ("ln -rs ${target} ${link}" as String)
-        }
         withdrawStateHolder.pathsToChangeGroup.each { path, group ->
-            withdrawStateHolder.script << ("chgrp --recursive --verbose ${group} ${path}" as String)
+            withdrawStateHolder.script << ("chgrp --no-dereference --recursive --verbose " +
+                    LocalShellHelper.shellEscape(group) + " " + LocalShellHelper.shellEscape(path))
         }
 
         withdrawStateHolder.script << "\n#restore file permissions to 444 for unwithdrawn FASTQ files"
         withdrawStateHolder.pathsToChangePermissions.each { filePath, permission ->
-            withdrawStateHolder.script << ("chmod ${permission} ${filePath}" as String)
+            withdrawStateHolder.script << ("chmod " + LocalShellHelper.shellEscape(permission) + " " + LocalShellHelper.shellEscape(filePath))
         }
 
         withdrawStateHolder.script << "\necho script has run till end\n"
@@ -226,17 +248,17 @@ class UnwithdrawStateHolder {
 
     List<String> summary = []
 
-    Map<Path, Path> linksToCreate = [:]
-
     Map<String, String> pathsToChangeGroup = [:]
 
-    Map<String,String> pathsToChangePermissions = [:]
+    Map<String, String> pathsToChangePermissions = [:]
 
     List<AbstractBamFile> bamFiles = []
 
     List<String> script = []
 
     String scriptFileName
+
+    List<String> nonExistingRawSequenceFiles = []
 
     List<SeqTrack> getSeqTracks() {
         return seqTracksWithComment*.seqTrack

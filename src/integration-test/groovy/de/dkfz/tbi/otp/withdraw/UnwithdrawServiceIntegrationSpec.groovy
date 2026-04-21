@@ -146,7 +146,6 @@ class UnwithdrawServiceIntegrationSpec extends Specification implements DomainFa
         service.unwithdrawAnalysis(state)
 
         then:
-        state.linksToCreate == [:]
         state.pathsToChangeGroup == [(linkDir.toString()): indelCallingInstance.project.unixGroup]
         state.bamFiles == bamFiles
         [indelCallingInstance].every { !it.withdrawn }

@@ -29,13 +29,13 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 class LocalShellHelper {
 
     private static Process execute(String cmd) {
-        assert cmd : "The input cmd must not be null"
+        assert cmd: "The input cmd must not be null"
         LogThreadLocal.threadLog?.debug("executing command:\n${cmd}")
-        return [ 'bash', '-c', cmd ].execute()
+        return ['bash', '-c', cmd].execute()
     }
 
     private static ProcessOutput waitForProcess(Process process) {
-        assert process : "The input process must not be null"
+        assert process: "The input process must not be null"
         StringBuffer stdout = new StringBuffer()
         StringBuffer stderr = new StringBuffer()
         process.waitForProcessOutput(stdout, stderr)
@@ -58,5 +58,16 @@ class LocalShellHelper {
 
     static String executeAndAssertExitCodeAndErrorOutAndReturnStdout(String cmd) {
         return executeAndWait(cmd).assertExitCodeZeroAndStderrEmpty().stdout
+    }
+
+    /**
+     * Helper function to safely escape shell arguments.
+     * Replaces single quotes with '\'' to prevent command injection.
+     * @param value the string to escape
+     * @return safely escaped string for shell usage
+     */
+    static String shellEscape(String value) {
+        String normalized = (value == null) ? "" : value
+        return "'${normalized.replace("'", "'\\''")}'"
     }
 }

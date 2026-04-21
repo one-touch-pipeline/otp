@@ -243,9 +243,10 @@ class WithdrawHelperService {
                 withdrawStateHolder.pathsToChangePermissions << filePath.toString()
             }
 
-            withdrawStateHolder.pathsToDelete << rawSequenceDataViewFileService.getFilePath(rawSequenceFile).toString()
+            // Instead of deleting, set group on the UUID structure links
+            withdrawStateHolder.pathsToChangeGroup << rawSequenceDataViewFileService.getFilePath(rawSequenceFile).toString()
             if (rawSequenceFile.seqType.singleCell && rawSequenceFile.seqTrack.singleCellWellLabel) {
-                withdrawStateHolder.pathsToDelete << rawSequenceDataAllWellFileService.getFilePath(rawSequenceFile).toString()
+                withdrawStateHolder.pathsToChangeGroup << rawSequenceDataAllWellFileService.getFilePath(rawSequenceFile).toString()
             }
 
             MergingWorkPackage.withCriteria {
@@ -276,8 +277,8 @@ class WithdrawHelperService {
     }
 
     String createBashScript(WithdrawStateHolder withdrawStateHolder) {
-        String withdrawnGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.WITHDRAWN_UNIX_GROUP)
-
+        String targetGroup =
+                withdrawStateHolder.unixGroup?.trim() ?: processingOptionService.findOptionAsString(ProcessingOption.OptionName.WITHDRAWN_UNIX_GROUP)
         List<String> script = [
                 FileService.BASH_HEADER,
         ]
@@ -289,7 +290,7 @@ class WithdrawHelperService {
 
         script << "\n#change group for links, files and directories"
         withdrawStateHolder.pathsToChangeGroup.each {
-            script << ("chgrp --recursive --verbose ${withdrawnGroup} ${it}" as String)
+            script << ("chgrp --no-dereference --recursive --verbose ${targetGroup} ${it}" as String)
         }
 
         script << "\n#change file permissions to 440 for withdrawn FASTQ files"

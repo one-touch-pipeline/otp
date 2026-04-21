@@ -401,9 +401,9 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         final Path finalPathNormal = CreateFileHelper.createFile(tempDir.resolve("finalNormal"))
         final Path finalPathSingleCell = CreateFileHelper.createFile(tempDir.resolve("finalSingleCell"))
         final Path uuidPath = CreateFileHelper.createFile(tempDir.resolve("uuid"))
-        final String viewByPidPathNormal = "${File.separator}tmp${File.separator}viewByPidNormal"
-        final String viewByPidPathSingleCell = "${File.separator}tmp${File.separator}viewByPidSingleCell"
-        final String wellPathSingleCell = "${File.separator}tmp${File.separator}wellSingleCell"
+        final Path viewByPidPathNormal = CreateFileHelper.createFile(tempDir.resolve("viewByPidNormal"))
+        final Path viewByPidPathSingleCell = CreateFileHelper.createFile(tempDir.resolve("viewByPidSingleCell"))
+        final Path wellPathSingleCell = CreateFileHelper.createFile(tempDir.resolve("wellSingleCell"))
         final Path fastqcPath = tempDir.resolve("fastqc")
         Files.createDirectories(fastqcPath)
         final Path finalMd5sumNormal = CreateFileHelper.createFile(tempDir.resolve("finalMd5sum"))
@@ -463,12 +463,11 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
                 finalMd5sumSingleCell.toString(),
                 fastqcPath.toString(),
                 uuidPath.toString(),
+                viewByPidPathNormal.toString(),        // These are now actual files that exist
+                viewByPidPathSingleCell.toString(),    // These are now actual files that exist
+                wellPathSingleCell.toString(),         // These are now actual files that exist
         ]
-        List<String> pathsToDelete = [
-                viewByPidPathNormal,
-                viewByPidPathSingleCell,
-                wellPathSingleCell,
-        ]
+        List<String> pathsToDelete = []
 
         when:
         service.handleRawSequenceFiles(holder)
@@ -476,11 +475,11 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         then:
         1 * service.rawSequenceDataWorkFileService.getFilePath(fastqFile) >> finalPathNormal
         1 * service.rawSequenceDataWorkFileService.getMd5sumPath(fastqFile) >> finalMd5sumNormal
-        1 * service.rawSequenceDataViewFileService.getFilePath(fastqFile) >> Paths.get(viewByPidPathNormal)
+        1 * service.rawSequenceDataViewFileService.getFilePath(fastqFile) >> viewByPidPathNormal
         1 * service.rawSequenceDataWorkFileService.getFilePath(singleCellFastqFile) >> finalPathSingleCell
         1 * service.rawSequenceDataWorkFileService.getMd5sumPath(singleCellFastqFile) >> finalMd5sumSingleCell
-        1 * service.rawSequenceDataViewFileService.getFilePath(singleCellFastqFile) >> Paths.get(viewByPidPathSingleCell)
-        1 * service.rawSequenceDataAllWellFileService.getFilePath(singleCellFastqFile) >> Paths.get(wellPathSingleCell)
+        1 * service.rawSequenceDataViewFileService.getFilePath(singleCellFastqFile) >> viewByPidPathSingleCell
+        1 * service.rawSequenceDataAllWellFileService.getFilePath(singleCellFastqFile) >> wellPathSingleCell
 
         1 * service.fastqcLinkFileService.getDirectoryPath(fastqcProcessedFile) >> fastqcPath
         1 * service.fastqcWorkFileService.getDirectoryPath(fastqcProcessedFile) >> uuidPath
@@ -561,7 +560,7 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
             1 * createFileWithContent(withdrawnScript, _, _, FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION) >> { Path path, String content, String unixGroup, Set<PosixFilePermission> filePermission ->
                 assert content.startsWith(FileService.BASH_HEADER)
                 assert content.contains("rm --recursive --force --verbose ${pathToDelete}" as String)
-                assert content.contains("chgrp --recursive --verbose ${withdrawnGroup} ${pathToChangeGroup}" as String)
+                assert content.contains("chgrp --no-dereference --recursive --verbose ${withdrawnGroup} ${pathToChangeGroup}" as String)
                 assert content.contains("chmod 440 ${pathToChangePermission}" as String)
             }
             0 * _
@@ -630,7 +629,7 @@ class WithdrawHelperServiceSpec extends HibernateSpec implements FastqcDomainFac
         }
 
         pathsToChangeGroup.each {
-            assert script.contains("chgrp --recursive --verbose ${withdrawnGroup} ${it}" as String)
+            assert script.contains("chgrp --no-dereference --recursive --verbose ${withdrawnGroup} ${it}" as String)
         }
 
         pathsToChangePermissions.each {

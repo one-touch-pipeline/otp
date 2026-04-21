@@ -59,6 +59,12 @@ class WithdrawParameters {
     boolean stopOnAlreadyWithdrawnData = true
 
     /**
+     * Unix group for putting the samples in quarantine state.
+     * If empty, use the WITHDRAWN group from the processing option.
+     */
+    String unixGroup = ''
+
+    /**
      * The seqTracks to withdraw
      */
     List<SeqTrack> getSeqTracks() {

@@ -55,7 +55,7 @@ class LocalShellHelperSpec extends Specification {
 
     void "test waitForProcess works correctly"() {
         given:
-        Process process = [ 'bash', '-c', COMMAND ].execute()
+        Process process = ['bash', '-c', COMMAND].execute()
 
         when:
         ProcessOutput actual = LocalShellHelper.waitForProcess(process)
@@ -127,5 +127,40 @@ class LocalShellHelperSpec extends Specification {
         then:
         AssertionError e = thrown()
         e.message.contains("Expected exit code to be 0, but it is")
+    }
+
+    void "test shellEscape with simple string returns quoted string"() {
+        expect:
+        LocalShellHelper.shellEscape("simple_string") == "'simple_string'"
+    }
+
+    void "test shellEscape with null returns empty quoted string"() {
+        expect:
+        LocalShellHelper.shellEscape(null) == "''"
+    }
+
+    void "test shellEscape with empty string returns quoted empty string"() {
+        expect:
+        LocalShellHelper.shellEscape("") == "''"
+    }
+
+    void "test shellEscape with single quote is properly escaped and quoted"() {
+        expect:
+        LocalShellHelper.shellEscape("it's here") == "'it'\\''s here'"
+    }
+
+    void "test shellEscape with multiple single quotes are properly escaped and quoted"() {
+        expect:
+        LocalShellHelper.shellEscape("'don't' 'touch'") == "''\\''don'\\''t'\\'' '\\''touch'\\'''"
+    }
+
+    void "test shellEscape with path containing single quote returns quoted and escaped"() {
+        expect:
+        LocalShellHelper.shellEscape("/data/it's here/file.fastq") == "'/data/it'\\''s here/file.fastq'"
+    }
+
+    void "test shellEscape with special characters but no quotes returns quoted"() {
+        expect:
+        LocalShellHelper.shellEscape("/path with spaces & symbols") == "'/path with spaces & symbols'"
     }
 }
