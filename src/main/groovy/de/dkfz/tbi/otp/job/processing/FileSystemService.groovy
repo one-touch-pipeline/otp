@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.job.processing
 
 import com.github.robtimus.filesystems.sftp.*
 import com.jcraft.jsch.*
-import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import grails.util.Environment
 import groovy.util.logging.Slf4j
@@ -48,9 +47,6 @@ class FileSystemService {
 
     @Autowired
     ConfigService configService
-
-    @Autowired
-    GrailsApplication grailsApplication
 
     @Autowired
     ProcessingOptionService processingOptionService
@@ -88,8 +84,8 @@ class FileSystemService {
             env.withConfig(config)
 
             try {
-                fileSystem = FileSystems.newFileSystem(URI.create("sftp://${configService.sshHost}:${configService.sshPort}"),
-                        env, grailsApplication.classLoader)
+                fileSystem = new SFTPFileSystemProvider().newFileSystem(
+                        URI.create("sftp://${configService.sshHost}:${configService.sshPort}"), env)
             } catch (FileSystemException exception) {
                 throw new LoginFailedRemoteFileSystemException("Fail to login ${configService.sshUser}@${configService.sshHost}:${configService.sshPort} " +
                         "using authentication method ${configService.sshAuthenticationMethod}", exception)

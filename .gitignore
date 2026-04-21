@@ -34,6 +34,9 @@ logs/*
 *.kate-swp
 ## Stale NFS handles
 .nfs*
+.claude
+.claude-code.yml
+.CLAUDE.md
 
 ### Grails
 .groovy/*
