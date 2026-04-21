@@ -51,7 +51,7 @@ import java.nio.file.*
  * @param < D >  of type DataSwapData<P extends DataSwapParameters> build in {@link #buildDataDTO} containing all entities
  *        necessary to perform swap.
  */
-@SuppressWarnings(["JavaIoPackageAccess", "MethodCount"])
+@SuppressWarnings(["JavaIoPackageAccess", "MethodCount", "GStringExpressionWithinString"])
 @CompileDynamic
 @Transactional
 abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends DataSwapData<P>> {
@@ -69,6 +69,28 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
 
             set -e
             set -v
+
+            create_directories_with_group_and_permission() {
+                local target_dir="\$1"
+                local unix_group="\$2"
+                local permission="\$3"
+                [ -d "\$target_dir" ] && return 0
+                # Find boundary: walk up from target until we hit an existing ancestor.
+                local existing="\$target_dir"
+                while [ ! -e "\$existing" ]; do
+                    existing="\$(dirname "\$existing")"
+                done
+                local subpath="\${target_dir#\${existing%/}/}"
+                local current="\$existing"
+                local IFS='/'
+                # Walk down the path: create each missing level and set group + mode explicitly.
+                for part in \$subpath; do
+                    current="\$current/\$part"
+                    mkdir "\$current"
+                    chgrp "\$unix_group" "\$current"
+                    chmod "\$permission" "\$current"
+                done
+            }
 
             """.stripIndent()
 
@@ -197,8 +219,10 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
                     bashCommand = "# new file already exists: '${newPath}'; delete old file\n rm -f '${oldPath}'\n"
                 }
             } else {
+                String group = data.projectSwap.new.unixGroup
+                String perm = FileService.DEFAULT_DIRECTORY_PERMISSION_STRING
                 bashCommand = """
-                              mkdir -p -m 2750 '${newPath.parent}';
+                              create_directories_with_group_and_permission '${newPath.parent}' '${group}' '${perm}';
                               mv '${oldPath}' \\
                                  '${newPath}';
                               ${getFixGroupCommand(newPath)}\n
@@ -302,13 +326,16 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
         String mappingEntry = singleCellService.mappingEntry(rawSequenceFile)
 
         String oldMappingFile = oldValues[WELL_MAPPING_FILE_NAME]
+        String group = rawSequenceFile.project.unixGroup
+        String perm = FileService.DEFAULT_DIRECTORY_PERMISSION_STRING
 
         return """
                |# Single Cell structure
                |## recreate link
                |rm -f '${oldValues[WELL_FILE_NAME]}'
-               |mkdir -p -m 2750 '${wellFile.parent}'
+               |create_directories_with_group_and_permission '${wellFile.parent}' '${group}' '${perm}'
                |ln -sr '${newDirectFileName}' \\\n      '${wellFile}'
+               |chgrp -h '${group}' '${wellFile}'
                |
                |## remove entry from old mapping file
                |chmod 640 '${oldMappingFile}'
@@ -511,6 +538,8 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
     private String createRenameRawSequenceFileCommands(String oldFilename, RawSequenceFile rawSequenceFile, D data) throws FileNotFoundException {
         FileSystem fileSystem = fileSystemService.remoteFileSystem
         String outPutBashCommands = ""
+        String group = rawSequenceFile.project.unixGroup
+        String perm = FileService.DEFAULT_DIRECTORY_PERMISSION_STRING
         // fill local variables
         String oldDirectFileName = data.oldRawSequenceFileNameMap[rawSequenceFile][DIRECT_FILE_NAME]
         String oldVbpFileName = data.oldRawSequenceFileNameMap[rawSequenceFile][VBP_FILE_NAME]
@@ -539,7 +568,7 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
             }
             bashMoveDirectFile = """\n
                                      # ${rawSequenceFile.seqTrack} ${rawSequenceFile}
-                                     mkdir -p -m 2750 '${newDirectPath.parent}';""".stripIndent()
+                                     create_directories_with_group_and_permission '${newDirectPath.parent}' '${group}' '${perm}';""".stripIndent()
 
             bashMoveDirectFile += """
                                           |mv '${oldDirectFileName}' \\
@@ -552,9 +581,10 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
                                           |fi\n""".stripMargin()
         }
         bashMoveVbpFile += """\
-                               |mkdir -p -m 2750 '${newVbpPath.parent}';
+                               |create_directories_with_group_and_permission '${newVbpPath.parent}' '${group}' '${perm}';
                                |ln -sr '${newDirectPath}' \\
-                               |      '${newVbpPath}'""".stripMargin()
+                               |      '${newVbpPath}'
+                               |chgrp -h '${group}' '${newVbpPath}'""".stripMargin()
 
         outPutBashCommands += "${bashMoveDirectFile}\n${bashMoveVbpFile}\n"
         if (oldWellName) {

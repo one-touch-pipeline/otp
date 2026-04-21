@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataswap.parameters.SampleSwapParameters
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactoryInstance
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
@@ -148,8 +149,11 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
         copyScriptContent.contains("rm -rf ${destinationDirectory}")
         RawSequenceFile.findAllBySeqTrack(seqTrack).eachWithIndex { RawSequenceFile it, int i ->
             assert copyScriptContent.contains("rm -f '${fastqFileLinks[i]}'")
-            assert copyScriptContent.contains("mkdir -p -m 2750 '${rawSequenceDataViewFileService.getDirectoryPath(it)}'")
+            assert copyScriptContent.contains("create_directories_with_group_and_permission " +
+                    "'${rawSequenceDataViewFileService.getDirectoryPath(it)}' " +
+                    "'${it.project.unixGroup}' '${FileService.DEFAULT_DIRECTORY_PERMISSION_STRING}'")
             assert copyScriptContent.contains("ln -sr '${rawSequenceDataWorkFileService.getFilePath(it)}' \\\n      '${rawSequenceDataViewFileService.getFilePath(it)}'")
+            assert copyScriptContent.contains("chgrp -h '${it.project.unixGroup}' '${rawSequenceDataViewFileService.getFilePath(it)}'")
             assert it.comment.comment == "Attention: Datafile swapped!"
         }
         copyScriptContent.contains("rm -rf ${cleanupPath}")

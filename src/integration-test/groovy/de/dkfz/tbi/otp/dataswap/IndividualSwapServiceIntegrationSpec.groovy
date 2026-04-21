@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataswap.parameters.IndividualSwapParameters
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactoryInstance
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
@@ -154,12 +155,17 @@ class IndividualSwapServiceIntegrationSpec extends Specification implements User
         copyScriptContent.contains("rm -rf ${destinationDirectory}")
         copyScriptContent.startsWith(AbstractDataSwapService.BASH_HEADER)
         RawSequenceFile.findAllBySeqTrack(seqTrack).each { RawSequenceFile it ->
-            assert copyScriptContent.contains("mkdir -p -m 2750 '${rawSequenceDataWorkFileService.getFilePath(it).parent}'")
+            assert copyScriptContent.contains("create_directories_with_group_and_permission " +
+                    "'${rawSequenceDataWorkFileService.getFilePath(it).parent}' " +
+                    "'${it.project.unixGroup}' '${FileService.DEFAULT_DIRECTORY_PERMISSION_STRING}'")
             assert copyScriptContent.contains("mv '${fastqFilePaths[it]}' \\\n   '${rawSequenceDataWorkFileService.getFilePath(it)}'")
             assert copyScriptContent.contains("mv '${fastqFilePaths[it]}.md5sum' \\\n     '${rawSequenceDataWorkFileService.getMd5sumPath(it)}'")
             assert copyScriptContent.contains("rm -f '${fastqFileLinks[it]}'")
-            assert copyScriptContent.contains("mkdir -p -m 2750 '${rawSequenceDataViewFileService.getDirectoryPath(it)}'")
+            assert copyScriptContent.contains("create_directories_with_group_and_permission " +
+                    "'${rawSequenceDataViewFileService.getDirectoryPath(it)}' " +
+                    "'${it.project.unixGroup}' '${FileService.DEFAULT_DIRECTORY_PERMISSION_STRING}'")
             assert copyScriptContent.contains("ln -sr '${rawSequenceDataWorkFileService.getFilePath(it)}' \\\n      '${rawSequenceDataViewFileService.getFilePath(it)}'")
+            assert copyScriptContent.contains("chgrp -h '${it.project.unixGroup}' '${rawSequenceDataViewFileService.getFilePath(it)}'")
             assert it.comment.comment == "Attention: Datafile swapped!"
         }
         copyScriptContent.contains("rm -rf ${cleanupPath}")

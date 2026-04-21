@@ -205,6 +205,13 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         thrown(AssertionError)
     }
 
+    void "BASH_HEADER, contains create_directories_with_group_and_permission function definition"() {
+        expect:
+        AbstractDataSwapService.BASH_HEADER.contains('create_directories_with_group_and_permission')
+        AbstractDataSwapService.BASH_HEADER.contains('chgrp')
+        AbstractDataSwapService.BASH_HEADER.contains('chmod')
+    }
+
     @Unroll
     void "collectFileNamesOfRawSequenceFiles, when single cell is #singleCell and label is #wellLabel, then return correct list"() {
         given:
@@ -336,8 +343,9 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                                 |# Single Cell structure
                                 |## recreate link
                                 |rm -f '${OLD_WELL_PATH}'
-                                |mkdir -p -m 2750 '${NEW_ALL_PATH}'
+                                |create_directories_with_group_and_permission '${NEW_ALL_PATH}' '${rawSequenceFile.project.unixGroup}' '${FileService.DEFAULT_DIRECTORY_PERMISSION_STRING}'
                                 |ln -sr '${NEW_FINAL_PATH}' \\\n      '${NEW_WELL_PATH}'
+                                |chgrp -h '${rawSequenceFile.project.unixGroup}' '${NEW_WELL_PATH}'
                                 |
                                 |## remove entry from old mapping file
                                 |chmod 640 '${OLD_MAPPING_PATH}'
@@ -465,16 +473,20 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         given:
         final Path oldPath = CreateFileHelper.createFile(tempDir.resolve("old"))
         final Path newPath = Paths.get("/parent/not_existing_new_file")
+        final Project newProject = createProject()
+        final DataSwapData dataSwapData = new DataSwapData(
+                projectSwap: new Swap(newProject, newProject),
+        )
 
         final String fileMoveCommand = """
-                                       mkdir -p -m 2750 '${newPath.parent}';
+                                       create_directories_with_group_and_permission '${newPath.parent}' '${newProject.unixGroup}' '${FileService.DEFAULT_DIRECTORY_PERMISSION_STRING}';
                                        mv '${oldPath}' \\
                                           '${newPath}';
                                        chgrp -h `stat -c '%G' ${newPath.parent}` ${newPath}\n
                                        """.stripIndent()
 
         when:
-        String bashCommand = service.generateMaybeMoveBashCommand(oldPath, newPath, null)
+        String bashCommand = service.generateMaybeMoveBashCommand(oldPath, newPath, dataSwapData)
 
         then:
         bashCommand == fileMoveCommand
@@ -831,7 +843,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
         rawSequenceFiles.each {
             final String bashMoveDirectFile = """\n
                                      |# ${it.seqTrack} ${rawSequenceFilePaths[it].newFileName}
-                                     |mkdir -p -m 2750 '${rawSequenceFilePaths[it].newPath.parent}';
+                                     |create_directories_with_group_and_permission '${rawSequenceFilePaths[it].newPath.parent}' '${it.project.unixGroup}' '${FileService.DEFAULT_DIRECTORY_PERMISSION_STRING}';
                                      |mv '${rawSequenceFilePaths[it].oldPath}' \\
                                      |   '${rawSequenceFilePaths[it].newPath}';
                                      |chgrp -h `stat -c '%G' ${rawSequenceFilePaths[it].newPath.parent}` ${rawSequenceFilePaths[it].newPath}
@@ -843,9 +855,10 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
 
             final String bashMoveVbpFile = """\
                                  |rm -f '${rawSequenceFilePaths[it].oldVbpPath}';
-                                 |mkdir -p -m 2750 '${rawSequenceFilePaths[it].newVbpPath.parent}';
+                                 |create_directories_with_group_and_permission '${rawSequenceFilePaths[it].newVbpPath.parent}' '${it.project.unixGroup}' '${FileService.DEFAULT_DIRECTORY_PERMISSION_STRING}';
                                  |ln -sr '${rawSequenceFilePaths[it].newPath}' \\
-                                 |      '${rawSequenceFilePaths[it].newVbpPath}'""".stripMargin()
+                                 |      '${rawSequenceFilePaths[it].newVbpPath}'
+                                 |chgrp -h '${it.project.unixGroup}' '${rawSequenceFilePaths[it].newVbpPath}'""".stripMargin()
 
             bashScriptToMoveFiles += "${bashMoveDirectFile}\n${bashMoveVbpFile}\n"
             bashScriptToMoveFiles += "\n\n"
@@ -971,9 +984,10 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
             final String bashMoveDirectFile = "rm -f '${rawSequenceFilePaths[it].oldPath}'"
             final String bashMoveVbpFile = """\
                                  |rm -f '${rawSequenceFilePaths[it].oldVbpPath}';
-                                 |mkdir -p -m 2750 '${rawSequenceFilePaths[it].newVbpPath.parent}';
+                                 |create_directories_with_group_and_permission '${rawSequenceFilePaths[it].newVbpPath.parent}' '${it.project.unixGroup}' '${FileService.DEFAULT_DIRECTORY_PERMISSION_STRING}';
                                  |ln -sr '${rawSequenceFilePaths[it].newPath}' \\
-                                 |      '${rawSequenceFilePaths[it].newVbpPath}'""".stripMargin()
+                                 |      '${rawSequenceFilePaths[it].newVbpPath}'
+                                 |chgrp -h '${it.project.unixGroup}' '${rawSequenceFilePaths[it].newVbpPath}'""".stripMargin()
 
             bashScriptToMoveFiles += "${bashMoveDirectFile}\n${bashMoveVbpFile}\n"
             bashScriptToMoveFiles += "\n\n"
@@ -1075,17 +1089,19 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
             final String bashMoveDirectFile = "rm -f '${rawSequenceFilePaths[it].oldPath}'"
             final String bashMoveVbpFile = """\
                                  |rm -f '${rawSequenceFilePaths[it].oldVbpPath}';
-                                 |mkdir -p -m 2750 '${rawSequenceFilePaths[it].newVbpPath.parent}';
+                                 |create_directories_with_group_and_permission '${rawSequenceFilePaths[it].newVbpPath.parent}' '${it.project.unixGroup}' '${FileService.DEFAULT_DIRECTORY_PERMISSION_STRING}';
                                  |ln -sr '${rawSequenceFilePaths[it].newPath}' \\
-                                 |      '${rawSequenceFilePaths[it].newVbpPath}'""".stripMargin()
+                                 |      '${rawSequenceFilePaths[it].newVbpPath}'
+                                 |chgrp -h '${it.project.unixGroup}' '${rawSequenceFilePaths[it].newVbpPath}'""".stripMargin()
 
             bashScriptToMoveFiles += "${bashMoveDirectFile}\n${bashMoveVbpFile}\n"
             bashScriptToMoveFiles += """
                                  |# Single Cell structure
                                  |## recreate link
                                  |rm -f '${rawSequenceFilePaths[it].oldWellFile}'
-                                 |mkdir -p -m 2750 '${rawSequenceFilePaths[it].newVbpPath.parent}'
+                                 |create_directories_with_group_and_permission '${rawSequenceFilePaths[it].newVbpPath.parent}' '${it.project.unixGroup}' '${FileService.DEFAULT_DIRECTORY_PERMISSION_STRING}'
                                  |ln -sr '${rawSequenceFilePaths[it].newPath}' \\\n      '${rawSequenceFilePaths[it].newVbpPath}'
+                                 |chgrp -h '${it.project.unixGroup}' '${rawSequenceFilePaths[it].newVbpPath}'
                                  |\n## remove entry from old mapping file
                                  |chmod 640 '${rawSequenceFilePaths[it].oldWellMappingFileEntryName}'
                                  |sed -i '\\#${rawSequenceFilePaths[it].oldWellMappingFileEntryName}#d' ${rawSequenceFilePaths[it].oldWellMappingFile}
