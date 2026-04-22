@@ -46,9 +46,9 @@ class CellRangerExecuteJobSpec extends Specification {
     static final String MODULE_LOADER = "source /etc/modules"
     static final String MODULE_ENABLE = "module load"
     static final String PROGRAM_VERSION = "10.0.0"
-    static final String LOCAL_CORES = "8"
+    static final String LOCAL_CORES = "16"
     static final String LOCAL_MEM = "64"
-    static final String COMBINED_CONFIG = '{"OTP_CLUSTER": {"CORES": "8", "MEMORY": "64"}}'
+    static final String COMBINED_CONFIG = '{"OTP_CLUSTER": {"CORES": "16", "MEMORY": "64", "WALLTIME": "PT100H"}}'
     static final String SAMPLE_NAME = "pid1_tumor"
     static final Path WORK_DIR = Paths.get("/work/dir")
     static final Path RESULT_DIR = Paths.get("/result/dir")

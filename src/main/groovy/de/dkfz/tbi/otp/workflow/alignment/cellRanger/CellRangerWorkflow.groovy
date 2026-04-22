@@ -49,6 +49,7 @@ class CellRangerWorkflow extends AlignmentWorkflow implements LinearWorkflow {
     List<Class<? extends Job>> getJobList() {
         return [
                 // AlignmentFragmentJob,
+                // CellRangerCheckFragmentKeysJob,
                 // CellRangerConditionalFailJob,
                 AttachUuidJob,
                 // CellRangerPrepareJob,
