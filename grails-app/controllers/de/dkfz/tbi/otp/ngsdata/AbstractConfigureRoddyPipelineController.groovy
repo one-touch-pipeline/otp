@@ -85,7 +85,7 @@ abstract class AbstractConfigureRoddyPipelineController extends AbstractConfigur
         configure(configuration)
 
         flash.message = new FlashMessage(flash.message = g.message(code: "configurePipeline.store.success") as String)
-        redirect(controller: "analysisConfigurationOverview")
+        redirect(controller: "workflowSelection")
     }
 
     protected abstract String getDefaultPluginName(String roddyName)

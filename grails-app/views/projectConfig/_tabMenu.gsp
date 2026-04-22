@@ -20,34 +20,10 @@
   - SOFTWARE.
   --}%
 
-%{-- g:if and this tab-menu can be removed as soon as the alignmentConfigurationOverview and analysisConfigurationOverview pages have been removed --}%
-<g:if test="${controllerName == "alignmentConfigurationOverview" || controllerName == "analysisConfigurationOverview"}">
-<div class="tab-menu">
-    <g:link controller="workflowSelection" action="index" class="${controllerName == "workflowSelection" ? 'active' : ''}"><g:message code="config.tabMenu.workflowSelection"/></g:link>
-    <g:link controller="alignmentConfigurationOverview" action="index" class="${controllerName == "alignmentConfigurationOverview" ? 'active' : ''}"><g:message code="config.tabMenu.alignment"/></g:link>
-    <g:link controller="analysisConfigurationOverview" action="index" class="${controllerName == "analysisConfigurationOverview" ? 'active' : ''}"><g:message code="config.tabMenu.analysis"/></g:link>
-    <g:link controller="sampleCategory" action="index" class="${controllerName == "sampleCategory" ? 'active' : ''}"><g:message code="config.tabMenu.sampleCategory"/></g:link>
-    <g:link controller="qcThreshold" action="projectConfiguration" class="${controllerName == "qcThreshold" ? 'active' : ''}"><g:message code="config.tabMenu.qcThresholds"/></g:link>
-    <g:link controller="cellRangerConfiguration" action="index" class="${controllerName == "cellRangerConfiguration" ? 'active' : ''}"><g:message code="config.tabMenu.cellRanger"/></g:link>
-</div>
-</g:if>
-
-
-<g:if test="${controllerName != "alignmentConfigurationOverview" && controllerName != "analysisConfigurationOverview"}">
 <ul class="nav nav-tabs tab-menu">
     <li class="nav-item">
         <g:link controller="workflowSelection" action="index" class="nav-link ${controllerName == "workflowSelection" ? 'active fw-bold' : 'text-black'}">
             <g:message code="config.tabMenu.workflowSelection"/>
-        </g:link>
-    </li>
-    <li class="nav-item">
-        <g:link controller="alignmentConfigurationOverview" action="index" class="nav-link ${controllerName == "alignmentConfigurationOverview" ? 'active fw-bold' : 'text-black'}">
-            <g:message code="config.tabMenu.alignment"/>
-        </g:link>
-    </li>
-    <li class="nav-item">
-        <g:link controller="analysisConfigurationOverview" action="index" class="nav-link ${controllerName == "analysisConfigurationOverview" ? 'active fw-bold' : 'text-black'}">
-            <g:message code="config.tabMenu.analysis"/>
         </g:link>
     </li>
     <li class="nav-item">
@@ -66,4 +42,3 @@
         </g:link>
     </li>
 </ul>
-</g:if>

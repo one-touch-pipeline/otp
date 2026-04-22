@@ -39,7 +39,7 @@
 
     <g:render template="/templates/bootstrap/noChange" model="[project: selectedProject]"/>
 
-    <g:form action="update" params='["seqType.id": seqType.id, overviewController: "analysisConfigurationOverview"]' method="POST">
+    <g:form action="update" params='["seqType.id": seqType.id, overviewController: "workflowSelection"]' method="POST">
         <table class="pipelineTable">
             <tr>
                 <th></th>
@@ -62,14 +62,14 @@
                 <td class="myKey"></td>
                 <td>
                     <g:submitButton class="${archived} ${deleted}" name="submit" value="Submit"/>
-                    <g:link controller="analysisConfigurationOverview" class="btn">${g.message(code: "default.button.cancel.label")}</g:link>
+                    <g:link controller="workflowSelection" class="btn">${g.message(code: "default.button.cancel.label")}</g:link>
                 </td>
             </tr>
         </table>
     </g:form>
     <g:if test="${currentVersion}">
         <g:form controller="configurePipeline" action="invalidateConfig" method="POST"
-                params='["seqType.id": seqType.id, "pipeline.id": pipeline.id, "originAction": actionName, overviewController: "analysisConfigurationOverview"]'>
+                params='["seqType.id": seqType.id, "pipeline.id": pipeline.id, "originAction": actionName, overviewController: "workflowSelection"]'>
             <g:submitButton class="${archived} ${deleted}" name="invalidateConfig" value="Invalidate Config"/>
         </g:form>
     </g:if>
