@@ -138,12 +138,12 @@ try {
                 assert false: "no mode selected"
         }
 
+        assert false: "DEBUG: transaction intentionally failed to rollback changes"
         println "Execute the following line:"
         println output.join("\n\n")
 
         outputFile.text = output.join('\n\n')
 
-        assert false: "DEBUG: transaction intentionally failed to rollback changes"
     }
 } catch (Throwable t) {
     output << 'Execution failed'
