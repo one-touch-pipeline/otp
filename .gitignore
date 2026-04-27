@@ -95,3 +95,9 @@ node_modules/
 /cypress/downloads/*
 cypress.env.json
 cypressReport.txt
+
+### AI tools ###
+.claude
+.claude-code.yml
+CLAUDE.md
+.github
