@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflow.bamImport
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.dataprocessing.BamImportInstance
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.jobs.AbstractLinkJob
@@ -38,12 +39,18 @@ class BamImportLinkJob extends AbstractLinkJob implements BamImportShared {
     @Override
     protected List<LinkEntry> getLinkMap(WorkflowStep workflowStep) {
         ExternallyProcessedBamFile bamFile = getBamFile(workflowStep)
+        BamImportInstance importInstance = getImportInstance(bamFile)
 
         List<String> fileNames = [
                 bamFile.fileName,
                 bamFile.baiFileName,
         ]
         fileNames.addAll(bamFile.furtherFiles)
+
+        if (!importInstance.linkOperation.linkSource || bamFile.md5sum) {
+            fileNames.add("${bamFile.fileName}.md5sum" as String)
+            fileNames.add("${bamFile.baiFileName}.md5sum" as String)
+        }
 
         Path linkDir = externalAlignmentLinkFileService.getDirectoryPath(bamFile)
         Path workDir = externalAlignmentWorkFileService.getDirectoryPath(bamFile)

@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflow.bamImport
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.dataprocessing.BamImportInstance
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.workflow.jobs.AbstractOtpClusterValidationJob
 import de.dkfz.tbi.otp.workflow.shared.ValidationJobFailedException
@@ -39,17 +40,30 @@ class BamImportValidationJob extends AbstractOtpClusterValidationJob implements 
     @Override
     protected List<Path> getExpectedFiles(WorkflowStep workflowStep) {
         ExternallyProcessedBamFile bamFile = getBamFile(workflowStep)
+        BamImportInstance importInstance = getImportInstance(bamFile)
         Path sourceBaseDir = externalAlignmentSourceFileService.getDirectoryPath(bamFile)
         Path targetBaseDir = externalAlignmentWorkFileService.getDirectoryPath(bamFile)
-        return [
-                externalAlignmentWorkFileService.getBamFile(bamFile),
-                externalAlignmentWorkFileService.getBaiFile(bamFile),
+        Path targetBam = externalAlignmentWorkFileService.getBamFile(bamFile)
 
-        ] + bamFile.furtherFiles.findAll {
+        List<Path> expectedFiles = [
+                targetBam,
+                externalAlignmentWorkFileService.getBaiFile(bamFile),
+        ]
+
+        if (!importInstance.linkOperation.linkSource || bamFile.md5sum)  {
+            [
+                "${bamFile.fileName}.md5sum",
+                "${bamFile.baiFileName}.md5sum",
+            ].each { expectedFiles.add(targetBaseDir.resolve(it)) }
+        }
+
+        expectedFiles.addAll(bamFile.furtherFiles.findAll {
             Files.isRegularFile(sourceBaseDir.resolve(it))
         }.collect {
             targetBaseDir.resolve(it)
-        }
+        })
+
+        return expectedFiles
     }
 
     @Override

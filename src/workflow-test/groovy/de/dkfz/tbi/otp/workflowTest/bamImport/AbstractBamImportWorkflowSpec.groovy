@@ -325,6 +325,16 @@ abstract class AbstractBamImportWorkflowSpec extends AbstractWorkflowSpec implem
                 assert !Files.isSymbolicLink(path)
             }
         }
+
+        if (bamImportInstance.linkOperation != BamImportInstance.LinkOperation.LINK_SOURCE) {
+            Path md5sumPath = uuidDir.resolve("${bamFile.bamFileName}.md5sum")
+            fileService.ensureFileIsReadableAndNotEmpty(md5sumPath)
+            assert !Files.isSymbolicLink(md5sumPath)
+
+            Path md5sumBaiPath = uuidDir.resolve("${bamFile.baiFileName}.md5sum")
+            fileService.ensureFileIsReadableAndNotEmpty(md5sumBaiPath)
+            assert !Files.isSymbolicLink(md5sumBaiPath)
+        }
     }
 
     /**
@@ -356,6 +366,20 @@ abstract class AbstractBamImportWorkflowSpec extends AbstractWorkflowSpec implem
             }
             assert Files.isSymbolicLink(path)
             assert uuidDir.resolve(it).toRealPath() == path.toRealPath()
+        }
+
+        if (bamImportInstance.linkOperation != BamImportInstance.LinkOperation.LINK_SOURCE) {
+            String md5sumFileName = "${bamFile.bamFileName}.md5sum"
+            Path md5sumPath = viewByPidDir.resolve(md5sumFileName)
+            fileService.ensureFileIsReadableAndNotEmpty(md5sumPath)
+            assert Files.isSymbolicLink(md5sumPath)
+            assert uuidDir.resolve(md5sumFileName).toRealPath() == md5sumPath.toRealPath()
+
+            String md5sumBaiFileName = "${bamFile.baiFileName}.md5sum"
+            Path md5sumBaiPath = viewByPidDir.resolve(md5sumBaiFileName)
+            fileService.ensureFileIsReadableAndNotEmpty(md5sumBaiPath)
+            assert Files.isSymbolicLink(md5sumBaiPath)
+            assert uuidDir.resolve(md5sumBaiFileName).toRealPath() == md5sumBaiPath.toRealPath()
         }
     }
 

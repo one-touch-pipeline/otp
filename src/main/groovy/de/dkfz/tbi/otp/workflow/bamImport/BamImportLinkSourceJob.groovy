@@ -22,19 +22,25 @@
 package de.dkfz.tbi.otp.workflow.bamImport
 
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.BamImportInstance
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.utils.LinkEntry
 import de.dkfz.tbi.otp.workflow.jobs.AbstractLinkJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
+import java.nio.file.Files
 import java.nio.file.Path
 
 @Component
 @Slf4j
 class BamImportLinkSourceJob extends AbstractLinkJob implements BamImportShared {
+
+    @Autowired
+    RemoteShellHelper remoteShellHelper
 
     @Override
     protected List<LinkEntry> getLinkMap(WorkflowStep workflowStep) {
@@ -50,6 +56,16 @@ class BamImportLinkSourceJob extends AbstractLinkJob implements BamImportShared 
                 bamFile.baiFileName,
         ]
         fileNames.addAll(bamFile.furtherFiles)
+        if (bamFile.md5sum) {
+            Path md5sumPath = externalAlignmentWorkFileService.getMd5SumPath(bamFile)
+            Files.writeString(md5sumPath, bamFile.md5sum)
+
+            remoteShellHelper.executeCommandReturnProcessOutput(
+                    "cd ${shellQuote(externalAlignmentWorkFileService.getDirectoryPath(bamFile))} && " +
+                            "md5sum -- ${shellQuote(bamFile.baiFileName)} " +
+                            "> ${shellQuote(externalAlignmentWorkFileService.getMd5SumPathBai(bamFile))}"
+            ).assertExitCodeZero()
+        }
 
         Path importFolder = externalAlignmentWorkFileService.getDirectoryPath(bamFile)
         Path sourceFolder = externalAlignmentSourceFileService.getDirectoryPath(bamFile)
@@ -67,4 +83,8 @@ class BamImportLinkSourceJob extends AbstractLinkJob implements BamImportShared 
 
     @Override
     protected void saveResult(WorkflowStep workflowStep) { }
+
+    private static String shellQuote(Object value) {
+        return "'${value.toString().replace("'", "'\\''")}'"
+    }
 }

@@ -26,6 +26,7 @@ import spock.lang.Specification
 import spock.lang.TempDir
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.BamImportInstance
 import de.dkfz.tbi.otp.dataprocessing.ExternalMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.BamImportWorkflowDomainFactory
@@ -43,6 +44,7 @@ class BamImportValidationJobSpec extends Specification implements DataTest, BamI
     Class[] getDomainClassesToMock() {
         return [
                 ExternalMergingWorkPackage,
+                BamImportInstance,
                 ExternallyProcessedBamFile,
                 WorkflowStep,
         ]
@@ -68,27 +70,31 @@ class BamImportValidationJobSpec extends Specification implements DataTest, BamI
             'directory/directory2/test2.txt',
     ]
 
-    void setup() {
-        workflowStep = createWorkflowStep([
+    private Map createJobForOperation(BamImportInstance.LinkOperation linkOperation, String dirSuffix, String md5sum = null) {
+        WorkflowStep ws = createWorkflowStep([
                 workflowRun: createWorkflowRun([
                         workflowVersion: null,
                         workflow       : findOrCreateBamImportWorkflowWorkflow(),
                 ]),
         ])
 
-        ExternallyProcessedBamFile bamFile = createBamFile(furtherFiles: FURTHER_FILE_NAMES)
+        ExternallyProcessedBamFile bamFile = createBamFile(furtherFiles: FURTHER_FILE_NAMES, md5sum: md5sum)
+        createBamImportInstance(
+                externallyProcessedBamFiles: [bamFile],
+                linkOperation: linkOperation,
+        )
 
-        targetDir = tempDir.resolve("target")
-        Files.createDirectories(targetDir)
+        Path target = tempDir.resolve("target-${dirSuffix}")
+        Files.createDirectories(target)
 
-        bamFilePath = targetDir.resolve(bamFile.fileName)
-        baiFilePath = targetDir.resolve("${bamFile.fileName}.bai")
+        Path bamPath = target.resolve(bamFile.fileName)
+        Path baiPath = target.resolve("${bamFile.fileName}.bai")
 
-        Path sourceDir = tempDir.resolve("source")
-        Files.createDirectories(sourceDir)
+        Path source = tempDir.resolve("source-${dirSuffix}")
+        Files.createDirectories(source)
 
         bamFile.furtherFiles.each {
-            Path furtherFilesPath = sourceDir.resolve(it)
+            Path furtherFilesPath = source.resolve(it)
             if (it.endsWith("directory") || it.endsWith("directory2")) {
                 Files.createDirectories(furtherFilesPath)
             } else {
@@ -96,19 +102,30 @@ class BamImportValidationJobSpec extends Specification implements DataTest, BamI
             }
         }
 
-        job = new BamImportValidationJob()
-        job.concreteArtefactService = Mock(ConcreteArtefactService) {
-            _ * getOutputArtefact(workflowStep, BamImportValidationJob.de_dkfz_tbi_otp_workflow_bamImport_BamImportShared__OUTPUT_ROLE) >> bamFile
+        BamImportValidationJob validationJob = new BamImportValidationJob()
+        validationJob.concreteArtefactService = Mock(ConcreteArtefactService) {
+            _ * getOutputArtefact(ws, BamImportValidationJob.de_dkfz_tbi_otp_workflow_bamImport_BamImportShared__OUTPUT_ROLE) >> bamFile
             0 * _
         }
-        job.externalAlignmentWorkFileService = Mock(ExternalAlignmentWorkFileService) {
-            getDirectoryPath(bamFile) >> targetDir
-            getBamFile(bamFile) >> bamFilePath
-            getBaiFile(bamFile) >> baiFilePath
+        validationJob.externalAlignmentWorkFileService = Mock(ExternalAlignmentWorkFileService) {
+            getDirectoryPath(bamFile) >> target
+            getBamFile(bamFile) >> bamPath
+            getBaiFile(bamFile) >> baiPath
         }
-        job.externalAlignmentSourceFileService = Mock(ExternalAlignmentSourceFileService) {
-            getDirectoryPath(bamFile) >> sourceDir
+        validationJob.externalAlignmentSourceFileService = Mock(ExternalAlignmentSourceFileService) {
+            getDirectoryPath(bamFile) >> source
         }
+
+        return [workflowStep: ws, job: validationJob, targetDir: target, bamFilePath: bamPath, baiFilePath: baiPath]
+    }
+
+    void setup() {
+        Map fixture = createJobForOperation(BamImportInstance.LinkOperation.COPY_AND_KEEP, "copy", "d41d8cd98f00b204e9800998ecf8427e")
+        workflowStep = fixture.workflowStep
+        job = fixture.job
+        targetDir = fixture.targetDir
+        bamFilePath = fixture.bamFilePath
+        baiFilePath = fixture.baiFilePath
     }
 
     void "test getExpectedFiles"() {
@@ -119,9 +136,47 @@ class BamImportValidationJobSpec extends Specification implements DataTest, BamI
         TestCase.assertContainSame(result, [
                 bamFilePath,
                 baiFilePath,
+                targetDir.resolve("${bamFilePath.fileName}.md5sum"),
+                targetDir.resolve("${baiFilePath.fileName}.md5sum"),
                 targetDir.resolve('test.txt'),
                 targetDir.resolve('directory/test1.txt'),
                 targetDir.resolve('directory/directory2/test2.txt'),
+        ])
+    }
+
+    void "test getExpectedFiles, when no md5sum provided, should not include md5sum files"() {
+        given:
+        Map fixture = createJobForOperation(BamImportInstance.LinkOperation.LINK_SOURCE, "linksource")
+
+        when:
+        List<Path> result = fixture.job.getExpectedFiles(fixture.workflowStep)
+
+        then:
+        TestCase.assertContainSame(result, [
+                fixture.bamFilePath,
+                fixture.baiFilePath,
+                fixture.targetDir.resolve('test.txt'),
+                fixture.targetDir.resolve('directory/test1.txt'),
+                fixture.targetDir.resolve('directory/directory2/test2.txt'),
+        ])
+    }
+
+    void "test getExpectedFiles, when link source operation with md5sum, should include md5sum files"() {
+        given:
+        Map fixture = createJobForOperation(BamImportInstance.LinkOperation.LINK_SOURCE, "linksource-md5", "d41d8cd98f00b204e9800998ecf8427e")
+
+        when:
+        List<Path> result = fixture.job.getExpectedFiles(fixture.workflowStep)
+
+        then:
+        TestCase.assertContainSame(result, [
+                fixture.bamFilePath,
+                fixture.baiFilePath,
+                fixture.targetDir.resolve("${fixture.bamFilePath.fileName}.md5sum"),
+                fixture.targetDir.resolve("${fixture.baiFilePath.fileName}.md5sum"),
+                fixture.targetDir.resolve('test.txt'),
+                fixture.targetDir.resolve('directory/test1.txt'),
+                fixture.targetDir.resolve('directory/directory2/test2.txt'),
         ])
     }
 

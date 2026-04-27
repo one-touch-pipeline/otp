@@ -39,4 +39,12 @@ trait AbstractExternalAlignmentFileService
     Path getBamMaxReadLengthFile(ExternallyProcessedBamFile bamFile) {
         return getDirectoryPath(bamFile).resolve("${bamFile.bamFileName}.maxReadLength")
     }
+
+    Path getMd5SumPath(ExternallyProcessedBamFile bamFile) {
+        return getDirectoryPath(bamFile).resolve("${bamFile.bamFileName}.md5sum")
+    }
+
+    Path getMd5SumPathBai(ExternallyProcessedBamFile bamFile) {
+        return getDirectoryPath(bamFile).resolve("${bamFile.baiFileName}.md5sum")
+    }
 }

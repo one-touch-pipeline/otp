@@ -25,6 +25,7 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.BamImportInstance
 import de.dkfz.tbi.otp.dataprocessing.ExternalMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.BamImportWorkflowDomainFactory
@@ -43,12 +44,13 @@ class BamImportLinkJobSpec extends Specification implements DataTest, BamImportW
     Class[] getDomainClassesToMock() {
         return [
                 ExternalMergingWorkPackage,
+                BamImportInstance,
                 ExternallyProcessedBamFile,
                 WorkflowStep,
         ]
     }
 
-    void "test getLinkMap"() {
+    void "test getLinkMap, #testCase"() {
         given:
         WorkflowStep workflowStep = createWorkflowStep([
                 workflowRun: createWorkflowRun([
@@ -56,7 +58,14 @@ class BamImportLinkJobSpec extends Specification implements DataTest, BamImportW
                         workflow       : findOrCreateBamImportWorkflowWorkflow(),
                 ]),
         ])
-        ExternallyProcessedBamFile bamFile = createBamFile(furtherFiles: ['test.txt', 'asdf.genes'])
+        ExternallyProcessedBamFile bamFile = createBamFile(
+                furtherFiles: ['test.txt', 'asdf.genes'],
+                md5sum: md5sum,
+        )
+        createBamImportInstance(
+                externallyProcessedBamFiles: [bamFile],
+                linkOperation: linkOperation,
+        )
 
         Path importFolder = Paths.get("/import")
         Path workFolder = Paths.get("/work")
@@ -77,11 +86,22 @@ class BamImportLinkJobSpec extends Specification implements DataTest, BamImportW
         List<LinkEntry> result = job.getLinkMap(workflowStep)
 
         then:
-        TestCase.assertContainSame(result, [
+        List<LinkEntry> expected = [
                 new LinkEntry(link: importFolder.resolve(bamFile.fileName), target: workFolder.resolve(bamFile.fileName)),
                 new LinkEntry(link: importFolder.resolve(bamFile.baiFileName), target: workFolder.resolve(bamFile.baiFileName)),
                 new LinkEntry(link: importFolder.resolve('test.txt'), target: workFolder.resolve('test.txt')),
                 new LinkEntry(link: importFolder.resolve('asdf.genes'), target: workFolder.resolve('asdf.genes')),
-        ])
+        ]
+        if (expectMd5sum) {
+            expected.add(new LinkEntry(link: importFolder.resolve("${bamFile.fileName}.md5sum"), target: workFolder.resolve("${bamFile.fileName}.md5sum")))
+            expected.add(new LinkEntry(link: importFolder.resolve("${bamFile.baiFileName}.md5sum"), target: workFolder.resolve("${bamFile.baiFileName}.md5sum")))
+        }
+        TestCase.assertContainSame(result, expected)
+
+        where:
+        testCase                                     | linkOperation                                 | md5sum                             || expectMd5sum
+        "copy operation includes md5sum links"       | BamImportInstance.LinkOperation.COPY_AND_KEEP | null                               || true
+        "link source without md5sum excludes md5sum" | BamImportInstance.LinkOperation.LINK_SOURCE   | null                               || false
+        "link source with md5sum includes md5sum"    | BamImportInstance.LinkOperation.LINK_SOURCE   | 'd41d8cd98f00b204e9800998ecf8427e' || true
     }
 }

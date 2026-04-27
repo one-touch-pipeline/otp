@@ -23,15 +23,19 @@ package de.dkfz.tbi.otp.workflow.bamImport
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.BamImportWorkflowDomainFactory
 import de.dkfz.tbi.otp.infrastructure.alignment.ExternalAlignmentSourceFileService
 import de.dkfz.tbi.otp.infrastructure.alignment.ExternalAlignmentWorkFileService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.utils.LinkEntry
+import de.dkfz.tbi.otp.utils.ProcessOutput
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
+import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -45,6 +49,9 @@ class BamImportLinkSourceJobSpec extends Specification implements DataTest, BamI
                 WorkflowStep,
         ]
     }
+
+    @TempDir
+    Path tempDir
 
     WorkflowStep workflowStep
     ExternallyProcessedBamFile bamFile
@@ -64,28 +71,68 @@ class BamImportLinkSourceJobSpec extends Specification implements DataTest, BamI
             0 * _
         }
     }
-    void "test getLinkMap should return list with entries when link source is true"() {
-        given:
-        createBamImportInstance(externallyProcessedBamFiles: [bamFile], linkOperation: BamImportInstance.LinkOperation.LINK_SOURCE)
-        Path targetBaseDirFilePath = Paths.get("/source")
-        Path sourceBamFilePath = targetBaseDirFilePath.resolve(Paths.get(bamFile.bamFileName))
-        Path sourceBaiFilePath = targetBaseDirFilePath.resolve(Paths.get(bamFile.baiFileName))
-        Path realTargetBamImportFolder = Paths.get("/target")
-        Path targetBamFilePath = realTargetBamImportFolder.resolve(Paths.get(bamFile.bamFileName))
-        Path targetBaiFilePath = realTargetBamImportFolder.resolve(Paths.get(bamFile.baiFileName))
+
+    private Map setupLinkSourceMocks(String workDirName) {
+        Path workDir = tempDir.resolve(workDirName)
+        Files.createDirectories(workDir)
+        Path sourceDir = Paths.get("/source")
+        Path md5sumPath = workDir.resolve("${bamFile.bamFileName}.md5sum")
+
         job.externalAlignmentWorkFileService = Mock(ExternalAlignmentWorkFileService) {
-            1 * getDirectoryPath(bamFile) >> targetBaseDirFilePath
+            _ * getDirectoryPath(bamFile) >> workDir
+            _ * getMd5SumPath(bamFile) >> md5sumPath
+            _ * getMd5SumPathBai(bamFile) >> workDir.resolve("${bamFile.baiFileName}.md5sum")
         }
         job.externalAlignmentSourceFileService = Mock(ExternalAlignmentSourceFileService) {
-            1 * getDirectoryPath(bamFile) >> realTargetBamImportFolder
+            1 * getDirectoryPath(bamFile) >> sourceDir
         }
-        expect:
-        job.getLinkMap(workflowStep) == [
-                new LinkEntry(link: sourceBamFilePath, target: targetBamFilePath),
-                new LinkEntry(link: sourceBaiFilePath, target: targetBaiFilePath),
-                new LinkEntry(link: targetBaseDirFilePath.resolve("file1"), target: realTargetBamImportFolder.resolve("file1")),
-                new LinkEntry(link: targetBaseDirFilePath.resolve("file2"), target: realTargetBamImportFolder.resolve("file2")),
+        return [workDir: workDir, sourceDir: sourceDir, md5sumPath: md5sumPath]
+    }
+
+    void "test getLinkMap, when link source without md5sum, should return links and neither write BAM md5sum nor compute BAI md5sum"() {
+        given:
+        createBamImportInstance(externallyProcessedBamFiles: [bamFile], linkOperation: BamImportInstance.LinkOperation.LINK_SOURCE)
+        Map dirs = setupLinkSourceMocks("work")
+        job.remoteShellHelper = Mock(RemoteShellHelper) {
+            0 * executeCommandReturnProcessOutput(_)
+        }
+
+        when:
+        List<LinkEntry> result = job.getLinkMap(workflowStep)
+
+        then:
+        result == [
+                new LinkEntry(link: dirs.workDir.resolve(bamFile.bamFileName), target: dirs.sourceDir.resolve(bamFile.bamFileName)),
+                new LinkEntry(link: dirs.workDir.resolve(bamFile.baiFileName), target: dirs.sourceDir.resolve(bamFile.baiFileName)),
+                new LinkEntry(link: dirs.workDir.resolve("file1"), target: dirs.sourceDir.resolve("file1")),
+                new LinkEntry(link: dirs.workDir.resolve("file2"), target: dirs.sourceDir.resolve("file2")),
         ]
+        !Files.exists(dirs.md5sumPath)
+    }
+
+    void "test getLinkMap, when link source with md5sum, should write md5sum file and compute BAI md5sum"() {
+        given:
+        String md5sumValue = "d41d8cd98f00b204e9800998ecf8427e"
+        bamFile.md5sum = md5sumValue
+        bamFile.save(flush: true)
+        createBamImportInstance(externallyProcessedBamFiles: [bamFile], linkOperation: BamImportInstance.LinkOperation.LINK_SOURCE)
+        Map dirs = setupLinkSourceMocks("work-md5")
+        job.remoteShellHelper = Mock(RemoteShellHelper) {
+            1 * executeCommandReturnProcessOutput(_) >> new ProcessOutput(stdout: "", stderr: "", exitCode: 0)
+        }
+
+        when:
+        List<LinkEntry> result = job.getLinkMap(workflowStep)
+
+        then:
+        result == [
+                new LinkEntry(link: dirs.workDir.resolve(bamFile.bamFileName), target: dirs.sourceDir.resolve(bamFile.bamFileName)),
+                new LinkEntry(link: dirs.workDir.resolve(bamFile.baiFileName), target: dirs.sourceDir.resolve(bamFile.baiFileName)),
+                new LinkEntry(link: dirs.workDir.resolve("file1"), target: dirs.sourceDir.resolve("file1")),
+                new LinkEntry(link: dirs.workDir.resolve("file2"), target: dirs.sourceDir.resolve("file2")),
+        ]
+        Files.exists(dirs.md5sumPath)
+        Files.readString(dirs.md5sumPath) == md5sumValue
     }
 
     void "test getLinkMap should return empty list when link source is false"() {
