@@ -341,7 +341,7 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         0 * _
     }
 
-    void "sendDeleteEmail"() {
+    void "sendDeleteEmail when deleting user is operator (DM) - should not show who deleted"() {
         given:
         final User requester = createUser()
         final User pi1 = createUser()
@@ -357,7 +357,35 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         then:
         1 * projectRequestService.messageSourceService.createMessage(_, _) >> subject
         1 * projectRequestService.securityService.currentUser >> pi1
-        1 * projectRequestService.messageSourceService.createMessage(_, [
+        1 * projectRequestService.securityService.ifAllGranted(Role.ROLE_OPERATOR) >> true  // User is DM
+        1 * projectRequestService.messageSourceService.createMessage("notification.projectRequest.deleted.body.dm", [
+                recipients        : "$expectedAuthorityUsernames, ${requester.realName} (${requester.username})",
+                projectRequestName: request.name,
+                teamSignature     : emailSenderSalutation,
+        ]) >> body
+        1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
+        1 * projectRequestService.mailHelperService.saveMail(subject, body, expectedRecipients*.email)
+        0 * _
+    }
+
+    void "sendDeleteEmail when deleting user is not operator - should show who deleted"() {
+        given:
+        final User requester = createUser()
+        final User pi1 = createUser()
+        final User pi2 = createUser()
+        final List<User> users = [pi1, pi2, requester]
+        final ProjectRequest request = createProjectRequest([requester: requester], [usersThatNeedToApprove: users])
+        final List<User> expectedRecipients = users
+        final String expectedAuthorityUsernames = users.collect { "${it.realName} (${it.username})" }.join(", ")
+
+        when:
+        projectRequestService.sendDeleteEmail(request)
+
+        then:
+        1 * projectRequestService.messageSourceService.createMessage(_, _) >> subject
+        1 * projectRequestService.securityService.currentUser >> pi1
+        1 * projectRequestService.securityService.ifAllGranted(Role.ROLE_OPERATOR) >> false
+        1 * projectRequestService.messageSourceService.createMessage("notification.projectRequest.deleted.body.other", [
                 recipients        : "$expectedAuthorityUsernames, ${requester.realName} (${requester.username})",
                 projectRequestName: request.name,
                 deletingUser      : pi1,

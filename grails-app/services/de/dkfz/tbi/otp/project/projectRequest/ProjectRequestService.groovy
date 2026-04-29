@@ -409,16 +409,27 @@ class ProjectRequestService {
         recipients?.add(requester.email)
         recipients.unique()
         String projectAuthoritiesUsernames = allProjectAuthorities.collect { "${it.realName} (${it.username})" }.join(", ")
+
+        User deletingUser = securityService.currentUser
+        boolean isDeletingUserOperator = securityService.ifAllGranted(Role.ROLE_OPERATOR)
+
         String subject = messageSourceService.createMessage("notification.projectRequest.deleted.subject", [
                 projectRequestName: projectRequest.name,
                 projectRequestId  : projectRequest.id,
         ])
-        String body = messageSourceService.createMessage("notification.projectRequest.deleted.body", [
+
+        String templateKey = isDeletingUserOperator ? "notification.projectRequest.deleted.body.dm" : "notification.projectRequest.deleted.body.other"
+        Map<String, Object> templateParams = [
                 recipients        : "$projectAuthoritiesUsernames, ${requester.realName} (${requester.username})",
                 projectRequestName: projectRequest.name,
-                deletingUser      : securityService.currentUser,
                 teamSignature     : processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME),
-        ])
+        ]
+
+        if (!isDeletingUserOperator) {
+            templateParams.deletingUser = deletingUser
+        }
+
+        String body = messageSourceService.createMessage(templateKey, templateParams)
         mailHelperService.saveMail(subject, body, recipients)
     }
 
