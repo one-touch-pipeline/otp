@@ -64,7 +64,7 @@ StringBuilder log = new StringBuilder()
 
 final Path scriptOutputDirectory = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve('sample_swap')
 String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
-fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(scriptOutputDirectory, unixGroup)
+fileService.createDirectoryRecursivelyAndSetPermissions(scriptOutputDirectory, unixGroup)
 fileService.setPermission(scriptOutputDirectory, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
 
 /** have we manually checked yet if all (potentially symlinked) fastq datafiles still exist on the filesystem? */

@@ -375,13 +375,13 @@ class ProjectService {
         if (Files.exists(projectDirectory)) {
             // ensure correct permission and group
             fileService.setGroupViaBash(projectDirectory, unixGroup)
-            fileService.setPermissionViaBash(projectDirectory, FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
+            fileService.setPermission(projectDirectory, FileService.DEFAULT_DIRECTORY_PERMISSION)
             return
         }
 
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectDirectory.parent,
-                unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectDirectory, unixGroup)
+        fileService.createDirectoryRecursivelyAndSetPermissions(projectDirectory.parent,
+                unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION)
+        fileService.createDirectoryRecursivelyAndSetPermissions(projectDirectory, unixGroup)
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -394,15 +394,15 @@ class ProjectService {
         if (Files.exists(analysisDirectory)) {
             // ensure correct permission and group
             fileService.setGroupViaBash(analysisDirectory, unixGroup)
-            fileService.setPermissionViaBash(analysisDirectory, FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
+            fileService.setPermission(analysisDirectory, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
             return
         }
 
         try {
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisDirectory.parent,
-                    unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisDirectory, unixGroup,
-                    FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
+            fileService.createDirectoryRecursivelyAndSetPermissions(analysisDirectory.parent,
+                    unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION)
+            fileService.createDirectoryRecursivelyAndSetPermissions(analysisDirectory, unixGroup,
+                    FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
         } catch (FileSystemException | OtpFileSystemException e) {
             if (sendMailInErrorCase) {
                 String header = "Could not automatically create analysisDir '${project.dirAnalysis}' for Project '${project.name}'."
@@ -613,7 +613,7 @@ class ProjectService {
         )
         File configDirectory = configFilePath.parentFile
 
-        executeScript(getScriptBash(configDirectory, xmlConfig, configFilePath))
+        executeScript(getScriptBash(configDirectory, xmlConfig, configFilePath, configuration.project.unixGroup))
 
         return roddyWorkflowConfigService.importProjectConfigFile(
                 configuration.project,
@@ -667,13 +667,13 @@ class ProjectService {
                 }, "No reference genome is compatible with SOPHIA.")
     }
 
-    private String getScriptBash(File configDirectory, String xmlConfig, File configFilePath) {
+    private String getScriptBash(File configDirectory, String xmlConfig, File configFilePath, String unixGroup) {
         String md5 = HelperUtils.randomMd5sum
         String createConfigDirectory = ''
 
         if (!configDirectory.exists()) {
             createConfigDirectory = """\
-mkdir -p -m 2750 ${configDirectory}
+mkdir -p -m 750 ${configDirectory}
 """
         }
 
@@ -681,9 +681,12 @@ mkdir -p -m 2750 ${configDirectory}
 
 ${createConfigDirectory}
 
+chgrp ${unixGroup} ${configDirectory}
+
 cat <<${md5} > ${configFilePath}
 ${xmlConfig.replaceAll(/\$/, /\\\$/)}${md5}
 
+chgrp ${unixGroup} ${configFilePath}
 chmod 0440 ${configFilePath}
 
 """

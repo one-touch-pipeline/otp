@@ -277,9 +277,9 @@ class EgaSubmissionFileService {
         filesToCreate.each {
             Path path = basePath.resolve(it.key)
             Files.deleteIfExists(path)
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path.parent,
+            fileService.createDirectoryRecursivelyAndSetPermissions(path.parent,
                     unixGroup,
-                    FileService.OWNER_DIRECTORY_PERMISSION_STRING)
+                    FileService.OWNER_DIRECTORY_PERMISSION)
             fileService.createFileWithContent(path,
                     it.value,
                     unixGroup,

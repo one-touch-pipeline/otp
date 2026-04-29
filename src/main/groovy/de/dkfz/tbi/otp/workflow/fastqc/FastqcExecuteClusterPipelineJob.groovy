@@ -61,7 +61,7 @@ class FastqcExecuteClusterPipelineJob extends AbstractExecuteClusterPipelineJob 
         if (Files.exists(outputDir)) {
             logService.addSimpleLogEntry(workflowStep, "Deleting output directory ${outputDir}")
             fileService.deleteDirectoryRecursively(outputDir)
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDir, workflowStep.workflowRun.project.unixGroup,)
+            fileService.createDirectoryRecursivelyAndSetPermissions(outputDir, workflowStep.workflowRun.project.unixGroup,)
         }
 
         // check if fastqc reports are provided and can be copied

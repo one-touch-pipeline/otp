@@ -64,7 +64,7 @@ abstract class AbstractLogDirectoryServiceSpec extends Specification implements 
             0 * _
         }
         service.fileService = Mock(FileService) {
-            1 * createDirectoryRecursivelyAndSetPermissionsViaBash(expected, unixGroup)
+            1 * createDirectoryRecursivelyAndSetPermissions(expected, unixGroup)
             1 * changeFileSystem(expected, FileSystems.default) >> expected
             0 * _
         }

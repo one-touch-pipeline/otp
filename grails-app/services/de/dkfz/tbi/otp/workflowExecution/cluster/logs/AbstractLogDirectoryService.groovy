@@ -54,7 +54,7 @@ abstract class AbstractLogDirectoryService {
             FileSystem fileSystem = fileSystemService.remoteFileSystem
             Path remoteLogPath = fileService.changeFileSystem(logPath, fileSystem)
             String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(remoteLogPath, unixGroup)
+            fileService.createDirectoryRecursivelyAndSetPermissions(remoteLogPath, unixGroup)
         }
         return logPath
     }

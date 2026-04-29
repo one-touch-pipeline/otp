@@ -89,7 +89,7 @@ FileSystem fileSystem = fileSystemService.remoteFileSystem
 // where to put output
 Path output_dir = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve("export")
 String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
-fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(output_dir, unixGroup)
+fileService.createDirectoryRecursivelyAndSetPermissions(output_dir, unixGroup)
 Path output =    output_dir.resolve("${output_name}.csv")
 Path done_flag = output_dir.resolve("${output_name}.done")
 

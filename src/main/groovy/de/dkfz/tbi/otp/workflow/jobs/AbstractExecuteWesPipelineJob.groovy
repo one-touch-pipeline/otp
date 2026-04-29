@@ -125,7 +125,7 @@ abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob 
             String unixGroup = workflowStep.workflowRun.project.unixGroup
             parameters.each { Path path, Map<String, String> parameter ->
                 // define directory to store its output
-                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path, unixGroup)
+                fileService.createDirectoryRecursivelyAndSetPermissions(path, unixGroup)
 
                 // config should be created each time since it is modified with mergeSortedMaps method
                 Map<String, String> config = mapper.readValue(workflowStep.workflowRun.combinedConfig, HashMap)

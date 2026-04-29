@@ -546,11 +546,11 @@ class ExampleData {
 
             String unixGroup = project.unixGroup
             dirs.each {
-                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(it, unixGroup)
+                fileService.createDirectoryRecursivelyAndSetPermissions(it, unixGroup)
             }
 
             dirsMap.each { Path pathFinal, Path pathWork ->
-                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(pathWork, unixGroup)
+                fileService.createDirectoryRecursivelyAndSetPermissions(pathWork, unixGroup)
                 fileService.createLink(pathFinal, pathWork, unixGroup, CreateLinkOption.DELETE_EXISTING_FILE)
             }
 
@@ -604,12 +604,12 @@ class ExampleData {
                 dirsMap[baseDir.resolve(it)] = workDir.resolve(it)
             }
 
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workDir, project.unixGroup)
+            fileService.createDirectoryRecursivelyAndSetPermissions(workDir, project.unixGroup)
 
             dirsMap.each {
                 Path pathFinal = fileSystem.getPath(it.key.toString())
                 Path pathWork = fileSystem.getPath(it.value.toString())
-                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(pathWork, project.unixGroup)
+                fileService.createDirectoryRecursivelyAndSetPermissions(pathWork, project.unixGroup)
                 fileService.createLink(pathFinal, pathWork, project.unixGroup, CreateLinkOption.DELETE_EXISTING_FILE)
             }
 
@@ -718,7 +718,7 @@ class ExampleData {
         println "creating dummy cell ranger files on file system"
         singleCellBamFiles.each { SingleCellBamFile bam ->
             Path workdir = cellRangerWorkFileService.getDirectoryPath(bam)
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workdir, project.unixGroup)
+            fileService.createDirectoryRecursivelyAndSetPermissions(workdir, project.unixGroup)
 
             Path resultsPath = cellRangerWorkFileService.getResultDirectory(bam)
 
@@ -727,12 +727,12 @@ class ExampleData {
                     cellRangerWorkFileService.getOutputDirectory(bam),
                     resultsPath,
             ].each {
-                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(it, project.unixGroup)
+                fileService.createDirectoryRecursivelyAndSetPermissions(it, project.unixGroup)
             }
 
             CellRangerFileNames.CREATED_RESULT_DIRS.each {
                 Path path = resultsPath.resolve(it)
-                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path, project.unixGroup)
+                fileService.createDirectoryRecursivelyAndSetPermissions(path, project.unixGroup)
             }
 
             CellRangerFileNames.CREATED_RESULT_FILES.each {
@@ -1514,7 +1514,7 @@ class ExampleData {
         if (createFilesOnFilesystem) {
             Path path = fileSystemService.remoteFileSystem.getPath(file)
             String unixGroup = project.unixGroup
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path.parent, unixGroup)
+            fileService.createDirectoryRecursivelyAndSetPermissions(path.parent, unixGroup)
             fileService.createFileWithContent(path, "someDummyContent", unixGroup, FileService.DEFAULT_FILE_PERMISSION, true)
         }
         return new RoddyWorkflowConfig([

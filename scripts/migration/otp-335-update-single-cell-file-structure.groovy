@@ -52,8 +52,8 @@ println rawSequenceFiles.collect { RawSequenceFile rawSequenceFile ->
     [
             '-------------------------------',
             "#${rawSequenceFile} of ${rawSequenceFile.seqTrack.toString().replace('<br>', ' ')}",
-            "mkdir -m 2750 -p ${newPath.parent}",
-            "mkdir -m 2750 -p ${wellPath.parent}",
+            "mkdir -m 750 -p ${newPath.parent}",
+            "mkdir -m 750 -p ${wellPath.parent}",
             "rm ${oldPath} ",
             "ln -s ${source} ${newPath}",
             "ln -s ${source} ${wellPath}",

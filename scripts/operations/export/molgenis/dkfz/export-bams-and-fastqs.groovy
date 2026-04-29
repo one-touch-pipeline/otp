@@ -357,7 +357,7 @@ projects.each { Project project ->
     Path projectPath = projectService.getProjectDirectory(project)
     Path outputDirectory = projectPath.resolve("exports").resolve("molgenis").resolve(timestamp)
 
-    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDirectory, project.unixGroup)
+    fileService.createDirectoryRecursivelyAndSetPermissions(outputDirectory, project.unixGroup)
 
     MolgenisExporter exporter = new MolgenisExporter(ctx: ctx)
 

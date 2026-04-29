@@ -699,7 +699,7 @@ WorkflowRun.withNewTransaction {
                 writable: true
         ).save(flush: true)
         // Create main directory structure if not done yet
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(basePath, unixGroup)
+        fileService.createDirectoryRecursivelyAndSetPermissions(basePath, unixGroup)
 
         println "Created new BaseFolder: ${baseFolder.path}"
     }
@@ -748,14 +748,14 @@ void createFileStructureForWorkflowRun(WorkflowRun workflowRun, String baseDir, 
     if (Files.exists(workFolderPath)) {
         fileService.deleteDirectoryRecursively(workFolderPath)
     }
-    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workFolderPath, unixGroup)
+    fileService.createDirectoryRecursivelyAndSetPermissions(workFolderPath, unixGroup)
     println "Created WorkFolder with UUID: ${workflowRun.workFolder.uuid}"
     println "WorkFolder path: ${workFolderPath}"
 
     // Create proper OTP view-by-pid structure using OTP file services
     Path runPath = rawSequenceDataViewFileService.getFilePath(seqTrack.sequenceFiles.first()).parent
 
-    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(runPath, unixGroup)
+    fileService.createDirectoryRecursivelyAndSetPermissions(runPath, unixGroup)
 
     // Create subfolders within the UUID directory using remote filesystem
     Path inputPath = workFolderPath.resolve("input")
@@ -763,10 +763,10 @@ void createFileStructureForWorkflowRun(WorkflowRun workflowRun, String baseDir, 
     Path tracePath = workFolderPath.resolve("trace")
     Path logsPath = workFolderPath.resolve("logs")
 
-    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(inputPath, unixGroup)
-    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(fastqcResultsPath, unixGroup)
-    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(tracePath, unixGroup)
-    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(logsPath, unixGroup)
+    fileService.createDirectoryRecursivelyAndSetPermissions(inputPath, unixGroup)
+    fileService.createDirectoryRecursivelyAndSetPermissions(fastqcResultsPath, unixGroup)
+    fileService.createDirectoryRecursivelyAndSetPermissions(tracePath, unixGroup)
+    fileService.createDirectoryRecursivelyAndSetPermissions(logsPath, unixGroup)
 
     // Create realistic FastQ files in input subfolder
     String samplePrefix = "sample_${individual.pid.toLowerCase()}"
@@ -891,8 +891,8 @@ Result files written to: ${fastqcResultsPath}
     // Create view-by-pid links
     Path viewFastqcResultsPath = runPath
     Path viewLogsPath = runPath.resolve("logs")
-    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(viewFastqcResultsPath, unixGroup)
-    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(viewLogsPath, unixGroup)
+    fileService.createDirectoryRecursivelyAndSetPermissions(viewFastqcResultsPath, unixGroup)
+    fileService.createDirectoryRecursivelyAndSetPermissions(viewLogsPath, unixGroup)
 
     try {
         // Link input FastQ files

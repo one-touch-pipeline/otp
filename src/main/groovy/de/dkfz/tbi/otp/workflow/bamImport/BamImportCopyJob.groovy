@@ -99,7 +99,7 @@ md5sum -c ${targetBaseDir}/md5sum.md5sum\
         String furtherFilesCopy = bamFile.furtherFiles.collect { String relativePath ->
             Path sourceFurtherFile = sourceBaseDir.resolve(relativePath)
             Path targetFurtherFile = targetBaseDir.resolve(relativePath)
-            return "mkdir -p -m 2750 ${targetFurtherFile.parent}\n" +
+            return "mkdir -p -m 750 ${targetFurtherFile.parent}\n" +
                     "cp -HLR ${sourceFurtherFile} ${targetFurtherFile}"
         }.join("\n")
 
@@ -116,7 +116,7 @@ if [ -e "${targetBam}" ]; then
     rm -rf ${targetBam}* ${furtherFilesTarget}
 fi
 
-mkdir -p -m 2750 ${targetBaseDir}
+mkdir -p -m 750 ${targetBaseDir}
 # copy and calculate max read length at the same time
 cat ${sourceBam} | tee ${targetBam} | ${samtoolsCommand} view ${referenceGenomePath} - | ${groovyCommand} ${maxReadLengthScript} > ${bamMaxReadLengthFile}
 cp -HL ${sourceBai} ${targetBai}

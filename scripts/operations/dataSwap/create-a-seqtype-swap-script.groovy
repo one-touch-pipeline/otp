@@ -131,7 +131,7 @@ builder.addGroovyCommand("""
           String swapLabel = "${swapLabel}"
           final Path SCRIPT_OUTPUT_DIRECTORY = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve('sample_swap').resolve(swapLabel)
           String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
-          fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(SCRIPT_OUTPUT_DIRECTORY, unixGroup)
+          fileService.createDirectoryRecursivelyAndSetPermissions(SCRIPT_OUTPUT_DIRECTORY, unixGroup)
           fileService.setPermission(SCRIPT_OUTPUT_DIRECTORY, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
           
           /** did we manually check yet if all (potentially symlinked) fastq datafiles still exist on the filesystem? */

@@ -243,16 +243,16 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         String unixGroup = configService.testingGroup
         Path projectPath = configService.rootPath.toPath().resolve(dirName)
         projectService.fileService = Mock(FileService) {
-            1 * createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
-            1 * createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath, unixGroup)
+            1 * createDirectoryRecursivelyAndSetPermissions(projectPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION)
+            1 * createDirectoryRecursivelyAndSetPermissions(projectPath, unixGroup)
             0 * _
         }
 
         if (dirAnalysis) {
             dirAnalysis = "${tempDir}${dirAnalysis}"
             Path analysisPath = Paths.get(dirAnalysis)
-            1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
-            1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath, unixGroup, FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
+            1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(analysisPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION)
+            1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(analysisPath, unixGroup, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
         }
 
         when:
@@ -361,10 +361,10 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         then:
-        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
-        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath, unixGroup)
-        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
-        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath, unixGroup, FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(projectPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(projectPath, unixGroup)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(analysisPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(analysisPath, unixGroup, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
         0 * projectService.fileService._
 
         project
@@ -410,9 +410,9 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         then:
         1 * projectService.fileService.setGroupViaBash(projectPath, unixGroup)
-        1 * projectService.fileService.setPermissionViaBash(projectPath, FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
+        1 * projectService.fileService.setPermission(projectPath, FileService.DEFAULT_DIRECTORY_PERMISSION)
         1 * projectService.fileService.setGroupViaBash(analysisPath, unixGroup)
-        1 * projectService.fileService.setPermissionViaBash(analysisPath, FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
+        1 * projectService.fileService.setPermission(analysisPath, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
         0 * projectService.fileService._
 
         project
@@ -462,10 +462,10 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         then:
-        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
-        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath, unixGroup)
-        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
-        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath, unixGroup, FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING) >> {
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(projectPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(projectPath, unixGroup)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(analysisPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(analysisPath, unixGroup, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION) >> {
             throw new OtpFileSystemException(exceptionMessage)
         }
         0 * projectService.fileService._
@@ -546,7 +546,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         then:
-        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING) >> {
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(projectPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION) >> {
             throw new ChangeFileGroupException(exceptionMessage)
         }
         0 * projectService.fileService._
@@ -625,10 +625,10 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         then:
-        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
-        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(projectPath, unixGroup)
-        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING)
-        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(analysisPath, unixGroup, FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(projectPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(projectPath, unixGroup)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(analysisPath.parent, unixGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION)
+        1 * projectService.fileService.createDirectoryRecursivelyAndSetPermissions(analysisPath, unixGroup, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
         0 * projectService.fileService._
     }
 
@@ -860,6 +860,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         roddyWorkflowConfig.exists()
         PosixFileAttributes attributes = Files.readAttributes(roddyWorkflowConfig.toPath(), PosixFileAttributes, LinkOption.NOFOLLOW_LINKS)
         TestCase.assertContainSame(attributes.permissions(), [PosixFilePermission.OWNER_READ, PosixFilePermission.GROUP_READ])
+        attributes.group().name == configuration.project.unixGroup
 
         where:
         analysisName | service       | genomeOption
@@ -1368,7 +1369,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     // method name is constructed at runtime
     private RoddyConfiguration createRoddySnvConfiguration(Map properties = [:]) {
         RoddyConfiguration configuration = new RoddyConfiguration([
-                project          : CollectionUtils.atMostOneElement(Project.findAllByName("testProjectAlignment")),
+                project          : roddyProject,
                 seqType          : SeqTypeService.exomePairedSeqType,
                 pluginName       : 'SNVCallingWorkflow',
                 programVersion   : '1.0.166-1',
@@ -1383,7 +1384,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     // method name is constructed at runtime
     private RoddyConfiguration createRoddyIndelConfiguration(Map properties = [:]) {
         RoddyConfiguration configuration = new RoddyConfiguration([
-                project          : CollectionUtils.atMostOneElement(Project.findAllByName("testProjectAlignment")),
+                project          : roddyProject,
                 seqType          : SeqTypeService.exomePairedSeqType,
                 pluginName       : 'IndelCallingWorkflow',
                 programVersion   : '1.0.166-1',
@@ -1398,7 +1399,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     // method name is constructed at runtime
     private RoddyConfiguration createRoddySophiaConfiguration(Map properties = [:]) {
         RoddyConfiguration configuration = new RoddyConfiguration([
-                project          : CollectionUtils.atMostOneElement(Project.findAllByName("testProjectAlignment")),
+                project          : roddyProject,
                 seqType          : SeqTypeService.wholeGenomePairedSeqType,
                 pluginName       : 'SophiaWorkflow',
                 programVersion   : '1.0.14',
@@ -1413,7 +1414,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     // method name is constructed at runtime
     private RoddyConfiguration createRoddyAceseqConfiguration(Map properties = [:]) {
         RoddyConfiguration configuration = new RoddyConfiguration([
-                project          : CollectionUtils.atMostOneElement(Project.findAllByName("testProjectAlignment")),
+                project          : roddyProject,
                 seqType          : SeqTypeService.wholeGenomePairedSeqType,
                 pluginName       : 'ACEseqWorkflow',
                 programVersion   : '1.2.6',
@@ -1422,6 +1423,12 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         ] + properties)
         checkProjectDirectory(configuration)
         return configuration
+    }
+
+    private Project getRoddyProject() {
+        Project project = CollectionUtils.atMostOneElement(Project.findAllByName("testProjectAlignment"))
+        project.unixGroup = configService.testingGroup
+        return project
     }
 
     private void checkProjectDirectory(RoddyConfiguration configuration) {

@@ -35,7 +35,7 @@ UNIX_GROUP_SHOULD="$4"
 
 
 CMD_CHGRP="chgrp -vh "$UNIX_GROUP_SHOULD" {}"
-CMD_CHMOD_2750="chmod -v 2750 {}"
+CMD_CHMOD_750="chmod -v 750 {}"
 CMD_CHMOD_444="chmod -v 444 {}"
 CMD_CHMOD_644="chmod -v 644 {}"
 
@@ -59,7 +59,7 @@ if [ -d "$PID_DIRECTORY" ]
 then
     find "$PID_DIRECTORY" \
         \( -group "$UNIX_GROUP_IS"                                        -exec $interceptor $CMD_CHGRP \; \) , \
-        \( -type d -not -perm 2750                                        -exec $interceptor $CMD_CHMOD_2750 \; \) , \
+        \( -type d -not -perm 750                                        -exec $interceptor $CMD_CHMOD_750 \; \) , \
         \( -type f -not -perm 444 \
                    -not -name ".roddyExecCache.txt" \
                    -not -name "zippedAnalysesMD5.txt" \

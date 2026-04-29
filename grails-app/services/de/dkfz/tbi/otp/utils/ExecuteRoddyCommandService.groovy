@@ -214,14 +214,14 @@ class ExecuteRoddyCommandService {
             remoteShellHelper.executeCommand("""\
                 |umask 027
                 |chgrp -h ${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)} ${file}
-                |chmod 2750 ${fileList}""".stripMargin()
+                |chmod 750 ${fileList}""".stripMargin()
             )
         } else {
             remoteShellHelper.executeCommand("""\
                 |umask 027
-                |mkdir -m 2750 -p ${file} && \\
+                |mkdir -m 750 -p ${file} && \\
                 |chgrp -h ${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)} ${file}
-                |chmod 2750 ${fileList}""".stripMargin()
+                |chmod 750 ${fileList}""".stripMargin()
             )
             WaitingFileUtils.waitUntilExists(file)
         }
@@ -240,7 +240,7 @@ class ExecuteRoddyCommandService {
         correctGroups(roddyResult)
 
         correctPermissions(roddyResult)
-        executionHelperService.setPermission(roddyResult.workDirectory, FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
+        // executionHelperService.setPermission(roddyResult.workDirectory, FileService.DEFAULT_DIRECTORY_PERMISSION)
     }
 
     @SuppressWarnings('LineLength')
@@ -254,7 +254,7 @@ class ExecuteRoddyCommandService {
 
             echo ""
             echo "correct directory permission"
-            find -type d -not -perm 2750 -print -exec chmod 2750 '{}' \\; | wc -l
+            find -type d -not -perm 750 -print -exec chmod 750 '{}' \\; | wc -l
 
             echo ""
             echo "correct file permission for non bam/bai files"

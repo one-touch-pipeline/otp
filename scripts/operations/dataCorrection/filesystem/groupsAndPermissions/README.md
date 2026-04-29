@@ -96,13 +96,13 @@ The script cleans a project in four steps, one for each subdirectory. Each step 
 file permission based on where they are located and what type of file they are:
 
   - **config directory:**
-    - directories are set to 2750
+    - directories are set to 750
     - config files should have the permission 440
   - **project info directory:**
     - directories are set to 2700
     - project infos should have the permission 400
   - **sequencing directory:**
-    - directories are set to 2750
+    - directories are set to 750
     - all files are set to 440
     - an exception to this rule are the following files:
       - `*.bam` and `*.bai` which are set to 444

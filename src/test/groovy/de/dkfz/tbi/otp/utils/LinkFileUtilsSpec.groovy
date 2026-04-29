@@ -143,7 +143,7 @@ class LinkFileUtilsSpec extends Specification implements DataTest {
         String unixGroup = configService.testingGroup
 
         linkFileUtils.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
-            3 * executeCommandReturnProcessOutput(_) >> { String command ->
+            2 * executeCommandReturnProcessOutput(_) >> { String command ->
                 return new ProcessOutput(command, '', 0)
             }
         }

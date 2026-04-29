@@ -57,7 +57,7 @@ class LinkFileUtils {
             targetLinkMap.values().each {
                 Path dir = fileService.toPath(it, fileSystem)
                 fileService.deleteDirectoryRecursively(dir)
-                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(dir.parent, unixGroup)
+                fileService.createDirectoryRecursivelyAndSetPermissions(dir.parent, unixGroup)
             }
 
             targetLinkMap.each { File target, File link ->

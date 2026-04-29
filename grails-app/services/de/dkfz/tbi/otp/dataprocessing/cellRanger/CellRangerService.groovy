@@ -94,12 +94,12 @@ class CellRangerService {
         Path sampleDirectory = cellRangerWorkFileService.getSampleDirectory(singleCellBamFile)
 
         fileService.deleteDirectoryRecursively(sampleDirectory) // delete dir if exist from previous run
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(sampleDirectory, unixGroup)
+        fileService.createDirectoryRecursivelyAndSetPermissions(sampleDirectory, unixGroup)
 
         singleCellBamFile.containedSeqTracks.groupBy { it.sampleIdentifier }.each { String sampleIdentifier, List<SeqTrack> seqTracks ->
             String sampleIdentifierDirName = sampleIdentifierForDirectoryStructure(sampleIdentifier)
             Path sampleIdentifierDirectory = sampleDirectory.resolve(sampleIdentifierDirName)
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(sampleIdentifierDirectory, unixGroup)
+            fileService.createDirectoryRecursivelyAndSetPermissions(sampleIdentifierDirectory, unixGroup)
             seqTracks.sort { it.id }.withIndex(1).each { SeqTrack seqTrack, int laneCounter ->
                 seqTrack.sequenceFilesWhereIndexFileIsFalse.sort { it.id }.each { RawSequenceFile rawSequenceFile ->
                     String formattedLaneNumber = String.valueOf(laneCounter).padLeft(3, '0')

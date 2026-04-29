@@ -88,7 +88,7 @@ List<WorkflowRun> workflowRuns = WorkflowRun.findAllByProjectInListAndWorkflowAn
 FileSystem fileSystem = fileSystemService.remoteFileSystem
 final Path scriptOutputDirectory = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve('migrationToUUID').resolve("${TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date())}_${workflow.name.replace(" ", "_")}")
 String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
-fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(scriptOutputDirectory, unixGroup)
+fileService.createDirectoryRecursivelyAndSetPermissions(scriptOutputDirectory, unixGroup)
 fileService.setPermission(scriptOutputDirectory, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
 
 int amountStringBuilders = Math.ceil(workflowRuns.size() / workflowRunsPerScript)
@@ -130,7 +130,7 @@ WorkflowRun.withTransaction {
                 filestoreService.attachWorkFolder(workflowRun, workFolder)
 
                 String output = """
-# create the first two uuid fragment dirs with 2755 if they dont already exist
+# create the first two uuid fragment dirs with 755 if they dont already exist
 if [ ! -d '${workFolderPath.parent.parent}' ]; then
 mkdir -p ${workFolderPath.parent.parent}
 chgrp ${group} ${workFolderPath.parent.parent}
@@ -142,7 +142,7 @@ chgrp ${group} ${workFolderPath.parent}
 chmod ${fileService.DIRECTORY_WITH_OTHER_PERMISSION_STRING} ${workFolderPath.parent}
 fi
 
-# create the last uuid fragment (the new workdir) with 2750 permissions
+# create the last uuid fragment (the new workdir) with 750 permissions
 mkdir ${workFolderPath}
 chgrp ${workflowRun.project.unixGroup} ${workFolderPath}
 chmod ${fileService.DEFAULT_DIRECTORY_PERMISSION_STRING} ${workFolderPath}

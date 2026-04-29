@@ -96,7 +96,7 @@ FileSystem fileSystem = fileSystemService.remoteFileSystem
 Path outputFile = fileSystem.getPath(pathName)
 
 String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
-fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputFile.parent, unixGroup)
+fileService.createDirectoryRecursivelyAndSetPermissions(outputFile.parent, unixGroup)
 
 List<String> output = []
 

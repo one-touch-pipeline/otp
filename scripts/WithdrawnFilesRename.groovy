@@ -24,7 +24,6 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 
 import java.nio.file.FileSystem
 import java.nio.file.Path
@@ -47,7 +46,7 @@ FileSystem fileSystem = fileSystemService.remoteFileSystem
 
 Path generated_script_to_run_manually = fileService.toPath(configService.scriptOutputPath, fileSystem).resolve("withdraw").resolve("renameWithdrawnFiles.sh")
 String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
-fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(generated_script_to_run_manually.parent, unixGroup)
+fileService.createDirectoryRecursivelyAndSetPermissions(generated_script_to_run_manually.parent, unixGroup)
 List<Path> renameFiles = []
 
 MergingWorkPackage.list().each { MergingWorkPackage mergingWorkPackage ->

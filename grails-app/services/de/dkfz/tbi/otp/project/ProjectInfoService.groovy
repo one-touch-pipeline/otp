@@ -107,9 +107,9 @@ class ProjectInfoService {
         Path file = getPath(projectInfo)
 
         String unixGroup = projectInfo.project.unixGroup
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(file.parent,
+        fileService.createDirectoryRecursivelyAndSetPermissions(file.parent,
                 unixGroup,
-                FileService.OWNER_DIRECTORY_PERMISSION_STRING)
+                FileService.OWNER_DIRECTORY_PERMISSION)
         fileService.createFileWithContent(file, content, unixGroup, [PosixFilePermission.OWNER_READ] as Set)
         return file
     }

@@ -69,26 +69,6 @@ class FileService {
     static final int MILLIS_BETWEEN_RETRIES = 50
 
     /**
-     * The default directory permissions (2750) with setgid bit
-     */
-    static final String DEFAULT_DIRECTORY_PERMISSION_STRING = "2750"
-
-    /**
-     * The directory permissions allowing all to access (2755) with setgid bit
-     */
-    static final String DIRECTORY_WITH_OTHER_PERMISSION_STRING = "2755"
-
-    /**
-     * The directory permissions only accessible for owner (2700) with setgid bit
-     */
-    static final String OWNER_DIRECTORY_PERMISSION_STRING = "2700"
-
-    /**
-     * The directory permissions accessible for owner and group members (2770) with setgid bit
-     */
-    static final String OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING = "2770"
-
-    /**
      * Owner and Group read/write (770)
      */
     static final Set<PosixFilePermission> OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION = [
@@ -152,6 +132,34 @@ class FileService {
             PosixFilePermission.GROUP_READ,
             PosixFilePermission.GROUP_WRITE,
     ].toSet().asImmutable()
+
+    /**
+     * The default directory permissions (750)
+     */
+    static final Set<PosixFilePermission> DEFAULT_DIRECTORY_PERMISSION = [
+            PosixFilePermission.OWNER_READ,
+            PosixFilePermission.OWNER_WRITE,
+            PosixFilePermission.OWNER_EXECUTE,
+            PosixFilePermission.GROUP_READ,
+            PosixFilePermission.GROUP_EXECUTE,
+    ].toSet().asImmutable()
+
+    static final String DEFAULT_DIRECTORY_PERMISSION_STRING = "750"
+
+    /**
+     * The directory permissions allowing all to access (755)
+     */
+    static final Set<PosixFilePermission> DIRECTORY_WITH_OTHER_PERMISSION = [
+            PosixFilePermission.OWNER_READ,
+            PosixFilePermission.OWNER_WRITE,
+            PosixFilePermission.OWNER_EXECUTE,
+            PosixFilePermission.GROUP_READ,
+            PosixFilePermission.GROUP_EXECUTE,
+            PosixFilePermission.OTHERS_READ,
+            PosixFilePermission.OTHERS_EXECUTE,
+    ].toSet().asImmutable()
+
+    static final String DIRECTORY_WITH_OTHER_PERMISSION_STRING = "755"
 
     /**
      * The default header to use for bash scripts.
@@ -428,26 +436,27 @@ class FileService {
     }
 
     /**
-     * Create the requested directory (absolute path) and all missing parent directories. The group and permissions are set via bash.
+     * Create the requested directory (absolute path) and all missing parent directories.
      *
-     * It won't fail if the directory already exist, but then the group and permissions are not changed.
+     * It won't fail if the directory already exists, but then the group and permissions are not changed.
      */
-    void createDirectoryRecursivelyAndSetPermissionsViaBash(Path path, String unixGroup,
-                                                            String permissions = DEFAULT_DIRECTORY_PERMISSION_STRING) {
+    void createDirectoryRecursivelyAndSetPermissions(Path path, String unixGroup,
+                                                     Set<PosixFilePermission> permissions = DEFAULT_DIRECTORY_PERMISSION) {
         assert path
         assert path.absolute
         assert unixGroup?.trim(), "unixGroup must not be null or blank"
 
-        createDirectoryRecursivelyAndSetPermissionsViaBashInternal(path, unixGroup, permissions)
+        createDirectoryRecursivelyAndSetPermissionsInternal(path, unixGroup, permissions)
     }
 
-    private void createDirectoryRecursivelyAndSetPermissionsViaBashInternal(Path path, String unixGroup, String permissions) {
+    private void createDirectoryRecursivelyAndSetPermissionsInternal(Path path, String unixGroup,
+                                                                     Set<PosixFilePermission> permissions) {
         if (Files.exists(path)) {
             if (!Files.isDirectory(path)) {
                 throw new CreateDirectoryException("The path ${path} already exist, but is not a directory")
             }
         } else {
-            createDirectoryRecursivelyAndSetPermissionsViaBashInternal(path.parent, unixGroup, permissions)
+            createDirectoryRecursivelyAndSetPermissionsInternal(path.parent, unixGroup, permissions)
 
             try {
                 createDirectoryHandlingParallelCreationOfSameDirectory(path)
@@ -455,12 +464,12 @@ class FileService {
                 throw new CreateDirectoryException("Failed to create directory ${path}", e)
             }
             setGroupViaBash(path, unixGroup)
-            setPermissionViaBash(path, permissions)
+            setPermission(path, permissions)
         }
     }
 
-    void setDefaultDirectoryPermissionViaBash(Path path) {
-        setPermissionViaBash(path, DEFAULT_DIRECTORY_PERMISSION_STRING)
+    void applyDefaultDirectoryPermission(Path path) {
+        setPermission(path, DEFAULT_DIRECTORY_PERMISSION)
     }
 
     void setPermissionViaBash(Path path, String permissions) throws ChangeFilePermissionException {
@@ -579,7 +588,7 @@ class FileService {
      * Create the requested file with the given content and permission.
      *
      * The path have to be absolute and may not exist yet. Missing parent directories are created automatically with the
-     * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
+     * {@link #DEFAULT_DIRECTORY_PERMISSION}.
      */
     void createFileWithContent(
             Path path,
@@ -594,7 +603,7 @@ class FileService {
      * Create the requested file with the given content as list of strings and permission.
      *
      * The path must be absolute and may not exist yet. Missing parent directories will be created automatically using
-     * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
+     * {@link #DEFAULT_DIRECTORY_PERMISSION}.
      */
     void createFileWithContent(
             Path path,
@@ -611,7 +620,7 @@ class FileService {
      * Create the requested file with the given byte content and permission.
      *
      * The path have to be absolute and may not exist yet. Missing parent directories are created automatically with the
-     * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
+     * {@link #DEFAULT_DIRECTORY_PERMISSION}.
      */
     void createFileWithContent(
             Path path,
@@ -643,7 +652,7 @@ class FileService {
             assert !Files.exists(path)
         }
 
-        createDirectoryRecursivelyAndSetPermissionsViaBash(path.parent, unixGroup)
+        createDirectoryRecursivelyAndSetPermissions(path.parent, unixGroup)
 
         try {
             closure()
@@ -662,14 +671,14 @@ class FileService {
      * pre-existing files of the same name will be overwritten without asking.
      *
      * When outputFolder not exist yet, it is created automatically including missing parent directories with the
-     * {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
+     * {@link #DEFAULT_DIRECTORY_PERMISSION}.
      */
     // false positives, since rule can not recognize calling class
     @SuppressWarnings('ExplicitFlushForDeleteRule')
     Path createOrOverwriteScriptOutputFile(Path outputFolder, String fileName, String unixGroup) {
         Path p = outputFolder.resolve(fileName)
 
-        createDirectoryRecursivelyAndSetPermissionsViaBash(outputFolder, unixGroup)
+        createDirectoryRecursivelyAndSetPermissions(outputFolder, unixGroup)
 
         if (Files.exists(p)) {
             Files.delete(p)
@@ -687,7 +696,7 @@ class FileService {
      *
      * The target has to exist, the link may only exist if option {@link CreateLinkOption#DELETE_EXISTING_FILE} is given.
      * Both parameters have to be absolute.
-     * Missing parent directories are created automatically with the {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}.
+     * Missing parent directories are created automatically with the {@link #DEFAULT_DIRECTORY_PERMISSION}.
      *
      * By default a relative link is created, by passing {@link CreateLinkOption#ABSOLUTE} an absolute link is created.
      *
@@ -733,7 +742,7 @@ class FileService {
                 target :
                 link.parent.relativize(target)
 
-        createDirectoryRecursivelyAndSetPermissionsViaBash(link.parent, unixGroup)
+        createDirectoryRecursivelyAndSetPermissions(link.parent, unixGroup)
 
         // SFTP does not support creating symbolic links
         if (link.fileSystem.provider() instanceof SFTPFileSystemProvider) {
@@ -762,7 +771,7 @@ class FileService {
      * Correct the group and permission recursive for the directory structure.
      *
      * The permissions are set:
-     * - directories are set to: {@link #DEFAULT_DIRECTORY_PERMISSION_STRING}
+     * - directories are set to: {@link #DEFAULT_DIRECTORY_PERMISSION}
      * - files to: {@link #DEFAULT_FILE_PERMISSION}
      */
     void correctPathPermissionAndGroupRecursive(Path path, String group) {
@@ -784,7 +793,7 @@ class FileService {
                     correctPathAndGroupPermissionRecursiveInternal(it, group)
                 }
                 setGroupViaBash(path, group)
-                defaultDirectoryPermissionViaBash = path
+                applyDefaultDirectoryPermission(path)
             } finally {
                 stream?.close()
             }

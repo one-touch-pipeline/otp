@@ -220,7 +220,7 @@ projectNames.each { projectName ->
     assert project : "There is not project with the name ${projectName}"
 
     Path outputFolderPerProject = outputFolder.resolve(projectName)
-    fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputFolderPerProject, project.unixGroup)
+    fileService.createDirectoryRecursivelyAndSetPermissions(outputFolderPerProject, project.unixGroup)
 
     file << "\n${projectName}\n"
 

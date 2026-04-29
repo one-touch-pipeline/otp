@@ -170,7 +170,7 @@ abstract class AbstractBamImportWorkflowSpec extends AbstractWorkflowSpec implem
         Path bamPath = referenceDataDirectory.resolve(alignmentFileName)
         Path indexPath = referenceDataDirectory.resolve(indexFileName)
         String unixGroup = configService.testingGroup
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(realDir, unixGroup)
+        fileService.createDirectoryRecursivelyAndSetPermissions(realDir, unixGroup)
         remoteShellHelper.executeCommandReturnProcessOutput("cp ${bamPath} ${indexPath} ${realDir}").assertExitCodeZeroAndStderrEmpty()
         return bamPath
     }
@@ -188,7 +188,7 @@ abstract class AbstractBamImportWorkflowSpec extends AbstractWorkflowSpec implem
     private void prepareFileSystemCreateAndLinkFurtherFiles(Path realDir, Path linkDir) {
         String unixGroup = configService.testingGroup
         ALL_FILES.each { String filePath ->
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(realDir.resolve(filePath), unixGroup)
+            fileService.createDirectoryRecursivelyAndSetPermissions(realDir.resolve(filePath), unixGroup)
             fileService.createFileWithContent(realDir.resolve(filePath), "dummy", unixGroup, FileService.DEFAULT_FILE_PERMISSION, true)
             fileService.createLink(linkDir.resolve(filePath), realDir.resolve(filePath), unixGroup)
         }

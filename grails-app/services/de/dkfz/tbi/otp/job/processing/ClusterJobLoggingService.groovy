@@ -53,10 +53,10 @@ class ClusterJobLoggingService {
     File createAndGetLogDirectory(ProcessingStep processingStep) {
         File logDirectory = getLogDirectory(processingStep)
         if (!logDirectory.exists()) {
-            // race condition between threads and within NFS can be ignored, since createDirectoryRecursivelyAndSetPermissionsViaBash handle them
+            // race condition between threads and within NFS can be ignored, since createDirectoryRecursivelyAndSetPermissions handle them
             FileSystem fileSystem = fileSystemService.remoteFileSystem
             String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(fileSystem.getPath(logDirectory.toString()), unixGroup)
+            fileService.createDirectoryRecursivelyAndSetPermissions(fileSystem.getPath(logDirectory.toString()), unixGroup)
         }
         return logDirectory
     }

@@ -55,7 +55,7 @@ class DataInstallationPrepareJob extends AbstractPrepareJob implements DataInsta
 
         Path runDirectory = rawSequenceDataWorkFileService.getFilePath(seqTrack.sequenceFiles.first()).parent
         logService.addSimpleLogEntry(workflowStep, "Creating work directory ${runDirectory}")
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(
+        fileService.createDirectoryRecursivelyAndSetPermissions(
                 runDirectory,
                 workflowStep.workflowRun.project.unixGroup,
         )

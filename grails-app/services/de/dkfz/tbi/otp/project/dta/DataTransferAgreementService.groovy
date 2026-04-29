@@ -193,7 +193,7 @@ class DataTransferAgreementService {
         Path absoluteFilePath = getPathOnRemoteFileSystem(dtaFile)
 
         String unixGroup = dtaFile.dataTransferAgreement.project.unixGroup
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(absoluteFilePath.parent, unixGroup, FileService.OWNER_DIRECTORY_PERMISSION_STRING)
+        fileService.createDirectoryRecursivelyAndSetPermissions(absoluteFilePath.parent, unixGroup, FileService.OWNER_DIRECTORY_PERMISSION)
         fileService.createFileWithContent(absoluteFilePath, fileContent, unixGroup, [PosixFilePermission.OWNER_READ] as Set<PosixFilePermission>)
         fileService.setGroupViaBash(absoluteFilePath, unixGroup)
 

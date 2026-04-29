@@ -566,7 +566,7 @@ class MetaDataExport {
         }
 
         String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputFile.parent, unixGroup)
+        fileService.createDirectoryRecursivelyAndSetPermissions(outputFile.parent, unixGroup)
 
         writeMetadata(rawSequenceFiles, outputFile, exportColumns, reimportProject)
         fileService.setPermission(outputFile, [

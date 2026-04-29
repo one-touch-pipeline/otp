@@ -27,7 +27,6 @@ import groovyx.gpars.GParsPool
 import de.dkfz.tbi.otp.FileNotFoundException
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
@@ -119,7 +118,7 @@ Path base = fileSystem.getPath(configService.scriptOutputPath.toString()).resolv
         resolve(TimeFormats.DATE_TIME_SECONDS_DASHES.getFormattedDate(new Date()))
 
 String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
-fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(base, unixGroup)
+fileService.createDirectoryRecursivelyAndSetPermissions(base, unixGroup)
 println "Base Directory:\n${base}"
 
 List<String> handleRoddyCall(String cmd, Path commandOutput, String nameUsedInConfig, Path extractedOutput, String unixGroup) {
@@ -222,7 +221,7 @@ GParsPool.withPool(parallel) {
                         '[^a-zA-Z0-9_]', '-')
                 String plugin = roddyWorkflowConfig.programVersion.split(':')[1]
                 work = base.resolve(plugin).resolve(projectName)
-                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(work, unixGroup)
+                fileService.createDirectoryRecursivelyAndSetPermissions(work, unixGroup)
 
                 // -------------
                 // old system

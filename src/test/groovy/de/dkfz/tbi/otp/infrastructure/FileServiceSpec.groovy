@@ -83,29 +83,6 @@ class FileServiceSpec extends Specification implements DataTest {
             ].asImmutable(),
     ].asImmutable()
 
-    static private final Set<PosixFilePermission> POSIX_DIRECTORY_PERMISSION_PART = [
-            PosixFilePermission.OWNER_READ,
-            PosixFilePermission.OWNER_WRITE,
-            PosixFilePermission.OWNER_EXECUTE,
-            PosixFilePermission.GROUP_READ,
-            PosixFilePermission.GROUP_EXECUTE,
-    ].toSet().asImmutable()
-
-    static private final Set<PosixFilePermission> PERMISSIONS_OWNER = [
-            PosixFilePermission.OWNER_READ,
-            PosixFilePermission.OWNER_WRITE,
-            PosixFilePermission.OWNER_EXECUTE,
-    ].toSet().asImmutable()
-
-    static private final Set<PosixFilePermission> PERMISSIONS_OWNER_GROUP = [
-            PosixFilePermission.OWNER_READ,
-            PosixFilePermission.OWNER_WRITE,
-            PosixFilePermission.OWNER_EXECUTE,
-            PosixFilePermission.GROUP_READ,
-            PosixFilePermission.GROUP_WRITE,
-            PosixFilePermission.GROUP_EXECUTE,
-    ].toSet().asImmutable()
-
     FileService fileService = new FileService()
 
     TestConfigService configService = new TestConfigService()
@@ -180,8 +157,8 @@ class FileServiceSpec extends Specification implements DataTest {
         permissionString || permissionPosix
         '500'            || [PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_EXECUTE]
         '550'            || [PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_EXECUTE, PosixFilePermission.GROUP_READ, PosixFilePermission.GROUP_EXECUTE]
-        '700'            || PERMISSIONS_OWNER
-        '2700'           || PERMISSIONS_OWNER
+        '700'            || FileService.OWNER_DIRECTORY_PERMISSION
+        '2700'           || FileService.OWNER_DIRECTORY_PERMISSION
     }
 
     void "setPermissionViaBash, if permission can't be changed, then throw ChangeFilePermissionException"() {
@@ -249,7 +226,7 @@ class FileServiceSpec extends Specification implements DataTest {
         assert !permissions.contains(PosixFilePermission.OTHERS_EXECUTE)
     }
 
-    void "createDirectoryRecursivelyAndSetPermissionsViaBash, if path does not exist, then create it and set group and permission"() {
+    void "createDirectoryRecursivelyAndSetPermissions, if path does not exist, then create it and set group and permission"() {
         given:
         mockRemoteShellHelper()
         TestConfigService configService = new TestConfigService()
@@ -261,7 +238,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path directory3 = directory2.resolve('directory3')
 
         when:
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(directory3, group, permission)
+        fileService.createDirectoryRecursivelyAndSetPermissions(directory3, group, permission)
 
         then:
         [
@@ -271,20 +248,20 @@ class FileServiceSpec extends Specification implements DataTest {
         ].each {
             assert Files.exists(it)
             assert Files.isDirectory(it)
-            assert Files.getPosixFilePermissions(it) == permissionPosix
+            assert Files.getPosixFilePermissions(it) == permission
             assert Files.getFileAttributeView(it, PosixFileAttributeView, LinkOption.NOFOLLOW_LINKS).readAttributes().group().name == group
         }
 
         where:
-        firstGroup | permission || permissionPosix
-        true       | '700'      || PERMISSIONS_OWNER
-        true       | '770'      || PERMISSIONS_OWNER_GROUP
-        false      | '700'      || PERMISSIONS_OWNER
-        false      | '770'      || PERMISSIONS_OWNER_GROUP
+        firstGroup | permission
+        true       | FileService.OWNER_DIRECTORY_PERMISSION
+        true       | FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION
+        false      | FileService.OWNER_DIRECTORY_PERMISSION
+        false      | FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION
     }
 
     @Unroll
-    void "createDirectoryRecursivelyAndSetPermissionsViaBash, when directory exist and #name, then throw #exception"() {
+    void "createDirectoryRecursivelyAndSetPermissions, when directory exist and #name, then throw #exception"() {
         given:
         mockRemoteShellHelper()
         TestConfigService configService = new TestConfigService()
@@ -297,7 +274,7 @@ class FileServiceSpec extends Specification implements DataTest {
         CreateFileHelper.createFile(filePath.resolve('file'))
 
         when:
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(directory, group, permission)
+        fileService.createDirectoryRecursivelyAndSetPermissions(directory, group, permission)
 
         then:
         OtpFileSystemException e = thrown()
@@ -309,12 +286,11 @@ class FileServiceSpec extends Specification implements DataTest {
         Files.setPosixFilePermissions(directory.parent, allPermissions)
 
         where:
-        name                          | directoryName | validGroup | permission               || exception
-        'directory is file'           | 'file'        | true       | '666'                    || CreateDirectoryException
-        'directory based on file'     | 'file/dir'    | true       | '666'                    || CreateDirectoryException
-        'group change fail'           | 'dir/dir'     | false      | '666'                    || ChangeFileGroupException
-        'permission change fail'      | 'dir/dir'     | true       | HelperUtils.randomMd5sum || ChangeFilePermissionException
-        'directory has no permission' | 'dir/dir'     | true       | '000'                    || CreateDirectoryException
+        name                          | directoryName | validGroup | permission                                || exception
+        'directory is file'           | 'file'        | true       | FileService.OWNER_DIRECTORY_PERMISSION     || CreateDirectoryException
+        'directory based on file'     | 'file/dir'    | true       | FileService.OWNER_DIRECTORY_PERMISSION     || CreateDirectoryException
+        'group change fail'           | 'dir/dir'     | false      | FileService.OWNER_DIRECTORY_PERMISSION     || ChangeFileGroupException
+        'directory has no permission' | 'dir/dir'     | true       | ([] as Set<PosixFilePermission>)           || CreateDirectoryException
     }
 
     // ----------------------------------------------------------------------------------------------------
@@ -824,9 +800,9 @@ class FileServiceSpec extends Specification implements DataTest {
         fileService.correctPathPermissionAndGroupRecursive(tempDir, group)
 
         then:
-        Files.getPosixFilePermissions(tempDir) == POSIX_DIRECTORY_PERMISSION_PART
-        Files.getPosixFilePermissions(dir1) == POSIX_DIRECTORY_PERMISSION_PART
-        Files.getPosixFilePermissions(dir2) == POSIX_DIRECTORY_PERMISSION_PART
+        Files.getPosixFilePermissions(tempDir) == FileService.DEFAULT_DIRECTORY_PERMISSION
+        Files.getPosixFilePermissions(dir1) == FileService.DEFAULT_DIRECTORY_PERMISSION
+        Files.getPosixFilePermissions(dir2) == FileService.DEFAULT_DIRECTORY_PERMISSION
 
         Files.getPosixFilePermissions(file) == FileService.DEFAULT_FILE_PERMISSION
         Files.getPosixFilePermissions(bamFile) == FileService.DEFAULT_FILE_PERMISSION

@@ -64,9 +64,9 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
         final RunYapsaInstance runYapsaInstance = processParameterObject as RunYapsaInstance
 
         String unixGroup = runYapsaInstance.project.unixGroup
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(
+        fileService.createDirectoryRecursivelyAndSetPermissions(
                 runYapsaService.getWorkDirectory(runYapsaInstance),
-                unixGroup, FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
+                unixGroup, FileService.DEFAULT_DIRECTORY_PERMISSION)
 
         String jobScript = createScript(runYapsaInstance)
 

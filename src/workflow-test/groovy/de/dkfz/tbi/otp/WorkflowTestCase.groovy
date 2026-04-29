@@ -93,7 +93,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
     FileService fileService
 
     // permissions to be applied to the source test data
-    protected final static String TEST_DATA_MODE_DIR = "2750"
+    protected final static String TEST_DATA_MODE_DIR = "750"
     protected final static String TEST_DATA_MODE_FILE = "640"
 
     final static String CHROMOSOME_NAMES_FILE = 'chromosome-names.txt'
@@ -338,8 +338,8 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
         FileSystem fileSystem = fileSystemService.remoteFileSystem
         String unixGroup = configService.testingGroup
         files.each {
-            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(fileSystem.getPath(it.toString()), unixGroup,
-                    FileService.DEFAULT_DIRECTORY_PERMISSION_STRING)
+            fileService.createDirectoryRecursivelyAndSetPermissions(fileSystem.getPath(it.toString()), unixGroup,
+                    FileService.DEFAULT_DIRECTORY_PERMISSION)
         }
     }
 

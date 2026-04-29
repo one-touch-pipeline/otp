@@ -20,8 +20,9 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.TimeFormats
@@ -86,7 +87,8 @@ class MolgenisGlobal {
 
 String timestamp = TimeFormats.DATE_TIME_DASHES.getFormattedDate(new Date())
 final Path outputDirectory = ctx.fileService.toPath(ctx.configService.scriptOutputPath, ctx.fileSystemService.getRemoteFilesystem).resolve("export").resolve("molgenis").resolve("${timestamp}-projects-and-users")
-ctx.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(outputDirectory)
+String unixGroup = ctx.processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
+ctx.fileService.createDirectoryRecursivelyAndSetPermissions(outputDirectory, unixGroup)
 ctx.fileService.setPermission(outputDirectory, ctx.fileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
 
 println "Writing to: ${outputDirectory}"

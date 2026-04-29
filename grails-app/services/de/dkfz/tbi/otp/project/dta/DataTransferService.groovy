@@ -134,7 +134,7 @@ class DataTransferService {
         Path path = getPathOnRemoteFileSystem(transferDocument)
 
         String unixGroup = transferDocument.dataTransfer.dataTransferAgreement.project.unixGroup
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(path.parent, unixGroup, FileService.OWNER_DIRECTORY_PERMISSION_STRING)
+        fileService.createDirectoryRecursivelyAndSetPermissions(path.parent, unixGroup, FileService.OWNER_DIRECTORY_PERMISSION)
         fileService.createFileWithContent(path, fileContent, unixGroup, [PosixFilePermission.OWNER_READ] as Set<PosixFilePermission>)
         fileService.setGroupViaBash(path, unixGroup)
 

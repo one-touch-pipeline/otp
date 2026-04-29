@@ -79,8 +79,8 @@ class ExecuteCellRangerJob extends AbstractOtpJob implements AutoRestartableJob 
     private void prepareInputStructure(SingleCellBamFile singleCellBamFile) {
         String unixGroup = singleCellBamFile.project.unixGroup
         Path workDirectory = cellRangerWorkFileService.getDirectoryPath(singleCellBamFile)
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workDirectory, unixGroup)
-        fileService.setPermissionViaBash(workDirectory, FileService.OWNER_DIRECTORY_PERMISSION_STRING)
+        fileService.createDirectoryRecursivelyAndSetPermissions(workDirectory, unixGroup)
+        fileService.setPermission(workDirectory, FileService.OWNER_DIRECTORY_PERMISSION)
 
         cellRangerService.deleteOutputDirectoryStructureIfExists(singleCellBamFile)
         cellRangerService.createInputDirectoryStructure(singleCellBamFile)

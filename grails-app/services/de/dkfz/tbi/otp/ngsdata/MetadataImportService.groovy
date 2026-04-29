@@ -236,11 +236,11 @@ class MetadataImportService {
 
         try {
             if (!Files.exists(targetFile)) {
-                // create the directory and set the permission with owner and group access (setgid bit) explicitly
+                // create the directory and file with owner and group permissions explicitly
                 String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
-                fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(targetFile.parent,
+                fileService.createDirectoryRecursivelyAndSetPermissions(targetFile.parent,
                         unixGroup,
-                        FileService.OWNER_AND_GROUP_DIRECTORY_PERMISSION_STRING)
+                        FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
                 fileService.createFileWithContent(targetFile, context.content, unixGroup)
             }
             assert Files.readAllBytes(targetFile) == context.content

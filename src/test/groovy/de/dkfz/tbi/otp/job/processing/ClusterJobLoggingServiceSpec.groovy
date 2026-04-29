@@ -69,7 +69,7 @@ class ClusterJobLoggingServiceSpec extends Specification implements DataTest {
             _ * findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP) >> configService.testingGroup
         }
         service.fileService = Stub(FileService) {
-            createDirectoryRecursivelyAndSetPermissionsViaBash(_, _) >> { Path dir, String unixGroup ->
+            createDirectoryRecursivelyAndSetPermissions(_, _) >> { Path dir, String unixGroup ->
                 Files.createDirectories(dir)
             }
         }
@@ -100,7 +100,7 @@ class ClusterJobLoggingServiceSpec extends Specification implements DataTest {
         given:
         service.fileSystemService = new TestFileSystemService()
         service.fileService = Mock(FileService) {
-            1 * createDirectoryRecursivelyAndSetPermissionsViaBash(_, _) >> { Path dir, String unixGroup ->
+            1 * createDirectoryRecursivelyAndSetPermissions(_, _) >> { Path dir, String unixGroup ->
                 Files.createDirectories(dir)
             }
         }
@@ -116,7 +116,7 @@ class ClusterJobLoggingServiceSpec extends Specification implements DataTest {
         given:
         service.fileSystemService = new TestFileSystemService()
         service.fileService = Mock(FileService) {
-            3 * createDirectoryRecursivelyAndSetPermissionsViaBash(_, _)
+            3 * createDirectoryRecursivelyAndSetPermissions(_, _)
         }
 
         when:

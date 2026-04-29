@@ -517,7 +517,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         additionalDataDirectory = workingDirectory.resolve('additional-data')
 
         String unixGroup = configService.testingGroup
-        fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workingDirectory, unixGroup)
+        fileService.createDirectoryRecursivelyAndSetPermissions(workingDirectory, unixGroup)
 
         [
                 (OtpProperty.PATH_PROJECT_ROOT)    : "${workingDirectory}/projectPath",
@@ -827,7 +827,8 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         Files.walk(rootPath).withCloseable { stream ->
             stream.each { Path path ->
                 if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
-                    assert fileService.getPermissionViaBash(path, LinkOption.NOFOLLOW_LINKS) == fileService.DEFAULT_DIRECTORY_PERMISSION_STRING
+                    Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(path, LinkOption.NOFOLLOW_LINKS)
+                    assert permissions == FileService.DEFAULT_DIRECTORY_PERMISSION
                 }
                 if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
                     Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(path, LinkOption.NOFOLLOW_LINKS)

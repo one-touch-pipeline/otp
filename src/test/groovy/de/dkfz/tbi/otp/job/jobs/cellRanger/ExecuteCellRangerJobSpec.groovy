@@ -132,10 +132,10 @@ class ExecuteCellRangerJobSpec extends Specification implements CellRangerFactor
 
         then:
         0 * job.fileService._
-        1 * job.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workDirectory, _)
+        1 * job.fileService.createDirectoryRecursivelyAndSetPermissions(workDirectory, _)
 
         then:
-        1 * job.fileService.setPermissionViaBash(workDirectory, FileService.OWNER_DIRECTORY_PERMISSION_STRING)
+        1 * job.fileService.setPermission(workDirectory, FileService.OWNER_DIRECTORY_PERMISSION)
 
         then:
         1 * job.cellRangerService.deleteOutputDirectoryStructureIfExists(singleCellBamFile)

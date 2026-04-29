@@ -198,12 +198,12 @@ if \\[ -e "\\S+" \\]; then
     rm -rf \\S+\\* \\S+
 fi
 
-mkdir -p -m 2750 \\S+
+mkdir -p -m 750 \\S+
 # copy and calculate max read length at the same time
 cat \\S+.bam \\| tee \\S+.bam \\| samtools view  - \\| groovy /tool-dir/bamMaxReadLength.groovy > \\S+.bam.maxReadLength
 cp -HL \\S+.bam.bai \\S+.bam.bai
 
-mkdir -p -m 2750 \\S+
+mkdir -p -m 750 \\S+
 cp -HLR \\S+ \\S+
 
 cd \\S+

@@ -66,7 +66,7 @@ class AbstractPrepareJobSpec extends Specification implements DataTest, Workflow
         then:
         1 * job.buildWorkDirectoryPath(workflowStep) >> workDirectory
         1 * job.shouldWorkDirectoryBeProtected() >> false
-        1 * job.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workDirectory, workflowStep.workflowRun.project.unixGroup) >> null
+        1 * job.fileService.createDirectoryRecursivelyAndSetPermissions(workDirectory, workflowStep.workflowRun.project.unixGroup) >> null
         workflowStep.workflowRun.workDirectory == workDirectory.toString()
 
         1 * job.generateMapForLinking(workflowStep) >> [new LinkEntry(link, target)]
@@ -98,7 +98,7 @@ class AbstractPrepareJobSpec extends Specification implements DataTest, Workflow
         then:
         1 * job.buildWorkDirectoryPath(workflowStep) >> workDirectory
         1 * job.shouldWorkDirectoryBeProtected() >> true
-        1 * job.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workDirectory, workflowStep.workflowRun.project.unixGroup) >> null
+        1 * job.fileService.createDirectoryRecursivelyAndSetPermissions(workDirectory, workflowStep.workflowRun.project.unixGroup) >> null
         workflowStep.workflowRun.workDirectory == workDirectory.toString()
 
         1 * job.processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP) >> testGroup
@@ -138,8 +138,8 @@ class AbstractPrepareJobSpec extends Specification implements DataTest, Workflow
         1 * job.filestoreService.getWorkFolderPath(_) >> workFolder
         1 * job.processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP) >> testGroup
 
-        1 * job.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workFolder.parent, testGroup, "2755")
-        1 * job.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(workFolder, testGroup, "2750")
+        1 * job.fileService.createDirectoryRecursivelyAndSetPermissions(workFolder.parent, testGroup, FileService.DIRECTORY_WITH_OTHER_PERMISSION)
+        1 * job.fileService.createDirectoryRecursivelyAndSetPermissions(workFolder, testGroup, FileService.DEFAULT_DIRECTORY_PERMISSION)
 
         1 * job.generateMapForLinking(workflowStep) >> [new LinkEntry(link, target)]
         1 * job.fileService.createLink(target, link, _, CreateLinkOption.DELETE_EXISTING_FILE) >> null

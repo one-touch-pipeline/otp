@@ -141,10 +141,10 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         1 * cellRangerService.fileService.deleteDirectoryRecursively(sampleDirectory)
 
         then:
-        1 * cellRangerService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(sampleDirectory, _)
+        1 * cellRangerService.fileService.createDirectoryRecursivelyAndSetPermissions(sampleDirectory, _)
 
         then:
-        1 * cellRangerService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(sampleIdentifierPath, _)
+        1 * cellRangerService.fileService.createDirectoryRecursivelyAndSetPermissions(sampleIdentifierPath, _)
 
         2 * cellRangerService.rawSequenceDataViewFileService.getFilePath(_) >>> [
                 Paths.get(file1),
@@ -154,7 +154,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         1 * cellRangerService.fileService.createLink(mate2, filePath2, _, _)
 
         then:
-        1 * cellRangerService.fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(sampleDirectory.resolve(sampleIdentifier2DirName), _)
+        1 * cellRangerService.fileService.createDirectoryRecursivelyAndSetPermissions(sampleDirectory.resolve(sampleIdentifier2DirName), _)
 
         2 * cellRangerService.rawSequenceDataViewFileService.getFilePath(_) >>> [
                 Paths.get(file3),
@@ -188,8 +188,8 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
                 },
                 fileService                   : Mock(FileService) {
                     1 * deleteDirectoryRecursively(uuidBasedSampleDirectory)
-                    1 * createDirectoryRecursivelyAndSetPermissionsViaBash(uuidBasedSampleDirectory, _)
-                    1 * createDirectoryRecursivelyAndSetPermissionsViaBash(expectedSampleSubDir, _)
+                    1 * createDirectoryRecursivelyAndSetPermissions(uuidBasedSampleDirectory, _)
+                    1 * createDirectoryRecursivelyAndSetPermissions(expectedSampleSubDir, _)
                     2 * createLink(_, _, _, _)
                     0 * _
                 },

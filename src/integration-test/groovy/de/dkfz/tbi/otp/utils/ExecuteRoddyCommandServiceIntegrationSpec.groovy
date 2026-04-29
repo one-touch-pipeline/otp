@@ -601,7 +601,7 @@ class ExecuteRoddyCommandServiceIntegrationSpec extends Specification {
 
         then:
         String expected = """\
-            2750
+            750
             440
             444
             444

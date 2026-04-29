@@ -35,7 +35,7 @@ UNIX_GROUP_SHOULD="$4"
 
 
 CMD_CHGRP="chgrp -vh "$UNIX_GROUP_SHOULD" {}"
-CMD_CHMOD_2750="chmod -v 2750 {}"
+CMD_CHMOD_750="chmod -v 750 {}"
 CMD_CHMOD_2700="chmod -v 2700 {}"
 CMD_CHMOD_400="chmod -v 400 {}"
 CMD_CHMOD_444="chmod -v 444 {}"
@@ -63,7 +63,7 @@ if [ -d "$CONFIG_DIRECTORY" ]
 then
     find "$CONFIG_DIRECTORY" \
         \( -group "$UNIX_GROUP_IS" -exec $interceptor $CMD_CHGRP \; \) , \
-        \( -type d -not -perm 2750 -exec $interceptor $CMD_CHMOD_2750 \; \) , \
+        \( -type d -not -perm 750 -exec $interceptor $CMD_CHMOD_750 \; \) , \
         \( -type f -not -perm 444  -exec $interceptor $CMD_CHMOD_444 \; \);
 else
     echo "# No config directory found: $CONFIG_DIRECTORY"
@@ -87,7 +87,7 @@ if [ -d "$SEQUENCING_DIRECTORY" ]
 then
     find "$SEQUENCING_DIRECTORY" \
         \( -group "$UNIX_GROUP_IS"                                        -exec $interceptor $CMD_CHGRP \; \) , \
-        \( -type d -not -perm 2750                                        -exec $interceptor $CMD_CHMOD_2750 \; \) , \
+        \( -type d -not -perm 750                                        -exec $interceptor $CMD_CHMOD_750 \; \) , \
         \( -type f -not -perm 444 \
                    -not -name ".roddyExecCache.txt" \
                    -not -name "zippedAnalysesMD5.txt" \
