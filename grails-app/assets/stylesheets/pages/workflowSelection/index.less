@@ -71,3 +71,13 @@
     &:nth-child(4) { width: 7% !important; }  // Action buttons
   }
 }
+
+// Make select2 dropdowns wider than the input for smaller screens
+.select2-container--open .select2-dropdown {
+  min-width: max-content !important;
+}
+
+// Add padding to prevent scrollbar overlap
+.select2-results__option {
+  padding-right: 15px !important;
+}

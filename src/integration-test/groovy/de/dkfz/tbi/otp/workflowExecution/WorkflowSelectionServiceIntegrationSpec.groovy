@@ -193,4 +193,43 @@ class WorkflowSelectionServiceIntegrationSpec extends Specification implements W
         ['sws1', 'sws3'] | ['rg3', 'rg4']
         ['sws2', 'sws3'] | ['rg4']
     }
+
+    void "getPossibleAlignmentOptions, should filter species by projectSpecies"() {
+        given:
+        Workflow workflow = createWorkflow()
+        workflowSelectionService.workflowService = Mock(WorkflowService)
+        workflowSelectionService.workflowService.findAllAlignmentWorkflows() >> [workflow]
+        SpeciesWithStrain speciesWithStrain1 = createSpeciesWithStrain([strain: [name: 'sws1']])
+        SpeciesWithStrain speciesWithStrain2 = createSpeciesWithStrain([strain: [name: 'sws2']])
+        ReferenceGenome refGenome = createReferenceGenome([speciesWithStrain: [speciesWithStrain1, speciesWithStrain2] as Set])
+        createWorkflowVersion([
+                apiVersion             : createWorkflowApiVersion(workflow: workflow),
+                allowedReferenceGenomes: [refGenome],
+                supportedSeqTypes      : [createSeqType()],
+        ])
+
+        List<SpeciesWithStrain> projectSpeciesList = []
+        if (projectSpeciesNames != null) {
+            projectSpeciesList = projectSpeciesNames.collect { strainName ->
+                SpeciesWithStrain.findByStrain(Strain.findByName(strainName))
+            }
+        }
+
+        WorkflowSelectionOptionDTO selectedOption = new WorkflowSelectionOptionDTO([
+                projectSpecies: (projectSpeciesNames == null ? null : projectSpeciesList as Set),
+        ])
+
+        when:
+        WorkflowSelectionOptionsDTO result = workflowSelectionService.getPossibleAlignmentOptions(selectedOption)
+
+        then:
+        TestCase.assertContainSame(result.species*.strain*.name, expectedSpecies)
+
+        where:
+        projectSpeciesNames | expectedSpecies
+        null                | ['sws1', 'sws2']
+        []                  | ['sws1', 'sws2']
+        ['sws1']            | ['sws1']
+        ['sws2']            | ['sws2']
+    }
 }

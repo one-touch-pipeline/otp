@@ -54,6 +54,7 @@ $(() => {
     formData.append('seqType.id', seqTypeSelect.val());
     formData.append('workflowVersion.id', versionSelect.val());
     formData.append('referenceGenome.id', refGenomeSelect.val());
+    formData.append('xenograft', $('#xenograft-checkbox').is(':checked'));
     if (speciesSelect.val()) {
       speciesSelect.val().forEach((species) => {
         formData.append('speciesWithStrains', species);
@@ -73,7 +74,7 @@ $(() => {
     data.seqType.displayName,
     data.version.displayName,
     data.refGenome.displayName,
-    data.species.map((specie) => specie.displayName).join(' + '),
+    data.species.map((species) => species.displayName).join(' + '),
     `<button class="btn float-end btn-outline-danger remove-config-btn"
          data-ref-genome-selector="${data.refGenSelectorId}"
          data-version-selector="${data.workflowVersionSelector.id}">

@@ -178,6 +178,17 @@
                             </tfoot>
                         </sec:ifAllGranted>
                     </table>
+
+                    <sec:ifAllGranted roles="ROLE_OPERATOR">
+                    <g:unless test="${hasMouseSpecies}">
+                        <h5 class="my-3">
+                            <input type="checkbox" class="xenograft-check" id="xenograft-checkbox">
+                            <label class="xenograft-check" for="xenograft-checkbox">
+                                ${g.message(code: "workflowSelection.fullStrainSelection")}
+                            </label>
+                        </h5>
+                    </g:unless>
+                    </sec:ifAllGranted>
                 </div>
             </div>
         </div>

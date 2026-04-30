@@ -21,8 +21,8 @@
  */
 
 /**
- * A handler to change the shown version to Not configured after one Fastqc workflow is configured
- * This js avoids to reload the backend
+ * A handler to change the shown version to "Not configured" after one Fastqc workflow is configured
+ * This js avoids reloading the backend
  */
 window.workflowSelectionUpdateSuccessHandler = function (container) {
   'use strict';
@@ -46,7 +46,7 @@ window.workflowSelectionUpdateSuccessHandler = function (container) {
 $.otp.workflowSelection = {
   currentAjaxCalls: {},
   removeButtons: {},
-  /** Contains all html form elements, that are used to select a configuration */
+  /** Contains all HTML form elements that are used to select a configuration */
   addButtons: {},
   selectElements: {},
   optionsActions: {},
@@ -88,6 +88,7 @@ $.otp.workflowSelection = {
     displayString += '</ul>';
     return displayString;
   },
+
   /** Saves the configuration for the selected workflowType and handles disabling and enabling of the button */
   saveConfig(workflowType, button) {
     'use strict';
@@ -120,6 +121,7 @@ $.otp.workflowSelection = {
       button.removeAttr('disabled');
     });
   },
+
   updateTableRowData(workflowType, data) {
     'use strict';
 
@@ -158,6 +160,7 @@ $.otp.workflowSelection = {
     }
     $(alteredRow).find('button').on('click', (e) => $.otp.workflowSelection.removeConfiguration(workflowType, e));
   },
+
   removeConfiguration(workflowType, event) {
     'use strict';
 
@@ -201,6 +204,7 @@ $.otp.workflowSelection = {
       $.otp.workflowSelection.enableRemoveButtons(workflowType);
     });
   },
+
   /** Method to receive all possible options from the backend and assign them to the select options */
   getPossibleOptions(workflowType) {
     'use strict';
@@ -211,6 +215,7 @@ $.otp.workflowSelection = {
     if (currentAjaxCall) {
       currentAjaxCall.abort();
     }
+    $.otp.workflowSelection.toggleSelectElements(workflowType, true);
     $.otp.workflowSelection.currentAjaxCalls[workflowType] = $.ajax({
       url: $.otp.createLink({
         controller: 'workflowSelection',
@@ -230,8 +235,11 @@ $.otp.workflowSelection = {
           $.otp.toaster.showErrorToast('Workflow Configuration', 'Some error occurred.');
         }
       }
+    }).always(() => {
+      $.otp.workflowSelection.toggleSelectElements(workflowType, false);
     });
   },
+
   setPossibleOptions(selectElement, idList) {
     'use strict';
 
@@ -243,14 +251,25 @@ $.otp.workflowSelection = {
         el.prop('disabled', !idList.includes(+value));
       }
     });
+
     if (selectElement.val() === null || JSON.stringify(selectElement.val()) === '[]') {
       selectElement.val('');
     }
+
     const valueAfter = selectElement.val();
     if (JSON.stringify(valueBefore) !== JSON.stringify(valueAfter)) {
       selectElement.trigger('change');
     }
   },
+
+  toggleSelectElements(workflowType, disabled) {
+    'use strict';
+
+    $.otp.workflowSelection.selectElements[workflowType].forEach((selectElement) => {
+      selectElement.prop('disabled', disabled);
+    });
+  },
+
   /** Receives a list of formElement Items and clears these */
   clearFormFields(workflowType) {
     'use strict';
@@ -260,7 +279,8 @@ $.otp.workflowSelection = {
       formElement.trigger('change.select2');
     });
   },
-  /** Disables all remove buttons in corresponding table on workflowSelection page */
+
+  /** Disables all remove buttons in the corresponding table on the workflowSelection page */
   disableRemoveButtons(workflowType) {
     'use strict';
 
@@ -268,7 +288,8 @@ $.otp.workflowSelection = {
       .$('button.remove-config-btn:not([disabled])');
     $.otp.workflowSelection.removeButtons[workflowType].prop('disabled', true);
   },
-  /** Enables all remove buttons in corresponding table on workflowSelection page */
+
+  /** Enables all remove buttons in the corresponding table on the workflowSelection page */
   enableRemoveButtons(workflowType) {
     'use strict';
 

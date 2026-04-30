@@ -66,5 +66,21 @@ export default [
         button: "readonly"
       }
     }
+  },
+  // For Cypress tests: adding Cypress globals for IntelliJ's error highlighting
+  {
+    files: ["cypress/e2e/**/*.js", "cypress/support/**/*.js"],
+    languageOptions: {
+      globals: {
+        // keep browser globals in tests
+        ...globals.browser,
+        // Mocha globals: describe, it, beforeEach, context, etc.
+        ...globals.mocha,
+        // Cypress-specific globals
+        cy: "readonly",
+        Cypress: "readonly",
+        expect: "readonly"
+      }
+    }
   }
 ];

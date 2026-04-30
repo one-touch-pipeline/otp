@@ -44,6 +44,10 @@ $(document).ready(() => {
     $.otp.workflowSelection.getPossibleOptions(workflowType);
   });
 
+  $('#xenograft-checkbox').on('change', () => {
+    $.otp.workflowSelection.getPossibleOptions('alignment');
+  });
+
   $('#fastqcTable').dataTable({
     paging: false,
     dom: 'it'

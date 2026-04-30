@@ -73,7 +73,34 @@ class WorkflowSelectionController implements CheckAndCall {
 
         Project project = projectSelectionService.selectedProject
 
-        List<FastQcValues> fastqcVersions = fastqcWorkflows.collect { Workflow workflow ->
+        List<SeqType> analysisSeqTypes = workflowService.getSupportedSeqTypesOfVersions(analysisWorkflows).sort { it.displayNameWithLibraryLayout }
+        List<SeqType> alignmentSeqTypes = workflowService.getSupportedSeqTypesOfVersions(alignmentWorkflows)
+
+        List<ReferenceGenome> refGenomes = buildSortedReferenceGenomes(alignmentWorkflows)
+
+        return [
+                alignment             : [
+                        conf            : buildAlignmentConf(project, alignmentWorkflows),
+                        workflows       : alignmentWorkflows,
+                        seqTypes        : alignmentSeqTypes,
+                        species         : referenceGenomeService.getAllSpeciesWithStrains(refGenomes as Set),
+                        referenceGenomes: refGenomes,
+                        versions        : buildVersionsForWorkflows(alignmentWorkflows),
+                ],
+                analysis              : [
+                        conf     : buildAnalysisConf(project, analysisWorkflows),
+                        workflows: analysisWorkflows,
+                        versions : buildVersionsForWorkflows(analysisWorkflows),
+                        seqTypes : analysisSeqTypes,
+                ],
+                fastqcVersions        : buildFastqcVersions(project, fastqcWorkflows),
+                seqTypeMergingCriteria: buildSeqTypeMergingCriteria(project, alignmentSeqTypes),
+                hasMouseSpecies       : project?.speciesWithStrains?.any { it.species.speciesCommonName.name == "Mouse" },
+        ]
+    }
+
+    private List<FastQcValues> buildFastqcVersions(Project project, List<Workflow> fastqcWorkflows) {
+        return fastqcWorkflows.collect { Workflow workflow ->
             WorkflowVersion version = atMostOneElement(WorkflowVersionSelector.findAllByProjectAndDeprecationDateIsNull(project).findAll {
                 it.workflowVersion.workflow == workflow
             })?.workflowVersion
@@ -82,9 +109,11 @@ class WorkflowSelectionController implements CheckAndCall {
             }.collect { Version.fromWorkflowVersion(it) }
             return new FastQcValues(workflow, versions, version)
         }
+    }
 
-        List<WorkflowVersionConfValue> alignmentConf = alignmentWorkflows.collectMany { workflow ->
-            return workflowVersionSelectorService.findAllByProjectAndWorkflow(project, workflow).collectMany { wvSelector ->
+    private List<WorkflowVersionConfValue> buildAlignmentConf(Project project, List<Workflow> alignmentWorkflows) {
+        return alignmentWorkflows.collectMany { workflow ->
+            workflowVersionSelectorService.findAllByProjectAndWorkflow(project, workflow).collectMany { wvSelector ->
                 SeqType seqType = wvSelector.seqType
                 List<ReferenceGenomeSelector> rgSelectors = referenceGenomeSelectorService.findAllBySeqTypeAndWorkflowAndProject(seqType, workflow, project)
                 return rgSelectors.collect { rgSelector ->
@@ -97,70 +126,50 @@ class WorkflowSelectionController implements CheckAndCall {
                 }
             }
         }
+    }
 
-        List<SeqType> analysisSeqTypes = workflowService.getSupportedSeqTypesOfVersions(analysisWorkflows).sort { it.displayNameWithLibraryLayout }
-
-        List<WorkflowVersionConfValue> analysisConf = analysisWorkflows.collectMany { workflow ->
-            return workflowVersionSelectorService.findAllByProjectAndWorkflow(project, workflow).collect { wvSelector ->
+    private List<WorkflowVersionConfValue> buildAnalysisConf(Project project, List<Workflow> analysisWorkflows) {
+        return analysisWorkflows.collectMany { workflow ->
+            workflowVersionSelectorService.findAllByProjectAndWorkflow(project, workflow).collect { wvSelector ->
                 SeqType seqType = wvSelector.seqType
                 new WorkflowVersionConfValue(wvSelector.id, workflow, seqType, [], wvSelector.workflowVersion, null)
             }
         }
+    }
 
-        List<SeqType> alignmentSeqTypes = workflowService.getSupportedSeqTypesOfVersions(alignmentWorkflows)
-
+    private Map<SeqType, MergingCriteria> buildSeqTypeMergingCriteria(Project project, List<SeqType> alignmentSeqTypes) {
         List<MergingCriteria> mergingCriteria = MergingCriteria.findAllByProject(project)
-        Map<SeqType, MergingCriteria> seqTypeMergingCriteria = alignmentSeqTypes
+        return alignmentSeqTypes
                 .sort { it.displayNameWithLibraryLayout }
                 .collectEntries { SeqType seqType -> [(seqType): mergingCriteria.find { it.seqType == seqType }] }
                 .findAll { it.value }
+    }
 
-        List<Version> alignmentVersions = alignmentWorkflows.collectMany { Workflow workflow ->
+    private List<Version> buildVersionsForWorkflows(List<Workflow> workflows) {
+        return workflows.collectMany { Workflow workflow ->
             workflowVersionService.findAllByWorkflow(workflow).sort { a, b ->
                 new WorkflowVersionComparatorConsideringDefaultAndDeprecated(workflow.defaultVersion).compare(a, b)
             }.collect { Version.fromWorkflowVersion(it) }
         }
+    }
 
-        List<Version> analysisVersions = analysisWorkflows.collectMany { Workflow workflow ->
-            workflowVersionService.findAllByWorkflow(workflow).sort { a, b ->
-                new WorkflowVersionComparatorConsideringDefaultAndDeprecated(workflow.defaultVersion).compare(a, b)
-            }.collect { Version.fromWorkflowVersion(it) }
-        }
-
-        List<ReferenceGenome> refGenomes = (workflowVersionService.findAllByWorkflows(alignmentWorkflows).collectMany {
-            it.allowedReferenceGenomes
-        }).sort { ReferenceGenome a, ReferenceGenome b ->
-            (a.legacy <=> b.legacy) ?: a.name.compareToIgnoreCase(b.name)
-        }.unique()
-        Set<SpeciesWithStrain> species = referenceGenomeService.getAllSpeciesWithStrains(refGenomes as Set)
-        return [
-                alignment             : [
-                        conf            : alignmentConf,
-                        workflows       : alignmentWorkflows,
-                        seqTypes        : alignmentSeqTypes,
-                        species         : species,
-                        referenceGenomes: refGenomes,
-                        versions        : alignmentVersions,
-                ],
-                analysis              : [
-                        conf     : analysisConf,
-                        workflows: analysisWorkflows,
-                        versions : analysisVersions,
-                        seqTypes : analysisSeqTypes,
-                ],
-                fastqcVersions        : fastqcVersions,
-                seqTypeMergingCriteria: seqTypeMergingCriteria,
-        ]
+    private List<ReferenceGenome> buildSortedReferenceGenomes(List<Workflow> alignmentWorkflows) {
+        return workflowVersionService.findAllByWorkflows(alignmentWorkflows).collectMany { it.allowedReferenceGenomes }
+                .sort { ReferenceGenome a, ReferenceGenome b ->
+                    (a.legacy <=> b.legacy) ?: a.name.compareToIgnoreCase(b.name)
+                }.unique()
     }
 
     def possibleAlignmentOptions(ConfigurationCommand cmd) {
         checkDefaultErrorsAndCallMethod(cmd) {
+            boolean showAllSpecies = params.getBoolean('xenograft', false)
             WorkflowSelectionOptionsDTO options = workflowSelectionService.getPossibleAlignmentOptions(new WorkflowSelectionOptionDTO([
                     workflow       : cmd.workflow,
                     workflowVersion: cmd.workflowVersion,
                     seqType        : cmd.seqType,
                     species        : cmd.speciesWithStrains,
                     refGenome      : cmd.referenceGenome,
+                    projectSpecies : showAllSpecies ? null : projectSelectionService.requestedProject.speciesWithStrains,
             ]))
 
             render([

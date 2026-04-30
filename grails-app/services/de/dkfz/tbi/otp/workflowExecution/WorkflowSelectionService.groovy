@@ -83,15 +83,23 @@ class WorkflowSelectionService {
                 referenceGenomeService.getSpeciesWithStrainOptions(option.refGenome, option.species) as Set :
                 referenceGenomeService.getAllSpeciesWithStrains(refGenomes) as Set
 
+        if (option.projectSpecies) {
+            species = species.findAll { option.projectSpecies.contains(it) }
+        }
+
         if (option.species) {
+            Map<ReferenceGenome, List<List<SpeciesWithStrain>>> refGenomeCombinationsMap = refGenomes.collectEntries {
+                [(it): referenceGenomeService.getSpeciesWithStrainCombinations(it)]
+            }
             refGenomes = refGenomes.findAll {
-                List<List<SpeciesWithStrain>> combinationList = referenceGenomeService.getSpeciesWithStrainCombinations(it)
+                List<List<SpeciesWithStrain>> combinationList = refGenomeCombinationsMap[it]
                 return combinationList.every { speciesList -> option.species.any { speciesList.contains(it) } } &&
                         option.species.every { specOpt -> combinationList.any { combination -> combination.contains(specOpt) } }
             }
             // Add currently selected reference genome option, if the selected species can be extended to a fitting combination for that reference genome
             if (option.refGenome) {
-                List<List<SpeciesWithStrain>> combinationList = referenceGenomeService.getSpeciesWithStrainCombinations(option.refGenome)
+                List<List<SpeciesWithStrain>> combinationList = refGenomeCombinationsMap[option.refGenome] ?:
+                        referenceGenomeService.getSpeciesWithStrainCombinations(option.refGenome)
                 if (option.species.every { it -> combinationList.any { combination -> combination.contains(it) } }) {
                     refGenomes.add(option.refGenome)
                 }
@@ -126,6 +134,7 @@ class WorkflowSelectionOptionsDTO {
 
 @TupleConstructor
 class WorkflowSelectionOptionDTO {
+    Set<SpeciesWithStrain> projectSpecies
     Workflow workflow
     WorkflowVersion workflowVersion
     SeqType seqType

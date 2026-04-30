@@ -56,6 +56,7 @@ describe('Check workflow selection page', () => {
         cy.wait('@possibleOptions');
         cy.get('#alignment-ref-genome-select').select(config.alignment.refGenome, { force: true });
         cy.wait('@possibleOptions');
+        cy.get('#xenograft-checkbox').check();
         cy.get('#alignment-species-select').select(config.alignment.species, { force: true });
         cy.wait('@possibleOptions');
 
@@ -89,6 +90,35 @@ describe('Check workflow selection page', () => {
       });
     });
 
+    it('should show all species when xenograft checkbox is checked and filter again when unchecked', () => {
+      cy.visit('/workflowSelection/index');
+
+      cy.intercept('/workflowSelection/possibleAlignmentOptions*').as('possibleOptions');
+
+      cy.get('h2#headingAlignment').click();
+      cy.wait('@possibleOptions');
+
+      cy.get('#xenograft-checkbox').should('exist');
+      cy.get('#xenograft-checkbox').should('not.be.checked');
+
+      // With the checkbox unchecked, some species options should be disabled (filtered by project species)
+      cy.get('#alignment-species-select option:disabled').should('have.length.greaterThan', 0);
+
+      cy.get('#alignment-species-select option:not(:disabled)').its('length').then((enabledBefore) => {
+        cy.get('#xenograft-checkbox').check();
+        cy.wait('@possibleOptions');
+
+        cy.get('#alignment-species-select option:disabled').should('have.length', 0);
+
+        cy.get('#alignment-species-select option:not(:disabled)').should('have.length.greaterThan', enabledBefore - 1);
+
+        cy.get('#xenograft-checkbox').uncheck();
+        cy.wait('@possibleOptions');
+
+        cy.get('#alignment-species-select option:disabled').should('have.length.greaterThan', 0);
+      });
+    });
+
     it('should create two analysis configurations for same project and seq type and delete it', () => {
       cy.visit('/workflowSelection/index');
 
@@ -115,7 +145,7 @@ describe('Check workflow selection page', () => {
             .as('createdCells1');
         });
 
-        // Create a second workflowVersionSelector with same project and seqType
+        // Create a second workflowVersionSelector with the same project and seqType
         cy.get('#analysis-workflow-select').select(config.analysis[1].workflow, { force: true });
         cy.wait('@possibleOptions');
         cy.get('#analysis-seq-type-select').select(config.analysis[1].seqType, { force: true });
@@ -172,6 +202,7 @@ describe('Check workflow selection page', () => {
         cy.get('#alignment-seq-type-select').select(config.alignment.seqType, { force: true });
         cy.get('#alignment-version-select').select(config.alignment.version.id, { force: true });
         cy.get('#alignment-ref-genome-select').select(config.alignment.refGenome, { force: true });
+        cy.get('#xenograft-checkbox').check();
         cy.get('#alignment-species-select').select(config.alignment.species[0], { force: true });
 
         cy.get('button#add-alignment-config-btn').click();
@@ -204,6 +235,7 @@ describe('Check workflow selection page', () => {
       cy.get('#alignment-seq-type-select').should('not.exist');
       cy.get('#alignment-version-select').should('not.exist');
       cy.get('#alignment-ref-genome-select').should('not.exist');
+      cy.get('#xenograft-checkbox').should('not.exist');
       cy.get('#alignment-species-select').should('not.exist');
       cy.get('#analysis-workflow-select').should('not.exist');
       cy.get('#analysis-seq-type-select').should('not.exist');
