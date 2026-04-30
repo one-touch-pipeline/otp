@@ -25,7 +25,8 @@ import groovy.json.JsonOutput
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.alignment.AbstractAlignmentWorkflowTest
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
@@ -49,10 +50,10 @@ abstract class AbstractCellRangerAlignmentWorkflowTests extends AbstractAlignmen
     CellRangerConfigurationService cellRangerConfigurationService
 
     List<String> fastqFiles = [
-            "fastqFiles/10x/normal/paired/pbmc_1k_v3_S1_L001_R1_001.fastq.gz",
-            "fastqFiles/10x/normal/paired/pbmc_1k_v3_S1_L001_R2_001.fastq.gz",
-            "fastqFiles/10x/normal/paired/pbmc_1k_v3_S1_L002_R1_001.fastq.gz",
-            "fastqFiles/10x/normal/paired/pbmc_1k_v3_S1_L002_R2_001.fastq.gz",
+            "fastqFiles/10x/small/test_10x_sc3_v3_5k_a549_gex_l1_fastq1.fastq.gz",
+            "fastqFiles/10x/small/test_10x_sc3_v3_5k_a549_gex_l1_fastq2.fastq.gz",
+            "fastqFiles/10x/small/test_10x_sc3_v3_5k_a549_gex_l2_fastq1.fastq.gz",
+            "fastqFiles/10x/small/test_10x_sc3_v3_5k_a549_gex_l2_fastq2.fastq.gz",
     ]
 
     abstract Map<String, Integer> getTestParameters()
@@ -68,23 +69,23 @@ abstract class AbstractCellRangerAlignmentWorkflowTests extends AbstractAlignmen
 
             ToolName toolName = createToolName(path: "cellranger")
             ReferenceGenomeIndex referenceGenomeIndex = createReferenceGenomeIndex(
-                    toolName        : toolName,
-                    path            : "1.2.0",
-                    referenceGenome : createReferenceGenome(path: "hg_GRCh38"),
+                    toolName: toolName,
+                    path: "1.2.0",
+                    referenceGenome: createReferenceGenome(path: "hg_GRCh38"),
                     indexToolVersion: "1.2.0",
             )
 
             ConfigPerProjectAndSeqType conf = createConfig(
-                    seqType         : seqType,
-                    project         : project,
-                    programVersion  : "CellRanger/10.0.0",
+                    seqType: seqType,
+                    project: project,
+                    programVersion: "CellRanger/10.0.0",
             )
 
             mwp = createMergingWorkPackage(
-                    needsProcessing     : true,
-                    sample              : sample,
-                    config              : conf,
-                    referenceGenome     : referenceGenomeIndex.referenceGenome,
+                    needsProcessing: true,
+                    sample: sample,
+                    config: conf,
+                    referenceGenome: referenceGenomeIndex.referenceGenome,
                     referenceGenomeIndex: referenceGenomeIndex,
             )
 
