@@ -26,12 +26,16 @@ import grails.gorm.hibernate.annotation.ManagedEntity
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.Entity
 
+import java.time.LocalDate
+
 @ManagedEntity
 class ProjectRequestPersistentState implements Entity {
 
     /** beanNames are provided by the classes implementing {@link de.dkfz.tbi.otp.project.projectRequest.ProjectRequestState} **/
     String beanName
     User currentOwner
+    /** Set to the current date each time this request enters the Approval state; used to compute reminder cutoffs. */
+    LocalDate approvalRoundStartedAt
 
     static hasMany = [
             usersThatNeedToApprove: User,
@@ -48,8 +52,9 @@ class ProjectRequestPersistentState implements Entity {
         currentOwner index: "project_request_persistent_state_current_owner_idx"
     }
 
-    static constraints = {
+    static Closure constraints = {
         beanName blank: false
         currentOwner nullable: true
+        approvalRoundStartedAt nullable: true
     }
 }

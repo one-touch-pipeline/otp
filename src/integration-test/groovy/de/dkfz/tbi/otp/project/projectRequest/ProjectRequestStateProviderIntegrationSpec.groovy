@@ -25,9 +25,12 @@ import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.project.ProjectRequest
+
+import java.time.LocalDate
 
 @Rollback
 @Integration
@@ -75,6 +78,68 @@ class ProjectRequestStateProviderIntegrationSpec extends Specification implement
 
         then:
         projectRequest.state.beanName == "approved"
+    }
+
+    void "setState sets approvalRoundStartedAt when transitioning to Approval"() {
+        given:
+        ProjectRequest projectRequest = createProjectRequest()
+        LocalDate before = LocalDate.now()
+
+        when:
+        projectRequestStateProvider.setState(projectRequest, Approval)
+        LocalDate after = LocalDate.now()
+        projectRequest.refresh()
+
+        then:
+        projectRequest.state.beanName == "approval"
+        !projectRequest.state.approvalRoundStartedAt.isBefore(before)
+        !projectRequest.state.approvalRoundStartedAt.isAfter(after)
+    }
+
+    void "setState refreshes approvalRoundStartedAt when re-entering Approval"() {
+        given:
+        LocalDate oldDate = LocalDate.of(1970, 1, 2)
+        ProjectRequest projectRequest = createProjectRequest([
+                state: createProjectRequestPersistentState([
+                        beanName              : "approval",
+                        approvalRoundStartedAt: oldDate,
+                ])
+        ])
+        LocalDate before = LocalDate.now()
+
+        when:
+        projectRequestStateProvider.setState(projectRequest, Approval)
+        LocalDate after = LocalDate.now()
+        projectRequest.refresh()
+
+        then:
+        projectRequest.state.beanName == "approval"
+        !projectRequest.state.approvalRoundStartedAt.isBefore(before)
+        !projectRequest.state.approvalRoundStartedAt.isAfter(after)
+        projectRequest.state.approvalRoundStartedAt != oldDate
+    }
+
+    @Unroll
+    void "setState does not overwrite approvalRoundStartedAt on transition to #stateClass.simpleName"() {
+        given:
+        LocalDate approvalRoundStartedAt = LocalDate.of(1970, 1, 2)
+        ProjectRequest projectRequest = createProjectRequest([
+                state: createProjectRequestPersistentState([
+                        beanName              : "approval",
+                        approvalRoundStartedAt: approvalRoundStartedAt,
+                ])
+        ])
+
+        when:
+        projectRequestStateProvider.setState(projectRequest, stateClass)
+        projectRequest.refresh()
+
+        then:
+        projectRequest.state.beanName == ProjectRequestStateProvider.getStateBeanName(stateClass)
+        projectRequest.state.approvalRoundStartedAt == approvalRoundStartedAt
+
+        where:
+        stateClass << [Approved, Check, Draft, Initial, PiEdit, RequesterEdit]
     }
 
     void "getStateBeanName, should return initial for the state class Initial"() {

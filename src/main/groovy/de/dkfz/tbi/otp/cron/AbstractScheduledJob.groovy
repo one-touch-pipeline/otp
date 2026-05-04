@@ -51,6 +51,7 @@ abstract class AbstractScheduledJob {
             DeleteOldMailsJob,
             FetchUserDataFromLdapJob,
             GenerateAndSendKPIsForNBI,
+            ProjectRequestReminderJob,
             ScheduleUsersForDeactivationJob,
             UnknownLdapUsersJob,
     ]

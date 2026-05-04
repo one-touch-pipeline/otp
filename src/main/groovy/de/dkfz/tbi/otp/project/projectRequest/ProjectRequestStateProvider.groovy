@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.project.ProjectRequest
 
+import java.time.LocalDate
 import javax.annotation.PostConstruct
 
 @CompileDynamic
@@ -63,6 +64,9 @@ class ProjectRequestStateProvider {
 
     void setState(ProjectRequest projectRequest, Class<ProjectRequestState> stateClass) {
         projectRequest.state.beanName = getStateBeanName(stateClass)
+        if (stateClass == Approval) {
+            projectRequest.state.approvalRoundStartedAt = LocalDate.now()
+        }
         projectRequestService.saveProjectRequest(projectRequest)
     }
 

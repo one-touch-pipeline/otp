@@ -29,7 +29,7 @@
 set -e
 
 # Get list of changed files in this branch (modified, added, or renamed)
-CHANGED_FILES=$(git diff --name-only "$(git merge-base HEAD origin/master)" --diff-filter=ACMR | grep '\.groovy$' | grep -v "^scripts/" || true)
+CHANGED_FILES=$(git diff --name-only "$(git merge-base HEAD origin/master)" --diff-filter=ACMR | grep '\.groovy$' | grep -v "^scripts/" | grep -v "^migrations/" || true)
 
 # Check if there are any changed Groovy files
 if [ -z "$CHANGED_FILES" ]; then

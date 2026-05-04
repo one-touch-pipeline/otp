@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 databaseChangeLog = {
     include file: 'changelogs/2022/initialDatabaseSchema.groovy'
 
@@ -221,5 +220,8 @@ databaseChangeLog = {
 
     include file: 'changelogs/2026/otp-2929-improve-workflow-step-index.groovy'
 
+    include file: 'changelogs/2026/otp-2951-add-project-request-approval-round-tracking.groovy'
+
     include file: 'changelogs/2024/otp-2700.groovy'
 }
+// codenarc-enable AbcMetric, NoScriptBindings

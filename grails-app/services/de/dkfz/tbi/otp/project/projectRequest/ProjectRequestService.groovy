@@ -25,6 +25,7 @@ import grails.gorm.transactions.Transactional
 import grails.web.mapping.LinkGenerator
 import groovy.transform.CompileDynamic
 import org.codehaus.groovy.runtime.InvokerHelper
+import org.hibernate.FetchMode
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 
@@ -41,10 +42,13 @@ import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.security.user.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.MessageSourceService
+import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
+import de.dkfz.tbi.otp.utils.exceptions.SaveMailException
 
 import java.time.LocalDate
 
+@SuppressWarnings('MethodCount')
 @Transactional
 class ProjectRequestService {
 
@@ -90,6 +94,7 @@ class ProjectRequestService {
         return departmentService.getListOfHeadsForDepartment(department)
     }
 
+    @SuppressWarnings('AbcMetric')
     @CompileDynamic
     ProjectRequest saveProjectRequestFromCommand(ProjectRequestCreationCommand cmd) throws OtpRuntimeException {
         securityService.ensureNotSwitchedUser()
@@ -340,6 +345,59 @@ class ProjectRequestService {
         mailHelperService.saveMail(subject, body, recipients, ccs)
     }
 
+    @CompileDynamic
+    @SuppressWarnings('CatchException')
+    void sendReminderEmailsForPendingApprovals(LocalDate today) {
+        assert today: "today must not be null"
+
+        String teamSignature = processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME)
+        List<ProjectRequest> projectRequests = ProjectRequest.withCriteria {
+            fetchMode("requester", FetchMode.JOIN)
+            state {
+                eq("beanName", ProjectRequestStateProvider.getStateBeanName(Approval))
+                lt("approvalRoundStartedAt", today)
+            }
+            order("id", "asc")
+        } as List<ProjectRequest>
+
+        projectRequests.each { ProjectRequest projectRequest ->
+            try {
+                SessionUtils.withNewTransaction {
+                    sendReminderEmail(ProjectRequest.get(projectRequest.id), teamSignature)
+                }
+            } catch (SaveMailException e) {
+                log.error("Failed to save reminder email for ProjectRequest ${projectRequest.id}: ${e.message}", e)
+                throw e
+            } catch (Exception e) {
+                log.error("Unexpected error sending reminder for ProjectRequest ${projectRequest.id}: ${e.message}", e)
+                throw e
+            }
+        }
+    }
+
+    private void sendReminderEmail(ProjectRequest projectRequest, String teamSignature) {
+        List<User> projectAuthorities = (projectRequest.state.usersThatNeedToApprove as List).unique()
+        if (!projectAuthorities) {
+            log.warn("Skipping reminder for ProjectRequest ${projectRequest.id} — no unapproved PIs")
+            return
+        }
+        User requester = projectRequest.requester
+        List<String> recipients = projectAuthorities*.email
+        List<String> ccs = [requester.email]
+        String projectAuthoritiesUsernames = projectAuthorities.collect { "${it.realName} (${it.username})" }.join(", ")
+        String subject = messageSourceService.createMessage("notification.projectRequest.reminder.subject", [
+                projectRequestName: projectRequest.name,
+                projectRequestId  : projectRequest.id,
+        ])
+        String body = messageSourceService.createMessage("notification.projectRequest.reminder.body", [
+                projectRequestName: projectRequest.name,
+                projectAuthorities: projectAuthoritiesUsernames,
+                link              : getProjectRequestLinkWithoutParams(projectRequest),
+                teamSignature     : teamSignature,
+        ])
+        mailHelperService.saveMail(subject, body, recipients, ccs)
+    }
+
     void sendPiRejectEmail(ProjectRequest projectRequest, String rejectComment) {
         User requester = projectRequest.requester
         List<String> recipients = [requester.email]
@@ -565,6 +623,7 @@ class ProjectRequestService {
         return auditLogService.logAction(AuditLog.Action.PROJECT_REQUEST, "${staticLogPrefix} ${description}")
     }
 
+    @SuppressWarnings('NestedBlockDepth')
     @CompileDynamic
     List<ProjectRequest> getRequestsUserIsInvolved(boolean resolved) {
         String equalOrNotEqual = resolved ? "eq" : "ne"

@@ -47,6 +47,7 @@ import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
+import java.sql.Timestamp
 import java.time.LocalDate
 
 @Integration
@@ -221,6 +222,121 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         1 * projectRequestService.mailHelperService.saveMail(subject, body, authorities*.email, [requester.email])
         1 * projectRequestService.processingOptionService.findOptionAsString(_) >> emailSenderSalutation
         0 * _
+    }
+
+    void "sendReminderEmailsForPendingApprovals sends reminder only to unapproved PIs for Approval-state requests entered before today"() {
+        given:
+        final LocalDate today = LocalDate.of(2026, 4, 15)
+        final LocalDate yesterday = today.minusDays(1)
+        final LocalDate todayDate = today
+        final User requester = createUser()
+        final User approvedPi = createUser()
+        final User unapprovedPi = createUser()
+        final ProjectRequest request = createProjectRequest([requester: requester], [
+                beanName                 : "approval",
+                usersThatNeedToApprove   : [unapprovedPi],
+                usersThatAlreadyApproved : [approvedPi],
+        ])
+        final ProjectRequest requestCreatedToday = createProjectRequest([:], [
+                beanName              : "approval",
+                usersThatNeedToApprove: [createUser()],
+        ])
+        final ProjectRequest requestInOtherState = createProjectRequest([:], [
+                beanName              : "check",
+                usersThatNeedToApprove: [createUser()],
+        ])
+        ProjectRequestPersistentState.executeUpdate(
+                "UPDATE ProjectRequestPersistentState SET approvalRoundStartedAt = :date WHERE id = :id",
+                [date: yesterday, id: request.state.id]
+        )
+        ProjectRequestPersistentState.executeUpdate(
+                "UPDATE ProjectRequestPersistentState SET approvalRoundStartedAt = :date WHERE id = :id",
+                [date: todayDate, id: requestCreatedToday.state.id]
+        )
+        ProjectRequestPersistentState.executeUpdate(
+                "UPDATE ProjectRequestPersistentState SET approvalRoundStartedAt = :date WHERE id = :id",
+                [date: yesterday, id: requestInOtherState.state.id]
+        )
+        // withNewTransaction opens a new Hibernate session where uncommitted test data is invisible;
+        // stub get() to return the already-loaded entity (same pattern as WorkflowRunService).
+        GroovySpy(ProjectRequest, global: true)
+        ProjectRequest.get(request.id) >> request
+        final String expectedAuthorityUsernames = "${unapprovedPi.realName} (${unapprovedPi.username})"
+
+        when:
+        projectRequestService.sendReminderEmailsForPendingApprovals(today)
+
+        then:
+        1 * projectRequestService.messageSourceService.createMessage("notification.projectRequest.reminder.subject", [
+                projectRequestName: request.name,
+                projectRequestId  : request.id,
+        ]) >> subject
+        1 * projectRequestService.linkGenerator.link(_) >> link
+        1 * projectRequestService.messageSourceService.createMessage("notification.projectRequest.reminder.body", [
+                projectRequestName: request.name,
+                projectAuthorities: expectedAuthorityUsernames,
+                link              : link,
+                teamSignature     : emailSenderSalutation,
+        ]) >> body
+        1 * projectRequestService.mailHelperService.saveMail(subject, body, [unapprovedPi.email], [requester.email])
+        1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME) >> emailSenderSalutation
+        0 * projectRequestService.mailHelperService.saveMail(_, _, _, _)
+    }
+
+    void "sendReminderEmailsForPendingApprovals skips re-entered Approval when approvalRoundStartedAt is today"() {
+        given:
+        final LocalDate today = LocalDate.of(2026, 4, 15)
+        final Date weekAgo = Timestamp.valueOf(today.minusDays(7).atStartOfDay())
+        final ProjectRequest request = createProjectRequest([:], [
+                beanName              : "approval",
+                usersThatNeedToApprove: [createUser()],
+        ])
+        // Simulate re-entry: dateCreated is old (first round), approvalRoundStartedAt is today (second round entered today)
+        ProjectRequestPersistentState.executeUpdate(
+                "UPDATE ProjectRequestPersistentState SET dateCreated = :date WHERE id = :id",
+                [date: weekAgo, id: request.state.id]
+        )
+        ProjectRequestPersistentState.executeUpdate(
+                "UPDATE ProjectRequestPersistentState SET approvalRoundStartedAt = :date WHERE id = :id",
+                [date: today, id: request.state.id]
+        )
+
+        when:
+        projectRequestService.sendReminderEmailsForPendingApprovals(today)
+
+        then:
+        1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME) >> emailSenderSalutation
+        0 * _
+    }
+
+    @SuppressWarnings("ThrowRuntimeException")
+    void "sendReminderEmailsForPendingApprovals re-throws exception on reminder failure"() {
+        given:
+        final LocalDate today = LocalDate.of(2026, 4, 15)
+        final LocalDate yesterday = today.minusDays(1)
+        final User failingRequester = createUser()
+        final User failingPi = createUser()
+        final ProjectRequest failingRequest = createProjectRequest([requester: failingRequester], [
+                beanName              : "approval",
+                usersThatNeedToApprove: [failingPi],
+        ])
+        ProjectRequestPersistentState.executeUpdate(
+                "UPDATE ProjectRequestPersistentState SET approvalRoundStartedAt = :date WHERE id = :id",
+                [date: yesterday, id: failingRequest.state.id]
+        )
+        GroovySpy(ProjectRequest, global: true)
+        ProjectRequest.get(failingRequest.id) >> failingRequest
+
+        when:
+        projectRequestService.sendReminderEmailsForPendingApprovals(today)
+
+        then:
+        thrown(RuntimeException)
+        1 * projectRequestService.processingOptionService.findOptionAsString(ProcessingOption.OptionName.HELP_DESK_TEAM_NAME) >> emailSenderSalutation
+        1 * projectRequestService.messageSourceService.createMessage("notification.projectRequest.reminder.subject", _) >> {
+            throw new RuntimeException("mail creation failed")
+        }
+        0 * projectRequestService.mailHelperService.saveMail(_, _, _, _)
     }
 
     void "sendPiRejectEmail"() {
@@ -1103,4 +1219,5 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         ""    | true
         "not" | false
     }
+
 }
