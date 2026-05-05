@@ -35,9 +35,7 @@ import de.dkfz.tbi.otp.utils.ProcessOutput
 import de.dkfz.tbi.otp.workflow.ConcreteArtefactService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
+import java.nio.file.*
 
 class BamImportLinkSourceJobSpec extends Specification implements DataTest, BamImportWorkflowDomainFactory {
     @Override
@@ -72,16 +70,17 @@ class BamImportLinkSourceJobSpec extends Specification implements DataTest, BamI
         }
     }
 
-    private Map setupLinkSourceMocks(String workDirName) {
+    private Map setupLinkSourceMocks(String workDirName, boolean withMd5sum) {
+        int md5sumcount = withMd5sum ? 1 : 0
         Path workDir = tempDir.resolve(workDirName)
         Files.createDirectories(workDir)
         Path sourceDir = Paths.get("/source")
         Path md5sumPath = workDir.resolve("${bamFile.bamFileName}.md5sum")
 
         job.externalAlignmentWorkFileService = Mock(ExternalAlignmentWorkFileService) {
-            _ * getDirectoryPath(bamFile) >> workDir
-            _ * getMd5SumPath(bamFile) >> md5sumPath
-            _ * getMd5SumPathBai(bamFile) >> workDir.resolve("${bamFile.baiFileName}.md5sum")
+            1 * getDirectoryPath(bamFile) >> workDir
+            md5sumcount * getMd5SumPath(bamFile) >> md5sumPath
+            md5sumcount * getMd5SumPathBai(bamFile) >> sourceDir.resolve("${bamFile.baiFileName}.md5sum")
         }
         job.externalAlignmentSourceFileService = Mock(ExternalAlignmentSourceFileService) {
             1 * getDirectoryPath(bamFile) >> sourceDir
@@ -92,7 +91,7 @@ class BamImportLinkSourceJobSpec extends Specification implements DataTest, BamI
     void "test getLinkMap, when link source without md5sum, should return links and neither write BAM md5sum nor compute BAI md5sum"() {
         given:
         createBamImportInstance(externallyProcessedBamFiles: [bamFile], linkOperation: BamImportInstance.LinkOperation.LINK_SOURCE)
-        Map dirs = setupLinkSourceMocks("work")
+        Map dirs = setupLinkSourceMocks("work", false)
         job.remoteShellHelper = Mock(RemoteShellHelper) {
             0 * executeCommandReturnProcessOutput(_)
         }
@@ -116,7 +115,7 @@ class BamImportLinkSourceJobSpec extends Specification implements DataTest, BamI
         bamFile.md5sum = md5sumValue
         bamFile.save(flush: true)
         createBamImportInstance(externallyProcessedBamFiles: [bamFile], linkOperation: BamImportInstance.LinkOperation.LINK_SOURCE)
-        Map dirs = setupLinkSourceMocks("work-md5")
+        Map dirs = setupLinkSourceMocks("work-md5", true)
         job.remoteShellHelper = Mock(RemoteShellHelper) {
             1 * executeCommandReturnProcessOutput(_) >> new ProcessOutput(stdout: "", stderr: "", exitCode: 0)
         }

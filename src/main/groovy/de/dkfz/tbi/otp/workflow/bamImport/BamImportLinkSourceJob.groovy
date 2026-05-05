@@ -51,6 +51,9 @@ class BamImportLinkSourceJob extends AbstractLinkJob implements BamImportShared 
             return []
         }
 
+        Path importFolder = externalAlignmentWorkFileService.getDirectoryPath(bamFile)
+        Path sourceFolder = externalAlignmentSourceFileService.getDirectoryPath(bamFile)
+
         List<String> fileNames = [
                 bamFile.fileName,
                 bamFile.baiFileName,
@@ -61,14 +64,11 @@ class BamImportLinkSourceJob extends AbstractLinkJob implements BamImportShared 
             Files.writeString(md5sumPath, bamFile.md5sum)
 
             remoteShellHelper.executeCommandReturnProcessOutput(
-                    "cd ${shellQuote(externalAlignmentWorkFileService.getDirectoryPath(bamFile))} && " +
+                    "cd ${shellQuote(sourceFolder)} && " +
                             "md5sum -- ${shellQuote(bamFile.baiFileName)} " +
                             "> ${shellQuote(externalAlignmentWorkFileService.getMd5SumPathBai(bamFile))}"
             ).assertExitCodeZero()
         }
-
-        Path importFolder = externalAlignmentWorkFileService.getDirectoryPath(bamFile)
-        Path sourceFolder = externalAlignmentSourceFileService.getDirectoryPath(bamFile)
 
         return fileNames.collect {
             new LinkEntry(
