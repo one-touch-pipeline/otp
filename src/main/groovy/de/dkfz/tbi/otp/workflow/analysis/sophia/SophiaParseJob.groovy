@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.jobs.AbstractParseJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
+import java.nio.file.Files
 import java.nio.file.Path
 
 @Component
@@ -49,7 +50,7 @@ class SophiaParseJob extends AbstractParseJob implements SophiaWorkflowShared {
     void parseOutputs(WorkflowStep workflowStep) {
         SophiaInstance instance = getSophiaInstance(workflowStep)
         Path qcFile = sophiaWorkFileService.getQcJsonFile(instance)
-        JSONObject qcJson = JSON.parse(qcFile.text) as JSONObject
+        JSONObject qcJson = JSON.parse(Files.readString(qcFile)) as JSONObject
         Map<String, String> qcValues = qcJson.values()[0] as Map<String, String>
 
         SophiaQc sophiaQc = CollectionUtils.atMostOneElement(SophiaQc.findAllBySophiaInstance(instance))

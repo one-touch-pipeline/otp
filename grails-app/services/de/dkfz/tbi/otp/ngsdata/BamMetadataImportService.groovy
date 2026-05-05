@@ -190,7 +190,7 @@ class BamMetadataImportService {
                 if (qualityControlFile) {
                     Path qualityControlFilePath = bamFileParent.resolve(qualityControlFile)
 
-                    def qcValues = new JsonSlurper().parse(qualityControlFilePath.bytes)
+                    def qcValues = new JsonSlurper().parse(Files.readAllBytes(qualityControlFilePath))
 
                     new ExternallyProcessedBamFileQualityAssessment(
                             properlyPaired: qcValues.all.properlyPaired,

@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 
+import java.nio.file.Files
 import java.nio.file.Path
 
 @CompileDynamic
@@ -59,8 +60,8 @@ class ParseIndelQcJob extends AbstractEndStateAwareJobImpl implements AutoRestar
         FileService.ensureFileIsReadableAndNotEmptyStatic(indelQcFile)
         Path sampleSwapFile = indelCallingService.getSampleSwapJsonFile(instance)
         FileService.ensureFileIsReadableAndNotEmptyStatic(sampleSwapFile)
-        JSONObject qcJson = JSON.parse(indelQcFile.text)
-        JSONObject sampleSwapJson = JSON.parse(sampleSwapFile.text)
+        JSONObject qcJson = JSON.parse(Files.readString(indelQcFile))
+        JSONObject sampleSwapJson = JSON.parse(Files.readString(sampleSwapFile))
         IndelCallingInstance.withTransaction {
             IndelQualityControl indelQc = qcJson.values()
             indelQc.file = new File(indelQc.file.replace('./', '')).path

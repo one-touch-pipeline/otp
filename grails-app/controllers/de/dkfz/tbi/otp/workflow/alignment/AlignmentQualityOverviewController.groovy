@@ -340,7 +340,7 @@ class AlignmentQualityOverviewController implements CheckAndCall {
         Path file = rnaAlignmentWorkFileService.getArribaFusionPlotPdf(rrbf)
 
         if (fileService.fileIsReadable(file)) {
-            render(file: file.bytes, contentType: PDF.mimeType)
+            render(file: Files.readAllBytes(file), contentType: PDF.mimeType)
         } else {
             render(text: "no plot available", contentType: TXT.mimeType)
         }

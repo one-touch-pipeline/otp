@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.jobs.AbstractParseJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
+import java.nio.file.Files
 import java.nio.file.Path
 
 @Component
@@ -49,7 +50,7 @@ class AceseqParseJob extends AbstractParseJob implements AceseqWorkflowShared {
         AceseqInstance aceseqInstance = getAceseqInstance(workflowStep)
 
         Path qcFile = aceseqWorkFileService.getQcJsonFile(aceseqInstance)
-        Map<String, Map> qcJson = JSON.parse(qcFile.text) as Map<String, Map>
+        Map<String, Map> qcJson = JSON.parse(Files.readString(qcFile)) as Map<String, Map>
 
         qcJson.collect { String number, Map<String, String> values ->
             Map<String, Object> aceseqValues = values

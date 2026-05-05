@@ -124,7 +124,7 @@ SeqTrack.withTransaction {
                                 if (overview) {
                                     println "SKIP SINCE FILE EXISTS with unknown md5sum: copy ${originalPathResolved} to ${finalPath.parent}"
                                 }
-                            } else if (md5sum.text.contains(df.fastqMd5sum)) {
+                            } else if (Files.readString(md5sum).contains(df.fastqMd5sum)) {
                                 if (overview) {
                                     println "SKIP SINCE FILE EXISTS with correct md5sum: copy ${originalPathResolved} to ${finalPath.parent}"
                                 }

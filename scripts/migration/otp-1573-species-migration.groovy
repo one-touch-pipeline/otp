@@ -25,6 +25,7 @@ import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.TransactionUtils
 
+import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -48,7 +49,7 @@ Map speciesMap = [
 ]
 
 TransactionUtils.withNewTransaction { session ->
-    pathToTsvFile.readLines().each { line ->
+    Files.readAllLines(pathToTsvFile).each { line ->
         String[] fields = line.split(/\t/)
 
         String pid = fields[1].trim()

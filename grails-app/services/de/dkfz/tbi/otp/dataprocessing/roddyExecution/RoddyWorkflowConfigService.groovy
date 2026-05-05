@@ -126,7 +126,7 @@ class RoddyWorkflowConfigService {
         RoddyWorkflowConfig config = RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)
         if (config) {
             FileSystem fs = fileSystemService.remoteFileSystem
-            String currentConfigContent = fs.getPath(config.configFilePath).text
+            String currentConfigContent = Files.readString(fs.getPath(config.configFilePath))
             return new ConfigState(currentConfigContent, currentConfigContent.encodeAsMD5() != config.md5sum)
         }
         return new ConfigState("", false)

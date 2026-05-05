@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 
 import javax.sql.DataSource
+import java.nio.file.Files
 import java.nio.file.Path
 
 /**
@@ -53,7 +54,7 @@ RawSequenceDataViewFileService rawSequenceDataViewFileService = ctx.rawSequenceD
 
 Path path = fileService.toPath(new File(fastqToCramFile), fileSystemService.remoteFileSystem)
 ScriptBuilder scriptBuilder = new ScriptBuilder(configService, fileService, fileSystemService, processingOptionService, path.parent)
-ArrayList<String[]> rows = path.readLines().tail()*.split('\t')
+ArrayList<String[]> rows = Files.readAllLines(path).tail()*.split('\t')
 
 List<String> pathsToDelete = []
 

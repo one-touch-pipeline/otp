@@ -100,7 +100,7 @@ class LicenseCheck {
     static void checkLicense(Path path, List<String> problems) {
         List<String> code = []
         try {
-            code = path.readLines()
+            code = Files.readAllLines(path)
         } catch (MalformedInputException ignored) {
             // likely binary file
         }

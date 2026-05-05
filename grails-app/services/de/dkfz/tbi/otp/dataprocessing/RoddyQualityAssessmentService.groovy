@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+import java.nio.file.Files
 import java.nio.file.Path
 
 import static de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification.CONTIG
@@ -118,10 +119,10 @@ class RoddyQualityAssessmentService {
     private Map<String, Map> parseRoddyQaStatistics(RoddyBamFile roddyBamFile, Path qualityControlJsonFile, Path qualityControlTargetExtractJsonFile = null) {
         Map<String, Map> chromosomeInformation = [:]
 
-        JSONObject qualityControlJson = JSON.parse(qualityControlJsonFile.text)
+        JSONObject qualityControlJson = JSON.parse(Files.readString(qualityControlJsonFile))
         JSONObject qualityControlTargetExtractJson
         if (roddyBamFile.seqType.needsBedFile && qualityControlTargetExtractJsonFile != null) {
-            qualityControlTargetExtractJson = JSON.parse(qualityControlTargetExtractJsonFile.text)
+            qualityControlTargetExtractJson = JSON.parse(Files.readString(qualityControlTargetExtractJsonFile))
         }
         List<String> chromosomeNames = ReferenceGenomeEntry.findAllByReferenceGenomeAndClassificationInList(
                 roddyBamFile.referenceGenome, [CONTIG, UNDEFINED])*.name

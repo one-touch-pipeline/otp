@@ -43,7 +43,7 @@ class CreateFileHelper {
         if (!Files.exists(file.parent)) {
             Files.createDirectories(file.parent)
         }
-        file.text = content
+        Files.writeString(file, content)
         return file
     }
 

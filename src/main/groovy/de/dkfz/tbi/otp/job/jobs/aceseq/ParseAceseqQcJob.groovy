@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 
+import java.nio.file.Files
 import java.nio.file.Path
 
 @CompileDynamic
@@ -55,7 +56,7 @@ class ParseAceseqQcJob extends AbstractEndStateAwareJobImpl implements AutoResta
         final AceseqInstance aceseqInstance = processParameterObject
 
         Path qcFile = aceseqService.getQcJsonFile(aceseqInstance)
-        JSONObject qcJson = JSON.parse(qcFile.text)
+        JSONObject qcJson = JSON.parse(Files.readString(qcFile))
         AceseqQc.withTransaction {
             AceseqQc qcOne = qcJson.collect { String number, Map values ->
                 AceseqQc qc = new AceseqQc(values)

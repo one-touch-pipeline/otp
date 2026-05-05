@@ -60,7 +60,7 @@ databaseChangeLog = {
 
     files.each { file ->
         changeSet(author: "otp", id: file.getFileName().toString(), runOnChange: "true") {
-            sql(file.text)
+            sql(Files.readString(file))
         }
     }
 }

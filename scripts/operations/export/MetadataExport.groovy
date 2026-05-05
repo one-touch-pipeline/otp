@@ -413,7 +413,7 @@ class MetaDataExport {
      * The output file has a format which is processable by the {@linkplain MetadataImportService}.
      */
     void writeMetadata(Collection<RawSequenceFile> rawSequenceFiles, Path metadataOutputFile, ExportColumnsEnum exportColumns, Project reimportProject) {
-        metadataOutputFile.bytes = getMetadata(rawSequenceFiles, exportColumns, reimportProject).getBytes(StandardCharsets.UTF_8)
+        Files.write(metadataOutputFile, getMetadata(rawSequenceFiles, exportColumns, reimportProject).getBytes(StandardCharsets.UTF_8))
     }
 
     String getMetadata(Collection<RawSequenceFile> rawSequenceFiles, ExportColumnsEnum exportColumns, Project reimportProject) {

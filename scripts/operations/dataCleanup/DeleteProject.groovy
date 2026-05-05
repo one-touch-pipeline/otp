@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 
 import java.nio.file.FileSystem
+import java.nio.file.Files
 import java.nio.file.Path
 
 /**
@@ -142,7 +143,7 @@ try {
         println "Execute the following line:"
         println output.join("\n\n")
 
-        outputFile.text = output.join('\n\n')
+        Files.writeString(outputFile, output.join('\n\n'))
 
     }
 } catch (Throwable t) {
@@ -151,7 +152,7 @@ try {
     output << StackTraceUtils.getStackTrace(t)
 
     println output.join("\n\n")
-    outputFile.text = output.join('\n\n')
+    Files.writeString(outputFile, output.join('\n\n'))
     throw t
 }
 

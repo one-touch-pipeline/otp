@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.workflow.jobs.AbstractParseJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
+import java.nio.file.Files
 import java.nio.file.Path
 
 @Component
@@ -57,7 +58,7 @@ class IndelParseJob extends AbstractParseJob implements IndelWorkflowShared {
     private void parseIndelQcJson(IndelCallingInstance instance) {
         Path indelQcFile = indelWorkFileService.getIndelQcJsonFile(instance)
 
-        JSONObject qcJson = JSON.parse(indelQcFile.text) as JSONObject
+        JSONObject qcJson = JSON.parse(Files.readString(indelQcFile)) as JSONObject
 
         Map<String, String> qcValues = qcJson.values()[0] as Map<String, String>
         qcValues.file = qcValues.file.replace('./', '')
@@ -77,7 +78,7 @@ class IndelParseJob extends AbstractParseJob implements IndelWorkflowShared {
     @CompileDynamic
     private void parseSampleSwapJson(IndelCallingInstance instance) {
         Path sampleSwapFile = indelWorkFileService.getSampleSwapJsonFile(instance)
-        Map<String, String> sampleSwapJson = JSON.parse(sampleSwapFile.text) as Map<String, String>
+        Map<String, String> sampleSwapJson = JSON.parse(Files.readString(sampleSwapFile)) as Map<String, String>
 
         IndelSampleSwapDetection sampleSwap = CollectionUtils.atMostOneElement(IndelSampleSwapDetection.findAllByIndelCallingInstance(instance))
         if (sampleSwap) {

@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.dataprocessing.PlotType
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelResultsService
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
+import java.nio.file.Files
 import java.nio.file.Path
 
 import static de.dkfz.tbi.otp.administration.Document.FormatType.PNG
@@ -65,9 +66,9 @@ class IndelController extends AbstractAnalysisController {
         List<Path> filePaths = indelResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
         Path file = filePaths.first()
         if (cmd.plotType == PlotType.INDEL) {
-            render(file: file.bytes, contentType: PDF.mimeType)
+            render(file: Files.readAllBytes(file), contentType: PDF.mimeType)
         } else {
-            render(file: file.bytes, contentType: PNG.mimeType)
+            render(file: Files.readAllBytes(file), contentType: PNG.mimeType)
         }
     }
 

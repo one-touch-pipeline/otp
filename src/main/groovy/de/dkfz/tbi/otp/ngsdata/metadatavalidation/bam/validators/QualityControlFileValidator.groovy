@@ -102,7 +102,7 @@ class QualityControlFileValidator extends AbstractValueTuplesValidator<BamMetada
             } else {
                 Object qcValues
                 try {
-                    qcValues = new JsonSlurper().parse(qualityControlFilePath.bytes)
+                    qcValues = new JsonSlurper().parse(Files.readAllBytes(qualityControlFilePath))
                 } catch (IOException ex) {
                     context.addProblem(it.cells, LogLevel.ERROR, ex.message)
                     return

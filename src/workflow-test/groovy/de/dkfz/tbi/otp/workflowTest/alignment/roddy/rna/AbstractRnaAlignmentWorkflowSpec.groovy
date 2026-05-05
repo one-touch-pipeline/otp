@@ -37,6 +37,7 @@ import de.dkfz.tbi.otp.workflowTest.alignment.roddy.AbstractRoddyAlignmentWorkfl
 import de.dkfz.tbi.otp.workflowTest.referenceGenome.ReferenceGenomeHg37Phix
 import de.dkfz.tbi.otp.workflowTest.roddy.RnaRoddyFileAssertHelper
 
+import java.nio.file.Files
 import java.nio.file.Path
 
 /**
@@ -211,8 +212,8 @@ abstract class AbstractRnaAlignmentWorkflowSpec extends AbstractRoddyAlignmentWo
     protected void checkQC(RoddyBamFile bamFile) {
         CollectionUtils.exactlyOneElement(RnaQualityAssessment.findAllByAbstractBamFile(bamFile))
 
-        JSON.parse(rnaAlignmentLinkFileService.getMergedQAJsonFile(bamFile).text)
-        assert rnaAlignmentLinkFileService.getMergedQAJsonFile(bamFile).text.trim() != ""
+        JSON.parse(Files.readString(rnaAlignmentLinkFileService.getMergedQAJsonFile(bamFile)))
+        assert Files.readString(rnaAlignmentLinkFileService.getMergedQAJsonFile(bamFile)).trim() != ""
 
         assert bamFile.coverage == null
 

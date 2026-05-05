@@ -283,7 +283,7 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
             assert Files.exists(mappingFile)
 
             // check mappingFileContext
-            String mappingFileContent = mappingFile.text
+            String mappingFileContent = Files.readString(mappingFile)
             assert mappingFileContent.split('\n').size() == rawSequenceFiles.size()
             rawSequenceFiles.each {
                 assert mappingFileContent.contains(singleCellService.mappingEntry(it))

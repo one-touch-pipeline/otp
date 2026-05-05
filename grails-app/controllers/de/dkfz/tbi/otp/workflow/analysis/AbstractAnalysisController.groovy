@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 
+import java.nio.file.Files
 import java.nio.file.Path
 
 import static de.dkfz.tbi.otp.administration.Document.FormatType.TXT
@@ -73,7 +74,7 @@ abstract class AbstractAnalysisController {
             return render(text: "No config file available", contentType: TXT.mimeType)
         }
 
-        byte[] content = configPath.bytes
+        byte[] content = Files.readAllBytes(configPath)
         if (cmd.to == 'DOWNLOAD') {
             response.setHeader("Content-disposition", "attachment; filename=${configPath.fileName}")
         }

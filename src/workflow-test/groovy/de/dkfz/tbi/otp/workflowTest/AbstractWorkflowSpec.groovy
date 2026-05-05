@@ -660,7 +660,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
 
         files.each {
             log.debug("  - Load ${it}")
-            sql.execute(it.text.replaceAll("nextval('hibernate_sequence')", "NEXT VALUE FOR hibernate_sequence").replaceAll("ON CONFLICT DO NOTHING", ""))
+            sql.execute(Files.readString(it).replaceAll("nextval('hibernate_sequence')", "NEXT VALUE FOR hibernate_sequence").replaceAll("ON CONFLICT DO NOTHING", ""))
         }
     }
 

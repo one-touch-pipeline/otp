@@ -59,7 +59,7 @@ class BamImportFinishJob extends AbstractFinishJob implements BamImportShared {
         if (!bamFile.maximumReadLength) {
             Path bamMaxReadLengthFile = externalAlignmentWorkFileService.getBamMaxReadLengthFile(bamFile)
             fileService.ensureFileIsReadableAndNotEmpty(bamMaxReadLengthFile)
-            bamFile.maximumReadLength = bamMaxReadLengthFile.text as Integer
+            bamFile.maximumReadLength = Files.readString(bamMaxReadLengthFile) as Integer
         }
 
         if (!bamFile.md5sum) {

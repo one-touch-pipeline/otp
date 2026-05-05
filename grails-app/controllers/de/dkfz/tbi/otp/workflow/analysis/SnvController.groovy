@@ -26,6 +26,7 @@ import grails.converters.JSON
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvResultsService
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
+import java.nio.file.Files
 import java.nio.file.Path
 
 import static de.dkfz.tbi.otp.administration.Document.FormatType.PDF
@@ -61,7 +62,7 @@ class SnvController extends AbstractAnalysisController {
         }
         List<Path> filePaths = snvResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
         Path file = filePaths.first()
-        render(file: file.bytes, contentType: PDF.mimeType)
+        render(file: Files.readAllBytes(file), contentType: PDF.mimeType)
     }
 
     JSON dataTableResults(DataTableCommand cmd) {

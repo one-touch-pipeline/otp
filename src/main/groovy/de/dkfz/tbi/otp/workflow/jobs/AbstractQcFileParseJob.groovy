@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.utils.spreadsheet.Spreadsheet
 import de.dkfz.tbi.otp.workflow.TableColumn
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
+import java.nio.file.Files
 import java.nio.file.Path
 
 /**
@@ -58,7 +59,7 @@ abstract class AbstractQcFileParseJob extends AbstractParseJob {
      * Parses the TSV file and extracts the specified columns from the first row
      */
     private Map<String, String> parseQcFile(Path qcFilePath) {
-        Spreadsheet spreadsheet = new Spreadsheet(qcFilePath.text, delimiter)
+        Spreadsheet spreadsheet = new Spreadsheet(Files.readString(qcFilePath), delimiter)
         assert spreadsheet.dataRows: "No data rows found in ${qcFilePath}"
         Row firstRow = spreadsheet.dataRows.first()
 

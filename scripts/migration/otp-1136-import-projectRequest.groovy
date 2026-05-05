@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.utils.spreadsheet.Row
 import de.dkfz.tbi.otp.utils.spreadsheet.Spreadsheet
 
 import java.nio.file.FileSystem
+import java.nio.file.Files
 import java.nio.file.Path
 
 /**
@@ -45,7 +46,7 @@ FileSystemService fileSystemService = ctx.fileSystemService
 FileSystem fileSystem = fileSystemService.remoteFileSystem
 Path path = fileSystem.getPath(fileName)
 
-Spreadsheet s = new Spreadsheet(path.text)
+Spreadsheet s = new Spreadsheet(Files.readString(path))
 ProjectRequest.withTransaction {
     s.dataRows.each { Row row -> // get the values from the spreadsheet for example: projectRequest id, organizationalUnit & costCenter
         String projectRequestId = row.getCellByColumnTitle('projectRequestId').text

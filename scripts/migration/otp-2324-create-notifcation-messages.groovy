@@ -97,7 +97,7 @@ WorkflowRun.withTransaction {
         }
 
         Map<String, String> config = [:]
-        file.text.eachLine { line ->
+        Files.readString(file).eachLine { line ->
             Matcher m = pattern.matcher(line)
             if (m.matches()) {
                 config[m.group('key')] = m.group('value')

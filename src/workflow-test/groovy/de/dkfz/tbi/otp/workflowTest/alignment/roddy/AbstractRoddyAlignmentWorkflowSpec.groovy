@@ -387,7 +387,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
         }
 
         panCancerLinkFileService.getSingleLaneQAJsonFiles(bamFile).each { SeqTrack seqTrack, Path qaFile ->
-            JSONObject json = (JSONObject) JSON.parse(qaFile.text)
+            JSONObject json = (JSONObject) JSON.parse(Files.readString(qaFile))
             Iterator chromosomes = json.keys()
             chromosomes.each { String chromosome ->
                 CollectionUtils.exactlyOneElement(RoddySingleLaneQa.findAllByChromosomeAndSeqTrack(chromosome, seqTrack))
@@ -395,7 +395,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
         }
         RoddyMergedBamQa mergedQa = CollectionUtils.exactlyOneElement(
                 RoddyMergedBamQa.findAllByAbstractBamFileAndChromosome(bamFile, RoddyQualityAssessment.ALL))
-        JSONObject json = (JSONObject) JSON.parse(panCancerLinkFileService.getMergedQAJsonFile(bamFile).text)
+        JSONObject json = (JSONObject) JSON.parse(Files.readString(panCancerLinkFileService.getMergedQAJsonFile(bamFile)))
         json.keys().each { String chromosome ->
             assert RoddyMergedBamQa.findAllByChromosomeAndAbstractBamFile(chromosome, bamFile)
         }
@@ -490,7 +490,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
         // check default json, additional needs to be checked in the subclass
         Path qaJson = getWorkMergedQAJsonFile(bamFile)
         fileAssertHelper.assertFileIsReadableAndNotEmpty(qaJson)
-        JSON.parse(qaJson.text) // throws ConverterException when the JSON content is not valid
+        JSON.parse(Files.readString(qaJson)) // throws ConverterException when the JSON content is not valid
 
         assertWorkflowWorkDirectoryFileSystemState(bamFile)
     }
@@ -502,7 +502,7 @@ abstract class AbstractRoddyAlignmentWorkflowSpec extends AbstractAlignmentWorkf
 
     private void assertBamFileFileOnFileSystem(RoddyBamFile bamFile) {
         // check md5sum content
-        assert bamFile.md5sum == panCancerLinkFileService.getMd5sumFile(bamFile).text.replaceAll("\n", "")
+        assert bamFile.md5sum == Files.readString(panCancerLinkFileService.getMd5sumFile(bamFile)).replaceAll("\n", "")
 
         // content of the bam file
         LogThreadLocal.withThreadLog(System.out) {
