@@ -26,14 +26,12 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.SeqPlatformModelLabelService
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractSingleValueValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 @Component
-class InstrumentModelValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+class InstrumentModelValidator extends AbstractSingleValueValidator implements MetadataValidator {
 
     @Autowired
     SeqPlatformModelLabelService seqPlatformModelLabelService
@@ -44,12 +42,12 @@ class InstrumentModelValidator extends AbstractSingleValueValidator<MetadataVali
     }
 
     @Override
-    String getColumnTitle(MetadataValidationContext context) {
+    String getColumnTitle(ValidationContext context) {
         return MetaDataColumn.INSTRUMENT_MODEL.name()
     }
 
     @Override
-    void validateValue(MetadataValidationContext context, String seqPlatformModelLabelNameOrAlias, Set<Cell> cells) {
+    void validateValue(ValidationContext context, String seqPlatformModelLabelNameOrAlias, Set<Cell> cells) {
         if (!seqPlatformModelLabelNameOrAlias) {
             context.addProblem(cells, LogLevel.ERROR, "Instrument model must not be empty.", "At least one Instrument model is empty.")
         } else if (!seqPlatformModelLabelService.findByNameOrImportAlias(seqPlatformModelLabelNameOrAlias)) {

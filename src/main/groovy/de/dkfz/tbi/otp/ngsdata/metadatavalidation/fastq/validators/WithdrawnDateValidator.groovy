@@ -24,16 +24,14 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractSingleValueValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.WITHDRAWN_DATE
 
 @Component
-class WithdrawnDateValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+class WithdrawnDateValidator extends AbstractSingleValueValidator implements MetadataValidator {
 
     static final String NONE = 'NONE'
 
@@ -44,16 +42,16 @@ class WithdrawnDateValidator extends AbstractSingleValueValidator<MetadataValida
     }
 
     @Override
-    String getColumnTitle(MetadataValidationContext context) {
+    String getColumnTitle(ValidationContext context) {
         return WITHDRAWN_DATE.name()
     }
 
     @Override
-    void checkColumn(MetadataValidationContext context) {
+    void checkColumn(ValidationContext context) {
     }
 
     @Override
-    void validateValue(MetadataValidationContext context, String value, Set<Cell> cells) {
+    void validateValue(ValidationContext context, String value, Set<Cell> cells) {
         final String uppercaseValue = value.toUpperCase(Locale.ENGLISH)
         if (value != "" && uppercaseValue != NONE) {
             context.addProblem(cells, LogLevel.ERROR, "'${value}' is not an acceptable '${WITHDRAWN_DATE}' value. It must be empty or 'None'. Withdrawn data cannot be imported into OTP.", "Withdrawn data cannot be imported into OTP.")

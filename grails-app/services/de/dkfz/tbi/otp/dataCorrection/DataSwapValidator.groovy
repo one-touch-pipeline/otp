@@ -21,8 +21,7 @@
  */
 package de.dkfz.tbi.otp.dataCorrection
 
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.ValidationContext
 import de.dkfz.tbi.otp.utils.spreadsheet.validation.Validator
 
-interface DataSwapValidator extends Validator<ValidationContext> {
+interface DataSwapValidator extends Validator {
 }

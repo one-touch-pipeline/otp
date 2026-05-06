@@ -27,7 +27,6 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.extractData.ExtractProjectSampleType
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.extractData.ProjectSampleType
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeProjectSeqTypeService
 import de.dkfz.tbi.otp.project.Project
@@ -38,8 +37,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowVersionSelectorService
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
-class BedFileValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator, ExtractProjectSampleType {
-
+class BedFileValidator extends AbstractValueTuplesValidator implements MetadataValidator, ExtractProjectSampleType {
     @Autowired
     MetadataImportService metadataImportService
 
@@ -61,31 +59,31 @@ class BedFileValidator extends AbstractValueTuplesValidator<MetadataValidationCo
     }
 
     @Override
-    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         return [SEQUENCING_TYPE, SEQUENCING_READ_TYPE, LIB_PREP_KIT, SAMPLE_NAME, PROJECT]*.name()
     }
 
     @Override
-    List<String> getOptionalColumnTitles(MetadataValidationContext context) {
+    List<String> getOptionalColumnTitles(ValidationContext context) {
         return [BASE_MATERIAL.name()]
     }
 
     @Override
-    void checkMissingRequiredColumn(MetadataValidationContext context, String columnTitle) {
+    void checkMissingRequiredColumn(ValidationContext context, String columnTitle) {
     }
 
     @Override
-    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) {
+    void checkMissingOptionalColumn(ValidationContext context, String columnTitle) {
     }
 
     @Override
-    void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each { ValueTuple valueTuple ->
             validateValueTuple(context, valueTuple)
         }
     }
 
-    void validateValueTuple(MetadataValidationContext context, ValueTuple valueTuple) {
+    void validateValueTuple(ValidationContext context, ValueTuple valueTuple) {
         SeqType seqType = validatorHelperService.getSeqTypeFromMetadata(valueTuple)
 
         if (!seqType || !seqType.needsBedFile) {

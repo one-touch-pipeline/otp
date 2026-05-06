@@ -25,7 +25,6 @@ import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.Run
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.TimeFormats
@@ -35,7 +34,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.RUN_DATE
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.RUN_ID
 
 @Component
-class RunRunDateValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class RunRunDateValidator extends AbstractValueTuplesValidator implements MetadataValidator {
 
     @CompileDynamic
     @Override
@@ -47,13 +46,13 @@ class RunRunDateValidator extends AbstractValueTuplesValidator<MetadataValidatio
     }
 
     @Override
-    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         return [RUN_ID, RUN_DATE]*.name()
     }
 
     @CompileDynamic
     @Override
-    void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> allValueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> allValueTuples) {
         allValueTuples.groupBy { it.getValue(RUN_ID.name()) }.each { String runName, Collection<ValueTuple> valueTuplesOfRun ->
             if (valueTuplesOfRun.size() == 1) {
                 ValueTuple valueTuple = CollectionUtils.exactlyOneElement(valueTuplesOfRun)

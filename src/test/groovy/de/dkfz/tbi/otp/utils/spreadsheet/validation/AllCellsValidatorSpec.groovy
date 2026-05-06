@@ -42,7 +42,7 @@ class AllCellsValidatorSpec extends Specification {
                     assert ctx == context
                     calledFor.add([value, cells])
                 },
-        ] as AbstractAllCellsValidator<ValidationContext>
+        ] as AbstractAllCellsValidator
 
         when:
         validator.validate(context)

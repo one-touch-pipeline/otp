@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
@@ -31,28 +30,27 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.CENTER_NAME
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.ILSE_NO
 
 @Component
-class IlseNumberSeqCenterValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
-
+class IlseNumberSeqCenterValidator extends AbstractValueTuplesValidator implements MetadataValidator {
     @Override
     Collection<String> getDescriptions() {
         return ["An ILSe number is given if and only if the sequencing center is 'DKFZ'."]
     }
 
     @Override
-    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         return [CENTER_NAME]*.name()
     }
 
     @Override
-    List<String> getOptionalColumnTitles(MetadataValidationContext context) {
+    List<String> getOptionalColumnTitles(ValidationContext context) {
         return [ILSE_NO]*.name()
     }
 
     @Override
-    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) { }
+    void checkMissingOptionalColumn(ValidationContext context, String columnTitle) { }
 
     @Override
-    void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each { ValueTuple valueTuple ->
             String seqCenterName = valueTuple.getValue(CENTER_NAME.name())
             String ilseNumber = valueTuple.getValue(ILSE_NO.name())

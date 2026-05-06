@@ -26,14 +26,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.*
 
 @Component
-class LibraryPreparationKitValidator extends AbstractValueTuplesValidator<BamMetadataValidationContext> implements BamMetadataValidator {
+class LibraryPreparationKitValidator extends AbstractValueTuplesValidator implements BamMetadataValidator {
 
     @Autowired
     LibraryPreparationKitService libraryPreparationKitService
@@ -47,21 +46,21 @@ class LibraryPreparationKitValidator extends AbstractValueTuplesValidator<BamMet
     }
 
     @Override
-    List<String> getRequiredColumnTitles(BamMetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         return []
     }
 
     @Override
-    List<String> getOptionalColumnTitles(BamMetadataValidationContext context) {
+    List<String> getOptionalColumnTitles(ValidationContext context) {
         return [LIBRARY_PREPARATION_KIT, SEQUENCING_TYPE, SEQUENCING_READ_TYPE]*.name()
     }
 
     @Override
-    void checkMissingOptionalColumn(BamMetadataValidationContext context, String columnTitle) { }
+    void checkMissingOptionalColumn(ValidationContext context, String columnTitle) { }
 
     @CompileDynamic
     @Override
-    void validateValueTuples(BamMetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each {
             String libraryPreparationKit = it.getValue(LIBRARY_PREPARATION_KIT.name())
 

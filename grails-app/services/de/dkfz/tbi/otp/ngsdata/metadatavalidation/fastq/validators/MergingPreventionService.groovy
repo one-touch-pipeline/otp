@@ -26,9 +26,7 @@ import grails.gorm.transactions.Transactional
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackageService
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.ValueTuple
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 /**
  * A helper service for {@link MergingPreventionValidator}. It should not be used elsewhere.
@@ -86,7 +84,7 @@ class MergingPreventionService {
     /**
      * helper for {@link MergingPreventionValidator} to check, whether new data corresponds to existing Lanes
      */
-    void checkForSeqTracks(MetadataValidationContext context, ValueTuple valueTuple, MergingPreventionDataDto data) {
+    void checkForSeqTracks(ValidationContext context, ValueTuple valueTuple, MergingPreventionDataDto data) {
         List<SeqTrack> seqTracks = seqTrackService.findAllBySampleAndSeqTypeAndAntibodyTarget(data.sample, data.seqType, data.antibodyTarget)
         if (!seqTracks) {
             return
@@ -130,7 +128,7 @@ class MergingPreventionService {
     /**
      * helper for {@link MergingPreventionValidator} to check, whether new data corresponds to existing {@link MergingWorkPackage}
      */
-    void checkForMergingWorkPackage(MetadataValidationContext context, ValueTuple valueTuple, MergingPreventionDataDto data) {
+    void checkForMergingWorkPackage(ValidationContext context, ValueTuple valueTuple, MergingPreventionDataDto data) {
         List<MergingWorkPackage> mergingWorkPackages = mergingWorkPackageService.findAllBySampleAndSeqTypeAndAntibodyTarget(
                 data.sample, data.seqType, data.antibodyTarget)
 

@@ -26,15 +26,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
-class AntibodyAntibodyTargetSeqTypeValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
-
+class AntibodyAntibodyTargetSeqTypeValidator extends AbstractValueTuplesValidator implements MetadataValidator {
     @Autowired
     SeqTypeService seqTypeService
 
@@ -58,21 +56,21 @@ class AntibodyAntibodyTargetSeqTypeValidator extends AbstractValueTuplesValidato
     }
 
     @Override
-    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         return [SEQUENCING_TYPE, SEQUENCING_READ_TYPE]*.name()
     }
 
     @Override
-    List<String> getOptionalColumnTitles(MetadataValidationContext context) {
+    List<String> getOptionalColumnTitles(ValidationContext context) {
         return [ANTIBODY_TARGET, ANTIBODY, BASE_MATERIAL]*.name()
     }
 
     @Override
-    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) {
+    void checkMissingOptionalColumn(ValidationContext context, String columnTitle) {
     }
 
     @Override
-    void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each { ValueTuple valueTuple ->
             String antibodyTarget = valueTuple.getValue(ANTIBODY_TARGET.name()) ?: ""
             String antibody = valueTuple.getValue(ANTIBODY.name()) ?: ""

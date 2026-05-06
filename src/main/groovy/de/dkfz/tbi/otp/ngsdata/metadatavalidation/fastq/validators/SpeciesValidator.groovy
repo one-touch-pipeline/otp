@@ -27,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrainService
@@ -40,7 +39,7 @@ import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
-class SpeciesValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class SpeciesValidator extends AbstractValueTuplesValidator implements MetadataValidator {
 
     @Autowired
     ValidatorHelperService validatorHelperService
@@ -70,22 +69,22 @@ class SpeciesValidator extends AbstractValueTuplesValidator<MetadataValidationCo
     }
 
     @Override
-    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         return [SPECIES]*.name()
     }
 
     @Override
-    List<String> getOptionalColumnTitles(MetadataValidationContext context) {
+    List<String> getOptionalColumnTitles(ValidationContext context) {
         return [PROJECT, SAMPLE_NAME]*.name()
     }
 
     @Override
-    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) {
+    void checkMissingOptionalColumn(ValidationContext context, String columnTitle) {
     }
 
     @CompileDynamic
     @Override
-    void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         Set<Cell> emptyCells = [] as Set
         Map<String, Set<Cell>> unknownCells = [:]
 

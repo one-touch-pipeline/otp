@@ -26,14 +26,12 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.BamMetadataColumn
 import de.dkfz.tbi.otp.ngsdata.Individual
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractSingleValueValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 @Component
-class IndividualValidator extends AbstractSingleValueValidator<BamMetadataValidationContext> implements BamMetadataValidator {
+class IndividualValidator extends AbstractSingleValueValidator implements BamMetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {
@@ -41,13 +39,13 @@ class IndividualValidator extends AbstractSingleValueValidator<BamMetadataValida
     }
 
     @Override
-    String getColumnTitle(BamMetadataValidationContext context) {
+    String getColumnTitle(ValidationContext context) {
         return BamMetadataColumn.INDIVIDUAL.name()
     }
 
     @CompileDynamic
     @Override
-    void validateValue(BamMetadataValidationContext context, String individual, Set<Cell> cells) {
+    void validateValue(ValidationContext context, String individual, Set<Cell> cells) {
         if (!Individual.findAllByPid(individual)) {
             context.addProblem(cells, LogLevel.ERROR, "The individual '${individual}' is not registered in OTP.", "At least one individual is not registered in OTP.")
         }

@@ -24,16 +24,14 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractSingleValueValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 @Component
-class Md5sumFormatValidator extends AbstractSingleValueValidator<AbstractMetadataValidationContext> implements MetadataValidator, BamMetadataValidator {
+class Md5sumFormatValidator extends AbstractSingleValueValidator implements MetadataValidator, BamMetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {
@@ -41,12 +39,12 @@ class Md5sumFormatValidator extends AbstractSingleValueValidator<AbstractMetadat
     }
 
     @Override
-    String getColumnTitle(AbstractMetadataValidationContext context) {
+    String getColumnTitle(ValidationContext context) {
         return MetaDataColumn.MD5.name()
     }
 
     @Override
-    void checkColumn(AbstractMetadataValidationContext context) {
+    void checkColumn(ValidationContext context) {
         if (context instanceof BamMetadataValidationContext) {
             if (context.linkSourceFiles) {
                 context.addProblem(Collections.emptySet(), LogLevel.ERROR,
@@ -60,7 +58,7 @@ class Md5sumFormatValidator extends AbstractSingleValueValidator<AbstractMetadat
     }
 
     @Override
-    void validateValue(AbstractMetadataValidationContext context, String value, Set<Cell> cells) {
+    void validateValue(ValidationContext context, String value, Set<Cell> cells) {
         if (context instanceof BamMetadataValidationContext) {
             if (!value.empty) {
                 checkMd5Sum(context, value, cells)
@@ -73,7 +71,7 @@ class Md5sumFormatValidator extends AbstractSingleValueValidator<AbstractMetadat
         }
     }
 
-    static void checkMd5Sum(AbstractMetadataValidationContext context, String value, Set<Cell> cells) {
+    static void checkMd5Sum(ValidationContext context, String value, Set<Cell> cells) {
         if (!(value ==~ /^[0-9a-fA-F]{32}$/)) {
             context.addProblem(cells, LogLevel.ERROR, "Not a well-formatted MD5 sum: '${value}'.", "At least one md5sum is not well formatted.")
         }

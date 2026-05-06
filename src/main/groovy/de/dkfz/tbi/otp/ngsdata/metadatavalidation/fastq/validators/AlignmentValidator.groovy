@@ -27,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
@@ -39,8 +38,7 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowVersionSelectorService
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
-class AlignmentValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
-
+class AlignmentValidator extends AbstractValueTuplesValidator implements MetadataValidator {
     @Autowired
     SeqTypeService seqTypeService
 
@@ -64,21 +62,21 @@ class AlignmentValidator extends AbstractValueTuplesValidator<MetadataValidation
     }
 
     @Override
-    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         return [SEQUENCING_READ_TYPE, SEQUENCING_TYPE]*.name()
     }
 
     @Override
-    List<String> getOptionalColumnTitles(MetadataValidationContext context) {
+    List<String> getOptionalColumnTitles(ValidationContext context) {
         return [BASE_MATERIAL, PROJECT, SAMPLE_NAME, SPECIES]*.name()
     }
 
     @Override
-    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) {
+    void checkMissingOptionalColumn(ValidationContext context, String columnTitle) {
     }
 
     @Override
-    void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> allValueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> allValueTuples) {
         List<SeqType> alignAbleSeqTypes = seqTypeService.findAlignAbleSeqTypes()
         List<SeqType> seqTypesNewSystem = alignAbleSeqTypes - seqTypeService.seqTypesOldWorkflowSystem
         allValueTuples.groupBy {
@@ -95,7 +93,7 @@ class AlignmentValidator extends AbstractValueTuplesValidator<MetadataValidation
     }
 
     @CompileDynamic
-    private void checkSingleTuple(ProjectSeqTypeSpecies projectSeqTypeSpecies, MetadataValidationContext context, List<SeqType> seqTypesNewSystem) {
+    private void checkSingleTuple(ProjectSeqTypeSpecies projectSeqTypeSpecies, ValidationContext context, List<SeqType> seqTypesNewSystem) {
         Project project = projectSeqTypeSpecies.project
         SeqType seqType = projectSeqTypeSpecies.seqType
         List<SpeciesWithStrain> species = projectSeqTypeSpecies.speciesWithStrains
@@ -115,7 +113,7 @@ class AlignmentValidator extends AbstractValueTuplesValidator<MetadataValidation
         }
     }
 
-    private static void createWarningMessage(MetadataValidationContext context, String message) {
+    private static void createWarningMessage(ValidationContext context, String message) {
         context.addProblem(Collections.emptySet(), LogLevel.WARNING, message, "At least one Alignment or Reference Genome is not configured.")
     }
 

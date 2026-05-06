@@ -24,17 +24,14 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractSingleValueValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.INDEX
 
 @Component
-class BarcodeValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
-
+class BarcodeValidator extends AbstractSingleValueValidator implements MetadataValidator {
     final static String MUST_REGEX = /^[0-9a-zA-Z\-\+\.\,]*$/
     final static String SHOULD_REGEX = /^[ACGTN\-,]*$/
 
@@ -48,17 +45,17 @@ class BarcodeValidator extends AbstractSingleValueValidator<MetadataValidationCo
     }
 
     @Override
-    String getColumnTitle(MetadataValidationContext context) {
+    String getColumnTitle(ValidationContext context) {
         return INDEX.name()
     }
 
     @Override
-    void checkColumn(MetadataValidationContext context) {
+    void checkColumn(ValidationContext context) {
         addWarningForMissingOptionalColumn(context, INDEX.name(), "OTP will try to parse the barcodes from the filenames.")
     }
 
     @Override
-    void validateValue(MetadataValidationContext context, String barcode, Set<Cell> cells) {
+    void validateValue(ValidationContext context, String barcode, Set<Cell> cells) {
         if (!(barcode ==~ MUST_REGEX)) {
             context.addProblem(cells, LogLevel.ERROR, "'${barcode}' is not a well-formed barcode. It must match the regular expression '${MUST_REGEX}'. It should match the regular expression '${SHOULD_REGEX}'.", "At least one barcode is not a well-formed barcode.")
         } else if (!(barcode ==~ SHOULD_REGEX) && !barcode.empty) {

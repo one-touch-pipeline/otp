@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
 import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
@@ -38,7 +37,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 @CompileDynamic
 @Component
-class SampleIdentifierValidator extends AbstractValueTuplesValidator<AbstractMetadataValidationContext> implements MetadataValidator {
+class SampleIdentifierValidator extends AbstractValueTuplesValidator implements MetadataValidator {
 
     @Autowired
     SampleIdentifierService sampleIdentifierService
@@ -52,7 +51,7 @@ class SampleIdentifierValidator extends AbstractValueTuplesValidator<AbstractMet
     }
 
     @Override
-    List<String> getRequiredColumnTitles(AbstractMetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         return [
                 SAMPLE_NAME,
                 SEQUENCING_TYPE,
@@ -61,7 +60,7 @@ class SampleIdentifierValidator extends AbstractValueTuplesValidator<AbstractMet
     }
 
     @Override
-    List<String> getOptionalColumnTitles(AbstractMetadataValidationContext context) {
+    List<String> getOptionalColumnTitles(ValidationContext context) {
         return [
                 BASE_MATERIAL,
                 PROJECT,
@@ -69,7 +68,7 @@ class SampleIdentifierValidator extends AbstractValueTuplesValidator<AbstractMet
     }
 
     @Override
-    void validateValueTuples(AbstractMetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each { ValueTuple valueTuple ->
             String sampleName = valueTuple.getValue(SAMPLE_NAME.name())
             ParsedSampleIdentifier identifier = findExistingParsedSampleIdentifierForValueTuple(valueTuple)

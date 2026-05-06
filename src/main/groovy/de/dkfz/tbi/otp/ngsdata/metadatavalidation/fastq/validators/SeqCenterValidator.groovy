@@ -25,17 +25,15 @@ import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.SeqCenter
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractSingleValueValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.CENTER_NAME
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 @Component
-class SeqCenterValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+class SeqCenterValidator extends AbstractSingleValueValidator implements MetadataValidator {
 
     @CompileDynamic
     @Override
@@ -44,13 +42,13 @@ class SeqCenterValidator extends AbstractSingleValueValidator<MetadataValidation
     }
 
     @Override
-    String getColumnTitle(MetadataValidationContext context) {
+    String getColumnTitle(ValidationContext context) {
         return CENTER_NAME.name()
     }
 
     @CompileDynamic
     @Override
-    void validateValue(MetadataValidationContext context, String centerName, Set<Cell> cells) {
+    void validateValue(ValidationContext context, String centerName, Set<Cell> cells) {
         if (!atMostOneElement(SeqCenter.findAllByName(centerName))) {
             context.addProblem(cells, LogLevel.ERROR, "Sequencing center '${centerName}' is not registered in the OTP database.", "At least one sequencing center is not registered in the OTP database.")
         }

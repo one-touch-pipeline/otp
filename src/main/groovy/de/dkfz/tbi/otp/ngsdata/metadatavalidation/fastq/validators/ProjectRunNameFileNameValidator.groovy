@@ -27,7 +27,6 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.ngsdata.SampleIdentifierService
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
@@ -36,7 +35,7 @@ import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
-class ProjectRunNameFileNameValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class ProjectRunNameFileNameValidator extends AbstractValueTuplesValidator implements MetadataValidator {
 
     @Autowired
     SampleIdentifierService sampleIdentifierService
@@ -48,30 +47,30 @@ class ProjectRunNameFileNameValidator extends AbstractValueTuplesValidator<Metad
     }
 
     @Override
-    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         return [FASTQ_FILE, RUN_ID]*.name()
     }
 
     @Override
-    List<String> getOptionalColumnTitles(MetadataValidationContext context) {
+    List<String> getOptionalColumnTitles(ValidationContext context) {
         return [PROJECT]*.name()
     }
 
     @Override
-    void checkMissingRequiredColumn(MetadataValidationContext context, String columnTitle) { }
+    void checkMissingRequiredColumn(ValidationContext context, String columnTitle) { }
 
     @Override
-    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) { }
+    void checkMissingOptionalColumn(ValidationContext context, String columnTitle) { }
 
     @Override
-    void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each { ValueTuple valueTuple ->
             validateValueTuple(context, valueTuple)
         }
     }
 
     @CompileDynamic
-    void validateValueTuple(MetadataValidationContext context, ValueTuple valueTuple) {
+    void validateValueTuple(ValidationContext context, ValueTuple valueTuple) {
         String runId = valueTuple.getValue(RUN_ID.name())
         String fileName = new File(valueTuple.getValue(FASTQ_FILE.name())).name
         String projectName = valueTuple.getValue(PROJECT.name())

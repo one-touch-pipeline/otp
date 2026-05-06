@@ -23,17 +23,15 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractSingleValueValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SINGLE_CELL_WELL_LABEL
 
 @Component
-class SingleCellWellLabelValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+class SingleCellWellLabelValidator extends AbstractSingleValueValidator implements MetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {
@@ -41,18 +39,23 @@ class SingleCellWellLabelValidator extends AbstractSingleValueValidator<Metadata
     }
 
     @Override
-    String getColumnTitle(MetadataValidationContext context) {
+    String getColumnTitle(ValidationContext context) {
         return SINGLE_CELL_WELL_LABEL.name()
     }
 
     @Override
-    void checkColumn(MetadataValidationContext context) {
+    void checkColumn(ValidationContext context) {
     }
 
     @Override
-    void validateValue(MetadataValidationContext context, String singleCellWellLabel, Set<Cell> cells) {
+    void validateValue(ValidationContext context, String singleCellWellLabel, Set<Cell> cells) {
         if (singleCellWellLabel && !OtpPathValidator.isValidPathComponent(singleCellWellLabel)) {
-            context.addProblem(cells, LogLevel.ERROR, "The single cell well label '${singleCellWellLabel}' is not a valid directory name.", "At least one single cell well label is not a valid directory name..")
+            context.addProblem(
+                    cells,
+                    LogLevel.ERROR,
+                    "The single cell well label '${singleCellWellLabel}' is not a valid directory name.",
+                    "At least one single cell well label is not a valid directory name."
+            )
         }
     }
 }

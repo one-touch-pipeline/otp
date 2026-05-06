@@ -25,7 +25,6 @@ import groovy.json.JsonSlurper
 import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
@@ -37,8 +36,7 @@ import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.BAM_FILE_PATH
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.QUALITY_CONTROL_FILE
 
 @Component
-class QualityControlFileValidator extends AbstractValueTuplesValidator<BamMetadataValidationContext> implements BamMetadataValidator {
-
+class QualityControlFileValidator extends AbstractValueTuplesValidator implements BamMetadataValidator {
     @Override
     Collection<String> getDescriptions() {
         return [
@@ -47,12 +45,12 @@ class QualityControlFileValidator extends AbstractValueTuplesValidator<BamMetada
     }
 
     @Override
-    List<String> getRequiredColumnTitles(BamMetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         return [QUALITY_CONTROL_FILE, BAM_FILE_PATH]*.name()
     }
 
     @Override
-    void checkMissingRequiredColumn(BamMetadataValidationContext context, String columnTitle) {
+    void checkMissingRequiredColumn(ValidationContext context, String columnTitle) {
         if (columnTitle == QUALITY_CONTROL_FILE.name())  {
             addWarningForMissingOptionalColumn(context, columnTitle, "'${QUALITY_CONTROL_FILE.name()}' has to be set for Sophia")
         } else {
@@ -61,11 +59,11 @@ class QualityControlFileValidator extends AbstractValueTuplesValidator<BamMetada
     }
 
     @Override
-    void checkMissingOptionalColumn(BamMetadataValidationContext context, String columnTitle) { }
+    void checkMissingOptionalColumn(ValidationContext context, String columnTitle) { }
 
     @CompileDynamic
     @Override
-    void validateValueTuples(BamMetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each {
             String bamFile = it.getValue(BAM_FILE_PATH.name())
             String qualityControlFile = it.getValue(QUALITY_CONTROL_FILE.name())

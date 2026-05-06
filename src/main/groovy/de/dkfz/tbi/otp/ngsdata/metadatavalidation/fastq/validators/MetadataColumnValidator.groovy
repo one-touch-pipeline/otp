@@ -25,11 +25,11 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.MetaDataKey
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
 import de.dkfz.tbi.otp.utils.spreadsheet.Row
 import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.ValidationContext
 
 @Component
 class MetadataColumnValidator implements MetadataValidator {
@@ -40,7 +40,7 @@ class MetadataColumnValidator implements MetadataValidator {
     }
 
     @Override
-    void validate(MetadataValidationContext context) {
+    void validate(ValidationContext context) {
         Row row = context.spreadsheet.header
         List<String> metadataColumnList = MetaDataKey.list()*.name + MetaDataColumn.values()*.toString() + MetaDataColumn.values().collectMany { it.importAliases }
 

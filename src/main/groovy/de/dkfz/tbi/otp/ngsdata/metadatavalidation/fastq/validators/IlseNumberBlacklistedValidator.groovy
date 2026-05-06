@@ -25,34 +25,31 @@ import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.IlseSubmission
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractSingleValueValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.ILSE_NO
 
 @Component
-class IlseNumberBlacklistedValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
-
+class IlseNumberBlacklistedValidator extends AbstractSingleValueValidator implements MetadataValidator {
     @Override
     Collection<String> getDescriptions() {
         return ["The ILSe number is not blacklisted"]
     }
 
     @Override
-    String getColumnTitle(MetadataValidationContext context) {
+    String getColumnTitle(ValidationContext context) {
         return ILSE_NO.name()
     }
 
     @Override
-    void checkColumn(MetadataValidationContext context) { }
+    void checkColumn(ValidationContext context) { }
 
     @CompileDynamic
     @Override
-    void validateValue(MetadataValidationContext context, String value, Set<Cell> cells) {
+    void validateValue(ValidationContext context, String value, Set<Cell> cells) {
         if (value && value.isInteger()) {
             IlseSubmission ilseSubmission = CollectionUtils.atMostOneElement(IlseSubmission.findAllByIlseNumberAndWarning(value.toInteger(), true))
             if (ilseSubmission) {

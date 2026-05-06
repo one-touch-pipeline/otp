@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
@@ -40,7 +39,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 @CompileDynamic
 @Component
-class SampleValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class SampleValidator extends AbstractValueTuplesValidator implements MetadataValidator {
 
     static final String ERROR_NEITHER_REGISTERED_NOR_PARSEABLE = "At least one sample name is neither registered in OTP nor can be parsed."
     static final String ERROR_PARSED_PROJECT_UNKNOWN = "At least for one sample name the parsed project is not registered in OTP"
@@ -67,22 +66,22 @@ class SampleValidator extends AbstractValueTuplesValidator<MetadataValidationCon
     }
 
     @Override
-    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         return [SAMPLE_NAME]*.name()
     }
 
     @Override
-    List<String> getOptionalColumnTitles(MetadataValidationContext context) {
+    List<String> getOptionalColumnTitles(ValidationContext context) {
         return [PROJECT, PATIENT_ID, SAMPLE_TYPE, ANTIBODY_TARGET]*.name()
     }
 
     @Override
-    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) {
+    void checkMissingOptionalColumn(ValidationContext context, String columnTitle) {
     }
 
     @Override
     @SuppressWarnings("Indentation")
-    void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         Collection<String> missingIdentifiersWithProject = []
         Collection<String> parsedSampleIdentifiers = []
 
@@ -127,7 +126,7 @@ class SampleValidator extends AbstractValueTuplesValidator<MetadataValidationCon
         }
     }
 
-    private String checkValueTupleAndReportProjectAndFillLists(ValueTuple valueTuple, MetadataValidationContext context,
+    private String checkValueTupleAndReportProjectAndFillLists(ValueTuple valueTuple, ValidationContext context,
                                                                List<String> missingIdentifiersWithProject, List<String> parsedSampleIdentifiers) {
         String sampleName = valueTuple.getValue(SAMPLE_NAME.name())
         String projectName = valueTuple.getValue(PROJECT.name()) ?: ''
@@ -154,7 +153,7 @@ class SampleValidator extends AbstractValueTuplesValidator<MetadataValidationCon
         return sampleIdentifier?.project?.name ?: parsedIdentifier?.projectName
     }
 
-    private void checkNeitherKnownSampleIdentifierNorParsable(Project project, MetadataValidationContext context, ValueTuple valueTuple, String sampleName,
+    private void checkNeitherKnownSampleIdentifierNorParsable(Project project, ValidationContext context, ValueTuple valueTuple, String sampleName,
                                                               String projectName) {
         if (project && project.sampleIdentifierParserBeanName != SampleIdentifierParserBeanName.NO_PARSER) {
             context.addProblem(valueTuple.cells, LogLevel.ERROR,
@@ -168,7 +167,7 @@ class SampleValidator extends AbstractValueTuplesValidator<MetadataValidationCon
         }
     }
 
-    private boolean checkParsableButUnknownSampleIdentfier(ParsedSampleIdentifier parsedIdentifier, MetadataValidationContext context,
+    private boolean checkParsableButUnknownSampleIdentfier(ParsedSampleIdentifier parsedIdentifier, ValidationContext context,
                                                            ValueTuple valueTuple, String sampleName, Project project) {
         boolean error = false
         Project parsedProject = ProjectService.findByNameOrNameInMetadataFiles(parsedIdentifier.projectName)
@@ -197,7 +196,7 @@ class SampleValidator extends AbstractValueTuplesValidator<MetadataValidationCon
     }
 
     private void checkKnownSampleIdentifierAndParsable(ParsedSampleIdentifier parsedIdentifier, SampleIdentifier sampleIdentifier,
-                                                       MetadataValidationContext context, ValueTuple valueTuple, String sampleName) {
+                                                       ValidationContext context, ValueTuple valueTuple, String sampleName) {
         Project parsedProject = ProjectService.findByNameOrNameInMetadataFiles(parsedIdentifier.projectName)
         if (sampleIdentifier.project != parsedProject) {
             context.addProblem(valueTuple.cells, LogLevel.WARNING,

@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
@@ -32,7 +31,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_NAME
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.TAGMENTATION_LIBRARY
 
 @Component
-class SampleLibraryValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class SampleLibraryValidator extends AbstractValueTuplesValidator implements MetadataValidator {
 
     static final String LIB = "lib"
 
@@ -43,20 +42,20 @@ class SampleLibraryValidator extends AbstractValueTuplesValidator<MetadataValida
     }
 
     @Override
-    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         return [SAMPLE_NAME]*.name()
     }
 
     @Override
-    List<String> getOptionalColumnTitles(MetadataValidationContext context) {
+    List<String> getOptionalColumnTitles(ValidationContext context) {
         return [TAGMENTATION_LIBRARY]*.name()
     }
 
     @Override
-    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) { }
+    void checkMissingOptionalColumn(ValidationContext context, String columnTitle) { }
 
     @Override
-    void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each { ValueTuple valueTuple ->
             String sample = valueTuple.getValue(SAMPLE_NAME.name())
             if (sample.toLowerCase(Locale.ENGLISH).contains(LIB) && !valueTuple.getValue(TAGMENTATION_LIBRARY.name())) {

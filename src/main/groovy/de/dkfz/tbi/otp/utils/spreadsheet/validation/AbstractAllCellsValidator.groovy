@@ -28,10 +28,10 @@ import de.dkfz.tbi.otp.utils.spreadsheet.Row
 /**
  * Fetches all cells (including header cells), uniquifies their values and validates each of them once
  */
-abstract class AbstractAllCellsValidator<C extends ValidationContext> implements Validator<C> {
+abstract class AbstractAllCellsValidator implements Validator {
 
     @Override
-    void validate(C context) {
+    void validate(ValidationContext context) {
         Map<String, Set<Cell>> cellsByValue = [:]
         ([context.spreadsheet.header] + context.spreadsheet.dataRows)*.each { Row row ->
             row.cells.each { Cell cell ->
@@ -46,5 +46,5 @@ abstract class AbstractAllCellsValidator<C extends ValidationContext> implements
     /**
      * @param cells The cells in which the value appears
      */
-    abstract void validateValue(C context, String value, Set<Cell> cells)
+    abstract void validateValue(ValidationContext context, String value, Set<Cell> cells)
 }

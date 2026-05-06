@@ -26,7 +26,6 @@ import groovy.transform.TupleConstructor
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
@@ -39,7 +38,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 import static de.dkfz.tbi.otp.utils.StringUtils.extractDistinguishingCharacter
 
 @Component
-class SeqTrackValidator extends AbstractColumnSetValidator<MetadataValidationContext> implements MetadataValidator {
+class SeqTrackValidator extends AbstractColumnSetValidator implements MetadataValidator {
 
     static final Collection<MetaDataColumn> EQUAL_ATTRIBUTES = [
             ANTIBODY,
@@ -70,7 +69,7 @@ class SeqTrackValidator extends AbstractColumnSetValidator<MetadataValidationCon
     }
 
     @Override
-    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         return [
                 RUN_ID,
                 LANE_NO,
@@ -79,7 +78,7 @@ class SeqTrackValidator extends AbstractColumnSetValidator<MetadataValidationCon
     }
 
     @Override
-    void validate(MetadataValidationContext context) {
+    void validate(ValidationContext context) {
         getRowsWithExtractedValues(context).groupBy {
             it.runName.value
         }.each { String runName, List<RowWithExtractedValues> runRows ->
@@ -95,7 +94,7 @@ class SeqTrackValidator extends AbstractColumnSetValidator<MetadataValidationCon
     }
 
     @CompileDynamic
-    private List<RowWithExtractedValues> getRowsWithExtractedValues(MetadataValidationContext context) {
+    private List<RowWithExtractedValues> getRowsWithExtractedValues(ValidationContext context) {
         Column runColumn
         Column laneNumberColumn
         Column projectColumn
@@ -150,7 +149,7 @@ class SeqTrackValidator extends AbstractColumnSetValidator<MetadataValidationCon
         } as Set<String>
     }
 
-    private void validateMultiplexing(MetadataValidationContext context, Map<String, List<RowWithExtractedValues>> laneRowsByBarcode, Set<String> laneIds) {
+    private void validateMultiplexing(ValidationContext context, Map<String, List<RowWithExtractedValues>> laneRowsByBarcode, Set<String> laneIds) {
         if (laneRowsByBarcode.isEmpty()) {
             return
         }
@@ -195,7 +194,7 @@ class SeqTrackValidator extends AbstractColumnSetValidator<MetadataValidationCon
         }
     }
 
-    private void validateSeqTrack(MetadataValidationContext context, List<RowWithExtractedValues> seqTrackRows, Set<String> laneIds) {
+    private void validateSeqTrack(ValidationContext context, List<RowWithExtractedValues> seqTrackRows, Set<String> laneIds) {
         RowWithExtractedValues anySeqTrackRow = seqTrackRows.first()
 
         for (MetaDataColumn mdColumn : EQUAL_ATTRIBUTES) {
@@ -226,7 +225,7 @@ class SeqTrackValidator extends AbstractColumnSetValidator<MetadataValidationCon
         validateMateNumbersInFilenames(context, rowsWithoutIndex(context, seqTrackRows))
     }
 
-    private void validateMates(MetadataValidationContext context, List<RowWithExtractedValues> seqTrackRows) {
+    private void validateMates(ValidationContext context, List<RowWithExtractedValues> seqTrackRows) {
         Map<String, List<RowWithExtractedValues>> seqTrackRowsByMateNumber =
                 seqTrackRows.findAll { it.mateNumber }.groupBy { it.mateNumber.value }
 
@@ -266,14 +265,14 @@ class SeqTrackValidator extends AbstractColumnSetValidator<MetadataValidationCon
         }
     }
 
-    private List<RowWithExtractedValues> rowsWithoutIndex(MetadataValidationContext context, List<RowWithExtractedValues> seqTrackRows) {
+    private List<RowWithExtractedValues> rowsWithoutIndex(ValidationContext context, List<RowWithExtractedValues> seqTrackRows) {
         Column mateColumn = context.spreadsheet.getColumn(READ.name())
         return seqTrackRows.findAll {
             !it.row.getCell(mateColumn)?.text?.toUpperCase(Locale.ENGLISH)?.startsWith('I')
         }
     }
 
-    private void validateMateNumbersInFilenames(MetadataValidationContext context, List<RowWithExtractedValues> seqTrackRows) {
+    private void validateMateNumbersInFilenames(ValidationContext context, List<RowWithExtractedValues> seqTrackRows) {
         Column filenameColumn = context.spreadsheet.getColumn(FASTQ_FILE.name())
         if (filenameColumn && seqTrackRows.size() > 1) {
             Collection<Cell> filenameCells = seqTrackRows*.row*.getCell(filenameColumn)

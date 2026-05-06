@@ -26,14 +26,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
-class LibPrepKitSeqTypeValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class LibPrepKitSeqTypeValidator extends AbstractValueTuplesValidator implements MetadataValidator {
 
     @Autowired
     SeqTypeService seqTypeService
@@ -49,23 +48,23 @@ class LibPrepKitSeqTypeValidator extends AbstractValueTuplesValidator<MetadataVa
     }
 
     @Override
-    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         return [SEQUENCING_TYPE, SEQUENCING_READ_TYPE]*.name()
     }
 
     @Override
-    List<String> getOptionalColumnTitles(MetadataValidationContext context) {
+    List<String> getOptionalColumnTitles(ValidationContext context) {
         return [LIB_PREP_KIT, BASE_MATERIAL]*.name()
     }
 
     @Override
-    void checkMissingRequiredColumn(MetadataValidationContext context, String columnTitle) { }
+    void checkMissingRequiredColumn(ValidationContext context, String columnTitle) { }
 
     @Override
-    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) { }
+    void checkMissingOptionalColumn(ValidationContext context, String columnTitle) { }
 
     @Override
-    void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         List<SeqType> seqTypesRequiredLibPrepKit = SeqTypeService.seqTypesRequiredLibPrepKit
         valueTuples.each { ValueTuple valueTuple ->
             SeqType seqType = validatorHelperService.getSeqTypeFromMetadata(valueTuple)

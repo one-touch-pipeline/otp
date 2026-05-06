@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.Data
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesWithAbsolutePath
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
 import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.ValidationContext
 
 @Component
 class RunNameInMetadataPathValidator implements MetadataValidator {
@@ -41,14 +42,17 @@ class RunNameInMetadataPathValidator implements MetadataValidator {
     }
 
     @Override
-    void validate(MetadataValidationContext context) {
+    void validate(ValidationContext context) {
         List<Cell> runCells = context.spreadsheet.dataRows*.getCell(context.spreadsheet.getColumn(MetaDataColumn.RUN_ID.name()))
         List<String> runNames = runCells.text.unique()
 
+        // Safe down casting, because the context is only used for bam metadata validation and
+        // thus always of type BamMetadataValidationContext
+        MetadataValidationContext metadataValidationContext = context as MetadataValidationContext
         if (runNames.size() == 1 &&
-                !(context.directoryStructure instanceof DataFilesInGpcfSpecificStructure) &&
-                !(context.directoryStructure instanceof DataFilesWithAbsolutePath) &&
-                !context.metadataFile.toString().contains(runNames.first())) {
+                !(metadataValidationContext.directoryStructure instanceof DataFilesInGpcfSpecificStructure) &&
+                !(metadataValidationContext.directoryStructure instanceof DataFilesWithAbsolutePath) &&
+                !metadataValidationContext.metadataFile.toString().contains(runNames.first())) {
             context.addProblem(runCells as Set, LogLevel.WARNING,
                     "The path of the metadata file should contain the run name.")
         }

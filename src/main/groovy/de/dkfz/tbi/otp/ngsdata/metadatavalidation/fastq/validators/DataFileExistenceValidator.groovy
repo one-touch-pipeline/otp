@@ -38,8 +38,7 @@ import java.nio.file.Path
 import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationService.pathForMessage
 
 @Component
-class DataFileExistenceValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
-
+class DataFileExistenceValidator extends AbstractValueTuplesValidator implements MetadataValidator {
     @Autowired
     FileService fileService
 
@@ -52,18 +51,24 @@ class DataFileExistenceValidator extends AbstractValueTuplesValidator<MetadataVa
     }
 
     @Override
-    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
-        return context.directoryStructure.requiredColumnTitles
+    List<String> getRequiredColumnTitles(ValidationContext context) {
+        if (!(context instanceof MetadataValidationContext)) {
+            return []
+        }
+
+        MetadataValidationContext metadataValidationContext = context as MetadataValidationContext
+        return metadataValidationContext.directoryStructure.requiredColumnTitles
     }
 
     @CompileDynamic
     @Override
-    void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> allValueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> allValueTuples) {
         boolean directoryStructureInfoAdded = false
         Closure addDirectoryStructureInfo = {
             if (!directoryStructureInfoAdded) {
+                MetadataValidationContext metadataValidationContext = context as MetadataValidationContext
                 context.addProblem(Collections.emptySet(), LogLevel.INFO,
-                        "Using directory structure '${context.directoryStructureDescription}'. If this is incorrect, please select the correct one.")
+                        "Using directory structure '${metadataValidationContext.directoryStructureDescription}'. If this is incorrect, please select the correct one.")
                 directoryStructureInfoAdded = true
             }
         }

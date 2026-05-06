@@ -26,14 +26,12 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.SequencingKitLabelService
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractSingleValueValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 @Component
-class SequencingKitValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+class SequencingKitValidator extends AbstractSingleValueValidator implements MetadataValidator {
 
     @Autowired
     SequencingKitLabelService sequencingKitLabelService
@@ -44,17 +42,17 @@ class SequencingKitValidator extends AbstractSingleValueValidator<MetadataValida
     }
 
     @Override
-    String getColumnTitle(MetadataValidationContext context) {
+    String getColumnTitle(ValidationContext context) {
         return MetaDataColumn.SEQUENCING_KIT.name()
     }
 
     @Override
-    void checkColumn(MetadataValidationContext context) {
+    void checkColumn(ValidationContext context) {
         addWarningForMissingOptionalColumn(context, MetaDataColumn.SEQUENCING_KIT.name())
     }
 
     @Override
-    void validateValue(MetadataValidationContext context, String sequencingKitLabelNameOrAlias, Set<Cell> cells) {
+    void validateValue(ValidationContext context, String sequencingKitLabelNameOrAlias, Set<Cell> cells) {
         if (!sequencingKitLabelNameOrAlias.empty && !sequencingKitLabelService.findByNameOrImportAlias(sequencingKitLabelNameOrAlias)) {
             context.addProblem(cells, LogLevel.ERROR, "Sequencing kit '${sequencingKitLabelNameOrAlias}' is not registered in the OTP database.", "At least one sequencing kit is not registered in the OTP database.")
         }

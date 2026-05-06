@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 import static de.dkfz.tbi.otp.ngsdata.SampleIdentifierService.BulkSampleCreationHeader.*
 
 @Component
-class BulkSampleCreationValidator extends AbstractValueTuplesValidator<ValidationContext> {
+class BulkSampleCreationValidator extends AbstractValueTuplesValidator {
 
     @Override
     List<String> getRequiredColumnTitles(ValidationContext context) {

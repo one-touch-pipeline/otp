@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 import java.util.regex.Pattern
 
 @Component
-class CommentAndNoteValidator<C extends ValidationContext> implements Validator<C>, BamMetadataValidator, MetadataValidator  {
+class CommentAndNoteValidator implements Validator, BamMetadataValidator, MetadataValidator  {
 
     static final Pattern COMMENT_OR_NOTE = Pattern.compile("(comment|note)", Pattern.CASE_INSENSITIVE)
 
@@ -41,7 +41,7 @@ class CommentAndNoteValidator<C extends ValidationContext> implements Validator<
     }
 
     @Override
-    void validate(C context) {
+    void validate(ValidationContext context) {
         List<Column> columns = []
         context.spreadsheet.header.cells.each { Cell cell ->
             if (COMMENT_OR_NOTE.matcher(cell.text).find()) {

@@ -25,7 +25,6 @@ import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
@@ -35,20 +34,19 @@ import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.SAMPLE_TYPE
 
 @CompileDynamic
 @Component
-class SampleTypeIndividualValidator extends AbstractValueTuplesValidator<BamMetadataValidationContext> implements BamMetadataValidator {
-
+class SampleTypeIndividualValidator extends AbstractValueTuplesValidator implements BamMetadataValidator {
     @Override
     Collection<String> getDescriptions() {
         return ['The sample as combination of individual and sample type is registered in OTP.']
     }
 
     @Override
-    List<String> getRequiredColumnTitles(BamMetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         return [INDIVIDUAL, SAMPLE_TYPE]*.name()
     }
 
     @Override
-    void validateValueTuples(BamMetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each {
             String individual = it.getValue(INDIVIDUAL.name())
             String sampleType = it.getValue(SAMPLE_TYPE.name())

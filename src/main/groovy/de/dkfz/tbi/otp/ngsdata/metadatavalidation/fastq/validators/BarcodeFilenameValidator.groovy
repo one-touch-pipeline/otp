@@ -25,7 +25,6 @@ import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.MultiplexingService
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
@@ -33,8 +32,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.FASTQ_FILE
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.INDEX
 
 @Component
-class BarcodeFilenameValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
-
+class BarcodeFilenameValidator extends AbstractValueTuplesValidator implements MetadataValidator {
     @CompileDynamic
     @Override
     Collection<String> getDescriptions() {
@@ -42,20 +40,20 @@ class BarcodeFilenameValidator extends AbstractValueTuplesValidator<MetadataVali
     }
 
     @Override
-    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         return [FASTQ_FILE]*.name()
     }
 
     @Override
-    List<String> getOptionalColumnTitles(MetadataValidationContext context) {
+    List<String> getOptionalColumnTitles(ValidationContext context) {
         return [INDEX]*.name()
     }
 
     @Override
-    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) { }
+    void checkMissingOptionalColumn(ValidationContext context, String columnTitle) { }
 
     @Override
-    void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each { ValueTuple valueTuple ->
             String barcode = valueTuple.getValue(INDEX.name())
             String fileName = valueTuple.getValue(FASTQ_FILE.name())

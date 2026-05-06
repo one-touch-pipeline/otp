@@ -24,17 +24,15 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractSingleValueValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
 import java.util.regex.Matcher
 
 @Component
-class TagmentationLibraryValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+class TagmentationLibraryValidator extends AbstractSingleValueValidator implements MetadataValidator {
 
     static final String REGEX = /^(?:lib(?:[1-9]\d*|NA)|)$/
 
@@ -44,15 +42,15 @@ class TagmentationLibraryValidator extends AbstractSingleValueValidator<Metadata
     }
 
     @Override
-    String getColumnTitle(MetadataValidationContext context) {
+    String getColumnTitle(ValidationContext context) {
         return MetaDataColumn.TAGMENTATION_LIBRARY.name()
     }
 
     @Override
-    void checkColumn(MetadataValidationContext context) { }
+    void checkColumn(ValidationContext context) { }
 
     @Override
-    void validateValue(MetadataValidationContext context, String library, Set<Cell> cells) {
+    void validateValue(ValidationContext context, String library, Set<Cell> cells) {
         if (library) {
             Matcher matcher = library =~ REGEX
             if (!OtpPathValidator.isValidPathComponent(library)) {

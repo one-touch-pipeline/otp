@@ -26,14 +26,12 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.BamMetadataColumn
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractSingleValueValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 @Component
-class ReferenceGenomeValidator extends AbstractSingleValueValidator<BamMetadataValidationContext> implements BamMetadataValidator {
+class ReferenceGenomeValidator extends AbstractSingleValueValidator implements BamMetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {
@@ -41,13 +39,13 @@ class ReferenceGenomeValidator extends AbstractSingleValueValidator<BamMetadataV
     }
 
     @Override
-    String getColumnTitle(BamMetadataValidationContext context) {
+    String getColumnTitle(ValidationContext context) {
         return BamMetadataColumn.REFERENCE_GENOME.name()
     }
 
     @CompileDynamic
     @Override
-    void validateValue(BamMetadataValidationContext context, String refGen, Set<Cell> cells) {
+    void validateValue(ValidationContext context, String refGen, Set<Cell> cells) {
         if (!ReferenceGenome.findAllByName(refGen)) {
             context.addProblem(cells, LogLevel.ERROR, "The reference genome '${refGen}' is not registered in OTP.", "At least one reference genome is not registered in OTP.")
         }

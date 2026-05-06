@@ -24,14 +24,12 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractSingleValueValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 @Component
-class MateNumberValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+class MateNumberValidator extends AbstractSingleValueValidator implements MetadataValidator {
 
     static final private String MATE_NUMBER_EXPRESSION = /^(i|I)?[1-9]\d*$/
 
@@ -49,17 +47,17 @@ class MateNumberValidator extends AbstractSingleValueValidator<MetadataValidatio
     }
 
     @Override
-    String getColumnTitle(MetadataValidationContext context) {
+    String getColumnTitle(ValidationContext context) {
         return MetaDataColumn.READ.name()
     }
 
     @Override
-    void checkColumn(MetadataValidationContext context) {
+    void checkColumn(ValidationContext context) {
         addErrorForMissingRequiredColumn(context, MetaDataColumn.READ.name())
     }
 
     @Override
-    void validateValue(MetadataValidationContext context, String mateNumber, Set<Cell> cells) {
+    void validateValue(ValidationContext context, String mateNumber, Set<Cell> cells) {
         if (!mateNumber) {
             context.addProblem(cells, LogLevel.ERROR, ERROR_NOT_PROVIDED)
         } else if (!(mateNumber ==~ MATE_NUMBER_EXPRESSION)) {

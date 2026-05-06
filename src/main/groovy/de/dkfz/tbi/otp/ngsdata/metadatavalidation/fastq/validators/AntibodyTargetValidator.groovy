@@ -25,17 +25,14 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.AntibodyTargetService
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractSingleValueValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.ANTIBODY_TARGET
 
 @Component
-class AntibodyTargetValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
-
+class AntibodyTargetValidator extends AbstractSingleValueValidator implements MetadataValidator {
     @Autowired
     AntibodyTargetService antibodyTargetService
 
@@ -45,16 +42,16 @@ class AntibodyTargetValidator extends AbstractSingleValueValidator<MetadataValid
     }
 
     @Override
-    String getColumnTitle(MetadataValidationContext context) {
+    String getColumnTitle(ValidationContext context) {
         return ANTIBODY_TARGET.name()
     }
 
     @Override
-    void checkColumn(MetadataValidationContext context) {
+    void checkColumn(ValidationContext context) {
     }
 
     @Override
-    void validateValue(MetadataValidationContext context, String antibodyTarget, Set<Cell> cells) {
+    void validateValue(ValidationContext context, String antibodyTarget, Set<Cell> cells) {
         if (antibodyTarget && !antibodyTargetService.findByNameOrImportAlias(antibodyTarget)) {
             context.addProblem(cells, LogLevel.ERROR, "The antibody target '${antibodyTarget}' is not registered in OTP.",
                     "At least one antibody target is not registered in OTP.")

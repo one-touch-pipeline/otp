@@ -24,29 +24,26 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.SoftwareToolService
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractSingleValueValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.FASTQ_GENERATOR
 
 @Component
-class FastqGeneratorValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
-
+class FastqGeneratorValidator extends AbstractSingleValueValidator implements MetadataValidator {
     @Override
     Collection<String> getDescriptions() {
         return ['The fastq generator is registered in the OTP database or empty.']
     }
 
     @Override
-    String getColumnTitle(MetadataValidationContext context) {
+    String getColumnTitle(ValidationContext context) {
         return FASTQ_GENERATOR.name()
     }
 
     @Override
-    void validateValue(MetadataValidationContext context, String fastqGenerator, Set<Cell> cells) {
+    void validateValue(ValidationContext context, String fastqGenerator, Set<Cell> cells) {
         if (fastqGenerator && !SoftwareToolService.getBaseCallingTool(fastqGenerator)) {
             context.addProblem(cells, LogLevel.ERROR, "Fastq generator '${fastqGenerator}' is not registered in the OTP database.", "At least one fastq generator is not registered in the OTP database.")
         }

@@ -23,17 +23,15 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractSingleValueValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.RUN_ID
 
 @Component
-class RunNameValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+class RunNameValidator extends AbstractSingleValueValidator implements MetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {
@@ -41,12 +39,12 @@ class RunNameValidator extends AbstractSingleValueValidator<MetadataValidationCo
     }
 
     @Override
-    String getColumnTitle(MetadataValidationContext context) {
+    String getColumnTitle(ValidationContext context) {
         return RUN_ID.name()
     }
 
     @Override
-    void validateValue(MetadataValidationContext context, String runName, Set<Cell> cells) {
+    void validateValue(ValidationContext context, String runName, Set<Cell> cells) {
         if (!OtpPathValidator.isValidPathComponent(runName)) {
             context.addProblem(cells, LogLevel.ERROR, "The run name '${runName}' is not a valid directory name.", "At least one run name is not a valid directory name.")
         }

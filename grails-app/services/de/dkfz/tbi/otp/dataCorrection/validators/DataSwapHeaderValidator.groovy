@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.otp.utils.spreadsheet.validation.ValidationContext
 
 @Component
-class DataSwapHeaderValidator extends AbstractColumnSetValidator<ValidationContext> implements DataSwapValidator {
+class DataSwapHeaderValidator extends AbstractColumnSetValidator implements DataSwapValidator {
     @Autowired
     DataSwapService dataSwapService
 

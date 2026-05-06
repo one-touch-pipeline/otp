@@ -26,15 +26,12 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.BamMetadataColumn
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractSingleValueValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 @Component
-class SeqTypeBamValidator extends AbstractSingleValueValidator<BamMetadataValidationContext> implements BamMetadataValidator {
-
+class SeqTypeBamValidator extends AbstractSingleValueValidator implements BamMetadataValidator {
     @Autowired
     SeqTypeService seqTypeService
 
@@ -44,12 +41,12 @@ class SeqTypeBamValidator extends AbstractSingleValueValidator<BamMetadataValida
     }
 
     @Override
-    String getColumnTitle(BamMetadataValidationContext context) {
+    String getColumnTitle(ValidationContext context) {
         return BamMetadataColumn.SEQUENCING_TYPE.name()
     }
 
     @Override
-    void validateValue(BamMetadataValidationContext context, String seqType, Set<Cell> cells) {
+    void validateValue(ValidationContext context, String seqType, Set<Cell> cells) {
         if (!seqType) {
             context.addProblem(cells, LogLevel.ERROR, "No seqType is given.")
         } else if (!seqTypeService.findByNameOrImportAlias(seqType)) {

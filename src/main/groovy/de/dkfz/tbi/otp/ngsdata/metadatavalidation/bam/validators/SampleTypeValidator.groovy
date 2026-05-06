@@ -25,14 +25,12 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.BamMetadataColumn
 import de.dkfz.tbi.otp.ngsdata.SampleTypeService
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractSingleValueValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 @Component
-class SampleTypeValidator extends AbstractSingleValueValidator<BamMetadataValidationContext> implements BamMetadataValidator {
+class SampleTypeValidator extends AbstractSingleValueValidator implements BamMetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {
@@ -40,12 +38,12 @@ class SampleTypeValidator extends AbstractSingleValueValidator<BamMetadataValida
     }
 
     @Override
-    String getColumnTitle(BamMetadataValidationContext context) {
+    String getColumnTitle(ValidationContext context) {
         return BamMetadataColumn.SAMPLE_TYPE.name()
     }
 
     @Override
-    void validateValue(BamMetadataValidationContext context, String sampleType, Set<Cell> cells) {
+    void validateValue(ValidationContext context, String sampleType, Set<Cell> cells) {
         if (!SampleTypeService.findSampleTypeByName(sampleType)) {
             context.addProblem(cells, LogLevel.ERROR, "The sample type '${sampleType}' is not registered in OTP.", "At least one sample type is not registered in OTP.")
         }

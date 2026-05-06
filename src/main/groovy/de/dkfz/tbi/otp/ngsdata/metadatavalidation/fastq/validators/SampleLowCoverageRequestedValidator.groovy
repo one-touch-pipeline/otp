@@ -26,27 +26,15 @@ import groovy.transform.TupleConstructor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.LibraryPreparationKitService
-import de.dkfz.tbi.otp.ngsdata.MetadataImportService
-import de.dkfz.tbi.otp.ngsdata.SampleIdentifierService
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.ValidatorHelperService
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.ValueTuple
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractValueTuplesValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.BASE_MATERIAL
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.LOW_COVERAGE_REQUESTED
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PROJECT
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_NAME
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SEQUENCING_READ_TYPE
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SEQUENCING_TYPE
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
-class SampleLowCoverageRequestedValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class SampleLowCoverageRequestedValidator extends AbstractValueTuplesValidator implements MetadataValidator {
 
     @Autowired
     MetadataImportService metadataImportService
@@ -66,25 +54,25 @@ class SampleLowCoverageRequestedValidator extends AbstractValueTuplesValidator<M
     }
 
     @Override
-    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         return [PROJECT, SAMPLE_NAME, SEQUENCING_TYPE, SEQUENCING_READ_TYPE, LOW_COVERAGE_REQUESTED,]*.name()
     }
 
     @Override
-    List<String> getOptionalColumnTitles(MetadataValidationContext context) {
+    List<String> getOptionalColumnTitles(ValidationContext context) {
         return [BASE_MATERIAL.name()]
     }
 
     @Override
-    void checkMissingRequiredColumn(MetadataValidationContext context, String columnTitle) {
+    void checkMissingRequiredColumn(ValidationContext context, String columnTitle) {
     }
 
     @Override
-    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) {
+    void checkMissingOptionalColumn(ValidationContext context, String columnTitle) {
     }
 
     @Override
-    void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.groupBy { values ->
             SeqType seqType = validatorHelperService.getSeqTypeFromMetadata(values)
             if (!seqType) {

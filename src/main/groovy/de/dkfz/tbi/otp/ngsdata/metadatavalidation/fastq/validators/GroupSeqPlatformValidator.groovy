@@ -24,30 +24,15 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
-import de.dkfz.tbi.otp.ngsdata.SeqPlatform
-import de.dkfz.tbi.otp.ngsdata.SeqPlatformGroup
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.ValidatorHelperService
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractValueTuplesValidator
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.ValueTuple
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.BASE_MATERIAL
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.INSTRUMENT_MODEL
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.INSTRUMENT_PLATFORM
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PROJECT
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_NAME
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SEQUENCING_KIT
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SEQUENCING_READ_TYPE
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SEQUENCING_TYPE
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
-class GroupSeqPlatformValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
-
+class GroupSeqPlatformValidator extends AbstractValueTuplesValidator implements MetadataValidator {
     private final ValidatorHelperService validatorHelperService
-
     GroupSeqPlatformValidator(final ValidatorHelperService validatorHelperService) {
         this.validatorHelperService = validatorHelperService
     }
@@ -60,17 +45,17 @@ class GroupSeqPlatformValidator extends AbstractValueTuplesValidator<MetadataVal
     }
 
     @Override
-    List<String> getRequiredColumnTitles(final MetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(final ValidationContext context) {
         return [SAMPLE_NAME, SEQUENCING_TYPE, SEQUENCING_READ_TYPE, PROJECT, INSTRUMENT_PLATFORM, INSTRUMENT_MODEL]*.name()
     }
 
     @Override
-    List<String> getOptionalColumnTitles(final MetadataValidationContext context) {
+    List<String> getOptionalColumnTitles(final ValidationContext context) {
         return [BASE_MATERIAL, SEQUENCING_KIT,]*.name()
     }
 
     @Override
-    void validateValueTuples(final MetadataValidationContext context, final Collection<ValueTuple> valueTuples) {
+    void validateValueTuples(final ValidationContext context, final Collection<ValueTuple> valueTuples) {
         valueTuples.each { tuple ->
             SeqType seqType = validatorHelperService.getSeqTypeFromMetadata(tuple)
             SeqPlatform seqPlatform = validatorHelperService.findSeqPlatform(tuple)

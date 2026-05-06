@@ -29,27 +29,27 @@ import de.dkfz.tbi.otp.utils.spreadsheet.Column
 /**
  * A base class for validators which validate values from a specific set of columns
  */
-abstract class AbstractColumnSetValidator<C extends ValidationContext> implements Validator<C> {
+abstract class AbstractColumnSetValidator implements Validator {
 
     /**
      * A List of all Columns that are required for the Validator to run
      */
-    abstract List<String> getRequiredColumnTitles(C context)
+    abstract List<String> getRequiredColumnTitles(ValidationContext context)
 
     /**
      * A List of all Columns that not are required for the Validator to run, but are needed for certain validation
      */
     @SuppressWarnings("UnusedMethodParameter")
-    List<String> getOptionalColumnTitles(C context) {
+    List<String> getOptionalColumnTitles(ValidationContext context) {
         return []
     }
 
     /**
-     * @return The columns in the same order as returned by {@link #getRequiredColumnTitles(C)} and {@link #getOptionalColumnTitles(C)}. Contains {@code null}
+     * @return The columns in the same order as returned by {@link #getRequiredColumnTitles(ValidationContext)} and {@link #getOptionalColumnTitles(ValidationContext)}. Contains {@code null}
      * in place of missing columns.
      * @throws ColumnsMissingException if the validator cannot continue because of missing columns
      */
-    final List<Column> findColumns(C context) {
+    final List<Column> findColumns(ValidationContext context) {
         List<Column> columns = []
         Collection<String> missingColumns = []
         getRequiredColumnTitles(context).each {
@@ -74,12 +74,12 @@ abstract class AbstractColumnSetValidator<C extends ValidationContext> implement
     }
 
     /**
-     * Called for each column returned by {@link #getRequiredColumnTitles(C)} that is missing.
-     * Calls {@link #addErrorForMissingRequiredColumn(C, String)}
+     * Called for each column returned by {@link #getRequiredColumnTitles(ValidationContext)} that is missing.
+     * Calls {@link #addErrorForMissingRequiredColumn(ValidationContext, String)}
      *
      * Overwrite when this is not the desired behaviour
      */
-    void checkMissingRequiredColumn(C context, String columnTitle) {
+    void checkMissingRequiredColumn(ValidationContext context, String columnTitle) {
         addErrorForMissingRequiredColumn(context, columnTitle)
     }
 
@@ -88,12 +88,12 @@ abstract class AbstractColumnSetValidator<C extends ValidationContext> implement
     }
 
     /**
-     * Called for each column returned by {@link #getOptionalColumnTitles(C)} that is missing.
-     * Calls {@link #addWarningForMissingOptionalColumn(C, String)}
+     * Called for each column returned by {@link #getOptionalColumnTitles(ValidationContext)} that is missing.
+     * Calls {@link #addWarningForMissingOptionalColumn(ValidationContext, String)}
      *
      * Overwrite when this is not the desired behaviour
      */
-    void checkMissingOptionalColumn(C context, String columnTitle) {
+    void checkMissingOptionalColumn(ValidationContext context, String columnTitle) {
         addWarningForMissingOptionalColumn(context, columnTitle)
     }
 

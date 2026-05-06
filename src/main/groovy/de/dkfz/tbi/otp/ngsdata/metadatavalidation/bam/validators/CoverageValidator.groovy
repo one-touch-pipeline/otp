@@ -24,14 +24,12 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.BamMetadataColumn
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractSingleValueValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 @Component
-class CoverageValidator extends AbstractSingleValueValidator<BamMetadataValidationContext> implements BamMetadataValidator {
+class CoverageValidator extends AbstractSingleValueValidator implements BamMetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {
@@ -39,17 +37,17 @@ class CoverageValidator extends AbstractSingleValueValidator<BamMetadataValidati
     }
 
     @Override
-    String getColumnTitle(BamMetadataValidationContext context) {
+    String getColumnTitle(ValidationContext context) {
         return BamMetadataColumn.COVERAGE.name()
     }
 
     @Override
-    void checkColumn(BamMetadataValidationContext context) {
+    void checkColumn(ValidationContext context) {
         addWarningForMissingOptionalColumn(context, BamMetadataColumn.COVERAGE.name())
     }
 
     @Override
-    void validateValue(BamMetadataValidationContext context, String coverage, Set<Cell> cells) {
+    void validateValue(ValidationContext context, String coverage, Set<Cell> cells) {
         if (!coverage.empty) {
             if (!coverage.isDouble()) {
                 context.addProblem(cells, LogLevel.ERROR, "The coverage '${coverage}' should be a double number.", "At least one coverage is not a double number.")

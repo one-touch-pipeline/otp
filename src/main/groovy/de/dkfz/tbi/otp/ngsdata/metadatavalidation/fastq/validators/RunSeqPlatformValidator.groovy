@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
@@ -34,7 +33,7 @@ import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
-class RunSeqPlatformValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class RunSeqPlatformValidator extends AbstractValueTuplesValidator implements MetadataValidator {
 
     @Autowired
     SeqPlatformService seqPlatformService
@@ -49,18 +48,18 @@ class RunSeqPlatformValidator extends AbstractValueTuplesValidator<MetadataValid
     }
 
     @Override
-    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         return [RUN_ID, INSTRUMENT_PLATFORM, INSTRUMENT_MODEL]*.name()
     }
 
     @Override
-    List<String> getOptionalColumnTitles(MetadataValidationContext context) {
+    List<String> getOptionalColumnTitles(ValidationContext context) {
         return [SEQUENCING_KIT]*.name()
     }
 
     @CompileDynamic
     @Override
-    void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> allValueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> allValueTuples) {
         allValueTuples.groupBy { it.getValue(RUN_ID.name()) }.each { String runName, List<ValueTuple> valueTuplesOfRun ->
             if (valueTuplesOfRun.size() == 1) {
                 ValueTuple valueTuple = CollectionUtils.exactlyOneElement(valueTuplesOfRun)

@@ -25,15 +25,13 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.SequencingReadType
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractSingleValueValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 @Component
-class LibraryLayoutValidator extends AbstractSingleValueValidator<AbstractMetadataValidationContext> implements MetadataValidator, BamMetadataValidator {
+class LibraryLayoutValidator extends AbstractSingleValueValidator implements MetadataValidator, BamMetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {
@@ -41,12 +39,12 @@ class LibraryLayoutValidator extends AbstractSingleValueValidator<AbstractMetada
     }
 
     @Override
-    String getColumnTitle(AbstractMetadataValidationContext context) {
+    String getColumnTitle(ValidationContext context) {
         return MetaDataColumn.SEQUENCING_READ_TYPE.name()
     }
 
     @Override
-    void validateValue(AbstractMetadataValidationContext context, String libraryLayoutName, Set<Cell> cells) {
+    void validateValue(ValidationContext context, String libraryLayoutName, Set<Cell> cells) {
         SequencingReadType libraryLayout = SequencingReadType.getByName(libraryLayoutName)
         if (!libraryLayout) {
             context.addProblem(cells, LogLevel.ERROR, "sequencing read type '${libraryLayoutName}' is not registered in OTP.", "At least one sequencing read type is not registered in OTP.")

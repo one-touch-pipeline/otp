@@ -26,17 +26,15 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.BamMetadataColumn
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractSingleValueValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 @Component
-class ProjectValidator extends AbstractSingleValueValidator<AbstractMetadataValidationContext> implements MetadataValidator, BamMetadataValidator {
+class ProjectValidator extends AbstractSingleValueValidator implements MetadataValidator, BamMetadataValidator {
 
     @CompileDynamic
     @Override
@@ -45,19 +43,19 @@ class ProjectValidator extends AbstractSingleValueValidator<AbstractMetadataVali
     }
 
     @Override
-    String getColumnTitle(AbstractMetadataValidationContext context) {
+    String getColumnTitle(ValidationContext context) {
         return MetaDataColumn.PROJECT.name()
     }
 
     @Override
-    void checkColumn(AbstractMetadataValidationContext context) {
+    void checkColumn(ValidationContext context) {
         if (context instanceof BamMetadataValidationContext) {
             addErrorForMissingRequiredColumn(context, BamMetadataColumn.PROJECT.name())
         }
     }
 
     @Override
-    void validateValue(AbstractMetadataValidationContext context, String projectName, Set<Cell> cells) {
+    void validateValue(ValidationContext context, String projectName, Set<Cell> cells) {
         if (!ProjectService.findByNameOrNameInMetadataFiles(projectName)) {
             def level
             if (context instanceof BamMetadataValidationContext) {

@@ -27,12 +27,10 @@ import de.dkfz.tbi.otp.ngsdata.BamMetadataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractSingleValueValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 @Component
-class MaximalReadLengthValidator extends AbstractSingleValueValidator<BamMetadataValidationContext> implements BamMetadataValidator {
-
+class MaximalReadLengthValidator extends AbstractSingleValueValidator implements BamMetadataValidator {
     @Override
     Collection<String> getDescriptions() {
         return [
@@ -42,13 +40,14 @@ class MaximalReadLengthValidator extends AbstractSingleValueValidator<BamMetadat
     }
 
     @Override
-    String getColumnTitle(BamMetadataValidationContext context) {
+    String getColumnTitle(ValidationContext context) {
         return BamMetadataColumn.MAXIMAL_READ_LENGTH.name()
     }
 
     @Override
-    void checkColumn(BamMetadataValidationContext context) {
-        if (context.linkSourceFiles) {
+    void checkColumn(ValidationContext context) {
+        BamMetadataValidationContext bamContext = context as BamMetadataValidationContext
+        if (bamContext.linkSourceFiles) {
             context.addProblem(Collections.emptySet(), LogLevel.ERROR,
                     "If source files should only linked, the column '${BamMetadataColumn.MAXIMAL_READ_LENGTH.name()}' is required.")
         } else {
@@ -57,13 +56,14 @@ class MaximalReadLengthValidator extends AbstractSingleValueValidator<BamMetadat
     }
 
     @Override
-    void validateValue(BamMetadataValidationContext context, String maximalReadLength, Set<Cell> cells) {
+    void validateValue(ValidationContext context, String maximalReadLength, Set<Cell> cells) {
+        BamMetadataValidationContext bamContext = context as BamMetadataValidationContext
         if (maximalReadLength) {
             if (!maximalReadLength.integer) {
                 context.addProblem(cells, LogLevel.ERROR, "The maximalReadLength '${maximalReadLength}' should be an integer number.",
                         "At least one maximalReadLength is not an integer number.")
             }
-        } else if (context.linkSourceFiles) {
+        } else if (bamContext.linkSourceFiles) {
             context.addProblem(cells, LogLevel.ERROR, "The maximalReadLength is required, if the files should only be linked")
         }
     }

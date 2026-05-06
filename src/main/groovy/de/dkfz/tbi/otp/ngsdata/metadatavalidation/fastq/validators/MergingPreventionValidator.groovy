@@ -27,10 +27,8 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit
 import de.dkfz.tbi.otp.ngsdata.SeqPlatformGroup
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.ValueTuple
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractValueTuplesValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
@@ -68,7 +66,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
  *    - {@link MergingCriteria#useSeqPlatformGroup} is {@link MergingCriteria.SpecificSeqPlatformGroups#USE_OTP_DEFAULT}
  */
 @Component
-class MergingPreventionValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class MergingPreventionValidator extends AbstractValueTuplesValidator implements MetadataValidator {
 
     @Autowired
     MergingPreventionService mergingPreventionService
@@ -82,33 +80,33 @@ class MergingPreventionValidator extends AbstractValueTuplesValidator<MetadataVa
     }
 
     @Override
-    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         /** This content is used externally. Please discuss a change in the team */
         return [SAMPLE_NAME, SEQUENCING_TYPE, SEQUENCING_READ_TYPE, PROJECT, INSTRUMENT_PLATFORM, INSTRUMENT_MODEL]*.name()
     }
 
     @Override
-    List<String> getOptionalColumnTitles(MetadataValidationContext context) {
+    List<String> getOptionalColumnTitles(ValidationContext context) {
         /** This content is used externally. Please discuss a change in the team */
         return [BASE_MATERIAL, ANTIBODY_TARGET, SEQUENCING_KIT, LIB_PREP_KIT]*.name()
     }
 
     @Override
-    void checkMissingRequiredColumn(MetadataValidationContext context, String columnTitle) {
+    void checkMissingRequiredColumn(ValidationContext context, String columnTitle) {
     }
 
     @Override
-    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) {
+    void checkMissingOptionalColumn(ValidationContext context, String columnTitle) {
     }
 
     @Override
-    void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each { ValueTuple valueTuple ->
             validateValueTuple(context, valueTuple)
         }
     }
 
-    protected void validateValueTuple(MetadataValidationContext context, ValueTuple valueTuple) {
+    protected void validateValueTuple(ValidationContext context, ValueTuple valueTuple) {
         MergingPreventionDataDto data = mergingPreventionService.parseMetaData(valueTuple)
         if (!data.filledCompletely) {
             return

@@ -28,16 +28,15 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.BamMetadataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
-import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractSingleValueValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
 import java.nio.file.Files
 import java.nio.file.Path
 
 @Component
-class BamFilePathValidator extends AbstractSingleValueValidator<BamMetadataValidationContext> implements BamMetadataValidator {
+class BamFilePathValidator extends AbstractSingleValueValidator implements BamMetadataValidator {
 
     @Autowired
     FileService fileService
@@ -52,18 +51,21 @@ class BamFilePathValidator extends AbstractSingleValueValidator<BamMetadataValid
     }
 
     @Override
-    String getColumnTitle(BamMetadataValidationContext context) {
+    String getColumnTitle(ValidationContext context) {
         return BamMetadataColumn.BAM_FILE_PATH.name()
     }
 
     @Override
-    void validateValue(BamMetadataValidationContext context, String filePath, Set<Cell> cells) {
+    void validateValue(ValidationContext context, String filePath, Set<Cell> cells) {
         if (!(filePath.endsWith(".bam") || filePath.endsWith(".cram"))) {
             context.addProblem(cells, LogLevel.ERROR, "Filename '${filePath}' does not end with '.bam' or '.cram'.", "At least one filename does not end with '.bam' or '.cram'.")
         }
         if (OtpPathValidator.isValidAbsolutePath(filePath)) {
             try {
-                Path bamFile = context.fileSystem.getPath(filePath)
+                // Safe down casting, because the context is only used for bam metadata validation and
+                // thus always of type BamMetadataValidationContext
+                BamMetadataValidationContext bamContext = context as BamMetadataValidationContext
+                Path bamFile = bamContext.fileSystem.getPath(filePath)
                 if (!Files.isRegularFile(bamFile)) {
                     if (Files.exists(bamFile)) {
                         context.addProblem(cells, LogLevel.ERROR, "'${filePath}' is not a file.", "At least one file is not a file.")
@@ -77,7 +79,7 @@ class BamFilePathValidator extends AbstractSingleValueValidator<BamMetadataValid
             } catch (Exception e) {
                 context.addProblem(Collections.emptySet(), LogLevel.ERROR, e.message)
             }
-       } else {
+        } else {
             context.addProblem(cells, LogLevel.ERROR, "The path '${filePath}' is no absolute path.", "At least one path is no absolute path.")
         }
     }

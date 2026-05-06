@@ -28,7 +28,6 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.SampleIdentifierService
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
@@ -37,7 +36,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Slf4j
 @Component
-class SingleCellWellLabelSingleCellValidator extends AbstractValueTuplesValidator<AbstractMetadataValidationContext> implements MetadataValidator {
+class SingleCellWellLabelSingleCellValidator extends AbstractValueTuplesValidator implements MetadataValidator {
 
     static final String WARNING_MESSAGE = "The submission contains single cell data without a well label " +
             "(provided via column ${SINGLE_CELL_WELL_LABEL} or by project parser)"
@@ -54,21 +53,21 @@ class SingleCellWellLabelSingleCellValidator extends AbstractValueTuplesValidato
     }
 
     @Override
-    List<String> getRequiredColumnTitles(AbstractMetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         return [BASE_MATERIAL]*.name()
     }
 
     @Override
-    List<String> getOptionalColumnTitles(AbstractMetadataValidationContext context) {
+    List<String> getOptionalColumnTitles(ValidationContext context) {
         return [SINGLE_CELL_WELL_LABEL, PROJECT, SAMPLE_NAME]*.name()
     }
 
     @Override
-    void checkMissingOptionalColumn(AbstractMetadataValidationContext context, String columnTitle) {
+    void checkMissingOptionalColumn(ValidationContext context, String columnTitle) {
     }
 
     @Override
-    void validateValueTuples(AbstractMetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         if (!context.spreadsheet.getColumn(BASE_MATERIAL.name())) {
             return // no single cell seq types
         }

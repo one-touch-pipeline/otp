@@ -27,16 +27,14 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.ngsdata.LibraryPreparationKitService
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractSingleValueValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.LIB_PREP_KIT
 
 @Component
-class LibPrepKitValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+class LibPrepKitValidator extends AbstractSingleValueValidator implements MetadataValidator {
 
     @Autowired
     LibraryPreparationKitService libraryPreparationKitService
@@ -48,17 +46,17 @@ class LibPrepKitValidator extends AbstractSingleValueValidator<MetadataValidatio
     }
 
     @Override
-    String getColumnTitle(MetadataValidationContext context) {
+    String getColumnTitle(ValidationContext context) {
         return LIB_PREP_KIT.name()
     }
 
     @Override
-    void checkColumn(MetadataValidationContext context) {
+    void checkColumn(ValidationContext context) {
         addWarningForMissingOptionalColumn(context, LIB_PREP_KIT.name())
     }
 
     @Override
-    void validateValue(MetadataValidationContext context, String value, Set<Cell> cells) {
+    void validateValue(ValidationContext context, String value, Set<Cell> cells) {
         if (value == "" || value == InformationReliability.UNKNOWN_VERIFIED.rawValue) {
             context.addProblem(cells, LogLevel.WARNING, "The library preparation kit column is ${value ?: 'empty'}", "At least one library preparation kit is ${value ?: 'empty'}")
         } else if (!libraryPreparationKitService.findByNameOrImportAlias(value)) {

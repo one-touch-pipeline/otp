@@ -26,14 +26,13 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import de.dkfz.tbi.otp.ngsdata.ValidatorHelperService
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SEQUENCING_TYPE
 
 @Component
-class SeqTypeValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class SeqTypeValidator extends AbstractValueTuplesValidator implements MetadataValidator {
 
     @Autowired
     SeqTypeService seqTypeService
@@ -47,15 +46,15 @@ class SeqTypeValidator extends AbstractValueTuplesValidator<MetadataValidationCo
     }
 
     @Override
-    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         return [SEQUENCING_TYPE]*.name()
     }
 
     @Override
-    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) { }
+    void checkMissingOptionalColumn(ValidationContext context, String columnTitle) { }
 
     @Override
-    void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each { ValueTuple valueTuple ->
             String seqType = validatorHelperService.getSeqTypeNameFromMetadata(valueTuple)
             if (!seqType) {

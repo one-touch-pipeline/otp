@@ -26,14 +26,12 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.SeqPlatform
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractSingleValueValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 @Component
-class InstrumentPlatformValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+class InstrumentPlatformValidator extends AbstractSingleValueValidator implements MetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {
@@ -41,13 +39,13 @@ class InstrumentPlatformValidator extends AbstractSingleValueValidator<MetadataV
     }
 
     @Override
-    String getColumnTitle(MetadataValidationContext context) {
+    String getColumnTitle(ValidationContext context) {
         return MetaDataColumn.INSTRUMENT_PLATFORM.name()
     }
 
     @CompileDynamic
     @Override
-    void validateValue(MetadataValidationContext context, String seqPlatformName, Set<Cell> cells) {
+    void validateValue(ValidationContext context, String seqPlatformName, Set<Cell> cells) {
         if (!SeqPlatform.findAllByName(seqPlatformName)) {
             context.addProblem(cells, LogLevel.ERROR, "Instrument platform '${seqPlatformName}' is not registered in the OTP database.", "At least one instrument platform is not registered in the OTP database.")
         }

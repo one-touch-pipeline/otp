@@ -37,9 +37,9 @@ class ColumnSetValidatorSpec extends Specification {
 
     void test_findColumns_WithMissingRequiredColumn() {
         given:
-        AbstractColumnSetValidator<ValidationContext> validator = [
+        AbstractColumnSetValidator validator = [
                 getRequiredColumnTitles: { ValidationContext context -> ['C1', 'B1', 'A1'] },
-        ] as AbstractColumnSetValidator<ValidationContext>
+        ] as AbstractColumnSetValidator
 
         when:
         validator.findColumns(context)
@@ -54,7 +54,7 @@ class ColumnSetValidatorSpec extends Specification {
 
     void test_findColumns_WithMissingOptionalColumn() {
         given:
-        AbstractColumnSetValidator<ValidationContext> validator = new AbstractColumnSetValidator<ValidationContext>() {
+        AbstractColumnSetValidator validator = new AbstractColumnSetValidator() {
             @Override
             List<String> getRequiredColumnTitles(ValidationContext context) {
                 return []

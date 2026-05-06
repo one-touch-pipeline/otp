@@ -25,7 +25,6 @@ import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.extractData.ExtractProjectSampleType
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.extractData.ProjectSampleType
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
@@ -34,7 +33,7 @@ import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
-class MultiImportValidator extends AbstractValueTuplesValidator<AbstractMetadataValidationContext> implements MetadataValidator, ExtractProjectSampleType {
+class MultiImportValidator extends AbstractValueTuplesValidator implements MetadataValidator, ExtractProjectSampleType {
 
     @Override
     Collection<String> getDescriptions() {
@@ -42,29 +41,29 @@ class MultiImportValidator extends AbstractValueTuplesValidator<AbstractMetadata
     }
 
     @Override
-    List<String> getRequiredColumnTitles(AbstractMetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         return [MD5, SAMPLE_NAME, PROJECT]*.name()
     }
 
     @Override
-    void checkMissingRequiredColumn(AbstractMetadataValidationContext context, String columnTitle) {
+    void checkMissingRequiredColumn(ValidationContext context, String columnTitle) {
         // should not create the missing required column, that are part of another validators
     }
 
     @Override
-    void checkMissingOptionalColumn(AbstractMetadataValidationContext context, String columnTitle) {
+    void checkMissingOptionalColumn(ValidationContext context, String columnTitle) {
         // should not create the missing optional column, that are part of another validators
     }
 
     @Override
-    void validateValueTuples(AbstractMetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each { ValueTuple valueTuple ->
             validateValueTuple(context, valueTuple)
         }
     }
 
     @CompileDynamic
-    void validateValueTuple(AbstractMetadataValidationContext context, ValueTuple valueTuple) {
+    void validateValueTuple(ValidationContext context, ValueTuple valueTuple) {
         String md5sum = valueTuple.getValue(MD5.name())
 
         ProjectSampleType projectSampleType = getProjectAndSampleTypeFromMetadata(valueTuple)

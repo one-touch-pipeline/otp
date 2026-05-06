@@ -29,10 +29,10 @@ import de.dkfz.tbi.otp.utils.spreadsheet.*
 /**
  * Fetches the values in specified columns of all data rows, uniquifies these value tuples and validates the set
  */
-abstract class AbstractValueTuplesValidator<C extends ValidationContext> extends AbstractColumnSetValidator<C> {
+abstract class AbstractValueTuplesValidator extends AbstractColumnSetValidator {
 
     @Override
-    final void validate(C context) {
+    final void validate(ValidationContext context) {
         List<Column> columns
         try {
             columns = findColumns(context)
@@ -51,9 +51,9 @@ abstract class AbstractValueTuplesValidator<C extends ValidationContext> extends
     }
 
     /**
-     * Called by {@link #validate(C)} once with all the unique value tuples in the spreadsheet
+     * Called by {@link #validate(ValidationContext)} once with all the unique value tuples in the spreadsheet
      */
-    abstract void validateValueTuples(C context, Collection<ValueTuple> valueTuples)
+    abstract void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples)
 }
 
 @TupleConstructor
@@ -73,30 +73,30 @@ class ValueTuple {
     final Set<Cell> cells
 }
 
-abstract class AbstractSingleValueValidator<C extends ValidationContext> extends AbstractValueTuplesValidator<C> {
+abstract class AbstractSingleValueValidator extends AbstractValueTuplesValidator {
 
     @Override
-    final List<String> getRequiredColumnTitles(C context) {
+    final List<String> getRequiredColumnTitles(ValidationContext context) {
         return [getColumnTitle(context)]
     }
 
-    abstract String getColumnTitle(C context)
+    abstract String getColumnTitle(ValidationContext context)
 
     @Override
-    final void checkMissingRequiredColumn(C context, String columnTitle) {
+    final void checkMissingRequiredColumn(ValidationContext context, String columnTitle) {
         checkColumn(context)
     }
 
-    void checkColumn(C context) {
+    void checkColumn(ValidationContext context) {
         super.checkMissingRequiredColumn(context, getColumnTitle(context))
     }
 
     @Override
-    final void validateValueTuples(C context, Collection<ValueTuple> valueTuples) {
+    final void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each {
             validateValue(context, CollectionUtils.exactlyOneElement(it.valuesByColumnTitle.values()), it.cells)
         }
     }
 
-    abstract void validateValue(C context, String value, Set<Cell> cells)
+    abstract void validateValue(ValidationContext context, String value, Set<Cell> cells)
 }

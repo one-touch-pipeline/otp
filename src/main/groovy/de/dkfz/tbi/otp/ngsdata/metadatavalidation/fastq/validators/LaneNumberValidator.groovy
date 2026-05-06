@@ -23,16 +23,14 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractSingleValueValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.LANE_NO
 
 @Component
-class LaneNumberValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+class LaneNumberValidator extends AbstractSingleValueValidator implements MetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {
@@ -42,12 +40,12 @@ class LaneNumberValidator extends AbstractSingleValueValidator<MetadataValidatio
     }
 
     @Override
-    String getColumnTitle(MetadataValidationContext context) {
+    String getColumnTitle(ValidationContext context) {
         return LANE_NO.name()
     }
 
     @Override
-    void validateValue(MetadataValidationContext context, String laneNumber, Set<Cell> cells) {
+    void validateValue(ValidationContext context, String laneNumber, Set<Cell> cells) {
         if (laneNumber.empty) {
             context.addProblem(cells, LogLevel.ERROR, "The lane number must not be empty.")
         } else if (!(laneNumber ==~ /^[0-9a-zA-Z]+$/)) {

@@ -27,7 +27,6 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.SampleIdentifier
 import de.dkfz.tbi.otp.ngsdata.SampleIdentifierService
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
@@ -40,7 +39,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_NAME
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 @Component
-class SampleProjectValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class SampleProjectValidator extends AbstractValueTuplesValidator implements MetadataValidator {
 
     @Autowired
     SampleIdentifierService sampleIdentifierService
@@ -51,12 +50,12 @@ class SampleProjectValidator extends AbstractValueTuplesValidator<MetadataValida
         return ["The value in the column '${PROJECT}' should be consistent with the parsed „project“ value from the sample name."]
     }
     @Override
-    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         return [SAMPLE_NAME, PROJECT]*.name()
     }
 
     @Override
-    void checkMissingRequiredColumn(MetadataValidationContext context, String columnTitle) {
+    void checkMissingRequiredColumn(ValidationContext context, String columnTitle) {
         if (columnTitle == PROJECT.name()) {
             addWarningForMissingOptionalColumn(context, columnTitle)
         }
@@ -64,7 +63,7 @@ class SampleProjectValidator extends AbstractValueTuplesValidator<MetadataValida
 
     @CompileDynamic
     @Override
-    void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each {
             String sampleName = it.getValue(SAMPLE_NAME.name())
             String projectName = it.getValue(PROJECT.name())

@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.SequencingReadType
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
@@ -32,7 +31,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.READ
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SEQUENCING_READ_TYPE
 
 @Component
-class MateNumberLibraryLayoutValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class MateNumberLibraryLayoutValidator extends AbstractValueTuplesValidator implements MetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {
@@ -40,19 +39,19 @@ class MateNumberLibraryLayoutValidator extends AbstractValueTuplesValidator<Meta
     }
 
     @Override
-    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         return [READ, SEQUENCING_READ_TYPE]*.name()
     }
 
     @Override
-    void checkMissingRequiredColumn(MetadataValidationContext context, String columnTitle) {
+    void checkMissingRequiredColumn(ValidationContext context, String columnTitle) {
         if (columnTitle == SEQUENCING_READ_TYPE.name()) {
             addErrorForMissingRequiredColumn(context, columnTitle)
         }
     }
 
     @Override
-    void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each {
             String libraryLayoutName = it.getValue(SEQUENCING_READ_TYPE.name())
             String mateNumber = it.getValue(READ.name())

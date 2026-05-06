@@ -26,7 +26,7 @@ import de.dkfz.tbi.otp.utils.spreadsheet.Spreadsheet
 /**
  * Validates a {@link Spreadsheet}
  */
-interface Validator<C extends ValidationContext> {
+interface Validator {
 
-    void validate(C context)
+    void validate(ValidationContext context)
 }

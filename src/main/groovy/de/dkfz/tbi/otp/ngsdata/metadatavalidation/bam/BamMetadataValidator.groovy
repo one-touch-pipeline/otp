@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.utils.spreadsheet.validation.Validator
  * Validators implementing this interfaces and annotated with {@link Component} will automatically be used for
  * validating externally processed bam meta data files.
  */
-interface BamMetadataValidator extends Validator<BamMetadataValidationContext> {
+interface BamMetadataValidator extends Validator {
 
     /**
      * @return A collection of descriptions of the validations which this validator performs

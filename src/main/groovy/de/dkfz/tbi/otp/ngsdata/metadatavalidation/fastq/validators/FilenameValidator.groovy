@@ -25,18 +25,15 @@ import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractSingleValueValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
+import de.dkfz.tbi.otp.utils.validation.OtpPathValidator
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.FASTQ_FILE
 
 @Component
-class FilenameValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
-
+class FilenameValidator extends AbstractSingleValueValidator implements MetadataValidator {
     /**
      * '_' is required because the AlignmentAndQCWorkflows Roddy Plugin uses it as a
      * separator to group FastQs.
@@ -58,12 +55,12 @@ class FilenameValidator extends AbstractSingleValueValidator<MetadataValidationC
     }
 
     @Override
-    String getColumnTitle(MetadataValidationContext context) {
+    String getColumnTitle(ValidationContext context) {
         return FASTQ_FILE.name()
     }
 
     @Override
-    void validateValue(MetadataValidationContext context, String filename, Set<Cell> cells) {
+    void validateValue(ValidationContext context, String filename, Set<Cell> cells) {
         String basename = filename.split("/").last()
         if (!filename.endsWith('.gz')) {
             context.addProblem(cells, LogLevel.ERROR, "Filename '${filename}' does not end with '.gz'.", "At least one filename does not end with '.gz'.")

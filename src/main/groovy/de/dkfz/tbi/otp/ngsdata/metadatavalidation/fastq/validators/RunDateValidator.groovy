@@ -24,12 +24,10 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.TimeFormats
 import de.dkfz.tbi.otp.utils.spreadsheet.Cell
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
-import de.dkfz.tbi.otp.utils.spreadsheet.validation.AbstractSingleValueValidator
+import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -38,7 +36,7 @@ import java.time.format.DateTimeParseException
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.RUN_DATE
 
 @Component
-class RunDateValidator extends AbstractSingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+class RunDateValidator extends AbstractSingleValueValidator implements MetadataValidator {
 
     /**
      * The date format used in the run names.
@@ -59,12 +57,12 @@ class RunDateValidator extends AbstractSingleValueValidator<MetadataValidationCo
     }
 
     @Override
-    String getColumnTitle(MetadataValidationContext context) {
+    String getColumnTitle(ValidationContext context) {
         return RUN_DATE.name()
     }
 
     @Override
-    void validateValue(MetadataValidationContext context, String runDate, Set<Cell> cells) {
+    void validateValue(ValidationContext context, String runDate, Set<Cell> cells) {
         try {
             LocalDate date = LocalDate.parse(runDate, RUN_DATE_FORMATTER)
             if (date > LocalDate.now().plusDays(1)) {

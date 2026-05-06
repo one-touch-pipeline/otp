@@ -25,7 +25,6 @@ import groovy.transform.CompileDynamic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.IlseSubmission
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
@@ -33,7 +32,7 @@ import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.ILSE_NO
 
 @Component
-class IlseNumberValidator extends AbstractValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+class IlseNumberValidator extends AbstractValueTuplesValidator implements MetadataValidator {
 
     final static String ILSE_RANGE = "[${IlseSubmission.MIN_ILSE_VALUE}..${IlseSubmission.MAX_ILSE_NUMBER}]"
 
@@ -48,16 +47,16 @@ class IlseNumberValidator extends AbstractValueTuplesValidator<MetadataValidatio
     }
 
     @Override
-    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         return [ILSE_NO]*.name()
     }
 
     @Override
-    void checkMissingRequiredColumn(MetadataValidationContext context, String columnTitle) { }
+    void checkMissingRequiredColumn(ValidationContext context, String columnTitle) { }
 
     @CompileDynamic
     @Override
-    void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> allValueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> allValueTuples) {
         if (allValueTuples) {
             Map<String, List<ValueTuple>> allIlseNumbers = allValueTuples.groupBy { it.getValue(ILSE_NO.name()) }
             if (allIlseNumbers.size() != 1) {

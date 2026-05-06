@@ -27,14 +27,13 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 
 @Component
-class Md5sumUniqueValidator extends AbstractValueTuplesValidator<AbstractMetadataValidationContext> implements MetadataValidator, BamMetadataValidator {
+class Md5sumUniqueValidator extends AbstractValueTuplesValidator implements MetadataValidator, BamMetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {
@@ -44,17 +43,17 @@ class Md5sumUniqueValidator extends AbstractValueTuplesValidator<AbstractMetadat
     }
 
     @Override
-    List<String> getRequiredColumnTitles(AbstractMetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         return [MetaDataColumn.MD5.name()]
     }
 
     @Override
-    void checkMissingRequiredColumn(AbstractMetadataValidationContext context, String columnTitle) {
+    void checkMissingRequiredColumn(ValidationContext context, String columnTitle) {
     }
 
     @CompileDynamic
     @Override
-    void validateValueTuples(AbstractMetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.groupBy {
             it.getValue(MetaDataColumn.MD5.name()).toLowerCase(Locale.ENGLISH)
         }.each { String md5sum, Collection<ValueTuple> valueTuplesOfMd5sum ->

@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
@@ -36,7 +35,7 @@ import de.dkfz.tbi.otp.utils.spreadsheet.validation.*
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
-class SeqTypeLibraryLayoutValidator extends AbstractValueTuplesValidator<AbstractMetadataValidationContext> implements MetadataValidator, BamMetadataValidator {
+class SeqTypeLibraryLayoutValidator extends AbstractValueTuplesValidator implements MetadataValidator, BamMetadataValidator {
 
     @Autowired
     SeqTypeService seqTypeService
@@ -50,22 +49,22 @@ class SeqTypeLibraryLayoutValidator extends AbstractValueTuplesValidator<Abstrac
     }
 
     @Override
-    List<String> getRequiredColumnTitles(AbstractMetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         return [SEQUENCING_TYPE, SEQUENCING_READ_TYPE]*.name()
     }
 
     @Override
-    List<String> getOptionalColumnTitles(AbstractMetadataValidationContext context) {
+    List<String> getOptionalColumnTitles(ValidationContext context) {
         return context instanceof BamMetadataValidationContext ? [] : [MetaDataColumn.BASE_MATERIAL.name()]
     }
 
     @Override
-    void checkMissingOptionalColumn(AbstractMetadataValidationContext context, String columnTitle) {
+    void checkMissingOptionalColumn(ValidationContext context, String columnTitle) {
     }
 
     @CompileDynamic
     @Override
-    void validateValueTuples(AbstractMetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         List<SeqType> seqTypes = []
         valueTuples.each {
             String seqTypeName
