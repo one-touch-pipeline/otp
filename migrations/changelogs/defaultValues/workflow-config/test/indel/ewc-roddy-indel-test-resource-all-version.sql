@@ -41,7 +41,7 @@
 '                "basepath": "indelCallingWorkflow"' ||
 '            },' ||
 '            "indelAnnotation": {' ||
-'                "memory": "6",' ||
+'                "memory": "12",' ||
 '                "value": "platypusIndelAnnotation.sh",' ||
 '                "walltime": "10",' ||
 '                "cores": 6,' ||
