@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 # Copyright 2011-2026 The OTP authors
 #
@@ -23,12 +23,9 @@
 # This script is used for extracting names and length values of entries in the fasta file (reference genome).
 # It can be used on the cluster or on a local machine, and depends on BioPython.
 #
-# the call: python2 ../getReferenceGenomeInfo.py hs37d5_GRCm38mm10_PhiX.conv.fa
+# the call: python3 ../getReferenceGenomeInfo.py hs37d5_GRCm38mm10_PhiX.conv.fa
 #
-# How to install BioPython for Python 2:
-#    sudo zypper in python-pip python-devel python-numpy-devel gcc
-#    sudo pip2 --proxy PROXY_HOST:PROXY_PORT install biopython
-# or for Python 3:
+# How to install BioPython:
 #    sudo zypper in python3-pip python3-devel python3-numpy-devel gcc
 #    sudo pip3 --proxy PROXY_HOST:PROXY_PORT install biopython
 
@@ -52,7 +49,7 @@ print("Reading fasta file from " + sys.argv[1])
 existing_aliases = []
 previous_record_w = None
 
-handle = open(sys.argv[1], "rU")
+handle = open(sys.argv[1], "r")
 for record in SeqIO.parse(handle, "fasta"):
     # if a record is duplicated with the suffixes _W and _C appended respectively, combine them without the suffix
     # this assumes that the duplicated entries occur consecutively, with _W first
