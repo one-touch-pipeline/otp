@@ -97,6 +97,8 @@ class SampleSwapService extends AbstractDataSwapService<SampleSwapParameters, Sa
             data.moveFilesCommands << copyAndRemoveFastQcFile(oldFastQcFileName, newFastQcFileNames[fastqcProcessedFile], data)
         }
 
+        createFixGroupOnUuidFoldersCommands(data)
+
         createRemoveAnalysisAndAlignmentsCommands(data)
     }
 

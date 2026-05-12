@@ -34,7 +34,10 @@ import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 import de.dkfz.tbi.otp.dataswap.data.DataSwapData
 import de.dkfz.tbi.otp.dataswap.parameters.DataSwapParameters
+import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
+import de.dkfz.tbi.otp.filestore.FilestoreService
+import de.dkfz.tbi.otp.filestore.WorkFolder
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataAllWellFileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
@@ -45,10 +48,12 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
+import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
 import java.nio.file.*
 
-class AbstractDataSwapServiceSpec extends Specification implements DataTest, RoddyPanCancerFactory {
+class AbstractDataSwapServiceSpec extends Specification implements DataTest, RoddyPanCancerFactory, FastqcDomainFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -70,6 +75,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                 AceseqQc,
                 MergingWorkPackage,
                 FastqFile,
+                FastqcProcessedFile,
         ]
     }
 
@@ -1022,7 +1028,7 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
 
         for (int i : 1..seqTrackAmount) {
             final SeqTrack seqTrack = createSeqTrackWithTwoFastqFile(
-                    [sample: sample, seqType: createSeqType([singleCell: true,]), singleCellWellLabel: 'WELL',],
+                    [sample: sample, seqType: createSeqTypePaired([singleCell: true,]), singleCellWellLabel: 'WELL',],
                     [fileName: "DataFileFileName_${i}_R1.gz", project: project, used: false,],
                     [fileName: "DataFileFileName_${i}_R2.gz", project: project, used: false,]
             )
@@ -1265,5 +1271,219 @@ class AbstractDataSwapServiceSpec extends Specification implements DataTest, Rod
                     "newVbpPath" : newFilesExists ? createExistingFilePath("NewVbp${it.fileName}") : createNonExistingFilePath("NewVbp${it.fileName}"),
             ]]
         }
+    }
+
+    private WorkflowArtefact createWorkflowArtefactWithWorkFolder(WorkFolder workFolder) {
+        return Mock(WorkflowArtefact) {
+            _ * getProducedBy() >> Mock(WorkflowRun) {
+                _ * getWorkFolder() >> workFolder
+            }
+        }
+    }
+
+    void "createFixGroupOnUuidFoldersCommands, emits chgrp for fastq workFolder when seqTrack has one attached"() {
+        given:
+        final Project project = createProject()
+        final SeqTrack seqTrack = createSeqTrack([
+                seqType: createSeqType(),
+        ])
+        seqTrack.workflowArtefact = createWorkflowArtefactWithWorkFolder(Mock(WorkFolder))
+        final Path workFolderPath = Paths.get('/work/folder1')
+        final String unixGroup = project.unixGroup
+
+        service.filestoreService = Mock(FilestoreService) {
+            1 * getWorkFolderPath(_) >> workFolderPath
+            0 * _
+        }
+
+        final DataSwapData dataSwapData = new DataSwapData(
+                projectSwap: new Swap(project, project),
+                seqTrackList: [seqTrack],
+                rawSequenceFiles: [],
+                moveFilesCommands: [AbstractDataSwapService.BASH_HEADER]
+        )
+
+        when:
+        service.createFixGroupOnUuidFoldersCommands(dataSwapData)
+
+        then:
+        String commands = dataSwapData.moveFilesCommands.join()
+        commands.contains('################ fix group on UUID folders ################')
+        commands.contains("chgrp -hR '${unixGroup}' '${workFolderPath}'")
+    }
+
+    void "createFixGroupOnUuidFoldersCommands, emits chgrp for fastqc workFolder when a FastqcProcessedFile has one attached"() {
+        given:
+        final Project project = createProject()
+        final RawSequenceFile rawSequenceFile = createFastqFile()
+        final WorkFolder workFolder = Mock(WorkFolder)
+        final FastqcProcessedFile fastqcFile = createFastqcProcessedFile(sequenceFile: rawSequenceFile)
+        fastqcFile.workflowArtefact = createWorkflowArtefactWithWorkFolder(workFolder)
+        final Path workFolderPath = Paths.get('/work/fastqc-folder')
+        final String unixGroup = project.unixGroup
+
+        service.filestoreService = Mock(FilestoreService) {
+            1 * getWorkFolderPath(workFolder) >> workFolderPath
+            0 * _
+        }
+
+        final DataSwapData dataSwapData = new DataSwapData(
+                projectSwap: new Swap(project, project),
+                seqTrackList: [],
+                rawSequenceFiles: [rawSequenceFile],
+                moveFilesCommands: [AbstractDataSwapService.BASH_HEADER]
+        )
+
+        when:
+        service.createFixGroupOnUuidFoldersCommands(dataSwapData)
+
+        then:
+        String commands = dataSwapData.moveFilesCommands.join()
+        commands.contains('################ fix group on UUID folders ################')
+        commands.contains("chgrp -hR '${unixGroup}' '${workFolderPath}'")
+    }
+
+    void "createFixGroupOnUuidFoldersCommands, when multiple seqTracks have same workFolder deduplicates correctly"() {
+        given:
+        final Project project = createProject()
+        final WorkFolder workFolder = Mock(WorkFolder)
+        final SeqTrack seqTrack1 = createSeqTrack([seqType: createSeqType()])
+        final SeqTrack seqTrack2 = createSeqTrack([seqType: createSeqType()])
+        seqTrack1.workflowArtefact = createWorkflowArtefactWithWorkFolder(workFolder)
+        seqTrack2.workflowArtefact = createWorkflowArtefactWithWorkFolder(workFolder)
+        final Path workFolderPath = Paths.get('/work/folder')
+        final String unixGroup = project.unixGroup
+
+        service.filestoreService = Mock(FilestoreService) {
+            1 * getWorkFolderPath(workFolder) >> workFolderPath
+            0 * _
+        }
+
+        final DataSwapData dataSwapData = new DataSwapData(
+                projectSwap: new Swap(project, project),
+                seqTrackList: [seqTrack1, seqTrack2],
+                rawSequenceFiles: [],
+                moveFilesCommands: [AbstractDataSwapService.BASH_HEADER]
+        )
+
+        when:
+        service.createFixGroupOnUuidFoldersCommands(dataSwapData)
+
+        then:
+        String commands = dataSwapData.moveFilesCommands.join()
+        int chgrpCount = commands.count("chgrp -hR '${unixGroup}' '${workFolderPath}'")
+        chgrpCount == 1
+    }
+
+    void "createFixGroupOnUuidFoldersCommands, emits no chgrp lines when no seqTrack has a workFolder"() {
+        given:
+        final Project project = createProject()
+        final SeqTrack seqTrack = createSeqTrack([seqType: createSeqType()])
+        seqTrack.workflowArtefact = null
+        final String initialCommands = AbstractDataSwapService.BASH_HEADER
+
+        service.filestoreService = Mock(FilestoreService) {
+            0 * _
+        }
+
+        final DataSwapData dataSwapData = new DataSwapData(
+                projectSwap: new Swap(project, project),
+                seqTrackList: [seqTrack],
+                rawSequenceFiles: [],
+                moveFilesCommands: [initialCommands]
+        )
+
+        when:
+        service.createFixGroupOnUuidFoldersCommands(dataSwapData)
+
+        then:
+        dataSwapData.moveFilesCommands.join() == initialCommands
+    }
+
+    void "createFixGroupOnUuidFoldersCommands, section header is emitted before any chgrp line"() {
+        given:
+        final Project project = createProject()
+        final SeqTrack seqTrack = createSeqTrack([seqType: createSeqType()])
+        seqTrack.workflowArtefact = createWorkflowArtefactWithWorkFolder(Mock(WorkFolder))
+        final Path workFolderPath = Paths.get('/work/folder')
+        final String unixGroup = project.unixGroup
+
+        service.filestoreService = Mock(FilestoreService) {
+            1 * getWorkFolderPath(_) >> workFolderPath
+            0 * _
+        }
+
+        final DataSwapData dataSwapData = new DataSwapData(
+                projectSwap: new Swap(project, project),
+                seqTrackList: [seqTrack],
+                rawSequenceFiles: [],
+                moveFilesCommands: [AbstractDataSwapService.BASH_HEADER]
+        )
+
+        when:
+        service.createFixGroupOnUuidFoldersCommands(dataSwapData)
+
+        then:
+        String commands = dataSwapData.moveFilesCommands.join()
+        int headerIndex = commands.indexOf('################ fix group on UUID folders ################')
+        int chgrpIndex = commands.indexOf("chgrp -hR '${unixGroup}' '${workFolderPath}'")
+        headerIndex < chgrpIndex
+        headerIndex >= 0
+    }
+
+    void "collectUniqueWorkFolders, collects from seqTrack workflowArtefacts"() {
+        given:
+        final SeqTrack seqTrack = createSeqTrack([seqType: createSeqType()])
+        final WorkFolder workFolder = Mock(WorkFolder)
+        seqTrack.workflowArtefact = createWorkflowArtefactWithWorkFolder(workFolder)
+
+        final DataSwapData dataSwapData = new DataSwapData(
+                seqTrackList: [seqTrack],
+                rawSequenceFiles: []
+        )
+
+        when:
+        Set<WorkFolder> result = service.collectUniqueWorkFolders(dataSwapData)
+
+        then:
+        result.size() == 1
+        result.contains(workFolder)
+    }
+
+    void "collectUniqueWorkFolders, collects from FastqcProcessedFile workflowArtefacts"() {
+        given:
+        final RawSequenceFile rawSequenceFile = createFastqFile()
+        final WorkFolder workFolder = Mock(WorkFolder)
+        final FastqcProcessedFile fastqcFile = createFastqcProcessedFile(sequenceFile: rawSequenceFile)
+        fastqcFile.workflowArtefact = createWorkflowArtefactWithWorkFolder(workFolder)
+
+        final DataSwapData dataSwapData = new DataSwapData(
+                seqTrackList: [],
+                rawSequenceFiles: [rawSequenceFile],
+        )
+
+        when:
+        Set<WorkFolder> result = service.collectUniqueWorkFolders(dataSwapData)
+
+        then:
+        result.size() == 1
+        result.contains(workFolder)
+    }
+
+    void "collectUniqueWorkFolders, returns empty set when no workFolders found"() {
+        given:
+        final SeqTrack seqTrack = createSeqTrack([seqType: createSeqType()])
+        seqTrack.workflowArtefact = null
+
+        final DataSwapData dataSwapData = new DataSwapData(
+                seqTrackList: [seqTrack],
+                rawSequenceFiles: []
+        )
+
+        when:
+        Set<WorkFolder> result = service.collectUniqueWorkFolders(dataSwapData)
+
+        then:
+        result.size() == 0
     }
 }

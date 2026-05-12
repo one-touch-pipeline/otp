@@ -105,6 +105,8 @@ class LaneSwapService extends AbstractDataSwapService<LaneSwapParameters, LaneSw
         }
 
         checkForRemainingSeqTracks(data)
+
+        createFixGroupOnUuidFoldersCommands(data)
     }
 
     @Override

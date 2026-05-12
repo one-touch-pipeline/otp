@@ -105,6 +105,8 @@ class IndividualSwapService extends AbstractDataSwapService<IndividualSwapParame
             data.moveFilesCommands << copyAndRemoveFastQcFile(oldFastQcFileName, newFastqcFileNames[fastqcProcessedFile], data)
         }
 
+        createFixGroupOnUuidFoldersCommands(data)
+
         createRemoveAnalysisAndAlignmentsCommands(data)
     }
 

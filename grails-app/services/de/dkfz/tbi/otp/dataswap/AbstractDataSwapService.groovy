@@ -32,6 +32,8 @@ import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 import de.dkfz.tbi.otp.dataswap.data.DataSwapData
 import de.dkfz.tbi.otp.dataswap.parameters.DataSwapParameters
+import de.dkfz.tbi.otp.filestore.FilestoreService
+import de.dkfz.tbi.otp.filestore.WorkFolder
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.infrastructure.fastqc.FastqcLinkFileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -111,6 +113,7 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
     RawSequenceDataViewFileService rawSequenceDataViewFileService
     RawSequenceDataAllWellFileService rawSequenceDataAllWellFileService
     ProcessingOptionService processingOptionService
+    FilestoreService filestoreService
 
     /**
      * Logs various arguments of DataSwapParameters in DataSwapParameters.log that can be examined later in the script output.
@@ -388,6 +391,38 @@ abstract class AbstractDataSwapService<P extends DataSwapParameters, D extends D
         data.dirsToDelete.each {
             data.moveFilesCommands << "rm -rf ${it}\n"
         }
+    }
+
+    /**
+     * Create bash commands to fix group on UUID folders
+     *
+     * @param data DTO containing all entities necessary to perform a swap
+     */
+    void createFixGroupOnUuidFoldersCommands(D data) {
+        Set<WorkFolder> uniqueWorkFolders = collectUniqueWorkFolders(data)
+        if (!uniqueWorkFolders) {
+            return
+        }
+        data.moveFilesCommands << "\n\n################ fix group on UUID folders ################\n"
+        uniqueWorkFolders.each { WorkFolder workFolder ->
+            data.moveFilesCommands << "chgrp -hR '${data.projectSwap.new.unixGroup}' '${filestoreService.getWorkFolderPath(workFolder)}'\n"
+        }
+    }
+
+    @CompileDynamic
+    private Set<WorkFolder> collectUniqueWorkFolders(D data) {
+        Set<WorkFolder> workFolders = [] as Set
+        data.seqTrackList.each { SeqTrack seqTrack ->
+            if (seqTrack.workflowArtefact?.producedBy?.workFolder) {
+                workFolders << seqTrack.workflowArtefact.producedBy.workFolder
+            }
+        }
+        (data.rawSequenceFiles ? FastqcProcessedFile.findAllBySequenceFileInList(data.rawSequenceFiles) : []).each { FastqcProcessedFile fastqcFile ->
+            if (fastqcFile.workflowArtefact?.producedBy?.workFolder) {
+                workFolders << fastqcFile.workflowArtefact.producedBy.workFolder
+            }
+        }
+        return workFolders
     }
 
     /**
