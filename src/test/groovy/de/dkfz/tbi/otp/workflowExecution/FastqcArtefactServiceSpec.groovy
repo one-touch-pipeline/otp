@@ -117,6 +117,20 @@ class FastqcArtefactServiceSpec extends HibernateSpec implements WorkflowSystemD
         TestCase.assertContainSame(result, expected)
     }
 
+    void "fetchRelatedFastqcArtefactsForSeqTracks, when fastqc artefact has FAILED state, then still return it"() {
+        given:
+        setupData()
+        workflowArtefactFastqc1.state = WorkflowArtefact.State.FAILED
+        workflowArtefactFastqc1.save(flush: true)
+
+        when:
+        List<FastqcArtefactDataWithFastqcProcessedFile> result = fastqcArtefactService.fetchRelatedFastqcArtefactsForSeqTracks(seqTracks)
+
+        then:
+        result.size() == 1
+        result.first().artefact == fastqc1
+    }
+
     void "fetchWorkflowVersionSelectorForSeqTracks, when called for workflow and seqTracks, then return WorkflowVersionSelector"() {
         given:
         setupData()

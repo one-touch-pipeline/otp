@@ -280,6 +280,52 @@ class FastqcDeciderSpec extends Specification implements DataTest, WorkflowSyste
     }
 
     @Unroll
+    void "createWorkflowRunsAndOutputArtefacts, when #name and FastqcProcessedFile exists with FAILED artefact, then retrigger and reuse existing file"() {
+        given:
+        setupData(useWes)
+
+        WorkflowArtefact seqTrackArtefact = createWorkflowArtefact([artefactType: ArtefactType.FASTQ])
+        SeqTrack seqTrack = createSeqTrackWithTwoFastqFile([workflowArtefact: seqTrackArtefact])
+        FastqcArtefactDataWithSeqTrack fastqcArtefactData = createFastqcArtefactDataForSeqTrack(seqTrack)
+
+        List<FastqcArtefactDataWithFastqcProcessedFile> additionalArtefacts = seqTrack.sequenceFiles.collect {
+            FastqcProcessedFile fastqcProcessedFile = createFastqcProcessedFile([
+                    sequenceFile    : it,
+                    workflowArtefact: createWorkflowArtefact([
+                            artefactType: ArtefactType.FASTQC,
+                            state       : WorkflowArtefact.State.FAILED,
+                    ]),
+            ])
+            createFastqcArtefactDataWithFastqcProcessedFile(fastqcProcessedFile)
+        }
+
+        Map<SeqTrack, List<RawSequenceFile>> rawSequenceFileMap = seqTrack.sequenceFiles.groupBy { it.seqTrack }
+        WorkflowVersionSelector selector = createWorkflowVersionSelector([
+                workflowVersion: usedVersion,
+                project        : seqTrack.project,
+                seqType        : null,
+        ])
+
+        and: 'services'
+        createServicesForCreateWorkflowRunsAndOutputArtefacts(usedVersion, seqTrack)
+
+        when:
+        DeciderResult deciderResult = decider.createWorkflowRunsAndOutputArtefacts(fastqcArtefactData, additionalArtefacts, rawSequenceFileMap, selector)
+
+        then:
+        deciderResult.newArtefacts.size() == 2
+        deciderResult.warnings.empty
+
+        FastqcProcessedFile.list().size() == 2
+        TestCase.assertContainSame(FastqcProcessedFile.list()*.workflowArtefact, deciderResult.newArtefacts)
+
+        where:
+        name   | useWes
+        'bash' | false
+        'wes'  | true
+    }
+
+    @Unroll
     void "createWorkflowRunsAndOutputArtefacts, when #name, then create no FastqcProcessedFile file and add a warning"() {
         given:
         setupData(useWes)

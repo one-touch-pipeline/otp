@@ -104,7 +104,6 @@ class FastqcArtefactService {
         where
             st in (:seqTracks)
             and df.fileWithdrawn = false
-            and wa.state <> '${WorkflowArtefact.State.FAILED}'
             and wa.state <> '${WorkflowArtefact.State.SKIPPED}'
             and wa.withdrawnDate is null
         """
@@ -181,4 +180,5 @@ class FastqcArtefactService {
             } as Map<SeqTrack, List<RawSequenceFile>>
         }
     }
+
 }

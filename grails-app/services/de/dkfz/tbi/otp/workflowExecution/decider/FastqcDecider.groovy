@@ -162,8 +162,10 @@ class FastqcDecider implements Decider {
                 case DeciderCreateWorkflowAction.CREATE_MISSING_AND_NEWER:
                     throw new DeciderCreateWorkflowActionException("The action CREATE_MISSING_AND_NEWER is not supported for fastqc")
                 default: // case DeciderCreateWorkflowActions.CREATE_MISSING: //(default)
-                    deciderResult.warnings << "skip ${seqTrackString}, since fastqc already exist".toString()
-                    return deciderResult
+                    if (additionalArtefacts.every { it.workflowArtefact?.state != WorkflowArtefact.State.FAILED }) {
+                        deciderResult.warnings << "skip ${seqTrackString}, since fastqc already exist".toString()
+                        return deciderResult
+                    }
             }
         }
 
