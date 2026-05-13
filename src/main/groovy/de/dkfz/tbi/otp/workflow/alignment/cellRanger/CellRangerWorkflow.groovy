@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerWorkFileService
+import de.dkfz.tbi.otp.workflow.alignment.AlignmentFragmentJob
 import de.dkfz.tbi.otp.workflow.alignment.AlignmentWorkflow
 import de.dkfz.tbi.otp.workflow.jobs.*
 import de.dkfz.tbi.otp.workflowExecution.Artefact
@@ -48,20 +49,20 @@ class CellRangerWorkflow extends AlignmentWorkflow implements LinearWorkflow {
     @Override
     List<Class<? extends Job>> getJobList() {
         return [
-                // AlignmentFragmentJob,
-                // CellRangerCheckFragmentKeysJob,
-                // CellRangerConditionalFailJob,
+                AlignmentFragmentJob,
+                CellRangerCheckFragmentKeysJob,
+                CellRangerConditionalFailJob,
                 AttachUuidJob,
-                // CellRangerPrepareJob,
-                // CellRangerExecuteJob,
-                // CellRangerValidationJob,
-                // CellRangerParseJob,
-                // CellRangerCleanUpJob,
-                // CellRangerAclCleanUpJob,
+                CellRangerPrepareJob,
+                CellRangerExecuteJob,
+                CellRangerValidationJob,
+                CellRangerParseJob,
+                CellRangerCleanUpJob,
+                CellRangerAclCleanUpJob,
                 SetCorrectPermissionJob,
                 CalculateSizeJob,
-                // CellRangerLinkJob,
-                // CellRangerFinishJob,
+                CellRangerLinkJob,
+                CellRangerFinishJob,
         ]
     }
 

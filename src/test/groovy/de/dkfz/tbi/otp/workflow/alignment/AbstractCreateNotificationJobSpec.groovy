@@ -114,7 +114,7 @@ abstract class AbstractCreateNotificationJobSpec extends Specification implement
         abstractBamFile = createRoddyBamFile()
 
         job = createJob()
-        job.alignmentInfoService = new AlignmentInfoService()
+        job.roddyAlignmentInfoService = new RoddyAlignmentInfoService()
         job.messageSourceService = Mock(MessageSourceService) {
             createMessage("notification.template.alignment.processing", _) >> NOTIFICATION_PROCESSING
             createMessage("notification.template.alignment.processing.roddy", _) >> NOTIFICATION_RODDY

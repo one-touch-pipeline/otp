@@ -1,0 +1,209 @@
+/*
+ * Copyright 2011-2026 The OTP authors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package de.dkfz.tbi.otp.dataprocessing
+
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
+import grails.gorm.transactions.Transactional
+
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
+import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
+import de.dkfz.tbi.otp.utils.ProcessOutput
+import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
+import de.dkfz.tbi.otp.utils.exceptions.NotSupportedException
+import de.dkfz.tbi.otp.workflow.alignment.AlignmentWorkflow
+import de.dkfz.tbi.otp.workflow.alignment.cellRanger.CellRangerWorkflow
+import de.dkfz.tbi.otp.workflowExecution.*
+
+import java.util.regex.Matcher
+
+@Transactional
+class RoddyAlignmentInfoService extends AbstractAlignmentInfoService {
+
+    ConfigFragmentService configFragmentService
+    ExecuteRoddyCommandService executeRoddyCommandService
+    RemoteShellHelper remoteShellHelper
+    SeqTypeService seqTypeService
+
+    private static final ObjectMapper MAPPER = new ObjectMapper()
+
+    @Override
+    boolean supports(OtpWorkflow workflow) {
+        return workflow.isAlignment() && !(workflow instanceof CellRangerWorkflow)
+    }
+
+    @Override
+    AlignmentInfo getAlignmentInfo(WorkflowRun run) {
+        Map<String, String> config = extractCValuesMapFromJsonConfigString(run.combinedConfig)
+        AbstractBamFile bamFile = run.outputArtefacts[AlignmentWorkflow.OUTPUT_BAM].artefact.get() as AbstractBamFile
+        return generateRoddyAlignmentInfo(config, bamFile.project, bamFile.seqType,
+                run.workflowVersion.workflowVersion)
+    }
+
+    Map<String, String> extractCValuesMapFromJsonConfigString(String config) {
+        JsonNode node = MAPPER.readTree(config)
+        return node?.get('RODDY')?.get('cvalues')?.fields()?.collectEntries {
+            [(it.key): it.value.get('value').asText()]
+        }
+    }
+
+    /**
+     * @deprecated method is part of the old workflow system
+     */
+    @Deprecated
+    RoddyAlignmentInfo getRoddyAlignmentInformation(RoddyWorkflowConfig workflowConfig) {
+        assert workflowConfig
+        ProcessOutput output = getRoddyProcessOutput(workflowConfig)
+        Map<String, String> config = extractConfigRoddyOutput(output)
+        return generateRoddyAlignmentInfo(config, workflowConfig.project, workflowConfig.seqType, workflowConfig.programVersion)
+    }
+
+    /**
+     * @deprecated method is part of the old workflow system
+     */
+    @Deprecated
+    ProcessOutput getRoddyProcessOutput(RoddyWorkflowConfig workflowConfig) {
+        String nameInConfigFile = workflowConfig.nameUsedInConfig
+        String cmd = executeRoddyCommandService.roddyGetRuntimeConfigCommand(workflowConfig, nameInConfigFile, workflowConfig.seqType.roddyName)
+
+        ProcessOutput output = remoteShellHelper.executeCommandReturnProcessOutput(cmd)
+
+        if (output.exitCode != 0) {
+            log?.debug("Alignment information can't be detected:\n${output}")
+            throw new NotSupportedException("Alignment information can't be detected. Is Roddy with support for printidlessruntimeconfig installed?")
+        }
+
+        if (output.stderr.contains("The project configuration \"${nameInConfigFile}.config\" could not be found")) {
+            log?.debug("Error during output of roddy:\n${output}")
+            throw new FileNotFoundException("Roddy could not find the configuration '${nameInConfigFile}'. Probably some access problem.")
+        }
+
+        return output
+    }
+
+    private RoddyAlignmentInfo generateRoddyAlignmentInfo(Map<String, String> config, Project project, SeqType seqType, String programVersion) {
+        Map bwa = createAlignmentCommandOptionsMap(config, project, seqType)
+        Map merge = createMergeCommandOptionsMap(config, project, seqType)
+
+        return new RoddyAlignmentInfo(
+                alignmentProgram: bwa.command,
+                alignmentParameter: bwa.options,
+                samToolsCommand: config.get("SAMTOOLS_VERSION") ? "Version ${config.get("SAMTOOLS_VERSION")}" : "",
+                mergeCommand: merge.command,
+                mergeOptions: merge.options,
+                programVersion: programVersion,
+        )
+    }
+
+    private Map createMergeCommandOptionsMap(Map<String, String> config, Project project, SeqType seqType) {
+        Map merge = [:]
+        merge.options = ''
+
+        MergeTool tool = getMergeTool(config, seqType)
+        switch (tool) {
+            case MergeTool.BIOBAMBAM:
+                merge.command = config.get("BIOBAMBAM_VERSION") ? "Biobambam bammarkduplicates Version ${config.get("BIOBAMBAM_VERSION")}" : ""
+                merge.options = config.get("mergeAndRemoveDuplicates_argumentList")
+                break
+            case MergeTool.PICARD:
+                merge.command = config.get("PICARD_VERSION") ? "Picard Version ${config.get("PICARD_VERSION")}" : ""
+                break
+            case MergeTool.SAMBAMBA:
+                merge.command = config.get('SAMBAMBA_MARKDUP_VERSION') ? "Sambamba Version ${config.get('SAMBAMBA_MARKDUP_VERSION')}" : ""
+                merge.options = config.get('SAMBAMBA_MARKDUP_OPTS')
+                break
+            case MergeTool.SAMBAMBA_RNA:
+                merge.command = config.get('SAMBAMBA_VERSION') ? "Sambamba Version ${config.get('SAMBAMBA_VERSION')}" : ""
+                break
+            default:
+                merge.command = "Unknown tool: ${tool}"
+        }
+
+        if (!merge.command) {
+            log?.debug("Could not extract merging configuration for ${project} ${seqType} from config:\n${config}")
+            throw new ParsingException("Could not extract merging configuration value from Roddy config for ${project} ${seqType}")
+        }
+
+        return merge
+    }
+
+    private MergeTool getMergeTool(Map<String, String> config, SeqType seqType) {
+        if (seqType.isRna()) {
+            return MergeTool.SAMBAMBA_RNA
+        }
+        String tool = config.get('markDuplicatesVariant')
+        return MergeTool.getByName(tool) ?: config.get("useBioBamBamMarkDuplicates") == 'true' ? MergeTool.BIOBAMBAM : MergeTool.PICARD
+    }
+
+    private Map createAlignmentCommandOptionsMap(Map<String, String> config, Project project, SeqType seqType) {
+        Map bwa = [:]
+
+        if (config) {
+            if (seqType.isRna()) {
+                bwa.command = config.get("STAR_VERSION") ? "STAR Version ${config.get("STAR_VERSION")}" : ""
+                bwa.options = ['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].collect { name ->
+                    config.get("STAR_PARAMS_${name}".toString())
+                }.join(' ')
+            } else if (config.get("useAcceleratedHardware") == "true") {
+                bwa.command = config.get("BWA_ACCELERATED_VERSION") ? "bwa-bb Version ${config.get("BWA_ACCELERATED_VERSION")}" : ""
+                bwa.options = config.get("BWA_MEM_OPTIONS") + ' ' + config.get("BWA_MEM_CONVEY_ADDITIONAL_OPTIONS")
+            } else {
+                bwa.command = config.get("BWA_VERSION") ? "BWA Version ${config.get("BWA_VERSION")}" : ""
+                bwa.options = config.get("BWA_MEM_OPTIONS")
+            }
+        }
+
+        if (!bwa.command) {
+            log?.debug("Could not extract alignment configuration for ${project} ${seqType} from config:\n${config}")
+            throw new ParsingException("Could not extract alignment configuration value from Roddy config for ${project} ${seqType}")
+        }
+
+        return bwa
+    }
+
+    /**
+     * @deprecated method is part of the old workflow system
+     */
+    @Deprecated
+    private Map<String, String> extractConfigRoddyOutput(ProcessOutput output) {
+        Map<String, String> res = [:]
+        output.stdout.eachLine { String line ->
+            Matcher matcher = line =~ /(?:declare +-x +(?:-i +)?)?([^ =]*)=(.*)/
+            if (matcher.matches()) {
+                String key = matcher.group(1)
+                String value = matcher.group(2)
+                res[key] = value.startsWith("\"") && value.length() > 2 ? value.substring(1, value.length() - 1) : value
+            }
+        }
+
+        if (res.isEmpty()) {
+            log?.debug("Could not extract any configuration value from the roddy output:\n${output}")
+            throw new ParsingException("Could not extract any configuration value from the roddy output")
+        }
+
+        return res
+    }
+}

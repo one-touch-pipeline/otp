@@ -57,6 +57,8 @@ class RoddyAlignmentInfo implements AlignmentInfo {
 @CompileDynamic
 @Canonical
 class SingleCellAlignmentInfo implements AlignmentInfo {
+    String localCores
+    String localMemory
 
     @Override
     Map<String, Object> getAlignmentSpecificMessageAttributes() {
@@ -64,6 +66,8 @@ class SingleCellAlignmentInfo implements AlignmentInfo {
                 code  : "notification.template.alignment.processing.singleCell",
                 params: [
                         programVersion: this.programVersion,
+                        localCores    : this.localCores,
+                        localMemory   : this.localMemory,
                 ],
         ]
     }

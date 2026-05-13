@@ -109,8 +109,8 @@ class CellRangerCleanUpJobSpec extends Specification implements DataTest, CellRa
         List<Path> pathsToDelete = job.getAdditionalPathsToDelete(workflowStep)
 
         then:
-        1 * cellRangerLinkFileService.getOutputDirectory(currentBamFile) >> outputDirectory
-        1 * cellRangerLinkFileService.getResultDirectory(currentBamFile) >> resultDirectory
+        1 * cellRangerWorkFileService.getOutputDirectory(currentBamFile) >> outputDirectory
+        1 * cellRangerWorkFileService.getResultDirectory(currentBamFile) >> resultDirectory
 
         and:
         pathsToDelete.contains(tempFile1)
@@ -141,8 +141,8 @@ class CellRangerCleanUpJobSpec extends Specification implements DataTest, CellRa
         List<Path> pathsToDelete = job.getAdditionalPathsToDelete(workflowStep)
 
         then:
-        1 * cellRangerLinkFileService.getOutputDirectory(currentBamFile) >> outputDirectory
-        1 * cellRangerLinkFileService.getResultDirectory(currentBamFile) >> resultDirectory
+        1 * cellRangerWorkFileService.getOutputDirectory(currentBamFile) >> outputDirectory
+        1 * cellRangerWorkFileService.getResultDirectory(currentBamFile) >> resultDirectory
 
         and:
         pathsToDelete.size() == 1
@@ -168,8 +168,8 @@ class CellRangerCleanUpJobSpec extends Specification implements DataTest, CellRa
         List<Path> pathsToDelete = job.getAdditionalPathsToDelete(workflowStep)
 
         then:
-        1 * cellRangerLinkFileService.getOutputDirectory(currentBamFile) >> outputDirectory
-        1 * cellRangerLinkFileService.getResultDirectory(currentBamFile) >> resultDirectory
+        1 * cellRangerWorkFileService.getOutputDirectory(currentBamFile) >> outputDirectory
+        1 * cellRangerWorkFileService.getResultDirectory(currentBamFile) >> resultDirectory
 
         and:
         pathsToDelete.empty // Only result directory exists and it should be preserved
@@ -265,8 +265,8 @@ class CellRangerCleanUpJobSpec extends Specification implements DataTest, CellRa
         List<Path> pathsToDelete = job.getAdditionalPathsToDelete(workflowStep)
 
         then:
-        1 * cellRangerLinkFileService.getOutputDirectory(currentBamFile) >> outputDirectory
-        1 * cellRangerLinkFileService.getResultDirectory(currentBamFile) >> null
+        1 * cellRangerWorkFileService.getOutputDirectory(currentBamFile) >> outputDirectory
+        1 * cellRangerWorkFileService.getResultDirectory(currentBamFile) >> null
 
         and:
         pathsToDelete.size() == 1
@@ -293,8 +293,8 @@ class CellRangerCleanUpJobSpec extends Specification implements DataTest, CellRa
         List<Path> pathsToDelete = job.getAdditionalPathsToDelete(workflowStep)
 
         then:
-        1 * cellRangerLinkFileService.getOutputDirectory(currentBamFile) >> outputDirectory
-        1 * cellRangerLinkFileService.getResultDirectory(currentBamFile) >> nonExistentResultDirectory
+        1 * cellRangerWorkFileService.getOutputDirectory(currentBamFile) >> outputDirectory
+        1 * cellRangerWorkFileService.getResultDirectory(currentBamFile) >> nonExistentResultDirectory
 
         and:
         pathsToDelete.size() == 1
@@ -326,8 +326,8 @@ class CellRangerCleanUpJobSpec extends Specification implements DataTest, CellRa
         List<Path> pathsToDelete = job.getAdditionalPathsToDelete(workflowStep)
 
         then:
-        1 * cellRangerLinkFileService.getOutputDirectory(currentBamFile) >> outputDirectory
-        1 * cellRangerLinkFileService.getResultDirectory(currentBamFile) >> resultDirectory
+        1 * cellRangerWorkFileService.getOutputDirectory(currentBamFile) >> outputDirectory
+        1 * cellRangerWorkFileService.getResultDirectory(currentBamFile) >> resultDirectory
         1 * cellRangerLinkFileService.getDirectoryPath(oldBamFile1) >> oldPath1
         1 * cellRangerLinkFileService.getDirectoryPath(oldBamFile2) >> oldPath2
 
@@ -360,8 +360,8 @@ class CellRangerCleanUpJobSpec extends Specification implements DataTest, CellRa
         List<Path> pathsToDelete = job.getAdditionalPathsToDelete(workflowStep)
 
         then:
-        1 * cellRangerLinkFileService.getOutputDirectory(currentBamFile) >> outputDirectory
-        1 * cellRangerLinkFileService.getResultDirectory(currentBamFile) >> resultDirectory
+        1 * cellRangerWorkFileService.getOutputDirectory(currentBamFile) >> outputDirectory
+        1 * cellRangerWorkFileService.getResultDirectory(currentBamFile) >> resultDirectory
         1 * cellRangerLinkFileService.getDirectoryPath(oldBamFile1) >> oldPath1
         1 * cellRangerLinkFileService.getDirectoryPath(oldBamFile2) >> null // Returns null
 
@@ -393,8 +393,8 @@ class CellRangerCleanUpJobSpec extends Specification implements DataTest, CellRa
         job.getAdditionalPathsToDelete(workflowStep)
 
         then:
-        1 * cellRangerLinkFileService.getOutputDirectory(currentBamFile) >> outputDirectory
-        1 * cellRangerLinkFileService.getResultDirectory(currentBamFile) >> resultDirectory
+        1 * cellRangerWorkFileService.getOutputDirectory(currentBamFile) >> outputDirectory
+        1 * cellRangerWorkFileService.getResultDirectory(currentBamFile) >> resultDirectory
 
         and:
         thrown(Exception) // Should propagate the exception

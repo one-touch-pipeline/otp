@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.workflow.alignment.cellRanger
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerService
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
@@ -60,6 +61,8 @@ class CellRangerPrepareJob extends AbstractPrepareJob implements CellRangerShare
     @Override
     protected void doFurtherPreparation(WorkflowStep workflowStep) {
         SingleCellBamFile bamFile = getBamFile(workflowStep)
+        bamFile.fileOperationStatus = AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING
+        bamFile.save(flush: true)
         cellRangerService.createInputDirectoryStructure(bamFile)
         notificationCreator.setStartedForSeqTracks(bamFile.seqTracks, Ticket.ProcessingStep.ALIGNMENT)
         CellRangerMergingWorkPackage workPackage = bamFile.mergingWorkPackage

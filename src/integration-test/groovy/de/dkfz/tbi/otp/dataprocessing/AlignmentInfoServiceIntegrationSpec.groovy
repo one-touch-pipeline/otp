@@ -21,8 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -30,11 +30,10 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.workflow.alignment.cellRanger.CellRangerWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.roddy.wgbs.WgbsWorkflow
-import de.dkfz.tbi.otp.workflowExecution.OtpWorkflowService
-import de.dkfz.tbi.otp.workflowExecution.Workflow
-import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
+import de.dkfz.tbi.otp.workflowExecution.*
 
 @Rollback
 @Integration
@@ -163,6 +162,32 @@ class AlignmentInfoServiceIntegrationSpec extends Specification implements Workf
         name                  | config                                                                                                                 || expectedError
         'no alignment values' | """"a": {"value": "b", "type": "string"},"c": {"value": "d", "type": "string"}"""                                      || 'Could not extract alignment configuration value from Roddy config'
         'no merging values'   | """"useAcceleratedHardware": {"value": "false", "type": "string"},"BWA_VERSION": {"value": "aln", "type": "string"}""" || 'Could not extract merging configuration value from Roddy config'
+    }
+
+    void "test getAlignmentInformationForRun, when CellRanger workflow, return SingleCellAlignmentInfo with correct data"() {
+        given:
+        String version = "7.1.0"
+        Workflow workflow = createWorkflow(name: CellRangerWorkflow.WORKFLOW)
+        WorkflowRun workflowRun = createWorkflowRun(
+                workflow: workflow,
+                combinedConfig: "{}",
+                workflowVersion: createWorkflowVersion(
+                        apiVersion: createWorkflowApiVersion(workflow: workflow),
+                        workflowVersion: version,
+                )
+        )
+        alignmentInfoService.otpWorkflowService = Mock(OtpWorkflowService) {
+            1 * lookupOtpWorkflowBean(_) >> new CellRangerWorkflow()
+        }
+
+        when:
+        SingleCellAlignmentInfo alignmentInfo = alignmentInfoService.getAlignmentInformationForRun(workflowRun)
+
+        then:
+        alignmentInfo
+        alignmentInfo.alignmentProgram == "cellranger"
+        alignmentInfo.alignmentParameter == ""
+        alignmentInfo.programVersion == version
     }
 
     void "test getAlignmentInformationForRun, from Roddy WorkflowConfig and AlignmentInfo"() {

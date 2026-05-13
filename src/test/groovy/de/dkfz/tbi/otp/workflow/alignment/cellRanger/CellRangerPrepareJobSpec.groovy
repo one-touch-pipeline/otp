@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.workflow.alignment.cellRanger
 
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerService
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
@@ -87,6 +88,8 @@ class CellRangerPrepareJobSpec extends Specification {
         cellRangerPrepareJob.doFurtherPreparation(workflowStep)
 
         then:
+        1 * bamFile.setFileOperationStatus(AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING)
+        1 * bamFile.save(flush: true)
         1 * cellRangerService.createInputDirectoryStructure(bamFile)
         1 * notificationCreator.setStartedForSeqTracks(bamFile.seqTracks, Ticket.ProcessingStep.ALIGNMENT)
     }
@@ -102,6 +105,10 @@ class CellRangerPrepareJobSpec extends Specification {
         when:
         cellRangerPrepareJob.doFurtherPreparation(workflowStep)
 
+        then:
+        1 * bamFile.setFileOperationStatus(AbstractBamFile.FileOperationStatus.NEEDS_PROCESSING)
+        then:
+        1 * bamFile.save(flush: true)
         then:
         1 * workPackage.setNeedsProcessing(false)
         then:

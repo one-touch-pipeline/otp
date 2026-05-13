@@ -410,6 +410,7 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
                     referenceGenome      : referenceGenome,
                     pipeline             : additionalData.pipeline,
             ])
+            workPackage.save(flush: false, deepValidate: false)
         }
 
         return workPackage

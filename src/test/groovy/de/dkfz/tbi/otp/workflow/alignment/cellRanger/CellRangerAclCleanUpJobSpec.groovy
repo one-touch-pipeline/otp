@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerFileNames
 import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerWorkFileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.utils.ProcessOutput
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStateChangeService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Paths
@@ -37,22 +38,27 @@ class CellRangerAclCleanUpJobSpec extends Specification {
     CellRangerAclCleanUpJob cellRangerAclCleanUpJob
     CellRangerWorkFileService cellRangerWorkFileService
     RemoteShellHelper remoteShellHelper
+    WorkflowStateChangeService workflowStateChangeService
 
     void setup() {
         cellRangerWorkFileService = Mock(CellRangerWorkFileService)
         remoteShellHelper = Mock(RemoteShellHelper) {
             0 * _
         }
+        workflowStateChangeService = Mock(WorkflowStateChangeService)
         cellRangerAclCleanUpJob = new CellRangerAclCleanUpJob(cellRangerWorkFileService, remoteShellHelper)
+        cellRangerAclCleanUpJob.workflowStateChangeService = workflowStateChangeService
     }
 
     CellRangerAclCleanUpJob overrideCellRangerJob(SingleCellBamFile bamFile) {
-        return new CellRangerAclCleanUpJob(cellRangerWorkFileService, remoteShellHelper) {
+        CellRangerAclCleanUpJob job = new CellRangerAclCleanUpJob(cellRangerWorkFileService, remoteShellHelper) {
             @Override
             SingleCellBamFile getBamFile(WorkflowStep ws) {
                 return bamFile
             }
         }
+        job.workflowStateChangeService = workflowStateChangeService
+        return job
     }
 
     @Unroll
@@ -77,6 +83,7 @@ class CellRangerAclCleanUpJobSpec extends Specification {
         then:
         1 * remoteShellHelper.executeCommandReturnProcessOutput(expectedCommandToExecute) >> new ProcessOutput("", "", 0)
         1 * cellRangerWorkFileService.getResultDirectory(bamFile) >> testPath
+        1 * workflowStateChangeService.changeStateToSuccess(workflowStep)
 
         where:
         testPath << [

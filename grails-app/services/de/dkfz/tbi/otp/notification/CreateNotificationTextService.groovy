@@ -244,7 +244,7 @@ class CreateNotificationTextService {
         String directories = getMergingDirectories(allGoodBamFiles)
 
         List<AbstractBamFile> bamFilesOldSystem = allGoodBamFiles.findAll {
-            return !(it instanceof RoddyBamFile && it.workflowArtefact?.producedBy && it.workflowArtefact.producedBy.state != WorkflowRun.State.LEGACY)
+            return !(it.workflowArtefact?.producedBy && it.workflowArtefact.producedBy.state != WorkflowRun.State.LEGACY)
         }
 
         Map<AlignmentConfig, AlignmentInfo> alignmentInfoByConfig = bamFilesOldSystem*.alignmentConfig.unique().collectEntries {
@@ -283,7 +283,7 @@ class CreateNotificationTextService {
         }
 
         message += getUserDocumentationOldSystem(alignmentInfoByConfig)
-        message += getUserDocumentation(((allGoodBamFiles - bamFilesOldSystem) as List<RoddyBamFile>)*.workflowArtefact)
+        message += getUserDocumentation((allGoodBamFiles - bamFilesOldSystem)*.workflowArtefact)
 
         return message
     }

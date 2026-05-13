@@ -1110,7 +1110,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
     void "findOrCreateMergingWorkPackage, when no existing workPackage found, should create new one"() {
         given:
         Sample sample = createSample()
-        SeqType seqType = createSeqType()
+        SeqType seqType = createSeqType([ hasAntibodyTarget: true ])
         AntibodyTarget antibodyTarget = createAntibodyTarget()
         SeqPlatformGroup seqPlatformGroup = createSeqPlatformGroup()
         LibraryPreparationKit libraryPreparationKit = createLibraryPreparationKit()

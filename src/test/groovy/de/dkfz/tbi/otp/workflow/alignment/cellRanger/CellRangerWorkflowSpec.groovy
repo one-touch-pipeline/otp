@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerWorkFileService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.workflow.alignment.AlignmentFragmentJob
 import de.dkfz.tbi.otp.workflow.jobs.*
 
 class CellRangerWorkflowSpec extends Specification implements CellRangerFactory, DataTest {
@@ -58,18 +59,20 @@ class CellRangerWorkflowSpec extends Specification implements CellRangerFactory,
     void "getJobList, should return all CellRangerJob bean names in correct order"() {
         expect:
         cellRangerWorkflow.jobList == [
-                // AlignmentFragmentJob,
-                // CellRangerConditionalFailJob,
+                AlignmentFragmentJob,
+                CellRangerCheckFragmentKeysJob,
+                CellRangerConditionalFailJob,
                 AttachUuidJob,
-                // CellRangerPrepareJob,
-                // CellRangerExecuteJob,
-                // CellRangerValidationJob,
-                // CellRangerParseJob,
-                // CellRangerCleanUpJob,
+                CellRangerPrepareJob,
+                CellRangerExecuteJob,
+                CellRangerValidationJob,
+                CellRangerParseJob,
+                CellRangerCleanUpJob,
+                CellRangerAclCleanUpJob,
                 SetCorrectPermissionJob,
                 CalculateSizeJob,
-                // CellRangerLinkJob,
-                // CellRangerFinishJob,
+                CellRangerLinkJob,
+                CellRangerFinishJob,
         ]
     }
 

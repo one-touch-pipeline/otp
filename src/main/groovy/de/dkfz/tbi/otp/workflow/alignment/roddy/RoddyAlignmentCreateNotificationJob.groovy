@@ -27,7 +27,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.AlignmentInfoService
+import de.dkfz.tbi.otp.dataprocessing.RoddyAlignmentInfoService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.otp.workflow.alignment.AlignmentWorkflowShared
@@ -42,7 +42,7 @@ class RoddyAlignmentCreateNotificationJob extends AbstractCreateNotificationJob 
     MessageSourceService messageSourceService
 
     @Autowired
-    AlignmentInfoService alignmentInfoService
+    RoddyAlignmentInfoService roddyAlignmentInfoService
 
     @CompileDynamic
     @Override
@@ -53,7 +53,7 @@ class RoddyAlignmentCreateNotificationJob extends AbstractCreateNotificationJob 
 
         Map<String, String> config
         try {
-            config = alignmentInfoService.extractCValuesMapFromJsonConfigString(workflowStep.workflowRun.combinedConfig)
+            config = roddyAlignmentInfoService.extractCValuesMapFromJsonConfigString(workflowStep.workflowRun.combinedConfig)
         } catch (JsonParseException e) {
             throw new IllegalArgumentException("Failed to parse combinedConfig in workflowRun ${workflowStep.workflowRun}. " +
                     "Please ensure it is a valid JSON string.", e)

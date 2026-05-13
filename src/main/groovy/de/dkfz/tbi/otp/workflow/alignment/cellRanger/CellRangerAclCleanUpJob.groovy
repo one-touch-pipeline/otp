@@ -49,6 +49,7 @@ class CellRangerAclCleanUpJob extends AbstractJob implements CellRangerShared {
     void execute(WorkflowStep workflowStep) {
         SingleCellBamFile singleCellBamFile = getBamFile(workflowStep)
         remoteShellHelper.executeCommandReturnProcessOutput(fixCellRangerChgrpProblem(singleCellBamFile)).assertExitCodeZeroAndStderrEmpty()
+        workflowStateChangeService.changeStateToSuccess(workflowStep)
     }
 
     @Override

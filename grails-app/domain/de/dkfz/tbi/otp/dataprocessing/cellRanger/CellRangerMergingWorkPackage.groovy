@@ -49,6 +49,8 @@ class CellRangerMergingWorkPackage extends MergingWorkPackage {
     static constraints = {
         sample(validator: { val, obj ->
             if (obj.status != CellRangerMergingWorkPackage.Status.DELETED) {
+                // Cache the programVersion to avoid repeated lookups in the loop, since getProgramVersion() may hit the DB
+                String programVersion = obj.programVersion
                 List<CellRangerMergingWorkPackage> workPackages = createCriteria().list {
                     eq('sample', val)
                     eq('seqType', obj.seqType)
@@ -62,11 +64,10 @@ class CellRangerMergingWorkPackage extends MergingWorkPackage {
                     } else {
                         isNull('enforcedCells')
                     }
-                    config {
-                        eq('programVersion', obj.programVersion)
-                    }
                     eq('referenceGenomeIndex', obj.referenceGenomeIndex)
                     'in'('status', [CellRangerMergingWorkPackage.Status.UNSET, CellRangerMergingWorkPackage.Status.FINAL])
+                }.findAll {
+                    it.programVersion == programVersion
                 } as List<CellRangerMergingWorkPackage>
                 if (workPackages.size() > 1 || workPackages && workPackages.first().id != obj.id) {
                     return ["unique.combination", "Sample, SeqType, ExpectedCells, EnforcedCells, ProgramVersion and ReferenceGenomeIndex"]
@@ -121,6 +122,10 @@ class CellRangerMergingWorkPackage extends MergingWorkPackage {
     String getProgramVersion() {
         if (config) {
             return config.programVersion
+        }
+        // Guard against a transient (unsaved) workPackage
+        if (!id) {
+            return null
         }
         AbstractBamFile lastBamFile = AbstractBamFile.createCriteria().get {
             eq("workPackage", this)

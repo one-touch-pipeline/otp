@@ -51,9 +51,9 @@ class CellRangerCleanUpJob extends AbstractCleanUpJob implements CellRangerShare
     List<Path> getAdditionalPathsToDelete(WorkflowStep workflowStep) {
         SingleCellBamFile singleCellBamFile = getBamFile(workflowStep)
 
-        // Remove all directories in the output directory except the result directory
-        Path outputDirectory = cellRangerLinkFileService.getOutputDirectory(singleCellBamFile)
-        Path resultDirectory = cellRangerLinkFileService.getResultDirectory(singleCellBamFile)
+        // Remove all directories in the work output directory except the result directory
+        Path outputDirectory = cellRangerWorkFileService.getOutputDirectory(singleCellBamFile)
+        Path resultDirectory = cellRangerWorkFileService.getResultDirectory(singleCellBamFile)
 
         List<Path> pathsToDelete = Files.list(outputDirectory).withCloseable { stream ->
             stream.collect(Collectors.toList())
