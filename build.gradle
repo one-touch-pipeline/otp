@@ -40,7 +40,7 @@ buildscript {
 
 plugins {
     id "com.github.monosoul.markdown.page.generator" version "2.4.0.0"
-    id "org.openapi.generator" version "7.21.0"
+    id "org.openapi.generator" version "7.22.0"
     id "com.github.node-gradle.node" version "7.1.0"
     // plugin to calculate coverage
     id 'jacoco'
@@ -145,9 +145,9 @@ def generatedSourcesDir = "$buildDir/generated/openapi"
 task generateWes(type: GenerateTask) {
     generatorName = "java"
     library = "webclient"
-    inputSpec = "${sourceSets.main.resources.srcDirs[0]}/wes-api/workflow_execution_service.swagger.yaml"
-    configFile = "${sourceSets.main.resources.srcDirs[0]}/wes-api/workflow_execution_service.swagger.config.json"
-    outputDir = generatedSourcesDir
+    inputSpec.set(layout.projectDirectory.file(sourceSets.main.resources.srcDirs[0].toString() + "/wes-api/workflow_execution_service.swagger.yaml"))
+    configFile.set(layout.projectDirectory.file(sourceSets.main.resources.srcDirs[0].toString() + "/wes-api/workflow_execution_service.swagger.config.json"))
+    outputDir.set(layout.projectDirectory.dir(generatedSourcesDir))
     configOptions = [
             dateLibrary    : "java17",
             openApiNullable: "false"
