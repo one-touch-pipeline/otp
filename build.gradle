@@ -481,9 +481,9 @@ dependencies {
     implementation "org.openapitools:openapi-generator-gradle-plugin:7.22.0"
 
     // openapi-generator:7.13.0 requires jackson-datatype-jsr310:2.17.1
-    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.21.2"
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.21.2'
-    implementation 'com.fasterxml.jackson.core:jackson-core:2.21.2'
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.21.3"
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.21.3'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.21.3'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.21'
 
     integrationTestImplementation sourceSets.testHelper.output
