@@ -271,7 +271,7 @@ INSERT INTO external_workflow_config_selector_workflow_version (external_workflo
 SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for Roddy ACEseq (CNV calling) 1.2.8-4 WHOLE_GENOME PAIRED'),
        (SELECT id
         FROM workflow_version
-        WHERE api_version_id = (SELECT id FROM workflow_api_version WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy ACEseq (CNV calling)'))
+        WHERE api_version_id in (SELECT id FROM workflow_api_version WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy ACEseq (CNV calling)'))
           AND workflow_version.workflow_version = '1.2.8-4')
 ON CONFLICT DO NOTHING;
 

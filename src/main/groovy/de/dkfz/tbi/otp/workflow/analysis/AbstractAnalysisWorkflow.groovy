@@ -24,12 +24,12 @@ package de.dkfz.tbi.otp.workflow.analysis
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.workflowExecution.Artefact
-import de.dkfz.tbi.otp.workflowExecution.LinearWorkflow
+import de.dkfz.tbi.otp.workflowExecution.OtpWorkflow
 
 /**
  * Common class for all analysis workflows
  */
-abstract class AbstractAnalysisWorkflow implements LinearWorkflow {
+abstract class AbstractAnalysisWorkflow implements OtpWorkflow {
 
     static final String ANALYSIS_OUTPUT = "ANALYSIS_OUTPUT"
 

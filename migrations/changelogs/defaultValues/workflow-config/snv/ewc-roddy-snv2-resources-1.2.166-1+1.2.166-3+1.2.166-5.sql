@@ -67,19 +67,19 @@ INSERT INTO external_workflow_config_selector_workflow_version (external_workflo
 SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for Roddy SNV calling 1.2.166-1, 1.2.166-3, 1.2.166-5'),
        (SELECT id
         FROM workflow_version
-        WHERE api_version_id = (SELECT id FROM workflow_api_version WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy SNV calling'))
+        WHERE api_version_id in (SELECT id FROM workflow_api_version WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy SNV calling'))
           AND workflow_version.workflow_version = '1.2.166-1') ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
 SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for Roddy SNV calling 1.2.166-1, 1.2.166-3, 1.2.166-5'),
        (SELECT id
         FROM workflow_version
-        WHERE api_version_id = (SELECT id FROM workflow_api_version WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy SNV calling'))
+        WHERE api_version_id in (SELECT id FROM workflow_api_version WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy SNV calling'))
           AND workflow_version.workflow_version = '1.2.166-3') ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
 SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for Roddy SNV calling 1.2.166-1, 1.2.166-3, 1.2.166-5'),
        (SELECT id
         FROM workflow_version
-        WHERE api_version_id = (SELECT id FROM workflow_api_version WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy SNV calling'))
+        WHERE api_version_id in (SELECT id FROM workflow_api_version WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy SNV calling'))
           AND workflow_version.workflow_version = '1.2.166-5') ON CONFLICT DO NOTHING;

@@ -82,13 +82,13 @@
     ON CONFLICT DO NOTHING;
 
     INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
-        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for Roddy Indel calling 2.0.0-101, 2.4.1-1, 2.4.1-2'), (SELECT id FROM workflow_version WHERE api_version_id = (SELECT id FROM workflow_api_version WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy Indel calling')) AND workflow_version.workflow_version = '2.0.0-101')
+        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for Roddy Indel calling 2.0.0-101, 2.4.1-1, 2.4.1-2'), (SELECT id FROM workflow_version WHERE api_version_id in (SELECT id FROM workflow_api_version WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy Indel calling')) AND workflow_version.workflow_version = '2.0.0-101')
     ON CONFLICT DO NOTHING;
 
     INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
-        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for Roddy Indel calling 2.0.0-101, 2.4.1-1, 2.4.1-2'), (SELECT id FROM workflow_version WHERE api_version_id = (SELECT id FROM workflow_api_version WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy Indel calling')) AND workflow_version.workflow_version = '2.4.1-1')
+        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for Roddy Indel calling 2.0.0-101, 2.4.1-1, 2.4.1-2'), (SELECT id FROM workflow_version WHERE api_version_id in (SELECT id FROM workflow_api_version WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy Indel calling')) AND workflow_version.workflow_version = '2.4.1-1')
     ON CONFLICT DO NOTHING;
 
     INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
-        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for Roddy Indel calling 2.0.0-101, 2.4.1-1, 2.4.1-2'), (SELECT id FROM workflow_version WHERE api_version_id = (SELECT id FROM workflow_api_version WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy Indel calling')) AND workflow_version.workflow_version = '2.4.1-2')
+        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for Roddy Indel calling 2.0.0-101, 2.4.1-1, 2.4.1-2'), (SELECT id FROM workflow_version WHERE api_version_id in (SELECT id FROM workflow_api_version WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy Indel calling')) AND workflow_version.workflow_version = '2.4.1-2')
     ON CONFLICT DO NOTHING;

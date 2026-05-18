@@ -31,38 +31,62 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.workflow.analysis.*
 import de.dkfz.tbi.otp.workflow.jobs.*
 import de.dkfz.tbi.otp.workflowExecution.Artefact
+import de.dkfz.tbi.otp.workflowExecution.MultiApiVersionWorkflow
 
 /**
  * represents the Indel Workflow
  */
 @Component
 @Slf4j
-class IndelWorkflow extends AbstractAnalysisWorkflow {
+class IndelWorkflow extends AbstractAnalysisWorkflow implements MultiApiVersionWorkflow {
 
     public static final String WORKFLOW = "Roddy Indel calling"
+
+    public static final Map<Integer, List<String>> JOB_LIST_PER_API_IDENTIFIER = [
+            (1): [
+                    AnalysisConditionalSkipJob,
+                    RoddyAnalysisFragmentJob,
+                    IndelCheckFragmentKeysV1Job,
+                    IndelConditionalFailJob,
+                    // IndelCreateNotificationJob,
+                    AttachUuidJob,
+                    IndelPrepareJob,
+                    IndelExecuteJob,
+                    IndelValidationJob,
+                    IndelParseJob,
+                    RoddyCleanupJob,
+                    SetCorrectPermissionJob,
+                    CalculateSizeJob,
+                    AnalysisLinkJob,
+                    AnalysisFinishJob,
+            ],
+            (2): [
+                    AnalysisConditionalSkipJob,
+                    RoddyAnalysisFragmentJob,
+                    IndelCheckFragmentKeysV2Job,
+                    IndelConditionalFailJob,
+                    // IndelCreateNotificationJob,
+                    AttachUuidJob,
+                    IndelPrepareJob,
+                    IndelExecuteJob,
+                    IndelValidationJob,
+                    IndelParseJob,
+                    RoddyCleanupJob,
+                    SetCorrectPermissionJob,
+                    CalculateSizeJob,
+                    AnalysisLinkJob,
+                    AnalysisFinishJob,
+            ],
+    ].collectEntries { Integer identifier, List<Class<? extends Job>> beanClasses ->
+        [(identifier): beanClasses*.simpleName*.uncapitalize().asImmutable()]
+    }.asImmutable()
 
     @Autowired
     IndelWorkFileService indelWorkFileService
 
     @Override
-    List<Class<? extends Job>> getJobList() {
-        return [
-                AnalysisConditionalSkipJob,
-                RoddyAnalysisFragmentJob,
-                IndelCheckFragmentKeysJob,
-                IndelConditionalFailJob,
-//                IndelCreateNotificationJob,
-                AttachUuidJob,
-                IndelPrepareJob,
-                IndelExecuteJob,
-                IndelValidationJob,
-                IndelParseJob,
-                RoddyCleanupJob,
-                SetCorrectPermissionJob,
-                CalculateSizeJob,
-                AnalysisLinkJob,
-                AnalysisFinishJob,
-        ]
+    List<String> getJobList(Integer identifier) {
+        return JOB_LIST_PER_API_IDENTIFIER[identifier]
     }
 
     @Override

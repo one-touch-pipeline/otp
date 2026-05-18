@@ -25,12 +25,13 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 
-class IndelCheckFragmentKeysJobSpec extends Specification {
-    IndelCheckFragmentKeysJob job
+class IndelCheckFragmentKeysV2JobSpec extends Specification {
+
+    private IndelCheckFragmentKeysV2Job job
 
     void "getCvalues, should return expected keys"() {
         given:
-        job = new IndelCheckFragmentKeysJob()
+        job = new IndelCheckFragmentKeysV2Job()
         Collection<String> expectedKeys = [
                 "VEP_BINARY",
                 "VEP_VERSION",

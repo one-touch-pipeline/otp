@@ -19,33 +19,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.jobs
+package de.dkfz.tbi.otp.workflow.analysis.snv
 
-import groovy.util.logging.Slf4j
-import org.springframework.stereotype.Component
+import spock.lang.Specification
 
-/**
- * Checks the required fragment keys for Weskit workflows,
- * currently we only have nextflow workflows.
- * Maybe this will have to be adapted later for other workflow engines
- */
-@Component
-@Slf4j
-class WeskitCheckFragmentKeysJob extends AbstractCheckFragmentKeysJob {
+import de.dkfz.tbi.TestCase
 
-    static final String WESKIT = "WESKIT"
-    static final String MAX_MEMORY = "MAX_MEMORY"
-    static final String MAX_RUNTIME = "MAX_RUNTIME"
-    static final String PROFILE = "PROFILE"
+class SnvCheckFragmentKeysV2JobSpec extends Specification {
 
-    // IMPORTANT: Adding new keys here requires a new API version and a new CheckFragmentKeysJob subclass,
-    // as existing workflow runs would fail without those keys in their fragment configuration.
-    @Override
-    Set<String> getKeyPaths() {
-        return [
-                "${WESKIT}/${MAX_MEMORY}",
-                "${WESKIT}/${MAX_RUNTIME}",
-                "${WESKIT}/${PROFILE}",
-        ] as Set
+    private SnvCheckFragmentKeysV2Job job
+
+    void "getCvalues, should return expected keys"() {
+        given:
+        job = new SnvCheckFragmentKeysV2Job()
+        Collection<String> expectedKeys = [
+                "tbiLsfVirtualEnvDir",
+                "VEP_BINARY",
+                "VEP_VERSION",
+                "VEP_FORKS",
+                "VEP_FA_INDEX",
+                "VEP_CACHE_BASE",
+                "VEP_PLUGIN_CADD_SNV",
+                "VEP_PLUGIN_SPLICEAI_SNV",
+                "VEP_PLUGIN_SPLICEAI_INDEL",
+                "VEP_SPECIES",
+                "VEP_ASSEMBLY",
+                "VEP_OUT_FORMAT",
+        ]
+
+        expect:
+        TestCase.assertContainSame(job.cvalues, expectedKeys)
     }
 }

@@ -29,37 +29,60 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.workflow.analysis.*
 import de.dkfz.tbi.otp.workflow.jobs.*
 import de.dkfz.tbi.otp.workflowExecution.Artefact
+import de.dkfz.tbi.otp.workflowExecution.MultiApiVersionWorkflow
 
 /**
  * represents the SNV Workflow
  */
 @Component
 @Slf4j
-class SnvWorkflow extends AbstractAnalysisWorkflow {
+class SnvWorkflow extends AbstractAnalysisWorkflow implements MultiApiVersionWorkflow {
 
     public static final String WORKFLOW = "Roddy SNV calling"
+
+    public static final Map<Integer, List<String>> JOB_LIST_PER_API_IDENTIFIER = [
+            (1): [
+                    AnalysisConditionalSkipJob,
+                    RoddyAnalysisFragmentJob,
+                    SnvCheckFragmentKeysV1Job,
+                    SnvConditionalFailJob,
+                    // SnvCreateNotificationJob,
+                    AttachUuidJob,
+                    SnvPrepareJob,
+                    SnvExecuteJob,
+                    SnvValidationJob,
+                    RoddyCleanupJob,
+                    SetCorrectPermissionJob,
+                    CalculateSizeJob,
+                    AnalysisLinkJob,
+                    AnalysisFinishJob,
+            ],
+            (2): [
+                    AnalysisConditionalSkipJob,
+                    RoddyAnalysisFragmentJob,
+                    SnvCheckFragmentKeysV2Job,
+                    SnvConditionalFailJob,
+                    // SnvCreateNotificationJob,
+                    AttachUuidJob,
+                    SnvPrepareJob,
+                    SnvExecuteJob,
+                    SnvValidationJob,
+                    RoddyCleanupJob,
+                    SetCorrectPermissionJob,
+                    CalculateSizeJob,
+                    AnalysisLinkJob,
+                    AnalysisFinishJob,
+            ],
+    ].collectEntries { Integer identifier, List<Class<? extends Job>> beanClasses ->
+        [(identifier): beanClasses*.simpleName*.uncapitalize().asImmutable()]
+    }.asImmutable()
 
     @Autowired
     SnvWorkFileService snvWorkFileService
 
     @Override
-    List<Class<? extends Job>> getJobList() {
-        return [
-                AnalysisConditionalSkipJob,
-                RoddyAnalysisFragmentJob,
-                SnvCheckFragmentKeysJob,
-                SnvConditionalFailJob,
-//                SnvCreateNotificationJob,
-                AttachUuidJob,
-                SnvPrepareJob,
-                SnvExecuteJob,
-                SnvValidationJob,
-                RoddyCleanupJob,
-                SetCorrectPermissionJob,
-                CalculateSizeJob,
-                AnalysisLinkJob,
-                AnalysisFinishJob,
-        ]
+    List<String> getJobList(Integer identifier) {
+        return JOB_LIST_PER_API_IDENTIFIER[identifier]
     }
 
     @Override

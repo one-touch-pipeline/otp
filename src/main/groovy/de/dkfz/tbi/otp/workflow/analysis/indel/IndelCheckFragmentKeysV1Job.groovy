@@ -29,23 +29,13 @@ import de.dkfz.tbi.otp.workflow.jobs.AbstractRoddyCheckFragmentKeysJob
 
 @Component
 @Slf4j
-class IndelCheckFragmentKeysJob extends AbstractRoddyCheckFragmentKeysJob implements AnalysisWorkflowShared {
+class IndelCheckFragmentKeysV1Job extends AbstractRoddyCheckFragmentKeysJob implements AnalysisWorkflowShared {
 
+    // IMPORTANT: Adding new keys here requires a new API version and a new CheckFragmentKeysJob subclass,
+    // as existing workflow runs would fail without those keys in their fragment configuration.
     @Override
     Collection<String> getCvalues() {
         return [
-                // new options introduced in 1.2.177-602, partly depending on on reference genome or location
-                "VEP_BINARY",
-                "VEP_VERSION",
-                "VEP_FORKS",
-                "VEP_FA_INDEX",
-                "VEP_CACHE_BASE",
-                "VEP_PLUGIN_CADD_SNV",
-                "VEP_PLUGIN_SPLICEAI_SNV",
-                "VEP_PLUGIN_SPLICEAI_INDEL",
-                "VEP_SPECIES",
-                "VEP_ASSEMBLY",
-                "VEP_OUT_FORMAT",
         ]
     }
 }

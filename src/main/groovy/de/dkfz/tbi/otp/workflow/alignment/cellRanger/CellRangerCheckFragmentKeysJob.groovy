@@ -34,6 +34,8 @@ import de.dkfz.tbi.otp.workflow.jobs.AbstractCheckFragmentKeysJob
 @Slf4j
 class CellRangerCheckFragmentKeysJob extends AbstractCheckFragmentKeysJob {
 
+    // IMPORTANT: Adding new keys here requires a new API version and a new CheckFragmentKeysJob subclass,
+    // as existing workflow runs would fail without those keys in their fragment configuration.
     @Override
     Set<String> getKeyPaths() {
         return [

@@ -46,17 +46,23 @@
     ON CONFLICT DO NOTHING;
 
     INSERT INTO external_workflow_config_selector_workflow (external_workflow_config_selector_workflows_id, workflow_id)
-        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for Roddy Indel calling 1.2.177-601, 1.2.177-602 WHOLE_GENOME PAIRED'), (SELECT id FROM workflow WHERE name = 'Roddy Indel calling')
+        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for Roddy Indel calling 1.2.177-601, 1.2.177-602 WHOLE_GENOME PAIRED'),
+               (SELECT id FROM workflow WHERE name = 'Roddy Indel calling')
     ON CONFLICT DO NOTHING;
 
     INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
-        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for Roddy Indel calling 1.2.177-601, 1.2.177-602 WHOLE_GENOME PAIRED'), (SELECT id FROM workflow_version WHERE api_version_id = (SELECT id FROM workflow_api_version WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy Indel calling')) AND workflow_version.workflow_version = '1.2.177-601')
+        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for Roddy Indel calling 1.2.177-601, 1.2.177-602 WHOLE_GENOME PAIRED'),
+               (SELECT id FROM workflow_version WHERE api_version_id in (SELECT id FROM workflow_api_version WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy Indel calling'))
+                                                  AND workflow_version.workflow_version = '1.2.177-601')
     ON CONFLICT DO NOTHING;
 
     INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
-        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for Roddy Indel calling 1.2.177-601, 1.2.177-602 WHOLE_GENOME PAIRED'), (SELECT id FROM workflow_version WHERE api_version_id = (SELECT id FROM workflow_api_version WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy Indel calling')) AND workflow_version.workflow_version = '1.2.177-602')
+        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for Roddy Indel calling 1.2.177-601, 1.2.177-602 WHOLE_GENOME PAIRED'),
+               (SELECT id FROM workflow_version WHERE api_version_id in (SELECT id FROM workflow_api_version WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy Indel calling'))
+                                                  AND workflow_version.workflow_version = '1.2.177-602')
     ON CONFLICT DO NOTHING;
 
     INSERT INTO external_workflow_config_selector_seq_type (external_workflow_config_selector_seq_types_id, seq_type_id)
-        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for Roddy Indel calling 1.2.177-601, 1.2.177-602 WHOLE_GENOME PAIRED'), (SELECT id FROM seq_type WHERE name = 'WHOLE_GENOME' AND single_cell = false AND library_layout = 'PAIRED')
+        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for Roddy Indel calling 1.2.177-601, 1.2.177-602 WHOLE_GENOME PAIRED'),
+               (SELECT id FROM seq_type WHERE name = 'WHOLE_GENOME' AND single_cell = false AND library_layout = 'PAIRED')
     ON CONFLICT DO NOTHING;

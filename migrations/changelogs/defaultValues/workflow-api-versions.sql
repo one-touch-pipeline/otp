@@ -56,9 +56,17 @@ INSERT INTO workflow_api_version(id, date_created, last_updated, version, workfl
 VALUES (NEXTVAL('hibernate_sequence'), NOW(), NOW(), 0, (SELECT id FROM workflow WHERE name = 'Roddy SNV calling'), 1)
 ON CONFLICT DO NOTHING;
 
+INSERT INTO workflow_api_version(id, date_created, last_updated, version, workflow_id, identifier)
+VALUES (NEXTVAL('hibernate_sequence'), NOW(), NOW(), 0, (SELECT id FROM workflow WHERE name = 'Roddy SNV calling'), 2)
+ON CONFLICT DO NOTHING;
+
 --Roddy Indel calling
 INSERT INTO workflow_api_version(id, date_created, last_updated, version, workflow_id, identifier)
 VALUES (NEXTVAL('hibernate_sequence'), NOW(), NOW(), 0, (SELECT id FROM workflow WHERE name = 'Roddy Indel calling'), 1)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO workflow_api_version(id, date_created, last_updated, version, workflow_id, identifier)
+VALUES (NEXTVAL('hibernate_sequence'), NOW(), NOW(), 0, (SELECT id FROM workflow WHERE name = 'Roddy Indel calling'), 2)
 ON CONFLICT DO NOTHING;
 
 --Roddy Sophia (structural variation calling)

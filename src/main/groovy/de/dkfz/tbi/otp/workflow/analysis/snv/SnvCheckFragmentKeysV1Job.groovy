@@ -19,33 +19,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.jobs
+package de.dkfz.tbi.otp.workflow.analysis.snv
 
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
-/**
- * Checks the required fragment keys for Weskit workflows,
- * currently we only have nextflow workflows.
- * Maybe this will have to be adapted later for other workflow engines
- */
+import de.dkfz.tbi.otp.workflow.analysis.AnalysisWorkflowShared
+import de.dkfz.tbi.otp.workflow.jobs.AbstractRoddyCheckFragmentKeysJob
+
 @Component
 @Slf4j
-class WeskitCheckFragmentKeysJob extends AbstractCheckFragmentKeysJob {
-
-    static final String WESKIT = "WESKIT"
-    static final String MAX_MEMORY = "MAX_MEMORY"
-    static final String MAX_RUNTIME = "MAX_RUNTIME"
-    static final String PROFILE = "PROFILE"
+class SnvCheckFragmentKeysV1Job extends AbstractRoddyCheckFragmentKeysJob implements AnalysisWorkflowShared {
 
     // IMPORTANT: Adding new keys here requires a new API version and a new CheckFragmentKeysJob subclass,
     // as existing workflow runs would fail without those keys in their fragment configuration.
     @Override
-    Set<String> getKeyPaths() {
+    Collection<String> getCvalues() {
         return [
-                "${WESKIT}/${MAX_MEMORY}",
-                "${WESKIT}/${MAX_RUNTIME}",
-                "${WESKIT}/${PROFILE}",
-        ] as Set
+        ]
     }
 }

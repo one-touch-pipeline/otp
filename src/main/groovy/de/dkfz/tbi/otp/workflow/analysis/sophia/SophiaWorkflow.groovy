@@ -31,13 +31,14 @@ import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaWorkFileService
 import de.dkfz.tbi.otp.workflow.analysis.*
 import de.dkfz.tbi.otp.workflow.jobs.*
 import de.dkfz.tbi.otp.workflowExecution.Artefact
+import de.dkfz.tbi.otp.workflowExecution.LinearWorkflow
 
 /**
  * represents the Sophia Workflow
  */
 @Component
 @Slf4j
-class SophiaWorkflow extends AbstractAnalysisWorkflow {
+class SophiaWorkflow extends AbstractAnalysisWorkflow implements LinearWorkflow {
 
     public static final String WORKFLOW = "Roddy Sophia (structural variation calling)"
 

@@ -31,13 +31,14 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.workflow.analysis.*
 import de.dkfz.tbi.otp.workflow.jobs.*
 import de.dkfz.tbi.otp.workflowExecution.Artefact
+import de.dkfz.tbi.otp.workflowExecution.LinearWorkflow
 
 /**
  * represents the ACESeq Workflow
  */
 @Component
 @Slf4j
-class AceseqWorkflow extends AbstractAnalysisWorkflow {
+class AceseqWorkflow extends AbstractAnalysisWorkflow implements LinearWorkflow {
 
     public static final String WORKFLOW = "Roddy ACEseq (CNV calling)"
 

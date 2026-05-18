@@ -788,7 +788,7 @@ INSERT INTO external_workflow_config_selector_workflow_version (external_workflo
 SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default cvalue values for RNA alignment 1.3.0'),
        (SELECT id
         FROM workflow_version
-        WHERE api_version_id =
+        WHERE api_version_id in
               (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'RNA alignment'))
           AND workflow_version.workflow_version = '1.3.0')
 ON CONFLICT DO NOTHING;

@@ -223,5 +223,6 @@ databaseChangeLog = {
     include file: 'changelogs/2026/otp-2951-add-project-request-approval-round-tracking.groovy'
 
     include file: 'changelogs/2024/otp-2700.groovy'
+
+    include file: 'changelogs/2026/otp-2985-delete-previous-snv-indel-version.groovy'
 }
-// codenarc-enable AbcMetric, NoScriptBindings

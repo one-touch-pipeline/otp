@@ -19,33 +19,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflow.jobs
+package de.dkfz.tbi.otp.workflow.analysis.indel
 
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
-/**
- * Checks the required fragment keys for Weskit workflows,
- * currently we only have nextflow workflows.
- * Maybe this will have to be adapted later for other workflow engines
- */
+import de.dkfz.tbi.otp.workflow.analysis.AnalysisWorkflowShared
+import de.dkfz.tbi.otp.workflow.jobs.AbstractRoddyCheckFragmentKeysJob
+
 @Component
 @Slf4j
-class WeskitCheckFragmentKeysJob extends AbstractCheckFragmentKeysJob {
-
-    static final String WESKIT = "WESKIT"
-    static final String MAX_MEMORY = "MAX_MEMORY"
-    static final String MAX_RUNTIME = "MAX_RUNTIME"
-    static final String PROFILE = "PROFILE"
+class IndelCheckFragmentKeysV2Job extends AbstractRoddyCheckFragmentKeysJob implements AnalysisWorkflowShared {
 
     // IMPORTANT: Adding new keys here requires a new API version and a new CheckFragmentKeysJob subclass,
     // as existing workflow runs would fail without those keys in their fragment configuration.
     @Override
-    Set<String> getKeyPaths() {
+    Collection<String> getCvalues() {
         return [
-                "${WESKIT}/${MAX_MEMORY}",
-                "${WESKIT}/${MAX_RUNTIME}",
-                "${WESKIT}/${PROFILE}",
-        ] as Set
+                // new options introduced in 1.2.177-602, partly depending on on reference genome or location
+                "VEP_BINARY",
+                "VEP_VERSION",
+                "VEP_FORKS",
+                "VEP_FA_INDEX",
+                "VEP_CACHE_BASE",
+                "VEP_PLUGIN_CADD_SNV",
+                "VEP_PLUGIN_SPLICEAI_SNV",
+                "VEP_PLUGIN_SPLICEAI_INDEL",
+                "VEP_SPECIES",
+                "VEP_ASSEMBLY",
+                "VEP_OUT_FORMAT",
+        ]
     }
 }

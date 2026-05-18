@@ -626,5 +626,5 @@
     ON CONFLICT DO NOTHING;
 
     INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
-        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default cvalue values for Roddy Sophia (structural variation calling) 2.2.0'), (SELECT id FROM workflow_version WHERE api_version_id = (SELECT id FROM workflow_api_version WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy Sophia (structural variation calling)')) AND workflow_version.workflow_version = '2.2.0')
+        SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default cvalue values for Roddy Sophia (structural variation calling) 2.2.0'), (SELECT id FROM workflow_version WHERE api_version_id in (SELECT id FROM workflow_api_version WHERE workflow_id = (SELECT id FROM workflow WHERE name = 'Roddy Sophia (structural variation calling)')) AND workflow_version.workflow_version = '2.2.0')
     ON CONFLICT DO NOTHING;

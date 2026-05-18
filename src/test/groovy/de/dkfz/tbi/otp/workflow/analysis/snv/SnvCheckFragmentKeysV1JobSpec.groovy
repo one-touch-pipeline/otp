@@ -21,33 +21,21 @@
  */
 package de.dkfz.tbi.otp.workflow.analysis.snv
 
-import groovy.util.logging.Slf4j
-import org.springframework.stereotype.Component
+import spock.lang.Specification
 
-import de.dkfz.tbi.otp.workflow.analysis.AnalysisWorkflowShared
-import de.dkfz.tbi.otp.workflow.jobs.AbstractRoddyCheckFragmentKeysJob
+import de.dkfz.tbi.TestCase
 
-@Component
-@Slf4j
-class SnvCheckFragmentKeysJob extends AbstractRoddyCheckFragmentKeysJob implements AnalysisWorkflowShared {
+class SnvCheckFragmentKeysV1JobSpec extends Specification {
 
-    @Override
-    Collection<String> getCvalues() {
-        return [
-                // option for virtual env
-                "tbiLsfVirtualEnvDir",
-                // new optioned introduced in 1.2.166-6, partly depending on on reference genome or location
-                "VEP_BINARY",
-                "VEP_VERSION",
-                "VEP_FORKS",
-                "VEP_FA_INDEX",
-                "VEP_CACHE_BASE",
-                "VEP_PLUGIN_CADD_SNV",
-                "VEP_PLUGIN_SPLICEAI_SNV",
-                "VEP_PLUGIN_SPLICEAI_INDEL",
-                "VEP_SPECIES",
-                "VEP_ASSEMBLY",
-                "VEP_OUT_FORMAT",
+    private SnvCheckFragmentKeysV1Job job
+
+    void "getCvalues, should return expected keys"() {
+        given:
+        job = new SnvCheckFragmentKeysV1Job()
+        Collection<String> expectedKeys = [
         ]
+
+        expect:
+        TestCase.assertContainSame(job.cvalues, expectedKeys)
     }
 }

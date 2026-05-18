@@ -31,13 +31,14 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.workflow.analysis.*
 import de.dkfz.tbi.otp.workflow.jobs.*
 import de.dkfz.tbi.otp.workflowExecution.Artefact
+import de.dkfz.tbi.otp.workflowExecution.LinearWorkflow
 
 /**
  * represents the RunYapsa Workflow
  */
 @Component
 @Slf4j
-class RunYapsaWorkflow extends AbstractAnalysisWorkflow {
+class RunYapsaWorkflow extends AbstractAnalysisWorkflow implements LinearWorkflow {
 
     public static final String WORKFLOW = "runYapsa (mutational signature analysis)"
 
