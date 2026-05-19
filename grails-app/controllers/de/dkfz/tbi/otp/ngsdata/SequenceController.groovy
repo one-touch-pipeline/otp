@@ -149,8 +149,6 @@ class SequenceController {
                                 fastqId : it.id,
                         ]
                     } ?: []
-                    List<String> dataFormats = seqTrackIdRawSequenceFileMap[seq.seqTrackId]?.dataFormat
-                    data.dataFormat = dataFormats ? CollectionUtils.exactlyOneElement(dataFormats.unique()) : ' - '
                     dataToRender.aaData << data
                 }
             }
@@ -267,7 +265,7 @@ enum SequenceColumn {
     SPECIES_COMMON_NAME("sequence.list.headers.speciesCommonName", "speciesCommonName"),
     SCIENTIFIC_NAME("sequence.list.headers.scientificName", "scientificName"),
     STRAIN("sequence.list.headers.strain", "strain"),
-    MIXED_IN_SPECIES("sequence.list.headers.mixedInSpecies", "strain"),
+    MIXED_IN_SPECIES("sequence.list.headers.mixedInSpecies", "mixedInSpecies"),
     DATA_FORMAT("sequence.list.headers.dataFormat", "dataFormat", true),
 
     final String message
@@ -275,10 +273,11 @@ enum SequenceColumn {
     final Boolean hideInCsv
 
     static SequenceColumn fromDataTable(int column) {
-        if (column >= values().size() || column < 0) {
+        List<SequenceColumn> cols = values().findAll { it != WITHDRAWN }
+        if (column < 0 || column >= cols.size()) {
             return PROJECT
         }
-        return values()[column]
+        return cols[column]
     }
 }
 

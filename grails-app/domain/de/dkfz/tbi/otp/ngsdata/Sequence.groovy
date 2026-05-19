@@ -146,6 +146,8 @@ class Sequence implements Serializable {
     /** contains accumulated and compound information of {@link Sample#mixedInSpecies} */
     String mixedInSpecies
 
+    String dataFormat
+
     static mapping = {
         table 'sequences'
         version false
@@ -178,6 +180,7 @@ class Sequence implements Serializable {
         ]
         dayCreated formula: 'DATE(date_created)'
         importDate column: 'import_date'
+        dataFormat column: 'data_format'
     }
 
     static constraints = {
@@ -197,6 +200,7 @@ class Sequence implements Serializable {
         scientificName nullable: true
         strain nullable: true
         mixedInSpecies nullable: true
+        dataFormat nullable: true
     }
 
     String getLibraryLayoutDirName() {

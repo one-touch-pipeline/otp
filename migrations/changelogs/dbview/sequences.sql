@@ -73,6 +73,14 @@ SELECT seqTrack.id                                                              
        seqCenter.dir_name                                                                                               AS seq_center_dir_name,
        COALESCE((SELECT BOOL_AND(file_exists) FROM raw_sequence_file sf WHERE sf.seq_track_id = seqTrack.id), FALSE)    AS file_exists,
        COALESCE((SELECT BOOL_AND(file_withdrawn) FROM raw_sequence_file sf WHERE sf.seq_track_id = seqTrack.id), FALSE) AS file_withdrawn,
+       (SELECT CASE rsf."class"
+                   WHEN 'de.dkfz.tbi.otp.ngsdata.FastqFile' THEN 'fastq'
+                   WHEN 'de.dkfz.tbi.otp.ngsdata.SequenceCramFile' THEN 'cram'
+                   ELSE 'unknown' END
+        FROM raw_sequence_file rsf
+        WHERE rsf.seq_track_id = seqTrack.id
+        ORDER BY rsf.id
+        LIMIT 1)                                                                                                        AS data_format,
        scn.name                                                                                                         AS species_common_name,
        species.scientific_name                                                                                          AS scientific_name,
        strn.name                                                                                                        AS strain,
