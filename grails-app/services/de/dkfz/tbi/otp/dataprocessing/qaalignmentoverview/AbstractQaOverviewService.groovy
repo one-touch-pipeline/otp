@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.qaalignmentoverview
 
-import asset.pipeline.grails.LinkGenerator
+import grails.web.mapping.LinkGenerator
 import grails.gorm.transactions.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 

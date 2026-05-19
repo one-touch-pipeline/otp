@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import asset.pipeline.grails.LinkGenerator
+import grails.web.mapping.LinkGenerator
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll

@@ -21,14 +21,14 @@
  */
 package de.dkfz.tbi.otp
 
-import asset.pipeline.grails.LinkGenerator
 import groovy.transform.CompileDynamic
+import org.grails.web.mapping.DefaultLinkGenerator
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.security.SecurityService
 
 @CompileDynamic
-class ProjectLinkGenerator extends LinkGenerator {
+class ProjectLinkGenerator extends DefaultLinkGenerator {
 
     @Autowired
     ProjectSelectionService projectSelectionService

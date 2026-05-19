@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import asset.pipeline.grails.LinkGenerator
+import grails.web.mapping.LinkGenerator
 import grails.gorm.transactions.Transactional
 import groovy.transform.Synchronized
 import groovy.util.logging.Slf4j

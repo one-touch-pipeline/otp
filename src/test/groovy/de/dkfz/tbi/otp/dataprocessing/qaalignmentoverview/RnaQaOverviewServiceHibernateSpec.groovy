@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.qaalignmentoverview
 
-import asset.pipeline.grails.LinkGenerator
+import grails.web.mapping.LinkGenerator
 import grails.test.hibernate.HibernateSpec
 import spock.lang.Unroll
 
