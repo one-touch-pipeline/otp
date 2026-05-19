@@ -31,8 +31,6 @@ import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
-import java.time.LocalDate
-
 @CompileDynamic
 @Component
 @Slf4j
@@ -44,14 +42,7 @@ class CheckExpiredProjectsJob extends AbstractScheduledJob {
     @Autowired
     MessageSourceService messageSourceService
 
-    /**
-     * Run this job only once per month.
-     * @return true if it is the first day of a month
-     */
-    @Override
-    boolean isAdditionalRunConditionMet() {
-        return LocalDate.now().dayOfMonth == 1
-    }
+    final String cronExpression = "0 0 3 1 * *"
 
     @Override
     void wrappedExecute() {

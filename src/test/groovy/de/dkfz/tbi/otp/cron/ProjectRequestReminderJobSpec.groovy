@@ -22,29 +22,12 @@
 package de.dkfz.tbi.otp.cron
 
 import spock.lang.Specification
-import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.project.projectRequest.ProjectRequestService
 
-import java.time.DayOfWeek
 import java.time.LocalDate
 
 class ProjectRequestReminderJobSpec extends Specification {
-
-    @Unroll
-    void "isAdditionalRunConditionMet returns true only on Monday (#dayOfWeek)"() {
-        given:
-        LocalDate fixedDate = LocalDate.of(2026, 4, 13).plusDays(dayOffset)
-        ProjectRequestReminderJob job = createJob(fixedDate)
-
-        expect:
-        job.isAdditionalRunConditionMet() == isMonday
-
-        where:
-        dayOfWeek         | dayOffset | isMonday
-        DayOfWeek.MONDAY  | 0         | true
-        DayOfWeek.TUESDAY | 1         | false
-    }
 
     void "wrappedExecute delegates to service"() {
         given:

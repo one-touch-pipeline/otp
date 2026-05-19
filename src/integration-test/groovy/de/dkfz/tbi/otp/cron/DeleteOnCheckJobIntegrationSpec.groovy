@@ -83,11 +83,4 @@ class DeleteOnCheckJobIntegrationSpec extends Specification implements UserDomai
         job.wrappedExecute()
     }
 
-    void "isAdditionalRunConditionMet, should return true only on the first day of the month"() {
-        given:
-        setupData()
-
-        expect:
-        job.isAdditionalRunConditionMet() == (LocalDate.now().dayOfMonth == 1)
-    }
 }

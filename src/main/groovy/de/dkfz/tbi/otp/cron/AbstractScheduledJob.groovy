@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.cron
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
@@ -67,8 +66,9 @@ abstract class AbstractScheduledJob {
 
     abstract void wrappedExecute()
 
+    String cronExpression = "0 0 5 * * *"
+
     @SuppressWarnings(["CatchThrowable"])
-    @Scheduled(cron="0 0 5 * * *")
     void execute() {
         SessionUtils.withNewSession {
             try {

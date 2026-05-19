@@ -28,7 +28,6 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.project.projectRequest.ProjectRequestService
 
-import java.time.DayOfWeek
 import java.time.LocalDate
 
 @CompileDynamic
@@ -39,10 +38,7 @@ class ProjectRequestReminderJob extends AbstractScheduledJob {
     @Autowired
     ProjectRequestService projectRequestService
 
-    @Override
-    boolean isAdditionalRunConditionMet() {
-        return today().dayOfWeek == DayOfWeek.MONDAY
-    }
+    final String cronExpression = "0 0 4 * * 1"
 
     @Override
     void wrappedExecute() {

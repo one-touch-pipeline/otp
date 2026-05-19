@@ -25,10 +25,10 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.tracking.DeNbiKpi
 import de.dkfz.tbi.otp.tracking.DeNbiKpiService
-import de.dkfz.tbi.otp.administration.MailHelperService
 
 import java.time.LocalDate
 import java.time.ZoneId
@@ -49,14 +49,7 @@ class GenerateAndSendKPIsForNBI extends AbstractScheduledJob {
     @Autowired
     DeNbiKpiService deNbiKpiService
 
-    /**
-     * Run this job only once per month.
-     * @return true if it is the first day of a month
-     */
-    @Override
-    boolean isAdditionalRunConditionMet() {
-        return LocalDate.now().dayOfMonth == 1
-    }
+    final String cronExpression = "0 0 3 1 * *"
 
     @Override
     void wrappedExecute() {

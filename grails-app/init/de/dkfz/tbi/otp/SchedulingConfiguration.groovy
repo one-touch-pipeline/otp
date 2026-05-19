@@ -28,18 +28,38 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.TaskScheduler
 import org.springframework.scheduling.Trigger
 import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.scheduling.annotation.SchedulingConfigurer
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
+import org.springframework.scheduling.config.CronTask
+import org.springframework.scheduling.config.ScheduledTaskRegistrar
 
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.cron.AbstractScheduledJob
 
 import java.util.concurrent.ScheduledFuture
 
 @Configuration
 @EnableScheduling
-class SchedulingConfiguration {
+class SchedulingConfiguration implements SchedulingConfigurer {
 
     @Autowired
     ConfigService configService
+
+    @Autowired
+    List<AbstractScheduledJob> scheduledJobs
+
+    // populated during configureTasks — allows tests to verify what was registered
+    final List<CronTask> registeredCronTasks = []
+
+    @Override
+    void configureTasks(ScheduledTaskRegistrar registrar) {
+        registrar.taskScheduler = threadPoolTaskScheduler()
+        scheduledJobs.groupBy { it.cronExpression }.each { String cron, List<AbstractScheduledJob> jobs ->
+            CronTask task = new CronTask({ jobs.each { job -> job.execute() } }, cron)
+            registeredCronTasks << task
+            registrar.addCronTask(task)
+        }
+    }
 
     @Bean
     TaskScheduler threadPoolTaskScheduler() {
