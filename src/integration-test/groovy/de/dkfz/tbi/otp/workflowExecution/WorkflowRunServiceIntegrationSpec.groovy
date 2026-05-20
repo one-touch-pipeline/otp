@@ -258,4 +258,142 @@ class WorkflowRunServiceIntegrationSpec extends Specification implements Workflo
 
         return workflowRun
     }
+
+    void "workflowOverview, with stepFilter equal to current step beanName, returns matching runs"() {
+        given:
+        Workflow workflow = createWorkflow()
+        WorkflowRun run1 = createWorkflowRun(workflow: workflow, state: WorkflowRun.State.RUNNING_OTP)
+        WorkflowRun run2 = createWorkflowRun(workflow: workflow, state: WorkflowRun.State.RUNNING_OTP)
+
+        createWorkflowStep(workflowRun: run1, beanName: 'dataInstallationConditionalFailJob', obsolete: false)
+        createWorkflowStep(workflowRun: run2, beanName: 'otherStepName', obsolete: false)
+
+        WorkflowRunSearchCriteria criteria = new WorkflowRunSearchCriteria(
+            workflow, [WorkflowRun.State.RUNNING_OTP], null, 'dataInstallationConditionalFailJob', [], 0, 10
+        )
+
+        when:
+        WorkflowRunSearchResult result = workflowRunService.workflowOverview(criteria)
+
+        then:
+        result.data*.id.contains(run1.id)
+        !result.data*.id.contains(run2.id)
+    }
+
+    void "workflowOverview, with stepFilter not equal to current step beanName, excludes run"() {
+        given:
+        Workflow workflow = createWorkflow()
+        WorkflowRun run = createWorkflowRun(workflow: workflow, state: WorkflowRun.State.RUNNING_OTP)
+        createWorkflowStep(workflowRun: run, beanName: 'someJobName', obsolete: false)
+
+        WorkflowRunSearchCriteria criteria = new WorkflowRunSearchCriteria(
+            workflow, [WorkflowRun.State.RUNNING_OTP], null, 'some', [], 0, 10
+        )
+
+        when:
+        WorkflowRunSearchResult result = workflowRunService.workflowOverview(criteria)
+
+        then:
+        !result.data*.id.contains(run.id)
+    }
+
+    void "workflowOverview, excludes run when stepFilter matches an obsolete latest step"() {
+        given:
+        Workflow workflow = createWorkflow()
+        WorkflowRun run = createWorkflowRun(workflow: workflow, state: WorkflowRun.State.RUNNING_OTP)
+
+        createWorkflowStep(workflowRun: run, beanName: 'firstStepName', obsolete: false)
+        createWorkflowStep(workflowRun: run, beanName: 'lastStepName', obsolete: true)
+
+        WorkflowRunSearchCriteria criteria = new WorkflowRunSearchCriteria(
+            workflow, [WorkflowRun.State.RUNNING_OTP], null, 'lastStepName', [], 0, 10
+        )
+
+        when:
+        WorkflowRunSearchResult result = workflowRunService.workflowOverview(criteria)
+
+        then:
+        !result.data*.id.contains(run.id)
+    }
+
+    void "workflowOverview, excludes run when stepFilter matches an older non-obsolete step"() {
+        given:
+        Workflow workflow = createWorkflow()
+        WorkflowRun run = createWorkflowRun(workflow: workflow, state: WorkflowRun.State.RUNNING_OTP)
+
+        createWorkflowStep(workflowRun: run, beanName: 'firstStepName', obsolete: false)
+        createWorkflowStep(workflowRun: run, beanName: 'lastStepName', obsolete: false)
+
+        WorkflowRunSearchCriteria criteria = new WorkflowRunSearchCriteria(
+            workflow, [WorkflowRun.State.RUNNING_OTP], null, 'firstStepName', [], 0, 10
+        )
+
+        when:
+        WorkflowRunSearchResult result = workflowRunService.workflowOverview(criteria)
+
+        then:
+        !result.data*.id.contains(run.id)
+    }
+
+    void "workflowOverview, includes run when stepFilter matches the latest non-obsolete step"() {
+        given:
+        Workflow workflow = createWorkflow()
+        WorkflowRun run = createWorkflowRun(workflow: workflow, state: WorkflowRun.State.RUNNING_OTP)
+
+        createWorkflowStep(workflowRun: run, beanName: 'firstStepName', obsolete: false)
+        createWorkflowStep(workflowRun: run, beanName: 'lastStepName', obsolete: true)
+
+        WorkflowRunSearchCriteria criteria = new WorkflowRunSearchCriteria(
+            workflow, [WorkflowRun.State.RUNNING_OTP], null, 'firstStepName', [], 0, 10
+        )
+
+        when:
+        WorkflowRunSearchResult result = workflowRunService.workflowOverview(criteria)
+
+        then:
+        result.data*.id.contains(run.id)
+    }
+
+    void "workflowOverview, with run having only obsoleted steps, excludes run when stepFilter is active"() {
+        given:
+        Workflow workflow = createWorkflow()
+        WorkflowRun run = createWorkflowRun(workflow: workflow, state: WorkflowRun.State.RUNNING_OTP)
+        createWorkflowStep(workflowRun: run, beanName: 'someJob', obsolete: true)
+
+        WorkflowRunSearchCriteria criteria = new WorkflowRunSearchCriteria(
+            workflow, [WorkflowRun.State.RUNNING_OTP], null, 'someJob', [], 0, 10
+        )
+
+        when:
+        WorkflowRunSearchResult result = workflowRunService.workflowOverview(criteria)
+
+        then:
+        !result.data*.id.contains(run.id)
+    }
+
+    void "workflowOverview, stepFilter composes with workflow, state, and name filters as AND"() {
+        given:
+        Workflow workflow1 = createWorkflow()
+        Workflow workflow2 = createWorkflow()
+
+        WorkflowRun run1 = createWorkflowRun(workflow: workflow1, state: WorkflowRun.State.RUNNING_OTP, displayName: 'foo')
+        WorkflowRun run2 = createWorkflowRun(workflow: workflow1, state: WorkflowRun.State.PENDING, displayName: 'foo')
+        WorkflowRun run3 = createWorkflowRun(workflow: workflow2, state: WorkflowRun.State.RUNNING_OTP, displayName: 'foo')
+        WorkflowRun run4 = createWorkflowRun(workflow: workflow1, state: WorkflowRun.State.RUNNING_OTP, displayName: 'bar')
+
+        createWorkflowStep(workflowRun: run1, beanName: 'installation', obsolete: false)
+        createWorkflowStep(workflowRun: run2, beanName: 'installation', obsolete: false)
+        createWorkflowStep(workflowRun: run3, beanName: 'installation', obsolete: false)
+        createWorkflowStep(workflowRun: run4, beanName: 'installation', obsolete: false)
+
+        WorkflowRunSearchCriteria criteria = new WorkflowRunSearchCriteria(
+            workflow1, [WorkflowRun.State.RUNNING_OTP], 'foo', 'installation', [], 0, 10
+        )
+
+        when:
+        WorkflowRunSearchResult result = workflowRunService.workflowOverview(criteria)
+
+        then:
+        result.data*.id == [run1.id]
+    }
 }

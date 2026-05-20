@@ -124,6 +124,7 @@ class RunShowDetailsCommand {
     }
     List<WorkflowRun.State> states
     String name
+    String stepFilter
 }
 
 class DataCommand extends DataTablesCommand {

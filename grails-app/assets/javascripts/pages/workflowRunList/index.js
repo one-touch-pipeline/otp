@@ -22,6 +22,13 @@
 $(() => {
   'use strict';
 
+  const getFilterParams = () => ({
+    'workflow.id': $('#workflow').val(),
+    state: $('#state').val(),
+    name: $('#name').val(),
+    stepFilter: $('#stepFilter').val()
+  });
+
   const runsTable = $('#runs');
   const table = runsTable.DataTable({
     dom: '<"top"i>rt<"bottom"lp><"clear">',
@@ -68,11 +75,7 @@ $(() => {
               controller: 'workflowRunDetails',
               action: 'index',
               id: row.id,
-              parameters: {
-                'workflow.id': $('#workflow').val(),
-                state: $('#state').val(),
-                name: $('#name').val()
-              }
+              parameters: getFilterParams()
             });
             return `<a title="${row.displayName.replaceAll('\n', '<br>')}" 
                        data-bs-toggle="tooltip" data-placement="bottom" href="${workflowRunDetailsPageLink}">
@@ -177,11 +180,7 @@ $(() => {
         action: 'data'
       }),
       data(data) {
-        const json = data;
-        json['workflow.id'] = $('#workflow').val();
-        json.state = $('#state').val();
-        json.name = $('#name').val();
-        return json;
+        return Object.assign(data, getFilterParams());
       },
       dataSrc(json) {
         setCount(json.count);
@@ -220,6 +219,48 @@ $(() => {
     table.draw();
   });
 
+  const stepFilter = $('#stepFilter');
+  const stepFilters = $('#stepFilterSuggestions [data-step-filter-suggestion]').map((_, element) => (
+    $(element).data('step-filter-suggestion')
+  )).get();
+
+  const escapeHtml = function (value) {
+    return $('<div>').text(value).html();
+  };
+
+  const findMatchingStepFilters = function (query, syncResults) {
+    const lowerCaseQuery = query.toLowerCase();
+    syncResults(stepFilters.filter((step) => (
+      step.toLowerCase().includes(lowerCaseQuery)
+    )).map((step) => ({
+      name: step
+    })));
+  };
+
+  stepFilter.typeahead(
+    {
+      highlight: true,
+      hint: false
+    },
+    {
+      display: 'name',
+      limit: 1000,
+      source: findMatchingStepFilters,
+      templates: {
+        empty: '<div>No matching workflow step.</div>',
+        suggestion: (result) => `<div>${escapeHtml(result.name)}</div>`
+      }
+    }
+  );
+
+  let selectedStepFilter = stepFilter.val();
+  stepFilter.on('typeahead:select typeahead:autocomplete change', () => {
+    if (stepFilter.val() !== selectedStepFilter) {
+      selectedStepFilter = stepFilter.val();
+      table.draw();
+    }
+  });
+
   $('#selectAll').on('click', (e) => {
     const checkboxes = $('input.tableCheckbox:not([disabled])');
     checkboxes.prop('checked', e.target.checked);
@@ -251,11 +292,7 @@ $(() => {
       'redirect',
       $.otp.createLink({
         controller: 'workflowRunList',
-        parameters: {
-          'workflow.id': $('#workflow').val(),
-          state: $('#state').val(),
-          name: $('#name').val()
-        }
+        parameters: getFilterParams()
       }).slice($.otp.contextPath.length)
     );
   };

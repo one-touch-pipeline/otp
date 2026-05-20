@@ -34,7 +34,7 @@
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><g:link controller="workflowRunList" action="index"
-                                                params="['workflow.id': cmd.workflow?.id, state: cmd.states?.join(','), name: cmd.name]">${g.message(code: "workflow.navigation.list")}</g:link></li>
+                                                params="['workflow.id': cmd.workflow?.id, state: cmd.states?.join(','), name: cmd.name, stepFilter: cmd.stepFilter]">${g.message(code: "workflow.navigation.list")}</g:link></li>
             <li class="breadcrumb-item active" aria-current="page">${g.message(code: "workflow.navigation.details")} (${workflowRun.id})</li>
         </ol>
     </nav>

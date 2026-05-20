@@ -33,6 +33,8 @@ class WorkflowRunListController extends AbstractWorkflowRunController {
 
     WorkflowRunService workflowRunService
 
+    WorkflowStepService workflowStepService
+
     static allowedMethods = [
             index: "GET",
             data : "GET",
@@ -46,6 +48,7 @@ class WorkflowRunListController extends AbstractWorkflowRunController {
         return [
                 cmd      : cmd,
                 workflows: workflows,
+                steps    : workflowStepService.currentWorkflowStepBeanNames,
                 states   : WorkflowRunOverviewController.STATES,
                 columns  : WorkflowRunListColumn.values(),
         ]
@@ -58,6 +61,7 @@ class WorkflowRunListController extends AbstractWorkflowRunController {
                 cmd.workflow,
                 cmd.states,
                 cmd.name,
+                cmd.stepFilter,
                 cmd.orderList,
                 cmd.start,
                 cmd.length
@@ -75,6 +79,7 @@ class RunShowCommand {
     Workflow workflow
     String state
     String name
+    String stepFilter
 }
 
 class RunDataShowCommand extends DataTablesCommand {
@@ -85,4 +90,5 @@ class RunDataShowCommand extends DataTablesCommand {
     }
     List<WorkflowRun.State> states
     String name
+    String stepFilter
 }

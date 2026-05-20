@@ -146,6 +146,7 @@ class WorkflowRun implements Commentable, Entity {
         comment cascade: "all-delete-orphan"
         workDirectory type: 'text'
         notificationText type: 'text'
+        workflowSteps batchSize: 100
     }
 
     Map<String, WorkflowArtefact> getInputArtefacts() {

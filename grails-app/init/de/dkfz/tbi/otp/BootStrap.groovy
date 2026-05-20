@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.ngsdata.FastqImportInstanceService
 import de.dkfz.tbi.otp.security.user.UserService
 import de.dkfz.tbi.otp.workflow.bamImport.BamImportService
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStepService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowSystemService
 
 class BootStrap {
@@ -46,6 +47,7 @@ class BootStrap {
     BamImportService bamImportService
     FileSystemService fileSystemService
     RemoteShellHelper remoteShellHelper
+    WorkflowStepService workflowStepService
 
     Closure<Void> init = { servletContext ->
         // load the shutdown service
@@ -59,6 +61,7 @@ class BootStrap {
 
         fastqImportInstanceService.changeProcessToWait()
         bamImportService.changeProcessToWait()
+        workflowStepService.initializeCurrentWorkflowStepBeanNames()
 
         if (configService.isJobSystemEnabled()) {
             log.info("JobSystem is enabled")

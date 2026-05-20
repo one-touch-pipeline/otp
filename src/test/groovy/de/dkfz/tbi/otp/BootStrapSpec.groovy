@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.FastqImportInstanceService
 import de.dkfz.tbi.otp.workflow.bamImport.BamImportService
 import de.dkfz.tbi.otp.workflow.shared.WorkflowException
+import de.dkfz.tbi.otp.workflowExecution.WorkflowStepService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowSystemService
 
 class BootStrapSpec extends Specification {
@@ -48,6 +49,7 @@ class BootStrapSpec extends Specification {
         bootStrap.bamImportService = Mock(BamImportService)
         bootStrap.configService = Mock(ConfigService)
         bootStrap.schedulerService = Mock(SchedulerService)
+        bootStrap.workflowStepService = Mock(WorkflowStepService)
         bootStrap.workflowSystemService = Mock(WorkflowSystemService)
 
         when:
@@ -59,6 +61,7 @@ class BootStrapSpec extends Specification {
         1 * bootStrap.propertiesValidationService.validateStartUpProperties()
         1 * bootStrap.fastqImportInstanceService.changeProcessToWait()
         1 * bootStrap.bamImportService.changeProcessToWait()
+        1 * bootStrap.workflowStepService.initializeCurrentWorkflowStepBeanNames()
         1 * bootStrap.configService.isJobSystemEnabled() >> jobSystemEnabled
         jobSystemCount * bootStrap.schedulerService.startup()
         jobSystemCount * bootStrap.workflowSystemService.startWorkflowSystem()
@@ -80,6 +83,7 @@ class BootStrapSpec extends Specification {
         bootStrap.bamImportService = Mock(BamImportService)
         bootStrap.configService = Mock(ConfigService)
         bootStrap.schedulerService = Mock(SchedulerService)
+        bootStrap.workflowStepService = Mock(WorkflowStepService)
         bootStrap.workflowSystemService = Mock(WorkflowSystemService)
 
         when:
@@ -91,6 +95,7 @@ class BootStrapSpec extends Specification {
         1 * bootStrap.propertiesValidationService.validateStartUpProperties()
         1 * bootStrap.fastqImportInstanceService.changeProcessToWait()
         1 * bootStrap.bamImportService.changeProcessToWait()
+        1 * bootStrap.workflowStepService.initializeCurrentWorkflowStepBeanNames()
         1 * bootStrap.configService.isJobSystemEnabled() >> 1
         1 * bootStrap.schedulerService.startup()
         1 * bootStrap.workflowSystemService.startWorkflowSystem() >> {

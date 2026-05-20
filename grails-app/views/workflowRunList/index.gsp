@@ -61,7 +61,21 @@
                 </tr>
                 <tr>
                     <td><label for="name">${g.message(code: "workflowRun.list.name")}</label></td>
-                    <td><input type="text" id="name" value="${cmd?.name}" autocomplete="off"/></td>
+                    <td><input type="text" id="name" class="form-control" value="${cmd?.name}" autocomplete="off"/></td>
+                </tr>
+                <tr>
+                    <td><label for="stepFilter">${g.message(code: "workflowRun.list.step")}</label></td>
+                    <td>
+                        <div class="workflow-step-auto-complete">
+                            <input type="text" id="stepFilter" name="stepFilter" class="input-field autocompleted form-control"
+                                   value="${cmd?.stepFilter}" autocomplete="off"/>
+                        </div>
+                        <div id="stepFilterSuggestions" class="d-none">
+                            <g:each in="${steps}" var="step">
+                                <span data-step-filter-suggestion="${step}"></span>
+                            </g:each>
+                        </div>
+                    </td>
                 </tr>
             </table>
         </div>

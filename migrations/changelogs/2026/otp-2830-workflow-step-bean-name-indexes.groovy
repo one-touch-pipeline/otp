@@ -19,24 +19,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
 
-import groovy.transform.TupleConstructor
-import org.hibernate.criterion.Order
-
-@TupleConstructor
-class WorkflowRunSearchCriteria {
-    Workflow workflow
-    List<WorkflowRun.State> states
-    String name
-    String stepFilter
-
-    List<Order> orderList
-
-    int start
-    int length
-
-    boolean isPagingEnabled() {
-        return length != -1
+databaseChangeLog = {
+    changeSet(author: "tirtaram", id: "otp-2830-1") {
+        createIndex(indexName: "workflow_step_bean_name__obsolete__id__workflow_run_id__idx", tableName: "workflow_step") {
+            column(name: "bean_name")
+            column(name: "obsolete")
+            column(name: "id")
+            column(name: "workflow_run_id")
+        }
+    }
+    changeSet(author: "tirtaram", id: "otp-2830-2") {
+        createIndex(indexName: "workflow_step_obsolete__workflow_run_id__id__idx", tableName: "workflow_step") {
+            column(name: "obsolete")
+            column(name: "workflow_run_id")
+            column(name: "id")
+        }
     }
 }

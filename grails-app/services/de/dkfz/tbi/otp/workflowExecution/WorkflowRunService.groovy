@@ -222,7 +222,21 @@ class WorkflowRunService {
     }
 
     @CompileDynamic
-    private Closure getCriteria(Workflow workflow, List<WorkflowRun.State> states, String name) {
+    private List<Long> fetchMatchingRunIds(String stepFilter) {
+        return WorkflowStep.executeQuery("""
+            SELECT ws.workflowRun.id
+            FROM WorkflowStep ws
+            WHERE ws.obsolete = false
+              AND ws.beanName = :filter
+              AND ws.id = (
+                  SELECT max(ws2.id) FROM WorkflowStep ws2
+                  WHERE ws2.workflowRun = ws.workflowRun AND ws2.obsolete = false
+              )
+        """, [filter: stepFilter]) as List<Long>
+    }
+
+    @CompileDynamic
+    private Closure getCriteria(Workflow workflow, List<WorkflowRun.State> states, String name, List<Long> matchingRunIds) {
         return {
             if (name) {
                 or {
@@ -237,13 +251,31 @@ class WorkflowRunService {
                 eq("workflow", workflow)
             }
             ne("state", WorkflowRun.State.LEGACY)
+            if (matchingRunIds != null) {
+                // Embed Long IDs as a SQL literal to bypass PostgreSQL's 65,535 JDBC parameter limit.
+                sqlRestriction("this_.id IN (${matchingRunIds.join(',')})")
+            }
         }
     }
 
     @SuppressWarnings('AbcMetric')
     @CompileDynamic
     WorkflowRunSearchResult workflowOverview(WorkflowRunSearchCriteria workflowRunSearchCriteria) {
-        Closure criteria = getCriteria(workflowRunSearchCriteria.workflow, workflowRunSearchCriteria.states, workflowRunSearchCriteria.name)
+        String stepFilter = workflowRunSearchCriteria.stepFilter
+        List<Long> matchingRunIds = null
+
+        if (stepFilter) {
+            matchingRunIds = fetchMatchingRunIds(stepFilter)
+            if (matchingRunIds.empty) {
+                return new WorkflowRunSearchResult(
+                        data: [],
+                        workflowsTotal: WorkflowRun.countByStateNotEqual(WorkflowRun.State.LEGACY),
+                )
+            }
+        }
+
+        Closure criteria = getCriteria(workflowRunSearchCriteria.workflow, workflowRunSearchCriteria.states,
+                workflowRunSearchCriteria.name, matchingRunIds)
         WorkflowRunSearchResult result = new WorkflowRunSearchResult()
 
         result.data = WorkflowRun.createCriteria().list {

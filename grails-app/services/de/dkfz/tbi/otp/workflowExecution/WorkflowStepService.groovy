@@ -25,6 +25,12 @@ import groovy.transform.CompileDynamic
 
 class WorkflowStepService {
 
+    private List<String> currentWorkflowStepBeanNames = []
+
+    List<String> getCurrentWorkflowStepBeanNames() {
+        return currentWorkflowStepBeanNames
+    }
+
     /**
      * If the {@link WorkflowStep} was restart, then take the job before the restarted. Otherwise use the job run before this job.
      *
@@ -51,5 +57,19 @@ class WorkflowStepService {
                 eq('state', WorkflowRun.State.RUNNING_OTP)
             }
         } as List<WorkflowStep>
+    }
+
+    void initializeCurrentWorkflowStepBeanNames() {
+        currentWorkflowStepBeanNames = findCurrentWorkflowStepBeanNames().asImmutable()
+    }
+
+    List<String> findCurrentWorkflowStepBeanNames() {
+        return (WorkflowStep.executeQuery("""
+            SELECT DISTINCT ws.beanName
+            FROM WorkflowStep ws
+            WHERE ws.obsolete = false
+        """) as List<String>).sort { String a, String b ->
+            String.CASE_INSENSITIVE_ORDER.compare(a, b) ?: a <=> b
+        }
     }
 }

@@ -29,8 +29,8 @@
 <div class="container-fluid otp-main-container">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><g:link controller="workflowRunList" action="index" params="['workflow.id': nav.workflow?.id, state: nav.states?.join(','), name: nav.name]">${g.message(code: "workflow.navigation.list")}</g:link></li>
-            <li class="breadcrumb-item"><g:link controller="workflowRunDetails" action="index" params="['workflow.id': nav.workflow?.id, state: nav.states?.join(','), name: nav.name]" id="${step.workflowRun.id}">
+            <li class="breadcrumb-item"><g:link controller="workflowRunList" action="index" params="['workflow.id': nav.workflow?.id, state: nav.states?.join(','), name: nav.name, stepFilter: nav.stepFilter]">${g.message(code: "workflow.navigation.list")}</g:link></li>
+            <li class="breadcrumb-item"><g:link controller="workflowRunDetails" action="index" params="['workflow.id': nav.workflow?.id, state: nav.states?.join(','), name: nav.name, stepFilter: nav.stepFilter]" id="${step.workflowRun.id}">
                 ${g.message(code: "workflow.navigation.details")} (${step.workflowRun.id})</g:link>
             </li>
             <li class="breadcrumb-item active" aria-current="page">${g.message(code: "workflow.navigation.logs")} (${step.id})</li>
