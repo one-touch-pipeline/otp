@@ -53,6 +53,7 @@ class DataTransferController implements CheckAndCall {
             updateDataTransferAgreementComment   : 'POST',
             updateDataTransferComment            : 'POST',
             deleteDataTransferAgreement          : 'POST',
+            deleteDataTransfer                   : 'POST',
     ]
 
     DataTransferAgreementService dataTransferAgreementService
@@ -62,10 +63,6 @@ class DataTransferController implements CheckAndCall {
     def index() {
         Project project = projectSelectionService.selectedProject
         List<DataTransferAgreement> dataTransferAgreements = dataTransferAgreementService.getSortedDataTransferAgreementsByProject(project)
-                .collect { it ->
-                    it.transfers = it.transfers.sort { a, b -> b.dateCreated <=> a.dateCreated }
-                    return it
-                }
 
         return [
                 dataTransferAgreements: dataTransferAgreements,
@@ -223,6 +220,26 @@ class DataTransferController implements CheckAndCall {
             flash.message = new FlashMessage(g.message(code: "default.invalid.session") as String, '')
         }
         redirect(action: "index")
+    }
+
+    def deleteDataTransfer(DataTransferCommand cmd) {
+        Map redirectParams = [:]
+        withForm {
+            if (cmd.hasErrors()) {
+                flash.message = new FlashMessage(g.message(code: "dataTransfer.message.error.deleteFile") as String, cmd.errors)
+            } else {
+                try {
+                    long dtaId = cmd.dataTransfer.dataTransferAgreement.id
+                    redirectParams["fragment"] = "doc${dtaId}"
+                    dataTransferService.deleteDataTransfer(cmd.dataTransfer)
+                } catch (IOException | AssertionError e) {
+                    flash.message = new FlashMessage(g.message(code: "dataTransfer.message.error.exception") as String, e.toString())
+                }
+            }
+        }.invalidToken {
+            flash.message = new FlashMessage(g.message(code: "default.invalid.session") as String, '')
+        }
+        redirect([action: "index"] + redirectParams)
     }
 
     JSON updateDataTransferAgreementComment(UpdateDataTransferAgreementCommentCommand cmd) {

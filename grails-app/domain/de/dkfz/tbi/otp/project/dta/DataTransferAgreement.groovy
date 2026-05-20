@@ -79,8 +79,8 @@ class DataTransferAgreement implements Entity {
     static Closure mapping = {
         project index: "data_transfer_agreement_project_idx"
         comment type: "text"
-        dataTransferAgreementDocuments lazy: false
-        transfers lazy: false
+        dataTransferAgreementDocuments lazy: false, fetch: "join"
+        transfers lazy: false, fetch: "join", sort: "dateCreated", order: "desc"
     }
 
     static mappedBy = [

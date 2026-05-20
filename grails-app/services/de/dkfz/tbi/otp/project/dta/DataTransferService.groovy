@@ -68,7 +68,7 @@ class DataTransferService {
      * Add one new file to an data transfer object.
      *
      * @param dataTransfer to update
-     * @param file, the new one
+     * @param file the new one
      * @return updated data transfer
      * @throws FileIsEmptyException when the file has no content
      */
@@ -93,7 +93,7 @@ class DataTransferService {
      * database as well as in the filesystem.
      *
      * @param dataTransfer to update
-     * @param files, list of the new documents
+     * @param files list of the new documents
      * @return updated DataTransfer
      * @throws DataTransferNotFoundException when the given transfer does not exist
      * @throws FileIsEmptyException when one of the files is empty
@@ -119,6 +119,22 @@ class DataTransferService {
         }
 
         return resultDataTransfer
+    }
+
+    /**
+     * Permanently delete a DataTransfer and its documents from the file system and also from the database.
+     * This action cannot be undone.
+     *
+     * @param dataTransfer which should be deleted
+     * @throws IOException when deletion on the filesystem fails
+     * @throws AssertionError when a validator fails
+     */
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void deleteDataTransfer(DataTransfer dataTransfer) throws IOException, AssertionError {
+        Path pathToDelete = getPathOnRemoteFileSystem(dataTransfer)
+        fileService.deleteDirectoryRecursively(pathToDelete)
+        dataTransfer.dataTransferAgreement.removeFromTransfers(dataTransfer)
+        dataTransfer.delete(flush: true)
     }
 
     /**

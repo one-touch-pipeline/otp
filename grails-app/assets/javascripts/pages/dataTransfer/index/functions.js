@@ -35,6 +35,20 @@ function confirmDataTransferDeletion(event) {
 }
 
 // eslint-disable-next-line no-unused-vars
+function confirmDeleteDataTransfer(event, form) {
+  'use strict';
+
+  const { transferId, transferName, transferFiles } = form.dataset;
+
+  const fileInfo = transferFiles ? `\nAffected files: ${transferFiles}` : '';
+
+  if (!window.confirm(`Are you sure you want to delete DataTransfer #${transferId} (${transferName})?${fileInfo}
+  \nThis action cannot be undone!`)) {
+    event.preventDefault();
+  }
+}
+
+// eslint-disable-next-line no-unused-vars
 function confirmCompleteTransfer(event) {
   'use strict';
 

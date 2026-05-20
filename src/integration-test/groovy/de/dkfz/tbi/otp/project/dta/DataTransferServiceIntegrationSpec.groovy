@@ -38,6 +38,7 @@ import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.ProcessOutput
 
 import java.nio.file.FileSystems
+import java.nio.file.Files
 import java.nio.file.Path
 
 @Rollback
@@ -196,5 +197,64 @@ class DataTransferServiceIntegrationSpec extends Specification implements Docume
         then:
         noExceptionThrown()
         DataTransfer.get(transfer.id).comment == newComment
+    }
+
+    void "deleteDataTransfer, should delete the transfer and its directory from the filesystem when the path exists"() {
+        given:
+        setupData()
+        DataTransfer transfer = createDataTransfer()
+        DataTransfer otherTransfer = createDataTransfer([dataTransferAgreement: transfer.dataTransferAgreement])
+        long otherTransferId = otherTransfer.id
+        Path transferPath = dataTransferService.getPathOnRemoteFileSystem(transfer)
+        Files.createDirectories(transferPath)
+
+        when:
+        doWithAuth(OPERATOR) {
+            dataTransferService.deleteDataTransfer(transfer)
+        }
+
+        then:
+        noExceptionThrown()
+        !DataTransfer.get(transfer.id)
+        !Files.exists(transferPath)
+        DataTransfer.get(otherTransferId)
+    }
+
+    void "deleteDataTransfer, should delete the transfer from the database when its directory does not exist on the filesystem"() {
+        given:
+        setupData()
+        DataTransfer transfer = createDataTransfer()
+        long transferId = transfer.id
+
+        when:
+        doWithAuth(OPERATOR) {
+            dataTransferService.deleteDataTransfer(transfer)
+        }
+
+        then:
+        noExceptionThrown()
+        !DataTransfer.get(transferId)
+    }
+
+    void "deleteDataTransfer, should remove the transfer from the agreement and delete all its documents"() {
+        given:
+        setupData()
+        MultipartFile file = createMultipartFile()
+        DataTransfer transfer = createDataTransfer()
+        doWithAuth(OPERATOR) {
+            dataTransferService.addFileToDataTransfer(transfer, file)
+        }
+        long transferId = transfer.id
+        DataTransferAgreement agreement = transfer.dataTransferAgreement
+
+        when:
+        doWithAuth(OPERATOR) {
+            dataTransferService.deleteDataTransfer(transfer)
+        }
+
+        then:
+        noExceptionThrown()
+        !DataTransfer.get(transferId)
+        !DataTransferAgreement.get(agreement.id).transfers.find { it.id == transferId }
     }
 }

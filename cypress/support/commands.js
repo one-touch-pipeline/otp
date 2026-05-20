@@ -140,7 +140,7 @@ Cypress.Commands.add('checkPage', (url) => {
  *
  */
 // eslint-disable-next-line strict
-Cypress.Commands.add('checkDownloadByContent', (filename, fileEnding, headerList, contentListList, quote = '"') => {
+Cypress.Commands.add('checkDownloadByContent', (filename, fileEnding, headerList, contentListList, quote = '"', wildcardFilename = false) => {
   const downloadsFolder = Cypress.config('downloadsFolder');
   const today = new Date();
   const year = today.getFullYear();
@@ -148,9 +148,7 @@ Cypress.Commands.add('checkDownloadByContent', (filename, fileEnding, headerList
   const day = String(today.getDate()).padStart(2, '0');
   const date = `${year}-${month}-${day}`;
 
-  const filepath = path.join(downloadsFolder, `${filename}_${date}${fileEnding}`);
-
-  cy.readFile(filepath, 'utf8', { timeout: 5000 }).then((content) => {
+  const checkContent = (content) => {
     cy.log(`content: ${content}`);
     const lines = content.split('\n');
     cy.log('rows:');
@@ -170,13 +168,24 @@ Cypress.Commands.add('checkDownloadByContent', (filename, fileEnding, headerList
       cy.log(`Check for content: ${expectedContentLine}`);
       cy.wrap(lines).should('include', expectedContentLine);
     });
-  });
+  };
+
+  if (wildcardFilename) {
+    const pattern = `${filename}_${date}*${fileEnding}`;
+    cy.exec(`find ${downloadsFolder} -name "${pattern}" -type f | head -1`)
+      .then(({ stdout }) => {
+        cy.readFile(stdout.trim(), 'utf8', { timeout: 5000 }).then((content) => checkContent(content));
+      });
+  } else {
+    const filepath = path.join(downloadsFolder, `${filename}_${date}${fileEnding}`);
+    cy.readFile(filepath, 'utf8', { timeout: 5000 }).then((content) => checkContent(content));
+  }
 });
 
 // eslint-disable-next-line strict
-Cypress.Commands.add('checkDownloadByContentOfFixture', (fixtureFileName, quote = '"') => {
+Cypress.Commands.add('checkDownloadByContentOfFixture', (fixtureFileName, quote = '"', wildcardFilename = false) => {
   cy.fixture(`downloadChecks/${fixtureFileName}`).then((config) => {
-    cy.checkDownloadByContent(config.filename, config.extension, config.header, config.data, quote);
+    cy.checkDownloadByContent(config.filename, config.extension, config.header, config.data, quote, wildcardFilename);
   });
 });
 

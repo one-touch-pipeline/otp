@@ -75,6 +75,19 @@
                         link="${g.createLink(controller: 'dataTransfer', action: 'updateDataTransferComment', params: ["dataTransfer.id": transfer.id])}"
                         value="${transfer.comment}"/>
             </div>
+            <br>
+            <div class="delete-transfer-wrapper mt-2">
+                <g:form action="deleteDataTransfer" useToken="true" style="display: inline"
+                        data-transfer-id="${transfer.id}"
+                        data-transfer-name="${transfer.direction.adjective} – ${transfer.peerPerson} (${transfer.peerAccount ?: 'N/A'})"
+                        data-transfer-files="${transfer.dataTransferDocuments*.fileName.join(', ')}"
+                        onSubmit="confirmDeleteDataTransfer(event, this)">
+                    <input type="hidden" name="dataTransfer.id" value="${transfer.id}"/>
+                    <button type="submit" class="btn btn-sm btn-danger">
+                        <i class="bi bi-trash"></i> <g:message code="dataTransfer.dta.transfer.delete"/>
+                    </button>
+                </g:form>
+            </div>
         </li>
         <hr>
     </g:each>

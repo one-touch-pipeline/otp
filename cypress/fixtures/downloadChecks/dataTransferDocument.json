@@ -1,0 +1,6 @@
+{
+  "filename": "hello-world",
+  "extension": ".txt",
+  "header": ["Hello World!"],
+  "data": []
+}
