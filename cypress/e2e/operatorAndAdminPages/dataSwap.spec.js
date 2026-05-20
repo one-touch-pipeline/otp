@@ -43,7 +43,8 @@ describe('test for data swap page', () => {
       cy.intercept('/dataSwap/swapData*').as('dataSwap');
 
       cy.get('#sequenceTable_processing').should('not.be.visible');
-      cy.get('div#sequenceTable_wrapper button').contains('Download Sample Swap Template').click();
+      cy.get('div#sequenceTable_wrapper button').contains('Options').click();
+      cy.get('div.dt-button-collection').contains('Download Sample Swap Template').click();
       cy.wait('@downloadTemplate').then((res) => {
         cy.visit('/dataSwap');
         const filename = res.response.headers['content-disposition'].split('filename=')[1];

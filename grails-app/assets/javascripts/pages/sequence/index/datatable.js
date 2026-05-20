@@ -31,20 +31,30 @@ $.otp.sequence = {
     const showRunLinks = document.getElementById('showRunLinks').value;
 
     $('#sequenceTable').DataTable({
-      dom: '<"row align-items-end" <"col" Bfr>><"row" <"col-12" i>><"row" t>S',
-      buttons: [
-        $.otp.showOrHideColumn(() => $.otp.showOrHideColumn()),
-        $.otp.getDownloadButtonServerSide(() => $.otp.createLink({
-          controller: 'sequence',
-          action: 'exportAll',
-          parameters: { filtering: JSON.stringify(searchCriteria()) }
-        }), 'Download CSV'),
-        $.otp.getDownloadButtonServerSide(() => $.otp.createLink({
-          controller: 'sequence',
-          action: 'sampleSwapTemplate',
-          parameters: { filtering: JSON.stringify(searchCriteria()) }
-        }), 'Download Sample Swap Template')
-      ],
+      dom: '<"row align-items-end" <"col-auto" B><"col" fr>><"row" <"col-12" i>><"row" t>S',
+      buttons: [{
+        extend: 'collection',
+        text: 'Options',
+        autoClose: true,
+        buttons: [
+          ...$.otp.showOrHideColumn(),
+          ...$.otp.getDownloadButtonServerSide(() => $.otp.createLink({
+            controller: 'sequence',
+            action: 'exportAll',
+            parameters: { filtering: JSON.stringify(searchCriteria()) }
+          }), 'Download CSV'),
+          ...$.otp.getDownloadButtonServerSide(() => $.otp.createLink({
+            controller: 'sequence',
+            action: 'sampleSwapTemplate',
+            parameters: { filtering: JSON.stringify(searchCriteria()) }
+          }), 'Download Sample Swap Template'),
+          ...$.otp.getDownloadButtonServerSide(() => $.otp.createLink({
+            controller: 'sequence',
+            action: 'ghgaExport',
+            parameters: { filtering: JSON.stringify(searchCriteria()) }
+          }), 'Download GHGA Template')
+        ]
+      }],
       bFilter: false,
       bProcessing: true,
       bServerSide: true,

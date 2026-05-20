@@ -87,4 +87,22 @@ class SequenceControllerSpec extends Specification implements ControllerUnitTest
             it.split(",", -1).size() == expectedNumberOfColumns
         }
     }
+
+    void "test ghgaExport to ensure correct column count and that duplicate sequences are reduced to one row"() {
+        given:
+        Sequence sequence = DomainFactory.createSequence()
+        createSeqTrack(id: sequence.seqTrackId)
+        controller.seqTrackService = Mock(SeqTrackService) {
+            1 * listSequences(*_) >> [sequence, sequence]
+        }
+
+        when:
+        controller.ghgaExport()
+
+        then:
+        controller.response.status == SC_OK
+        String[] lines = (controller.response.text as String).split("\n")
+        lines.size() == 2 // header + 1 deduplicated data row (not 3)
+        lines.every { it.split(",", -1).size() == 21 }
+    }
 }

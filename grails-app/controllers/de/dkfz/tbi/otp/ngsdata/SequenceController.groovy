@@ -48,6 +48,7 @@ class SequenceController {
             dataTableSource   : "POST",
             exportAll         : "GET",
             sampleSwapTemplate: "GET",
+            ghgaExport        : "GET",
     ]
 
     def index() {
@@ -198,6 +199,52 @@ class SequenceController {
         String content = "${contentHeader}\n${contentBody}\n"
         response.contentType = ContentType.APPLICATION_OCTET_STREAM.mimeType
         response.setHeader("Content-disposition", "filename=Sequence_Export_" + currentDate + ".csv")
+        response.outputStream << content.toString().bytes
+    }
+
+    def ghgaExport(DataTableCommand cmd) {
+        SequenceFiltering filtering = SequenceFiltering.fromJSON(params.filtering)
+        String timestamp = TimeFormats.DATE.getFormattedDate(new Date())
+
+        List<Sequence> sequences = seqTrackService.listSequences(0, -1, cmd.sortOrder, SequenceColumn.fromDataTable(cmd.iSortCol_0), filtering)
+
+        List<Sequence> uniqueSequences = sequences.unique(false) { Sequence row ->
+            [row.projectName, row.pid, row.seqTypeDisplayName, row.libraryLayout, row.singleCell, row.sampleTypeName]
+        }
+
+        String contentBody = uniqueSequences.collect { Sequence row ->
+            [
+                    row.projectName,
+                    row.pid,
+                    row.seqTypeDisplayName,
+                    row.libraryLayout,
+                    row.singleCell ? SeqType.SINGLE_CELL_TRUE : SeqType.SINGLE_CELL_FALSE,
+                    row.sampleTypeName,
+                    "", // GHGA PID
+                    "", // Publication PID
+                    "", // Sample Name at GHGA
+                    "", // Sample Name in Publication
+                    "", // Sample Description
+                    "", // Case
+                    "", // Biological Sex
+                    "", // Phenotypic Features Terms
+                    "", // Phenotypic Features Ids
+                    "", // Diagnosis Terms
+                    "", // Diagnosis Ids
+                    "", // Age at Sampling
+                    "", // Organism Part
+                    "", // Cell Line
+                    "", // Geographical Region
+            ].collect { it ?: "" }.join(",")
+        }.join("\n")
+
+        String contentHeader = "Project,Patient ID,Sequence Type Name,Sequencing Read Type,Single Cell," +
+                "Sample Type,GHGA PID,Publication PID,Sample Name at GHGA,Sample Name in Publication," +
+                "Sample Description,Case,Biological Sex,Phenotypic Features Terms,Phenotypic Features Ids," +
+                "Diagnosis Terms,Diagnosis Ids,Age at Sampling,Organism Part,Cell Line,Geographical Region"
+        String content = "${contentHeader}\n${contentBody}\n"
+        response.contentType = ContentType.APPLICATION_OCTET_STREAM.mimeType
+        response.setHeader("Content-disposition", "filename=GHGA_Export_${timestamp}.csv")
         response.outputStream << content.toString().bytes
     }
 

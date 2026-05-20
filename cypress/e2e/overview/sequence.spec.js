@@ -39,13 +39,30 @@ describe('Check statistics page', () => {
         cy.visit('/sequence/index');
       });
 
+      it('should have an Options dropdown button', () => {
+        cy.visit('/sequence/index');
+        cy.get('div#sequenceTable_wrapper button').contains('Options').should('exist');
+      });
+
+      it('should show all expected items in the Options dropdown', () => {
+        cy.visit('/sequence/index');
+        cy.get('div#sequenceTable_wrapper button').contains('Options').click();
+        cy.get('div.dt-button-collection').within(() => {
+          cy.contains('Show MixedInSpecies').should('exist');
+          cy.contains('Download CSV').should('exist');
+          cy.contains('Download Sample Swap Template').should('exist');
+          cy.contains('Download GHGA Template').should('exist');
+        });
+      });
+
       it('should download the csv file and verify the download', () => {
         cy.visit('/sequence/index');
 
         filterForDownload('sequence.json');
 
         cy.get('#sequenceTable_processing').should('exist');
-        cy.get('div#sequenceTable_wrapper button').contains('Download CSV').click();
+        cy.get('div#sequenceTable_wrapper button').contains('Options').click();
+        cy.get('div.dt-button-collection').contains('Download CSV').click();
         cy.checkDownloadByContentOfFixture('sequence.json', '');
       });
 
@@ -54,9 +71,21 @@ describe('Check statistics page', () => {
 
         filterForDownload('dataSwapTemplate.json');
 
-        cy.get('div#sequenceTable_wrapper button').contains('Download Sample Swap Template').click();
+        cy.get('div#sequenceTable_wrapper button').contains('Options').click();
+        cy.get('div.dt-button-collection').contains('Download Sample Swap Template').click();
 
         cy.checkDownloadByContentOfFixture('dataSwapTemplate.json', '');
+      });
+
+      it('should download the GHGA template and verify the download', () => {
+        cy.visit('/sequence/index');
+
+        filterForDownload('ghgaTemplate.json');
+
+        cy.get('div#sequenceTable_wrapper button').contains('Options').click();
+        cy.get('div.dt-button-collection').contains('Download GHGA Template').click();
+
+        cy.checkDownloadByContentOfFixture('ghgaTemplate.json', '');
       });
 
       it('should filter the table by sample type', () => {
