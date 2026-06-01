@@ -31,6 +31,11 @@ module.exports = defineConfig({
     testIsolation: false,
     // eslint-disable-next-line strict
     setupNodeEvents(on, config) {
+      // Load env vars from cypress/cypress.env.json (canonical location alongside other cypress config)
+      // eslint-disable-next-line global-require
+      const envFile = require('./cypress/cypress.env.json');
+      config.env = { ...config.env, ...envFile };
+
       on('task', {
         log(message) {
           // eslint-disable-no-console
@@ -38,6 +43,8 @@ module.exports = defineConfig({
           return null;
         }
       });
+
+      return config;
     }
   },
   screenshotsFolder: 'cypress/screenshots',

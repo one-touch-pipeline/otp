@@ -46,7 +46,6 @@ export DISABLE_RESTART=true
 
 # copy files given via variable
 cp $DOCKER_ENV ./.env
-cp $CYPRESS_ENV ./cypress.env.json
 cp $OTP_PROPERTIES_CYPRESS ~/.otp.properties
 
 # create info about gitlab

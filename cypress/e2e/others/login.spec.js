@@ -23,12 +23,29 @@
 describe('check login', () => {
   'use strict';
 
+  beforeEach(() => {
+    cy.clearCookies();
+  });
+
   context('when user login data is correct', () => {
     it('should redirect to requested page', () => {
       const username = Cypress.env('user_username');
       const password = Cypress.env('user_password');
 
+      cy.visit('/individual/list');
+      cy.url().should('contain', '/login?target=');
+      cy.get('#account').type(username);
+      cy.get('#password').type(password);
+      cy.get('#loginButton').click();
+
+      cy.url().should('contain', '/individual/list');
+    });
+
+    it('should redirect to requested page when password contains non-ASCII characters (§ £)', () => {
+      cy.loginAs('nonAsciiPassword');
       cy.clearCookies();
+      const username = Cypress.env('nonAsciiPassword_username');
+      const password = Cypress.env('nonAsciiPassword_password');
 
       cy.visit('/individual/list');
       cy.url().should('contain', '/login?target=');
@@ -44,8 +61,6 @@ describe('check login', () => {
     it('should redirect to login page and show error message', () => {
       const username = Cypress.env('user_username');
       const password = 'wrong-password';
-
-      cy.clearCookies();
 
       cy.visit('/');
       cy.get('#account').type(username);
@@ -63,8 +78,6 @@ describe('check login', () => {
       const username = 'nonexisting-user';
       const password = '*';
 
-      cy.clearCookies();
-
       cy.visit('/');
       cy.get('#account').type(username);
       cy.get('#password').type(password);
@@ -75,4 +88,5 @@ describe('check login', () => {
       cy.get('.login_message').contains('There is a problem with your account. Please contact support@otp.de.');
     });
   });
+
 });

@@ -25,8 +25,7 @@ import io.netty.channel.ChannelOption
 import io.netty.handler.timeout.ReadTimeoutHandler
 import io.netty.handler.timeout.WriteTimeoutHandler
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.*
 import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler
@@ -57,6 +56,7 @@ import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.*
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler
 import org.springframework.security.web.authentication.switchuser.SwitchUserFilter
+import org.springframework.web.filter.CharacterEncodingFilter
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.netty.http.client.HttpClient
 
@@ -196,6 +196,7 @@ class SecurityConfiguration {
                             .mvcMatchers(
                                     "/",
                                     "/auth/**",
+                                    "/authenticate",
                                     "/info/about",
                                     "/info/numbers",
                                     "/info/contact",
@@ -228,6 +229,7 @@ class SecurityConfiguration {
                     }
         } else {
             http
+                    .addFilterBefore(new CharacterEncodingFilter("UTF-8", true), UsernamePasswordAuthenticationFilter)
                     .formLogin { formLogin ->
                         formLogin
                                 .loginPage("/").permitAll()

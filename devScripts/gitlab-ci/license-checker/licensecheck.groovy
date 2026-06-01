@@ -93,6 +93,7 @@ class LicenseCheck {
             "package.json",
 
             "cypress/reporter-config.json",
+            "cypress/cypress.env.json",
 
             "docker/keycloak/realm-export.json",
     ].collect { Paths.get(it) }

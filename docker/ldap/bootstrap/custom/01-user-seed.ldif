@@ -122,6 +122,7 @@ member: UID=ewok,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 member: UID=goofy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 member: UID=mike,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 member: UID=sulley,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=umberto,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 
 dn: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
 changetype: add
@@ -185,6 +186,7 @@ member: UID=ewok,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 member: UID=goofy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 member: UID=mike,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 member: UID=sulley,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=umberto,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 
 dn: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
 changetype: add
@@ -248,6 +250,7 @@ member: UID=ewok,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 member: UID=goofy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 member: UID=mike,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 member: UID=sulley,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=umberto,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 
 dn: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
 changetype: add
@@ -311,6 +314,7 @@ member: UID=ewok,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 member: UID=goofy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 member: UID=mike,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 member: UID=sulley,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=umberto,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 
 dn: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
 changetype: add
@@ -374,6 +378,7 @@ member: UID=ewok,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 member: UID=goofy,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 member: UID=mike,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 member: UID=sulley,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+member: UID=umberto,OU=persons,OU=users,{{ LDAP_BASE_DN }}
 
 ####################################################
 ## Add Users and Set as Members of above Groups
@@ -1540,6 +1545,32 @@ thumbnailphoto: someImageData
 uid: claudia
 useraccountcontrol: 1024
 userPassword: otp
+memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 4,OU=groups,{{ LDAP_BASE_DN }}
+memberOf: CN=Example project 5,OU=groups,{{ LDAP_BASE_DN }}
+
+### User with non-ASCII characters in password — exists to test the CharacterEncodingFilter fix.
+### Plain-text password: p§ss£ord  (§ = U+00A7, £ = U+00A3)
+### LDIF (RFC 2849) requires base64 encoding for any value containing non-ASCII bytes.
+### The :: notation signals base64. To verify: printf 'cMKnc3PCo29yZA==' | base64 -d
+
+dn: UID=umberto,OU=persons,OU=users,{{ LDAP_BASE_DN }}
+changetype: add
+cn: umberto
+department: Development
+givenname: Umberto
+mail: umberto.dev@otp.dev
+objectcategory: user
+objectcategory: person
+objectclass: inetOrgPerson
+objectclass: user
+sn: Dev
+thumbnailphoto: someImageData
+uid: umberto
+useraccountcontrol: 1024
+userPassword:: cMKnc3PCo29yZA==
 memberOf: CN=Example project 1,OU=groups,{{ LDAP_BASE_DN }}
 memberOf: CN=Example project 2,OU=groups,{{ LDAP_BASE_DN }}
 memberOf: CN=Example project 3,OU=groups,{{ LDAP_BASE_DN }}

@@ -93,7 +93,6 @@ node_modules/
 /cypress/screenshots/*
 /cypress/videos/*
 /cypress/downloads/*
-cypress.env.json
 cypressReport.txt
 .vscode/*
 .vscode
