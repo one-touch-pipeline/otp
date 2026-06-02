@@ -430,6 +430,11 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
         ].flatten().unique()
     }
 
+    @Deprecated
+    List<SeqType> getSeqTypesOldWorkflowSystem() {
+        return []
+    }
+
     @CompileDynamic
     List<SeqType> getSeqTypesWithAntibodyTarget() {
         return SeqType.findAllByHasAntibodyTarget(true)
