@@ -203,7 +203,6 @@ class CellRangerDataCleanupJob extends AbstractScheduledJob {
                 project              : project.name,
                 plannedDeletionDate  : formattedPlannedDeletionDate,
                 formattedMwpList     : getFormattedMwpList(cellRangerMwps),
-                otpLinkCellRanger    : getOtpLinksCellRanger(project),
                 otpLinkUserManagement: getOtpLinksUserManagement(project),
         ])
     }
@@ -223,10 +222,6 @@ class CellRangerDataCleanupJob extends AbstractScheduledJob {
 
     String getOtpLinksUserManagement(Project project) {
         return createNotificationTextService.createOtpLinks([project], 'projectUser', 'index')
-    }
-
-    String getOtpLinksCellRanger(Project project) {
-        return createNotificationTextService.createOtpLinks([project], 'cellRanger', 'finalRunSelection')
     }
 
     void deleteTooOldResults(List<CellRangerMergingWorkPackage> cellRangerMwps) {
