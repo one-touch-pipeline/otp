@@ -300,10 +300,12 @@ class CellRangerDataCleanupJobIntegrationSpec extends Specification implements C
                 project              : project.name,
                 plannedDeletionDate  : cellRangerDataCleanupJob.formattedPlannedDeletionDate,
                 formattedMwpList     : CellRangerDataCleanupJob.getFormattedMwpList(cellRangerMergingWorkPackages),
+                otpLinkCellRanger    : '[link to CellRanger]',
                 otpLinkUserManagement: '[link to UserManagement]',
         ])
 
-        and: "includes the link to the user management page"
+        and: "includes the links to the action pages"
+        1 * cellRangerDataCleanupJob.createNotificationTextService.createOtpLinks([project], 'cellRanger', 'finalRunSelection') >> '[link to CellRanger]'
         1 * cellRangerDataCleanupJob.createNotificationTextService.createOtpLinks([project], 'projectUser', 'index') >> '[link to UserManagement]'
     }
 
