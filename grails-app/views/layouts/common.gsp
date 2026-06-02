@@ -95,8 +95,6 @@
                                     <ul>
                                         <li><g:link controller="alignmentQualityOverview" action="index"><g:message
                                                 code="otp.menu.alignmentQuality"/></g:link></li><br>
-                                        <li><g:link controller="cellRanger" action="finalRunSelection"><g:message
-                                                code="otp.menu.cellRanger.finalRunSelection"/></g:link></li><br>
                                         <li><g:link controller="snv" action="results"><g:message code="otp.menu.snv.results"/></g:link></li>
                                         <li><g:link controller="indel" action="results"><g:message code="otp.menu.indel.results"/></g:link></li>
                                         <li><g:link controller="aceseq" action="results"><g:message code="otp.menu.cnv.results"/></g:link></li>
