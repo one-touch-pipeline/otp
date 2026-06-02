@@ -432,7 +432,9 @@ class SeqTypeService extends AbstractMetadataFieldsService<SeqType> {
 
     @Deprecated
     List<SeqType> getSeqTypesOldWorkflowSystem() {
-        return []
+        return [
+                get10xSingleCellRnaSeqType()
+        ]
     }
 
     @CompileDynamic

@@ -59,7 +59,7 @@ class AllDecider implements Decider {
     /** list of Deciders in the correct order */
     List<Class<? extends Decider>> deciders = [
             FastqcDecider,
-            CellRangerDecider,
+//            CellRangerDecider,
             PanCancerDecider,
             WgbsDecider,
             RnaAlignmentDecider,
