@@ -139,6 +139,11 @@ class SeqTypeServiceSpec extends AbstractMetadataFieldsServiceSpec<SeqType> impl
         service.findByNameOrImportAlias(NAME, [dirName: "Other${SEQ_TYPE_DIR}", displayName: SEQ_TYPE_DISPLAY_NAME, libraryLayout: SequencingReadType.MATE_PAIR, singleCell: true])
     }
 
+    void "getSeqTypesOldWorkflowSystem returns empty list"() {
+        expect:
+        seqTypeService.seqTypesOldWorkflowSystem == []
+    }
+
     void "test changeLegacyState of paired end seq type - should always keep single-end and paired-end in sync"() {
         given:
         SeqType single = DomainFactory.createSeqType()

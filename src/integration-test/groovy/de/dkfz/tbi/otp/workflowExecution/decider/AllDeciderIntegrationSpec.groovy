@@ -41,6 +41,14 @@ import de.dkfz.tbi.otp.workflowExecution.*
 @Integration
 class AllDeciderIntegrationSpec extends Specification implements ServiceUnitTest<AllDecider>, FastqcWorkflowDomainFactory {
 
+    void "deciders list contains CellRangerDecider"() {
+        given:
+        AllDecider allDecider = new AllDecider()
+
+        expect:
+        allDecider.deciders.contains(CellRangerDecider)
+    }
+
     void "test decide for Decider"() {
         given:
         AllDecider allDecider = new AllDecider()

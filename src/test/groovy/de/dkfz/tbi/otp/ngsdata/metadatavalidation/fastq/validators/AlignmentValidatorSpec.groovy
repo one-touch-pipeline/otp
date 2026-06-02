@@ -87,9 +87,7 @@ class AlignmentValidatorSpec extends Specification implements DataTest, DomainFa
                     seqTypeOldSystem,
                     seqTypeNewSystem,
             ]
-            count * seqTypesOldWorkflowSystem >> [
-                    seqTypeOldSystem,
-            ]
+            count * seqTypesOldWorkflowSystem >> []
             _ * findByNameOrImportAlias(_, _) >> { String nameOrImportAlias, Map properties ->
                 return CollectionUtils.exactlyOneElement(SeqType.findAllByName(nameOrImportAlias), "Not found: ${nameOrImportAlias}")
             }
