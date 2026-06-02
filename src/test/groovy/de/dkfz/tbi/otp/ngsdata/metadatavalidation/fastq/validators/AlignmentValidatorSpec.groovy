@@ -39,9 +39,9 @@ import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrainService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.utils.spreadsheet.validation.LogLevel
 import de.dkfz.tbi.otp.utils.spreadsheet.validation.Problem
+import de.dkfz.tbi.otp.workflowExecution.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
@@ -87,7 +87,6 @@ class AlignmentValidatorSpec extends Specification implements DataTest, DomainFa
                     seqTypeOldSystem,
                     seqTypeNewSystem,
             ]
-            count * seqTypesOldWorkflowSystem >> []
             _ * findByNameOrImportAlias(_, _) >> { String nameOrImportAlias, Map properties ->
                 return CollectionUtils.exactlyOneElement(SeqType.findAllByName(nameOrImportAlias), "Not found: ${nameOrImportAlias}")
             }
