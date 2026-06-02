@@ -30,15 +30,15 @@ import io.swagger.client.wes.model.State
 import org.hibernate.*
 import org.hibernate.criterion.Order
 import org.hibernate.sql.JoinType
+import org.hibernate.transform.Transformers
+import org.hibernate.type.StandardBasicTypes
 
 import de.dkfz.tbi.otp.SqlUtil
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.workflowExecution.wes.WesRun
-import de.dkfz.tbi.otp.workflowExecution.wes.WesRunService
-import de.dkfz.tbi.otp.workflowExecution.wes.WesRunStateDto
+import de.dkfz.tbi.otp.workflowExecution.wes.*
 
 import javax.sql.DataSource
 import java.time.ZonedDateTime
@@ -222,6 +222,23 @@ class WorkflowRunService {
     }
 
     @CompileDynamic
+    private Map<Long, List<WorkflowStepInfo>> fetchWorkflowStepsForRuns(List<Long> runIds) {
+        return (WorkflowStep.createCriteria().list {
+            createAlias("workflowRun", "workflowRun")
+            'in'("workflowRun.id", runIds)
+            projections {
+                property("id", "id")
+                property("obsolete", "obsolete")
+                property("beanName", "beanName")
+                property("lastUpdated", "lastUpdated")
+                property("workflowRun.id", "workflowRunId")
+            }
+            order("id")
+            resultTransformer(Transformers.aliasToBean(WorkflowStepInfo))
+        } as List<WorkflowStepInfo>).groupBy { WorkflowStepInfo info -> info.workflowRunId }
+    }
+
+    @CompileDynamic
     private List<Long> fetchMatchingRunIds(String stepFilter) {
         return WorkflowStep.executeQuery("""
             SELECT ws.workflowRun.id
@@ -278,17 +295,32 @@ class WorkflowRunService {
                 workflowRunSearchCriteria.name, matchingRunIds)
         WorkflowRunSearchResult result = new WorkflowRunSearchResult()
 
-        result.data = WorkflowRun.createCriteria().list {
+        List<WorkflowRunInfo> workflowRunInfos = WorkflowRun.createCriteria().list {
             criteria.delegate = delegate
             criteria()
+            createAlias("workflow", "workflowJoin")
+            createAlias("comment", "commentJoin", JoinType.LEFT_OUTER_JOIN)
+            projections {
+                property("id", "id")
+                property("state", "state")
+                property("displayName", "displayName")
+                property("shortDisplayName", "shortDisplayName")
+                property("dateCreated", "dateCreated")
+                property("workflowJoin.name", "workflowName")
+                property("workflowJoin.deprecatedDate", "workflowDeprecatedDate")
+                property("commentJoin.comment", "commentText")
+                property("commentJoin.author", "commentAuthor")
+                property("commentJoin.modificationDate", "commentModificationDate")
+                property("firstJobStarted", "firstJobStarted")
+                property("lastJobFinished", "lastJobFinished")
+            }
             workflowRunSearchCriteria.orderList.each { DataTablesCommand.Order dtOrder ->
                 WorkflowRunListColumn column = WorkflowRunListColumn.fromDataTable(dtOrder.column)
                 if (column == WorkflowRunListColumn.COMMENT) {
-                    createAlias("comment", "comment", JoinType.LEFT_OUTER_JOIN)
                     if (dtOrder.direction == DataTablesCommand.Order.Dir.asc) {
-                        addOrder(Order.asc("comment.modificationDate").nulls(NullPrecedence.LAST))
+                        addOrder(Order.asc("commentJoin.modificationDate").nulls(NullPrecedence.LAST))
                     } else {
-                        addOrder(Order.desc("comment.modificationDate").nulls(NullPrecedence.LAST))
+                        addOrder(Order.desc("commentJoin.modificationDate").nulls(NullPrecedence.LAST))
                     }
                 } else if (column in [WorkflowRunListColumn.FIRST_JOB_STARTED, WorkflowRunListColumn.LAST_JOB_FINISHED]) {
                     if (dtOrder.direction == DataTablesCommand.Order.Dir.asc) {
@@ -304,42 +336,76 @@ class WorkflowRunService {
             if (workflowRunSearchCriteria.pagingEnabled) {
                 maxResults(workflowRunSearchCriteria.length)
             }
-        }.collect { WorkflowRun r ->
-            List<WorkflowStep> steps = r.workflowSteps.findAll { !it.obsolete }
-            WorkflowStep lastStep = steps ? steps.last() : null
+            resultTransformer(Transformers.aliasToBean(WorkflowRunInfo))
+        } as List<WorkflowRunInfo>
+
+        Map<Long, List<WorkflowStepInfo>> stepsByRunId = workflowRunInfos ?
+                fetchWorkflowStepsForRuns(workflowRunInfos*.id) : [:]
+
+        result.data = workflowRunInfos.collect { WorkflowRunInfo runInfo ->
+            List<WorkflowStepInfo> steps = (stepsByRunId[runInfo.id] ?: []).findAll { !it.obsolete }
+            WorkflowStepInfo lastStep = steps ? steps.last() : null
+
+            ZonedDateTime durationEnd = runInfo.lastJobFinished ?:
+                    (runInfo.state in [WorkflowRun.State.PENDING, WorkflowRun.State.RUNNING_WES, WorkflowRun.State.RUNNING_OTP] ?
+                            ZonedDateTime.now() : null)
+            String duration = runInfo.firstJobStarted ?
+                    (TimeUtils.getFormattedDurationForZonedDateTime(runInfo.firstJobStarted, durationEnd) ?: "-") : "-"
+
+            String comment = runInfo.commentText ?
+                    "Author: ${runInfo.commentAuthor}, last modified at: ${TimeFormats.DATE.getFormattedDate(runInfo.commentModificationDate)}," +
+                            " comment: ${runInfo.commentText.replaceAll("\n", ", ")}}" : ""
+
+            String workflowDisplayName = "${runInfo.workflowName}${runInfo.workflowDeprecatedDate ? " (deprecated)" : ""}"
+
             return [
-                    state          : r.state,
-                    stateDesc      : r.state.description,
-                    comment        : r.comment?.displayString()?.replaceAll("\n", ", ") ?: "",
-                    workflow       : r.workflow.toString(),
-                    displayName    : r.displayName,
-                    shortName      : r.shortDisplayName,
-                    dateCreated    : TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(r.dateCreated),
+                    state          : runInfo.state,
+                    stateDesc      : runInfo.state.description,
+                    comment        : comment,
+                    workflow       : workflowDisplayName,
+                    displayName    : runInfo.displayName,
+                    shortName      : runInfo.shortDisplayName,
+                    dateCreated    : TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(runInfo.dateCreated),
                     lastUpdated    : lastStep?.lastUpdated ? TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(lastStep.lastUpdated) : "",
-                    duration       : calculateDuration(r),
-                    id             : r.id,
+                    duration       : duration,
+                    id             : runInfo.id,
                     step           : lastStep?.beanName,
                     stepId         : lastStep?.id,
                     steps          : (steps - lastStep).reverse()*.beanName,
                     stepIds        : (steps - lastStep).reverse()*.id,
-                    firstJobStarted: r.firstJobStarted ? TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedZonedDateTime(r.firstJobStarted) : "",
-                    lastJobFinished: r.lastJobFinished ? TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedZonedDateTime(r.lastJobFinished) : "",
+                    firstJobStarted: runInfo.firstJobStarted ? TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedZonedDateTime(runInfo.firstJobStarted) : "",
+                    lastJobFinished: runInfo.lastJobFinished ? TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedZonedDateTime(runInfo.lastJobFinished) : "",
             ]
         }
-        result.workflowsFiltered = WorkflowRun.createCriteria().count {
+
+        String runningStates = [WorkflowRun.State.RUNNING_OTP, WorkflowRun.State.RUNNING_WES]
+                .collect { "'${it.name()}'" }.join(', ')
+
+        WorkflowRunCounts counts = WorkflowRun.createCriteria().get {
             criteria.delegate = delegate
             criteria()
-        }
-        result.running = WorkflowRun.createCriteria().count {
-            criteria.delegate = delegate
-            criteria()
-            "in"("state", [WorkflowRun.State.RUNNING_OTP, WorkflowRun.State.RUNNING_WES])
-        }
-        result.failed = WorkflowRun.createCriteria().count {
-            criteria.delegate = delegate
-            criteria()
-            eq("state", WorkflowRun.State.FAILED)
-        }
+            projections {
+                sqlProjection(
+                        "COUNT(*) as workflowsFiltered",
+                        "workflowsFiltered",
+                        StandardBasicTypes.LONG,
+                )
+                sqlProjection(
+                        "SUM(CASE WHEN state IN (${runningStates}) THEN 1 ELSE 0 END) as running",
+                        "running",
+                        StandardBasicTypes.LONG,
+                )
+                sqlProjection(
+                        "SUM(CASE WHEN state = '${WorkflowRun.State.FAILED.name()}' THEN 1 ELSE 0 END) as failed",
+                        "failed",
+                        StandardBasicTypes.LONG,
+                )
+            }
+            resultTransformer(Transformers.aliasToBean(WorkflowRunCounts))
+        } as WorkflowRunCounts
+        result.workflowsFiltered = counts.workflowsFiltered as int
+        result.running = counts.running as int
+        result.failed = counts.failed as int
         result.workflowsTotal = WorkflowRun.countByStateNotEqual(WorkflowRun.State.LEGACY)
 
         return result
