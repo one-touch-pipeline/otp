@@ -405,7 +405,7 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
 
         CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService(
                 linkGenerator: Mock(LinkGenerator) {
-                    projectCount * link(_) >> 'link'
+                    (projectCount + (singleCell ? 1 : 0)) * link(_) >> 'link'
                 },
                 lsdfFilesService: new LsdfFilesService(),
                 messageSourceService: messageSourceServiceWithMockedMessageSource,
@@ -426,7 +426,7 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         String expectedRuns = seqTracks*.run*.name.sort().unique().join(', ')
         String expectedLinks = seqTracks*.project.unique().collect { 'link' }.join('\n')
         String expectedSamples = samples.join('\n')
-        String expectedAlign = align ? "\nfurther processing further notification" : ""
+        String expectedAlign = align ? "\nfurther processing${singleCell ? " cell ranger faq" : ""} further notification" : ""
 
         String expected = """
 data installation finished
@@ -818,13 +818,14 @@ ${expectedAlign}"""
                 data1.seqTrackProcessingStatus,
         ])
 
+        int crOffset = (name == "Cell Ranger") ? 1 : 0
         CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService(
                 alignmentInfoService: Mock(AlignmentInfoService) {
                     1 * getAlignmentInformationFromConfig(_) >> data1.alignmentInfo
                     0 * _
                 },
                 linkGenerator: Mock(LinkGenerator) {
-                    1 * link(_) >> "link"
+                    (1 + crOffset) * link(_) >> "link"
                 },
         )
         createNotificationTextService.processingOptionService = new ProcessingOptionService()
@@ -833,6 +834,8 @@ ${expectedAlign}"""
                     1 * getMessageInternal("notification.template.alignment.base", [], _) >> ""
                     1 * getMessageInternal("notification.template.alignment.processing", [], _) >> ""
                     1 * getMessageInternal("notification.template.alignment.noFurtherProcessing", [], _) >> ""
+                    crOffset * getMessageInternal("notification.template.annotation.cellRanger.selfservice", [], _) >> ""
+                    0 * getMessageInternal("notification.template.annotation.cellRanger.selfservice.alreadyFinal", [], _) >> ""
 
                     (singleCell ? 0 : 1) * getMessageInternal("notification.template.alignment.processing.roddy", [], _) >> ""
                     (singleCell ? 1 : 0) * getMessageInternal("notification.template.alignment.processing.singleCell", [], _) >> ""
@@ -891,7 +894,7 @@ ${expectedAlign}"""
                     0 * _
                 },
                 linkGenerator: Mock(LinkGenerator) {
-                    1 * link(_) >> "link"
+                    (1 + countCellRanger) * link(_) >> "link"
                 },
                 processingOptionService: new ProcessingOptionService(),
         )
@@ -905,6 +908,8 @@ ${expectedAlign}"""
                     countRoddy * getMessageInternal("notification.template.alignment.processing.roddy", [], _) >> ""
                     countPanCan * getMessageInternal("notification.template.references.alignment.pancancer", [], _) >> ""
                     countCellRanger * getMessageInternal("notification.template.references.alignment.cellRanger", [], _) >> ""
+
+                    countCellRanger * getMessageInternal("notification.template.annotation.cellRanger.selfservice", [], _) >> ""
 
                     0 * _
                 }
@@ -954,7 +959,7 @@ ${expectedAlign}"""
                     0 * _
                 },
                 linkGenerator: Mock(LinkGenerator) {
-                    3 * link(_) >> "link"
+                    4 * link(_) >> "link"
                 },
                 processingOptionService: new ProcessingOptionService(),
         )
@@ -967,6 +972,7 @@ ${expectedAlign}"""
                     2 * getMessageInternal("notification.template.alignment.processing.roddy", [], _) >> ""
                     1 * getMessageInternal("notification.template.references.alignment.pancancer", [], _) >> ""
                     1 * getMessageInternal("notification.template.references.alignment.cellRanger", [], _) >> ""
+                    1 * getMessageInternal("notification.template.annotation.cellRanger.selfservice", [], _) >> ""
                     0 * _
                 }
         )

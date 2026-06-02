@@ -201,7 +201,18 @@ class CreateNotificationTextService {
         ])
 
         if (status.alignmentProcessingStatus != NOTHING_DONE_WONT_DO) {
-            message += '\n' + messageSourceService.createMessage('notification.template.installation.furtherProcessing')
+            if ((seqTracks.any { it.seqType in SeqTypeService.cellRangerAlignableSeqTypes })) {
+                message += '\n' + messageSourceService.createMessage('notification.template.installation.furtherProcessing.cellRanger', [
+                        links: createOtpLinks(seqTracks*.project, "cellRangerConfiguration", "index"),
+                ])
+                if (ProcessingOptionService.findOption(OptionName.NOTIFICATION_TEMPLATE_FAQ_LINK)) {
+                    message += messageSourceService.createMessage('notification.template.installation.furtherProcessing.cellRanger.faq', [
+                            faq: processingOptionService.findOptionAsString(OptionName.NOTIFICATION_TEMPLATE_FAQ_LINK),
+                    ])
+                }
+            } else {
+                message += '\n' + messageSourceService.createMessage('notification.template.installation.furtherProcessing')
+            }
             message += messageSourceService.createMessage('notification.template.installation.furtherProcessing.furtherNotification')
         }
 
@@ -247,7 +258,7 @@ class CreateNotificationTextService {
         String message = messageSourceService.createMessage("notification.template.alignment.base", [
                 samples         : sampleNames,
                 links           : links,
-                cellRangerNote  : "",
+                cellRangerNote  : cellRangerAlignmentNotificationHelper(allGoodBamFiles.findAll { it instanceof SingleCellBamFile } as Set<SingleCellBamFile>),
                 processingValues: processingValues.trim(),
                 paths           : directories,
         ])
@@ -376,6 +387,22 @@ class CreateNotificationTextService {
         return workflowArtefacts*.producedBy*.workflow.sort().unique()
                 .collect { applicationContext.getBean(it.beanName) as OtpWorkflow }*.userDocumentation.findAll()
                 .collect { messageSourceService.createMessage(it) }.collect { "\n${it}" }.join("")
+    }
+
+    private String cellRangerAlignmentNotificationHelper(Set<SingleCellBamFile> bams) {
+        if (!bams) {
+            return ""
+        }
+        String finalRunSelectionLink = createOtpLinks(bams*.project, "cellRanger", "finalRunSelection")
+
+        List<String> message = []
+        message << messageSourceService.createMessage("notification.template.annotation.cellRanger.selfservice", [finalRunSelectionLink: finalRunSelectionLink])
+        if (bams*.mergingWorkPackage.any { it.status == CellRangerMergingWorkPackage.Status.FINAL }) {
+            message << messageSourceService.createMessage("notification.template.annotation.cellRanger.selfservice.alreadyFinal", [
+                    serviceMail: processingOptionService.findOptionAsString(OptionName.EMAIL_TICKET_SYSTEM),
+            ])
+        }
+        return message.join('\n\n')
     }
 
     String snvNotification(ProcessingStatus status) {

@@ -20,25 +20,11 @@
   - SOFTWARE.
   --}%
 
-<ul class="nav nav-tabs tab-menu">
-    <li class="nav-item">
-        <g:link controller="workflowSelection" action="index" class="nav-link ${controllerName == "workflowSelection" ? 'active fw-bold' : 'text-black'}">
-            <g:message code="config.tabMenu.workflowSelection"/>
-        </g:link>
-    </li>
-    <li class="nav-item">
-        <g:link controller="sampleCategory" action="index" class="nav-link ${controllerName == "sampleCategory" ? 'active fw-bold' : 'text-black'}">
-            <g:message code="config.tabMenu.sampleCategory"/>
-        </g:link>
-    </li>
-    <li class="nav-item">
-        <g:link controller="qcThreshold" action="projectConfiguration" class="nav-link ${controllerName == "qcThreshold" ? 'active fw-bold' : 'text-black'}">
-            <g:message code="config.tabMenu.qcThresholds"/>
-        </g:link>
-    </li>
-    <li class="nav-item">
-        <g:link controller="cellRangerConfiguration" action="index" class="nav-link ${controllerName == "cellRangerConfiguration" ? 'active fw-bold' : 'text-black'}">
-            <g:message code="config.tabMenu.cellRanger"/>
-        </g:link>
-    </li>
-</ul>
+<%@ page import="de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage.Status" %>
+
+<g:if test="${mwp.status == Status.FINAL}"><b>${g.message(code: "cellRanger.selection.finalRun")}</b></g:if>
+<g:if test="${mwp.status == Status.DELETED}"><span class="deletedClickable">${g.message(code: "cellRanger.selection.deletedRun")}</g:if>
+<g:if test="${mwp.expectedCells}">${g.message(code: "cellRanger.selection.expectedCells", args: [mwp.expectedCells])}</g:if>
+<g:if test="${mwp.enforcedCells}">${g.message(code: "cellRanger.selection.enforcedCells", args: [mwp.enforcedCells])}</g:if>
+<g:if test="${!(mwp.expectedCells || mwp.enforcedCells)}">${g.message(code: "cellRanger.selection.default")}</g:if>
+<g:if test="${mwp.status == Status.DELETED}"></span></g:if>
