@@ -76,4 +76,24 @@ class IndividualServiceSpec extends Specification implements DataTest, ServiceUn
         then:
         seqDir.resolve(seqType.dirName).resolve('view-by-pid').resolve(individual.pid) == actualPath
     }
+
+    void "test createIndividual without samples"() {
+        given:
+        Project project = createProject()
+        IndividualCommand cmd = new IndividualCommand(
+                identifier: "pid123",
+                individualProject: project,
+                type: Individual.Type.REAL,
+                samples: null
+        )
+
+        when:
+        Individual individual = service.createIndividual(cmd)
+
+        then:
+        individual != null
+        individual.pid == "pid123"
+        individual.project == project
+        individual.type == Individual.Type.REAL
+    }
 }

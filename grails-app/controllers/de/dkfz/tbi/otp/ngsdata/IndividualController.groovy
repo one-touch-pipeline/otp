@@ -245,7 +245,7 @@ class IndividualCommand implements Validateable {
     String identifier
     Project individualProject
     Individual.Type type
-    List<SampleCommand> samples
+    List<SampleCommand> samples  = []
     boolean checkRedirect
 
     static constraints = {
@@ -259,7 +259,7 @@ class IndividualCommand implements Validateable {
 
 class SampleCommand {
     String sampleType
-    List<String> sampleIdentifiers
+    List<String> sampleIdentifiers = []
 }
 
 class UpdateFieldCommand {

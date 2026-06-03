@@ -218,7 +218,7 @@ class IndividualService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void createSamples(Individual individual, List<SampleCommand> samples) {
-        samples.each { SampleCommand sampleCommand ->
+        samples?.each { SampleCommand sampleCommand ->
             SampleType sampleType = createSampleType(sampleCommand.sampleType)
             if (!sampleType) {
                 throw new IndividualCreationException("SampleType could not be found nor created.")

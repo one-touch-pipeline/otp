@@ -253,4 +253,40 @@ class IndividualControllerSpec extends Specification implements ControllerUnitTe
         then:
         controller.flash.message.message == "individual.update.error"
     }
+
+    // save is controller method, no domain
+    @SuppressWarnings(['ExplicitFlushForSaveRule'])
+    void "save, when save is called without samples, then create the individual and no samples"() {
+        given:
+        Project project = createProject()
+
+        controller.individualService = new IndividualService([
+                sampleIdentifierService: new SampleIdentifierService(),
+        ])
+
+        // work around to get the service in the command object
+        controller.params.individualService = controller.individualService
+
+        when:
+        controller.request.method = 'POST'
+        controller.params.identifier = "Identifier"
+        controller.params['individualProject.id'] = project.id
+        controller.params.type = Individual.Type.REAL.toString()
+        controller.params.checkRedirect = false
+
+        controller.save()
+
+        then:
+        controller.flash.message.message == "individual.update.create.success"
+
+        Individual individual = CollectionUtils.exactlyOneElement(Individual.list())
+        individual.pid == 'Identifier'
+        individual.project == project
+        individual.type == Individual.Type.REAL
+
+        controller.response.redirectedUrl == "/individual/insert/${individual.id}"
+
+        Sample.count() == 0
+        SampleIdentifier.count() == 0
+    }
 }
