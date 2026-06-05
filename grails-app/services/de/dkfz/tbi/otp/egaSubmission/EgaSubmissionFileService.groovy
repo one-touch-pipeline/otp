@@ -24,10 +24,11 @@ package de.dkfz.tbi.otp.egaSubmission
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.administration.MailHelperService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
-import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.MessageSourceService
@@ -35,7 +36,6 @@ import de.dkfz.tbi.otp.utils.spreadsheet.*
 
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.attribute.PosixFilePermission
 
 import static de.dkfz.tbi.otp.egaSubmission.EgaSubmissionFileService.EgaColumnName.*
 
@@ -49,7 +49,7 @@ class EgaSubmissionFileService {
     FileSystemService fileSystemService
     MailHelperService mailHelperService
     MessageSourceService messageSourceService
-    ProjectService projectService
+    ProcessingOptionService processingOptionService
     SecurityService securityService
 
     enum EgaColumnName {
@@ -261,11 +261,13 @@ class EgaSubmissionFileService {
     }
 
     private Path createPathForSubmission(EgaSubmission submission) {
-        return projectService.getProjectDirectory(submission.project).resolve('submission').resolve(submission.id.toString())
+        String egaPath = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EGA_PATH)
+        return fileSystemService.remoteFileSystem.getPath(egaPath).resolve(submission.id.toString())
     }
 
     void createFilesForUpload(EgaSubmission submission) {
-        Path basePath = createPathForSubmission(submission)
+        Path storagePath = createPathForSubmission(submission)
+        String egaUnixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EGA_UNIX_GROUP)
 
         Map<String, String> filesToCreate = [:]
         filesToCreate << egaFileContentService.createFilesToUploadFileContent(submission)
@@ -273,22 +275,21 @@ class EgaSubmissionFileService {
         filesToCreate << egaFileContentService.createPairedFastqFileMapping(submission)
         filesToCreate << egaFileContentService.createBamFileMapping(submission)
 
-        String unixGroup = submission.project.unixGroup
         filesToCreate.each {
-            Path path = basePath.resolve(it.key)
+            Path path = storagePath.resolve(it.key)
             Files.deleteIfExists(path)
             fileService.createDirectoryRecursivelyAndSetPermissions(path.parent,
-                    unixGroup,
-                    FileService.OWNER_DIRECTORY_PERMISSION)
+                    egaUnixGroup,
+                    FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
             fileService.createFileWithContent(path,
                     it.value,
-                    unixGroup,
-                    [PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE] as Set<PosixFilePermission>)
+                    egaUnixGroup,
+                    FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION)
         }
     }
 
     void sendEmail(EgaSubmission submission) {
-        Path basePath = createPathForSubmission(submission)
+        Path storagePath = createPathForSubmission(submission)
         User user = securityService.currentUser
 
         String subject = "New ${submission}"
@@ -297,7 +298,7 @@ class EgaSubmissionFileService {
                 project      : submission.project.name,
                 submission   : submission.id,
                 numberOfFiles: submission.rawSequenceFilesToSubmit.size() + submission.bamFilesToSubmit.size(),
-                path         : basePath,
+                path         : storagePath,
         ])
         mailHelperService.saveMail(subject, content, [user.email])
     }

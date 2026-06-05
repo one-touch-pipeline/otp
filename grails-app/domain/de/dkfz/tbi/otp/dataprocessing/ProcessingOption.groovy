@@ -291,6 +291,12 @@ class ProcessingOption implements Entity {
                 Necessity.REQUIRED, null, TypeValidators.ABSOLUTE_PATH
         ),
 
+        // EGA submission paths
+        EGA_PATH(
+                "Base storage path for EGA submissions",
+                Necessity.REQUIRED, null, TypeValidators.ABSOLUTE_PATH
+        ),
+
         // roddy
         RODDY_PATH(
                 "Path to the roddy.sh on the current cluster",
@@ -512,6 +518,10 @@ class ProcessingOption implements Entity {
         ),
         WITHDRAWN_UNIX_GROUP(
                 "unix group to use for withdrawn data",
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
+        ),
+        EGA_UNIX_GROUP(
+                "unix group to use for EGA submission data",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT_OPTIONAL
         ),
 

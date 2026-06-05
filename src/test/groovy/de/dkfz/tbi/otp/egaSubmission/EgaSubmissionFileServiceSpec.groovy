@@ -25,27 +25,23 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.TempDir
 
-import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.administration.MailHelperService
-import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.submissions.ega.EgaSubmissionFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
-import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.security.SecurityService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.spreadsheet.Delimiter
 import de.dkfz.tbi.otp.utils.spreadsheet.Spreadsheet
 
-import java.nio.file.FileSystem
 import java.nio.file.Path
+import java.nio.file.Paths
 
 import static de.dkfz.tbi.otp.egaSubmission.EgaSubmissionFileService.EgaColumnName.*
 
@@ -307,17 +303,18 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
 
     void "createFilesForUpload, when submission is given, then create all expected files"() {
         given:
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
-
-        egaSubmissionFileService.projectService = new ProjectService()
-        egaSubmissionFileService.projectService.configService = configService
-        egaSubmissionFileService.projectService.fileSystemService = new TestFileSystemService()
+        String egaPath = tempDir
+        String egaUnixGroup = "ega-group"
 
         EgaSubmission egaSubmission = createEgaSubmission()
 
-        Path basePath = egaSubmissionFileService.projectService.getProjectDirectory(egaSubmission.project).resolve('submission')
-                .resolve(egaSubmission.id.toString())
+        Path basePath = tempDir.resolve(egaSubmission.id.toString())
 
+        egaSubmissionFileService.fileSystemService = new TestFileSystemService()
+        egaSubmissionFileService.processingOptionService = Mock(ProcessingOptionService) {
+            _ * findOptionAsString(ProcessingOption.OptionName.EGA_PATH) >> egaPath
+            _ * findOptionAsString(ProcessingOption.OptionName.EGA_UNIX_GROUP) >> egaUnixGroup
+        }
         egaSubmissionFileService.egaFileContentService = Mock(EgaFileContentService) {
             1 * createFilesToUploadFileContent(egaSubmission) >> [
                     mapping: 'mappingContent',
@@ -337,13 +334,14 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
             0 * _
         }
         egaSubmissionFileService.fileService = Mock(FileService) {
-            1 * createFileWithContent(basePath.resolve('mapping'), 'mappingContent', _, _)
-            1 * createFileWithContent(basePath.resolve('fastqSingle1'), 'contentFastqSingle1', _, _)
-            1 * createFileWithContent(basePath.resolve('fastqSingle2'), 'contentFastqSingle2', _, _)
-            1 * createFileWithContent(basePath.resolve('fastqPaired1'), 'contentFastqPaired1', _, _)
-            1 * createFileWithContent(basePath.resolve('fastqPaired2'), 'contentFastqPaired2', _, _)
-            1 * createFileWithContent(basePath.resolve('bam1'), 'contentBam1', _, _)
-            1 * createFileWithContent(basePath.resolve('bam2'), 'contentBam2', _, _)
+            1 * createFileWithContent(basePath.resolve('mapping'), 'mappingContent', egaUnixGroup, FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION)
+            1 * createFileWithContent(basePath.resolve('fastqSingle1'), 'contentFastqSingle1', egaUnixGroup, FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION)
+            1 * createFileWithContent(basePath.resolve('fastqSingle2'), 'contentFastqSingle2', egaUnixGroup, FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION)
+            1 * createFileWithContent(basePath.resolve('fastqPaired1'), 'contentFastqPaired1', egaUnixGroup, FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION)
+            1 * createFileWithContent(basePath.resolve('fastqPaired2'), 'contentFastqPaired2', egaUnixGroup, FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION)
+            1 * createFileWithContent(basePath.resolve('bam1'), 'contentBam1', egaUnixGroup, FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION)
+            1 * createFileWithContent(basePath.resolve('bam2'), 'contentBam2', egaUnixGroup, FileService.OWNER_READ_WRITE_GROUP_READ_WRITE_FILE_PERMISSION)
+            _ * createDirectoryRecursivelyAndSetPermissions(_, egaUnixGroup, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
         }
 
         when:
@@ -355,45 +353,47 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
 
     void "saveEmail, when submission is given, then send email"() {
         given:
-        TestConfigService configService = new TestConfigService()
+        String egaPath = "/ega/storage"
 
         EgaSubmission egaSubmission = createEgaSubmission()
 
+        Path expectedStoragePath = Paths.get(egaPath).resolve(egaSubmission.id.toString())
         String emailSubject = "New ${egaSubmission}"
         String content = "some content"
         User user = new User(
                 realName: "Real Name",
                 email: "ua.ub@uc.ude",
         )
+        Map capturedParams
 
-        egaSubmissionFileService.fileSystemService = Mock(FileSystemService) {
-            1 * getRemoteFileSystem() >> Mock(FileSystem) {
-                1 * getPath(*_) >> tempDir
-            }
+        egaSubmissionFileService.fileSystemService = new TestFileSystemService()
+        egaSubmissionFileService.processingOptionService = Mock(ProcessingOptionService) {
+            _ * findOptionAsString(ProcessingOption.OptionName.EGA_PATH) >> egaPath
         }
         egaSubmissionFileService.securityService = Mock(SecurityService) {
             1 * getCurrentUser() >> user
         }
         egaSubmissionFileService.messageSourceService = Mock(MessageSourceService) {
-            1 * createMessage(_, _) >> content
+            1 * createMessage('egaSubmission.template.base', _) >> { String key, Map params ->
+                capturedParams = params
+                content
+            }
         }
         egaSubmissionFileService.mailHelperService = Mock(MailHelperService) {
             1 * saveMail(emailSubject, content, [user.email])
         }
-        egaSubmissionFileService.projectService = new ProjectService()
-        egaSubmissionFileService.projectService.configService = configService
-        egaSubmissionFileService.projectService.fileSystemService = egaSubmissionFileService.fileSystemService
 
         when:
         egaSubmissionFileService.sendEmail(egaSubmission)
 
         then:
-        noExceptionThrown()
+        capturedParams.path == expectedStoragePath
     }
 
     void "prepareSubmissionForUpload, when submission is given, then files are created, email is send state is changed to FILE_UPLOAD_STARTED"() {
         given:
-        TestConfigService configService = new TestConfigService()
+        String egaPath = tempDir
+        String egaUnixGroup = "ega-group"
 
         EgaSubmission egaSubmission = createEgaSubmission([
                 samplesToSubmit : [createSampleSubmissionObject()] as Set,
@@ -407,10 +407,10 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
                 email: "ua.ub@uc.ude",
         )
 
-        egaSubmissionFileService.fileSystemService = Mock(FileSystemService) {
-            2 * getRemoteFileSystem() >> Mock(FileSystem) {
-                2 * getPath(*_) >> tempDir
-            }
+        egaSubmissionFileService.fileSystemService = new TestFileSystemService()
+        egaSubmissionFileService.processingOptionService = Mock(ProcessingOptionService) {
+            _ * findOptionAsString(ProcessingOption.OptionName.EGA_PATH) >> egaPath
+            _ * findOptionAsString(ProcessingOption.OptionName.EGA_UNIX_GROUP) >> egaUnixGroup
         }
         egaSubmissionFileService.egaFileContentService = Mock(EgaFileContentService) {
             1 * createFilesToUploadFileContent(egaSubmission) >> [:]
@@ -421,6 +421,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         }
         egaSubmissionFileService.fileService = Mock(FileService) {
             _ * createFileWithContent(_, _, _, _)
+            _ * createDirectoryRecursivelyAndSetPermissions(_, _, _)
         }
         egaSubmissionFileService.securityService = Mock(SecurityService) {
             1 * getCurrentUser() >> user
@@ -431,9 +432,6 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         egaSubmissionFileService.mailHelperService = Mock(MailHelperService) {
             1 * saveMail(emailSubject, content, [user.email])
         }
-        egaSubmissionFileService.projectService = new ProjectService()
-        egaSubmissionFileService.projectService.configService = configService
-        egaSubmissionFileService.projectService.fileSystemService = egaSubmissionFileService.fileSystemService
 
         when:
         egaSubmissionFileService.prepareSubmissionForUpload(egaSubmission)
