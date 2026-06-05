@@ -21,11 +21,13 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import grails.web.mapping.LinkGenerator
 import groovy.transform.CompileDynamic
 import groovy.transform.TupleConstructor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
@@ -53,6 +55,9 @@ class AlignmentValidator extends AbstractValueTuplesValidator implements Metadat
 
     @Autowired
     ReferenceGenomeSelectorService referenceGenomeSelectorService
+
+    @Autowired
+    LinkGenerator grailsLinkGenerator
 
     @Override
     Collection<String> getDescriptions() {
@@ -99,10 +104,24 @@ class AlignmentValidator extends AbstractValueTuplesValidator implements Metadat
         List<SpeciesWithStrain> species = projectSeqTypeSpecies.speciesWithStrains
         if (seqType in seqTypesNewSystem) {
             if (!workflowVersionSelectorService.hasAlignmentConfigForProjectAndSeqType(project, seqType)) {
-                createWarningMessage(context, "Alignment is not configured for Project '${project}' and SeqType '${seqType}'")
+                String configLink = grailsLinkGenerator.link(
+                        controller: 'workflowSelection',
+                        action: 'index',
+                        params: [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): project.name],
+                        absolute: true,
+                )
+                createWarningMessage(context, "Alignment is not configured for Project '${project}', SeqType '${seqType}' " +
+                        "and Species '${species.join(' + ')}'. Go to Workflow Config page: ${configLink}")
             }
             else if (!referenceGenomeSelectorService.hasReferenceGenomeConfigForProjectAndSeqTypeAndSpecies(project, seqType, species)) {
-                createWarningMessage(context, "Reference Genome is not configured for Project '${project}', SeqType '${seqType}' and Species '${species.join(' + ')}'")
+                String configLink = grailsLinkGenerator.link(
+                        controller: 'workflowSelection',
+                        action: 'index',
+                        params: [(ProjectSelectionService.PROJECT_SELECTION_PARAMETER): project.name],
+                        absolute: true,
+                )
+                createWarningMessage(context, "Reference Genome is not configured for Project '${project}', SeqType '${seqType}' " +
+                        "and Species '${species.join(' + ')}'. Go to Workflow Config page: ${configLink}")
             }
         } else if (seqType in SeqTypeService.cellRangerAlignableSeqTypes) {
             if (!projectService.getLatestCellRangerConfig(project, seqType)) {

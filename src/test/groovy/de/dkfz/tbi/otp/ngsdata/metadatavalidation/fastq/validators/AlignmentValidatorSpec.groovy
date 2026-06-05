@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import grails.testing.gorm.DataTest
+import grails.web.mapping.LinkGenerator
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -61,6 +62,8 @@ class AlignmentValidatorSpec extends Specification implements DataTest, DomainFa
                 ReferenceGenomeSelector,
         ]
     }
+
+    private static final String WORKFLOW_CONFIG_LINK = "https://otp.example/otp/workflowSelection/index?project=project"
 
     private SeqType seqTypeNotAlignable
     private SeqType seqTypeOldSystem
@@ -104,6 +107,9 @@ class AlignmentValidatorSpec extends Specification implements DataTest, DomainFa
                 },
                 referenceGenomeSelectorService: Mock(ReferenceGenomeSelectorService) {
                     _ * _
+                },
+                grailsLinkGenerator           : Mock(LinkGenerator) {
+                    _ * link(_) >> WORKFLOW_CONFIG_LINK
                 },
         ])
     }
@@ -172,7 +178,10 @@ ${seqTypeNewSystem.name},${project.name},,DNA,${seqTypeNewSystem.libraryLayout},
 
         Collection<Problem> expectedProblems = [
                 new Problem(Collections.emptySet(), LogLevel.WARNING, "CellRanger is not configured for Project '${project}' and SeqType '${seqTypeCellRanger}'", "At least one Alignment or Reference Genome is not configured."),
-                new Problem(Collections.emptySet(), LogLevel.WARNING, "Alignment is not configured for Project '${project}' and SeqType '${seqTypeNewSystem}'", "At least one Alignment or Reference Genome is not configured."),
+                new Problem(Collections.emptySet(), LogLevel.WARNING,
+                        "Alignment is not configured for Project '${project}', SeqType '${seqTypeNewSystem}' " +
+                                "and Species '${findOrCreateMouseSpecies()}'. Go to Workflow Config page: ${WORKFLOW_CONFIG_LINK}",
+                        "At least one Alignment or Reference Genome is not configured."),
         ]
 
         when:
@@ -196,7 +205,8 @@ ${seqTypeNewSystem.name},${project.name},,DNA,${seqTypeNewSystem.libraryLayout},
 """.replaceAll(',', '\t'))
         Collection<Problem> expectedProblems = [
                 new Problem(Collections.emptySet(), LogLevel.WARNING,
-                        "Reference Genome is not configured for Project '${project}', SeqType '${seqTypeNewSystem}' and Species '${speciesWithStrainList.join(' + ')}'",
+                        "Reference Genome is not configured for Project '${project}', SeqType '${seqTypeNewSystem}' " +
+                                "and Species '${speciesWithStrainList.join(' + ')}'. Go to Workflow Config page: ${WORKFLOW_CONFIG_LINK}",
                         "At least one Alignment or Reference Genome is not configured."),
         ]
 
