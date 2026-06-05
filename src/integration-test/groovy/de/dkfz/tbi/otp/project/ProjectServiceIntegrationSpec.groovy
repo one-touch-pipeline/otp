@@ -28,6 +28,8 @@ import org.grails.datastore.gorm.events.AutoTimestampEventListener
 import org.springframework.mock.web.MockMultipartFile
 import spock.lang.*
 
+import java.nio.file.Files
+
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.administration.MailHelperService
@@ -834,7 +836,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                     species        : [findOrCreateHumanSpecies()] as Set,
                     referenceGenome: DomainFactory.createAceseqReferenceGenome(),
             ])
-            referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenomeSelector.referenceGenome, false).mkdirs()
+            Files.createDirectories(referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenomeSelector.referenceGenome, false))
             doWithAuth(ADMIN) {
                 processingOptionService.createOrUpdate(
                         genomeOption,
@@ -886,7 +888,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                     species        : [findOrCreateHumanSpecies()] as Set,
                     referenceGenome: DomainFactory.createAceseqReferenceGenome(),
             ])
-            referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenomeSelector.referenceGenome, false).mkdirs()
+            Files.createDirectories(referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenomeSelector.referenceGenome, false))
             doWithAuth(ADMIN) {
                 processingOptionService.createOrUpdate(
                         genomeOption,

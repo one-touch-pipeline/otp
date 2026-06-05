@@ -138,7 +138,7 @@ class CellRangerService {
 
         ReferenceGenomeIndex referenceGenomeIndex = workPackage.referenceGenomeIndex
 
-        File indexFile = referenceGenomeIndexService.getFile(referenceGenomeIndex)
+        Path indexPath = referenceGenomeIndexService.getFile(referenceGenomeIndex)
 
         String localCores = processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_CELLRANGER_CORE_COUNT)
         String localMem = processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_CELLRANGER_CORE_MEM)
@@ -151,7 +151,7 @@ class CellRangerService {
         Map<String, String> parameters = [
                 (CellRangerParameters.ID.parameterName)           : singleCellBamFile.id.toString(),
                 (CellRangerParameters.FASTQ.parameterName)        : fastqDirectories,
-                (CellRangerParameters.TRANSCRIPTOME.parameterName): indexFile.absolutePath,
+                (CellRangerParameters.TRANSCRIPTOME.parameterName): indexPath.toAbsolutePath().toString(),
                 (CellRangerParameters.SAMPLE.parameterName)       : singleCellBamFile.singleCellSampleName,
                 (CellRangerParameters.LOCAL_CORES.parameterName)  : localCores,
                 (CellRangerParameters.LOCAL_MEM.parameterName)    : localMem,
@@ -177,7 +177,7 @@ class CellRangerService {
 
         ReferenceGenomeIndex referenceGenomeIndex = workPackage.referenceGenomeIndex
 
-        File indexFile = referenceGenomeIndexService.getFile(referenceGenomeIndex)
+        Path indexFile = referenceGenomeIndexService.getFile(referenceGenomeIndex)
 
         Path sampleDirectory = cellRangerWorkFileService.getSampleDirectory(singleCellBamFile)
         String fastqDirectories = singleCellBamFile.containedSeqTracks*.sampleIdentifier.unique().collect { String sampleIdentifier ->
@@ -187,7 +187,7 @@ class CellRangerService {
         Map<String, String> parameters = [
                 (CellRangerParameters.ID.parameterName)           : singleCellBamFile.id.toString(),
                 (CellRangerParameters.FASTQ.parameterName)        : fastqDirectories,
-                (CellRangerParameters.TRANSCRIPTOME.parameterName): indexFile.absolutePath,
+                (CellRangerParameters.TRANSCRIPTOME.parameterName): indexFile.toAbsolutePath().toString(),
                 (CellRangerParameters.SAMPLE.parameterName)       : singleCellBamFile.singleCellSampleName,
                 (CellRangerParameters.LOCAL_CORES.parameterName)  : localCores,
                 (CellRangerParameters.LOCAL_MEM.parameterName)    : localMem,

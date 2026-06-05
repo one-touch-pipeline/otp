@@ -28,6 +28,8 @@ import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisConditionalFailJobSpec
 
+import java.nio.file.Path
+
 class IndelConditionalFailJobSpec extends AbstractAnalysisConditionalFailJobSpec {
 
     final static String BEDFILE_FILE_NAME = "bed_file"
@@ -49,9 +51,9 @@ class IndelConditionalFailJobSpec extends AbstractAnalysisConditionalFailJobSpec
         super.setupWithSeqType(seqTypeName)
 
         bedFile = DomainFactory.createBedFile([
-                referenceGenome: bamFile1.referenceGenome,
+                referenceGenome      : bamFile1.referenceGenome,
                 libraryPreparationKit: bamFile1.mergingWorkPackage.libraryPreparationKit,
-                fileName: BEDFILE_FILE_NAME,
+                fileName             : BEDFILE_FILE_NAME,
         ])
     }
 
@@ -71,7 +73,7 @@ class IndelConditionalFailJobSpec extends AbstractAnalysisConditionalFailJobSpec
 
         where:
         name               | bedfile                                                   || errmsgs
-        "bed file found"   | { BEDFILE_FILE_NAME }                                     || []
+        "bed file found"   | { Path.of(BEDFILE_FILE_NAME) }                            || []
         "bed file missing" | { throw new FileNotReadableException(BEDFILE_FILE_NAME) } || ["Required BED file ${BEDFILE_FILE_NAME} cannot be found or not readable.\ncan not read file: bed_file"]
     }
 
@@ -80,7 +82,7 @@ class IndelConditionalFailJobSpec extends AbstractAnalysisConditionalFailJobSpec
         super.setupMocking()
 
         job.bedFileService = Mock(BedFileService) {
-            (bamFile1.seqType.name == SeqTypeNames.EXOME.seqTypeName ? 1 : 0) * filePath(bedFile) >> true
+            (bamFile1.seqType.name == SeqTypeNames.EXOME.seqTypeName ? 1 : 0) * filePath(bedFile) >> Path.of(BEDFILE_FILE_NAME)
         }
     }
 }

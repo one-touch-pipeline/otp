@@ -37,7 +37,7 @@ println referenceGenome.gcContentFile
 println referenceGenome.mappabilityFile
 println referenceGenome.replicationTimeFile
 
-String basePath = referenceGenomeService.referenceGenomeDirectory(referenceGenome, false).absolutePath
+String basePath = referenceGenomeService.referenceGenomeDirectory(referenceGenome, false).toString()
 
 // for ACEseq
 ReferenceGenome.withTransaction {

@@ -106,7 +106,7 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, PanCanc
         job.roddyConfigValueService = new RoddyConfigValueService()
 
         job.roddyConfigValueService.referenceGenomeService = Mock(ReferenceGenomeService) {
-            fastaFilePath(roddyBamFile.referenceGenome) >> { tempDir.resolve("fasta-path").toFile() }
+            fastaFilePath(roddyBamFile.referenceGenome) >> { tempDir.resolve("fasta-path") }
         }
         job.roddyConfigValueService.rawSequenceDataViewFileService = new RawSequenceDataViewFileService()
         job.roddyConfigValueService.rawSequenceDataViewFileService.individualService = Mock(IndividualService) {
@@ -173,7 +173,7 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, PanCanc
         given:
         setupDataForGetConfigurationValues()
         job.bedFileService.filePath(_) >> { BedFile bedFile ->
-            return "BedFilePath"
+            return Path.of("BedFilePath")
         }
 
         SeqType exomeSeqType = DomainFactory.createExomeSeqType()
@@ -206,7 +206,7 @@ class PanCancerExecuteJobSpec extends Specification implements DataTest, PanCanc
         referenceGenome.fingerPrintingFileName = "fingerprintingFile"
         referenceGenome.save(flush: true)
 
-        job.roddyConfigValueService.referenceGenomeService.fingerPrintingFile(roddyBamFile.referenceGenome) >> { new File("${tempDir}${File.separator}fingerprint-path") }
+        job.roddyConfigValueService.referenceGenomeService.fingerPrintingFile(roddyBamFile.referenceGenome) >> { tempDir.resolve("fingerprint-path") }
 
         Map<String, String> expectedCommand = [
                 sharedFilesBaseDirectory         : [value: null, type: "path"],

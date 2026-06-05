@@ -31,7 +31,6 @@ import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.infrastructure.alignment.AlignmentLinkFileServiceFactoryService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
-import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.Path
@@ -40,6 +39,9 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 @Transactional
 class RoddyConfigValueService {
+
+    // constants for rna configurations
+    static final String RUN_ARRIBA = "RUN_ARRIBA"
 
     AlignmentLinkFileServiceFactoryService alignmentLinkFileServiceFactoryService
     ChromosomeIdentifierSortingService chromosomeIdentifierSortingService
@@ -66,7 +68,7 @@ class RoddyConfigValueService {
 
         Map<String, Map<String, String>> cValues = [:]
 
-        String referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome).absolutePath
+        String referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome)
         cValues.put("INDEX_PREFIX", createPathValueMap(referenceGenomeFastaFile)) // used for PanCancer pipeline
         cValues.put("GENOME_FA", createPathValueMap(referenceGenomeFastaFile)) // used for RNA pipeline
 
@@ -77,7 +79,7 @@ class RoddyConfigValueService {
 
         if (roddyBamFile.project.fingerPrinting && roddyBamFile.referenceGenome.fingerPrintingFileName) {
             cValues.put("runFingerprinting", createBooleanValueMap("true"))
-            cValues.put("fingerprintingSitesFile", createPathValueMap(referenceGenomeService.fingerPrintingFile(roddyBamFile.referenceGenome).absolutePath))
+            cValues.put("fingerprintingSitesFile", createPathValueMap(referenceGenomeService.fingerPrintingFile(roddyBamFile.referenceGenome).toString()))
         } else {
             cValues.put("runFingerprinting", createBooleanValueMap("false"))
         }
@@ -88,7 +90,7 @@ class RoddyConfigValueService {
     @CompileDynamic
     boolean getRunArriba(WorkflowStep workflowStep) {
         JsonNode combinedConfigJson = MAPPER.readTree(workflowStep.workflowRun.combinedConfig)
-        Boolean runArriba = combinedConfigJson?.RODDY?.cvalues?.fields()?.find { it.key == ProjectService.RUN_ARRIBA }?.value?.value?.asBoolean()
+        Boolean runArriba = combinedConfigJson?.RODDY?.cvalues?.fields()?.find { it.key == RUN_ARRIBA }?.value?.value?.asBoolean()
         Boolean useSingleEndProcessing = combinedConfigJson?.RODDY?.cvalues?.fields()?.find { it.key == 'useSingleEndProcessing' }?.value?.value?.asBoolean()
         return ((runArriba == null || runArriba == Boolean.TRUE) && (useSingleEndProcessing == null || useSingleEndProcessing == Boolean.FALSE))
     }

@@ -23,29 +23,23 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
-import spock.lang.IgnoreIf
-import spock.lang.Specification
-import spock.lang.TempDir
+import spock.lang.*
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.referencegenome.FastaEntry
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.ngsdata.taxonomy.Species
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.security.UserAndRoles
-import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.CreateFileHelper
-import de.dkfz.tbi.otp.utils.LocalShellHelper
+import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigSelector
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -104,7 +98,7 @@ class ReferenceGenomeServiceIntegrationSpec extends Specification implements Use
             )
         }
 
-        File expectedFile = referenceGenomeService.referenceGenomeMetaInformationPath(referenceGenome)
+        Path expectedFile = referenceGenomeService.referenceGenomeMetaInformationPath(referenceGenome)
         String expectedContent = """\
             |chr_1\t1\t1
             |chr_2\t2\t2
@@ -114,8 +108,8 @@ class ReferenceGenomeServiceIntegrationSpec extends Specification implements Use
         referenceGenomeService.createReferenceGenomeMetafile(referenceGenome)
 
         then:
-        expectedFile.exists()
-        expectedFile.text == expectedContent
+        Files.exists(expectedFile)
+        Files.readString(expectedFile) == expectedContent
     }
 
     @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
@@ -181,10 +175,10 @@ class ReferenceGenomeServiceIntegrationSpec extends Specification implements Use
     void testChromosomeLengthFile_AllFine() {
         given:
         MergingWorkPackage mergingWorkPackage = createDataForChromosomeSizeInformationFiles()
-        File pathExp = chromosomeLengthFile.toFile()
+        Path pathExp = chromosomeLengthFile
 
         when:
-        File pathAct = referenceGenomeService.chromosomeLengthFile(mergingWorkPackage, false)
+        Path pathAct = referenceGenomeService.chromosomeLengthFile(mergingWorkPackage, false)
 
         then:
         pathExp == pathAct
@@ -192,12 +186,13 @@ class ReferenceGenomeServiceIntegrationSpec extends Specification implements Use
 
     void testChromosomeLengthFile_WithFileCheck_AllFine() {
         given:
+        setupData()
         MergingWorkPackage mergingWorkPackage = createDataForChromosomeSizeInformationFiles()
-        File pathExp = chromosomeLengthFile.toFile()
+        Path pathExp = chromosomeLengthFile
         CreateFileHelper.createFile(pathExp)
 
         when:
-        File pathAct = referenceGenomeService.chromosomeLengthFile(mergingWorkPackage, true)
+        Path pathAct = referenceGenomeService.chromosomeLengthFile(mergingWorkPackage, true)
 
         then:
         pathExp == pathAct
@@ -250,6 +245,7 @@ class ReferenceGenomeServiceIntegrationSpec extends Specification implements Use
 
     void testChromosomeLengthFile_ChromosomeLengthFileFileDoesNotExistAndExistenceIsChecked_ShouldFail() {
         given:
+        setupData()
         MergingWorkPackage mergingWorkPackage = createDataForChromosomeSizeInformationFiles()
 
         when:

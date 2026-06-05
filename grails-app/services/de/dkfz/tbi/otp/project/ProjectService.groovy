@@ -68,19 +68,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 @Transactional
 class ProjectService {
 
-    static final long FACTOR_1024 = 1024
-
-    static final String PHIX_INFIX = 'PhiX'
-
-    // constants for rna configurations
-    static final String ARRIBA_KNOWN_FUSIONS = "ARRIBA_KNOWN_FUSIONS"
-    static final String ARRIBA_BLACKLIST = "ARRIBA_BLACKLIST"
-    static final String GENOME_GATK_INDEX = "GENOME_GATK_INDEX"
-    static final String GENOME_KALLISTO_INDEX = "GENOME_KALLISTO_INDEX"
-    static final String GENOME_STAR_INDEX = "GENOME_STAR_INDEX"
-    static final String RUN_ARRIBA = "RUN_ARRIBA"
-    static final String RUN_FEATURE_COUNTS_DEXSEQ = "RUN_FEATURE_COUNTS_DEXSEQ"
-
     static final String PROJECT_INFO = "projectInfo"
 
     @Autowired
@@ -89,12 +76,10 @@ class ProjectService {
     ConfigService configService
     FileService fileService
     FileSystemService fileSystemService
-    GeneModelService geneModelService
     ProcessingOptionService processingOptionService
     ProjectInfoService projectInfoService
     ProjectRequestService projectRequestService
     ProjectRequestStateProvider projectRequestStateProvider
-    ReferenceGenomeIndexService referenceGenomeIndexService
     ReferenceGenomeService referenceGenomeService
     RoddyWorkflowConfigService roddyWorkflowConfigService
     SophiaService sophiaService

@@ -171,7 +171,7 @@ abstract class AbstractAnalysisConditionalFailJobSpec extends Specification impl
             0 * _
         }
         job.referenceGenomeService = Mock(ReferenceGenomeService) {
-            1 * fastaFilePath(_) >> fastaDir.toFile()
+            1 * fastaFilePath(_) >> fastaDir
             0 * _
         }
         job.fileService = Mock(FileService) {

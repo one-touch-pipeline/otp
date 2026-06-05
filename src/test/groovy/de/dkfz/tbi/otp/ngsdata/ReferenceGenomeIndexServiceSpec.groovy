@@ -27,8 +27,11 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeIndexService
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
+
+import java.nio.file.Paths
 
 class ReferenceGenomeIndexServiceSpec extends Specification implements DataTest, ServiceUnitTest<ReferenceGenomeIndexService> {
 
@@ -47,6 +50,7 @@ class ReferenceGenomeIndexServiceSpec extends Specification implements DataTest,
     void setup() {
         service.referenceGenomeService = new ReferenceGenomeService()
         service.referenceGenomeService.processingOptionService = new ProcessingOptionService()
+        service.referenceGenomeService.fileSystemService = new TestFileSystemService()
         ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome(path: "1KGRef")
         ToolName toolName = DomainFactory.createToolName(path: "toolName")
         referenceGenomeIndex = DomainFactory.createReferenceGenomeIndex(path: "path", toolName: toolName, referenceGenome: referenceGenome)
@@ -55,7 +59,7 @@ class ReferenceGenomeIndexServiceSpec extends Specification implements DataTest,
 
     void "test getFile"() {
         expect:
-        service.getFile(referenceGenomeIndex) == new File("/referenceGenomes/1KGRef/indexes/toolName/path")
+        service.getFile(referenceGenomeIndex) == Paths.get("/referenceGenomes/1KGRef/indexes/toolName/path")
     }
 
     void "test getFile fails with null"() {

@@ -27,8 +27,11 @@ import spock.lang.*
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 
+import java.nio.file.Files
 import java.nio.file.Path
 
 class BedFileServiceSpec extends Specification implements DataTest, ServiceUnitTest<BedFileService> {
@@ -61,6 +64,13 @@ class BedFileServiceSpec extends Specification implements DataTest, ServiceUnitT
 
         service.referenceGenomeService = new ReferenceGenomeService()
         service.referenceGenomeService.processingOptionService = new ProcessingOptionService()
+        service.referenceGenomeService.fileSystemService = new TestFileSystemService()
+        service.referenceGenomeService.fileService = Mock(FileService) {
+            _ * fileIsReadable(_) >> { Path path ->
+                return Files.isReadable(path)
+            }
+        }
+        service.fileService = service.referenceGenomeService.fileService
     }
 
     void "test filePath, when bedFile is null, should fail"() {
@@ -76,7 +86,7 @@ class BedFileServiceSpec extends Specification implements DataTest, ServiceUnitT
         service.filePath(bedFile)
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown()
         e.message.contains("the bedFile can not be read")
     }
 
@@ -85,7 +95,7 @@ class BedFileServiceSpec extends Specification implements DataTest, ServiceUnitT
         new File(referenceGenomesBaseDirectory, 'bedFileName').createNewFile()
 
         expect:
-        service.filePath(bedFile) == "${referenceGenomesBaseDirectory.parentFile.path}/targetRegions/bedFileName" as String
+        service.filePath(bedFile) == Path.of("${referenceGenomesBaseDirectory.parentFile.path}/targetRegions/bedFileName")
     }
 
     @Unroll

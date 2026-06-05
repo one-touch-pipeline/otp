@@ -94,8 +94,8 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
         roddyBamFile.referenceGenome.save(flush: true)
 
         service.referenceGenomeService = Mock(ReferenceGenomeService) {
-            _ * fastaFilePath(roddyBamFile.referenceGenome) >> { Paths.get("/fasta-path").toFile() }
-            _ * fingerPrintingFile(roddyBamFile.referenceGenome) >> { Paths.get("/fingerprint-path").toFile() }
+            _ * fastaFilePath(roddyBamFile.referenceGenome) >> { Paths.get("/fasta-path") }
+            _ * fingerPrintingFile(roddyBamFile.referenceGenome) >> { Paths.get("/fingerprint-path") }
         }
 
         Map<String, String> expectedCommand = [
@@ -119,7 +119,7 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
         RoddyBamFile roddyBamFile = createBamFile()
 
         service.referenceGenomeService = Mock(ReferenceGenomeService) {
-            fastaFilePath(roddyBamFile.referenceGenome) >> { Paths.get("/fasta-path").toFile() }
+            fastaFilePath(roddyBamFile.referenceGenome) >> { Paths.get("/fasta-path") }
         }
 
         Map<String, String> expectedCommand = [
@@ -143,7 +143,7 @@ class RoddyConfigValueServiceSpec extends Specification implements ServiceUnitTe
         roddyBamFile.mergingWorkPackage.seqType = DomainFactory.createRnaPairedSeqType()
 
         service.referenceGenomeService = Mock(ReferenceGenomeService) {
-            fastaFilePath(roddyBamFile.referenceGenome) >> { Paths.get("/fasta-path").toFile() }
+            fastaFilePath(roddyBamFile.referenceGenome) >> { Paths.get("/fasta-path") }
         }
 
         Map<String, String> expectedCommand = [

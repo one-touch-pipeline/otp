@@ -76,14 +76,14 @@ class SnvExecuteJob extends AbstractExecuteRoddyPipelineJob implements SnvWorkfl
         AbstractBamFile bamFileControl = snvCallingInstance.sampleType2BamFile
 
         ReferenceGenome referenceGenome = snvCallingInstance.referenceGenome
-        File referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(referenceGenome)
-        File chromosomeLengthFile = referenceGenomeService.chromosomeLengthFile(bamFileControl.mergingWorkPackage)
+        Path referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(referenceGenome)
+        Path chromosomeLengthFile = referenceGenomeService.chromosomeLengthFile(bamFileControl.mergingWorkPackage)
 
         Path individualPath = individualService.getViewByPidPath(snvCallingInstance.individual, snvCallingInstance.seqType)
 
         Map<String, Map<String, String>> additionalValues = [
-                REFERENCE_GENOME          : roddyConfigValueService.createPathValueMap(referenceGenomeFastaFile.path.toString()),
-                CHROMOSOME_LENGTH_FILE    : roddyConfigValueService.createPathValueMap(chromosomeLengthFile.path.toString()),
+                REFERENCE_GENOME          : roddyConfigValueService.createPathValueMap(referenceGenomeFastaFile.toString()),
+                CHROMOSOME_LENGTH_FILE    : roddyConfigValueService.createPathValueMap(chromosomeLengthFile.toString()),
                 CHR_SUFFIX                : roddyConfigValueService.createValueMap(referenceGenome.chromosomeSuffix),
                 CHR_PREFIX                : roddyConfigValueService.createValueMap(referenceGenome.chromosomePrefix),
                 analysisMethodNameOnOutput: roddyConfigValueService.createValueMap(individualPath.relativize(resultDirectory).toString()),

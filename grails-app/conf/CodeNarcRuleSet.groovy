@@ -679,6 +679,7 @@ All the Rules that will be used for OTP
     }
     SpaceAfterOpeningBrace {
         priority = CRITICAL
+        ignoreEmptyBlock = true
     }
     SpaceAfterSemicolon {
         priority = CRITICAL
@@ -702,6 +703,7 @@ All the Rules that will be used for OTP
     }
     SpaceBeforeClosingBrace {
         priority = CRITICAL
+        ignoreEmptyBlock = true
     }
     SpaceBeforeOpeningBrace {
         priority = CRITICAL

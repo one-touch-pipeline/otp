@@ -307,7 +307,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         given:
         new TestConfigService()
 
-        final File indexFile = new File(TestCase.uniqueNonExistentPath, 'someIndex')
+        final Path indexFile = TestCase.uniqueNonExistentPath.toPath().resolve('someIndex')
 
         String sampleIdentifier = "abc *ÄÜ?°!§%&/()=?`def"
         CellRangerMergingWorkPackage mwp = createMergingWorkPackage([
@@ -344,7 +344,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         then:
         map[CellRangerParameters.ID.parameterName] == singleCellBamFile.id.toString()
         map[CellRangerParameters.FASTQ.parameterName] == sampleDirectory.resolve("abc________________def").toFile().absolutePath
-        map[CellRangerParameters.TRANSCRIPTOME.parameterName] == indexFile.absolutePath
+        map[CellRangerParameters.TRANSCRIPTOME.parameterName] == indexFile.toAbsolutePath().toString()
         map[CellRangerParameters.SAMPLE.parameterName] == singleCellBamFile.singleCellSampleName
         map[CellRangerParameters.LOCAL_CORES.parameterName] ==~ /\d+/
         map[CellRangerParameters.LOCAL_MEM.parameterName] ==~ /\d+/

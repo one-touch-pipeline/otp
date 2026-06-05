@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
@@ -40,9 +41,10 @@ import de.dkfz.tbi.otp.ngsdata.taxonomy.Species
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 
-import java.nio.file.Path
+import java.nio.file.*
 
 class ReferenceGenomeServiceSpec extends Specification implements DataTest, ServiceUnitTest<ReferenceGenomeService>, TaxonomyFactory, DomainFactoryCore {
 
@@ -50,8 +52,8 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
     ReferenceGenomeEntry referenceGenomeEntry
     Project project
 
-    File directory
-    File file
+    Path directory
+    Path file
 
     @TempDir
     Path tempDir
@@ -73,14 +75,19 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         service.processingOptionService = new ProcessingOptionService()
         service.fileSystemService = new TestFileSystemService()
         service.fileService = new FileService([
-                configService: service.configService,
+                configService    : service.configService,
+                remoteShellHelper: Mock(RemoteShellHelper) {
+                    _ * executeCommandReturnProcessOutput(_) >> { String command ->
+                        LocalShellHelper.executeAndWait(command)
+                    }
+                },
         ])
         service.configService.processingOptionService = service.processingOptionService
 
-        directory = tempDir.resolve("reference_genomes/referenceGenome").toFile()
-        DomainFactory.createProcessingOptionBasePathReferenceGenome(directory.parent)
+        directory = tempDir.resolve("reference_genomes/referenceGenome")
+        DomainFactory.createProcessingOptionBasePathReferenceGenome(directory.parent.toString())
 
-        file = CreateFileHelper.createFile(directory.toPath().resolve("prefixName.fa"), "test").toFile()
+        file = CreateFileHelper.createFile(directory.resolve("prefixName.fa"), "test")
 
         project = createProject()
         project.save(flush: true)
@@ -113,10 +120,10 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
     void testFilePathToDirectoryCorrect() {
         given:
         setupTest()
-        File pathExp = directory
+        Path pathExp = directory
 
         when:
-        File pathAct = service.referenceGenomeDirectory(referenceGenome) as File
+        Path pathAct = service.referenceGenomeDirectory(referenceGenome)
 
         then:
         pathExp == pathAct
@@ -143,7 +150,7 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         service.referenceGenomeDirectory(referenceGenome)
 
         then:
-        directory.exists() == false
+        !Files.exists(directory)
         thrown RuntimeException
     }
 
@@ -151,23 +158,23 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         given:
         setupTest()
         boolean deletion = directory.deleteDir()
-        File pathExp = directory
+        Path pathExp = directory
 
         when:
-        File pathAct = service.referenceGenomeDirectory(referenceGenome, false)
+        Path pathAct = service.referenceGenomeDirectory(referenceGenome, false)
 
         then:
-        deletion == true
+        deletion
         pathExp == pathAct
     }
 
     void testFilePathToDirectory() {
         given:
         setupTest()
-        File pathExp = directory
+        Path pathExp = directory
 
         when:
-        File pathAct = service.referenceGenomeDirectory(referenceGenome)
+        Path pathAct = service.referenceGenomeDirectory(referenceGenome)
 
         then:
         pathExp == pathAct
@@ -176,10 +183,10 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
     void testFilePathToDirectoryWrongPath() {
         given:
         setupTest()
-        File wrongPath = new File("test")
+        Path wrongPath = Paths.get("test")
 
         when:
-        File pathAct = service.referenceGenomeDirectory(referenceGenome)
+        Path pathAct = service.referenceGenomeDirectory(referenceGenome)
 
         then:
         wrongPath != pathAct
@@ -206,8 +213,8 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         service.referenceGenomeDirectory(referenceGenome)
 
         then:
-        deletion == true
-        directory.exists() == false
+        deletion
+        !Files.exists(directory)
         thrown RuntimeException
     }
 
@@ -215,23 +222,23 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
         given:
         setupTest()
         boolean deletion = directory.deleteDir()
-        File pathExp = directory
+        Path pathExp = directory
 
         when:
-        File pathAct = service.referenceGenomeDirectory(referenceGenome, false)
+        Path pathAct = service.referenceGenomeDirectory(referenceGenome, false)
 
         then:
-        deletion == true
+        deletion
         pathExp == pathAct
     }
 
     void testFilePath() {
         given:
         setupTest()
-        File pathExp = new File(directory, "prefixName.fa")
+        Path pathExp = directory.resolve("prefixName.fa")
 
         when:
-        File pathAct = service.fastaFilePath(referenceGenome)
+        Path pathAct = service.fastaFilePath(referenceGenome)
 
         then:
         pathExp == pathAct
@@ -240,10 +247,10 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
     void testFingerPrintingFile() {
         given:
         setupTest()
-        File pathExp = new File(directory, "fingerPrinting/fingerPrinting.bed")
+        Path pathExp = directory.resolve("fingerPrinting/fingerPrinting.bed")
 
         when:
-        File pathAct = service.fingerPrintingFile(referenceGenome, false)
+        Path pathAct = service.fingerPrintingFile(referenceGenome, false)
 
         then:
         pathExp == pathAct
@@ -300,10 +307,10 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
     void testPathToChromosomeSizeFilesPerReference_DirectoryDoesNotExist_WithoutExistCheck_AllFine() {
         given:
         setupTest()
-        File pathExp = new File(directory, ReferenceGenomeService.CHROMOSOME_SIZE_FILES_PREFIX)
+        Path pathExp = directory.resolve(ReferenceGenomeService.CHROMOSOME_SIZE_FILES_PREFIX)
 
         when:
-        File pathAct = service.pathToChromosomeSizeFilesPerReference(referenceGenome, false)
+        Path pathAct = service.pathToChromosomeSizeFilesPerReference(referenceGenome, false)
 
         then:
         pathExp == pathAct
@@ -312,11 +319,11 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
     void testPathToChromosomeSizeFilesPerReference_DirectoryExist_WithExistCheck_AllFine() {
         given:
         setupTest()
-        File pathExp = new File(directory, ReferenceGenomeService.CHROMOSOME_SIZE_FILES_PREFIX)
-        CreateFileHelper.createFile(pathExp)
+        Path pathExp = directory.resolve(ReferenceGenomeService.CHROMOSOME_SIZE_FILES_PREFIX)
+        Files.createFile(pathExp)
 
         when:
-        File pathAct = service.pathToChromosomeSizeFilesPerReference(referenceGenome, true)
+        Path pathAct = service.pathToChromosomeSizeFilesPerReference(referenceGenome, true)
 
         then:
         pathExp == pathAct
@@ -325,10 +332,10 @@ class ReferenceGenomeServiceSpec extends Specification implements DataTest, Serv
     void test_cytosinePositionIndexFilePath_AllFine() {
         given:
         setupTest()
-        File pathExp = new File(directory, referenceGenome.cytosinePositionsIndex)
+        Path pathExp = directory.resolve(referenceGenome.cytosinePositionsIndex)
 
         when:
-        CreateFileHelper.createFile(pathExp)
+        Files.createFile(pathExp)
 
         then:
         pathExp == service.cytosinePositionIndexFilePath(referenceGenome)

@@ -25,19 +25,21 @@ import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeIndex
 
+import java.nio.file.Path
+
 @Transactional
 class ReferenceGenomeIndexService {
     ReferenceGenomeService referenceGenomeService
 
     static final String REFERENCE_GENOME_INDEX_PATH_COMPONENT = "indexes"
 
-    File getFile(ReferenceGenomeIndex referenceGenomeIndex) {
+    Path getFile(ReferenceGenomeIndex referenceGenomeIndex) {
         assert referenceGenomeIndex : "referenceGenomeIndex is null"
-        return new File(getBasePath(referenceGenomeIndex), referenceGenomeIndex.path)
+        return getBasePath(referenceGenomeIndex).resolve(referenceGenomeIndex.path)
     }
 
-    private File getBasePath(ReferenceGenomeIndex referenceGenomeIndex) {
-        return new File(new File(referenceGenomeService.referenceGenomeDirectory(referenceGenomeIndex.referenceGenome, false),
-                REFERENCE_GENOME_INDEX_PATH_COMPONENT), referenceGenomeIndex.toolName.path)
+    private Path getBasePath(ReferenceGenomeIndex referenceGenomeIndex) {
+        return referenceGenomeService.referenceGenomeDirectory(referenceGenomeIndex.referenceGenome, false).
+                resolve(REFERENCE_GENOME_INDEX_PATH_COMPONENT).resolve(referenceGenomeIndex.toolName.path)
     }
 }

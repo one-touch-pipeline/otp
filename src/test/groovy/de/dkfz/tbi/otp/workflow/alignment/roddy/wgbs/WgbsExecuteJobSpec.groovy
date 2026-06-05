@@ -106,15 +106,15 @@ class WgbsExecuteJobSpec extends Specification implements DataTest, WgbsAlignmen
         job.bedFileService = Mock(BedFileService)
         job.roddyConfigValueService = new RoddyConfigValueService()
         job.referenceGenomeService = Mock(ReferenceGenomeService) {
-            fastaFilePath(roddyBamFile.referenceGenome) >> { tempDir.resolve("fasta-path").toAbsolutePath().toFile() }
+            fastaFilePath(roddyBamFile.referenceGenome) >> { tempDir.resolve("fasta-path").toAbsolutePath() }
             cytosinePositionIndexFilePath(roddyBamFile.referenceGenome) >>
-                    { Paths.get(tempDir.toString(), "cytosine-position-index-path").toAbsolutePath().toFile() }
+                    { tempDir.resolve("cytosine-position-index-path").toAbsolutePath() }
         }
         job.roddyConfigValueService.referenceGenomeService = job.referenceGenomeService
 
         DomainFactory.createRoddyAlignableSeqTypes()
 
-        DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(tempDir.toString(), "reference_genomes").path)
+        DomainFactory.createProcessingOptionBasePathReferenceGenome(tempDir.resolve("reference_genomes").toString())
     }
 
     void cleanup() {
@@ -196,7 +196,7 @@ class WgbsExecuteJobSpec extends Specification implements DataTest, WgbsAlignmen
         referenceGenome.fingerPrintingFileName = "fingerprintingFile"
         referenceGenome.save(flush: true)
 
-        job.roddyConfigValueService.referenceGenomeService.fingerPrintingFile(roddyBamFile.referenceGenome) >> { tempDir.resolve("fingerprint-path").toAbsolutePath().toFile() }
+        job.roddyConfigValueService.referenceGenomeService.fingerPrintingFile(roddyBamFile.referenceGenome) >> { tempDir.resolve("fingerprint-path").toAbsolutePath() }
         job.roddyConfigValueService.chromosomeIdentifierSortingService = new ChromosomeIdentifierSortingService()
 
         Map<String, String> expectedCommand = [

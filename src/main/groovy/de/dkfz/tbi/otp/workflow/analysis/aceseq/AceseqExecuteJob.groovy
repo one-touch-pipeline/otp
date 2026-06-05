@@ -75,13 +75,13 @@ class AceseqExecuteJob extends AbstractExecuteRoddyPipelineJob implements Aceseq
         AbstractBamFile bamFileDisease = aceseqInstance.sampleType1BamFile
 
         ReferenceGenome referenceGenome = bamFileDisease.referenceGenome
-        File referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(referenceGenome)
-        File chromosomeLengthFile = referenceGenomeService.chromosomeLengthFile(bamFileDisease.mergingWorkPackage)
-        File gcContentFile = referenceGenomeService.gcContentFile(bamFileDisease.mergingWorkPackage)
+        Path referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(referenceGenome)
+        Path chromosomeLengthFile = referenceGenomeService.chromosomeLengthFile(bamFileDisease.mergingWorkPackage)
+        Path gcContentFile = referenceGenomeService.gcContentFile(bamFileDisease.mergingWorkPackage)
 
         Map<String, Map<String, String>> additionalValues = [
-                REFERENCE_GENOME              : roddyConfigValueService.createPathValueMap(referenceGenomeFastaFile.path),
-                CHROMOSOME_LENGTH_FILE        : roddyConfigValueService.createPathValueMap(chromosomeLengthFile.path),
+                REFERENCE_GENOME              : roddyConfigValueService.createPathValueMap(referenceGenomeFastaFile.toString()),
+                CHROMOSOME_LENGTH_FILE        : roddyConfigValueService.createPathValueMap(chromosomeLengthFile.toString()),
                 CHR_SUFFIX                    : roddyConfigValueService.createValueMap(referenceGenome.chromosomeSuffix),
                 CHR_PREFIX                    : roddyConfigValueService.createValueMap(referenceGenome.chromosomePrefix),
 
@@ -89,7 +89,7 @@ class AceseqExecuteJob extends AbstractExecuteRoddyPipelineJob implements Aceseq
                 svOutputDirectory             : roddyConfigValueService.createPathValueMap(workDirectory.toString()),
                 MAPPABILITY_FILE              : roddyConfigValueService.createPathValueMap(referenceGenome.mappabilityFile),
                 REPLICATION_TIME_FILE         : roddyConfigValueService.createPathValueMap(referenceGenome.replicationTimeFile),
-                GC_CONTENT_FILE               : roddyConfigValueService.createPathValueMap(gcContentFile.path),
+                GC_CONTENT_FILE               : roddyConfigValueService.createPathValueMap(gcContentFile.toString()),
                 GENETIC_MAP_FILE              : roddyConfigValueService.createPathValueMap(referenceGenome.geneticMapFile),
                 KNOWN_HAPLOTYPES_FILE         : roddyConfigValueService.createPathValueMap(referenceGenome.knownHaplotypesFile),
                 KNOWN_HAPLOTYPES_LEGEND_FILE  : roddyConfigValueService.createPathValueMap(referenceGenome.knownHaplotypesLegendFile),

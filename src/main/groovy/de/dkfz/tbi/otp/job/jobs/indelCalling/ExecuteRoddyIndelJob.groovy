@@ -68,9 +68,9 @@ class ExecuteRoddyIndelJob extends AbstractExecutePanCanJob<IndelCallingInstance
         Path bamFileControlPath = linkBamFileInWorkDirectory(bamFileControl, workDirectory)
 
         ReferenceGenome referenceGenome = indelCallingInstance.referenceGenome
-        File referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(referenceGenome)
+        Path referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(referenceGenome)
         assert referenceGenomeFastaFile: "Path to the reference genome file is null"
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(referenceGenomeFastaFile)
+        fileService.ensureFileIsReadableAndNotEmpty(referenceGenomeFastaFile)
 
         Path individualPath = individualService.getViewByPidPath(indelCallingInstance.individual, indelCallingInstance.seqType)
         Path resultDirectory = indelCallingService.getWorkDirectory(indelCallingInstance)
@@ -80,7 +80,7 @@ class ExecuteRoddyIndelJob extends AbstractExecutePanCanJob<IndelCallingInstance
         cValues.add("sample_list:${bamFileControl.sampleType.dirName};${bamFileDisease.sampleType.dirName}")
         cValues.add("possibleTumorSampleNamePrefixes:${bamFileDisease.sampleType.dirName}")
         cValues.add("possibleControlSampleNamePrefixes:${bamFileControl.sampleType.dirName}")
-        cValues.add("REFERENCE_GENOME:${referenceGenomeFastaFile.path}")
+        cValues.add("REFERENCE_GENOME:${referenceGenomeFastaFile}")
         cValues.add("CHR_SUFFIX:${referenceGenome.chromosomeSuffix}")
         cValues.add("CHR_PREFIX:${referenceGenome.chromosomePrefix}")
         cValues.add("analysisMethodNameOnOutput:${individualPath.relativize(resultDirectory)}")
@@ -90,7 +90,7 @@ class ExecuteRoddyIndelJob extends AbstractExecutePanCanJob<IndelCallingInstance
 
         if (bamFileDisease.seqType.isExome()) {
             BedFile bedFile = bamFileDisease.bedFile
-            File bedFilePath = bedFileService.filePath(bedFile) as File
+            Path bedFilePath = bedFileService.filePath(bedFile)
             cValues.add("EXOME_CAPTURE_KIT_BEDFILE:${bedFilePath}")
         }
 

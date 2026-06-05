@@ -89,7 +89,7 @@ class IndelExecuteJobSpec extends Specification implements DataTest, WorkflowSys
         }
         job.roddyConfigValueService = new RoddyConfigValueService()
         job.referenceGenomeService = Mock(ReferenceGenomeService) {
-            fastaFilePath(instance.referenceGenome) >> { new File("/fasta-path") }
+            fastaFilePath(instance.referenceGenome) >> { Paths.get("/fasta-path") }
         }
         job.individualService = Mock(IndividualService) {
             getViewByPidPath(_, _) >> tempDir

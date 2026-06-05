@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.*
 
+import java.nio.file.Files
 import java.nio.file.Path
 
 class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
@@ -91,8 +92,10 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
 
     void "prepareAndReturnWorkflowSpecificCValues, when all fine, return correct value list"() {
         given:
-        File fasta = CreateFileHelper.createFile(tempDir.resolve("fasta.fa").toFile())
-        File chromosomeLength = tempDir.toFile()
+        Path fasta = tempDir.resolve("fasta.fa")
+        Files.createFile(fasta)
+        Path chromosomeLength = tempDir.resolve("chrTotalLength.tsv")
+        Files.createFile(chromosomeLength)
 
         TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         IndividualService individualService = Mock(IndividualService) {
@@ -103,7 +106,7 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
                 configService         : configService,
                 individualService     : individualService,
                 snvCallingService     : Spy(SnvCallingService) {
-                    1 * validateInputBamFiles(_) >> { }
+                    1 * validateInputBamFiles(_) >> {}
                 },
                 referenceGenomeService: Mock(ReferenceGenomeService) {
                     1 * fastaFilePath(_) >> fasta
@@ -112,6 +115,10 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
                 },
         ])
         job.fileSystemService = new TestFileSystemService()
+        job.fileService = Mock(FileService) {
+                1 * ensureFileIsReadableAndNotEmpty(fasta)
+                0 * _
+        }
         job.snvCallingService.individualService = individualService
         job.chromosomeIdentifierSortingService = new ChromosomeIdentifierSortingService()
 
@@ -144,8 +151,8 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
                 "sample_list:${bamFileControl.sampleType.dirName};${bamFileDisease.sampleType.dirName}",
                 "possibleTumorSampleNamePrefixes:${bamFileDisease.sampleType.dirName}",
                 "possibleControlSampleNamePrefixes:${bamFileControl.sampleType.dirName}",
-                "REFERENCE_GENOME:${fasta.path}",
-                "CHROMOSOME_LENGTH_FILE:${chromosomeLength.path}",
+                "REFERENCE_GENOME:${fasta}",
+                "CHROMOSOME_LENGTH_FILE:${chromosomeLength}",
                 "CHR_SUFFIX:${snvCallingInstance.referenceGenome.chromosomeSuffix}",
                 "CHR_PREFIX:${snvCallingInstance.referenceGenome.chromosomePrefix}",
                 "${job.getChromosomeIndexParameterWithoutMitochondrium(snvCallingInstance.referenceGenome)}",
@@ -184,11 +191,11 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
         ExecuteRoddySnvJob job = new ExecuteRoddySnvJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_) >> { }
+                    1 * correctPermissionsAndGroups(_) >> {}
                 },
                 snvCallingService         : Spy(SnvCallingService) {
-                    1 * validateInputBamFiles(_) >> { }
-                    1 * getResultRequiredForRunYapsaAndEnsureIsReadableAndNotEmpty(_) >> { }
+                    1 * validateInputBamFiles(_) >> {}
+                    1 * getResultRequiredForRunYapsaAndEnsureIsReadableAndNotEmpty(_) >> {}
                 },
         ])
         job.snvCallingService.individualService = individualService
@@ -263,7 +270,7 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
         ExecuteRoddySnvJob job = new ExecuteRoddySnvJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_) >> { }
+                    1 * correctPermissionsAndGroups(_) >> {}
                 },
         ])
 

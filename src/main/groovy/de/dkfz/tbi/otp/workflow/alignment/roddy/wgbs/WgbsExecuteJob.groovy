@@ -70,8 +70,8 @@ class WgbsExecuteJob extends RoddyAlignmentExecuteJob implements PanCancerShared
         conf.putAll(roddyConfigValueService.getChromosomeIndexParameterWithMitochondrion(roddyBamFile.referenceGenome))
 
         if (roddyBamFile.referenceGenome.cytosinePositionsIndex) {
-            File file = referenceGenomeService.cytosinePositionIndexFilePath(roddyBamFile.referenceGenome)
-            conf.put("CYTOSINE_POSITIONS_INDEX", roddyConfigValueService.createPathValueMap(file.absolutePath))
+            Path path = referenceGenomeService.cytosinePositionIndexFilePath(roddyBamFile.referenceGenome)
+            conf.put("CYTOSINE_POSITIONS_INDEX", roddyConfigValueService.createPathValueMap(path.toString()))
         } else {
             throw new JobFailedException("Cytosine position index for reference genome ${roddyBamFile.referenceGenome} is not defined.")
         }

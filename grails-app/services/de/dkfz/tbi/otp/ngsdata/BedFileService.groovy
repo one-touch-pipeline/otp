@@ -24,8 +24,11 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 import de.dkfz.tbi.otp.utils.CollectionUtils
+
+import java.nio.file.Path
 
 import static org.springframework.util.Assert.notNull
 
@@ -33,17 +36,19 @@ import static org.springframework.util.Assert.notNull
 class BedFileService {
 
     ReferenceGenomeService referenceGenomeService
+
+    FileService fileService
+
     private final static String TARGET_REGIONS_DIR = "targetRegions"
 
     /**
      * @return absolute path to the given {@link BedFile}
      */
-    String filePath(BedFile bedFile, boolean checkExistence = true) {
+    Path filePath(BedFile bedFile, boolean checkExistence = true) {
         notNull(bedFile, "bedFile must not be null")
-        String refGenomePath = referenceGenomeService.referenceGenomeDirectory(bedFile.referenceGenome, checkExistence).path
-        String bedFilePath = "${refGenomePath}/${TARGET_REGIONS_DIR}/${bedFile.fileName}"
-        File file = new File(bedFilePath)
-        if (!checkExistence || file.canRead()) {
+        Path refGenomePath = referenceGenomeService.referenceGenomeDirectory(bedFile.referenceGenome, checkExistence)
+        Path bedFilePath = refGenomePath.resolve(TARGET_REGIONS_DIR).resolve(bedFile.fileName)
+        if (!checkExistence || fileService.fileIsReadable(bedFilePath)) {
             return bedFilePath
         }
         throw new FileNotReadableException("the bedFile can not be read: ${bedFilePath}")

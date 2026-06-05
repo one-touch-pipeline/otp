@@ -76,22 +76,22 @@ class ExecuteRoddyAceseqJob extends AbstractExecutePanCanJob<AceseqInstance> imp
         ReferenceGenome referenceGenome = bamFileDisease.referenceGenome
         referenceGenomeService.checkReferenceGenomeFilesAvailability(bamFileDisease.mergingWorkPackage)
 
-        File referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(referenceGenome)
+        Path referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(referenceGenome)
         assert referenceGenomeFastaFile: "Path to the reference genome file is null"
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(referenceGenomeFastaFile)
+        fileService.ensureFileIsReadableAndNotEmpty(referenceGenomeFastaFile)
 
-        File chromosomeLengthFile = referenceGenomeService.chromosomeLengthFile(bamFileDisease.mergingWorkPackage)
+        Path chromosomeLengthFile = referenceGenomeService.chromosomeLengthFile(bamFileDisease.mergingWorkPackage)
         assert chromosomeLengthFile: "Path to the chromosome length file is null"
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(chromosomeLengthFile)
+        fileService.ensureFileIsReadableAndNotEmpty(chromosomeLengthFile)
 
-        File gcContentFile = referenceGenomeService.gcContentFile(bamFileDisease.mergingWorkPackage)
+        Path gcContentFile = referenceGenomeService.gcContentFile(bamFileDisease.mergingWorkPackage)
         assert gcContentFile: "Path to the gc content file is null"
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(gcContentFile)
+        fileService.ensureFileIsReadableAndNotEmpty(gcContentFile)
 
         SophiaInstance sophiaInstance = SophiaInstance.getLatestValidSophiaInstanceForSamplePair(aceseqInstance.samplePair)
         Path aceseqInputFile = sophiaService.getFinalAceseqInputFile(sophiaInstance)
         assert aceseqInputFile : "Path to the ACEseq input file is null"
-        fileService.ensureFileIsReadableAndNotEmptyStatic(aceseqInputFile)
+        fileService.ensureFileIsReadableAndNotEmpty(aceseqInputFile)
 
         fileService.createLink(
                 aceseqService.getWorkDirectory(aceseqInstance).resolve(aceseqInputFile.fileName), aceseqInputFile,

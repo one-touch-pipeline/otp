@@ -71,9 +71,9 @@ class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<SnvCallingInstance> im
         File bamFileControlPath = bamFileControl.pathForFurtherProcessing
 
         ReferenceGenome referenceGenome = snvCallingInstance.referenceGenome
-        File referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(referenceGenome)
+        Path referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(referenceGenome)
         assert referenceGenomeFastaFile: "Path to the reference genome file is null"
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(referenceGenomeFastaFile)
+        fileService.ensureFileIsReadableAndNotEmpty(referenceGenomeFastaFile)
 
         Path individualPath = individualService.getViewByPidPath(snvCallingInstance.individual, snvCallingInstance.seqType)
         Path resultDirectory = snvCallingService.getWorkDirectory(snvCallingInstance)
@@ -83,8 +83,8 @@ class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<SnvCallingInstance> im
         cValues.add("sample_list:${bamFileControl.sampleType.dirName};${bamFileDisease.sampleType.dirName}")
         cValues.add("possibleTumorSampleNamePrefixes:${bamFileDisease.sampleType.dirName}")
         cValues.add("possibleControlSampleNamePrefixes:${bamFileControl.sampleType.dirName}")
-        cValues.add("REFERENCE_GENOME:${referenceGenomeFastaFile.path}")
-        cValues.add("CHROMOSOME_LENGTH_FILE:${referenceGenomeService.chromosomeLengthFile(bamFileControl.mergingWorkPackage).path}")
+        cValues.add("REFERENCE_GENOME:${referenceGenomeFastaFile}")
+        cValues.add("CHROMOSOME_LENGTH_FILE:${referenceGenomeService.chromosomeLengthFile(bamFileControl.mergingWorkPackage)}")
         cValues.add("CHR_SUFFIX:${referenceGenome.chromosomeSuffix}")
         cValues.add("CHR_PREFIX:${referenceGenome.chromosomePrefix}")
         cValues.add("${getChromosomeIndexParameterWithoutMitochondrium(snvCallingInstance.referenceGenome)}")

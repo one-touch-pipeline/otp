@@ -121,9 +121,11 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
     @SuppressWarnings('NoFilesReadableRule')
     void "prepareAndReturnWorkflowSpecificCValues, when all fine, return correct value list"() {
         given:
-        File fasta = CreateFileHelper.createFile(tempDir.resolve("fasta.fa").toFile())
-        File chromosomeLength = CreateFileHelper.createFile(tempDir.resolve("chrTotalLength.tsv").toFile())
-        File gcContent = CreateFileHelper.createFile(tempDir.resolve("gcContentFile.tsv").toFile())
+        Path fasta = CreateFileHelper.createFile(tempDir.resolve("fasta.fa"))
+        Path chromosomeLength = tempDir.resolve("chrTotalLength.tsv")
+        Files.createFile(chromosomeLength)
+        Path gcContent = tempDir.resolve("gcContentFile.tsv")
+        Files.createFile(gcContent)
 
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstance(aceseqInstance.samplePair)
         CreateRoddyFileHelper.createSophiaResultFiles(sophiaInstance, individualService)
@@ -135,11 +137,11 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
                     ensureFileIsReadableAndNotEmptyStatic(_) >> true
                 },
                 aceseqService         : Mock(AceseqService) {
-                    1 * validateInputBamFiles(_) >> { }
+                    1 * validateInputBamFiles(_) >> {}
                     getWorkDirectory(_) >> { Paths.get("/asdf") }
                 },
                 referenceGenomeService: Mock(ReferenceGenomeService) {
-                    1 * checkReferenceGenomeFilesAvailability(_) >> { }
+                    1 * checkReferenceGenomeFilesAvailability(_) >> {}
                     1 * fastaFilePath(_) >> fasta
                     1 * chromosomeLengthFile(_) >> chromosomeLength
                     1 * gcContentFile(_) >> gcContent
@@ -218,10 +220,10 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
         ExecuteRoddyAceseqJob job = new ExecuteRoddyAceseqJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_) >> { }
+                    1 * correctPermissionsAndGroups(_) >> {}
                 },
                 aceseqService             : Mock(AceseqService) {
-                    1 * validateInputBamFiles(_) >> { }
+                    1 * validateInputBamFiles(_) >> {}
                 },
         ])
 
@@ -278,7 +280,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
         ExecuteRoddyAceseqJob job = new ExecuteRoddyAceseqJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_) >> { }
+                    1 * correctPermissionsAndGroups(_) >> {}
                 },
         ])
 

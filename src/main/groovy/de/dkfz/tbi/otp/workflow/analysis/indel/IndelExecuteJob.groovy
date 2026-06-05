@@ -78,11 +78,11 @@ class IndelExecuteJob extends AbstractExecuteRoddyPipelineJob implements IndelWo
         AbstractBamFile bamFileControl = indelCallingInstance.sampleType2BamFile
 
         ReferenceGenome referenceGenome = indelCallingInstance.referenceGenome
-        File referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(referenceGenome)
+        Path referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(referenceGenome)
 
         Path individualPath = individualService.getViewByPidPath(indelCallingInstance.individual, indelCallingInstance.seqType)
         Map<String, Map<String, String>> additionalValues = [
-                REFERENCE_GENOME          : roddyConfigValueService.createPathValueMap(referenceGenomeFastaFile.path),
+                REFERENCE_GENOME          : roddyConfigValueService.createPathValueMap(referenceGenomeFastaFile.toString()),
                 CHR_SUFFIX                : roddyConfigValueService.createValueMap(referenceGenome.chromosomeSuffix),
                 CHR_PREFIX                : roddyConfigValueService.createValueMap(referenceGenome.chromosomePrefix),
                 VCF_NORMAL_HEADER_COL     : roddyConfigValueService.createValueMap(bamFileControl.sampleType.dirName),
@@ -94,7 +94,7 @@ class IndelExecuteJob extends AbstractExecuteRoddyPipelineJob implements IndelWo
         Map<String, Map<String, String>> config = roddyConfigValueService.getAnalysisInputVersion2(indelCallingInstance, workDirectory) + additionalValues
 
         if (bamFileDisease.seqType.needsBedFile) {
-            config.put("EXOME_CAPTURE_KIT_BEDFILE", roddyConfigValueService.createPathValueMap(bedFileService.filePath(bamFileDisease.bedFile)))
+            config.put("EXOME_CAPTURE_KIT_BEDFILE", roddyConfigValueService.createPathValueMap(bedFileService.filePath(bamFileDisease.bedFile).toString()))
         }
 
         return config

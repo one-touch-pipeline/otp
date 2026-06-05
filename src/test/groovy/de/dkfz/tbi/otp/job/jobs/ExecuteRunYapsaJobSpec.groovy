@@ -136,7 +136,7 @@ class ExecuteRunYapsaJobSpec extends Specification implements DataTest {
 
         job.referenceGenomeService = Mock(ReferenceGenomeService) {
             fastaFilePath(_) >> { ReferenceGenome referenceGenome ->
-                return new File("/reference/genome.fa")
+                return Paths.get("/reference/genome.fa")
             }
         }
         job.processingOptionService = new ProcessingOptionService()

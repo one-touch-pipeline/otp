@@ -30,6 +30,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.workflow.alignment.roddy.RoddyAlignmentExecuteJob
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
+import java.nio.file.Path
+
 @Component
 @Slf4j
 class PanCancerExecuteJob extends RoddyAlignmentExecuteJob implements PanCancerShared {
@@ -57,7 +59,7 @@ class PanCancerExecuteJob extends RoddyAlignmentExecuteJob implements PanCancerS
 
         if (roddyBamFile.seqType.needsBedFile) {
             BedFile bedFile = roddyBamFile.bedFile
-            File bedFilePath = bedFileService.filePath(bedFile) as File
+            Path bedFilePath = bedFileService.filePath(bedFile)
             conf.put("TARGET_REGIONS_FILE", roddyConfigValueService.createPathValueMap(bedFilePath.toString()))
             conf.put("TARGETSIZE", roddyConfigValueService.createValueMap(bedFile.targetSize.toString()))
         }

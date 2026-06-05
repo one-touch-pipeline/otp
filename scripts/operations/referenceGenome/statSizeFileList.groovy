@@ -24,6 +24,9 @@ package operations.referenceGenome
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeService
 
+import java.nio.file.Files
+import java.nio.file.Path
+
 /**
  * Create a list of possible stat size files for all registered reference genomes.
  */
@@ -34,11 +37,15 @@ ReferenceGenome.list().sort {
     it.id
 }.each { ReferenceGenome referenceGenome ->
     println " *\n * - ${referenceGenome.name}:"
-    File statDir = referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenome, false)
-    statDir.list()?.findAll {
-        it ==~ ReferenceGenomeProjectSeqType.TAB_FILE_PATTERN
-    }?.sort()?.each {
-        println " *   - ${it}"
+    Path statDir = referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenome, false)
+    Files.list(statDir).withCloseable {
+        it.collect {
+            it.fileName.toString()
+        }.findAll {
+            it ==~ ReferenceGenomeProjectSeqType.TAB_FILE_PATTERN
+        }?.sort()?.each {
+            println " *   - ${it}"
+        }
     }
 }
 ''

@@ -25,6 +25,8 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.TempDir
 
+import java.nio.file.Paths
+
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
@@ -99,9 +101,9 @@ class AceseqExecuteJobSpec extends Specification implements DataTest, WorkflowSy
             }
         }
         job.referenceGenomeService = Mock(ReferenceGenomeService) {
-            fastaFilePath(instance.sampleType1BamFile.referenceGenome) >> { new File("/fasta-path") }
-            chromosomeLengthFile(instance.sampleType1BamFile.mergingWorkPackage) >> { new File("/chr-length-path") }
-            gcContentFile(instance.sampleType1BamFile.mergingWorkPackage) >> { new File("/gc-path") }
+            fastaFilePath(instance.sampleType1BamFile.referenceGenome) >> { Paths.get("/fasta-path") }
+            chromosomeLengthFile(instance.sampleType1BamFile.mergingWorkPackage) >> { Paths.get("/chr-length-path") }
+            gcContentFile(instance.sampleType1BamFile.mergingWorkPackage) >> { Paths.get("/gc-path") }
         }
     }
 

@@ -25,6 +25,8 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.TempDir
 
+import java.nio.file.Paths
+
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
@@ -101,8 +103,8 @@ class SnvExecuteJobSpec extends Specification implements DataTest, WorkflowSyste
             }
         }
         job.referenceGenomeService = Mock(ReferenceGenomeService) {
-            fastaFilePath(instance.referenceGenome) >> { new File("/fasta-path") }
-            chromosomeLengthFile(instance.sampleType2BamFile.mergingWorkPackage) >> { new File("/chr-length-path") }
+            fastaFilePath(instance.referenceGenome) >> { Paths.get("/fasta-path") }
+            chromosomeLengthFile(instance.sampleType2BamFile.mergingWorkPackage) >> { Paths.get("/chr-length-path") }
         }
         job.individualService = Mock(IndividualService) {
             getViewByPidPath(_, _) >> tempDir

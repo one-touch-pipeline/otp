@@ -99,7 +99,7 @@ abstract class AbstractAnalysisConditionalFailJob extends AbstractConditionalFai
 
         // Check the reference genome
         ReferenceGenome referenceGenome = bamFileDisease.referenceGenome
-        Path referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(referenceGenome)?.toPath()
+        Path referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(referenceGenome)
         if (!referenceGenomeFastaFile) {
             errorMessages.push("Reference genome file ${referenceGenomeFastaFile} can not be found." as String)
         } else if (!Files.exists(referenceGenomeFastaFile)) {

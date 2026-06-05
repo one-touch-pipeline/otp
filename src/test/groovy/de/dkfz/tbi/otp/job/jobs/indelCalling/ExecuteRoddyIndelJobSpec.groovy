@@ -97,7 +97,7 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
     @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "prepareAndReturnWorkflowSpecificCValues, when all fine and WGS, return correct value list"() {
         given:
-        File fasta = CreateFileHelper.createFile(tempDir.resolve("fasta.fa").toFile())
+        Path fasta = CreateFileHelper.createFile(tempDir.resolve("fasta.fa"))
 
         TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         IndividualService individualService = Mock(IndividualService) {
@@ -153,7 +153,7 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
                 "sample_list:${bamFileControl.sampleType.dirName};${bamFileDisease.sampleType.dirName}",
                 "possibleTumorSampleNamePrefixes:${bamFileDisease.sampleType.dirName}",
                 "possibleControlSampleNamePrefixes:${bamFileControl.sampleType.dirName}",
-                "REFERENCE_GENOME:${fasta.path}",
+                "REFERENCE_GENOME:${fasta}",
                 "CHR_SUFFIX:${indelCallingInstance.referenceGenome.chromosomeSuffix}",
                 "CHR_PREFIX:${indelCallingInstance.referenceGenome.chromosomePrefix}",
                 "analysisMethodNameOnOutput:${analysisMethodNameOnOutput}",
@@ -179,8 +179,8 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
     @IgnoreIf({ System.getProperty("os.name").toLowerCase().contains("windows") })
     void "prepareAndReturnWorkflowSpecificCValues, when all fine and WES, return correct value list"() {
         given:
-        File fasta = CreateFileHelper.createFile(tempDir.resolve("fasta.fa").toFile())
-        File bedFile = CreateFileHelper.createFile(tempDir.resolve("bed.txt").toFile())
+        Path fasta = CreateFileHelper.createFile(tempDir.resolve("fasta.fa"))
+        Path bedFile = CreateFileHelper.createFile(tempDir.resolve("bed.txt"))
 
         new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): tempDir.toString()])
         IndividualService individualService = Mock(IndividualService) {
@@ -261,7 +261,7 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
                 "sample_list:${bamFileControl.sampleType.dirName};${bamFileDisease.sampleType.dirName}",
                 "possibleTumorSampleNamePrefixes:${bamFileDisease.sampleType.dirName}",
                 "possibleControlSampleNamePrefixes:${bamFileControl.sampleType.dirName}",
-                "REFERENCE_GENOME:${fasta.path}",
+                "REFERENCE_GENOME:${fasta}",
                 "CHR_SUFFIX:${indelCallingInstance.referenceGenome.chromosomeSuffix}",
                 "CHR_PREFIX:${indelCallingInstance.referenceGenome.chromosomePrefix}",
                 "analysisMethodNameOnOutput:${analysisMethodNameOnOutput}",

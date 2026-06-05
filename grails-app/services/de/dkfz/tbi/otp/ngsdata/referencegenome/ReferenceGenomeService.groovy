@@ -28,7 +28,6 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -77,26 +76,26 @@ class ReferenceGenomeService {
      * @param referenceGenome the reference genome for which the directory path is created
      * @return path to a directory storing files for the given reference genome
      */
-    File referenceGenomeDirectory(ReferenceGenome referenceGenome, boolean checkExistence = true) {
+    Path referenceGenomeDirectory(ReferenceGenome referenceGenome, boolean checkExistence = true) {
         notNull referenceGenome, "The reference genome is not specified"
-        String path = processingOptionService.findOptionAsString(OptionName.BASE_PATH_REFERENCE_GENOME)
-        assert OtpPathValidator.isValidAbsolutePath(path)
-        return checkFileExistence(new File(path, referenceGenome.path), checkExistence)
+        String pathName = processingOptionService.findOptionAsString(OptionName.BASE_PATH_REFERENCE_GENOME)
+        assert OtpPathValidator.isValidAbsolutePath(pathName)
+        Path path = fileSystemService.remoteFileSystem.getPath(pathName).resolve(referenceGenome.path)
+        return checkPathExistence(path, checkExistence)
     }
 
-    File fingerPrintingFile(ReferenceGenome referenceGenome, boolean checkExistence = true) {
-        File referenceGenomeBasePath = referenceGenomeDirectory(referenceGenome, checkExistence)
-        File fingerPrintingFile = new File(referenceGenomeBasePath, "${FINGER_PRINTING_FILE_FOLDER_NAME}/${referenceGenome.fingerPrintingFileName}")
-        return checkFileExistence(fingerPrintingFile, checkExistence)
+    Path fingerPrintingFile(ReferenceGenome referenceGenome, boolean checkExistence = true) {
+        Path referenceGenomeBasePath = referenceGenomeDirectory(referenceGenome, checkExistence)
+        Path fingerPrintingFile = referenceGenomeBasePath.resolve("${FINGER_PRINTING_FILE_FOLDER_NAME}/${referenceGenome.fingerPrintingFileName}")
+        return checkPathExistence(fingerPrintingFile, checkExistence)
     }
 
     /**
      * returns the path to the fasta file for the given reference genome
      * @param the reference genome for which the file path is created
      */
-    File fastaFilePath(ReferenceGenome referenceGenome, boolean checkExistence = true) {
-        return checkFileExistence(new File(referenceGenomeDirectory(referenceGenome, checkExistence),
-                "${referenceGenome.fileNamePrefix}.fa"), checkExistence)
+    Path fastaFilePath(ReferenceGenome referenceGenome, boolean checkExistence = true) {
+        return checkPathExistence(referenceGenomeDirectory(referenceGenome, checkExistence).resolve("${referenceGenome.fileNamePrefix}.fa"), checkExistence)
     }
 
     /**
@@ -114,55 +113,55 @@ class ReferenceGenomeService {
      * returns the path to the cytosine position index file for the given reference genome depending on project
      * @param the reference genome for which the file path is created and the belonging project
      */
-    File cytosinePositionIndexFilePath(ReferenceGenome referenceGenome) {
+    Path cytosinePositionIndexFilePath(ReferenceGenome referenceGenome) {
         assert referenceGenome.cytosinePositionsIndex: "cytosinePositionsIndex is not set"
-        File file = new File(referenceGenomeDirectory(referenceGenome), referenceGenome.cytosinePositionsIndex)
-        return checkFileExistence(file, true)
+        Path path = referenceGenomeDirectory(referenceGenome).resolve(referenceGenome.cytosinePositionsIndex)
+        return checkPathExistence(path, true)
     }
 
     /**
      * returns the path to the file containing the reference genome meta information (names, length values)
      */
-    File referenceGenomeMetaInformationPath(ReferenceGenome referenceGenome) {
+    Path referenceGenomeMetaInformationPath(ReferenceGenome referenceGenome) {
         notNull(referenceGenome, "The input referenceGenome of the method referenceGenomeMetaInformationPath is null")
-        return new File(referenceGenomeDirectory(referenceGenome), "metaInformation.txt")
+        return referenceGenomeDirectory(referenceGenome).resolve("metaInformation.txt")
     }
 
-    File pathToChromosomeSizeFilesPerReference(ReferenceGenome referenceGenome, boolean checkExistence = true) {
+    Path pathToChromosomeSizeFilesPerReference(ReferenceGenome referenceGenome, boolean checkExistence = true) {
         notNull(referenceGenome, "The reference genome is not specified")
-        File file = new File(referenceGenomeDirectory(referenceGenome, checkExistence), CHROMOSOME_SIZE_FILES_PREFIX)
-        return checkFileExistence(file, checkExistence)
+        Path path = referenceGenomeDirectory(referenceGenome, checkExistence).resolve(CHROMOSOME_SIZE_FILES_PREFIX)
+        return checkPathExistence(path, checkExistence)
     }
 
     Path chromosomeLengthPath(AbstractMergingWorkPackage mergingWorkPackage, boolean checkExistence = true) {
-        return chromosomeLengthFile(mergingWorkPackage, checkExistence).toPath()
+        return chromosomeLengthFile(mergingWorkPackage, checkExistence)
     }
 
-    File chromosomeLengthFile(AbstractMergingWorkPackage mergingWorkPackage, boolean checkExistence = true) {
+    Path chromosomeLengthFile(AbstractMergingWorkPackage mergingWorkPackage, boolean checkExistence = true) {
         assert mergingWorkPackage, "The mergingWorkPackage is not specified"
         assert mergingWorkPackage.referenceGenome.chromosomeLengthFilePath: "No chromosome length file path is defined for ${mergingWorkPackage}"
-        File file = new File(pathToChromosomeSizeFilesPerReference(mergingWorkPackage.referenceGenome, checkExistence),
-                mergingWorkPackage.referenceGenome.chromosomeLengthFilePath)
-        return checkFileExistence(file, checkExistence)
+        Path path = pathToChromosomeSizeFilesPerReference(mergingWorkPackage.referenceGenome, checkExistence).
+                resolve(mergingWorkPackage.referenceGenome.chromosomeLengthFilePath)
+        return checkPathExistence(path, checkExistence)
     }
 
     Path gcContentPath(AbstractMergingWorkPackage mergingWorkPackage, boolean checkExistence = true) {
-        return gcContentFile(mergingWorkPackage, checkExistence).toPath()
+        return gcContentFile(mergingWorkPackage, checkExistence)
     }
 
-    File gcContentFile(AbstractMergingWorkPackage mergingWorkPackage, boolean checkExistence = true) {
+    Path gcContentFile(AbstractMergingWorkPackage mergingWorkPackage, boolean checkExistence = true) {
         assert mergingWorkPackage, "The mergingWorkPackage is not specified"
         assert mergingWorkPackage.referenceGenome.gcContentFile: "No gc content file path is defined for ${mergingWorkPackage}"
-        File file = new File(pathToChromosomeSizeFilesPerReference(mergingWorkPackage.referenceGenome, checkExistence),
-                mergingWorkPackage.referenceGenome.gcContentFile)
-        return checkFileExistence(file, checkExistence)
+        Path path = pathToChromosomeSizeFilesPerReference(mergingWorkPackage.referenceGenome, checkExistence).
+                resolve(mergingWorkPackage.referenceGenome.gcContentFile)
+        return checkPathExistence(path, checkExistence)
     }
 
-    private File checkFileExistence(File file, boolean checkExistence) {
-        if (!checkExistence || file.canRead()) {
-            return file
+    private Path checkPathExistence(Path path, boolean checkExistence) {
+        if (!checkExistence || fileService.fileIsReadable(path)) {
+            return path
         }
-        throw new FileNotReadableException("${file} can not be read")
+        throw new FileNotReadableException("${path} can not be read")
     }
 
     /**
@@ -330,8 +329,7 @@ class ReferenceGenomeService {
      */
     @CompileDynamic
     void createReferenceGenomeMetafile(ReferenceGenome referenceGenome) {
-        FileSystem fileSystem = fileSystemService.remoteFileSystem
-        Path path = fileSystem.getPath(referenceGenomeMetaInformationPath(referenceGenome).absolutePath)
+        Path path = referenceGenomeMetaInformationPath(referenceGenome)
 
         String content = ReferenceGenomeEntry.findAllByReferenceGenome(referenceGenome).collect { ReferenceGenomeEntry referenceGenomeEntry ->
             return [
@@ -341,28 +339,29 @@ class ReferenceGenomeService {
             ].join("\t")
         }.join("\n")
 
-        String unixGroup = processingOptionService.findOptionAsString(ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)
+        String unixGroup = processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)
         fileService.createFileWithContent(path, content, unixGroup)
     }
 
     void checkReferenceGenomeFilesAvailability(AbstractMergingWorkPackage mergingWorkPackage) {
+        FileSystem fileSystem = fileSystemService.remoteFileSystem
         [
-                new File(mergingWorkPackage.referenceGenome.mappabilityFile),
-                new File(mergingWorkPackage.referenceGenome.replicationTimeFile),
-                gcContentFile(mergingWorkPackage),
-                new File(mergingWorkPackage.referenceGenome.geneticMapFileX),
-                new File(mergingWorkPackage.referenceGenome.knownHaplotypesFileX),
-                new File(mergingWorkPackage.referenceGenome.knownHaplotypesLegendFileX),
-        ].each {
-            LsdfFilesService.ensureFileIsReadableAndNotEmpty(it)
+                fileSystem.getPath(mergingWorkPackage.referenceGenome.mappabilityFile),
+                fileSystem.getPath(mergingWorkPackage.referenceGenome.replicationTimeFile),
+                gcContentPath(mergingWorkPackage),
+                fileSystem.getPath(mergingWorkPackage.referenceGenome.geneticMapFileX),
+                fileSystem.getPath(mergingWorkPackage.referenceGenome.knownHaplotypesFileX),
+                fileSystem.getPath(mergingWorkPackage.referenceGenome.knownHaplotypesLegendFileX),
+        ].each { Path path ->
+            fileService.ensureFileIsReadableAndNotEmpty(path)
         }
 
         [
-                new File(mergingWorkPackage.referenceGenome.geneticMapFile).parentFile,
-                new File(mergingWorkPackage.referenceGenome.knownHaplotypesFile).parentFile,
-                new File(mergingWorkPackage.referenceGenome.knownHaplotypesLegendFile).parentFile,
+                fileSystem.getPath(mergingWorkPackage.referenceGenome.geneticMapFile).parent,
+                fileSystem.getPath(mergingWorkPackage.referenceGenome.knownHaplotypesFile).parent,
+                fileSystem.getPath(mergingWorkPackage.referenceGenome.knownHaplotypesLegendFile).parent,
         ].each {
-            LsdfFilesService.ensureDirIsReadableAndNotEmpty(it)
+            fileService.ensureDirIsReadableAndNotEmpty(it)
         }
     }
 
