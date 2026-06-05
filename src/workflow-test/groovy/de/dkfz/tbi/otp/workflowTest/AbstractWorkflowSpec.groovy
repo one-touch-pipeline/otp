@@ -867,7 +867,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      */
     protected void linkReferenceGenomeDirectoryToReference(ReferenceGenome referenceGenome) {
         Path target = referenceDataDirectory.resolve("reference-genomes").resolve(referenceGenome.path)
-        Path link = remoteFileSystem.getPath(referenceGenomeService.referenceGenomeDirectory(referenceGenome, false).absolutePath)
+        Path link = referenceGenomeService.referenceGenomeDirectory(referenceGenome, false)
         fileService.createLink(link, target, configService.workflowProjectUnixGroup)
     }
 

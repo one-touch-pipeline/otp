@@ -51,7 +51,7 @@ abstract class AbstractAlignmentWorkflowTest extends WorkflowTestCase {
     }
 
     void setUpRefGenomeDir(MergingWorkPackage workPackage, File refGenDir) {
-        File linkRefGenDir = referenceGenomeService.referenceGenomeDirectory(workPackage.referenceGenome, false)
+        File linkRefGenDir = new File(referenceGenomeService.referenceGenomeDirectory(workPackage.referenceGenome, false).toString())
         linkFileUtils.createAndValidateLinks([(refGenDir): linkRefGenDir], configService.workflowProjectUnixGroup)
     }
 }
