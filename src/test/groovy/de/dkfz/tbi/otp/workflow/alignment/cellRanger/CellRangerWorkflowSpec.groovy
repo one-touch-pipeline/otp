@@ -59,6 +59,7 @@ class CellRangerWorkflowSpec extends Specification implements CellRangerFactory,
     void "getJobList, should return all CellRangerJob bean names in correct order"() {
         expect:
         cellRangerWorkflow.jobList == [
+                SkipForEmptyRawSequenceFileJob,
                 AlignmentFragmentJob,
                 CellRangerCheckFragmentKeysJob,
                 CellRangerConditionalFailJob,

@@ -41,6 +41,7 @@ class WesFastQcWorkflow implements LinearWorkflow {
     @Override
     List<Class<? extends Job>> getJobList() {
         return [
+                SkipForEmptyRawSequenceFileJob,
                 FastqcFragmentJob,
                 WeskitCheckFragmentKeysJob,
                 FastqcConditionalFailJob,

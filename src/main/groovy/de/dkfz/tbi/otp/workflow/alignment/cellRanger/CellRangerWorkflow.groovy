@@ -49,6 +49,7 @@ class CellRangerWorkflow extends AlignmentWorkflow implements LinearWorkflow {
     @Override
     List<Class<? extends Job>> getJobList() {
         return [
+                SkipForEmptyRawSequenceFileJob,
                 AlignmentFragmentJob,
                 CellRangerCheckFragmentKeysJob,
                 CellRangerConditionalFailJob,

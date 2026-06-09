@@ -48,6 +48,7 @@ class PanCancerWorkflow extends AlignmentWorkflow implements LinearWorkflow {
     @Override
     List<Class<? extends Job>> getJobList() {
         return [
+                SkipForEmptyRawSequenceFileJob,
                 AlignmentFragmentJob,
 //                RoddyAlignmentCheckFragmentKeysJob,
                 // will be uncommented after default fragments have been adapted

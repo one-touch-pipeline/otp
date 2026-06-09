@@ -41,6 +41,7 @@ class WgbsWorkflowSpec extends Specification implements RoddyPanCancerFactory, D
     void "getJobList, should return all WGBS Workflow bean names in correct order"() {
         expect:
         wgbsWorkflow.jobList == [
+                SkipForEmptyRawSequenceFileJob,
                 AlignmentFragmentJob,
 //                RoddyAlignmentCheckFragmentKeysJob,
                 AttachUuidJob,

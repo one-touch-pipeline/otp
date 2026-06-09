@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.workflow.jobs.AttachUuidJob
 import de.dkfz.tbi.otp.workflow.jobs.CalculateSizeJob
 import de.dkfz.tbi.otp.workflow.jobs.OtpClusterCheckFragmentKeysJob
 import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
+import de.dkfz.tbi.otp.workflow.jobs.SkipForEmptyRawSequenceFileJob
 import de.dkfz.tbi.otp.workflowExecution.Artefact
 
 class BashFastqcWorkflowSpec extends Specification implements DataTest, DomainFactoryCore {
@@ -50,6 +51,7 @@ class BashFastqcWorkflowSpec extends Specification implements DataTest, DomainFa
     void "getJobList, should return all FastqcJob bean names in correct order"() {
         expect:
         fastqcWorkflow.jobList == [
+                SkipForEmptyRawSequenceFileJob,
                 FastqcFragmentJob,
                 OtpClusterCheckFragmentKeysJob,
                 FastqcConditionalFailJob,

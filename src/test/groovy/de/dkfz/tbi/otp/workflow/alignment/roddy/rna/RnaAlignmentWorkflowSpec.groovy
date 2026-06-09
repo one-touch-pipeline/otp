@@ -55,6 +55,7 @@ class RnaAlignmentWorkflowSpec extends Specification implements RoddyRnaFactory,
     void "getJobList, should return all RnaAlignmentJob bean names in correct order"() {
         expect:
         rnaAlignmentWorkflow.jobList == [
+                SkipForEmptyRawSequenceFileJob,
                 AlignmentFragmentJob,
 //                RnaAlignmentCheckFragmentKeysJob,
                 RoddyAlignmentConditionalFailJob,

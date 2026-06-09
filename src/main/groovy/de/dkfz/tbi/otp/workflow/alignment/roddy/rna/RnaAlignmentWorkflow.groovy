@@ -46,6 +46,7 @@ class RnaAlignmentWorkflow extends AlignmentWorkflow implements LinearWorkflow {
     @Override
     List<Class<? extends Job>> getJobList() {
         return [
+                SkipForEmptyRawSequenceFileJob,
                 AlignmentFragmentJob,
 //                RnaAlignmentCheckFragmentKeysJob,
                 // will be uncommented after default fragments have been adapted

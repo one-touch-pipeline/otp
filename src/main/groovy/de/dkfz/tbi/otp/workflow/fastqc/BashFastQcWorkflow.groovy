@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.workflow.jobs.CalculateSizeJob
 import de.dkfz.tbi.otp.workflow.jobs.Job
 import de.dkfz.tbi.otp.workflow.jobs.OtpClusterCheckFragmentKeysJob
 import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
+import de.dkfz.tbi.otp.workflow.jobs.SkipForEmptyRawSequenceFileJob
 import de.dkfz.tbi.otp.workflowExecution.*
 
 /**
@@ -45,6 +46,7 @@ class BashFastQcWorkflow implements LinearWorkflow {
     @Override
     List<Class<? extends Job>> getJobList() {
         return [
+                SkipForEmptyRawSequenceFileJob,
                 FastqcFragmentJob,
                 OtpClusterCheckFragmentKeysJob,
                 FastqcConditionalFailJob,

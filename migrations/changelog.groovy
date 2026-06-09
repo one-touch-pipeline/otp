@@ -227,4 +227,6 @@ databaseChangeLog = {
     include file: 'changelogs/2024/otp-2700.groovy'
 
     include file: 'changelogs/2026/otp-2985-delete-previous-snv-indel-version.groovy'
+
+    include file: 'changelogs/2026/otp-2937-add-empty-file-flag-to-raw-sequence-file.groovy'
 }

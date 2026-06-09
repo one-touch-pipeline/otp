@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.workflowTest.AbstractWorkflowSpec
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Duration
+import java.util.zip.GZIPOutputStream
 
 /**
  * Workflow test for the Fastq import.
@@ -44,11 +45,8 @@ import java.time.Duration
  */
 class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
 
-    static final private String FASTQ_R1_ORIGINAL_FILENAME = "gerald_D1VCPACXX_6_R1.fastq.bz2"
-    static final private String FASTQ_R2_ORIGINAL_FILENAME = "gerald_D1VCPACXX_6_R2.fastq.bz2"
     static final private String FASTQ_R1_FILENAME = "example_fileR1.fastq.gz"
     static final private String FASTQ_R2_FILENAME = "example_fileR2.fastq.gz"
-    static final private String DIRECTORY_IN_INPUT = "fastqFiles/wgs/normal/paired/run1/sequence"
 
     Class<? extends OtpWorkflow> workflowComponentClass = DataInstallationWorkflow
 
@@ -87,16 +85,19 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
         SessionUtils.withTransaction {
             fileType = createFileType()
 
-            fastqR1Filepath = prepareFileSystemForFile(FASTQ_R1_FILENAME, FASTQ_R1_ORIGINAL_FILENAME)
-            fastqR2Filepath = prepareFileSystemForFile(FASTQ_R2_FILENAME, FASTQ_R2_ORIGINAL_FILENAME)
+            fastqR1Filepath = prepareFileSystemForFile(FASTQ_R1_FILENAME)
+            fastqR2Filepath = prepareFileSystemForFile(FASTQ_R2_FILENAME)
         }
     }
 
-    private Path prepareFileSystemForFile(String fileName, String orgName) {
-        Path path = referenceDataDirectory.resolve(DIRECTORY_IN_INPUT).resolve(orgName)
-        Path link = additionalDataDirectory.resolve(fileName)
-        fileService.createLink(link, path, configService.workflowProjectUnixGroup)
-        return path
+    private Path prepareFileSystemForFile(String fileName) {
+        Path file = additionalDataDirectory.resolve(fileName)
+        ByteArrayOutputStream baos = new ByteArrayOutputStream()
+        new GZIPOutputStream(baos).withCloseable { gz ->
+            gz.write("@read1\nACGT\n+\nIIII\n".bytes)
+        }
+        fileService.createFileWithContent(file, baos.toByteArray(), configService.workflowProjectUnixGroup)
+        return file
     }
 
     private String md5sum(Path filepath) {
@@ -211,8 +212,8 @@ class DataInstallationWorkflowSpec extends AbstractWorkflowSpec {
             seqTracks = (1..3).collect {
                 String fileNameR1 = "${it}_${FASTQ_R1_FILENAME}"
                 String fileNameR2 = "${it}_${FASTQ_R2_FILENAME}"
-                Path linkR1 = prepareFileSystemForFile(fileNameR1, FASTQ_R1_ORIGINAL_FILENAME)
-                Path linkR2 = prepareFileSystemForFile(fileNameR2, FASTQ_R2_ORIGINAL_FILENAME)
+                Path linkR1 = prepareFileSystemForFile(fileNameR1)
+                Path linkR2 = prepareFileSystemForFile(fileNameR2)
 
                 SeqTrack seqTrack = createSeqTrack([
                         run                : run,

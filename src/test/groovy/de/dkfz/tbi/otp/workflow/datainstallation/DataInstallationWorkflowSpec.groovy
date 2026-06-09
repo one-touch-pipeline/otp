@@ -54,6 +54,7 @@ class DataInstallationWorkflowSpec extends Specification implements DataTest, Do
                 OtpClusterCheckFragmentKeysJob,
                 DataInstallationConditionalFailJob,
                 AttachUuidJob,
+                CheckFastqFileEmptyJob,
                 DataInstallationPrepareJob,
                 CopyOrLinkFastqsOfLaneJob,
                 DataInstallationValidationJob,

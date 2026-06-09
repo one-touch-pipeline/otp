@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.workflow.jobs.CalculateSizeJob
 import de.dkfz.tbi.otp.workflow.jobs.Job
 import de.dkfz.tbi.otp.workflow.jobs.RoddyCleanupJob
 import de.dkfz.tbi.otp.workflow.jobs.SetCorrectPermissionJob
+import de.dkfz.tbi.otp.workflow.jobs.SkipForEmptyRawSequenceFileJob
 import de.dkfz.tbi.otp.workflowExecution.*
 
 @Component
@@ -46,6 +47,7 @@ class WgbsWorkflow extends PanCancerWorkflow {
     @Override
     List<Class<? extends Job>> getJobList() {
         return [
+                SkipForEmptyRawSequenceFileJob,
                 AlignmentFragmentJob,
 //                RoddyAlignmentCheckFragmentKeysJob,
                 // will be uncommented after default fragments have been adapted

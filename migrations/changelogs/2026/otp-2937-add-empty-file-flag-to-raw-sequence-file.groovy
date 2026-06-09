@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2011-2026 The OTP authors
  *
@@ -19,29 +20,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
 
-import grails.gorm.hibernate.annotation.ManagedEntity
-
-import de.dkfz.tbi.otp.utils.Entity
-
-@ManagedEntity
-class WorkflowStepSkipMessage implements Entity {
-
-    enum Category {
-        MAXIMAL_READ_LENGTH_MISSING,
-        SOPHIA_WORKFLOW_COMPATIBLE_QUALITY_ASSESSMENT_MISSING,
-        PREREQUISITE_WORKFLOW_RUN_NOT_SUCCESSFUL,
-        PROJECT_THRESHOLD_REJECTION,
-        WORKFLOW_COVERAGE_REJECTION,
-        EMPTY_FILE,
-    }
-
-    String message
-
-    Category category
-
-    static mapping = {
-        message type: "text"
+databaseChangeLog = {
+    changeSet(author: "Foued", id: "otp-2937") {
+        addColumn(tableName: "raw_sequence_file") {
+            column(name: "empty_file", type: "boolean") {
+                constraints(nullable: true)
+            }
+        }
+        sql("""
+            UPDATE raw_sequence_file SET empty_file = false;
+            ALTER TABLE raw_sequence_file ALTER COLUMN empty_file SET NOT NULL;
+            """)
     }
 }

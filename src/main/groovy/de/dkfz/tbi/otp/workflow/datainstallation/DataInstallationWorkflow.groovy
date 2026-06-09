@@ -48,6 +48,7 @@ class DataInstallationWorkflow implements LinearWorkflow {
                 OtpClusterCheckFragmentKeysJob,
                 DataInstallationConditionalFailJob,
                 AttachUuidJob,
+                CheckFastqFileEmptyJob,
                 DataInstallationPrepareJob,
                 CopyOrLinkFastqsOfLaneJob,
                 DataInstallationValidationJob,

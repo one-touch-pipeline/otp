@@ -64,6 +64,7 @@ abstract class RawSequenceFile implements CommentableWithProject, Entity {
     boolean fileExists = false     // does file exists in file system
     boolean fileLinked = false     // is the file properly linked in view-by-pid
     long fileSize = 0              // size of the file
+    boolean emptyFile = false      // is the uncompressed content of the file empty
 
     /**
      * In paired-end sequencing, short DNA fragments with adapters at both ends get sequenced twice,
