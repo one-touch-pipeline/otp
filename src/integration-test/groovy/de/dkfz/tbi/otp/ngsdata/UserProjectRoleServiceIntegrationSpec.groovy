@@ -967,13 +967,14 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     }
 
     @Unroll
-    void "notifyProjectAuthoritiesAndUser sends email with correct content (authoritative=#authoritative, role=#projectRoleName)"() {
+    void "notifyProjectAuthoritiesAndUser sends email with correct content (authoritative=#authoritative, role=#projectRoleName, file access=#accessToFiles)"() {
         given:
         setupData()
 
         ProjectRole projectRole = projectRoleName ? CollectionUtils.exactlyOneElement(ProjectRole.findAllByName(projectRoleName)) : createProjectRole()
         UserProjectRole newUPR = createUserProjectRole(
                 projectRoles: [projectRole],
+                accessToFiles: accessToFiles,
         )
 
         Map properties = [
@@ -989,7 +990,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         UserProjectRole executingUPR = createUserProjectRole(properties)
 
         String expectedSubject = "newProjectMember\n${newUPR.project.name}"
-        String expectedContent = "newProjectMember\n${EMAIL_SENDER_NAME}\n${newUPR.user.realName}\n${newUPR.projectRoles.name.join(",")}\n${newUPR.project.name}"
+        String expectedContent = "newProjectMember\n${EMAIL_SENDER_NAME}\n${newUPR.user.realName}\n${newUPR.projectRoles.name.join(",")}\n" +
+                "${newUPR.project.name}\n${newUPR.user.realName} has${accessToFiles ? "" : " not"} been granted file access."
 
         when:
         doWithAuth(executingUPR.user.username) {
@@ -1004,11 +1006,11 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         )
 
         where:
-        authoritative | projectRoleName
-        true          | ProjectRole.Basic.SUBMITTER.name()
-        false         | ProjectRole.Basic.SUBMITTER.name()
-        true          | null
-        false         | null
+        authoritative | projectRoleName                    | accessToFiles
+        true          | ProjectRole.Basic.SUBMITTER.name() | true
+        false         | ProjectRole.Basic.SUBMITTER.name() | false
+        true          | null                               | true
+        false         | null                               | false
     }
 
     void "notifyProjectAuthoritiesAndDisabledUser, sends mail, direct recipients: affected, CC: authorities and user managers"() {
@@ -1886,7 +1888,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                     |${executingUser}
                     |${userIdentifier}
                     |${projectRole}
-                    |${projectName}'''.stripMargin()
+                    |${projectName}
+                    |${userIdentifier} has${accessToFiles ? "" : " not"} been granted file access.'''.stripMargin()
 
             _ * getMessageInternal("projectUser.notification.fileAccessChange.subject", [], _) >>
                     '''fileAccessChange

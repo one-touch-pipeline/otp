@@ -296,6 +296,7 @@ class UserProjectRoleService {
                 projectRole   : projectRoleNames.join(", "),
                 projectName   : projectName,
                 executingUser : mailHelperService.senderName,
+                accessToFiles : userProjectRole.accessToFiles,
         ])
 
         List<User> projectAuthoritiesAndUserManagers = getUniqueProjectAuthoritiesAndUserManagers(userProjectRole.project)
