@@ -26,6 +26,8 @@ import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.time.ZonedDateTime
+
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 
 class WorkflowStateChangeServiceSpec extends Specification implements ServiceUnitTest<WorkflowStateChangeService>, DataTest, WorkflowSystemDomainFactory {
@@ -73,8 +75,34 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
 
         then:
         workflowStep.state == WorkflowStep.State.FAILED
+        workflowStep.jobFinished != null
         workflowStep.workflowError.message == throwable.message
         workflowStep.workflowRun.state == WorkflowRun.State.FAILED
+    }
+
+    void "test changeStateToFailedAfterRestart"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep()
+
+        when:
+        service.changeStateToFailedAfterRestart(workflowStep)
+
+        then:
+        workflowStep.state == WorkflowStep.State.FAILED
+        workflowStep.jobFinished != null
+        workflowStep.workflowRun.state == WorkflowRun.State.FAILED
+    }
+
+    void "test changeStateToFinalFailed"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep()
+
+        when:
+        service.changeStateToFinalFailed(workflowStep)
+
+        then:
+        workflowStep.workflowRun.state == WorkflowRun.State.FAILED_FINAL
+        workflowStep.workflowRun.lastJobFinished != null
     }
 
     @Unroll
@@ -146,10 +174,32 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
 
         then:
         workflowStep.state == WorkflowStep.State.SUCCESS
+        workflowStep.jobFinished != null
         workflowStep.workflowRun.state == WorkflowRun.State.SUCCESS
+        workflowStep.workflowRun.lastJobFinished != null
         workflowStep.workflowRun.outputArtefacts.every { String s, WorkflowArtefact wa ->
             wa.state == WorkflowArtefact.State.SUCCESS
         }
+    }
+
+    void "test changeStateToSuccess, is not last step, does not set finish timestamps"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep(beanName: "1st job bean")
+        createWorkflowArtefact(producedBy: workflowStep.workflowRun, outputRole: "abc")
+        workflowStep.workflowRun.workflow.beanName = "workflow bean"
+        workflowStep.workflowRun.workflow.save(flush: true)
+        service.otpWorkflowService = Mock(OtpWorkflowService) {
+            1 * lookupOtpWorkflowBean(workflowStep.workflowRun) >> Mock(OtpWorkflow) {
+                _ * getNextJobBeanName(workflowStep) >> "2nd job bean"
+            }
+        }
+
+        when:
+        service.changeStateToSuccess(workflowStep)
+
+        then:
+        workflowStep.jobFinished != null
+        workflowStep.workflowRun.lastJobFinished == null
     }
 
     void "test changeStateToRunning"() {
@@ -161,6 +211,24 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
 
         then:
         workflowStep.state == WorkflowStep.State.RUNNING
+        workflowStep.jobStarted != null
         workflowStep.workflowRun.state == WorkflowRun.State.RUNNING_OTP
+        workflowStep.workflowRun.firstJobStarted != null
+    }
+
+    void "test changeStateToRunning, does not overwrite existing start timestamps"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep()
+        ZonedDateTime existingStepStart = ZonedDateTime.now().minusHours(1)
+        ZonedDateTime existingRunStart = ZonedDateTime.now().minusHours(2)
+        workflowStep.jobStarted = existingStepStart
+        workflowStep.workflowRun.firstJobStarted = existingRunStart
+
+        when:
+        service.changeStateToRunning(workflowStep)
+
+        then:
+        workflowStep.jobStarted == existingStepStart
+        workflowStep.workflowRun.firstJobStarted == existingRunStart
     }
 }

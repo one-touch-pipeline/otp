@@ -31,6 +31,9 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.utils.TimeUtils
+
+import java.time.ZonedDateTime
 
 class WorkflowRunServiceSpec extends Specification implements ServiceUnitTest<WorkflowRunService>, DataTest, WorkflowSystemDomainFactory {
 
@@ -39,6 +42,7 @@ class WorkflowRunServiceSpec extends Specification implements ServiceUnitTest<Wo
         return [
                 SeqTrack,
                 WorkflowRun,
+                WorkflowStep,
         ]
     }
 
@@ -162,8 +166,161 @@ class WorkflowRunServiceSpec extends Specification implements ServiceUnitTest<Wo
     }
 
     void 'getCumulatedClusterJobsStatus, should return empty string for null object or empty list'() {
-        expect:
-        service.getCumulatedClusterJobsStatus([]) == ''
-        service.getCumulatedClusterJobsStatus(null) == ''
+        when:
+        String status1 = service.getCumulatedClusterJobsStatus([])
+        String status2 = service.getCumulatedClusterJobsStatus(null)
+
+        then:
+        status1 == ''
+        status2 == ''
+    }
+
+    void 'calculateDuration, when firstJobStarted is null, return dash'() {
+        given:
+        WorkflowRun workflowRun = createWorkflowRun(state: WorkflowRun.State.SUCCESS)
+
+        when:
+        String duration = service.calculateDuration(workflowRun)
+
+        then:
+        duration == "-"
+    }
+
+    @Unroll
+    void 'calculateDuration, when run is in running state #state and firstJobStarted is set, return formatted duration'() {
+        given:
+        ZonedDateTime start = ZonedDateTime.now().minusMinutes(5)
+        WorkflowRun workflowRun = createWorkflowRun(state: state, firstJobStarted: start)
+
+        when:
+        String duration = service.calculateDuration(workflowRun)
+
+        then:
+        duration != "-"
+
+        where:
+        state << [WorkflowRun.State.PENDING, WorkflowRun.State.RUNNING_OTP, WorkflowRun.State.RUNNING_WES]
+    }
+
+    @Unroll
+    void 'calculateDuration, when run is finished with state #state and lastJobFinished is set, return duration between both timestamps'() {
+        given:
+        ZonedDateTime start = ZonedDateTime.now().minusMinutes(10)
+        ZonedDateTime finish = ZonedDateTime.now().minusMinutes(2)
+        WorkflowRun workflowRun = createWorkflowRun(state: state, firstJobStarted: start, lastJobFinished: finish)
+
+        when:
+        String duration = service.calculateDuration(workflowRun)
+
+        then:
+        duration == TimeUtils.getFormattedDurationForZonedDateTime(start, finish)
+
+        where:
+        state << [
+                WorkflowRun.State.SUCCESS,
+                WorkflowRun.State.SKIPPED_MISSING_PRECONDITION,
+                WorkflowRun.State.FAILED_FINAL,
+                WorkflowRun.State.RESTARTED,
+                WorkflowRun.State.KILLED,
+        ]
+    }
+
+    void 'calculateDuration, when run is finished but lastJobFinished is null, return dash'() {
+        given:
+        WorkflowRun workflowRun = createWorkflowRun(state: WorkflowRun.State.SUCCESS, firstJobStarted: ZonedDateTime.now().minusMinutes(5))
+
+        when:
+        String duration = service.calculateDuration(workflowRun)
+
+        then:
+        duration == "-"
+    }
+
+    void 'calculateStepDuration, when jobStarted is null, return dash'() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep(state: WorkflowStep.State.SUCCESS)
+
+        when:
+        String duration = service.calculateStepDuration(workflowStep)
+
+        then:
+        duration == "-"
+    }
+
+    void 'calculateStepDuration, when step is running and jobStarted is set, return formatted duration'() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep(state: WorkflowStep.State.RUNNING, jobStarted: ZonedDateTime.now().minusMinutes(5))
+
+        when:
+        String duration = service.calculateStepDuration(workflowStep)
+
+        then:
+        duration != "-"
+    }
+
+    @Unroll
+    void 'calculateStepDuration, when step is finished with state #state and both timestamps are set, return duration between both timestamps'() {
+        given:
+        ZonedDateTime start = ZonedDateTime.now().minusMinutes(10)
+        ZonedDateTime finish = ZonedDateTime.now().minusMinutes(2)
+        WorkflowStep workflowStep = createWorkflowStep(state: state, jobStarted: start, jobFinished: finish, workflowError: workflowError)
+
+        when:
+        String duration = service.calculateStepDuration(workflowStep)
+
+        then:
+        duration == TimeUtils.getFormattedDurationForZonedDateTime(start, finish)
+
+        where:
+        state                      | workflowError
+        WorkflowStep.State.FAILED  | createWorkflowError()
+        WorkflowStep.State.SUCCESS | null
+        WorkflowStep.State.SKIPPED | null
+    }
+
+    @Unroll
+    void 'calculateDuration, when run is in running state #state but lastJobFinished is set, return duration between firstJobStarted and lastJobFinished'() {
+        given:
+        ZonedDateTime start = ZonedDateTime.now().minusMinutes(10)
+        ZonedDateTime finish = ZonedDateTime.now().minusMinutes(2)
+        WorkflowRun workflowRun = createWorkflowRun(state: state, firstJobStarted: start, lastJobFinished: finish)
+
+        when:
+        String duration = service.calculateDuration(workflowRun)
+
+        then:
+        duration == TimeUtils.getFormattedDurationForZonedDateTime(start, finish)
+
+        where:
+        state << [WorkflowRun.State.PENDING, WorkflowRun.State.RUNNING_OTP, WorkflowRun.State.RUNNING_WES]
+    }
+
+    void 'calculateStepDuration, when step is in RUNNING state but jobFinished is set, return duration between jobStarted and jobFinished'() {
+        given:
+        ZonedDateTime start = ZonedDateTime.now().minusMinutes(10)
+        ZonedDateTime finish = ZonedDateTime.now().minusMinutes(2)
+        WorkflowStep workflowStep = createWorkflowStep(state: WorkflowStep.State.RUNNING, jobStarted: start, jobFinished: finish)
+
+        when:
+        String duration = service.calculateStepDuration(workflowStep)
+
+        then:
+        duration == TimeUtils.getFormattedDurationForZonedDateTime(start, finish)
+    }
+
+    void 'calculateDuration, when run is FAILED and lastJobFinished is null, return dash'() {
+        given:
+        ZonedDateTime start = ZonedDateTime.now().minusMinutes(5)
+        WorkflowRun workflowRun = createWorkflowRun(
+                state: WorkflowRun.State.FAILED,
+                firstJobStarted: start,
+                lastJobFinished: null
+        )
+
+        when:
+        String duration = service.calculateDuration(workflowRun)
+
+        then:
+        duration == "-"
     }
 }

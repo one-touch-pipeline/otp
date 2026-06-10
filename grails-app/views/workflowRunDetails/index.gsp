@@ -151,6 +151,8 @@
                             <th>${g.message(code: "workflowRun.details.step")}</th>
                             <th>${g.message(code: "workflowRun.details.dateCreated")}</th>
                             <th>${g.message(code: "workflowRun.details.lastUpdated")}</th>
+                            <th>${g.message(code: "workflowRun.details.jobStarted")}</th>
+                            <th>${g.message(code: "workflowRun.details.jobFinished")}</th>
                             <th>${g.message(code: "workflowRun.details.duration")}</th>
                             <th>${g.message(code: "workflowRun.details.id")}</th>
                             <th></th>

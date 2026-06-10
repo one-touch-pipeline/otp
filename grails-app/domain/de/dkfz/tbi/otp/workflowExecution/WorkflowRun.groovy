@@ -32,6 +32,8 @@ import de.dkfz.tbi.otp.filestore.WorkFolder
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.Entity
 
+import java.time.ZonedDateTime
+
 @ManagedEntity
 class WorkflowRun implements Commentable, Entity {
 
@@ -81,6 +83,9 @@ class WorkflowRun implements Commentable, Entity {
     String shortDisplayName
 
     String notificationText
+
+    ZonedDateTime firstJobStarted
+    ZonedDateTime lastJobFinished
 
     /**
      * Flag to indicate, whether restarting a job can cause problems.
@@ -132,6 +137,8 @@ class WorkflowRun implements Commentable, Entity {
 
         workFolder nullable: true, unique: true
         notificationText nullable: true
+        firstJobStarted nullable: true
+        lastJobFinished nullable: true
     }
 
     static belongsTo = [workFolder: WorkFolder]
@@ -147,6 +154,8 @@ class WorkflowRun implements Commentable, Entity {
         workDirectory type: 'text'
         notificationText type: 'text'
         workflowSteps batchSize: 100
+        firstJobStarted index: 'workflow_run_first_job_started_idx'
+        lastJobFinished index: 'workflow_run_last_job_finished_idx'
     }
 
     Map<String, WorkflowArtefact> getInputArtefacts() {

@@ -41,7 +41,7 @@ import de.dkfz.tbi.otp.workflowExecution.wes.WesRunService
 import de.dkfz.tbi.otp.workflowExecution.wes.WesRunStateDto
 
 import javax.sql.DataSource
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 @Transactional
 class WorkflowRunService {
@@ -290,6 +290,12 @@ class WorkflowRunService {
                     } else {
                         addOrder(Order.desc("comment.modificationDate").nulls(NullPrecedence.LAST))
                     }
+                } else if (column in [WorkflowRunListColumn.FIRST_JOB_STARTED, WorkflowRunListColumn.LAST_JOB_FINISHED]) {
+                    if (dtOrder.direction == DataTablesCommand.Order.Dir.asc) {
+                        addOrder(Order.asc(column.orderColumn).nulls(NullPrecedence.LAST))
+                    } else {
+                        addOrder(Order.desc(column.orderColumn).nulls(NullPrecedence.LAST))
+                    }
                 } else {
                     order(column.orderColumn, dtOrder.direction.name())
                 }
@@ -299,32 +305,25 @@ class WorkflowRunService {
                 maxResults(workflowRunSearchCriteria.length)
             }
         }.collect { WorkflowRun r ->
-            String duration = r.workflowSteps.empty ? "-" :
-                    r.state in [WorkflowRun.State.PENDING,
-                                WorkflowRun.State.RUNNING_WES,
-                                WorkflowRun.State.RUNNING_OTP,] ?
-                            TimeUtils.getFormattedDuration(convertDateToLocalDateTime(r.workflowSteps.first().dateCreated),
-                                    convertDateToLocalDateTime(new Date())) :
-                            TimeUtils.getFormattedDuration(convertDateToLocalDateTime(r.workflowSteps.first().dateCreated),
-                                    convertDateToLocalDateTime(r.workflowSteps.last().lastUpdated))
-
             List<WorkflowStep> steps = r.workflowSteps.findAll { !it.obsolete }
             WorkflowStep lastStep = steps ? steps.last() : null
             return [
-                    state      : r.state,
-                    stateDesc  : r.state.description,
-                    comment    : r.comment?.displayString()?.replaceAll("\n", ", ") ?: "",
-                    workflow   : r.workflow.toString(),
-                    displayName: r.displayName,
-                    shortName  : r.shortDisplayName,
-                    dateCreated: TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(r.dateCreated),
-                    lastUpdated: lastStep?.lastUpdated ? TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(lastStep.lastUpdated) : "",
-                    duration   : duration,
-                    id         : r.id,
-                    step       : lastStep?.beanName,
-                    stepId     : lastStep?.id,
-                    steps      : (steps - lastStep).reverse()*.beanName,
-                    stepIds    : (steps - lastStep).reverse()*.id,
+                    state          : r.state,
+                    stateDesc      : r.state.description,
+                    comment        : r.comment?.displayString()?.replaceAll("\n", ", ") ?: "",
+                    workflow       : r.workflow.toString(),
+                    displayName    : r.displayName,
+                    shortName      : r.shortDisplayName,
+                    dateCreated    : TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(r.dateCreated),
+                    lastUpdated    : lastStep?.lastUpdated ? TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedDate(lastStep.lastUpdated) : "",
+                    duration       : calculateDuration(r),
+                    id             : r.id,
+                    step           : lastStep?.beanName,
+                    stepId         : lastStep?.id,
+                    steps          : (steps - lastStep).reverse()*.beanName,
+                    stepIds        : (steps - lastStep).reverse()*.id,
+                    firstJobStarted: r.firstJobStarted ? TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedZonedDateTime(r.firstJobStarted) : "",
+                    lastJobFinished: r.lastJobFinished ? TimeFormats.DATE_TIME_WITHOUT_SECONDS.getFormattedZonedDateTime(r.lastJobFinished) : "",
             ]
         }
         result.workflowsFiltered = WorkflowRun.createCriteria().count {
@@ -346,8 +345,24 @@ class WorkflowRunService {
         return result
     }
 
-    private LocalDateTime convertDateToLocalDateTime(Date date) {
-        return date.toInstant().atZone(configService.timeZoneId).toLocalDateTime()
+    @CompileDynamic
+    protected String calculateDuration(WorkflowRun run) {
+        if (!run.firstJobStarted) {
+            return "-"
+        }
+        ZonedDateTime end = run.lastJobFinished ?:
+                (run.state in [WorkflowRun.State.PENDING, WorkflowRun.State.RUNNING_WES, WorkflowRun.State.RUNNING_OTP] ?
+                        ZonedDateTime.now() : null)
+        return TimeUtils.getFormattedDurationForZonedDateTime(run.firstJobStarted, end) ?: "-"
+    }
+
+    @CompileDynamic
+    protected String calculateStepDuration(WorkflowStep step) {
+        if (!step.jobStarted) {
+            return "-"
+        }
+        ZonedDateTime end = step.jobFinished ?: ZonedDateTime.now()
+        return TimeUtils.getFormattedDurationForZonedDateTime(step.jobStarted, end) ?: "-"
     }
 
     @CompileDynamic
@@ -392,8 +407,9 @@ class WorkflowRunService {
                     name                     : step.beanName,
                     dateCreated              : TimeFormats.DATE_TIME.getFormattedDate(step.dateCreated),
                     lastUpdated              : TimeFormats.DATE_TIME.getFormattedDate(step.lastUpdated),
-                    duration                 : TimeUtils.getFormattedDuration(convertDateToLocalDateTime(step.dateCreated),
-                            convertDateToLocalDateTime(step.lastUpdated)),
+                    jobStarted               : step.jobStarted ? TimeFormats.DATE_TIME.getFormattedZonedDateTime(step.jobStarted) : "",
+                    jobFinished              : step.jobFinished ? TimeFormats.DATE_TIME.getFormattedZonedDateTime(step.jobFinished) : "",
+                    duration                 : calculateStepDuration(step),
                     error                    : step.workflowError,
                     clusterJobs              : collectClusterJobDetails(clusterJobs),
                     cumulatedClusterJobsState: getCumulatedClusterJobsStatus(clusterJobs.collect { new ClusterJobStateDto(it.checkStatus, it.exitStatus) }),

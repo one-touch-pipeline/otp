@@ -28,6 +28,19 @@ describe('Check workflow run details page', () => {
       cy.loginAs('operator');
     });
 
+    it('should show "Job started" and "Job finished" columns on the details page', () => {
+      cy.intercept('/workflowRunList/data*').as('data');
+      cy.visit('/workflowRunList/index?state=WAITING_FOR_USER');
+      cy.wait('@data').its('response.statusCode').should('eq', 200);
+
+      cy.get('table#runs tbody').should('not.be.empty');
+      cy.get('table#runs tbody tr').first().find('a').click();
+      cy.location('pathname').should('contain', '/workflowRunDetails/index');
+
+      cy.get('table#steps thead th').contains('Job started').should('exist');
+      cy.get('table#steps thead th').contains('Job finished').should('exist');
+    });
+
     it('should visit the error log of a restarted workflow run', () => {
       cy.intercept('/workflowRunDetails/data*').as('workflowRunDetailsData');
       cy.intercept('/workflowRunDetails/showError/*').as('showWorkflowErrors');

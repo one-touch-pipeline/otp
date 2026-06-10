@@ -226,16 +226,3 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
         }
     }
 }
-
-enum PlotType {
-    SNV,
-    INDEL,
-    INDEL_TINDA,
-    SOPHIA,
-    ACESEQ_GC_CORRECTED,
-    ACESEQ_QC_GC_CORRECTED,
-    ACESEQ_WG_COVERAGE,
-    ACESEQ_TCN_DISTANCE_COMBINED_STAR,
-    ACESEQ_ALL,
-    ACESEQ_EXTRA,
-}

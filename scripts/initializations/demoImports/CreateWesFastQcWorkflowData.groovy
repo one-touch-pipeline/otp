@@ -499,6 +499,7 @@ trait WorkflowStepsCreator {
                 previous   : previousStep,
                 clusterJobs: [] as Set,
                 wesRuns    : [] as Set,
+                jobStarted : ZonedDateTime.now(),
         ]).save(flush: false)
     }
 

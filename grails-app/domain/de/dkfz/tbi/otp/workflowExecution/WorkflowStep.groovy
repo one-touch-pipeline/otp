@@ -30,6 +30,8 @@ import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.workflowExecution.log.WorkflowError
 import de.dkfz.tbi.otp.workflowExecution.wes.WesRun
 
+import java.time.ZonedDateTime
+
 @ManagedEntity
 class WorkflowStep implements Commentable, Entity {
 
@@ -57,6 +59,9 @@ class WorkflowStep implements Commentable, Entity {
     WorkflowStep restartedFrom
 
     boolean obsolete = false
+
+    ZonedDateTime jobStarted
+    ZonedDateTime jobFinished
 
     Set<ClusterJob> clusterJobs = [] as Set
 
@@ -92,6 +97,8 @@ class WorkflowStep implements Commentable, Entity {
         }
 
         comment nullable: true
+        jobStarted nullable: true
+        jobFinished nullable: true
     }
 
     static Closure mapping = {

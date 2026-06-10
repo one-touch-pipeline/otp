@@ -114,6 +114,7 @@ WorkflowRun.withNewTransaction {
 
     Closure createWorkflowRun = { WorkflowRun.State workflowState, Map map = [:] ->
         return new WorkflowRun([
+                firstJobStarted : ZonedDateTime.now(),
                 workflow        : workflow,
                 state           : workflowState,
                 project         : project,
@@ -131,6 +132,7 @@ WorkflowRun.withNewTransaction {
                 beanName   : DataInstallationConditionalFailJob.simpleName.uncapitalize(),
                 state      : state,
                 clusterJobs: [] as Set,
+                jobStarted: ZonedDateTime.now(),
         ] + map).save(flush: true)
 
         (1..5).each {

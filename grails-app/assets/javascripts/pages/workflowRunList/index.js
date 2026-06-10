@@ -91,6 +91,8 @@ $(() => {
       },
       { data: 'dateCreated' },
       { data: 'lastUpdated' },
+      { data: 'firstJobStarted' },
+      { data: 'lastJobFinished' },
       {
         data: 'duration',
         orderable: false

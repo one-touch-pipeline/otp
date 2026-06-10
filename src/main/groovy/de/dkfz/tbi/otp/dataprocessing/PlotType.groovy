@@ -19,33 +19,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
+package de.dkfz.tbi.otp.dataprocessing
 
-import groovy.transform.TupleConstructor
-
-@TupleConstructor
-enum WorkflowRunListColumn {
-    CHECKBOX("", ""),
-    STATUS("workflowRun.list.state", "state"),
-    COMMENT("workflowRun.list.comment", "modificationDate"),
-    WORKFLOW("workflowRun.list.workflow", ""),
-    NAME("workflowRun.list.name", "displayName"),
-    STEP("workflowRun.list.step", ""),
-    CREATED("workflowRun.list.created", "dateCreated"),
-    UPDATED("workflowRun.list.updated", "lastUpdated"),
-    FIRST_JOB_STARTED("workflowRun.list.firstJobStarted", "firstJobStarted"),
-    LAST_JOB_FINISHED("workflowRun.list.lastJobFinished", "lastJobFinished"),
-    DURATION("workflowRun.list.duration", ""),
-    ID("workflowRun.list.id", "id"),
-    BUTTONS("", ""),
-
-    final String message
-    final String orderColumn
-
-    static WorkflowRunListColumn fromDataTable(int column) {
-        if (column >= values().size() || column < 0) {
-            return UPDATED
-        }
-        return values()[column]
-    }
+enum PlotType {
+    SNV,
+    INDEL,
+    INDEL_TINDA,
+    SOPHIA,
+    ACESEQ_GC_CORRECTED,
+    ACESEQ_QC_GC_CORRECTED,
+    ACESEQ_WG_COVERAGE,
+    ACESEQ_TCN_DISTANCE_COMBINED_STAR,
+    ACESEQ_ALL,
+    ACESEQ_EXTRA,
 }

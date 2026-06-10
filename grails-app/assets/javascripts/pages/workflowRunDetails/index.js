@@ -273,6 +273,8 @@ $(() => {
       },
       { data: 'dateCreated' },
       { data: 'lastUpdated' },
+      { data: 'jobStarted' },
+      { data: 'jobFinished' },
       {
         data: 'duration',
         orderable: false

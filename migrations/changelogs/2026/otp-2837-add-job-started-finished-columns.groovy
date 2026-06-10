@@ -19,33 +19,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.workflowExecution
-
-import groovy.transform.TupleConstructor
-
-@TupleConstructor
-enum WorkflowRunListColumn {
-    CHECKBOX("", ""),
-    STATUS("workflowRun.list.state", "state"),
-    COMMENT("workflowRun.list.comment", "modificationDate"),
-    WORKFLOW("workflowRun.list.workflow", ""),
-    NAME("workflowRun.list.name", "displayName"),
-    STEP("workflowRun.list.step", ""),
-    CREATED("workflowRun.list.created", "dateCreated"),
-    UPDATED("workflowRun.list.updated", "lastUpdated"),
-    FIRST_JOB_STARTED("workflowRun.list.firstJobStarted", "firstJobStarted"),
-    LAST_JOB_FINISHED("workflowRun.list.lastJobFinished", "lastJobFinished"),
-    DURATION("workflowRun.list.duration", ""),
-    ID("workflowRun.list.id", "id"),
-    BUTTONS("", ""),
-
-    final String message
-    final String orderColumn
-
-    static WorkflowRunListColumn fromDataTable(int column) {
-        if (column >= values().size() || column < 0) {
-            return UPDATED
+databaseChangeLog = {
+    changeSet(author: "-", id: "otp-2837-add-job-started-finished-columns-1") {
+        addColumn(tableName: "workflow_run") {
+            column(name: "first_job_started", type: "TIMESTAMP WITH TIME ZONE")
         }
-        return values()[column]
+        addColumn(tableName: "workflow_run") {
+            column(name: "last_job_finished", type: "TIMESTAMP WITH TIME ZONE")
+        }
+    }
+
+    changeSet(author: "-", id: "otp-2837-add-job-started-finished-columns-2") {
+        createIndex(indexName: "workflow_run_first_job_started_idx", tableName: "workflow_run") {
+            column(name: "first_job_started")
+        }
+        createIndex(indexName: "workflow_run_last_job_finished_idx", tableName: "workflow_run") {
+            column(name: "last_job_finished")
+        }
+    }
+
+    changeSet(author: "-", id: "otp-2837-add-job-started-finished-columns-3") {
+        addColumn(tableName: "workflow_step") {
+            column(name: "job_started", type: "TIMESTAMP WITH TIME ZONE")
+        }
+        addColumn(tableName: "workflow_step") {
+            column(name: "job_finished", type: "TIMESTAMP WITH TIME ZONE")
+        }
     }
 }

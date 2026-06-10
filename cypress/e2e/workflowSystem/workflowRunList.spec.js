@@ -29,6 +29,18 @@ describe('Check workflow run list page', () => {
       cy.visit('/workflowRunList/index?state=FAILED');
     });
 
+    it('should show "First job started" and "Last job finished" columns', () => {
+      cy.intercept('/workflowRunList/data*').as('workflowRunListData');
+
+      cy.get('select#state').select('WAITING_FOR_USER', { force: true });
+      cy.wait('@workflowRunListData').its('response.statusCode').should('eq', 200);
+      cy.get('table#runs tbody').should('not.be.empty');
+
+      cy.get('table#runs thead th').contains('First job started');
+      cy.get('table#runs thead th').contains('Last job finished');
+
+    });
+
     it('should filter the list by state', () => {
       cy.intercept('/workflowRunList/data*').as('workflowRunListFilter');
 

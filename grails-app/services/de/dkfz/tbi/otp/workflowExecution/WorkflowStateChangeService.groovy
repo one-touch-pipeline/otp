@@ -25,6 +25,8 @@ import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 import org.hibernate.Hibernate
 
+import java.time.ZonedDateTime
+
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.Entity
@@ -134,6 +136,7 @@ class WorkflowStateChangeService {
     void changeStateToFinalFailed(WorkflowStep step) {
         assert step
         step.workflowRun.state = WorkflowRun.State.FAILED_FINAL
+        step.workflowRun.lastJobFinished = step.jobFinished ?: ZonedDateTime.now()
         step.workflowRun.save(flush: true)
 
         step.workflowRun.outputArtefacts.each { String role, WorkflowArtefact workflowArtefact ->
@@ -170,6 +173,7 @@ class WorkflowStateChangeService {
 
         step.workflowError = new WorkflowError(message: throwable.message ?: '-', stacktrace: StackTraceUtils.getStackTrace(throwable))
         step.state = WorkflowStep.State.FAILED
+        step.jobFinished = ZonedDateTime.now()
         step.save(flush: true)
     }
 
@@ -181,6 +185,7 @@ class WorkflowStateChangeService {
 
         step.workflowError = new WorkflowError(message: "The step was still running while OTP was shut down. ", stacktrace: "")
         step.state = WorkflowStep.State.FAILED
+        step.jobFinished = ZonedDateTime.now()
         step.save(flush: true)
     }
 
@@ -205,7 +210,9 @@ class WorkflowStateChangeService {
     @CompileDynamic
     void changeStateToSuccess(WorkflowStep step) {
         assert step
+        ZonedDateTime finishedAt = ZonedDateTime.now()
         step.state = WorkflowStep.State.SUCCESS
+        step.jobFinished = finishedAt
         step.save(flush: true)
 
         String nextJob = null
@@ -216,6 +223,7 @@ class WorkflowStateChangeService {
 
         if (!nextJob) {
             step.workflowRun.state = WorkflowRun.State.SUCCESS
+            step.workflowRun.lastJobFinished = finishedAt
             step.workflowRun.save(flush: true)
             step.workflowRun.outputArtefacts.each { String role, WorkflowArtefact workflowArtefact ->
                 workflowArtefact.state = WorkflowArtefact.State.SUCCESS
@@ -228,9 +236,11 @@ class WorkflowStateChangeService {
     void changeStateToRunning(WorkflowStep step) {
         assert step
         step.workflowRun.state = WorkflowRun.State.RUNNING_OTP
+        step.workflowRun.firstJobStarted = step.workflowRun.firstJobStarted ?: ZonedDateTime.now()
         step.workflowRun.save(flush: true)
 
         step.state = WorkflowStep.State.RUNNING
+        step.jobStarted = step.jobStarted ?: ZonedDateTime.now()
         step.save(flush: true)
     }
 
