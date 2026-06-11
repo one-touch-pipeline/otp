@@ -112,5 +112,7 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity, Comme
         piUsers joinTable: "project_request_pi_user"
         seqTypes index: "project_request_seqTypes_idx"
         state index: "project_request_state_idx"
+        // This tells Hibernate to delete the associated projectFields entities
+        projectFields cascade: "all-delete-orphan"
     }
 }

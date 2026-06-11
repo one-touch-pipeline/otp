@@ -233,9 +233,9 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         final User approvedPi = createUser()
         final User unapprovedPi = createUser()
         final ProjectRequest request = createProjectRequest([requester: requester], [
-                beanName                 : "approval",
-                usersThatNeedToApprove   : [unapprovedPi],
-                usersThatAlreadyApproved : [approvedPi],
+                beanName                : "approval",
+                usersThatNeedToApprove  : [unapprovedPi],
+                usersThatAlreadyApproved: [approvedPi],
         ])
         final ProjectRequest requestCreatedToday = createProjectRequest([:], [
                 beanName              : "approval",
@@ -960,6 +960,36 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         ProjectRequest.count == 0
     }
 
+    void "deleteProjectRequest with additional fields"() {
+        given:
+        ProjectRequest projectRequest = createProjectRequest()
+        projectRequest.projectFields = [createTextFieldValue(), createDecimalFieldValue(), createDateFieldValue()]
+
+        expect:
+        ProjectRequest.count == 1
+        TextFieldDefinition.count == 1
+        DecimalNumberFieldDefinition.count == 1
+        DateFieldDefinition.count == 1
+        AbstractFieldValue.count == 3
+        TextFieldValue.count == 1
+        DecimalNumberFieldValue.count == 1
+        DateFieldValue.count == 1
+
+        when:
+        projectRequestService.deleteProjectRequest(projectRequest)
+
+        then:
+        ProjectRequest.count == 0
+        // The types/definitions are not deleted, only their values
+        TextFieldDefinition.count == 1
+        DecimalNumberFieldDefinition.count == 1
+        DateFieldDefinition.count == 1
+        AbstractFieldValue.count == 0
+        TextFieldValue.count == 0
+        DecimalNumberFieldValue.count == 0
+        DateFieldValue.count == 0
+    }
+
     void "listAdditionalFieldValues"() {
         given:
         TextFieldValue textFieldValue = createTextFieldValue()
@@ -1219,5 +1249,4 @@ class ProjectRequestServiceIntegrationSpec extends Specification implements User
         ""    | true
         "not" | false
     }
-
 }
