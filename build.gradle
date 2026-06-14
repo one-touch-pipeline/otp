@@ -478,7 +478,7 @@ dependencies {
     implementation 'org.springframework.security:spring-security-ldap:5.8.16'
     implementation 'org.springframework.security:spring-security-oauth2-client:5.8.16'
 
-    implementation "org.openapitools:openapi-generator-gradle-plugin:7.22.0"
+    implementation "org.openapitools:openapi-generator-gradle-plugin:7.23.0"
 
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.22.0"
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.22.0'
