@@ -72,6 +72,10 @@ joinTables="\
 (job_error_definition_job_error_definition)|\
 (library_preparation_kit_import_alias)|\
 (merging_work_package_seq_track)|\
+(notification_depending_notification)|\
+(notification_status_notification)|\
+(notification_workflow_run)|\
+(create_notification_workflow_run)|\
 (project_request_keywords)|\
 (project_request_seq_type)|\
 (project_request_project_request_user)|\
