@@ -13,7 +13,7 @@
     "cy-wait": "start-server-and-test './gradlew --build-cache bootRun' 'http-get://localhost:8080/health' './gradlew --build-cache runCypressTests' "
   },
   "devDependencies": {
-    "@cyclonedx/cyclonedx-npm": "4.2.1",
+    "@cyclonedx/cyclonedx-npm": "5.0.0",
     "@eslint/js": "^10.0.1",
     "cypress": "~15.17.0",
     "cypress-multi-reporters": "~2.0.5",
