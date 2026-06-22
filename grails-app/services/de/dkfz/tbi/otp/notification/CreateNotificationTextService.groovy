@@ -38,6 +38,7 @@ import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.tracking.Ticket.ProcessingStep
 import de.dkfz.tbi.otp.utils.MessageSourceService
+import de.dkfz.tbi.otp.utils.exceptions.NotSupportedException
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
@@ -219,6 +220,7 @@ class CreateNotificationTextService {
         return message
     }
 
+    @SuppressWarnings("TrailingComma")
     String alignmentNotification(ProcessingStatus statusInput) {
         assert statusInput
 
@@ -248,8 +250,21 @@ class CreateNotificationTextService {
         }
 
         Map<AlignmentConfig, AlignmentInfo> alignmentInfoByConfig = bamFilesOldSystem*.alignmentConfig.unique().collectEntries {
-            [it, alignmentInfoService.getAlignmentInformationFromConfig(it)]
-        }
+            try {
+                [it, alignmentInfoService.getAlignmentInformationFromConfig(it)]
+            } catch (ParsingException | NotSupportedException | FileNotFoundException e) {
+                log.warn("Could not get alignment info from config ${it} (so it will be skipped): ${e.message}")
+                String dummyInfo = "N/A (config for alignment could not be parsed or is missing)"
+                [it, new RoddyAlignmentInfo([
+                        alignmentProgram  : dummyInfo,
+                        alignmentParameter: dummyInfo,
+                        programVersion    : dummyInfo,
+                        mergeCommand      : dummyInfo,
+                        mergeOptions      : dummyInfo,
+                        samToolsCommand   : dummyInfo,
+                ])]
+            }
+        } as Map<AlignmentConfig, AlignmentInfo>
 
         String processingValues = alignmentInformationProcessingValues((allGoodBamFiles - bamFilesOldSystem))
 

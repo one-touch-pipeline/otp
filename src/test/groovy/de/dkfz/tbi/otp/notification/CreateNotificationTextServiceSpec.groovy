@@ -21,9 +21,13 @@
  */
 package de.dkfz.tbi.otp.notification
 
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
 import grails.testing.gorm.DataTest
 import grails.web.mapping.LinkGenerator
 import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
+import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -480,6 +484,64 @@ ${expectedAlign}"""
         then:
         AssertionError e = thrown()
         e.message.contains('assert status')
+    }
+
+    @Unroll
+    void "alignmentNotification, when getAlignmentInformationFromConfig #scenario for old-system bam file, exception is caught and notification is returned"() {
+        given:
+        DomainFactory.createRoddyAlignableSeqTypes()
+        DomainFactory.createProcessingOptionForEmailSenderSalutation()
+
+        Map data = createData([
+                sampleId1                : 'sampleId1',
+                alignmentProcessingStatus: ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
+        ])
+
+        ProcessingStatus processingStatus = new ProcessingStatus([
+                data.seqTrackProcessingStatus,
+        ])
+
+        Logger serviceLogger = (Logger) LoggerFactory.getLogger(CreateNotificationTextService)
+        ListAppender<ILoggingEvent> appender = new ListAppender<>()
+        appender.start()
+        serviceLogger.addAppender(appender)
+
+        CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService(
+                alignmentInfoService: Mock(AlignmentInfoService) {
+                    1 * getAlignmentInformationFromConfig(_) >> { args ->
+                        if (configFound) {
+                            return data.alignmentInfo
+                        }
+                        throw new ParsingException("Could not extract any configuration value from the roddy output")
+                    }
+                    0 * _
+                },
+                linkGenerator: Mock(LinkGenerator) {
+                    1 * link(_) >> 'link'
+                },
+                messageSourceService: messageSourceServiceWithMockedMessageSource,
+        )
+        createNotificationTextService.processingOptionService = new ProcessingOptionService()
+        createNotificationTextService.projectService = new ProjectService()
+        createNotificationTextService.projectService.configService = configService
+        createNotificationTextService.projectService.fileSystemService = new TestFileSystemService()
+
+        when:
+        String message = createNotificationTextService.alignmentNotification(processingStatus)
+
+        then:
+        noExceptionThrown()
+        message
+        message.contains(configFound ? "${data.alignmentInfo.programVersion}" : "N/A (config for alignment could not be parsed or is missing)")
+        appender.list.count { it.formattedMessage.contains("Could not get alignment info from config") } == expectedWarnCount
+
+        cleanup:
+        serviceLogger.detachAppender(appender)
+
+        where:
+        scenario           | configFound || expectedWarnCount
+        'succeeds'         | true        || 0
+        'throws an exception' | false       || 1
     }
 
     @Unroll
