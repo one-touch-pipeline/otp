@@ -31,10 +31,12 @@
 # recommended search strings are "YYYY-MM-DD", "allData_YYYY-MM-DD" or "YYYY-MM-DD_hh-mm-ss" (or any part/combination thereof)
 #
 # examples:
-#   ./devScripts/postgres/recreateDatabase.sh                # default: loads most recent dump
+#   ./devScripts/postgres/recreateDatabase.sh                              # default: loads most recent dump
 #   ./devScripts/postgres/recreateDatabase.sh 2019-02-12
 #   ./devScripts/postgres/recreateDatabase.sh allData_2019-02-12
 #   ./devScripts/postgres/recreateDatabase.sh 2019-02-12_09-52-22
+#   SKIP_LOGS=1 ./devScripts/postgres/recreateDatabase.sh                  # skip workflow log tables (faster)
+#   SKIP_LOGS=1 ./devScripts/postgres/recreateDatabase.sh 2019-02-12
 
 set -Eeux
 
@@ -72,9 +74,23 @@ du -hs "${DUMP_TO_LOAD}"
 
 PSQL="psql --username=otp  --dbname=otp --host=localhost --port=$PORT"
 
+
+RESTORE_LIST_OPT=()
+if [[ -n "${SKIP_LOGS:-}" ]]; then
+    pg_restore -l "${DUMP_TO_LOAD}" > restore.list
+    sed -i '/TABLE DATA public workflow_command_log otp/ s/^/;/' restore.list
+    sed -i '/TABLE DATA public workflow_log otp/ s/^/;/' restore.list
+    sed -i '/TABLE DATA public workflow_message_log otp/ s/^/;/' restore.list
+    RESTORE_LIST_OPT=(-L restore.list)
+fi
+
 # Work around pg_restore failing due to an option set automatically by Postgres clients >= 9.3
 echo "Loading dump..."
-time pg_restore --username=postgres --host=localhost --port=$PORT --dbname=otp --jobs=$PRODUCTION_POSTGRES_JOB_COUNT --no-privileges "${DUMP_TO_LOAD}" || true
+time pg_restore --username=postgres --host=localhost --port=$PORT --dbname=otp --jobs=$PRODUCTION_POSTGRES_JOB_COUNT --no-privileges "${RESTORE_LIST_OPT[@]}" "${DUMP_TO_LOAD}" || true
+
+if [[ -n "${SKIP_LOGS:-}" ]]; then
+    rm restore.list
+fi
 
 echo "Dump loaded"
 
