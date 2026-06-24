@@ -37,6 +37,8 @@ class WeskitCheckFragmentKeysJob extends AbstractCheckFragmentKeysJob {
     static final String MAX_MEMORY = "MAX_MEMORY"
     static final String MAX_RUNTIME = "MAX_RUNTIME"
     static final String PROFILE = "PROFILE"
+    static final String WORKFLOW_TYPE_VERSION = "WORKFLOW_TYPE_VERSION"
+    static final String WORKFLOW_CONFIG_URL = "WORKFLOW_CONFIG_URL"
 
     // IMPORTANT: Adding new keys here requires a new API version and a new CheckFragmentKeysJob subclass,
     // as existing workflow runs would fail without those keys in their fragment configuration.
@@ -46,6 +48,8 @@ class WeskitCheckFragmentKeysJob extends AbstractCheckFragmentKeysJob {
                 "${WESKIT}/${MAX_MEMORY}",
                 "${WESKIT}/${MAX_RUNTIME}",
                 "${WESKIT}/${PROFILE}",
+                "${WESKIT}/${WORKFLOW_TYPE_VERSION}",
+                "${WESKIT}/${WORKFLOW_CONFIG_URL}",
         ] as Set
     }
 }

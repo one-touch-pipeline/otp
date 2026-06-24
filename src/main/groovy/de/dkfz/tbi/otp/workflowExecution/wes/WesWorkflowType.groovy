@@ -28,8 +28,8 @@ import groovy.transform.TupleConstructor
  */
 @TupleConstructor
 enum WesWorkflowType {
-    NEXTFLOW('NextFlow', 'NFL', '23.04.1'),
-    SNAKE_MAKE('SnakeMake', 'SMK', '6.10.0')
+    NEXTFLOW('NextFlow', 'NFL'),
+    SNAKE_MAKE('SnakeMake', 'SMK')
 
     /**
      * name to show
@@ -40,11 +40,6 @@ enum WesWorkflowType {
      * the value used in weskit
      */
     final String weskitName
-
-    /**
-     * the version of the workflow available in weskit. Currently, only one supported.
-     */
-    final String version
 
     @Override
     String toString() {

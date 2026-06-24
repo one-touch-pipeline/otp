@@ -69,13 +69,6 @@ abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob 
     abstract WesWorkflowType getWorkflowType()
 
     /**
-     * Return the relative url of the workflow according to the base workflow directory
-     *
-     * @return relative url of the workflow
-     */
-    abstract String getWorkflowUrl(WorkflowRun workflowRun)
-
-    /**
      * Return the parameters for workflow runs. Each element in the list will be used to trigger an own Weskit call
      *
      * @param WorkflowStep current workflow step
@@ -93,15 +86,6 @@ abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob 
     abstract boolean shouldWeskitJobSend(WorkflowStep workflowStep)
 
     /**
-     * Return the version of the execution system, value needs to be known by Weskit for the workflowType
-     *
-     * @return workflow version in string format
-     */
-    String getWorkflowTypeVersion() {
-        return weskitAccessService.serviceInfo.workflowEngineVersions[workflowType]
-    }
-
-    /**
      * Execute the workflow
      *
      * @param workflowStep current workflow step
@@ -116,7 +100,6 @@ abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob 
             workflowRunService.markJobAsNotRestartableInSeparateTransaction(workflowStep.workflowRun)
 
             WesWorkflowType workflowType = this.workflowType
-            String workflowUrl = getWorkflowUrl(workflowStep.workflowRun)
 
             ObjectMapper mapper = new ObjectMapper()
 
@@ -128,14 +111,18 @@ abstract class AbstractExecuteWesPipelineJob extends AbstractExecutePipelineJob 
                 fileService.createDirectoryRecursivelyAndSetPermissions(path, unixGroup)
 
                 // config should be created each time since it is modified with mergeSortedMaps method
-                Map<String, String> config = mapper.readValue(workflowStep.workflowRun.combinedConfig, HashMap)
+                Map<String, Map<String, String>> config = mapper.readValue(workflowStep.workflowRun.combinedConfig, HashMap)
+                String workflowUrl = config[WeskitCheckFragmentKeysJob.WESKIT][WeskitCheckFragmentKeysJob.WORKFLOW_CONFIG_URL]
+                String workflowTypeVersion = config[WeskitCheckFragmentKeysJob.WESKIT][WeskitCheckFragmentKeysJob.WORKFLOW_TYPE_VERSION]
+
                 JSONObject mergedParameter = mapUtilService.mergeSortedMaps([config, parameter]) as JSONObject
 
                 WesWorkflowEngineParameter engineParameter = createWesWorkflowEngineParameter(
                         workflowStep,
                         mergedParameter.get(WeskitCheckFragmentKeysJob.WESKIT) as Map<String, String>)
                 mergedParameter.remove(WeskitCheckFragmentKeysJob.WESKIT)
-                WesWorkflowParameter wesParameter = new WesWorkflowParameter(mergedParameter, engineParameter, workflowType, path, workflowUrl)
+                WesWorkflowParameter wesParameter = new WesWorkflowParameter(mergedParameter, engineParameter, workflowType, workflowTypeVersion, path,
+                        workflowUrl)
                 logService.addSimpleLogEntry(workflowStep, "Call Weskit with ${wesParameter}")
                 logService.addSimpleLogEntry(workflowStep, "Work directory ${path}")
 

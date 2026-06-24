@@ -216,7 +216,7 @@ class TestConfigService extends ConfigService {
 
         // Log each property for debugging
         properties.each { key, value ->
-            log.info("  - ${key} = ${value}")
+            log.info("  - ${key} (${key.getClass()}) = ${value}")
         }
     }
 

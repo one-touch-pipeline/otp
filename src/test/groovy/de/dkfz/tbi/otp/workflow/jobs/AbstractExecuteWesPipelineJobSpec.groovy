@@ -69,16 +69,6 @@ class AbstractExecuteWesPipelineJobSpec extends Specification implements DataTes
         }
 
         @Override
-        String getWorkflowTypeVersion() {
-            return "21.04.0"
-        }
-
-        @Override
-        String getWorkflowUrl(WorkflowRun workflowRun) {
-            return "nf-seq-qc-${workflowRun.workflowVersion.workflowVersion}/main.nf"
-        }
-
-        @Override
         Map<Path, Map<String, String>> getRunSpecificParameters(WorkflowStep workflowStep, Path path) {
             return [
                     (tempDir.resolve("1")): ["k1": "v1"],

@@ -396,7 +396,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                                 accountName      : clusterJob.accountName,
                                 dependencies     : clusterJob.dependencies*.id.join(","),
                         ].each { key, value ->
-                            logEntries << "      - ${key}: ${value}"
+                            logEntries << "      - ${key}: ${prefixForOutput(value as String)}"
                         }
                     }
                     workflowStep.wesRuns.eachWithIndex { WesRun wesRun, int weskitIndex ->
@@ -415,7 +415,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                                 stdout       : wesRun.wesRunLog.runLog.stdout,
                                 stderr       : wesRun.wesRunLog.runLog.stderr,
                         ].each { key, value ->
-                            logEntries << "      - ${key}: ${value}"
+                            logEntries << "      - ${key}: ${prefixForOutput(value as String)}"
                         }
                     }
                     if (workflowError) {
@@ -436,7 +436,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      */
     private String prefixForOutput(String value) {
         String prefix = " " * 12
-        return value.replaceAll('\n', "\n${prefix}")
+        return value ? value.replaceAll('\n', "\n${prefix}") : ""
     }
 
     /**

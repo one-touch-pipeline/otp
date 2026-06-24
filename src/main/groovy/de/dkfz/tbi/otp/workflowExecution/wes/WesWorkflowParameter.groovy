@@ -31,6 +31,7 @@ class WesWorkflowParameter {
     final JSONObject workflowParams
     final WesWorkflowEngineParameter wesWorkflowEngineParameter
     final WesWorkflowType workflowType
+    final String workflowTypeVersion
     final Path workDirectory
     final String workflowUrl
 
@@ -41,6 +42,7 @@ class WesWorkflowParameter {
                 "workflowParams: ${workflowParams.toString(4)}",
                 wesWorkflowEngineParameter.toString().replaceAll('\n', '\n    '),
                 "workflowType: ${workflowType}",
+                "workflowTypeVersion: ${workflowTypeVersion}",
                 "workDirectory: ${workDirectory}",
                 "workflowUrl: ${workflowUrl}",
         ].join('\n- ')

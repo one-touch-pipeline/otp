@@ -47,11 +47,6 @@ class FastqcExecuteWesPipelineJob extends AbstractExecuteWesPipelineJob implemen
         return WesWorkflowType.NEXTFLOW
     }
 
-    @Override
-    String getWorkflowUrl(WorkflowRun workflowRun) {
-        return "nf-seq-qc-${workflowRun.workflowVersion.workflowVersion}/main.nf"
-    }
-
     // false positives for UnsafeImplementationAsMap & UnnecessaryCast
     @SuppressWarnings(["UnsafeImplementationAsMap", "UnnecessaryCast"])
     @Override

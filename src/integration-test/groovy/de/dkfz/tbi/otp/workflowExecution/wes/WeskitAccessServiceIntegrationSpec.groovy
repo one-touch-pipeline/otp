@@ -97,6 +97,7 @@ class WeskitAccessServiceIntegrationSpec extends Specification implements Domain
                 run_dir: Paths.get('/tmp').relativize(workDir).toString(),
         ] as JSON
 
+        String toolversion = "1.0.0"
         String workflow = "nf-seq-qc-1.0.0/main.nf"
 
         WesWorkflowEngineParameter engineParameter = new WesWorkflowEngineParameter(
@@ -107,13 +108,13 @@ class WeskitAccessServiceIntegrationSpec extends Specification implements Domain
                 "24:00",
                 "singularity",
         )
-        WesWorkflowParameter wesWorkflowParameter = new WesWorkflowParameter(workflowParamsJson, engineParameter, WesWorkflowType.NEXTFLOW, workDir, workflow)
+        WesWorkflowParameter wesWorkflowParameter = new WesWorkflowParameter(workflowParamsJson, engineParameter, WesWorkflowType.NEXTFLOW, toolversion, workDir, workflow)
 
         when:
         RunId runId = service.runWorkflow(wesWorkflowParameter)
 
         then:
-        1 * api.runWorkflow(_ as String, WesWorkflowType.NEXTFLOW.weskitName, WesWorkflowType.NEXTFLOW.version, _ as String, _ as String, workflow, null
+        1 * api.runWorkflow(_ as String, WesWorkflowType.NEXTFLOW.weskitName, toolversion, _ as String, _ as String, workflow, null
         ) >> { String workflowParams, String workflowType, String workflowTypeVersion, String tags, String workflowEngineParameters, String workflowUrl, List<File> workflowAttachment ->
             assert JSON.parse(workflowParams) == workflowParamsJson
             assert JSON.parse(tags) == JSON.parse(tagsJson.toString(true))

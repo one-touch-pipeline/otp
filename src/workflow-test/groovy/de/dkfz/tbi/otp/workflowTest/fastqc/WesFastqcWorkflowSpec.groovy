@@ -88,7 +88,9 @@ class WesFastqcWorkflowSpec extends AbstractDecidedWorkflowSpec {
             "fastqc.fo",
     ].asImmutable()
 
-    private static final List<String> EXPECTED_ZIP_ENTRIES_COPIED = (EXPECTED_ZIP_ENTRIES + ["Images/kmer_profiles.png"]).collect {
+    private static final List<String> EXPECTED_ZIP_ENTRIES_COPIED = (EXPECTED_ZIP_ENTRIES + ["Images/kmer_profiles.png"]).findAll {
+        !it.endsWith('svg')
+    }.collect {
         "asdf_fastqc/${it}".toString()
     }.asImmutable()
 

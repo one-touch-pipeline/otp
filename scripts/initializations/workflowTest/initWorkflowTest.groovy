@@ -198,25 +198,49 @@ void configureVepForSnvAndIndelLocationSpecific() {
  * @see ConfigSelectorService#create().
  */
 void configureWorkflowSpecificSettings() {
-    // Example Weskit configuration for nf-seq-qc workflow
-    // Uncomment and adapt as needed:
-    /*
     String workflowName = "nf-seq-qc"
-    Set<Workflow> workflowsByName = Workflow.findAllByName(workflowName) as Set<Workflow>
-    if (!workflowsByName) {
-        throw new IllegalArgumentException("No Workflow exists with name '${workflowName}'")
-    }
-    configSelectorService.create(new CreateCommand([
-            selectorName: 'WeskitSelector',
-            type: Selector.GENERIC,
-            workflows: workflowsByName,
-            value: groovy.json.JsonOutput.JsonOutput.toJson(["WESKIT", [
-                    "MAX_MEMORY": "512M",
-                    "MAX_RUNTIME": "24:00",
-                    "PROFILES": "slurm,singularity",
-            ]])
+    List<Workflow> workflowsByName = [CollectionUtils.exactlyOneElement(Workflow.findAllByName(workflowName), "Could not find '${workflowName}'")]
+
+    println configSelectorService.create(new CreateCommand([
+            selectorName: 'weskit selector',
+            type        : SelectorType.GENERIC,
+            workflows   : workflowsByName,
+            value       : """
+                            {
+                                "WESKIT": {
+                                    "MAX_MEMORY": "512M",
+                                    "MAX_RUNTIME": "24:00",
+                                }
+                            }
+                          """
     ]))
-    */
+
+    println configSelectorService.create(new CreateCommand([
+            selectorName: 'Nextflow selector',
+            type        : SelectorType.GENERIC,
+            workflows   : workflowsByName,
+            value       : """
+                            {
+                                "WESKIT": {
+                                    "WORKFLOW_TYPE_VERSION": "$WORKFLOW_TYPE_VERSION",
+                                    "PROFILE": "$PROFILE",
+                                }
+                            }
+                          """
+    ]))
+
+    println configSelectorService.create(new CreateCommand([
+            selectorName: 'nf-seq-qc selector',
+            type        : SelectorType.GENERIC,
+            workflows   : workflowsByName,
+            value       : """
+                            {
+                                "WESKIT": {
+                                    "WORKFLOW_CONFIG_URL": "$WORKFLOW_CONFIG_URL",
+                                }
+                            }
+                          """
+    ]))
 }
 
 // Execute the configuration

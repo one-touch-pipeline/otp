@@ -58,9 +58,12 @@ class ConfigService implements ApplicationContextAware {
         Properties properties = new Properties()
         String propertiesFile = System.getenv("OTP_PROPERTIES")
         if (propertiesFile && new File(propertiesFile).canRead()) {
-            properties.load(new FileInputStream(propertiesFile))
+            log.debug("Load property file: ${propertiesFile}")
+            new FileInputStream(propertiesFile).withCloseable { properties.load(it) }
         } else {
-            properties.load(Files.newInputStream(Paths.get(System.getProperty("user.home"), ".otp.properties")))
+            Path defaultPropertyFile = Paths.get(System.getProperty("user.home"), ".otp.properties")
+            log.debug("Load default property file: ${defaultPropertyFile}")
+            Files.newInputStream(defaultPropertyFile).withCloseable { properties.load(it) }
         }
         return properties
     }
@@ -297,6 +300,7 @@ class ConfigService implements ApplicationContextAware {
                 Integer.parseInt(otpPropertiesValue.defaultValue)
     }
 
+    @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")
     @Override
     void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         context = applicationContext

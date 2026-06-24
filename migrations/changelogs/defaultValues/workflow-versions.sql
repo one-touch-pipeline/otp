@@ -31,7 +31,7 @@ ON CONFLICT DO NOTHING;
 INSERT INTO workflow_version(id, version, api_version_id, workflow_version, date_created, last_updated)
 VALUES (NEXTVAL('hibernate_sequence'), 0,
         (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'nf-seq-qc') AND wav.identifier = 1),
-        '1.1.0', NOW(), NOW())
+        '1.2.2', NOW(), NOW())
 ON CONFLICT DO NOTHING;
 
 -- pancancer versions

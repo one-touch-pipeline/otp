@@ -116,7 +116,7 @@ class WeskitAccessService {
             api.runWorkflow(
                     wesWorkflowParameter.workflowParams.toString(JSON_INDENT_FACTOR),
                     wesWorkflowParameter.workflowType.weskitName,
-                    wesWorkflowParameter.workflowType.version,
+                    wesWorkflowParameter.workflowTypeVersion,
                     tags,
                     engine,
                     wesWorkflowParameter.workflowUrl,
@@ -177,6 +177,7 @@ class WeskitAccessService {
         assert parameter.workflowParams
         assert parameter.wesWorkflowEngineParameter
         assert parameter.workflowType
+        assert parameter.workflowTypeVersion
         assert parameter.workDirectory
         assert parameter.workflowUrl
 
