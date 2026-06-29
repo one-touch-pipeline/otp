@@ -145,7 +145,9 @@ class WesRunService {
     }
 
     boolean hasReports(WesRun wesRun) {
-        return wesRun.wesRunLog?.state == State.COMPLETE || wesRun.wesRunLog?.state == State.EXECUTOR_ERROR || wesRun.wesRunLog?.state == State.SYSTEM_ERROR
+        return !wesRun.workflowStep.obsolete && (
+                wesRun.wesRunLog?.state == State.COMPLETE || wesRun.wesRunLog?.state == State.EXECUTOR_ERROR || wesRun.wesRunLog?.state == State.SYSTEM_ERROR
+        )
     }
 }
 

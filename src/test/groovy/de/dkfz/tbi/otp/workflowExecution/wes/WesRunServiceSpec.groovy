@@ -239,6 +239,19 @@ class WesRunServiceSpec extends Specification implements ServiceUnitTest<WesRunS
         result == false
     }
 
+    void "hasReports, when workflowStep is obsolete, returns false"() {
+        given:
+        WesRunLog wesRunLog = createWesRunLog([state: State.COMPLETE])
+        WorkflowStep workflowStep = createWorkflowStep([obsolete: true])
+        WesRun wesRun = createWesRun([wesRunLog: wesRunLog, workflowStep: workflowStep])
+
+        when:
+        boolean result = service.hasReports(wesRun)
+
+        then:
+        result == false
+    }
+
     void "getCumulatedWesRunsStatus, when empty list provided, returns empty string"() {
         when:
         String result = service.getCumulatedWesRunsStatus([])

@@ -81,6 +81,10 @@ class WesRunController {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "WesRun not found")
             return
         }
+        if (!wesRunService.hasReports(wesRun)) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "No report available for this WES run")
+            return
+        }
 
         try {
             byte[] content = wesRunService.getReportFileContent(wesRun)

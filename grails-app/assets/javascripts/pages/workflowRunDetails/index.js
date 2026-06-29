@@ -142,7 +142,7 @@ $(() => {
                        </td>
                        <td>${wesRun.state}</td>
                        <td>${wesRun.hasReport ? $.otp.createLinkMarkup({
-    text: 'WESkit Report',
+    text: 'Nextflow Report',
     controller: 'wesRun',
     action: 'showReport',
     id: wesRun.id

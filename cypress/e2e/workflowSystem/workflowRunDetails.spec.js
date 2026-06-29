@@ -41,6 +41,47 @@ describe('Check workflow run details page', () => {
       cy.get('table#steps thead th').contains('Job finished').should('exist');
     });
 
+    it('should not show WESkit Report link for obsolete steps after a restart', () => {
+      cy.intercept('/workflowRunDetails/data*').as('stepsData');
+      cy.visit('/workflowRunList/index?state=FAILED');
+      cy.get('table#runs tbody').should('not.be.empty');
+
+      cy.contains('table#runs tbody a', 'WES Restart Scenario (OTP-2980)').click();
+      cy.location('pathname').should('contain', '/workflowRunDetails/index');
+
+      cy.wait('@stepsData').then((interception) => {
+        const steps = interception.response.body.data;
+
+        // Steps with WES runs are auto-expanded on draw — child rows are already visible.
+        // Find the obsolete and restarted steps by their properties from the API response.
+        const obsoleteStep = steps.find((s) => s.obsolete && s.wesRuns.length > 0);
+        const restartedStep = steps.find((s) => !s.obsolete && s.wesRuns.length > 0);
+
+        // Obsolete step: WES run COMPLETE but hasReport=false → no WESkit Report link
+        cy.contains('table#steps tbody td', obsoleteStep.id.toString())
+          .closest('tr').next()
+          .contains('a', 'Nextflow Report').should('not.exist');
+
+        // Restarted step: WES run COMPLETE and hasReport=true → WESkit Report link present
+        // Fetch the report and compare its content against the source file in the SSH init script
+        cy.contains('table#steps tbody td', restartedStep.id.toString())
+          .closest('tr').next()
+          .contains('a', 'Nextflow Report').should('exist')
+          .invoke('attr', 'href')
+          .then((href) => {
+            cy.readFile('docker/ssh/30-create-wes-restart-report.sh').then((script) => {
+              const match = script.match(/cat >.*<<'EOF'\n([\s\S]*?)\nEOF/);
+              const expectedContent = match[1];
+              cy.request(href).then((response) => {
+                expect(response.status).to.eq(200);
+                expect(response.headers['content-type']).to.include('text/html');
+                expect(response.body.trim()).to.eq(expectedContent.trim());
+              });
+            });
+          });
+      });
+    });
+
     it('should visit the error log of a restarted workflow run', () => {
       cy.intercept('/workflowRunDetails/data*').as('workflowRunDetailsData');
       cy.intercept('/workflowRunDetails/showError/*').as('showWorkflowErrors');
@@ -243,6 +284,8 @@ describe('Check workflow run details page', () => {
         cy.get('form button.failed-waiting-btn').should('be.visible', 'Set failed waiting');
       });
     });
+
+
   });
 
   context('when user is normal user', () => {

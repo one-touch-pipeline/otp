@@ -102,6 +102,7 @@ class WesRunControllerSpec extends Specification implements ControllerUnitTest<W
         and: 'mock service behavior'
         if (wesRunExists) {
             controller.wesRunService.getById(wesRunId) >> wesRun
+            controller.wesRunService.hasReports(wesRun) >> hasReport
             if (reportFileException) {
                 controller.wesRunService.getReportFileContent(wesRun) >> { throw reportFileException }
             } else if (reportContent) {
@@ -127,11 +128,12 @@ class WesRunControllerSpec extends Specification implements ControllerUnitTest<W
         }
 
         where:
-        scenario                                       | wesRunExists | validCommand | reportContent                                 | reportFileException                         | expectedStatus                   | expectedContent                               | nonExistentId
-        "WesRun exists and report file is available"   | true         | true         | "<html><body>Test Report</body></html>".bytes | null                                        | HttpServletResponse.SC_OK        | "<html><body>Test Report</body></html>".bytes | null
-        "WesRun does not exist"                        | false        | true         | null                                          | null                                        | HttpServletResponse.SC_NOT_FOUND | null                                          | 999L
-        "report file does not exist"                   | true         | true         | null                                          | new NoSuchFileException("Report not found") | HttpServletResponse.SC_NOT_FOUND | null                                          | null
-        "access to report file is denied"              | true         | true         | null                                          | new AccessDeniedException("Access denied")  | HttpServletResponse.SC_FORBIDDEN | null                                          | null
-        "command with null ID is treated as not found" | false        | false        | null                                          | null                                        | HttpServletResponse.SC_NOT_FOUND | null                                          | null
+        scenario                                       | wesRunExists | validCommand | hasReport | reportContent                                 | reportFileException                         | expectedStatus                   | expectedContent                               | nonExistentId
+        "WesRun exists and report file is available"   | true         | true         | true      | "<html><body>Test Report</body></html>".bytes | null                                        | HttpServletResponse.SC_OK        | "<html><body>Test Report</body></html>".bytes | null
+        "WesRun exists but step is obsolete"           | true         | true         | false     | null                                          | null                                        | HttpServletResponse.SC_NOT_FOUND | null                                          | null
+        "WesRun does not exist"                        | false        | true         | false     | null                                          | null                                        | HttpServletResponse.SC_NOT_FOUND | null                                          | 999L
+        "report file does not exist"                   | true         | true         | true      | null                                          | new NoSuchFileException("Report not found") | HttpServletResponse.SC_NOT_FOUND | null                                          | null
+        "access to report file is denied"              | true         | true         | true      | null                                          | new AccessDeniedException("Access denied")  | HttpServletResponse.SC_FORBIDDEN | null                                          | null
+        "command with null ID is treated as not found" | false        | false        | false     | null                                          | null                                        | HttpServletResponse.SC_NOT_FOUND | null                                          | null
     }
 }
