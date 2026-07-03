@@ -477,13 +477,13 @@ class ProjectRequestCreationCommand implements Validateable {
             }) {
                 return "projectRequest.users.no.authority"
             }
-            if (value*.username.size() != value*.username.unique().size() || !val*.username?.intersect(obj.users*.username)?.isEmpty()) {
+            if (value*.username.size() != value*.username.unique().size() || !value*.username?.intersect(obj.users*.username?.findAll() ?: [])?.isEmpty()) {
                 return "projectRequest.users.unique"
             }
         }
         users validator: { val, obj ->
             List<ProjectRequestUserCommand> value = val?.toList()?.findAll() ?: []
-            if (value*.username.size() != value*.username.unique().size() || !val*.username?.intersect(obj.piUsers*.username)?.isEmpty()) {
+            if (value*.username.size() != value*.username.unique().size() || !value*.username?.intersect(obj.piUsers*.username?.findAll() ?: [])?.isEmpty()) {
                 return "projectRequest.users.unique"
             }
         }

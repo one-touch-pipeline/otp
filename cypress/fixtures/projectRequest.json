@@ -29,5 +29,19 @@
     "projectType": "SEQUENCING",
     "storagePeriod": "Store data for ten years",
     "speciesWithStrainList": "Mouse (Mus caroli) [Unknown]"
+  },
+  {
+    "projectName": "my-demo-project-um-1",
+    "keywords": "new-keyword{enter} keyword1{enter}",
+    "description": "my-description: hello world, this is a description that is longer than 50 chars.",
+    "projectType": "USER_MANAGEMENT",
+    "storagePeriod": "Store data for ten years"
+  },
+  {
+    "projectName": "my-demo-project-um-2",
+    "keywords": "keyword1{enter}",
+    "description": "my-description: hello world, this is a description that is longer than 50 chars.",
+    "projectType": "USER_MANAGEMENT",
+    "storagePeriod": "Store data for ten years"
   }
 ]

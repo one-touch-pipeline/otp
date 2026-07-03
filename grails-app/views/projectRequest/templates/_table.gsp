@@ -43,7 +43,7 @@
         <g:each var="projectRequest" in="${projectRequests}">
             <tr>
                 <td>
-                    <g:link action="view" id="${projectRequest.id}">${projectRequest.name}</g:link>
+                    <g:link class="project-request-link" action="view" id="${projectRequest.id}">${projectRequest.name}</g:link>
                 </td>
                 <td>
                     ${g.message(code: projectRequest.stateDisplayName)}
