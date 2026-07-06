@@ -29,6 +29,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.filestore.FilestoreService
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 import java.nio.file.*
@@ -38,6 +39,8 @@ class WesRunService {
 
     FileService fileService
     FilestoreService filestoreService
+    WeskitAccessService weskitAccessService
+    LogService logService
 
     // regex to find the report file (starting with 'report' and ending with '.html'. e.g. report-20252034.html)
     static final String MATCHER_REPORT_FILE = /report.*\.html/
@@ -148,6 +151,19 @@ class WesRunService {
         return !wesRun.workflowStep.obsolete && (
                 wesRun.wesRunLog?.state == State.COMPLETE || wesRun.wesRunLog?.state == State.EXECUTOR_ERROR || wesRun.wesRunLog?.state == State.SYSTEM_ERROR
         )
+    }
+
+    /**
+     * Kill all running WESkit runs in a workflow step
+     *
+     * @param workflowStep the workflow step holding all the WESkit runs
+     */
+    void killWesRunsInWorkflowStep(WorkflowStep workflowStep) {
+        assert workflowStep.wesRuns: "${workflowStep}: doesn't contain any WESkit runs"
+        workflowStep.wesRuns.each { WesRun wesRun ->
+            weskitAccessService.cancelRun(wesRun)
+        }
+        logService.addSimpleLogEntry(workflowStep, "Following WESkit runs have been cancelled: ${workflowStep.wesRuns*.wesIdentifier.join(',')}")
     }
 }
 

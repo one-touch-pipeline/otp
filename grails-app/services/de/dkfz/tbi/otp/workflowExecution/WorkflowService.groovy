@@ -24,6 +24,8 @@ package de.dkfz.tbi.otp.workflowExecution
 import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 
+import de.dkfz.tbi.otp.job.processing.ClusterJobManagerFactoryService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.project.Project
@@ -31,6 +33,8 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.exceptions.FileAccessForProjectNotAllowedException
 import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
 import de.dkfz.tbi.otp.workflow.fastqc.WesFastQcWorkflow
+import de.dkfz.tbi.otp.workflowExecution.cluster.ClusterJobHandlingService
+import de.dkfz.tbi.otp.workflowExecution.wes.WesRunService
 
 @Transactional
 class WorkflowService {
@@ -40,6 +44,14 @@ class WorkflowService {
     OtpWorkflowService otpWorkflowService
 
     WorkflowVersionService workflowVersionService
+
+    ClusterJobManagerFactoryService clusterJobManagerFactoryService
+
+    FileSystemService fileSystemService
+
+    ClusterJobHandlingService clusterJobHandlingService
+
+    WesRunService wesRunService
 
     static final Set<String> FASTQC_WORKFLOWS = [
             BashFastQcWorkflow.WORKFLOW,
@@ -72,7 +84,7 @@ class WorkflowService {
     @CompileDynamic
     WorkflowRun createRestartedWorkflow(WorkflowStep step) {
         assert step
-        assert step.workflowRun.state in [WorkflowRun.State.FAILED, WorkflowRun.State.FAILED_WAITING]
+        assert step.workflowRun.state in [WorkflowRun.State.FAILED, WorkflowRun.State.FAILED_WAITING, WorkflowRun.State.KILLED]
 
         if (step.workflowRun.project.state == Project.State.ARCHIVED || step.workflowRun.project.state == Project.State.DELETED) {
             String stateName = step.workflowRun.project.state.name().toLowerCase()
@@ -89,6 +101,48 @@ class WorkflowService {
 
         oldRun.state = WorkflowRun.State.RESTARTED
         oldRun.save(flush: true)
+
+        return run
+    }
+
+    /**
+     * Kill a workflow run if it is in a state where killing the run is allowed:
+     * [ PENDING, RUNNING_OTP, RUNNING_WES ]
+     *
+     * If the current workflow step is an OTP job/step -> let it run to the end
+     * If the current workflow step is a Cluster job/step -> kill the cluster job
+     * If the current workflow step is a WESkit job/step -> cancel the WES run
+     *
+     * The state of the workflow run is set to KILLED
+     *
+     * No next workflow step will be triggered (@link JobService#createNextJob(WorkflowRun workflowRun))
+     *
+     * @param run the workflow run to be killed
+     * @return the workflow run that has been killed
+     */
+    WorkflowRun killWorkflowRun(WorkflowRun run) {
+        assert run.state in WorkflowRun.UNFINISHED_STATES : "WorkflowRun ${run} is not allowed to be killed"
+
+        if (run.project.state in [Project.State.ARCHIVED, Project.State.DELETED]) {
+            String stateName = run.project.state.name().toLowerCase()
+            throw new FileAccessForProjectNotAllowedException("${run.project} is ${stateName} and ${run} cannot be killed")
+        }
+
+        if (run.state == WorkflowRun.State.RUNNING_WES) {
+            WorkflowStep step = run.workflowSteps.last()
+            assert step: "Missing workflow step for the current workflow run"
+            assert step.state == WorkflowStep.State.SUCCESS: "Workflow step is not in SUCCESS state"
+            if (step.clusterJobs) {
+                // Kill all cluster jobs in this workflow step
+                clusterJobHandlingService.killClusterJobsInWorkflowStep(step)
+            } else if (step.wesRuns) {
+                // Kill all WESkit runs in this workflow step
+                wesRunService.killWesRunsInWorkflowStep(step)
+            }
+        }
+
+        run.state = WorkflowRun.State.KILLED
+        run.save(flush: true)
 
         return run
     }

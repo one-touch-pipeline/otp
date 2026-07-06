@@ -289,9 +289,9 @@ $(() => {
           const runState = $stepsTable
             .data('wf-run-state');
           const buttonsDisabled = (!lastStepFailed ||
-          runState === 'RESTARTED' ||
-          runState === 'FAILED_FINAL' ||
-          row.obsolete) ? ' disabled ' : '';
+            runState === 'RESTARTED' ||
+            runState === 'FAILED_FINAL' ||
+            row.obsolete) ? ' disabled ' : '';
           const restartStepButton = button($.otp.createLink({
             controller: 'workflowRunDetails',
             action: 'restartStep',

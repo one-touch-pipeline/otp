@@ -43,6 +43,7 @@ abstract class AbstractWorkflowRunController implements CheckAndCall {
             restartStep        : "POST",
             restartPreviousStep: "POST",
             restartRun         : "POST",
+            killRun            : "POST",
     ]
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -94,6 +95,17 @@ abstract class AbstractWorkflowRunController implements CheckAndCall {
         redirect uri: cmd.redirect
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    def killRun(RunKillCommand cmd) {
+        checkErrorAndCallMethodWithFlashMessageWithoutTokenCheck(cmd, "workflowRun.list.killRuns") {
+            assert cmd.run: "No WorkflowRun provided"
+            WorkflowRun workflowRun = WorkflowRun.get(cmd.run)
+            assert workflowRun: "WorkflowRun with id ${cmd.run} does not exist"
+            workflowService.killWorkflowRun(workflowRun)
+        }
+        redirect uri: cmd.redirect
+    }
+
     protected LocalDateTime convertDateToLocalDateTime(Date date) {
         return date.toInstant().atZone(configService.timeZoneId).toLocalDateTime()
     }
@@ -114,6 +126,20 @@ class RunUpdateCommand implements Validateable {
     String redirect
 
     static constraints = {
+        redirect(nullable: false, validator: { String val ->
+            val.startsWith("/")
+        })
+    }
+}
+
+class RunKillCommand implements Validateable {
+    Long run
+    String redirect
+
+    static constraints = {
+        run(nullable: false, validator: { Long val ->
+            val != null && WorkflowRun.exists(val)
+        })
         redirect(nullable: false, validator: { String val ->
             val.startsWith("/")
         })

@@ -21,8 +21,8 @@
  */
 package de.dkfz.tbi.otp.workflowExecution
 
-import grails.web.mapping.LinkGenerator
 import grails.testing.gorm.DataTest
+import grails.web.mapping.LinkGenerator
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -39,7 +39,8 @@ class JobServiceSpec extends Specification implements DataTest, WorkflowSystemDo
             WorkflowRun.State.RUNNING_WES,
     ].asImmutable()
 
-    static private final List<WorkflowRun.State> NOT_ALLOWED_STATE = (WorkflowRun.State.values().toList() - ALLOWED_STATE).asImmutable()
+    static private final List<WorkflowRun.State> NOT_ALLOWED_STATE =
+            (WorkflowRun.State.values().toList() - ALLOWED_STATE - WorkflowRun.State.KILLED).asImmutable()
 
     private JobService service
 
@@ -396,6 +397,20 @@ class JobServiceSpec extends Specification implements DataTest, WorkflowSystemDo
 
         then:
         thrown(BeanToRestartNotFoundInWorkflowRunException)
+    }
+
+    void "test createNextJob, when run is KILLED, then return early without creating job"() {
+        given:
+        WorkflowRun workflowRun = createWorkflowRun(state: WorkflowRun.State.KILLED)
+        createWorkflowStep(workflowRun: workflowRun, beanName: "1st job bean", state: WorkflowStep.State.SUCCESS)
+
+        when:
+        service.createNextJob(workflowRun)
+
+        then:
+        notThrown(Exception)
+        WorkflowStep.all.size() == 1  // No new job created
+        workflowRun.state == WorkflowRun.State.KILLED  // State unchanged
     }
 
     /**

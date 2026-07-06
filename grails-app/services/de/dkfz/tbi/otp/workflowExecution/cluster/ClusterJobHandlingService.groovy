@@ -32,6 +32,7 @@ import de.dkfz.roddy.execution.Code
 import de.dkfz.roddy.tools.UnescapedString
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.job.processing.ClusterJobManagerFactoryService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
 import de.dkfz.tbi.otp.workflowExecution.LogService
@@ -56,6 +57,8 @@ class ClusterJobHandlingService {
     ClusterJobService clusterJobService
 
     ClusterJobHelperService clusterJobHelperService
+
+    ClusterJobManagerFactoryService clusterJobManagerFactoryService
 
     ClusterLogDirectoryService clusterLogDirectoryService
 
@@ -154,6 +157,24 @@ class ClusterJobHandlingService {
         logService.addSimpleLogEntry(workflowStep, "Finish starting ${beJobs.size()} cluster jobs: ${jobToString(beJobs)}")
     }
 
+    /**
+     * Kill all cluster jobs in a given workflow step
+     * @param jobManager the jobManager of BatchEuphoria
+     * @param workflowStep current workflow step that contains cluster jobs
+     */
+    void killClusterJobsInWorkflowStep(WorkflowStep workflowStep) {
+        assert workflowStep.clusterJobs: "${workflowStep}: doesn't contain any cluster jobs"
+        try {
+            BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.jobManager
+            List<BEJob> beJobs = mapToBEJobs(jobManager, workflowStep.clusterJobs)
+            jobManager.killJobs(beJobs)
+            logService.addSimpleLogEntry(workflowStep, "Following cluster jobs have been killed: ${jobToString(beJobs)}")
+        } catch (BEException e) {
+            // bkill reports already-finished jobs as errors; treat as non-fatal and log for audit
+            logService.addSimpleLogEntry(workflowStep, "Failed to kill some cluster jobs (they may already be finished): ${e.message}")
+        }
+    }
+
     List<ClusterJob> createAndSaveClusterJobs(WorkflowStep workflowStep, List<BEJob> beJobs) {
         logService.addSimpleLogEntry(workflowStep, "Begin creating  ${beJobs.size()} cluster job statistic: ${jobToString(beJobs)}")
         String sshUser = configService.sshUser
@@ -188,5 +209,14 @@ class ClusterJobHandlingService {
 
     private String clusterJobToString(List<ClusterJob> jobs) {
         return jobs*.clusterJobId.join(', ')
+    }
+
+    private List<BEJob> mapToBEJobs(BatchEuphoriaJobManager jobManager, Collection<ClusterJob> clusterJobs) {
+        return clusterJobs.collect { ClusterJob clusterJob ->
+            BEJobID beJobId = new BEJobID(clusterJob.clusterJobId)
+            BEJob beJob = new BEJob(beJobId, jobManager)
+            beJob.runResult = new BEJobResult(null, beJob, null, null, null, null)
+            return beJob
+        }
     }
 }

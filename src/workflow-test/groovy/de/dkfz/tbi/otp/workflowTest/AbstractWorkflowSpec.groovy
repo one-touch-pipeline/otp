@@ -686,20 +686,7 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
         }
     }
 
-    /**
-     * Starts the workflow system and then wait for starting and ending of the given count of {@link WorkflowRun}.
-     * All {@link WorkflowRun} not in state {@link WorkflowRun.State#PENDING} are considered as started.
-     * All {@link WorkflowRun} not in state {@link WorkflowRun.State#PENDING},{@link WorkflowRun.State#RUNNING_OTP} or {@link WorkflowRun.State#RUNNING_WES}
-     * are considered as finish.
-     *
-     * If all workflows are finished, the workflow states are checked based on the given {@link CheckType}.
-     *
-     * The waiting time is limited by the timeouts {@link #getStartWorkflowTimeout()} and {@link #getRunningTimeout()}.
-     * In case the timeout is reached, a {@link TimeoutException} is thrown.
-     *
-     * It is no problem if additional workflows exist, as long at least the given count of {@link WorkflowRun} are ended.
-     */
-    protected void execute(CheckType checkType = CheckType.SUCCESS) {
+    protected void startWorkflow() {
         log.debug("starting workflow system")
         SessionUtils.withTransaction {
             int newWorkflowCountDataBase = WorkflowRun.countByState(WorkflowRun.State.PENDING)
@@ -711,6 +698,22 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
             updateDomainValuesForTesting()
             workflowSystemService.startWorkflowSystem()
         }
+    }
+    /**
+     * Starts the workflow system and then waits for the starting and ending of the given count of {@link WorkflowRun}.
+     * All {@link WorkflowRun} not in state {@link WorkflowRun.State#PENDING} are considered as started.
+     * All {@link WorkflowRun} not in state {@link WorkflowRun.State#PENDING},{@link WorkflowRun.State#RUNNING_OTP}, or {@link WorkflowRun.State#RUNNING_WES}
+     * are considered as finished.
+     *
+     * If all workflows are finished, the workflow states are checked based on the given {@link CheckType}.
+     *
+     * The waiting time is limited by the timeouts {@link #getStartWorkflowTimeout()} and {@link #getRunningTimeout()}.
+     * In case the timeout is reached, a {@link TimeoutException} is thrown.
+     *
+     * It is no problem if additional workflows exist, as long at least the given count of {@link WorkflowRun} are ended.
+     */
+    protected void execute(CheckType checkType = CheckType.SUCCESS) {
+        startWorkflow()
         waitUntilWorkflowStarts()
         waitUntilWorkflowFinishes()
         log.debug("workflows finished")
@@ -749,18 +752,19 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
     }
 
     /**
-     * Wait until all new workflows are started or the timeout {@link #getStartWorkflowTimeout()} is reached.
-     * All {@link WorkflowRun} not in state {@link WorkflowRun.State#PENDING} are considered as started.
+     * Generic polling helper that blocks the process until {@code closure} returns {@code true} or the timeout expires.
      *
-     * It is no problem if additional workflows exist.
+     * Polls every second. Logs a progress line every {@code interval} milliseconds. Aborts early with a
+     * {@link JobSchedulerException} if a scheduler exception was detected.
      *
-     * In case the timeout is reached, a {@link TimeoutException} is thrown.
+     * @param condition human-readable label used in log and timeout messages (e.g. {@code "start"}, {@code "finish"})
+     * @param timeout   maximum time to wait before throwing {@link TimeoutException}
+     * @param interval  milliseconds between periodic progress log messages
+     * @param closure   condition evaluated inside a transaction; polling stops when it returns {@code true}
      */
-    private void waitUntilWorkflowStarts() {
-        Duration timeout = startWorkflowTimeout
+    protected void waitUntilWorkflowInState(String condition, Duration timeout, long interval, Closure closure) {
         long timeoutMillis = timeout.toMillis()
-        log.debug "Wait for starting ${newWorkflowRuns.size()} workflows, max ${timeout}"
-        List<Long> newWorkflowRunIds = newWorkflowRuns*.id
+        log.debug "Wait for ${newWorkflowRuns.size()} workflows to ${condition}, max ${timeout}"
         long lastLog = System.currentTimeMillis()
         int counter = 0
         if (!ThreadUtils.waitFor({
@@ -768,17 +772,35 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
                 throw new JobSchedulerException("Stop, since exception in one of the cron jobs occurred", exceptionInScheduler)
             }
             long milliSeconds = System.currentTimeMillis()
-            if (lastLog < milliSeconds - 10000L) {
-                log.debug "waiting for workflow starting (${counter += 10} seconds) ... "
-                lastLog += 10000L
+            if (lastLog < milliSeconds - interval) {
+                if (interval == 60000L) { // 1 minute interval
+                    log.debug "waiting for workflow to ${condition} in (${counter += 1} min) ... "
+                } else { // otherwise in seconds
+                    log.debug "waiting for workflow to ${condition} in (${counter += 10} sec) ... "
+                }
+                lastLog += interval
             }
             SessionUtils.withTransaction {
-                return WorkflowRun.countByStateAndIdInList(WorkflowRun.State.PENDING, newWorkflowRunIds) == 0
+                return closure()
             }
         }, timeoutMillis, 1000L)) {
-            TimeoutException e = new TimeoutException("Workflow(s) did not started within ${timeout.toString().substring(2)}.")
+            TimeoutException e = new TimeoutException("Workflow(s) did not ${condition} within ${timeoutMillis} ms.")
             log.debug(e.message, e)
             throw e
+        }
+    }
+
+    /**
+     * Wait until all new workflows are started or the timeout {@link #getStartWorkflowTimeout()} is reached.
+     * All {@link WorkflowRun} not in state {@link WorkflowRun.State#PENDING} are considered as started.
+     *
+     * It is no problem if additional workflows exist.
+     *
+     * In case the timeout is reached, a {@link TimeoutException} is thrown.
+     */
+    protected void waitUntilWorkflowStarts() {
+        waitUntilWorkflowInState("start", startWorkflowTimeout, 10000L) {
+            WorkflowRun.countByStateAndIdInList(WorkflowRun.State.PENDING, newWorkflowRuns*.id) == 0
         }
     }
 
@@ -792,29 +814,38 @@ abstract class AbstractWorkflowSpec extends Specification implements UserAndRole
      *
      * In case the timeout is reached, a {@link TimeoutException} is thrown.
      */
-    private void waitUntilWorkflowFinishes() {
-        Duration timeout = runningTimeout
-        log.debug "Wait until ${newWorkflowRuns.size()} workflowRuns finished, max ${timeout}"
-        long timeoutMillis = timeout.toMillis()
-        List<Long> newWorkflowRunIds = newWorkflowRuns*.id
-        long lastLog = System.currentTimeMillis()
-        int counter = 0
-        if (!ThreadUtils.waitFor({
-            if (exceptionInScheduler) {
-                throw new JobSchedulerException("Stop, since exception in one of the cron jobs occurred", exceptionInScheduler)
-            }
-            long milliSeconds = System.currentTimeMillis()
-            if (lastLog < milliSeconds - 60000L) {
-                log.debug "waiting (${counter++} min) ... "
-                lastLog += 60000L
-            }
-            SessionUtils.withTransaction {
-                return WorkflowRun.countByStateInListAndIdInList(RUNNING_AND_WAITING_STATES, newWorkflowRunIds) == 0
-            }
-        }, timeoutMillis, 1000L)) {
-            TimeoutException e = new TimeoutException("Workflow did not finish within ${timeout.toString().substring(2)}.")
-            log.debug(e.message, e)
-            throw e
+    protected void waitUntilWorkflowFinishes() {
+        waitUntilWorkflowInState("finish", runningTimeout, 60000L) {
+            WorkflowRun.countByStateInListAndIdInList(RUNNING_AND_WAITING_STATES, newWorkflowRuns*.id) == 0
+        }
+    }
+
+    /**
+     * Wait until at least one workflow in {@link #newWorkflowRuns} reaches state {@link WorkflowRun.State#RUNNING_WES},
+     * or the timeout {@link #getRunningTimeout()} is reached.
+     *
+     * Use this before issuing a kill request to ensure cluster jobs have been submitted.
+     *
+     * In case the timeout is reached, a {@link TimeoutException} is thrown.
+     */
+    protected void waitUntilWorkflowRunWes() {
+        waitUntilWorkflowInState("reach RUNNING_WES", runningTimeout, 60000L) {
+            WorkflowRun.countByStateAndIdInList(WorkflowRun.State.RUNNING_WES, newWorkflowRuns*.id) > 0
+        }
+    }
+
+    /**
+     * Wait until all workflows in {@link #newWorkflowRuns} have left {@link WorkflowRun.State#RUNNING_WES}
+     * (i.e. at least one has reached {@link WorkflowRun.State#KILLED}),
+     * or the timeout {@link #getRunningTimeout()} is reached.
+     *
+     * Use this after issuing a kill request to confirm the kill has been processed.
+     *
+     * In case the timeout is reached, a {@link TimeoutException} is thrown.
+     */
+    protected void waitUntilWorkflowKilled() {
+        waitUntilWorkflowInState("reach KILLED", runningTimeout, 60000L) {
+            WorkflowRun.countByStateAndIdInList(WorkflowRun.State.KILLED, newWorkflowRuns*.id) > 0
         }
     }
 

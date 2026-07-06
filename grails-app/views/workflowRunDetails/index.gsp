@@ -54,13 +54,15 @@
             ${raw(workflowRun.displayName.replace("\n", "<br>"))}
             <p></p>
             <g:form method="POST">
+                <input type="hidden" name="run" value="${workflowRun.id}">
                 <input type="hidden" name="step" value="${workflowRun.workflowSteps ? workflowRun.workflowSteps.last().id : null}">
                 <input type="hidden" name="redirect" value="${uriWithParams}"/>
 
                 <div class="btn-group">
                     %{-- Button to set the workflow run to failed final, only enabled if the workflow run is in the failed or failed waiting state --}%
                     <button class="btn btn-sm btn-primary failed-final-btn"
-                        ${(workflowRun.state != WorkflowRun.State.FAILED && workflowRun.state != WorkflowRun.State.FAILED_WAITING) ? "disabled" : ""}
+                        ${(workflowRun.state != WorkflowRun.State.FAILED && workflowRun.state != WorkflowRun.State.FAILED_WAITING &&
+                                workflowRun.state != WorkflowRun.State.KILLED) ? "disabled" : ""}
                             formaction="${g.createLink(action: "setFailedFinal")}" title="${g.message(code: "workflowRun.details.setFailedFinal")}">
                         <i class="bi-file-earmark-x"></i> ${g.message(code: "workflowRun.details.setFailedFinal")}
                     </button>
@@ -77,9 +79,17 @@
 
                     %{-- Button to restart the run, only enabled if the workflow run is in the failed or failed waiting state --}%
                     <button class="btn btn-sm btn-primary restart-run-btn"
-                        ${(workflowRun.state != WorkflowRun.State.FAILED && workflowRun.state != WorkflowRun.State.FAILED_WAITING) ? "disabled" : ""}
+                        ${(workflowRun.state != WorkflowRun.State.FAILED && workflowRun.state != WorkflowRun.State.FAILED_WAITING &&
+                                workflowRun.state != WorkflowRun.State.KILLED) ? "disabled" : ""}
                             formaction="${g.createLink(action: "restartRun")}" title="${g.message(code: "workflowRun.details.restartRun")}">
                         <i class="bi-reply-all"></i> ${g.message(code: "workflowRun.details.restartRun")}
+                    </button>
+
+                    %{-- Button to kill the run, only enabled if the workflow run is in the unfinished states --}%
+                    <button class="btn btn-sm btn-primary kill-run-btn"
+                        ${(workflowRun.state in WorkflowRun.UNFINISHED_STATES) ? "" : "disabled"}
+                            formaction="${g.createLink(action: "killRun")}" title="${g.message(code: "workflowRun.details.killRun")}">
+                        <i class="bi-x-octagon-fill"></i> ${g.message(code: "workflowRun.details.killRun")}
                     </button>
                 </div>
             </g:form>

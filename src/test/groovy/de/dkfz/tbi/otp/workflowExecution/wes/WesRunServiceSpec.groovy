@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.filestore.*
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.otp.workflowExecution.LogService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
@@ -310,5 +311,55 @@ class WesRunServiceSpec extends Specification implements ServiceUnitTest<WesRunS
         wesRun.wesIdentifier == wesIdentifier
         wesRun.subPath == subPath
         wesRun.state == WesRun.MonitorState.CHECKING
+    }
+
+    void "killWesRunsInWorkflowStep, when workflow step has multiple WES runs, cancel all runs and log the identifiers"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep()
+        WesRun wesRun1 = createWesRun([workflowStep: workflowStep, wesIdentifier: "wes-id-1"])
+        WesRun wesRun2 = createWesRun([workflowStep: workflowStep, wesIdentifier: "wes-id-2"])
+        String expectedLog = "Following WESkit runs have been cancelled: ${[wesRun1.wesIdentifier, wesRun2.wesIdentifier].join(',')}"
+
+        service.weskitAccessService = Mock(WeskitAccessService)
+        service.logService = Mock(LogService)
+
+        when:
+        service.killWesRunsInWorkflowStep(workflowStep)
+
+        then:
+        1 * service.weskitAccessService.cancelRun(wesRun1)
+        1 * service.weskitAccessService.cancelRun(wesRun2)
+        1 * service.logService.addSimpleLogEntry(workflowStep, expectedLog)
+    }
+
+    void "killWesRunsInWorkflowStep, when workflow step has a single WES run, cancel the run and log the identifier"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep()
+        WesRun wesRun = createWesRun([workflowStep: workflowStep, wesIdentifier: "wes-id-single"])
+
+        service.weskitAccessService = Mock(WeskitAccessService)
+        service.logService = Mock(LogService)
+
+        when:
+        service.killWesRunsInWorkflowStep(workflowStep)
+
+        then:
+        1 * service.weskitAccessService.cancelRun(wesRun)
+        1 * service.logService.addSimpleLogEntry(workflowStep, "Following WESkit runs have been cancelled: wes-id-single")
+    }
+
+    void "killWesRunsInWorkflowStep, when workflow step has no WES runs, do not call cancelRun and throw AssertionError"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep()
+        service.weskitAccessService = Mock(WeskitAccessService)
+
+        when:
+        service.killWesRunsInWorkflowStep(workflowStep)
+
+        then:
+        0 * service.weskitAccessService.cancelRun(_)
+        Throwable ex = thrown()
+        ex.class == AssertionError
+        ex.message.contains("doesn't contain any WESkit runs")
     }
 }

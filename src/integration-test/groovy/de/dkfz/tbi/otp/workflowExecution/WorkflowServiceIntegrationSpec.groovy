@@ -34,7 +34,9 @@ import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaWorkFileService
 import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.*
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.exceptions.FileAccessForProjectNotAllowedException
 import de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.roddy.rna.RnaAlignmentWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
@@ -45,6 +47,8 @@ import de.dkfz.tbi.otp.workflow.analysis.snv.SnvWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.sophia.SophiaWorkflow
 import de.dkfz.tbi.otp.workflow.fastqc.BashFastQcWorkflow
 import de.dkfz.tbi.otp.workflow.fastqc.WesFastQcWorkflow
+import de.dkfz.tbi.otp.workflowExecution.cluster.ClusterJobHandlingService
+import de.dkfz.tbi.otp.workflowExecution.wes.WesRunService
 
 import java.time.LocalDate
 
@@ -54,6 +58,7 @@ class WorkflowServiceIntegrationSpec extends Specification implements WorkflowSy
 
     WorkflowService workflowService
     OtpWorkflowService otpWorkflowService
+    JobService jobService
 
     static final String WORKFLOW_NAME = "WORKFLOW"
 
@@ -460,5 +465,168 @@ class WorkflowServiceIntegrationSpec extends Specification implements WorkflowSy
         _ | getCurrentInstance                                                                                                       | getDependentInstance                                                 | inputRole                   | getCurrentOtpWorkflow                                                                                             | getDependentOtpWorkflow    | current   | dependent
         _ | { workflowArtefact -> SophiaDomainFactory.INSTANCE.createInstanceWithRoddyBamFiles(workflowArtefact: workflowArtefact) } | { AceseqDomainFactory.INSTANCE.createInstanceWithRoddyBamFiles() }   | AceseqWorkflow.SOPHIA_INPUT | { new SophiaWorkflow(sophiaWorkFileService: Mock(SophiaWorkFileService) { constructInstanceName(_) >> "name" }) } | { new AceseqWorkflow() }   | "Sophia " | "ACEseq"
         _ | { workflowArtefact -> SnvDomainFactory.INSTANCE.createInstanceWithRoddyBamFiles(workflowArtefact: workflowArtefact) }    | { RunYapsaDomainFactory.INSTANCE.createInstanceWithRoddyBamFiles() } | RunYapsaWorkflow.SNV_INPUT  | { new SnvWorkflow(snvWorkFileService: Mock(SnvWorkFileService) { constructInstanceName(_) >> "name" }) }          | { new RunYapsaWorkflow() } | "SNV"     | "runYapsa"
+    }
+
+    @SuppressWarnings('ClosureAsLastMethodParameter')
+    void "killWorkflowRun, when run state is RUNNING_WES and step has multiple cluster jobs, then kill all cluster jobs"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep([
+                state        : WorkflowStep.State.SUCCESS,
+                workflowRun  : createWorkflowRun([state: WorkflowRun.State.RUNNING_WES]),
+        ])
+        createClusterJob([workflowStep: workflowStep])
+        createClusterJob([workflowStep: workflowStep])
+        workflowStep.refresh()
+        workflowService.clusterJobHandlingService = Mock(ClusterJobHandlingService)
+
+        when:
+        WorkflowRun result = workflowService.killWorkflowRun(workflowStep.workflowRun)
+
+        then:
+        1 * workflowService.clusterJobHandlingService.killClusterJobsInWorkflowStep(workflowStep)
+        result.state == WorkflowRun.State.KILLED
+    }
+
+    void "killWorkflowRun, when run state is RUNNING_WES and step has multiple WES runs, then kill all WES runs"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep([
+                state        : WorkflowStep.State.SUCCESS,
+                workflowRun  : createWorkflowRun([state: WorkflowRun.State.RUNNING_WES]),
+        ])
+        createWesRun([workflowStep: workflowStep])
+        createWesRun([workflowStep: workflowStep])
+        workflowStep.refresh()
+        workflowService.wesRunService = Mock(WesRunService)
+
+        when:
+        WorkflowRun result = workflowService.killWorkflowRun(workflowStep.workflowRun)
+
+        then:
+        1 * workflowService.wesRunService.killWesRunsInWorkflowStep(workflowStep)
+        result.state == WorkflowRun.State.KILLED
+   }
+
+    void "killWorkflowRun, when run state is RUNNING_OTP, then set run to KILLED without stopping the OTP job, so no subsequent jobs are started"() {
+        given:
+        WorkflowRun workflowRun = createWorkflowRun([state: WorkflowRun.State.RUNNING_OTP])
+        WorkflowStep firstStep = createWorkflowStep([
+                state      : WorkflowStep.State.RUNNING,
+                workflowRun: workflowRun,
+        ])
+
+        when: "the run is killed while the first OTP job is still running"
+        workflowService.killWorkflowRun(firstStep.workflowRun)
+
+        then: "the run is KILLED, but the first OTP job has not stopped"
+        workflowRun.refresh()
+        firstStep.refresh()
+        workflowRun.state == WorkflowRun.State.KILLED
+        firstStep.state == WorkflowStep.State.RUNNING
+
+        when: "the first OTP job finishes naturally and the scheduler tries to start the next job"
+        firstStep.state = WorkflowStep.State.SUCCESS
+        firstStep.save(flush: true)
+        jobService.createNextJob(workflowRun)
+
+        then: "no second step is started because the run is set to KILLED"
+        workflowRun.refresh()
+        workflowRun.workflowSteps.size() == 1
+        firstStep.refresh()
+        firstStep == workflowRun.workflowSteps.first()
+        firstStep.state == WorkflowStep.State.SUCCESS
+    }
+
+    void "killWorkflowRun, when run state is PENDING, then set run to KILLED and do no start any subsequent jobs"() {
+        given:
+        WorkflowRun workflowRun = createWorkflowRun([state: WorkflowRun.State.PENDING])
+
+        when: "the run is killed before the first OTP job is started"
+        workflowService.killWorkflowRun(workflowRun)
+
+        then: "the run is KILLED"
+        workflowRun.refresh()
+        workflowRun.state == WorkflowRun.State.KILLED
+
+        when: "the scheduler tries to start the first job"
+        jobService.createNextJob(workflowRun)
+
+        then: "no step is started because the run is KILLED"
+        workflowRun.refresh()
+        workflowRun.workflowSteps.size() == 0
+    }
+
+    @Unroll
+    void "killWorkflowRun, when run state is #runState, then no run is killed"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep([
+                state      : WorkflowStep.State.CREATED,
+                workflowRun: createWorkflowRun([state: runState]),
+        ])
+        String expectedAssertionMessage = "WorkflowRun ${workflowStep.workflowRun} is not allowed to be killed"
+
+        when:
+        workflowService.killWorkflowRun(workflowStep.workflowRun)
+
+        then:
+        AssertionError e = thrown(AssertionError)
+        e.message.contains(expectedAssertionMessage)
+        workflowStep.workflowRun.refresh()
+        workflowStep.workflowRun.state == runState
+
+        where:
+        runState << [
+                WorkflowRun.State.WAITING_FOR_USER,
+                WorkflowRun.State.FAILED,
+                WorkflowRun.State.FAILED_WAITING,
+                WorkflowRun.State.FAILED_FINAL,
+                WorkflowRun.State.SKIPPED_MISSING_PRECONDITION,
+                WorkflowRun.State.SUCCESS,
+                WorkflowRun.State.RESTARTED,
+                WorkflowRun.State.LEGACY,
+        ]
+    }
+
+    void "killWorkflowRun, when run state is RUNNING_WES and step has no cluster jobs or WES runs, then only set run to KILLED"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep([
+                state      : WorkflowStep.State.SUCCESS,
+                workflowRun: createWorkflowRun([state: WorkflowRun.State.RUNNING_WES]),
+        ])
+        workflowService.clusterJobHandlingService = Mock(ClusterJobHandlingService) {
+            0 * killClusterJobsInWorkflowStep(_)
+        }
+        workflowService.wesRunService = Mock(WesRunService) {
+            0 * killWesRunsInWorkflowStep(_)
+        }
+
+        when:
+        WorkflowRun result = workflowService.killWorkflowRun(workflowStep.workflowRun)
+
+        then:
+        result.state == WorkflowRun.State.KILLED
+    }
+
+    @Unroll
+    void "killWorkflowRun, when project state is #projectState, then throw FileAccessForProjectNotAllowedException"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep([
+                state      : WorkflowStep.State.CREATED,
+                workflowRun: createWorkflowRun([
+                        state  : WorkflowRun.State.RUNNING_OTP,
+                        project: createProject([state: projectState]),
+                ]),
+        ])
+
+        String expectedExceptionMessage = "${workflowStep.workflowRun.project} is ${projectState.name().toLowerCase()} and ${workflowStep.workflowRun} cannot be killed"
+
+        when:
+        workflowService.killWorkflowRun(workflowStep.workflowRun)
+
+        then:
+        Exception e = thrown(FileAccessForProjectNotAllowedException)
+        e.message.contains(expectedExceptionMessage)
+
+        where:
+        projectState << [Project.State.ARCHIVED, Project.State.DELETED]
     }
 }

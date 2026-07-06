@@ -125,6 +125,17 @@ class WeskitAccessService {
         }
     }
 
+    /**
+     * Wrapper to encapsulate the WESkit API call to cancel a workflow run
+     * @param wesRun the run to be canceled
+     * @return the run id
+     */
+    RunId cancelRun(WesRun wesRun) {
+        return doApiCall { WorkflowExecutionServiceApi api ->
+            api.cancelRun(wesRun.wesIdentifier)
+        }
+    }
+
     // library use directly RuntimeException
     @SuppressWarnings('CatchRuntimeException')
     private <T> T doApiCall(Closure<Mono<T>> closure) {

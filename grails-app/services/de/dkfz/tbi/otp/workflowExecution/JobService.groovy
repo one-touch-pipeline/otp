@@ -56,6 +56,13 @@ class JobService {
     void createNextJob(WorkflowRun workflowRun) {
         assert workflowRun
         assert workflowRun.workflow.beanName
+
+        // Do not create next job if the workflow has been killed
+        if (workflowRun.state == WorkflowRun.State.KILLED) {
+            log.debug("Will not create job, since the workflow was killed: ${workflowRun}")
+            return
+        }
+
         assert workflowRun.state in WORKFLOW_RUN_STATES_ALLOW_NEXT_JOB
 
         WorkflowStep lastWorkflowStep = workflowRun.workflowSteps ? workflowRun.workflowSteps.last() : null

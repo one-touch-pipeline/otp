@@ -29,13 +29,14 @@ import de.dkfz.roddy.BEException
 import de.dkfz.roddy.config.JobLog
 import de.dkfz.roddy.config.ResourceSet
 import de.dkfz.roddy.execution.Code
-import de.dkfz.roddy.tools.UnescapedString
 import de.dkfz.roddy.execution.io.ExecutionResult
 import de.dkfz.roddy.execution.jobs.*
+import de.dkfz.roddy.tools.UnescapedString
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.job.processing.ClusterJobManagerFactoryService
 import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
 import de.dkfz.tbi.otp.workflow.shared.JobFailedException
 import de.dkfz.tbi.otp.workflowExecution.LogService
@@ -354,6 +355,77 @@ class ClusterJobHandlingServiceSpec extends Specification implements ServiceUnit
 
         then:
         thrown(KillClusterJobException)
+    }
+
+    @SuppressWarnings("ClosureAsLastMethodParameter")
+    void "killClusterJobsInWorkflowStep, when everything is fine, then kill all jobs and log success"() {
+        given:
+        workflowStep = createWorkflowStep()
+        (1..2).collect {
+            createClusterJob([workflowStep: workflowStep])
+        }
+
+        BatchEuphoriaJobManager jobManager = Mock(BatchEuphoriaJobManager) {
+            1 * killJobs({ it.size() == 2 })
+            0 * _
+        }
+
+        service.clusterJobManagerFactoryService = Mock(ClusterJobManagerFactoryService) {
+            1 * getJobManager() >> jobManager
+        }
+        service.logService = Mock(LogService) {
+            1 * addSimpleLogEntry(workflowStep, { it.contains("Following cluster jobs have been killed:") })
+            0 * _
+        }
+
+        when:
+        service.killClusterJobsInWorkflowStep(workflowStep)
+
+        then:
+        noExceptionThrown()
+    }
+
+    void "killClusterJobsInWorkflowStep, when killJobs throws a BEException, then catch the exception, log the error and don't rethrow it"() {
+        given:
+        workflowStep = createWorkflowStep()
+        (1..2).collect {
+            createClusterJob([workflowStep: workflowStep])
+        }
+
+        BatchEuphoriaJobManager jobManager = Mock(BatchEuphoriaJobManager) {
+            1 * killJobs(_) >> { throw new BEException("test failure") }
+            0 * _
+        }
+
+        service.clusterJobManagerFactoryService = Mock(ClusterJobManagerFactoryService) {
+            1 * getJobManager() >> jobManager
+        }
+        service.logService = Mock(LogService) {
+            1 * addSimpleLogEntry(workflowStep, "Failed to kill some cluster jobs (they may already be finished): test failure")
+            0 * _
+        }
+
+        when:
+        service.killClusterJobsInWorkflowStep(workflowStep)
+
+        then:
+        noExceptionThrown()
+    }
+
+    void "killClusterJobsInWorkflowStep, when workflow step has no cluster jobs, do not call killJobs and throw AssertionError"() {
+        given:
+        WorkflowStep workflowStep = createWorkflowStep()
+        Mock(BatchEuphoriaJobManager) {
+            0 * killJobs(_)
+        }
+
+        when:
+        service.killClusterJobsInWorkflowStep(workflowStep)
+
+        then:
+        Throwable ex = thrown()
+        ex.class == AssertionError
+        ex.message.contains("doesn't contain any cluster jobs")
     }
 
     void "createAndSaveClusterJobs, when all fine, then create all cluster jobs and no exception thrown"() {
