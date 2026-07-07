@@ -467,6 +467,20 @@ class WorkflowRunServiceIntegrationSpec extends Specification implements Workflo
         result.failed == 1
     }
 
+    void "workflowOverview, with no matching runs, returns zero counts instead of throwing an error"() {
+        given:
+        WorkflowRunSearchCriteria criteria = new WorkflowRunSearchCriteria(createWorkflow(), [], null, null, [], 0, 10)
+
+        when:
+        WorkflowRunSearchResult result = workflowRunService.workflowOverview(criteria)
+
+        then:
+        result.data == []
+        result.workflowsFiltered == 0
+        result.running == 0
+        result.failed == 0
+    }
+
     void "workflowOverview, excludes LEGACY runs from data and filtered count"() {
         given:
         Workflow workflow = createWorkflow()

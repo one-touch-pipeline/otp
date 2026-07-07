@@ -391,12 +391,12 @@ class WorkflowRunService {
                         StandardBasicTypes.LONG,
                 )
                 sqlProjection(
-                        "SUM(CASE WHEN state IN (${runningStates}) THEN 1 ELSE 0 END) as running",
+                        "COALESCE(SUM(CASE WHEN state IN (${runningStates}) THEN 1 ELSE 0 END), 0) as running",
                         "running",
                         StandardBasicTypes.LONG,
                 )
                 sqlProjection(
-                        "SUM(CASE WHEN state = '${WorkflowRun.State.FAILED.name()}' THEN 1 ELSE 0 END) as failed",
+                        "COALESCE(SUM(CASE WHEN state = '${WorkflowRun.State.FAILED.name()}' THEN 1 ELSE 0 END), 0) as failed",
                         "failed",
                         StandardBasicTypes.LONG,
                 )
