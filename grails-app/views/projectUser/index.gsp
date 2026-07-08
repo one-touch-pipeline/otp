@@ -137,7 +137,7 @@
             </sec:access>
             <div class="submit-container mb-4">
                 <div class="pe-2">
-                    <button class="btn btn-primary no-wrap" type="submit" id="addUserWithLdapSubmitButton" onclick="indicateFileAccessChange(this);">
+                    <button class="btn btn-primary no-wrap" type="submit" id="addUserWithLdapSubmitButton">
                         <span id="file-access-spinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
                         ${g.message(code: 'projectUser.addMember.action', args: [selectedProject?.name])}
                     </button>

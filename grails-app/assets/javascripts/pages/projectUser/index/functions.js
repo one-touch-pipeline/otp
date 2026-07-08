@@ -49,17 +49,6 @@ function onToggleAccessToFiles(context) {
   hideLabelAndShowEditor(context);
 }
 
-// eslint-disable-next-line no-unused-vars
-function indicateFileAccessChange(button) {
-  'use strict';
-
-  button.disabled = true;
-  $(button).find('#file-access-spinner').removeClass('d-none');
-  $.otp.toaster.showInfoToast('Info', 'This request may take some time. Please wait a moment.');
-  button.form.submit();
-  return false;
-}
-
 function postFileAccessChange(context) {
   'use strict';
 
@@ -183,6 +172,14 @@ $(() => {
     const project = $(this).data('project');
     const emails = $(this).data('emails');
     prompt(`Emails for ${project}`, emails);
+  });
+
+  $('#addUserWithLdapSubmitButton').on('click', function (event) {
+    event.preventDefault();
+    this.disabled = true;
+    $(this).find('#file-access-spinner').removeClass('d-none');
+    $.otp.toaster.showInfoToast('Info', 'This request may take some time. Please wait a moment.');
+    this.form.submit();
   });
 
   $('#add-button').on('click', function () {
