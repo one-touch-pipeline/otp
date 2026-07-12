@@ -510,7 +510,7 @@ dependencies {
     // library for easy HTML editing
     implementation 'org.jsoup:jsoup:1.22.2'
 
-    implementation 'com.networknt:json-schema-validator:2.0.3'
+    implementation 'com.networknt:json-schema-validator:2.0.4'
 
     implementation "org.grails.plugins:grails-console:2.1.1"
     implementation "org.grails.plugins:mail:4.0.2"
