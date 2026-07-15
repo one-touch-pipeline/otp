@@ -32,12 +32,16 @@ $(document).ready(() => {
   $.otp.polling = {
     // polling every minute
     POLL_INTERVAL: 60000,
-    URL: $.otp.createLink({ controller: 'info', action: 'newsBanner' }),
+    URL: $.otp.createLink({
+      controller: 'info',
+      action: 'newsBanner'
+    }),
 
     /**
      * Stop polling
      */
-    stopPolling: () => {},
+    stopPolling: () => {
+    },
 
     /**
      * The function startPoll triggers a polling call
@@ -68,6 +72,9 @@ $(document).ready(() => {
 
   $.otp.banner = {
     show: () => {
+      if ($('.otp-system-banner-container .otp-system-banner').length > 0) {
+        return;
+      }
       $('div.news-banner').removeClass('news-banner-hidden').addClass('news-banner-shown');
     },
     hide: () => {

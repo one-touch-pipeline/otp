@@ -31,6 +31,7 @@
     <meta name="projectName" content="${selectedProject?.name}">
     <meta name="projectParameter" content="${projectParameter}">
     <asset:stylesheet src="mainmenu.less"/>
+    <asset:stylesheet src="systemStatusBanner.less"/>
     <otp:favicon/>
     <g:layoutHead/>
 </head>
@@ -233,6 +234,7 @@
             </div>
         </div>
     </g:if>
+    <g:render template="/templates/systemStatusBanners"/>
     <div id="infoBox" class="info-box"></div>
     <g:layoutBody/>
     <div class="footer" role="contentinfo">

@@ -28,12 +28,16 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.InstanceLogo
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.security.SecurityService
+import de.dkfz.tbi.otp.workflowExecution.WorkflowSystemService
 
 @Slf4j
 @CompileStatic
 class OptionsInterceptor {
     ProcessingOptionService processingOptionService
     ConfigService configService
+    SecurityService securityService
+    WorkflowSystemService workflowSystemService
 
     OptionsInterceptor() {
         matchAll()
@@ -43,7 +47,8 @@ class OptionsInterceptor {
     boolean before() { return true }
 
     @Override
-    @SuppressWarnings('UnnecessaryObjectReferences') // doesn't work with service references
+    @SuppressWarnings('UnnecessaryObjectReferences')
+    // doesn't work with service references
     boolean after() {
         if (model != null) {
             model.contactDataOperatedBy = processingOptionService.findOptionAsString(ProcessingOption.OptionName.GUI_CONTACT_DATA_OPERATED_BY)
@@ -55,6 +60,11 @@ class OptionsInterceptor {
             model.piwikEnabled = processingOptionService.findOptionAsBoolean(ProcessingOption.OptionName.GUI_TRACKING_ENABLED)
             model.showPartners = processingOptionService.findOptionAsBoolean(ProcessingOption.OptionName.GUI_SHOW_PARTNERS)
             model.oidcEnabled = configService.oidcEnabled
+
+            boolean administrativeUser = securityService.hasCurrentUserAdministrativeRoles()
+            model.autoImportDisabledBannerVisible = administrativeUser &&
+                    !processingOptionService.findOptionAsBoolean(ProcessingOption.OptionName.TICKET_SYSTEM_AUTO_IMPORT_ENABLED)
+            model.workflowSystemDisabledBannerVisible = administrativeUser && !workflowSystemService.enabled
 
             InstanceLogo logo
             try {

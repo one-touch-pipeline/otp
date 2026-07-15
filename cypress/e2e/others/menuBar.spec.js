@@ -158,6 +158,11 @@ describe('Click all menu items in the menu bar', () => {
     });
 
     it('should click the EGA menu item', () => {
+      // When a subsystem is disabled, the system-status warning banners float over the top of the page and can
+      // cover the (centered) EGA menu item. Remove them first so the item is clickable.
+      cy.get('body').then(($body) => {
+        $body.find('.otp-system-banner-container').remove();
+      });
       cy.get('li.menuContainerItem').contains('EGA').click();
       cy.checkPage('/egaSubmission/overview');
     });
