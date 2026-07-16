@@ -222,4 +222,21 @@ class WorkflowStateChangeServiceIntegrationSpec extends Specification implements
         artefact2.withdrawn
         artefact3.withdrawn
     }
+
+    void "test changeStateToFinalFailed, when run has no workflow steps (e.g. was killed while still PENDING)"() {
+        given:
+        createUserAndRoles()
+
+        WorkflowRun workflowRun = createWorkflowRun(state: WorkflowRun.State.KILLED)
+
+        when:
+        doWithAuth(ADMIN) {
+            workflowStateChangeService.changeStateToFinalFailed(workflowRun)
+        }
+
+        then:
+        workflowRun.workflowSteps == null
+        workflowRun.state == WorkflowRun.State.FAILED_FINAL
+        workflowRun.lastJobFinished != null
+    }
 }

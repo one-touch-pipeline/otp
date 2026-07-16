@@ -49,8 +49,12 @@ abstract class AbstractWorkflowRunController implements CheckAndCall {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     def setFailedFinal(RunUpdateCommand cmd) {
         checkErrorAndCallMethodWithFlashMessageWithoutTokenCheck(cmd, "workflowRun.list.setFailedFinal") {
-            assert cmd.step: 'No steps defined.'
-            workflowStateChangeService.changeStateToFinalFailed(cmd.step.collect { WorkflowStep.get(it) })
+            List<Long> stepIds = cmd.step.findAll()
+            if (stepIds) {
+                workflowStateChangeService.changeStateToFinalFailed(stepIds.collect { WorkflowStep.get(it) })
+            } else {
+                resolveRunsFromRunIds(cmd).each { workflowStateChangeService.changeStateToFinalFailed(it) }
+            }
         }
         redirect uri: cmd.redirect
     }
@@ -89,10 +93,27 @@ abstract class AbstractWorkflowRunController implements CheckAndCall {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     def restartRun(RunUpdateCommand cmd) {
         checkErrorAndCallMethodWithFlashMessageWithoutTokenCheck(cmd, "workflowRun.list.restartRuns") {
-            assert cmd.step: 'No steps defined.'
-            workflowService.createRestartedWorkflows(cmd.step.collect { WorkflowStep.get(it) })
+            List<Long> stepIds = cmd.step.findAll()
+            if (stepIds) {
+                workflowService.createRestartedWorkflows(stepIds.collect { WorkflowStep.get(it) })
+            } else {
+                resolveRunsFromRunIds(cmd).each { workflowService.createRestartedWorkflow(it) }
+            }
         }
         redirect uri: cmd.redirect
+    }
+
+    /**
+     * Resolves the WorkflowRuns referred to by a RunUpdateCommand's run id(s). Used only as a
+     * fallback when no step id was given at all (e.g. a run killed while still PENDING, which
+     * never had a WorkflowStep) — whenever step ids are present, the original step-based path
+     * is used instead so step-specific data (e.g. WorkflowStep#jobFinished) is not lost.
+     */
+    private List<WorkflowRun> resolveRunsFromRunIds(RunUpdateCommand cmd) {
+        assert cmd.run: 'No runs defined.'
+        List<WorkflowRun> runs = cmd.run.collect { WorkflowRun.get(it) }
+        assert runs.every(): 'No runs defined.'
+        return runs
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -123,6 +144,7 @@ abstract class AbstractWorkflowRunController implements CheckAndCall {
 
 class RunUpdateCommand implements Validateable {
     List<Long> step = []
+    List<Long> run = []
     String redirect
 
     static constraints = {

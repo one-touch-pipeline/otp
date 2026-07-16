@@ -105,6 +105,18 @@ class WorkflowStateChangeServiceSpec extends Specification implements ServiceUni
         workflowStep.workflowRun.lastJobFinished != null
     }
 
+    void "test changeStateToFinalFailed, when run has no workflow steps (e.g. was killed while still PENDING)"() {
+        given:
+        WorkflowRun workflowRun = createWorkflowRun()
+
+        when:
+        service.changeStateToFinalFailed(workflowRun)
+
+        then:
+        workflowRun.state == WorkflowRun.State.FAILED_FINAL
+        workflowRun.lastJobFinished != null
+    }
+
     @Unroll
     void "test toggleFailedWaitingState"() {
         given:

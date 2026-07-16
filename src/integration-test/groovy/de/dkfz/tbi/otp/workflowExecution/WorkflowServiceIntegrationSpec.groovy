@@ -109,6 +109,21 @@ class WorkflowServiceIntegrationSpec extends Specification implements WorkflowSy
         wr2.inputArtefacts.values().every { it == newWorkflowArtefact }
     }
 
+    void "createRestartedWorkflow, when run has no workflow steps (e.g. was killed while still PENDING), then still create a new WorkflowRun"() {
+        given:
+        WorkflowRun workflowRun = createWorkflowRun([state: WorkflowRun.State.KILLED])
+        workflowService.otpWorkflowService = Mock(OtpWorkflowService)
+
+        when:
+        WorkflowRun newRun = workflowService.createRestartedWorkflow(workflowRun)
+
+        then:
+        workflowRun.workflowSteps == null
+        workflowRun.state == WorkflowRun.State.RESTARTED
+        newRun.state == WorkflowRun.State.PENDING
+        newRun.restartedFrom == workflowRun
+    }
+
     void "findAllAlignmentWorkflows, should return all the alignment workflows"() {
         given:
         Workflow workflow = createWorkflow([beanName: 'rnaAlignmentWorkflow'])

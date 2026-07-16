@@ -84,16 +84,21 @@ class WorkflowService {
     @CompileDynamic
     WorkflowRun createRestartedWorkflow(WorkflowStep step) {
         assert step
-        assert step.workflowRun.state in [WorkflowRun.State.FAILED, WorkflowRun.State.FAILED_WAITING, WorkflowRun.State.KILLED]
+        return createRestartedWorkflow(step.workflowRun)
+    }
 
-        if (step.workflowRun.project.state == Project.State.ARCHIVED || step.workflowRun.project.state == Project.State.DELETED) {
-            String stateName = step.workflowRun.project.state.name().toLowerCase()
+    @CompileDynamic
+    WorkflowRun createRestartedWorkflow(WorkflowRun oldRun) {
+        assert oldRun
+        assert oldRun.state in [WorkflowRun.State.FAILED, WorkflowRun.State.FAILED_WAITING, WorkflowRun.State.KILLED]
+
+        if (oldRun.project.state == Project.State.ARCHIVED || oldRun.project.state == Project.State.DELETED) {
+            String stateName = oldRun.project.state.name().toLowerCase()
             throw new FileAccessForProjectNotAllowedException(
-                    "${step.workflowRun.project} is ${stateName} and ${step.workflowRun} cannot be restarted"
+                    "${oldRun.project} is ${stateName} and ${oldRun} cannot be restarted"
             )
         }
 
-        WorkflowRun oldRun = step.workflowRun
         WorkflowRun run = createNewRunBasedOnOldRun(oldRun)
         run.workDirectory = oldRun.workDirectory
         createInputArtefactsForNewRun(oldRun, run)

@@ -28,6 +28,34 @@ describe('Check workflow run details page', () => {
       cy.loginAs('operator');
     });
 
+    it('should kill a pending workflow run without any workflow step and restart it', () => {
+      killPendingWorkflowRun('run 45: PENDING');
+
+      // Restart the killed run
+      cy.intercept('/workflowRunDetails/restartRun*').as('restartWorkflowRun');
+      cy.get('form button.restart-run-btn').should('be.enabled').click();
+
+      cy.wait('@restartWorkflowRun').then((interception) => {
+        expect(interception.response.statusCode).to.eq(302);
+        cy.location('pathname').should('contain', '/workflowRunDetails/index');
+        cy.contains('p', 'The run was restarted after it failed.').should('be.visible');
+      });
+    });
+
+    it('should kill a pending workflow run without any workflow step and set it as failed final', () => {
+      killPendingWorkflowRun('run 45: PENDING');
+
+      // Set failed final
+      cy.intercept('/workflowRunDetails/setFailedFinal*').as('setFailedFinal');
+      cy.get('form button.failed-final-btn').should('be.enabled').click();
+
+      cy.wait('@setFailedFinal').then((interception) => {
+        expect(interception.response.statusCode).to.eq(302);
+        cy.location('pathname').should('contain', '/workflowRunDetails/index');
+        cy.contains('p', 'The run failed, and an operator decided not to restart it.').should('be.visible');
+      });
+    });
+
     it('should show "Job started" and "Job finished" columns on the details page', () => {
       cy.intercept('/workflowRunList/data*').as('data');
       cy.visit('/workflowRunList/index?state=WAITING_FOR_USER');
@@ -89,14 +117,14 @@ describe('Check workflow run details page', () => {
 
       cy.get('table#runs tbody').should('not.be.empty');
 
-      cy.get('table#runs tbody tr').first().find('a').click();
+      cy.contains('table#runs tbody a', 'Workflow with restarts: First run').click();
 
       cy.wait('@workflowRunDetailsData').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
         cy.location('pathname').should('contain', '/workflowRunDetails/index');
       });
 
-      cy.get('table#steps').find('tr.error-row').find('a').click();
+      cy.get('table#steps').find('tr.error-row').find('a').first().click();
 
       cy.wait('@showWorkflowErrors').then((interception) => {
         expect(interception.response.statusCode).to.eq(200);
@@ -312,4 +340,26 @@ function setWorkflowToFailedWaiting() {
   cy.get('table#runs tbody tr').first().find('a').click();
   cy.location('pathname').should('contain', '/workflowRunDetails/index');
   cy.get('form button.failed-waiting-btn').click();
+}
+
+// This is a helper function to filter the run list down to PENDING runs, open the run with the
+// given name, and kill it, leaving the browser on the (now KILLED) run's details page.
+function killPendingWorkflowRun(runName) {
+  cy.intercept('/workflowRunList/data*').as('data');
+  cy.visit('/workflowRunList/index?state=PENDING');
+  cy.wait('@data').its('response.statusCode').should('eq', 200);
+
+  cy.get('table#runs tbody').should('not.be.empty');
+  cy.contains('table#runs tbody a', runName).click();
+  cy.location('pathname').should('contain', '/workflowRunDetails/index');
+
+  // Kill the pending run
+  cy.intercept('/workflowRunDetails/killRun*').as('killWorkflowRun');
+  cy.get('form button.kill-run-btn').click();
+
+  cy.wait('@killWorkflowRun').then((interception) => {
+    expect(interception.response.statusCode).to.eq(302);
+    cy.location('pathname').should('contain', '/workflowRunDetails/index');
+    cy.get('#statusDot').should('have.attr', 'data-status', 'KILLED');
+  });
 }

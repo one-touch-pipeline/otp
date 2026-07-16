@@ -135,17 +135,28 @@ class WorkflowStateChangeService {
     @CompileDynamic
     void changeStateToFinalFailed(WorkflowStep step) {
         assert step
-        step.workflowRun.state = WorkflowRun.State.FAILED_FINAL
-        step.workflowRun.lastJobFinished = step.jobFinished ?: ZonedDateTime.now()
-        step.workflowRun.save(flush: true)
+        applyFinalFailedState(step.workflowRun, step.jobFinished)
+    }
 
-        step.workflowRun.outputArtefacts.each { String role, WorkflowArtefact workflowArtefact ->
+    @CompileDynamic
+    void changeStateToFinalFailed(WorkflowRun run) {
+        assert run
+        applyFinalFailedState(run, null)
+    }
+
+    @CompileDynamic
+    private void applyFinalFailedState(WorkflowRun run, ZonedDateTime lastJobFinished) {
+        run.state = WorkflowRun.State.FAILED_FINAL
+        run.lastJobFinished = lastJobFinished ?: ZonedDateTime.now()
+        run.save(flush: true)
+
+        run.outputArtefacts.each { String role, WorkflowArtefact workflowArtefact ->
             workflowArtefact.state = WorkflowArtefact.State.FAILED
             workflowArtefact.save(flush: true)
             withdrawArtefact(workflowArtefact)
         }
 
-        getDependingWorkflowRuns(step.workflowRun).each { WorkflowRun workflowRun ->
+        getDependingWorkflowRuns(run).each { WorkflowRun workflowRun ->
             if (workflowRun.state == WorkflowRun.State.PENDING) {
                 workflowRun.state = WorkflowRun.State.SKIPPED_MISSING_PRECONDITION
                 workflowRun.skipMessage = new WorkflowStepSkipMessage(
