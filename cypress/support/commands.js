@@ -20,6 +20,8 @@
  * SOFTWARE.
  */
 
+/* global require */
+
 const path = require('path');
 
 const login = (username, password) => {
@@ -80,7 +82,7 @@ Cypress.Commands.add('logout', () => {
 let checkedHrefList = [];
 const excludedLinks = [];
 
-// eslint-disable-next-line strict
+
 Cypress.Commands.add('checkAllAnkerElements', (initial = true) => {
   if (initial) {
     checkedHrefList = [];
@@ -139,8 +141,10 @@ Cypress.Commands.add('checkPage', (url) => {
  * [[v3a,v3b,v3c],[v2a,v2b,v2c]]
  *
  */
-// eslint-disable-next-line strict
-Cypress.Commands.add('checkDownloadByContent', (filename, fileEnding, headerList, contentListList, quote = '"', wildcardFilename = false) => {
+
+Cypress.Commands.add(
+  'checkDownloadByContent',
+  (filename, fileEnding, headerList, contentListList, quote = '"', wildcardFilename = false) => {
   const downloadsFolder = Cypress.config('downloadsFolder');
   const today = new Date();
   const year = today.getFullYear();
@@ -180,9 +184,10 @@ Cypress.Commands.add('checkDownloadByContent', (filename, fileEnding, headerList
     const filepath = path.join(downloadsFolder, `${filename}_${date}${fileEnding}`);
     cy.readFile(filepath, 'utf8', { timeout: 5000 }).then((content) => checkContent(content));
   }
-});
+  }
+);
 
-// eslint-disable-next-line strict
+
 Cypress.Commands.add('checkDownloadByContentOfFixture', (fixtureFileName, quote = '"', wildcardFilename = false) => {
   cy.fixture(`downloadChecks/${fixtureFileName}`).then((config) => {
     cy.checkDownloadByContent(config.filename, config.extension, config.header, config.data, quote, wildcardFilename);
@@ -361,7 +366,7 @@ Cypress.Commands.add('toggleButton', (buttonText, expectedSelector, assertionCal
  * cy.selectAvailableOptionFromDropdown('property');
  * cy.selectAvailableOptionFromDropdown('seqType.id', 2);
  */
-// eslint-disable-next-line strict
+
 Cypress.Commands.add('selectAvailableOptionFromDropdown', (selectName, optionIndex = 1) => {
   cy.get(`select[name="${selectName}"]`).then(($select) => {
     const option = $select.find('option').eq(optionIndex).val();

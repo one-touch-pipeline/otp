@@ -36,6 +36,8 @@ mv *.tar.gz filesystem
 cd filesystem
 tar -xf otp_example_data.tar.gz && rm otp_example_data.tar.gz
 tar -xf bam-import.tar.gz && rm bam-import.tar.gz
+rm -rf autoimport
+cp -a ../autoimport ./autoimport
 
 #correct permissions
 chown -R otp:otp .

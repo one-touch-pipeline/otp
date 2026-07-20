@@ -48,6 +48,16 @@ export DISABLE_RESTART=true
 cp $DOCKER_ENV ./.env
 cp $OTP_PROPERTIES_CYPRESS ~/.otp.properties
 
+cypressSecret="$(sed -n -E 's/^[[:space:]]*"otp\.autoimport\.secret"[[:space:]]*:[[:space:]]*"([^"]*)".*$/\1/p' cypress/cypress.env.json | tail -n 1)"
+
+if [[ -z "$cypressSecret" ]]
+then
+    echo "otp.autoimport.secret is missing or empty in cypress/cypress.env.json"
+    exit 1
+fi
+printf '\notp.autoimport.secret=%s\n' "$cypressSecret" >> ~/.otp.properties
+echo "Configured otp.autoimport.secret for Cypress"
+
 # create info about gitlab
 docker info > logs/docker-info.log
 

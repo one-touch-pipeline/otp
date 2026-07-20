@@ -27,6 +27,7 @@ import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
 
 @CompileStatic
+@SuppressWarnings(['ClassNameSameAsFilename', 'JavaIoPackageAccess'])
 class LicenseCheck {
 
     static List<String> requiredLicense = [
@@ -70,6 +71,8 @@ class LicenseCheck {
             "target",
 
             "cypress/fixtures",
+
+            "docker/ssh/autoimport",
     ].collect { Paths.get(it) }
 
     static List<Path> ignoredFiles = [
@@ -164,6 +167,7 @@ class LicenseCheck {
         }
     }
 
+    @SuppressWarnings(['CatchThrowable', 'Println', 'SystemExit'])
     static void main(String... args) {
         InputStreamReader stdinReader = new InputStreamReader(System.in)
         BufferedReader reader = new BufferedReader(stdinReader)
