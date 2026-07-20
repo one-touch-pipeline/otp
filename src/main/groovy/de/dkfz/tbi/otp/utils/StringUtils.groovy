@@ -21,7 +21,13 @@
  */
 package de.dkfz.tbi.otp.utils
 
+import java.nio.charset.StandardCharsets
+
 class StringUtils {
+
+    static String encodeForUrl(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8)
+    }
 
     static String escapeForSqlLike(String string) {
         return string.replaceAll(/([\\_%])/, /\\$1/)

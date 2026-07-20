@@ -49,6 +49,7 @@ import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer.PanCancerWorkflow
+import de.dkfz.tbi.otp.workflow.notification.WorkflowNotificationContentService
 import de.dkfz.tbi.otp.workflowExecution.Workflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
@@ -253,6 +254,8 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         createNotificationTextService.projectService = new ProjectService()
         createNotificationTextService.projectService.configService = configService
         createNotificationTextService.projectService.fileSystemService = new TestFileSystemService()
+        createNotificationTextService.workflowNotificationContentService =
+                new WorkflowNotificationContentService(projectService: createNotificationTextService.projectService)
 
         when:
         String fileNameString = createNotificationTextService.getMergingDirectories([roddyBamFile1, roddyBamFile2, roddyBamFile3])
@@ -279,6 +282,8 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         createNotificationTextService.projectService = new ProjectService()
         createNotificationTextService.projectService.configService = configService
         createNotificationTextService.projectService.fileSystemService = new TestFileSystemService()
+        createNotificationTextService.workflowNotificationContentService =
+                new WorkflowNotificationContentService(projectService: createNotificationTextService.projectService)
 
         when:
         String fileNameString = createNotificationTextService.getMergingDirectories([roddyBamFile])
@@ -525,6 +530,8 @@ ${expectedAlign}"""
         createNotificationTextService.projectService = new ProjectService()
         createNotificationTextService.projectService.configService = configService
         createNotificationTextService.projectService.fileSystemService = new TestFileSystemService()
+        createNotificationTextService.workflowNotificationContentService =
+                new WorkflowNotificationContentService(projectService: createNotificationTextService.projectService)
 
         when:
         String message = createNotificationTextService.alignmentNotification(processingStatus)
@@ -596,6 +603,8 @@ ${expectedAlign}"""
         createNotificationTextService.projectService = new ProjectService()
         createNotificationTextService.projectService.configService = configService
         createNotificationTextService.projectService.fileSystemService = new TestFileSystemService()
+        createNotificationTextService.workflowNotificationContentService =
+                new WorkflowNotificationContentService(projectService: createNotificationTextService.projectService)
 
         SeqTrack seqTrack1 = data1.seqTrack as SeqTrack
         SeqTrack seqTrack2 = data2.seqTrack as SeqTrack
@@ -760,6 +769,8 @@ ${expectedAlign}"""
         createNotificationTextService.projectService = new ProjectService()
         createNotificationTextService.projectService.configService = configService
         createNotificationTextService.projectService.fileSystemService = new TestFileSystemService()
+        createNotificationTextService.workflowNotificationContentService =
+                new WorkflowNotificationContentService(projectService: createNotificationTextService.projectService)
 
         SeqTrack seqTrack1 = data1.seqTrack as SeqTrack
         SeqTrack seqTrack2 = data2.seqTrack as SeqTrack
@@ -908,6 +919,8 @@ ${expectedAlign}"""
         createNotificationTextService.projectService = new ProjectService()
         createNotificationTextService.projectService.configService = configService
         createNotificationTextService.projectService.fileSystemService = new TestFileSystemService()
+        createNotificationTextService.workflowNotificationContentService =
+                new WorkflowNotificationContentService(projectService: createNotificationTextService.projectService)
 
         when:
         createNotificationTextService.alignmentNotification(processingStatus)
@@ -979,6 +992,8 @@ ${expectedAlign}"""
         createNotificationTextService.projectService = new ProjectService()
         createNotificationTextService.projectService.configService = configService
         createNotificationTextService.projectService.fileSystemService = new TestFileSystemService()
+        createNotificationTextService.workflowNotificationContentService =
+                new WorkflowNotificationContentService(projectService: createNotificationTextService.projectService)
 
         when:
         createNotificationTextService.alignmentNotification(processingStatus)
@@ -1041,6 +1056,8 @@ ${expectedAlign}"""
         createNotificationTextService.projectService = new ProjectService()
         createNotificationTextService.projectService.configService = configService
         createNotificationTextService.projectService.fileSystemService = new TestFileSystemService()
+        createNotificationTextService.workflowNotificationContentService =
+                new WorkflowNotificationContentService(projectService: createNotificationTextService.projectService)
 
         when:
         createNotificationTextService.alignmentNotification(processingStatus)

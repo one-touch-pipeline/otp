@@ -29,6 +29,29 @@ import static de.dkfz.tbi.otp.utils.StringUtils.longestCommonPrefix
 
 class StringUtilsSpec extends Specification {
 
+    void "encodeForUrl, encodes special characters for use in a URL query parameter"() {
+        expect:
+        StringUtils.encodeForUrl(input) == expected
+
+        where:
+        input            || expected
+        "simple"         || "simple"
+        "with space"     || "with+space"
+        "with&ampersand" || "with%26ampersand"
+        "with=equals"    || "with%3Dequals"
+        "a/b?c#d"        || "a%2Fb%3Fc%23d"
+        "100%"           || "100%25"
+        "a+b"            || "a%2Bb"
+        "<html>@dkfz"    || "%3Chtml%3E%40dkfz"
+        'quote"\'apos'   || "quote%22%27apos"
+        "tab\tnewline\n" || "tab%09newline%0A"
+        "Müller"         || "M%C3%BCller"
+        "smörgåsbord"    || "sm%C3%B6rg%C3%A5sbord"
+        "emoji🧬seq"      || "emoji%F0%9F%A7%ACseq"
+        "safe-_.*"       || "safe-_.*"
+        "~tilde"         || "%7Etilde"
+    }
+
     void "test commonPrefixLength with same length and no common prefix"() {
         expect:
         commonPrefixLength('ab', 'bc') == 0

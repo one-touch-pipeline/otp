@@ -39,6 +39,7 @@ import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.tracking.Ticket.ProcessingStep
 import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.otp.utils.exceptions.NotSupportedException
+import de.dkfz.tbi.otp.workflow.notification.WorkflowNotificationContentService
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
@@ -58,6 +59,7 @@ class CreateNotificationTextService {
     ProcessingOptionService processingOptionService
     ProjectService projectService
     TicketService ticketService
+    WorkflowNotificationContentService workflowNotificationContentService
 
     /**
      * Helper function to create the notification for exactly one ProcessingStep.
@@ -524,25 +526,9 @@ class CreateNotificationTextService {
         }.unique().sort().join('\n')
     }
 
-    @SuppressWarnings('GStringExpressionWithinString')
     String getMergingDirectories(List<AbstractBamFile> bamFiles) {
         assert bamFiles
-        String pid = '${PID}'
-        String sampleType = '${SAMPLE_TYPE}'
-
-        return bamFiles.collect {
-            String seqTypeDir = it.seqType.dirName
-            String layout = it.seqType.libraryLayoutDirName
-            String antiBodyTarget = it.seqType.hasAntibodyTarget ? '-${ANTI_BODY_TARGET}' : ''
-            projectService.getProjectDirectory(it.project)
-                    .resolve("sequencing")
-                    .resolve(seqTypeDir)
-                    .resolve("view-by-pid")
-                    .resolve(pid)
-                    .resolve("${sampleType}${antiBodyTarget}")
-                    .resolve(layout)
-                    .resolve("merged-alignment")
-        }.unique().sort().join('\n')
+        return workflowNotificationContentService.getMergingDirectories(bamFiles).join('\n')
     }
 
     @CompileDynamic

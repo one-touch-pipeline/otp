@@ -72,7 +72,10 @@ class ConcreteArtefactService {
     }
 
     def <T> List<T> getInputArtefacts(WorkflowStep workflowStep, String inputRoleName, boolean required = true) {
-        WorkflowRun workflowRun = workflowStep.workflowRun
+        return getInputArtefacts(workflowStep.workflowRun, inputRoleName, required)
+    }
+
+    def <T> List<T> getInputArtefacts(WorkflowRun workflowRun, String inputRoleName, boolean required = true) {
         List<WorkflowArtefact> workflowArtefacts = workflowRun.inputArtefacts.findAll {
             it.key ==~ /^${inputRoleName}(_\d+)?$/
         }*.value
