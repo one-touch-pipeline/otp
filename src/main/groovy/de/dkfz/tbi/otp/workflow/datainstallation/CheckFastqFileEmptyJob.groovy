@@ -27,21 +27,31 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.RawSequenceFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.otp.utils.ProcessOutput
 import de.dkfz.tbi.otp.workflow.jobs.AbstractConditionalSkipJob
 import de.dkfz.tbi.otp.workflow.shared.SkipWorkflowStepException
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 /**
- * Checks whether any of the raw sequence files for a SeqTrack contain empty content after decompression.
- * Sets the {@link RawSequenceFile#emptyFile} flag for any empty file found.
- *
- * The check uses a remote bash command to avoid loading the entire file into memory and to support
- * remote file systems where Java cannot open gzip files directly.
+ * Flags each empty raw sequence file of a SeqTrack by decompressing the front and bailing after the
+ * first byte ({@code zcat '<path>' | head -c 1 | wc -c; echo zcat_status=${PIPESTATUS[0]}}). Outcomes:
+ * 0 bytes with zcat exit 0 is empty and sets {@link RawSequenceFile#emptyFile};
+ * 0 bytes with zcat exit non-zero is corrupt and not flagged;
+ * at least 1 byte is non-empty and not flagged;
+ * a timeout is not flagged.
  */
 @Component
 @Slf4j
 class CheckFastqFileEmptyJob extends AbstractConditionalSkipJob implements DataInstallationShared {
+
+    /** Seconds before the emptiness check is aborted; healthy files return sub-second, so this only fires on pathological or very slow input. */
+    private static final int COMMAND_TIMEOUT_SECONDS = 300
+
+    /** Exit code GNU {@code timeout} returns when it kills the command. */
+    private static final int TIMEOUT_EXIT_CODE = 124
+
+    private static final String STATUS_PREFIX = "zcat_status="
 
     private final RemoteShellHelper remoteShellHelper
 
@@ -54,22 +64,35 @@ class CheckFastqFileEmptyJob extends AbstractConditionalSkipJob implements DataI
         SeqTrack seqTrack = getSeqTrack(workflowStep)
 
         seqTrack.sequenceFiles.each { RawSequenceFile rawSequenceFile ->
-            String path = rawSequenceFile.fullInitialPath
-            String escapedPath = path.replace("'", "'\\''")
-            ProcessOutput result = remoteShellHelper.executeCommandReturnProcessOutput("gzip -l '${escapedPath}'")
-            if (result.exitCode != 0) {
-                logService.addSimpleLogEntry(workflowStep,
-                        "Cannot check emptiness of '${rawSequenceFile.fileName}' (gzip -l exited ${result.exitCode}): ${result.stderr?.trim()}")
+            String payload = "zcat ${LocalShellHelper.shellEscape(rawSequenceFile.fullInitialPath)} | head -c 1 | wc -c; " +
+                    "echo \"${STATUS_PREFIX}\${PIPESTATUS[0]}\""
+            String command = "timeout ${COMMAND_TIMEOUT_SECONDS} bash -c ${LocalShellHelper.shellEscape(payload)}"
+            ProcessOutput result = remoteShellHelper.executeCommandReturnProcessOutput(command)
+
+            if (result.exitCode == TIMEOUT_EXIT_CODE) {
+                logService.addSimpleLogEntry(workflowStep, "Emptiness check for '${rawSequenceFile.fileName}' timed out after " +
+                        "${COMMAND_TIMEOUT_SECONDS}s and was not flagged as empty")
                 return
             }
-            if (result.stderr) {
-                logService.addSimpleLogEntry(workflowStep, "gzip -l produced warnings for '${rawSequenceFile.fileName}': ${result.stderr.trim()}")
+
+            List<String> lines = (result.stdout ?: "").readLines()*.trim()
+            Integer byteCount = lines.find { it ==~ /\d+/ }?.toInteger()
+            String statusLine = lines.find { it.startsWith(STATUS_PREFIX) }
+            Integer zcatStatus = statusLine ? statusLine.substring(STATUS_PREFIX.length()).toInteger() : null
+
+            if (byteCount == null || zcatStatus == null) {
+                logService.addSimpleLogEntry(workflowStep, "Cannot check emptiness of '${rawSequenceFile.fileName}' " +
+                        "(unexpected output, exit ${result.exitCode}): ${(result.stdout ?: "").trim()}")
+                return
             }
 
-            List<String> lines = result.stdout.readLines()
-            String uncompressedSize = lines.size() > 1 ? lines[1].trim().split(/\s+/)[1] : ""
+            if (byteCount == 0 && zcatStatus != 0) {
+                logService.addSimpleLogEntry(workflowStep, "Cannot check emptiness of '${rawSequenceFile.fileName}' " +
+                        "(zcat exited ${zcatStatus}): ${result.stderr?.trim()}")
+                return
+            }
 
-            if (uncompressedSize == "0") {
+            if (byteCount == 0) {
                 rawSequenceFile.emptyFile = true
                 rawSequenceFile.save(flush: true)
                 logService.addSimpleLogEntry(workflowStep, "RawSequenceFile '${rawSequenceFile.fileName}' is empty")

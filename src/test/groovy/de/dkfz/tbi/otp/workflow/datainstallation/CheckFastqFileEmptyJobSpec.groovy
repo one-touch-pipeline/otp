@@ -68,9 +68,8 @@ class CheckFastqFileEmptyJobSpec extends Specification implements DataTest, Data
         given:
         SeqTrack seqTrack = createSeqTrackWithTwoFastqFile()
         job.concreteArtefactService.getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> seqTrack
-        remoteShellHelper.executeCommandReturnProcessOutput(_) >> new ProcessOutput(
-                stdout: "         compressed        uncompressed  ratio uncompressed_name\n          8          12  72.6% file.fastq.gz",
-                stderr: "", exitCode: 0)
+        // non-empty file: head reads its byte and closes the pipe, so zcat is killed by SIGPIPE (141)
+        remoteShellHelper.executeCommandReturnProcessOutput(_) >> new ProcessOutput(stdout: "1\nzcat_status=141", stderr: "", exitCode: 0)
 
         when:
         job.checkRequirements(workflowStep)
@@ -85,9 +84,8 @@ class CheckFastqFileEmptyJobSpec extends Specification implements DataTest, Data
         SeqTrack seqTrack = createSeqTrackWithOneFastqFile()
         long fileId = seqTrack.sequenceFiles.first().id
         job.concreteArtefactService.getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> seqTrack
-        remoteShellHelper.executeCommandReturnProcessOutput(_) >> new ProcessOutput(
-                stdout: "         compressed        uncompressed  ratio uncompressed_name\n         20           0   0.0% file.fastq.gz",
-                stderr: "", exitCode: 0)
+        // empty file: zcat decompresses to zero bytes and exits cleanly (0)
+        remoteShellHelper.executeCommandReturnProcessOutput(_) >> new ProcessOutput(stdout: "0\nzcat_status=0", stderr: "", exitCode: 0)
 
         when:
         job.checkRequirements(workflowStep)
@@ -95,6 +93,57 @@ class CheckFastqFileEmptyJobSpec extends Specification implements DataTest, Data
         then:
         notThrown(SkipWorkflowStepException)
         FastqFile.get(fileId).emptyFile
+    }
+
+    void "checkRequirements should issue the timeout-guarded bash pipeline with the escaped path"() {
+        given:
+        SeqTrack seqTrack = createSeqTrackWithOneFastqFile()
+        String path = seqTrack.sequenceFiles.first().fullInitialPath
+        job.concreteArtefactService.getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> seqTrack
+        String issuedCommand = null
+
+        when:
+        job.checkRequirements(workflowStep)
+
+        then:
+        1 * remoteShellHelper.executeCommandReturnProcessOutput(_) >> { String cmd ->
+            issuedCommand = cmd
+            return new ProcessOutput(stdout: "1\nzcat_status=141", stderr: "", exitCode: 0)
+        }
+        issuedCommand == "timeout 300 bash -c 'zcat '\\''${path}'\\'' | head -c 1 | wc -c; echo \"zcat_status=\${PIPESTATUS[0]}\"'"
+    }
+
+    void "checkRequirements should not set emptyFile and should log when decompression fails"() {
+        given:
+        SeqTrack seqTrack = createSeqTrackWithOneFastqFile()
+        long fileId = seqTrack.sequenceFiles.first().id
+        job.concreteArtefactService.getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> seqTrack
+        // corrupt file: zero bytes produced but zcat errored (non-zero) before any output
+        remoteShellHelper.executeCommandReturnProcessOutput(_) >> new ProcessOutput(
+                stdout: "0\nzcat_status=1", stderr: "gzip: file.fastq.gz: not in gzip format", exitCode: 0)
+
+        when:
+        job.checkRequirements(workflowStep)
+
+        then:
+        notThrown(SkipWorkflowStepException)
+        !FastqFile.get(fileId).emptyFile
+    }
+
+    void "checkRequirements should not set emptyFile and should log when the command times out"() {
+        given:
+        SeqTrack seqTrack = createSeqTrackWithOneFastqFile()
+        long fileId = seqTrack.sequenceFiles.first().id
+        job.concreteArtefactService.getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> seqTrack
+        // timeout fired: GNU timeout exits 124 and kills the command
+        remoteShellHelper.executeCommandReturnProcessOutput(_) >> new ProcessOutput(stdout: "", stderr: "", exitCode: 124)
+
+        when:
+        job.checkRequirements(workflowStep)
+
+        then:
+        notThrown(SkipWorkflowStepException)
+        !FastqFile.get(fileId).emptyFile
     }
 
     void "checkRequirements should set emptyFile only on empty files when results are mixed"() {
@@ -106,13 +155,9 @@ class CheckFastqFileEmptyJobSpec extends Specification implements DataTest, Data
 
         job.concreteArtefactService.getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> seqTrack
         remoteShellHelper.executeCommandReturnProcessOutput { String cmd -> cmd.contains(sortedFiles[0].fullInitialPath) } >>
-                new ProcessOutput(
-                        stdout: "         compressed        uncompressed  ratio uncompressed_name\n         20           0   0.0% file.fastq.gz",
-                        stderr: "", exitCode: 0)
+                new ProcessOutput(stdout: "0\nzcat_status=0", stderr: "", exitCode: 0)
         remoteShellHelper.executeCommandReturnProcessOutput { String cmd -> cmd.contains(sortedFiles[1].fullInitialPath) } >>
-                new ProcessOutput(
-                        stdout: "         compressed        uncompressed  ratio uncompressed_name\n          8          12  72.6% file.fastq.gz",
-                        stderr: "", exitCode: 0)
+                new ProcessOutput(stdout: "1\nzcat_status=141", stderr: "", exitCode: 0)
 
         when:
         job.checkRequirements(workflowStep)
