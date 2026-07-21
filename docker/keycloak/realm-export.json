@@ -76,6 +76,11 @@
       "clientRole" : false,
       "containerId" : "f83446d1-d211-47c7-bbcf-68c7fbcabd45",
       "attributes" : { }
+    }, {
+      "name" : "admin",
+      "description" : "Realm admin role (used for Grafana Admin mapping)",
+      "composite" : false,
+      "clientRole" : false
     } ],
     "client" : {
       "realm-management" : [ {
@@ -397,6 +402,17 @@
       },
       "notBefore": 0,
       "groups": []
+    }, {
+      "username": "grafana-admin",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "grafana-admin@example.org",
+      "firstName": "Grafana",
+      "lastName": "Admin",
+      "credentials": [
+        { "type": "password", "value": "grafana", "temporary": false }
+      ],
+      "realmRoles": ["default-roles-otp", "admin"]
     }
   ],
   "clients" : [ {
@@ -620,6 +636,25 @@
     "baseUrl": "",
     "adminUrl": "",
     "authorizationServicesEnabled": false
+  }, {
+    "clientId": "grafana",
+    "enabled": true,
+    "protocol": "openid-connect",
+    "publicClient": false,
+    "secret": "grafana-dev-secret",
+    "clientAuthenticatorType": "client-secret",
+    "standardFlowEnabled": true,
+    "directAccessGrantsEnabled": true,
+    "implicitFlowEnabled": false,
+    "serviceAccountsEnabled": false,
+    "redirectUris": ["http://localhost:3000/login/generic_oauth"],
+    "webOrigins": ["http://localhost:3000"],
+    "attributes": {
+      "post.logout.redirect.uris": "http://localhost:3000/login",
+      "pkce.code.challenge.method": "S256"
+    },
+    "defaultClientScopes": ["web-origins", "acr", "roles", "profile", "email"],
+    "optionalClientScopes": ["offline_access"]
   }, {
     "id" : "022c9a1d-de50-47ed-9f81-44e95fb10c0c",
     "clientId" : "otp-keycloak-api",

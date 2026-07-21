@@ -38,7 +38,7 @@ spring {
 }
 
 management.endpoints.enabledByDefault = true
-management.endpoints.web.exposure.include = ['metrics', 'health', 'info', 'heapdump']
+management.endpoints.web.exposure.include = ['metrics', 'health', 'info', 'heapdump', 'prometheus']
 management.endpoints.web.'base-path'= '/actuator'
 
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination

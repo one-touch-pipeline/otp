@@ -191,6 +191,9 @@ class SecurityConfiguration {
                                     "/impersonate",
                             ).hasRole("SWITCH_USER")
                             .mvcMatchers(
+                                    "/actuator/prometheus",
+                            ).permitAll()
+                            .mvcMatchers(
                                     "/actuator/**",
                             ).access("hasRole('ROLE_ADMIN')")
                             .mvcMatchers(

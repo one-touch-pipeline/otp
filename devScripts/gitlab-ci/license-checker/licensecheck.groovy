@@ -99,6 +99,8 @@ class LicenseCheck {
             "cypress/cypress.env.json",
 
             "docker/keycloak/realm-export.json",
+
+            "docker/grafana/dashboards/jvm-micrometer.json",
     ].collect { Paths.get(it) }
 
     static void checkLicense(Path path, List<String> problems) {

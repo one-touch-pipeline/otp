@@ -20,9 +20,9 @@
 
 # Main docker-compose file.
 # Run `docker compose up` to start an otp database, ldap, ssh, mail and admin tool servers.
-# To run it with otp, you should also run docker-compose.dev.yml or docker-compose.war.yml
+# Run `docker compose --profile dev up` to also start the otp development app.
+# Run `docker compose --profile dev --profile monitoring up` to also start Prometheus and Grafana.
 
-version: '3.0'
 services:
   postgres:
     container_name: otp-dev-postgres
@@ -43,6 +43,10 @@ services:
     container_name: otp-dev-keycloak
     env_file:
       - .env
+    environment:
+      KC_HOSTNAME_URL: http://localhost:${KEYCLOAK_PORT:-8100}
+      KC_HOSTNAME_STRICT_BACKCHANNEL: "false"
+      KC_HTTP_ENABLED: "true"
     ports:
       - "${HOST_IP:-127.0.0.1}:${KEYCLOAK_PORT:-8100}:8080"
     networks:
@@ -89,6 +93,82 @@ services:
     ports:
       - "${HOST_IP:-127.0.0.1}:${MAILHOG_PORT_GUI:-8025}:8025"
       - "${HOST_IP:-127.0.0.1}:${MAILHOG_PORT_MAIL:-1025}:1025"
+    networks:
+      otp:
+
+  otp:
+    profiles:
+      - dev
+    container_name: otp-dev
+    restart: on-failure
+    build:
+      dockerfile: docker/otp/Dockerfile
+      context: .
+      args:
+        GRADLE_PROXY_ENABLED: $GRADLE_PROXY_ENABLED
+        GRADLE_PROXY_HOST: $GRADLE_PROXY_HOST
+        GRADLE_PROXY_PORT: $GRADLE_PROXY_PORT
+    env_file:
+      - .env
+    ports:
+      - "${HOST_IP:-127.0.0.1}:${OTP_PORT:-8080}:8080"
+    volumes:
+      - filesystem:/home/otp/filesystem
+      - $LOCAL_SOURCE_PATH/gradle:/home/otp/app/gradle
+      - $LOCAL_SOURCE_PATH/grails-app:/home/otp/app/grails-app
+      - $LOCAL_SOURCE_PATH/migrations:/home/otp/app/migrations
+      - $LOCAL_SOURCE_PATH/src:/home/otp/app/src
+      - $LOCAL_SOURCE_PATH/.otp.properties:/home/otp/app/.otp.properties
+      - $LOCAL_SOURCE_PATH/gradlew:/home/otp/app/gradlew
+      - $LOCAL_SOURCE_PATH/build.gradle:/home/otp/app/build.gradle
+      - $LOCAL_SOURCE_PATH/gradle.properties:/home/otp/app/gradle.properties
+      - $LOCAL_SOURCE_PATH/settings.gradle:/home/otp/app/settings.gradle
+    depends_on:
+      - postgres
+    networks:
+      otp:
+
+  prometheus:
+    profiles:
+      - monitoring
+    image: prom/prometheus:latest
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      otp:
+
+  grafana:
+    profiles:
+      - monitoring
+    image: grafana/grafana:latest
+    depends_on:
+      - prometheus
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SERVER_ROOT_URL: http://localhost:3000/
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+      GF_AUTH_BASIC_ENABLED: "false"
+      GF_AUTH_GENERIC_OAUTH_ENABLED: "true"
+      GF_AUTH_GENERIC_OAUTH_NAME: DKFZ SSO
+      GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP: "true"
+      GF_AUTH_GENERIC_OAUTH_CLIENT_ID: grafana
+      GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET: grafana-dev-secret
+      GF_AUTH_GENERIC_OAUTH_SCOPES: openid email profile offline_access roles
+      GF_AUTH_GENERIC_OAUTH_AUTH_URL: http://localhost:${KEYCLOAK_PORT:-8100}/realms/otp-dev/protocol/openid-connect/auth
+      GF_AUTH_GENERIC_OAUTH_TOKEN_URL: http://keycloak:8080/realms/otp-dev/protocol/openid-connect/token
+      GF_AUTH_GENERIC_OAUTH_API_URL: http://keycloak:8080/realms/otp-dev/protocol/openid-connect/userinfo
+      GF_AUTH_GENERIC_OAUTH_SIGNOUT_REDIRECT_URL: http://localhost:${KEYCLOAK_PORT:-8100}/realms/otp-dev/protocol/openid-connect/logout?post_logout_redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Flogin
+      GF_AUTH_GENERIC_OAUTH_EMAIL_ATTRIBUTE_PATH: email
+      GF_AUTH_GENERIC_OAUTH_LOGIN_ATTRIBUTE_PATH: preferred_username
+      GF_AUTH_GENERIC_OAUTH_NAME_ATTRIBUTE_PATH: name
+      GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_PATH: contains(realm_access.roles[*], 'admin') && 'Admin' || contains(realm_access.roles[*], 'editor') && 'Editor' || 'Viewer'
+      GF_AUTH_GENERIC_OAUTH_USE_REFRESH_TOKEN: "true"
+      GF_AUTH_GENERIC_OAUTH_USE_PKCE: "true"
+    volumes:
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./docker/grafana/dashboards:/var/lib/grafana/dashboards:ro
     networks:
       otp:
 
