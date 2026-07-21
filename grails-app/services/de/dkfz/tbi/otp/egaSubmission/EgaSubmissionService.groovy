@@ -103,8 +103,9 @@ class EgaSubmissionService {
     }
 
     @CompileDynamic
+    @Transactional(readOnly = true)
     boolean egaUploadIsInProgress(Project project) {
-        return !EgaSubmission.findAllByProjectAndState(project, EgaSubmission.State.FILE_UPLOAD_STARTED).empty
+        return EgaSubmission.countByProjectAndState(project, EgaSubmission.State.FILE_UPLOAD_STARTED) > 0
     }
 
     void createAndSaveSampleSubmissionObjects(EgaSubmission submission, List<String> sampleIdSeqTypeIdList) {

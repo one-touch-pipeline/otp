@@ -27,7 +27,7 @@ import groovy.transform.CompileDynamic
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.project.Project
 
-@Transactional
+@Transactional(readOnly = true)
 class SampleOverviewService {
 
     /**
@@ -66,20 +66,14 @@ class SampleOverviewService {
     }
 
     /**
-     * fetch and return all combination of {@link Individual} (as pid) and of Sample type name with the number of lanes depend of {@link SeqType}
-     * as list.
-     * <br> Example:[
-     * [pid: patient1, sampleTypeName: sampleTypeName1, seqType: sampleType1, laneCount: laneCount1],
-     * [pid: patient1, sampleTypeName: sampleTypeName1, seqType: sampleType2, laneCount: laneCount2],
-     * [pid: patient1, sampleTypeName: sampleTypeName2, seqType: sampleType1, laneCount: laneCount3],
-     * [pid: patient2, sampleTypeName: sampleTypeName1, seqType: sampleType1, laneCount: laneCount4],
-     * ...]
+     * Projects, per {@link Individual} (pid) and sample type name, the number of registered (not withdrawn) lanes
+     * grouped by {@link SeqType}.
      * @param project the project for filtering the result
-     * @return all combination of  name of {@link Individual}(pid) and sampleTypeName with with the number of lanes depend of {@link SeqType}  as list
+     * @return one {@link SampleOverviewRegisteredLaneCountRow} per (pid, sampleTypeName, seqTypeId) combination
      */
     @CompileDynamic
-    List<Map> laneCountForSeqtypesPerPatientAndSampleType(Project project) {
-        List lanes = AggregateSequences.withCriteria {
+    List<SampleOverviewRegisteredLaneCountRow> laneCountForSeqtypesPerPatientAndSampleType(Project project) {
+        List<Object[]> lanes = AggregateSequences.withCriteria {
             eq("projectId", project?.id)
             projections {
                 groupProperty("pid")
@@ -88,27 +82,20 @@ class SampleOverviewService {
                 sum("laneCount")
             }
         }
-
-        Map<Long, SeqType> seqTypes = [:]
-
-        return lanes.collect {
-            SeqType seqType = seqTypes[it[2]]
-            if (!seqType) {
-                seqType = SeqType.get(it[2])
-                seqTypes.put(it[2], seqType)
-            }
-            [
-                    pid           : it[0],
-                    sampleTypeName: it[1],
-                    seqType       : seqType,
-                    laneCount     : it[3],
-            ]
+        return lanes.collect { Object[] it ->
+            new SampleOverviewRegisteredLaneCountRow(it[0] as String, it[1] as String, it[2] as Long, it[3] as Long)
         }
     }
 
+    /**
+     * Projects, per {@link Individual} (pid) and sample type name, the number of withdrawn lanes grouped by
+     * {@link SeqType}.
+     * @param project the project for filtering the result
+     * @return one {@link SampleOverviewWithdrawnLaneCountRow} per (pid, sampleTypeName, seqTypeId) combination
+     */
     @CompileDynamic
-    List<Map> withdrawnLaneCountForSeqTypesPerPatientAndSampleType(Project project) {
-        List lanes = Sequence.withCriteria {
+    List<SampleOverviewWithdrawnLaneCountRow> withdrawnLaneCountForSeqTypesPerPatientAndSampleType(Project project) {
+        List<Object[]> lanes = Sequence.withCriteria {
             eq("projectId", project?.id)
             eq("fileWithdrawn", true)
             projections {
@@ -118,36 +105,76 @@ class SampleOverviewService {
                 count()
             }
         }
-
-        Map<Long, SeqType> seqTypes = [:]
-
-        return lanes.collect {
-            SeqType seqType = seqTypes[it[2]]
-            if (!seqType) {
-                seqType = SeqType.get(it[2])
-                seqTypes.put(it[2], seqType)
-            }
-            [
-                    pid           : it[0],
-                    sampleTypeName: it[1],
-                    seqType       : seqType,
-                    withdrawnCount: it[3],
-            ]
+        return lanes.collect { Object[] it ->
+            new SampleOverviewWithdrawnLaneCountRow(it[0] as String, it[1] as String, it[2] as Long, it[3] as Long)
         }
     }
 
+    /**
+     * Projects the scalar fields the sample overview table needs for every processed BAM file that is the
+     * in-project-folder file of its work package. Neither the {@link AbstractBamFile} nor its lazy associations
+     * are hydrated.
+     * @param project the project for filtering the result
+     * @return one {@link SampleOverviewBamFileRow} per matching BAM file
+     */
     @CompileDynamic
-    Collection<AbstractBamFile> abstractBamFilesInProjectFolder(Project project) {
+    List<SampleOverviewBamFileRow> abstractBamFilesInProjectFolder(Project project) {
         if (!project) {
             return []
         }
         return AbstractBamFile.executeQuery("""
-from
-        AbstractBamFile abstractBamFile
-where
-        workPackage.sample.individual.project = :project
-        and workPackage.bamFileInProjectFolder = abstractBamFile
-        and fileOperationStatus = :fileOperationStatus
-""", [project: project, fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED])
+                select
+                    individual.pid,
+                    sampleType.name,
+                    seqType.id,
+                    pipeline.id,
+                    bamFile.numberOfMergedLanes,
+                    bamFile.coverage,
+                    bamFile.withdrawn
+                from AbstractBamFile bamFile
+                    join bamFile.workPackage workPackage
+                    join workPackage.sample sample
+                    join sample.individual individual
+                    join sample.sampleType sampleType
+                    join individual.project project
+                    join workPackage.seqType seqType
+                    join workPackage.pipeline pipeline
+                where
+                    project = :project
+                    and workPackage.bamFileInProjectFolder = bamFile
+                    and bamFile.fileOperationStatus = :fileOperationStatus
+                """, [project: project, fileOperationStatus: AbstractBamFile.FileOperationStatus.PROCESSED]).collect { Object[] it ->
+            new SampleOverviewBamFileRow(
+                    it[0] as String,
+                    it[1] as String,
+                    it[2] as Long,
+                    it[3] as Long,
+                    it[4] as Integer,
+                    it[5] as Double,
+                    it[6] as boolean,
+            )
+        }
+    }
+
+    /**
+     * Projects the (pid, sampleTypeName) of every {@link Sample} of the project so that samples without any
+     * sequencing data still appear as a row in the sample overview. The {@link Sample} entity is not hydrated.
+     * @param project the project for filtering the result
+     * @return one {@link SampleOverviewSampleRow} per sample of the project
+     */
+    @CompileDynamic
+    List<SampleOverviewSampleRow> samplesOfProject(Project project) {
+        if (!project) {
+            return []
+        }
+        return Sample.executeQuery("""
+                select individual.pid, sampleType.name
+                from Sample sample
+                    join sample.individual individual
+                    join sample.sampleType sampleType
+                where individual.project = :project
+                """, [project: project]).collect { Object[] it ->
+            new SampleOverviewSampleRow(it[0] as String, it[1] as String)
+        }
     }
 }

@@ -25,7 +25,6 @@ import grails.converters.JSON
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ProjectSelectionService
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.egaSubmission.EgaSubmissionService
 import de.dkfz.tbi.otp.project.Project
@@ -36,7 +35,6 @@ class SampleOverviewController {
 
     ProjectSelectionService projectSelectionService
     SampleOverviewService sampleOverviewService
-    SampleService sampleService
     EgaSubmissionService egaSubmissionService
 
     static allowedMethods = [
@@ -83,24 +81,24 @@ class SampleOverviewController {
 
         // Only counts lanes, which are not withdrawn
         sampleOverviewService.laneCountForSeqtypesPerPatientAndSampleType(project).each {
-            dataLastMap[it.pid as String][it.sampleTypeName as String].laneCountRegistered[it.seqType.id as Long] = it.laneCount as String
+            dataLastMap[it.pid][it.sampleTypeName].laneCountRegistered[it.seqTypeId] = it.registeredLaneCount as String
         }
 
         // adds all withdrawn lanes to the total amount of registered Lanes and shows the number of withdrawn lanes in brackets
         sampleOverviewService.withdrawnLaneCountForSeqTypesPerPatientAndSampleType(project).each {
-            Integer notWithdrawnLanesCount = (dataLastMap[it.pid as String][it.sampleTypeName as String]
-                    .laneCountRegistered[it.seqType.id as Long] ?: 0) as Integer
-            String registeredLanesCount = (notWithdrawnLanesCount + (it.withdrawnCount as Integer)) as String
-            dataLastMap[it.pid as String][it.sampleTypeName as String].laneCountRegistered[it.seqType.id as Long] =
-                    registeredLanesCount + " (${it.withdrawnCount})"
+            Integer notWithdrawnLanesCount = (dataLastMap[it.pid][it.sampleTypeName]
+                    .laneCountRegistered[it.seqTypeId] ?: 0) as Integer
+            String registeredLanesCount = (notWithdrawnLanesCount + (it.withdrawnLaneCount as Integer)) as String
+            dataLastMap[it.pid][it.sampleTypeName].laneCountRegistered[it.seqTypeId] =
+                    registeredLanesCount + " (${it.withdrawnLaneCount})"
         }
 
         sampleOverviewService.abstractBamFilesInProjectFolder(project).each {
-            dataLastMap[it.individual.pid][it.sampleType.name].bamFilesInProjectFolder[it.seqType.id][it.pipeline.id].add(it)
+            dataLastMap[it.pid][it.sampleTypeName].bamFilesInProjectFolder[it.seqTypeId][it.pipelineId].add(it)
         }
 
-        sampleService.getSamplesOfProject(project).each { Sample sample ->
-            dataLastMap[sample.individual.pid][sample.sampleType.name]
+        sampleOverviewService.samplesOfProject(project).each {
+            dataLastMap[it.pid][it.sampleTypeName]
         }
 
         List<Pipeline> pipelines = findPipelines()
@@ -124,7 +122,7 @@ class SampleOverviewController {
                     if (laneCount) {
                         columnsToHide.remove(columnNumber)
                     }
-                    Map<Long, Collection<AbstractBamFile>> bamFilesPerWorkflow = informationOfSample.bamFilesInProjectFolder.get(seqType.id)
+                    Map<Long, Collection<SampleOverviewBamFileRow>> bamFilesPerWorkflow = informationOfSample.bamFilesInProjectFolder.get(seqType.id)
 
                     pipelines.each { Pipeline pipeline ->
                         columnNumber++
@@ -180,5 +178,5 @@ class InfoAboutOneSample {
     // Map<SeqType.id, value>>
     Map<Long, String> laneCountRegistered = [:]
     // Map<SeqType.id, Map<Pipeline.id, Collection<bamFileInProjectFolder>>>
-    Map<Long, Map<Long, Collection<AbstractBamFile>>> bamFilesInProjectFolder = [:].withDefault { [:].withDefault { [] } }
+    Map<Long, Map<Long, Collection<SampleOverviewBamFileRow>>> bamFilesInProjectFolder = [:].withDefault { [:].withDefault { [] } }
 }
