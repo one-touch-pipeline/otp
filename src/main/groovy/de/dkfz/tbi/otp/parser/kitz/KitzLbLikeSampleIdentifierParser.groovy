@@ -19,29 +19,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.parser.ilp
+package de.dkfz.tbi.otp.parser.kitz
 
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.ngsdata.SampleTypePerProject
 import de.dkfz.tbi.otp.parser.*
 
 import java.util.regex.Matcher
 
 @Component
-class IlpParser implements SampleIdentifierParser, ProjectMappingParser {
+class KitzLbLikeSampleIdentifierParser implements SampleIdentifierParser, ProjectMappingParser {
 
-    static final String PROJECT = /(?<project>(\w{4}))/
-    static final String PID_PART = /\w{4,10}/
-    static final String SAMPLE_TYPE = /(?<sampleType>([a-zA-Z]\d{1,2}-[a-zA-Z]\d{1,2}(-[a-zA-Z]{1,2}\d{1,2})?))/
-    static final String PID = "(?<pid>(${PROJECT}-${PID_PART}))"
-    static final String REGEX = "^${PID}-${SAMPLE_TYPE}\$"
+    static final String PROJECT_PREFIX = /(?<projectPrefix>[A-Z]{4})/
+    static final String INTERMEDIATE = /[0-9A-Z]{3,6}/
+    static final String DIGITS = /[0-9]{3,4}/
+    static final String PID = /(?<pid>${PROJECT_PREFIX}-${INTERMEDIATE}-${DIGITS})/
+    static final String TISSUE_TYPE = /(?<tissueType>([PTLASBU]|DBS|TD))/
+    static final String SAMPLE_NUMBER = /(?<sampleNumber>[0-9]{1,2})/
+    static final String ALIQUOT_NUMBER = /(?<aliquotNumber>[0-9]{1,2})/
+    static final String REGEX = "^${PID}-${TISSUE_TYPE}${SAMPLE_NUMBER}\\.${ALIQUOT_NUMBER}\$"
 
     final ProcessingOptionService processingOptionService
 
-    IlpParser(final ProcessingOptionService processingOptionService) {
+    KitzLbLikeSampleIdentifierParser(final ProcessingOptionService processingOptionService) {
         this.processingOptionService = processingOptionService
     }
 
@@ -54,21 +56,29 @@ class IlpParser implements SampleIdentifierParser, ProjectMappingParser {
         if (matcher) {
             assert matcher.matches()
 
-            String projectName = mapProjectName(ProcessingOption.OptionName.ILP_PARSER_MAPPING, matcher.group('project'))
+            String projectName = mapProjectName(ProcessingOption.OptionName.KITZ_LB_LIKE_PARSER_MAPPING, matcher.group('projectPrefix'))
 
             if (!projectName) {
                 return null
             }
 
-            String sampleType = matcher.group('sampleType').toLowerCase()
-            SampleTypePerProject.Category category = determineSampleTypeCategory(sampleType)
+            String tissueAbbreviation = matcher.group('tissueType')
+            KitzLbLikeTissueType kitzLbLikeTissueType = KitzLbLikeTissueType.fromKey(tissueAbbreviation)
+            if (!kitzLbLikeTissueType) {
+                return null
+            }
+
+            String sampleNumber = matcher.group('sampleNumber').padLeft(2, '0')
+            String aliquotNumber = matcher.group('aliquotNumber').padLeft(2, '0')
+
+            String sampleType = "${kitzLbLikeTissueType}-${sampleNumber}-${aliquotNumber}"
 
             return new DefaultParsedSampleIdentifier(
                     projectName,
                     matcher.group('pid'),
                     sampleType,
                     sampleIdentifier,
-                    category,
+                    null,
             )
         }
         return null
@@ -77,18 +87,5 @@ class IlpParser implements SampleIdentifierParser, ProjectMappingParser {
     @Override
     String tryParseSingleCellWellLabel(String sampleIdentifier) {
         return null
-    }
-
-    protected SampleTypePerProject.Category determineSampleTypeCategory(String sampleType) {
-        String firstLetter = sampleType.charAt(0)
-
-        switch (firstLetter) {
-            case ['b', 'n', 'f', 'k', 'z']:
-                return SampleTypePerProject.Category.CONTROL
-            case ['t', 'm', 's', 'x', 'l', 'p', 'c', 'a', 'q', 'y', 'u']:
-                return SampleTypePerProject.Category.DISEASE
-            default:
-                return null
-        }
     }
 }

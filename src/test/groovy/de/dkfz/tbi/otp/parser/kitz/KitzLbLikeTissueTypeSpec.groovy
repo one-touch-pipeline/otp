@@ -19,18 +19,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.parser.hipo
+package de.dkfz.tbi.otp.parser.kitz
 
 import spock.lang.Specification
 
-class HipoTissueTypeSpec extends Specification {
+class KitzLbLikeTissueTypeSpec extends Specification {
 
     void "test fromKey"() {
         expect:
-        HipoTissueType.fromKey("B") == HipoTissueType.BLOOD
+        KitzLbLikeTissueType.fromKey("P") == KitzLbLikeTissueType.PLASMA
 
         when:
-        HipoTissueType.fromKey("-")
+        KitzLbLikeTissueType.fromKey("-")
 
         then:
         thrown(IllegalArgumentException)

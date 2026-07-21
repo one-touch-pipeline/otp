@@ -21,45 +21,26 @@
  */
 package de.dkfz.tbi.otp.parser.inform
 
-import groovy.json.JsonException
-import groovy.json.JsonSlurper
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
-import de.dkfz.tbi.otp.parser.SampleIdentifierParser
+import de.dkfz.tbi.otp.parser.*
 
 import java.util.regex.Matcher
 
 @Component
-
-class InformLikeSampleIdentifierParser implements SampleIdentifierParser {
+class InformLikeSampleIdentifierParser implements SampleIdentifierParser, ProjectMappingParser {
     static final int PAD_LEFT = 2
 
-    @Autowired
-    ProcessingOptionService processingOptionService
+    final ProcessingOptionService processingOptionService
 
-    private Map<String, String> projectPrefixToNameMap() {
-        String option = processingOptionService.findOptionAsString(ProcessingOption.OptionName.INFORM_LIKE_PARSER_MAPPING)
-        if (option?.trim()) {
-            try {
-                return new JsonSlurper().parseText(option) as Map<String, String>
-            } catch (JsonException ignored) {
-                return [:]
-            }
-        }
-        return [:]
-    }
-
-    private String mapProjectName(String projectPrefix) {
-        Map<String, String> prefixToName = projectPrefixToNameMap()
-        return prefixToName[projectPrefix]?.trim() ?: null
+    InformLikeSampleIdentifierParser(final ProcessingOptionService processingOptionService) {
+        this.processingOptionService = processingOptionService
     }
 
     private List<String> fetchProjectPrefixes() {
-        return projectPrefixToNameMap().keySet().toList()
+        return projectPrefixToNameMap(ProcessingOption.OptionName.INFORM_LIKE_PARSER_MAPPING).keySet().toList()
     }
 
     @Override
@@ -67,7 +48,7 @@ class InformLikeSampleIdentifierParser implements SampleIdentifierParser {
         Matcher matcher = sampleIdentifier =~ createRegex()
         if (matcher) {
             assert matcher.matches()
-            String projectName = mapProjectName(matcher.group('project'))
+            String projectName = mapProjectName(ProcessingOption.OptionName.INFORM_LIKE_PARSER_MAPPING, matcher.group('project'))
             return new DefaultParsedSampleIdentifier(
                     projectName,
                     matcher.group('pid'),

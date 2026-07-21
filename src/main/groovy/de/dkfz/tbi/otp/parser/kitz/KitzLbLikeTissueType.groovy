@@ -19,42 +19,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.parser.hipo
+package de.dkfz.tbi.otp.parser.kitz
 
-/**
- * Tissue types as defined by the HIPO project.
- */
-enum HipoTissueType {
-    TUMOR                               ('T'),
-    METASTASIS                          ('M'),
-    SPHERE                              ('S'),
-    XENOGRAFT                           ('X'),
-    BLOOD                               ('B'),
-    CONTROL                             ('N'),
-    CELL                                ('C'),
-    INVASIVE_MARGINS                    ('I'),
-    PATIENT_DERIVED_CULTURE             ('P'),
-    CULTURE_DERIVED_XENOGRAFT           ('Q'),
-    PLASMA                              ('L'),
-    BUFFY_COAT                          ('F'),
-    NORMAL_SORTED_CELLS                 ('Z'),
-    TUMOR_INTERVAL_DEBULKING_SURGERY    ('E'),
-    EXTERNAL_CONTROL                    ('K'),
-    LYMPH_NODES                         ('A'),
-    UNDEFINED_NEOPLASIA                 ('U'),
+enum KitzLbLikeTissueType {
+    PLASMA   ('P'),
+    TUMOR    ('T'),
+    CSF      ('L'),
+    EYEFLUID ('A'),
+    BLOOD    ('B'),
+    DBS      ('DBS'),
+    SERUM    ('S'),
+    TEARDROP ('TD'),
+    URINE    ('U')
 
-    final char key
+    final String key
 
-    private HipoTissueType(String key) {
-        this.key = key as char
+    private KitzLbLikeTissueType(String key) {
+        this.key = key
     }
 
-    static HipoTissueType fromKey(String key) {
-        HipoTissueType hipoTissueType = values().find { it.key == key as char }
-        if (hipoTissueType == null) {
+    static KitzLbLikeTissueType fromKey(String key) {
+        KitzLbLikeTissueType kitzLbLikeTissueType = values().find { it.key == key }
+        if (kitzLbLikeTissueType == null) {
             throw new IllegalArgumentException()
         }
-        return hipoTissueType
+        return kitzLbLikeTissueType
     }
 
     @Override

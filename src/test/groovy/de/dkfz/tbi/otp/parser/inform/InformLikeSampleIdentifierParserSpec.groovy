@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
 
 class InformLikeSampleIdentifierParserSpec extends Specification implements DataTest, DomainFactoryCore {
 
-    InformLikeSampleIdentifierParser informLikeSampleIdentifierParser = new InformLikeSampleIdentifierParser()
+    InformLikeSampleIdentifierParser informLikeSampleIdentifierParser
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -51,7 +51,7 @@ class InformLikeSampleIdentifierParserSpec extends Specification implements Data
                         '   "MPSA":"MPSA"\n' +
                         '}',
         )
-        informLikeSampleIdentifierParser.processingOptionService = new ProcessingOptionService()
+        informLikeSampleIdentifierParser = new InformLikeSampleIdentifierParser(new ProcessingOptionService())
     }
 
     @Unroll('INFORM like identifier #input is parsed to PID #pid, sample type name #sampleTypeDbName')

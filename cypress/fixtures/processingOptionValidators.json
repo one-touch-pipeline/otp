@@ -50,7 +50,8 @@
       "regex": "lue"
     },
     "options": [
-      "HIPO2_PARSER_MAPPING"
+      "HIPO2_PARSER_MAPPING",
+      "KITZ_LB_LIKE_PARSER_MAPPING"
     ]
   },
   "FLOAT" :

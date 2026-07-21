@@ -21,16 +21,13 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.testing.mixin.integration.Integration
 import grails.gorm.transactions.Rollback
+import grails.testing.mixin.integration.Integration
 import org.junit.Test
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
-import de.dkfz.tbi.otp.parser.hipo.Hipo2SampleIdentifierParser
-import de.dkfz.tbi.otp.parser.inform.InformLikeSampleIdentifierParser
 import de.dkfz.tbi.otp.project.Project
 
 @Rollback
@@ -47,8 +44,6 @@ class SampleIdentifierServiceTests implements DomainFactoryCore {
                         '   "H123":"hipo_123",\n' +
                         '}',
         )
-        Hipo2SampleIdentifierParser parser = sampleIdentifierService.getSampleIdentifierParser(SampleIdentifierParserBeanName.HIPO2) as Hipo2SampleIdentifierParser
-        parser.processingOptionService = new ProcessingOptionService()
     }
 
     @Test
@@ -91,8 +86,6 @@ class SampleIdentifierServiceTests implements DomainFactoryCore {
                         '   "I":"INFORM1"\n' +
                         '}',
         )
-        InformLikeSampleIdentifierParser parser = sampleIdentifierService.getSampleIdentifierParser(SampleIdentifierParserBeanName.INFORM_LIKE) as InformLikeSampleIdentifierParser
-        parser.processingOptionService = new ProcessingOptionService()
         Project project = createProject(name: 'INFORM1', sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.INFORM_LIKE)
         assert sampleIdentifierService.parseSampleIdentifier('I123_456_1T3_D1', project).projectName == 'INFORM1'
     }
