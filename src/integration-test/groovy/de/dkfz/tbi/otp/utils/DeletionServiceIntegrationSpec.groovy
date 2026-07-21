@@ -29,10 +29,13 @@ import spock.lang.TempDir
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.domainFactory.FastqcDomainFactory
 import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
@@ -51,6 +54,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
 import de.dkfz.tbi.otp.project.dta.*
 import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.utils.exceptions.NotSupportedException
 import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.*
@@ -909,13 +913,16 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         roddyBamFile.workPackage.bamFileInProjectFolder = roddyBamFile
         roddyBamFile.workPackage.save(flush: true)
+        SeqTrack seqTrack = roddyBamFile.seqTracks.iterator().next()
+        WorkflowRun alignmentRun = wireSeqTrackToBamFile(seqTrack, roddyBamFile)
 
         when:
-        deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(roddyBamFile.seqTracks.iterator().next())
+        deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack)
 
         then:
         !RoddyBamFile.get(roddyBamFile.id)
         !MergingWorkPackage.get(roddyBamFile.workPackage.id)
+        !WorkflowRun.get(alignmentRun.id)
     }
 
     void "testDeleteAllProcessingInformationAndResultOfOneSeqTrack_SingleCellBamFile"() {
@@ -924,13 +931,406 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
         SingleCellBamFile singleCellBamFile = DomainFactory.proxyCellRanger.createBamFile()
         singleCellBamFile.workPackage.bamFileInProjectFolder = singleCellBamFile
         singleCellBamFile.workPackage.save(flush: true)
+        SeqTrack seqTrack = singleCellBamFile.seqTracks.iterator().next()
+        WorkflowRun alignmentRun = wireSeqTrackToBamFile(seqTrack, singleCellBamFile)
 
         when:
-        deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(singleCellBamFile.seqTracks.iterator().next())
+        deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack)
 
         then:
-        !RoddyBamFile.get(singleCellBamFile.id)
-        !MergingWorkPackage.get(singleCellBamFile.workPackage.id)
+        !SingleCellBamFile.get(singleCellBamFile.id)
+        !CellRangerMergingWorkPackage.get(singleCellBamFile.workPackage.id)
+        !WorkflowRun.get(alignmentRun.id)
+    }
+
+    /**
+     * Wires an analysis (e.g. SNV calling) as the consumer of its input bam files' artefacts, mirroring how the
+     * production graph links a tumor/control analysis to the bam files it was run on.
+     */
+    private void wireBamFilesToAnalysis(BamFilePairAnalysis analysis, List<AbstractBamFile> bamFiles) {
+        WorkflowRun analysisRun = createWorkflowRun()
+        bamFiles.each { AbstractBamFile bamFile ->
+            createWorkflowRunInputArtefact(workflowRun: analysisRun, workflowArtefact: bamFile.workflowArtefact)
+        }
+        analysis.workflowArtefact = createWorkflowArtefact(producedBy: analysisRun)
+        analysis.save(flush: true)
+    }
+
+    void "collectArtefactsInDeletionOrder, when roddy chain with analysis exists, returns consumers before producers with their concrete artefacts and excludes the seqTrack artefact"() {
+        given:
+        SnvCallingInstance analysis = DomainFactory.createSnvInstanceWithRoddyBamFiles()
+        RoddyBamFile bamFile = analysis.sampleType1BamFile as RoddyBamFile
+
+        WorkflowArtefact seqTrackArtefact = createWorkflowArtefact()
+        SeqTrack seqTrack = createSeqTrack(workflowArtefact: seqTrackArtefact)
+
+        WorkflowRun alignmentRun = createWorkflowRun()
+        createWorkflowRunInputArtefact(workflowRun: alignmentRun, workflowArtefact: seqTrackArtefact)
+        WorkflowArtefact bamArtefact = createWorkflowArtefact(producedBy: alignmentRun)
+        bamFile.workflowArtefact = bamArtefact
+        bamFile.save(flush: true)
+
+        WorkflowRun analysisRun = createWorkflowRun()
+        createWorkflowRunInputArtefact(workflowRun: analysisRun, workflowArtefact: bamArtefact)
+        WorkflowArtefact analysisArtefact = createWorkflowArtefact(producedBy: analysisRun)
+        analysis.workflowArtefact = analysisArtefact
+        analysis.save(flush: true)
+
+        when:
+        List<ArtefactDeletionEntry> entries = deletionService.collectArtefactsInDeletionOrder(seqTrack)
+
+        then:
+        entries*.workflowArtefact == [analysisArtefact, bamArtefact]
+        entries[0].concreteArtefact == analysis
+        entries[1].concreteArtefact == bamFile
+    }
+
+    void "collectArtefactsInDeletionOrder, when an analysis consumes another analysis, returns the consuming analysis before the consumed one"() {
+        given:
+        SophiaInstance sophia = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
+        AceseqInstance aceseq = DomainFactory.createAceseqInstanceWithSameSamplePair(sophia)
+        RoddyBamFile bamFile = sophia.sampleType1BamFile as RoddyBamFile
+
+        WorkflowArtefact seqTrackArtefact = createWorkflowArtefact()
+        SeqTrack seqTrack = createSeqTrack(workflowArtefact: seqTrackArtefact)
+
+        WorkflowRun alignmentRun = createWorkflowRun()
+        createWorkflowRunInputArtefact(workflowRun: alignmentRun, workflowArtefact: seqTrackArtefact)
+        WorkflowArtefact bamArtefact = createWorkflowArtefact(producedBy: alignmentRun)
+        bamFile.workflowArtefact = bamArtefact
+        bamFile.save(flush: true)
+
+        WorkflowRun sophiaRun = createWorkflowRun()
+        createWorkflowRunInputArtefact(workflowRun: sophiaRun, workflowArtefact: bamArtefact)
+        WorkflowArtefact sophiaArtefact = createWorkflowArtefact(producedBy: sophiaRun)
+        sophia.workflowArtefact = sophiaArtefact
+        sophia.save(flush: true)
+
+        // Aceseq consumes both the bam and the Sophia result, mirroring AceseqDecider's SOPHIA_INPUT dependency.
+        WorkflowRun aceseqRun = createWorkflowRun()
+        createWorkflowRunInputArtefact(workflowRun: aceseqRun, workflowArtefact: bamArtefact)
+        createWorkflowRunInputArtefact(workflowRun: aceseqRun, workflowArtefact: sophiaArtefact)
+        WorkflowArtefact aceseqArtefact = createWorkflowArtefact(producedBy: aceseqRun)
+        aceseq.workflowArtefact = aceseqArtefact
+        aceseq.save(flush: true)
+
+        when:
+        List<ArtefactDeletionEntry> entries = deletionService.collectArtefactsInDeletionOrder(seqTrack)
+
+        then:
+        entries*.workflowArtefact == [aceseqArtefact, sophiaArtefact, bamArtefact]
+        entries*.concreteArtefact == [aceseq, sophia, bamFile]
+    }
+
+    void "collectArtefactsInDeletionOrder, when single cell bam file is the only downstream artefact, returns only its entry"() {
+        given:
+        WorkflowArtefact seqTrackArtefact = createWorkflowArtefact()
+        SeqTrack seqTrack = createSeqTrack(workflowArtefact: seqTrackArtefact)
+
+        WorkflowRun alignmentRun = createWorkflowRun()
+        createWorkflowRunInputArtefact(workflowRun: alignmentRun, workflowArtefact: seqTrackArtefact)
+        WorkflowArtefact bamArtefact = createWorkflowArtefact(producedBy: alignmentRun)
+        SingleCellBamFile singleCellBamFile = DomainFactory.proxyCellRanger.createBamFile(workflowArtefact: bamArtefact)
+
+        when:
+        List<ArtefactDeletionEntry> entries = deletionService.collectArtefactsInDeletionOrder(seqTrack)
+
+        then:
+        entries*.workflowArtefact == [bamArtefact]
+        entries[0].concreteArtefact == singleCellBamFile
+    }
+
+    void "collectArtefactsInDeletionOrder, when seqTrack has no workflowArtefact, returns empty list"() {
+        given:
+        SeqTrack seqTrack = createSeqTrack()
+
+        expect:
+        deletionService.collectArtefactsInDeletionOrder(seqTrack) == []
+    }
+
+    void "collectArtefactsInDeletionOrder, when more artefacts than the query chunk size are reachable, returns the complete set"() {
+        given:
+        WorkflowArtefact seqTrackArtefact = createWorkflowArtefact()
+        SeqTrack seqTrack = createSeqTrack(workflowArtefact: seqTrackArtefact)
+
+        WorkflowRun run = createWorkflowRun()
+        createWorkflowRunInputArtefact(workflowRun: run, workflowArtefact: seqTrackArtefact)
+        int artefactCount = DeletionService.ARTEFACT_QUERY_CHUNK_SIZE + 1
+        artefactCount.times {
+            createWorkflowArtefact(producedBy: run)
+        }
+
+        when:
+        List<ArtefactDeletionEntry> entries = deletionService.collectArtefactsInDeletionOrder(seqTrack)
+
+        then:
+        entries.size() == artefactCount
+        entries*.workflowArtefact as Set == WorkflowArtefact.findAllByProducedBy(run) as Set
+    }
+
+    void "deleteAllProcessingInformationAndResultOfOneSeqTrack, roddy chain, deletes analysis before bam file and merging work package"() {
+        given:
+        SnvCallingInstance analysis = DomainFactory.createSnvInstanceWithRoddyBamFiles()
+        RoddyBamFile bamFile = analysis.sampleType1BamFile as RoddyBamFile
+        bamFile.workPackage.bamFileInProjectFolder = bamFile
+        bamFile.workPackage.save(flush: true)
+        SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
+
+        WorkflowRun alignmentRun = wireSeqTrackToBamFile(seqTrack, bamFile)
+        WorkflowRun analysisRun = createWorkflowRun()
+        createWorkflowRunInputArtefact(workflowRun: analysisRun, workflowArtefact: bamFile.workflowArtefact)
+        WorkflowArtefact analysisArtefact = createWorkflowArtefact(producedBy: analysisRun)
+        analysis.workflowArtefact = analysisArtefact
+        analysis.save(flush: true)
+
+        // deletionService is an autowired Spring singleton; save the collaborator so mutating it does not leak into
+        // other tests, and restore it in cleanup.
+        AnalysisDeletionService originalAnalysisDeletionService = deletionService.analysisDeletionService
+        boolean bamStillPresentWhenAnalysisDeleted = false
+        deletionService.analysisDeletionService = Mock(AnalysisDeletionService) {
+            1 * deleteInstance(analysis) >> {
+                bamStillPresentWhenAnalysisDeleted = RoddyBamFile.get(bamFile.id) != null
+                analysis.delete(flush: true)
+                []
+            }
+            _ * deleteSamplePairsWithoutAnalysisInstances(_) >> { arguments ->
+                (arguments[0] as List<SamplePair>)*.delete(flush: true)
+                []
+            }
+        }
+
+        when:
+        deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack)
+
+        then:
+        bamStillPresentWhenAnalysisDeleted
+        !RoddyBamFile.get(bamFile.id)
+        !MergingWorkPackage.get(bamFile.workPackage.id)
+        !WorkflowRun.get(alignmentRun.id)
+        !WorkflowRun.get(analysisRun.id)
+
+        cleanup:
+        deletionService.analysisDeletionService = originalAnalysisDeletionService
+    }
+
+    void "deleteAllProcessingInformationAndResultOfOneSeqTrack, when an analysis consumes another analysis, deletes the consuming analysis before the consumed one"() {
+        given:
+        SophiaInstance sophia = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
+        AceseqInstance aceseq = DomainFactory.createAceseqInstanceWithSameSamplePair(sophia)
+        RoddyBamFile bamFile = sophia.sampleType1BamFile as RoddyBamFile
+        bamFile.workPackage.bamFileInProjectFolder = bamFile
+        bamFile.workPackage.save(flush: true)
+        SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
+
+        WorkflowRun alignmentRun = wireSeqTrackToBamFile(seqTrack, bamFile)
+
+        WorkflowRun sophiaRun = createWorkflowRun()
+        createWorkflowRunInputArtefact(workflowRun: sophiaRun, workflowArtefact: bamFile.workflowArtefact)
+        WorkflowArtefact sophiaArtefact = createWorkflowArtefact(producedBy: sophiaRun)
+        sophia.workflowArtefact = sophiaArtefact
+        sophia.save(flush: true)
+
+        // Aceseq consumes both the bam and the Sophia result, mirroring AceseqDecider's SOPHIA_INPUT dependency.
+        WorkflowRun aceseqRun = createWorkflowRun()
+        createWorkflowRunInputArtefact(workflowRun: aceseqRun, workflowArtefact: bamFile.workflowArtefact)
+        createWorkflowRunInputArtefact(workflowRun: aceseqRun, workflowArtefact: sophiaArtefact)
+        WorkflowArtefact aceseqArtefact = createWorkflowArtefact(producedBy: aceseqRun)
+        aceseq.workflowArtefact = aceseqArtefact
+        aceseq.save(flush: true)
+
+        // deletionService is an autowired Spring singleton; save the collaborator so mutating it does not leak into
+        // other tests, and restore it in cleanup.
+        AnalysisDeletionService originalAnalysisDeletionService = deletionService.analysisDeletionService
+        boolean sophiaStillPresentWhenAceseqDeleted = false
+        deletionService.analysisDeletionService = Mock(AnalysisDeletionService) {
+            1 * deleteInstance(aceseq) >> {
+                sophiaStillPresentWhenAceseqDeleted = SophiaInstance.get(sophia.id) != null
+                aceseq.delete(flush: true)
+                []
+            }
+            1 * deleteInstance(sophia) >> {
+                sophia.delete(flush: true)
+                []
+            }
+            _ * deleteSamplePairsWithoutAnalysisInstances(_) >> { arguments ->
+                (arguments[0] as List<SamplePair>)*.delete(flush: true)
+                []
+            }
+        }
+
+        when:
+        deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack)
+
+        then:
+        sophiaStillPresentWhenAceseqDeleted
+        !AceseqInstance.get(aceseq.id)
+        !SophiaInstance.get(sophia.id)
+        !RoddyBamFile.get(bamFile.id)
+        !WorkflowRun.get(alignmentRun.id)
+        !WorkflowRun.get(sophiaRun.id)
+        !WorkflowRun.get(aceseqRun.id)
+
+        cleanup:
+        deletionService.analysisDeletionService = originalAnalysisDeletionService
+    }
+
+    void "deleteAllProcessingInformationAndResultOfOneSeqTrack, roddy chain, deletes process parameters for analysis and bam file"() {
+        given:
+        SnvCallingInstance analysis = DomainFactory.createSnvInstanceWithRoddyBamFiles()
+        RoddyBamFile bamFile = analysis.sampleType1BamFile as RoddyBamFile
+        bamFile.workPackage.bamFileInProjectFolder = bamFile
+        bamFile.workPackage.save(flush: true)
+        SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
+
+        wireSeqTrackToBamFile(seqTrack, bamFile)
+        wireBamFilesToAnalysis(analysis, [bamFile])
+
+        Process analysisProcess = DomainFactory.createProcess(finished: true)
+        Process bamProcess = DomainFactory.createProcess(finished: true)
+        DomainFactory.createProcessParameter(analysisProcess, analysis)
+        DomainFactory.createProcessParameter(bamProcess, bamFile)
+
+        AnalysisDeletionService originalAnalysisDeletionService = deletionService.analysisDeletionService
+        deletionService.analysisDeletionService = Mock(AnalysisDeletionService) {
+            1 * deleteInstance(analysis) >> {
+                analysis.delete(flush: true)
+                []
+            }
+            _ * deleteSamplePairsWithoutAnalysisInstances(_) >> { arguments ->
+                (arguments[0] as List<SamplePair>)*.delete(flush: true)
+                []
+            }
+        }
+
+        when:
+        deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack)
+
+        then:
+        !ProcessParameter.findAllByProcess(analysisProcess)
+        !ProcessParameter.findAllByProcess(bamProcess)
+
+        cleanup:
+        deletionService.analysisDeletionService = originalAnalysisDeletionService
+    }
+
+    void "deleteAllProcessingInformationAndResultOfOneSeqTrack, removes graph metadata of deleted bam and keeps retained fastqc artefact"() {
+        given:
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
+        bamFile.workPackage.bamFileInProjectFolder = bamFile
+        bamFile.workPackage.save(flush: true)
+        SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
+
+        WorkflowArtefact seqTrackArtefact = createWorkflowArtefact()
+        seqTrack.workflowArtefact = seqTrackArtefact
+        seqTrack.save(flush: true)
+
+        WorkflowRun alignmentRun = createWorkflowRun()
+        createWorkflowRunInputArtefact(workflowRun: alignmentRun, workflowArtefact: seqTrackArtefact)
+        WorkflowArtefact bamArtefact = createWorkflowArtefact(producedBy: alignmentRun)
+        bamFile.workflowArtefact = bamArtefact
+        bamFile.save(flush: true)
+
+        WorkflowRun fastqcRun = createWorkflowRun()
+        createWorkflowRunInputArtefact(workflowRun: fastqcRun, workflowArtefact: seqTrackArtefact)
+        WorkflowArtefact fastqcArtefact = createWorkflowArtefact(producedBy: fastqcRun)
+        FastqcProcessedFile fastqcProcessedFile = createFastqcProcessedFile(workflowArtefact: fastqcArtefact)
+
+        when:
+        deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack)
+
+        then:
+        !RoddyBamFile.get(bamFile.id)
+        !WorkflowArtefact.get(bamArtefact.id)
+        !WorkflowRun.get(alignmentRun.id)
+        WorkflowArtefact.get(seqTrackArtefact.id)
+        FastqcProcessedFile.get(fastqcProcessedFile.id)
+        WorkflowArtefact.get(fastqcArtefact.id)
+        WorkflowRun.get(fastqcRun.id)
+    }
+
+    void "deleteAllProcessingInformationAndResultOfOneSeqTrack, falls back to legacy deletion when a bam file is not reachable via the graph"() {
+        given:
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
+        bamFile.workPackage.bamFileInProjectFolder = bamFile
+        bamFile.workPackage.save(flush: true)
+        SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
+        WorkflowArtefact seqTrackArtefact = createWorkflowArtefact()
+        seqTrack.workflowArtefact = seqTrackArtefact
+        seqTrack.save(flush: true)
+
+        when:
+        deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack)
+
+        then:
+        notThrown(NotSupportedException)
+        !RoddyBamFile.get(bamFile.id)
+        !MergingWorkPackage.get(bamFile.workPackage.id)
+        WorkflowArtefact.get(seqTrackArtefact.id)
+    }
+
+    void "deleteAllProcessingInformationAndResultOfOneSeqTrack, falls back and leaves workflow metadata untouched when an analysis is not in the graph"() {
+        given:
+        SnvCallingInstance analysis = DomainFactory.createSnvInstanceWithRoddyBamFiles()
+        RoddyBamFile bamFile = analysis.sampleType1BamFile as RoddyBamFile
+        bamFile.workPackage.bamFileInProjectFolder = bamFile
+        bamFile.workPackage.save(flush: true)
+        SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
+
+        // the bam file is wired to the graph, but the analysis has no workflowArtefact -- partially migrated data
+        WorkflowRun alignmentRun = wireSeqTrackToBamFile(seqTrack, bamFile)
+        Long bamArtefactId = bamFile.workflowArtefact.id
+
+        AnalysisDeletionService originalAnalysisDeletionService = deletionService.analysisDeletionService
+        deletionService.analysisDeletionService = Mock(AnalysisDeletionService) {
+            1 * deleteInstance(analysis) >> {
+                analysis.delete(flush: true)
+                []
+            }
+            _ * deleteSamplePairsWithoutAnalysisInstances(_) >> { arguments ->
+                (arguments[0] as List<SamplePair>)*.delete(flush: true)
+                []
+            }
+        }
+
+        when:
+        deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack)
+
+        then:
+        !RoddyBamFile.get(bamFile.id)
+        WorkflowRun.get(alignmentRun.id)
+        WorkflowArtefact.get(bamArtefactId)
+
+        cleanup:
+        deletionService.analysisDeletionService = originalAnalysisDeletionService
+    }
+
+    void "deleteAllProcessingInformationAndResultOfOneSeqTrack, aborts when a run produces both a deletable bam and a retained artefact"() {
+        given:
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
+        bamFile.workPackage.bamFileInProjectFolder = bamFile
+        bamFile.workPackage.save(flush: true)
+        SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
+
+        WorkflowArtefact seqTrackArtefact = createWorkflowArtefact()
+        seqTrack.workflowArtefact = seqTrackArtefact
+        seqTrack.save(flush: true)
+
+        WorkflowRun alignmentRun = createWorkflowRun()
+        createWorkflowRunInputArtefact(workflowRun: alignmentRun, workflowArtefact: seqTrackArtefact)
+        WorkflowArtefact bamArtefact = createWorkflowArtefact(producedBy: alignmentRun)
+        bamFile.workflowArtefact = bamArtefact
+        bamFile.save(flush: true)
+        WorkflowArtefact retainedArtefact = createWorkflowArtefact(producedBy: alignmentRun)
+        FastqcProcessedFile fastqcProcessedFile = createFastqcProcessedFile(workflowArtefact: retainedArtefact)
+
+        when:
+        deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack)
+
+        then:
+        NotSupportedException e = thrown(NotSupportedException)
+        e.message.contains("retained")
+        RoddyBamFile.get(bamFile.id)
+        FastqcProcessedFile.get(fastqcProcessedFile.id)
     }
 
     void "testDeleteSeqTrack"() {
@@ -1196,6 +1596,7 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
                 ]),
                 seqTracks  : seqTracks,
         ])
+        wireSeqTrackToBamFile(seqTracks, roddyBamFile)
         CreateFileHelper.createFile(panCancerLinkFileService.getBamFile(roddyBamFile))
         return roddyBamFile
     }
@@ -1209,6 +1610,7 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
                 ]),
                 seqTracks  : seqTracks,
         ])
+        wireSeqTrackToBamFile(seqTracks, singleCellBamFile)
         CreateFileHelper.createFile(cellRangerWorkFileService.getDirectoryPath(singleCellBamFile).resolve(singleCellBamFile.bamFileName))
         return singleCellBamFile
     }
@@ -1234,6 +1636,7 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
 
         dataBaseSetupForBamFiles(bamFile)
         createFastqFiles(bamFile)
+        wireSeqTrackToBamFile(bamFile.containedSeqTracks as List, bamFile)
 
         File finalBamFile = bamFile.baseDirectory
         CreateFileHelper.createFile(new File(finalBamFile, "test.bam"))
@@ -1282,10 +1685,14 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
         AbstractBamFile tumorBamFiles = snvCallingInstance.sampleType1BamFile
         dataBaseSetupForBamFiles(tumorBamFiles)
         createFastqFiles(tumorBamFiles)
+        wireSeqTrackToBamFile(tumorBamFiles.containedSeqTracks as List, tumorBamFiles)
 
         AbstractBamFile controlBamFiles = snvCallingInstance.sampleType2BamFile
         dataBaseSetupForBamFiles(controlBamFiles)
         createFastqFiles(controlBamFiles)
+        wireSeqTrackToBamFile(controlBamFiles.containedSeqTracks as List, controlBamFiles)
+
+        wireBamFilesToAnalysis(snvCallingInstance, [tumorBamFiles, controlBamFiles])
 
         File snvFolder = fileService.toFile(snvCallingService.getWorkDirectory(snvCallingInstance))
         CreateFileHelper.createFile(new File(snvFolder, "test.vcf"))
@@ -1418,6 +1825,7 @@ rm -rf $seqDir/$seqTypeDirName/${individual.pid}
                 identifier: 1,
                 seqTracks: [lane1, lane2] as Set
         ], RoddyBamFile)
+        wireSeqTrackToBamFile([lane1, lane2], withdrawnBam)
 
         RoddyBamFile activeBam = createRoddyBamFile([
                 workPackage: mwp,

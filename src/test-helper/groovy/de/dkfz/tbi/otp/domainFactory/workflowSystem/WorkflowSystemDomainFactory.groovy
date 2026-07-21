@@ -25,11 +25,13 @@ import io.swagger.client.wes.model.State
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.filestore.BaseFolder
 import de.dkfz.tbi.otp.filestore.WorkFolder
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.workflow.restartHandler.WorkflowJobErrorDefinition
 import de.dkfz.tbi.otp.workflowExecution.*
@@ -145,6 +147,23 @@ trait WorkflowSystemDomainFactory implements DomainFactoryCore, TaxonomyFactory 
                 role            : "role_${nextId}",
                 workflowArtefact: { createWorkflowArtefact() },
         ], properties)
+    }
+
+    WorkflowRun wireSeqTrackToBamFile(SeqTrack seqTrack, AbstractBamFile bamFile) {
+        return wireSeqTrackToBamFile([seqTrack], bamFile)
+    }
+
+    WorkflowRun wireSeqTrackToBamFile(List<SeqTrack> seqTracks, AbstractBamFile bamFile) {
+        WorkflowRun alignmentRun = createWorkflowRun()
+        seqTracks.each { SeqTrack seqTrack ->
+            WorkflowArtefact seqTrackArtefact = createWorkflowArtefact()
+            seqTrack.workflowArtefact = seqTrackArtefact
+            seqTrack.save(flush: true)
+            createWorkflowRunInputArtefact(workflowRun: alignmentRun, workflowArtefact: seqTrackArtefact)
+        }
+        bamFile.workflowArtefact = createWorkflowArtefact(producedBy: alignmentRun, artefactType: ArtefactType.BAM)
+        bamFile.save(flush: true)
+        return alignmentRun
     }
 
     WorkflowJobErrorDefinition createWorkflowJobErrorDefinition(Map properties = [:]) {

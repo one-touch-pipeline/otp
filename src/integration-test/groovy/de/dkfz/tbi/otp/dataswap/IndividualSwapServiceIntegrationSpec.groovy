@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataswap.parameters.IndividualSwapParameters
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactoryInstance
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
@@ -52,7 +53,7 @@ import java.nio.file.Files
 
 @Rollback
 @Integration
-class IndividualSwapServiceIntegrationSpec extends Specification implements UserAndRoles, IsRoddy {
+class IndividualSwapServiceIntegrationSpec extends Specification implements UserAndRoles, IsRoddy, WorkflowSystemDomainFactory {
 
     IndividualSwapService individualSwapService
     TestConfigService configService
@@ -93,6 +94,7 @@ class IndividualSwapServiceIntegrationSpec extends Specification implements User
         Project newProject = DomainFactory.createProject()
         String scriptName = "TEST-MOVE-INDIVIDUAL"
         SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
+        wireSeqTrackToBamFile(seqTrack, bamFile)
         Map<String,String> fastqFileLinks = [:]
         Map<String,String> fastqFilePaths = [:]
         RawSequenceFile.findAllBySeqTrack(seqTrack).each {

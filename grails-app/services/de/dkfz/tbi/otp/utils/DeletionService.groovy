@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.utils
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.Canonical
 import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.CommentService
@@ -47,11 +48,12 @@ import de.dkfz.tbi.otp.project.dta.DataTransferAgreement
 import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
 import de.dkfz.tbi.otp.utils.exceptions.FileNotFoundException
 import de.dkfz.tbi.otp.utils.exceptions.NotSupportedException
-import de.dkfz.tbi.otp.workflowExecution.ExternalWorkflowConfigSelector
+import de.dkfz.tbi.otp.workflowExecution.*
 
 import java.nio.file.Files
 import java.nio.file.Path
 
+import static org.hibernate.proxy.HibernateProxyHelper.getClassWithoutInitializingProxy
 import static org.springframework.util.Assert.notNull
 
 /**
@@ -60,6 +62,10 @@ import static org.springframework.util.Assert.notNull
 @SuppressWarnings('Println')
 @Transactional
 class DeletionService {
+
+    // Conservative batch size for IN-list queries while walking the artefact graph.
+    // Not the JDBC limit (65,535, see WorkflowRunService#getCriteria) -- just a safe chunk size.
+    static final int ARTEFACT_QUERY_CHUNK_SIZE = 1000
 
     AbstractBamFileService abstractBamFileService
     AnalysisDeletionService analysisDeletionService
@@ -362,91 +368,38 @@ class DeletionService {
             seqTrackService.throwExceptionInCaseOfExternallyProcessedBamFileIsAttached([seqTrack])
         }
 
-        // for RoddyBamFiles
-        MergingWorkPackage mergingWorkPackage = null
-        List<RoddyBamFile> bamFiles = RoddyBamFile.createCriteria().listDistinct {
+        // Verification set: the processing results this method is responsible for deleting, found via the legacy
+        // hardcoded queries. It does not drive the graph deletion order -- it is the completeness cross-check deciding
+        // whether the graph path can be taken, and the input of the legacy fallback when it cannot.
+        List<RoddyBamFile> roddyBamFiles = RoddyBamFile.createCriteria().listDistinct {
             seqTracks {
                 eq("id", seqTrack.id)
             }
-            order("id", "desc")
         }
-
-        if (bamFiles) {
-            List<BamFilePairAnalysis> analyses = BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(bamFiles, bamFiles)
-            List<SamplePair> samplePairs = SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(
-                    bamFiles.first().workPackage,
-                    bamFiles.first().workPackage)
-
-            analyses.each {
-                dirsToDelete.addAll(analysisDeletionService.deleteInstance(it).collect {
-                    new File(it.toString())
-                })
-                deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(it.id.toString(), it.class.name))
-            }
-            dirsToDelete.addAll(analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(samplePairs))
-        }
-
-        // delete bam files
-        bamFiles.each { RoddyBamFile bamFile ->
-            mergingWorkPackage = bamFile.mergingWorkPackage
-            mergingWorkPackage.bamFileInProjectFolder = null
-            mergingWorkPackage.save(flush: true, validate: false) // since object is deleted later, no validation is necessary
-            deleteQualityAssessmentInfoForAbstractBamFile(bamFile)
-            deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(bamFile.id.toString(), bamFile.class.name))
-            Path baseDir = panCancerLinkFileService.getDirectoryPath(bamFile)
-            if (Files.exists(baseDir) && bamFile.isMostRecentBamFile()) {
-                Files.list(baseDir).findAll {
-                    it.fileName.toString() != ExternallyProcessedBamFile.NON_OTP
-                }.each {
-                    dirsToDelete << new File(it.toString())
-                }
-            }
-            if (bamFile.workflowArtefact?.producedBy?.workFolder) {
-                Path workFolder = filestoreService.getWorkFolderPath(bamFile.workflowArtefact.producedBy)
-                if (Files.exists(workFolder)) {
-                    dirsToDelete << new File(workFolder.toString())
-                }
-            }
-            bamFile.delete(flush: true)
-            // The MergingWorkPackage can only be deleted if all corresponding RoddyBamFiles are removed already
-            if (!RoddyBamFile.findAllByWorkPackage(mergingWorkPackage)) {
-                mergingWorkPackage.delete(flush: true)
-            }
-        }
-
-        // for SingleCellBamFiles
         List<SingleCellBamFile> singleCellBamFiles = SingleCellBamFile.createCriteria().list {
             seqTracks {
                 eq("id", seqTrack.id)
             }
-            order("id", "desc")
+        }
+        List<AbstractBamFile> verificationBamFiles = (roddyBamFiles + singleCellBamFiles) as List<AbstractBamFile>
+        List<BamFilePairAnalysis> verificationAnalyses = verificationBamFiles ?
+                BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(verificationBamFiles, verificationBamFiles) : []
+        List<Artefact> verificationSet = (verificationBamFiles + verificationAnalyses) as List<Artefact>
+
+        // Graph-ordered downstream artefacts (consumers before producers), filtered to the ones this method deletes.
+        ArtefactGraph graph = collectArtefactGraph(seqTrack)
+        List<ArtefactDeletionEntry> deletableEntries = graph.entriesInDeletionOrder.findAll {
+            isDeletableArtefact(it.concreteArtefact)
         }
 
-        CellRangerMergingWorkPackage crmwp = null
-        singleCellBamFiles.each { SingleCellBamFile bamFile ->
-            crmwp = bamFile.mergingWorkPackage
-            crmwp.bamFileInProjectFolder = null
-            crmwp.save(flush: true, validate: false)
-            deleteQualityAssessmentInfoForAbstractBamFile(bamFile)
-            deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(bamFile.id.toString(), bamFile.class.name))
-            Path baseDirectory = abstractBamFileService.getBaseDirectory(bamFile)
-            if (Files.exists(baseDirectory)) {
-                Files.list(baseDirectory).findAll {
-                    it.fileName.toString() != ExternallyProcessedBamFile.NON_OTP
-                }.each {
-                    dirsToDelete << new File(it.toString())
-                }
-            }
-            if (bamFile.workflowArtefact?.producedBy?.workFolder) {
-                Path workFolder = filestoreService.getWorkFolderPath(bamFile.workflowArtefact.producedBy)
-                if (Files.exists(workFolder)) {
-                    dirsToDelete << new File(workFolder.toString())
-                }
-            }
-            bamFile.delete(flush: true)
-            if (!SingleCellBamFile.findAllByWorkPackage(crmwp)) {
-                crmwp.delete(flush: true)
-            }
+        if (graphCoversVerificationSet(verificationSet, deletableEntries)) {
+            // Abort before deleting anything if cleaning up the graph metadata would also remove a retained artefact.
+            assertGraphDeletionTouchesNoRetainedArtefact(graph, deletableEntries)
+            dirsToDelete.addAll(deleteProcessingResultsInGraphOrder(deletableEntries))
+        } else {
+            // Legacy data whose results are missing a workflowArtefact cannot be deleted in graph order. Fall back to
+            // the pre-graph deletion flow over the verification set; any partial workflow metadata stays untouched.
+            dirsToDelete.addAll(deleteConcreteArtefacts(verificationAnalyses, verificationBamFiles))
         }
 
         List<MergingWorkPackage> mergingWorkPackages = MergingWorkPackage.createCriteria().list {
@@ -465,6 +418,296 @@ class DeletionService {
         }
 
         return dirsToDelete
+    }
+
+    /**
+     * Whether the given artefact is one this method deletes: a processing result (analysis or bam file). Metadata-only
+     * graph entries have no concrete object, and any other concrete type is left untouched here -- e.g. FastQC and raw
+     * sequence files are removed separately by deleteSeqTrack via deleteRawSequenceFile.
+     */
+    private static boolean isDeletableArtefact(Artefact artefact) {
+        // getClassWithoutInitializingProxy resolves the artefact's real domain class. It is used for every type check
+        // and class-name lookup in this service, because instanceof and artefact.class both misreport a Hibernate
+        // proxy's subtype and would otherwise misclassify a proxied artefact.
+        Class<?> artefactClass = getClassWithoutInitializingProxy(artefact)
+        return BamFilePairAnalysis.isAssignableFrom(artefactClass) ||
+                RoddyBamFile.isAssignableFrom(artefactClass) ||
+                SingleCellBamFile.isAssignableFrom(artefactClass)
+    }
+
+    /**
+     * Batch-fetches the output {@link WorkflowArtefact}s of the given runs in one query per chunk, instead of the
+     * N+1 pattern of reading each run's {@code outputArtefacts} (itself a per-run query) inside a loop.
+     */
+    @CompileDynamic
+    private static List<WorkflowArtefact> findOutputArtefactsOf(List<WorkflowRun> runs) {
+        return runs.collate(ARTEFACT_QUERY_CHUNK_SIZE).collectMany { List<WorkflowRun> chunk ->
+            WorkflowArtefact.findAllByProducedByInList(chunk)
+        }
+    }
+
+    /**
+     * Whether the graph traversal reached every processing result the legacy queries found. False for legacy data
+     * whose {@code workflowArtefact} is null: the result exists but cannot be deleted in graph order.
+     */
+    @CompileDynamic
+    private static boolean graphCoversVerificationSet(List<Artefact> verificationSet, List<ArtefactDeletionEntry> deletableEntries) {
+        Set<String> reachableKeys = deletableEntries.collect { artefactKey(it.concreteArtefact) } as Set<String>
+        return verificationSet.every { reachableKeys.contains(artefactKey(it)) }
+    }
+
+    /**
+     * Deletes the given concrete processing results: analyses first (they consume bam files), then orphaned
+     * SamplePairs, then the bam files, so a bam file's MergingWorkPackage can be removed without a SamplePair or
+     * analysis still referencing it. Shared by the graph-ordered path and the legacy fallback.
+     */
+    @CompileDynamic
+    private List<File> deleteConcreteArtefacts(List<Artefact> analyses, List<Artefact> bamFiles) {
+        List<File> dirsToDelete = []
+        analyses.each { Artefact analysis ->
+            dirsToDelete.addAll(deleteConcreteArtefact(analysis))
+        }
+        List<SamplePair> samplePairs = bamFiles.findAll { RoddyBamFile.isAssignableFrom(getClassWithoutInitializingProxy(it)) }.collectMany {
+            SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(it.workPackage, it.workPackage)
+        }.unique { it.id }
+        dirsToDelete.addAll(analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(samplePairs))
+        bamFiles.each { Artefact bamFile ->
+            dirsToDelete.addAll(deleteConcreteArtefact(bamFile))
+        }
+        return dirsToDelete
+    }
+
+    /**
+     * Deletes the concrete objects of the given entries in graph order (consumers before producers -- analyses always
+     * precede the bam files they consume), then cleans the now-orphaned workflow graph metadata for exactly the
+     * deleted artefacts.
+     */
+    @CompileDynamic
+    private List<File> deleteProcessingResultsInGraphOrder(List<ArtefactDeletionEntry> deletableEntries) {
+        List<ArtefactDeletionEntry> analysisEntries = deletableEntries.findAll {
+            BamFilePairAnalysis.isAssignableFrom(getClassWithoutInitializingProxy(it.concreteArtefact))
+        }
+        List<ArtefactDeletionEntry> bamEntries = deletableEntries - analysisEntries
+        List<File> dirsToDelete = deleteConcreteArtefacts(analysisEntries*.concreteArtefact, bamEntries*.concreteArtefact)
+
+        // deleteWorkflowRun recurses into downstream consumers, so skip runs a previous call already removed.
+        deletableEntries.collect { it.workflowArtefact.producedBy }.findAll { it }.unique { it.id }.each { WorkflowRun run ->
+            if (WorkflowRun.exists(run.id)) {
+                workflowDeletionService.deleteWorkflowRun(run)
+            }
+        }
+        return dirsToDelete
+    }
+
+    /**
+     * Aborts if deleting the graph metadata of the deletable artefacts would also remove a retained artefact (one this
+     * method must not delete, e.g. FastQC). {@link WorkflowDeletionService#deleteWorkflowRun} recurses from each
+     * producing run into co-outputs and downstream consumers; if any reached artefact still has a concrete object that
+     * is not deletable, that recursion would trip the assertion in {@code deleteWorkflowArtefact}. This replays that
+     * reachability on the already-traversed graph, without further database queries.
+     */
+    @CompileDynamic
+    private static void assertGraphDeletionTouchesNoRetainedArtefact(ArtefactGraph graph, List<ArtefactDeletionEntry> deletableEntries) {
+        Set<Long> deletedRunIds = deletableEntries.collect { it.workflowArtefact.producedBy?.id }.findAll { it } as Set<Long>
+        Map<Long, ArtefactDeletionEntry> entryByArtefactId = graph.entriesInDeletionOrder.collectEntries {
+            [(it.workflowArtefact.id): it]
+        }
+
+        // Seed with all outputs of the runs whose metadata will be deleted, then follow successor edges downstream.
+        Set<Long> touchedArtefactIds = graph.entriesInDeletionOrder.findAll {
+            it.workflowArtefact.producedBy?.id in deletedRunIds
+        }*.workflowArtefact*.id as Set<Long>
+        List<Long> frontier = touchedArtefactIds as List<Long>
+        while (frontier) {
+            frontier = frontier.collectMany { Long artefactId ->
+                graph.successorArtefactIdsByArtefactId[artefactId] ?: []
+            }.findAll { Long successorId ->
+                touchedArtefactIds.add(successorId)
+            }
+        }
+
+        List<Artefact> retained = touchedArtefactIds.collect { entryByArtefactId[it].concreteArtefact }.findAll {
+            it && !isDeletableArtefact(it)
+        }
+        if (retained) {
+            throw new NotSupportedException("Deleting this seqTrack's processing results would also remove retained " +
+                    "artefacts still present in the workflow graph: ${retained.unique { it.id }.join(', ')}")
+        }
+    }
+
+    @CompileDynamic
+    private static String artefactKey(Artefact artefact) {
+        // Keys the artefact families this method deletes, for the coverage cross-check only. The type prefixes the id
+        // because ids are unique per table, so a RoddyBamFile and a SingleCellBamFile (or an analysis) sharing an id
+        // must not collide.
+        Class<?> artefactClass = getClassWithoutInitializingProxy(artefact)
+        if (BamFilePairAnalysis.isAssignableFrom(artefactClass)) {
+            return "analysis:${artefact.id}"
+        }
+        if (RoddyBamFile.isAssignableFrom(artefactClass)) {
+            return "roddyBam:${artefact.id}"
+        }
+        if (SingleCellBamFile.isAssignableFrom(artefactClass)) {
+            return "singleCellBam:${artefact.id}"
+        }
+        throw new NotSupportedException("Cannot key artefact of unsupported type: ${artefact}")
+    }
+
+    @CompileDynamic
+    private List<File> deleteConcreteArtefact(Artefact artefact) {
+        Class<?> artefactClass = getClassWithoutInitializingProxy(artefact)
+        if (BamFilePairAnalysis.isAssignableFrom(artefactClass)) {
+            List<File> dirs = analysisDeletionService.deleteInstance(artefact).collect { new File(it.toString()) }
+            deleteProcessParametersForArtefact(artefact)
+            return dirs
+        }
+        if (RoddyBamFile.isAssignableFrom(artefactClass)) {
+            deleteProcessParametersForArtefact(artefact)
+            return deleteRoddyBamFile(artefact)
+        }
+        if (SingleCellBamFile.isAssignableFrom(artefactClass)) {
+            deleteProcessParametersForArtefact(artefact)
+            return deleteSingleCellBamFile(artefact)
+        }
+        throw new NotSupportedException("Cannot delete artefact of unsupported type: ${artefact}")
+    }
+
+    @CompileDynamic
+    private void deleteProcessParametersForArtefact(Artefact artefact) {
+        deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(artefact.id.toString(), getClassWithoutInitializingProxy(artefact).name))
+    }
+
+    @CompileDynamic
+    private List<File> deleteRoddyBamFile(RoddyBamFile bamFile) {
+        List<File> dirs = []
+        MergingWorkPackage mergingWorkPackage = bamFile.mergingWorkPackage
+        mergingWorkPackage.bamFileInProjectFolder = null
+        mergingWorkPackage.save(flush: true, validate: false) // since object is deleted later, no validation is necessary
+        deleteQualityAssessmentInfoForAbstractBamFile(bamFile)
+        Path baseDir = panCancerLinkFileService.getDirectoryPath(bamFile)
+        if (Files.exists(baseDir) && bamFile.isMostRecentBamFile()) {
+            Files.list(baseDir).findAll {
+                it.fileName.toString() != ExternallyProcessedBamFile.NON_OTP
+            }.each {
+                dirs << new File(it.toString())
+            }
+        }
+        if (bamFile.workflowArtefact?.producedBy?.workFolder) {
+            Path workFolder = filestoreService.getWorkFolderPath(bamFile.workflowArtefact.producedBy)
+            if (Files.exists(workFolder)) {
+                dirs << new File(workFolder.toString())
+            }
+        }
+        bamFile.delete(flush: true)
+        // The MergingWorkPackage can only be deleted if all corresponding RoddyBamFiles are removed already
+        if (!RoddyBamFile.findAllByWorkPackage(mergingWorkPackage)) {
+            mergingWorkPackage.delete(flush: true)
+        }
+        return dirs
+    }
+
+    @CompileDynamic
+    private List<File> deleteSingleCellBamFile(SingleCellBamFile bamFile) {
+        List<File> dirs = []
+        CellRangerMergingWorkPackage crmwp = bamFile.mergingWorkPackage
+        crmwp.bamFileInProjectFolder = null
+        crmwp.save(flush: true, validate: false)
+        deleteQualityAssessmentInfoForAbstractBamFile(bamFile)
+        Path baseDirectory = abstractBamFileService.getBaseDirectory(bamFile)
+        if (Files.exists(baseDirectory)) {
+            Files.list(baseDirectory).findAll {
+                it.fileName.toString() != ExternallyProcessedBamFile.NON_OTP
+            }.each {
+                dirs << new File(it.toString())
+            }
+        }
+        if (bamFile.workflowArtefact?.producedBy?.workFolder) {
+            Path workFolder = filestoreService.getWorkFolderPath(bamFile.workflowArtefact.producedBy)
+            if (Files.exists(workFolder)) {
+                dirs << new File(workFolder.toString())
+            }
+        }
+        bamFile.delete(flush: true)
+        if (!SingleCellBamFile.findAllByWorkPackage(crmwp)) {
+            crmwp.delete(flush: true)
+        }
+        return dirs
+    }
+
+    /**
+     * Walks the workflow graph downstream of the given SeqTrack's artefact and returns one entry
+     * per reachable artefact, ordered so that consumers appear before the producers they consume
+     * (e.g. an analysis before the bam file it was computed from). Entries are deduped by
+     * artefact. The SeqTrack's own artefact is never included. Returns an empty list if the
+     * SeqTrack has no workflow artefact.
+     */
+    @CompileDynamic
+    List<ArtefactDeletionEntry> collectArtefactsInDeletionOrder(SeqTrack seqTrack) {
+        return collectArtefactGraph(seqTrack).entriesInDeletionOrder
+    }
+
+    /**
+     * Same traversal as {@link #collectArtefactsInDeletionOrder}, additionally exposing the successor edges
+     * (consumed artefact to the outputs of its consuming runs) so callers can replay run-deletion reachability
+     * in memory.
+     */
+    @CompileDynamic
+    private ArtefactGraph collectArtefactGraph(SeqTrack seqTrack) {
+        WorkflowArtefact rootArtefact = seqTrack.workflowArtefact
+        if (!rootArtefact) {
+            return new ArtefactGraph([], [:])
+        }
+
+        Map<Long, WorkflowArtefact> discoveredArtefactsById = [:]
+        Map<Long, List<Long>> successorIdsByArtefactId = [:]
+        Set<Long> visitedArtefactIds = [rootArtefact.id] as Set
+        List<WorkflowArtefact> frontier = [rootArtefact]
+
+        while (frontier) {
+            List<WorkflowArtefact> nextFrontier = []
+            frontier.collate(ARTEFACT_QUERY_CHUNK_SIZE).each { List<WorkflowArtefact> chunk ->
+                List<WorkflowRunInputArtefact> inputArtefacts = WorkflowRunInputArtefact.findAllByWorkflowArtefactInList(chunk)
+                List<WorkflowRun> consumingRuns = inputArtefacts*.workflowRun.unique { it.id }
+                Map<Long, List<WorkflowArtefact>> producedArtefactsByRunId = findOutputArtefactsOf(consumingRuns).groupBy { it.producedBy.id }
+
+                inputArtefacts.each { WorkflowRunInputArtefact inputArtefact ->
+                    Long consumedArtefactId = inputArtefact.workflowArtefact.id
+                    (producedArtefactsByRunId[inputArtefact.workflowRun.id] ?: []).each { WorkflowArtefact producedArtefact ->
+                        successorIdsByArtefactId.computeIfAbsent(consumedArtefactId) { [] } << producedArtefact.id
+                        if (visitedArtefactIds.add(producedArtefact.id)) {
+                            discoveredArtefactsById[producedArtefact.id] = producedArtefact
+                            nextFrontier << producedArtefact
+                        }
+                    }
+                }
+            }
+            frontier = nextFrontier
+        }
+
+        // Resolve all concrete artefacts in bulk: WorkflowArtefact.getArtefact() runs one polymorphic query per
+        // call, which would otherwise fire once per discovered artefact inside the emit recursion below.
+        Map<Long, Artefact> concreteArtefactsByWorkflowArtefactId = discoveredArtefactsById.values()
+                .collate(ARTEFACT_QUERY_CHUNK_SIZE)
+                .collectMany { List<WorkflowArtefact> chunk ->
+                    WorkflowArtefact.executeQuery(
+                            "FROM de.dkfz.tbi.otp.workflowExecution.Artefact WHERE workflowArtefact IN (:chunk)", [chunk: chunk])
+                }
+                .collectEntries { [(it.workflowArtefact.id): it] }
+
+        List<ArtefactDeletionEntry> orderedEntries = []
+        Set<Long> emittedArtefactIds = [] as Set
+        Closure emitDescendantsFirst
+        emitDescendantsFirst = { Long artefactId ->
+            (successorIdsByArtefactId[artefactId] ?: []).each { Long successorId ->
+                if (emittedArtefactIds.add(successorId)) {
+                    emitDescendantsFirst(successorId)
+                    orderedEntries << new ArtefactDeletionEntry(discoveredArtefactsById[successorId], concreteArtefactsByWorkflowArtefactId[successorId])
+                }
+            }
+        }
+        emitDescendantsFirst(rootArtefact.id)
+
+        return new ArtefactGraph(orderedEntries, successorIdsByArtefactId)
     }
 
     @CompileDynamic
@@ -777,4 +1020,16 @@ class DeletionService {
             }
         }
     }
+}
+
+@Canonical
+class ArtefactDeletionEntry {
+    WorkflowArtefact workflowArtefact
+    Artefact concreteArtefact
+}
+
+@Canonical
+class ArtefactGraph {
+    List<ArtefactDeletionEntry> entriesInDeletionOrder
+    Map<Long, List<Long>> successorArtefactIdsByArtefactId
 }

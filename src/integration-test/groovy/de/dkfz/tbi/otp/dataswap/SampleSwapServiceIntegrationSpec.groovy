@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataswap.parameters.SampleSwapParameters
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactoryInstance
+import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataWorkFileService
@@ -49,7 +50,7 @@ import java.nio.file.Path
 
 @Rollback
 @Integration
-class SampleSwapServiceIntegrationSpec extends Specification implements UserAndRoles, IsRoddy {
+class SampleSwapServiceIntegrationSpec extends Specification implements UserAndRoles, IsRoddy, WorkflowSystemDomainFactory {
 
     SampleSwapService sampleSwapService
     TestConfigService configService
@@ -90,6 +91,7 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
         individual.species = null
         individual.save(flush: true)
         SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
+        wireSeqTrackToBamFile(seqTrack, bamFile)
         seqTrack.sample.mixedInSpecies = [
                 TaxonomyFactoryInstance.INSTANCE.createSpeciesWithStrain(),
                 TaxonomyFactoryInstance.INSTANCE.createSpeciesWithStrain(),

@@ -173,7 +173,7 @@ class TestConfigService extends ConfigService {
     }
 
     static String getPrimaryGroup() {
-        return LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("id --group --name").trim()
+        return LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("id -gn").trim()
     }
 
     /**
