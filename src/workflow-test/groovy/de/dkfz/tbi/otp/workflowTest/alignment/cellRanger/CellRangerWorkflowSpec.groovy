@@ -25,11 +25,13 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerLinkFileService
 import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.workflow.alignment.cellRanger.CellRangerWorkflow
 import de.dkfz.tbi.otp.workflowExecution.OtpWorkflow
@@ -115,6 +117,14 @@ class CellRangerWorkflowSpec extends AbstractAlignmentWorkflowSpec implements Re
     }
 
     @Override
+    protected void checkWorkPackageState() {
+        super.checkWorkPackageState()
+        CellRangerMergingWorkPackage workPackage = CollectionUtils.exactlyOneElement(CellRangerMergingWorkPackage.list())
+        workPackage.refresh()
+        assert workPackage.status == CellRangerMergingWorkPackage.Status.FINAL
+    }
+
+    @Override
     protected void assertBaseFileSystemState(AbstractBamFile bamFile) {
         SingleCellBamFile scBamFile = bamFile as SingleCellBamFile
         cellRangerLinkFileService.getLinkedResultFiles(scBamFile).each {
@@ -124,10 +134,10 @@ class CellRangerWorkflowSpec extends AbstractAlignmentWorkflowSpec implements Re
     }
 
     @Override
-    protected void checkQC(AbstractBamFile bamFile) { }
+    protected void checkQC(AbstractBamFile bamFile) {}
 
     @Override
-    protected void checkBamFileConfig(AbstractBamFile bamFile) { }
+    protected void checkBamFileConfig(AbstractBamFile bamFile) {}
 
     protected void setUpFilesVariables() {
         testFastqFiles = [
@@ -148,9 +158,9 @@ class CellRangerWorkflowSpec extends AbstractAlignmentWorkflowSpec implements Re
 
         ToolName toolName = createToolName(name: 'CELL_RANGER', type: ToolName.Type.SINGLE_CELL, path: "cellranger")
         referenceGenomeIndex = createReferenceGenomeIndex(
-                toolName        : toolName,
-                path            : "1.2.0",
-                referenceGenome : referenceGenome,
+                toolName: toolName,
+                path: "1.2.0",
+                referenceGenome: referenceGenome,
                 indexToolVersion: "1.2.0",
         )
         log.info("Create ReferenceGenomeIndex ${referenceGenomeIndex}")

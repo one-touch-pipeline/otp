@@ -497,7 +497,7 @@ class AlignmentArtefactService {
             ]) as List<List<?>>).groupBy {
                 new AlignmentWorkPackageGroup(it[INDEX_0] as Sample, it[INDEX_1] as SeqType, it[INDEX_2] as AntibodyTarget)
             }.collectEntries {
-                [(it.key): it.value.collect { it[INDEX_3] as MergingWorkPackage }]
+                [(it.key): it.value.collect { it[INDEX_3] as MergingWorkPackage }.toSet()]
             } as Map<AlignmentWorkPackageGroup, Set<MergingWorkPackage>>
         }
     }

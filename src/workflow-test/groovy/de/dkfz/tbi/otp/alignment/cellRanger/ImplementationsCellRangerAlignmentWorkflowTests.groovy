@@ -21,6 +21,9 @@
  */
 package de.dkfz.tbi.otp.alignment.cellRanger
 
+import spock.lang.Ignore
+
+@Ignore
 class CellRangerAlignmentOneLaneExpectedCellsWorkflowTests extends AbstractCellRangerAlignmentWorkflowTests {
 
     @Override
@@ -29,6 +32,7 @@ class CellRangerAlignmentOneLaneExpectedCellsWorkflowTests extends AbstractCellR
     }
 }
 
+@Ignore
 class CellRangerAlignmentOneLaneEnforcedCellsWorkflowTests extends AbstractCellRangerAlignmentWorkflowTests {
 
     @Override
@@ -37,6 +41,7 @@ class CellRangerAlignmentOneLaneEnforcedCellsWorkflowTests extends AbstractCellR
     }
 }
 
+@Ignore
 class CellRangerAlignmentOneLaneNeitherCellsWorkflowTests extends AbstractCellRangerAlignmentWorkflowTests {
 
     @Override
@@ -45,6 +50,7 @@ class CellRangerAlignmentOneLaneNeitherCellsWorkflowTests extends AbstractCellRa
     }
 }
 
+@Ignore
 class CellRangerAlignmentTwoLanesExpectedCellsWorkflowTests extends AbstractCellRangerAlignmentWorkflowTests {
 
     @Override
@@ -53,6 +59,7 @@ class CellRangerAlignmentTwoLanesExpectedCellsWorkflowTests extends AbstractCell
     }
 }
 
+@Ignore
 class CellRangerAlignmentTwoLanesEnforcedCellsWorkflowTests extends AbstractCellRangerAlignmentWorkflowTests {
 
     @Override
@@ -61,6 +68,7 @@ class CellRangerAlignmentTwoLanesEnforcedCellsWorkflowTests extends AbstractCell
     }
 }
 
+@Ignore
 class CellRangerAlignmentTwoLanesNeitherCellsWorkflowTests extends AbstractCellRangerAlignmentWorkflowTests {
 
     @Override

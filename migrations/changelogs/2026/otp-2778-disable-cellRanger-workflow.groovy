@@ -19,23 +19,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.analysis.pair.roddy.aceseq
 
-import spock.lang.Ignore
-
-import de.dkfz.tbi.otp.analysis.pair.bamfiles.SeqTypeAndInputBamFilesHCC1187Div8
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.SeqTypeService
-
-@Ignore
-class WgsAceseqWithRoddyBamFileWorkflowTests extends AbstractAceseqWorkflowTests implements SeqTypeAndInputBamFilesHCC1187Div8 {
-
-    void setupSpec() {
-        ignoreExternalBamFileTest = true
-    }
-
-    @Override
-    SeqType seqTypeToUse() {
-        return SeqTypeService.wholeGenomePairedSeqType
+databaseChangeLog = {
+    changeSet(author: "-", id: "otp-2778") {
+        sql("""
+            UPDATE job_execution_plan
+            SET enabled = false
+            WHERE name = 'CellRangerWorkflow';
+        """)
     }
 }

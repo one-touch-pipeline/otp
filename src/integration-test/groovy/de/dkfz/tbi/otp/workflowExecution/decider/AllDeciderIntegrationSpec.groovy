@@ -23,23 +23,23 @@ package de.dkfz.tbi.otp.workflowExecution.decider
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
-import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.FastqcWorkflowDomainFactory
+import de.dkfz.tbi.otp.workflow.alignment.cellRanger.CellRangerWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.roddy.rna.RnaAlignmentWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.roddy.wgbs.WgbsWorkflow
-import de.dkfz.tbi.otp.workflow.alignment.cellRanger.CellRangerWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.aceseq.AceseqWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.indel.IndelWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.snv.SnvWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.sophia.SophiaWorkflow
 import de.dkfz.tbi.otp.workflowExecution.*
+import de.dkfz.tbi.otp.workflowExecution.decider.analysis.*
 
 @Rollback
 @Integration
-class AllDeciderIntegrationSpec extends Specification implements ServiceUnitTest<AllDecider>, FastqcWorkflowDomainFactory {
+class AllDeciderIntegrationSpec extends Specification implements FastqcWorkflowDomainFactory {
 
     void "test decide for Decider"() {
         given:

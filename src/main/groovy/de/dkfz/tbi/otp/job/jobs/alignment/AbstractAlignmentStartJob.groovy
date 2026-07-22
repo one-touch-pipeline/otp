@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.job.jobs.alignment
 
 import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
-import org.springframework.scheduling.annotation.Scheduled
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.jobs.RestartableStartJob
@@ -41,7 +40,7 @@ import de.dkfz.tbi.otp.workflowExecution.ProcessingPriority
 abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements RestartableStartJob {
 
     @Override
-    @Scheduled(fixedDelay = 60000L)
+    // Disable scheduling for now
     void execute() {
         SessionUtils.withTransaction {
             startAlignment()

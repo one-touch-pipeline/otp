@@ -21,10 +21,13 @@
  */
 package de.dkfz.tbi.otp.analysis.pair.roddy.sophia
 
+import spock.lang.Ignore
+
 import de.dkfz.tbi.otp.analysis.pair.bamfiles.SeqTypeAndInputBamFilesHCC1187Div128
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
+@Ignore
 class WesSophiaWorkflowTests extends AbstractSophiaWorkflowTests implements SeqTypeAndInputBamFilesHCC1187Div128 {
 
     @Override

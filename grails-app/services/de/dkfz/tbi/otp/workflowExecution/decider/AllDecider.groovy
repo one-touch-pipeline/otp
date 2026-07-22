@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
+import de.dkfz.tbi.otp.workflow.alignment.cellRanger.CellRangerWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.roddy.rna.RnaAlignmentWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.roddy.wgbs.WgbsWorkflow
@@ -59,10 +60,10 @@ class AllDecider implements Decider {
     /** list of Deciders in the correct order */
     List<Class<? extends Decider>> deciders = [
             FastqcDecider,
-//            CellRangerDecider,
             PanCancerDecider,
             WgbsDecider,
             RnaAlignmentDecider,
+            CellRangerDecider,
             SnvDecider,
             IndelDecider,
             SophiaDecider,
@@ -96,6 +97,7 @@ class AllDecider implements Decider {
                 PanCancerWorkflow.WORKFLOW,
                 WgbsWorkflow.WORKFLOW,
                 RnaAlignmentWorkflow.WORKFLOW,
+                CellRangerWorkflow.WORKFLOW,
         ].collect {
             workflowService.getExactlyOneWorkflow(it)
         }) as Set<SeqType>

@@ -35,7 +35,7 @@
 
     <g:render template="/templates/quickNavigationBar" model="[
             linkText: g.message(code: 'cellRanger.linkTo.configurationPage'),
-            link    : g.createLink(controller: 'cellRangerConfiguration', action: 'index'),
+            link    : g.createLink(controller: 'workflowSelection', action: 'index'),
             tooltip : g.message(code: 'cellRanger.linkTo.configurationPage.tooltip')
     ]"/>
 
@@ -104,12 +104,6 @@
                                 ${g.message(code: "cellRanger.selection.wait")}
                             </g:if>
                         </g:if>
-                    </td>
-                    <td class="${archived} ${deleted}">
-                        <g:link controller="cellRangerConfiguration"
-                                params="${["individual.id": mwps.sample.individual.id, "sampleType.id": mwps.sample.sampleType.id, "seqType.id": mwps.seqType.id, "reference.id": mwps.reference.id]}">
-                            ${g.message(code: "cellRanger.selection.rerun")}
-                        </g:link>
                     </td>
                     <td>
                         <g:if test="${mwps.anyFinal}">

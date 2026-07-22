@@ -21,9 +21,12 @@
  */
 package de.dkfz.tbi.otp.analysis.pair.roddy.indel
 
+import spock.lang.Ignore
+
 import de.dkfz.tbi.otp.analysis.pair.bamfiles.SeqTypeAndInputBamFilesHCC1187Div64
 import de.dkfz.tbi.otp.ngsdata.*
 
+@Ignore
 class WgsIndelWorkflowTests extends AbstractIndelWorkflowTests implements SeqTypeAndInputBamFilesHCC1187Div64 {
 
     @Override

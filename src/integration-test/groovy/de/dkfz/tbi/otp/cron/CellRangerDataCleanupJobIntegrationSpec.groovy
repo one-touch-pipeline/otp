@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.cron
 
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
+import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -50,6 +51,9 @@ import static de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPac
 @Rollback
 @Integration
 class CellRangerDataCleanupJobIntegrationSpec extends Specification implements CellRangerFactory, UserAndRoles, UserDomainFactory {
+
+    @Autowired
+    MessageSourceService messageSourceService
 
     static final int REMINDER_WEEKS = 12
     static final int REMINDER_DAYS = REMINDER_WEEKS * 7
@@ -304,9 +308,37 @@ class CellRangerDataCleanupJobIntegrationSpec extends Specification implements C
                 otpLinkUserManagement: '[link to UserManagement]',
         ])
 
-        and: "includes the links to the action pages"
+        and: "includes the link to the final run selection page"
         1 * cellRangerDataCleanupJob.createNotificationTextService.createOtpLinks([project], 'cellRanger', 'finalRunSelection') >> '[link to CellRanger]'
+
+        and: "includes the link to the user management page"
         1 * cellRangerDataCleanupJob.createNotificationTextService.createOtpLinks([project], 'projectUser', 'index') >> '[link to UserManagement]'
+    }
+
+    void "buildReminderMessageBody, renders the real message template without a MissingPropertyException"() {
+        given:
+        setupData()
+
+        CellRangerDataCleanupJob cellRangerDataCleanupJob = new CellRangerDataCleanupJob([
+                processingOptionService      : new ProcessingOptionService(),
+                createNotificationTextService: Mock(CreateNotificationTextService) {
+                    createOtpLinks(_, _, _) >> '[link]'
+                },
+                messageSourceService         : messageSourceService,
+        ])
+        LocalDate baseDate = LocalDate.now()
+
+        Project project = createProject()
+        Sample sample = createSample(individual: createIndividual(project: project))
+        List<CellRangerMergingWorkPackage> cellRangerMergingWorkPackages = [
+                createCellRangerMwpHelper(UNSET, baseDate, null, REMINDER_DAYS + 1, true, [sample: sample]),
+        ]
+
+        when: "the email body is rendered against the real template"
+        String body = cellRangerDataCleanupJob.buildReminderMessageBody(project, cellRangerMergingWorkPackages)
+
+        then: "no binding is missing and the CellRanger link is included"
+        body.contains('[link]')
     }
 
     void "deleteOfOldFailedWorkflows, call deleteMwps for old not finished mwp and send mail"() {

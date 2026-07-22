@@ -235,4 +235,6 @@ databaseChangeLog = {
     include file: 'changelogs/2026/otp-2937-add-empty-file-flag-to-raw-sequence-file.groovy'
 
     include file: 'changelogs/2026/otp-2991-notification-domain-classes.groovy'
+
+    include file: 'changelogs/2026/otp-2778-disable-cellRanger-workflow.groovy'
 }

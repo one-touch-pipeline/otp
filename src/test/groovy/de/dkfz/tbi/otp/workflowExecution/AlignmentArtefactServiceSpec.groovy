@@ -682,7 +682,7 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
                 bamFile1.mergingWorkPackage.sample, bamFile1.mergingWorkPackage.seqType, bamFile1.mergingWorkPackage.antibodyTarget)
 
         Map<AlignmentWorkPackageGroup, Set<MergingWorkPackage>> expected = [
-                (group3): [bamFile1.mergingWorkPackage],
+                (group3): [bamFile1.mergingWorkPackage] as Set,
         ]
 
         when:

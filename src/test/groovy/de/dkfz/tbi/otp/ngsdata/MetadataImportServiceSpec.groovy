@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
@@ -485,7 +484,6 @@ ${SPECIES}                      ${speciesImportAlias}                       ${sp
         service.fastqMetadataValidationService.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
             executeCommandReturnProcessOutput(_) >> { String cmd -> LocalShellHelper.executeAndWait(cmd) }
         }
-        service.cellRangerConfigurationService = Mock(CellRangerConfigurationService)
 
         when:
         List<ValidateAndImportResult> validateAndImportResults1 = service.validateAndImportMultiple(TICKET_NUMBER, '1111', true)
@@ -2079,6 +2077,5 @@ ${SPECIES}                      ${human}+${mouse}+${chicken}                ${hu
         service.dataInstallationInitializationService = Mock(DataInstallationInitializationService) {
             _ * createWorkflowRuns(_) >> []
         }
-        service.cellRangerConfigurationService = Mock(CellRangerConfigurationService)
     }
 }

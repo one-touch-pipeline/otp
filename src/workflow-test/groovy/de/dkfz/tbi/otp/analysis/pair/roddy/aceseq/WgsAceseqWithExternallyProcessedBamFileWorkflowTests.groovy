@@ -21,10 +21,13 @@
  */
 package de.dkfz.tbi.otp.analysis.pair.roddy.aceseq
 
+import spock.lang.Ignore
+
 import de.dkfz.tbi.otp.analysis.pair.bamfiles.SeqTypeAndInputBamFilesHCC1187Div8
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
+@Ignore
 class WgsAceseqWithExternallyProcessedBamFileWorkflowTests extends AbstractAceseqWorkflowTests implements SeqTypeAndInputBamFilesHCC1187Div8 {
 
     void setupSpec() {

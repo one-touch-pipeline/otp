@@ -36,9 +36,4 @@
             <g:message code="config.tabMenu.qcThresholds"/>
         </g:link>
     </li>
-    <li class="nav-item">
-        <g:link controller="cellRangerConfiguration" action="index" class="nav-link ${controllerName == "cellRangerConfiguration" ? 'active fw-bold' : 'text-black'}">
-            <g:message code="config.tabMenu.cellRanger"/>
-        </g:link>
-    </li>
 </ul>

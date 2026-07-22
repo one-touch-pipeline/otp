@@ -233,7 +233,7 @@ describe('Check trigger Workflows page', () => {
         });
 
         cy.get('#infos li').should('not.be.empty');
-        cy.get('#resultWarning li').should('have.length', 1)
+        cy.get('#resultWarning li').should('have.length', 3)
           .each((row) => {
             cy.wrap(row).contains('recreate').contains('since action is CREATE_ALWAYS');
           });

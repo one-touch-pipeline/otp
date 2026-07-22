@@ -33,7 +33,6 @@ import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
@@ -82,7 +81,6 @@ class MetadataImportService {
     AntibodyTargetService antibodyTargetService
     DataInstallationInitializationService dataInstallationInitializationService
 
-    CellRangerConfigurationService cellRangerConfigurationService
     ConfigService configService
     FileService fileService
     FileSystemService fileSystemService
@@ -476,7 +474,6 @@ class MetadataImportService {
             MultiplexingService.combineLaneNumberAndBarcode(it.getCellByColumnTitle(LANE_NO.name()).text, extractBarcode(it).value)
         }
         int amountOfRows = runsGroupedByLane.size()
-        Set<Sample> samples = [] as Set
         runsGroupedByLane.eachWithIndex { String laneId, List<Row> rows, int index ->
             String projectName = uniqueColumnValue(rows, PROJECT)
             Project project = ProjectService.findByNameOrNameInMetadataFiles(projectName)
@@ -583,10 +580,6 @@ class MetadataImportService {
             seqTrack.save(flush: true)
 
             mergingCriteriaService.createDefaultMergingCriteria(sampleIdentifier.project, seqType)
-            samples.add(sampleIdentifier.sample)
-        }
-        samples.each {
-            cellRangerConfigurationService.runOnImport(it.individual.project, it)
         }
     }
 

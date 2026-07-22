@@ -48,8 +48,9 @@ import static groovyx.gpars.GParsPool.withPool
 // User input parameters
 
 /**
- * Specifies how many individuals with CellRanger BAM files to be processed together in one batch
- * depending upon the numbers of seqTracks and logical CPU cores available.
+ * Maximum number of individuals with CellRanger BAM files to process together in one batch.
+ * The actual batch size is reduced automatically (see effectiveBatchSize below) so that there are
+ * enough batches to keep all logical CPU cores busy; it is never increased above this value.
  */
 int batchSize = 100
 
@@ -63,9 +64,20 @@ boolean dryRun = true
  */
 String processPriority = 'prod-prio3'
 
+/**
+ * DEV ONLY - MUST be false in production.
+ * If true, the remote (SFTP) file system is NOT contacted and a placeholder workDirectory string is
+ * used instead. Use this on dev environments where the remote file system is unreachable, otherwise
+ * the getBaseDirectory() path factory hangs on the SFTP connect. The created WorkflowRuns then carry
+ * a dummy workDirectory and must NOT be used for real processing - it only verifies that the script
+ * runs and creates the WorkflowRuns / WorkflowArtefacts.
+ */
+@Field boolean useDummyWorkDirectory = false
+
 //////////////////////////////////////////////////////////////
 
 assert batchSize >= 1
+assert !(useDummyWorkDirectory && !dryRun) : "useDummyWorkDirectory must only be used with dryRun=true to avoid persisting dummy work directories"
 
 @Field final String WORKFLOW_NAME = CellRangerWorkflow.WORKFLOW
 
@@ -89,9 +101,14 @@ ORDER BY i.id ASC
 
 @Field final String querySingleCellBamFilesToMigrate = """
 SELECT DISTINCT scb FROM SingleCellBamFile scb
-JOIN scb.workPackage mwp
-JOIN mwp.sample.individual i
-JOIN FETCH scb.seqTracks
+JOIN FETCH scb.workPackage mwp
+JOIN FETCH mwp.sample sample
+JOIN FETCH sample.sampleType
+JOIN FETCH sample.individual i
+JOIN FETCH i.project
+JOIN FETCH mwp.seqType
+JOIN FETCH scb.seqTracks st
+LEFT JOIN FETCH st.workflowArtefact
 WHERE scb.workflowArtefact IS NULL
 AND i.id in (:individualIds)
 ORDER BY scb.id ASC
@@ -106,9 +123,12 @@ void migrateToNewWorkflow(List<Long> individualIds, Workflow workflow, Processin
     )
 
     singleCellBamFiles.each { SingleCellBamFile singleCellBamFile ->
-        // getting and prepare information
-        // get the legacy folder of viewByPid, which are not yet migrated to the UUID filesystem structure
-        String directory = cellRangerWorkFileService.getBaseDirectory(singleCellBamFile).resolve(singleCellBamFile.workDirectoryName)
+        // get the legacy folder of viewByPid, which are not yet migrated to the UUID filesystem structure.
+        // In dev mode (useDummyWorkDirectory) the remote file system is bypassed with a placeholder path,
+        // because getBaseDirectory() builds its Path via the remote (SFTP) file system, which may be unreachable.
+        String directory = useDummyWorkDirectory ?
+                "/dev-dummy-work-directory/${singleCellBamFile.id}/${singleCellBamFile.workDirectoryName}" :
+                cellRangerWorkFileService.getBaseDirectory(singleCellBamFile).resolve(singleCellBamFile.workDirectoryName)
         List<SeqTrack> seqTracks = singleCellBamFile.seqTracks.sort {
             it.id
         }
@@ -175,29 +195,39 @@ void migrateToNewWorkflow(List<Long> individualIds, Workflow workflow, Processin
 }
 // =================================================
 
-fileSystemService.getRemoteFileSystem()
+// Prime the remote (SFTP) file system connection once, unless dev mode bypasses it entirely.
+if (!useDummyWorkDirectory) {
+    fileSystemService.getRemoteFileSystem()
+} else {
+    println "useDummyWorkDirectory=true -> remote file system is NOT contacted; workDirectory will be a placeholder"
+}
 
 List<List<Long>> individualsIdsWithSingleCellBamFileCount = SingleCellBamFile.executeQuery(
         queryIndividualsToMigrate)
 
 List<Long> individualIds = individualsIdsWithSingleCellBamFileCount.collect { it[0] } as List<Long>
-List<List<Long>> listOfListOfIndividuals = individualIds.collate(batchSize)
 int numBamFiles = individualIds ? individualsIdsWithSingleCellBamFileCount.collect { it[1] }.sum() as int : 0
 int numIndividuals = individualIds.size()
 println "There are ${numBamFiles} CellRanger BAM Files of ${numIndividuals} Individuals to be migrated into new workflow system"
 
+int numCores = Runtime.runtime.availableProcessors()
+
+// Choose the actual batch size so that there are enough batches to keep all cores busy (aim for a
+// few batches per core), but never larger than the configured maximum. Otherwise a handful of large
+// batches would leave most cores idle.
+int effectiveBatchSize = Math.max(1, Math.min(batchSize, (int) Math.ceil(numIndividuals / (numCores * 4.0d))))
+List<List<Long>> listOfListOfIndividuals = individualIds.collate(effectiveBatchSize)
+
 if (individualsIdsWithSingleCellBamFileCount) {
     // process in chunks
     long numBatches = listOfListOfIndividuals.size()
-    println "${numBatches} batches will be processed"
 
     // fetch the CellRanger Workflow
     Workflow workflow = workflowService.getExactlyOneWorkflow(WORKFLOW_NAME)
     assert workflow: "configured workflow ${WORKFLOW_NAME} does not exist"
     println "Migrate CellRanger BAM files to new workflow system for Workflow \"${WORKFLOW_NAME}\""
 
-    int numCores = Runtime.runtime.availableProcessors()
-    println "${numCores} logical CPU core(s) are available"
+    println "${numCores} logical CPU core(s) available; using batch size ${effectiveBatchSize} (max ${batchSize}) -> ${numBatches} batches"
 
     // fetch the priority from database
     ProcessingPriority priority = CollectionUtils.exactlyOneElement(ProcessingPriority.findAllByName(processPriority),

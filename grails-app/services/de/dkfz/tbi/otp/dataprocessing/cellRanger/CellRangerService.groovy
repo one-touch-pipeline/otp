@@ -30,9 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.infrastructure.RawSequenceDataViewFileService
-import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerFileNames
-import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerLinkFileService
-import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerWorkFileService
+import de.dkfz.tbi.otp.infrastructure.alignment.*
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.referencegenome.ReferenceGenomeIndexService
@@ -170,7 +168,7 @@ class CellRangerService {
     }
 
     Map<String, String> createCellRangerParameters(SingleCellBamFile singleCellBamFile, String programVersion,
-                                                    String localCores, String localMem) {
+                                                   String localCores, String localMem) {
         assert singleCellBamFile
 
         CellRangerMergingWorkPackage workPackage = singleCellBamFile.workPackage as CellRangerMergingWorkPackage
@@ -243,8 +241,10 @@ class CellRangerService {
 
         updateBamFile(singleCellBamFile)
 
-        singleCellBamFile.workPackage.bamFileInProjectFolder = singleCellBamFile
-        singleCellBamFile.workPackage.save(flush: true)
+        CellRangerMergingWorkPackage workPackage = singleCellBamFile.mergingWorkPackage
+        workPackage.bamFileInProjectFolder = singleCellBamFile
+        workPackage.status = CellRangerMergingWorkPackage.Status.FINAL
+        workPackage.save(flush: true)
 
         abstractBamFileService.updateSamplePairStatusToNeedProcessing(singleCellBamFile)
     }

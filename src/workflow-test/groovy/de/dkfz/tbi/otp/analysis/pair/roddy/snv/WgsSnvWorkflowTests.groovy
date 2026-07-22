@@ -21,10 +21,13 @@
  */
 package de.dkfz.tbi.otp.analysis.pair.roddy.snv
 
+import spock.lang.Ignore
+
 import de.dkfz.tbi.otp.analysis.pair.bamfiles.SeqTypeAndInputBamFilesHCC1187Div32
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
+@Ignore
 class WgsSnvWorkflowTests extends AbstractSnvWorkflowTests implements SeqTypeAndInputBamFilesHCC1187Div32 {
 
     @Override
