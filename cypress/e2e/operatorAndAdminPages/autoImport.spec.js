@@ -43,15 +43,6 @@ const expectedForIlse = (ilse) => {
   };
 };
 
-const secret = () => {
-  'use strict';
-
-  // An explicitly configured empty secret must not silently fall back to the dev default:
-  // sending it makes the request fail loudly and expose the misconfiguration.
-  const configuredSecret = Cypress.env('otp.autoimport.secret');
-  return configuredSecret === undefined ? 'secret' : configuredSecret;
-};
-
 const requestJson = (options) => {
   'use strict';
 
@@ -138,16 +129,23 @@ const resetAutoImport = () => {
 const autoImport = (ilseNumbers, ticketNumber, failOnStatusCode) => {
   'use strict';
 
-  return cy.request({
-    method: 'GET',
-    url: '/metadataImport/autoImport',
-    failOnStatusCode: failOnStatusCode !== false,
-    qs: {
-      secret: secret(),
-      ticketNumber,
-      ilseNumbers,
-      ignoreMd5sumError: 'TRUE'
-    }
+  return cy.env(['otp.autoimport.secret']).then((env) => {
+    // An explicitly configured empty secret must not silently fall back to the dev default:
+    // sending it makes the request fail loudly and expose the misconfiguration.
+    const configuredSecret = env['otp.autoimport.secret'];
+    const secret = configuredSecret === undefined ? 'secret' : configuredSecret;
+
+    return cy.request({
+      method: 'GET',
+      url: '/metadataImport/autoImport',
+      failOnStatusCode: failOnStatusCode !== false,
+      qs: {
+        secret,
+        ticketNumber,
+        ilseNumbers,
+        ignoreMd5sumError: 'TRUE'
+      }
+    });
   });
 };
 

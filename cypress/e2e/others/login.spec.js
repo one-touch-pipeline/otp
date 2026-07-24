@@ -29,37 +29,39 @@ describe('check login', () => {
 
   context('when user login data is correct', () => {
     it('should redirect to requested page', () => {
-      const username = Cypress.env('user_username');
-      const password = Cypress.env('user_password');
+      const username = Cypress.expose('user_username');
 
-      cy.visit('/individual/list');
-      cy.url().should('contain', '/login?target=');
-      cy.get('#account').type(username);
-      cy.get('#password').type(password);
-      cy.get('#loginButton').click();
+      cy.env(['user_password']).then((env) => {
+        cy.visit('/individual/list');
+        cy.url().should('contain', '/login?target=');
+        cy.get('#account').type(username);
+        cy.get('#password').type(env['user_password']);
+        cy.get('#loginButton').click();
 
-      cy.url().should('contain', '/individual/list');
+        cy.url().should('contain', '/individual/list');
+      });
     });
 
     it('should redirect to requested page when password contains non-ASCII characters (§ £)', () => {
       cy.loginAs('nonAsciiPassword');
       cy.clearCookies();
-      const username = Cypress.env('nonAsciiPassword_username');
-      const password = Cypress.env('nonAsciiPassword_password');
+      const username = Cypress.expose('nonAsciiPassword_username');
 
-      cy.visit('/individual/list');
-      cy.url().should('contain', '/login?target=');
-      cy.get('#account').type(username);
-      cy.get('#password').type(password);
-      cy.get('#loginButton').click();
+      cy.env(['nonAsciiPassword_password']).then((env) => {
+        cy.visit('/individual/list');
+        cy.url().should('contain', '/login?target=');
+        cy.get('#account').type(username);
+        cy.get('#password').type(env['nonAsciiPassword_password']);
+        cy.get('#loginButton').click();
 
-      cy.url().should('contain', '/individual/list');
+        cy.url().should('contain', '/individual/list');
+      });
     });
   });
 
   context('when password is wrong', () => {
     it('should redirect to login page and show error message', () => {
-      const username = Cypress.env('user_username');
+      const username = Cypress.expose('user_username');
       const password = 'wrong-password';
 
       cy.visit('/');

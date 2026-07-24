@@ -82,7 +82,7 @@ describe('Check projectRequest page', () => {
   // Opens the PI tab and fills the first PI row with the given username (defaults to the standard user).
   const setPrimaryPi = () => {
     cy.get('a#pi-tab').click();
-    cy.get('.pi-user-form input.username-input').first().clear().type(Cypress.env('user_username'));
+    cy.get('.pi-user-form input.username-input').first().clear().type(Cypress.expose('user_username'));
     cy.get('.pi-user-form select.pi-role-select').first().select('PI', { force: true });
   };
 
@@ -131,12 +131,12 @@ describe('Check projectRequest page', () => {
             const request = requests[draftIdx];
             fillProjectRequestForm(request);
 
-            const operatorUsername = Cypress.env('operator_username');
+            const operatorUsername = Cypress.expose('operator_username');
             cy.get('a#user-tab').click();
             cy.get('.user-form input.username-input').first().clear().type(operatorUsername);
             cy.get('.user-form select.project-role-select').first().select('BIOINFORMATICIAN', { force: true });
             cy.get('#clone-add-1').click();
-            cy.get('.user-form input.username-input').eq(1).clear().type(Cypress.env('user_username'));
+            cy.get('.user-form input.username-input').eq(1).clear().type(Cypress.expose('user_username'));
             cy.get('.user-form select.project-role-select').eq(1).select('COORDINATOR', { force: true });
 
             setPrimaryPi();
@@ -164,7 +164,7 @@ describe('Check projectRequest page', () => {
             const request = requests[draftIdx];
             fillProjectRequestForm(request);
 
-            const operatorUsername = Cypress.env('operator_username');
+            const operatorUsername = Cypress.expose('operator_username');
             cy.get('a#user-tab').click();
             cy.get('.user-form input.username-input').first().clear().type(operatorUsername);
             cy.get('.user-form select.project-role-select').first().select('BIOINFORMATICIAN', { force: true });
@@ -340,7 +340,7 @@ describe('Check projectRequest page', () => {
             cy.get('.pi-user-form input.username-input').eq(1).clear().type('goofy');
             cy.get('.pi-user-form select.pi-role-select').eq(1).select('PI', { force: true });
 
-            const operatorUsername = Cypress.env('operator_username');
+            const operatorUsername = Cypress.expose('operator_username');
             cy.get('a#user-tab').click();
             cy.get('.user-form select.project-role-select').first().select('COORDINATOR', { force: true });
             cy.get('.user-form input.username-input').first().clear().type(operatorUsername);
@@ -477,7 +477,7 @@ describe('Check projectRequest page', () => {
         cy.get('.pi-user-form select.pi-selector').first().select(pi, { force: true });
         cy.get('.pi-user-form select.pi-role-select').first().select('BIOINFORMATICIAN', { force: true });
 
-        const operatorUsername = Cypress.env('operator_username');
+        const operatorUsername = Cypress.expose('operator_username');
         cy.get('a#user-tab').click();
         cy.get('.user-form input.username-input').first().clear().type(operatorUsername);
         cy.get('.user-form select.project-role-select').first().select('SUBMITTER', { force: true });

@@ -67,10 +67,11 @@ const login = (username, password) => {
 Cypress.Commands.add('loginAs', (type) => {
   'use strict';
 
-  const username = Cypress.env(`${type}_username`);
-  const password = Cypress.env(`${type}_password`);
+  const username = Cypress.expose(`${type}_username`);
 
-  login(username, password);
+  cy.env([`${type}_password`]).then((env) => {
+    login(username, env[`${type}_password`]);
+  });
 });
 
 Cypress.Commands.add('logout', () => {
@@ -330,7 +331,7 @@ Cypress.Commands.add('logBoth', (text) => {
  * This could be useful for performing local cypress test.
  */
 Cypress.Commands.add('logDebug', (message, ...args) => {
-  if (Cypress.env('LOG_DEBUG_ENABLED')) {
+  if (Cypress.expose('LOG_DEBUG_ENABLED')) {
     return cy.log(`debug: ${message}`, args);
   }
   return undefined;
