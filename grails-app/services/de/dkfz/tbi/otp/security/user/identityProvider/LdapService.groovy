@@ -345,7 +345,7 @@ class LdapUserDetailsAttributesMapper extends AbstractLdapServiceAwareAttributes
                 realName         : realNameCreatable ? "${givenName} ${sn}" : null,
                 mail             : a.get(LdapKey.MAIL)?.get()?.toString(),
                 department       : a.get(LdapKey.DEPARTMENT) ? a.get(LdapKey.DEPARTMENT)?.get()?.toString() : "",
-                thumbnailPhoto   : a.get(LdapKey.THUMBNAIL_PHOTO) ? a.get(LdapKey.THUMBNAIL_PHOTO)?.get()?.toString() : "",
+                thumbnailPhoto   : (a.get(LdapKey.THUMBNAIL_PHOTO)?.get() as byte[])?.encodeBase64()?.toString() ?: "",
                 deactivated      : deactivated,
                 memberOfGroupList: memberOfList,
         ])

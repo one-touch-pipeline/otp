@@ -312,7 +312,7 @@ class UserEntry {
 
         this.inLdap = idpUserDetails?.username ?: false
         this.realName = inLdap ? idpUserDetails.realName : user.realName
-        this.thumbnailPhoto = inLdap ? idpUserDetails.thumbnailPhoto.bytes.encodeBase64().toString() : ""
+        this.thumbnailPhoto = inLdap ? idpUserDetails.thumbnailPhoto : ""
         this.department = inLdap ? idpUserDetails.department : ""
         this.projectRoleNames = userProjectRole.projectRoles*.name.sort()
         // each UserEntry might have different Roles available dependent on the assigned Roles to the userProjectRole
