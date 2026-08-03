@@ -380,7 +380,7 @@ cypress tests:
     DOCKER_DRIVER: overlay2
     HOST_IP: "0.0.0.0"
   services:
-    - name: docker:dind
+    - name: docker:28-dind
       alias: openssh-server
   script:
     - set -e
