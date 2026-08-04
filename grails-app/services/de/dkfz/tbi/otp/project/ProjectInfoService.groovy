@@ -92,7 +92,7 @@ class ProjectInfoService {
         ProjectInfo projectInfo = cmd.projectInfo
         Path path = getPath(projectInfo)
         fileService.deleteDirectoryRecursively(path)
-        projectInfo.project = null
+        projectInfo.project.removeFromProjectInfos(projectInfo)
         projectInfo.delete(flush: true)
     }
 

@@ -37,6 +37,7 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.restarting.RestartHandlerService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.utils.ShouldNotBeReachedException
 
 import java.util.regex.Pattern
 
@@ -84,10 +85,10 @@ class SchedulerIntegrationTests implements UserAndRoles {
             scheduler.executeJob(job)
         }
         ProcessingStepUpdate update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.CREATED,
-            previous: null,
-            processingStep: step
+                date: new Date(),
+                state: ExecutionState.CREATED,
+                previous: null,
+                processingStep: step
         )
         assertNotNull(update.save(flush: true))
         TestCase.shouldFail(InvalidStateException) {
@@ -134,10 +135,10 @@ class SchedulerIntegrationTests implements UserAndRoles {
             scheduler.executeJob(endStateAwareJob)
         }
         ProcessingStepUpdate update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.CREATED,
-            previous: null,
-            processingStep: step
+                date: new Date(),
+                state: ExecutionState.CREATED,
+                previous: null,
+                processingStep: step
         )
         assertNotNull(update.save(flush: true))
         TestCase.shouldFail(InvalidStateException) {
@@ -147,7 +148,7 @@ class SchedulerIntegrationTests implements UserAndRoles {
             endStateAwareJob.endState
         }
         scheduler.restartHandlerService.metaClass.handleRestart = { Job job ->
-            assert false: 'Should not reach this point'
+            throw new ShouldNotBeReachedException('Should not reach this point')
         }
         scheduler.executeJob(endStateAwareJob)
         assertEquals(ExecutionState.SUCCESS, endStateAwareJob.endState)
@@ -196,10 +197,10 @@ class SchedulerIntegrationTests implements UserAndRoles {
         }
         assert 1 == executedCounter
         ProcessingStepUpdate update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.CREATED,
-            previous: null,
-            processingStep: step
+                date: new Date(),
+                state: ExecutionState.CREATED,
+                previous: null,
+                processingStep: step
         )
         assertNotNull(update.save(flush: true))
         TestCase.shouldFail(InvalidStateException) {
@@ -249,13 +250,13 @@ class SchedulerIntegrationTests implements UserAndRoles {
         Job job = grailsApplication.mainContext.getBean("failingTestJob") as Job
         job.processingStep = step
         DomainFactory.createProcessingStepUpdate(
-            state: ExecutionState.CREATED,
-            processingStep: step
+                state: ExecutionState.CREATED,
+                processingStep: step
         )
         boolean notified = false
         scheduler.jobMailService.metaClass.sendErrorNotification = { Job job2, String errorMessage ->
             if (notified) {
-                assert false: 'called twice'
+                throw new ShouldNotBeReachedException('called twice')
             } else {
                 notified = true
             }
@@ -290,10 +291,10 @@ class SchedulerIntegrationTests implements UserAndRoles {
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save(flush: true))
         ProcessingStepUpdate update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.CREATED,
-            previous: null,
-            processingStep: step
+                date: new Date(),
+                state: ExecutionState.CREATED,
+                previous: null,
+                processingStep: step
         )
         assertNotNull(update.save(flush: true))
         // run the Job
@@ -330,10 +331,10 @@ class SchedulerIntegrationTests implements UserAndRoles {
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save(flush: true))
         ProcessingStepUpdate update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.CREATED,
-            previous: null,
-            processingStep: step
+                date: new Date(),
+                state: ExecutionState.CREATED,
+                previous: null,
+                processingStep: step
         )
         assertNotNull(update.save(flush: true))
         Job job = grailsApplication.mainContext.getBean("directTestJob") as Job
@@ -356,10 +357,10 @@ class SchedulerIntegrationTests implements UserAndRoles {
         step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save(flush: true))
         update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.CREATED,
-            previous: null,
-            processingStep: step
+                date: new Date(),
+                state: ExecutionState.CREATED,
+                previous: null,
+                processingStep: step
         )
         assertNotNull(update.save(flush: true))
         job = grailsApplication.mainContext.getBean("directTestJob") as Job

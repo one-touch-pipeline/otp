@@ -284,13 +284,27 @@ integrationTest() {
         doFirst {
             println "use postgres docker"
 
-            // Where is docker-compose?
+            // Where is docker?
             String docker = '/usr/bin/which docker'.execute()?.text?.trim()
 
             if (!docker) {
                 throw new IllegalStateException('Unable to find docker. Is it installed and available via PATH?')
             }
-            String dockerCompose = "${docker} compose"
+
+            // Docker Compose comes in two flavours: the "docker compose" subcommand (Compose v2) or the standalone
+            // "docker-compose" executable (Compose v1). Prefer the subcommand and fall back to the standalone command.
+            String dockerCompose
+            if ("${docker} compose version".execute().waitFor() == 0) {
+                dockerCompose = "${docker} compose"
+            } else {
+                String dockerComposeStandalone = '/usr/bin/which docker-compose'.execute()?.text?.trim()
+                if (!dockerComposeStandalone) {
+                    throw new IllegalStateException(
+                            'Unable to find docker compose. Neither the "docker compose" subcommand nor the standalone ' +
+                            '"docker-compose" command is available. Is Docker Compose installed and available via PATH?')
+                }
+                dockerCompose = dockerComposeStandalone
+            }
 
             List<String> dockerPorts = (0..maxParallelForks - 1).collect {
 

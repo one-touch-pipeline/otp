@@ -33,12 +33,13 @@ import spock.lang.Unroll
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.utils.ShouldNotBeReachedException
 
 class BamFilePairAnalysisSpec extends Specification implements DataTest {
 
@@ -182,7 +183,7 @@ class BamFilePairAnalysisSpec extends Specification implements DataTest {
                         ] + propertiesForMergingWorkPackage)
                 ] + properties)
             default:
-                assert false
+                throw new ShouldNotBeReachedException()
         }
     }
 

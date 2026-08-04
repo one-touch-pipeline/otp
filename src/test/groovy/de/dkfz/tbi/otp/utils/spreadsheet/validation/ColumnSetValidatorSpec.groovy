@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.utils.spreadsheet.validation
 
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.utils.ShouldNotBeReachedException
 import de.dkfz.tbi.otp.utils.spreadsheet.Column
 import de.dkfz.tbi.otp.utils.spreadsheet.Spreadsheet
 
@@ -67,7 +68,7 @@ class ColumnSetValidatorSpec extends Specification {
 
             @Override
             void validate(ValidationContext context) {
-                assert false : 'should not be called'
+                throw new ShouldNotBeReachedException('should not be called')
             }
         }
 

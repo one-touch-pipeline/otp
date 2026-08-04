@@ -106,7 +106,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     ConstantAssertExpression {
-        priority = LOW
+        priority = CRITICAL
     }
     ConstantIfExpression {
         priority = DEFAULT

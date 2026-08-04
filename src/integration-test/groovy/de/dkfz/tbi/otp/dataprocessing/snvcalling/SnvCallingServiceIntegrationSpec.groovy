@@ -300,7 +300,7 @@ class SnvCallingServiceIntegrationSpec extends Specification implements DomainFa
                 sampleType2BamFile: new RoddyBamFile(),
         ])
         snvCallingService.abstractBamFileService = Mock(AbstractBamFileService) {
-            2 * getExistingBamFilePath(_) >> TestCase.uniqueNonExistentPath >> { assert false }
+            2 * getExistingBamFilePath(_) >> TestCase.uniqueNonExistentPath >> { throw new AssertionError() }
         }
 
         when:

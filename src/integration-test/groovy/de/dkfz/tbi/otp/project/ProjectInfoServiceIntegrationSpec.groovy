@@ -56,11 +56,11 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         createUserAndRoles()
         projectInfoService = new ProjectInfoService(
                 executionHelperService: Mock(ExecutionHelperService),
-                fileSystemService     : Mock(FileSystemService) {
+                fileSystemService: Mock(FileSystemService) {
                     _ * getRemoteFileSystem() >> FileSystems.default
                     0 * _
                 },
-                fileService           : new FileService([
+                fileService: new FileService([
                         remoteShellHelper: Mock(RemoteShellHelper) {
                             _ * executeCommandReturnProcessOutput(_) >> { String command ->
                                 return new ProcessOutput(command, '', 0)
@@ -230,9 +230,9 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         noExceptionThrown()
 
         where:
-        property          | value
-        'comment'         | null
-        'comment'         | ''
+        property  | value
+        'comment' | null
+        'comment' | ''
     }
 
     @Unroll
@@ -290,10 +290,38 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         project.projectInfos.size() == 1
     }
 
-    @Ignore("TODO: otp-1541, cannot test this until we have a postgres DB instead of H2") // TODO otp-1541
+    // Deleting a ProjectInfo removes it from its Project's collection. On H2 this orphan removal
+    // does not behave like on the production PostgreSQL DB, so this test only runs when the integration tests use PostgreSQL.
+    @IgnoreIf({ !(System.getProperty("databaseForIntegrationTest") in ["DOCKER", "DOCKER_CI"]) })
     void "deleteProjectInfo, properly removes entries from project and project info"() {
-        expect:
-        assert false
+        given:
+        setupData()
+        Project project = createProject()
+
+        ProjectInfo projectInfo = doWithAuth(ADMIN) {
+            projectInfoService.createProjectInfoAndUploadFile(project, createAddProjectInfoCommand(projectInfoFile: createMultipartFile()))
+        }
+        project.refresh()
+
+        assert ProjectInfo.count == 1
+        assert project.projectInfos.size() == 1
+
+        Path path = projectInfoService.getPath(projectInfo)
+        assert Files.exists(path)
+
+        ProjectInfoCommand cmd = new ProjectInfoCommand(projectInfo: projectInfo)
+
+        when:
+        doWithAuth(OPERATOR) {
+            projectInfoService.deleteProjectInfo(cmd)
+        }
+        project.refresh()
+
+        then:
+        ProjectInfo.count == 0
+        project.projectInfos.empty
+        !Files.exists(path)
+        Project.get(project.id) != null
     }
 
     void "getProjectInfoContent, returns file content or empty byte array if file does not exist"() {
