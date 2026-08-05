@@ -21,7 +21,7 @@
 # This file contains gitlab ci jobs running in all repositories.
 # The jobs shouldn't have dependencies to jobs running not in all repositories
 
-image: registry.gitlab.com/one-touch-pipeline/otp/otp-ci-java-17:2026-01-16
+image: registry.gitlab.com/one-touch-pipeline/otp/otp-ci-java-17:2026-07-24
 
 # notes:
 ## having multiple commands in one variable does not work
@@ -237,7 +237,7 @@ integration tests:
 workflow tests:
   extends: .abstract_test_template
   services:
-    - name:  registry.gitlab.com/one-touch-pipeline/otp/otp-mocked-cluster:2026-02-11
+    - name:  registry.gitlab.com/one-touch-pipeline/otp/otp-mocked-cluster:2026-07-24
       alias: openssh-server
       variables:
         PUID: "1000"
@@ -368,6 +368,7 @@ cypress tests:
           - cypress.config.js
           - devScripts/gitlab-ci/cypress/**/*
           - docker/**/*
+          - docker-compose.yml
           - grails-app/assets/**/*
           - grails-app/taglib/**/*
           - grails-app/views/**/*

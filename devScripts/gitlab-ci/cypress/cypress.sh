@@ -62,10 +62,12 @@ echo "Configured otp.autoimport.secret for Cypress"
 docker info > logs/docker-info.log
 
 echo "===================================="
-docker compose -f docker-compose.yml up --build postgres > logs/postgres.log &
-sleep 10s
-docker compose -f docker-compose.yml up --build open-ldap > logs/open-ldap.log &
-docker compose -f docker-compose.yml up --build openssh-server > logs/openssh-server.log &
+docker compose -f docker-compose.yml up --no-build --quiet-pull postgres > logs/postgres.log 2>&1 &
+(
+  sleep 10s
+  docker compose -f docker-compose.yml up --no-build --quiet-pull open-ldap > logs/open-ldap.log 2>&1 &
+  docker compose -f docker-compose.yml up --no-build --quiet-pull openssh-server > logs/openssh-server.log 2>&1 &
+)&
 
 # wait for database to be ready and apply all database changes before starting of OTP, since bootrun already responses to request before
 # the database migration has run through and if there are changes to tables used by 'http-get://localhost:8080' a lot of logs are created
@@ -74,6 +76,19 @@ timeout 90s bash -c 'until docker exec otp-dev-postgres pg_isready ; do sleep 5 
 
 echo "===================================="
 ./gradlew --build-cache dbmUpdate npm_exec_cypress_install
+
+echo "===================================="
+# wait for the services OTP needs at runtime, they had time to start up during the gradle build above
+
+# slapd must listen on 389 and the bootstrap ldif must be applied. Anonymous reads are denied by the osixia ACLs,
+# so the data is queried via the local socket, where root is authorized without a password.
+timeout 60s bash -c 'until docker exec otp-dev-ldap ldapwhoami -x -H ldap://localhost:389 > /dev/null 2>&1 \
+        && docker exec otp-dev-ldap ldapsearch -Y EXTERNAL -Q -H ldapi:/// -LLL -s base -b "ou=users,dc=otpldap,dc=dev" dn > /dev/null 2>&1
+    do sleep 5 ; done'
+
+# the openssh-server image starts sshd only after '/custom-cont-init.d' has extracted the test file system,
+# so an sshd answering on 2222 also means the tarballs are unpacked
+timeout 60s bash -c 'until docker exec otp-dev-ssh-server sh -c "nc -w 3 localhost 2222 < /dev/null | grep -q ^SSH-" 2> /dev/null ; do sleep 5 ; done'
 
 echo "===================================="
 ./gradlew --build-cache npm_run_cy-wait | tee cypressReport.txt

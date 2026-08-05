@@ -46,7 +46,7 @@
     - >-
       /kaniko/executor
       --context "${CONTEXT}/"
-      --dockerfile "./Dockerfile"
+      --dockerfile "./${DOCKERFILE:-Dockerfile}"
       --destination "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:${CURRENT_DATE_TAG}"
       --destination "${CI_REGISTRY_IMAGE}/${IMAGE_NAME}:latest"
 
@@ -71,3 +71,36 @@ build-mocked-cluster:
     IMAGE_NAME: otp-mocked-cluster
     CONTEXT: "${CI_PROJECT_DIR}/docker/mocked-workflow-test/"
     PATH_CHECK_CHANGES: docker/mocked-workflow-test/**/*
+
+
+# Images for the local development docker-compose setup.
+# docker-compose.yml references these via the registry instead of building them locally.
+
+build-dev-postgres-image:
+  extends: .build-image
+  variables:
+    IMAGE_NAME: otp-dev-postgres
+    CONTEXT: "${CI_PROJECT_DIR}/docker/database/"
+    DOCKERFILE: Dockerfile.dev
+    PATH_CHECK_CHANGES: docker/database/**/*
+
+build-dev-keycloak-image:
+  extends: .build-image
+  variables:
+    IMAGE_NAME: otp-dev-keycloak
+    CONTEXT: "${CI_PROJECT_DIR}/docker/keycloak/"
+    PATH_CHECK_CHANGES: docker/keycloak/**/*
+
+build-dev-ldap-image:
+  extends: .build-image
+  variables:
+    IMAGE_NAME: otp-dev-ldap
+    CONTEXT: "${CI_PROJECT_DIR}/docker/ldap/"
+    PATH_CHECK_CHANGES: docker/ldap/**/*
+
+build-dev-ssh-image:
+  extends: .build-image
+  variables:
+    IMAGE_NAME: otp-dev-ssh
+    CONTEXT: "${CI_PROJECT_DIR}/docker/ssh/"
+    PATH_CHECK_CHANGES: docker/ssh/**/*

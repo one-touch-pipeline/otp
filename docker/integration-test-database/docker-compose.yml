@@ -21,7 +21,7 @@
 version: '3.0'
 services:
   integration-test:
-    image: registry.gitlab.com/one-touch-pipeline/otp/otp-ci-integration-test-database:2024-10-11
+    image: registry.gitlab.com/one-touch-pipeline/otp/otp-ci-integration-test-database:2026-07-24
     ports:
       - "127.0.0.1::5432"
     environment:

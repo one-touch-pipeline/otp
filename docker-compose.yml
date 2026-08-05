@@ -28,9 +28,8 @@ services:
     container_name: otp-dev-postgres
     env_file:
       - .env
-    build:
-      context: ./docker/database/
-      dockerfile: Dockerfile.dev
+    # Image built and pushed by the `build-dev-postgres-image` job in .gitlab-ci-create-image.yml
+    image: registry.gitlab.com/one-touch-pipeline/otp/otp-dev-postgres:2026-07-24
     ports:
       - "${HOST_IP:-127.0.0.1}:${POSTGRES_PORT:-5432}:5432"
     volumes:
@@ -39,7 +38,8 @@ services:
       otp:
 
   keycloak:
-    build: docker/keycloak
+    # Image built and pushed by the `build-dev-keycloak-image` job in .gitlab-ci-create-image.yml
+    image: registry.gitlab.com/one-touch-pipeline/otp/otp-dev-keycloak:2026-07-24
     container_name: otp-dev-keycloak
     env_file:
       - .env
@@ -54,7 +54,8 @@ services:
 
   open-ldap:
     container_name: otp-dev-ldap
-    build: docker/ldap
+    # Image built and pushed by the `build-dev-ldap-image` job in .gitlab-ci-create-image.yml
+    image: registry.gitlab.com/one-touch-pipeline/otp/otp-dev-ldap:2026-07-24
     ports:
       - "${HOST_IP:-127.0.0.1}:${OPEN_LDAP_PORT:-1389}:389"
     volumes:
@@ -77,7 +78,8 @@ services:
 
   openssh-server:
     container_name: otp-dev-ssh-server
-    build: docker/ssh
+    # Image built and pushed by the `build-dev-ssh-image` job in .gitlab-ci-create-image.yml
+    image: registry.gitlab.com/one-touch-pipeline/otp/otp-dev-ssh:2026-07-24
     env_file:
       - .env
     volumes:
@@ -114,15 +116,15 @@ services:
       - "${HOST_IP:-127.0.0.1}:${OTP_PORT:-8080}:8080"
     volumes:
       - filesystem:/home/otp/filesystem
-      - $LOCAL_SOURCE_PATH/gradle:/home/otp/app/gradle
-      - $LOCAL_SOURCE_PATH/grails-app:/home/otp/app/grails-app
-      - $LOCAL_SOURCE_PATH/migrations:/home/otp/app/migrations
-      - $LOCAL_SOURCE_PATH/src:/home/otp/app/src
-      - $LOCAL_SOURCE_PATH/.otp.properties:/home/otp/app/.otp.properties
-      - $LOCAL_SOURCE_PATH/gradlew:/home/otp/app/gradlew
-      - $LOCAL_SOURCE_PATH/build.gradle:/home/otp/app/build.gradle
-      - $LOCAL_SOURCE_PATH/gradle.properties:/home/otp/app/gradle.properties
-      - $LOCAL_SOURCE_PATH/settings.gradle:/home/otp/app/settings.gradle
+      - ${LOCAL_SOURCE_PATH:-.}/gradle:/home/otp/app/gradle
+      - ${LOCAL_SOURCE_PATH:-.}/grails-app:/home/otp/app/grails-app
+      - ${LOCAL_SOURCE_PATH:-.}/migrations:/home/otp/app/migrations
+      - ${LOCAL_SOURCE_PATH:-.}/src:/home/otp/app/src
+      - ${LOCAL_SOURCE_PATH:-.}/.otp.properties:/home/otp/app/.otp.properties
+      - ${LOCAL_SOURCE_PATH:-.}/gradlew:/home/otp/app/gradlew
+      - ${LOCAL_SOURCE_PATH:-.}/build.gradle:/home/otp/app/build.gradle
+      - ${LOCAL_SOURCE_PATH:-.}/gradle.properties:/home/otp/app/gradle.properties
+      - ${LOCAL_SOURCE_PATH:-.}/settings.gradle:/home/otp/app/settings.gradle
     depends_on:
       - postgres
     networks:
