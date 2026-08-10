@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.workflow
 
-import htsjdk.samtools.SamReaderFactory
+import htsjdk.samtools.*
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.RoddyResultWorkFileServiceFactoryService
@@ -30,8 +30,8 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.infrastructure.alignment.PanCancerWorkFileService
 import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
+import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.Paths
 
 class RoddyService implements WorkflowShared {
 
@@ -45,11 +45,16 @@ class RoddyService implements WorkflowShared {
 
     List<String> getReadGroupsInBam(WorkflowStep workflowStep) {
         final RoddyBamFile roddyBamFile = getRoddyBamFile(workflowStep)
-        Path path = panCancerWorkFileService.getBamFile(roddyBamFile)
-        // convert to local path, since SamReaderFactory use SeekableByteChannel, which is not supported by the ftp remote file system
-        Path pathLocal = Paths.get(path.toString())
+        final Path path = panCancerWorkFileService.getBamFile(roddyBamFile)
         final SamReaderFactory factory = SamReaderFactory.makeDefault().enable(SamReaderFactory.Option.VALIDATE_CRC_CHECKSUMS)
-        return factory.getFileHeader(pathLocal).readGroups*.id.sort()
+        // read the header from a plain InputStream: the header is located at the beginning of the BAM, therefore
+        // sequential access is sufficient. Using a Path instead would make SamReaderFactory attach the bai index and
+        // seek via SeekableByteChannel, which the remote (sftp) file system does not support.
+        return Files.newInputStream(path).withCloseable { InputStream stream ->
+            factory.open(SamInputResource.of(stream)).withCloseable { SamReader reader ->
+                return reader.fileHeader.readGroups*.id.sort()
+            }
+        }
     }
 
     List<String> getReadGroupsExpected(WorkflowStep workflowStep) {
