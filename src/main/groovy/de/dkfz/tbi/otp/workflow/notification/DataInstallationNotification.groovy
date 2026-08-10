@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.workflow.notification
 
-import groovy.transform.CompileStatic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.project.Project
@@ -36,7 +35,6 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
  * As for the workflow jobs, the methods rely on the surrounding transaction of the caller.
  */
 @Component
-@CompileStatic
 class DataInstallationNotification extends AbstractWorkflowNotification {
 
     @Override
@@ -57,6 +55,7 @@ class DataInstallationNotification extends AbstractWorkflowNotification {
 
         return new NotificationContent(
                 notificationTexts: workflowNotificationContentService.buildSampleNotificationText(rows),
+                notificationTextsByRunId: workflowNotificationContentService.buildSampleNotificationTextsByRunId(rows),
                 guiUrls: buildGuiUrls(rows),
                 filePatterns: buildFilePatterns(rows, projects),
         )

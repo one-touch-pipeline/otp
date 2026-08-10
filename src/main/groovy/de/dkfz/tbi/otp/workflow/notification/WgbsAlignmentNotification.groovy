@@ -21,13 +21,11 @@
  */
 package de.dkfz.tbi.otp.workflow.notification
 
-import groovy.transform.CompileStatic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.workflow.alignment.roddy.wgbs.WgbsWorkflow
 
 @Component
-@CompileStatic
 class WgbsAlignmentNotification extends AbstractAlignmentNotification {
 
     @Override

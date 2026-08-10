@@ -33,6 +33,9 @@ class NotificationContent {
     /** the texts representing the data of the workflow runs, used in the mails */
     Set<String> notificationTexts
 
+    /** the notification text of each workflow run which produced one; a run can have only one */
+    Map<Long, String> notificationTextsByRunId
+
     /** the URLs of the GUI where the corresponding data is shown, including project and, where applicable, seqType */
     Set<String> guiUrls
 

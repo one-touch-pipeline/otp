@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.workflow.notification
 
-import groovy.transform.CompileStatic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.workflow.analysis.aceseq.AceseqWorkflow
@@ -30,7 +29,6 @@ import de.dkfz.tbi.otp.workflow.analysis.aceseq.AceseqWorkflow
  * {@link WorkflowNotification} for the Roddy ACEseq (CNV calling) workflow.
  */
 @Component
-@CompileStatic
 class RoddyAceseqNotification extends AbstractAnalysisNotification {
 
     @Override

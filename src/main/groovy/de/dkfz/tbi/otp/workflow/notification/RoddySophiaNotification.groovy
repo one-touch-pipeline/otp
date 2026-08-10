@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.workflow.notification
 
-import groovy.transform.CompileStatic
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.workflow.analysis.sophia.SophiaWorkflow
@@ -30,7 +29,6 @@ import de.dkfz.tbi.otp.workflow.analysis.sophia.SophiaWorkflow
  * {@link WorkflowNotification} for the Roddy Sophia (structural variation calling) workflow.
  */
 @Component
-@CompileStatic
 class RoddySophiaNotification extends AbstractAnalysisNotification {
 
     @Override

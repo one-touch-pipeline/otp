@@ -31,15 +31,16 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SequencingReadType
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.project.ProjectService
+import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
 /**
  * Provides the reusable content helpers needed to build the workflow notification mails.
  *
- * Each fetch method resolves the data of all given {@link WorkflowRun}s in a single projection query keyed on the
- * workflow run ids. Only the scalar fields needed for the mail are selected, so no lazy domain graph is walked and
- * the query count does not scale with the number of workflow runs. The returned rows are the single data source
- * from which a {@link WorkflowNotification} derives all content sections.
+ * Each fetch method resolves the data of all given {@link WorkflowRun}s, or of a whole ticket, in a single projection
+ * query. Only the scalar fields needed for the mail are selected, so no lazy domain graph is walked and the query
+ * count does not scale with the number of workflow runs. The returned rows are the single data source from which a
+ * {@link WorkflowNotification} derives all content sections.
  */
 @Transactional
 class WorkflowNotificationContentService {
@@ -57,7 +58,7 @@ class WorkflowNotificationContentService {
         }
         return SeqTrack.executeQuery('''
                 select individual.pid, sampleType.name, seqType.displayName, seqType.libraryLayout, seqType.singleCell,
-                       seqTrack.sampleIdentifier, project.id, project.name
+                       seqTrack.sampleIdentifier, project.id, project.name, workflowArtefact.producedBy.id
                 from SeqTrack seqTrack
                 join seqTrack.workflowArtefact workflowArtefact
                 join seqTrack.sample sample
@@ -87,7 +88,7 @@ class WorkflowNotificationContentService {
         }
         return SeqTrack.executeQuery('''
                 select individual.pid, sampleType.name, seqType.displayName, seqType.libraryLayout, seqType.singleCell,
-                       seqTrack.sampleIdentifier, project.id, project.name
+                       seqTrack.sampleIdentifier, project.id, project.name, workflowRunInputArtefact.workflowRun.id
                 from SeqTrack seqTrack
                 join seqTrack.sample sample
                 join sample.individual individual
@@ -117,7 +118,7 @@ class WorkflowNotificationContentService {
         return BamFilePairAnalysis.executeQuery('''
                 select individual.pid, sampleType1.name, sampleType2.name,
                        seqType.displayName, seqType.libraryLayout, seqType.singleCell,
-                       project.id, project.name
+                       project.id, project.name, workflowArtefact.producedBy.id
                 from BamFilePairAnalysis analysis
                 join analysis.workflowArtefact workflowArtefact
                 join analysis.samplePair samplePair
@@ -143,6 +144,7 @@ class WorkflowNotificationContentService {
                     seqTypeDisplayName(values[3] as String, values[4] as SequencingReadType, values[5] as boolean), // seqType
                     values[6] as Long,   // project.id
                     values[7] as String, // project.name
+                    values[8] as Long,   // workflowArtefact.producedBy.id
             )
         }
     }
@@ -183,6 +185,26 @@ class WorkflowNotificationContentService {
     }
 
     /**
+     * Fetches the ILSe numbers of the seq tracks imported under the given ticket, distinct and ascending.
+     *
+     * Only the numbers are selected, so neither the seq tracks nor their lazy
+     * {@link de.dkfz.tbi.otp.ngsdata.IlseSubmission}s are loaded.
+     * Seq tracks without an ILSe submission are dropped by the join, matching that a missing number cannot be shown.
+     */
+    @CompileDynamic
+    List<Integer> fetchIlseNumbers(Ticket ticket) {
+        return SeqTrack.executeQuery('''
+                select distinct ilseSubmission.ilseNumber
+                from SeqTrack seqTrack
+                join seqTrack.ilseSubmission ilseSubmission
+                where exists (from RawSequenceFile rawSequenceFile
+                        where rawSequenceFile.seqTrack = seqTrack
+                          and rawSequenceFile.fastqImportInstance.ticket = :ticket)
+                order by ilseSubmission.ilseNumber
+                ''', [ticket: ticket])
+    }
+
+    /**
      * Batch loads the projects of the given IDs in a single query, so the {@link de.dkfz.tbi.otp.project.ProjectService}
      * can resolve the sequencing directory from a real project entity without a per-row lookup.
      */
@@ -211,10 +233,9 @@ class WorkflowNotificationContentService {
             return [] as Set
         }
         return rows.groupBy { SampleNotificationRow row ->
-            "${row.pid} ${row.sampleTypeName} ${row.seqTypeDisplayName}"
+            sampleNotificationHeader(row)
         }.sort { it.key }.collect { String header, List<SampleNotificationRow> groupRows ->
-            String sampleNames = groupRows*.sampleIdentifier.unique().sort().join(", ")
-            "${header} (${sampleNames})".toString()
+            formatSampleNotificationText(header, groupRows)
         } as Set
     }
 
@@ -228,8 +249,66 @@ class WorkflowNotificationContentService {
             return [] as Set
         }
         return rows.collect { SamplePairNotificationRow row ->
-            "${row.pid} ${row.sampleType1Name} ${row.sampleType2Name} ${row.seqTypeDisplayName}".toString()
+            formatSamplePairNotificationText(row)
         }.unique().sort() as Set
+    }
+
+    /**
+     * Creates the display text of each workflow run which produced the given sample rows.
+     *
+     * The text per run uses the same format as {@link #buildSampleNotificationText(Collection)}. It is needed to attribute
+     * each text to its own run, for example to pair a skipped or final failed run with its skip message or comment.
+     */
+    Map<Long, String> buildSampleNotificationTextsByRunId(Collection<SampleNotificationRow> rows) {
+        if (!rows) {
+            return [:]
+        }
+        return rows.groupBy { SampleNotificationRow row ->
+            row.workflowRunId
+        }.collectEntries { Long workflowRunId, List<SampleNotificationRow> runRows ->
+            Map<String, List<SampleNotificationRow>> groupedRows = runRows.groupBy { SampleNotificationRow row ->
+                sampleNotificationHeader(row)
+            }
+            assert groupedRows.size() == 1: "Workflow run ${workflowRunId} must have exactly one notification text"
+            String notificationText = groupedRows.collect { String header, List<SampleNotificationRow> groupRows ->
+                formatSampleNotificationText(header, groupRows)
+            }.join("")
+            [(workflowRunId): notificationText]
+        }
+    }
+
+    /**
+     * Creates the display text of each workflow run which produced the given sample pair rows.
+     *
+     * The text per run uses the same format as {@link #buildSamplePairNotificationText(Collection)}. It is needed to attribute
+     * each text to its own run, for example to pair a skipped or final failed run with its skip message or comment.
+     */
+    Map<Long, String> buildSamplePairNotificationTextsByRunId(Collection<SamplePairNotificationRow> rows) {
+        if (!rows) {
+            return [:]
+        }
+        return rows.groupBy { SamplePairNotificationRow row ->
+            row.workflowRunId
+        }.collectEntries { Long workflowRunId, List<SamplePairNotificationRow> runRows ->
+            Set<String> notificationTexts = runRows.collect { SamplePairNotificationRow row ->
+                formatSamplePairNotificationText(row)
+            } as Set
+            assert notificationTexts.size() == 1: "Workflow run ${workflowRunId} must have exactly one notification text"
+            [(workflowRunId): notificationTexts.join("")]
+        }
+    }
+
+    private static String sampleNotificationHeader(SampleNotificationRow row) {
+        return "${row.pid} ${row.sampleTypeName} ${row.seqTypeDisplayName}".toString()
+    }
+
+    private static String formatSampleNotificationText(String header, Collection<SampleNotificationRow> rows) {
+        String sampleNames = rows*.sampleIdentifier.unique().sort().join(", ")
+        return "${header} (${sampleNames})".toString()
+    }
+
+    private static String formatSamplePairNotificationText(SamplePairNotificationRow row) {
+        return "${row.pid} ${row.sampleType1Name} ${row.sampleType2Name} ${row.seqTypeDisplayName}".toString()
     }
 
     /**
@@ -272,6 +351,7 @@ class WorkflowNotificationContentService {
                 values[5] as String, // seqTrack.sampleIdentifier
                 values[6] as Long,   // project.id
                 values[7] as String, // project.name
+                values[8] as Long,   // workflow run id
         )
     }
 

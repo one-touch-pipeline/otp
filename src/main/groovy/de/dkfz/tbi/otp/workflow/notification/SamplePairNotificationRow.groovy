@@ -41,4 +41,6 @@ class SamplePairNotificationRow {
     Long projectId
 
     String projectName
+
+    Long workflowRunId
 }

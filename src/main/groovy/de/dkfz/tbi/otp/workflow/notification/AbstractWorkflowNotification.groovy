@@ -21,13 +21,11 @@
  */
 package de.dkfz.tbi.otp.workflow.notification
 
-import groovy.transform.CompileStatic
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.project.ProjectService
 
-@CompileStatic
 abstract class AbstractWorkflowNotification implements WorkflowNotification {
 
     @Autowired

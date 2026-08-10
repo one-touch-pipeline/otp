@@ -21,8 +21,6 @@
  */
 package de.dkfz.tbi.otp.workflow.notification
 
-import groovy.transform.CompileStatic
-
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
@@ -37,7 +35,6 @@ import java.nio.file.Path
  * The GUI controller and the result directory of the file patterns are workflow specific and provided by the
  * concrete subclasses. As for the workflow jobs, the methods rely on the surrounding transaction of the caller.
  */
-@CompileStatic
 abstract class AbstractAnalysisNotification extends AbstractWorkflowNotification {
 
     /**
@@ -58,6 +55,7 @@ abstract class AbstractAnalysisNotification extends AbstractWorkflowNotification
 
         return new NotificationContent(
                 notificationTexts: workflowNotificationContentService.buildSamplePairNotificationText(rows),
+                notificationTextsByRunId: workflowNotificationContentService.buildSamplePairNotificationTextsByRunId(rows),
                 guiUrls: buildGuiUrls(rows),
                 filePatterns: buildFilePatterns(rows, projects),
         )

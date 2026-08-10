@@ -60,12 +60,13 @@ class WorkflowNotificationSpec extends Specification {
 
     void "DataInstallationNotification, builds workflow name, text, GUI URL and file pattern from the output sample rows"() {
         given:
-        SampleNotificationRow row = new SampleNotificationRow("pid", "tumor", "WGS PAIRED bulk", "sample1", PROJECT_ID, PROJECT_NAME)
+        SampleNotificationRow row = new SampleNotificationRow("pid", "tumor", "WGS PAIRED bulk", "sample1", PROJECT_ID, PROJECT_NAME, 11L)
 
         WorkflowNotificationContentService contentService = Mock(WorkflowNotificationContentService)
         contentService.fetchOutputSampleRows([workflowRun], DataInstallationWorkflow.OUTPUT_FASTQ) >> [row]
         contentService.loadProjectsById([PROJECT_ID]) >> [(PROJECT_ID): project]
         contentService.buildSampleNotificationText([row]) >> (["sample text"] as Set)
+        contentService.buildSampleNotificationTextsByRunId([row]) >> ([11L: "sample text"])
 
         DataInstallationNotification notification = new DataInstallationNotification(
                 configService: Stub(ConfigService) { getConfigServerUrl() >> OTP_URL },
@@ -80,13 +81,14 @@ class WorkflowNotificationSpec extends Specification {
         notification.workflowName() == DataInstallationWorkflow.WORKFLOW
         notification.pipelineAcknowledgementTemplate() == null
         content.notificationTexts == ["sample text"] as Set
+        content.notificationTextsByRunId == [11L: "sample text"]
         content.guiUrls == ["${OTP_URL}/sampleOverview/index?project=${PROJECT_NAME}".toString()] as Set
         content.filePatterns == ["${SEQUENCING_DIR}/\${SEQUENCING_TYPE_DIR}".toString()] as Set /* codenarc-disable-line GStringExpressionWithinString */
     }
 
     void "AbstractAlignmentNotification, builds text from the input sample rows and GUI URL and file patterns from the output BAM rows"() {
         given:
-        SampleNotificationRow sampleRow = new SampleNotificationRow("pid", "tumor", "WGS PAIRED bulk", "sample1", PROJECT_ID, PROJECT_NAME)
+        SampleNotificationRow sampleRow = new SampleNotificationRow("pid", "tumor", "WGS PAIRED bulk", "sample1", PROJECT_ID, PROJECT_NAME, 11L)
         AlignmentBamNotificationRow bamRow = new AlignmentBamNotificationRow(PROJECT_ID, PROJECT_NAME, SEQ_TYPE_ID, "whole_genome_sequencing", false, "paired")
 
         WorkflowNotificationContentService contentService = Mock(WorkflowNotificationContentService)
@@ -94,6 +96,7 @@ class WorkflowNotificationSpec extends Specification {
         contentService.fetchOutputBamRows([workflowRun], AlignmentWorkflow.OUTPUT_BAM) >> [bamRow]
         contentService.loadProjectsById([PROJECT_ID]) >> [(PROJECT_ID): project]
         contentService.buildSampleNotificationText([sampleRow]) >> (["sample text"] as Set)
+        contentService.buildSampleNotificationTextsByRunId([sampleRow]) >> ([11L: "sample text"])
 
         PanCancerAlignmentNotification notification = new PanCancerAlignmentNotification(
                 configService: Stub(ConfigService) { getConfigServerUrl() >> OTP_URL },
@@ -108,18 +111,20 @@ class WorkflowNotificationSpec extends Specification {
         notification.workflowName() == PanCancerWorkflow.WORKFLOW
         notification.pipelineAcknowledgementTemplate() == "notification.template.references.alignment.pancancer"
         content.notificationTexts == ["sample text"] as Set
+        content.notificationTextsByRunId == [11L: "sample text"]
         content.guiUrls == ["${OTP_URL}/alignmentQualityOverview/index?project=${PROJECT_NAME}&seqType=${SEQ_TYPE_ID}".toString()] as Set
         content.filePatterns == ["${SEQUENCING_DIR}/whole_genome_sequencing/view-by-pid/\${PID}/\${SAMPLE_TYPE}/paired/merged-alignment".toString()] as Set /* codenarc-disable-line GStringExpressionWithinString */
     }
 
     void "AbstractAnalysisNotification, builds text, GUI URL and file pattern from the output sample pair rows"() {
         given:
-        SamplePairNotificationRow row = new SamplePairNotificationRow("pid", "tumor", "control", "WGS PAIRED bulk", PROJECT_ID, PROJECT_NAME)
+        SamplePairNotificationRow row = new SamplePairNotificationRow("pid", "tumor", "control", "WGS PAIRED bulk", PROJECT_ID, PROJECT_NAME, 11L)
 
         WorkflowNotificationContentService contentService = Mock(WorkflowNotificationContentService)
         contentService.fetchSamplePairRows([workflowRun], AbstractAnalysisWorkflow.ANALYSIS_OUTPUT) >> [row]
         contentService.loadProjectsById([PROJECT_ID]) >> [(PROJECT_ID): project]
         contentService.buildSamplePairNotificationText([row]) >> (["sample pair text"] as Set)
+        contentService.buildSamplePairNotificationTextsByRunId([row]) >> ([11L: "sample pair text"])
 
         RoddySnvCallingNotification notification = new RoddySnvCallingNotification(
                 configService: Stub(ConfigService) { getConfigServerUrl() >> OTP_URL },
@@ -134,6 +139,7 @@ class WorkflowNotificationSpec extends Specification {
         notification.workflowName() == SnvWorkflow.WORKFLOW
         notification.pipelineAcknowledgementTemplate() == "notification.template.references.snv"
         content.notificationTexts == ["sample pair text"] as Set
+        content.notificationTextsByRunId == [11L: "sample pair text"]
         content.guiUrls == ["${OTP_URL}/snv/results?project=${PROJECT_NAME}".toString()] as Set
         content.filePatterns == ["${SEQUENCING_DIR}/\${SEQUENCING_TYPE_DIR}/view-by-pid/\${PID}/snv_results/paired/\${SAMPLE_TYPE1}_\${SAMPLE_TYPE2}".toString()] as Set /* codenarc-disable-line GStringExpressionWithinString */
     }

@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.analysis.SnvDomainFactory
 import de.dkfz.tbi.otp.domainFactory.workflowSystem.WorkflowSystemDomainFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.project.Project
+import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.workflow.alignment.AlignmentWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationWorkflow
@@ -64,6 +65,7 @@ class WorkflowNotificationContentServiceIntegrationSpec extends Specification im
         rows.first().sampleIdentifier == "sampleId1"
         rows.first().projectId == sample.individual.project.id
         rows.first().projectName == sample.individual.project.name
+        rows.first().workflowRunId == run.id
     }
 
     void "fetchInputSampleRows, projects the scalar sample data of the input seq tracks linked via the numbered input role"() {
@@ -88,6 +90,7 @@ class WorkflowNotificationContentServiceIntegrationSpec extends Specification im
         rows.first().sampleTypeName == "control"
         rows.first().seqTypeDisplayName == seqType.displayNameWithLibraryLayout
         rows.first().sampleIdentifier == "sampleId2"
+        rows.first().workflowRunId == run.id
     }
 
     void "fetchSamplePairRows, projects the scalar sample pair data of the analysis instances of the given runs"() {
@@ -108,6 +111,7 @@ class WorkflowNotificationContentServiceIntegrationSpec extends Specification im
         rows.first().seqTypeDisplayName == samplePair.seqType.displayNameWithLibraryLayout
         rows.first().projectId == samplePair.project.id
         rows.first().projectName == samplePair.project.name
+        rows.first().workflowRunId == run.id
     }
 
     void "fetchOutputBamRows, projects the scalar project and seq type data of the output bam files of the given runs"() {
@@ -137,6 +141,29 @@ class WorkflowNotificationContentServiceIntegrationSpec extends Specification im
         workflowNotificationContentService.fetchOutputBamRows([], AlignmentWorkflow.OUTPUT_BAM) == []
     }
 
+    void "fetchIlseNumbers, projects the distinct ILSe numbers of the ticket ascending, ignoring seq tracks without one"() {
+        given:
+        Ticket ticket = createTicket()
+        IlseSubmission sharedSubmission = createIlseSubmission(ilseNumber: 100)
+        createSeqTrackOfTicket(ticket, createIlseSubmission(ilseNumber: 300))
+        createSeqTrackOfTicket(ticket, sharedSubmission)
+        createSeqTrackOfTicket(ticket, sharedSubmission)
+        createSeqTrackOfTicket(ticket, null)
+        createSeqTrackOfTicket(createTicket(), createIlseSubmission(ilseNumber: 999))
+
+        expect:
+        workflowNotificationContentService.fetchIlseNumbers(ticket) == [100, 300]
+    }
+
+    void "fetchIlseNumbers, when no seq track of the ticket has an ILSe number, returns an empty list"() {
+        given:
+        Ticket ticket = createTicket()
+        createSeqTrackOfTicket(ticket, null)
+
+        expect:
+        workflowNotificationContentService.fetchIlseNumbers(ticket) == []
+    }
+
     void "loadProjectsById, batch loads the unique projects by id ignoring null ids"() {
         given:
         Project project1 = createProject()
@@ -147,5 +174,13 @@ class WorkflowNotificationContentServiceIntegrationSpec extends Specification im
 
         then:
         projects == [(project1.id): project1, (project2.id): project2]
+    }
+
+    private SeqTrack createSeqTrackOfTicket(Ticket ticket, IlseSubmission ilseSubmission) {
+        SeqTrack seqTrack = createSeqTrack(ilseSubmission: ilseSubmission)
+        FastqFile fastqFile = createFastqFile(seqTrack: seqTrack)
+        fastqFile.fastqImportInstance = createFastqImportInstance(ticket: ticket, sequenceFiles: [fastqFile])
+        fastqFile.save(flush: true)
+        return seqTrack
     }
 }

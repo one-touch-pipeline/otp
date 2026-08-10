@@ -100,14 +100,30 @@ class WorkflowNotificationContentServiceSpec extends Specification implements Do
         service.buildSamplePairNotificationText([]) == [] as Set
     }
 
+    void "buildSampleNotificationTextsByRunId, when rows are empty or null, returns empty map"() {
+        expect:
+        service.buildSampleNotificationTextsByRunId(rows) == [:]
+
+        where:
+        rows << [[], null]
+    }
+
+    void "buildSamplePairNotificationTextsByRunId, when rows are empty or null, returns empty map"() {
+        expect:
+        service.buildSamplePairNotificationTextsByRunId(rows) == [:]
+
+        where:
+        rows << [[], null]
+    }
+
     void "buildSampleNotificationText, groups by PID, sample type and seqType with unique and sorted sample names"() {
         given:
         List<SampleNotificationRow> rows = [
-                new SampleNotificationRow("pidA", "tumor1", "WGS PAIRED bulk", "sampleName2", 1L, "projectA"),
-                new SampleNotificationRow("pidA", "tumor1", "WGS PAIRED bulk", "sampleName1", 1L, "projectA"),
-                new SampleNotificationRow("pidA", "tumor1", "WGS PAIRED bulk", "sampleName1", 1L, "projectA"),
-                new SampleNotificationRow("pidA", "tumor2", "WGS PAIRED bulk", "sampleName3", 1L, "projectA"),
-                new SampleNotificationRow("pidB", "tumor1", "WGS PAIRED bulk", "sampleName4", 2L, "projectB"),
+                new SampleNotificationRow("pidA", "tumor1", "WGS PAIRED bulk", "sampleName2", 1L, "projectA", null),
+                new SampleNotificationRow("pidA", "tumor1", "WGS PAIRED bulk", "sampleName1", 1L, "projectA", null),
+                new SampleNotificationRow("pidA", "tumor1", "WGS PAIRED bulk", "sampleName1", 1L, "projectA", null),
+                new SampleNotificationRow("pidA", "tumor2", "WGS PAIRED bulk", "sampleName3", 1L, "projectA", null),
+                new SampleNotificationRow("pidB", "tumor1", "WGS PAIRED bulk", "sampleName4", 2L, "projectB", null),
         ]
 
         Set<String> expected = [
@@ -123,9 +139,9 @@ class WorkflowNotificationContentServiceSpec extends Specification implements Do
     void "buildSamplePairNotificationText, returns unique and sorted PIDs, with both sample types and seqTypes per sample pair"() {
         given:
         List<SamplePairNotificationRow> rows = [
-                new SamplePairNotificationRow("pidB", "tumor", "control", "WGS PAIRED bulk", 2L, "projectB"),
-                new SamplePairNotificationRow("pidA", "tumor", "control", "WGS PAIRED bulk", 1L, "projectA"),
-                new SamplePairNotificationRow("pidA", "tumor", "control", "WGS PAIRED bulk", 1L, "projectA"),
+                new SamplePairNotificationRow("pidB", "tumor", "control", "WGS PAIRED bulk", 2L, "projectB", null),
+                new SamplePairNotificationRow("pidA", "tumor", "control", "WGS PAIRED bulk", 1L, "projectA", null),
+                new SamplePairNotificationRow("pidA", "tumor", "control", "WGS PAIRED bulk", 1L, "projectA", null),
         ]
 
         Set<String> expected = [
@@ -135,6 +151,57 @@ class WorkflowNotificationContentServiceSpec extends Specification implements Do
 
         expect:
         service.buildSamplePairNotificationText(rows) == expected
+    }
+
+    void "notification texts are grouped per workflow run"() {
+        given:
+        List<SampleNotificationRow> sampleRows = [
+                new SampleNotificationRow("pidA", "tumor", "WGS PAIRED bulk", "sample2", 1L, "projectA", 11L),
+                new SampleNotificationRow("pidA", "tumor", "WGS PAIRED bulk", "sample1", 1L, "projectA", 11L),
+                new SampleNotificationRow("pidB", "control", "WGS PAIRED bulk", "sample3", 1L, "projectA", 12L),
+        ]
+        List<SamplePairNotificationRow> samplePairRows = [
+                new SamplePairNotificationRow("pidA", "tumor", "control", "WGS PAIRED bulk", 1L, "projectA", 11L),
+                new SamplePairNotificationRow("pidB", "tumor", "control", "WGS PAIRED bulk", 1L, "projectA", 12L),
+        ]
+
+        expect:
+        service.buildSampleNotificationTextsByRunId(sampleRows) == [
+                11L: "pidA tumor WGS PAIRED bulk (sample1, sample2)",
+                12L: "pidB control WGS PAIRED bulk (sample3)",
+        ]
+        service.buildSamplePairNotificationTextsByRunId(samplePairRows) == [
+                11L: "pidA tumor control WGS PAIRED bulk",
+                12L: "pidB tumor control WGS PAIRED bulk",
+        ]
+    }
+
+    void "buildSampleNotificationTextsByRunId, rejects multiple notification texts for one workflow run"() {
+        given:
+        List<SampleNotificationRow> rows = [
+                new SampleNotificationRow("pidA", "tumor", "WGS PAIRED bulk", "sample1", 1L, "projectA", 11L),
+                new SampleNotificationRow("pidB", "control", "WGS PAIRED bulk", "sample2", 1L, "projectA", 11L),
+        ]
+
+        when:
+        service.buildSampleNotificationTextsByRunId(rows)
+
+        then:
+        thrown(AssertionError)
+    }
+
+    void "buildSamplePairNotificationTextsByRunId, rejects multiple notification texts for one workflow run"() {
+        given:
+        List<SamplePairNotificationRow> rows = [
+                new SamplePairNotificationRow("pidA", "tumor", "control", "WGS PAIRED bulk", 1L, "projectA", 11L),
+                new SamplePairNotificationRow("pidB", "tumor", "control", "WGS PAIRED bulk", 1L, "projectA", 11L),
+        ]
+
+        when:
+        service.buildSamplePairNotificationTextsByRunId(rows)
+
+        then:
+        thrown(AssertionError)
     }
 
     void "getMergingDirectories, when bamFiles is empty, returns empty set"() {

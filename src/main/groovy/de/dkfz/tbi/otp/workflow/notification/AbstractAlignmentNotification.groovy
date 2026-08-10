@@ -21,8 +21,6 @@
  */
 package de.dkfz.tbi.otp.workflow.notification
 
-import groovy.transform.CompileStatic
-
 import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.otp.workflow.alignment.AlignmentWorkflow
@@ -36,7 +34,6 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
  * The {@code workflowName} and {@code pipelineAcknowledgementTemplate} are workflow specific and provided by the
  * concrete subclasses. As for the workflow jobs, the methods rely on the surrounding transaction of the caller.
  */
-@CompileStatic
 abstract class AbstractAlignmentNotification extends AbstractWorkflowNotification {
 
     @Override
@@ -49,6 +46,7 @@ abstract class AbstractAlignmentNotification extends AbstractWorkflowNotificatio
 
         return new NotificationContent(
                 notificationTexts: workflowNotificationContentService.buildSampleNotificationText(sampleRows),
+                notificationTextsByRunId: workflowNotificationContentService.buildSampleNotificationTextsByRunId(sampleRows),
                 guiUrls: buildGuiUrls(bamRows),
                 filePatterns: buildFilePatterns(bamRows, projects),
         )
