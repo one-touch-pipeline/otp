@@ -145,6 +145,13 @@ enum OtpProperty {
      */
     SCHEDULER_ENABLED('otp.scheduler.enabled', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.DEVELOPMENT), 'false'),
 
+    /**
+     * Enable the feature-flagged testing endpoints (see {@code TestingController}) used to isolate Cypress E2E tests
+     * via a rolled-back database transaction. Must only ever be enabled in test/development environments; the
+     * endpoints return HTTP 403 while this is not explicitly set to {@code true}.
+     */
+    TESTING_ENDPOINTS_ENABLED('otp.testing.endpoints.enabled', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.DEVELOPMENT), 'false'),
+
     final String key
 
     final TypeValidators validator

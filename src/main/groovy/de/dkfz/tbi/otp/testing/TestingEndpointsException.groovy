@@ -19,26 +19,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package de.dkfz.tbi.otp.testing
 
-/* global require */
+import groovy.transform.InheritConstructors
 
-require('./commands');
+import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
 
-// Database isolation at the PAGE (spec-file) level.
-//
-// Because Cypress loads this support file per spec, these root-level hooks run once at the start and once at the end of
-// each spec file. That opens a server-side database transaction wrapping the whole file (including its own
-// before/beforeEach/after hooks and every test) and rolls it back afterwards, so specs cannot pollute each other's
-// database state. Deliberately NOT beforeEach/afterEach: many specs are ordered create -> edit -> delete chains whose
-// later tests rely on state created by earlier tests in the same file.
-//
-// Requires the feature-flagged endpoints (otp.testing.endpoints.enabled=true); when disabled the commands no-op, so the
-// suite still runs without isolation. Filesystem side effects (uploads/downloads) are not covered and keep their
-// existing per-spec cleanups.
-before(() => {
-  cy.beginTestTransaction();
-});
-
-after(() => {
-  cy.rollbackTestTransaction();
-});
+/**
+ * Thrown when the feature-flagged testing endpoints are used without their infrastructure being installed (i.e. when
+ * {@code otp.testing.endpoints.enabled} is not {@code true}). Should be unreachable, as {@code TestingController} guards
+ * every action on the flag.
+ */
+@InheritConstructors
+class TestingEndpointsException extends OtpRuntimeException {
+}

@@ -36,7 +36,11 @@ class ProjectSelectionInterceptor {
     int order = 2
 
     ProjectSelectionInterceptor() {
-        matchAll().except(controller: 'error')
+        matchAll()
+                .except(controller: 'error')
+                // feature-flagged Cypress test-isolation endpoints: must do no DB access, otherwise a per-request
+                // savepoint here could be cascaded away by RELEASE SAVEPOINT and destroy a nested test savepoint
+                .except(controller: 'testing')
     }
 
     @Override

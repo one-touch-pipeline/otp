@@ -80,6 +80,90 @@ Cypress.Commands.add('logout', () => {
   cy.visit('/logout');
 });
 
+/**
+ * Open a database transaction on the server so that everything a spec file writes can be undone afterwards.
+ *
+ * Backed by the feature-flagged OTP endpoint POST /testing/begin, which is only active when
+ * `otp.testing.endpoints.enabled=true`. When the flag is off the endpoint returns 403; in that case this command logs a
+ * warning and does nothing, so the suite still runs (just without database isolation) on instances without the flag.
+ *
+ * Intended to be called once per spec file (see support/index.js), NOT per test: many specs are ordered
+ * create -> edit -> delete chains where a later test depends on state created by an earlier one.
+ */
+Cypress.Commands.add('beginTestTransaction', () => {
+  'use strict';
+
+  cy.request({
+    method: 'POST',
+    url: '/testing/begin',
+    failOnStatusCode: false
+  }).then((response) => {
+    if (response.status !== 200) {
+      cy.log(`Database test isolation is not active (POST /testing/begin returned ${response.status}). ` +
+        'Set otp.testing.endpoints.enabled=true to enable it.');
+    }
+  });
+});
+
+/** Roll back the transaction opened by cy.beginTestTransaction(), resetting the database to its pre-spec state. */
+Cypress.Commands.add('rollbackTestTransaction', () => {
+  'use strict';
+
+  cy.request({
+    method: 'POST',
+    url: '/testing/rollback',
+    failOnStatusCode: false
+  }).then((response) => {
+    if (response.status !== 200) {
+      cy.log(`Could not roll back the test transaction (POST /testing/rollback returned ${response.status}).`);
+    }
+  });
+});
+
+/**
+ * Open a NESTED transaction layer (a savepoint) on top of the page-level transaction opened by
+ * cy.beginTestTransaction(), and roll just that layer back with cy.rollbackNestedTransaction().
+ *
+ * These hit the very same /testing/begin and /testing/rollback endpoints as the page-level commands: the server keeps
+ * a stack, so a second `begin` nests under the first and each `rollback` unwinds only the innermost layer. Use them
+ * when a single spec needs per-TEST isolation (reset after each `it()`) as well as the per-page reset, e.g.:
+ *
+ *   beforeEach(() => cy.beginNestedTransaction());
+ *   afterEach(() => cy.rollbackNestedTransaction());
+ *
+ * NOTE: not used by any spec yet. Most specs are ordered create -> edit -> delete chains that must NOT be reset
+ * between tests. Only add these hooks to a spec that is genuinely independent test-by-test.
+ */
+Cypress.Commands.add('beginNestedTransaction', () => {
+  'use strict';
+
+  cy.request({
+    method: 'POST',
+    url: '/testing/begin',
+    failOnStatusCode: false
+  }).then((response) => {
+    if (response.status !== 200) {
+      cy.log(`Database test isolation is not active (POST /testing/begin returned ${response.status}). ` +
+        'Set otp.testing.endpoints.enabled=true to enable it.');
+    }
+  });
+});
+
+/** Roll back the innermost nested layer opened by cy.beginNestedTransaction(); the outer transaction stays open. */
+Cypress.Commands.add('rollbackNestedTransaction', () => {
+  'use strict';
+
+  cy.request({
+    method: 'POST',
+    url: '/testing/rollback',
+    failOnStatusCode: false
+  }).then((response) => {
+    if (response.status !== 200) {
+      cy.log(`Could not roll back the nested test transaction (POST /testing/rollback returned ${response.status}).`);
+    }
+  });
+});
+
 let checkedHrefList = [];
 const excludedLinks = [];
 

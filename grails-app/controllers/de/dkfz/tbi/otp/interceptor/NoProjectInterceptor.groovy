@@ -36,6 +36,8 @@ class NoProjectInterceptor {
     NoProjectInterceptor() {
         matchAll()
                 .except(controller: 'error')
+                // feature-flagged Cypress test-isolation endpoints
+                .except(controller: 'testing')
                 .except(controller: 'projectRequest')
                 .except(controller: 'departmentConfiguration')
                 .except(controller: 'ldap')

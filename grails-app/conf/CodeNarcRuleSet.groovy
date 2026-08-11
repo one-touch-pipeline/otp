@@ -899,6 +899,8 @@ All the Rules that will be used for OTP
     }
     JdbcConnectionReference {
         priority = DEFAULT
+        // PinningDataSource legitimately manages a raw JDBC connection to isolate Cypress tests (test-only, feature-flagged)
+        doNotApplyToFileNames = 'PinningDataSource.groovy,PinningDataSourceSpec.groovy'
     }
     JdbcResultSetReference {
         priority = DEFAULT

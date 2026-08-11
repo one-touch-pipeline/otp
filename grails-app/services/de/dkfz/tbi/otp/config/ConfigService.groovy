@@ -282,6 +282,14 @@ class ConfigService implements ApplicationContextAware {
         return getBooleanValue(OtpProperty.SCHEDULER_ENABLED)
     }
 
+    /**
+     * Whether the feature-flagged testing endpoints (see {@code TestingController}) are enabled. Defaults to
+     * {@code false} so the endpoints are never reachable unless explicitly turned on in a test environment.
+     */
+    boolean isTestingEndpointsEnabled() {
+        return getBooleanValue(OtpProperty.TESTING_ENDPOINTS_ENABLED, false)
+    }
+
     private File getAndCheckPathFromProperty(OtpProperty property) {
         return new File(otpProperties.get(property) ?: property.defaultValue)
     }

@@ -211,6 +211,9 @@ class SecurityConfiguration {
                                     "/statistic/laneCountPerDate",
                                     "/privacyPolicy/**",
                                     "/metadataImport/autoImport",
+                                    // feature-flagged Cypress test-isolation endpoints; each action itself returns 403
+                                    // unless 'otp.testing.endpoints.enabled=true', so they are safe to permit here
+                                    "/testing/**",
                                     "/grails-errorhandler/**",
                                     "/error/**",
                                     "/webjars/chart.js/**",

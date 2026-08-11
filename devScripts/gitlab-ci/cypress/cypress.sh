@@ -48,6 +48,15 @@ export DISABLE_RESTART=true
 cp $DOCKER_ENV ./.env
 cp $OTP_PROPERTIES_CYPRESS ~/.otp.properties
 
+# append repo-controlled Cypress-only properties (e.g. otp.testing.endpoints.enabled) so they don't
+# have to live in the shared $OTP_PROPERTIES_CYPRESS CI variable
+if [[ -f cypress/extra.cypress.properties ]]
+then
+    printf '\n' >> ~/.otp.properties
+    cat cypress/extra.cypress.properties >> ~/.otp.properties
+    echo "Appended cypress/extra.cypress.properties to ~/.otp.properties"
+fi
+
 cypressSecret="$(sed -n -E 's/^[[:space:]]*"otp\.autoimport\.secret"[[:space:]]*:[[:space:]]*"([^"]*)".*$/\1/p' cypress/cypress.env.json | tail -n 1)"
 
 if [[ -z "$cypressSecret" ]]

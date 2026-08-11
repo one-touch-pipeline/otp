@@ -24,7 +24,10 @@ import io.micrometer.core.instrument.Tag
 import io.micrometer.core.instrument.binder.jpa.HibernateMetrics
 
 import de.dkfz.tbi.otp.ProjectLinkGenerator
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.handler.CustomExceptionResolver
+import de.dkfz.tbi.otp.testing.PinningDataSourceRegistrar
 
 beans = {
     exceptionHandler(CustomExceptionResolver) {
@@ -46,4 +49,20 @@ beans = {
     }
 
     hibernateMetrics(HibernateMetrics, ref('sessionFactory'), 'hibernate', [] as Iterable<Tag>)
+
+    // Feature-flagged database isolation for end-to-end (Cypress) tests. Only when 'otp.testing.endpoints.enabled=true'
+    // do we replace GORM's data source connection source factory so a single spec file's writes can be rolled back.
+    // Never registered in production, so it has zero effect there. See TestingController / PinningDataSource.
+    if (Environment.current in [Environment.DEVELOPMENT, Environment.PRODUCTION]) {
+        boolean testingEndpointsEnabled = false
+        try {
+            testingEndpointsEnabled = Boolean.parseBoolean(ConfigService.parsePropertiesFile().getProperty(
+                    OtpProperty.TESTING_ENDPOINTS_ENABLED.key, OtpProperty.TESTING_ENDPOINTS_ENABLED.defaultValue))
+        } catch (IOException ignored) {
+            // no readable properties file -> leave the testing endpoints disabled
+        }
+        if (testingEndpointsEnabled) {
+            pinningDataSourceRegistrar(PinningDataSourceRegistrar)
+        }
+    }
 }

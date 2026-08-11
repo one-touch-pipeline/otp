@@ -39,6 +39,8 @@ class PrivacyPolicyInterceptor {
                 .except(controller: "logout", action: "index")
                 .except(controller: "auth", action: "logout")
                 .except(controller: "info", action: "newsBanner")
+                // feature-flagged Cypress test-isolation endpoints; called before login, must not be redirected
+                .except(controller: "testing")
     }
 
     @Override
