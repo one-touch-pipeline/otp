@@ -68,4 +68,8 @@ class WorkFolder implements Entity {
     static Closure constraints = {
         size nullable: true
     }
+
+    static Closure mapping = {
+        uuid index: "work_folder_uuid_idx"
+    }
 }

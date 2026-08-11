@@ -237,4 +237,6 @@ databaseChangeLog = {
     include file: 'changelogs/2026/otp-2991-notification-domain-classes.groovy'
 
     include file: 'changelogs/2026/otp-2778-disable-cellRanger-workflow.groovy'
+
+    include file: 'changelogs/2026/otp-3019.groovy'
 }
