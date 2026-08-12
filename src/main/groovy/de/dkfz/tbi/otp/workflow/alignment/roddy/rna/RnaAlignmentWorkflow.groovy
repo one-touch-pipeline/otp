@@ -24,8 +24,7 @@ package de.dkfz.tbi.otp.workflow.alignment.roddy.rna
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackage
 import de.dkfz.tbi.otp.infrastructure.alignment.RoddyBamFileNames
 import de.dkfz.tbi.otp.workflow.alignment.*
 import de.dkfz.tbi.otp.workflow.alignment.roddy.RoddyAlignmentCheckQcJob
@@ -69,24 +68,8 @@ class RnaAlignmentWorkflow extends AlignmentWorkflow implements LinearWorkflow {
     }
 
     @Override
-    Artefact createCopyOfArtefact(Artefact artefact) {
-        RnaRoddyBamFile rnaRoddyBamFile = artefact as RnaRoddyBamFile
-        rnaRoddyBamFile.withdrawn = true
-        rnaRoddyBamFile.save(flush: true)
-
-        MergingWorkPackage mergingWorkPackage = rnaRoddyBamFile.mergingWorkPackage
-        int identifier = RnaRoddyBamFile.nextIdentifier(mergingWorkPackage)
-
-        RnaRoddyBamFile outputRnaRoddyBamFile = new RnaRoddyBamFile([
-                workPackage        : mergingWorkPackage,
-                identifier         : identifier,
-                workDirectoryName  : "${RoddyBamFileNames.WORK_DIR_PREFIX}_${identifier}",
-                seqTracks          : rnaRoddyBamFile.seqTracks.collect() as Set,
-                config             : rnaRoddyBamFile.config,
-                numberOfMergedLanes: rnaRoddyBamFile.containedSeqTracks.size(),
-        ]).save(flush: true)
-
-        return outputRnaRoddyBamFile
+    String buildWorkDirectoryName(AbstractMergingWorkPackage mergingWorkPackage, int identifier) {
+        return "${RoddyBamFileNames.WORK_DIR_PREFIX}_${identifier}"
     }
 
     @Override

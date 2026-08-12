@@ -21,8 +21,10 @@
  */
 package de.dkfz.tbi.otp.workflow.analysis
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractAnalysisWorkFileService
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.workflowExecution.Artefact
 import de.dkfz.tbi.otp.workflowExecution.OtpWorkflow
 
@@ -36,6 +38,33 @@ abstract class AbstractAnalysisWorkflow implements OtpWorkflow {
     static final String INPUT_TUMOR_BAM = "TUMOR_BAM"
 
     static final String INPUT_CONTROL_BAM = "CONTROL_BAM"
+
+    /**
+     * Resolve the concrete {@link AbstractAnalysisWorkFileService} used to construct the instance name of the copied artefact.
+     */
+    abstract AbstractAnalysisWorkFileService getAnalysisWorkFileService()
+
+    @Override
+    Artefact createCopyOfArtefact(Artefact artefact) {
+        BamFilePairAnalysis analysisInstance = artefact as BamFilePairAnalysis
+        analysisInstance.withdrawn = true
+        analysisInstance.save(flush: true)
+
+        SamplePair pair = analysisInstance.samplePair
+        String newInstanceName = analysisWorkFileService.constructInstanceName(artefact.workflowArtefact.producedBy.workflowVersion)
+
+        BamFilePairAnalysis outputInstance = analysisInstance.class.newInstance() as BamFilePairAnalysis
+        outputInstance.with {
+            samplePair = pair
+            instanceName = newInstanceName
+            config = analysisInstance.config
+            sampleType1BamFile = pair.mergingWorkPackage1.bamFileInProjectFolder
+            sampleType2BamFile = pair.mergingWorkPackage2.bamFileInProjectFolder
+        }
+        outputInstance.save(flush: true)
+
+        return outputInstance
+    }
 
     @Override
     void reconnectDependencies(Artefact artefact, Artefact newArtefact, String role) {

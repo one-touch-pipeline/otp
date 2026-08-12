@@ -25,10 +25,10 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractAnalysisWorkFileService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.workflow.analysis.*
 import de.dkfz.tbi.otp.workflow.jobs.*
-import de.dkfz.tbi.otp.workflowExecution.Artefact
 import de.dkfz.tbi.otp.workflowExecution.MultiApiVersionWorkflow
 
 /**
@@ -86,22 +86,8 @@ class SnvWorkflow extends AbstractAnalysisWorkflow implements MultiApiVersionWor
     }
 
     @Override
-    Artefact createCopyOfArtefact(Artefact artefact) {
-        SnvCallingInstance snvCallingInstance = artefact as SnvCallingInstance
-        snvCallingInstance.withdrawn = true
-        snvCallingInstance.save(flush: true)
-
-        SamplePair samplePair = snvCallingInstance.samplePair
-
-        SnvCallingInstance outputSnvCallingInstance = new SnvCallingInstance([
-                samplePair        : samplePair,
-                instanceName      : snvWorkFileService.constructInstanceName(artefact.workflowArtefact.producedBy.workflowVersion),
-                config            : snvCallingInstance.config,
-                sampleType1BamFile: samplePair.mergingWorkPackage1.bamFileInProjectFolder,
-                sampleType2BamFile: samplePair.mergingWorkPackage2.bamFileInProjectFolder,
-        ]).save(flush: true)
-
-        return outputSnvCallingInstance
+    AbstractAnalysisWorkFileService getAnalysisWorkFileService() {
+        return snvWorkFileService
     }
 
     final String userDocumentation = "notification.template.references.snv"

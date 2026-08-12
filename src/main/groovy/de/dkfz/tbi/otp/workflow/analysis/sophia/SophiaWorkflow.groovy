@@ -25,12 +25,10 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
-import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
+import de.dkfz.tbi.otp.dataprocessing.AbstractAnalysisWorkFileService
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaWorkFileService
 import de.dkfz.tbi.otp.workflow.analysis.*
 import de.dkfz.tbi.otp.workflow.jobs.*
-import de.dkfz.tbi.otp.workflowExecution.Artefact
 import de.dkfz.tbi.otp.workflowExecution.LinearWorkflow
 
 /**
@@ -67,22 +65,8 @@ class SophiaWorkflow extends AbstractAnalysisWorkflow implements LinearWorkflow 
     }
 
     @Override
-    Artefact createCopyOfArtefact(Artefact artefact) {
-        SophiaInstance sophiaInstance = artefact as SophiaInstance
-        sophiaInstance.withdrawn = true
-        sophiaInstance.save(flush: true)
-
-        SamplePair samplePair = sophiaInstance.samplePair
-
-        SophiaInstance outputSophiaInstance = new SophiaInstance([
-                samplePair        : samplePair,
-                instanceName      : sophiaWorkFileService.constructInstanceName(artefact.workflowArtefact.producedBy.workflowVersion),
-                config            : sophiaInstance.config,
-                sampleType1BamFile: samplePair.mergingWorkPackage1.bamFileInProjectFolder,
-                sampleType2BamFile: samplePair.mergingWorkPackage2.bamFileInProjectFolder,
-        ]).save(flush: true)
-
-        return outputSophiaInstance
+    AbstractAnalysisWorkFileService getAnalysisWorkFileService() {
+        return sophiaWorkFileService
     }
 
     final String userDocumentation = "notification.template.references.sophia"

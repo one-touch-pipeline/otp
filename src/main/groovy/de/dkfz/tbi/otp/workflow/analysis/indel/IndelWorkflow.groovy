@@ -25,12 +25,10 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.AbstractAnalysisWorkFileService
 import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelWorkFileService
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.workflow.analysis.*
 import de.dkfz.tbi.otp.workflow.jobs.*
-import de.dkfz.tbi.otp.workflowExecution.Artefact
 import de.dkfz.tbi.otp.workflowExecution.MultiApiVersionWorkflow
 
 /**
@@ -90,22 +88,8 @@ class IndelWorkflow extends AbstractAnalysisWorkflow implements MultiApiVersionW
     }
 
     @Override
-    Artefact createCopyOfArtefact(Artefact artefact) {
-        IndelCallingInstance indelCallingInstance = artefact as IndelCallingInstance
-        indelCallingInstance.withdrawn = true
-        indelCallingInstance.save(flush: true)
-
-        SamplePair samplePair = indelCallingInstance.samplePair
-
-        IndelCallingInstance outputIndelCallingInstance = new IndelCallingInstance([
-                samplePair        : samplePair,
-                instanceName      : indelWorkFileService.constructInstanceName(artefact.workflowArtefact.producedBy.workflowVersion),
-                config            : indelCallingInstance.config,
-                sampleType1BamFile: samplePair.mergingWorkPackage1.bamFileInProjectFolder,
-                sampleType2BamFile: samplePair.mergingWorkPackage2.bamFileInProjectFolder,
-        ]).save(flush: true)
-
-        return outputIndelCallingInstance
+    AbstractAnalysisWorkFileService getAnalysisWorkFileService() {
+        return indelWorkFileService
     }
 
     final String userDocumentation = "notification.template.references.indel"

@@ -25,8 +25,8 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.infrastructure.alignment.CellRangerWorkFileService
 import de.dkfz.tbi.otp.workflow.alignment.AlignmentFragmentJob
 import de.dkfz.tbi.otp.workflow.alignment.AlignmentWorkflow
@@ -68,24 +68,8 @@ class CellRangerWorkflow extends AlignmentWorkflow implements LinearWorkflow {
     }
 
     @Override
-    @SuppressWarnings('ImplicitReturnStatement')
-    Artefact createCopyOfArtefact(Artefact artefact) {
-        SingleCellBamFile singleCellBamFile = artefact as SingleCellBamFile
-        singleCellBamFile.withdrawn = true
-        singleCellBamFile.save(flush: true)
-
-        CellRangerMergingWorkPackage cellRangerMergingWorkPackage = singleCellBamFile.mergingWorkPackage
-        int identifier = SingleCellBamFile.nextIdentifier(cellRangerMergingWorkPackage)
-
-        SingleCellBamFile outputSingleCellBamFile = new SingleCellBamFile([
-                workPackage        : cellRangerMergingWorkPackage,
-                identifier         : identifier,
-                workDirectoryName  : cellRangerWorkFileService.buildWorkDirectoryName(cellRangerMergingWorkPackage, identifier),
-                seqTracks          : singleCellBamFile.seqTracks.collect() as Set,
-                numberOfMergedLanes: singleCellBamFile.containedSeqTracks.size(),
-        ]).save(flush: true)
-
-        return outputSingleCellBamFile
+    String buildWorkDirectoryName(AbstractMergingWorkPackage mergingWorkPackage, int identifier) {
+        return cellRangerWorkFileService.buildWorkDirectoryName(mergingWorkPackage as CellRangerMergingWorkPackage, identifier)
     }
 
     @Override

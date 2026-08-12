@@ -21,6 +21,11 @@
  */
 package de.dkfz.tbi.otp.workflow.alignment
 
+import groovy.transform.CompileDynamic
+
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackage
+import de.dkfz.tbi.otp.workflowExecution.Artefact
 import de.dkfz.tbi.otp.workflowExecution.OtpWorkflow
 
 abstract class AlignmentWorkflow implements OtpWorkflow {
@@ -28,6 +33,38 @@ abstract class AlignmentWorkflow implements OtpWorkflow {
     public static final String INPUT_FASTQ = "FASTQ"
     public static final String INPUT_FASTQC = "FASTQC"
     public static final String OUTPUT_BAM = "BAM"
+
+    /**
+     * Resolve the name of the work directory for the copied bam file.
+     */
+    abstract String buildWorkDirectoryName(AbstractMergingWorkPackage mergingWorkPackage, int identifier)
+
+    /**
+     * Since it is designed for repeated run, it creates and returns a new artefact
+     */
+    @Override
+    @CompileDynamic
+    Artefact createCopyOfArtefact(Artefact artefact) {
+        AbstractBamFile bamFile = artefact as AbstractBamFile
+        bamFile.withdrawn = true
+        bamFile.save(flush: true)
+
+        AbstractMergingWorkPackage mergingWorkPackage = bamFile.mergingWorkPackage
+        int identifier = bamFile.nextIdentifier(mergingWorkPackage)
+
+        AbstractBamFile outputBamFile = bamFile.class.newInstance() as AbstractBamFile
+        outputBamFile.workPackage = mergingWorkPackage
+        outputBamFile.identifier = identifier
+        outputBamFile.workDirectoryName = buildWorkDirectoryName(mergingWorkPackage, identifier)
+        outputBamFile.seqTracks = bamFile.seqTracks.collect() as Set
+        outputBamFile.numberOfMergedLanes = bamFile.containedSeqTracks.size()
+        if (outputBamFile.hasProperty('config')) {
+            outputBamFile.config = bamFile.config
+        }
+        outputBamFile.save(flush: true)
+
+        return outputBamFile
+    }
 
     @Override
     boolean isAlignment() {

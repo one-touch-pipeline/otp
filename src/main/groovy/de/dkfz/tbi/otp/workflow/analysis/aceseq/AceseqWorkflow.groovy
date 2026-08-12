@@ -25,12 +25,10 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqInstance
+import de.dkfz.tbi.otp.dataprocessing.AbstractAnalysisWorkFileService
 import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqWorkFileService
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.workflow.analysis.*
 import de.dkfz.tbi.otp.workflow.jobs.*
-import de.dkfz.tbi.otp.workflowExecution.Artefact
 import de.dkfz.tbi.otp.workflowExecution.LinearWorkflow
 
 /**
@@ -69,22 +67,8 @@ class AceseqWorkflow extends AbstractAnalysisWorkflow implements LinearWorkflow 
     }
 
     @Override
-    Artefact createCopyOfArtefact(Artefact artefact) {
-        AceseqInstance aceseqInstance = artefact as AceseqInstance
-        aceseqInstance.withdrawn = true
-        aceseqInstance.save(flush: true)
-
-        SamplePair samplePair = aceseqInstance.samplePair
-
-        AceseqInstance outputAceseqInstance = new AceseqInstance([
-                samplePair        : samplePair,
-                instanceName      : aceseqWorkFileService.constructInstanceName(artefact.workflowArtefact.producedBy.workflowVersion),
-                config            : aceseqInstance.config,
-                sampleType1BamFile: samplePair.mergingWorkPackage1.bamFileInProjectFolder,
-                sampleType2BamFile: samplePair.mergingWorkPackage2.bamFileInProjectFolder,
-        ]).save(flush: true)
-
-        return outputAceseqInstance
+    AbstractAnalysisWorkFileService getAnalysisWorkFileService() {
+        return aceseqWorkFileService
     }
 
     final String userDocumentation = "notification.template.references.aceseq"

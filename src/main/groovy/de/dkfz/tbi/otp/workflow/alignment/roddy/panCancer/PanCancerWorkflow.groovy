@@ -24,8 +24,7 @@ package de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer
 import groovy.util.logging.Slf4j
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackage
 import de.dkfz.tbi.otp.infrastructure.alignment.RoddyBamFileNames
 import de.dkfz.tbi.otp.workflow.alignment.*
 import de.dkfz.tbi.otp.workflow.alignment.roddy.RoddyAlignmentCheckQcJob
@@ -70,28 +69,9 @@ class PanCancerWorkflow extends AlignmentWorkflow implements LinearWorkflow {
         ]
     }
 
-    /**
-     * Since it is designed for repeated run, it creates and returns a new artefact
-     */
     @Override
-    Artefact createCopyOfArtefact(Artefact artefact) {
-        RoddyBamFile roddyBamFile = artefact as RoddyBamFile
-        roddyBamFile.withdrawn = true
-        roddyBamFile.save(flush: true)
-
-        MergingWorkPackage mergingWorkPackage = roddyBamFile.mergingWorkPackage
-        int identifier = RoddyBamFile.nextIdentifier(mergingWorkPackage)
-
-        RoddyBamFile outputRoddyBamFile = new RoddyBamFile([
-                workPackage        : mergingWorkPackage,
-                identifier         : identifier,
-                workDirectoryName  : "${RoddyBamFileNames.WORK_DIR_PREFIX}_${identifier}",
-                seqTracks          : roddyBamFile.seqTracks.collect() as Set,
-                config             : roddyBamFile.config,
-                numberOfMergedLanes: roddyBamFile.containedSeqTracks.size(),
-        ]).save(flush: true)
-
-        return outputRoddyBamFile
+    String buildWorkDirectoryName(AbstractMergingWorkPackage mergingWorkPackage, int identifier) {
+        return "${RoddyBamFileNames.WORK_DIR_PREFIX}_${identifier}"
     }
 
     /**
