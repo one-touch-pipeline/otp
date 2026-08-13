@@ -57,11 +57,28 @@ class WorkflowDeletionService {
 
         WorkflowRun workflowRunToDelete = WorkflowRun.get(workflowRun.id)
         if (workflowRunToDelete) {
+            detachRestartSuccessor(workflowRunToDelete)
             workflowRunToDelete.delete(flush: true)
         }
 
         deleteSkipMessage(skipMessage)
         deleteWorkFolder(workFolder)
+    }
+
+    /**
+     * Restarting a run creates a successor pointing back to it via {@link WorkflowRun#restartedFrom}. The successor
+     * outlives its predecessor, so that reference has to be cut before deleting: otherwise the successor, still
+     * attached to the Hibernate session, re-saves the just deleted run by cascade on the next flush.
+     *
+     * The successor thereby loses the link to its history, which is accepted, since it is only informational.
+     */
+    @CompileDynamic
+    private void detachRestartSuccessor(WorkflowRun workflowRun) {
+        WorkflowRun successor = CollectionUtils.atMostOneElement(WorkflowRun.findAllByRestartedFrom(workflowRun))
+        if (successor) {
+            successor.restartedFrom = null
+            successor.save(flush: true)
+        }
     }
 
     @CompileDynamic

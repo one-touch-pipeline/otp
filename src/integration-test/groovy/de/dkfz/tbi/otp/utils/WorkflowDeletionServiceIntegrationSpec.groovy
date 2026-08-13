@@ -68,6 +68,21 @@ class WorkflowDeletionServiceIntegrationSpec extends Specification implements Wo
         WorkFolder.count == 0
     }
 
+    void "deleteWorkflowRun, should delete the run and unset restartedFrom of its successor"() {
+        given:
+        WorkflowRun restartedFromRun = createWorkflowRun()
+        WorkflowRun restartedRun = createWorkflowRun([
+                restartedFrom: restartedFromRun,
+        ])
+
+        when:
+        workflowDeletionService.deleteWorkflowRun(restartedFromRun)
+
+        then:
+        !WorkflowRun.get(restartedFromRun.id)
+        WorkflowRun.get(restartedRun.id).restartedFrom == null
+    }
+
     void "test deleteWorkflowArtefact"() {
         given:
         WorkflowRunInputArtefact wria = createWorkflowArtefactAndRun()
