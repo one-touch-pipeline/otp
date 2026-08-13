@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.testing
 
-import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.grails.datastore.gorm.jdbc.connections.CachedDataSourceConnectionSourceFactory
 import org.grails.datastore.gorm.jdbc.connections.DataSourceConnectionSource
@@ -42,7 +41,6 @@ import javax.sql.DataSource
  * Hibernate holds the connection source's {@code source} directly, bypassing the bean.)</p>
  */
 @Slf4j
-@CompileStatic
 class PinningDataSourceConnectionSourceFactory extends CachedDataSourceConnectionSourceFactory {
 
     private final Object cacheLock = new Object()

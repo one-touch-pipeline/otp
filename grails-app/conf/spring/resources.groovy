@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.handler.CustomExceptionResolver
 import de.dkfz.tbi.otp.testing.PinningDataSourceRegistrar
+import de.dkfz.tbi.otp.testing.TestTransactionService
 
 beans = {
     exceptionHandler(CustomExceptionResolver) {
@@ -50,10 +51,11 @@ beans = {
 
     hibernateMetrics(HibernateMetrics, ref('sessionFactory'), 'hibernate', [] as Iterable<Tag>)
 
-    // Feature-flagged database isolation for end-to-end (Cypress) tests. Only when 'otp.testing.endpoints.enabled=true'
-    // do we replace GORM's data source connection source factory so a single spec file's writes can be rolled back.
-    // Never registered in production, so it has zero effect there. See TestingController / PinningDataSource.
-    if (Environment.current in [Environment.DEVELOPMENT, Environment.PRODUCTION]) {
+    // Feature-flagged database isolation for end-to-end (Cypress) tests. Only in the DEVELOPMENT environment AND only
+    // when 'otp.testing.endpoints.enabled=true' do we replace GORM's data source connection source factory (so a spec
+    // file's writes can be rolled back) and register the TestTransactionService bean. Never registered in production or
+    // when the flag is off, so it has zero effect there. See TestingController / PinningDataSource.
+    if (Environment.current == Environment.DEVELOPMENT) {
         boolean testingEndpointsEnabled = false
         try {
             testingEndpointsEnabled = Boolean.parseBoolean(ConfigService.parsePropertiesFile().getProperty(
@@ -63,6 +65,7 @@ beans = {
         }
         if (testingEndpointsEnabled) {
             pinningDataSourceRegistrar(PinningDataSourceRegistrar)
+            testTransactionService(TestTransactionService)
         }
     }
 }

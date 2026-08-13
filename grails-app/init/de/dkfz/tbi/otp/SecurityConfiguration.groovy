@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp
 
+import grails.util.Environment
 import io.netty.channel.ChannelOption
 import io.netty.handler.timeout.ReadTimeoutHandler
 import io.netty.handler.timeout.WriteTimeoutHandler
@@ -182,6 +183,11 @@ class SecurityConfiguration {
                                 "/static/console*/**",
                         ).denyAll()
                     }
+                    if (Environment.current == Environment.DEVELOPMENT) {
+                        authorize.mvcMatchers("/testing/**").permitAll()
+                    } else {
+                        authorize.mvcMatchers("/testing/**").denyAll()
+                    }
                     authorize
                             .mvcMatchers(
                                     "/adminSeed/**",
@@ -211,9 +217,6 @@ class SecurityConfiguration {
                                     "/statistic/laneCountPerDate",
                                     "/privacyPolicy/**",
                                     "/metadataImport/autoImport",
-                                    // feature-flagged Cypress test-isolation endpoints; each action itself returns 403
-                                    // unless 'otp.testing.endpoints.enabled=true', so they are safe to permit here
-                                    "/testing/**",
                                     "/grails-errorhandler/**",
                                     "/error/**",
                                     "/webjars/chart.js/**",

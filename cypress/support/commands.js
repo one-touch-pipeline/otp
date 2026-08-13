@@ -98,10 +98,13 @@ Cypress.Commands.add('beginTestTransaction', () => {
     url: '/testing/begin',
     failOnStatusCode: false
   }).then((response) => {
-    if (response.status !== 200) {
-      cy.log(`Database test isolation is not active (POST /testing/begin returned ${response.status}). ` +
-        'Set otp.testing.endpoints.enabled=true to enable it.');
+    if (response.status === 403) {
+      // feature flag off -> isolation intentionally not active; run without it (no transaction opened)
+      cy.log('Database test isolation is disabled (403). Set otp.testing.endpoints.enabled=true to enable it.');
+      return;
     }
+    // any other non-200 is a real endpoint failure -> fail the spec instead of running silently without isolation
+    expect(response.status, 'POST /testing/begin').to.eq(200);
   });
 });
 
@@ -114,9 +117,12 @@ Cypress.Commands.add('rollbackTestTransaction', () => {
     url: '/testing/rollback',
     failOnStatusCode: false
   }).then((response) => {
-    if (response.status !== 200) {
-      cy.log(`Could not roll back the test transaction (POST /testing/rollback returned ${response.status}).`);
+    if (response.status === 403) {
+      // feature flag off -> nothing was opened, nothing to roll back
+      return;
     }
+    // any other non-200 is a real failure (e.g. unbalanced begin/rollback -> 500) -> fail the spec
+    expect(response.status, 'POST /testing/rollback').to.eq(200);
   });
 });
 
@@ -142,10 +148,12 @@ Cypress.Commands.add('beginNestedTransaction', () => {
     url: '/testing/begin',
     failOnStatusCode: false
   }).then((response) => {
-    if (response.status !== 200) {
-      cy.log(`Database test isolation is not active (POST /testing/begin returned ${response.status}). ` +
-        'Set otp.testing.endpoints.enabled=true to enable it.');
+    if (response.status === 403) {
+      // feature flag off -> isolation intentionally not active
+      cy.log('Database test isolation is disabled (403). Set otp.testing.endpoints.enabled=true to enable it.');
+      return;
     }
+    expect(response.status, 'POST /testing/begin (nested)').to.eq(200);
   });
 });
 
@@ -158,9 +166,10 @@ Cypress.Commands.add('rollbackNestedTransaction', () => {
     url: '/testing/rollback',
     failOnStatusCode: false
   }).then((response) => {
-    if (response.status !== 200) {
-      cy.log(`Could not roll back the nested test transaction (POST /testing/rollback returned ${response.status}).`);
+    if (response.status === 403) {
+      return;
     }
+    expect(response.status, 'POST /testing/rollback (nested)').to.eq(200);
   });
 });
 

@@ -26,13 +26,8 @@ import groovy.util.logging.Slf4j
 import org.springframework.jdbc.datasource.DelegatingDataSource
 
 import javax.sql.DataSource
-import java.lang.reflect.InvocationHandler
-import java.lang.reflect.InvocationTargetException
-import java.lang.reflect.Method
-import java.lang.reflect.Proxy
-import java.sql.Connection
-import java.sql.SQLException
-import java.sql.Savepoint
+import java.lang.reflect.*
+import java.sql.*
 
 /**
  * A {@link DataSource} wrapper used exclusively for isolating end-to-end (Cypress) tests. It is only installed when
@@ -58,7 +53,6 @@ import java.sql.Savepoint
  * innermost layer first — a nested savepoint while any are open, otherwise the whole transaction.</p>
  */
 @Slf4j
-@CompileStatic
 class PinningDataSource extends DelegatingDataSource {
 
     /**
@@ -120,8 +114,7 @@ class PinningDataSource extends DelegatingDataSource {
     void rollback() {
         synchronized (lock) {
             if (pinnedConnection == null) {
-                log.warn("rollback() called without an active test transaction; nothing to do.")
-                return
+                throw new TestTransactionException("rollback() called without an active test transaction (unbalanced begin/rollback).")
             }
             if (!savepointStack.isEmpty()) {
                 Savepoint savepoint = savepointStack.pop()

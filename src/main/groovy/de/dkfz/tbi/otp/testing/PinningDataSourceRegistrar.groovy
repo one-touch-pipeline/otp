@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.testing
 
-import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.BeansException
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory
@@ -36,7 +35,6 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProce
  * never registered and GORM's normal factory is used unchanged.</p>
  */
 @Slf4j
-@CompileStatic
 class PinningDataSourceRegistrar implements BeanDefinitionRegistryPostProcessor {
 
     static final String FACTORY_BEAN_NAME = "dataSourceConnectionSourceFactory"
@@ -48,8 +46,9 @@ class PinningDataSourceRegistrar implements BeanDefinitionRegistryPostProcessor 
             log.warn("Testing endpoints are ENABLED: replaced '${FACTORY_BEAN_NAME}' with " +
                     "PinningDataSourceConnectionSourceFactory. This must never happen in production.")
         } else {
-            log.error("Could not find bean '${FACTORY_BEAN_NAME}' to install Cypress test isolation; the testing " +
-                    "endpoints will not work.")
+            throw new TestingEndpointsException("Could not find bean '${FACTORY_BEAN_NAME}' to install Cypress test " +
+                    "isolation; the testing endpoints cannot work. This should be unreachable when GORM is configured " +
+                    "normally, so fail fast rather than start up half-installed.")
         }
     }
 

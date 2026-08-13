@@ -23,19 +23,17 @@ package de.dkfz.tbi.otp.testing
 
 /**
  * Controls the pinned database transaction used to isolate end-to-end (Cypress) tests. Delegates to the
- * {@link PinningDataSource} installed by {@link TestTransactionDataSourceBeanPostProcessor}.
+ * {@link PinningDataSource} installed by {@link PinningDataSourceConnectionSourceFactory}.
  *
- * <p>Beans are only present when {@code otp.testing.endpoints.enabled=true}; callers must guard on that flag (as
- * {@code TestingController} does) before invoking these methods.</p>
+ * <p>This is deliberately NOT a Grails service in {@code grails-app/services}: it is a plain bean registered
+ * conditionally in {@code resources.groovy}, so it only exists when {@code otp.testing.endpoints.enabled=true} in the
+ * development environment. Callers must still guard on that flag (as {@code TestingController} does) before invoking
+ * these methods.</p>
  *
- * Not {@code @Transactional}: it must operate on the raw pinned JDBC connection directly, outside GORM's transaction
- * handling.
+ * <p>It must NOT be transactional: {@link #begin()} / {@link #rollback()} operate on the raw pinned JDBC connection
+ * directly, outside GORM's transaction handling.</p>
  */
 class TestTransactionService {
-
-    // Must never run inside a GORM transaction: while a test transaction is active it would itself borrow the pinned
-    // connection, which rollback() then rolls back and closes underneath it.
-    static boolean transactional = false
 
     /** Open a fresh, uncommitted test transaction that all subsequent HTTP requests will run within. */
     void begin() {

@@ -92,7 +92,53 @@ class PinningDataSourceSpec extends Specification {
         !pinningDataSource.active
     }
 
-    void "rollback without an active transaction is a no-op"() {
+    void "several nested savepoints unwind last-in-first-out down to the outer transaction"() {
+        given:
+        Connection connection = Mock(Connection)
+        Savepoint firstSavepoint = Mock(Savepoint)
+        Savepoint secondSavepoint = Mock(Savepoint)
+        DataSource target = Mock(DataSource)
+        PinningDataSource pinningDataSource = new PinningDataSource(target)
+
+        and: "the outer transaction and two stacked savepoints are open (nesting depth 3)"
+        target.connection >> connection
+        connection.setSavepoint() >>> [firstSavepoint, secondSavepoint]
+        pinningDataSource.begin() // depth 1: outer transaction
+        pinningDataSource.begin() // depth 2: first savepoint
+        pinningDataSource.begin() // depth 3: second savepoint
+
+        when: "the innermost layer is rolled back"
+        pinningDataSource.rollback()
+
+        then: "only the most recently opened savepoint is unwound; nothing older is touched"
+        1 * connection.rollback(secondSavepoint)
+        1 * connection.releaseSavepoint(secondSavepoint)
+        0 * connection.rollback(firstSavepoint)
+        0 * connection.rollback()
+        0 * connection.close()
+        pinningDataSource.active
+
+        when: "the next layer is rolled back"
+        pinningDataSource.rollback()
+
+        then: "the first savepoint is unwound, but the outer transaction still stands"
+        1 * connection.rollback(firstSavepoint)
+        1 * connection.releaseSavepoint(firstSavepoint)
+        0 * connection.rollback()
+        0 * connection.close()
+        pinningDataSource.active
+
+        when: "the outer transaction is finally rolled back"
+        pinningDataSource.rollback()
+
+        then:
+        1 * connection.rollback()
+        1 * connection.setAutoCommit(true)
+        1 * connection.close()
+        !pinningDataSource.active
+    }
+
+    void "rollback without an active transaction throws (unbalanced begin/rollback)"() {
         given:
         DataSource target = Mock(DataSource)
         PinningDataSource pinningDataSource = new PinningDataSource(target)
@@ -101,6 +147,7 @@ class PinningDataSourceSpec extends Specification {
         pinningDataSource.rollback()
 
         then:
+        thrown(TestTransactionException)
         0 * target._
         !pinningDataSource.active
     }
