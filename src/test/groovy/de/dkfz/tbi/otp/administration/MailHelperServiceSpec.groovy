@@ -61,6 +61,7 @@ class MailHelperServiceSpec extends Specification implements DataTest, DomainFac
     @Override
     Class[] getDomainClassesToMock() {
         return [
+                Attachment,
                 Mail,
                 ProcessingOption,
                 Project,
@@ -127,6 +128,23 @@ class MailHelperServiceSpec extends Specification implements DataTest, DomainFac
         [TICKET_EMAIL] | []             | []             || 1
         []             | [TICKET_EMAIL] | []             || 1
         []             | []             | [TICKET_EMAIL] || 2
+    }
+
+    void "saveEmail, when attachments are given, then save them ordered and linked to the mail"() {
+        given:
+        setupData()
+        Map<String, String> attachments = [
+                "first.txt" : "first content",
+                "second.txt": "second content",
+        ]
+
+        when:
+        Mail mail = mailHelperService.saveMail(SUBJECT, BODY, [], [], [], attachments)
+
+        then:
+        mail.attachments*.name == ["first.txt", "second.txt"]
+        mail.attachments*.content == ["first content", "second content"]
+        Attachment.count() == 2
     }
 
     @Unroll
@@ -301,4 +319,7 @@ class MailHelperServiceSpec extends Specification implements DataTest, DomainFac
         then:
         TestCase.assertContainSame(Mail.list(), mailsToKeep)
     }
+
+    // the deletion of the attachments along with their mail depends on the hibernate cascade, which this test
+    // implementation of GORM does not do, see MailHelperServiceIntegrationSpec
 }

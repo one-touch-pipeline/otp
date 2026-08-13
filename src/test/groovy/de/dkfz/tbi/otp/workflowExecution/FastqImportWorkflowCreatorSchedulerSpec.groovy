@@ -152,7 +152,7 @@ class FastqImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSch
         1 * scheduler.allDecider.decide(_) >> deciderResult
         1 * scheduler.samplePairDeciderService.findOrCreateSamplePairs(expectedListForSnv)
         0 * scheduler.samplePairDeciderService._
-        1 * scheduler.notificationCreator.sendWorkflowCreateSuccessMail(_, _)
+        1 * scheduler.notificationCreator.sendWorkflowCreateSuccessMail(_, _, _)
 
         where:
         name                                | artefactType       | analysableSeqType

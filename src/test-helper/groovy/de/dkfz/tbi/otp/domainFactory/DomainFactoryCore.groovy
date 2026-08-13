@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.domainFactory
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
+import de.dkfz.tbi.otp.administration.Attachment
 import de.dkfz.tbi.otp.administration.Mail
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
@@ -460,5 +461,16 @@ trait DomainFactoryCore implements DomainFactoryHelper, TaxonomyFactory {
                 cc     : [],
                 bcc    : [],
         ], properties, saveAndValidate)
+    }
+
+    Attachment createAttachment(Map properties = [:], boolean saveAndValidate = true) {
+        Attachment attachment = createDomainObject(Attachment, [
+                name   : "attachment_${nextId}.txt",
+                content: "content_${nextId}",
+                mail   : { createMail() },
+        ], properties, false)
+        // has to happen before saving, otherwise hibernate does not know about the association, e.g. for the cascade
+        attachment.mail.addToAttachments(attachment)
+        return saveAndValidate ? attachment.save(flush: true) : attachment
     }
 }

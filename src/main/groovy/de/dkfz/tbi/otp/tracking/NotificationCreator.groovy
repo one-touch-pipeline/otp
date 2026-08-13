@@ -455,7 +455,7 @@ class NotificationCreator {
         return WorkflowProcessingStatus.values().find { it.done == done && it.mightDoMore == mightDoMore }
     }
 
-    void sendWorkflowCreateSuccessMail(MetaDataFile metaDataFile, String message) {
+    void sendWorkflowCreateSuccessMail(MetaDataFile metaDataFile, String message, Map<String, String> attachments = [:]) {
         metaDataFile.refresh()
         long id = metaDataFile.fastqImportInstance.id
 
@@ -470,7 +470,7 @@ class NotificationCreator {
                 message,
         ].join('\n')
 
-        mailHelperService.saveMail(subject, body)
+        mailHelperService.saveMail(subject, body, [], [], [], attachments)
     }
 
     void sendWorkflowCreateErrorMail(MetaDataFile metaDataFile, Throwable throwable) {
@@ -504,7 +504,7 @@ class NotificationCreator {
         mailHelperService.saveErrorMailInNewTransaction(subject, body)
     }
 
-    void sendBamImportWorkflowCreateSuccessMail(Ticket ticket, Long importId, Instant instant, String message) {
+    void sendBamImportWorkflowCreateSuccessMail(Ticket ticket, Long importId, Instant instant, String message, Map<String, String> attachments = [:]) {
         String subject = ticket ? "[${ticketService.getPrefixedTicketNumber(ticket)}] " : ""
         subject += "Workflow created successfully at ${TimeFormats.DATE_TIME.getFormattedInstant(instant)} for BamImport with ID: ${importId}"
 
@@ -514,7 +514,7 @@ class NotificationCreator {
                 "",
                 message,
         ].join('\n')
-        mailHelperService.saveMail(subject, body)
+        mailHelperService.saveMail(subject, body, [], [], [], attachments)
     }
 
     void sendBamImportWorkflowCreateErrorMail(Ticket ticket, Long importId, Instant instant, Throwable throwable) {

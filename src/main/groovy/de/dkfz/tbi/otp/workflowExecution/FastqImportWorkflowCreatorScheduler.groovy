@@ -93,10 +93,10 @@ class FastqImportWorkflowCreatorScheduler extends AbstractWorkflowCreatorSchedul
     }
 
     @Override
-    protected void createSuccessMail(Long importId, Instant instant, String message) {
+    protected void createSuccessMail(Long importId, Instant instant, String message, Map<String, String> attachments) {
         FastqImportInstance fastqImportInstance = FastqImportInstance.get(importId)
         MetaDataFile metaDataFile = metaDataFileService.findByFastqImportInstance(fastqImportInstance)
-        notificationCreator.sendWorkflowCreateSuccessMail(metaDataFile, message)
+        notificationCreator.sendWorkflowCreateSuccessMail(metaDataFile, message, attachments)
     }
 
     @Override

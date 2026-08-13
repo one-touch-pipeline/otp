@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.administration
 import grails.gorm.transactions.Transactional
 import grails.plugins.mail.MailService
 import groovy.transform.CompileDynamic
+import org.springframework.transaction.TransactionStatus
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
@@ -34,6 +35,7 @@ import de.dkfz.tbi.otp.utils.TimeFormats
 import de.dkfz.tbi.otp.utils.exceptions.SaveMailException
 
 import grails.validation.ValidationException
+import java.nio.charset.StandardCharsets
 import java.time.ZonedDateTime
 
 @Transactional
@@ -55,7 +57,12 @@ class MailHelperService {
         }
     }
 
-    Mail saveMail(String subject, String body, List<String> to = [], List<String> cc = [], List<String> bcc = []) {
+    /**
+     * @param attachments file name to content, for output too big to put into the mail body. Order is preserved.
+     */
+    @SuppressWarnings("ParameterCount")
+    Mail saveMail(String subject, String body, List<String> to = [], List<String> cc = [], List<String> bcc = [],
+                  Map<String, String> attachments = [:]) {
         if (!subject) {
             throw new IllegalArgumentException("mail subject needs to be given")
         }
@@ -79,6 +86,9 @@ class MailHelperService {
                 cc     : cc,
                 bcc    : bcc,
         ])
+        attachments.each { String name, String content ->
+            mail.addToAttachments(new Attachment(name: name, content: content))
+        }
 
         try {
             mail.save(flush: true)
@@ -105,8 +115,13 @@ class MailHelperService {
         String mailBody = (toCount > 1 && footer) ? (mail.body + '\n\n' + footer) : mail.body
         String senderAddressFetch = senderAddress
         String replyToAddressFetched = replyToAddress
+        List<Attachment> mailAttachments = mail.attachments
 
         mailService.sendMail {
+            // multipart needs to be set before any other DSL call, otherwise it has no effect
+            if (mailAttachments) {
+                multipart true
+            }
             from senderAddressFetch
             replyTo replyToAddressFetched
             // the dsl require list, otherwise exception are thrown
@@ -119,6 +134,9 @@ class MailHelperService {
             }
             subject mail.subject
             body mailBody
+            mailAttachments.each { Attachment attachment ->
+                attach attachment.name, "text/plain;charset=UTF-8", attachment.content.getBytes(StandardCharsets.UTF_8)
+            }
         }
 
         if (mail.id) {
@@ -168,6 +186,7 @@ class MailHelperService {
             |cc: ${mail.cc.join(', ')}
             |bcc: ${mail.bcc.join(', ')}
             |subject: '${mail.subject}'
+            |attachments (${mail.attachments.size()}): ${mail.attachments.collect { "\n- ${it.name} (${it.content.length()})" }.join('')}
             |content:\n${mail.body}
         """.stripMargin().toString()
     }
@@ -177,6 +196,12 @@ class MailHelperService {
         int delay = processingOptionService.findOptionAsInteger(ProcessingOption.OptionName.DELETE_OLD_MAILS_DELAY)
         List<Mail> mails = Mail.findAllByStateAndSendDateTimeLessThan(Mail.State.SENT, ZonedDateTime.now().minusDays(delay))
         log.info("Deleting ${mails.size()} old mails.")
+        // Deleting the mails as entities lets hibernate remove their attachments (cascade: all-delete-orphan) and their
+        // to/cc/bcc rows too. Since the flush mode is manual, the deletes have to be flushed explicitly, otherwise they
+        // never reach the database.
         Mail.deleteAll(mails)
+        Mail.withTransaction { TransactionStatus status ->
+            status.flush()
+        }
     }
 }

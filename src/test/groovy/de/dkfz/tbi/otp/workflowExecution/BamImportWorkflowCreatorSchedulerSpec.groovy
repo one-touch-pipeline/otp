@@ -152,7 +152,7 @@ class BamImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSched
         countDecider * scheduler.allDecider.decide(_) >> deciderResult
         countDecider * scheduler.samplePairDeciderService.findOrCreateSamplePairs(expectedListForSnv)
         0 * scheduler.samplePairDeciderService._
-        1 * scheduler.notificationCreator.sendBamImportWorkflowCreateSuccessMail(_, importId, _, _)
+        1 * scheduler.notificationCreator.sendBamImportWorkflowCreateSuccessMail(_, importId, _, _, _)
 
         where:
         name                                                     | analysableSeqType | createAnalysis || countDecider

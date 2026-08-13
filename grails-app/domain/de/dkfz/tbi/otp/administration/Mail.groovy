@@ -53,10 +53,18 @@ class Mail implements Entity {
 
     State state = State.WAITING
 
+    /** A {@link List}, not a {@link Set}, so the attachments keep the order they were added in. */
+    List<Attachment> attachments = []
+
+    static hasMany = [
+            attachments: Attachment,
+    ]
+
     static Closure mapping = {
         body type: "text"
         state index: "mail_state_date_created_idx"
         dateCreated index: "mail_state_date_created_idx"
+        attachments cascade: "all-delete-orphan"
     }
 
     static Closure constraints = {

@@ -262,16 +262,23 @@ ILSe 5678, runA, lane 1, ${sampleText}
         ])
         notificationCreator.mailHelperService = Mock(MailHelperService)
 
+        Map<String, String> attachments = [
+                "warnings.txt"         : "some warning",
+                "created-workflows.txt": "some artefact",
+                "processing-log.txt"   : "some log",
+        ]
+
         when:
-        notificationCreator.sendWorkflowCreateSuccessMail(metaDataFile, message)
+        notificationCreator.sendWorkflowCreateSuccessMail(metaDataFile, message, attachments)
 
         then:
-        1 * notificationCreator.mailHelperService.saveMail(_, _) >> { String emailSubject, String content ->
+        1 * notificationCreator.mailHelperService.saveMail(_, _, [], [], [], _) >> { String emailSubject, String content, List to, List cc, List bcc, Map mailAttachments ->
             assert emailSubject.startsWith("[${ticketPrefix}#${ticket.ticketNumber}]")
             assert emailSubject.contains("Workflow created successfully for ${metaDataFile.fileNameSource}")
             assert content.contains("The workflow creation succeeded:")
             assert content.contains("Import id: ${metaDataFile.fastqImportInstance.id}")
             assert content.contains(message)
+            assert mailAttachments == attachments
         }
     }
 

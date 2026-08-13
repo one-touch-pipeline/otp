@@ -48,6 +48,10 @@ import static grails.async.Promises.task
 @Slf4j
 abstract class AbstractWorkflowCreatorScheduler {
 
+    protected static final String DECIDER_WARNINGS_ATTACHMENT_NAME = "warnings.txt"
+    protected static final String DECIDER_CREATED_WORKFLOWS_ATTACHMENT_NAME = "created-workflows.txt"
+    protected static final String DECIDER_LOG_ATTACHMENT_NAME = "processing-log.txt"
+
     @Autowired
     AllDecider allDecider
 
@@ -124,8 +128,9 @@ abstract class AbstractWorkflowCreatorScheduler {
     private void createWorkflowAndCreateSuccessMail(long importId) {
         DeciderResult deciderResult = createWorkflows(importId)
         String message = messageFromDeciderResult(deciderResult)
+        Map<String, String> attachments = attachmentsFromDeciderResult(deciderResult)
 
-        createSuccessMail(importId, getExecutionTimestamp(importId), message)
+        createSuccessMail(importId, getExecutionTimestamp(importId), message, attachments)
     }
 
     @Transactional
@@ -157,32 +162,36 @@ abstract class AbstractWorkflowCreatorScheduler {
         log.debug("  sample pair creation finished for ${count} datafiles after: ${System.currentTimeMillis() - timeSamplePairs}ms")
     }
 
+    /**
+     * Builds the counts-only summary for the mail body. The detail goes into {@link #attachmentsFromDeciderResult},
+     * to keep the body small enough for the ticket system to show completely.
+     */
     protected String messageFromDeciderResult(DeciderResult deciderResult) {
-        List<String> message = []
-        message << "Decider Results"
-        if (deciderResult.warnings) {
-            message << "Decider created ${deciderResult.warnings.size()} warnings:".toString()
-            deciderResult.warnings.each {
-                message << "- ${it}".toString()
-            }
-            message << ""
-        }
-        if (deciderResult.newArtefacts) {
-            message << "Decider created ${deciderResult.newArtefacts.size()} workflow runs / artefact:".toString()
-            deciderResult.newArtefacts.each {
-                Optional<Artefact> optionalArtefact = it.artefact
-                String artefactText = optionalArtefact.present ? optionalArtefact.get().toString() : '-'
-                message << "- ${it.producedBy}: ${artefactText}".toString()
-            }
-        } else {
-            message << "No artefacts created"
-        }
-        message << ""
-        message << "Decider log: "
-        deciderResult.infos.each {
-            message << "- ${it}".toString()
-        }
-        return message.join('\n')
+        return [
+                "Decider Results",
+                "- ${deciderResult.warnings.size()} warning(s), see attached file '${DECIDER_WARNINGS_ATTACHMENT_NAME}'".toString(),
+                "- ${deciderResult.newArtefacts.size()} workflow run(s) / artefact(s) created, " +
+                        "see attached file '${DECIDER_CREATED_WORKFLOWS_ATTACHMENT_NAME}'".toString(),
+                "- ${deciderResult.infos.size()} decider log entry/entries, see attached file '${DECIDER_LOG_ATTACHMENT_NAME}'".toString(),
+        ].join('\n')
+    }
+
+    /**
+     * Splits the decider output into the three files referenced by {@link #messageFromDeciderResult}.
+     */
+    protected Map<String, String> attachmentsFromDeciderResult(DeciderResult deciderResult) {
+        return [
+                (DECIDER_WARNINGS_ATTACHMENT_NAME)         : deciderResult.warnings ?
+                        deciderResult.warnings.collect { "- ${it}".toString() }.join('\n') : "No warnings occurred",
+                (DECIDER_CREATED_WORKFLOWS_ATTACHMENT_NAME): deciderResult.newArtefacts ?
+                        deciderResult.newArtefacts.collect {
+                            Optional<Artefact> optionalArtefact = it.artefact
+                            String artefactText = optionalArtefact.present ? optionalArtefact.get().toString() : '-'
+                            "- ${it.producedBy}: ${artefactText}".toString()
+                        }.join('\n') : "No artefacts created",
+                (DECIDER_LOG_ATTACHMENT_NAME)              : deciderResult.infos ?
+                        deciderResult.infos.collect { "- ${it}".toString() }.join('\n') : "No decider log entries",
+        ]
     }
 
     /**
@@ -223,8 +232,9 @@ abstract class AbstractWorkflowCreatorScheduler {
      * @param importId id of FastqImportInstance for Fastq import or BamImportInstance for Bam import
      * @param ts timestamp of execution
      * @param message success message
+     * @param attachments file name to content, see {@link #attachmentsFromDeciderResult}
      */
-    abstract protected void createSuccessMail(Long importId, Instant instant, String message)
+    abstract protected void createSuccessMail(Long importId, Instant instant, String message, Map<String, String> attachments)
 
     /**
      * Create and save error notification mail after workflows creation failed

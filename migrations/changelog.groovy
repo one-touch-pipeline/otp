@@ -239,4 +239,6 @@ databaseChangeLog = {
     include file: 'changelogs/2026/otp-2778-disable-cellRanger-workflow.groovy'
 
     include file: 'changelogs/2026/otp-3019.groovy'
+
+    include file: 'changelogs/2026/otp-2484-add-mail-attachment.groovy'
 }
