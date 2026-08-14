@@ -34,6 +34,7 @@ ENV GROOVY=$WORKFLOWS/groovy
 ENV GROOVY_SERVICE=$WORKFLOWS/groovy-service
 ENV BIN=$WORKFLOWS/bin
 ENV REFERENCE_DATA=$WORKFLOWS/reference-data
+ENV TOOLS=$WORKFLOWS/tools
 
 RUN apk update && \
     apk add --no-cache \
@@ -45,7 +46,7 @@ RUN apk update && \
 
 # create directories needed for mocked workflow tests
 RUN mkdir -p $WORKFLOWS/tests $WORKFLOWS/ngs_share $WORKFLOWS/virtualenvs \
-    $REFERENCE_DATA $JOBS $LOGS $GROOVY $GROOVY_SERVICE $BIN $OTP_HOME && \
+    $REFERENCE_DATA $JOBS $LOGS $GROOVY $GROOVY_SERVICE $BIN $TOOLS $OTP_HOME && \
     chown -R 1000:1002 $WORKFLOWS
 
 # needed for sdk install
@@ -65,6 +66,9 @@ RUN chown -R root:root /custom-cont-init.d/ && \
 
 # add service
 ADD groovy-service $GROOVY_SERVICE
+
+# add mocks of the otp tools deployed on the cluster, they are called by `groovy`, therefore no wrapper is created
+ADD tools $TOOLS
 
 # add scripts for mocking commands
 ADD groovy $GROOVY

@@ -259,6 +259,8 @@ workflow tests:
       --tests DataInstallationWorkflowSpec
       --tests FastqcWorkflowSpec
       --tests WesFastqcWorkflowSpec
+      --tests BamImportBamWorkflowSpec
+      --tests BamImportCramWorkflowSpec
   after_script:
     # fetch the logs of the mocked servers, they are not part of the job log, since they are written in the service container
     - devScripts/gitlab-ci/workflow-test/copyMockedClusterLogs.sh

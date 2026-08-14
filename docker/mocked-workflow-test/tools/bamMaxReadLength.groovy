@@ -20,22 +20,16 @@
  * SOFTWARE.
  */
 
-class Module {
+/**
+ * Mock of the OTP tool `tools/ngs/bamMaxReadLength.groovy`, which is deployed on the cluster.
+ *
+ * It returns a fixed number without reading it at all
+ */
+class MaxReadLength {
 
-    static final List<String> MODULES = [
-            "FastQC/0.11.5",
-            "groovy/2.4.15",
-            "samtools/1.2",
-    ].asImmutable()
+    static void main(String... args) {
+        assert System.in.text
 
-    static void main(String[] args) {
-        if (!args) {
-            System.err.println("No args")
-            System.exit(1)
-        }
-
-        assert args.length == 2
-        assert args[0] == 'load'
-        assert args[1] in MODULES
+        println 100
     }
 }

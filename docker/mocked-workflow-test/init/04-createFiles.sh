@@ -58,6 +58,9 @@ bamFiles/wgs/control_SOMEPID_merged.mdup.bam.bai
 bamFiles/wgs/control_SOMEPID_merged.mdup.bam
 bamFiles/wgs/tumor_SOMEPID_merged.mdup.bam
 bamFiles/wgs/control_SOMEPID_merged.mdup.bam.md5
+bamFiles/wgs/tumor_SOMEPID_merged.mdup.cram
+bamFiles/wgs/tumor_SOMEPID_merged.mdup.cram.crai
+bamFiles/wgs/tumor_SOMEPID_merged.mdup.cram.md5
 bamFiles/wgs/first-bam-file/control_merged.mdup.bam.bai
 bamFiles/wgs/first-bam-file/control_merged.mdup.bam.md5
 bamFiles/wgs/first-bam-file/tumor_merged.mdup.bam.md5
