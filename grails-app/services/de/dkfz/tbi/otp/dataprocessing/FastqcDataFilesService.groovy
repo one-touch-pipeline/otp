@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.zip.ZipEntry
-import java.util.zip.ZipFile
+import java.util.zip.ZipInputStream
 
 /**
  * This service is used by jobs running "fastqc" program.
@@ -66,29 +66,39 @@ class FastqcDataFilesService {
 
     /**
      * Returns an inputStream from the contents of a fastqc zip file
+     *
+     * The zip file is read sequentially via {@link ZipInputStream}, since neither {@link java.util.zip.ZipFile} nor the zip
+     * {@link java.nio.file.FileSystem} can be used: both need random access to the file, which the remote (sftp) file system
+     * does not provide.
+     *
+     * The returned stream is positioned at the requested entry and delivers exactly its content. It is owned by the caller,
+     * who has to close it.
+     *
      * @param withinZipPath Path to the resource within the zip file
      * @return An inputStream for the combination of zipPath and the withinZipPath parameters
      */
-    // zip file only works local, not remote
-    @SuppressWarnings("JavaIoPackageAccess")
-    @CompileDynamic
     InputStream getInputStreamFromZipFile(FastqcProcessedFile fastqcProcessedFile, String withinZipPath) {
         Path zipPath = fastqcWorkFileService.fastqcOutputPath(fastqcProcessedFile)
 
-        File input = new File(zipPath.toString())
-        if (!input.canRead()) {
-            throw new FileNotReadableException(input.path)
+        if (!fileService.fileIsReadable(zipPath)) {
+            throw new FileNotReadableException(zipPath.toString())
         }
 
-        ZipFile zipFile = new ZipFile(input)
-        ZipEntry zipEntry = zipFile.entries().find {
-            it.name.endsWith(withinZipPath)
-        }
-
-        if (!zipEntry) {
+        ZipInputStream zipStream = new ZipInputStream(Files.newInputStream(zipPath))
+        boolean entryFound = false
+        try {
+            for (ZipEntry zipEntry = zipStream.nextEntry; zipEntry != null; zipEntry = zipStream.nextEntry) {
+                if (zipEntry.name == withinZipPath || zipEntry.name.endsWith("/${withinZipPath}")) {
+                    entryFound = true
+                    return zipStream
+                }
+            }
             throw new CouldNotFindFastqcDataInZipFileException(zipPath, withinZipPath)
+        } finally {
+            if (!entryFound) {
+                zipStream.close()
+            }
         }
-        return zipFile.getInputStream(zipEntry)
     }
 
     /**
