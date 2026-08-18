@@ -61,7 +61,6 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
     AceseqService aceseqService
     RunYapsaService runYapsaService
     CreateNotificationTextService createNotificationTextService
-    ProcessingOptionService processingOptionService
     UserProjectRoleService userProjectRoleService
     TicketService ticketService
 
@@ -112,7 +111,6 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                 aceseqService: aceseqService,
                 runYapsaService: runYapsaService,
                 createNotificationTextService: createNotificationTextService,
-                processingOptionService: processingOptionService,
                 userProjectRoleService: userProjectRoleService,
                 ticketService: ticketService,
                 grailsApplication: grailsApplication,
@@ -1613,172 +1611,4 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
     }
 
-    ProcessingOption setupBlacklistImportSourceNotificationProcessingOption(String blacklist) {
-        return DomainFactory.createProcessingOptionLazy(
-                name: ProcessingOption.OptionName.BLACKLIST_IMPORT_SOURCE_NOTIFICATION,
-                type: null,
-                value: blacklist,
-        )
-    }
-
-    void "sendImportSourceOperatorNotification, no blacklisted paths"() {
-        given:
-        setupData()
-
-        Ticket ticket
-
-        SessionUtils.withTransaction {
-            DomainFactory.createProcessingOptionForTicketPrefix(PREFIX)
-            setupBlacklistImportSourceNotificationProcessingOption("")
-
-            ticket = createTicket()
-
-            RawSequenceFile rawSequenceFile = createFastqFile()
-            FastqImportInstance fastqImportInstance = createFastqImportInstance(ticket: ticket, sequenceFiles: [rawSequenceFile])
-
-            DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstance)
-
-            String prefix = ticketService.getPrefixedTicketNumber(ticket)
-            String expectedHeader = "Import source ready for deletion [${prefix}]"
-
-            String expectedEnd = [
-                    rawSequenceFile.fullInitialPath,
-            ].collect { "rm -f ${it}" }.join("\n")
-
-            notificationCreator.mailHelperService = Mock(MailHelperService) {
-                1 * saveMail(expectedHeader) { it.endsWith(expectedEnd) }
-            }
-        }
-
-        expect:
-        SessionUtils.withTransaction {
-            notificationCreator.sendImportSourceOperatorNotification(ticket)
-            return true
-        }
-    }
-
-    void "sendImportSourceOperatorNotification, does not send a mail when all paths are filtered out"() {
-        given:
-        setupData()
-
-        Ticket ticket
-
-        SessionUtils.withTransaction {
-            DomainFactory.createProcessingOptionForTicketPrefix(PREFIX)
-
-            String blacklisted = setupBlacklistImportSourceNotificationProcessingOption("${File.separator}blacklisted").value
-            ticket = createTicket()
-
-            FastqImportInstance fastqImportInstance = createFastqImportInstance(ticket: ticket, sequenceFiles: [
-                    createFastqFile(initialDirectory: "${blacklisted}"),
-                    createFastqFile(initialDirectory: "${blacklisted}"),
-            ])
-            DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstance, filePathSource: "${blacklisted}")
-
-            notificationCreator.mailHelperService = Mock(MailHelperService) {
-                0 * saveMail(_, _, _)
-            }
-        }
-
-        expect:
-        SessionUtils.withTransaction {
-            notificationCreator.sendImportSourceOperatorNotification(ticket)
-            return true
-        }
-    }
-
-    void "getPathsToDelete returns the paths of all DataFiles associated with the ticket"() {
-        given:
-        Ticket ticket
-        List<String> expected = []
-
-        SessionUtils.withTransaction {
-            ticket = createTicket()
-
-            List<RawSequenceFile> rawSequenceFilesA = [createFastqFile(), createFastqFile()]
-            FastqImportInstance fastqImportInstanceA = createFastqImportInstance(ticket: ticket, sequenceFiles: rawSequenceFilesA)
-
-            List<RawSequenceFile> rawSequenceFilesB = [createFastqFile(), createFastqFile(), createFastqFile()]
-            FastqImportInstance fastqImportInstanceB = createFastqImportInstance(ticket: ticket, sequenceFiles: rawSequenceFilesB)
-
-            DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceA)
-            DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceB)
-
-            expected.addAll(rawSequenceFilesA*.fullInitialPath)
-            expected.addAll(rawSequenceFilesB*.fullInitialPath)
-        }
-
-        expect:
-        SessionUtils.withTransaction {
-            assert notificationCreator.getPathsToDelete(ticket).sort() == expected.sort()
-            return true
-        }
-    }
-
-    void "getPathsToDelete leaves out blacklisted paths"() {
-        given:
-        Ticket ticket
-        List<String> expected = []
-
-        SessionUtils.withTransaction {
-            String blacklisted = setupBlacklistImportSourceNotificationProcessingOption("${File.separator}blacklisted").value
-
-            ticket = createTicket()
-
-            List<RawSequenceFile> rawSequenceFilesA = [createFastqFile(), createFastqFile()]
-            FastqImportInstance fastqImportInstanceA = createFastqImportInstance(ticket: ticket, sequenceFiles: rawSequenceFilesA)
-
-            Closure<RawSequenceFile> createBlacklistedRawSequenceFile = {
-                createFastqFile(initialDirectory: "${blacklisted}${File.separator}path${File.separator}dataFile")
-            }
-            List<RawSequenceFile> rawSequenceFilesB = [createFastqFile()]
-            List<RawSequenceFile> rawSequenceFilesBBlacklisted = [createBlacklistedRawSequenceFile(), createBlacklistedRawSequenceFile()]
-            FastqImportInstance fastqImportInstanceB = createFastqImportInstance(ticket: ticket, sequenceFiles: rawSequenceFilesB + rawSequenceFilesBBlacklisted)
-
-            DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceA, filePathSource: "${blacklisted}${File.separator}path${File.separator}metaDataFile")
-            DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceB)
-
-            expected.addAll(rawSequenceFilesA*.fullInitialPath)
-            expected.addAll(rawSequenceFilesB*.fullInitialPath)
-        }
-
-        expect:
-        SessionUtils.withTransaction {
-            assert notificationCreator.getPathsToDelete(ticket).sort() == expected.sort()
-            return true
-        }
-    }
-
-    void "getPathsToDelete returns empty list if all paths are blacklisted"() {
-        given:
-        Ticket ticket
-
-        SessionUtils.withTransaction {
-            String blacklisted = setupBlacklistImportSourceNotificationProcessingOption("${File.separator}blacklisted").value
-
-            ticket = createTicket()
-
-            Closure<RawSequenceFile> createBlacklistedRawSequenceFile = {
-                createFastqFile(initialDirectory: "${blacklisted}${File.separator}path${File.separator}dataFile")
-            }
-
-            FastqImportInstance fastqImportInstanceA = createFastqImportInstance(ticket: ticket, sequenceFiles: [
-                    createBlacklistedRawSequenceFile(),
-            ])
-
-            FastqImportInstance fastqImportInstanceB = createFastqImportInstance(ticket: ticket, sequenceFiles: [
-                    createBlacklistedRawSequenceFile(),
-                    createBlacklistedRawSequenceFile(),
-            ])
-
-            DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceA, filePathSource: "${blacklisted}${File.separator}path${File.separator}metaDataFile")
-            DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstanceB, filePathSource: "${blacklisted}${File.separator}path${File.separator}metaDataFile")
-        }
-
-        expect:
-        SessionUtils.withTransaction {
-            assert notificationCreator.getPathsToDelete(ticket).sort() == []
-            return true
-        }
-    }
 }

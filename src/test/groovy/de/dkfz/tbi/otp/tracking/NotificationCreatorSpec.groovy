@@ -59,7 +59,6 @@ class NotificationCreatorSpec extends Specification implements DataTest, DomainF
     final String ticketPrefix = "prefix"
 
     void setup() {
-        notificationCreator.processingOptionService = new ProcessingOptionService()
         notificationCreator.userProjectRoleService = new UserProjectRoleService()
         notificationCreator.ticketService = new TicketService(
                 processingOptionService: new ProcessingOptionService(),
@@ -381,31 +380,6 @@ ILSe 5678, runA, lane 1, ${sampleText}
         PARTLY_DONE_WONT_DO_MORE  | ALL_DONE                  || PARTLY_DONE_WONT_DO_MORE
         PARTLY_DONE_MIGHT_DO_MORE | ALL_DONE                  || PARTLY_DONE_MIGHT_DO_MORE
         ALL_DONE                  | ALL_DONE                  || ALL_DONE
-    }
-
-    ProcessingOption setupBlacklistImportSourceNotificationProcessingOption(String blacklist) {
-        return DomainFactory.createProcessingOptionLazy(
-                name: ProcessingOption.OptionName.BLACKLIST_IMPORT_SOURCE_NOTIFICATION,
-                type: null,
-                value: blacklist,
-        )
-    }
-
-    @Unroll
-    void "getPrefixBlacklistFilteredStrings properly filters out Strings that are listed in the blacklist"() {
-        when:
-        setupBlacklistImportSourceNotificationProcessingOption(blacklist)
-        List<String> result = notificationCreator.getPrefixBlacklistFilteredStrings(strings)
-
-        then:
-        result == expected
-
-        where:
-        strings                                       | blacklist       || expected
-        ["/data/t1", "/data/t2", "/data/t3"]          | ""              || ["/data/t1", "/data/t2", "/data/t3"]
-        ["/data/t1", "/data/t2", "/filtered/t3"]      | "/filtered"     || ["/data/t1", "/data/t2"]
-        ["/data/t1", "/filtered/no", "/filtered/yes"] | "/filtered/yes" || ["/data/t1", "/filtered/no"]
-        ["/data/t1", "/filtered/no", "/filtered/yes"] | "/filt"         || ["/data/t1"]
     }
 
     @Unroll

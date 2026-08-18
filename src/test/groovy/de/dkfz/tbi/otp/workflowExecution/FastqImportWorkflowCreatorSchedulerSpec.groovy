@@ -23,12 +23,15 @@ package de.dkfz.tbi.otp.workflowExecution
 
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.administration.MailHelperService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.domainFactory.UserDomainFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.RoddyPanCancerFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.NotificationCreator
+import de.dkfz.tbi.otp.tracking.Ticket
+import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.otp.utils.SystemUserService
 import de.dkfz.tbi.otp.utils.exceptions.OtpRuntimeException
@@ -162,6 +165,71 @@ class FastqImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSch
         "bam and analysable seqType"        | ArtefactType.BAM   | true
     }
 
+    void "createWorkflowsTask, when the import has a ticket, then trigger the import source ready for deletion notification"() {
+        given:
+        FastqImportWorkflowCreatorScheduler scheduler = createWorkflowCreatorScheduler()
+        findOrCreateProcessingOption(ProcessingOption.OptionName.OTP_SYSTEM_USER, createUser().username)
+        DomainFactory.createAllAnalysableSeqTypes()
+
+        Ticket ticket = DomainFactory.createTicket()
+        fastqImportInstance.ticket = ticket
+        fastqImportInstance.save(flush: true)
+
+        List<WorkflowRun> runs = [createWorkflowRun()]
+        List<WorkflowArtefact> workflowArtefacts = runs.collect {
+            createWorkflowArtefact([
+                    producedBy  : it,
+                    artefactType: ArtefactType.FASTQ,
+            ])
+        }
+        DeciderResult deciderResult = new DeciderResult()
+        deciderResult.newArtefacts.addAll(workflowArtefacts)
+
+        applicationContext // initialize the applicationContext
+
+        when:
+        scheduler.createWorkflowsTask(importId)
+
+        then:
+        1 * scheduler.dataInstallationInitializationService.createWorkflowRuns(fastqImportInstance) >> runs
+        1 * scheduler.allDecider.decide(_) >> deciderResult
+        1 * scheduler.fastqImportInstanceService.updateState(fastqImportInstance, WorkflowCreateState.SUCCESS)
+        1 * scheduler.ticketService.getPrefixedTicketNumber(ticket) >> "prefix"
+        1 * scheduler.ticketService.buildTicketDirectLink(ticket) >> "link"
+        1 * scheduler.ticketService.getMetaDataFilesOfTicket(ticket) >> []
+    }
+
+    void "createWorkflowsTask, when the import has no ticket, then do not trigger the import source ready for deletion notification"() {
+        given:
+        FastqImportWorkflowCreatorScheduler scheduler = createWorkflowCreatorScheduler()
+        findOrCreateProcessingOption(ProcessingOption.OptionName.OTP_SYSTEM_USER, createUser().username)
+        DomainFactory.createAllAnalysableSeqTypes()
+
+        assert fastqImportInstance.ticket == null
+
+        List<WorkflowRun> runs = [createWorkflowRun()]
+        List<WorkflowArtefact> workflowArtefacts = runs.collect {
+            createWorkflowArtefact([
+                    producedBy  : it,
+                    artefactType: ArtefactType.FASTQ,
+            ])
+        }
+        DeciderResult deciderResult = new DeciderResult()
+        deciderResult.newArtefacts.addAll(workflowArtefacts)
+
+        applicationContext // initialize the applicationContext
+
+        when:
+        scheduler.createWorkflowsTask(importId)
+
+        then:
+        1 * scheduler.dataInstallationInitializationService.createWorkflowRuns(fastqImportInstance) >> runs
+        1 * scheduler.allDecider.decide(_) >> deciderResult
+        1 * scheduler.fastqImportInstanceService.updateState(fastqImportInstance, WorkflowCreateState.SUCCESS)
+        0 * scheduler.ticketService._
+        0 * scheduler.mailHelperService._
+    }
+
     void "createWorkflowsTask, if decider throws exception, then send error E-Mail to ticketing system"() {
         given:
         FastqImportWorkflowCreatorScheduler scheduler = createWorkflowCreatorScheduler()
@@ -184,6 +252,36 @@ class FastqImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSch
         1 * scheduler.notificationCreator.sendWorkflowCreateErrorMail(metaDataFile, otpRuntimeException)
     }
 
+    @Unroll
+    void "getPrefixBlacklistFilteredStrings properly filters out Strings that are listed in the blacklist"() {
+        given:
+        FastqImportWorkflowCreatorScheduler scheduler = new FastqImportWorkflowCreatorScheduler([
+                processingOptionService: new ProcessingOptionService(),
+        ])
+
+        when:
+        setupBlacklistImportSourceNotificationProcessingOption(blacklist)
+        List<String> result = scheduler.getPrefixBlacklistFilteredStrings(strings)
+
+        then:
+        result == expected
+
+        where:
+        strings                                       | blacklist       || expected
+        ["/data/t1", "/data/t2", "/data/t3"]          | ""              || ["/data/t1", "/data/t2", "/data/t3"]
+        ["/data/t1", "/data/t2", "/filtered/t3"]      | "/filtered"     || ["/data/t1", "/data/t2"]
+        ["/data/t1", "/filtered/no", "/filtered/yes"] | "/filtered/yes" || ["/data/t1", "/filtered/no"]
+        ["/data/t1", "/filtered/no", "/filtered/yes"] | "/filt"         || ["/data/t1"]
+    }
+
+    ProcessingOption setupBlacklistImportSourceNotificationProcessingOption(String blacklist) {
+        return DomainFactory.createProcessingOptionLazy(
+                name: ProcessingOption.OptionName.BLACKLIST_IMPORT_SOURCE_NOTIFICATION,
+                type: null,
+                value: blacklist,
+        )
+    }
+
     @Override
     AbstractWorkflowCreatorScheduler createWorkflowCreatorScheduler() {
         return new FastqImportWorkflowCreatorScheduler([
@@ -195,6 +293,9 @@ class FastqImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSch
                 notificationCreator                  : Mock(NotificationCreator),
                 samplePairDeciderService             : Mock(SamplePairDeciderService),
                 workflowSystemService                : Mock(WorkflowSystemService),
+                ticketService                        : Mock(TicketService),
+                mailHelperService                    : Mock(MailHelperService),
+                processingOptionService              : Mock(ProcessingOptionService),
                 systemUserService                    : Mock(SystemUserService) {
                     _ * useSystemUserAsOperator(_) >> { Closure closure ->
                         return closure.call()

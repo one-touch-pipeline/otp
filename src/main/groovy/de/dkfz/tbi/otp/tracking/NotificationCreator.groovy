@@ -51,7 +51,6 @@ import de.dkfz.tbi.otp.workflow.WorkflowCreateState
 
 import java.time.Instant
 
-import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.BLACKLIST_IMPORT_SOURCE_NOTIFICATION
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.Done.NOTHING
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.Done.PARTLY
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
@@ -78,9 +77,6 @@ class NotificationCreator {
 
     @Autowired
     TicketService ticketService
-
-    @Autowired
-    ProcessingOptionService processingOptionService
 
     @Autowired
     RunYapsaService runYapsaService
@@ -144,10 +140,6 @@ class NotificationCreator {
             if (!mightDoMore) {
                 LogThreadLocal.threadLog?.debug("!mightDoMore: marking as finalNotificationSent")
                 ticketService.markFinalNotificationSent(ticket)
-            }
-            if (justCompletedProcessingSteps.contains(Ticket.ProcessingStep.INSTALLATION)) {
-                LogThreadLocal.threadLog?.debug("installation just completed")
-                sendImportSourceOperatorNotification(ticket)
             }
         }
     }
@@ -243,46 +235,6 @@ class NotificationCreator {
         }
 
         return content
-    }
-
-    void sendImportSourceOperatorNotification(Ticket ticket) {
-        String prefixedTicketNumber = ticketService.getPrefixedTicketNumber(ticket)
-        String subject = "Import source ready for deletion [${prefixedTicketNumber}]"
-        String ticketUrl = ticketService.buildTicketDirectLink(ticket)
-
-        String content = """\
-                |Related Ticket: ${prefixedTicketNumber}
-                |${ticketUrl}
-                |
-                |Deletion Script:
-                |
-                |#!/bin/bash
-                |
-                |set -e
-                |""".stripMargin()
-
-        List<String> pathsToDelete = getPathsToDelete(ticket)
-        content += pathsToDelete.collect { "rm -f ${it}" }.join("\n")
-
-        if (pathsToDelete) {
-            mailHelperService.saveMail(subject, content)
-        }
-    }
-
-    private List<String> getPathsToDelete(Ticket ticket) {
-        List<String> allPaths = []
-        ticketService.getMetaDataFilesOfTicket(ticket).each { MetaDataFile metaDataFile ->
-            List<String> initialPaths = metaDataFile.fastqImportInstance.sequenceFiles*.fullInitialPath
-            allPaths.addAll(initialPaths)
-        }
-        return getPrefixBlacklistFilteredStrings(allPaths)
-    }
-
-    private List<String> getPrefixBlacklistFilteredStrings(List<String> strings) {
-        List<String> blacklist = processingOptionService.findOptionAsList(BLACKLIST_IMPORT_SOURCE_NOTIFICATION)
-        return strings.findAll { String path ->
-            blacklist.every { it == "" || !path.startsWith(it) }
-        }
     }
 
     void appendSeqTrackString(StringBuilder sb, SeqTrack seqTrack) {

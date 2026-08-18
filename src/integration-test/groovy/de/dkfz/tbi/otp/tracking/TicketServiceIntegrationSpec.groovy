@@ -49,7 +49,6 @@ class TicketServiceIntegrationSpec extends Specification implements DomainFactor
         ticketService = new TicketService()
         ticketService.processingOptionService = new ProcessingOptionService()
         ticketService.notificationCreator = new NotificationCreator()
-        ticketService.notificationCreator.processingOptionService = new ProcessingOptionService()
         ticketService.notificationCreator.userProjectRoleService = new UserProjectRoleService()
     }
 

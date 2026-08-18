@@ -26,7 +26,11 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.administration.MailHelperService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.tracking.Ticket
+import de.dkfz.tbi.otp.tracking.TicketService
 import de.dkfz.tbi.otp.utils.LogUsedTimeUtils
 import de.dkfz.tbi.otp.workflow.WorkflowCreateState
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationInitializationService
@@ -34,6 +38,8 @@ import de.dkfz.tbi.otp.workflow.shared.FailedLoadingDbObjectException
 import de.dkfz.tbi.otp.workflowExecution.decider.DeciderResult
 
 import java.time.Instant
+
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.BLACKLIST_IMPORT_SOURCE_NOTIFICATION
 
 @Slf4j
 @Component
@@ -47,6 +53,15 @@ class FastqImportWorkflowCreatorScheduler extends AbstractWorkflowCreatorSchedul
 
     @Autowired
     MetaDataFileService metaDataFileService
+
+    @Autowired
+    TicketService ticketService
+
+    @Autowired
+    MailHelperService mailHelperService
+
+    @Autowired
+    ProcessingOptionService processingOptionService
 
     @Override
     Long getNextWaitingImportId() {
@@ -88,7 +103,51 @@ class FastqImportWorkflowCreatorScheduler extends AbstractWorkflowCreatorSchedul
 
             fastqImportInstanceService.updateState(fastqImportInstanceDb, WorkflowCreateState.SUCCESS)
 
+            if (fastqImportInstanceDb.ticket) {
+                sendImportSourceOperatorNotification(fastqImportInstanceDb.ticket)
+            }
+
             return deciderResult
+        }
+    }
+
+    void sendImportSourceOperatorNotification(Ticket ticket) {
+        String prefixedTicketNumber = ticketService.getPrefixedTicketNumber(ticket)
+        String subject = "Import source ready for deletion [${prefixedTicketNumber}]"
+        String ticketUrl = ticketService.buildTicketDirectLink(ticket)
+
+        String content = """\
+                |Related Ticket: ${prefixedTicketNumber}
+                |${ticketUrl}
+                |
+                |Deletion Script:
+                |
+                |#!/bin/bash
+                |
+                |set -e
+                |""".stripMargin()
+
+        List<String> pathsToDelete = getPathsToDelete(ticket)
+        content += pathsToDelete.collect { "rm -f ${it}" }.join("\n")
+
+        if (pathsToDelete) {
+            mailHelperService.saveMail(subject, content)
+        }
+    }
+
+    private List<String> getPathsToDelete(Ticket ticket) {
+        List<String> allPaths = []
+        ticketService.getMetaDataFilesOfTicket(ticket).each { MetaDataFile metaDataFile ->
+            List<String> initialPaths = metaDataFile.fastqImportInstance.sequenceFiles*.fullInitialPath
+            allPaths.addAll(initialPaths)
+        }
+        return getPrefixBlacklistFilteredStrings(allPaths)
+    }
+
+    private List<String> getPrefixBlacklistFilteredStrings(List<String> strings) {
+        List<String> blacklist = processingOptionService.findOptionAsList(BLACKLIST_IMPORT_SOURCE_NOTIFICATION)
+        return strings.findAll { String path ->
+            blacklist.every { it == "" || !path.startsWith(it) }
         }
     }
 
