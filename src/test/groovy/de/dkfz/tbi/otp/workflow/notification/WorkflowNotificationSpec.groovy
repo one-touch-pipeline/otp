@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.workflow.alignment.AlignmentWorkflow
 import de.dkfz.tbi.otp.workflow.alignment.roddy.panCancer.PanCancerWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.snv.SnvWorkflow
+import de.dkfz.tbi.otp.workflow.bamImport.BamImportWorkflow
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 
@@ -84,6 +85,37 @@ class WorkflowNotificationSpec extends Specification {
         content.notificationTextsByRunId == [11L: "sample text"]
         content.guiUrls == ["${OTP_URL}/sampleOverview/index?project=${PROJECT_NAME}".toString()] as Set
         content.filePatterns == ["${SEQUENCING_DIR}/\${SEQUENCING_TYPE_DIR}".toString()] as Set /* codenarc-disable-line GStringExpressionWithinString */
+    }
+
+    void "BamImportNotification, builds workflow name, text, empty GUI URL and extended file pattern from output BAM rows"() {
+        given:
+        BamImportNotificationRow row = new BamImportNotificationRow(
+                "pid", "tumor", "WGS PAIRED bulk", "whole_genome_sequencing", false, "paired",
+                PROJECT_ID, 11L
+        )
+
+        WorkflowNotificationContentService contentService = Mock(WorkflowNotificationContentService)
+        contentService.fetchBamImportNotificationRows([workflowRun], BamImportWorkflow.OUTPUT_BAM) >> [row]
+        contentService.loadProjectsById([PROJECT_ID]) >> [(PROJECT_ID): project]
+        contentService.buildBamImportNotificationText([row]) >> (["sample text"] as Set)
+        contentService.buildBamImportNotificationTextsByRunId([row]) >> ([11L: "sample text"])
+
+        BamImportNotification notification = new BamImportNotification(
+                configService: Stub(ConfigService) { getConfigServerUrl() >> OTP_URL },
+                projectService: Stub(ProjectService) { getSequencingDirectory(project) >> Paths.get(SEQUENCING_DIR) },
+                workflowNotificationContentService: contentService,
+        )
+
+        when:
+        NotificationContent content = notification.buildContent([workflowRun])
+
+        then:
+        notification.workflowName() == BamImportWorkflow.WORKFLOW
+        notification.pipelineAcknowledgementTemplate() == null
+        content.notificationTexts == ["sample text"] as Set
+        content.notificationTextsByRunId == [11L: "sample text"]
+        content.guiUrls == [] as Set
+        content.filePatterns == ["${SEQUENCING_DIR}/whole_genome_sequencing/view-by-pid/\${PID}/\${SAMPLE_TYPE}/paired/merged-alignment/nonOTP".toString()] as Set /* codenarc-disable-line GStringExpressionWithinString */
     }
 
     void "AbstractAlignmentNotification, builds text from the input sample rows and GUI URL and file patterns from the output BAM rows"() {

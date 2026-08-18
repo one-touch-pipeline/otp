@@ -25,6 +25,7 @@ import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingInstance
@@ -36,6 +37,7 @@ import de.dkfz.tbi.otp.project.Project
 import de.dkfz.tbi.otp.tracking.Ticket
 import de.dkfz.tbi.otp.workflow.alignment.AlignmentWorkflow
 import de.dkfz.tbi.otp.workflow.analysis.AbstractAnalysisWorkflow
+import de.dkfz.tbi.otp.workflow.bamImport.BamImportWorkflow
 import de.dkfz.tbi.otp.workflow.datainstallation.DataInstallationWorkflow
 import de.dkfz.tbi.otp.workflowExecution.WorkflowArtefact
 import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
@@ -133,12 +135,34 @@ class WorkflowNotificationContentServiceIntegrationSpec extends Specification im
         rows.first().libraryLayoutDirName == bamFile.seqType.libraryLayoutDirName
     }
 
+    void "fetchBamImportNotificationRows, projects the scalar data of externally processed bam files of the given runs"() {
+        given:
+        WorkflowRun run = createWorkflowRun()
+        WorkflowArtefact artefact = createWorkflowArtefact(producedBy: run, outputRole: BamImportWorkflow.OUTPUT_BAM)
+        ExternallyProcessedBamFile bamFile = DomainFactory.createExternallyProcessedBamFile(workflowArtefact: artefact)
+
+        when:
+        List<BamImportNotificationRow> rows = workflowNotificationContentService.fetchBamImportNotificationRows([run], BamImportWorkflow.OUTPUT_BAM)
+
+        then:
+        rows.size() == 1
+        rows.first().pid == bamFile.individual.pid
+        rows.first().sampleTypeName == bamFile.sampleType.name
+        rows.first().seqTypeDisplayName == bamFile.seqType.displayNameWithLibraryLayout
+        rows.first().seqTypeDirName == bamFile.seqType.dirName
+        rows.first().hasAntibodyTarget == bamFile.seqType.hasAntibodyTarget
+        rows.first().libraryLayoutDirName == bamFile.seqType.libraryLayoutDirName
+        rows.first().projectId == bamFile.project.id
+        rows.first().workflowRunId == run.id
+    }
+
     void "fetch methods, when no workflow runs are given, return an empty list"() {
         expect:
         workflowNotificationContentService.fetchOutputSampleRows([], DataInstallationWorkflow.OUTPUT_FASTQ) == []
         workflowNotificationContentService.fetchInputSampleRows([], AlignmentWorkflow.INPUT_FASTQ) == []
         workflowNotificationContentService.fetchSamplePairRows([], AbstractAnalysisWorkflow.ANALYSIS_OUTPUT) == []
         workflowNotificationContentService.fetchOutputBamRows([], AlignmentWorkflow.OUTPUT_BAM) == []
+        workflowNotificationContentService.fetchBamImportNotificationRows([], BamImportWorkflow.OUTPUT_BAM) == []
     }
 
     void "fetchIlseNumbers, projects the distinct ILSe numbers of the ticket ascending, ignoring seq tracks without one"() {

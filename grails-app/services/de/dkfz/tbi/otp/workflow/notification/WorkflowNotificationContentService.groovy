@@ -26,6 +26,7 @@ import groovy.transform.CompileDynamic
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
+import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedBamFile
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SequencingReadType
@@ -341,6 +342,76 @@ class WorkflowNotificationContentService {
                     .resolve("merged-alignment")
                     .toString()
         }.unique().sort() as Set
+    }
+
+    /**
+     * Fetches the data rows of externally processed BAM files produced by the given workflow runs.
+     * Used by the BamImport notification.
+     */
+    @CompileDynamic
+    List<BamImportNotificationRow> fetchBamImportNotificationRows(Collection<WorkflowRun> workflowRuns, String outputRole) {
+        if (!workflowRuns) {
+            return []
+        }
+        return ExternallyProcessedBamFile.executeQuery('''
+                select individual.pid, sampleType.name, seqType.displayName, seqType.libraryLayout, seqType.singleCell,
+                       seqType.dirName, seqType.hasAntibodyTarget,
+                       project.id, workflowArtefact.producedBy.id
+                from ExternallyProcessedBamFile bamFile
+                join bamFile.workflowArtefact workflowArtefact
+                join bamFile.workPackage workPackage
+                join workPackage.sample sample
+                join sample.individual individual
+                join individual.project project
+                join workPackage.seqType seqType
+                join sample.sampleType sampleType
+                where workflowArtefact.producedBy.id in (:workflowRunIds)
+                  and workflowArtefact.outputRole = :outputRole
+                ''', [
+                workflowRunIds: workflowRuns*.id,
+                outputRole    : outputRole,
+        ]).collect { Object[] values ->
+            new BamImportNotificationRow(
+                    values[0] as String, // individual.pid
+                    values[1] as String, // sampleType.name
+                    seqTypeDisplayName(values[2] as String, values[3] as SequencingReadType, values[4] as boolean), // seqTypeDisplayName
+                    values[5] as String, // seqType.dirName
+                    values[6] as boolean, // seqType.hasAntibodyTarget
+                    (values[3] as SequencingReadType).name().toLowerCase(), // libraryLayoutDirName
+                    values[7] as Long,   // project.id
+                    values[8] as Long,   // workflowRunId
+            )
+        }
+    }
+
+    /**
+     * Creates the display text of the given BAM import rows.
+     */
+    Set<String> buildBamImportNotificationText(Collection<BamImportNotificationRow> rows) {
+        if (!rows) {
+            return [] as Set
+        }
+        return rows.collect { BamImportNotificationRow row ->
+            "${row.pid} ${row.sampleTypeName} ${row.seqTypeDisplayName}".toString()
+        }.unique().sort() as Set
+    }
+
+    /**
+     * Creates the display text of each workflow run which produced the given BAM import rows.
+     */
+    Map<Long, String> buildBamImportNotificationTextsByRunId(Collection<BamImportNotificationRow> rows) {
+        if (!rows) {
+            return [:]
+        }
+        return rows.groupBy { BamImportNotificationRow row ->
+            row.workflowRunId
+        }.collectEntries { Long workflowRunId, List<BamImportNotificationRow> runRows ->
+            Set<String> notificationTexts = runRows.collect { BamImportNotificationRow row ->
+                "${row.pid} ${row.sampleTypeName} ${row.seqTypeDisplayName}".toString()
+            } as Set
+            assert notificationTexts.size() == 1: "Workflow run ${workflowRunId} must have exactly one notification text"
+            [(workflowRunId): notificationTexts.join("")]
+        }
     }
 
     private static SampleNotificationRow toSampleRow(Object[] values) {

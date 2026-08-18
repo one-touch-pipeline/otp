@@ -204,6 +204,40 @@ class WorkflowNotificationContentServiceSpec extends Specification implements Do
         thrown(AssertionError)
     }
 
+    void "buildBamImportNotificationText, returns formatted texts of BamImportNotificationRow"() {
+        given:
+        List<BamImportNotificationRow> rows = [
+                new BamImportNotificationRow("pidA", "tumor", "WGS PAIRED bulk", "wgs", false, "paired", 1L, 11L),
+                new BamImportNotificationRow("pidA", "tumor", "WGS PAIRED bulk", "wgs", false, "paired", 1L, 11L),
+                new BamImportNotificationRow("pidB", "control", "WGS PAIRED bulk", "wgs", false, "paired", 1L, 12L),
+        ]
+
+        expect:
+        service.buildBamImportNotificationText(rows) == [
+                "pidA tumor WGS PAIRED bulk",
+                "pidB control WGS PAIRED bulk",
+        ] as Set
+
+        service.buildBamImportNotificationTextsByRunId(rows) == [
+                11L: "pidA tumor WGS PAIRED bulk",
+                12L: "pidB control WGS PAIRED bulk",
+        ]
+    }
+
+    void "buildBamImportNotificationTextsByRunId, rejects multiple notification texts for one workflow run"() {
+        given:
+        List<BamImportNotificationRow> rows = [
+                new BamImportNotificationRow("pidA", "tumor", "WGS PAIRED bulk", "wgs", false, "paired", 1L, 11L),
+                new BamImportNotificationRow("pidB", "control", "WGS PAIRED bulk", "wgs", false, "paired", 1L, 11L),
+        ]
+
+        when:
+        service.buildBamImportNotificationTextsByRunId(rows)
+
+        then:
+        thrown(AssertionError)
+    }
+
     void "getMergingDirectories, when bamFiles is empty, returns empty set"() {
         expect:
         service.getMergingDirectories([]) == [] as Set
