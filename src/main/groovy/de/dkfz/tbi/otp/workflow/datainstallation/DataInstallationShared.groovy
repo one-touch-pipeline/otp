@@ -34,8 +34,9 @@ import de.dkfz.tbi.otp.workflowExecution.WorkflowStep
 
 trait DataInstallationShared extends WorkflowShared {
 
-    private static final String WORKFLOW = DataInstallationWorkflow.WORKFLOW
-    public static final String OUTPUT_ROLE = DataInstallationWorkflow.OUTPUT_FASTQ
+    private static final List<String> ALLOWED_WORKFLOWS = [
+            DataInstallationWorkflow.WORKFLOW,
+    ]
 
     @Autowired
     LsdfFilesService lsdfFilesService
@@ -52,8 +53,8 @@ trait DataInstallationShared extends WorkflowShared {
     @Autowired
     ConcreteArtefactService concreteArtefactService
 
-    SeqTrack getSeqTrack(WorkflowStep workflowStep) {
-        checkWorkflowName(workflowStep, WORKFLOW)
-        return concreteArtefactService.getOutputArtefact(workflowStep, OUTPUT_ROLE)
+    SeqTrack getSeqTrack(WorkflowStep workflowStep, String outputRole = DataInstallationWorkflow.OUTPUT_FASTQ) {
+        checkWorkflowName(workflowStep, ALLOWED_WORKFLOWS)
+        return concreteArtefactService.getOutputArtefact(workflowStep, outputRole)
     }
 }

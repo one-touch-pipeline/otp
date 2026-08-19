@@ -59,10 +59,32 @@ class DataInstallationSharedSpec extends Specification implements WorkflowSystem
         dataInstallationSharedInstance.getSeqTrack(workflowStep)
 
         then:
-        1 * dataInstallationSharedInstance.checkWorkflowName(workflowStep, DataInstallationWorkflow.WORKFLOW)
+        1 * dataInstallationSharedInstance.checkWorkflowName(workflowStep, [DataInstallationWorkflow.WORKFLOW])
 
         then:
         1 * dataInstallationSharedInstance.concreteArtefactService.getOutputArtefact(workflowStep, DataInstallationWorkflow.OUTPUT_FASTQ) >> seqTrack
+    }
+
+    void "getSeqTrack should use provided output role"() {
+        given:
+        final DataInstallationShared dataInstallationSharedInstance = Spy(DataInstallationSharedInstance)
+        dataInstallationSharedInstance.concreteArtefactService = Mock(ConcreteArtefactService)
+        final WorkflowRun run = createWorkflowRun([
+                workflow: createWorkflow([
+                        name: DataInstallationWorkflow.WORKFLOW
+                ]),
+        ])
+        final WorkflowStep workflowStep = createWorkflowStep([workflowRun: run])
+        SeqTrack seqTrack = createSeqTrack()
+
+        when:
+        dataInstallationSharedInstance.getSeqTrack(workflowStep, "UNALIGNED_CRAM")
+
+        then:
+        1 * dataInstallationSharedInstance.checkWorkflowName(workflowStep, [DataInstallationWorkflow.WORKFLOW])
+
+        then:
+        1 * dataInstallationSharedInstance.concreteArtefactService.getOutputArtefact(workflowStep, "UNALIGNED_CRAM") >> seqTrack
     }
 
     @SuppressWarnings('EmptyClass')
