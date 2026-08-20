@@ -91,6 +91,8 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
                 CellRangerMergingWorkPackage,
                 WorkflowRunInputArtefact,
                 WorkflowVersionSelector,
+                WorkflowRun,
+                WorkflowArtefact,
         ]
     }
 
@@ -892,6 +894,81 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         'no seqplatformgroup for MWP & SeqTrack'              | true                       | false                         | true                       | true
     }
 
+    void "createWorkflowRunsAndOutputArtefacts, when there is an active running run for the same workPackage, then it is killed and set to final failed"() {
+        given:
+        createDataForCreateWorkflowRunsAndOutputArtefacts(true, [
+                existingBamFileOtherSeqTracks: false,
+                noSeqPlatformGroupSeqTrack   : false,
+                noSeqPlatformGroupMwp        : false,
+        ])
+
+        if (baseMergingWorkPackage.hasProperty('config') && baseMergingWorkPackage.config) {
+            baseMergingWorkPackage.config.programVersion = workflowVersion.workflowVersion
+            baseMergingWorkPackage.config.save(flush: true)
+        }
+
+        // an already active alignment run and its output bam file for the same work package
+        WorkflowRun activeRun = createWorkflowRun(state: WorkflowRun.State.RUNNING_OTP)
+        createBamFile(
+                workPackage: baseMergingWorkPackage,
+                workflowArtefact: createWorkflowArtefact(producedBy: activeRun, state: WorkflowArtefact.State.PLANNED_OR_RUNNING)
+        )
+
+        and: 'services are mocked'
+        createServicesForCreateWorkflowRunsAndOutputArtefacts(workflowVersion, seqTrack1)
+        decider.workflowService = Mock(WorkflowService)
+        decider.workflowStateChangeService = Mock(WorkflowStateChangeService)
+
+        when:
+        DeciderResult deciderResult = decider.createWorkflowRunsAndOutputArtefacts(projectSeqTypeGroup, alignmentDeciderGroup,
+                dataList, additionalDataList, additionalData, workflowVersion)
+
+        then: 'the conflicting run is killed (stopping its jobs) and set to the non-restartable final failed state'
+        1 * decider.workflowService.killWorkflowRun(activeRun)
+        1 * decider.workflowStateChangeService.changeStateToFinalFailed(activeRun)
+
+        and: 'a new run is still created'
+        deciderResult.newArtefacts.size() == 1
+    }
+
+    void "createWorkflowRunsAndOutputArtefacts, when a conflicting run is not in a killable state, then it is only set to final failed"() {
+        given:
+        createDataForCreateWorkflowRunsAndOutputArtefacts(true, [
+                existingBamFileOtherSeqTracks: false,
+                noSeqPlatformGroupSeqTrack   : false,
+                noSeqPlatformGroupMwp        : false,
+        ])
+
+        if (baseMergingWorkPackage.hasProperty('config') && baseMergingWorkPackage.config) {
+            baseMergingWorkPackage.config.programVersion = workflowVersion.workflowVersion
+            baseMergingWorkPackage.config.save(flush: true)
+        }
+
+        // a conflicting run that already failed (waiting for an operator) still has an active output artefact,
+        // but is not in a killable state
+        WorkflowRun failedRun = createWorkflowRun(state: WorkflowRun.State.FAILED)
+        createBamFile(
+                workPackage: baseMergingWorkPackage,
+                workflowArtefact: createWorkflowArtefact(producedBy: failedRun, state: WorkflowArtefact.State.PLANNED_OR_RUNNING)
+        )
+
+        and: 'services are mocked'
+        createServicesForCreateWorkflowRunsAndOutputArtefacts(workflowVersion, seqTrack1)
+        decider.workflowService = Mock(WorkflowService)
+        decider.workflowStateChangeService = Mock(WorkflowStateChangeService)
+
+        when:
+        DeciderResult deciderResult = decider.createWorkflowRunsAndOutputArtefacts(projectSeqTypeGroup, alignmentDeciderGroup,
+                dataList, additionalDataList, additionalData, workflowVersion)
+
+        then: 'it is not killed (nothing to kill), but still set to final failed'
+        0 * decider.workflowService.killWorkflowRun(_)
+        1 * decider.workflowStateChangeService.changeStateToFinalFailed(failedRun)
+
+        and:
+        deciderResult.newArtefacts.size() == 1
+    }
+
     @Unroll
     void "createWorkflowRunsAndOutputArtefacts, when #name, then do not create a new bam file and create a warning"() {
         given:
@@ -1397,6 +1474,9 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         decider.alignmentWorkFileServiceFactoryService = Mock(AlignmentWorkFileServiceFactoryService) {
             _ * getService(_) >> workFileService
         }
+        // used by cancelConflictingRuns to supersede an already active run for the same work package (otp-3020)
+        decider.workflowService = Mock(WorkflowService)
+        decider.workflowStateChangeService = Mock(WorkflowStateChangeService)
     }
 
     protected void createEmptyServicesForCreateWorkflowRunsAndOutputArtefacts(int mailCount) {

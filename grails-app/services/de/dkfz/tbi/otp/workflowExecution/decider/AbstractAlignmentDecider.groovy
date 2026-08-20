@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.workflowExecution.decider
 
 import grails.gorm.transactions.Transactional
+import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -32,6 +33,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.utils.exceptions.FileAccessForProjectNotAllowedException
 import de.dkfz.tbi.otp.workflowExecution.*
 import de.dkfz.tbi.otp.workflowExecution.decider.alignment.*
 
@@ -60,6 +62,9 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
 
     @Autowired
     WorkflowRunService workflowRunService
+
+    @Autowired
+    WorkflowStateChangeService workflowStateChangeService
 
     abstract boolean requiresFastqcResults()
 
@@ -306,6 +311,8 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
         workPackage.seqTracks = seqTracks as Set
         workPackage.save(flush: false, deepValidate: false)
 
+        cancelConflictingRuns(workPackage)
+
         List<String> displayName = [
                 "project: ${projectSeqTypeGroup.project.name}",
                 "individual: ${group.individual.displayName}",
@@ -419,5 +426,36 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
         }
 
         return workPackage
+    }
+
+    /**
+     * Supersedes any still active or planned workflow runs for the same MergingWorkPackage, so that at most one
+     * alignment run is active per MergingWorkPackage. This prevents the race in which a finishing run deletes the
+     * work folder of a concurrent run of the same sample (otp-3020).
+     *
+     * Each conflicting run is killed (stopping its running cluster/WES jobs) and then set to the final failed state,
+     * which withdraws its output artefact so it is neither re-detected as active nor restartable afterwards.
+     */
+    @CompileDynamic
+    private void cancelConflictingRuns(MergingWorkPackage workPackage) {
+        List<AbstractBamFile> activeBamFiles = AbstractBamFile.createCriteria().list {
+            eq('workPackage', workPackage)
+            workflowArtefact {
+                eq('state', WorkflowArtefact.State.PLANNED_OR_RUNNING)
+            }
+        } as List<AbstractBamFile>
+        activeBamFiles.each { AbstractBamFile activeBam ->
+            WorkflowRun activeRun = activeBam.workflowArtefact.producedBy
+
+            if (activeRun.state in WorkflowRun.UNFINISHED_STATES) {
+                try {
+                    workflowService.killWorkflowRun(activeRun)
+                } catch (FileAccessForProjectNotAllowedException e) {
+                    log.warn("Could not kill superseded workflow run ${activeRun}, since its project is not accessible", e)
+                }
+            }
+
+            workflowStateChangeService.changeStateToFinalFailed(activeRun)
+        }
     }
 }
