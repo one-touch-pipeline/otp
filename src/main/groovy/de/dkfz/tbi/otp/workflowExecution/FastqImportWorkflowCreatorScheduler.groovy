@@ -104,14 +104,15 @@ class FastqImportWorkflowCreatorScheduler extends AbstractWorkflowCreatorSchedul
             fastqImportInstanceService.updateState(fastqImportInstanceDb, WorkflowCreateState.SUCCESS)
 
             if (fastqImportInstanceDb.ticket) {
-                sendImportSourceOperatorNotification(fastqImportInstanceDb.ticket)
+                sendImportSourceOperatorNotification(fastqImportInstanceDb)
             }
 
             return deciderResult
         }
     }
 
-    void sendImportSourceOperatorNotification(Ticket ticket) {
+    void sendImportSourceOperatorNotification(FastqImportInstance fastqImportInstance) {
+        Ticket ticket = fastqImportInstance.ticket
         String prefixedTicketNumber = ticketService.getPrefixedTicketNumber(ticket)
         String subject = "Import source ready for deletion [${prefixedTicketNumber}]"
         String ticketUrl = ticketService.buildTicketDirectLink(ticket)
@@ -127,7 +128,7 @@ class FastqImportWorkflowCreatorScheduler extends AbstractWorkflowCreatorSchedul
                 |set -e
                 |""".stripMargin()
 
-        List<String> pathsToDelete = getPathsToDelete(ticket)
+        List<String> pathsToDelete = getPathsToDelete(fastqImportInstance)
         content += pathsToDelete.collect { "rm -f ${it}" }.join("\n")
 
         if (pathsToDelete) {
@@ -135,13 +136,8 @@ class FastqImportWorkflowCreatorScheduler extends AbstractWorkflowCreatorSchedul
         }
     }
 
-    private List<String> getPathsToDelete(Ticket ticket) {
-        List<String> allPaths = []
-        ticketService.getMetaDataFilesOfTicket(ticket).each { MetaDataFile metaDataFile ->
-            List<String> initialPaths = metaDataFile.fastqImportInstance.sequenceFiles*.fullInitialPath
-            allPaths.addAll(initialPaths)
-        }
-        return getPrefixBlacklistFilteredStrings(allPaths)
+    private List<String> getPathsToDelete(FastqImportInstance fastqImportInstance) {
+        return getPrefixBlacklistFilteredStrings(fastqImportInstance.sequenceFiles*.fullInitialPath)
     }
 
     private List<String> getPrefixBlacklistFilteredStrings(List<String> strings) {

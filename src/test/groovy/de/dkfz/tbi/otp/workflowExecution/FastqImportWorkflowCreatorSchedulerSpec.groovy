@@ -196,7 +196,8 @@ class FastqImportWorkflowCreatorSchedulerSpec extends AbstractWorkflowCreatorSch
         1 * scheduler.fastqImportInstanceService.updateState(fastqImportInstance, WorkflowCreateState.SUCCESS)
         1 * scheduler.ticketService.getPrefixedTicketNumber(ticket) >> "prefix"
         1 * scheduler.ticketService.buildTicketDirectLink(ticket) >> "link"
-        1 * scheduler.ticketService.getMetaDataFilesOfTicket(ticket) >> []
+        _ * scheduler.processingOptionService.findOptionAsList(_) >> []
+        0 * scheduler.ticketService.getMetaDataFilesOfTicket(_)
     }
 
     void "createWorkflowsTask, when the import has no ticket, then do not trigger the import source ready for deletion notification"() {
