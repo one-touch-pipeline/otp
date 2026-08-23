@@ -519,7 +519,7 @@ dependencies {
     implementation 'commons-io:commons-io:2.22.0'
 
     // libraries for SSH and SFTP
-    implementation 'com.github.mwiede:jsch:2.28.6'
+    implementation 'com.github.mwiede:jsch:2.28.7'
     implementation 'com.github.robtimus:sftp-fs:4.0.1'
 
     // library for easy HTML editing
