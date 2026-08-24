@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.workflowExecution.decider
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileDynamic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -131,7 +130,7 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
                                                           AlignmentArtefactDataList additionalArtefactDataList, Workflow workflow) {
         Collection<SeqTrack> seqTracks = inputArtefactDataList.seqTrackData*.artefact
         if (!seqTracks) {
-            return new AlignmentAdditionalData([:], [:], [:], [:], [:], [:], null)
+            return new AlignmentAdditionalData([:], [:], [:], [:], [:], [:], null, [:])
         }
         return new AlignmentAdditionalData(
                 alignmentArtefactService.fetchReferenceGenome(workflow, seqTracks),
@@ -141,6 +140,7 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
                 alignmentArtefactService.fetchMergingWorkPackages(seqTracks),
                 requiresFastqcResults() ? alignmentArtefactService.fetchRawSequenceFiles(seqTracks) : [:],
                 pipelineService.findByPipelineName(pipelineName),
+                alignmentArtefactService.fetchActiveAlignmentRunsPerWorkPackage(seqTracks),
         )
     }
 
@@ -311,7 +311,7 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
         workPackage.seqTracks = seqTracks as Set
         workPackage.save(flush: false, deepValidate: false)
 
-        cancelConflictingRuns(workPackage)
+        cancelConflictingRuns(workPackage, additionalData)
 
         List<String> displayName = [
                 "project: ${projectSeqTypeGroup.project.name}",
@@ -435,18 +435,13 @@ abstract class AbstractAlignmentDecider extends AbstractWorkflowDecider<Alignmen
      *
      * Each conflicting run is killed (stopping its running cluster/WES jobs) and then set to the final failed state,
      * which withdraws its output artefact so it is neither re-detected as active nor restartable afterwards.
+     *
+     * The conflicting runs are taken from the prefetched {@link AlignmentAdditionalData#activeRunsPerWorkPackage}, so
+     * that no query is executed inside the per-group processing loop.
      */
-    @CompileDynamic
-    private void cancelConflictingRuns(MergingWorkPackage workPackage) {
-        List<AbstractBamFile> activeBamFiles = AbstractBamFile.createCriteria().list {
-            eq('workPackage', workPackage)
-            workflowArtefact {
-                eq('state', WorkflowArtefact.State.PLANNED_OR_RUNNING)
-            }
-        } as List<AbstractBamFile>
-        activeBamFiles.each { AbstractBamFile activeBam ->
-            WorkflowRun activeRun = activeBam.workflowArtefact.producedBy
-
+    private void cancelConflictingRuns(MergingWorkPackage workPackage, AlignmentAdditionalData additionalData) {
+        List<WorkflowRun> activeRuns = additionalData.activeRunsPerWorkPackage[workPackage] ?: []
+        activeRuns.each { WorkflowRun activeRun ->
             if (activeRun.state in WorkflowRun.UNFINISHED_STATES) {
                 try {
                     workflowService.killWorkflowRun(activeRun)

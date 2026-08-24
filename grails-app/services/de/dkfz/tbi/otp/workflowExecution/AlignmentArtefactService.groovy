@@ -359,6 +359,24 @@ class AlignmentArtefactService {
             and mergingWorkPackage.seqType = st.seqType
         """
 
+    private final static String HQL_FETCH_ACTIVE_RUNS = """
+        select distinct
+            workPackage,
+            workflowArtefact.producedBy
+        from
+            AbstractBamFile bam
+            join bam.workPackage workPackage
+            join bam.workflowArtefact workflowArtefact,
+            SeqTrack st
+        where
+            st in (:seqTracks)
+            and workPackage.sample = st.sample
+            and workPackage.seqType = st.seqType
+            and workflowArtefact.state = :state
+            and workflowArtefact.producedBy is not null
+            and workPackage.class != de.dkfz.tbi.otp.dataprocessing.ExternalMergingWorkPackage
+        """
+
     private final static String HQL_FETCH_DATA_FILES = """
         select distinct
             df,
@@ -499,6 +517,19 @@ class AlignmentArtefactService {
             }.collectEntries {
                 [(it.key): it.value.collect { it[INDEX_3] as MergingWorkPackage }.toSet()]
             } as Map<AlignmentWorkPackageGroup, Set<MergingWorkPackage>>
+        }
+    }
+
+    Map<MergingWorkPackage, List<WorkflowRun>> fetchActiveAlignmentRunsPerWorkPackage(Collection<SeqTrack> seqTracks) {
+        return LogUsedTimeUtils.logUsedTime(log, "          fetchActiveAlignmentRunsPerWorkPackage") {
+            return (AbstractBamFile.executeQuery(HQL_FETCH_ACTIVE_RUNS, [
+                    seqTracks: seqTracks,
+                    state    : WorkflowArtefact.State.PLANNED_OR_RUNNING,
+            ]) as List<List<?>>).groupBy {
+                it[INDEX_0] as MergingWorkPackage
+            }.collectEntries {
+                [(it.key): it.value.collect { it[INDEX_1] as WorkflowRun }]
+            } as Map<MergingWorkPackage, List<WorkflowRun>>
         }
     }
 

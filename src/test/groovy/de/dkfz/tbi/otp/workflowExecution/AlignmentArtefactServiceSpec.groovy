@@ -709,6 +709,36 @@ class AlignmentArtefactServiceSpec extends HibernateSpec implements WorkflowSyst
         TestCase.assertContainSame(result, expected)
     }
 
+    void "fetchActiveAlignmentRunsPerWorkPackage, returns the planned or running runs grouped by work package, ignoring finished ones (otp-3020)"() {
+        given:
+        setupData()
+
+        WorkflowRun activeRun = createWorkflowRun()
+        RoddyBamFile activeBamFile = createBamFileWithSpecies([
+                workflowArtefact: createWorkflowArtefact([artefactType: ArtefactType.BAM, producedBy: activeRun]),
+        ])
+        MergingWorkPackage workPackage = activeBamFile.mergingWorkPackage as MergingWorkPackage
+
+        // a finished (SUCCESS) run of the same work package must be ignored
+        createBamFile([
+                workPackage     : workPackage,
+                workflowArtefact: createWorkflowArtefact([
+                        artefactType: ArtefactType.BAM,
+                        producedBy  : createWorkflowRun(),
+                        state       : WorkflowArtefact.State.SUCCESS,
+                ]),
+        ])
+
+        SeqTrack seqTrack = createSeqTrack([sample: workPackage.sample, seqType: workPackage.seqType])
+
+        when:
+        Map<MergingWorkPackage, List<WorkflowRun>> result = alignmentArtefactService.fetchActiveAlignmentRunsPerWorkPackage([seqTrack])
+
+        then:
+        result.size() == 1
+        result[workPackage] == [activeRun]
+    }
+
     private SeqTrack createSeqTrackWithTwoFastqFileAndSpecies(Map parameters) {
         return createSeqTrackWithTwoFastqFile([
                 sample: createSample([

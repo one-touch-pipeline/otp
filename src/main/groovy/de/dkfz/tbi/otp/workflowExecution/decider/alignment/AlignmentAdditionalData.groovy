@@ -27,6 +27,7 @@ import groovy.transform.TupleConstructor
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
+import de.dkfz.tbi.otp.workflowExecution.WorkflowRun
 import de.dkfz.tbi.otp.workflowExecution.decider.AdditionalData
 import de.dkfz.tbi.otp.workflowExecution.decider.ProjectSeqTypeGroup
 
@@ -42,4 +43,5 @@ class AlignmentAdditionalData implements AdditionalData {
     Map<AlignmentWorkPackageGroup, Set<MergingWorkPackage>> mergingWorkPackageMap
     Map<SeqTrack, List<RawSequenceFile>> rawSequenceFileMap
     Pipeline pipeline
+    Map<MergingWorkPackage, List<WorkflowRun>> activeRunsPerWorkPackage
 }

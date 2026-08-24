@@ -276,6 +276,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
             1 * fetchSpecificSeqPlatformGroup([seqTrack]) >> specificSeqPlatformGroupMap
             1 * fetchDefaultSeqPlatformGroup() >> defaultSeqPlatformGroupMap
             1 * fetchMergingWorkPackages([seqTrack]) >> mergingWorkPackageMap
+            1 * fetchActiveAlignmentRunsPerWorkPackage([seqTrack]) >> [:]
             useFastqcCount * fetchRawSequenceFiles([seqTrack]) >> rawSequenceFileMap
             fetchReferenceGenomeIndexesCount * fetchReferenceGenomeIndexes(_, _) >> referenceGenomeIndexMap
         }
@@ -907,12 +908,9 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
             baseMergingWorkPackage.config.save(flush: true)
         }
 
-        // an already active alignment run and its output bam file for the same work package
+        // an already active alignment run for the same work package, prefetched into the additional data
         WorkflowRun activeRun = createWorkflowRun(state: WorkflowRun.State.RUNNING_OTP)
-        createBamFile(
-                workPackage: baseMergingWorkPackage,
-                workflowArtefact: createWorkflowArtefact(producedBy: activeRun, state: WorkflowArtefact.State.PLANNED_OR_RUNNING)
-        )
+        additionalData.activeRunsPerWorkPackage = [(baseMergingWorkPackage): [activeRun]]
 
         and: 'services are mocked'
         createServicesForCreateWorkflowRunsAndOutputArtefacts(workflowVersion, seqTrack1)
@@ -947,10 +945,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         // a conflicting run that already failed (waiting for an operator) still has an active output artefact,
         // but is not in a killable state
         WorkflowRun failedRun = createWorkflowRun(state: WorkflowRun.State.FAILED)
-        createBamFile(
-                workPackage: baseMergingWorkPackage,
-                workflowArtefact: createWorkflowArtefact(producedBy: failedRun, state: WorkflowArtefact.State.PLANNED_OR_RUNNING)
-        )
+        additionalData.activeRunsPerWorkPackage = [(baseMergingWorkPackage): [failedRun]]
 
         and: 'services are mocked'
         createServicesForCreateWorkflowRunsAndOutputArtefacts(workflowVersion, seqTrack1)
@@ -1373,7 +1368,7 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         }
 
         additionalData = new AlignmentAdditionalData(referenceGenomeMap, [:], [:], [:], [:], rawSequenceFileMap,
-                additionalDataPipelineForCreateWorkflowRunsAndOutputArtefacts)
+                additionalDataPipelineForCreateWorkflowRunsAndOutputArtefacts, [:])
         configureReferenceGenomeIndexMap(additionalData, [referenceGenome])
 
         if (createMwp) {
@@ -1474,9 +1469,6 @@ abstract class AbstractAlignmentDeciderSpec extends Specification implements Dat
         decider.alignmentWorkFileServiceFactoryService = Mock(AlignmentWorkFileServiceFactoryService) {
             _ * getService(_) >> workFileService
         }
-        // used by cancelConflictingRuns to supersede an already active run for the same work package (otp-3020)
-        decider.workflowService = Mock(WorkflowService)
-        decider.workflowStateChangeService = Mock(WorkflowStateChangeService)
     }
 
     protected void createEmptyServicesForCreateWorkflowRunsAndOutputArtefacts(int mailCount) {
