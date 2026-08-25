@@ -245,4 +245,7 @@ databaseChangeLog = {
     include file: 'changelogs/2026/otp-3022-add-check-cluster-log-on-success.groovy'
 
     include file: 'changelogs/2026/otp-3027.groovy'
+
+    include file: 'changelogs/2026/otp-2472.groovy'
+
 }

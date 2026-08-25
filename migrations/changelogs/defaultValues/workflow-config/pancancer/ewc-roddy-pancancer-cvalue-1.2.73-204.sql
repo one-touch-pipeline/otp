@@ -20,22 +20,250 @@
  * SOFTWARE.
  */
 
+
 INSERT INTO external_workflow_config_fragment(id, version, date_created, last_updated, object_version, name, config_values)
 VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue values for PanCancer alignment 1.2.73-204',
         '{' ||
         '    "RODDY": {' ||
         '        "cvalues": {' ||
+        '            "JAVA_BINARY": {' ||
+        '                "value": "java"' ||
+        '            },' ||
+        '            "CHROMOSOME_INDICES": {' ||
+        '                "value": "( {1..22} X Y )",' ||
+        '                "type": "bashArray"' ||
+        '            },' ||
+        '            "CHROMOSOME_INDICES_SORTED": {' ||
+        '                "value": "( 2 1 3 4 5 6 7 X 8 10 11 12 9 13 14 15 16 17 18 19 20 21 22 Y )",' ||
+        '                "type": "bashArray"' ||
+        '            },' ||
+        '            "CHR_PREFIX": {' ||
+        '                "value": "\"\""' ||
+        '            },' ||
+        '            "CHR_SUFFIX": {' ||
+        '                "value": "\"\""' ||
+        '            },' ||
+        '            "SEQUENCER_PROTOCOL": {' ||
+        '                "value": "paired"' ||
+        '            },' ||
+        '            "mergeCol": {' ||
+        '                "value": "Sample"' ||
+        '            },' ||
+        '            "markCol": {' ||
+        '                "value": "Library"' ||
+        '            },' ||
+        '            "datasetCol": {' ||
+        '                "value": "PID"' ||
+        '            },' ||
+        '            "readLayoutCol": {' ||
+        '                "value": "ReadLayout"' ||
+        '            },' ||
+        '            "runCol": {' ||
+        '                "value": "Run"' ||
+        '            },' ||
+        '            "mateCol": {' ||
+        '                "value": "Mate"' ||
+        '            },' ||
+        '            "fileCol": {' ||
+        '                "value": "SequenceFile"' ||
+        '            },' ||
+        '            "metadataTableColumnIDs": {' ||
+        '                "value": "datasetCol,mergeCol,markCol,runCol,mateCol,fileCol,readLayoutCol",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "HTSLIB_VERSION": {' ||
+        '                "value": "0.2.5",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "PERL_VERSION": {' ||
+        '                "value": "5.20.2",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "PYTHON_VERSION": {' ||
+        '                "value": "2.7.9",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "R_VERSION": {' ||
+        '                "value": "3.4.0",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "BEDTOOLS_VERSION": {' ||
+        '                "value": "2.16.2",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "VCFTOOLS_VERSION": {' ||
+        '                "value": "0.1.10",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "SAMTOOLS_VERSION": {' ||
+        '                "value": "0.1.19",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "SAMBAMBA_VERSION": {' ||
+        '                "value": "0.5.9",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "SAMBAMBA_FLAGSTATS_VERSION": {' ||
+        '                "value": "0.4.6",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "MBUFFER_VERSION": {' ||
+        '                "value": "20160613",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "SAMBAMBA_MARKDUP_VERSION": {' ||
+        '                "value": "0.6.5",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "PICARD_VERSION": {' ||
+        '                "value": "1.125",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "LIBMAUS_VERSION": {' ||
+        '                "value": "0.0.131",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "BIOBAMBAM_VERSION": {' ||
+        '                "value": "0.0.148",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "JAVA_VERSION": {' ||
+        '                "value": "1.8.0_131",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "FASTQC_VERSION": {' ||
+        '                "value": "0.11.3",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "BWA_VERSION": {' ||
+        '                "value": "0.7.15",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "BWAKIT_VERSION": {' ||
+        '                "value": "${BWA_VERSION}",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "K8_VERSION": {' ||
+        '                "value": "0.2.5",' ||
+        '                "type": "string"' ||
+        '            },' ||
         '            "workflowEnvironmentScript": {' ||
         '                "value": "workflowEnvironment_tbiLsf",' ||
         '                "type": "string"' ||
         '            },' ||
         '            "sampleDirectory": {' ||
-        '                "value": "${inputBaseDirectory}/${p' || 'id}/${sample}/${SEQUENCER_PROTOCOL}",' ||
+        '                "value": "${inputBaseDirectory}/${p'||'id}/${sample}/${SEQUENCER_PROTOCOL}",' ||
         '                "type": "path"' ||
         '            },' ||
         '            "sequenceDirectory": {' ||
         '                "value": "${sampleDirectory}/${run}/sequence",' ||
         '                "type": "path"' ||
+        '            },' ||
+        '            "refDataBaseDirectory": {' ||
+        '                "value": "/icgc/ngs_share",' ||
+        '                "type": "path"' ||
+        '            },' ||
+        '            "runSlimWorkflow": {' ||
+        '                "value": "true",' ||
+        '                "type": "boolean"' ||
+        '            },' ||
+        '            "useCombinedAlignAndSampe": {' ||
+        '                "value": "true",' ||
+        '                "type": "boolean"' ||
+        '            },' ||
+        '            "useRoddyScratchAsBigFileScratch": {' ||
+        '                "value": "false",' ||
+        '                "type": "boolean"' ||
+        '            },' ||
+        '            "runFastQC": {' ||
+        '                "value": "false",' ||
+        '                "type": "boolean"' ||
+        '            },' ||
+        '            "runCoveragePlots": {' ||
+        '                "value": "true",' ||
+        '                "type": "boolean"' ||
+        '            },' ||
+        '            "runBwaPostAltJs": {' ||
+        '                "value": "false",' ||
+        '                "type": "boolean"' ||
+        '            },' ||
+        '            "bwaPostAltJsHla": {' ||
+        '                "value": "false",' ||
+        '                "type": "boolean"' ||
+        '            },' ||
+        '            "bwaPostAltJsMinPaRatio": {' ||
+        '                "value": "",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "bwaPostAltJsPath": {' ||
+        '                "value": "",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "fingerprintsOutputDirectory": {' ||
+        '                "value": "fingerprinting",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "runFingerprinting": {' ||
+        '                "value": "false",' ||
+        '                "type": "boolean"' ||
+        '            },' ||
+        '            "fingerprintingSitesFile_hs37": {' ||
+        '                "value": "${refDataBaseDirectory}/assemblies/hg19_GRCh37_1000genomes/databases/fingerprinting/hovestadt_v1.1/snp138Common.n1000.vh20140318.bed",' ||
+        '                "type": "path"' ||
+        '            },' ||
+        '            "fingerprintingSitesFile": {' ||
+        '                "value": "${fingerprintingSitesFile_hs37}",' ||
+        '                "type": "path"' ||
+        '            },' ||
+        '            "INSERT_SIZE_LIMIT": {' ||
+        '                "value": 1000,' ||
+        '                "type": "integer"' ||
+        '            },' ||
+        '            "BWA_MEM_THREADS": {' ||
+        '                "value": 8,' ||
+        '                "type": "integer"' ||
+        '            },' ||
+        '            "markDuplicatesVariant": {' ||
+        '                "value": "sambamba",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "SAMBAMBA_MARKDUP_OPTS": {' ||
+        '                "value": "\"-t 1 -l 0 --hash-table-size=2000000 --overflow-list-size=1000000 --io-buffer-size=64\""' ||
+        '            },' ||
+        '            "PICARD_MARKDUP_JVM_OPTS": {' ||
+        '                "value": "-Xms64G -Xmx64G"' ||
+        '            },' ||
+        '            "CONVEY_SAMBAMBA_SAMSORT_THREADS": {' ||
+        '                "value": 8,' ||
+        '                "type": "integer"' ||
+        '            },' ||
+        '            "CONVEY_SAMBAMBA_SAMSORT_MEMSIZE": {' ||
+        '                "value": "96G",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "CHROM_SIZES_FILE": {' ||
+        '                "value": "${chromosomeSizesFile_hg19}",' ||
+        '                "type": "path"' ||
+        '            },' ||
+        '            "INDEX_PREFIX": {' ||
+        '                "value": "${indexPrefix_bwa05_hg19_chr}",' ||
+        '                "type": "path"' ||
+        '            },' ||
+        '            "ALT_FILE": {' ||
+        '                "value": "${INDEX_PREFIX}.alt",' ||
+        '                "type": "path"' ||
+        '            },' ||
+        '            "MBUFFER_SIZE_LARGE": {' ||
+        '                "value": "2g",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "MBUFFER_SIZE_SMALL": {' ||
+        '                "value": "100m",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "pairedBamSuffix": {' ||
+        '                "value": "paired.bam.sorted.bam",' ||
+        '                "type": "string"' ||
         '            },' ||
         '            "outputAnalysisBaseDirectory": {' ||
         '                "value": "${outputBaseDirectory}",' ||
@@ -62,10 +290,6 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue value
         '            },' ||
         '            "defaultMergedBamSuffix": {' ||
         '                "value": "${mergedBamSuffix_markDuplicatesShort}",' ||
-        '                "type": "string"' ||
-        '            },' ||
-        '            "pairedBamSuffix": {' ||
-        '                "value": "paired.bam.sorted.bam",' ||
         '                "type": "string"' ||
         '            },' ||
         '            "alignmentOutputDirectory": {' ||
@@ -329,10 +553,6 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue value
         '            "JOB_PROFILER_BINARY": {' ||
         '                "value": "strace.sh"' ||
         '            },' ||
-        '            "INDEX_PREFIX": {' ||
-        '                "value": "${indexPrefix_bwa05_hg19_chr}",' ||
-        '                "type": "path"' ||
-        '            },' ||
         '            "BWA_ALIGNMENT_OPTIONS": {' ||
         '                "value": "\"-q 20\""' ||
         '            },' ||
@@ -375,10 +595,6 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue value
         '            "SNP_MAXCOVERAGE": {' ||
         '                "value": "300"' ||
         '            },' ||
-        '            "CHROM_SIZES_FILE": {' ||
-        '                "value": "${chromosomeSizesFile_hg19}",' ||
-        '                "type": "path"' ||
-        '            },' ||
         '            "ADAPTOR_TRIMMING_OPTIONS_0": {' ||
         '                "value": "\"PE -threads 12 -phred33\""' ||
         '            },' ||
@@ -396,33 +612,9 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue value
         '                "value": "false",' ||
         '                "type": "boolean"' ||
         '            },' ||
-        '            "runFastQC": {' ||
-        '                "value": "false",' ||
-        '                "type": "boolean"' ||
-        '            },' ||
-        '            "useCombinedAlignAndSampe": {' ||
-        '                "value": "true",' ||
-        '                "type": "boolean"' ||
-        '            },' ||
-        '            "runSlimWorkflow": {' ||
-        '                "value": "true",' ||
-        '                "type": "boolean"' ||
-        '            },' ||
         '            "useAcceleratedHardware": {' ||
         '                "value": "false",' ||
         '                "type": "boolean"' ||
-        '            },' ||
-        '            "BWA_VERSION": {' ||
-        '                "value": "0.7.15",' ||
-        '                "type": "string"' ||
-        '            },' ||
-        '            "markDuplicatesVariant": {' ||
-        '                "value": "sambamba",' ||
-        '                "type": "string"' ||
-        '            },' ||
-        '            "SAMBAMBA_MARKDUP_VERSION": {' ||
-        '                "value": "0.6.5",' ||
-        '                "type": "string"' ||
         '            }' ||
         '        }' ||
         '    }' ||
@@ -430,11 +622,9 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue value
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, priority, selector_type, external_workflow_config_fragment_id)
-VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 'Default cvalue values for PanCancer alignment 1.2.73-204', 6, 'DEFAULT_VALUES',
-        (SELECT id
-         FROM external_workflow_config_fragment
-         WHERE name = 'Default cvalue values for PanCancer alignment 1.2.73-204'
-           AND deprecation_date IS NULL))
+VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 'Default cvalue values for PanCancer alignment 1.2.73-204', 6, 'DEFAULT_VALUES', (
+    SELECT id FROM external_workflow_config_fragment WHERE name = 'Default cvalue values for PanCancer alignment 1.2.73-204'
+                                                       AND deprecation_date IS NULL))
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector_workflow (external_workflow_config_selector_workflows_id, workflow_id)

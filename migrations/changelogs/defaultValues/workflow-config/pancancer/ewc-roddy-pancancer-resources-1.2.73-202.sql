@@ -20,6 +20,7 @@
  * SOFTWARE.
  */
 
+
 INSERT INTO external_workflow_config_fragment(id, version, date_created, last_updated, object_version, name, config_values)
 VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default resources values for PanCancer alignment 1.2.73-202',
         '{' ||
@@ -47,6 +48,14 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default resources va
         '                "cores": 8,' ||
         '                "basepath": "qcPipeline"' ||
         '            },' ||
+        '            "accelerated:alignment": {' ||
+        '                "memory": "36",' ||
+        '                "value": "bwaAlignSequence.sh",' ||
+        '                "nodes": 1,' ||
+        '                "walltime": "5",' ||
+        '                "cores": 12,' ||
+        '                "basepath": "qcPipeline"' ||
+        '            },' ||
         '            "sampesort": {' ||
         '                "memory": "75",' ||
         '                "value": "bwaSampeSort.sh",' ||
@@ -71,12 +80,28 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default resources va
         '                "cores": 8,' ||
         '                "basepath": "qcPipeline"' ||
         '            },' ||
+        '            "accelerated:alignAndPair": {' ||
+        '                "memory": "26",' ||
+        '                "value": "bwaMemSort.sh",' ||
+        '                "nodes": 1,' ||
+        '                "walltime": "30",' ||
+        '                "cores": 12,' ||
+        '                "basepath": "qcPipeline"' ||
+        '            },' ||
         '            "alignAndPairSlim": {' ||
         '                "memory": "45",' ||
         '                "value": "bwaMemSortSlim.sh",' ||
         '                "nodes": 1,' ||
         '                "walltime": "180",' ||
         '                "cores": 8,' ||
+        '                "basepath": "qcPipeline"' ||
+        '            },' ||
+        '            "accelerated:alignAndPairSlim": {' ||
+        '                "memory": "126",' ||
+        '                "value": "bwaMemSortSlim.sh",' ||
+        '                "nodes": 1,' ||
+        '                "walltime": "30",' ||
+        '                "cores": 12,' ||
         '                "basepath": "qcPipeline"' ||
         '            },' ||
         '            "samtoolsIndex": {' ||
@@ -93,14 +118,6 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default resources va
         '                "nodes": 1,' ||
         '                "walltime": "5",' ||
         '                "cores": 1,' ||
-        '                "basepath": "qcPipeline"' ||
-        '            },' ||
-        '            "samtoolsFlagstat": {' ||
-        '                "value": "samtoolsFlagstatBamfile.sh",' ||
-        '                "basepath": "qcPipeline"' ||
-        '            },' ||
-        '            "insertSizes": {' ||
-        '                "value": "insertSizeDistribution.sh",' ||
         '                "basepath": "qcPipeline"' ||
         '            },' ||
         '            "chromosomeDiff": {' ||
@@ -174,6 +191,14 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default resources va
         '                "walltime": "120",' ||
         '                "cores": 6,' ||
         '                "basepath": "qcPipeline"' ||
+        '            },' ||
+        '            "samtoolsFlagstat": {' ||
+        '                "value": "samtoolsFlagstatBamfile.sh",' ||
+        '                "basepath": "qcPipeline"' ||
+        '            },' ||
+        '            "insertSizes": {' ||
+        '                "value": "insertSizeDistribution.sh",' ||
+        '                "basepath": "qcPipeline"' ||
         '            }' ||
         '        }' ||
         '    }' ||
@@ -181,11 +206,9 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default resources va
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, priority, selector_type, external_workflow_config_fragment_id)
-VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 'Default resources values for PanCancer alignment 1.2.73-202', 6, 'DEFAULT_VALUES',
-        (SELECT id
-         FROM external_workflow_config_fragment
-         WHERE name = 'Default resources values for PanCancer alignment 1.2.73-202'
-           AND deprecation_date IS NULL))
+VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 'Default resources values for PanCancer alignment 1.2.73-202', 6, 'DEFAULT_VALUES', (
+    SELECT id FROM external_workflow_config_fragment WHERE name = 'Default resources values for PanCancer alignment 1.2.73-202'
+                                                       AND deprecation_date IS NULL))
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector_workflow (external_workflow_config_selector_workflows_id, workflow_id)

@@ -22,15 +22,19 @@
 
 
 INSERT INTO external_workflow_config_fragment(id, version, date_created, last_updated, object_version, name, config_values)
-VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue values for PanCancer alignment 1.2.73-202',
+VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue values for WGBS alignment 1.2.73-201, 1.2.73-202',
         '{' ||
         '    "RODDY": {' ||
         '        "cvalues": {' ||
         '            "JAVA_BINARY": {' ||
         '                "value": "java"' ||
         '            },' ||
+        '            "BASE_QUALITY_CUTOFF": {' ||
+        '                "value": 0,' ||
+        '                "type": "integer"' ||
+        '            },' ||
         '            "CHROMOSOME_INDICES": {' ||
-        '                "value": "( {1..22} X Y )",' ||
+        '                "value": "( 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y MT )",' ||
         '                "type": "bashArray"' ||
         '            },' ||
         '            "CHROMOSOME_INDICES_SORTED": {' ||
@@ -45,6 +49,13 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue value
         '            },' ||
         '            "SEQUENCER_PROTOCOL": {' ||
         '                "value": "paired"' ||
+        '            },' ||
+        '            "SEQUENCER_STRATEGY": {' ||
+        '                "value": "wholeGenome"' ||
+        '            },' ||
+        '            "WINDOW_SIZE": {' ||
+        '                "value": 1,' ||
+        '                "type": "integer"' ||
         '            },' ||
         '            "mergeCol": {' ||
         '                "value": "Sample"' ||
@@ -112,7 +123,7 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue value
         '                "type": "string"' ||
         '            },' ||
         '            "SAMBAMBA_MARKDUP_VERSION": {' ||
-        '                "value": "0.5.9",' ||
+        '                "value": "0.6.5",' ||
         '                "type": "string"' ||
         '            },' ||
         '            "PICARD_VERSION": {' ||
@@ -151,6 +162,14 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue value
         '                "value": "${sampleDirectory}/${run}/sequence",' ||
         '                "type": "path"' ||
         '            },' ||
+        '            "analysisMethodNameOnInput": {' ||
+        '                "value": "whole_genome_analysis",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "analysisMethodNameOnOutput": {' ||
+        '                "value": "genome",' ||
+        '                "type": "string"' ||
+        '            },' ||
         '            "refDataBaseDirectory": {' ||
         '                "value": "/icgc/ngs_share",' ||
         '                "type": "path"' ||
@@ -168,7 +187,7 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue value
         '                "type": "boolean"' ||
         '            },' ||
         '            "runCoveragePlots": {' ||
-        '                "value": "true",' ||
+        '                "value": "false",' ||
         '                "type": "boolean"' ||
         '            },' ||
         '            "fingerprintsOutputDirectory": {' ||
@@ -192,11 +211,11 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue value
         '                "type": "integer"' ||
         '            },' ||
         '            "BWA_MEM_THREADS": {' ||
-        '                "value": 8,' ||
+        '                "value": 14,' ||
         '                "type": "integer"' ||
         '            },' ||
         '            "markDuplicatesVariant": {' ||
-        '                "value": "",' ||
+        '                "value": "sambamba",' ||
         '                "type": "string"' ||
         '            },' ||
         '            "SAMBAMBA_MARKDUP_OPTS": {' ||
@@ -228,64 +247,6 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue value
         '            "MBUFFER_SIZE_SMALL": {' ||
         '                "value": "100m",' ||
         '                "type": "string"' ||
-        '            },' ||
-        '            "outputAnalysisBaseDirectory": {' ||
-        '                "value": "${outputBaseDirectory}",' ||
-        '                "type": "path"' ||
-        '            },' ||
-        '            "outputExecutionDirectory": {' ||
-        '                "value": "${outputAnalysisBaseDirectory}/exec_${executionTimeString}"' ||
-        '            },' ||
-        '            "mergedBamSuffix_markDuplicates": {' ||
-        '                "value": "merged.bam.dupmarked.bam",' ||
-        '                "type": "string"' ||
-        '            },' ||
-        '            "mergedBamSuffix_markDuplicatesShort": {' ||
-        '                "value": "merged.mdup.bam",' ||
-        '                "type": "string"' ||
-        '            },' ||
-        '            "mergedBamSuffix_removeDuplicates": {' ||
-        '                "value": "merged.bam.rmdup.bam",' ||
-        '                "type": "string"' ||
-        '            },' ||
-        '            "mergedBamSuffixList": {' ||
-        '                "value": "${mergedBamSuffix_markDuplicates},${mergedBamSuffix_markDuplicatesShort},${mergedBamSuffix_removeDuplicates}",' ||
-        '                "type": "string"' ||
-        '            },' ||
-        '            "defaultMergedBamSuffix": {' ||
-        '                "value": "${mergedBamSuffix_markDuplicatesShort}",' ||
-        '                "type": "string"' ||
-        '            },' ||
-        '            "pairedBamSuffix": {' ||
-        '                "value": "paired.bam.sorted.bam",' ||
-        '                "type": "string"' ||
-        '            },' ||
-        '            "alignmentOutputDirectory": {' ||
-        '                "value": "alignment"' ||
-        '            },' ||
-        '            "fastx_qcOutputDirectory": {' ||
-        '                "value": "fastx_qc"' ||
-        '            },' ||
-        '            "coverageOutputDirectory": {' ||
-        '                "value": "coverage"' ||
-        '            },' ||
-        '            "flagstatsOutputDirectory": {' ||
-        '                "value": "flagstats"' ||
-        '            },' ||
-        '            "structuralVariationOutputDirectory": {' ||
-        '                "value": "structural_variation"' ||
-        '            },' ||
-        '            "insertSizesOutputDirectory": {' ||
-        '                "value": "insertsize_distribution"' ||
-        '            },' ||
-        '            "metricsOutputDirectory": {' ||
-        '                "value": "metrics"' ||
-        '            },' ||
-        '            "mpileupOutputDirectory": {' ||
-        '                "value": "mpileup"' ||
-        '            },' ||
-        '            "mpileupPlatypusOutputDirectory": {' ||
-        '                "value": "platypus_indel"' ||
         '            },' ||
         '            "assembliesBaseDirectory": {' ||
         '                "value": "${sharedFilesBaseDirectory}/assemblies",' ||
@@ -487,6 +448,104 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue value
         '                "value": "${assembliesHG191000GenomesDirectory}/Affymetrics/Affy5/chr/#CHROM#_AFFY.vcf",' ||
         '                "type": "path"' ||
         '            },' ||
+        '            "useBioBamBamMarkDuplicates": {' ||
+        '                "value": "false",' ||
+        '                "type": "boolean"' ||
+        '            },' ||
+        '            "useBioBamBamSort": {' ||
+        '                "value": "false",' ||
+        '                "type": "boolean"' ||
+        '            },' ||
+        '            "useAcceleratedHardware": {' ||
+        '                "value": "false",' ||
+        '                "type": "boolean"' ||
+        '            },' ||
+        '            "useAdaptorTrimming": {' ||
+        '                "value": "true",' ||
+        '                "type": "boolean"' ||
+        '            },' ||
+        '            "reorderUndirectionalWGBSReadPairs": {' ||
+        '                "value": "false",' ||
+        '                "type": "boolean"' ||
+        '            },' ||
+        '            "METH_CALLS_CONVERTER": {' ||
+        '                "value": "none",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "METH_CALL_PARAMETERS": {' ||
+        '                "value": "-t -e 5 -x -z",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "CYTOSINE_POSITIONS_INDEX": {' ||
+        '                "value": "${ch_pos_index_methylCtools_mm10GRC}",' ||
+        '                "type": "path"' ||
+        '            },' ||
+        '            "methCallingOutputDirectory": {' ||
+        '                "value": "methylationCalling",' ||
+        '                "type": "path"' ||
+        '            },' ||
+        '            "methCallingMetricsOutputDirectory": {' ||
+        '                "value": "methylationCallingMetrics",' ||
+        '                "type": "path"' ||
+        '            },' ||
+        '            "outputAnalysisBaseDirectory": {' ||
+        '                "value": "${outputBaseDirectory}",' ||
+        '                "type": "path"' ||
+        '            },' ||
+        '            "outputExecutionDirectory": {' ||
+        '                "value": "${outputAnalysisBaseDirectory}/exec_${executionTimeString}"' ||
+        '            },' ||
+        '            "mergedBamSuffix_markDuplicates": {' ||
+        '                "value": "merged.bam.dupmarked.bam",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "mergedBamSuffix_markDuplicatesShort": {' ||
+        '                "value": "merged.mdup.bam",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "mergedBamSuffix_removeDuplicates": {' ||
+        '                "value": "merged.bam.rmdup.bam",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "mergedBamSuffixList": {' ||
+        '                "value": "${mergedBamSuffix_markDuplicates},${mergedBamSuffix_markDuplicatesShort},${mergedBamSuffix_removeDuplicates}",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "defaultMergedBamSuffix": {' ||
+        '                "value": "${mergedBamSuffix_markDuplicatesShort}",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "pairedBamSuffix": {' ||
+        '                "value": "paired.bam.sorted.bam",' ||
+        '                "type": "string"' ||
+        '            },' ||
+        '            "alignmentOutputDirectory": {' ||
+        '                "value": "alignment"' ||
+        '            },' ||
+        '            "fastx_qcOutputDirectory": {' ||
+        '                "value": "fastx_qc"' ||
+        '            },' ||
+        '            "coverageOutputDirectory": {' ||
+        '                "value": "coverage"' ||
+        '            },' ||
+        '            "flagstatsOutputDirectory": {' ||
+        '                "value": "flagstats"' ||
+        '            },' ||
+        '            "structuralVariationOutputDirectory": {' ||
+        '                "value": "structural_variation"' ||
+        '            },' ||
+        '            "insertSizesOutputDirectory": {' ||
+        '                "value": "insertsize_distribution"' ||
+        '            },' ||
+        '            "metricsOutputDirectory": {' ||
+        '                "value": "metrics"' ||
+        '            },' ||
+        '            "mpileupOutputDirectory": {' ||
+        '                "value": "mpileup"' ||
+        '            },' ||
+        '            "mpileupPlatypusOutputDirectory": {' ||
+        '                "value": "platypus_indel"' ||
+        '            },' ||
         '            "alignmentThreads": {' ||
         '                "value": "12",' ||
         '                "type": "string"' ||
@@ -580,20 +639,8 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue value
         '            "outputAllowAccessRightsModification": {' ||
         '                "value": "false"' ||
         '            },' ||
-        '            "useBioBamBamSort": {' ||
-        '                "value": "false",' ||
-        '                "type": "boolean"' ||
-        '            },' ||
         '            "useCombinedAlignAndSampe": {' ||
         '                "value": "true",' ||
-        '                "type": "boolean"' ||
-        '            },' ||
-        '            "useAcceleratedHardware": {' ||
-        '                "value": "false",' ||
-        '                "type": "boolean"' ||
-        '            },' ||
-        '            "useAdaptorTrimming": {' ||
-        '                "value": "false",' ||
         '                "type": "boolean"' ||
         '            }' ||
         '        }' ||
@@ -602,21 +649,30 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue value
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, priority, selector_type, external_workflow_config_fragment_id)
-VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 'Default cvalue values for PanCancer alignment 1.2.73-202', 6, 'DEFAULT_VALUES', (
-    SELECT id FROM external_workflow_config_fragment WHERE name = 'Default cvalue values for PanCancer alignment 1.2.73-202'
+VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 'Default cvalue values for WGBS alignment 1.2.73-201, 1.2.73-202', 6, 'DEFAULT_VALUES', (
+    SELECT id FROM external_workflow_config_fragment WHERE name = 'Default cvalue values for WGBS alignment 1.2.73-201, 1.2.73-202'
                                                        AND deprecation_date IS NULL))
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector_workflow (external_workflow_config_selector_workflows_id, workflow_id)
-SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default cvalue values for PanCancer alignment 1.2.73-202'),
-       (SELECT id FROM workflow WHERE name = 'PanCancer alignment')
+SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default cvalue values for WGBS alignment 1.2.73-201, 1.2.73-202'),
+       (SELECT id FROM workflow WHERE name = 'WGBS alignment')
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
-SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default cvalue values for PanCancer alignment 1.2.73-202'),
+SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default cvalue values for WGBS alignment 1.2.73-201, 1.2.73-202'),
        (SELECT id
         FROM workflow_version
         WHERE api_version_id in
-              (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment'))
+              (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'WGBS alignment'))
+          AND workflow_version.workflow_version = '1.2.73-201')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
+SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default cvalue values for WGBS alignment 1.2.73-201, 1.2.73-202'),
+       (SELECT id
+        FROM workflow_version
+        WHERE api_version_id in
+              (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'WGBS alignment'))
           AND workflow_version.workflow_version = '1.2.73-202')
 ON CONFLICT DO NOTHING;

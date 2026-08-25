@@ -215,7 +215,7 @@ class FileService {
     boolean fileIsReadable(Path path) {
         ProcessOutput output
         try {
-            output = remoteShellHelper.executeCommandReturnProcessOutput("test -r ${path}")
+            output = remoteShellHelper.executeCommandReturnProcessOutput("test -r ${LocalShellHelper.shellEscape(path.toString())}")
             return output.exitCode == 0
         } catch (ProcessingException e) {
             log.error("error while trying to read file: ${e.message}")
@@ -474,21 +474,24 @@ class FileService {
 
     void setPermissionViaBash(Path path, String permissions) throws ChangeFilePermissionException {
         try {
-            remoteShellHelper.executeCommandReturnProcessOutput("chmod ${permissions} ${path}").assertExitCodeZeroAndStderrEmpty()
+            String escapedPath = LocalShellHelper.shellEscape(path.toString())
+            remoteShellHelper.executeCommandReturnProcessOutput("chmod ${permissions} ${escapedPath}").assertExitCodeZeroAndStderrEmpty()
         } catch (ProcessingException | AssertionError e) {
             throw new ChangeFilePermissionException("Failed to change permission to ${permissions} for path ${path}", e)
         }
     }
 
     String getPermissionViaBash(Path path, LinkOption... options) {
-        return remoteShellHelper.executeCommandReturnProcessOutput("stat ${LinkOption.NOFOLLOW_LINKS in options ? "" : "-L"} -c %a ${path}")
+        String escapedPath = LocalShellHelper.shellEscape(path.toString())
+        return remoteShellHelper.executeCommandReturnProcessOutput("stat ${LinkOption.NOFOLLOW_LINKS in options ? "" : "-L"} -c %a ${escapedPath}")
                 .assertExitCodeZeroAndStderrEmpty().stdout.trim()
     }
 
     void setGroupViaBash(Path path, String unixGroup) throws ChangeFileGroupException {
         assert unixGroup?.trim(), "unixGroup must not be null or blank"
         try {
-            remoteShellHelper.executeCommandReturnProcessOutput("chgrp -h ${unixGroup} ${path}").assertExitCodeZeroAndStderrEmpty()
+            String escapedPath = LocalShellHelper.shellEscape(path.toString())
+            remoteShellHelper.executeCommandReturnProcessOutput("chgrp -h ${unixGroup} ${escapedPath}").assertExitCodeZeroAndStderrEmpty()
         } catch (ProcessingException | AssertionError e) {
             throw new ChangeFileGroupException("Failed to change group to ${unixGroup} for path ${path}", e)
         }
@@ -747,7 +750,9 @@ class FileService {
         // SFTP does not support creating symbolic links
         if (link.fileSystem.provider() instanceof SFTPFileSystemProvider) {
             // use -T option so behaviour is the same as createSymbolicLink()
-            remoteShellHelper.executeCommandReturnProcessOutput("ln -Ts '${targetPath}' '${link}'")
+            String escapedTargetPath = LocalShellHelper.shellEscape(targetPath.toString())
+            String escapedLinkedPath = LocalShellHelper.shellEscape(link.toString())
+            remoteShellHelper.executeCommandReturnProcessOutput("ln -Ts ${escapedTargetPath} ${escapedLinkedPath}")
         } else {
             Files.createSymbolicLink(link, targetPath)
         }

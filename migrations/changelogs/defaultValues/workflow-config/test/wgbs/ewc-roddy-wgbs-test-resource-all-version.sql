@@ -22,7 +22,7 @@
 
 
 INSERT INTO external_workflow_config_fragment(id, version, date_created, last_updated, object_version, name, config_values)
-VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default test-resource values for PanCancer alignment test',
+VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default test-resource values for WGBS alignment test',
         '{' ||
         '    "RODDY": {' ||
         '        "resources": {' ||
@@ -99,6 +99,17 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default test-resourc
         '                "value": "genomeCoverageReadBins.sh",' ||
         '                "basepath": "qcPipeline"' ||
         '            },' ||
+        '            "coveragePlot": {' ||
+        '                "value": "genomeCoveragePlots.sh",' ||
+        '                "walltime": "00:15:00",' ||
+        '                "basepath": "qcPipeline"' ||
+        '            },' ||
+        '            "coveragePlotSingle": {' ||
+        '                "memory": "5",' ||
+        '                "value": "genomeCoveragePlots.sh",' ||
+        '                "walltime": "0:20:0",' ||
+        '                "basepath": "qcPipeline"' ||
+        '            },' ||
         '            "mergeAndRemoveDuplicates": {' ||
         '                "value": "mergeAndRemoveDuplicates.sh",' ||
         '                "walltime": "1",' ||
@@ -122,6 +133,13 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default test-resourc
         '                "walltime": "00:15:00",' ||
         '                "basepath": "qcPipeline"' ||
         '            },' ||
+        '            "methylationCallingMeta": {' ||
+        '                "memory": "8",' ||
+        '                "value": "methylCtools_methylation_calling_meta.sh",' ||
+        '                "walltime": "00:15:00",' ||
+        '                "cores": 3,' ||
+        '                "basepath": "bisulfiteWorkflow"' ||
+        '            },' ||
         '            "samtoolsFlagstat": {' ||
         '                "value": "samtoolsFlagstatBamfile.sh",' ||
         '                "basepath": "qcPipeline"' ||
@@ -129,6 +147,10 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default test-resourc
         '            "insertSizes": {' ||
         '                "value": "insertSizeDistribution.sh",' ||
         '                "basepath": "qcPipeline"' ||
+        '            },' ||
+        '            "methylationCalling": {' ||
+        '                "value": "methylCtools_methylation_calling.sh",' ||
+        '                "basepath": "bisulfiteWorkflow"' ||
         '            }' ||
         '        }' ||
         '    }' ||
@@ -136,12 +158,12 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default test-resourc
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, priority, selector_type, external_workflow_config_fragment_id)
-VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 'Default test-resource values for PanCancer alignment test', 100, 'DEFAULT_VALUES', (
-    SELECT id FROM external_workflow_config_fragment WHERE name = 'Default test-resource values for PanCancer alignment test'
+VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 'Default test-resource values for WGBS alignment test', 100, 'DEFAULT_VALUES', (
+    SELECT id FROM external_workflow_config_fragment WHERE name = 'Default test-resource values for WGBS alignment test'
                                                        AND deprecation_date IS NULL))
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector_workflow (external_workflow_config_selector_workflows_id, workflow_id)
-SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default test-resource values for PanCancer alignment test'),
-       (SELECT id FROM workflow WHERE name = 'PanCancer alignment')
+SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default test-resource values for WGBS alignment test'),
+       (SELECT id FROM workflow WHERE name = 'WGBS alignment')
 ON CONFLICT DO NOTHING;

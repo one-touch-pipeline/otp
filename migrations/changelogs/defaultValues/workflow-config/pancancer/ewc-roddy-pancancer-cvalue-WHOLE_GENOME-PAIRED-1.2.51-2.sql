@@ -22,12 +22,16 @@
 
 
 INSERT INTO external_workflow_config_fragment(id, version, date_created, last_updated, object_version, name, config_values)
-VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue values for PanCancer alignment 1.2.73-202',
+VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue values for PanCancer alignment 1.2.51-2 WHOLE_GENOME PAIRED',
         '{' ||
         '    "RODDY": {' ||
         '        "cvalues": {' ||
         '            "JAVA_BINARY": {' ||
         '                "value": "java"' ||
+        '            },' ||
+        '            "BASE_QUALITY_CUTOFF": {' ||
+        '                "value": 0,' ||
+        '                "type": "integer"' ||
         '            },' ||
         '            "CHROMOSOME_INDICES": {' ||
         '                "value": "( {1..22} X Y )",' ||
@@ -45,6 +49,13 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue value
         '            },' ||
         '            "SEQUENCER_PROTOCOL": {' ||
         '                "value": "paired"' ||
+        '            },' ||
+        '            "SEQUENCER_STRATEGY": {' ||
+        '                "value": "wholeGenome"' ||
+        '            },' ||
+        '            "WINDOW_SIZE": {' ||
+        '                "value": 1,' ||
+        '                "type": "integer"' ||
         '            },' ||
         '            "mergeCol": {' ||
         '                "value": "Sample"' ||
@@ -99,16 +110,16 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue value
         '                "value": "0.1.19",' ||
         '                "type": "string"' ||
         '            },' ||
+        '            "MBUFFER_VERSION": {' ||
+        '                "value": "20160613",' ||
+        '                "type": "string"' ||
+        '            },' ||
         '            "SAMBAMBA_VERSION": {' ||
-        '                "value": "0.5.9",' ||
+        '                "value": "0.4.6",' ||
         '                "type": "string"' ||
         '            },' ||
         '            "SAMBAMBA_FLAGSTATS_VERSION": {' ||
         '                "value": "0.4.6",' ||
-        '                "type": "string"' ||
-        '            },' ||
-        '            "MBUFFER_VERSION": {' ||
-        '                "value": "20160613",' ||
         '                "type": "string"' ||
         '            },' ||
         '            "SAMBAMBA_MARKDUP_VERSION": {' ||
@@ -151,17 +162,13 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue value
         '                "value": "${sampleDirectory}/${run}/sequence",' ||
         '                "type": "path"' ||
         '            },' ||
-        '            "refDataBaseDirectory": {' ||
-        '                "value": "/icgc/ngs_share",' ||
-        '                "type": "path"' ||
+        '            "analysisMethodNameOnInput": {' ||
+        '                "value": "whole_genome_analysis",' ||
+        '                "type": "string"' ||
         '            },' ||
-        '            "runSlimWorkflow": {' ||
-        '                "value": "true",' ||
-        '                "type": "boolean"' ||
-        '            },' ||
-        '            "useRoddyScratchAsBigFileScratch": {' ||
-        '                "value": "false",' ||
-        '                "type": "boolean"' ||
+        '            "analysisMethodNameOnOutput": {' ||
+        '                "value": "genome",' ||
+        '                "type": "string"' ||
         '            },' ||
         '            "runFastQC": {' ||
         '                "value": "false",' ||
@@ -170,22 +177,6 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue value
         '            "runCoveragePlots": {' ||
         '                "value": "true",' ||
         '                "type": "boolean"' ||
-        '            },' ||
-        '            "fingerprintsOutputDirectory": {' ||
-        '                "value": "fingerprinting",' ||
-        '                "type": "string"' ||
-        '            },' ||
-        '            "runFingerprinting": {' ||
-        '                "value": "false",' ||
-        '                "type": "boolean"' ||
-        '            },' ||
-        '            "fingerprintingSitesFile_hs37": {' ||
-        '                "value": "${refDataBaseDirectory}/assemblies/hg19_GRCh37_1000genomes/databases/fingerprinting/hovestadt_v1.1/snp138Common.n1000.vh20140318.bed",' ||
-        '                "type": "path"' ||
-        '            },' ||
-        '            "fingerprintingSitesFile": {' ||
-        '                "value": "${fingerprintingSitesFile_hs37}",' ||
-        '                "type": "path"' ||
         '            },' ||
         '            "INSERT_SIZE_LIMIT": {' ||
         '                "value": 1000,' ||
@@ -200,34 +191,7 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue value
         '                "type": "string"' ||
         '            },' ||
         '            "SAMBAMBA_MARKDUP_OPTS": {' ||
-        '                "value": "\"-t 1 -l 0 --hash-table-size=2000000 --overflow-list-size=1000000 --io-buffer-size=64\""' ||
-        '            },' ||
-        '            "PICARD_MARKDUP_JVM_OPTS": {' ||
-        '                "value": "-Xms64G -Xmx64G"' ||
-        '            },' ||
-        '            "CONVEY_SAMBAMBA_SAMSORT_THREADS": {' ||
-        '                "value": 8,' ||
-        '                "type": "integer"' ||
-        '            },' ||
-        '            "CONVEY_SAMBAMBA_SAMSORT_MEMSIZE": {' ||
-        '                "value": "96G",' ||
-        '                "type": "string"' ||
-        '            },' ||
-        '            "CHROM_SIZES_FILE": {' ||
-        '                "value": "${chromosomeSizesFile_hg19}",' ||
-        '                "type": "path"' ||
-        '            },' ||
-        '            "INDEX_PREFIX": {' ||
-        '                "value": "${indexPrefix_bwa05_hg19_chr}",' ||
-        '                "type": "path"' ||
-        '            },' ||
-        '            "MBUFFER_SIZE_LARGE": {' ||
-        '                "value": "2g",' ||
-        '                "type": "string"' ||
-        '            },' ||
-        '            "MBUFFER_SIZE_SMALL": {' ||
-        '                "value": "100m",' ||
-        '                "type": "string"' ||
+        '                "value": "\"-t 6 -l 9 --hash-table-size=2000000 --overflow-list-size=1000000 --io-buffer-size=64\""' ||
         '            },' ||
         '            "outputAnalysisBaseDirectory": {' ||
         '                "value": "${outputBaseDirectory}",' ||
@@ -521,6 +485,10 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue value
         '            "JOB_PROFILER_BINARY": {' ||
         '                "value": "strace.sh"' ||
         '            },' ||
+        '            "INDEX_PREFIX": {' ||
+        '                "value": "${indexPrefix_bwa05_hg19_chr}",' ||
+        '                "type": "path"' ||
+        '            },' ||
         '            "BWA_ALIGNMENT_OPTIONS": {' ||
         '                "value": "\"-q 20\""' ||
         '            },' ||
@@ -563,6 +531,10 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue value
         '            "SNP_MAXCOVERAGE": {' ||
         '                "value": "300"' ||
         '            },' ||
+        '            "CHROM_SIZES_FILE": {' ||
+        '                "value": "${chromosomeSizesFile_hg19}",' ||
+        '                "type": "path"' ||
+        '            },' ||
         '            "ADAPTOR_TRIMMING_OPTIONS_0": {' ||
         '                "value": "\"PE -threads 12 -phred33\""' ||
         '            },' ||
@@ -588,6 +560,10 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue value
         '                "value": "true",' ||
         '                "type": "boolean"' ||
         '            },' ||
+        '            "runSlimWorkflow": {' ||
+        '                "value": "true",' ||
+        '                "type": "boolean"' ||
+        '            },' ||
         '            "useAcceleratedHardware": {' ||
         '                "value": "false",' ||
         '                "type": "boolean"' ||
@@ -602,21 +578,26 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default cvalue value
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, priority, selector_type, external_workflow_config_fragment_id)
-VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 'Default cvalue values for PanCancer alignment 1.2.73-202', 6, 'DEFAULT_VALUES', (
-    SELECT id FROM external_workflow_config_fragment WHERE name = 'Default cvalue values for PanCancer alignment 1.2.73-202'
+VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 'Default cvalue values for PanCancer alignment 1.2.51-2 WHOLE_GENOME PAIRED', 22, 'DEFAULT_VALUES', (
+    SELECT id FROM external_workflow_config_fragment WHERE name = 'Default cvalue values for PanCancer alignment 1.2.51-2 WHOLE_GENOME PAIRED'
                                                        AND deprecation_date IS NULL))
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector_workflow (external_workflow_config_selector_workflows_id, workflow_id)
-SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default cvalue values for PanCancer alignment 1.2.73-202'),
+SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default cvalue values for PanCancer alignment 1.2.51-2 WHOLE_GENOME PAIRED'),
        (SELECT id FROM workflow WHERE name = 'PanCancer alignment')
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
-SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default cvalue values for PanCancer alignment 1.2.73-202'),
+SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default cvalue values for PanCancer alignment 1.2.51-2 WHOLE_GENOME PAIRED'),
        (SELECT id
         FROM workflow_version
         WHERE api_version_id in
               (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment'))
-          AND workflow_version.workflow_version = '1.2.73-202')
+          AND workflow_version.workflow_version = '1.2.51-2')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO external_workflow_config_selector_seq_type (external_workflow_config_selector_seq_types_id, seq_type_id)
+SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default cvalue values for PanCancer alignment 1.2.51-2 WHOLE_GENOME PAIRED'),
+       (SELECT id FROM seq_type WHERE name = 'WHOLE_GENOME' AND single_cell = FALSE AND library_layout = 'PAIRED')
 ON CONFLICT DO NOTHING;

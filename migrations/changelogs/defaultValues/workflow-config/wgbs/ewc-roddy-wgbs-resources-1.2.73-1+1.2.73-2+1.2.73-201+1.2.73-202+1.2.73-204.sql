@@ -22,7 +22,7 @@
 
 
 INSERT INTO external_workflow_config_fragment(id, version, date_created, last_updated, object_version, name, config_values)
-VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default resources values for PanCancer alignment 1.2.73-1, 1.2.73-201, 1.2.73-204',
+VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default resources values for WGBS alignment 1.2.73-1, 1.2.73-2, 1.2.73-201, 1.2.73-202, 1.2.73-204',
         '{' ||
         '    "RODDY": {' ||
         '        "resources": {' ||
@@ -136,6 +136,22 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default resources va
         '                "cores": 4,' ||
         '                "basepath": "qcPipeline"' ||
         '            },' ||
+        '            "coveragePlot": {' ||
+        '                "memory": "0.05",' ||
+        '                "value": "genomeCoveragePlots.sh",' ||
+        '                "nodes": 1,' ||
+        '                "walltime": "6",' ||
+        '                "cores": 4,' ||
+        '                "basepath": "qcPipeline"' ||
+        '            },' ||
+        '            "coveragePlotSingle": {' ||
+        '                "memory": "3",' ||
+        '                "value": "genomeCoveragePlots.sh",' ||
+        '                "nodes": 1,' ||
+        '                "walltime": "10",' ||
+        '                "cores": 4,' ||
+        '                "basepath": "qcPipeline"' ||
+        '            },' ||
         '            "mergeAndRemoveDuplicates": {' ||
         '                "memory": "73",' ||
         '                "value": "mergeAndRemoveDuplicates.sh",' ||
@@ -160,6 +176,22 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default resources va
         '                "cores": 3,' ||
         '                "basepath": "qcPipeline"' ||
         '            },' ||
+        '            "mergeAndRemoveDuplicatesSlimSambamba": {' ||
+        '                "memory": "100",' ||
+        '                "value": "mergeAndMarkOrRemoveDuplicatesSlim.sh",' ||
+        '                "nodes": 1,' ||
+        '                "walltime": "120",' ||
+        '                "cores": 6,' ||
+        '                "basepath": "qcPipeline"' ||
+        '            },' ||
+        '            "methylationCallingMeta": {' ||
+        '                "memory": "20",' ||
+        '                "value": "methylCtools_methylation_calling_meta.sh",' ||
+        '                "nodes": 1,' ||
+        '                "walltime": "120",' ||
+        '                "cores": 13,' ||
+        '                "basepath": "bisulfiteWorkflow"' ||
+        '            },' ||
         '            "samtoolsFlagstat": {' ||
         '                "value": "samtoolsFlagstatBamfile.sh",' ||
         '                "basepath": "qcPipeline"' ||
@@ -167,6 +199,10 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default resources va
         '            "insertSizes": {' ||
         '                "value": "insertSizeDistribution.sh",' ||
         '                "basepath": "qcPipeline"' ||
+        '            },' ||
+        '            "methylationCalling": {' ||
+        '                "value": "methylCtools_methylation_calling.sh",' ||
+        '                "basepath": "bisulfiteWorkflow"' ||
         '            }' ||
         '        }' ||
         '    }' ||
@@ -174,39 +210,57 @@ VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 0, 'Default resources va
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector(id, version, date_created, last_updated, name, priority, selector_type, external_workflow_config_fragment_id)
-VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 'Default resources values for PanCancer alignment 1.2.73-1, 1.2.73-201, 1.2.73-204', 6, 'DEFAULT_VALUES', (
-    SELECT id FROM external_workflow_config_fragment WHERE name = 'Default resources values for PanCancer alignment 1.2.73-1, 1.2.73-201, 1.2.73-204'
+VALUES (NEXTVAL('hibernate_sequence'), 0, NOW(), NOW(), 'Default resources values for WGBS alignment 1.2.73-1, 1.2.73-2, 1.2.73-201, 1.2.73-202, 1.2.73-204', 6, 'DEFAULT_VALUES', (
+    SELECT id FROM external_workflow_config_fragment WHERE name = 'Default resources values for WGBS alignment 1.2.73-1, 1.2.73-2, 1.2.73-201, 1.2.73-202, 1.2.73-204'
                                                        AND deprecation_date IS NULL))
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector_workflow (external_workflow_config_selector_workflows_id, workflow_id)
-SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for PanCancer alignment 1.2.73-1, 1.2.73-201, 1.2.73-204'),
-       (SELECT id FROM workflow WHERE name = 'PanCancer alignment')
+SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for WGBS alignment 1.2.73-1, 1.2.73-2, 1.2.73-201, 1.2.73-202, 1.2.73-204'),
+       (SELECT id FROM workflow WHERE name = 'WGBS alignment')
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
-SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for PanCancer alignment 1.2.73-1, 1.2.73-201, 1.2.73-204'),
+SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for WGBS alignment 1.2.73-1, 1.2.73-2, 1.2.73-201, 1.2.73-202, 1.2.73-204'),
        (SELECT id
         FROM workflow_version
         WHERE api_version_id in
-              (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment'))
+              (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'WGBS alignment'))
           AND workflow_version.workflow_version = '1.2.73-1')
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
-SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for PanCancer alignment 1.2.73-1, 1.2.73-201, 1.2.73-204'),
+SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for WGBS alignment 1.2.73-1, 1.2.73-2, 1.2.73-201, 1.2.73-202, 1.2.73-204'),
        (SELECT id
         FROM workflow_version
         WHERE api_version_id in
-              (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment'))
+              (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'WGBS alignment'))
+          AND workflow_version.workflow_version = '1.2.73-2')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
+SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for WGBS alignment 1.2.73-1, 1.2.73-2, 1.2.73-201, 1.2.73-202, 1.2.73-204'),
+       (SELECT id
+        FROM workflow_version
+        WHERE api_version_id in
+              (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'WGBS alignment'))
           AND workflow_version.workflow_version = '1.2.73-201')
 ON CONFLICT DO NOTHING;
 
 INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
-SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for PanCancer alignment 1.2.73-1, 1.2.73-201, 1.2.73-204'),
+SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for WGBS alignment 1.2.73-1, 1.2.73-2, 1.2.73-201, 1.2.73-202, 1.2.73-204'),
        (SELECT id
         FROM workflow_version
         WHERE api_version_id in
-              (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'PanCancer alignment'))
+              (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'WGBS alignment'))
+          AND workflow_version.workflow_version = '1.2.73-202')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO external_workflow_config_selector_workflow_version (external_workflow_config_selector_workflow_versions_id, workflow_version_id)
+SELECT (SELECT id FROM external_workflow_config_selector WHERE name = 'Default resources values for WGBS alignment 1.2.73-1, 1.2.73-2, 1.2.73-201, 1.2.73-202, 1.2.73-204'),
+       (SELECT id
+        FROM workflow_version
+        WHERE api_version_id in
+              (SELECT id FROM workflow_api_version wav WHERE wav.workflow_id = (SELECT id FROM workflow WHERE name = 'WGBS alignment'))
           AND workflow_version.workflow_version = '1.2.73-204')
 ON CONFLICT DO NOTHING;

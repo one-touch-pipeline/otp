@@ -933,3 +933,7 @@ task allBom() {
     dependsOn tasks.allConfigsGradleBom
     dependsOn tasks.named('npm_run_cyclonedx-npm')
 }
+
+springBoot {
+    mainClass = 'de.dkfz.tbi.otp.Application'
+}

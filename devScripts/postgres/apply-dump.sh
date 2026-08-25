@@ -77,11 +77,16 @@ PSQL="psql --username=otp  --dbname=otp --host=localhost --port=$PORT"
 
 RESTORE_LIST_OPT=()
 if [[ -n "${SKIP_LOGS:-}" ]]; then
-    pg_restore -l "${DUMP_TO_LOAD}" > restore.list
-    sed -i '/TABLE DATA public workflow_command_log otp/ s/^/;/' restore.list
-    sed -i '/TABLE DATA public workflow_log otp/ s/^/;/' restore.list
-    sed -i '/TABLE DATA public workflow_message_log otp/ s/^/;/' restore.list
-    RESTORE_LIST_OPT=(-L restore.list)
+    echo "Exclude tables for workflow logs"
+    mkdir -p tmp
+    pg_restore -l "${DUMP_TO_LOAD}" > tmp/restore.list
+
+    # exclude logs of workflow system
+    sed -i '/TABLE DATA public workflow_command_log otp/ s/^/;/' tmp/restore.list
+    sed -i '/TABLE DATA public workflow_log otp/ s/^/;/' tmp/restore.list
+    sed -i '/TABLE DATA public workflow_message_log otp/ s/^/;/' tmp/restore.list
+
+    RESTORE_LIST_OPT=(-L tmp/restore.list)
 fi
 
 # Work around pg_restore failing due to an option set automatically by Postgres clients >= 9.3
@@ -89,7 +94,7 @@ echo "Loading dump..."
 time pg_restore --username=postgres --host=localhost --port=$PORT --dbname=otp --jobs=$PRODUCTION_POSTGRES_JOB_COUNT --no-privileges "${RESTORE_LIST_OPT[@]}" "${DUMP_TO_LOAD}" || true
 
 if [[ -n "${SKIP_LOGS:-}" ]]; then
-    rm restore.list
+    rm tmp/restore.list
 fi
 
 echo "Dump loaded"
@@ -108,5 +113,12 @@ echo "Disabling workflow runs"
 ${PSQL} --command "UPDATE public.workflow_run SET state = 'FAILED' WHERE state = 'PENDING';"
 echo "Disabling workflow steps"
 ${PSQL} --command "UPDATE public.workflow_step SET state = 'FAILED' WHERE state = 'CREATED';"
+
+echo "Mark mails as sent"
+${PSQL} --command "update mail set state='SENT' where state='WAITING';"
+
+echo "Mark baseFolder as full"
+${PSQL} --command "update base_folder set writable=false where writable=true;"
+
 
 echo ""

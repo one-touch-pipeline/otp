@@ -83,6 +83,15 @@ class FileServiceSpec extends Specification implements DataTest {
             ].asImmutable(),
     ].asImmutable()
 
+    /**
+     * Path names which break naive single-quoting of shell command arguments.
+     */
+    static final List<String> PATH_NAMES_NEEDING_SHELL_ESCAPING = [
+            'name with space',
+            "name'with'apostrophe'",
+            "name with space and 'apostrophe'",
+    ].asImmutable()
+
     FileService fileService = new FileService()
 
     TestConfigService configService = new TestConfigService()
@@ -205,6 +214,58 @@ class FileServiceSpec extends Specification implements DataTest {
         ChangeFileGroupException e = thrown()
         e.message.contains(tempDir.toString())
         e.message.contains(group)
+    }
+
+    @Unroll
+    void "setPermissionViaBash, if path name is '#name', then the path argument is shell escaped and the permission is changed"() {
+        given:
+        mockRemoteShellHelper()
+        Path path = Files.createDirectory(tempDir.resolve(name))
+
+        when:
+        fileService.setPermissionViaBash(path, '550')
+
+        then:
+        TestCase.assertContainSame(Files.getPosixFilePermissions(path), [
+                PosixFilePermission.OWNER_READ,
+                PosixFilePermission.OWNER_EXECUTE,
+                PosixFilePermission.GROUP_READ,
+                PosixFilePermission.GROUP_EXECUTE,
+        ])
+
+        where:
+        name << PATH_NAMES_NEEDING_SHELL_ESCAPING
+    }
+
+    @Unroll
+    void "getPermissionViaBash, if path name is '#name', then the path argument is shell escaped and the permission is returned"() {
+        given:
+        mockRemoteShellHelper()
+        Path path = Files.createDirectory(tempDir.resolve(name))
+        Files.setPosixFilePermissions(path, PosixFilePermissions.fromString("r-xr-x---"))
+
+        expect:
+        fileService.getPermissionViaBash(path) == '550'
+
+        where:
+        name << PATH_NAMES_NEEDING_SHELL_ESCAPING
+    }
+
+    @Unroll
+    void "setGroupViaBash, if path name is '#name', then the path argument is shell escaped and the group is changed"() {
+        given:
+        mockRemoteShellHelper()
+        String group = new TestConfigService().testingGroup
+        Path path = Files.createDirectory(tempDir.resolve(name))
+
+        when:
+        fileService.setGroupViaBash(path, group)
+
+        then:
+        Files.getFileAttributeView(path, PosixFileAttributeView, LinkOption.NOFOLLOW_LINKS).readAttributes().group().name == group
+
+        where:
+        name << PATH_NAMES_NEEDING_SHELL_ESCAPING
     }
 
     private void assertDirectory(Path path) {
@@ -1189,6 +1250,25 @@ class FileServiceSpec extends Specification implements DataTest {
 
         expect:
         !fileService.fileIsReadable(Paths.get("/path/not/exists"))
+    }
+
+    @Unroll
+    void "fileIsReadable, if path name is '#name', then the path argument is shell escaped and the readability is detected"() {
+        given:
+        mockRemoteShellHelper()
+        Path file = CreateFileHelper.createFile(tempDir.resolve(name))
+
+        expect:
+        fileService.fileIsReadable(file)
+
+        when:
+        Files.setPosixFilePermissions(file, PosixFilePermissions.fromString("-wx-wx-wx"))
+
+        then:
+        !fileService.fileIsReadable(file)
+
+        where:
+        name << PATH_NAMES_NEEDING_SHELL_ESCAPING
     }
 
     void "ensureDirIsReadableAndNotEmpty, if directory exist and has content, but is not readable, then throw an assertion"() {
